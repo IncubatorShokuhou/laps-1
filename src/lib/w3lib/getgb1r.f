@@ -1,75 +1,75 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETGB1R(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,LB,F,NBITSS
-     +      ,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETGB1R        READS AND UNPACKS A GRIB MESSAGE
-C   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
-C
-C ABSTRACT: READ AND UNPACK A GRIB MESSAGE.
-C
-C PROGRAM HISTORY LOG:
-C   95-10-31  IREDELL
-C   04-07-22  CHUANG  ADD PACKING BIT NUMBER NBITSS IN THE ARGUMENT 
-C            LIST BECAUSE ETA GRIB FILES NEED IT TO REPACK GRIB FILE  
-C USAGE:    CALL GETGB1R(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,LB,F,IRET)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE
-C     LSKIP        INTEGER NUMBER OF BYTES TO SKIP
-C     LGRIB        INTEGER NUMBER OF BYTES TO READ
-C   OUTPUT ARGUMENTS:
-C     KF           INTEGER NUMBER OF DATA POINTS UNPACKED
-C     KPDS         INTEGER (200) UNPACKED PDS PARAMETERS
-C     KGDS         INTEGER (200) UNPACKED GDS PARAMETERS
-C     KENS         INTEGER (200) UNPACKED ENSEMBLE PDS PARMS
-C     LB           LOGICAL*1 (KF) UNPACKED BITMAP IF PRESENT
-C     F            REAL (KF) UNPACKED DATA
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    97     ERROR READING GRIB FILE
-C                    OTHER  W3FI63 GRIB UNPACKER RETURN CODE
-C
-C SUBPROGRAMS CALLED:
-C   BAREAD         BYTE-ADDRESSABLE READ
-C   W3FI63         UNPACK GRIB
-C   PDSEUP         UNPACK PDS EXTENSION
-C
-C REMARKS: THERE IS NO PROTECTION AGAINST UNPACKING TOO MUCH DATA.
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C   THIS SUBPROGRAM IS INTENDED FOR PRIVATE USE BY GETGB ROUTINES ONLY.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  CRAY, WORKSTATIONS
-C
-C$$$
-      INTEGER KPDS(200),KGDS(200),KENS(200)
-      LOGICAL*1 LB(*)
-      REAL F(*)
-      INTEGER KPTR(200)
-      CHARACTER GRIB(LGRIB)*1
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  READ GRIB RECORD
-      CALL BAREAD(LUGB,LSKIP,LGRIB,LREAD,GRIB)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  UNPACK GRIB RECORD
-      IF(LREAD.EQ.LGRIB) THEN
-        CALL W3FI63(GRIB,KPDS,KGDS,LB,F,KPTR,IRET)
-        IF(IRET.EQ.0.AND.KPDS(23).EQ.2) THEN
-          CALL PDSEUP(KENS,KPROB,XPROB,KCLUST,KMEMBR,45,GRIB(9))
-        ENDIF
-      ELSE
-        IRET=97
-      ENDIF
-      NBITSS=KPTR(20) 
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  RETURN NUMBER OF POINTS
-      IF(IRET.EQ.0) THEN
-        KF=KPTR(10)
-      ELSE
-        KF=0
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+c-----------------------------------------------------------------------
+      subroutine getgb1r(lugb,lskip,lgrib,kf,kpds,kgds,kens,lb,f,nbitss
+     +      ,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getgb1r        reads and unpacks a grib message
+c   prgmmr: iredell          org: w/nmc23     date: 95-10-31
+c
+c abstract: read and unpack a grib message.
+c
+c program history log:
+c   95-10-31  iredell
+c   04-07-22  chuang  add packing bit number nbitss in the argument 
+c            list because eta grib files need it to repack grib file  
+c usage:    call getgb1r(lugb,lskip,lgrib,kf,kpds,kgds,kens,lb,f,iret)
+c   input arguments:
+c     lugb         integer unit of the unblocked grib data file
+c     lskip        integer number of bytes to skip
+c     lgrib        integer number of bytes to read
+c   output arguments:
+c     kf           integer number of data points unpacked
+c     kpds         integer (200) unpacked pds parameters
+c     kgds         integer (200) unpacked gds parameters
+c     kens         integer (200) unpacked ensemble pds parms
+c     lb           logical*1 (kf) unpacked bitmap if present
+c     f            real (kf) unpacked data
+c     iret         integer return code
+c                    0      all ok
+c                    97     error reading grib file
+c                    other  w3fi63 grib unpacker return code
+c
+c subprograms called:
+c   baread         byte-addressable read
+c   w3fi63         unpack grib
+c   pdseup         unpack pds extension
+c
+c remarks: there is no protection against unpacking too much data.
+c   subprogram can be called from a multiprocessing environment.
+c   do not engage the same logical unit from more than one processor.
+c   this subprogram is intended for private use by getgb routines only.
+c
+c attributes:
+c   language: fortran 77
+c   machine:  cray, workstations
+c
+c$$$
+      integer kpds(200),kgds(200),kens(200)
+      logical*1 lb(*)
+      real f(*)
+      integer kptr(200)
+      character grib(lgrib)*1
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  read grib record
+      call baread(lugb,lskip,lgrib,lread,grib)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  unpack grib record
+      if(lread.eq.lgrib) then
+        call w3fi63(grib,kpds,kgds,lb,f,kptr,iret)
+        if(iret.eq.0.and.kpds(23).eq.2) then
+          call pdseup(kens,kprob,xprob,kclust,kmembr,45,grib(9))
+        endif
+      else
+        iret=97
+      endif
+      nbitss=kptr(20) 
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  return number of points
+      if(iret.eq.0) then
+        kf=kptr(10)
+      else
+        kf=0
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

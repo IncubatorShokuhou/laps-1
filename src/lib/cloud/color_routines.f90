@@ -1,13 +1,13 @@
 
-        subroutine nl_to_RGB(rad,glwref,contrast,cntref,wa,iverbose,xyz,rc,gc,bc)
+        subroutine nl_to_rgb(rad,glwref,contrast,cntref,wa,iverbose,xyz,rc,gc,bc)
 
         parameter (nc = 3)
 
         real wa(nc)                    ! wavelength (um)
 !       data wa    /.615,.546,.450/
 
-!       Luminance of sunlight from 1AU distance uniformly scattered 
-!       throughout a 360 degree sphere. This will be defined as the
+!       luminance of sunlight from 1au distance uniformly scattered 
+!       throughout a 360 degree sphere. this will be defined as the
 !       spectral radiance matching that of the solar spectrum.
         parameter (day_int0 = 3e9)
 
@@ -21,26 +21,26 @@
 
         parameter (day_int = day_int0)
 
-!       Exponential clipping of gamma function
+!       exponential clipping of gamma function
 !       expgamma(x) = 1. - exp(-x**(1./gamma))
 !       expgaminv(x) = (-(log(1.-x)))**gamma ! inverse of expgamma
 !       radhi(glwref,cntref) = (10.**glwref) / (expgaminv(cntref/255.))
 !       rad_to_counts2(rad1) = expgamma(rad1/radhi(glwref,cntref)) * 255.
 
-!       Straight gamma function
+!       straight gamma function
         fgamma(x) = x**(1./gamma)
         fgaminv(x) = x**gamma ! inverse of expgamma
         radhi(glwref,cntref) = (10.**glwref) / (fgaminv(cntref/255.))
         rad_to_counts2(rad1) = fgamma(rad1/radhi(glwref,cntref)) * 255.
 
-!       Convert nl to rintensity
+!       convert nl to rintensity
 
-!       Radiance units are watts/(m**2 sr nm)
+!       radiance units are watts/(m**2 sr nm)
 
-!       Day_int0 is luminance of sunlight from 1AU distance uniformly 
-!       scattered throughout a 360 degree sphere. This will be defined as
+!       day_int0 is luminance of sunlight from 1au distance uniformly 
+!       scattered throughout a 360 degree sphere. this will be defined as
 !       the spectral radiance matching that of the solar spectrum.
-!       Note solar constant is 1361.5 watts/m**2
+!       note solar constant is 1361.5 watts/m**2
         real rad(nc) 
         real rel_solar(nc), cdm2(nc)
         real fasun(nct), rel_solar_extrap(nct), farad(nct)
@@ -79,7 +79,7 @@
 !       1 candela = 1 lumen per steradian         (luminous intensity)
         cdm2(:) = (rad(:)/1e9) * 3183.0988 ! nl to candela/m**2
 
-!       Extrapolate color            
+!       extrapolate color            
         call extrap_color(rel_solar,wa,rel_solar_extrap) ! dimensionless
         farad(:) = fasun(:) * rel_solar_extrap(:)        ! spect irradiance
         if(iverbose .eq. 1)then
@@ -90,25 +90,25 @@
            enddo ! ict
         endif
 
-!       Convert sprad to xyz
+!       convert sprad to xyz
         call get_tricolor(farad,iverbose,wa,xx,yy,zz,x,y,z,luminance)
         if(iverbose .eq. 1)write(6,*)'xyzfarad = ',x,y,z
         if(iverbose .eq. 1)write(6,*)'luminance farad = ',luminance
         xyz(1) = x; xyz(2) = y; xyz(3) = z
 
-!       Convert xyz to (linear) rgb
+!       convert xyz to (linear) rgb
         ct = 5780.
         if(iverbose .eq. 1)write(6,*)'ct = ',ct
         call xyztosrgb(x,y,z,ct,r,g,b)             
 
-!       Convert rintensity to rgb (gamma correction)
+!       convert rintensity to rgb (gamma correction)
         call linearrgb_to_counts(r,g,b,rc,gc,bc)
 
         if(iverbose .eq. 1)write(6,*)'glwref = ',glwref
 
 !       if(iverbose .eq. 1)write(6,*)'desired rad = ',desired_rad
 
-        luma_of_counts = RGB2luma(rc,gc,bc)
+        luma_of_counts = rgb2luma(rc,gc,bc)
         if(iverbose .eq. 1)write(6,*)'luma_of_counts = ',luma_of_counts
 
 !       solar_counts = 240.
@@ -139,8 +139,8 @@
 
         real wa(nc)                    ! wavelength (um)
 
-!       Luminance of sunlight from 1AU distance uniformly scattered 
-!       throughout a 360 degree sphere. This will be defined as the
+!       luminance of sunlight from 1au distance uniformly scattered 
+!       throughout a 360 degree sphere. this will be defined as the
 !       spectral radiance matching that of the solar spectrum.
         parameter (day_int0 = 3e9)
 
@@ -148,14 +148,14 @@
 
         real a_nc(nc), a_nct(nct)
 
-!       Assuming nc = 3, find polynomial fit
-        X1 = log(wa(1))  ; X2 = log(wa(2))  ; X3 = log(wa(3))
-        Y1 = log(a_nc(1)); Y2 = log(a_nc(2)); Y3 = log(a_nc(3))
+!       assuming nc = 3, find polynomial fit
+        x1 = log(wa(1))  ; x2 = log(wa(2))  ; x3 = log(wa(3))
+        y1 = log(a_nc(1)); y2 = log(a_nc(2)); y3 = log(a_nc(3))
 
-        a = ((Y2-Y1)*(X1-X3) + (Y3-Y1)*(X2-X1)) / &
-            ((X1-X3)*(X2**2-X1**2) + (X2-X1)*(X3**2-X1**2))
-        b = ((Y2 - Y1) - A*(X2**2 - X1**2)) / (X2-X1)
-        c = Y1 - A*X1**2 - B*X1
+        a = ((y2-y1)*(x1-x3) + (y3-y1)*(x2-x1)) / &
+            ((x1-x3)*(x2**2-x1**2) + (x2-x1)*(x3**2-x1**2))
+        b = ((y2 - y1) - a*(x2**2 - x1**2)) / (x2-x1)
+        c = y1 - a*x1**2 - b*x1
 
         a_nct(:) = exp(a*log(wa_tri(:))**2 + b*log(wa_tri(:)) + c)
  
@@ -196,9 +196,9 @@
 
         xx = x; yy = y; zz = z
 
-        R=  (0.41847   *XX)-(0.15866  *YY)-(0.082835*ZZ)
-        G= -(0.091169  *XX)+(0.25243  *YY)+(0.015708*ZZ)
-        B=  (0.00092090*XX)-(0.0025498*YY)+(0.17860 *ZZ)
+        r=  (0.41847   *xx)-(0.15866  *yy)-(0.082835*zz)
+        g= -(0.091169  *xx)+(0.25243  *yy)+(0.015708*zz)
+        b=  (0.00092090*xx)-(0.0025498*yy)+(0.17860 *zz)
 
         return
         end
@@ -228,7 +228,7 @@
         g = g65 * colfrac + g50 * (1.-colfrac)
         b = b65 * colfrac + b50 * (1.-colfrac)
 
-!       Clip at 0. when outside the gamut
+!       clip at 0. when outside the gamut
         r = max(r,0.)
         g = max(g,0.)
         b = max(b,0.)
@@ -257,34 +257,34 @@
 
         subroutine get_fluxsun(wa,nc,iverbose,fa)
 
-!       Returns solar spectral irradiance for selected wavelengths
+!       returns solar spectral irradiance for selected wavelengths
 
         real fa(nc) ! watts/(m**2 nm)
         real wa(nc) ! wavelengths in microns
 
         if(iverbose .eq. 1)write(6,*)'  subroutine get_fluxsun',nc,wa
 
-!       Note that 5900K is the correlated color temperature of the sun
-!       giving the best fit to a blackbody curve shape. The total energy
-!       emitted though is related to the effective temperature of 5780K.
-!       We can thus consider the emissivity to be related to this difference.
-        BBTS = 5780.
-        CCTS = 5900. 
-        emissivity = (BBTS / CCTS)**4.
-        DS = 1.0 * 1.496e13 ! au to cm
-        RS = 1.0 * 6.96e10  ! solar radii to cm
+!       note that 5900k is the correlated color temperature of the sun
+!       giving the best fit to a blackbody curve shape. the total energy
+!       emitted though is related to the effective temperature of 5780k.
+!       we can thus consider the emissivity to be related to this difference.
+        bbts = 5780.
+        ccts = 5900. 
+        emissivity = (bbts / ccts)**4.
+        ds = 1.0 * 1.496e13 ! au to cm
+        rs = 1.0 * 6.96e10  ! solar radii to cm
         xc = 0.; yc = 0.; zc = 0.
 
         do ic = 1,nc   
-          W = wa(ic) * 1e-4 ! microns to cm  
+          w = wa(ic) * 1e-4 ! microns to cm  
           w_ang = wa(ic) * 10000.
-          BB = (.0000374/(W**5.)) / (EXP(1.43/(W*CCTS))-1.)
+          bb = (.0000374/(w**5.)) / (exp(1.43/(w*ccts))-1.)
           if(iverbose .eq. 1)write(6,*)'ic/w/bb',ic,w,bb
-          FA(IC)=((RS/DS)**2)*BB*emissivity*1E-8 ! erg/cm2/s/A
-          FA(IC)=FA(IC) * .01                    ! convert to W/m2/nm
+          fa(ic)=((rs/ds)**2)*bb*emissivity*1e-8 ! erg/cm2/s/a
+          fa(ic)=fa(ic) * .01                    ! convert to w/m2/nm
         enddo ! ic
 
-        if(iverbose .eq. 1)write(6,*)'fa sun (W/m2/nm) is ',fa
+        if(iverbose .eq. 1)write(6,*)'fa sun (w/m2/nm) is ',fa
 
         return
         end
@@ -295,20 +295,20 @@
 
         real wa(nc)                    ! wavelength (um)
 
-!       Luminance of sunlight from 1AU distance uniformly scattered 
-!       throughout a 360 degree sphere. This will be defined as the
+!       luminance of sunlight from 1au distance uniformly scattered 
+!       throughout a 360 degree sphere. this will be defined as the
 !       spectral radiance matching that of the solar spectrum.
         parameter (day_int0 = 3e9)
 
         include 'wac.inc'
 
-!       Integrate spectral irradiance with the color matching functions
+!       integrate spectral irradiance with the color matching functions
 
-        real fa(nct)   ! spectral irradiance array vs wavelength (Input)
-        real luminance ! candela / m**2                    (Output = yc)
+        real fa(nct)   ! spectral irradiance array vs wavelength (input)
+        real luminance ! candela / m**2                    (output = yc)
         character*255 static_dir
 
-!       3500 to 8000 Angstroms in 10 steps (color matching functions)
+!       3500 to 8000 angstroms in 10 steps (color matching functions)
         real x1(nct)!/0, .014, .336, .005, .433, 1.062, .283, .011, 0, 0/
         real y1(nct)!/0, .0004, .038, .323, .995, .631, .107, .004, .0001, 0/
         real z1(nct)!/0, .068, 1.773, .272, .009, 0,0,0,0,0/
@@ -327,10 +327,10 @@
 
         xc = 0.; yc = 0.; zc = 0.
 
-!       Integrate with trapezoidal rule
+!       integrate with trapezoidal rule
         do ic = 2,nct   
           icm = ic-1
-          W = wa_tri(ic) * 1e-4 ! microns to cm  
+          w = wa_tri(ic) * 1e-4 ! microns to cm  
           w_ang = wa_tri(ic) * 10000.
 
           xs = 0.5 * (x1(icm)*fa(icm) + x1(ic)*fa(ic))
@@ -364,7 +364,7 @@
 
       real luma
 
-!     Hue is 0:R, 1:B, 2:G, 3:R
+!     hue is 0:r, 1:b, 2:g, 3:r
 
       red1 = max(1.0 - abs(hue - 0.0),0.0)
       red2 = max(1.0 - abs(hue - 3.0),0.0)
@@ -372,7 +372,7 @@
       grn = max(1.0 - abs(hue  - 2.0),0.0)
       blu = max(1.0 - abs(hue  - 1.0),0.0)
 
-!     Normalize to the max intensity
+!     normalize to the max intensity
       colmax = max(red,grn,blu)
       if(colmax .gt. 0.)then
           red = red/colmax
@@ -388,7 +388,7 @@
       grn = grn * rintens
       blu = blu * rintens
 
-!     Scale the RGB intensity according to the luma calculation
+!     scale the rgb intensity according to the luma calculation
 
       luma = .30 * red + .59 * grn + .11 * blu
 

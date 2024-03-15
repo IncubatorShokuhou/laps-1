@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -57,21 +57,21 @@ cdis
 
         character*2 c2_cloud_types(0:10)
 !       data c2_cloud_types
-!    1  /'  ','St','Sc','Cu','Ns','Ac','As','Cs','Ci','Cc','Cb'/
+!    1  /'  ','st','sc','cu','ns','ac','as','cs','ci','cc','cb'/
         data c2_cloud_types
-     1  /'  ','ST','SC','CU','NS','AC','AS','CS','CI','CC','CB'/
+     1  /'  ','st','sc','cu','ns','ac','as','cs','ci','cc','cb'/
 
         character*2 c2_precip_types(0:10)
         data c2_precip_types
-     1  /'  ','Rn','Sn','Zr','Sl','Ha','L ','Zl','  ','  ','  '/
+     1  /'  ','rn','sn','zr','sl','ha','l ','zl','  ','  ','  '/
 
         character*1 c1_precip_types(0:10)
         data c1_precip_types
-     1  /' ','R','*','Z','I','H','L','F','M','M',' '/
+     1  /' ','r','*','z','i','h','l','f','m','m',' '/
 
-        ANGD = 0.
+        angd = 0.
 
-!       Pull out relavant bits
+!       pull out relavant bits
         do i = 1,imax
         do j = 1,jmax
 !          barg = cldpcp_type_2d(i,j)
@@ -97,7 +97,7 @@ cdis
         if(.not. l_meta)return
 
         if(c2_field .eq. 'tc' .or. c2_field .eq. 'cy')then
-            l_new = .true. ! Testing as T/F for cloud type
+            l_new = .true. ! testing as t/f for cloud type
 
             nc = 2
 
@@ -143,16 +143,16 @@ cdis
 !               endif
      
                 if(.not. l_new)then ! old way
-!                   write(6,*)'Plot type: ',c2_type,i,j
+!                   write(6,*)'plot type: ',c2_type,i,j
                     ri = i
                     rj = j
                     call plot_typeob(c2_type,nc,ri,rj,isize,imax,jmax)
                 else
-!                   write(6,*)'Plot type: ',c2_type,i,j
+!                   write(6,*)'plot type: ',c2_type,i,j
                     ri = i
                     rj = j
-!                   CALL PCLOQU(ri, rj, c2_type, size_z, ANGD, CNTR)
-                    CALL PCMEQU(ri, rj, c2_type, size_z, ANGD, CNTR)       
+!                   call pcloqu(ri, rj, c2_type, size_z, angd, cntr)
+                    call pcmequ(ri, rj, c2_type, size_z, angd, cntr)       
                 endif
             endif
 

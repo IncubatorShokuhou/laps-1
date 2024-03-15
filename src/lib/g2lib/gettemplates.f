@@ -1,92 +1,92 @@
       subroutine gettemplates(cgrib,lcgrib,ifldnum,igds,igdstmpl,
      &                    igdslen,ideflist,idefnum,ipdsnum,ipdstmpl,
      &                    ipdslen,coordlist,numcoord,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gettemplates 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-26
+! subprogram:    gettemplates 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-26
 !
-! ABSTRACT: This subroutine returns the Grid Definition, and
-!   Product Definition for a given data
-!   field.  Since there can be multiple data fields packed into a GRIB2
+! abstract: this subroutine returns the grid definition, and
+!   product definition for a given data
+!   field.  since there can be multiple data fields packed into a grib2
 !   message, the calling routine indicates which field is being requested
 !   with the ifldnum argument.
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-26  Gilbert
+! program history log:
+! 2000-05-26  gilbert
 !
-! USAGE:    CALL gettemplates(cgrib,lcgrib,ifldnum,igds,igdstmpl,igdslen,
+! usage:    call gettemplates(cgrib,lcgrib,ifldnum,igds,igdstmpl,igdslen,
 !    &                    ideflist,idefnum,ipdsnum,ipdstmpl,ipdslen,
 !    &                    coordlist,numcoord,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array that contains the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     ifldnum  - Specifies which field in the GRIB2 message to return.
+!   input argument list:
+!     cgrib    - character array that contains the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     ifldnum  - specifies which field in the grib2 message to return.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     igds     - Contains information read from the appropriate GRIB Grid 
-!                Definition Section 3 for the field being returned.
-!                Must be dimensioned >= 5.
-!                igds(1)=Source of grid definition (see Code Table 3.0)
-!                igds(2)=Number of grid points in the defined grid.
-!                igds(3)=Number of octets needed for each 
+!   output argument list:      
+!     igds     - contains information read from the appropriate grib grid 
+!                definition section 3 for the field being returned.
+!                must be dimensioned >= 5.
+!                igds(1)=source of grid definition (see code table 3.0)
+!                igds(2)=number of grid points in the defined grid.
+!                igds(3)=number of octets needed for each 
 !                            additional grid points definition.  
-!                            Used to define number of
+!                            used to define number of
 !                            points in each row ( or column ) for
 !                            non-regular grids.  
 !                            = 0, if using regular grid.
-!                igds(4)=Interpretation of list for optional points 
-!                            definition.  (Code Table 3.11)
-!                igds(5)=Grid Definition Template Number (Code Table 3.1)
-!     igdstmpl - Contains the data values for the specified Grid Definition
-!                Template ( NN=igds(5) ).  Each element of this integer 
-!                array contains an entry (in the order specified) of Grid
-!                Defintion Template 3.NN
-!                A safe dimension for this array can be obtained in advance
+!                igds(4)=interpretation of list for optional points 
+!                            definition.  (code table 3.11)
+!                igds(5)=grid definition template number (code table 3.1)
+!     igdstmpl - contains the data values for the specified grid definition
+!                template ( nn=igds(5) ).  each element of this integer 
+!                array contains an entry (in the order specified) of grid
+!                defintion template 3.nn
+!                a safe dimension for this array can be obtained in advance
 !                from maxvals(2), which is returned from subroutine gribinfo.
-!     igdslen  - Number of elements in igdstmpl().  i.e. number of entries
-!                in Grid Defintion Template 3.NN  ( NN=igds(5) ).
-!     ideflist - (Used if igds(3) .ne. 0)  This array contains the
+!     igdslen  - number of elements in igdstmpl().  i.e. number of entries
+!                in grid defintion template 3.nn  ( nn=igds(5) ).
+!     ideflist - (used if igds(3) .ne. 0)  this array contains the
 !                number of grid points contained in each row ( or column ).
-!                (part of Section 3)
-!                A safe dimension for this array can be obtained in advance
+!                (part of section 3)
+!                a safe dimension for this array can be obtained in advance
 !                from maxvals(3), which is returned from subroutine gribinfo.
-!     idefnum  - (Used if igds(3) .ne. 0)  The number of entries
+!     idefnum  - (used if igds(3) .ne. 0)  the number of entries
 !                in array ideflist.  i.e. number of rows ( or columns )
 !                for which optional grid points are defined.
-!     ipdsnum  - Product Definition Template Number ( see Code Table 4.0)
-!     ipdstmpl - Contains the data values for the specified Product Definition
-!                Template ( N=ipdsnum ).  Each element of this integer
-!                array contains an entry (in the order specified) of Product
-!                Defintion Template 4.N
-!                A safe dimension for this array can be obtained in advance
+!     ipdsnum  - product definition template number ( see code table 4.0)
+!     ipdstmpl - contains the data values for the specified product definition
+!                template ( n=ipdsnum ).  each element of this integer
+!                array contains an entry (in the order specified) of product
+!                defintion template 4.n
+!                a safe dimension for this array can be obtained in advance
 !                from maxvals(4), which is returned from subroutine gribinfo.
-!     ipdslen  - Number of elements in ipdstmpl().  i.e. number of entries
-!                in Product Defintion Template 4.N  ( N=ipdsnum ).
-!     coordlist- Array containg floating point values intended to document
+!     ipdslen  - number of elements in ipdstmpl().  i.e. number of entries
+!                in product defintion template 4.n  ( n=ipdsnum ).
+!     coordlist- array containg floating point values intended to document
 !                the vertical discretisation associated to model data
-!                on hybrid coordinate vertical levels.  (part of Section 4)
-!                The dimension of this array can be obtained in advance
+!                on hybrid coordinate vertical levels.  (part of section 4)
+!                the dimension of this array can be obtained in advance
 !                from maxvals(5), which is returned from subroutine gribinfo.
 !     numcoord - number of values in array coordlist.
-!     ierr     - Error return code.
+!     ierr     - error return code.
 !                0 = no error
-!                1 = Beginning characters "GRIB" not found.
-!                2 = GRIB message is not Edition 2.
-!                3 = The data field request number was not positive.
-!                4 = End string "7777" found, but not where expected.
-!                6 = GRIB message did not contain the requested number of
+!                1 = beginning characters "grib" not found.
+!                2 = grib message is not edition 2.
+!                3 = the data field request number was not positive.
+!                4 = end string "7777" found, but not where expected.
+!                6 = grib message did not contain the requested number of
 !                    data fields.
-!                7 = End string "7777" not found at end of message.
-!               10 = Error unpacking Section 3.
-!               11 = Error unpacking Section 4.
+!                7 = end string "7777" not found at end of message.
+!               10 = error unpacking section 3.
+!               11 = error unpacking section 4.
 !
-! REMARKS: Note that subroutine gribinfo can be used to first determine
-!          how many data fields exist in the given GRIB message.
+! remarks: note that subroutine gribinfo can be used to first determine
+!          how many data fields exist in the given grib message.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -98,7 +98,7 @@
       integer,intent(out) :: ierr
       real,intent(out) :: coordlist(*)
       
-      character(len=4),parameter :: grib='GRIB',c7777='7777'
+      character(len=4),parameter :: grib='grib',c7777='7777'
       character(len=4) :: ctemp
       integer:: listsec0(2)
       integer iofst,ibeg,istart
@@ -109,16 +109,16 @@
       ierr=0
       numfld=0
 !
-!  Check for valid request number
+!  check for valid request number
 !  
       if (ifldnum.le.0) then
-        print *,'gettemplates: Request for field number must be ',
+        print *,'gettemplates: request for field number must be ',
      &          'positive.'
         ierr=3
         return
       endif
 !
-!  Check for beginning of GRIB message in the first 100 bytes
+!  check for beginning of grib message in the first 100 bytes
 !
       istart=0
       do j=1,100
@@ -129,42 +129,42 @@
         endif
       enddo
       if (istart.eq.0) then
-        print *,'gettemplates:  Beginning characters GRIB not found.'
+        print *,'gettemplates:  beginning characters grib not found.'
         ierr=1
         return
       endif
 !
-!  Unpack Section 0 - Indicator Section 
+!  unpack section 0 - indicator section 
 !
       iofst=8*(istart+5)
-      call gbyte(cgrib,listsec0(1),iofst,8)     ! Discipline
+      call gbyte(cgrib,listsec0(1),iofst,8)     ! discipline
       iofst=iofst+8
-      call gbyte(cgrib,listsec0(2),iofst,8)     ! GRIB edition number
+      call gbyte(cgrib,listsec0(2),iofst,8)     ! grib edition number
       iofst=iofst+8
       iofst=iofst+32
-      call gbyte(cgrib,lengrib,iofst,32)        ! Length of GRIB message
+      call gbyte(cgrib,lengrib,iofst,32)        ! length of grib message
       iofst=iofst+32
       lensec0=16
       ipos=istart+lensec0
 !
-!  Currently handles only GRIB Edition 2.
+!  currently handles only grib edition 2.
 !  
       if (listsec0(2).ne.2) then
-        print *,'gettemplates: can only decode GRIB edition 2.'
+        print *,'gettemplates: can only decode grib edition 2.'
         ierr=2
         return
       endif
 !
-!  Loop through the remaining sections keeping track of the 
-!  length of each.  Also keep the latest Grid Definition Section info.
-!  Unpack the requested field number.
+!  loop through the remaining sections keeping track of the 
+!  length of each.  also keep the latest grid definition section info.
+!  unpack the requested field number.
 !
       do
-        !    Check to see if we are at end of GRIB message
+        !    check to see if we are at end of grib message
         ctemp=cgrib(ipos)//cgrib(ipos+1)//cgrib(ipos+2)//cgrib(ipos+3)
         if (ctemp.eq.c7777 ) then
           ipos=ipos+4
-          !    If end of GRIB message not where expected, issue error
+          !    if end of grib message not where expected, issue error
           if (ipos.ne.(istart+lengrib)) then
             print *,'gettemplates: "7777" found, but not where ',
      &              'expected.'
@@ -173,16 +173,16 @@
           endif
           exit
         endif
-        !     Get length of Section and Section number
+        !     get length of section and section number
         iofst=(ipos-1)*8
-        call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+        call gbyte(cgrib,lensec,iofst,32)        ! get length of section
         iofst=iofst+32
-        call gbyte(cgrib,isecnum,iofst,8)         ! Get Section number
+        call gbyte(cgrib,isecnum,iofst,8)         ! get section number
         iofst=iofst+8
         !print *,' lensec= ',lensec,'    secnum= ',isecnum
         !
-        !   If found Section 3, unpack the GDS info using the 
-        !   appropriate template.  Save in case this is the latest
+        !   if found section 3, unpack the gds info using the 
+        !   appropriate template.  save in case this is the latest
         !   grid before the requested field.
         !
         if (isecnum.eq.3) then
@@ -197,7 +197,7 @@
           endif
         endif
         !
-        !   If found Section 4, check to see if this field is the
+        !   if found section 4, check to see if this field is the
         !   one requested.
         !
         if (isecnum.eq.4) then
@@ -215,12 +215,12 @@
           endif
         endif
         !
-        !   Check to see if we read pass the end of the GRIB
+        !   check to see if we read pass the end of the grib
         !   message and missed the terminator string '7777'.
         !
-        ipos=ipos+lensec                 ! Update beginning of section pointer
+        ipos=ipos+lensec                 ! update beginning of section pointer
         if (ipos.gt.(istart+lengrib)) then
-          print *,'gettemplates: "7777"  not found at end of GRIB ',
+          print *,'gettemplates: "7777"  not found at end of grib ',
      &            'message.'
           ierr=7
           return
@@ -231,12 +231,12 @@
       enddo
 
 !
-!  If exited from above loop, the end of the GRIB message was reached
+!  if exited from above loop, the end of the grib message was reached
 !  before the requested field was found.
 !
-      print *,'gettemplates: GRIB message contained ',numlocal,
+      print *,'gettemplates: grib message contained ',numlocal,
      &        ' different fields.'
-      print *,'gettemplates: The request was for the ',ifldnum,
+      print *,'gettemplates: the request was for the ',ifldnum,
      &        ' field.'
       ierr=6
 

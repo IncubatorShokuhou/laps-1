@@ -1,5 +1,5 @@
 
-      Subroutine gen_ascii_lut(data_path,csatid,
+      subroutine gen_ascii_lut(data_path,csatid,
      &csattype,chtype,nelem,nlines,nx_l,ny_l,lat,lon,
      &istatus)
 c
@@ -63,9 +63,9 @@ c -------------------------------------------------------------------
      &                    mxfiles,
      &                    gfn_status)
       if(gfn_status.eq.1)then
-         write(*,*)'Success GFN (lvd)'
+         write(*,*)'success gfn (lvd)'
       else
-         write(6,*)'Error GFN (lvd)'
+         write(6,*)'error gfn (lvd)'
          istatus=-1
          goto 996
       endif
@@ -84,7 +84,7 @@ c -------------------------------------------------------------------
       goto 997
     
 c     i4time_current=1142776920      !this set to the i4time corresponding
-c                                     to date/time within the file LAPSI.ASC
+c                                     to date/time within the file lapsi.asc
 c10    call lvd_file_specifier(chtype,lvd_index,istatus)
 c      goto(1,2,3,2,2)lvd_index
 
@@ -110,7 +110,7 @@ c      goto(1,2,3,2,2)lvd_index
 
       else
 
-         write(6,*)'Already Computed ir lut'
+         write(6,*)'already computed ir lut'
          goto 900
 
       endif
@@ -126,39 +126,39 @@ c      goto(1,2,3,2,2)lvd_index
       cname='/lvd/sat-llij-'
       call get_directory('static',cdir,lend)
       table_path = cdir(1:lend)//cname//chtype(1:nc)//'-asc.lut'
-      write(6,*)'Write lat/lon to i/j look up table'
+      write(6,*)'write lat/lon to i/j look up table'
       write(6,*)table_path(1:35)
 
       call write_table (table_path,nx_l,ny_l,lat,lon,ri,rj,istatus)
       if(istatus .ne. 1)then
-         write(6,*)'Error writing look-up table'
+         write(6,*)'error writing look-up table'
          goto 900
       endif
 c
 c     call write_satsector_incfile(chtype,csattype,
 c    &1,nlines,1,nelem,istatus)
 c     if(istatus.ne.1)then
-c        write(6,*)'Error write satsector_incfile'
+c        write(6,*)'error write satsector_incfile'
 c        goto 900
 c     endif
 
-c     write(6,*)'Sector file written'
-c     write(6,*)'Done generating lut', chtype
+c     write(6,*)'sector file written'
+c     write(6,*)'done generating lut', chtype
 c     write(6,*)
 c
 c ------------------------------------------------------------------------------
       goto 900
 
-898   write(6,*)'Error get_static_info - path-to-raw-satellite'
+898   write(6,*)'error get_static_info - path-to-raw-satellite'
       goto 900
 
-901   write(6,*)'Error openning static/lvd/g8ir.parms file'
+901   write(6,*)'error openning static/lvd/g8ir.parms file'
       goto 900
 
-996   write(6,*)'Something wrong in get_file_names'
+996   write(6,*)'something wrong in get_file_names'
       goto 900
 
-997   write(6,*)'No files of type: ',chtype
+997   write(6,*)'no files of type: ',chtype
 
 900   return
       end

@@ -1,31 +1,31 @@
 
-!      Driver for sounding ingest
+!      driver for sounding ingest
        program snd_main
 
-!      Steve Albers      May-1999       Original Version
+!      steve albers      may-1999       original version
 
-       use mem_grid, ONLY: topo
+       use mem_grid, only: topo
 
-!      Access global parameters
+!      access global parameters
        character*8 c8_project
        character*9 a9_time
 
        call get_grid_dim_xy(ni,nj,istatus)
        if (istatus .ne. 1) then
-           write (6,*) 'Error getting horizontal domain dimensions'
+           write (6,*) 'error getting horizontal domain dimensions'
            stop
        endif
 
        call get_c8_project(c8_project,istatus)
        if (istatus .ne. 1) then
-          write (6,*) 'Error getting c8_project'
+          write (6,*) 'error getting c8_project'
           go to 999
        endif
 
        call get_laps_cycle_time(laps_cycle_time,istatus)
        if(istatus .ne. 1)stop
 
-       call GETENV('LAPS_A9TIME',a9_time)
+       call getenv('laps_a9time',a9_time)
        call s_len(a9_time,ilen)
 
        if(ilen .eq. 9)then
@@ -37,28 +37,28 @@
            write(6,*)' systime = ',a9_time
        endif
 
-       allocate( topo(ni,nj), STAT=istat_alloc )
+       allocate( topo(ni,nj), stat=istat_alloc )
        if(istat_alloc .ne. 0)then
-           write(6,*)' ERROR: Could not allocate topo'
+           write(6,*)' error: could not allocate topo'
            stop
        endif
 
-       call read_static_grid(ni,nj,'AVG',topo,istatus)
+       call read_static_grid(ni,nj,'avg',topo,istatus)
        if(istatus .ne. 1)then
            stop
        endif
 
-       call snd_sub(ni,nj,c8_project,laps_cycle_time,i4time_sys)          ! I
+       call snd_sub(ni,nj,c8_project,laps_cycle_time,i4time_sys)          ! i
 
  999   continue
 
-       write(6,*)' Successful end of ingest_sounding program...'
+       write(6,*)' successful end of ingest_sounding program...'
 
        deallocate(topo)
 
        end
 
-       subroutine snd_sub(ni,nj,c8_project,laps_cycle_time,i4time_sys)    ! I
+       subroutine snd_sub(ni,nj,c8_project,laps_cycle_time,i4time_sys)    ! i
 
        character*150 path_to_raw_raob,path_to_local_raob
        character*150 path_to_raw_drpsnd
@@ -86,58 +86,58 @@
 
        lun_out = 21
 
-       if(c8_project .ne. 'RSA')then
+       if(c8_project .ne. 'rsa')then
 
-!          Read RAOB data
-           if(c8_project .eq. 'AFTAC')then
-             c8_raob_format = 'NIMBUS'
+!          read raob data
+           if(c8_project .eq. 'aftac')then
+             c8_raob_format = 'nimbus'
            else
              c8_raob_format = c8_project
            endif
            write(6,*)
-           write(6,*)' Call ingest_raob, format=',c8_raob_format
+           write(6,*)' call ingest_raob, format=',c8_raob_format
            call ingest_raob(path_to_raw_raob,c8_raob_format,i4time_sys
      1                     ,l_fill_ht,lun_out)
 
            call s_len(c8_project,lenc8)
 
-!          Read Dropsonde data
-           if(c8_project .eq. 'NIMBUS')then       
+!          read dropsonde data
+           if(c8_project .eq. 'nimbus')then       
                c8_drpsnd_format = c8_project
 
-           elseif(c8_project .eq. 'CWB')then       
+           elseif(c8_project .eq. 'cwb')then       
                c8_drpsnd_format = c8_project
 
-           elseif(c8_project(1:min(3,lenc8)) .eq. 'AIR')then       
-               c8_drpsnd_format = 'SND'
+           elseif(c8_project(1:min(3,lenc8)) .eq. 'air')then       
+               c8_drpsnd_format = 'snd'
 
            else
-               c8_drpsnd_format = 'AVAPS'
+               c8_drpsnd_format = 'avaps'
 
            endif
 
            write(6,*)
-           write(6,*)' Call ingest_drpsnd, format=',c8_drpsnd_format       
+           write(6,*)' call ingest_drpsnd, format=',c8_drpsnd_format       
            call ingest_drpsnd(path_to_raw_drpsnd,c8_drpsnd_format
      1                       ,l_fill_ht,lun_out)
 
-       else ! RSA project
-           c8_raob_format = 'WFO'
+       else ! rsa project
+           c8_raob_format = 'wfo'
            write(6,*)
-           write(6,*)' Call ingest_raob, format=',c8_raob_format
+           write(6,*)' call ingest_raob, format=',c8_raob_format
            call ingest_raob(path_to_raw_raob,c8_raob_format,i4time_sys
      1                     ,l_fill_ht,lun_out)
 
-           c8_raob_format = 'RSA'
+           c8_raob_format = 'rsa'
            write(6,*)
-           write(6,*)' Call ingest_raob, format=',c8_raob_format
+           write(6,*)' call ingest_raob, format=',c8_raob_format
            call ingest_raob(path_to_local_raob,c8_raob_format,i4time_sys
      1                     ,l_fill_ht,lun_out)
 
-       endif ! RSA project
+       endif ! rsa project
 
        write(6,*)
-       write(6,*)' Call tower_driver_sub'
+       write(6,*)' call tower_driver_sub'
        maxobs = 6000
        itime_before = 900
        itime_after = 900
@@ -152,47 +152,47 @@
      1                      ,maxsta
      1                      ,istatus)
 
-!      Satellite soundings -- added goes (7/26/04 db)
+!      satellite soundings -- added goes (7/26/04 db)
 
        write(6,*)
-       if(c8_project .eq. 'AFWA')then
-           write(6,*)' Call ingest_satsnd for AFWA...'
+       if(c8_project .eq. 'afwa')then
+           write(6,*)' call ingest_satsnd for afwa...'
            call ingest_satsnd(path_to_raw_satsnd,c8_project
      1                       ,i4time_sys,lun_out)
        else
-           write(6,*)' Call ingest_satsnd for POES...'
+           write(6,*)' call ingest_satsnd for poes...'
            call ingest_satsnd(path_to_raw_poessnd,c8_project
      1                       ,i4time_sys,lun_out)
 
            write(6,*)
-           write(6,*)' Call ingest_goessnd...'
+           write(6,*)' call ingest_goessnd...'
            call ingest_goessnd (path_to_raw_satsnd, i4time_sys, 
      1                          lun_out, istatus)
        endif
 
-!      Radiometer data
+!      radiometer data
        write(6,*)
        i4time_rad = (i4time_sys/3600) * 3600
  900   filename13 = cvt_i4time_wfo_fname13(i4time_rad)
        call s_len(path_to_raw_radiometer,len_path)
        if(len_path .gt. 0)then
-           write(6,*)' Call get_radiometer_data, input file at '
+           write(6,*)' call get_radiometer_data, input file at '
      1              ,filename13
            call get_radiometer_data(i4time_sys,laps_cycle_time,ni,nj
-     1                             ,i4time_sys - 855/2 ! Radiomtr cyc time / 2
-     1                             ,i4time_sys + 855/2 ! Radiomtr cyc time / 2
+     1                             ,i4time_sys - 855/2 ! radiomtr cyc time / 2
+     1                             ,i4time_sys + 855/2 ! radiomtr cyc time / 2
      1                             ,path_to_raw_radiometer(1:len_path)
      1                                           //'/'//filename13
      1                             ,lun_out,istatus)
            if(istatus .ne. 1 .and. i4time_sys - i4time_rad .lt. 3600
      1                                                           )then      
-               write(6,*)' Trying radiometer for an hour earlier'
+               write(6,*)' trying radiometer for an hour earlier'
                i4time_rad = i4time_rad - 3600
                go to 900
            endif
        endif ! len_path > 0
 
-       close(lun_out) ! Output SND file
+       close(lun_out) ! output snd file
 
  999   return
        

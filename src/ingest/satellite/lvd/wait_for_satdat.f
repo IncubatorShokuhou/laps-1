@@ -84,14 +84,14 @@ c
              nn=index(c_ext(i),' ')-1
              path=data_dir(1:n)//'*'//c_ext(i)(1:nn)
              nn=index(path,' ')
-             write(6,*)'Waiting for ',path(1:nn)
+             write(6,*)'waiting for ',path(1:nn)
              write(6,*)'---------------------'
              call wait_for_data(path,i4time_data
      1               ,i4_check_interval,i4_total_wait
      1               ,i4_thresh_age
      1               ,istatus)
              if(istatus .ne. 1)then
-                write(6,*)'No data found: ',c_ext(i)
+                write(6,*)'no data found: ',c_ext(i)
                 foundit(i)=.true.
              else
                 call get_latest_file_time(path,i4time_nearest)
@@ -110,7 +110,7 @@ c
 
        goto 999
 
-995    write(6,*)'Error getting wait parms'
+995    write(6,*)'error getting wait parms'
 
 999    return
        end

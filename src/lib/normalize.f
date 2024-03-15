@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,105 +29,105 @@ cdis
 cdis 
 cdis 
 cdis 
-        Subroutine Normalize_Brightness(i4time,lat,lon,image,ni,nj
+        subroutine normalize_brightness(i4time,lat,lon,image,ni,nj
      1  ,sublat_d,sublon_d,range_m,l_national,iskip_bilin,r_missing_data
-     1  ,lun,i_dir,Phase_angle_d,Specular_ref_angle_d,Emission_angle_d
+     1  ,lun,i_dir,phase_angle_d,specular_ref_angle_d,emission_angle_d
      1  ,istatus)
 
 
-C***Normalize a vis satellite image for solar angle.
+c***normalize a vis satellite image for solar angle.
 
-C       S. Albers          Feb 94       Original version
-C       J. Smart           Jan 96       Output Phase angle array
-C       J. Smart           Mar 97       Added r_missing_data to argument list.
-C       S. Albers          May 97       No longer using 0 as missing data
-C                                       value. Added error trapping when
-C                                       Emission angle < 0.
-C       S. Albers          Jun 97       Error handling for 'iskip_bilin'
-C       J. Smart           Mar 99       Put Emission angle code in subroutine.
+c       s. albers          feb 94       original version
+c       j. smart           jan 96       output phase angle array
+c       j. smart           mar 97       added r_missing_data to argument list.
+c       s. albers          may 97       no longer using 0 as missing data
+c                                       value. added error trapping when
+c                                       emission angle < 0.
+c       s. albers          jun 97       error handling for 'iskip_bilin'
+c       j. smart           mar 99       put emission angle code in subroutine.
 
-C Argument      I/O       Type                    Description
-C --------      ---       ----    ------------------------------------------------
-C i4time         I        I*4     i4time of image (1960 reference)
-C lat            I        R*4  A  latitude array of image pixels (degrees)
-C lon            I        R*4  A  longitude array of image pixels (degrees)
-C image         I/O       R*4  A  Remapped image array.
-C ni             I        I*4     i dimension of image
-C nj             I        I*4     j dimension of image
-C sublat_d       I        R*4     Latitude of satellite subpoint (degrees)
-C sublon_d       I        R*4     Longitude...                   (degrees)
-C range_m        I        R*4     Distance of spacecraft from center of earth (m)
-C l_national     I        L       .true. for CONUS / .false. for LAPS
-C iskip_bilin    I        I*4     >5 for CONUS / ~1 for LAPS
-C                                 Controls subsampling of the grid for the more
-C                                 time-consuming calculations. Larger values
-C                                 give faster runtimes and less accuracy. 
-C                                 Smaller values give slower runtimes and
-C                                 greater accuracy, and also risks an error
-C                                 message about dimensions. In general, the 
-C                                 product of the satellite data resolution and
-C                                 'iskip_bilin' should lie between about 10km 
-C                                 and 30km.
-C lun            I        I*4     Logical Unit # for logging output
-C i_dir          I        I*4     Direction of normalization (-1,0,+1)
-C phase_angle_d  O        R*4  A  Phase Angle (sparse array if iskip_bilin > 1)
-C Specular_ref_angle_d O  R*4  A  Distance from specular reflection pt to sun
+c argument      i/o       type                    description
+c --------      ---       ----    ------------------------------------------------
+c i4time         i        i*4     i4time of image (1960 reference)
+c lat            i        r*4  a  latitude array of image pixels (degrees)
+c lon            i        r*4  a  longitude array of image pixels (degrees)
+c image         i/o       r*4  a  remapped image array.
+c ni             i        i*4     i dimension of image
+c nj             i        i*4     j dimension of image
+c sublat_d       i        r*4     latitude of satellite subpoint (degrees)
+c sublon_d       i        r*4     longitude...                   (degrees)
+c range_m        i        r*4     distance of spacecraft from center of earth (m)
+c l_national     i        l       .true. for conus / .false. for laps
+c iskip_bilin    i        i*4     >5 for conus / ~1 for laps
+c                                 controls subsampling of the grid for the more
+c                                 time-consuming calculations. larger values
+c                                 give faster runtimes and less accuracy. 
+c                                 smaller values give slower runtimes and
+c                                 greater accuracy, and also risks an error
+c                                 message about dimensions. in general, the 
+c                                 product of the satellite data resolution and
+c                                 'iskip_bilin' should lie between about 10km 
+c                                 and 30km.
+c lun            i        i*4     logical unit # for logging output
+c i_dir          i        i*4     direction of normalization (-1,0,+1)
+c phase_angle_d  o        r*4  a  phase angle (sparse array if iskip_bilin > 1)
+c specular_ref_angle_d o  r*4  a  distance from specular reflection pt to sun
       include 'trigd.inc'
-C istatus        O        I*4     Standard status return.
+c istatus        o        i*4     standard status return.
         integer         ni,nj
-C***Parameter list variables
+c***parameter list variables
         real          lat(ni,nj),lon(ni,nj)
-        Real          sublat_d,sublon_d,range_m
-        Integer       i4time,istatus
+        real          sublat_d,sublon_d,range_m
+        integer       i4time,istatus
         real          image(ni,nj)
         real          image_in(ni,nj)
         logical         l_national
 
-C***Local variables
+c***local variables
         integer maxlut
         real rpd
-        Parameter   (maxlut=2500,         ! largest array size allowed
+        parameter   (maxlut=2500,         ! largest array size allowed
      1          rpd=3.1415926536/180.)
 
-        Real*8  TX,TY,TZ,RX,RY,RZ,
-     1          SATX,SATY,SATZ,R8Phase_angle_r,
-     1          R8_ref_angle_r,
+        real*8  tx,ty,tz,rx,ry,rz,
+     1          satx,saty,satz,r8phase_angle_r,
+     1          r8_ref_angle_r,
      1          stx_n,sty_n,stz_n,arg_dum,
      1          tx_n,ty_n,tz_n,
      1          refx,refy,refz
 
-! Note that solar_factor and phase_factor originally were declared to maxlut
-        Real  normfac,imgtmp,                                                                               
+! note that solar_factor and phase_factor originally were declared to maxlut
+        real  normfac,imgtmp,                                                                               
      1          solar_factor(ni,nj),solar_alt_d(ni,nj),
-     1          XFrac,YFrac,
-     1          SF_UL,SF_UR,SF_LR,SF_LL,SF_U,SF_L,S_F,Weight,
-     1                PF_UL,PF_UR,PF_LR,PF_LL,PF_U,PF_L,P_F,RBril,RBrih,
-     1          Phase_factor(ni,nj),Phase_angle_d(ni,nj),
-     1          sat_radius,Emission_angle_d(ni,nj),
-     1          Specular_ref_angle_d(ni,nj)       
+     1          xfrac,yfrac,
+     1          sf_ul,sf_ur,sf_lr,sf_ll,sf_u,sf_l,s_f,weight,
+     1                pf_ul,pf_ur,pf_lr,pf_ll,pf_u,pf_l,p_f,rbril,rbrih,
+     1          phase_factor(ni,nj),phase_angle_d(ni,nj),
+     1          sat_radius,emission_angle_d(ni,nj),
+     1          specular_ref_angle_d(ni,nj)       
 
-        Real RBril_a(ni,nj),RBrih_a(ni,nj)
+        real rbril_a(ni,nj),rbrih_a(ni,nj)
 
-        Integer nilut,njlut,I,J,img_i(maxlut),img_j(maxlut),
-     1            ilut,jlut,ISpace,JSpace, ni2, nj2
+        integer nilut,njlut,i,j,img_i(maxlut),img_j(maxlut),
+     1            ilut,jlut,ispace,jspace, ni2, nj2
 
         character*9 a9time
 
         call make_fnam_lp (i4time,a9time,istatus)
         if(istatus .ne. 1)return
 
-        write(lun,*)' Begin normalization routine for ',a9time       
-        write(lun,*)' Sub Lat/Lon/Rng = ',sublat_d,sublon_d,range_m
+        write(lun,*)' begin normalization routine for ',a9time       
+        write(lun,*)' sub lat/lon/rng = ',sublat_d,sublon_d,range_m
         write(lun,*)' iskip_bilin = ',iskip_bilin
 
         nilut = (ni-2) / iskip_bilin + 2
         njlut = (nj-2) / iskip_bilin + 2
 
         write(lun,*)' ni/nj/nilut/njlut = ',ni,nj,nilut,njlut
-        write(lun,*)' corner SW ',lat(1,1),lon(1,1)
-        write(lun,*)' corner SE ',lat(ni,1),lon(ni,1)
-        write(lun,*)' corner NW ',lat(1,nj),lon(1,nj)
-        write(lun,*)' corner NE ',lat(ni,nj),lon(ni,nj)
+        write(lun,*)' corner sw ',lat(1,1),lon(1,1)
+        write(lun,*)' corner se ',lat(ni,1),lon(ni,1)
+        write(lun,*)' corner nw ',lat(1,nj),lon(1,nj)
+        write(lun,*)' corner ne ',lat(ni,nj),lon(ni,nj)
 
         call zero(phase_angle_d,ni,nj)
         call zero(emission_angle_d,ni,nj)
@@ -135,35 +135,35 @@ C***Local variables
 
         iwrite = 0
 
-C***Where's the sun?
-!       Use cartesian coordinates with the x-axis through the prime
-!       meridian and distances in AU.
+c***where's the sun?
+!       use cartesian coordinates with the x-axis through the prime
+!       meridian and distances in au.
         rlat = 0.
         rlon = 0.
         call solar_position(rlat,rlon,i4time,solar_alt_deg       
      1                     ,solar_dec_d,hr_angle_d)
         solar_range = 1.
         solar_sublon_d = -hr_angle_d
-        RX = cosd(solar_sublon_d) * cosd(solar_dec_d) * solar_range
-        RY = sind(solar_sublon_d) * cosd(solar_dec_d) * solar_range
-        RZ = sind(solar_dec_d)                        * solar_range
+        rx = cosd(solar_sublon_d) * cosd(solar_dec_d) * solar_range
+        ry = sind(solar_sublon_d) * cosd(solar_dec_d) * solar_range
+        rz = sind(solar_dec_d)                        * solar_range
 
-!   Satellite Location (in AU)
+!   satellite location (in au)
         au_m = 149000000.
         sat_radius = range_m / au_m
 
-        SATX = cosd(sublon_d) * cosd(sublat_d) * sat_radius
-        SATY = sind(sublon_d) * cosd(sublat_d) * sat_radius
-        SATZ = sind(sublat_d)                  * sat_radius
+        satx = cosd(sublon_d) * cosd(sublat_d) * sat_radius
+        saty = sind(sublon_d) * cosd(sublat_d) * sat_radius
+        satz = sind(sublat_d)                  * sat_radius
 
 !       write(lun,*)
-!    1 '   I    J    ALT    EMIS   PHA    PF   VIS  SPEC      LAT    LON'       
+!    1 '   i    j    alt    emis   pha    pf   vis  spec      lat    lon'       
 
-C***Fill the solar brightness and phase angle arrays
-        normfac=sind(58.)       ! Normalized sun angle
+c***fill the solar brightness and phase angle arrays
+        normfac=sind(58.)       ! normalized sun angle
 
         if(nilut .gt. maxlut .or. njlut .gt. maxlut)then
-            write(lun,*)'WARNING: Insufficient dimension for maxlut'
+            write(lun,*)'warning: insufficient dimension for maxlut'
             write(lun,*)'maxlut = ',maxlut
             write(lun,*)'nilut = ',nilut
             write(lun,*)'njlut = ',njlut
@@ -173,30 +173,30 @@ C***Fill the solar brightness and phase angle arrays
      1                    * float(iskip_bilin)
             iskip_new = int(rskip_new) + 1
 
-            write(lun,*)'Input parameter iskip_bilin currently equals'   
+            write(lun,*)'input parameter iskip_bilin currently equals'   
      1                 ,iskip_bilin
-            write(lun,*)'Try increasing iskip_bilin to approx '
+            write(lun,*)'try increasing iskip_bilin to approx '
      1                 ,iskip_new      
-            write(lun,*)'Secondary alternative is to increase maxlut'
+            write(lun,*)'secondary alternative is to increase maxlut'
      1                 ,' declared as a parameter in normalize.f'
             write(lun,*)
-     1      'Setting istatus to zero, returning without normalizing'
+     1      'setting istatus to zero, returning without normalizing'
 
             istatus = 0
             return
         else
-            write(lun,*)' Dimension for maxlut',maxlut,nilut,njlut
+            write(lun,*)' dimension for maxlut',maxlut,nilut,njlut
         endif
 
         nj2 = nj
         ni2 = ni
-        Do jlut=1,njlut
+        do jlut=1,njlut
          j = ((jlut-1) * iskip_bilin) + 1
          
          j = min(j,nj2)
          img_j(jlut) = j
 
-         Do ilut=1,nilut
+         do ilut=1,nilut
 
           i = ((ilut-1) * iskip_bilin) + 1
           i = min(i,ni2)
@@ -206,52 +206,52 @@ C***Fill the solar brightness and phase angle arrays
      1                                  ,solar_alt_d(i,j)
      1                                  ,solar_dec_d,hr_angle_d)
 
-C   Reduce and limit correction at terminator
-          If(solar_alt_d(i,j).lt.8.)then
+c   reduce and limit correction at terminator
+          if(solar_alt_d(i,j).lt.8.)then
            solar_alt_d(i,j)=max(8.-(8.-solar_alt_d(i,j))*.5,3.8)
-          EndIf
+          endif
 
           solar_factor(ilut,jlut)=log(sind(solar_alt_d(i,j))/normfac)
 
-C   Compute Emission Angle (Emission_angle_d = satellite angular altitude)
+c   compute emission angle (emission_angle_d = satellite angular altitude)
  
           call sat_angular_alt(sat_radius,lat(i,j),lon(i,j)
-     .,SATX,SATY,SATZ,TX,TY,TZ,Emission_angle_d(i,j),istatus)
+     .,satx,saty,satz,tx,ty,tz,emission_angle_d(i,j),istatus)
 
-          if(Emission_angle_d(i,j) .lt. 0.)then
+          if(emission_angle_d(i,j) .lt. 0.)then
               istatus = 0
 
               if(image(i,j) .ne. r_missing_data)then ! valid image data
 
                 if(iwrite .le. 1)then
                   write(6,*)
-     1            ' Warning, Emission_angle_d = ', Emission_angle_d(i,j)
+     1            ' warning, emission_angle_d = ', emission_angle_d(i,j)
                   write(6,*)
-     1            ' You are normalizing beyond the earths limb'     
+     1            ' you are normalizing beyond the earths limb'     
                   write(6,*)
-     1            ' Check your satellite subpoint and lat/lons'
+     1            ' check your satellite subpoint and lat/lons'
                   write(6,*)'i,j,lat(i,j),lon(i,j),sublat_d,sublon_d'        
                   write(6,*)i,j,lat(i,j),lon(i,j),sublat_d,sublon_d
                   write(6,*)'image counts is ',image(i,j)
                   iwrite = iwrite + 1
                 elseif(iwrite .le. 10)then
                   write(6,*)
-     1'Warning, Emission_angle_d < 0 (i/j/lat/lon/E): ',i,j,lat(i,j)
-     1,lon(i,j),Emission_angle_d(i,j)
+     1'warning, emission_angle_d < 0 (i/j/lat/lon/e): ',i,j,lat(i,j)
+     1,lon(i,j),emission_angle_d(i,j)
                   iwrite=iwrite+1
                 endif
 
               endif ! valid image pixel intensity
-              Emission_angle_d(i,j) = 0.0
+              emission_angle_d(i,j) = 0.0
   
           endif ! emission angle < 0 (looking beyond the limb)
 
-C   Compute Phase Angle
-          Call AngleVectors(TX-SATX,TY-SATY,TZ-SATZ,RX,RY,RZ
-     1                     ,R8Phase_angle_r)
-          Phase_angle_d(i,j) = 180. - R8Phase_angle_r / rpd
+c   compute phase angle
+          call anglevectors(tx-satx,ty-saty,tz-satz,rx,ry,rz
+     1                     ,r8phase_angle_r)
+          phase_angle_d(i,j) = 180. - r8phase_angle_r / rpd
 
-C   Compute Specular Reflection Angle
+c   compute specular reflection angle
           stx_n = tx-satx
           sty_n = ty-saty
           stz_n = tz-satz
@@ -264,20 +264,20 @@ C   Compute Specular Reflection Angle
 
           call deviate_ray(-1d0,stx_n,sty_n,stz_n,tx_n,ty_n,tz_n
      1                         ,refx,refy,refz)
-          Call AngleVectors(refx,refy,refz,RX,RY,RZ,R8_ref_angle_r)
-          Specular_ref_angle_d(i,j) = 180. - R8_ref_angle_r / rpd
+          call anglevectors(refx,refy,refz,rx,ry,rz,r8_ref_angle_r)
+          specular_ref_angle_d(i,j) = 180. - r8_ref_angle_r / rpd
 
 
           if(i .lt. 40)then ! for testing
 
-          Phase_factor(ilut,jlut) = cosd(phase_angle_d(i,j))**6
+          phase_factor(ilut,jlut) = cosd(phase_angle_d(i,j))**6
 !    1                    * sind(emission_angle_d(i,j))**1.0
 !    1                    * sind(solar_alt_d(i,j))**1.0
      1                    * sind(emission_angle_d(i,j))**0.5
      1                    * sind(solar_alt_d(i,j))**0.25
 
           else
-          Phase_factor(ilut,jlut) = cosd(phase_angle_d(i,j))**6
+          phase_factor(ilut,jlut) = cosd(phase_angle_d(i,j))**6
 !    1                    * sind(emission_angle_d(i,j))**1.0
 !    1                    * sind(solar_alt_d(i,j))**1.0
      1                    * sind(emission_angle_d(i,j))**0.5
@@ -287,10 +287,10 @@ C   Compute Specular Reflection Angle
           endif
 
 
-!         Phase_factor(ilut,jlut) = 0.    ! Disable Phase Factor Correction
+!         phase_factor(ilut,jlut) = 0.    ! disable phase factor correction
 
-!         Perhaps the Phase factor should be modified if the solar altitude
-!         is low (< 23 deg). This would probably be designed to darken
+!         perhaps the phase factor should be modified if the solar altitude
+!         is low (< 23 deg). this would probably be designed to darken
 !         the land areas at low phase angle and low solar altitude.
 
 
@@ -308,102 +308,102 @@ C   Compute Specular Reflection Angle
               endif
           endif
 
-         EndDo
-        EndDo
+         enddo
+        enddo
 
         if(iwrite.gt.0)then
-           write(6,*)'Warning: found ',iwrite,' pts with Emission',
+           write(6,*)'warning: found ',iwrite,' pts with emission',
      +' angle < 0.0'
         endif
-        write(lun,*)' Normalization Lookup Tables complete'
+        write(lun,*)' normalization lookup tables complete'
 
-C***Apply the solar brightness normalization to the image
+c***apply the solar brightness normalization to the image
         if(iskip_bilin .eq. 1)write(lun,*)
-     1   '   I    J    ALT    EMIS   PHA    '
-     1  ,'PF   VISI  VISO  SPEC   LAT  LON'     
+     1   '   i    j    alt    emis   pha    '
+     1  ,'pf   visi  viso  spec   lat  lon'     
         jlut=1
-        JSpace=img_j(jlut+1)-img_j(jlut)
+        jspace=img_j(jlut+1)-img_j(jlut)
 
-        Do j=1,nj
+        do j=1,nj
 
-         If(j .gt. img_j(jlut+1))then
+         if(j .gt. img_j(jlut+1))then
           jlut=jlut+1
-          JSpace=img_j(jlut+1)-img_j(jlut)
-         EndIf
+          jspace=img_j(jlut+1)-img_j(jlut)
+         endif
 
-         YFrac=Float(j-img_j(jlut))/JSpace
+         yfrac=float(j-img_j(jlut))/jspace
 
          ilut=1
-         ISpace=img_i(ilut+1)-img_i(ilut)
+         ispace=img_i(ilut+1)-img_i(ilut)
 
-         Do i=1,ni
+         do i=1,ni
 
-          If(i .gt. img_i(ilut+1))then
+          if(i .gt. img_i(ilut+1))then
            ilut=ilut+1
-           ISpace=img_i(ilut+1)-img_i(ilut)
-          EndIf
+           ispace=img_i(ilut+1)-img_i(ilut)
+          endif
 
-          XFrac=Float(i-img_i(ilut))/ISpace
+          xfrac=float(i-img_i(ilut))/ispace
 
-C   Bilinearly interpolate the normalization factor from the surrounding points.
-          SF_UL=solar_factor(ilut  ,jlut  )
-          SF_UR=solar_factor(ilut+1,jlut  )
-          SF_LR=solar_factor(ilut+1,jlut+1)
-          SF_LL=solar_factor(ilut  ,jlut+1)
+c   bilinearly interpolate the normalization factor from the surrounding points.
+          sf_ul=solar_factor(ilut  ,jlut  )
+          sf_ur=solar_factor(ilut+1,jlut  )
+          sf_lr=solar_factor(ilut+1,jlut+1)
+          sf_ll=solar_factor(ilut  ,jlut+1)
 
-          SF_U=SF_UL+(SF_UR-SF_UL)*XFrac
-          SF_L=SF_LL+(SF_LR-SF_LL)*XFrac
-          S_F=SF_U+(SF_L-SF_U)*YFrac
+          sf_u=sf_ul+(sf_ur-sf_ul)*xfrac
+          sf_l=sf_ll+(sf_lr-sf_ll)*xfrac
+          s_f=sf_u+(sf_l-sf_u)*yfrac
 
-C   Bilinearly interpolate the phase factor from the surrounding points.
-          PF_UL=Phase_Factor(ilut  ,jlut  )
-          PF_UR=Phase_Factor(ilut+1,jlut  )
-          PF_LR=Phase_Factor(ilut+1,jlut+1)
-          PF_LL=Phase_Factor(ilut  ,jlut+1)
+c   bilinearly interpolate the phase factor from the surrounding points.
+          pf_ul=phase_factor(ilut  ,jlut  )
+          pf_ur=phase_factor(ilut+1,jlut  )
+          pf_lr=phase_factor(ilut+1,jlut+1)
+          pf_ll=phase_factor(ilut  ,jlut+1)
 
-          PF_U=PF_UL+(PF_UR-PF_UL)*XFrac
-          PF_L=PF_LL+(PF_LR-PF_LL)*XFrac
-          P_F=PF_U+(PF_L-PF_U)*YFrac
+          pf_u=pf_ul+(pf_ur-pf_ul)*xfrac
+          pf_l=pf_ll+(pf_lr-pf_ll)*xfrac
+          p_f=pf_u+(pf_l-pf_u)*yfrac
 
-C   Greater (lesser) abs. values of RBriH and RBriL will brighten (darken) the
-C   high and low ends, respectively.  RBriL is modified to make darker land more
-C   uniform in brightness.
+c   greater (lesser) abs. values of rbrih and rbril will brighten (darken) the
+c   high and low ends, respectively.  rbril is modified to make darker land more
+c   uniform in brightness.
 
-!         Original result
+!         original result
 !         phase_const1   = 20.                                
 !         ph_const2_l = 0. 
 !         ph_const2_h = 0. 
 
-!         New result
+!         new result
           phase_const1   = 0.                                
           ph_const2_l = 10. 
           ph_const2_h = 10. 
 
-          RBriH=-60.*S_F   -   phase_const1*P_F
-          RBriH_a(i,j) = RBriH
+          rbrih=-60.*s_f   -   phase_const1*p_f
+          rbrih_a(i,j) = rbrih
 
           if(l_national)then
-            Weight=18.
-          Else ! Local type scales
-            If(S_F.gt.-1.0)then
-             Weight=30.
-            Else
-             Weight=Max(30.-12.*(-1.0-S_F),20.)
-            EndIf
-          EndIf
+            weight=18.
+          else ! local type scales
+            if(s_f.gt.-1.0)then
+             weight=30.
+            else
+             weight=max(30.-12.*(-1.0-s_f),20.)
+            endif
+          endif
 
-          RBriL=-Weight*S_F  -   phase_const1*P_F
-          RBriL_a(i,j) = RBriL
+          rbril=-weight*s_f  -   phase_const1*p_f
+          rbril_a(i,j) = rbril
 
-          If(image(i,j) .ne. r_missing_data)then
+          if(image(i,j) .ne. r_missing_data)then
             imgtmp = image(i,j)
             image_in(i,j) = image(i,j)
             if(i_dir .eq. +1)then ! regular normalization
-              Call Stretch(68.-RBriL,220.-RBriH,68.,220.,image(i,j))
-              Call Stretch(40.+ph_const2_l*P_F, 114.+ph_const2_h*P_F,
+              call stretch(68.-rbril,220.-rbrih,68.,220.,image(i,j))
+              call stretch(40.+ph_const2_l*p_f, 114.+ph_const2_h*p_f,
      1                     40.,                 114.,  image(i,j))
             elseif(i_dir .eq. -1)then
-              Call Stretch(68.,220.,68.-RBriL,220.-RBriH,image(i,j))
+              call stretch(68.,220.,68.-rbril,220.-rbrih,image(i,j))
             endif
 
             if(iskip_bilin .eq. 1)then ! print output visible counts
@@ -421,10 +421,10 @@ C   uniform in brightness.
 
           endif
 
-         EndDo ! j
-        EndDo ! i
+         enddo ! j
+        enddo ! i
 
-!       Examine arrays
+!       examine arrays
 !       phamin = 9.9
 !       do i = 1,ni
 !       do j = 1,nj
@@ -443,21 +443,21 @@ C   uniform in brightness.
 !       enddo ! i
 
 !       where(phase_factor(:,:) .lt. 0.01)
-!           write(6,*)' Phase_factor is zero ___'
+!           write(6,*)' phase_factor is zero ___'
 !       end where
 
 !       write(6,*)' phamin = ',phamin,minval(phase_factor)
 
         write(lun,70)minval(solar_alt_d),maxval(solar_alt_d)  
      1              ,minval(solar_factor),maxval(solar_factor)
-70      format(1x,'Solar alt / factor range:   ',2f8.2,3x,2f8.2)
+70      format(1x,'solar alt / factor range:   ',2f8.2,3x,2f8.2)
 
         if(phase_const1 .gt. 0.)then
             write(lun,71)minval(phase_angle_d),maxval(phase_angle_d)
      1                  ,minval(phase_factor) * phase_const1
      1                  ,maxval(phase_factor) * phase_const1
-            write(lun,72) 68.-maxval(RBriL_a), 68.-minval(RBriL_a)  
-     1                  ,220.-maxval(RBriH_a),220.-minval(RBriH_a)
+            write(lun,72) 68.-maxval(rbril_a), 68.-minval(rbril_a)  
+     1                  ,220.-maxval(rbrih_a),220.-minval(rbrih_a)
         else ! assume ph_const2 > 0.
             write(lun,71)minval(phase_angle_d),maxval(phase_angle_d)
      1                  ,minval(phase_factor) * ph_const2_l
@@ -468,26 +468,26 @@ C   uniform in brightness.
      1                   114. + maxval(phase_factor) * ph_const2_h 
         endif
 
-71      format(1x,'Phase angle / Rbri range:   ',2f8.2,3x,2f8.2)
+71      format(1x,'phase angle / rbri range:   ',2f8.2,3x,2f8.2)
 
-72      format(1x,'Stretch L H / range:        ',2f8.2,3x,2f8.2)
+72      format(1x,'stretch l h / range:        ',2f8.2,3x,2f8.2)
 
         write(lun,75)minval(image_in),maxval(image_in)         
      1              ,minval(image),maxval(image)          
-75      format(1x,'Image in/out range:         ',2f8.2,3x,2f8.2)
+75      format(1x,'image in/out range:         ',2f8.2,3x,2f8.2)
 
         istatus = 1
-        write(lun,*)' Normalization complete'
+        write(lun,*)' normalization complete'
 
-        Return
+        return
 
-        End
-C-------------------------------------------------------------------------------
-        Subroutine Stretch(IL,IH,JL,JH,rArg)
+        end
+c-------------------------------------------------------------------------------
+        subroutine stretch(il,ih,jl,jh,rarg)
 
-        Implicit        None
+        implicit        none
 
-        Real          A,B,IL,IH,JL,JH,rarg
+        real          a,b,il,ih,jl,jh,rarg
 
         a = (jh - jl) / (ih - il)
         b =  jl - il * a
@@ -518,61 +518,61 @@ c-----------------------------------------------------------------------
 c=======================================================================
 
       subroutine sat_angular_alt(sat_radius,lat,lon
-     .,SATX,SATY,SATZ,TX,TY,TZ,Emission_angle_d,istatus)
+     .,satx,saty,satz,tx,ty,tz,emission_angle_d,istatus)
 c
 c computes satellite altitude (degrees above horizon) for
-c a given earth lat/lon. Code taken from src/lib/normalize.f
-c by Albers, S.
+c a given earth lat/lon. code taken from src/lib/normalize.f
+c by albers, s.
 c
 c code put in subroutine for use in lvd satellite ingest for
 c determining the polar extent of useable satellite data.
-c Smart, J. 3/10/99
+c smart, j. 3/10/99
 c
       include 'trigd.inc'
 
-      Implicit None
+      implicit none
 
       integer  i,j,istatus
  
       real     rpd,radius_earth_m
-      Parameter (rpd = 3.1415926536/180.,
+      parameter (rpd = 3.1415926536/180.,
      1           radius_earth_m = 6378137.)
 
       real  lat,lon
       real  sat_radius,au_m
 
-!     Coordinates are equatorial and relative to prime meridian
-      real*8  TX,TY,TZ,       ! O (Earth Surface)                   
-     1        SATX,SATY,SATZ, ! I (Satellite relative to Earth Center - AU)
-     1        STX,STY,STZ,
-     1        R8Emission_angle_r     
+!     coordinates are equatorial and relative to prime meridian
+      real*8  tx,ty,tz,       ! o (earth surface)                   
+     1        satx,saty,satz, ! i (satellite relative to earth center - au)
+     1        stx,sty,stz,
+     1        r8emission_angle_r     
 
-      real  Emission_angle_d
+      real  emission_angle_d
 
 !     real cosd, sind
 
 c================================================================
         au_m = 149000000.
-C   Compute equatorial coordinates of point on sfc of earth
-        TX = cosd(lon) * cosd(lat) * radius_earth_m / au_m
-        TY = sind(lon) * cosd(lat) * radius_earth_m / au_m
-        TZ = sind(lat)             * radius_earth_m / au_m
+c   compute equatorial coordinates of point on sfc of earth
+        tx = cosd(lon) * cosd(lat) * radius_earth_m / au_m
+        ty = sind(lon) * cosd(lat) * radius_earth_m / au_m
+        tz = sind(lat)             * radius_earth_m / au_m
 
-C       Satellite relative to surface (AU)
-        STX = SATX-TX
-        STY = SATY-TY
-        STZ = SATZ-TZ
+c       satellite relative to surface (au)
+        stx = satx-tx
+        sty = saty-ty
+        stz = satz-tz
 
-C   Compute Emission Angle (Emission_angle_d = satellite angular altitude)
-        Call AngleVectors(STX,STY,STZ,TX,TY,TZ
-     1                            ,R8Emission_angle_r)
-        Emission_angle_d = 90. - R8Emission_angle_r / rpd
+c   compute emission angle (emission_angle_d = satellite angular altitude)
+        call anglevectors(stx,sty,stz,tx,ty,tz
+     1                            ,r8emission_angle_r)
+        emission_angle_d = 90. - r8emission_angle_r / rpd
 
         return
         end
 
-       subroutine refl_to_albedo(reflectance,solalt,land_albedo    ! I
-     1                          ,cloud_albedo)                     ! O
+       subroutine refl_to_albedo(reflectance,solalt,land_albedo    ! i
+     1                          ,cloud_albedo)                     ! o
 
        include 'trigd.inc'
 
@@ -583,8 +583,8 @@ C   Compute Emission Angle (Emission_angle_d = satellite angular altitude)
        reflectance_land = land_albedo * sind(solalt_eff)
        reflectance_air  = 0.11
 
-!      Cloud albedo = 1 if reflectance = sind(solalt_eff)       
-!      Cloud albedo = 0 if reflectance = reflectance_land+reflectance_air
+!      cloud albedo = 1 if reflectance = sind(solalt_eff)       
+!      cloud albedo = 0 if reflectance = reflectance_land+reflectance_air
 
        zeropoint = reflectance_land + reflectance_air
        onepoint = sind(solalt_eff)

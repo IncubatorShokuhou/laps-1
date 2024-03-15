@@ -1,278 +1,278 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
 
-MODULE fire 
+module fire
 
-  ! Module to contain subroutines for computing various fire weather
-  ! indices.
+   ! module to contain subroutines for computing various fire weather
+   ! indices.
 
-  IMPLICIT NONE
+   implicit none
 
-CONTAINS
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE ventilation(usig,vsig,zsig,pblhgt,topo,nx,ny,nz, &
-                         upbl, vpbl, vent_ind)
-  
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)    :: nx
-    INTEGER, INTENT(IN)    :: ny
-    INTEGER, INTENT(IN)    :: nz
-    REAL, INTENT(IN)       :: usig(nx,ny,nz)  ! U on sigma
-    REAL, INTENT(IN)       :: vsig(nx,ny,nz)  ! V on sigma
-    REAL, INTENT(IN)       :: zsig(nx,ny,nz)  ! Z on sigma
-    REAL, INTENT(IN)       :: pblhgt(nx,ny)
-    REAL, INTENT(IN)       :: topo(nx,ny)
-    REAL, INTENT(OUT)      :: upbl(nx,ny)
-    REAL, INTENT(OUT)      :: vpbl(nx,ny)
-    REAL, INTENT(OUT)      :: vent_ind(nx,ny)
+   subroutine ventilation(usig, vsig, zsig, pblhgt, topo, nx, ny, nz, &
+                          upbl, vpbl, vent_ind)
 
-    INTEGER                :: i,j,k, nbl
-    REAL                   :: usum, vsum, umean, vmean, spmean
+      implicit none
+      integer, intent(in)    :: nx
+      integer, intent(in)    :: ny
+      integer, intent(in)    :: nz
+      real, intent(in)       :: usig(nx, ny, nz)  ! u on sigma
+      real, intent(in)       :: vsig(nx, ny, nz)  ! v on sigma
+      real, intent(in)       :: zsig(nx, ny, nz)  ! z on sigma
+      real, intent(in)       :: pblhgt(nx, ny)
+      real, intent(in)       :: topo(nx, ny)
+      real, intent(out)      :: upbl(nx, ny)
+      real, intent(out)      :: vpbl(nx, ny)
+      real, intent(out)      :: vent_ind(nx, ny)
 
-    PRINT *, '---- Subroutine ventilation ----'
-  
-    DO j = 1 , ny
-      DO i = 1 , nx
-        
-        IF (pblhgt(i,j) .GT. 0.) THEN
+      integer                :: i, j, k, nbl
+      real                   :: usum, vsum, umean, vmean, spmean
 
-          ! Compute mean wind within the PBL
-          nbl = 0
-          usum = 0.
-          vsum = 0.
-          umean = 0.
-          vmean = 0.
-          sum_pbl: DO k = 1 , nz
-            IF (zsig(i,j,k)-topo(i,j) .LE. pblhgt(i,j)) THEN
-              nbl = nbl + 1
-              usum = usum + usig(i,j,k)
-              vsum = vsum + vsig(i,j,k)
-            ELSE
-              EXIT sum_pbl
-            ENDIF
-          ENDDO sum_pbl 
-          IF (nbl .GT. 0) THEN
-            umean = usum/FLOAT(nbl)
-            vmean = vsum/FLOAT(nbl)
-   
-            ! Compute mean wind speed for this layer
-            spmean = SQRT(umean**2 + vmean**2)
-            
-            ! Multiply mean speed by PBL depth to get index
-            vent_ind(i,j) = pblhgt(i,j) * spmean
-            upbl(i,j) = umean
-            vpbl(i,j) = vmean
-          ELSE
-            ! PBL height is lower than the lowest model level...use
-            ! lowest model wind
-            spmean = SQRT(usig(i,j,1)**2 + vsig(i,j,1)**2)
-            vent_ind(i,j) = pblhgt(i,j) * spmean
-            upbl(i,j) = usig(i,j,1)
-            vpbl(i,j) = vsig(i,j,1)
-          ENDIF
-        ELSE
-          PRINT *, 'WARNING:  PBL Height <=0 in ventilation index'
-          vent_ind(i,j) = 0.
-          upbl(i,j) = 0.
-          vpbl(i,j) = 0.
-        ENDIF
-      ENDDO
-    ENDDO
-    RETURN
-  END SUBROUTINE ventilation
+      print *, '---- subroutine ventilation ----'
+
+      do j = 1, ny
+         do i = 1, nx
+
+            if (pblhgt(i, j) .gt. 0.) then
+
+               ! compute mean wind within the pbl
+               nbl = 0
+               usum = 0.
+               vsum = 0.
+               umean = 0.
+               vmean = 0.
+               sum_pbl: do k = 1, nz
+                  if (zsig(i, j, k) - topo(i, j) .le. pblhgt(i, j)) then
+                     nbl = nbl + 1
+                     usum = usum + usig(i, j, k)
+                     vsum = vsum + vsig(i, j, k)
+                  else
+                     exit sum_pbl
+                  end if
+               end do sum_pbl
+               if (nbl .gt. 0) then
+                  umean = usum/float(nbl)
+                  vmean = vsum/float(nbl)
+
+                  ! compute mean wind speed for this layer
+                  spmean = sqrt(umean**2 + vmean**2)
+
+                  ! multiply mean speed by pbl depth to get index
+                  vent_ind(i, j) = pblhgt(i, j)*spmean
+                  upbl(i, j) = umean
+                  vpbl(i, j) = vmean
+               else
+                  ! pbl height is lower than the lowest model level...use
+                  ! lowest model wind
+                  spmean = sqrt(usig(i, j, 1)**2 + vsig(i, j, 1)**2)
+                  vent_ind(i, j) = pblhgt(i, j)*spmean
+                  upbl(i, j) = usig(i, j, 1)
+                  vpbl(i, j) = vsig(i, j, 1)
+               end if
+            else
+               print *, 'warning:  pbl height <=0 in ventilation index'
+               vent_ind(i, j) = 0.
+               upbl(i, j) = 0.
+               vpbl(i, j) = 0.
+            end if
+         end do
+      end do
+      return
+   end subroutine ventilation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE haines_layer(p3d_mb, t3d_k, td3d_k, haines2d, nx, ny, nz, &
-                    pmbbot, pmbtop)
+   subroutine haines_layer(p3d_mb, t3d_k, td3d_k, haines2d, nx, ny, nz, &
+                           pmbbot, pmbtop)
 
-    ! Computes haines index for layer bounded by top and bottom pressure 
-    ! levels pmbtop and pmbbot (mb).
+      ! computes haines index for layer bounded by top and bottom pressure
+      ! levels pmbtop and pmbbot (mb).
 
-    IMPLICIT NONE
+      implicit none
 
-    INTEGER, INTENT(IN)      :: nx, ny, nz
-    REAL, INTENT(IN)         :: p3d_mb(nx,ny,nz)  ! 3D pressure in mb
-    REAL, INTENT(IN)         :: t3d_k (nx,ny,nz)  ! 3D Temp in K
-    REAL, INTENT(IN)         :: td3d_k(nx,ny,nz)  ! 3D Dewpoint in K
-    REAL, INTENT(OUT)        :: haines2d(nx,ny)   ! 2D haines index
-    REAL, INTENT(IN)         :: pmbbot,pmbtop     ! Bounding mb levels
+      integer, intent(in)      :: nx, ny, nz
+      real, intent(in)         :: p3d_mb(nx, ny, nz)  ! 3d pressure in mb
+      real, intent(in)         :: t3d_k(nx, ny, nz)  ! 3d temp in k
+      real, intent(in)         :: td3d_k(nx, ny, nz)  ! 3d dewpoint in k
+      real, intent(out)        :: haines2d(nx, ny)   ! 2d haines index
+      real, intent(in)         :: pmbbot, pmbtop     ! bounding mb levels
 
-    ! Local Variables
+      ! local variables
 
-    INTEGER :: i,j,k, kk, km1
-    REAL :: tmkt, tmkb, tdkb, deltat, dpdep
-    REAL :: factor1, factor2
-    PRINT *, '---- Subroutine haines_layer ----'
-    DO j = 1 , ny
-      DO i = 1 , nx
-      
-        IF (p3d_mb(i,j,1) .lt. pmbbot) THEN
-          haines2d(i,j) = 1e37  ! Cannot be computed
-        ELSE
-    
-          DO k = 2, nz
-        
-            ! Account for flipped vertical coordinate from original 
-            ! algorithm from Seattle
-  
-            kk = nz+1-k
-            km1 = kk + 1 
-            
-            ! Find temperature at the top
-            IF (p3d_mb(i,j,kk).GT.pmbtop.AND.p3d_mb(i,j,km1).LE.pmbtop) THEN 
-              tmkt = t3d_k(i,j,km1) + (t3d_k(i,j,kk)-t3d_k(i,j,km1)) * &
-                     (log(pmbtop)-log(p3d_mb(i,j,km1))) / &
-                     (log(p3d_mb(i,j,kk))-log(p3d_mb(i,j,km1)))
-            ENDIF
+      integer :: i, j, k, kk, km1
+      real :: tmkt, tmkb, tdkb, deltat, dpdep
+      real :: factor1, factor2
+      print *, '---- subroutine haines_layer ----'
+      do j = 1, ny
+         do i = 1, nx
 
-            ! Find Temp/dewpoint at the bottom of the layer
-            
-            IF (p3d_mb(i,j,kk).GT.pmbbot.AND.p3d_mb(i,j,km1).LE.pmbbot) THEN
-              tmkb = t3d_k(i,j,km1) + (t3d_k(i,j,kk)-t3d_k(i,j,km1)) * &
-                     (log(pmbbot) - log(p3d_mb(i,j,km1))) / &
-                     (log(p3d_mb(i,j,kk))-log(p3d_mb(i,j,km1)))
-              tdkb = td3d_k(i,j,km1) + (td3d_k(i,j,kk) - td3d_k(i,j,km1)) * &
-                     (log(pmbbot) - log(p3d_mb(i,j,km1))) / &
-                     (log(p3d_mb(i,j,kk))-log(p3d_mb(i,j,km1)))
-            ENDIF
+            if (p3d_mb(i, j, 1) .lt. pmbbot) then
+               haines2d(i, j) = 1e37  ! cannot be computed
+            else
 
-          ENDDO
+               do k = 2, nz
 
-          deltat = tmkb - tmkt
-          dpdep  = tmkb - tdkb
+                  ! account for flipped vertical coordinate from original
+                  ! algorithm from seattle
 
-          IF (NINT(pmbbot) .EQ. 700) THEN ! High Haines
-            IF (deltat.LE. 17.5) THEN
-              factor1 = 1.
-            ELSEIF(deltat .GT. 17.5 .AND. deltat .LE. 21.5 ) THEN
-              factor1 = 2.   ! deltat > 21.5
-            ELSE
-              factor1 = 3.
-            ENDIF
+                  kk = nz + 1 - k
+                  km1 = kk + 1
 
-            IF (dpdep.LE. 14.5) THEN
-              factor2 = 1.
-            ELSEIF(dpdep .GT. 14.5 .AND. dpdep .LE. 20.5) THEN
-              factor2 = 2.
-            ELSE    ! dpdep > 20.5
-              factor2 = 3.
-            ENDIF
+                  ! find temperature at the top
+                  if (p3d_mb(i, j, kk) .gt. pmbtop .and. p3d_mb(i, j, km1) .le. pmbtop) then
+                     tmkt = t3d_k(i, j, km1) + (t3d_k(i, j, kk) - t3d_k(i, j, km1))* &
+                            (log(pmbtop) - log(p3d_mb(i, j, km1)))/ &
+                            (log(p3d_mb(i, j, kk)) - log(p3d_mb(i, j, km1)))
+                  end if
 
-          ELSEIF(NINT(pmbbot) .EQ. 850) THEN   ! Mid-level Haines
-            IF (deltat .LE. 5.5) THEN
-              factor1 = 1.
-            ELSEIF(deltat .GT. 5.5 .AND. deltat .LE. 10.5) THEN
-              factor1 = 2.
-            ELSE   ! deltat > 10.5
-              factor1 =3.
-            ENDIF
+                  ! find temp/dewpoint at the bottom of the layer
 
-            IF (dpdep .LE. 5.5 ) THEN
-              factor2 = 1.
-            ELSEIF( dpdep .GT. 5.5 .AND. dpdep .LE. 12.5) THEN
-              factor2 = 2.
-            ELSE   ! dpdep > 12.5
-              factor2 = 3.
-            ENDIF
-   
-          ELSE ! Cannot determine mid or high
-  
-            PRINT *, 'Haines_layer needs 850 or 700 as bottom layer'
-            PRINT *, 'Bottom level (mb) specified: ', pmbbot
- 
-            STOP 'bad_haines_layer'
+                  if (p3d_mb(i, j, kk) .gt. pmbbot .and. p3d_mb(i, j, km1) .le. pmbbot) then
+                     tmkb = t3d_k(i, j, km1) + (t3d_k(i, j, kk) - t3d_k(i, j, km1))* &
+                            (log(pmbbot) - log(p3d_mb(i, j, km1)))/ &
+                            (log(p3d_mb(i, j, kk)) - log(p3d_mb(i, j, km1)))
+                     tdkb = td3d_k(i, j, km1) + (td3d_k(i, j, kk) - td3d_k(i, j, km1))* &
+                            (log(pmbbot) - log(p3d_mb(i, j, km1)))/ &
+                            (log(p3d_mb(i, j, kk)) - log(p3d_mb(i, j, km1)))
+                  end if
 
-          ENDIF
+               end do
 
-          haines2d(i,j) = factor1 + factor2
+               deltat = tmkb - tmkt
+               dpdep = tmkb - tdkb
 
-        ENDIF 
-      ENDDO
-    ENDDO
-    RETURN
-  END SUBROUTINE haines_layer
+               if (nint(pmbbot) .eq. 700) then ! high haines
+                  if (deltat .le. 17.5) then
+                     factor1 = 1.
+                  elseif (deltat .gt. 17.5 .and. deltat .le. 21.5) then
+                     factor1 = 2.   ! deltat > 21.5
+                  else
+                     factor1 = 3.
+                  end if
+
+                  if (dpdep .le. 14.5) then
+                     factor2 = 1.
+                  elseif (dpdep .gt. 14.5 .and. dpdep .le. 20.5) then
+                     factor2 = 2.
+                  else    ! dpdep > 20.5
+                     factor2 = 3.
+                  end if
+
+               elseif (nint(pmbbot) .eq. 850) then   ! mid-level haines
+                  if (deltat .le. 5.5) then
+                     factor1 = 1.
+                  elseif (deltat .gt. 5.5 .and. deltat .le. 10.5) then
+                     factor1 = 2.
+                  else   ! deltat > 10.5
+                     factor1 = 3.
+                  end if
+
+                  if (dpdep .le. 5.5) then
+                     factor2 = 1.
+                  elseif (dpdep .gt. 5.5 .and. dpdep .le. 12.5) then
+                     factor2 = 2.
+                  else   ! dpdep > 12.5
+                     factor2 = 3.
+                  end if
+
+               else ! cannot determine mid or high
+
+                  print *, 'haines_layer needs 850 or 700 as bottom layer'
+                  print *, 'bottom level (mb) specified: ', pmbbot
+
+                  stop 'bad_haines_layer'
+
+               end if
+
+               haines2d(i, j) = factor1 + factor2
+
+            end if
+         end do
+      end do
+      return
+   end subroutine haines_layer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE fosberg_fwi(t2k, rh2pct, p_sfc_mb, u10, v10, &
-                         nx, ny, fwi)
+   subroutine fosberg_fwi(t2k, rh2pct, p_sfc_mb, u10, v10, &
+                          nx, ny, fwi)
 
-    ! Computes the Fosberg Fire Weather Index
- 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)              :: nx,ny
-    REAL, INTENT(IN)                 :: t2k(nx,ny)   ! Sfc Temp (K)
-    REAL, INTENT(IN)                 :: rh2pct(nx,ny)   ! Sfc RH (%)
-    REAL, INTENT(IN)                 :: p_sfc_mb(nx,ny) ! Sfc Press (mb)
-    REAL, INTENT(IN)                 :: u10(nx,ny)      ! 10 m U wind (m/s)
-    REAL, INTENT(IN)                 :: v10(nx,ny)      ! 10 m V wind (m/s)
-    REAL, INTENT(OUT)                :: fwi(nx,ny)      ! Fosberg Index
+      ! computes the fosberg fire weather index
 
-    ! Local Variables
+      implicit none
+      integer, intent(in)              :: nx, ny
+      real, intent(in)                 :: t2k(nx, ny)   ! sfc temp (k)
+      real, intent(in)                 :: rh2pct(nx, ny)   ! sfc rh (%)
+      real, intent(in)                 :: p_sfc_mb(nx, ny) ! sfc press (mb)
+      real, intent(in)                 :: u10(nx, ny)      ! 10 m u wind (m/s)
+      real, intent(in)                 :: v10(nx, ny)      ! 10 m v wind (m/s)
+      real, intent(out)                :: fwi(nx, ny)      ! fosberg index
 
-    INTEGER :: i,j
-    REAL :: uuu10, vvv10, m, n, t2f,rh2
+      ! local variables
 
-    DO j = 1 , ny
-      DO i = 1 , nx
+      integer :: i, j
+      real :: uuu10, vvv10, m, n, t2f, rh2
 
-        ! Convert Temperature from K to F
-        t2f = 1.8 * (t2k(i,j)-273.15) + 32.0
-        
-        ! Convert u/v from m/s to mph
-        uuu10 = u10(i,j) * 2.237
-        vvv10 = v10(i,j) * 2.237
-        rh2 = rh2pct(i,j)
+      do j = 1, ny
+         do i = 1, nx
 
-        IF ( rh2 .LE. 10.5 ) THEN
-           m = 0.03229 + (0.281073 * rh2) - (0.000578 * rh2 * t2f)
-        ELSE IF( rh2 .GT. 10.5 .AND. rh2 .LE. 50.5 ) THEN
-           m = 2.22749 + (0.160107 * rh2) - (0.014784 * t2f)
-        ELSE IF( rh2 .GT. 50.5 .AND. rh2 .LE. 100 ) THEN
-           m = 21.0606 + (0.005565 * rh2**2) - (0.00035 * rh2 * t2f) - &
-              (0.483199 * rh2)
-        ELSE         !   rh2 > 100
-           m = 21.0606 + (0.005565 * 100**2) - (0.00035 * 100 * t2f) - &
-               (0.483199 * 100)
-           PRINT *, 'fwi calculation: rh2 > 100 ', j, i, rh2, t2f
-        ENDIF
+            ! convert temperature from k to f
+            t2f = 1.8*(t2k(i, j) - 273.15) + 32.0
 
-        n = 1.0 - 2.0*(m/30.) + 1.5*(m/30.)**2 - 0.5*(m/30.)**3
-        fwi(i,j) = (n * SQRT(1.0 + uuu10**2 + vvv10**2)) / 0.3002
+            ! convert u/v from m/s to mph
+            uuu10 = u10(i, j)*2.237
+            vvv10 = v10(i, j)*2.237
+            rh2 = rh2pct(i, j)
 
-      ENDDO
-    ENDDO
-    RETURN
-  END SUBROUTINE fosberg_fwi
+            if (rh2 .le. 10.5) then
+               m = 0.03229 + (0.281073*rh2) - (0.000578*rh2*t2f)
+            else if (rh2 .gt. 10.5 .and. rh2 .le. 50.5) then
+               m = 2.22749 + (0.160107*rh2) - (0.014784*t2f)
+            else if (rh2 .gt. 50.5 .and. rh2 .le. 100) then
+               m = 21.0606 + (0.005565*rh2**2) - (0.00035*rh2*t2f) - &
+                   (0.483199*rh2)
+            else         !   rh2 > 100
+               m = 21.0606 + (0.005565*100**2) - (0.00035*100*t2f) - &
+                   (0.483199*100)
+               print *, 'fwi calculation: rh2 > 100 ', j, i, rh2, t2f
+            end if
+
+            n = 1.0 - 2.0*(m/30.) + 1.5*(m/30.)**2 - 0.5*(m/30.)**3
+            fwi(i, j) = (n*sqrt(1.0 + uuu10**2 + vvv10**2))/0.3002
+
+         end do
+      end do
+      return
+   end subroutine fosberg_fwi
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-END MODULE fire
+end module fire

@@ -1,8 +1,8 @@
 
       subroutine opac_wt(s,extc,field,ns,opac_thr,field_wt)
-!                        I  I     I    I    I        O
+!                        i  i     i    i    i        o
 
-!     Calculate field weighted by the opacity along the line of sight
+!     calculate field weighted by the opacity along the line of sight
 
       implicit real*8 (a-h,o-z)
 
@@ -12,7 +12,7 @@
 !     stop looping earlier      
 
       call opac_path(s,extc,ns,od,opac)
-!                    I  I   I   O   O
+!                    i  i   i   o   o
 
       sum_field_wt = 0d0
 
@@ -27,7 +27,7 @@
       if(sum_opac .gt. 0.)then
           field_wt = sum_field_wt / sum_opac
       else
-          write(6,'(" Error in opac_wt")')
+          write(6,'(" error in opac_wt")')
           stop
       endif
 
@@ -35,9 +35,9 @@
       end
 
       subroutine opac_path(s,extc,ns,od,opac)
-!                          I  I   I   O   O
+!                          i  i   i   o   o
 
-!     Calculate optical depth and opacity along a path. If a solid surface
+!     calculate optical depth and opacity along a path. if a solid surface
 !     such as the ground is in the path a high value of 'extc' is used along
 !     with two identical values of s.
 

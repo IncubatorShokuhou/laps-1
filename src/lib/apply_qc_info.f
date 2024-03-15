@@ -15,7 +15,7 @@
         real obs_mean(mo,mf)      
         real obs_std(mo,mf) 
 c
-c..... Stuff for the sfc data and other station info (LSO +)
+c..... stuff for the sfc data and other station info (lso +)
 c
         include 'sfcob.inc'
         type (sfcob) obs(mxstn)
@@ -56,7 +56,7 @@ c
 
         if(n_obs_b .gt. 0)then
 
-!           Apply QC information                            
+!           apply qc information                            
             iv_t   = 1
             iv_td  = 2
             iv_spd = 5
@@ -74,12 +74,12 @@ c
               goto 150
 130           continue
               if(mm .le. 50)then
-                write(6,*)' Found a QC match',mm,ista,stn_a(ista)
+                write(6,*)' found a qc match',mm,ista,stn_a(ista)
               endif
 
-!             Test biases and flag ob using expected accuracy info
+!             test biases and flag ob using expected accuracy info
 
-!             Temperature bias
+!             temperature bias
               if(bias_a(ista,iv_t) .ne. r_missing_data)then
                 biast_corr  = bias_a(ista,iv_t)  
      1                      - lapse_t *obs(mm)%elev_diff
@@ -98,7 +98,7 @@ c
                 endif
               endif
 
-!             Stuck temperature
+!             stuck temperature
               if(obs_std(ista,iv_t) .ne. r_missing_data)then
                 if(obs_std(ista,iv_t)  .lt. 0.1)then
                   if(t_s(mm) .ne. badflag)then
@@ -117,7 +117,7 @@ c
                 endif
               endif
 
-!             Dewpoint bias
+!             dewpoint bias
               if(bias_a(ista,iv_td) .ne. r_missing_data)then
                 biastd_corr = bias_a(ista,iv_td) 
      1                      - lapse_td*obs(mm)%elev_diff
@@ -143,7 +143,7 @@ c
                 endif
               endif
 
-!             Stuck wind direction
+!             stuck wind direction
               if(obs_std(ista,iv_dir) .ne. r_missing_data)then
                 if(obs_std(ista,iv_dir)  .lt. 3.0 .and. 
      1             obs_mean(ista,iv_spd) .gt. 0.)then
@@ -163,7 +163,7 @@ c
                 endif
               endif
 
-!             Stuck wind speed
+!             stuck wind speed
               if(obs_mean(ista,iv_spd) .ne. r_missing_data)then
                 if(obs_mean(ista,iv_spd) .le. 0.01)then   
                   if(ff_s(mm) .ne. badflag)then
@@ -184,7 +184,7 @@ c
 
 150         enddo ! mm
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
         endif
 

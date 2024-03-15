@@ -1,66 +1,66 @@
-      Subroutine rddata_line_elem(ncid,imax,jmax,nch
+      subroutine rddata_line_elem(ncid,imax,jmax,nch
      &,sounding,istatus)
 c
-c routine designed to read 3-d satellite sounding netCDF data with variable
-c line and element dimensions. Should work for 2d data with variable dimensions
+c routine designed to read 3-d satellite sounding netcdf data with variable
+c line and element dimensions. should work for 2d data with variable dimensions
 c if nch = 1
 c
-      Implicit None
+      implicit none
       include 'netcdf.inc'
-      Integer   RCODE
+      integer   rcode
 c
-      Integer   imax,jmax,nch
-      Integer   sounding(imax, jmax, nch)
-      Integer   sounding_rec(imax)
+      integer   imax,jmax,nch
+      integer   sounding(imax, jmax, nch)
+      integer   sounding_rec(imax)
 
-      Integer i,j,k
-      Integer varid,ncid
-      Integer istatus
-      Integer dim_id_x
-      Integer dim_id_y
-      Integer dim_id_k
-      Integer i4dum
+      integer i,j,k
+      integer varid,ncid
+      integer istatus
+      integer dim_id_x
+      integer dim_id_y
+      integer dim_id_k
+      integer i4dum
 
-      Integer START(10)
-      Integer COUNT(10)
-      Character*31 DUMMY
+      integer start(10)
+      integer count(10)
+      character*31 dummy
 c
-C **************************************************************************
+c **************************************************************************
 c
       istatus = 1
 c
-c Now ready to read the data
+c now ready to read the data
 c
-      START(1)=1
-      COUNT(2)=1
-      COUNT(3)=1
+      start(1)=1
+      count(2)=1
+      count(3)=1
 c
 c get sounding variable id
 c
-      rcode=NF_INQ_VARID(ncid,'sounding',varid)
+      rcode=nf_inq_varid(ncid,'sounding',varid)
       if(rcode.ne.0)then
-         write(6,*)'Error getting sounding varid'
+         write(6,*)'error getting sounding varid'
          istatus = -1
          return
       endif
 
       do k = 1,nch  !# of channels in sounding database (= 19).
 
-         write(6,*)'Reading channel ',k
+         write(6,*)'reading channel ',k
 
-         START(3)=k
+         start(3)=k
 
          do j = 1,jmax
 
-            COUNT(1)=imax
-            START(2)=j
+            count(1)=imax
+            start(2)=j
 
 c read line
-      rcode=NF_GET_VARA_INT(NCID,varid,START,COUNT,sounding_rec)
+      rcode=nf_get_vara_int(ncid,varid,start,count,sounding_rec)
             if(rcode.ne.0)then 
-               print*,'Error reading sounding database ',rcode
+               print*,'error reading sounding database ',rcode
                istatus = -1
-               print*,'Returning to main, istatus = ',istatus
+               print*,'returning to main, istatus = ',istatus
                return
             endif
 c
@@ -71,8 +71,8 @@ c
          enddo
       enddo
 c -------------------------------------
-C
-      write(6,*)'Sucessful reading sounding - rddata_line_elem '
+c
+      write(6,*)'sucessful reading sounding - rddata_line_elem '
 
-      Return
-      End
+      return
+      end

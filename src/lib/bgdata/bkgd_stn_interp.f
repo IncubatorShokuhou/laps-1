@@ -21,7 +21,7 @@ c
       j_mn = 0
       do j=1,ny_laps
       do i=1,nx_laps
-         if(td_sfc(i,j) .gt. tp_sfc(i,j) .AND. 
+         if(td_sfc(i,j) .gt. tp_sfc(i,j) .and. 
      1      td_sfc(i,j) .ne. r_missing_data)then
             diff = td_sfc(i,j) - tp_sfc(i,j)
             td_sfc(i,j)=tp_sfc(i,j)

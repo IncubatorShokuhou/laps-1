@@ -1,261 +1,261 @@
-      SUBROUTINE DGEMV ( TRANS, M, N, ALPHA, A, LDA, X, INCX,
-     $                   BETA, Y, INCY )
-*     .. Scalar Arguments ..
-      DOUBLE PRECISION   ALPHA, BETA
-      INTEGER            INCX, INCY, LDA, M, N
-      CHARACTER*1        TRANS
-*     .. Array Arguments ..
-      DOUBLE PRECISION   A( LDA, * ), X( * ), Y( * )
+      subroutine dgemv ( trans, m, n, alpha, a, lda, x, incx,
+     $                   beta, y, incy )
+*     .. scalar arguments ..
+      double precision   alpha, beta
+      integer            incx, incy, lda, m, n
+      character*1        trans
+*     .. array arguments ..
+      double precision   a( lda, * ), x( * ), y( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DGEMV  performs one of the matrix-vector operations
+*  dgemv  performs one of the matrix-vector operations
 *
-*     y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
+*     y := alpha*a*x + beta*y,   or   y := alpha*a'*x + beta*y,
 *
-*  where alpha and beta are scalars, x and y are vectors and A is an
+*  where alpha and beta are scalars, x and y are vectors and a is an
 *  m by n matrix.
 *
-*  Parameters
+*  parameters
 *  ==========
 *
-*  TRANS  - CHARACTER*1.
-*           On entry, TRANS specifies the operation to be performed as
+*  trans  - character*1.
+*           on entry, trans specifies the operation to be performed as
 *           follows:
 *
-*              TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
+*              trans = 'n' or 'n'   y := alpha*a*x + beta*y.
 *
-*              TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.
+*              trans = 't' or 't'   y := alpha*a'*x + beta*y.
 *
-*              TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.
+*              trans = 'c' or 'c'   y := alpha*a'*x + beta*y.
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  M      - INTEGER.
-*           On entry, M specifies the number of rows of the matrix A.
-*           M must be at least zero.
-*           Unchanged on exit.
+*  m      - integer.
+*           on entry, m specifies the number of rows of the matrix a.
+*           m must be at least zero.
+*           unchanged on exit.
 *
-*  N      - INTEGER.
-*           On entry, N specifies the number of columns of the matrix A.
-*           N must be at least zero.
-*           Unchanged on exit.
+*  n      - integer.
+*           on entry, n specifies the number of columns of the matrix a.
+*           n must be at least zero.
+*           unchanged on exit.
 *
-*  ALPHA  - DOUBLE PRECISION.
-*           On entry, ALPHA specifies the scalar alpha.
-*           Unchanged on exit.
+*  alpha  - double precision.
+*           on entry, alpha specifies the scalar alpha.
+*           unchanged on exit.
 *
-*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
-*           Before entry, the leading m by n part of the array A must
+*  a      - double precision array of dimension ( lda, n ).
+*           before entry, the leading m by n part of the array a must
 *           contain the matrix of coefficients.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  LDA    - INTEGER.
-*           On entry, LDA specifies the first dimension of A as declared
-*           in the calling (sub) program. LDA must be at least
+*  lda    - integer.
+*           on entry, lda specifies the first dimension of a as declared
+*           in the calling (sub) program. lda must be at least
 *           max( 1, m ).
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  X      - DOUBLE PRECISION array of DIMENSION at least
-*           ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'
+*  x      - double precision array of dimension at least
+*           ( 1 + ( n - 1 )*abs( incx ) ) when trans = 'n' or 'n'
 *           and at least
-*           ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.
-*           Before entry, the incremented array X must contain the
+*           ( 1 + ( m - 1 )*abs( incx ) ) otherwise.
+*           before entry, the incremented array x must contain the
 *           vector x.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  INCX   - INTEGER.
-*           On entry, INCX specifies the increment for the elements of
-*           X. INCX must not be zero.
-*           Unchanged on exit.
+*  incx   - integer.
+*           on entry, incx specifies the increment for the elements of
+*           x. incx must not be zero.
+*           unchanged on exit.
 *
-*  BETA   - DOUBLE PRECISION.
-*           On entry, BETA specifies the scalar beta. When BETA is
-*           supplied as zero then Y need not be set on input.
-*           Unchanged on exit.
+*  beta   - double precision.
+*           on entry, beta specifies the scalar beta. when beta is
+*           supplied as zero then y need not be set on input.
+*           unchanged on exit.
 *
-*  Y      - DOUBLE PRECISION array of DIMENSION at least
-*           ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'
+*  y      - double precision array of dimension at least
+*           ( 1 + ( m - 1 )*abs( incy ) ) when trans = 'n' or 'n'
 *           and at least
-*           ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.
-*           Before entry with BETA non-zero, the incremented array Y
-*           must contain the vector y. On exit, Y is overwritten by the
+*           ( 1 + ( n - 1 )*abs( incy ) ) otherwise.
+*           before entry with beta non-zero, the incremented array y
+*           must contain the vector y. on exit, y is overwritten by the
 *           updated vector y.
 *
-*  INCY   - INTEGER.
-*           On entry, INCY specifies the increment for the elements of
-*           Y. INCY must not be zero.
-*           Unchanged on exit.
+*  incy   - integer.
+*           on entry, incy specifies the increment for the elements of
+*           y. incy must not be zero.
+*           unchanged on exit.
 *
 *
-*  Level 2 Blas routine.
+*  level 2 blas routine.
 *
-*  -- Written on 22-October-1986.
-*     Jack Dongarra, Argonne National Lab.
-*     Jeremy Du Croz, Nag Central Office.
-*     Sven Hammarling, Nag Central Office.
-*     Richard Hanson, Sandia National Labs.
+*  -- written on 22-october-1986.
+*     jack dongarra, argonne national lab.
+*     jeremy du croz, nag central office.
+*     sven hammarling, nag central office.
+*     richard hanson, sandia national labs.
 *
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE         , ZERO
-      PARAMETER        ( ONE = 1.0D+0, ZERO = 0.0D+0 )
-*     .. Local Scalars ..
-      DOUBLE PRECISION   TEMP
-      INTEGER            I, INFO, IX, IY, J, JX, JY, KX, KY, LENX, LENY
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
-*     .. External Subroutines ..
-      EXTERNAL           XERBLA
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX
+*     .. parameters ..
+      double precision   one         , zero
+      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
+*     .. local scalars ..
+      double precision   temp
+      integer            i, info, ix, iy, j, jx, jy, kx, ky, lenx, leny
+*     .. external functions ..
+      logical            lsame
+      external           lsame
+*     .. external subroutines ..
+      external           xerbla
+*     .. intrinsic functions ..
+      intrinsic          max
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      IF     ( .NOT.LSAME( TRANS, 'N' ).AND.
-     $         .NOT.LSAME( TRANS, 'T' ).AND.
-     $         .NOT.LSAME( TRANS, 'C' )      )THEN
-         INFO = 1
-      ELSE IF( M.LT.0 )THEN
-         INFO = 2
-      ELSE IF( N.LT.0 )THEN
-         INFO = 3
-      ELSE IF( LDA.LT.MAX( 1, M ) )THEN
-         INFO = 6
-      ELSE IF( INCX.EQ.0 )THEN
-         INFO = 8
-      ELSE IF( INCY.EQ.0 )THEN
-         INFO = 11
-      END IF
-      IF( INFO.NE.0 )THEN
-         CALL XERBLA( 'DGEMV ', INFO )
-         RETURN
-      END IF
+      info = 0
+      if     ( .not.lsame( trans, 'n' ).and.
+     $         .not.lsame( trans, 't' ).and.
+     $         .not.lsame( trans, 'c' )      )then
+         info = 1
+      else if( m.lt.0 )then
+         info = 2
+      else if( n.lt.0 )then
+         info = 3
+      else if( lda.lt.max( 1, m ) )then
+         info = 6
+      else if( incx.eq.0 )then
+         info = 8
+      else if( incy.eq.0 )then
+         info = 11
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'dgemv ', info )
+         return
+      end if
 *
-*     Quick return if possible.
+*     quick return if possible.
 *
-      IF( ( M.EQ.0 ).OR.( N.EQ.0 ).OR.
-     $    ( ( ALPHA.EQ.ZERO ).AND.( BETA.EQ.ONE ) ) )
-     $   RETURN
+      if( ( m.eq.0 ).or.( n.eq.0 ).or.
+     $    ( ( alpha.eq.zero ).and.( beta.eq.one ) ) )
+     $   return
 *
-*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set
-*     up the start points in  X  and  Y.
+*     set  lenx  and  leny, the lengths of the vectors x and y, and set
+*     up the start points in  x  and  y.
 *
-      IF( LSAME( TRANS, 'N' ) )THEN
-         LENX = N
-         LENY = M
-      ELSE
-         LENX = M
-         LENY = N
-      END IF
-      IF( INCX.GT.0 )THEN
-         KX = 1
-      ELSE
-         KX = 1 - ( LENX - 1 )*INCX
-      END IF
-      IF( INCY.GT.0 )THEN
-         KY = 1
-      ELSE
-         KY = 1 - ( LENY - 1 )*INCY
-      END IF
+      if( lsame( trans, 'n' ) )then
+         lenx = n
+         leny = m
+      else
+         lenx = m
+         leny = n
+      end if
+      if( incx.gt.0 )then
+         kx = 1
+      else
+         kx = 1 - ( lenx - 1 )*incx
+      end if
+      if( incy.gt.0 )then
+         ky = 1
+      else
+         ky = 1 - ( leny - 1 )*incy
+      end if
 *
-*     Start the operations. In this version the elements of A are
-*     accessed sequentially with one pass through A.
+*     start the operations. in this version the elements of a are
+*     accessed sequentially with one pass through a.
 *
-*     First form  y := beta*y.
+*     first form  y := beta*y.
 *
-      IF( BETA.NE.ONE )THEN
-         IF( INCY.EQ.1 )THEN
-            IF( BETA.EQ.ZERO )THEN
-               DO 10, I = 1, LENY
-                  Y( I ) = ZERO
-   10          CONTINUE
-            ELSE
-               DO 20, I = 1, LENY
-                  Y( I ) = BETA*Y( I )
-   20          CONTINUE
-            END IF
-         ELSE
-            IY = KY
-            IF( BETA.EQ.ZERO )THEN
-               DO 30, I = 1, LENY
-                  Y( IY ) = ZERO
-                  IY      = IY   + INCY
-   30          CONTINUE
-            ELSE
-               DO 40, I = 1, LENY
-                  Y( IY ) = BETA*Y( IY )
-                  IY      = IY           + INCY
-   40          CONTINUE
-            END IF
-         END IF
-      END IF
-      IF( ALPHA.EQ.ZERO )
-     $   RETURN
-      IF( LSAME( TRANS, 'N' ) )THEN
+      if( beta.ne.one )then
+         if( incy.eq.1 )then
+            if( beta.eq.zero )then
+               do 10, i = 1, leny
+                  y( i ) = zero
+   10          continue
+            else
+               do 20, i = 1, leny
+                  y( i ) = beta*y( i )
+   20          continue
+            end if
+         else
+            iy = ky
+            if( beta.eq.zero )then
+               do 30, i = 1, leny
+                  y( iy ) = zero
+                  iy      = iy   + incy
+   30          continue
+            else
+               do 40, i = 1, leny
+                  y( iy ) = beta*y( iy )
+                  iy      = iy           + incy
+   40          continue
+            end if
+         end if
+      end if
+      if( alpha.eq.zero )
+     $   return
+      if( lsame( trans, 'n' ) )then
 *
-*        Form  y := alpha*A*x + y.
+*        form  y := alpha*a*x + y.
 *
-         JX = KX
-         IF( INCY.EQ.1 )THEN
-            DO 60, J = 1, N
-               IF( X( JX ).NE.ZERO )THEN
-                  TEMP = ALPHA*X( JX )
-                  DO 50, I = 1, M
-                     Y( I ) = Y( I ) + TEMP*A( I, J )
-   50             CONTINUE
-               END IF
-               JX = JX + INCX
-   60       CONTINUE
-         ELSE
-            DO 80, J = 1, N
-               IF( X( JX ).NE.ZERO )THEN
-                  TEMP = ALPHA*X( JX )
-                  IY   = KY
-                  DO 70, I = 1, M
-                     Y( IY ) = Y( IY ) + TEMP*A( I, J )
-                     IY      = IY      + INCY
-   70             CONTINUE
-               END IF
-               JX = JX + INCX
-   80       CONTINUE
-         END IF
-      ELSE
+         jx = kx
+         if( incy.eq.1 )then
+            do 60, j = 1, n
+               if( x( jx ).ne.zero )then
+                  temp = alpha*x( jx )
+                  do 50, i = 1, m
+                     y( i ) = y( i ) + temp*a( i, j )
+   50             continue
+               end if
+               jx = jx + incx
+   60       continue
+         else
+            do 80, j = 1, n
+               if( x( jx ).ne.zero )then
+                  temp = alpha*x( jx )
+                  iy   = ky
+                  do 70, i = 1, m
+                     y( iy ) = y( iy ) + temp*a( i, j )
+                     iy      = iy      + incy
+   70             continue
+               end if
+               jx = jx + incx
+   80       continue
+         end if
+      else
 *
-*        Form  y := alpha*A'*x + y.
+*        form  y := alpha*a'*x + y.
 *
-         JY = KY
-         IF( INCX.EQ.1 )THEN
-            DO 100, J = 1, N
-               TEMP = ZERO
-               DO 90, I = 1, M
-                  TEMP = TEMP + A( I, J )*X( I )
-   90          CONTINUE
-               Y( JY ) = Y( JY ) + ALPHA*TEMP
-               JY      = JY      + INCY
-  100       CONTINUE
-         ELSE
-            DO 120, J = 1, N
-               TEMP = ZERO
-               IX   = KX
-               DO 110, I = 1, M
-                  TEMP = TEMP + A( I, J )*X( IX )
-                  IX   = IX   + INCX
-  110          CONTINUE
-               Y( JY ) = Y( JY ) + ALPHA*TEMP
-               JY      = JY      + INCY
-  120       CONTINUE
-         END IF
-      END IF
+         jy = ky
+         if( incx.eq.1 )then
+            do 100, j = 1, n
+               temp = zero
+               do 90, i = 1, m
+                  temp = temp + a( i, j )*x( i )
+   90          continue
+               y( jy ) = y( jy ) + alpha*temp
+               jy      = jy      + incy
+  100       continue
+         else
+            do 120, j = 1, n
+               temp = zero
+               ix   = kx
+               do 110, i = 1, m
+                  temp = temp + a( i, j )*x( ix )
+                  ix   = ix   + incx
+  110          continue
+               y( jy ) = y( jy ) + alpha*temp
+               jy      = jy      + incy
+  120       continue
+         end if
+      end if
 *
-      RETURN
+      return
 *
-*     End of DGEMV .
+*     end of dgemv .
 *
-      END
+      end

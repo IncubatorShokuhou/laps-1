@@ -1,7 +1,7 @@
 
       subroutine get_acceptable_files(i4time_anal,bgpath,bgmodel,names
      +     ,max_files,use_analysis,use_forecast
-     +     ,bg_files,accepted_files,forecast_length,cmodel,NX,NY,NZ
+     +     ,bg_files,accepted_files,forecast_length,cmodel,nx,ny,nz
      +     ,rejected_files,rejected_cnt)
 
       implicit none
@@ -9,7 +9,7 @@
       include 'netcdf.inc'
 
       integer bgmodel
-      integer max_files, NX,NY,NZ,rejected_cnt
+      integer max_files, nx,ny,nz,rejected_cnt
       character*256 names(max_files)           ! should be returned as basenames
       character*256 names_tmp(max_files)
       character*256 rejected_files(max_files)
@@ -20,7 +20,7 @@
       parameter (ntbg=100)
       integer ivaltimes(100)
       integer nvaltimes
-      character*4   af,c4valtime,c4_FA_valtime
+      character*4   af,c4valtime,c4_fa_valtime
       character*3   c_fa_ext
       character*200 fullname
       character*256 cfilespec
@@ -57,12 +57,12 @@
 
       character*256 bgpath, null_string
 
-C
-C if forecast_length < 0 return only the file which matches i4time_anal 
-C if forecast_length = 0 return files for i4time_anal and the preceeding
-C forecast.  if forecast_length > 0 return all files for i4time_anal
-C to >= i4time_anal+forecast_length
-C      
+c
+c if forecast_length < 0 return only the file which matches i4time_anal 
+c if forecast_length = 0 return files for i4time_anal and the preceeding
+c forecast.  if forecast_length > 0 return all files for i4time_anal
+c to >= i4time_anal+forecast_length
+c      
       print*, '----------------------------------------------'
       print*, 'get_acceptable_files: use_analysis / use_forecast = '
      1                              ,use_analysis,use_forecast
@@ -70,15 +70,15 @@ C
 
       idebug = 0
 
-!     If later on we want to set use_forecast to .false. then we can use 
-!     analyses only similar to what is presently being done with the 'LAPS' 
+!     if later on we want to set use_forecast to .false. then we can use 
+!     analyses only similar to what is presently being done with the 'laps' 
 !     option.
 
-      if((use_forecast .eqv. .true.) .OR. 
+      if((use_forecast .eqv. .true.) .or. 
      1   (use_analysis .eqv. .true.)      )then       
           continue
       else
-          write(6,*)' ERROR: use_forecast AND use_analysis are false'       
+          write(6,*)' error: use_forecast and use_analysis are false'       
           return
       endif
 
@@ -112,8 +112,8 @@ C
          bg_names(ifile) = null_string
       enddo
 
-c     if(bgmodel.eq.0 .and. cmodel.ne.'LAPS_FUA'.and.
-c    +   cmodel.ne.'MODEL_FUA')then
+c     if(bgmodel.eq.0 .and. cmodel.ne.'laps_fua'.and.
+c    +   cmodel.ne.'model_fua')then
 c        do i=max(0,forecast_length),0,-1
 c           bg_files=bg_files+1
 c           call make_fnam_lp(i4time_anal+3600*i
@@ -132,16 +132,16 @@ c     elseif(bgmodel.eq.3)then
                exit search_mdltype
             endif
          enddo search_mdltype
-         if(cmodel(l+1:nclen).eq.'NF'.or.
-     &      cmodel(l+1:nclen).eq.'NF15'.or.
-     &      cmodel(l+1:nclen).eq.'NF45')then
+         if(cmodel(l+1:nclen).eq.'nf'.or.
+     &      cmodel(l+1:nclen).eq.'nf15'.or.
+     &      cmodel(l+1:nclen).eq.'nf45')then
             cwb_model_type='nf'
-         elseif(cmodel(l+1:nclen).eq.'GFS')then
+         elseif(cmodel(l+1:nclen).eq.'gfs')then
             cwb_model_type='gb'
-         elseif(cmodel(l+1:nclen).eq.'TFS')then
+         elseif(cmodel(l+1:nclen).eq.'tfs')then
             cwb_model_type='sb'
          else
-            print*,'Not able to determine CWB model type'
+            print*,'not able to determine cwb model type'
             print*,'cmodel = ',cmodel(1:nclen)
             stop
          endif
@@ -171,7 +171,7 @@ c     elseif(bgmodel.eq.3)then
                call make_fnam_lp(i4time_fa,fname9,istatus)
                lentodot=index(names(i),'.')
                c_fa_ext=names(i)(lentodot+1:j)
-               c4valtime=c4_FA_valtime(c_fa_ext)
+               c4valtime=c4_fa_valtime(c_fa_ext)
                bg_names(nvt)=fname9//c4valtime
 c              print*,'nvt/bg_names(nvt) ',i,bg_names(nvt)(1:14)
             endif
@@ -179,7 +179,7 @@ c              print*,'nvt/bg_names(nvt) ',i,bg_names(nvt)(1:14)
 
          bg_files=nvt
 
-      elseif(cmodel.ne.'LAPS')then
+      elseif(cmodel.ne.'laps')then
 
          final_time = i4time_anal+3600*max(0,forecast_length)
          call get_file_times(cfilespec,max_files,names,itimes
@@ -209,35 +209,35 @@ c              print*,'nvt/bg_names(nvt) ',i,bg_names(nvt)(1:14)
 !              if(index(names(i)(j+1:j+13),'/').eq.0 .and.
 !    +              names(i)(j:j).eq.'/') then
 
-!              Test for "grib" extension in the name
+!              test for "grib" extension in the name
                if(l_parse(names(i)(j+1:j+13),'grib'))then
-                 write(6,*)' ERROR: filename has .grib extension: '
+                 write(6,*)' error: filename has .grib extension: '
      1                    ,trim(names(i))
                  write(6,*)
      1             ' remove .grib extension if present and/or use links'
                endif
 
-               if(l_parse(names(i)(j+1:j+13),'/') .eqv. .false. .AND.
+               if(l_parse(names(i)(j+1:j+13),'/') .eqv. .false. .and.
      +              names(i)(j:j).eq.'/') then
                 
                   if(i .eq. 1)write(6,*)
      1            ' index no slash in last 13 chars test was true:'
      1            ,j,names(i)(j:j),' ',names(i)(j+1:j+13)
 
-CWNI-BLS ... Support for bgmodel = 10, assuming one uses the YYYYMMDD_HHMM
-CWNI-BLS     convention
-                  if ((bgmodel .eq. 4).OR.(bgmodel.eq.10)) then
-c     print *, 'SBN file:',names(i)(j+1:j+13)
+cwni-bls ... support for bgmodel = 10, assuming one uses the yyyymmdd_hhmm
+cwni-bls     convention
+                  if ((bgmodel .eq. 4).or.(bgmodel.eq.10)) then
+c     print *, 'sbn file:',names(i)(j+1:j+13)
                      fname=wfo_fname13_to_fname9(names(i)(j+1:j+13))
-CWNI-BLS ... Call to new version of get_nvaltimes for Unidata
-                     IF (bgmodel .EQ. 4) THEN                     
+cwni-bls ... call to new version of get_nvaltimes for unidata
+                     if (bgmodel .eq. 4) then                     
                        call get_nvaltimes(names(i),sbnvaltimes,ivaltimes
      +                                 ,istatus)
-                     ELSEIF (bgmodel.EQ.10) THEN
-                       print *,"Reading Unidata: ",TRIM(names(i))
+                     elseif (bgmodel.eq.10) then
+                       print *,"reading unidata: ",trim(names(i))
                        call get_nvaltimes_unidata(names(i),sbnvaltimes,
      +                                 ivaltimes,istatus)
-                     ENDIF
+                     endif
                      if(istatus.ne.1) then
                         print*,'error returned from get_sbn_model_id '
      +                         ,fname
@@ -248,7 +248,7 @@ CWNI-BLS ... Call to new version of get_nvaltimes for Unidata
                          kk=kk+1
                          if(kk.le.sbnvaltimes)then
                            write(af,'(i4.4)') ivaltimes(kk)/3600
-                           bg_names(k)=TRIM(fname)//af
+                           bg_names(k)=trim(fname)//af
                            names_tmp(k) = names(i)
                            nvaltimes = nvaltimes + 1
                          endif
@@ -268,13 +268,13 @@ CWNI-BLS ... Call to new version of get_nvaltimes for Unidata
 
          if((bgmodel.eq.4) .or. (bgmodel .eq. 10))then
             bg_files = nvaltimes-1
-            DO i=1,bg_files
+            do i=1,bg_files
               names(i) = names_tmp(i)
-            ENDDO
+            enddo
          endif
-      else ! c_model = 'LAPS' (exclusively using analyses)
-         print*,'LAPS analysis selected as background'
-         print*,'Checking lapsprd/lt1 subdirectory'
+      else ! c_model = 'laps' (exclusively using analyses)
+         print*,'laps analysis selected as background'
+         print*,'checking lapsprd/lt1 subdirectory'
          cfilespec=bgpath(1:len)//'/lt1/*'
          call get_file_times(cfilespec,max_files,names,itimes
      +,bg_files,istatus)
@@ -292,12 +292,12 @@ CWNI-BLS ... Call to new version of get_nvaltimes for Unidata
        
       endif
 
-      print *, "Total (nvaltimes) = ",nvaltimes
+      print *, "total (nvaltimes) = ",nvaltimes
 c ok, if we do not want 0-hr fcst files (analysis files) then filter them.
 c ---------------------------------------------------------------------------
-      if(cmodel.eq.'LAPS' .and. (.not.use_analysis))then
-         print*,'Error in namelist variables'
-         print*,'use_analysis must = true when cmodel = LAPS'
+      if(cmodel.eq.'laps' .and. (.not.use_analysis))then
+         print*,'error in namelist variables'
+         print*,'use_analysis must = true when cmodel = laps'
          return
       endif
       
@@ -310,39 +310,39 @@ c ---------------------------------------------------------------------------
              if(bg_names(i)(j-3:j).ne.'0000')then
                 ij=ij+1
                 bgnames_tmp(ij)=bg_names(i)
-                IF ((bgmodel .EQ. 4).OR.(bgmodel.EQ.10))THEN
+                if ((bgmodel .eq. 4).or.(bgmodel.eq.10))then
                   names_tmp(ij) = names(i)
                 endif 
              endif
           enddo
-          print*,'Removed ',bg_files-ij,' initial cond files '
+          print*,'removed ',bg_files-ij,' initial cond files '
           do i=1,bg_files
              bg_names(i)=' '
           enddo
 
           if(ij.eq.0)then
              print*,
-     1       'WARNING: all files must be initial files. Return to main'
-             print*,'Consider setting use_analysis parameter to true'
-             print*,'Forecasts should also be added to the analyses'
+     1       'warning: all files must be initial files. return to main'
+             print*,'consider setting use_analysis parameter to true'
+             print*,'forecasts should also be added to the analyses'
              deallocate(bgnames_tmp)
              accepted_files = 0
              return
           endif
 
           bg_files=ij
-          print *, 'Printing bg_names : names'
+          print *, 'printing bg_names : names'
           do i=1,bg_files
              bg_names(i)=bgnames_tmp(i)
-             IF ((bgmodel .EQ. 4).OR.(bgmodel.EQ.10))THEN
+             if ((bgmodel .eq. 4).or.(bgmodel.eq.10))then
                names(i) = names_tmp(i)
-             ENDIF
-             print *, TRIM(bg_names(i)),":", TRIM(names(i))
+             endif
+             print *, trim(bg_names(i)),":", trim(names(i))
           enddo
           deallocate(bgnames_tmp)
          endif
       else
-          print*,'Variable bg_files = 0, return to main'
+          print*,'variable bg_files = 0, return to main'
           print*
           accepted_files=0
           return
@@ -354,49 +354,49 @@ c -------------------------------------------------------------------
       ibkgd=1
 cwni      do n=1,bg_files-1
       do n=1,bg_files
-C -- WNI-BLS ... Reworked this whole section
-         if (n .EQ. 1) then
+c -- wni-bls ... reworked this whole section
+         if (n .eq. 1) then
            bkgd(ibkgd)=bg_names(n)(1:9)
            ifcst_bkgd(ibkgd)=1
            call i4time_fname_lp(bkgd(ibkgd),i4timeinit(ibkgd),istatus)
-           if(istatus .ne. 1)write(6,*)'WARNING - malformed time:'
+           if(istatus .ne. 1)write(6,*)'warning - malformed time:'
      +                      ,bkgd(ibkgd),i4timeinit(ibkgd)
-           print *, "First: ",ibkgd, ifcst_bkgd(ibkgd)
+           print *, "first: ",ibkgd, ifcst_bkgd(ibkgd)
          else
            finit1=bg_names(n-1)(1:9)
            finit2=bg_names(n)(1:9)
            if(finit1 .eq. finit2)then
-C            Same as previous init tim
+c            same as previous init tim
              ifcst_bkgd(ibkgd) = ifcst_bkgd(ibkgd) + 1
            else
-C            Start a new init time
+c            start a new init time
              ibkgd = ibkgd + 1
              bkgd(ibkgd)=bg_names(n)(1:9)
              ifcst_bkgd(ibkgd)=1 
              call i4time_fname_lp(bkgd(ibkgd),i4timeinit(ibkgd),istatus)
-             if(istatus .ne. 1)write(6,*)'WARNING - malformed time:'
+             if(istatus .ne. 1)write(6,*)'warning - malformed time:'
      +                        ,bkgd(ibkgd),i4timeinit(ibkgd)
            endif
 
          endif
 
-Curiously had to comment these lines as we now need 4 char to retain full filename
-c        if(bgmodel.eq.0 .and. cmodel.eq.'LAPS_FUA'.or.
-c    +       cmodel.eq.'MODEL_FUA'.or.cmodel.eq.'LAPS')then
+curiously had to comment these lines as we now need 4 char to retain full filename
+c        if(bgmodel.eq.0 .and. cmodel.eq.'laps_fua'.or.
+c    +       cmodel.eq.'model_fua'.or.cmodel.eq.'laps')then
 c            fcst(ibkgd,ifcst_bkgd(ibkgd))=bg_names(n)(10:11)
 c        else
              fcst(ibkgd,ifcst_bkgd(ibkgd))=bg_names(n)(10:13)
-             IF (bgmodel .EQ. 4 .OR. bgmodel .EQ. 10) THEN
-               IF (ifcst_bkgd(ibkgd).EQ.1)THEN
+             if (bgmodel .eq. 4 .or. bgmodel .eq. 10) then
+               if (ifcst_bkgd(ibkgd).eq.1)then
                  names_tmp(ibkgd) = names(n)
-                 print *,"**** ",TRIM(names_tmp(ibkgd))
-               ENDIF
+                 print *,"**** ",trim(names_tmp(ibkgd))
+               endif
              endif
 c        endif
 
       enddo ! n
 
-      print *,'Found ',ibkgd,' initial backgrounds '
+      print *,'found ',ibkgd,' initial backgrounds '
       do n=1,ibkgd
         print *,'bkgd ',n, bkgd(n),' has ',ifcst_bkgd(n),' fcsts'
       enddo
@@ -427,18 +427,18 @@ c ------------------------------------------------------------------------------
      +i4timeinit(n)+forecast_length*3600 .gt. i4time_anal)then   !let "forecast_length" window on init time qualify
 
             if(idebug .ge. 1)print*  
-            print*,'Found bkgd init that corresp to anal: ',bkgd(n)
+            print*,'found bkgd init that corresp to anal: ',bkgd(n)
      1            ,' i4timeinit = ',i4timeinit(n)
-            print*,'Num of fcst = ',ifcst_bkgd(n)
+            print*,'num of fcst = ',ifcst_bkgd(n)
 
 c this separate (near identical section) is due to local model having ffff = hhmm format
 c whereas the second section below is ffff = hhhh.
 
-            if(cmodel.eq.'LAPS_FUA'.or.cmodel.eq.'MODEL_FUA'
-     +                             .or.cmodel.eq.'HRRR'      
-     +                             .or.cmodel.eq.'RRs')then
+            if(cmodel.eq.'laps_fua'.or.cmodel.eq.'model_fua'
+     +                             .or.cmodel.eq.'hrrr'      
+     +                             .or.cmodel.eq.'rrs')then
 
-c    +       (cmodel.eq.'LAPS') )then ! all cmodel types with bgmodel = 0 need this switch.
+c    +       (cmodel.eq.'laps') )then ! all cmodel types with bgmodel = 0 need this switch.
 
                do jj=2,ifcst_bkgd(n)
                   af=fcst(n,jj-1)
@@ -458,29 +458,29 @@ c    +       (cmodel.eq.'LAPS') )then ! all cmodel types with bgmodel = 0 need t
                       indx_for_best_init=n
                       indx_for_best_fcst=jj-1
                    endif
-                   print*,'Found fcsts bounding anal init/fcst='
+                   print*,'found fcsts bounding anal init/fcst='
      1                   , indx_for_best_init                
      1                   , indx_for_best_fcst                
-                   print*,'Full name 1: ', bkgd(n),fcst(n,jj-1)
-                   print*,'Full name 2: ', bkgd(n),fcst(n,jj)
+                   print*,'full name 1: ', bkgd(n),fcst(n,jj-1)
+                   print*,'full name 2: ', bkgd(n),fcst(n,jj)
                    print*,'i4times: fcst1/anal/fcst2',valid_time_1
      1                                   ,i4time_anal,valid_time_2
                    print*
                   endif
                enddo
 
-            elseif(cmodel.ne.'LAPS')then
+            elseif(cmodel.ne.'laps')then
 
              if(idebug.ge.1)then
-               write(6,*)'cmodel .ne. LAPS block'
+               write(6,*)'cmodel .ne. laps block'
              endif
 
-!!! add Huiling Yuan 20120904  AAA001, tested with RUC, use_analysis=true
-             if ((use_analysis .eqv. .true.) .AND. 
+!!! add huiling yuan 20120904  aaa001, tested with ruc, use_analysis=true
+             if ((use_analysis .eqv. .true.) .and. 
      1           (use_forecast .eqv. .false.)      )then
 
               if(idebug.ge.1)then
-                write(6,*)'use_analysis = T AND use_forecast = F block'
+                write(6,*)'use_analysis = t and use_forecast = f block'
               endif
 
               jj=1
@@ -503,12 +503,12 @@ c    +       (cmodel.eq.'LAPS') )then ! all cmodel types with bgmodel = 0 need t
                     indx_for_best_fcst=jj
                  endif
 
-                 print*,'Found fcsts bounding anal'
-                 print*, "Index/init/fcst = ",n+1
+                 print*,'found fcsts bounding anal'
+                 print*, "index/init/fcst = ",n+1
      1                   , indx_for_best_init
      1                   , indx_for_best_fcst
-                 print*,'Full name 1: ', bkgd(n),fcst(n,jj)
-                 print*,'Full name 2: ', bkgd(n+1),fcst(n+1,jj)
+                 print*,'full name 1: ', bkgd(n),fcst(n,jj)
+                 print*,'full name 2: ', bkgd(n+1),fcst(n+1,jj)
                  write(6,*)valid_time_1,i4time_anal,valid_time_2
                  print*
 
@@ -516,11 +516,11 @@ c    +       (cmodel.eq.'LAPS') )then ! all cmodel types with bgmodel = 0 need t
 
               endif   ! (n.lt.ibkgd)
 
-!!!  partial if block, use_analysis=true,  by Huiling Yuan,  AAA001_A
-             else   !! add by Huiling Yuan, AAA001_B
+!!!  partial if block, use_analysis=true,  by huiling yuan,  aaa001_a
+             else   !! add by huiling yuan, aaa001_b
 
               if(idebug.ge.1)then
-                write(6,*)'use_analysis = F OR use_forecast = T block'
+                write(6,*)'use_analysis = f or use_forecast = t block'
               endif
 
               do jj=2,ifcst_bkgd(n)
@@ -544,34 +544,34 @@ c    +       (cmodel.eq.'LAPS') )then ! all cmodel types with bgmodel = 0 need t
                     indx_for_best_fcst=jj-1
                  endif
 
-                 print*,'Found fcsts bounding anal'
-                 print*, "Index/init/fcst = ",n
+                 print*,'found fcsts bounding anal'
+                 print*, "index/init/fcst = ",n
      1                   , indx_for_best_init                
      1                   , indx_for_best_fcst                
-                 print*,'Full name 1: ', bkgd(n),fcst(n,jj-1)
-                 print*,'Full name 2: ', bkgd(n),fcst(n,jj)
+                 print*,'full name 1: ', bkgd(n),fcst(n,jj-1)
+                 print*,'full name 2: ', bkgd(n),fcst(n,jj)
                  write(6,*)valid_time_1,i4time_anal,valid_time_2
                  print*
 
                 endif
               enddo
 
-             endif ! use_analysis.eqv..true., end Huiling Yuan,  AAA001
+             endif ! use_analysis.eqv..true., end huiling yuan,  aaa001
 
-            else  !must be LAPS
+            else  !must be laps
 
              if(n.gt.1)then
               valid_time_1=i4timeinit(n)
               valid_time_2=i4timeinit(n-1)
               if(valid_time_1.eq.i4time_anal)then
                indx_for_best_init1=n
-               print*,'Found prev analysis corresp to current need'
-               print*,'Full name 1: ', bkgd(indx_for_best_init1)
+               print*,'found prev analysis corresp to current need'
+               print*,'full name 1: ', bkgd(indx_for_best_init1)
               endif
               if(valid_time_2.eq.i4time_anal)then
                indx_for_best_init2=n-1
-               print*,'Found prev analysis corresp to current need'
-               print*,'Full name 2: ', bkgd(indx_for_best_init2)
+               print*,'found prev analysis corresp to current need'
+               print*,'full name 2: ', bkgd(indx_for_best_init2)
               endif
 
 c             endif
@@ -585,9 +585,9 @@ c             endif
                 call make_fnam_lp(valid_time_1+laps_cycle_time
      +,bkgd(indx_for_best_init1),istatus)
  
-                print*,'Found analyses corresp to anal+cycle_time'
-                print*,'Full name 1: ', bkgd(indx_for_best_init1)
-                print*,'Full name 2: ', bkgd(indx_for_best_init2)
+                print*,'found analyses corresp to anal+cycle_time'
+                print*,'full name 1: ', bkgd(indx_for_best_init1)
+                print*,'full name 2: ', bkgd(indx_for_best_init2)
                endif
               endif ! indx_for_best_init2
 
@@ -601,12 +601,12 @@ c             endif
 c
 c now restore the filename corresponding to the actual original "raw" file name 
 c -----------------------------------------------------------------------------
-      if(cmodel.ne.'LAPS')then
+      if(cmodel.ne.'laps')then
          if(indx_for_best_init.ne.0.and.indx_for_best_fcst.ne.0)then
             accepted_files = 2
-           if ((use_analysis .eqv. .true.) .AND.
-     1         (use_forecast .eqv. .false.))then   !! add  if block Huiling Yuan 20120905, AAA002
-!!!!  names(1) is the earlier file, and names(2) is the latter file, Huiling Yuan, 20120905
+           if ((use_analysis .eqv. .true.) .and.
+     1         (use_forecast .eqv. .false.))then   !! add  if block huiling yuan 20120905, aaa002
+!!!!  names(1) is the earlier file, and names(2) is the latter file, huiling yuan, 20120905
             names(2)=bkgd(indx_for_best_init-1)//fcst(indx_for_best_init
      +        ,indx_for_best_fcst)
             names(1)=bkgd(indx_for_best_init)//fcst(indx_for_best_init
@@ -616,14 +616,14 @@ c -----------------------------------------------------------------------------
      +        ,indx_for_best_fcst)
             names(1) = bkgd(indx_for_best_init)//fcst(indx_for_best_init
      +        ,indx_for_best_fcst+1)
-           endif     !! endif Huiling Yuan AAA002
+           endif     !! endif huiling yuan aaa002
 
-            print*,'Accepted file 1: ',TRIM(names(1))
-            print*,'Accepted file 2: ',TRIM(names(2))
+            print*,'accepted file 1: ',trim(names(1))
+            print*,'accepted file 2: ',trim(names(2))
          else
             print*,'!******************************************'
-            print*,'!*** WARNING: Did not find acceptable files'
-            print*,'!*** -------> Returning to main'
+            print*,'!*** warning: did not find acceptable files'
+            print*,'!*** -------> returning to main'
             print*,'!******************************************'
             print*,'indx_for_best_init/indx_for_best_fcst = '
      1            , indx_for_best_init,indx_for_best_fcst 
@@ -632,24 +632,24 @@ c -----------------------------------------------------------------------------
             return
          endif
 
-      else  ! cmodel = LAPS 
-c At t = cycle time or t+1 cycle time we need to use previous analyses to
+      else  ! cmodel = laps 
+c at t = cycle time or t+1 cycle time we need to use previous analyses to
 c advance fields in lga.
          if(indx_for_best_init1.ne.0.or.indx_for_best_init2.ne.0)then
             accepted_files=2
-            IF (bgmodel.EQ.4 .or. bgmodel .eq. 10) THEN
+            if (bgmodel.eq.4 .or. bgmodel .eq. 10) then
               names(2) = names_tmp(indx_for_best_init2)
               names(1) = names_tmp(indx_for_best_init1)
-            ELSE
+            else
               names(2)=bkgd(indx_for_best_init2)
               names(1)=bkgd(indx_for_best_init1)
-            ENDIF
-            print*,'Accepted file 1: ',TRIM(names(1))
-            print*,'Accepted file 2: ',TRIM(names(2))
+            endif
+            print*,'accepted file 1: ',trim(names(1))
+            print*,'accepted file 2: ',trim(names(2))
          else
             print*,'!******************************************'
-            print*,'!*** WARNING: Did not find acceptable files'
-            print*,'!*** -------> Returning to main'
+            print*,'!*** warning: did not find acceptable files'
+            print*,'!*** -------> returning to main'
             print*,'!******************************************'
             accepted_files = 0
             bg_files = 0
@@ -665,10 +665,10 @@ c    +         bg_names(n)(1:1).eq.'9')then
 c                 fname=bg_names(n)(1:9)
 c                 af=bg_names(n)(10:13)
 c                 read(af,'(i4)',err=888) ihour
-c                 if(bgmodel.eq.0.and.cmodel.eq.'LAPS_FUA'.or.
-c    +               cmodel.eq.'MODEL_FUA')ihour=ihour/100
+c                 if(bgmodel.eq.0.and.cmodel.eq.'laps_fua'.or.
+c    +               cmodel.eq.'model_fua')ihour=ihour/100
 c        else
-c           print*,'Ignoring unexpected filename ',TRIM(bg_names(n))
+c           print*,'ignoring unexpected filename ',trim(bg_names(n))
 c        endif 
 c     endif
 
@@ -679,30 +679,30 @@ c     endif
          call get_laps_dimensions(nz,istatus)
          call get_grid_dim_xy(nx,ny,istatus)
       else if(bgmodel.eq.1) then
-         NX = 81
-         NY = 62
-         NZ = 25        
+         nx = 81
+         ny = 62
+         nz = 25        
       else if(bgmodel.eq.7) then
-         NX = 185
-         NY = 129
-         NZ = 42
+         nx = 185
+         ny = 129
+         nz = 42
       else if(bgmodel.eq.9) then
-         call get_conus_dims(fullname,NX,NY,NZ)
-         print *,'nws:',NX,NY,NZ
+         call get_conus_dims(fullname,nx,ny,nz)
+         print *,'nws:',nx,ny,nz
       endif
 
       if(bgmodel .eq. 13 .and. lenf .ne. 13 .and. lenf .ne. 14)then
-         write(6,*)' WARNING: filename length appears incorrect ',lenf
+         write(6,*)' warning: filename length appears incorrect ',lenf
          write(6,*)' for example ',fullname(1:len+lenf)
          write(6,*)' remove .grib extension if present and/or use links'       
       endif
 
       write(6,*)
-     1    ' Normal finish of get_acceptable_files, lenf/names(1) = '  
-     1    ,lenf,TRIM(names(1))
+     1    ' normal finish of get_acceptable_files, lenf/names(1) = '  
+     1    ,lenf,trim(names(1))
       return
 
-888   print*,'Error decoding fname ',fname
+888   print*,'error decoding fname ',fname
       print*,'n/bg_names(n) = ',n,bg_names(n)
       print*,'af = ',af
 

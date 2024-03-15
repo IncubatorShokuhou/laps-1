@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -29,169 +29,169 @@ cdis
 cdis
 cdis
 cdis
-        Subroutine Cloud_bogus_w (dx, cloud_type, height, nk       ! I
-     1                           ,vv_to_height_ratio_Cu            ! I
-     1                           ,vv_to_height_ratio_Sc            ! I
-     1                           ,vv_for_St                        ! I
-     1                           ,l_deep_vv                        ! I
-     1                           ,w)                               ! O
+        subroutine cloud_bogus_w (dx, cloud_type, height, nk       ! i
+     1                           ,vv_to_height_ratio_cu            ! i
+     1                           ,vv_to_height_ratio_sc            ! i
+     1                           ,vv_for_st                        ! i
+     1                           ,l_deep_vv                        ! i
+     1                           ,w)                               ! o
 
-!Original version October 1990.
+!original version october 1990.
 
-!Modified May 1991 when we realized that a grid box is a lot bigger than
-!any updraft.  We reduced the maximum vv in the parabolic profiles in cumulus
-!clouds by a fairly large amount (30 m/s in 10 km Cu to 5 m/s), and the vv max
-!for stratocumulus by a smaller amount (50 cm/s in 4-km Sc to 20 cm/s).
+!modified may 1991 when we realized that a grid box is a lot bigger than
+!any updraft.  we reduced the maximum vv in the parabolic profiles in cumulus
+!clouds by a fairly large amount (30 m/s in 10 km cu to 5 m/s), and the vv max
+!for stratocumulus by a smaller amount (50 cm/s in 4-km sc to 20 cm/s).
 
-!  Modified June 2002 - Once again reduced the maximum cloud vv magnitude
-!                       and made it dependent on grid spacing.  Also
+!  modified june 2002 - once again reduced the maximum cloud vv magnitude
+!                       and made it dependent on grid spacing.  also
 !                       changed parabolic vv profile for cumuliform clouds
 !                       to only go down to the cloud base, rather than 
 !                       1/3rd of the cloud depth below base to try and
 !                       and improve elevated convection cases.
 
-!Can be used with either regular LAPS analysis grid or the cloud analysis grid.
-        Implicit none
-        Integer nk, cloud_type(nk)
-        Real dx, height(nk), w(nk) ! dx is M and w is M/S
+!can be used with either regular laps analysis grid or the cloud analysis grid.
+        implicit none
+        integer nk, cloud_type(nk)
+        real dx, height(nk), w(nk) ! dx is m and w is m/s
 
-!The following specifies the maximum vv in two cloud types as functions
-!of cloud depth.  Make parabolic vv profile, except for stratiform clouds,
-!which get a constant value.  The values are tuned to give values that
-!an NWP model would typically produce.  
-        Real vv_to_height_ratio_Cu
-        Real vv_to_height_ratio_Sc
-        Real vv_for_St
+!the following specifies the maximum vv in two cloud types as functions
+!of cloud depth.  make parabolic vv profile, except for stratiform clouds,
+!which get a constant value.  the values are tuned to give values that
+!an nwp model would typically produce.  
+        real vv_to_height_ratio_cu
+        real vv_to_height_ratio_sc
+        real vv_for_st
 
-        Real ratio, vv, Parabolic_vv_profile
+        real ratio, vv, parabolic_vv_profile
 
-        Integer k, k1, kbase, ktop
-        Real zbase, ztop
+        integer k, k1, kbase, ktop
+        real zbase, ztop
 
-        Logical l_deep_vv
+        logical l_deep_vv
 
-!   Cloud Type      /'  ','St','Sc','Cu','Ns','Ac','As','Cs','Ci','Cc','Cb'/
-!   Integer Value     0     1    2    3    4    5    6    7    8    9   10
+!   cloud type      /'  ','st','sc','cu','ns','ac','as','cs','ci','cc','cb'/
+!   integer value     0     1    2    3    4    5    6    7    8    9   10
 
-!Zero out return vector.
-        Do k = 1, nk
+!zero out return vector.
+        do k = 1, nk
          w(k) = 0.
-        End do
+        end do
 
-!Put in the vv's for cumuliform clouds (Cu or Cb) first.
-        ratio = vv_to_height_ratio_Cu / dx
-        Do k = 1, nk
-         If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
+!put in the vv's for cumuliform clouds (cu or cb) first.
+        ratio = vv_to_height_ratio_cu / dx
+        do k = 1, nk
+         if (cloud_type(k) .eq. 3  .or.  cloud_type(k) .eq. 10) then
           kbase = k
-          Go to 10
-         End if
-        End do
-        Go to 100
+          go to 10
+         end if
+        end do
+        go to 100
 
-10      Do k = kbase, nk
-         If(l_deep_vv)then ! We are using Adan's change
-          If (cloud_type(k) .ne. 0) then ! change to the cloudtop by Adan
+10      do k = kbase, nk
+         if(l_deep_vv)then ! we are using adan's change
+          if (cloud_type(k) .ne. 0) then ! change to the cloudtop by adan
            ktop = k
-          Else
-           Go to 20
-          End if
-         else ! Older strategy with shallower parabolic profiles
-          If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
+          else
+           go to 20
+          end if
+         else ! older strategy with shallower parabolic profiles
+          if (cloud_type(k) .eq. 3  .or.  cloud_type(k) .eq. 10) then
            ktop = k
-          Else
-           Go to 20
-          End if
+          else
+           go to 20
+          end if
          endif ! l_deep_vv
-        End do
+        end do
 
 20      k1 = k          ! save our place in the column
         zbase = height(kbase)
         ztop  = height(ktop)
-        Do k = 1, nk
-         vv = Parabolic_vv_profile (zbase, ztop, ratio, height(k))
-         If (vv .gt. 0.) then
+        do k = 1, nk
+         vv = parabolic_vv_profile (zbase, ztop, ratio, height(k))
+         if (vv .gt. 0.) then
           w(k) = vv
-         Else
-          w(k) = 0. ! could wipe out VV from another layer
-         End if
-        End do
+         else
+          w(k) = 0. ! could wipe out vv from another layer
+         end if
+        end do
         k1 = k1 + 1
-        If (k1 .ge. nk) go to 100
+        if (k1 .ge. nk) go to 100
 
-!Try for another level of Cu.
-        Do k = k1, nk
-         If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
+!try for another level of cu.
+        do k = k1, nk
+         if (cloud_type(k) .eq. 3  .or.  cloud_type(k) .eq. 10) then
           kbase = k
-          Go to 10
-         End if
-        End do
+          go to 10
+         end if
+        end do
 
-!Now do the stratocumulus or similar clouds (Sc, Ac, Cc, Ns).
-100     ratio = vv_to_height_ratio_Sc/dx
-        Do k = 1, nk
-         If (cloud_type(k) .eq. 2  .OR.  cloud_type(k) .eq. 4  .OR.
-     1     cloud_type(k) .eq. 5  .OR.  cloud_type(k) .eq. 9) then
+!now do the stratocumulus or similar clouds (sc, ac, cc, ns).
+100     ratio = vv_to_height_ratio_sc/dx
+        do k = 1, nk
+         if (cloud_type(k) .eq. 2  .or.  cloud_type(k) .eq. 4  .or.
+     1     cloud_type(k) .eq. 5  .or.  cloud_type(k) .eq. 9) then
           kbase = k
-          Go to 110
-         End if
-        End do
-        Go to 200
+          go to 110
+         end if
+        end do
+        go to 200
 
-110     Do k = kbase, nk
-         If (cloud_type(k) .eq. 2  .OR.  cloud_type(k) .eq. 4  .OR.
-     1     cloud_type(k) .eq. 5  .OR.  cloud_type(k) .eq. 9) then
+110     do k = kbase, nk
+         if (cloud_type(k) .eq. 2  .or.  cloud_type(k) .eq. 4  .or.
+     1     cloud_type(k) .eq. 5  .or.  cloud_type(k) .eq. 9) then
           ktop = k
-         Else
-          Go to 120
-         End if
-        End do
+         else
+          go to 120
+         end if
+        end do
 
 120     k1 = k          ! save our place in the column
         zbase = height(kbase)
         ztop  = height(ktop)
-        Do k = 1, nk
-         vv = Parabolic_vv_profile (zbase, ztop, ratio, height(k))
-         If (vv .gt. w(k)) w(k) = vv
-        End do
+        do k = 1, nk
+         vv = parabolic_vv_profile (zbase, ztop, ratio, height(k))
+         if (vv .gt. w(k)) w(k) = vv
+        end do
         k1 = k1 + 1
-        If (k1 .ge. nk) go to 200       ! try for stratiform clouds
+        if (k1 .ge. nk) go to 200       ! try for stratiform clouds
 
-!Try for another level of Sc.
-        Do k = k1, nk
-         If (cloud_type(k) .eq. 2  .OR.  cloud_type(k) .eq. 4  .OR.
-     1     cloud_type(k) .eq. 5  .OR.  cloud_type(k) .eq. 9) then
+!try for another level of sc.
+        do k = k1, nk
+         if (cloud_type(k) .eq. 2  .or.  cloud_type(k) .eq. 4  .or.
+     1     cloud_type(k) .eq. 5  .or.  cloud_type(k) .eq. 9) then
           kbase = k
-          Go to 110
-         End if
-        End do
+          go to 110
+         end if
+        end do
 
-!Make sure there is non-zero vv wherever there are clouds of any kind.
-!Also, return missing-data value for any non-bogussed vv value.
-200     Do k = 1, nk
-         If (cloud_type(k).ne.0 .AND. w(k).lt.vv_for_St) w(k) = vv_for_S
+!make sure there is non-zero vv wherever there are clouds of any kind.
+!also, return missing-data value for any non-bogussed vv value.
+200     do k = 1, nk
+         if (cloud_type(k).ne.0 .and. w(k).lt.vv_for_st) w(k) = vv_for_s
      1t
-         If (w(k) .eq. 0.) w(k) = 1E37
-        End do
+         if (w(k) .eq. 0.) w(k) = 1e37
+        end do
 
-        Return
-        End
+        return
+        end
 
 !-------------------------------------------------------------------
-        Real Function Parabolic_vv_profile (zbase, ztop, ratio, z)
-!The vertical velocity is zero at cloud top, peaks one third of the way up
+        real function parabolic_vv_profile (zbase, ztop, ratio, z)
+!the vertical velocity is zero at cloud top, peaks one third of the way up
 !from the base, and extends below the base by one third of the cloud depth.
 
-!  JUNE 2002 - No longer extending profile to below cloud base.
+!  june 2002 - no longer extending profile to below cloud base.
 
-        Implicit none
-        Real zbase, ztop, ratio, z
-        Real depth, vvmax, vvspan, halfspan, height_vvmax, x
+        implicit none
+        real zbase, ztop, ratio, z
+        real depth, vvmax, vvspan, halfspan, height_vvmax, x
 
         depth = ztop - zbase
-        If (depth .le. 0.) then
-         Parabolic_vv_profile = 0.
-         Return
-        End if
+        if (depth .le. 0.) then
+         parabolic_vv_profile = 0.
+         return
+        end if
 
         vvmax = ratio * depth
         vvspan = depth * 1.1    
@@ -199,30 +199,30 @@ cdis
         height_vvmax = ztop - halfspan
         x = -vvmax/(halfspan*halfspan)
 
-        Parabolic_vv_profile = x * (z-height_vvmax)**2 + vvmax
+        parabolic_vv_profile = x * (z-height_vvmax)**2 + vvmax
 
-        Return
-        End
+        return
+        end
 
 
-! The variant below is called from 'get_radar_deriv.f/radar_bogus_w'
+! the variant below is called from 'get_radar_deriv.f/radar_bogus_w'
 
 !-------------------------------------------------------------------
-        Real Function Parabolic_vv_profile1 (zbase, ztop, ratio, z)
-!The vertical velocity is zero at cloud top, peaks one third of the way up
+        real function parabolic_vv_profile1 (zbase, ztop, ratio, z)
+!the vertical velocity is zero at cloud top, peaks one third of the way up
 !from the base, and extends below the base by one third of the cloud depth.
 
-!  JUNE 2002 - No longer extending profile to below cloud base.
+!  june 2002 - no longer extending profile to below cloud base.
 
-        Implicit none
-        Real zbase, ztop, ratio, z
-        Real depth, vvmax, vvspan, halfspan, height_vvmax, x
+        implicit none
+        real zbase, ztop, ratio, z
+        real depth, vvmax, vvspan, halfspan, height_vvmax, x
 
         depth = ztop - zbase
-        If (depth .le. 0.) then
-         Parabolic_vv_profile1 = 0.
-         Return
-        End if
+        if (depth .le. 0.) then
+         parabolic_vv_profile1 = 0.
+         return
+        end if
 
         vvmax = ratio * depth
         vvspan = depth
@@ -230,7 +230,7 @@ cdis
         height_vvmax = ztop - halfspan
         x = -vvmax/(halfspan*halfspan)
 
-        Parabolic_vv_profile1 = x * (z-height_vvmax)**2 + vvmax
+        parabolic_vv_profile1 = x * (z-height_vvmax)**2 + vvmax
 
-        Return
-        End
+        return
+        end

@@ -1,7 +1,7 @@
         function a10_to_a9(a10_time,istatus)
 
-cdoc    Convert a10_time (yyMMddhhmm) to a9_time (yydddhhmm)
-!       Steve Albers 1998
+cdoc    convert a10_time (yymmddhhmm) to a9_time (yydddhhmm)
+!       steve albers 1998
 
         character*10 a10_time
         character*9 a10_to_a9, a8_to_a9, a9_time
@@ -20,8 +20,8 @@ cdoc    Convert a10_time (yyMMddhhmm) to a9_time (yydddhhmm)
 
         function yr_a10_to_a9(a10_time)
 
-cdoc    Convert a10_time (yyyyMMddhh) to a9_time (yydddhhmm)
-!       John Smart 2000
+cdoc    convert a10_time (yyyymmddhh) to a9_time (yydddhhmm)
+!       john smart 2000
 
         character*10 a10_time
         character*10 new_a10_time
@@ -38,8 +38,8 @@ cdoc    Convert a10_time (yyyyMMddhh) to a9_time (yydddhhmm)
 
         function a9_to_yr_a10_time(a9_time,istatus)
 
-cdoc    Convert a9_time (yydddhhmm) to a10_time (yyyyMMddhh)
-!       John Smart 2000
+cdoc    convert a9_time (yydddhhmm) to a10_time (yyyymmddhh)
+!       john smart 2000
 
         integer i4time_sys,ilen
         integer len
@@ -55,7 +55,7 @@ cdoc    Convert a9_time (yydddhhmm) to a10_time (yyyyMMddhh)
      1             anal_min,asctim_str,yr_jday,istatus)
 
         if(istatus.ne.1)then
-           print*,'Error returned from get_systime_all'
+           print*,'error returned from get_systime_all'
            return
         endif
 
@@ -71,8 +71,8 @@ cdoc    Convert a9_time (yydddhhmm) to a10_time (yyyyMMddhh)
 
         function a8_to_a9(a8_time)
 
-cdoc    Convert a8_time (yyMMddhh) to a9_time (yydddhhmm)
-!       Steve Albers 1998
+cdoc    convert a8_time (yymmddhh) to a9_time (yydddhhmm)
+!       steve albers 1998
 
         character*9 a8_to_a9
         character*9 a9
@@ -86,14 +86,14 @@ cdoc    Convert a8_time (yyMMddhh) to a9_time (yydddhhmm)
 1       format(i2,i2,i2,i2)
         go to 3
 
-2       write(6,*)' Input Error in a8_to_a9, a8_time = ',a8_time
+2       write(6,*)' input error in a8_to_a9, a8_time = ',a8_time
         stop     
 
 3       id = imon_a(imn)
 
         idays = id + idy
 
-!       Decide whether to add a day for leap year.
+!       decide whether to add a day for leap year.
         if(iyr .eq. (iyr / 4) * 4 )then
             if(imn .ge. 3)then
                 idays = idays + 1
@@ -119,19 +119,19 @@ c
 c
         function a9_to_a8(a9_time)
 c
-cdoc  Routine to convert LAPS 'yyjjjhhmm' time to 'yymmddhh' time.
-c     Corrected for Y2K.  P. Stamus, NOAA/FSL   Oct 1998
+cdoc  routine to convert laps 'yyjjjhhmm' time to 'yymmddhh' time.
+c     corrected for y2k.  p. stamus, noaa/fsl   oct 1998
 c
       character a9_time*9, a9_to_a8*8, a8*8
       integer imon_a(12), imon(12)
       data imon_a/0,31,59,90,120,151,181,212,243,273,304,334/
 c
-c..... First, read the LAPS time and get julian days.
+c..... first, read the laps time and get julian days.
 c
       read(a9_time,11) iyr, jjj, ihh, imin
  11   format(i2,i3,2i2)
 c
-c..... Check for leap year.
+c..... check for leap year.
 c
       do i=1,12
          imon(i) = imon_a(i)
@@ -142,7 +142,7 @@ c
          enddo !i
       endif
 c
-c..... Convert julian day to month, day.
+c..... convert julian day to month, day.
 c
       do i=12,1,-1
          kk = jjj - imon(i)
@@ -161,7 +161,7 @@ c
 c
  200  continue
 c
-c..... Now write out the time.
+c..... now write out the time.
 c
       write(a8,12) iyr, imm, idy, ihh
  12   format(4i2)
@@ -178,8 +178,8 @@ c
 
         function rsa13_to_a9(rsa13_time)
 
-cdoc    Convert rsa13_time (yyyyjjjhhmmss) to a9_time (yyjjjhhmm)
-!       Steve Albers 1998
+cdoc    convert rsa13_time (yyyyjjjhhmmss) to a9_time (yyjjjhhmm)
+!       steve albers 1998
 
         character*13 rsa13_time
         character*9 rsa13_to_a9
@@ -193,8 +193,8 @@ cdoc    Convert rsa13_time (yyyyjjjhhmmss) to a9_time (yyjjjhhmm)
 
         function a9_to_rsa13(a9_time)
 
-cdoc    Convert a9_time (yyjjjhhmm) to rsa13_time (yyyyjjjhhmmss)
-!       Steve Albers 1998
+cdoc    convert a9_time (yyjjjhhmm) to rsa13_time (yyyyjjjhhmmss)
+!       steve albers 1998
 
         character*9 a9_time
         character*13 a9_to_rsa13
@@ -217,20 +217,20 @@ c----------------------------------------------------------------------------
       function a7_to_a9_time(a7_time)
 
 c
-cdoc  Routine takes FA (CWB) model intial time, as described below, and converts
-cdoc  it to 9 character ascii format for laps. Routines below this 
-cdoc  (make_fa_valtime, a9_to_a7_time, make_fa_ext, and fname13_to_FA_filename)
-cdoc  take the FA model filename extension and convert it to a 4 character valid
+cdoc  routine takes fa (cwb) model intial time, as described below, and converts
+cdoc  it to 9 character ascii format for laps. routines below this 
+cdoc  (make_fa_valtime, a9_to_a7_time, make_fa_ext, and fname13_to_fa_filename)
+cdoc  take the fa model filename extension and convert it to a 4 character valid
 cdoc  time, or vice versa.
 c
 c===========================================================================
-cFA Model File description :
+cfa model file description :
 c===========================================================================
-c   nf9093000.12m : Sample data file 1.
-c                   9093000(YMMDDhh) => 1999/09/30/00z
+c   nf9093000.12m : sample data file 1.
+c                   9093000(ymmddhh) => 1999/09/30/00z
 c                   12m => 12hr fcst major-run(first cut)
-c   nf9093012.12m : Sample data file 2.
-c                   9093012(YMMDDhh) => 1999/09/30/12z
+c   nf9093012.12m : sample data file 2.
+c                   9093012(ymmddhh) => 1999/09/30/12z
 c===========================================================================
 
       implicit none
@@ -275,17 +275,17 @@ c
 c
 c ---------------------------------------------------------------------------
 c
-      function fname13_to_FA_filename(fname13,cmodel)
+      function fname13_to_fa_filename(fname13,cmodel)
 
       implicit none
 
       character*13 fname13
-      character*16 fname13_to_FA_filename
+      character*16 fname13_to_fa_filename
       character*10 fname10,a9_to_yr_a10_time
       character*9  a9_string
       character*4  a4_string
       character*(*) cmodel
-      character*3  c3_FA_ext,c3_ext
+      character*3  c3_fa_ext,c3_ext
       integer      lenc
       integer      istatus
 
@@ -295,15 +295,15 @@ c
 c     fname7=a9_to_a7_time(a9_string)
       fname10=a9_to_yr_a10_time(a9_string,istatus)
       if(istatus.ne.1)then
-         print*,'Error in conversion: a9_to_yr_a10_time'
+         print*,'error in conversion: a9_to_yr_a10_time'
          return
       endif
-      c3_ext=c3_FA_ext(a4_string)
+      c3_ext=c3_fa_ext(a4_string)
       call s_len(cmodel,lenc)
-      if(cmodel(1:lenc).eq.'CWB_20FA_LAMBERT_NF')then
-         fname13_to_FA_filename='nf'//fname10//'.'//c3_ext
-      elseif(cmodel(1:lenc).eq.'CWB_20FA_LAMBERT_RE')then
-         fname13_to_FA_filename='re'//fname10//'.'//c3_ext
+      if(cmodel(1:lenc).eq.'cwb_20fa_lambert_nf')then
+         fname13_to_fa_filename='nf'//fname10//'.'//c3_ext
+      elseif(cmodel(1:lenc).eq.'cwb_20fa_lambert_re')then
+         fname13_to_fa_filename='re'//fname10//'.'//c3_ext
       endif
 
       return
@@ -311,34 +311,34 @@ c     fname7=a9_to_a7_time(a9_string)
 
 c ---------------------------------------------------------------------------
 c
-      function c4_FA_valtime(c_FA_ext)
+      function c4_fa_valtime(c_fa_ext)
 
       implicit none
 
-      character*3 c_FA_ext
-      character*4 c4_FA_valtime
+      character*3 c_fa_ext
+      character*4 c4_fa_valtime
 
-      c4_FA_valtime='0000'
-      c4_FA_valtime(3:4)=c_FA_ext(1:2)
+      c4_fa_valtime='0000'
+      c4_fa_valtime(3:4)=c_fa_ext(1:2)
 
       return
       end
 
 c ---------------------------------------------------------------------------
 c
-      function c3_FA_ext(a4_string)
+      function c3_fa_ext(a4_string)
 
       implicit none
 
       integer number
       character*4 a4_string
-      character*3 c3_FA_ext
+      character*3 c3_fa_ext
 
       read(a4_string,'(i4)')number
       if(number.lt.10)then
-         c3_FA_ext='0'//a4_string(4:4)//'m'
+         c3_fa_ext='0'//a4_string(4:4)//'m'
       else
-         c3_FA_ext=a4_string(3:4)//'m'
+         c3_fa_ext=a4_string(3:4)//'m'
       endif
 
       return
@@ -367,8 +367,8 @@ c
        elseif(map_proj_name(1:len).eq.'rotlat')then
           c6_maproj='rotlat'
       else
-         print*,'Error: Unknown map projection: ',' map_proj =
-     1 ',map_proj_name(1:len),'.  Check the WRF namelist wrfsi.nl'
+         print*,'error: unknown map projection: ',' map_proj =
+     1 ',map_proj_name(1:len),'.  check the wrf namelist wrfsi.nl'
          return
       endif
 

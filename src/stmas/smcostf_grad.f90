@@ -1,262 +1,262 @@
-MODULE SMCOSTF_GRAD
-! CALCULATE THE PENALTY COST FUNCTION OF SMOOTH AND THE RELERTIVE GRADIENT
-! HISTORY: JANUARY 2008, SEPARATED FROME THE MODULE 'STMAS4D_CORE' BY ZHONGJIE HE
+module smcostf_grad
+! calculate the penalty cost function of smooth and the relertive gradient
+! history: january 2008, separated frome the module 'stmas4d_core' by zhongjie he
 
-  USE PRMTRS_STMAS
-  USE GENERALTOOLS, ONLY : G2ORDERIT
+   use prmtrs_stmas
+   use generaltools, only: g2orderit
 
-  PUBLIC       SMOTHCOST, SMOTHGRAD
+   public smothcost, smothgrad
 
 !**************************************************
-!COMMENT:
-!   THIS MODULE IS USED BY THE MODULE OF COSTFUN_GRAD TO CALCULATE THE PENALTY COST FUNCTION OF SMOOTH AND THE RELERTIVE GRADIENT
-!   SUBROUTINES:
-!      SMOTHCOST: CALCULATE SMOOTH PENALTY TERM OF COST FUNCTION.
-!      SMOTHGRAD: CALCULATE GRADIENTS OF SMOOTH TERM.
+!comment:
+!   this module is used by the module of costfun_grad to calculate the penalty cost function of smooth and the relertive gradient
+!   subroutines:
+!      smothcost: calculate smooth penalty term of cost function.
+!      smothgrad: calculate gradients of smooth term.
 !**************************************************
-CONTAINS
+contains
 
-SUBROUTINE SMOTHCOST
+   subroutine smothcost
 !*************************************************
-! SMOOTH PENALTY TERM OF COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! smooth penalty term of cost function
+! history: august 2007, coded by wei li.
 !
-!          MAY 2015 MODIFIED by YUANFU XIE
+!          may 2015 modified by yuanfu xie
 !          add a penalty parameter check
 !          and laplacian check: skip if small enough
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ,sm
-  double precision :: smx,smy,smz,smt
+      integer  :: i, j, k, t, s
+      real     :: z1, z2, z3, az, bz, cz, sm
+      double precision :: smx, smy, smz, smt
 ! --------------------
-! PENALTY TERM
+! penalty term
 
-  PRINT*,'SMOOTHING X: ',PENAL_X(1:NUMSTAT)
-  PRINT*,'SMOOTHING Y: ',PENAL_Y(1:NUMSTAT)
-  PRINT*,'SMOOTHING Z: ',PENAL_Z(1:NUMSTAT)
-  PRINT*,'SMOOTHING T: ',PENAL_T(1:NUMSTAT)
-  smx = 0.0d0
-  IF(NUMGRID(1).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_X(S) .GT. 0.0) THEN
-      DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-      DO J=1,NUMGRID(2)
-      DO I=2,NUMGRID(1)-1
-        ! COSTFUN=COSTFUN+PENAL_X(S)* &
-        sm = &
-          ((GRDANALS(I-1,J,K,T,S)-2*GRDANALS(I,J,K,T,S)+GRDANALS(I+1,J,K,T,S))/ &
-          (GRDSPAC(1)*GRDSPAC(1)))**2
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_X(S)*0.1) smx=smx+PENAL_X(S)*sm
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
+      print *, 'smoothing x: ', penal_x(1:numstat)
+      print *, 'smoothing y: ', penal_y(1:numstat)
+      print *, 'smoothing z: ', penal_z(1:numstat)
+      print *, 'smoothing t: ', penal_t(1:numstat)
+      smx = 0.0d0
+      if (numgrid(1) .ge. 3) then
+         do s = 1, numstat
+            if (penal_x(s) .gt. 0.0) then
+            do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+            do j = 1, numgrid(2)
+            do i = 2, numgrid(1) - 1
+               ! costfun=costfun+penal_x(s)* &
+               sm = &
+                  ((grdanals(i - 1, j, k, t, s) - 2*grdanals(i, j, k, t, s) + grdanals(i + 1, j, k, t, s))/ &
+                   (grdspac(1)*grdspac(1)))**2
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_x(s)*0.1) smx = smx + penal_x(s)*sm
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
 
-  smy = 0.0d0
-  IF(NUMGRID(2).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_Y(S) .GT. 0.0) THEN
-      DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-      DO J=2,NUMGRID(2)-1
-      DO I=1,NUMGRID(1)
-        ! COSTFUN=COSTFUN+PENAL_Y(S)* &
-        sm = &
-          ((GRDANALS(I,J-1,K,T,S)-2*GRDANALS(I,J,K,T,S)+GRDANALS(I,J+1,K,T,S))/ &
-          (GRDSPAC(2)*GRDSPAC(2)))**2
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_Y(S)*0.1) smy=smy+PENAL_Y(S)*sm
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
+      smy = 0.0d0
+      if (numgrid(2) .ge. 3) then
+         do s = 1, numstat
+            if (penal_y(s) .gt. 0.0) then
+            do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+            do j = 2, numgrid(2) - 1
+            do i = 1, numgrid(1)
+               ! costfun=costfun+penal_y(s)* &
+               sm = &
+                  ((grdanals(i, j - 1, k, t, s) - 2*grdanals(i, j, k, t, s) + grdanals(i, j + 1, k, t, s))/ &
+                   (grdspac(2)*grdspac(2)))**2
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_y(s)*0.1) smy = smy + penal_y(s)*sm
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
 
-  smz = 0.0d0
-  IF(NUMGRID(3).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_Z(S) .GT. 0.0) THEN
-      DO T=1,NUMGRID(4)
-      DO K=2,NUMGRID(3)-1
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
-        IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN       ! FOR SIGMA AND HEIGHT COORDINATE
-          Z1=ZZZ(I,J,K-1,T)
-          Z2=ZZZ(I,J,K  ,T)
-          Z3=ZZZ(I,J,K+1,T)
-        ELSEIF(IFPCDNT.EQ.1)THEN                     ! FOR PRESSURE COORDINATE
-          Z1=PPP(K-1)
-          Z2=PPP(K  )
-          Z3=PPP(K+1)
-        ENDIF
+      smz = 0.0d0
+      if (numgrid(3) .ge. 3) then
+         do s = 1, numstat
+            if (penal_z(s) .gt. 0.0) then
+            do t = 1, numgrid(4)
+            do k = 2, numgrid(3) - 1
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
+               if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then       ! for sigma and height coordinate
+                  z1 = zzz(i, j, k - 1, t)
+                  z2 = zzz(i, j, k, t)
+                  z3 = zzz(i, j, k + 1, t)
+               elseif (ifpcdnt .eq. 1) then                     ! for pressure coordinate
+                  z1 = ppp(k - 1)
+                  z2 = ppp(k)
+                  z3 = ppp(k + 1)
+               end if
 
-        CALL G2ORDERIT(Z1,Z2,Z3,AZ,BZ,CZ)
+               call g2orderit(z1, z2, z3, az, bz, cz)
 
-        AZ=AZ*(Z2-Z1)*(Z3-Z2)
-        BZ=BZ*(Z2-Z1)*(Z3-Z2)
-        CZ=CZ*(Z2-Z1)*(Z3-Z2)
-        ! COSTFUN=COSTFUN+PENAL_Z(S)* &
-        sm = &
-          (AZ*GRDANALS(I,J,K-1,T,S)+BZ*GRDANALS(I,J,K,T,S)+CZ*GRDANALS(I,J,K+1,T,S))**2
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_Z(S)*0.1) smz=smz+PENAL_Z(S)*sm
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
+               az = az*(z2 - z1)*(z3 - z2)
+               bz = bz*(z2 - z1)*(z3 - z2)
+               cz = cz*(z2 - z1)*(z3 - z2)
+               ! costfun=costfun+penal_z(s)* &
+               sm = &
+                  (az*grdanals(i, j, k - 1, t, s) + bz*grdanals(i, j, k, t, s) + cz*grdanals(i, j, k + 1, t, s))**2
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_z(s)*0.1) smz = smz + penal_z(s)*sm
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
 
-  smt = 0.0d0
-  IF(NUMGRID(4).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_T(S) .GT. 0.0) THEN
-      DO T=2,NUMGRID(4)-1
-      DO K=1,NUMGRID(3)
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
-        ! COSTFUN=COSTFUN+PENAL_T(S)* &
-        sm = &
-          ((GRDANALS(I,J,K,T-1,S)-2*GRDANALS(I,J,K,T,S)+GRDANALS(I,J,K,T+1,S))/ &
-          (GRDSPAC(4)*GRDSPAC(4)))**2
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_T(S)*0.1) smt=smt+PENAL_T(S)*sm
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
+      smt = 0.0d0
+      if (numgrid(4) .ge. 3) then
+         do s = 1, numstat
+            if (penal_t(s) .gt. 0.0) then
+            do t = 2, numgrid(4) - 1
+            do k = 1, numgrid(3)
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
+               ! costfun=costfun+penal_t(s)* &
+               sm = &
+                  ((grdanals(i, j, k, t - 1, s) - 2*grdanals(i, j, k, t, s) + grdanals(i, j, k, t + 1, s))/ &
+                   (grdspac(4)*grdspac(4)))**2
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_t(s)*0.1) smt = smt + penal_t(s)*sm
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
 
-  COSTFUN = COSTFUN+smx+smy+smz+smt
+      costfun = costfun + smx + smy + smz + smt
 
-  RETURN
-END SUBROUTINE SMOTHCOST
+      return
+   end subroutine smothcost
 
-SUBROUTINE SMOTHGRAD
+   subroutine smothgrad
 !*************************************************
-! SMOOTH PENALTY TERM OF GRADIENT
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! smooth penalty term of gradient
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: SM
+      integer  :: i, j, k, t, s
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: sm
 ! --------------------
-! PENALTY TERM
-  IF(NUMGRID(1).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_X(S) .GT. 0.0) THEN
-      DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-      DO J=1,NUMGRID(2)
-      DO I=2,NUMGRID(1)-1
-        SM=(GRDANALS(I-1,J,K,T,S)-2.0*GRDANALS(I,J,K,T,S)+GRDANALS(I+1,J,K,T,S))/ &
-          (GRDSPAC(1)*GRDSPAC(1))
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_X(S)*0.1) THEN
-          GRADINT(I-1,J,K,T,S)=GRADINT(I-1,J,K,T,S)+2.0*PENAL_X(S)/(GRDSPAC(1)*GRDSPAC(1))*SM
-          GRADINT(I  ,J,K,T,S)=GRADINT(I  ,J,K,T,S)+2.0*PENAL_X(S)/(GRDSPAC(1)*GRDSPAC(1))*(-2.0)*SM
-          GRADINT(I+1,J,K,T,S)=GRADINT(I+1,J,K,T,S)+2.0*PENAL_X(S)/(GRDSPAC(1)*GRDSPAC(1))*SM
-        ENDIF
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
-  IF(NUMGRID(2).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_Y(S) .GT. 0.0) THEN
-      DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-      DO I=1,NUMGRID(1)
-      DO J=2,NUMGRID(2)-1
-        SM=(GRDANALS(I,J-1,K,T,S)-2.0*GRDANALS(I,J,K,T,S)+GRDANALS(I,J+1,K,T,S))/ &
-          (GRDSPAC(2)*GRDSPAC(2))
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_Y(S)*0.1) THEN
-          GRADINT(I,J-1,K,T,S)=GRADINT(I,J-1,K,T,S)+2.0*PENAL_Y(S)/(GRDSPAC(2)*GRDSPAC(2))*SM
-          GRADINT(I,J  ,K,T,S)=GRADINT(I,J  ,K,T,S)+2.0*PENAL_Y(S)/(GRDSPAC(2)*GRDSPAC(2))*(-2.0)*SM
-          GRADINT(I,J+1,K,T,S)=GRADINT(I,J+1,K,T,S)+2.0*PENAL_Y(S)/(GRDSPAC(2)*GRDSPAC(2))*SM
-        ENDIF
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
-  IF(NUMGRID(3).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_Z(S) .GT. 0.0) THEN
-      DO T=1,NUMGRID(4)
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
-      DO K=2,NUMGRID(3)-1
-        IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN       ! FOR SIGMA AND HEIGHT COORDINATE
-          Z1=ZZZ(I,J,K-1,T)
-          Z2=ZZZ(I,J,K  ,T)
-          Z3=ZZZ(I,J,K+1,T)
-        ELSEIF(IFPCDNT.EQ.1)THEN                     ! FOR PRESSUR COORDINATE
-          Z1=PPP(K-1)
-          Z2=PPP(K  )
-          Z3=PPP(K+1)
-        ENDIF
-        CALL G2ORDERIT(Z1,Z2,Z3,AZ,BZ,CZ)
-        AZ=AZ*(Z2-Z1)*(Z3-Z2)
-        BZ=BZ*(Z2-Z1)*(Z3-Z2)
-        CZ=CZ*(Z2-Z1)*(Z3-Z2)
-        SM=AZ*GRDANALS(I,J,K-1,T,S)+BZ*GRDANALS(I,J,K,T,S)+CZ*GRDANALS(I,J,K+1,T,S)
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_Z(S)*0.1) THEN
-          GRADINT(I,J,K-1,T,S)=GRADINT(I,J,K-1,T,S)+2.0*PENAL_Z(S)*AZ*SM
-          GRADINT(I,J,K  ,T,S)=GRADINT(I,J,K  ,T,S)+2.0*PENAL_Z(S)*BZ*SM
-          GRADINT(I,J,K+1,T,S)=GRADINT(I,J,K+1,T,S)+2.0*PENAL_Z(S)*CZ*SM
-        ENDIF
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
-  IF(NUMGRID(4).GE.3)THEN
-    DO S=1,NUMSTAT
-      IF (PENAL_T(S) .GT. 0.0) THEN
-      DO K=1,NUMGRID(3)
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
-      DO T=2,NUMGRID(4)-1
-        SM=(GRDANALS(I,J,K,T-1,S)-2.0*GRDANALS(I,J,K,T,S)+GRDANALS(I,J,K,T+1,S))/ &
-          (GRDSPAC(4)*GRDSPAC(4))
-        ! YUANFU added a check to skip to small Laplacian: May 2015
-        IF (sm .GT. PENAL_T(S)*0.1) THEN
-          GRADINT(I,J,K,T-1,S)=GRADINT(I,J,K,T-1,S)+2.0*PENAL_T(S)/(GRDSPAC(4)*GRDSPAC(4))*SM
-          GRADINT(I,J,K,T  ,S)=GRADINT(I,J,K,T  ,S)+2.0*PENAL_T(S)/(GRDSPAC(4)*GRDSPAC(4))*(-2.0)*SM
-          GRADINT(I,J,K,T+1,S)=GRADINT(I,J,K,T+1,S)+2.0*PENAL_T(S)/(GRDSPAC(4)*GRDSPAC(4))*SM
-        ENDIF
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDIF
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE SMOTHGRAD
+! penalty term
+      if (numgrid(1) .ge. 3) then
+         do s = 1, numstat
+            if (penal_x(s) .gt. 0.0) then
+            do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+            do j = 1, numgrid(2)
+            do i = 2, numgrid(1) - 1
+               sm = (grdanals(i - 1, j, k, t, s) - 2.0*grdanals(i, j, k, t, s) + grdanals(i + 1, j, k, t, s))/ &
+                    (grdspac(1)*grdspac(1))
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_x(s)*0.1) then
+                  gradint(i - 1, j, k, t, s) = gradint(i - 1, j, k, t, s) + 2.0*penal_x(s)/(grdspac(1)*grdspac(1))*sm
+                  gradint(i, j, k, t, s) = gradint(i, j, k, t, s) + 2.0*penal_x(s)/(grdspac(1)*grdspac(1))*(-2.0)*sm
+                  gradint(i + 1, j, k, t, s) = gradint(i + 1, j, k, t, s) + 2.0*penal_x(s)/(grdspac(1)*grdspac(1))*sm
+               end if
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
+      if (numgrid(2) .ge. 3) then
+         do s = 1, numstat
+            if (penal_y(s) .gt. 0.0) then
+            do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+            do i = 1, numgrid(1)
+            do j = 2, numgrid(2) - 1
+               sm = (grdanals(i, j - 1, k, t, s) - 2.0*grdanals(i, j, k, t, s) + grdanals(i, j + 1, k, t, s))/ &
+                    (grdspac(2)*grdspac(2))
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_y(s)*0.1) then
+                  gradint(i, j - 1, k, t, s) = gradint(i, j - 1, k, t, s) + 2.0*penal_y(s)/(grdspac(2)*grdspac(2))*sm
+                  gradint(i, j, k, t, s) = gradint(i, j, k, t, s) + 2.0*penal_y(s)/(grdspac(2)*grdspac(2))*(-2.0)*sm
+                  gradint(i, j + 1, k, t, s) = gradint(i, j + 1, k, t, s) + 2.0*penal_y(s)/(grdspac(2)*grdspac(2))*sm
+               end if
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
+      if (numgrid(3) .ge. 3) then
+         do s = 1, numstat
+            if (penal_z(s) .gt. 0.0) then
+            do t = 1, numgrid(4)
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
+            do k = 2, numgrid(3) - 1
+               if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then       ! for sigma and height coordinate
+                  z1 = zzz(i, j, k - 1, t)
+                  z2 = zzz(i, j, k, t)
+                  z3 = zzz(i, j, k + 1, t)
+               elseif (ifpcdnt .eq. 1) then                     ! for pressur coordinate
+                  z1 = ppp(k - 1)
+                  z2 = ppp(k)
+                  z3 = ppp(k + 1)
+               end if
+               call g2orderit(z1, z2, z3, az, bz, cz)
+               az = az*(z2 - z1)*(z3 - z2)
+               bz = bz*(z2 - z1)*(z3 - z2)
+               cz = cz*(z2 - z1)*(z3 - z2)
+               sm = az*grdanals(i, j, k - 1, t, s) + bz*grdanals(i, j, k, t, s) + cz*grdanals(i, j, k + 1, t, s)
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_z(s)*0.1) then
+                  gradint(i, j, k - 1, t, s) = gradint(i, j, k - 1, t, s) + 2.0*penal_z(s)*az*sm
+                  gradint(i, j, k, t, s) = gradint(i, j, k, t, s) + 2.0*penal_z(s)*bz*sm
+                  gradint(i, j, k + 1, t, s) = gradint(i, j, k + 1, t, s) + 2.0*penal_z(s)*cz*sm
+               end if
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
+      if (numgrid(4) .ge. 3) then
+         do s = 1, numstat
+            if (penal_t(s) .gt. 0.0) then
+            do k = 1, numgrid(3)
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
+            do t = 2, numgrid(4) - 1
+               sm = (grdanals(i, j, k, t - 1, s) - 2.0*grdanals(i, j, k, t, s) + grdanals(i, j, k, t + 1, s))/ &
+                    (grdspac(4)*grdspac(4))
+               ! yuanfu added a check to skip to small laplacian: may 2015
+               if (sm .gt. penal_t(s)*0.1) then
+                  gradint(i, j, k, t - 1, s) = gradint(i, j, k, t - 1, s) + 2.0*penal_t(s)/(grdspac(4)*grdspac(4))*sm
+                  gradint(i, j, k, t, s) = gradint(i, j, k, t, s) + 2.0*penal_t(s)/(grdspac(4)*grdspac(4))*(-2.0)*sm
+                  gradint(i, j, k, t + 1, s) = gradint(i, j, k, t + 1, s) + 2.0*penal_t(s)/(grdspac(4)*grdspac(4))*sm
+               end if
+            end do
+            end do
+            end do
+            end do
+            end if
+         end do
+      end if
+      return
+   end subroutine smothgrad
 
-END MODULE SMCOSTF_GRAD
+end module smcostf_grad

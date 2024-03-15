@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -42,7 +42,7 @@ cdis
 cdis
 cdis
 cdis
-c FORTRAN 90 CONSTRUCTS USED OVER F77 CODE
+c fortran 90 constructs used over f77 code
 
       subroutine variational (
      1     sh,                  ! specific humidity g/g
@@ -73,27 +73,27 @@ c FORTRAN 90 CONSTRUCTS USED OVER F77 CODE
      1     covar_switch,path2covar)
 
  
-c   By inclusion of the goes_sbn data into the laps moisture analysis, an
+c   by inclusion of the goes_sbn data into the laps moisture analysis, an
 c   improvement in upper level moisture (above 500 mb) can be anticipated to be
-c   about 70%.  Current research is pursuing using the satellite data in other
+c   about 70%.  current research is pursuing using the satellite data in other
 c   levels and other variables such as temperature. 
 c
-c   This routine interfaces GOES 8/10/11 satellite broadcast network data (and
-c   local GVAR data) to the LAPS moisture analysis.  In 1999, this routine
-c   was modified from an earlier version that used the University of
-c   Wisconsin -- Madison's forward model to a new model developed at
-c   NESDIS.  OPTRAN (optical transmittance) forward model was developed by
-c   Thomas Kleespies (NESDIS) and questions about this model should be
-c   directed to him.  Forecast Systems Laboratory does not in any way
-c   guarantee the validity of OPTRAN and distributes this software on an
-c   as-is basis.  MOREOVER, FSL HAS PERMISSION TO DISTRIBUTE OPTRAN AS PART
-c   OF LAPS TO FEDERAL AGENCIES.  NON-FEDERAL ENTITIES NEED TO INQUIRE WITH
-c   NESDIS TO ESTABLISH THEIR RIGHTS AND OBLIGATIONS WITH REGARD TO OPTRAN.
+c   this routine interfaces goes 8/10/11 satellite broadcast network data (and
+c   local gvar data) to the laps moisture analysis.  in 1999, this routine
+c   was modified from an earlier version that used the university of
+c   wisconsin -- madison's forward model to a new model developed at
+c   nesdis.  optran (optical transmittance) forward model was developed by
+c   thomas kleespies (nesdis) and questions about this model should be
+c   directed to him.  forecast systems laboratory does not in any way
+c   guarantee the validity of optran and distributes this software on an
+c   as-is basis.  moreover, fsl has permission to distribute optran as part
+c   of laps to federal agencies.  non-federal entities need to inquire with
+c   nesdis to establish their rights and obligations with regard to optran.
 c   
-c   The version of OPTRAN with which this software is used, has been
-c   modified by FSL to include both sounder and imager channels for a
-c   particular satellite in one call to the routine.  Thus a user only need
-c   to setup OPTRAN for a particular satellite.  After doing such, either
+c   the version of optran with which this software is used, has been
+c   modified by fsl to include both sounder and imager channels for a
+c   particular satellite in one call to the routine.  thus a user only need
+c   to setup optran for a particular satellite.  after doing such, either
 c   the imager or sounding instrument can be used with the software without
 c   further recompilation. 
 
@@ -213,11 +213,11 @@ c     powell specific arrays
       
 c     optran specific arrays for powell function calling
       
-      real btemp_ob (Nchan)
+      real btemp_ob (nchan)
       integer cost_kk
-      real cost_p(Nlevel)
-      real cost_t_l(Nlevel)
-      real cost_mr_l(Nlevel)
+      real cost_p(nlevel)
+      real cost_t_l(nlevel)
+      real cost_mr_l(nlevel)
       real cost_tskin
       real cost_psfc
       integer cost_julian_day
@@ -286,20 +286,20 @@ c     common block for gps
       real cost_gps_data
       real cost_gps_weight
 
-c     SND common block
+c     snd common block
       common /cost_snd/cost_snd_data, cost_snd_wt,cost_snd_istatus
       real cost_snd_data(500)
       real cost_snd_wt(500)
       integer cost_snd_istatus
 
-c     Science common block
+c     science common block
       common/cost_science/cost_comment_switch
       integer cost_comment_switch
 
-c     Display common block
+c     display common block
       common /cost_display/ display_btemps
       real, dimension(1000) :: display_btemps
-      real, dimension(Nchan,ii,jj) :: field_display_btemps
+      real, dimension(nchan,ii,jj) :: field_display_btemps
       
 c     analysis of the factor field
       integer pn
@@ -345,7 +345,7 @@ c     read covariance data ----set for nam model -------------------------------
       if (covar_switch .ne. 0 ) then
 c     allocate temp covar arrays
       allocate (covar(19,19,93,65),covar_temp(19,19,93,65))
-         level7 = 7  !Okyeon needs to determine 700 level
+         level7 = 7  !okyeon needs to determine 700 level
          level5 = 11  !need to determine 500 level
          covar_s = covar_switch
          call s_len(path2covar,len)
@@ -356,7 +356,7 @@ c     allocate temp covar arrays
          close (26)
 c         write (6,*)((((covar(k,l,i,j),k = 1,19),l=1,19),i=1,93),j=1,65)
 
-C     INVERT COVAR since covar is direct from NAM and NOT laps.
+c     invert covar since covar is direct from nam and not laps.
 
 c     use f90 construct to make arrays identical
          covar_temp = covar
@@ -482,12 +482,12 @@ c     end read covariance data -----------------------------------------------
 
 
 c     code change to handle situation where direct radiance assimilation
-c     is not desired.  Note here that ngoes comes into this routine 
-c     assigned as zero (0).  This test takes this situation and assigns
+c     is not desired.  note here that ngoes comes into this routine 
+c     assigned as zero (0).  this test takes this situation and assigns
 c     cost_rad_istatus and goes_good to zero to insure that it not be used
 c     however, it was discovered that this code still needs to compute 
-c     synthetic radiances and to avoid a divide by zero, the FAKE assignment
-c     of ngoes to goes 12 is made here.  This fake assignment should be 
+c     synthetic radiances and to avoid a divide by zero, the fake assignment
+c     of ngoes to goes 12 is made here.  this fake assignment should be 
 c     goes 9 for asia if this is desired to run in that mode.  
       if (ngoes == 0) then
          cost_rad_istatus = 0
@@ -497,12 +497,12 @@ c                     adjustment
       endif
 
 
-      if (istatus_gps .eq. 1) write (6,*) 'GPS usage is a GO'
+      if (istatus_gps .eq. 1) write (6,*) 'gps usage is a go'
 
 c     check sat_skip for zero, if zero skip routine
       
       if (sat_skip.le.0) then
-         write (6,*) 'sat_skip parameter <=0, skipping POWELL entirely'
+         write (6,*) 'sat_skip parameter <=0, skipping powell entirely'
          return
       endif
       
@@ -510,7 +510,7 @@ c     assign sounder/imager parameter for powell method
       
       cost_isnd = isnd
       
-c     assign goes number for common block to make avail where needed for OPTRAN
+c     assign goes number for common block to make avail where needed for optran
       
       goes_number = ngoes
       if (goes_number == 8) sat_index = 1 ! goes east
@@ -548,11 +548,11 @@ c     call get_laps_config(grid_name,istatus)
          enddo
       enddo
       
-c     get satellite IMAGE radiance data for the laps grid
+c     get satellite image radiance data for the laps grid
       
       if (isnd .eq. 0) then     ! seek imager data
          
-         write(6,*) 'Attemping moisture analysis with imager'
+         write(6,*) 'attemping moisture analysis with imager'
          
          call get_directory('lvd',path,len)
          
@@ -580,14 +580,14 @@ c     install new changes for revised satellite path
          
          if (istatus.ne.1) then
             write(6,*) 'variational.f::
-     1           Failure on call to get_latest_file'
+     1           failure on call to get_latest_file'
             return
          endif
          
-         write (6,*) 'Attempting: ', filename1
+         write (6,*) 'attempting: ', filename1
 c     convert filename to i4time_sat
          call i4time_fname_lp (filename1,i4time_sat,istatus)
-         write (6,*) 'Getting satellite radiances (lvd)'
+         write (6,*) 'getting satellite radiances (lvd)'
          call read_lvd_3_4_5 (path,i4time_sat,ch3,ch4,ch5,
      1        ii,jj,kk,ngoes,istatus)
          
@@ -602,8 +602,8 @@ c     convert filename to i4time_sat
                if(ch3(i,j).le.0.0 .or. ch4(i,j).le.0.0 .or.
      1              ch5(i,j).le.0.0) then
                   istatus = 0
-c                  write(6,*) 'Zero value radiance discovered'
-c                  write(6,*) 'IMAGER DATA'
+c                  write(6,*) 'zero value radiance discovered'
+c                  write(6,*) 'imager data'
 c                  write(6,*) '   aborting satellite moisture'
 c                  write(6,*) '   data untrustworthy'
                   goes_good  = 0
@@ -614,15 +614,15 @@ c                  write(6,*) '   data untrustworthy'
          
          write(6,*) ' '
          write(6,*) ' '
-         write(6,*) 'Using LVD data from: ', filename1
+         write(6,*) 'using lvd data from: ', filename1
          write(6,*) ' '
          write(6,*) ' '
          
-      endif                     ! get IMAGER data only
+      endif                     ! get imager data only
       
 c     acquire sounder data
       
-      if(isnd.eq.1) then        ! get SOUNDER data only
+      if(isnd.eq.1) then        ! get sounder data only
          
          call rsr (i4time, rads, ii,jj,18,ngoes, istatus)
          if (istatus .ne. 1) then
@@ -631,7 +631,7 @@ c     acquire sounder data
             write(6,*) 'goes_good is ',goes_good
          endif
          
-      endif                     ! only get SOUNDER data
+      endif                     ! only get sounder data
       
 c     --------- at this point, the existance of satellite data is established,
 c     ---------  should be cost effective to continue.
@@ -648,7 +648,7 @@ c     fill tskin with laps sfc temp from structure
 
 c     get laps surface pressure now replaced with value from structure sfc_data
       
-      print*, 'Transferring surface pressure from structure'
+      print*, 'transferring surface pressure from structure'
 
       psfc = sfc_data%sfc_pres
 
@@ -665,8 +665,8 @@ c     setup cloud test (cloud array passed in)
          enddo
       enddo
       
-      write (6,*) 'Running GOES',ngoes,' forward model OPTRAN90 vsn'
-      write (6,*) 'Modify tskin and psfc for cloud top if present'
+      write (6,*) 'running goes',ngoes,' forward model optran90 vsn'
+      write (6,*) 'modify tskin and psfc for cloud top if present'
       
       do j = 1,jj
          do i = 1,ii
@@ -703,7 +703,7 @@ c     assign 0.0 moisture where there is missing data.
                   if(istatus .eq.1) then
                      mr_l(k,i,j) = mr(i,j,k)
                   else
-                     Write(6,*) 'trap sh2ml, i,j,k,mr ',i,j,k,mr(i,j,k)
+                     write(6,*) 'trap sh2ml, i,j,k,mr ',i,j,k,mr(i,j,k)
                      write(6,*) 'assigning mr to zero'
                      mr_l(k,i,j) = 0.0
                   endif
@@ -732,7 +732,7 @@ c     here use goes 8 for reference (goes 10 not avail)
      1              rads(i,j,10).le. 0.0) then
                   ch3(i,j) = rmd
                   if (rads(i,j,10).le.0.0) then
-                     write(6,*) 'Zero in ch10 ',rads(i,j,10), i,j
+                     write(6,*) 'zero in ch10 ',rads(i,j,10), i,j
                   endif
                else
                   ch3(i,j) = bias_correction (britgo(rads(i,j,10),10),
@@ -742,7 +742,7 @@ c     here use goes 8 for reference (goes 10 not avail)
      1              rads(i,j,8).le.0.0) then
                   ch4(i,j) = rmd
                   if (rads(i,j,8).le.0.0) then
-                     write(6,*) 'Zero in ch8 ',rads(i,j,8), i,j
+                     write(6,*) 'zero in ch8 ',rads(i,j,8), i,j
                   endif
                else
                   ch4(i,j) = bias_correction (britgo(rads(i,j,8),8),
@@ -752,7 +752,7 @@ c     here use goes 8 for reference (goes 10 not avail)
      1              rads(i,j,7).le.0.0) then
                   ch5(i,j) = rmd
                   if (rads(i,j,7).le.0.0) then
-                     write(6,*) 'Zero in ch7 ',rads(i,j,7), i,j
+                     write(6,*) 'zero in ch7 ',rads(i,j,7), i,j
                   endif
                else
                   ch5(i,j) = bias_correction (britgo(rads(i,j,7),7),
@@ -781,7 +781,7 @@ c     model
                go to 864        !skip ofm computation here
             endif
             
-c     insert call for OPTRAN for initial comparison with gimtau.f
+c     insert call for optran for initial comparison with gimtau.f
 c     note that optran is configured to return both sounder and imager
 c     channels used in this algorithm.
             
@@ -796,7 +796,7 @@ c     channels used in this algorithm.
      1           sfc_data(i,j)%secsola
      1           )
             
-            if(isnd.eq.0) then  ! IMAGER computation
+            if(isnd.eq.0) then  ! imager computation
                
                do kan = 1,3
                   
@@ -804,9 +804,9 @@ c     channels used in this algorithm.
                   
                enddo            !kan
                
-            endif               ! end IMAGER computation
+            endif               ! end imager computation
             
-            if(isnd.eq.1) then  ! SOUNDER computation
+            if(isnd.eq.1) then  ! sounder computation
                
                do kan = 1,7
                   
@@ -814,7 +814,7 @@ c     channels used in this algorithm.
                   
                enddo            ! kan
                
-            endif               ! end SOUNDER computation
+            endif               ! end sounder computation
  864        continue
 c            if (rads(i,j,1) .ne. mdf .and.
 c     1           abs(sfc_data(i,j)%sfc_temp - tbest(8)).lt. 5.0) then 
@@ -830,10 +830,10 @@ c            endif
 
  865  continue
       
-c     Execute powell method correction of layer humidity in clear areas
+c     execute powell method correction of layer humidity in clear areas
 
 c     at this point in the code, both the forward model and measured radiances
-c     are in arrays.  They can be printed out at this point as optional files
+c     are in arrays.  they can be printed out at this point as optional files
 
 c     compare rads with new variable of modeled radiances for compare.
 c     channels
@@ -899,13 +899,13 @@ c     new check for viable radiance location
             if(cost_rad_istatus.eq.1 .and. 
      1           abs(ch4(i,j)-btemp(i,j,2)).lt.5.) then
                if(print_switch .eq. 1) then
-                  write(6,*) 'Radiance passed clear chan test',
+                  write(6,*) 'radiance passed clear chan test',
      1                 abs(ch4(i,j)-btemp(i,j,2))
                endif
                continue         ! pass clear channel test
             elseif (cost_rad_istatus .eq. 1) then
                if (print_switch .eq.1) then
-                  write (6,*)'Radiance failed clear chan test',
+                  write (6,*)'radiance failed clear chan test',
      1                 abs(ch4(i,j)-btemp(i,j,2)), cost_rad_istatus
                endif
                cost_rad_istatus = 0 ! failing clear channel test
@@ -915,15 +915,15 @@ c     radiance data quality known, continue with normal run
             
             if (cost_rad_istatus.eq.1) then
                if (print_switch .eq. 1) then
-                  write(6,32) ' Observed=',ch3(i,j),' Modeled='
-     1                 ,btemp(i,j,1),' Diff=',(ch3(i,j)-btemp(i,j,1))
+                  write(6,32) ' observed=',ch3(i,j),' modeled='
+     1                 ,btemp(i,j,1),' diff=',(ch3(i,j)-btemp(i,j,1))
  32               format(1x,a10,f8.3,a9,f8.3,a6,f8.3)
                   write(6,*) ch4(i,j),btemp(i,j,2)
                   write(6,*) ch5(i,j), btemp(i,j,3)
                endif
             else
                if(print_switch .eq. 1 )then
-                  write(6,*)'Radiance data not included in variational'
+                  write(6,*)'radiance data not included in variational'
                endif
             endif
             
@@ -938,8 +938,8 @@ c     initialize cost function vector for scaling output
             
 c     copy imager data into radiance arrays
             
-            if(isnd.eq.0 .and. cost_rad_istatus.eq.1) then ! USE 
-                                !AS IMAGER DATA, btemps
+            if(isnd.eq.0 .and. cost_rad_istatus.eq.1) then ! use 
+                                !as imager data, btemps
                btemp_ob(1) = ch3(i,j)
                btemp_ob(2) = ch4(i,j)
                btemp_ob(3) = ch5(i,j)
@@ -947,8 +947,8 @@ c     copy imager data into radiance arrays
             
 c     copy sounder data into radiance arrays
             
-            if(isnd.eq.1 .and. cost_rad_istatus.eq.1) then ! USE
-                                ! AS SOUNDER DATA, btemps
+            if(isnd.eq.1 .and. cost_rad_istatus.eq.1) then ! use
+                                ! as sounder data, btemps
                btemp_ob(1) = ch3(i,j)
                btemp_ob(2) = ch4(i,j)
                btemp_ob(3) = ch5(i,j)
@@ -977,7 +977,7 @@ c     check for bad data in btemp_ob
 c     fill powell common block with profile data for routine variational
 c     this code executed for all types of data
 
-c     OKYEON COVARIANCE TESTING
+c     okyeon covariance testing
 
             if (covar_switch.ne.0)then
                do k = 1,3
@@ -1024,18 +1024,18 @@ c     cost function data for gvap (now include gradients in x and y instead of a
                cost_w1_y = (gw1(i,j+1)-gw1(i,j-1))*0.5
                cost_w2_y = (gw2(i,j+1)-gw2(i,j-1))*0.5
                cost_w3_y = (gw3(i,j+1)-gw3(i,j-1))*0.5
-               IF (gw1(i+1,j)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw2(i+1,j)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw3(i+1,j)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw1(i-1,j)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw2(i-1,j)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw3(i-1,j)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw1(i,j+1)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw2(i,j+1)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw3(i,j+1)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw1(i,j-1)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw2(i,j-1)==MDF) cost_gvap_istatus = 0 ! skip
-               IF (gw3(i,j-1)==MDF) cost_gvap_istatus = 0 ! skip
+               if (gw1(i+1,j)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw2(i+1,j)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw3(i+1,j)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw1(i-1,j)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw2(i-1,j)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw3(i-1,j)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw1(i,j+1)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw2(i,j+1)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw3(i,j+1)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw1(i,j-1)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw2(i,j-1)==mdf) cost_gvap_istatus = 0 ! skip
+               if (gw3(i,j-1)==mdf) cost_gvap_istatus = 0 ! skip
             else
                cost_w1_x = 0.0
                cost_w2_x = 0.0
@@ -1069,7 +1069,7 @@ c     cost function data for gps
             cost_gps_weight = gps_w (i,j)
             cost_gps_istatus = istatus_gps
 
-c     cost function data for SND, fill with mixing ratio
+c     cost function data for snd, fill with mixing ratio
 
             do k = 1,kk
 
@@ -1102,7 +1102,7 @@ c     that the func will never be non-zero in real search.
             if (fret.eq.0.0) then ! assume that func set to no
                                 !convergence
                if (print_switch .eq. 1) then
-                  write(6,*) ' FRET = 0, assume no converge, assign 1.0'
+                  write(6,*) ' fret = 0, assume no converge, assign 1.0'
                endif
              
                do ijk = 1,3
@@ -1113,12 +1113,12 @@ c     that the func will never be non-zero in real search.
 c     write out solution details
             if (iter(i,j) .eq. 0) then
                if (print_switch .eq. 1) then
-                  write(6,*) 'No iterations..',i,j,cost_gps_istatus, 
+                  write(6,*) 'no iterations..',i,j,cost_gps_istatus, 
      1                 cost_gvap_istatus, cost_cloud_istatus, fret
                else
-                  write(6,33) 'TEML ',abs(x(1)), abs(x(2)),abs(x(3)),
+                  write(6,33) 'teml ',abs(x(1)), abs(x(2)),abs(x(3)),
      1                 i,j,fret,iter(i,j)
-!HJ: W>=D+7 for e11.6. 10/15/2013
+!hj: w>=d+7 for e11.6. 10/15/2013
  33               format(a5,3(e13.6,2x),i3,1x,i3,1x,e13.6,i3)
                endif
             endif
@@ -1160,7 +1160,7 @@ c     1                 abs(x(1)),iter(i,j), cld(i,j)
          write(6,*) '...non-convergence '
       endif
 
-c     ************* Section on processing resulting scaling fields  ****
+c     ************* section on processing resulting scaling fields  ****
       
 c     modify original lq3 file with new factors for comparison tests.
 c     modify lq3 only in clear areas as defined by lc3.
@@ -1191,7 +1191,7 @@ c     derive field statistics to determine outliers
       lower_limit = ave - 3.*sdev
       write (6,*) 
       write (6,*) 
-      write (6,*) 'Classify acceptable data' 
+      write (6,*) 'classify acceptable data' 
       write (6,*) 
       write (6,*) 'acceptable range', lower_limit, upper_limit,
      1     (lower_limit+upper_limit)/2., 'top'
@@ -1219,12 +1219,12 @@ c     derive field statistics to determine outliers
             call smooth_grid2 (ii,jj,data_anal,1)
             call two_d_stats(ii,jj,data_anal,rmd)
             if (print_switch .eq. 1) then
-               write(6,*) 'TEMP processed slv_lapc 1'
+               write(6,*) 'temp processed slv_lapc 1'
             endif
             
          else
             if (print_switch .eq. 1) then
-               write(6,*) 'TEMP not enough data, skipping slv_lapc'
+               write(6,*) 'temp not enough data, skipping slv_lapc'
             endif
             data_anal = 1.0
          endif
@@ -1232,7 +1232,7 @@ c     derive field statistics to determine outliers
       else
          if (print_switch .eq. 1) then
             write(6,*) 
-     1      'TEMP pn = 0,no acceptable data to analyze for adjustment'
+     1      'temp pn = 0,no acceptable data to analyze for adjustment'
          endif
          data_anal = 1.0
          return
@@ -1302,7 +1302,7 @@ c     derive field statistics to determine outliers
       lower_limit = ave - 3.*sdev
       write (6,*) 
       write (6,*) 
-      write (6,*) 'Classify acceptable data' 
+      write (6,*) 'classify acceptable data' 
       write (6,*) 
       write (6,*) 'acceptable range', lower_limit, upper_limit,
      1     (lower_limit+upper_limit)/2., 'mid'
@@ -1330,12 +1330,12 @@ c     derive field statistics to determine outliers
             call smooth_grid2 (ii,jj,data_anal,1)
             call two_d_stats(ii,jj,data_anal,rmd)
             if (print_switch .eq. 1) then
-               write (6,*) 'TEMP processed slv_lapc 2'
+               write (6,*) 'temp processed slv_lapc 2'
             endif
             
          else
             if (print_switch .eq. 1) then
-               write(6,*) 'TEMP not enough data, skipping slv_lapc'
+               write(6,*) 'temp not enough data, skipping slv_lapc'
             endif
             data_anal = 1.0
          endif
@@ -1343,7 +1343,7 @@ c     derive field statistics to determine outliers
       else
          if (print_switch .eq. 1) then
             write(6,*) 
-     1        'TEMP pn = 0,no acceptable data to analyze for adjustment'
+     1        'temp pn = 0,no acceptable data to analyze for adjustment'
          endif
          data_anal = 1.0
          return
@@ -1389,7 +1389,7 @@ c     derive field statistics to determine outliers
       lower_limit = ave - 3.*sdev
       write (6,*) 
       write (6,*) 
-      write (6,*) 'Classify acceptable data' 
+      write (6,*) 'classify acceptable data' 
       write (6,*) 
       write (6,*) 'acceptable range', lower_limit, upper_limit,
      1     (lower_limit+upper_limit)/2., 'low'
@@ -1416,16 +1416,16 @@ c     derive field statistics to determine outliers
             call slv_laplc (data_anal,mask,ii,jj)
             call smooth_grid2 (ii,jj,data_anal,1)
             call two_d_stats(ii,jj,data_anal,rmd)
-            write (6,*) 'TEMP processed slv_lapc 2'
+            write (6,*) 'temp processed slv_lapc 2'
             
          else
-            write(6,*) 'TEMP not enough data, skipping slv_lapc'
+            write(6,*) 'temp not enough data, skipping slv_lapc'
             data_anal = 1.0
          endif
          
       else
          write(6,*) 
-     1        'TEMP pn = 0,no acceptable data to analyze for adjustment'
+     1        'temp pn = 0,no acceptable data to analyze for adjustment'
          data_anal = 1.0        ! assign entire array 1.0
          return
          

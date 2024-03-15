@@ -1,10 +1,10 @@
       subroutine readindexfile(cfname,nfldsmax,nlevsmax
      +,nflds,ilevs,p,ivarcoord,ivarid,istatus)
 c
-c 7-98: J. Smart.   routine reads yyjjjhhmmhhmm.index files for AFWA
-c                   models (AVN, NOGAPS, etc). Routine is used in readdgprep.f
-c                   and readnogaps. Result is used to find appropriate model
-c                   fields in AFWA degrib files.
+c 7-98: j. smart.   routine reads yyjjjhhmmhhmm.index files for afwa
+c                   models (avn, nogaps, etc). routine is used in readdgprep.f
+c                   and readnogaps. result is used to find appropriate model
+c                   fields in afwa degrib files.
 c
       implicit none
 
@@ -58,6 +58,6 @@ c
 501   print*,'error reading file ',cfname(1:ifl)
       return
 
-C502   print*,'end of file encountered'
+c502   print*,'end of file encountered'
 
       end

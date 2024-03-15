@@ -1,957 +1,949 @@
-MODULE GENERALTOOLS
+module generaltools
 
-CONTAINS
+contains
 
-SUBROUTINE INTERPLTN(ND,NG,CO,AC,OC)
+   subroutine interpltn(nd, ng, co, ac, oc)
 !*************************************************
-! CALCULATE THE INTERPOLATING COEFFICENT (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! calculate the interpolating coefficent (general)
+! history: august 2007, coded by wei li.
 !*************************************************
 ! 2     , 3     , 5     , 9
 ! 2**0+1, 2**1+1, 2**2+1, 2**3+1
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J
-  INTEGER , INTENT(IN)  :: ND,NG
-  REAL    , INTENT(IN)  :: AC(ND,NG),OC(ND)
-  REAL    , INTENT(OUT) :: CO(NG)
-  REAL                  :: DD(ND,NG),DC(ND)
+      integer  :: i, j
+      integer, intent(in)  :: nd, ng
+      real, intent(in)  :: ac(nd, ng), oc(nd)
+      real, intent(out) :: co(ng)
+      real                  :: dd(nd, ng), dc(nd)
 ! --------------------
-! DECLARE:
-!        'ND' IS THE NUMBER OF DIMENSIONS OF THE FIELD
-!        'NG' IS THE NUMBER OF GRIDPOINTS NEIGHBOR TO THE POSITION, WHICH IS TO BE INTERPOLATED, NG IS EQUAL TO 2**ND
-!        'CO' IS THE INTERPOLATING COEFFICIENTS.
-!        'OC' IS THE POSITION WHERE TO BE INTERPOLATED 
-!        'AC' IS THE INDEX OF THE GRIDPOINTS, WHICH IS NEIGHBOR TO THE POSITIOIN
+! declare:
+!        'nd' is the number of dimensions of the field
+!        'ng' is the number of gridpoints neighbor to the position, which is to be interpolated, ng is equal to 2**nd
+!        'co' is the interpolating coefficients.
+!        'oc' is the position where to be interpolated
+!        'ac' is the index of the gridpoints, which is neighbor to the positioin
 ! --------------------
-  DO I=1,ND
-    IF((OC(I)-AC(I,1))*(OC(I)-AC(I,2**(I-1)+1)).GT.0.0) THEN
-      PRINT*,'INTERPLTN: OC IS NOT IN THE DOMAIN ',I,OC(I),AC(I,1),AC(I,2**(I-1)+1)
-      STOP
-    ENDIF
-  ENDDO
-  DO I=1,ND
-    DO J=1,NG
-      DD(I,J)=AC(I,J)-OC(I)
-    ENDDO
-    DC(I)=ABS(AC(I,2**(I-1)+1)-AC(I,1))
-!    IF(DC(I).LE.0.0)STOP 'GRID ARRANGE WRONG!!!'            ! omitted by zhongjie he
-  ENDDO
-  DO I=1,ND
-    IF(DC(I).NE.0) THEN 
-      DO J=1,NG
-        DD(I,J)=DD(I,J)/DC(I)
-        IF(DD(I,J).GT.0.0)THEN
-          DD(I,J)=DD(I,J)-1.0
-        ELSE
-          DD(I,J)=DD(I,J)+1.0
-        ENDIF
-        DD(I,J)=ABS(DD(I,J))
-      ENDDO
-    ELSE                                     !     added by zhongjie he 
-      DO J=1,NG
-        DD(I,J)=1.
-      ENDDO
-    ENDIF
-  ENDDO
-  DO J=1,NG
-    CO(J)=1.0
-    DO I=1,ND
-      CO(J)=CO(J)*DD(I,J)
-    ENDDO
-  ENDDO
-  RETURN
-END SUBROUTINE INTERPLTN
+      do i = 1, nd
+         if ((oc(i) - ac(i, 1))*(oc(i) - ac(i, 2**(i - 1) + 1)) .gt. 0.0) then
+            print *, 'interpltn: oc is not in the domain ', i, oc(i), ac(i, 1), ac(i, 2**(i - 1) + 1)
+            stop
+         end if
+      end do
+      do i = 1, nd
+         do j = 1, ng
+            dd(i, j) = ac(i, j) - oc(i)
+         end do
+         dc(i) = abs(ac(i, 2**(i - 1) + 1) - ac(i, 1))
+!    if(dc(i).le.0.0)stop 'grid arrange wrong!!!'            ! omitted by zhongjie he
+      end do
+      do i = 1, nd
+         if (dc(i) .ne. 0) then
+            do j = 1, ng
+               dd(i, j) = dd(i, j)/dc(i)
+               if (dd(i, j) .gt. 0.0) then
+                  dd(i, j) = dd(i, j) - 1.0
+               else
+                  dd(i, j) = dd(i, j) + 1.0
+               end if
+               dd(i, j) = abs(dd(i, j))
+            end do
+         else                                     !     added by zhongjie he
+            do j = 1, ng
+               dd(i, j) = 1.
+            end do
+         end if
+      end do
+      do j = 1, ng
+         co(j) = 1.0
+         do i = 1, nd
+            co(j) = co(j)*dd(i, j)
+         end do
+      end do
+      return
+   end subroutine interpltn
 
-SUBROUTINE INTERPLTN_XIE(ND,NG,CO,AC,OC,IP,NP,PV)
+   subroutine interpltn_xie(nd, ng, co, ac, oc, ip, np, pv)
 !*************************************************
-! CALCULATE THE INTERPOLATING COEFFICENT (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! calculate the interpolating coefficent (general)
+! history: august 2007, coded by wei li.
 !
-!          MARCH 31, 2009 BY YUANFU XIE FOR LOG(P)
-!          INTERPOLATION.
+!          march 31, 2009 by yuanfu xie for log(p)
+!          interpolation.
 !*************************************************
 ! 2     , 3     , 5     , 9
 ! 2**0+1, 2**1+1, 2**2+1, 2**3+1
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,K1
-  INTEGER , INTENT(IN)  :: ND,NG,IP,NP
-  REAL    , INTENT(IN)  :: AC(ND,NG),OC(ND),PV(NP)
-  REAL    , INTENT(OUT) :: CO(NG)
-  REAL                  :: DD(ND,NG),DC(ND),P
+      integer  :: i, j, k, k1
+      integer, intent(in)  :: nd, ng, ip, np
+      real, intent(in)  :: ac(nd, ng), oc(nd), pv(np)
+      real, intent(out) :: co(ng)
+      real                  :: dd(nd, ng), dc(nd), p
 ! --------------------
-! DECLARE:
-!        'ND' IS THE NUMBER OF DIMENSIONS OF THE FIELD
-!        'NG' IS THE NUMBER OF GRIDPOINTS NEIGHBOR TO THE POSITION, WHICH IS TO BE INTERPOLATED, NG IS EQUAL TO 2**ND
-!        'CO' IS THE INTERPOLATING COEFFICIENTS.
-!        'OC' IS THE POSITION WHERE TO BE INTERPOLATED 
-!        'AC' IS THE INDEX OF THE GRIDPOINTS, WHICH IS NEIGHBOR TO THE POSITIOIN
+! declare:
+!        'nd' is the number of dimensions of the field
+!        'ng' is the number of gridpoints neighbor to the position, which is to be interpolated, ng is equal to 2**nd
+!        'co' is the interpolating coefficients.
+!        'oc' is the position where to be interpolated
+!        'ac' is the index of the gridpoints, which is neighbor to the positioin
 ! --------------------
-  DO I=1,ND
-    IF((OC(I)-AC(I,1))*(OC(I)-AC(I,2**(I-1)+1)).GT.0.0) THEN
-      PRINT*,'INTERPLTN: OC IS NOT IN THE DOMAIN ',I,OC(I),AC(I,1),AC(I,2**(I-1)+1)
-      STOP
-    ENDIF
-  ENDDO
-  DO I=1,ND
-    DO J=1,NG
-      DD(I,J)=AC(I,J)-OC(I)
-    ENDDO
-    DC(I)=ABS(AC(I,2**(I-1)+1)-AC(I,1))
-  ENDDO
-  DO I=1,ND
-    IF(DC(I).NE.0) THEN 
-      DO J=1,NG
-        DD(I,J)=DD(I,J)/DC(I)
-        IF(DD(I,J).GT.0.0)THEN
-          ! LOG(P):
-          IF (I .EQ. IP) THEN
-            K1 = AC(I,J)
-            IF (K1 .LE. 1) THEN
-              DD(I,J) = 0.0
-            ELSE
-              K = K1-1
-              P = PV(K)*DD(I,J)+(1.0-DD(I,J))*PV(K+1)
-              DD(I,J) = (LOG(P)-LOG(PV(k)))/(LOG(PV(K1))-LOG(PV(K)))
-            ENDIF
-          ELSE
-            DD(I,J)=DD(I,J)-1.0
-          ENDIF
-        ELSE
-          IF (I .EQ. IP) THEN
-            K = AC(I,J)
-            IF (K .GE. NP) THEN
-              DD(I,J) = 1.0
-            ELSE
-              K1 = K+1
-              P = (1.0+DD(I,J))*PV(K)-DD(I,J)*PV(K1)
-              DD(I,J) = (LOG(PV(K1))-LOG(P))/(LOG(PV(K1))-LOG(PV(K)))
-            ENDIF
-          ELSE
-            DD(I,J)=DD(I,J)+1.0
-          ENDIF
-        ENDIF
-        DD(I,J)=ABS(DD(I,J))
-      ENDDO
-    ELSE                                     !     added by zhongjie he 
-      DO J=1,NG
-        DD(I,J)=1.
-      ENDDO
-    ENDIF
-  ENDDO
+      do i = 1, nd
+         if ((oc(i) - ac(i, 1))*(oc(i) - ac(i, 2**(i - 1) + 1)) .gt. 0.0) then
+            print *, 'interpltn: oc is not in the domain ', i, oc(i), ac(i, 1), ac(i, 2**(i - 1) + 1)
+            stop
+         end if
+      end do
+      do i = 1, nd
+         do j = 1, ng
+            dd(i, j) = ac(i, j) - oc(i)
+         end do
+         dc(i) = abs(ac(i, 2**(i - 1) + 1) - ac(i, 1))
+      end do
+      do i = 1, nd
+         if (dc(i) .ne. 0) then
+            do j = 1, ng
+               dd(i, j) = dd(i, j)/dc(i)
+               if (dd(i, j) .gt. 0.0) then
+                  ! log(p):
+                  if (i .eq. ip) then
+                     k1 = ac(i, j)
+                     if (k1 .le. 1) then
+                        dd(i, j) = 0.0
+                     else
+                        k = k1 - 1
+                        p = pv(k)*dd(i, j) + (1.0 - dd(i, j))*pv(k + 1)
+                        dd(i, j) = (log(p) - log(pv(k)))/(log(pv(k1)) - log(pv(k)))
+                     end if
+                  else
+                     dd(i, j) = dd(i, j) - 1.0
+                  end if
+               else
+                  if (i .eq. ip) then
+                     k = ac(i, j)
+                     if (k .ge. np) then
+                        dd(i, j) = 1.0
+                     else
+                        k1 = k + 1
+                        p = (1.0 + dd(i, j))*pv(k) - dd(i, j)*pv(k1)
+                        dd(i, j) = (log(pv(k1)) - log(p))/(log(pv(k1)) - log(pv(k)))
+                     end if
+                  else
+                     dd(i, j) = dd(i, j) + 1.0
+                  end if
+               end if
+               dd(i, j) = abs(dd(i, j))
+            end do
+         else                                     !     added by zhongjie he
+            do j = 1, ng
+               dd(i, j) = 1.
+            end do
+         end if
+      end do
 
-  DO J=1,NG
-    CO(J)=1.0
-    DO I=1,ND
-      CO(J)=CO(J)*DD(I,J)
-    ENDDO
-  ENDDO
-  RETURN
-END SUBROUTINE INTERPLTN_XIE
+      do j = 1, ng
+         co(j) = 1.0
+         do i = 1, nd
+            co(j) = co(j)*dd(i, j)
+         end do
+      end do
+      return
+   end subroutine interpltn_xie
 
-SUBROUTINE GDERIVEIT(Z1,Z2,Z3,A,B,C)
+   subroutine gderiveit(z1, z2, z3, a, b, c)
 !*************************************************
-! GENERAL DERIVATIVE OF INTERIOR (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! general derivative of interior (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL  :: X,Y
-  REAL , INTENT(IN)  :: Z1,Z2,Z3
-  REAL , INTENT(OUT) :: A,B,C
+      real  :: x, y
+      real, intent(in)  :: z1, z2, z3
+      real, intent(out) :: a, b, c
 ! --------------------
-  X=Z2-Z1
-  Y=Z3-Z2
-  A=-Y/(X*X+X*Y)
-  B=(-X+Y)/(X*Y)
-  C=X/(X*Y+Y*Y)
-  RETURN
-END SUBROUTINE GDERIVEIT
+      x = z2 - z1
+      y = z3 - z2
+      a = -y/(x*x + x*y)
+      b = (-x + y)/(x*y)
+      c = x/(x*y + y*y)
+      return
+   end subroutine gderiveit
 
-SUBROUTINE GDERIVELB(Z1,Z2,Z3,A,B,C)
+   subroutine gderivelb(z1, z2, z3, a, b, c)
 !*************************************************
-! GENERAL DERIVATIVE OF LEFT BOUNDARY (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! general derivative of left boundary (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL  :: X,Y
-  REAL , INTENT(IN)  :: Z1,Z2,Z3
-  REAL , INTENT(OUT) :: A,B,C
+      real  :: x, y
+      real, intent(in)  :: z1, z2, z3
+      real, intent(out) :: a, b, c
 ! --------------------
-  X=Z2-Z1
-  Y=Z3-Z2
-  A=(-2.0*X-Y)/(X*X+X*Y)
-  B=(X+Y)/(X*Y)
-  C=-X/(X*Y+Y*Y)
-  RETURN
-END SUBROUTINE GDERIVELB
+      x = z2 - z1
+      y = z3 - z2
+      a = (-2.0*x - y)/(x*x + x*y)
+      b = (x + y)/(x*y)
+      c = -x/(x*y + y*y)
+      return
+   end subroutine gderivelb
 
-SUBROUTINE GDERIVERB(Z1,Z2,Z3,A,B,C)
+   subroutine gderiverb(z1, z2, z3, a, b, c)
 !*************************************************
-! GENERAL DERIVATIVE OF RIGHT BOUNDARY (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! general derivative of right boundary (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL  :: X,Y
-  REAL , INTENT(IN)  :: Z1,Z2,Z3
-  REAL , INTENT(OUT) :: A,B,C
+      real  :: x, y
+      real, intent(in)  :: z1, z2, z3
+      real, intent(out) :: a, b, c
 ! --------------------
-  X=Z2-Z1
-  Y=Z3-Z2
-  A=Y/(X*X+X*Y)
-  B=(-X-Y)/(X*Y)
-  C=(X+2.0*Y)/(X*Y+Y*Y)
-  RETURN
-END SUBROUTINE GDERIVERB
+      x = z2 - z1
+      y = z3 - z2
+      a = y/(x*x + x*y)
+      b = (-x - y)/(x*y)
+      c = (x + 2.0*y)/(x*y + y*y)
+      return
+   end subroutine gderiverb
 
-SUBROUTINE G2ORDERIT(Z1,Z2,Z3,A,B,C)
+   subroutine g2orderit(z1, z2, z3, a, b, c)
 !*************************************************
-! GENERAL 2-ORDER DERIVATIVE OF INTERIOR (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! general 2-order derivative of interior (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL  :: X,Y
-  REAL , INTENT(IN)  :: Z1,Z2,Z3
-  REAL , INTENT(OUT) :: A,B,C
+      real  :: x, y
+      real, intent(in)  :: z1, z2, z3
+      real, intent(out) :: a, b, c
 ! --------------------
-  X=Z2-Z1
-  Y=Z3-Z2
-  A=2.0/(X*X+X*Y)
-  B=-2.0/(X*Y)
-  C=2.0/(X*Y+Y*Y)
-  RETURN
-END SUBROUTINE G2ORDERIT
+      x = z2 - z1
+      y = z3 - z2
+      a = 2.0/(x*x + x*y)
+      b = -2.0/(x*y)
+      c = 2.0/(x*y + y*y)
+      return
+   end subroutine g2orderit
 
-SUBROUTINE PSTN2NUMB(NN,NP,NM,NC)
+   subroutine pstn2numb(nn, np, nm, nc)
 !*************************************************
-! TRANSFORM POSITION TO NUMBER (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! transform position to number (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER               :: PT,M,N
-  INTEGER , INTENT(IN)  :: NN
-  INTEGER , INTENT(IN)  :: NP(NN),NM(NN)
-  INTEGER , INTENT(OUT) :: NC
+      integer               :: pt, m, n
+      integer, intent(in)  :: nn
+      integer, intent(in)  :: np(nn), nm(nn)
+      integer, intent(out) :: nc
 ! --------------------
-! DECLARE:
-!        'NN' IS THE NUMBER OF DIMENSIONS OF THE FIELD
-!        'NP' IS THE INDEX OF THE GRIDPOINT AT EACH DIMENSION
-!        'NM' IS THE TOTAL GRID NUMBER OF EACH DIMENSIOIN 
-!        'NC' IS THE INDEX OF THE GRIDPOINT, WHEN THE FIELD IS TRANSLATED TO A 1 DIMENSIONAL FILED
+! declare:
+!        'nn' is the number of dimensions of the field
+!        'np' is the index of the gridpoint at each dimension
+!        'nm' is the total grid number of each dimensioin
+!        'nc' is the index of the gridpoint, when the field is translated to a 1 dimensional filed
 ! --------------------
-  NC=NP(1)
-  IF(NN.EQ.1)RETURN
-  DO N=2,NN
-    PT=NP(N)-1
-    DO M=1,N-1
-      PT=PT*NM(M)
-    ENDDO
-    NC=NC+PT
-  ENDDO
-  RETURN
-END SUBROUTINE PSTN2NUMB
+      nc = np(1)
+      if (nn .eq. 1) return
+      do n = 2, nn
+         pt = np(n) - 1
+         do m = 1, n - 1
+            pt = pt*nm(m)
+         end do
+         nc = nc + pt
+      end do
+      return
+   end subroutine pstn2numb
 
-SUBROUTINE NUMB2PSTN(NN,NP,NM,NC)
+   subroutine numb2pstn(nn, np, nm, nc)
 !*************************************************
-! TRANSFORM NUMBER TO POSITION (GENERAL) (NOT USED)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! transform number to position (general) (not used)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER               :: N,N0
-  INTEGER , INTENT(IN)  :: NN,NC
-  INTEGER , INTENT(IN)  :: NM(NN)
-  INTEGER , INTENT(OUT) :: NP(NN)
+      integer               :: n, n0
+      integer, intent(in)  :: nn, nc
+      integer, intent(in)  :: nm(nn)
+      integer, intent(out) :: np(nn)
 ! --------------------
-! DECLARE:
-!        'NN' IS THE NUMBER OF DIMENSIONS OF THE FIELD
-!        'NP' IS THE INDEX OF THE GRIDPOINT AT EACH DIMENSION, WHEN THE FIELD IS TRANSLATED TO A NN DIMENSIONAL FILED
-!        'NM' IS THE TOTAL GRID NUMBER OF EACH DIMENSIOIN
-!        'NC' IS THE INDEX OF THE GRIDPOINT IN THE 1 DIMENSIONAL FIELD
+! declare:
+!        'nn' is the number of dimensions of the field
+!        'np' is the index of the gridpoint at each dimension, when the field is translated to a nn dimensional filed
+!        'nm' is the total grid number of each dimensioin
+!        'nc' is the index of the gridpoint in the 1 dimensional field
 ! --------------------
-  N0=NC
-  NP(1)=MOD(N0,NM(1))
-  IF(NP(1).EQ.0)NP(1)=NM(1)
-  IF(NN.EQ.1)RETURN
-  DO N=2,NN
-    N0=(N0-NP(N-1))/NM(N-1)+1
-    NP(N)=MOD(N0,NM(N))
-    IF(NM(N).EQ.1)NP(N)=1
-    IF(NP(N).EQ.0)NP(N)=NM(N)
-  ENDDO
-  RETURN
-END SUBROUTINE NUMB2PSTN
+      n0 = nc
+      np(1) = mod(n0, nm(1))
+      if (np(1) .eq. 0) np(1) = nm(1)
+      if (nn .eq. 1) return
+      do n = 2, nn
+         n0 = (n0 - np(n - 1))/nm(n - 1) + 1
+         np(n) = mod(n0, nm(n))
+         if (nm(n) .eq. 1) np(n) = 1
+         if (np(n) .eq. 0) np(n) = nm(n)
+      end do
+      return
+   end subroutine numb2pstn
 
-SUBROUTINE VRTCLPSTN8(KM,LM,PP,P,PS,IS)
+   subroutine vrtclpstn8(km, lm, pp, p, ps, is)
 !*************************************************
-! GET VERTICAL POSITION (GENERAL)
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! get vertical position (general)
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: K
-  INTEGER ,INTENT(IN)  :: KM
-  REAL ,   INTENT(IN)  :: PP(KM)
-  REAL ,   INTENT(IN)  :: P,LM
-  REAL ,   INTENT(OUT) :: PS
-  INTEGER ,INTENT(OUT) :: IS
+      integer  :: k
+      integer, intent(in)  :: km
+      real, intent(in)  :: pp(km)
+      real, intent(in)  :: p, lm
+      real, intent(out) :: ps
+      integer, intent(out) :: is
 ! --------------------
-! DECLARE:
-!        'KM' IS THE NUMBER OF LEVELS OF THE FIELD
-!        'PP' IS THE PRESURE OF EACH LEVEL
-!        'P'  IS THE PRESURE OF THE POSITION, WHICH WE WANT TO GET ITS INDEX IN THE VERTICAL COORDINATE
-!        'PS' IS THE INDEX OF THE POINT IN THE VERTICAL COORDINATE
-!        'IS' IS THE STATE OF THE RESULT OF THIS SUBROUTINE, 0 MEANS WRONG, 1 MEANS OK
-!        'LM' IS A LIMITATION TO DECIDE WHETHER THE OBSERVATION IS AVAILABLE (JUST USED FOR THE CASE: KM=1)
+! declare:
+!        'km' is the number of levels of the field
+!        'pp' is the presure of each level
+!        'p'  is the presure of the position, which we want to get its index in the vertical coordinate
+!        'ps' is the index of the point in the vertical coordinate
+!        'is' is the state of the result of this subroutine, 0 means wrong, 1 means ok
+!        'lm' is a limitation to decide whether the observation is available (just used for the case: km=1)
 ! --------------------
-  IS=0
-  IF(KM.GE.2) THEN
-    DO K=1,KM-1
-      IF((P-PP(K))*(P-PP(K+1)).GT.0.0)CYCLE
-      PS=K+ABS(P-PP(K))/ABS(PP(K+1)-PP(K))
-      IS=1
-    ENDDO
-  ELSEIF(KM.EQ.1) THEN
-    IF(ABS(P-PP(1)).LE.LM) THEN
-      PS=1
-      IS=1
-    ENDIF
-  ENDIF
-  RETURN
-END SUBROUTINE VRTCLPSTN8
+      is = 0
+      if (km .ge. 2) then
+         do k = 1, km - 1
+            if ((p - pp(k))*(p - pp(k + 1)) .gt. 0.0) cycle
+            ps = k + abs(p - pp(k))/abs(pp(k + 1) - pp(k))
+            is = 1
+         end do
+      elseif (km .eq. 1) then
+         if (abs(p - pp(1)) .le. lm) then
+            ps = 1
+            is = 1
+         end if
+      end if
+      return
+   end subroutine vrtclpstn8
 
-SUBROUTINE VRTCLPSTN(KM,LM,PP,P,PS,IS)
+   subroutine vrtclpstn(km, lm, pp, p, ps, is)
 !*************************************************
-! GET VERTICAL POSITION (GENERAL)
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! get vertical position (general)
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: K
-  INTEGER ,INTENT(IN)  :: KM
-  REAL ,   INTENT(IN)  :: PP(KM),P,LM
-  REAL ,   INTENT(OUT) :: PS
-  INTEGER ,INTENT(OUT) :: IS
+      integer  :: k
+      integer, intent(in)  :: km
+      real, intent(in)  :: pp(km), p, lm
+      real, intent(out) :: ps
+      integer, intent(out) :: is
 ! --------------------
-! DECLARE:
-!        'KM' IS THE NUMBER OF LEVELS OF THE FIELD
-!        'PP' IS THE PRESURE OF EACH LEVEL
-!        'P'  IS THE PRESURE OF THE POSITION, WHICH WE WANT TO GET ITS INDEX IN THE VERTICAL COORDINATE
-!        'PS' IS THE INDEX OF THE POINT IN THE VERTICAL COORDINATE
-!        'IS' IS THE STATE OF THE RESULT OF THIS SUBROUTINE, 0 MEANS WRONG, 1 MEANS OK
-!        'LM' IS A LIMITATION OF PREESURE TO DECIDE WHETHER THE OBSERVATION IS AVAILABLE (JUST USED FOR THE CASE: KM=1)
+! declare:
+!        'km' is the number of levels of the field
+!        'pp' is the presure of each level
+!        'p'  is the presure of the position, which we want to get its index in the vertical coordinate
+!        'ps' is the index of the point in the vertical coordinate
+!        'is' is the state of the result of this subroutine, 0 means wrong, 1 means ok
+!        'lm' is a limitation of preesure to decide whether the observation is available (just used for the case: km=1)
 ! --------------------
-  IS=0
-  IF(KM.GE.2) THEN
-    DO K=1,KM-1
-      IF((P-PP(K))*(P-PP(K+1)).GT.0.0)CYCLE
-      PS=K+ABS(P-PP(K))/ABS(PP(K+1)-PP(K))
-      IS=1
-    ENDDO
-  ELSEIF(KM.EQ.1) THEN
-    IF(ABS(P-PP(1)).LE.LM) THEN
-      PS=1
-      IS=1
-    ENDIF
-  ENDIF
+      is = 0
+      if (km .ge. 2) then
+         do k = 1, km - 1
+            if ((p - pp(k))*(p - pp(k + 1)) .gt. 0.0) cycle
+            ps = k + abs(p - pp(k))/abs(pp(k + 1) - pp(k))
+            is = 1
+         end do
+      elseif (km .eq. 1) then
+         if (abs(p - pp(1)) .le. lm) then
+            ps = 1
+            is = 1
+         end if
+      end if
 
-  RETURN
-END SUBROUTINE VRTCLPSTN
+      return
+   end subroutine vrtclpstn
 
-SUBROUTINE ZPCONVERT(KM,ZZ,PP,Z,P,IS)
+   subroutine zpconvert(km, zz, pp, z, p, is)
 !*************************************************
-! FIND PRESSURE FROM HEIGHT (GENERAL)
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! find pressure from height (general)
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER              :: K
-  INTEGER ,INTENT(IN)  :: KM
-  REAL ,   INTENT(IN)  :: ZZ(KM),Z
-  REAL ,   INTENT(IN)  :: PP(KM)
-  REAL ,   INTENT(OUT) :: P
-  INTEGER ,INTENT(OUT) :: IS
+      integer              :: k
+      integer, intent(in)  :: km
+      real, intent(in)  :: zz(km), z
+      real, intent(in)  :: pp(km)
+      real, intent(out) :: p
+      integer, intent(out) :: is
 ! --------------------
-! DECLARE:
-!        'KM' IS THE NUMBER OF LEVELS OF THE FIELD
-!        'ZZ' IS THE HEIGHT OF EACH LEVEL
-!        'PP' IS THE PRESURE OF EACH LEVEL
-!        'Z'  IS THE HEIGHT OF POINT, WHICH WE WANT TO GET ITS PRESURE
-!        'P'  IS THE PRESURE CALCULATED FROM THE ZZ, PP, AND Z
-!        'IS' IS THE STATE OF THE RESULT OF THIS SUBROUTINE, 0 MEANS WRONG, 1 MEANS OK 
+! declare:
+!        'km' is the number of levels of the field
+!        'zz' is the height of each level
+!        'pp' is the presure of each level
+!        'z'  is the height of point, which we want to get its presure
+!        'p'  is the presure calculated from the zz, pp, and z
+!        'is' is the state of the result of this subroutine, 0 means wrong, 1 means ok
 ! --------------------
-  IS=0
-  DO K=1,KM-1
-    IF((Z-ZZ(K))*(Z-ZZ(K+1)).GT.0.0)CYCLE
-    P=PP(K)*ABS(ZZ(K+1)-Z)/ABS(ZZ(K+1)-ZZ(K))+PP(K+1)*ABS(Z-ZZ(K))/ABS(ZZ(K+1)-ZZ(K))
-    IS=1
-  ENDDO
-  RETURN
-END SUBROUTINE ZPCONVERT
+      is = 0
+      do k = 1, km - 1
+         if ((z - zz(k))*(z - zz(k + 1)) .gt. 0.0) cycle
+         p = pp(k)*abs(zz(k + 1) - z)/abs(zz(k + 1) - zz(k)) + pp(k + 1)*abs(z - zz(k))/abs(zz(k + 1) - zz(k))
+         is = 1
+      end do
+      return
+   end subroutine zpconvert
 
-SUBROUTINE FCST2BKGD(ND,NG,NS,NF,XF,YF,ZF,TF,NB,XB,YB,ZB,TB,FC,BK)
+   subroutine fcst2bkgd(nd, ng, ns, nf, xf, yf, zf, tf, nb, xb, yb, zb, tb, fc, bk)
 !*************************************************
-! INTERPOLATE MODEL FORECAST TO BACKGROUND USED IN ANALYZING (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! interpolate model forecast to background used in analyzing (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER , PARAMETER  :: MD=4
-  INTEGER , INTENT(IN) :: ND,NG,NS
-  INTEGER , INTENT(IN) :: NF(MD),NB(MD)
-  REAL    , INTENT(IN) :: XF(NF(1)),YF(NF(2)),ZF(NF(3)),TF(NF(4))
-  REAL    , INTENT(IN) :: XB(NB(1)),YB(NB(2)),ZB(NB(3)),TB(NB(4))
-  REAL    , INTENT(IN) :: FC(NF(1),NF(2),NF(3),NF(4),NS)
-  INTEGER              :: I,J,K,L,I0,J0,K0,L0,I1,J1,K1,L1,S,M,N,NN
-  REAL                 :: PP(MD)
-  REAL                 :: AC(ND,NG),OC(ND),CO(NG)
-  REAL    , INTENT(OUT):: BK(NB(1),NB(2),NB(3),NB(4),NS)
-  INTEGER              :: LM(ND)
+      integer, parameter  :: md = 4
+      integer, intent(in) :: nd, ng, ns
+      integer, intent(in) :: nf(md), nb(md)
+      real, intent(in) :: xf(nf(1)), yf(nf(2)), zf(nf(3)), tf(nf(4))
+      real, intent(in) :: xb(nb(1)), yb(nb(2)), zb(nb(3)), tb(nb(4))
+      real, intent(in) :: fc(nf(1), nf(2), nf(3), nf(4), ns)
+      integer              :: i, j, k, l, i0, j0, k0, l0, i1, j1, k1, l1, s, m, n, nn
+      real                 :: pp(md)
+      real                 :: ac(nd, ng), oc(nd), co(ng)
+      real, intent(out):: bk(nb(1), nb(2), nb(3), nb(4), ns)
+      integer              :: lm(nd)
 ! --------------------
-! DECLARE:
-!        'ND' IS THE NUMBER OF DIMENSIONS OF THE FIELD
-!        'NG' IS THE NUMBER OF GRIDPOINTS NEIGHBOR TO THE POSITION, WHICH IS TO BE INTERPOLATED, NG IS EQUAL TO 2**ND
-!        'NS' IS THE NUMBER OF VARIABLES THAT TO BE INTERPOLATED
-!        'NF' THE GRID NUMBER OF THE ORIGINAL FIELD
-!        'NB' THE GRID NUMBER OF THE TARGET FIELD
-!        'XF', 'YF', 'ZF' AND 'TF' ARE THE SCALES OF THE ORIGINAL FILED IN THE X, Y, Z AND T COORDINATES RESPECTIVELY
-!        'XB', 'YB', 'ZB' AND 'TB' ARE THE SCALES OF THE TARGET FIELD N THE X, Y, Z AND T COORDINATES
-!        'FC' THE ORIGINAL FIELD
-!        'BK' THE TARGET FIELD
-!        'CO' IS THE INTERPOLATING COEFFICIENTS.
-!        'OC' IS THE POSITION WHERE TO BE INTERPOLATED
-!        'AC' IS THE INDEX OF THE GRIDPOINTS, WHICH IS NEIGHBOR TO THE POSITIOIN
+! declare:
+!        'nd' is the number of dimensions of the field
+!        'ng' is the number of gridpoints neighbor to the position, which is to be interpolated, ng is equal to 2**nd
+!        'ns' is the number of variables that to be interpolated
+!        'nf' the grid number of the original field
+!        'nb' the grid number of the target field
+!        'xf', 'yf', 'zf' and 'tf' are the scales of the original filed in the x, y, z and t coordinates respectively
+!        'xb', 'yb', 'zb' and 'tb' are the scales of the target field n the x, y, z and t coordinates
+!        'fc' the original field
+!        'bk' the target field
+!        'co' is the interpolating coefficients.
+!        'oc' is the position where to be interpolated
+!        'ac' is the index of the gridpoints, which is neighbor to the positioin
 ! --------------------
-  DO L=1,NB(4)
-  DO K=1,NB(3)
-  DO J=1,NB(2)
-  DO I=1,NB(1)
-    CALL CHECKPSTN(NF(1),XF,XB(I),I0)
-    CALL CHECKPSTN(NF(2),YF,YB(J),J0)
-    CALL CHECKPSTN(NF(3),ZF,ZB(K),K0)
-    CALL CHECKPSTN(NF(4),TF,TB(L),L0)
-    IF(I0.EQ.0.OR.J0.EQ.0.OR.K0.EQ.0.OR.L0.EQ.0)STOP 'BACKGOUND CAN NOT BE GENERATED'
-    M=0
+      do l = 1, nb(4)
+      do k = 1, nb(3)
+      do j = 1, nb(2)
+      do i = 1, nb(1)
+         call checkpstn(nf(1), xf, xb(i), i0)
+         call checkpstn(nf(2), yf, yb(j), j0)
+         call checkpstn(nf(3), zf, zb(k), k0)
+         call checkpstn(nf(4), tf, tb(l), l0)
+         if (i0 .eq. 0 .or. j0 .eq. 0 .or. k0 .eq. 0 .or. l0 .eq. 0) stop 'backgound can not be generated'
+         m = 0
 !===============================================
-!    DO L1=L0,MIN0(L0+1,NF(4))
-!    DO K1=K0,MIN0(K0+1,NF(3))
-!    DO J1=J0,MIN0(J0+1,NF(2))
-!    DO I1=I0,MIN0(I0+1,NF(1))
-!      M=M+1
-!      PP(1)=XF(I1)
-!      PP(2)=YF(J1)
-!      PP(3)=ZF(K1)
-!      PP(4)=TF(L1)
-!      NN=0
-!      DO N=1,MD
-!        IF(NF(N).GE.2)THEN
-!          NN=NN+1
-!          AC(NN,M)=PP(N)
-!        ENDIF
-!      ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
+!    do l1=l0,min0(l0+1,nf(4))
+!    do k1=k0,min0(k0+1,nf(3))
+!    do j1=j0,min0(j0+1,nf(2))
+!    do i1=i0,min0(i0+1,nf(1))
+!      m=m+1
+!      pp(1)=xf(i1)
+!      pp(2)=yf(j1)
+!      pp(3)=zf(k1)
+!      pp(4)=tf(l1)
+!      nn=0
+!      do n=1,md
+!        if(nf(n).ge.2)then
+!          nn=nn+1
+!          ac(nn,m)=pp(n)
+!        endif
+!      enddo
+!    enddo
+!    enddo
+!    enddo
+!    enddo
 !================ modified by zhongjie he =====
-    LM(1)=I0+1
-    LM(2)=J0+1
-    LM(3)=K0+1
-    LM(4)=L0+1
-    DO N=1,ND
-      IF(ND.LT.N) LM(N)=LM(N)-1
-    ENDDO
-    DO L1=L0,LM(4)
-    DO K1=K0,LM(3)
-    DO J1=J0,LM(2)
-    DO I1=I0,LM(1)
-      M=M+1
-      PP(1)=XF(MIN0(I1,NF(1)))
-      PP(2)=YF(MIN0(J1,NF(3)))
-      PP(3)=ZF(MIN0(K1,NF(2)))
-      PP(4)=TF(MIN0(L1,NF(1)))
-      NN=0
-      DO N=1,MD
-        IF(NF(N).GE.2)THEN
-          NN=NN+1
-          AC(NN,M)=PP(N)
-        ENDIF
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
+         lm(1) = i0 + 1
+         lm(2) = j0 + 1
+         lm(3) = k0 + 1
+         lm(4) = l0 + 1
+         do n = 1, nd
+            if (nd .lt. n) lm(n) = lm(n) - 1
+         end do
+         do l1 = l0, lm(4)
+         do k1 = k0, lm(3)
+         do j1 = j0, lm(2)
+         do i1 = i0, lm(1)
+            m = m + 1
+            pp(1) = xf(min0(i1, nf(1)))
+            pp(2) = yf(min0(j1, nf(3)))
+            pp(3) = zf(min0(k1, nf(2)))
+            pp(4) = tf(min0(l1, nf(1)))
+            nn = 0
+            do n = 1, md
+               if (nf(n) .ge. 2) then
+                  nn = nn + 1
+                  ac(nn, m) = pp(n)
+               end if
+            end do
+         end do
+         end do
+         end do
+         end do
 !===============================================
-    PP(1)=XB(I)
-    PP(2)=YB(J)
-    PP(3)=ZB(K)
-    PP(4)=TB(L)
-    NN=0
-    DO N=1,MD
-      IF(NF(N).GE.2)THEN
-        NN=NN+1
-        OC(NN)=PP(N)
-      ENDIF
-    ENDDO
-    CALL INTERPLTN(ND,NG,CO,AC,OC)
-    DO S=1,NS
-      M=0
-      BK(I,J,K,L,S)=0.0
-      DO L1=L0,MIN0(L0+1,NF(4))
-      DO K1=K0,MIN0(K0+1,NF(3))
-      DO J1=J0,MIN0(J0+1,NF(2))
-      DO I1=I0,MIN0(I0+1,NF(1))
-        M=M+1
-        BK(I,J,K,L,S)=BK(I,J,K,L,S)+CO(M)*FC(I1,J1,K1,L1,S)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  RETURN
-END SUBROUTINE FCST2BKGD
+         pp(1) = xb(i)
+         pp(2) = yb(j)
+         pp(3) = zb(k)
+         pp(4) = tb(l)
+         nn = 0
+         do n = 1, md
+            if (nf(n) .ge. 2) then
+               nn = nn + 1
+               oc(nn) = pp(n)
+            end if
+         end do
+         call interpltn(nd, ng, co, ac, oc)
+         do s = 1, ns
+            m = 0
+            bk(i, j, k, l, s) = 0.0
+            do l1 = l0, min0(l0 + 1, nf(4))
+            do k1 = k0, min0(k0 + 1, nf(3))
+            do j1 = j0, min0(j0 + 1, nf(2))
+            do i1 = i0, min0(i0 + 1, nf(1))
+               m = m + 1
+               bk(i, j, k, l, s) = bk(i, j, k, l, s) + co(m)*fc(i1, j1, k1, l1, s)
+            end do
+            end do
+            end do
+            end do
+         end do
+      end do
+      end do
+      end do
+      end do
+      return
+   end subroutine fcst2bkgd
 
-SUBROUTINE CHECKPSTN(KM,ZZ,Z,KZ)
+   subroutine checkpstn(km, zz, z, kz)
 !*************************************************
-! FIND THE POSITION (GENERAL)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! find the position (general)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: K
-  INTEGER , INTENT(IN)  :: KM
-  REAL    , INTENT(IN)  :: ZZ(KM),Z
-  INTEGER , INTENT(OUT) :: KZ
+      integer  :: k
+      integer, intent(in)  :: km
+      real, intent(in)  :: zz(km), z
+      integer, intent(out) :: kz
 ! --------------------
-  KZ=0
-  IF(KM.EQ.1.AND.ZZ(1).EQ.Z)THEN
-    KZ=1
-    RETURN
-  ENDIF
-  DO K=1,KM-1
-    IF((Z-ZZ(K))*(Z-ZZ(K+1)).GT.0.0)CYCLE
-    KZ=K
-    EXIT
-  ENDDO
-  RETURN
-END SUBROUTINE CHECKPSTN
+      kz = 0
+      if (km .eq. 1 .and. zz(1) .eq. z) then
+         kz = 1
+         return
+      end if
+      do k = 1, km - 1
+         if ((z - zz(k))*(z - zz(k + 1)) .gt. 0.0) cycle
+         kz = k
+         exit
+      end do
+      return
+   end subroutine checkpstn
 
-SUBROUTINE GRIDTRANS(NV,N1,X1,Y1,Z1,T1,N2,X2,Y2,Z2,T2,G1,G2)
+   subroutine gridtrans(nv, n1, x1, y1, z1, t1, n2, x2, y2, z2, t2, g1, g2)
 !*************************************************
-!  THIS ROUTINE MAPS GRID FUNCTIONS TO OTHER GRID.
+!  this routine maps grid functions to other grid.
 !
-!  HISTORY: APR. 2008, CODED BY YUANFU XIE.
+!  history: apr. 2008, coded by yuanfu xie.
 !*************************************************
 
-  IMPLICIT NONE
+      implicit none
 
-  INTEGER, INTENT(IN) :: NV	! NUMBER OF VAR TO MAP
-  INTEGER, INTENT(IN) :: N1(4)	! NUMBERS OF INPUT GRIDPTS
-  INTEGER, INTENT(IN) :: N2(4)	! NUMBERS OF OUTPUT GRIDPTS
+      integer, intent(in) :: nv        ! number of var to map
+      integer, intent(in) :: n1(4)        ! numbers of input gridpts
+      integer, intent(in) :: n2(4)        ! numbers of output gridpts
 
-  REAL,    INTENT(IN) :: X1(N1(1)),Y1(N1(2)),Z1(N1(3)),T1(N1(4))
-				! BKG GRID POSITIONS
-  REAL,    INTENT(IN) :: X2(N2(1)),Y2(N2(2)),Z2(N2(3)),T2(N2(4))
-				! FINE GRID POSITIONS
-  REAL,    INTENT(IN) :: G1(N1(1),N1(2),N1(3),N1(4),NV)
-				! BACKGROUND VARIABLES
-  REAL,    INTENT(OUT) :: G2(N2(1),N2(2),N2(3),N2(4),NV)
+      real, intent(in) :: x1(n1(1)), y1(n1(2)), z1(n1(3)), t1(n1(4))
+      ! bkg grid positions
+      real, intent(in) :: x2(n2(1)), y2(n2(2)), z2(n2(3)), t2(n2(4))
+      ! fine grid positions
+      real, intent(in) :: g1(n1(1), n1(2), n1(3), n1(4), nv)
+      ! background variables
+      real, intent(out) :: g2(n2(1), n2(2), n2(3), n2(4), nv)
 
-  ! LOCAL VARIABLES:
-  INTEGER :: I,J,K,L
-  INTEGER :: IDX(2,N2(1)),IDY(2,N2(2)),IDZ(2,N2(3)),IDT(2,N2(4))
-  REAL    :: COX(2,N2(1)),COY(2,N2(2)),COZ(2,N2(3)),COT(2,N2(4)),S
+      ! local variables:
+      integer :: i, j, k, l
+      integer :: idx(2, n2(1)), idy(2, n2(2)), idz(2, n2(3)), idt(2, n2(4))
+      real    :: cox(2, n2(1)), coy(2, n2(2)), coz(2, n2(3)), cot(2, n2(4)), s
 
-  ! COEFFICIENTS AND INDICES:
-  ! LEFT:
-  IDX(1:2,1) = 1
-  IDY(1:2,1) = 1
-  IDZ(1:2,1) = 1
-  IDT(1:2,1) = 1
-  COX(1,1) = 1.0
-  COY(1,1) = 1.0
-  COZ(1,1) = 1.0
-  COT(1,1) = 1.0
-  COX(2,1) = 0.0
-  COY(2,1) = 0.0
-  COZ(2,1) = 0.0
-  COT(2,1) = 0.0
-  ! RIGHT:
-  IDX(1:2,N2(1)) = N1(1)
-  IDY(1:2,N2(2)) = N1(2)
-  IDZ(1:2,N2(3)) = N1(3)
-  IDT(1:2,N2(4)) = N1(4)
-  COX(1,N2(1)) = 1.0
-  COY(1,N2(2)) = 1.0
-  COZ(1,N2(3)) = 1.0
-  COT(1,N2(4)) = 1.0
-  COX(2,N2(1)) = 0.0
-  COY(2,N2(2)) = 0.0
-  COZ(2,N2(3)) = 0.0
-  COT(2,N2(4)) = 0.0
+      ! coefficients and indices:
+      ! left:
+      idx(1:2, 1) = 1
+      idy(1:2, 1) = 1
+      idz(1:2, 1) = 1
+      idt(1:2, 1) = 1
+      cox(1, 1) = 1.0
+      coy(1, 1) = 1.0
+      coz(1, 1) = 1.0
+      cot(1, 1) = 1.0
+      cox(2, 1) = 0.0
+      coy(2, 1) = 0.0
+      coz(2, 1) = 0.0
+      cot(2, 1) = 0.0
+      ! right:
+      idx(1:2, n2(1)) = n1(1)
+      idy(1:2, n2(2)) = n1(2)
+      idz(1:2, n2(3)) = n1(3)
+      idt(1:2, n2(4)) = n1(4)
+      cox(1, n2(1)) = 1.0
+      coy(1, n2(2)) = 1.0
+      coz(1, n2(3)) = 1.0
+      cot(1, n2(4)) = 1.0
+      cox(2, n2(1)) = 0.0
+      coy(2, n2(2)) = 0.0
+      coz(2, n2(3)) = 0.0
+      cot(2, n2(4)) = 0.0
 
-  ! X: UNIFORM GRID
-  S = X1(2)-X1(1)
-  DO I=2,N2(1)-1
-    IDX(1,I) = INT( (X2(I)-X1(1))/S ) +1
-    IDX(2,I) = IDX(1,I)+1
-    COX(2,I) = (X2(I)-X1(IDX(1,I)))/S
-    COX(1,I) = 1.0-COX(2,I)
-  ENDDO
+      ! x: uniform grid
+      s = x1(2) - x1(1)
+      do i = 2, n2(1) - 1
+         idx(1, i) = int((x2(i) - x1(1))/s) + 1
+         idx(2, i) = idx(1, i) + 1
+         cox(2, i) = (x2(i) - x1(idx(1, i)))/s
+         cox(1, i) = 1.0 - cox(2, i)
+      end do
 
-  ! Y: UNIFORM GRID
-  S = Y1(2)-Y1(1)
-  DO J=2,N2(2)-1
-    IDY(1,J) = INT( (Y2(J)-Y1(1))/S ) +1
-    IDY(2,J) = IDY(1,J)+1
-    COY(2,J) = (Y2(J)-Y1(IDY(1,J)))/S
-    COY(1,J) = 1.0-COY(2,J)
-  ENDDO
+      ! y: uniform grid
+      s = y1(2) - y1(1)
+      do j = 2, n2(2) - 1
+         idy(1, j) = int((y2(j) - y1(1))/s) + 1
+         idy(2, j) = idy(1, j) + 1
+         coy(2, j) = (y2(j) - y1(idy(1, j)))/s
+         coy(1, j) = 1.0 - coy(2, j)
+      end do
 
-  ! Z: NON-UNIFORM GRID
-  DO K=2,N2(3)-1
-    IDZ(1,K) = IDZ(1,K-1)
-    IDZ(2,K) = IDZ(1,K)+1
-    DO WHILE ( (IDZ(1,K) .LT. N1(3)) .AND. ( &
-      ( (Z1(1) .LT. Z1(2)) .AND. (Z2(K) .GE. Z1(IDZ(2,K))) ) .OR. &
-      ( (Z1(1) .GT. Z1(2)) .AND. (Z2(K) .LE. Z1(IDZ(2,K))) ) ) )
-      IDZ(1:2,K) = IDZ(1:2,K)+1
-    ENDDO
-  ENDDO
+      ! z: non-uniform grid
+      do k = 2, n2(3) - 1
+         idz(1, k) = idz(1, k - 1)
+         idz(2, k) = idz(1, k) + 1
+         do while ((idz(1, k) .lt. n1(3)) .and. ( &
+                   ((z1(1) .lt. z1(2)) .and. (z2(k) .ge. z1(idz(2, k)))) .or. &
+                   ((z1(1) .gt. z1(2)) .and. (z2(k) .le. z1(idz(2, k))))))
+            idz(1:2, k) = idz(1:2, k) + 1
+         end do
+      end do
 
-  ! T: UNIFORM GRID:
-  IF (N1(4) .GT. 1) S = T1(2)-T1(1)
-  DO L=2,N2(4)-1
-    IDT(1,L) = INT( (T2(L)-T1(1))/S ) +1
-    IDT(2,L) = IDT(1,L)+1
-    COT(2,L) = (T2(L)-T1(IDT(1,L)))/S
-    COT(1,L) = 1.0-COT(2,L)
-  ENDDO
+      ! t: uniform grid:
+      if (n1(4) .gt. 1) s = t1(2) - t1(1)
+      do l = 2, n2(4) - 1
+         idt(1, l) = int((t2(l) - t1(1))/s) + 1
+         idt(2, l) = idt(1, l) + 1
+         cot(2, l) = (t2(l) - t1(idt(1, l)))/s
+         cot(1, l) = 1.0 - cot(2, l)
+      end do
 
-  ! INTERPOLATIONS:
-  DO L=1,N2(4)
-  DO K=1,N2(3)
-  DO J=1,N2(2)
-  DO I=1,N2(1)
-    G2(I,J,K,L,1:NV) = &
-      G1(IDX(1,I),IDY(1,J),IDZ(1,K),IDT(1,L),1:NV)*COX(1,I)*COY(1,J)*COZ(1,K)*COT(1,L)+ &
+      ! interpolations:
+      do l = 1, n2(4)
+      do k = 1, n2(3)
+      do j = 1, n2(2)
+      do i = 1, n2(1)
+         g2(i, j, k, l, 1:nv) = &
+            g1(idx(1, i), idy(1, j), idz(1, k), idt(1, l), 1:nv)*cox(1, i)*coy(1, j)*coz(1, k)*cot(1, l) + &
+            g1(idx(2, i), idy(1, j), idz(1, k), idt(1, l), 1:nv)*cox(2, i)*coy(1, j)*coz(1, k)*cot(1, l) + &
+            g1(idx(1, i), idy(2, j), idz(1, k), idt(1, l), 1:nv)*cox(1, i)*coy(2, j)*coz(1, k)*cot(1, l) + &
+            g1(idx(1, i), idy(1, j), idz(2, k), idt(1, l), 1:nv)*cox(1, i)*coy(1, j)*coz(2, k)*cot(1, l) + &
+            g1(idx(1, i), idy(1, j), idz(1, k), idt(2, l), 1:nv)*cox(1, i)*coy(1, j)*coz(1, k)*cot(2, l) + &
+            g1(idx(2, i), idy(2, j), idz(1, k), idt(1, l), 1:nv)*cox(2, i)*coy(2, j)*coz(1, k)*cot(1, l) + &
+            g1(idx(2, i), idy(1, j), idz(2, k), idt(1, l), 1:nv)*cox(2, i)*coy(1, j)*coz(2, k)*cot(1, l) + &
+            g1(idx(2, i), idy(1, j), idz(1, k), idt(2, l), 1:nv)*cox(2, i)*coy(1, j)*coz(1, k)*cot(2, l) + &
+            g1(idx(1, i), idy(2, j), idz(2, k), idt(1, l), 1:nv)*cox(1, i)*coy(2, j)*coz(2, k)*cot(1, l) + &
+            g1(idx(1, i), idy(2, j), idz(1, k), idt(2, l), 1:nv)*cox(1, i)*coy(2, j)*coz(1, k)*cot(2, l) + &
+            g1(idx(1, i), idy(1, j), idz(2, k), idt(2, l), 1:nv)*cox(1, i)*coy(1, j)*coz(2, k)*cot(2, l) + &
+            g1(idx(2, i), idy(2, j), idz(2, k), idt(1, l), 1:nv)*cox(2, i)*coy(2, j)*coz(2, k)*cot(1, l) + &
+            g1(idx(2, i), idy(2, j), idz(1, k), idt(2, l), 1:nv)*cox(2, i)*coy(2, j)*coz(1, k)*cot(2, l) + &
+            g1(idx(2, i), idy(1, j), idz(2, k), idt(2, l), 1:nv)*cox(2, i)*coy(1, j)*coz(2, k)*cot(2, l) + &
+            g1(idx(1, i), idy(2, j), idz(2, k), idt(2, l), 1:nv)*cox(1, i)*coy(2, j)*coz(2, k)*cot(2, l) + &
+            g1(idx(2, i), idy(2, j), idz(2, k), idt(2, l), 1:nv)*cox(2, i)*coy(2, j)*coz(2, k)*cot(2, l)
+      end do
+      end do
+      end do
+      end do
 
-      G1(IDX(2,I),IDY(1,J),IDZ(1,K),IDT(1,L),1:NV)*COX(2,I)*COY(1,J)*COZ(1,K)*COT(1,L)+ &
-      G1(IDX(1,I),IDY(2,J),IDZ(1,K),IDT(1,L),1:NV)*COX(1,I)*COY(2,J)*COZ(1,K)*COT(1,L)+ &
-      G1(IDX(1,I),IDY(1,J),IDZ(2,K),IDT(1,L),1:NV)*COX(1,I)*COY(1,J)*COZ(2,K)*COT(1,L)+ &
-      G1(IDX(1,I),IDY(1,J),IDZ(1,K),IDT(2,L),1:NV)*COX(1,I)*COY(1,J)*COZ(1,K)*COT(2,L)+ &
+   end subroutine gridtrans
 
-      G1(IDX(2,I),IDY(2,J),IDZ(1,K),IDT(1,L),1:NV)*COX(2,I)*COY(2,J)*COZ(1,K)*COT(1,L)+ &
-      G1(IDX(2,I),IDY(1,J),IDZ(2,K),IDT(1,L),1:NV)*COX(2,I)*COY(1,J)*COZ(2,K)*COT(1,L)+ &
-      G1(IDX(2,I),IDY(1,J),IDZ(1,K),IDT(2,L),1:NV)*COX(2,I)*COY(1,J)*COZ(1,K)*COT(2,L)+ &
-      G1(IDX(1,I),IDY(2,J),IDZ(2,K),IDT(1,L),1:NV)*COX(1,I)*COY(2,J)*COZ(2,K)*COT(1,L)+ &
-      G1(IDX(1,I),IDY(2,J),IDZ(1,K),IDT(2,L),1:NV)*COX(1,I)*COY(2,J)*COZ(1,K)*COT(2,L)+ &
-      G1(IDX(1,I),IDY(1,J),IDZ(2,K),IDT(2,L),1:NV)*COX(1,I)*COY(1,J)*COZ(2,K)*COT(2,L)+ &
-
-      G1(IDX(2,I),IDY(2,J),IDZ(2,K),IDT(1,L),1:NV)*COX(2,I)*COY(2,J)*COZ(2,K)*COT(1,L)+ &
-      G1(IDX(2,I),IDY(2,J),IDZ(1,K),IDT(2,L),1:NV)*COX(2,I)*COY(2,J)*COZ(1,K)*COT(2,L)+ &
-      G1(IDX(2,I),IDY(1,J),IDZ(2,K),IDT(2,L),1:NV)*COX(2,I)*COY(1,J)*COZ(2,K)*COT(2,L)+ &
-      G1(IDX(1,I),IDY(2,J),IDZ(2,K),IDT(2,L),1:NV)*COX(1,I)*COY(2,J)*COZ(2,K)*COT(2,L)+ &
-
-      G1(IDX(2,I),IDY(2,J),IDZ(2,K),IDT(2,L),1:NV)*COX(2,I)*COY(2,J)*COZ(2,K)*COT(2,L)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-
-END SUBROUTINE GRIDTRANS
-
-SUBROUTINE BKGTOFINE(NS,NB,XB,YB,ZB,TB,NF,XF,YF,ZF,TF,BK,FG)
+   subroutine bkgtofine(ns, nb, xb, yb, zb, tb, nf, xf, yf, zf, tf, bk, fg)
 !*************************************************
-!  THIS ROUTINE MAPS MODEL BACKGROUND VARIABLES TO 
-!  THE FINEST GRID OF STMAS MULTIGRID.
+!  this routine maps model background variables to
+!  the finest grid of stmas multigrid.
 !
-!  HISTORY: APR. 2008, CODED BY YUANFU XIE.
+!  history: apr. 2008, coded by yuanfu xie.
 !*************************************************
 
-  IMPLICIT NONE
+      implicit none
 
-  INTEGER, INTENT(IN) :: NS	! NUMBER OF VAR TO MAP
-  INTEGER, INTENT(IN) :: NB(4)	! NUMBERS OF BK GRIDPOINT
-  INTEGER, INTENT(IN) :: NF(4)	! NUMBERS OF FINE GRIDPTS
+      integer, intent(in) :: ns        ! number of var to map
+      integer, intent(in) :: nb(4)        ! numbers of bk gridpoint
+      integer, intent(in) :: nf(4)        ! numbers of fine gridpts
 
-  REAL,    INTENT(IN) :: XB(NB(1)),YB(NB(2)),ZB(NB(3)),TB(NB(4))
-				! BKG GRID POSITIONS
-  REAL,    INTENT(IN) :: XF(NF(1)),YF(NF(2)),ZF(NF(3)),TF(NF(4))
-				! FINE GRID POSITIONS
-  REAL,    INTENT(IN) :: BK(NB(1),NB(2),NB(3),NB(4),NS)
-				! BACKGROUND VARIABLES
-  REAL,    INTENT(OUT) :: FG(NF(1),NF(2),NF(3),NF(4),NS)
+      real, intent(in) :: xb(nb(1)), yb(nb(2)), zb(nb(3)), tb(nb(4))
+      ! bkg grid positions
+      real, intent(in) :: xf(nf(1)), yf(nf(2)), zf(nf(3)), tf(nf(4))
+      ! fine grid positions
+      real, intent(in) :: bk(nb(1), nb(2), nb(3), nb(4), ns)
+      ! background variables
+      real, intent(out) :: fg(nf(1), nf(2), nf(3), nf(4), ns)
 
-  ! LOCAL VARIABLES:
-  INTEGER :: I,J,K,L,ID(2,4)
-  REAL    :: CO(2,4)
+      ! local variables:
+      integer :: i, j, k, l, id(2, 4)
+      real    :: co(2, 4)
 
-  ! FOR ALL GRID POINTS OVER THE FINEST GRID:
-  ID(1,4) = 1
-  ID(2,4) = MIN0(2,NB(4))
-  DO L=1,NF(4)
+      ! for all grid points over the finest grid:
+      id(1, 4) = 1
+      id(2, 4) = min0(2, nb(4))
+      do l = 1, nf(4)
 
-    ! FINE GRID POINTS PASSES BK GRID POINTS:
-    IF (NB(4) .EQ. 1) THEN	! ONLY ONE GRIDPOINT CASE
-      ID(2,4) = ID(1,4)+1
-    ELSE
-      DO WHILE ( (ID(1,4) .LT. NB(4)) .AND. (TF(L) .GE. TB(ID(2,4))) )
-        ID(1,4) = ID(1,4)+1
-        ID(2,4) = ID(1,4)+1
-      ENDDO
-    ENDIF
+         ! fine grid points passes bk grid points:
+         if (nb(4) .eq. 1) then        ! only one gridpoint case
+            id(2, 4) = id(1, 4) + 1
+         else
+            do while ((id(1, 4) .lt. nb(4)) .and. (tf(l) .ge. tb(id(2, 4))))
+               id(1, 4) = id(1, 4) + 1
+               id(2, 4) = id(1, 4) + 1
+            end do
+         end if
 
-    ! COEFFICIENTS:
-    IF (ID(2,4) .GT. NB(4)) THEN
-      ID(1:2,4) = NB(4)
-      CO(2,4) = 0.0
-    ELSE
-      CO(2,4) = (TF(L)-TB(ID(1,4)))/(TB(ID(2,4))-TB(ID(1,4)))
-    ENDIF
-    CO(1,4) = 1.0-CO(2,4)
+         ! coefficients:
+         if (id(2, 4) .gt. nb(4)) then
+            id(1:2, 4) = nb(4)
+            co(2, 4) = 0.0
+         else
+            co(2, 4) = (tf(l) - tb(id(1, 4)))/(tb(id(2, 4)) - tb(id(1, 4)))
+         end if
+         co(1, 4) = 1.0 - co(2, 4)
 
-    ! INITIALIZE GRID LEVEL 3:
-    ID(1,3) = 1
-    ID(2,3) = MIN0(2,NB(3))
-    DO K=1,NF(3)
+         ! initialize grid level 3:
+         id(1, 3) = 1
+         id(2, 3) = min0(2, nb(3))
+         do k = 1, nf(3)
 
-      ! FINE GRID POINTS PASSES BK GRID POINTS:
-      IF (NB(3) .EQ. 1) THEN		! ONLY ONE GRIDPOINT CASE
-        ID(2,3) = ID(1,3)+1
-      ELSE
-        DO WHILE ( (ID(1,3) .LT. NB(3)) .AND. ( &
-	   ((ZB(1) .GT. ZB(2)) .AND. (ZF(K) .LE. ZB(ID(2,3)))) .OR. &
-           ((ZB(1) .LT. ZB(2)) .AND. (ZF(K) .GE. ZB(ID(2,3)))) ) )
-        ID(1,3) = ID(1,3)+1
-        ID(2,3) = ID(1,3)+1
-        ENDDO
-      ENDIF
+            ! fine grid points passes bk grid points:
+            if (nb(3) .eq. 1) then                ! only one gridpoint case
+               id(2, 3) = id(1, 3) + 1
+            else
+               do while ((id(1, 3) .lt. nb(3)) .and. ( &
+                         ((zb(1) .gt. zb(2)) .and. (zf(k) .le. zb(id(2, 3)))) .or. &
+                         ((zb(1) .lt. zb(2)) .and. (zf(k) .ge. zb(id(2, 3))))))
+                  id(1, 3) = id(1, 3) + 1
+                  id(2, 3) = id(1, 3) + 1
+               end do
+            end if
 
-      ! COEFFICIENTS:
-      IF (ID(2,3) .GT. NB(3)) THEN
-        ID(1:2,3) = NB(3)
-        CO(2,3) = 0.0
-      ELSE
-        CO(2,3) = (ZF(K)-ZB(ID(1,3)))/(ZB(ID(2,3))-ZB(ID(1,3)))
-      ENDIF
-      CO(1,3) = 1.0-CO(2,3)
+            ! coefficients:
+            if (id(2, 3) .gt. nb(3)) then
+               id(1:2, 3) = nb(3)
+               co(2, 3) = 0.0
+            else
+               co(2, 3) = (zf(k) - zb(id(1, 3)))/(zb(id(2, 3)) - zb(id(1, 3)))
+            end if
+            co(1, 3) = 1.0 - co(2, 3)
 
-      ! INITIALIZE GRID LEVEL 2:
-      ID(1,2) = 1
-      ID(2,2) = MIN0(2,NB(2))
-      DO J=1,NF(2)
+            ! initialize grid level 2:
+            id(1, 2) = 1
+            id(2, 2) = min0(2, nb(2))
+            do j = 1, nf(2)
 
-        ! FINE GRID POINTS PASSES BK GRID POINTS:
-        IF (NB(2) .EQ. 1) THEN	! ONLY ONE GRIDPOINT CASE
-          ID(2,2) = ID(1,2)+1
-        ELSE
-          DO WHILE ( (ID(1,2) .LT. NB(2)) .AND. (YF(J) .GE. YB(ID(2,2))) )
-            ID(1,2) = ID(1,2)+1
-            ID(2,2) = ID(1,2)+1
-          ENDDO
-        ENDIF
+               ! fine grid points passes bk grid points:
+               if (nb(2) .eq. 1) then        ! only one gridpoint case
+                  id(2, 2) = id(1, 2) + 1
+               else
+                  do while ((id(1, 2) .lt. nb(2)) .and. (yf(j) .ge. yb(id(2, 2))))
+                     id(1, 2) = id(1, 2) + 1
+                     id(2, 2) = id(1, 2) + 1
+                  end do
+               end if
 
-        ! COEFFICIENTS:
-        IF (ID(2,2) .GT. NB(2)) THEN
-          ID(1:2,2) = NB(2)
-          CO(2,2) = 0.0
-        ELSE
-          CO(2,2) = (YF(J)-YB(ID(1,2)))/(YB(ID(2,2))-YB(ID(1,2)))
-        ENDIF
-        CO(1,2) = 1.0-CO(2,2)
+               ! coefficients:
+               if (id(2, 2) .gt. nb(2)) then
+                  id(1:2, 2) = nb(2)
+                  co(2, 2) = 0.0
+               else
+                  co(2, 2) = (yf(j) - yb(id(1, 2)))/(yb(id(2, 2)) - yb(id(1, 2)))
+               end if
+               co(1, 2) = 1.0 - co(2, 2)
 
-        ! INITIALIZE GRID LEVEL 2:
-        ID(1,1) = 1
-        ID(2,1) = MIN0(2,NB(1))
-        DO I=1,NF(1)
+               ! initialize grid level 2:
+               id(1, 1) = 1
+               id(2, 1) = min0(2, nb(1))
+               do i = 1, nf(1)
 
-          ! FINE GRID POINTS PASSES BK GRID POINTS:
-          IF (NB(1) .EQ. 1) THEN	! ONLY ONE GRIDPOINT CASE
-            ID(2,1) = ID(1,1)+1
-          ELSE
-            DO WHILE ( (ID(1,1) .LT. NB(1)) .AND. (XF(I) .GE. XB(ID(2,1))) )
-              ID(1,1) = ID(1,1)+1
-              ID(2,1) = ID(1,1)+1
-            ENDDO
-          ENDIF
+                  ! fine grid points passes bk grid points:
+                  if (nb(1) .eq. 1) then        ! only one gridpoint case
+                     id(2, 1) = id(1, 1) + 1
+                  else
+                     do while ((id(1, 1) .lt. nb(1)) .and. (xf(i) .ge. xb(id(2, 1))))
+                        id(1, 1) = id(1, 1) + 1
+                        id(2, 1) = id(1, 1) + 1
+                     end do
+                  end if
 
-          ! COEFFICIENTS:
-          IF (ID(2,1) .GT. NB(1)) THEN
-            ID(1:2,1) = NB(1)
-            CO(2,1) = 0.0
-          ELSE
-            CO(2,1) = (XF(I)-XB(ID(1,1)))/(XB(ID(2,1))-XB(ID(1,1)))
-          ENDIF
-          CO(1,1) = 1.0-CO(2,1)
+                  ! coefficients:
+                  if (id(2, 1) .gt. nb(1)) then
+                     id(1:2, 1) = nb(1)
+                     co(2, 1) = 0.0
+                  else
+                     co(2, 1) = (xf(i) - xb(id(1, 1)))/(xb(id(2, 1)) - xb(id(1, 1)))
+                  end if
+                  co(1, 1) = 1.0 - co(2, 1)
 
-	  FG(I,J,K,L,1:NS) = &
-	    BK(ID(1,1),ID(1,2),ID(1,3),ID(1,4),1:NS)*CO(1,1)*CO(1,2)*CO(1,3)*CO(1,4)+ &
+                  fg(i, j, k, l, 1:ns) = &
+                     bk(id(1, 1), id(1, 2), id(1, 3), id(1, 4), 1:ns)*co(1, 1)*co(1, 2)*co(1, 3)*co(1, 4) + &
+                     bk(id(2, 1), id(1, 2), id(1, 3), id(1, 4), 1:ns)*co(2, 1)*co(1, 2)*co(1, 3)*co(1, 4) + &
+                     bk(id(1, 1), id(2, 2), id(1, 3), id(1, 4), 1:ns)*co(1, 1)*co(2, 2)*co(1, 3)*co(1, 4) + &
+                     bk(id(1, 1), id(1, 2), id(2, 3), id(1, 4), 1:ns)*co(1, 1)*co(1, 2)*co(2, 3)*co(1, 4) + &
+                     bk(id(1, 1), id(1, 2), id(1, 3), id(2, 4), 1:ns)*co(1, 1)*co(1, 2)*co(1, 3)*co(2, 4) + &
+                     bk(id(2, 1), id(2, 2), id(1, 3), id(1, 4), 1:ns)*co(2, 1)*co(2, 2)*co(1, 3)*co(1, 4) + &
+                     bk(id(2, 1), id(1, 2), id(2, 3), id(1, 4), 1:ns)*co(2, 1)*co(1, 2)*co(2, 3)*co(1, 4) + &
+                     bk(id(2, 1), id(1, 2), id(1, 3), id(2, 4), 1:ns)*co(2, 1)*co(1, 2)*co(1, 3)*co(2, 4) + &
+                     bk(id(1, 1), id(2, 2), id(2, 3), id(1, 4), 1:ns)*co(1, 1)*co(2, 2)*co(2, 3)*co(1, 4) + &
+                     bk(id(1, 1), id(2, 2), id(1, 3), id(2, 4), 1:ns)*co(1, 1)*co(2, 2)*co(1, 3)*co(2, 4) + &
+                     bk(id(1, 1), id(1, 2), id(2, 3), id(2, 4), 1:ns)*co(1, 1)*co(1, 2)*co(2, 3)*co(2, 4) + &
+                     bk(id(2, 1), id(2, 2), id(2, 3), id(1, 4), 1:ns)*co(2, 1)*co(2, 2)*co(2, 3)*co(1, 4) + &
+                     bk(id(2, 1), id(2, 2), id(1, 3), id(2, 4), 1:ns)*co(2, 1)*co(2, 2)*co(1, 3)*co(2, 4) + &
+                     bk(id(2, 1), id(1, 2), id(2, 3), id(2, 4), 1:ns)*co(2, 1)*co(1, 2)*co(2, 3)*co(2, 4) + &
+                     bk(id(1, 1), id(2, 2), id(2, 3), id(2, 4), 1:ns)*co(1, 1)*co(2, 2)*co(2, 3)*co(2, 4) + &
+                     bk(id(2, 1), id(2, 2), id(2, 3), id(2, 4), 1:ns)*co(2, 1)*co(2, 2)*co(2, 3)*co(2, 4)
+               end do
+            end do
+         end do
+      end do
+   end subroutine bkgtofine
 
-            BK(ID(2,1),ID(1,2),ID(1,3),ID(1,4),1:NS)*CO(2,1)*CO(1,2)*CO(1,3)*CO(1,4)+ &
-            BK(ID(1,1),ID(2,2),ID(1,3),ID(1,4),1:NS)*CO(1,1)*CO(2,2)*CO(1,3)*CO(1,4)+ &
-            BK(ID(1,1),ID(1,2),ID(2,3),ID(1,4),1:NS)*CO(1,1)*CO(1,2)*CO(2,3)*CO(1,4)+ &
-            BK(ID(1,1),ID(1,2),ID(1,3),ID(2,4),1:NS)*CO(1,1)*CO(1,2)*CO(1,3)*CO(2,4)+ &
-
-            BK(ID(2,1),ID(2,2),ID(1,3),ID(1,4),1:NS)*CO(2,1)*CO(2,2)*CO(1,3)*CO(1,4)+ &
-            BK(ID(2,1),ID(1,2),ID(2,3),ID(1,4),1:NS)*CO(2,1)*CO(1,2)*CO(2,3)*CO(1,4)+ &
-            BK(ID(2,1),ID(1,2),ID(1,3),ID(2,4),1:NS)*CO(2,1)*CO(1,2)*CO(1,3)*CO(2,4)+ &
-            BK(ID(1,1),ID(2,2),ID(2,3),ID(1,4),1:NS)*CO(1,1)*CO(2,2)*CO(2,3)*CO(1,4)+ &
-            BK(ID(1,1),ID(2,2),ID(1,3),ID(2,4),1:NS)*CO(1,1)*CO(2,2)*CO(1,3)*CO(2,4)+ &
-            BK(ID(1,1),ID(1,2),ID(2,3),ID(2,4),1:NS)*CO(1,1)*CO(1,2)*CO(2,3)*CO(2,4)+ &
-
-            BK(ID(2,1),ID(2,2),ID(2,3),ID(1,4),1:NS)*CO(2,1)*CO(2,2)*CO(2,3)*CO(1,4)+ &
-            BK(ID(2,1),ID(2,2),ID(1,3),ID(2,4),1:NS)*CO(2,1)*CO(2,2)*CO(1,3)*CO(2,4)+ &
-            BK(ID(2,1),ID(1,2),ID(2,3),ID(2,4),1:NS)*CO(2,1)*CO(1,2)*CO(2,3)*CO(2,4)+ &
-            BK(ID(1,1),ID(2,2),ID(2,3),ID(2,4),1:NS)*CO(1,1)*CO(2,2)*CO(2,3)*CO(2,4)+ &
-
-            BK(ID(2,1),ID(2,2),ID(2,3),ID(2,4),1:NS)*CO(2,1)*CO(2,2)*CO(2,3)*CO(2,4)
-       ENDDO
-      ENDDO
-    ENDDO
-  ENDDO
-END SUBROUTINE BKGTOFINE
-
-SUBROUTINE DIRECTION(U,V,DG)
+   subroutine direction(u, v, dg)
 !*************************************************
-! CALCULATE DIRECTION (GENERAL) (NOT USED)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! calculate direction (general) (not used)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL  :: U,V,DG,RA
+      real  :: u, v, dg, ra
 ! --------------------
-  RA=ATAN(1.0D0)/45.0D0
-  IF(U.EQ.0.0D0)THEN
-    IF(V.GT.0.0D0)THEN
-      DG=90.0D0
-    ELSE
-      DG=270.0D0
-    ENDIF
-  ELSE
-    DG=ATAN2(V,U)/RA
-    IF(DG.LT.0.0D0)DG=DG+360.0D0
-  ENDIF
-  RETURN
-END SUBROUTINE DIRECTION
+      ra = atan(1.0d0)/45.0d0
+      if (u .eq. 0.0d0) then
+         if (v .gt. 0.0d0) then
+            dg = 90.0d0
+         else
+            dg = 270.0d0
+         end if
+      else
+         dg = atan2(v, u)/ra
+         if (dg .lt. 0.0d0) dg = dg + 360.0d0
+      end if
+      return
+   end subroutine direction
 
-SUBROUTINE GETOBDATE(AD,DH,BD)
+   subroutine getobdate(ad, dh, bd)
 !*************************************************
-! CALCULATE OBSERVATION DATE, MODIFIED FROM 'raob2dwl.f' (GENERAL) (NOT USED)
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
-!          MARCH 2008, MODIFIED BY ZHONGJIE HE.
+! calculate observation date, modified from 'raob2dwl.f' (general) (not used)
+! history: september 2007, coded by wei li.
+!          march 2008, modified by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: MN(12)
-  INTEGER  :: DT,IY,IM,ID
-  REAL  :: AD,BD,HR,DH
-  LOGICAL      :: FG
-  DATA MN/31,28,31,30,31,30,31,31,30,31,30,31/
-!  REAL ,EXTERNAL :: RELDAY
+      integer  :: mn(12)
+      integer  :: dt, iy, im, id
+      real  :: ad, bd, hr, dh
+      logical      :: fg
+      data mn/31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/
+!  real ,external :: relday
 ! --------------------
-  DT = NINT(AD)
-  IY = MOD(DT/1000000,100 )
-  IM = MOD(DT/10000  ,100 )
-  ID = MOD(DT/100    ,100 )
-  HR = AD - DT/100*100 + DH
-  IF(MOD(IY,4).EQ.0) MN(2) = 29
-  FG=.TRUE.
-  DO WHILE (FG)
-    IF(HR.LT.0) THEN
-      HR = HR+24
-      ID = ID-1
-      IF(ID.EQ.0) THEN
-        IM = IM-1
-        IF(IM.EQ.0) THEN
-          IM = 12
-          IY = IY-1
-          IF(IY.LT.0) IY = 99
-        ENDIF
-        ID = MN(IM)
-      ENDIF
-    ELSEIF(HR.GE.24) THEN
-      HR = HR-24
-      ID = ID+1
-      IF(ID.GT.MN(IM)) THEN
-        ID = 1
-        IM = IM+1
-        IF(IM.GT.12) THEN
-          IM = 1
-          IY = MOD(IY+1,100)
-        ENDIF
-      ENDIF
-    ELSE
-      FG=.FALSE.
-    ENDIF
-  ENDDO
-!  BD = IY*1000000 + IM*10000 + ID*100 + HR
-!  IF(ABS(BD-1.0D0*IDNINT(BD)).LE..01)BD=1.0D0*IDNINT(BD)
-!  IY=IY+2000
-!  BD=RELDAY(0,0,0,ID,IM,IY)-RELDAY(0,0,0,1,1,2000)
-!  BD=BD+HR/24.0
-  RETURN
-END SUBROUTINE GETOBDATE
+      dt = nint(ad)
+      iy = mod(dt/1000000, 100)
+      im = mod(dt/10000, 100)
+      id = mod(dt/100, 100)
+      hr = ad - dt/100*100 + dh
+      if (mod(iy, 4) .eq. 0) mn(2) = 29
+      fg = .true.
+      do while (fg)
+         if (hr .lt. 0) then
+            hr = hr + 24
+            id = id - 1
+            if (id .eq. 0) then
+               im = im - 1
+               if (im .eq. 0) then
+                  im = 12
+                  iy = iy - 1
+                  if (iy .lt. 0) iy = 99
+               end if
+               id = mn(im)
+            end if
+         elseif (hr .ge. 24) then
+            hr = hr - 24
+            id = id + 1
+            if (id .gt. mn(im)) then
+               id = 1
+               im = im + 1
+               if (im .gt. 12) then
+                  im = 1
+                  iy = mod(iy + 1, 100)
+               end if
+            end if
+         else
+            fg = .false.
+         end if
+      end do
+!  bd = iy*1000000 + im*10000 + id*100 + hr
+!  if(abs(bd-1.0d0*idnint(bd)).le..01)bd=1.0d0*idnint(bd)
+!  iy=iy+2000
+!  bd=relday(0,0,0,id,im,iy)-relday(0,0,0,1,1,2000)
+!  bd=bd+hr/24.0
+      return
+   end subroutine getobdate
 
-SUBROUTINE OBSTOGRID(Y0,X0,Y00,X00,IM,JM,X,Y,IS)
+   subroutine obstogrid(y0, x0, y00, x00, im, jm, x, y, is)
 !*************************************************
-! CALCULATE THE POSITION OF OBSERVATION AT THE MODEL GRID.
-! HISTORY: FEBURARY 2008, CODED by ZHONGJIE HE.
+! calculate the position of observation at the model grid.
+! history: feburary 2008, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
-  INTEGER  :: I,J
-  INTEGER , INTENT(IN)  :: IM,JM
-  REAL    , INTENT(IN)  :: X0,Y0
-  REAL    , INTENT(IN)  :: X00(IM,JM),Y00(IM,JM)
-  REAL    , INTENT(OUT) :: X,Y
-  INTEGER , INTENT(OUT) :: IS
+      implicit none
+      integer  :: i, j
+      integer, intent(in)  :: im, jm
+      real, intent(in)  :: x0, y0
+      real, intent(in)  :: x00(im, jm), y00(im, jm)
+      real, intent(out) :: x, y
+      integer, intent(out) :: is
 !--------------------
-  IS=0
-  X=0
-  Y=0
+      is = 0
+      x = 0
+      y = 0
 
-  IF(X0.LE.X00(1,1)) THEN
-    IF(ABS(X00(1,1)-X00(2,1)).LE.1E-10) RETURN 
-    X=1-(X0-X00(1,1))/(X00(1,1)-X00(2,1))
-  ENDIF
-  IF(X0.GE.X00(IM,JM)) THEN
-    IF(ABS(X00(IM,JM)-X00(IM-1,JM)).LE.1E-10) RETURN
-    X=IM+(X0-X00(IM,JM))/(X00(IM,JM)-X00(IM-1,JM))
-  ENDIF
-  DO I=2,IM
-    IF(X0.GE.X00(I-1,1) .AND. X0.LT.X00(I,1)) THEN
-      IF(ABS(X00(I-1,1)-X00(I,1)).LE.1E-10) RETURN
-      X=I-1+(X0-X00(I-1,1))/(X00(I,1)-X00(I-1,1))
-    ENDIF
-  ENDDO  
+      if (x0 .le. x00(1, 1)) then
+         if (abs(x00(1, 1) - x00(2, 1)) .le. 1e-10) return
+         x = 1 - (x0 - x00(1, 1))/(x00(1, 1) - x00(2, 1))
+      end if
+      if (x0 .ge. x00(im, jm)) then
+         if (abs(x00(im, jm) - x00(im - 1, jm)) .le. 1e-10) return
+         x = im + (x0 - x00(im, jm))/(x00(im, jm) - x00(im - 1, jm))
+      end if
+      do i = 2, im
+         if (x0 .ge. x00(i - 1, 1) .and. x0 .lt. x00(i, 1)) then
+            if (abs(x00(i - 1, 1) - x00(i, 1)) .le. 1e-10) return
+            x = i - 1 + (x0 - x00(i - 1, 1))/(x00(i, 1) - x00(i - 1, 1))
+         end if
+      end do
 
-  IF(Y0.LE.Y00(1,1)) THEN
-    IF(ABS(Y00(1,1)-Y00(1,2)).LE.1E-10) RETURN
-    Y=1-(Y0-Y00(1,1))/(Y00(1,1)-Y00(1,2))
-  ENDIF
-  IF(Y0.GE.Y00(IM,JM)) THEN
-    IF(ABS(Y00(IM,JM)-Y00(IM,JM-1)).LE.1E-10) RETURN
-    Y=JM+(Y0-Y00(IM,JM))/(Y00(IM,JM)-Y00(IM,JM-1))
-  ENDIF
-  DO J=2,JM
-    IF(Y0.GE.Y00(1,J-1) .AND. Y0.LT.Y00(1,J)) THEN
-      IF(ABS(Y00(1,J-1)-Y00(1,J)).LE.1E-10) RETURN
-      Y=J-1+(Y0-Y00(1,J-1))/(Y00(1,J)-Y00(1,J-1))
-    ENDIF
-  ENDDO
-  
-  IF(X.GE.1 .AND. X.LE.IM .AND. Y.GE.1 .AND. Y.LE.JM) IS=1
+      if (y0 .le. y00(1, 1)) then
+         if (abs(y00(1, 1) - y00(1, 2)) .le. 1e-10) return
+         y = 1 - (y0 - y00(1, 1))/(y00(1, 1) - y00(1, 2))
+      end if
+      if (y0 .ge. y00(im, jm)) then
+         if (abs(y00(im, jm) - y00(im, jm - 1)) .le. 1e-10) return
+         y = jm + (y0 - y00(im, jm))/(y00(im, jm) - y00(im, jm - 1))
+      end if
+      do j = 2, jm
+         if (y0 .ge. y00(1, j - 1) .and. y0 .lt. y00(1, j)) then
+            if (abs(y00(1, j - 1) - y00(1, j)) .le. 1e-10) return
+            y = j - 1 + (y0 - y00(1, j - 1))/(y00(1, j) - y00(1, j - 1))
+         end if
+      end do
 
-  RETURN
-END SUBROUTINE OBSTOGRID
+      if (x .ge. 1 .and. x .le. im .and. y .ge. 1 .and. y .le. jm) is = 1
 
-END MODULE GENERALTOOLS
+      return
+   end subroutine obstogrid
+
+end module generaltools

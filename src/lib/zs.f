@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -31,16 +31,16 @@ cdis
 cdis
         subroutine zs(precip_rate,temp_col_max,ni,nj,s_2d_out)
 
-!           1994    Steve Albers
-!       Jan 1998    Steve Albers     Remove lapsparms.inc and other cleanup
+!           1994    steve albers
+!       jan 1998    steve albers     remove lapsparms.inc and other cleanup
 
         real precip_rate(ni,nj)
-        real temp_col_max(ni,nj) ! Deg K
+        real temp_col_max(ni,nj) ! deg k
         real s_2d_out(ni,nj)
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting ref_base in zs'
+            write(6,*)' error getting ref_base in zs'
             stop
         endif
 
@@ -74,34 +74,34 @@ cdis
 
         function snow_to_rain_ratio(temp_col_max)
 
-!       Note that temp_col_max is in Deg K
+!       note that temp_col_max is in deg k
 
-        temp_col_c = temp_col_max - 273.15   ! Convert from K to C
+        temp_col_c = temp_col_max - 273.15   ! convert from k to c
 
-        if(temp_col_c .ge. 0.0)then          !  T > 0C, use 10
+        if(temp_col_c .ge. 0.0)then          !  t > 0c, use 10
 
             snow_to_rain_ratio = 10.
 
-        elseif(temp_col_c .ge. -3.0)then     !  0C > T >  -3C, ramp 10 - 15
+        elseif(temp_col_c .ge. -3.0)then     !  0c > t >  -3c, ramp 10 - 15
 
             frac = temp_col_c/ (-3.0)
             snow_to_rain_ratio = 10. * (1. - frac) + 15. * frac
 
-        elseif(temp_col_c .ge. -10.0)then    !  -3C > T > -10C, ramp 15 - 25
+        elseif(temp_col_c .ge. -10.0)then    !  -3c > t > -10c, ramp 15 - 25
 
             frac = (temp_col_c - (-3.0)) / (-7.0)
             snow_to_rain_ratio = 15. * (1. - frac) + 25. * frac
 
-        elseif(temp_col_c .ge. -18.0)then    ! -10C > T > -18C, use 25
+        elseif(temp_col_c .ge. -18.0)then    ! -10c > t > -18c, use 25
 
             snow_to_rain_ratio = 25.
 
-        elseif(temp_col_c .ge. -22.0)then    ! -18C > T > -22C, ramp 25 - 15
+        elseif(temp_col_c .ge. -22.0)then    ! -18c > t > -22c, ramp 25 - 15
 
             frac = (temp_col_c - (-18.0)) / (-4.0)
             snow_to_rain_ratio = 25. * (1. - frac) + 15. * frac
 
-        else                                 !        T < -22C, use 15
+        else                                 !        t < -22c, use 15
 
             snow_to_rain_ratio = 15.
 

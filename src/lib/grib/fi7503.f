@@ -1,312 +1,312 @@
-      SUBROUTINE FI7503 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-     *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE,IGDS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7501      ROW BY ROW, COL BY COL PACKING
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-05-20
-C
-C ABSTRACT: PERFORM ROW BY ROW OR COLUMN BY COLUMN PACKING
-C   GENERATING ALL BDS INFORMATION.
-C
-C PROGRAM HISTORY LOG:
-C   93-08-06  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7503 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-C    *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE,IGDS)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - INTEGER SOURCE ARRAY
-C     NPTS     - NUMBER OF POINTS IN IWORK
-C     IBDSFL   - FLAGS
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IPFLD    - CONTAINS BDS FROM BYTE 12 ON
-C     BDS11    - CONTAINS FIRST 11 BYTES FOR BDS
-C     LEN      - NUMBER OF BYTES FROM 12 ON
-C     LENBDS   - TOTAL LENGTH OF BDS
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-      CHARACTER*1     BDS11(*),PDS(*)
-C
-      REAL            REFNCE
-C
-      INTEGER         ISCAL2,KWIDE
-      INTEGER         LENBDS
-      INTEGER         IPFLD(*),IGDS(*)
-      INTEGER         LEN,KBDS(22)
-      INTEGER         IWORK(*)
-C                        OCTET NUMBER IN SECTION, FIRST ORDER PACKING
-C     INTEGER         KBDS(12)
-C                        FLAGS
-      INTEGER         IBDSFL(*)
-C                        EXTENDED FLAGS
-C     INTEGER         KBDS(14)
-C                        OCTET NUMBER FOR SECOND ORDER PACKING
-C     INTEGER         KBDS(15)
-C                        NUMBER OF FIRST ORDER VALUES
-C     INTEGER         KBDS(17)
-C                        NUMBER OF SECOND ORDER PACKED VALUES
-C     INTEGER         KBDS(19)
-C                        WIDTH OF SECOND ORDER PACKING
-      INTEGER         ISOWID(50000)
-C                        SECONDARY BIT MAP
-      INTEGER         ISOBMP(8200)
-C                        FIRST ORDER PACKED VALUES
-      INTEGER         IFOVAL(50000)
-C                        SECOND ORDER PACKED VALUES
-      INTEGER         ISOVAL(100000)
-C
-C     INTEGER         KBDS(11)
-C  ----------------------------------
-C                       INITIALIZE ARRAYS
-      DO 100 I = 1, 50000
-          ISOWID(I)  = 0
-          IFOVAL(I)  = 0
-  100 CONTINUE
-C
-      DO 101 I = 1, 8200
-          ISOBMP(I)  = 0
-  101 CONTINUE
-      DO 102 I = 1, 100000
-          ISOVAL(I)  = 0
-  102 CONTINUE
-C                      INITIALIZE POINTERS
-C                            SECONDARY BIT WIDTH POINTER
-      IWDPTR  = 0
-C                            SECONDARY BIT MAP POINTER
-      IBMP2P  = 0
-C                            FIRST ORDER VALUE POINTER
-      IFOPTR  = 0
-C                            BYTE POINTER TO START OF 1ST ORDER VALUES
-      KBDS(12)  = 0
-C                            BYTE POINTER TO START OF 2ND ORDER VALUES
-      KBDS(15)  = 0
-C                            TO CONTAIN NUMBER OF FIRST ORDER VALUES
-      KBDS(17)  = 0
-C                            TO CONTAIN NUMBER OF SECOND ORDER VALUES
-      KBDS(19)  = 0
-C                            SECOND ORDER PACKED VALUE POINTER
-      ISOPTR  = 0
-C  =======================================================
-C                         BUILD SECOND ORDER BIT MAP IN EITHER
-C                         ROW BY ROW OR COL BY COL FORMAT
-      IF (IAND(IGDS(13),32).NE.0) THEN
-C                              COLUMN BY COLUMN
-          KOUT  = IGDS(4)
-          KIN   = IGDS(5)
-C         PRINT *,'COLUMN BY COLUMN',KOUT,KIN
-      ELSE
-C                              ROW BY ROW
-          KOUT  = IGDS(5)
-          KIN   = IGDS(4)
-C         PRINT *,'ROW BY ROW',KOUT,KIN
-      END IF
-      KBDS(17)  = KOUT
-      KBDS(19)  = NPTS
-C
-C     DO 4100 J = 1, NPTS, 53
-C         WRITE (6,4101) (IWORK(K),K=J,J+52)
- 4101     FORMAT (1X,25I4)
-C         PRINT *,' '
-C4100 CONTINUE
-C
-C                             INITIALIZE BIT MAP POINTER
-      IBMP2P = 0
-C                             CONSTRUCT WORKING BIT MAP
-      DO 2000 I = 1, KOUT
-          DO 1000 J = 1, KIN
-              IF (J.EQ.1) THEN
-                  CALL SBYTE (ISOBMP,1,IBMP2P,1)
-              ELSE
-                  CALL SBYTE (ISOBMP,0,IBMP2P,1)
-              END IF
-              IBMP2P  = IBMP2P + 1
- 1000     CONTINUE
- 2000 CONTINUE
-      LEN  = IBMP2P / 32 + 1
-C     CALL BINARY(ISOBMP,LEN)
-C
-C                       PROCESS OUTER LOOP OF ROW BY ROW OR COL BY COL
-C
-      KPTR  = 1
-      KBDS(11)  = KWIDE
-      DO 6000 I = 1, KOUT
-C                       IN CURRENT ROW OR COL
-C                              FIND FIRST ORDER VALUE
-          JPTR  = KPTR
-          LOWEST  = IWORK(JPTR)
-          DO 4000 J = 1, KIN
-              IF (IWORK(JPTR).LT.LOWEST) THEN
-                  LOWEST = IWORK(JPTR)
-              END IF
-              JPTR  = JPTR + 1
- 4000     CONTINUE
-C                            SAVE FIRST ORDER VALUE
-          CALL SBYTE (IFOVAL,LOWEST,IFOPTR,KWIDE)
-          IFOPTR  = IFOPTR + KWIDE
-C         PRINT *,'FOVAL',I,LOWEST,KWIDE
-C                            SUBTRACT FIRST ORDER VALUE FROM OTHER VALS
-C                                         GETTING SECOND ORDER VALUES
-          JPTR  = KPTR
-          IBIG  = IWORK(JPTR) - LOWEST
-          DO 4200 J = 1, KIN
-              IWORK(JPTR)  = IWORK(JPTR) - LOWEST
-              IF (IWORK(JPTR).GT.IBIG) THEN
-                  IBIG  = IWORK(JPTR)
-              END IF
-              JPTR  = JPTR + 1
- 4200     CONTINUE
-C                            HOW MANY BITS TO CONTAIN LARGEST SECOND
-C                                         ORDER VALUE IN SEGMENT
-          CALL FI7505 (IBIG,NWIDE)
-C                            SAVE BIT WIDTH
-          CALL SBYTE (ISOWID,NWIDE,IWDPTR,8)
-          IWDPTR  = IWDPTR + 8
-C         PRINT *,I,'SOVAL',IBIG,' IN',NWIDE,' BITS'
-C         WRITE (6,4101) (IWORK(K),K=KPTR,KPTR+52)
-C                            SAVE SECOND ORDER VALUES OF THIS SEGMENT
-          DO 5000 J = 0, KIN-1
-              CALL SBYTE (ISOVAL,IWORK(KPTR+J),ISOPTR,NWIDE)
-              ISOPTR  = ISOPTR + NWIDE
- 5000     CONTINUE
-          KPTR    = KPTR + KIN
- 6000 CONTINUE
-C  =======================================================
-C                 CONCANTENATE ALL FIELDS FOR BDS
-C
-C                   REMAINDER GOES INTO IPFLD
-      IPTR  = 0
-C                               BYTES 12-13
-C                                          VALUE FOR N1
-C                                          LEAVE SPACE FOR THIS
-      IPTR   = IPTR + 16
-C                               BYTE 14
-C                                          EXTENDED FLAGS
-      CALL SBYTE (IPFLD,IBDSFL(5),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(6),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(7),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(8),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(9),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(10),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(11),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(12),IPTR,1)
-      IPTR  = IPTR + 1
-C                               BYTES 15-16
-C                 SKIP OVER VALUE  FOR N2
-      IPTR  = IPTR + 16
-C                               BYTES 17-18
-C                                     P1
-      CALL SBYTE (IPFLD,KBDS(17),IPTR,16)
-      IPTR  = IPTR + 16
-C                               BYTES 19-20
-C                                   P2
-      CALL SBYTE (IPFLD,KBDS(19),IPTR,16)
-      IPTR  = IPTR + 16
-C                               BYTE 21 - RESERVED LOCATION
-      CALL SBYTE (IPFLD,0,IPTR,8)
-      IPTR  = IPTR + 8
-C                               BYTES 22 - ?
-C                                      WIDTHS OF SECOND ORDER PACKING
-      IX    = (IWDPTR + 32) / 32
-      CALL SBYTES (IPFLD,ISOWID,IPTR,32,0,IX)
-      IPTR  = IPTR + IWDPTR
-C     PRINT *,'ISOWID',IWDPTR,IX
-C     CALL BINARY (ISOWID,IX)
-C
-C                     NO SECONDARY BIT MAP
+      subroutine fi7503 (iwork,ipfld,npts,ibdsfl,bds11,
+     *           len,lenbds,pds,refnce,iscal2,kwide,igds)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    fi7501      row by row, col by col packing
+c   prgmmr: cavanaugh        org: w/nmc42    date: 94-05-20
+c
+c abstract: perform row by row or column by column packing
+c   generating all bds information.
+c
+c program history log:
+c   93-08-06  cavanaugh
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call fi7503 (iwork,ipfld,npts,ibdsfl,bds11,
+c    *           len,lenbds,pds,refnce,iscal2,kwide,igds)
+c   input argument list:
+c     iwork    - integer source array
+c     npts     - number of points in iwork
+c     ibdsfl   - flags
+c
+c   output argument list:      (including work arrays)
+c     ipfld    - contains bds from byte 12 on
+c     bds11    - contains first 11 bytes for bds
+c     len      - number of bytes from 12 on
+c     lenbds   - total length of bds
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+      character*1     bds11(*),pds(*)
+c
+      real            refnce
+c
+      integer         iscal2,kwide
+      integer         lenbds
+      integer         ipfld(*),igds(*)
+      integer         len,kbds(22)
+      integer         iwork(*)
+c                        octet number in section, first order packing
+c     integer         kbds(12)
+c                        flags
+      integer         ibdsfl(*)
+c                        extended flags
+c     integer         kbds(14)
+c                        octet number for second order packing
+c     integer         kbds(15)
+c                        number of first order values
+c     integer         kbds(17)
+c                        number of second order packed values
+c     integer         kbds(19)
+c                        width of second order packing
+      integer         isowid(50000)
+c                        secondary bit map
+      integer         isobmp(8200)
+c                        first order packed values
+      integer         ifoval(50000)
+c                        second order packed values
+      integer         isoval(100000)
+c
+c     integer         kbds(11)
+c  ----------------------------------
+c                       initialize arrays
+      do 100 i = 1, 50000
+          isowid(i)  = 0
+          ifoval(i)  = 0
+  100 continue
+c
+      do 101 i = 1, 8200
+          isobmp(i)  = 0
+  101 continue
+      do 102 i = 1, 100000
+          isoval(i)  = 0
+  102 continue
+c                      initialize pointers
+c                            secondary bit width pointer
+      iwdptr  = 0
+c                            secondary bit map pointer
+      ibmp2p  = 0
+c                            first order value pointer
+      ifoptr  = 0
+c                            byte pointer to start of 1st order values
+      kbds(12)  = 0
+c                            byte pointer to start of 2nd order values
+      kbds(15)  = 0
+c                            to contain number of first order values
+      kbds(17)  = 0
+c                            to contain number of second order values
+      kbds(19)  = 0
+c                            second order packed value pointer
+      isoptr  = 0
+c  =======================================================
+c                         build second order bit map in either
+c                         row by row or col by col format
+      if (iand(igds(13),32).ne.0) then
+c                              column by column
+          kout  = igds(4)
+          kin   = igds(5)
+c         print *,'column by column',kout,kin
+      else
+c                              row by row
+          kout  = igds(5)
+          kin   = igds(4)
+c         print *,'row by row',kout,kin
+      end if
+      kbds(17)  = kout
+      kbds(19)  = npts
+c
+c     do 4100 j = 1, npts, 53
+c         write (6,4101) (iwork(k),k=j,j+52)
+ 4101     format (1x,25i4)
+c         print *,' '
+c4100 continue
+c
+c                             initialize bit map pointer
+      ibmp2p = 0
+c                             construct working bit map
+      do 2000 i = 1, kout
+          do 1000 j = 1, kin
+              if (j.eq.1) then
+                  call sbyte (isobmp,1,ibmp2p,1)
+              else
+                  call sbyte (isobmp,0,ibmp2p,1)
+              end if
+              ibmp2p  = ibmp2p + 1
+ 1000     continue
+ 2000 continue
+      len  = ibmp2p / 32 + 1
+c     call binary(isobmp,len)
+c
+c                       process outer loop of row by row or col by col
+c
+      kptr  = 1
+      kbds(11)  = kwide
+      do 6000 i = 1, kout
+c                       in current row or col
+c                              find first order value
+          jptr  = kptr
+          lowest  = iwork(jptr)
+          do 4000 j = 1, kin
+              if (iwork(jptr).lt.lowest) then
+                  lowest = iwork(jptr)
+              end if
+              jptr  = jptr + 1
+ 4000     continue
+c                            save first order value
+          call sbyte (ifoval,lowest,ifoptr,kwide)
+          ifoptr  = ifoptr + kwide
+c         print *,'foval',i,lowest,kwide
+c                            subtract first order value from other vals
+c                                         getting second order values
+          jptr  = kptr
+          ibig  = iwork(jptr) - lowest
+          do 4200 j = 1, kin
+              iwork(jptr)  = iwork(jptr) - lowest
+              if (iwork(jptr).gt.ibig) then
+                  ibig  = iwork(jptr)
+              end if
+              jptr  = jptr + 1
+ 4200     continue
+c                            how many bits to contain largest second
+c                                         order value in segment
+          call fi7505 (ibig,nwide)
+c                            save bit width
+          call sbyte (isowid,nwide,iwdptr,8)
+          iwdptr  = iwdptr + 8
+c         print *,i,'soval',ibig,' in',nwide,' bits'
+c         write (6,4101) (iwork(k),k=kptr,kptr+52)
+c                            save second order values of this segment
+          do 5000 j = 0, kin-1
+              call sbyte (isoval,iwork(kptr+j),isoptr,nwide)
+              isoptr  = isoptr + nwide
+ 5000     continue
+          kptr    = kptr + kin
+ 6000 continue
+c  =======================================================
+c                 concantenate all fields for bds
+c
+c                   remainder goes into ipfld
+      iptr  = 0
+c                               bytes 12-13
+c                                          value for n1
+c                                          leave space for this
+      iptr   = iptr + 16
+c                               byte 14
+c                                          extended flags
+      call sbyte (ipfld,ibdsfl(5),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(6),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(7),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(8),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(9),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(10),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(11),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(12),iptr,1)
+      iptr  = iptr + 1
+c                               bytes 15-16
+c                 skip over value  for n2
+      iptr  = iptr + 16
+c                               bytes 17-18
+c                                     p1
+      call sbyte (ipfld,kbds(17),iptr,16)
+      iptr  = iptr + 16
+c                               bytes 19-20
+c                                   p2
+      call sbyte (ipfld,kbds(19),iptr,16)
+      iptr  = iptr + 16
+c                               byte 21 - reserved location
+      call sbyte (ipfld,0,iptr,8)
+      iptr  = iptr + 8
+c                               bytes 22 - ?
+c                                      widths of second order packing
+      ix    = (iwdptr + 32) / 32
+      call sbytes (ipfld,isowid,iptr,32,0,ix)
+      iptr  = iptr + iwdptr
+c     print *,'isowid',iwdptr,ix
+c     call binary (isowid,ix)
+c
+c                     no secondary bit map
 
-C                                         DETERMINE LOCATION FOR START
-C                                         OF FIRST ORDER PACKED VALUES
-      KBDS(12)  = IPTR / 8 + 12
-C                                        STORE LOCATION
-      CALL SBYTE (IPFLD,KBDS(12),0,16)
-C                                     MOVE IN FIRST ORDER PACKED VALUES
-      IPASS   = (IFOPTR + 32) / 32
-      CALL SBYTES (IPFLD,IFOVAL,IPTR,32,0,IPASS)
-      IPTR  = IPTR + IFOPTR
-C     PRINT *,'IFOVAL',IFOPTR,IPASS,KWIDE
-C     CALL BINARY (IFOVAL,IPASS)
-      IF (MOD(IPTR,8).NE.0) THEN
-          IPTR  = IPTR + 8 - MOD(IPTR,8)
-      END IF
-C     PRINT *,'IFOPTR =',IFOPTR,' ISOPTR =',ISOPTR
-C                DETERMINE LOCATION FOR START
-C                     OF SECOND ORDER VALUES
-      KBDS(15)  = IPTR / 8 + 12
-C                                   SAVE LOCATION OF SECOND ORDER VALUES
-      CALL SBYTE (IPFLD,KBDS(15),24,16)
-C                  MOVE IN SECOND ORDER PACKED VALUES
-      IX    = (ISOPTR + 32) / 32
-      CALL SBYTES (IPFLD,ISOVAL,IPTR,32,0,IX)
-      IPTR  = IPTR + ISOPTR
-C     PRINT *,'ISOVAL',ISOPTR,IX
-C     CALL BINARY (ISOVAL,IX)
-      NLEFT  = MOD(IPTR+88,16)
-      IF (NLEFT.NE.0) THEN
-          NLEFT  = 16 - NLEFT
-          IPTR   = IPTR + NLEFT
-      END IF
-C                                COMPUTE LENGTH OF DATA PORTION
-      LEN     = IPTR / 8
-C                                    COMPUTE LENGTH OF BDS
-      LENBDS  = LEN + 11
-C  -----------------------------------
-C                               BYTES 1-3
-C                                   THIS FUNCTION COMPLETED BELOW
-C                                   WHEN LENGTH OF BDS IS KNOWN
-      CALL SBYTE (BDS11,LENBDS,0,24)
-C                               BYTE  4
-      CALL SBYTE (BDS11,IBDSFL(1),24,1)
-      CALL SBYTE (BDS11,IBDSFL(2),25,1)
-      CALL SBYTE (BDS11,IBDSFL(3),26,1)
-      CALL SBYTE (BDS11,IBDSFL(4),27,1)
-C                              ENTER NUMBER OF FILL BITS
-      CALL SBYTE (BDS11,NLEFT,28,4)
-C                               BYTE  5-6
-      IF (ISCAL2.LT.0) THEN
-          CALL SBYTE (BDS11,1,32,1)
-          ISCAL2 = - ISCAL2
-      ELSE
-          CALL SBYTE (BDS11,0,32,1)
-      END IF
-      CALL SBYTE (BDS11,ISCAL2,33,15)
-C
-C$  FILL OCTET 7-10 WITH THE REFERENCE VALUE
-C   CONVERT THE FLOATING POINT OF YOUR MACHINE TO IBM370 32 BIT
-C   FLOATING POINT NUMBER
-C                                        REFERENCE VALUE
-C                                          FIRST TEST TO SEE IF
-C                                          ON 32 OR 64 BIT COMPUTER
-      CALL W3FI01(LW)
-      IF (LW.EQ.4) THEN
-          CALL W3FI76 (REFNCE,IEXP,IMANT,32)
-      ELSE
-          CALL W3FI76 (REFNCE,IEXP,IMANT,64)
-      END IF
-      CALL SBYTE (BDS11,IEXP,48,8)
-      CALL SBYTE (BDS11,IMANT,56,24)
-C
-C                               BYTE  11
-C
-      CALL SBYTE (BDS11,KBDS(11),80,8)
-C
-      KLEN  = LENBDS / 4 + 1
-C     PRINT *,'BDS11 LISTING',4,LENBDS
-C     CALL BINARY (BDS11,4)
-C     PRINT *,'IPFLD LISTING'
-C     CALL BINARY (IPFLD,KLEN)
-      RETURN
-      END
+c                                         determine location for start
+c                                         of first order packed values
+      kbds(12)  = iptr / 8 + 12
+c                                        store location
+      call sbyte (ipfld,kbds(12),0,16)
+c                                     move in first order packed values
+      ipass   = (ifoptr + 32) / 32
+      call sbytes (ipfld,ifoval,iptr,32,0,ipass)
+      iptr  = iptr + ifoptr
+c     print *,'ifoval',ifoptr,ipass,kwide
+c     call binary (ifoval,ipass)
+      if (mod(iptr,8).ne.0) then
+          iptr  = iptr + 8 - mod(iptr,8)
+      end if
+c     print *,'ifoptr =',ifoptr,' isoptr =',isoptr
+c                determine location for start
+c                     of second order values
+      kbds(15)  = iptr / 8 + 12
+c                                   save location of second order values
+      call sbyte (ipfld,kbds(15),24,16)
+c                  move in second order packed values
+      ix    = (isoptr + 32) / 32
+      call sbytes (ipfld,isoval,iptr,32,0,ix)
+      iptr  = iptr + isoptr
+c     print *,'isoval',isoptr,ix
+c     call binary (isoval,ix)
+      nleft  = mod(iptr+88,16)
+      if (nleft.ne.0) then
+          nleft  = 16 - nleft
+          iptr   = iptr + nleft
+      end if
+c                                compute length of data portion
+      len     = iptr / 8
+c                                    compute length of bds
+      lenbds  = len + 11
+c  -----------------------------------
+c                               bytes 1-3
+c                                   this function completed below
+c                                   when length of bds is known
+      call sbyte (bds11,lenbds,0,24)
+c                               byte  4
+      call sbyte (bds11,ibdsfl(1),24,1)
+      call sbyte (bds11,ibdsfl(2),25,1)
+      call sbyte (bds11,ibdsfl(3),26,1)
+      call sbyte (bds11,ibdsfl(4),27,1)
+c                              enter number of fill bits
+      call sbyte (bds11,nleft,28,4)
+c                               byte  5-6
+      if (iscal2.lt.0) then
+          call sbyte (bds11,1,32,1)
+          iscal2 = - iscal2
+      else
+          call sbyte (bds11,0,32,1)
+      end if
+      call sbyte (bds11,iscal2,33,15)
+c
+c$  fill octet 7-10 with the reference value
+c   convert the floating point of your machine to ibm370 32 bit
+c   floating point number
+c                                        reference value
+c                                          first test to see if
+c                                          on 32 or 64 bit computer
+      call w3fi01(lw)
+      if (lw.eq.4) then
+          call w3fi76 (refnce,iexp,imant,32)
+      else
+          call w3fi76 (refnce,iexp,imant,64)
+      end if
+      call sbyte (bds11,iexp,48,8)
+      call sbyte (bds11,imant,56,24)
+c
+c                               byte  11
+c
+      call sbyte (bds11,kbds(11),80,8)
+c
+      klen  = lenbds / 4 + 1
+c     print *,'bds11 listing',4,lenbds
+c     call binary (bds11,4)
+c     print *,'ipfld listing'
+c     call binary (ipfld,klen)
+      return
+      end

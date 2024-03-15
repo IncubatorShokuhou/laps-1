@@ -1,19 +1,19 @@
-MODULE Initialize
+module initialize
 
 !****************************************************
-!  This module initializes the GPS data assimilation
+!  this module initializes the gps data assimilation
 !  package.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !****************************************************
 
-  USE Definition
-  USE Util_Tools
+  use definition
+  use util_tools
 
-CONTAINS
+contains
 
-  INCLUDE 'Namelist.f90'
-  INCLUDE 'ReadObsn.f90'
-  INCLUDE 'Grid2Obs.f90'
+  include 'namelist.f90'
+  include 'readobsn.f90'
+  include 'grid2obs.f90'
 
-END MODULE Initialize
+end module initialize

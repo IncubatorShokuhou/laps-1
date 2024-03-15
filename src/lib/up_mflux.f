@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -35,24 +35,24 @@ c
      1                     ,u_3d,v_3d,tpw_2d,upslope_flux
      1                     ,ht_3d,r_missing_data)
 
-c       Compute upslope moisture flux (using conventions in the PSD flux tool) 
+c       compute upslope moisture flux (using conventions in the psd flux tool) 
 
-	real topo(ni,nj)                 ! I Terrain elevation (m)
-	real ldf(ni,nj)                  ! I Land Fraction
-	real dx(ni,nj)                   ! I Grid spacing in X direction (m)
-	real dy(ni,nj)                   ! I Grid spacing in Y direction (m)
-        real u_3d(ni,nj,nk)              ! I U wind component in Grid X direction
-        real v_3d(ni,nj,nk)              ! I V wind component in Grid Y direction
-        real ht_3d(ni,nj,nk)             ! I
-        real tpw_2d(ni,nj)               ! I
-        real upslope_flux(ni,nj)         ! O
+	real topo(ni,nj)                 ! i terrain elevation (m)
+	real ldf(ni,nj)                  ! i land fraction
+	real dx(ni,nj)                   ! i grid spacing in x direction (m)
+	real dy(ni,nj)                   ! i grid spacing in y direction (m)
+        real u_3d(ni,nj,nk)              ! i u wind component in grid x direction
+        real v_3d(ni,nj,nk)              ! i v wind component in grid y direction
+        real ht_3d(ni,nj,nk)             ! i
+        real tpw_2d(ni,nj)               ! i
+        real upslope_flux(ni,nj)         ! o
 
-        real ht_lower(ni,nj)             ! L
-        real ht_upper(ni,nj)             ! L
-        real umean_2d(ni,nj)             ! L
-        real vmean_2d(ni,nj)             ! L
+        real ht_lower(ni,nj)             ! l
+        real ht_upper(ni,nj)             ! l
+        real umean_2d(ni,nj)             ! l
+        real vmean_2d(ni,nj)             ! l
 
-        write(6,*)' Subroutine up_mflux'
+        write(6,*)' subroutine up_mflux'
 
         ht_lower(:,:)  =  750. + topo(:,:)
         ht_upper(:,:)  = 1250. + topo(:,:)
@@ -69,7 +69,7 @@ c       Compute upslope moisture flux (using conventions in the PSD flux tool)
             ubar = umean_2d(i,j)
             vbar = vmean_2d(i,j)
 
-!           Determine terrain slope
+!           determine terrain slope
 	    dterdx = (topo(i,j)+topo(i,j-1)-topo(i-1,j)-topo(i-1,j-1)
      1                ) * .5 / dx(i,j)
 	    dterdy = (topo(i,j)+topo(i-1,j)-topo(i-1,j-1)-topo(i,j-1)
@@ -81,7 +81,7 @@ c       Compute upslope moisture flux (using conventions in the PSD flux tool)
 
             if(ldf(i,j) .lt. .01 .and. abs(topo(i,j)) .lt. 10.)then ! ocean
 
-!             Assume cos(theta) = 1, so we just want moisture flux
+!             assume cos(theta) = 1, so we just want moisture flux
 
               dvh = sqrt(ubar**2 + vbar**2)
 
@@ -89,15 +89,15 @@ c       Compute upslope moisture flux (using conventions in the PSD flux tool)
 
             else 
 
-!             Calculate upslope wind component (m/s)
-!             This is normalized by the terrain slope
+!             calculate upslope wind component (m/s)
+!             this is normalized by the terrain slope
               if(terrain_slope .gt. 0.)then
                   dvh = (ubar * dterdx + vbar * dterdy) / terrain_slope
               else
                   dvh = 0.
               endif
 
-!             Calculate upslope moisture flux (m**2/s)
+!             calculate upslope moisture flux (m**2/s)
 	      upslope_flux(i,j) = dvh * tpw_2d(i,j)
 
             endif
@@ -110,7 +110,7 @@ c       Compute upslope moisture flux (using conventions in the PSD flux tool)
               else
                   write(6,3)i,j,ubar,vbar,dvh,terrain_slope,tpw_2d(i,j)
      1                       ,upslope_flux(i,j)
-3 		  format(' WARNING: large UMF ',2i5,6e13.4)
+3 		  format(' warning: large umf ',2i5,6e13.4)
               endif
             endif 
 
@@ -133,16 +133,16 @@ c
      1                           ,u_3d,v_3d,ht_3d,umean_2d,vmean_2d
      1                           ,r_missing_data)       
 
-c       Compute mean wind over a 2D height layer 
+c       compute mean wind over a 2d height layer 
 
-        real ht_lower(ni,nj)         ! I
-        real ht_upper(ni,nj)         ! I
-        real u_3d(ni,nj,nk)          ! I U wind component in Grid X direction
-        real v_3d(ni,nj,nk)          ! I V wind component in Grid Y direction
-        real ht_3d(ni,nj,nk)         ! I
+        real ht_lower(ni,nj)         ! i
+        real ht_upper(ni,nj)         ! i
+        real u_3d(ni,nj,nk)          ! i u wind component in grid x direction
+        real v_3d(ni,nj,nk)          ! i v wind component in grid y direction
+        real ht_3d(ni,nj,nk)         ! i
 
-        real umean_2d(ni,nj)         ! O
-        real vmean_2d(ni,nj)         ! O
+        real umean_2d(ni,nj)         ! o
+        real vmean_2d(ni,nj)         ! o
 
         umean_2d = r_missing_data
         vmean_2d = r_missing_data
@@ -150,24 +150,24 @@ c       Compute mean wind over a 2D height layer
 	do j=1,nj
 	do i=1,ni
 
-!         Controlling layer (defined relative to topography)
+!         controlling layer (defined relative to topography)
           ht_lo  = ht_lower(i,j)
           ht_hi  = ht_upper(i,j)
 
           if(.true.)then
 
-!           Calculate mass weighted mean wind over the height layer       
+!           calculate mass weighted mean wind over the height layer       
             rk_lo = rlevel_of_field(ht_lo,ht_3d(i,j,:),1,1,nk,1,1
      1                             ,istatus)        
             if(istatus .ne. 1)then
-                write(6,*)' Bad status in rlevel_of_field for lo ',i,j
+                write(6,*)' bad status in rlevel_of_field for lo ',i,j
                 goto 900
             endif
 
             rk_hi = rlevel_of_field(ht_hi,ht_3d(i,j,:),1,1,nk,1,1  
      1                             ,istatus)        
             if(istatus .ne. 1)then
-                write(6,*)' Bad status in rlevel_of_field for hi ',i,j  
+                write(6,*)' bad status in rlevel_of_field for hi ',i,j  
                 goto 900
             endif
 
@@ -177,7 +177,7 @@ c       Compute mean wind over a 2D height layer
             k_lo = int(rk_lo)
             k_hi = int(rk_hi)
 
-!           Lower part
+!           lower part
             frac_lo = rk_lo - float(k_lo)
             u_lo = u_3d(i,j,k_lo)*(1.-frac_lo)+u_3d(i,j,k_lo+1)*frac_lo
             v_lo = v_3d(i,j,k_lo)*(1.-frac_lo)+v_3d(i,j,k_lo+1)*frac_lo     
@@ -190,7 +190,7 @@ c       Compute mean wind over a 2D height layer
 
             sumk = 1. - frac_lo
 
-!           Middle part
+!           middle part
             do k = k_lo+1,k_hi-1
                 ubar_lyr = (u_3d(i,j,k) + u_3d(i,j,k+1)) / 2.
                 vbar_lyr = (v_3d(i,j,k) + v_3d(i,j,k+1)) / 2. 
@@ -204,7 +204,7 @@ c       Compute mean wind over a 2D height layer
 !               endif
             enddo ! k
 
-!           Upper part  
+!           upper part  
             frac_hi = rk_hi - float(k_hi)
             u_hi = u_3d(i,j,k_hi)*(1.-frac_hi)+u_3d(i,j,k_hi+1)*frac_hi
             v_hi = v_3d(i,j,k_hi)*(1.-frac_hi)+v_3d(i,j,k_hi+1)*frac_hi     
@@ -217,14 +217,14 @@ c       Compute mean wind over a 2D height layer
 
             sumk = sumk + frac_hi
 
-!           Divide to get the means
+!           divide to get the means
             umean_2d(i,j) = ubar_sum / sumk
             vmean_2d(i,j) = vbar_sum / sumk            
 
             if(abs(umean_2d(i,j)) .gt. 1e10)then ! write debugging info
               write(6,11)i,j,rk_lo,rk_hi,u_lo,u_hi,ubar_llyr,ubar_hlyr
      1                                           ,ubar_sum,ubar,sumk
- 11	      format(' WARNING: large umean - ',2i5,9e13.4)
+ 11	      format(' warning: large umean - ',2i5,9e13.4)
             endif 
 
           endif

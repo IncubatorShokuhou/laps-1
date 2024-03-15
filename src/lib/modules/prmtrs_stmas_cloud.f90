@@ -1,339 +1,339 @@
-MODULE PRMTRS_STMAS_CLOUD
+module prmtrs_stmas_cloud
 
-  ! LAPS PARAMETERS
-  CHARACTER*9          :: LAPSAST            ! LAPS ASCII TIME
-  INTEGER              :: LAPSI4T            ! LAPS I4TIME
-  INTEGER              :: ICYCLE             ! LAPS CYCLE TIME
+  ! laps parameters
+  character*9          :: lapsast            ! laps ascii time
+  integer              :: lapsi4t            ! laps i4time
+  integer              :: icycle             ! laps cycle time
 
-  REAL                 :: RMISSING           ! LAPS DEFAULT MISSING VALUE (YUANFU)
-  REAL                 :: BADSFCDT           ! LAPS DEFAULT BAD SURFACE (YUANFU)
-  REAL    ,ALLOCATABLE :: LATITUDE(:,:)      ! LAPS LATITUDE OF THE GRID (YUANFU)
-  REAL    ,ALLOCATABLE :: LONGITUD(:,:)      ! LAPS LONGITUDE OF THE GRID (YUANFU)
-  REAL    ,ALLOCATABLE :: TOPOGRPH(:,:)      ! LAPS LONGITUDE OF THE GRID (YUANFU)
-  ! REAL    ,ALLOCATABLE :: LAPSRADW(:)        ! LAPS RADIAL WIND (YUANFU)
-  REAL    ,ALLOCATABLE :: Z_FCSTGD(:)        ! VERTICAL LEVEL OF MODEL OR LAPS
+  real                 :: rmissing           ! laps default missing value (yuanfu)
+  real                 :: badsfcdt           ! laps default bad surface (yuanfu)
+  real    ,allocatable :: latitude(:,:)      ! laps latitude of the grid (yuanfu)
+  real    ,allocatable :: longitud(:,:)      ! laps longitude of the grid (yuanfu)
+  real    ,allocatable :: topogrph(:,:)      ! laps longitude of the grid (yuanfu)
+  ! real    ,allocatable :: lapsradw(:)        ! laps radial wind (yuanfu)
+  real    ,allocatable :: z_fcstgd(:)        ! vertical level of model or laps
 
-  ! END OF LAPS PARAMETERS.
+  ! end of laps parameters.
 
-  ! GPS PROCESSING PARAMETERS:
-  ! SPECIFIC GAS CONSTANT FOR WATER VAPOR:
-  REAL    ,  PARAMETER :: RV_GAS=461
-  ! COEFFICIENTS OF REFRACTIVITY AT MICROWAVE FREQUENCIES:
-  REAL    ,  PARAMETER :: K2_RFC=22.1
-  REAL    ,  PARAMETER :: K3_RFC=373900
+  ! gps processing parameters:
+  ! specific gas constant for water vapor:
+  real    ,  parameter :: rv_gas=461
+  ! coefficients of refractivity at microwave frequencies:
+  real    ,  parameter :: k2_rfc=22.1
+  real    ,  parameter :: k3_rfc=373900
 
-  ! BUFR PARAMETERS:
-  REAL    ,  PARAMETER :: BUFRMISS = 10.0E10 ! MISSING VALUE IN REAL FOR BUFR DATA
-  REAL    ,  PARAMETER :: BADFLAG = -999.9   ! MISSING VALUE
+  ! bufr parameters:
+  real    ,  parameter :: bufrmiss = 10.0e10 ! missing value in real for bufr data
+  real    ,  parameter :: badflag = -999.9   ! missing value
 
-  INTEGER ,  PARAMETER :: MAXDIMS=4          ! NUMBER OF TOTAL DIMENSION
-  INTEGER ,  PARAMETER :: TMGOBS_CHANNEL=32  ! CHANNEL FOR TMG FILE
-  INTEGER ,  PARAMETER :: PIGOBS_CHANNEL=33  ! CHANNEL FOR TMG FILE
-  INTEGER              :: BGTHOBS            ! NOT USE BACKGROUND UNTIL NOBSGRID LESS THAN BGTHOBS
-  INTEGER              :: GRDLEVL            ! GRID LEVEL
-  INTEGER              :: NUMGRID(MAXDIMS)   ! NUMBER OF GRID FOR EVERY DIMENSION
-  INTEGER              :: INIGRID(MAXDIMS)   ! INITIAL NUMBER OF GRID FOR EVERY DIMENSION
-  INTEGER              :: MAXGRID(MAXDIMS)   ! MAX NUMBER OF GRID FOR EVERY DIMENSION
-  INTEGER              :: NTMPGRD(MAXDIMS)   ! NUMBER OF OLD GRID FOR EVERY DIMENSION
-  INTEGER              :: FCSTGRD(MAXDIMS)   ! NUMBER OF OLD GRID FOR EVERY DIMENSION
-  INTEGER              :: NUMDIMS            ! NUMBER OF DIMENSION VALID
-  INTEGER              :: NGPTOBS            ! NUMBER OF GRID POINT PER OBSERVATION
-  INTEGER              :: NUMSTAT            ! NUMBER OF STATE
-  INTEGER              :: NALLOBS            ! NUMBER OF TOTAL OBSERVATION VALID
-  INTEGER ,ALLOCATABLE :: NOBSTAT(:)         ! NUMBER OF VARIETY OF OBSERVATION VALID
-  INTEGER              :: NUMVARS            ! NUMBER OF TOTAL CONTROL VARIABLES VALID
-  INTEGER              :: IFBKGND            ! WHETHER USE BACKGROUND OR NOT, 1 IS YES, 0 IS NOT
-  INTEGER              :: IFBOUND            ! WHETHER USE BOUND OR NOT, 1 IS YES, 0 IS NOT
-  INTEGER              :: IFPCDNT            ! WHETHER USE PURE PRESSURE COORDINATE, 1 IS YES, 0 IS NOT
-  INTEGER              :: IF_TEST            ! WHETHER RUN FOR TEST CASE, 1 IS FOR THE TEST CASE, ADDED BY ZHONGJIE HE
-  INTEGER              :: FNSTGRD            ! THE FINEST GRID LEVEL
-  INTEGER              :: IFREPET            ! WHETHERE RUN THE MUTIGRID FRAME IN MONOTONOUS OR REPEATEDLY, 0 FOR MONOTONOUS, 1 FOR REPEATEDLY
-  INTEGER              :: ITREPET            ! THE TIMES TO REPEAT
+  integer ,  parameter :: maxdims=4          ! number of total dimension
+  integer ,  parameter :: tmgobs_channel=32  ! channel for tmg file
+  integer ,  parameter :: pigobs_channel=33  ! channel for tmg file
+  integer              :: bgthobs            ! not use background until nobsgrid less than bgthobs
+  integer              :: grdlevl            ! grid level
+  integer              :: numgrid(maxdims)   ! number of grid for every dimension
+  integer              :: inigrid(maxdims)   ! initial number of grid for every dimension
+  integer              :: maxgrid(maxdims)   ! max number of grid for every dimension
+  integer              :: ntmpgrd(maxdims)   ! number of old grid for every dimension
+  integer              :: fcstgrd(maxdims)   ! number of old grid for every dimension
+  integer              :: numdims            ! number of dimension valid
+  integer              :: ngptobs            ! number of grid point per observation
+  integer              :: numstat            ! number of state
+  integer              :: nallobs            ! number of total observation valid
+  integer ,allocatable :: nobstat(:)         ! number of variety of observation valid
+  integer              :: numvars            ! number of total control variables valid
+  integer              :: ifbkgnd            ! whether use background or not, 1 is yes, 0 is not
+  integer              :: ifbound            ! whether use bound or not, 1 is yes, 0 is not
+  integer              :: ifpcdnt            ! whether use pure pressure coordinate, 1 is yes, 0 is not
+  integer              :: if_test            ! whether run for test case, 1 is for the test case, added by zhongjie he
+  integer              :: fnstgrd            ! the finest grid level
+  integer              :: ifrepet            ! whethere run the mutigrid frame in monotonous or repeatedly, 0 for monotonous, 1 for repeatedly
+  integer              :: itrepet            ! the times to repeat
 
-  REAL    ,ALLOCATABLE :: PENAL0X(:)         ! INITIAL X DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL0Y(:)         ! INITIAL Y DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL0Z(:)         ! INITIAL Z DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL0T(:)         ! INITIAL T DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL_X(:)         ! X DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL_Y(:)         ! Y DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL_Z(:)         ! Z DIRECTION PENALTY COEFFICENT
-  REAL    ,ALLOCATABLE :: PENAL_T(:)         ! T DIRECTION PENALTY COEFFICENT
-  REAL                 :: PNLT0PU            ! INITIAL GEOSTROPHIC BALANCE PENALTY COEFFICENT, FOR P AND U
-  REAL                 :: PNLT0PV            ! INITIAL GEOSTROPHIC BALANCE PENALTY COEFFICENT, FOR P AND V
-  REAL                 :: PNLT_PU            ! GEOSTROPHIC BALANCE PENALTY COEFFICENT, FOR P AND U
-  REAL                 :: PNLT_PV            ! GEOSTROPHIC BALANCE PENALTY COEFFICENT, FOR P AND V
-  REAL                 :: GRDSPAC(MAXDIMS)   ! GRID SPACING
-  REAL                 :: ORIPSTN(MAXDIMS)   ! ORIGINAL POSITION OF THE STUDY DOMAIN
-  REAL                 :: COSTFUN            ! COST FUNCTION
-  REAL    ,ALLOCATABLE :: GRADINT(:,:,:,:,:) ! GRADIENT OF COST FUNCTION
-  CHARACTER(LEN=100)   :: OBSFILE            ! OBSERVATION FILE NAME
+  real    ,allocatable :: penal0x(:)         ! initial x direction penalty coefficent
+  real    ,allocatable :: penal0y(:)         ! initial y direction penalty coefficent
+  real    ,allocatable :: penal0z(:)         ! initial z direction penalty coefficent
+  real    ,allocatable :: penal0t(:)         ! initial t direction penalty coefficent
+  real    ,allocatable :: penal_x(:)         ! x direction penalty coefficent
+  real    ,allocatable :: penal_y(:)         ! y direction penalty coefficent
+  real    ,allocatable :: penal_z(:)         ! z direction penalty coefficent
+  real    ,allocatable :: penal_t(:)         ! t direction penalty coefficent
+  real                 :: pnlt0pu            ! initial geostrophic balance penalty coefficent, for p and u
+  real                 :: pnlt0pv            ! initial geostrophic balance penalty coefficent, for p and v
+  real                 :: pnlt_pu            ! geostrophic balance penalty coefficent, for p and u
+  real                 :: pnlt_pv            ! geostrophic balance penalty coefficent, for p and v
+  real                 :: grdspac(maxdims)   ! grid spacing
+  real                 :: oripstn(maxdims)   ! original position of the study domain
+  real                 :: costfun            ! cost function
+  real    ,allocatable :: gradint(:,:,:,:,:) ! gradient of cost function
+  character(len=100)   :: obsfile            ! observation file name
 
-  INTEGER              :: COSSTEP            ! THE ITERATE STEPS BEFORE MIDDLE GRID LEVEL
-  INTEGER              :: MIDGRID            ! MIDDLE GRID LEVEL WHERE THE ITERATE STEP CHANGED
-  INTEGER              :: FINSTEP            ! THE ITERATE STEPS AFTER MIDDLE GRID LEVEL
+  integer              :: cosstep            ! the iterate steps before middle grid level
+  integer              :: midgrid            ! middle grid level where the iterate step changed
+  integer              :: finstep            ! the iterate steps after middle grid level
 
-  INTEGER              :: U_CMPNNT           ! U COMPONENT INDEX
-  INTEGER              :: V_CMPNNT           ! V COMPONENT INDEX
-  INTEGER              :: W_CMPNNT           ! W COMPONENT INDEX
-  INTEGER              :: PRESSURE           ! PRESSURE INDEX
-  INTEGER              :: TEMPRTUR           ! TEMPERATURE INDEX
-  INTEGER              :: HUMIDITY           ! SPECIFIC HUMIDITY INDEX
+  integer              :: u_cmpnnt           ! u component index
+  integer              :: v_cmpnnt           ! v component index
+  integer              :: w_cmpnnt           ! w component index
+  integer              :: pressure           ! pressure index
+  integer              :: temprtur           ! temperature index
+  integer              :: humidity           ! specific humidity index
 !added by shuyuan 20100721 for radar reflectivity
-  INTEGER              :: ROUR_CMPNNT        ! DENSITY*RAIN WATER MIXING RATIO
-  INTEGER              :: ROUS_CMPNNT        ! DENSITY*SNOW WATER MIXING RATIO
+  integer              :: rour_cmpnnt        ! density*rain water mixing ratio
+  integer              :: rous_cmpnnt        ! density*snow water mixing ratio
 !
-  INTEGER              :: XSL                ! X COORDINATE INDEX
-  INTEGER              :: YSL                ! Y COORDINATE INDEX
-  INTEGER              :: PSL                ! PRESSURE INDEX
-  INTEGER              :: CSL                ! CORIOLIS FORCE INDEX
-  INTEGER              :: DSL                ! DENSITY INDEX
+  integer              :: xsl                ! x coordinate index
+  integer              :: ysl                ! y coordinate index
+  integer              :: psl                ! pressure index
+  integer              :: csl                ! coriolis force index
+  integer              :: dsl                ! density index
 
-  ! INTEGER ,ALLOCATABLE :: IDXRADWN(:,:)      ! GRID INDICES OF RADIAL WIND
+  ! integer ,allocatable :: idxradwn(:,:)      ! grid indices of radial wind
 
-  REAL                 :: XYTRANS            ! COEFFICIENT USED TO TRANSLATE THE X AND Y COORDINATE TO METERS
-  REAL                 :: Z_TRANS            ! COEFFICIENT USED TO TRANSLATE THE Z COORDINATE TO METERS
+  real                 :: xytrans            ! coefficient used to translate the x and y coordinate to meters
+  real                 :: z_trans            ! coefficient used to translate the z coordinate to meters
 
-  REAL    ,ALLOCATABLE :: WWW(:,:,:,:)       ! W COMPONENT
-  REAL    ,ALLOCATABLE :: XXX(:,:)           ! DISTANCE OF HORIZONTAL DIMENSION 1
-  REAL    ,ALLOCATABLE :: YYY(:,:)           ! DISTANCE OF HORIZONTAL DIMENSION 2
-  REAL    ,ALLOCATABLE :: ZZZ(:,:,:,:)       ! HEIGHT OF GENERAL VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: PPP(:)             ! PRESSURE VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: COR(:,:)           ! CORIOLIS FREQUENCY
-  REAL    ,ALLOCATABLE :: DEG(:,:)           ! DIRECTION ANGLE
-  REAL    ,ALLOCATABLE :: DEN(:,:,:,:)       ! DENSITY
-  REAL    ,ALLOCATABLE :: SCL(:)             ! SCALING THE PHYSICAL VARIABLE
-  REAL    ,ALLOCATABLE :: SL0(:)             ! DEFAULT SCALING THE PHYSICAL VARIABLE
-  REAL                 :: SCP(5)             ! SCALING XXX,YYY,ZZZ OR PPP,COR,DEN
-  REAL                 :: ORIVTCL
-  REAL    ,ALLOCATABLE :: XX0(:,:)           ! DISTANCE OF HORIZONTAL DIMENSION 1
-  REAL    ,ALLOCATABLE :: YY0(:,:)           ! DISTANCE OF HORIZONTAL DIMENSION 2
-  REAL    ,ALLOCATABLE :: ZZ0(:,:,:,:)       ! HEIGHT OF GENERAL VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: ZZB(:)       ! SIGMA LEVEL FOR VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: PP0(:)             ! PRESSURE VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: PPM(:)             ! MULTIGRID PRESSURE VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: CR0(:,:)           ! CORIOLIS FREQUENCY
-  REAL    ,ALLOCATABLE :: DG0(:,:)           ! DIRECTION ANGLE
-  REAL    ,ALLOCATABLE :: DN0(:,:,:,:)       ! DENSITY
-! FOR OBSERVATION
-  REAL                 :: OBSRADAR           ! THE OBSERVATION RATIO OF CONVENTION TO RADAR DATA
-  REAL                 :: OBS_SFMR           ! THE OBSERVATION RATIO OF CONVENTION TO SFMR DATA
-  REAL                 :: OBSREF           ! THE OBSERVATION RATIO OF REF
-  REAL    ,ALLOCATABLE :: OBSPOSTN(:,:)      ! COORDINATE OF OBSERVATION POINT
-  REAL    ,ALLOCATABLE :: OBSCOEFF(:,:)      ! INTERPOLATION COEFFICENT
-  INTEGER ,ALLOCATABLE :: OBSIDXPC(:,:)      ! INDEX OF EVERY NODE PER CELL
-  INTEGER ,ALLOCATABLE :: OBSSTATE(:)        ! NUMBER OF OBSERVATION FOR EVERY STATE
-  REAL    ,ALLOCATABLE :: OBSVALUE(:)        ! OBSERVATION VALUE
-  REAL    ,ALLOCATABLE :: OBSERROR(:)        ! OBSERVATION ERROR
-  REAL    ,ALLOCATABLE :: OBSEINF1(:)        ! OBSERVATION EXTRA INFORMATION 1
-  REAL    ,ALLOCATABLE :: OBSEINF2(:)        ! OBSERVATION EXTRA INFORMATION 2
-  REAL    ,ALLOCATABLE :: OBSEINF3(:)        ! OBSERVATION EXTRA INFORMATION 3
+  real    ,allocatable :: www(:,:,:,:)       ! w component
+  real    ,allocatable :: xxx(:,:)           ! distance of horizontal dimension 1
+  real    ,allocatable :: yyy(:,:)           ! distance of horizontal dimension 2
+  real    ,allocatable :: zzz(:,:,:,:)       ! height of general vertical coordinate
+  real    ,allocatable :: ppp(:)             ! pressure vertical coordinate
+  real    ,allocatable :: cor(:,:)           ! coriolis frequency
+  real    ,allocatable :: deg(:,:)           ! direction angle
+  real    ,allocatable :: den(:,:,:,:)       ! density
+  real    ,allocatable :: scl(:)             ! scaling the physical variable
+  real    ,allocatable :: sl0(:)             ! default scaling the physical variable
+  real                 :: scp(5)             ! scaling xxx,yyy,zzz or ppp,cor,den
+  real                 :: orivtcl
+  real    ,allocatable :: xx0(:,:)           ! distance of horizontal dimension 1
+  real    ,allocatable :: yy0(:,:)           ! distance of horizontal dimension 2
+  real    ,allocatable :: zz0(:,:,:,:)       ! height of general vertical coordinate
+  real    ,allocatable :: zzb(:)       ! sigma level for vertical coordinate
+  real    ,allocatable :: pp0(:)             ! pressure vertical coordinate
+  real    ,allocatable :: ppm(:)             ! multigrid pressure vertical coordinate
+  real    ,allocatable :: cr0(:,:)           ! coriolis frequency
+  real    ,allocatable :: dg0(:,:)           ! direction angle
+  real    ,allocatable :: dn0(:,:,:,:)       ! density
+! for observation
+  real                 :: obsradar           ! the observation ratio of convention to radar data
+  real                 :: obs_sfmr           ! the observation ratio of convention to sfmr data
+  real                 :: obsref           ! the observation ratio of ref
+  real    ,allocatable :: obspostn(:,:)      ! coordinate of observation point
+  real    ,allocatable :: obscoeff(:,:)      ! interpolation coefficent
+  integer ,allocatable :: obsidxpc(:,:)      ! index of every node per cell
+  integer ,allocatable :: obsstate(:)        ! number of observation for every state
+  real    ,allocatable :: obsvalue(:)        ! observation value
+  real    ,allocatable :: obserror(:)        ! observation error
+  real    ,allocatable :: obseinf1(:)        ! observation extra information 1
+  real    ,allocatable :: obseinf2(:)        ! observation extra information 2
+  real    ,allocatable :: obseinf3(:)        ! observation extra information 3
 
-  ! GPSMET WETDELAY DATA:
-  INTEGER, PARAMETER :: MAX_GPS = 5000		! TEMPORARILY HARD CODED  !!changefrom 2000 to 5000 20100525 liu
-  INTEGER :: NUM_GPS,I4T_GPS			! I4T_GPS: I4TIME OF Jan 1, 1970
-  REAL    :: GPS_XYT(3,MAX_GPS),GPS_ELV(MAX_GPS),GPS_TIM(MAX_GPS), &
-             GPS_ERR(MAX_GPS),GPS_TPW(MAX_GPS),GPS_WET(MAX_GPS)
+  ! gpsmet wetdelay data:
+  integer, parameter :: max_gps = 5000		! temporarily hard coded  !!changefrom 2000 to 5000 20100525 liu
+  integer :: num_gps,i4t_gps			! i4t_gps: i4time of jan 1, 1970
+  real    :: gps_xyt(3,max_gps),gps_elv(max_gps),gps_tim(max_gps), &
+             gps_err(max_gps),gps_tpw(max_gps),gps_wet(max_gps)
   
-! FOR GRID POINT VARIABLE
-  REAL    ,ALLOCATABLE :: GRDBKGD0(:,:,:,:,:)! GRID BACKGROUND VALUE
-  REAL    ,ALLOCATABLE :: GRDBKGND(:,:,:,:,:)! GRID BACKGROUND VALUE
-  REAL    ,ALLOCATABLE :: GRDANALS(:,:,:,:,:)! GRID ANALYSIS VALUE
-  REAL    ,ALLOCATABLE :: TMPANALS(:,:,:,:,:)! GRID ANALYSIS VALUE
+! for grid point variable
+  real    ,allocatable :: grdbkgd0(:,:,:,:,:)! grid background value
+  real    ,allocatable :: grdbkgnd(:,:,:,:,:)! grid background value
+  real    ,allocatable :: grdanals(:,:,:,:,:)! grid analysis value
+  real    ,allocatable :: tmpanals(:,:,:,:,:)! grid analysis value
 
-  REAL    ,ALLOCATABLE :: WWWOUT(:,:,:,:)    ! W COMPONENT FOR OUTPUT
-  REAL    ,ALLOCATABLE :: DIFFTOUT(:,:,:,:,:)! GRID ANALYSIS VALUE FOR OUTPUR
-  REAL    ,ALLOCATABLE :: Z_MAXGID(:)        ! VERTICAL LEVEL OF FINEST ANALYSIS GRID
+  real    ,allocatable :: wwwout(:,:,:,:)    ! w component for output
+  real    ,allocatable :: difftout(:,:,:,:,:)! grid analysis value for outpur
+  real    ,allocatable :: z_maxgid(:)        ! vertical level of finest analysis grid
 
-  REAL                 :: PNLT0HY            ! INITIAL HYDROSTATIC CONDITION PENALTY COEFFICENT. ADDIED BY ZHONGJIE HE
-  REAL                 :: PNLT_HY            ! HYDROSTATIC CONDITION PENALTY COEFFICENT. ADDIED BY ZHONGJIE HE
-  REAL                 :: TAUL_HY            ! REDUCTION COEFFICENT OF HYDROSTATIC CONDITION PENALTY TERM, ADDIED BY ZHONGJIE HE
-  REAL                 :: ENDHYLV            ! THE GRID LEVEL AFTER WHICH THE HYDROSTATIC CONDITION PENALTY TERM IS OMMITTED. ADDED BY ZHONGJIE HE
-  REAL                 :: ENDGSLV            ! THE GRID LEVEL AFTER WHICH THE GEOSTROPHIC BALANCE PENALTY TERM IS OMMITTED. ADDED BY ZHONGJIE HE
-  REAL                 :: LIMIT_3            ! THE LIMITATION OF HEIGHT TO DECIDE IN WHICH RANGE THE OBSERVATION IS AVIABLE. ADDED BY ZHONGJIE HE
-  REAL                 :: LIMIT_4            ! THE LIMITATION OF TIME TO DECIDE IN WHICH RANGE THE OBSERVATION IS AVIABLE. ADDED BY ZHONGJIE HE
+  real                 :: pnlt0hy            ! initial hydrostatic condition penalty coefficent. addied by zhongjie he
+  real                 :: pnlt_hy            ! hydrostatic condition penalty coefficent. addied by zhongjie he
+  real                 :: taul_hy            ! reduction coefficent of hydrostatic condition penalty term, addied by zhongjie he
+  real                 :: endhylv            ! the grid level after which the hydrostatic condition penalty term is ommitted. added by zhongjie he
+  real                 :: endgslv            ! the grid level after which the geostrophic balance penalty term is ommitted. added by zhongjie he
+  real                 :: limit_3            ! the limitation of height to decide in which range the observation is aviable. added by zhongjie he
+  real                 :: limit_4            ! the limitation of time to decide in which range the observation is aviable. added by zhongjie he
 
-  ! ANALYSIS DOMAIN BY YUANFU XIE:
-  INTEGER              :: ITIME2(2)          ! ANALYSIS TIME WINDOW
+  ! analysis domain by yuanfu xie:
+  integer              :: itime2(2)          ! analysis time window
 
-!RUIXIA LIU ADD 20120321
-  REAL    ,ALLOCATABLE :: AMSUA(:,:,:,:)
-  REAL    ,ALLOCATABLE :: T_SFC_0(:,:,:)
-  REAL    ,ALLOCATABLE :: AMSUAGRD(:,:,:,:)  ! SATELLITE MULTIGRID POSITION
-  REAL    ,ALLOCATABLE :: T_SFC_GRD(:,:,:)
-  REAL    ,ALLOCATABLE :: P_lyr(:)
-  REAL    ,ALLOCATABLE :: ozn_lyr(:)
-  REAL    ,ALLOCATABLE :: P_lvl(:)
-  REAL    ,ALLOCATABLE :: T_SFC(:,:)
-  REAL    ,ALLOCATABLE :: PPP1(:)             ! PRESSURE VERTICAL COORDINATE
-  REAL    ,ALLOCATABLE :: rad(:,:,:,:)
-  REAL    ,ALLOCATABLE :: ja(:,:,:,:,:)
-  REAL    ,ALLOCATABLE :: T_lyr(:,:,:)
-  REAL    ,ALLOCATABLE :: Q_lyr(:,:,:)
-  REAL  :: CMAG
-  INTEGER  :: INUM2
-  CHARACTER(LEN=100)   :: SAT_DA_USE
-  CHARACTER(LEN=200)   :: Co_Path
-  CHARACTER(LEN=100)   :: Sat_Data_Path(2)   ! ADD AMSU-B BY YUANFU FEB 2013
-  CHARACTER(LEN=100)   :: Moist_Unit(2)   ! ADD FOR AMSU-A/B BY YUANFU FEB 2013
-  INTEGER  :: NCHBEG,NCHEND
-  INTEGER  :: NAMSUB ! YUANFU ADDED FOR COUNTING NUMBER AMSU-B OBS
-  INTEGER  ,ALLOCATABLE  :: AMSUID(:,:)
-  INTEGER  :: AMSUA_CHANNELS_USED(15),AMSUB_CHANNELS_USED(5) ! YUANFU ADDED FOR CONTROLING AMSU DATA
-  REAL  ,ALLOCATABLE :: T_SFC_BKG0(:,:,:)
-  REAL    ,ALLOCATABLE :: T_lyr1(:,:,:)
-  REAL    ,ALLOCATABLE :: Q_lyr1(:,:,:)
-  REAL    ,ALLOCATABLE ::  T_SFC1(:,:)
-  REAL    ,ALLOCATABLE :: PPP2(:)
-  REAL OZN_lyr1(41)
-  REAL  ,  ALLOCATABLE :: rad1(:,:,:,:)
-  REAL    ,ALLOCATABLE :: ja1(:,:,:,:,:)
-  REAL  ,  ALLOCATABLE :: RAD_AMSUB(:,:,:,:)
-  REAL    ,ALLOCATABLE :: JAC_AMSUB(:,:,:,:,:)
-  REAL    ,ALLOCATABLE :: P_lvl1(:)
-  REAL    ,ALLOCATABLE :: LND(:,:)
-  REAL    ,ALLOCATABLE :: LND0(:,:)
-  REAL    ,ALLOCATABLE :: LNDGRD(:,:)
-  REAL    ,ALLOCATABLE :: LANDTYPE(:)
-  REAL    ,ALLOCATABLE :: LNDTY0(:)
-!END RUIXIA LIU ADD 20120321
+!ruixia liu add 20120321
+  real    ,allocatable :: amsua(:,:,:,:)
+  real    ,allocatable :: t_sfc_0(:,:,:)
+  real    ,allocatable :: amsuagrd(:,:,:,:)  ! satellite multigrid position
+  real    ,allocatable :: t_sfc_grd(:,:,:)
+  real    ,allocatable :: p_lyr(:)
+  real    ,allocatable :: ozn_lyr(:)
+  real    ,allocatable :: p_lvl(:)
+  real    ,allocatable :: t_sfc(:,:)
+  real    ,allocatable :: ppp1(:)             ! pressure vertical coordinate
+  real    ,allocatable :: rad(:,:,:,:)
+  real    ,allocatable :: ja(:,:,:,:,:)
+  real    ,allocatable :: t_lyr(:,:,:)
+  real    ,allocatable :: q_lyr(:,:,:)
+  real  :: cmag
+  integer  :: inum2
+  character(len=100)   :: sat_da_use
+  character(len=200)   :: co_path
+  character(len=100)   :: sat_data_path(2)   ! add amsu-b by yuanfu feb 2013
+  character(len=100)   :: moist_unit(2)   ! add for amsu-a/b by yuanfu feb 2013
+  integer  :: nchbeg,nchend
+  integer  :: namsub ! yuanfu added for counting number amsu-b obs
+  integer  ,allocatable  :: amsuid(:,:)
+  integer  :: amsua_channels_used(15),amsub_channels_used(5) ! yuanfu added for controling amsu data
+  real  ,allocatable :: t_sfc_bkg0(:,:,:)
+  real    ,allocatable :: t_lyr1(:,:,:)
+  real    ,allocatable :: q_lyr1(:,:,:)
+  real    ,allocatable ::  t_sfc1(:,:)
+  real    ,allocatable :: ppp2(:)
+  real ozn_lyr1(41)
+  real  ,  allocatable :: rad1(:,:,:,:)
+  real    ,allocatable :: ja1(:,:,:,:,:)
+  real  ,  allocatable :: rad_amsub(:,:,:,:)
+  real    ,allocatable :: jac_amsub(:,:,:,:,:)
+  real    ,allocatable :: p_lvl1(:)
+  real    ,allocatable :: lnd(:,:)
+  real    ,allocatable :: lnd0(:,:)
+  real    ,allocatable :: lndgrd(:,:)
+  real    ,allocatable :: landtype(:)
+  real    ,allocatable :: lndty0(:)
+!end ruixia liu add 20120321
 
-  ! YUANFU XIE ADDS DATA STRUCTURES FOR SATELLITE DATA:
-  TYPE SATELLITE_OBS
-    INTEGER :: NUMPRO,NUMCHS  ! NUMBER OF PROFILES AND CHANNELS
-    INTEGER, ALLOCATABLE :: GRDIDX(:,:)    ! HORIZONTAL GRID LOCATIONS
-    INTEGER, ALLOCATABLE :: LNDCVR(:)      ! LAND COVERAGE: LAND:1 WATER:0
-    INTEGER, ALLOCATABLE :: LNDTYP(:)      ! LAND TYPE: CRTM LAND OR WATER TYPE
-    REAL, ALLOCATABLE    :: SATVAL(:,:)    ! OBSERVED SATELLITE VALUES: CHANNELS X PROFILES
-    REAL, ALLOCATABLE    :: ANGLES(:,:)    ! SCAN & ZENITH ANGLES: 4 X PROFILES 
-                                           ! (LOCAL & SOLAR ANGLES)
-  END TYPE SATELLITE_OBS
+  ! yuanfu xie adds data structures for satellite data:
+  type satellite_obs
+    integer :: numpro,numchs  ! number of profiles and channels
+    integer, allocatable :: grdidx(:,:)    ! horizontal grid locations
+    integer, allocatable :: lndcvr(:)      ! land coverage: land:1 water:0
+    integer, allocatable :: lndtyp(:)      ! land type: crtm land or water type
+    real, allocatable    :: satval(:,:)    ! observed satellite values: channels x profiles
+    real, allocatable    :: angles(:,:)    ! scan & zenith angles: 4 x profiles 
+                                           ! (local & solar angles)
+  end type satellite_obs
 
-  TYPE(SATELLITE_OBS) :: AMSUB(3)          ! YUANFU ADDED AMSUB FEB 2013, MAX 3 TIME FRAME NOW
-  TYPE(SATELLITE_OBS) :: AMSUBM(3)         ! YUANFU ADDED AMSUB FOR A MULTIGRID LEVEL FEB 2013, MAX 3 TIME FRAME NOW
+  type(satellite_obs) :: amsub(3)          ! yuanfu added amsub feb 2013, max 3 time frame now
+  type(satellite_obs) :: amsubm(3)         ! yuanfu added amsub for a multigrid level feb 2013, max 3 time frame now
 
-CONTAINS
+contains
 
 !=================================================================================
 !>
-!! THIS ROUTINE INITIALIES A SATELLITE OBSERVATION DATA STRUCTURE.
-!! 1. ALLOCATE MEMORY;
-!! 2. ASSIGN VALUES.
+!! this routine initialies a satellite observation data structure.
+!! 1. allocate memory;
+!! 2. assign values.
 !!
 !! \history \n
-!! CREATION: MAR. 2013 \n
-!! AUTHOR  : YUANFU XIE AT NOAA/ESRL/GSD
+!! creation: mar. 2013 \n
+!! author  : yuanfu xie at noaa/esrl/gsd
 !
 !=================================================================================
-SUBROUTINE SATOBS_INIT(SAT_OBS,NUM_PRO,NUM_CHS,GRD_IDX,LND_CVR,LND_TYP,SAT_VAL,SAT_ANG)
+subroutine satobs_init(sat_obs,num_pro,num_chs,grd_idx,lnd_cvr,lnd_typ,sat_val,sat_ang)
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: NUM_PRO,NUM_CHS,GRD_IDX(2,NUM_PRO)
-  INTEGER, INTENT(IN) :: LND_CVR(NUM_PRO),LND_TYP(NUM_PRO)
-  REAL,    INTENT(IN) :: SAT_VAL(NUM_CHS,NUM_PRO),SAT_ANG(4,NUM_PRO)
+  integer, intent(in) :: num_pro,num_chs,grd_idx(2,num_pro)
+  integer, intent(in) :: lnd_cvr(num_pro),lnd_typ(num_pro)
+  real,    intent(in) :: sat_val(num_chs,num_pro),sat_ang(4,num_pro)
 
-  TYPE(SATELLITE_OBS) :: SAT_OBS
+  type(satellite_obs) :: sat_obs
 
-  ! LOCAL VARIABLES:
-  INTEGER :: IP,ISTATUS
+  ! local variables:
+  integer :: ip,istatus
 
-  ! ALLOCATE:
-  ALLOCATE(SAT_OBS%GRDIDX(2,NUM_PRO),SAT_OBS%LNDCVR(NUM_PRO),SAT_OBS%LNDTYP(NUM_PRO), &
-           SAT_OBS%SATVAL(NUM_CHS,NUM_PRO),SAT_OBS%ANGLES(4,NUM_PRO), STAT=ISTATUS)
+  ! allocate:
+  allocate(sat_obs%grdidx(2,num_pro),sat_obs%lndcvr(num_pro),sat_obs%lndtyp(num_pro), &
+           sat_obs%satval(num_chs,num_pro),sat_obs%angles(4,num_pro), stat=istatus)
 
-  SAT_OBS%NUMPRO = NUM_PRO
-  SAT_OBS%NUMCHS = NUM_CHS
+  sat_obs%numpro = num_pro
+  sat_obs%numchs = num_chs
   
-  DO IP=1,NUM_PRO
-    SAT_OBS%GRDIDX(:,IP) = GRD_IDX(:,IP)
-    SAT_OBS%LNDCVR(IP) = LND_CVR(IP)
-    SAT_OBS%LNDTYP(IP) = LND_TYP(IP)
-    SAT_OBS%SATVAL(:,IP) = SAT_VAL(:,IP)
-    SAT_OBS%ANGLES(:,IP) = SAT_ANG(:,IP)
-  ENDDO
+  do ip=1,num_pro
+    sat_obs%grdidx(:,ip) = grd_idx(:,ip)
+    sat_obs%lndcvr(ip) = lnd_cvr(ip)
+    sat_obs%lndtyp(ip) = lnd_typ(ip)
+    sat_obs%satval(:,ip) = sat_val(:,ip)
+    sat_obs%angles(:,ip) = sat_ang(:,ip)
+  enddo
   
-END SUBROUTINE SATOBS_INIT
+end subroutine satobs_init
 
 !=================================================================================
 !>
-!! THIS ROUTINE PROJECTS A SATELLITE OBSERVATION DATA STRUCTURE ON TO ONE OVER A
-!! FINER RESOLUTION.
+!! this routine projects a satellite observation data structure on to one over a
+!! finer resolution.
 !!
-!! \HISTORY \N
-!! CREATION: MAR. 2013
+!! \history \n
+!! creation: mar. 2013
 !!
-!! \AUTHOR: YUANFU XIE AT NOAA/ESRL/GSD
+!! \author: yuanfu xie at noaa/esrl/gsd
 !
 !=================================================================================
-SUBROUTINE SATOBS_PROJ(SATOBS1,SATOBS2,LEVEL,IFLAG)
+subroutine satobs_proj(satobs1,satobs2,level,iflag)
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN)  :: LEVEL
-  INTEGER, INTENT(OUT) :: IFLAG
-  TYPE(SATELLITE_OBS), INTENT(IN)  :: SATOBS1
-  TYPE(SATELLITE_OBS), INTENT(OUT) :: SATOBS2
+  integer, intent(in)  :: level
+  integer, intent(out) :: iflag
+  type(satellite_obs), intent(in)  :: satobs1
+  type(satellite_obs), intent(out) :: satobs2
 
-    ! LOCAL VARIABLES:
-  INTEGER :: IP,ISTATUS,IBASE
-  REAL    :: SQRT
+    ! local variables:
+  integer :: ip,istatus,ibase
+  real    :: sqrt
 
-  IF (LEVEL .LE. 0) THEN
-    IFLAG = 0
-    PRINT*,'NO PROJECTION IS NEEDED'
-    RETURN
-  ENDIF
-  IBASE = 2**(LEVEL-1)
+  if (level .le. 0) then
+    iflag = 0
+    print*,'no projection is needed'
+    return
+  endif
+  ibase = 2**(level-1)
 
-  SATOBS2%NUMCHS = SATOBS1%NUMCHS
-  SATOBS2%NUMPRO = SATOBS1%NUMPRO ! WORST CASE SCENARIO: PROJECTION HAS ALL OBS
+  satobs2%numchs = satobs1%numchs
+  satobs2%numpro = satobs1%numpro ! worst case scenario: projection has all obs
 
-  ! ALLOCATE:
-  ALLOCATE(SATOBS2%GRDIDX(2,SATOBS2%NUMPRO),SATOBS2%LNDCVR(SATOBS2%NUMPRO), &
-           SATOBS2%LNDTYP(SATOBS2%NUMPRO),SATOBS2%ANGLES(4,SATOBS2%NUMPRO), &
-           SATOBS2%SATVAL(SATOBS2%NUMCHS,SATOBS2%NUMPRO), STAT=ISTATUS)
+  ! allocate:
+  allocate(satobs2%grdidx(2,satobs2%numpro),satobs2%lndcvr(satobs2%numpro), &
+           satobs2%lndtyp(satobs2%numpro),satobs2%angles(4,satobs2%numpro), &
+           satobs2%satval(satobs2%numchs,satobs2%numpro), stat=istatus)
 
-  SATOBS2%NUMPRO = 0
-  DO IP=1,SATOBS1%NUMPRO
-    IF (MOD(SATOBS1%GRDIDX(1,IP)-1,IBASE) .EQ. 0 .AND. &
-        MOD(SATOBS1%GRDIDX(2,IP)-1,IBASE) .EQ. 0) THEN
-      SATOBS2%NUMPRO = SATOBS2%NUMPRO + 1
+  satobs2%numpro = 0
+  do ip=1,satobs1%numpro
+    if (mod(satobs1%grdidx(1,ip)-1,ibase) .eq. 0 .and. &
+        mod(satobs1%grdidx(2,ip)-1,ibase) .eq. 0) then
+      satobs2%numpro = satobs2%numpro + 1
 
-      SATOBS2%GRDIDX(:,SATOBS2%NUMPRO) = (SATOBS1%GRDIDX(:,IP)-1)/(2**(LEVEL-1))+1
-      SATOBS2%LNDCVR(SATOBS2%NUMPRO) = SATOBS1%LNDCVR(IP)
-      SATOBS2%LNDTYP(SATOBS2%NUMPRO) = SATOBS1%LNDTYP(IP)
-      SATOBS2%SATVAL(:,SATOBS2%NUMPRO) = SATOBS1%SATVAL(:,IP)
-      SATOBS2%ANGLES(:,SATOBS2%NUMPRO) = SATOBS1%ANGLES(:,IP)
-    ENDIF
-  ENDDO
+      satobs2%grdidx(:,satobs2%numpro) = (satobs1%grdidx(:,ip)-1)/(2**(level-1))+1
+      satobs2%lndcvr(satobs2%numpro) = satobs1%lndcvr(ip)
+      satobs2%lndtyp(satobs2%numpro) = satobs1%lndtyp(ip)
+      satobs2%satval(:,satobs2%numpro) = satobs1%satval(:,ip)
+      satobs2%angles(:,satobs2%numpro) = satobs1%angles(:,ip)
+    endif
+  enddo
 
-  IFLAG = 1
+  iflag = 1
 
-END SUBROUTINE SATOBS_PROJ
+end subroutine satobs_proj
 
 !=================================================================================
 !>
-!! THIS	FOLLOWING ROUTINE IS TO DEALLOCATE A SATELLITE_OBS DATA TYPE VARIABLE.
+!! this	following routine is to deallocate a satellite_obs data type variable.
 !!
-!! \HISTORY \N
-!! CREATION: MAR. 2013 \N
-!! \AUTHOR: YUANFU XIE AT NOAA/ESRL
+!! \history \n
+!! creation: mar. 2013 \n
+!! \author: yuanfu xie at noaa/esrl
 !
 !=================================================================================
 
-SUBROUTINE SATOBS_DEAD(SATOBS)
+subroutine satobs_dead(satobs)
 
-  TYPE(SATELLITE_OBS) :: SATOBS
+  type(satellite_obs) :: satobs
 
-  ! LOCAL VARIABLES:
-  INTEGER :: ISTATUS
+  ! local variables:
+  integer :: istatus
 
-  SATOBS%NUMPRO = 0
-  SATOBS%NUMCHS = 0
+  satobs%numpro = 0
+  satobs%numchs = 0
 
-  DEALLOCATE(SATOBS%GRDIDX,SATOBS%LNDCVR,SATOBS%LNDTYP,SATOBS%SATVAL,SATOBS%ANGLES, &
-             STAT=ISTATUS)
+  deallocate(satobs%grdidx,satobs%lndcvr,satobs%lndtyp,satobs%satval,satobs%angles, &
+             stat=istatus)
 
-END SUBROUTINE SATOBS_DEAD
+end subroutine satobs_dead
 
-END MODULE PRMTRS_STMAS_CLOUD
+end module prmtrs_stmas_cloud

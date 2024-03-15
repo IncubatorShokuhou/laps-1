@@ -1,43 +1,43 @@
       subroutine addlocal(cgrib,lcgrib,csec2,lcsec2,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    addlocal 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-01
+! subprogram:    addlocal 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-01
 !
-! ABSTRACT: This subroutine adds a Local Use Section (Section 2) to 
-!   a GRIB2 message.
-!   This routine is used with routines "gribcreate", "addgrid", "addfield",
-!   and "gribend" to create a complete GRIB2 message.  Subroutine
-!   gribcreate must be called first to initialize a new GRIB2 message.
+! abstract: this subroutine adds a local use section (section 2) to 
+!   a grib2 message.
+!   this routine is used with routines "gribcreate", "addgrid", "addfield",
+!   and "gribend" to create a complete grib2 message.  subroutine
+!   gribcreate must be called first to initialize a new grib2 message.
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-01  Gilbert
+! program history log:
+! 2000-05-01  gilbert
 !
-! USAGE:    CALL addlocal(cgrib,lcgrib,csec2,lcsec2,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array to contain the GRIB2 message
-!     lcgrib   - Maximum length (bytes) of array cgrib.
-!     csec2    - Character array containing information to be added to
-!                Section 2.
-!     lcsec2   - Number of bytes of character array csec2 to be added to
-!                Section 2.
+! usage:    call addlocal(cgrib,lcgrib,csec2,lcsec2,ierr)
+!   input argument list:
+!     cgrib    - character array to contain the grib2 message
+!     lcgrib   - maximum length (bytes) of array cgrib.
+!     csec2    - character array containing information to be added to
+!                section 2.
+!     lcsec2   - number of bytes of character array csec2 to be added to
+!                section 2.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     cgrib    - Character array to contain the GRIB2 message
-!     ierr     - Error return code.
+!   output argument list:      
+!     cgrib    - character array to contain the grib2 message
+!     ierr     - error return code.
 !                0 = no error
-!                1 = GRIB message was not initialized.  Need to call
+!                1 = grib message was not initialized.  need to call
 !                    routine gribcreate first.
-!                2 = GRIB message already complete.  Cannot add new section.
-!                3 = Sum of Section byte counts doesn't add to total byte count.
-!                4 = Previous Section was not 1 or 7.
+!                2 = grib message already complete.  cannot add new section.
+!                3 = sum of section byte counts doesn't add to total byte count.
+!                4 = previous section was not 1 or 7.
 !
-! REMARKS: Note that the Local Use Section ( Section 2 ) can only follow
-!          Section 1 or Section 7 in a GRIB2 message.
+! remarks: note that the local use section ( section 2 ) can only follow
+!          section 1 or section 7 in a grib2 message.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -46,90 +46,90 @@
       integer,intent(in) :: lcgrib,lcsec2
       integer,intent(out) :: ierr
       
-      character(len=4),parameter :: grib='GRIB',c7777='7777'
+      character(len=4),parameter :: grib='grib',c7777='7777'
       character(len=4):: ctemp
       integer,parameter :: two=2
       integer lensec2,iofst,ibeg,lencurr,len
  
       ierr=0
 !
-!  Check to see if beginning of GRIB message exists
+!  check to see if beginning of grib message exists
 !
       ctemp=cgrib(1)//cgrib(2)//cgrib(3)//cgrib(4)
       if ( ctemp.ne.grib ) then
-        print *,'addlocal: GRIB not found in given message.'
-        print *,'addlocal: Call to routine gribcreate required',
-     &          ' to initialize GRIB messge.'
+        print *,'addlocal: grib not found in given message.'
+        print *,'addlocal: call to routine gribcreate required',
+     &          ' to initialize grib messge.'
         ierr=1
         return
       endif
 !
-!  Get current length of GRIB message
+!  get current length of grib message
 !  
       call gbyte(cgrib,lencurr,96,32)
 !
-!  Check to see if GRIB message is already complete
+!  check to see if grib message is already complete
 !  
       ctemp=cgrib(lencurr-3)//cgrib(lencurr-2)//cgrib(lencurr-1)
      &      //cgrib(lencurr)
       if ( ctemp.eq.c7777 ) then
-        print *,'addlocal: GRIB message already complete.  Cannot',
+        print *,'addlocal: grib message already complete.  cannot',
      &          ' add new section.'
         ierr=2
         return
       endif
 !
-!  Loop through all current sections of the GRIB message to
+!  loop through all current sections of the grib message to
 !  find the last section number.
 !
-      len=16    ! length of Section 0
+      len=16    ! length of section 0
       do 
-      !    Get section number and length of next section
+      !    get section number and length of next section
         iofst=len*8
         call gbyte(cgrib,ilen,iofst,32)
         iofst=iofst+32
         call gbyte(cgrib,isecnum,iofst,8)
         len=len+ilen
-      !    Exit loop if last section reached
+      !    exit loop if last section reached
         if ( len.eq.lencurr ) exit
-      !    If byte count for each section doesn't match current
+      !    if byte count for each section doesn't match current
       !    total length, then there is a problem.
         if ( len.gt.lencurr ) then
-          print *,'addlocal: Section byte counts don''t add to total.'
-          print *,'addlocal: Sum of section byte counts = ',len
-          print *,'addlocal: Total byte count in Section 0 = ',lencurr
+          print *,'addlocal: section byte counts don''t add to total.'
+          print *,'addlocal: sum of section byte counts = ',len
+          print *,'addlocal: total byte count in section 0 = ',lencurr
           ierr=3
           return
         endif
       enddo
 !
-!  Section 2 can only be added after sections 1 and 7.
+!  section 2 can only be added after sections 1 and 7.
 !
       if ( (isecnum.ne.1) .and. (isecnum.ne.7) ) then
-        print *,'addlocal: Section 2 can only be added after Section',
-     &          ' 1 or Section 7.'
-        print *,'addlocal: Section ',isecnum,' was the last found in',
-     &          ' given GRIB message.'
+        print *,'addlocal: section 2 can only be added after section',
+     &          ' 1 or section 7.'
+        print *,'addlocal: section ',isecnum,' was the last found in',
+     &          ' given grib message.'
         ierr=4
         return
       endif
 !
-!  Add Section 2  - Local Use Section
+!  add section 2  - local use section
 !
-      ibeg=lencurr*8        !   Calculate offset for beginning of section 2
+      ibeg=lencurr*8        !   calculate offset for beginning of section 2
       iofst=ibeg+32         !   leave space for length of section
-      call sbyte(cgrib,two,iofst,8)     ! Store section number ( 2 )
+      call sbyte(cgrib,two,iofst,8)     ! store section number ( 2 )
       istart=lencurr+5
       cgrib(istart+1:istart+lcsec2)=csec2(1:lcsec2)
       !
-      !   Calculate length of section 2 and store it in octets
+      !   calculate length of section 2 and store it in octets
       !   1-4 of section 2.
       !
       lensec2=lcsec2+5      ! bytes
       call sbyte(cgrib,lensec2,ibeg,32)
 
 !
-!  Update current byte total of message in Section 0
+!  update current byte total of message in section 0
 !
       call sbyte(cgrib,lencurr+lensec2,96,32)
 

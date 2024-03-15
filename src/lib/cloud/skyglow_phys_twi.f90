@@ -1,25 +1,25 @@
 
 
-        subroutine skyglow_phys_twi(ialt_start,ialt_end,ialt_delt &! I
-                   ,jazi_start,jazi_end,jazi_delt                 &! I
-                   ,minalt,maxalt,minazi,maxazi,idebug_a          &! I
-                   ,sol_alt,sol_azi,view_alt,view_az              &! I
-                   ,earth_radius,patm,aod_vrt,aod_ray,aod_ray_dir &! I
-                   ,aero_scaleht                                  &! I
-                   ,htmsl,redp_lvl                                &! I
-                   ,aod_ill                                       &! I
-                   ,l_solar_eclipse,i4time,rlat,rlon              &! I
-                   ,clear_radf_c,horz_dep_d,ag_2d                 &! I
-                   ,clear_rad_c,elong                       )      ! O
+        subroutine skyglow_phys_twi(ialt_start,ialt_end,ialt_delt &! i
+                   ,jazi_start,jazi_end,jazi_delt                 &! i
+                   ,minalt,maxalt,minazi,maxazi,idebug_a          &! i
+                   ,sol_alt,sol_azi,view_alt,view_az              &! i
+                   ,earth_radius,patm,aod_vrt,aod_ray,aod_ray_dir &! i
+                   ,aero_scaleht                                  &! i
+                   ,htmsl,redp_lvl                                &! i
+                   ,aod_ill                                       &! i
+                   ,l_solar_eclipse,i4time,rlat,rlon              &! i
+                   ,clear_radf_c,horz_dep_d,ag_2d                 &! i
+                   ,clear_rad_c,elong                       )      ! o
 
-!       Sky glow with solar altitude <= 0
+!       sky glow with solar altitude <= 0
 
         include 'trigd.inc'
 
-        use mem_namelist, ONLY: aod_bin, aod_asy
-        use mem_allsky, ONLY: ext_g, nc
+        use mem_namelist, only: aod_bin, aod_asy
+        use mem_allsky, only: ext_g, nc
 
-!       Statement Functions
+!       statement functions
         trans(od) = exp(-min(od,80.))
         opac(od) = 1.0 - trans(od)
 !       brt(a) = (1.0 - exp(-.14 * a))/.14 ! rel. sky brightness (max~7)
@@ -27,7 +27,7 @@
         brtf(am,od_per_am) = 1.0 - exp(-am*od_per_am) ! rel. sky brightness (max=1)
         brto(od) = 1.0 - exp(-min(od,80.)) ! rel. sky brightness (max=1)
 
-        angdif(X,Y)=MOD(X-Y+540.,360.)-180.
+        angdif(x,y)=mod(x-y+540.,360.)-180.
         angleunitvectors(a1,a2,a3,b1,b2,b3) = acosd(a1*b1+a2*b2+a3*b3)
         scurve(x) = (-0.5 * cos(x*3.14159265)) + 0.5  ! range of x/scurve is 0 to 1
 
@@ -49,7 +49,7 @@
         real clear_rad_c0(nc,minalt:maxalt,minazi:maxazi) ! clear sky (no eclipse)
         real clear_radf_c(nc,minalt:maxalt,minazi:maxazi)! integrated
                ! fraction of air molecules illuminated by the sun along
-               ! line of sight (consider Earth's shadow + clouds)
+               ! line of sight (consider earth's shadow + clouds)
                ! topo and multiple scattering is accounted for
         real ag_2d(minalt:maxalt,minazi:maxazi) ! gas airmass (topo/notopo)
         real aod_ill(minalt:maxalt,minazi:maxazi) ! aerosol illuminated
@@ -118,24 +118,24 @@
          else
            iverbose = 0
          endif
-         call get_airmass(altray,htmsl,patm &       ! I
-                         ,aero_refht,aero_scaleht & ! I
-                         ,earth_radius,iverbose &   ! I
-                         ,ag,ao,aa,refr_deg)        ! O
+         call get_airmass(altray,htmsl,patm &       ! i
+                         ,aero_refht,aero_scaleht & ! i
+                         ,earth_radius,iverbose &   ! i
+                         ,ag,ao,aa,refr_deg)        ! o
 
-!        Determine aerosol multiple scattering order
+!        determine aerosol multiple scattering order
 !        altscat = 1.00 * altray + 0.00 * sol_alt
 !        altscat = max(altray,sol_alt)
 !        altscat = sqrt(0.5 * (altray**2 + solalt**2))
-!        call get_airmass(altscat,htmsl,patm &      ! I
-!                        ,aero_refht,aero_scaleht & ! I
-!                        ,earth_radius,1 &          ! I
-!                        ,agdum,aodum,aascat,refr_deg) ! O
+!        call get_airmass(altscat,htmsl,patm &      ! i
+!                        ,aero_refht,aero_scaleht & ! i
+!                        ,earth_radius,1 &          ! i
+!                        ,agdum,aodum,aascat,refr_deg) ! o
 !        scatter_order = 1.0 ! f(altray,sol_alt)
 !        scatter_order = max(aod_vrt*aascat,1.0)**1.0 ! 0.5-1.5
 !        write(6,*)' aod_ray/aascat/sco',aod_ray(ialt,minazi),aascat,scatter_order
 
-!        Determine effective asymmetry parameter from multiple scattering
+!        determine effective asymmetry parameter from multiple scattering
 !        http://www.arm.gov/publications/proceedings/conf15/extended_abs/sakerin_sm.pdf
 !        do isc = 1,nsc
 !          if(aod_asy(isc) .gt. 0.)then
@@ -149,17 +149,17 @@
 
 !        cosp_frac = max(1.-scatter_order,0.)
 
-!        Set this for values of -5 to +5 degrees of solar altitude
+!        set this for values of -5 to +5 degrees of solar altitude
          if(.false.)then
            ags_a = ag_s/ag_90
            aas_a = aa_s/aa_90
          elseif(.false.)then
            do isolalt = -5,+5
              sol_alt_a = sol_alt + float(isolalt)
-             call get_airmass(sol_alt_a,htmsl,patm &    ! I
-                             ,aero_refht,aero_scaleht & ! I
-                             ,earth_radius,1 &          ! I
-                             ,ag_s,ao_s,aa_s,refr_deg)  ! O
+             call get_airmass(sol_alt_a,htmsl,patm &    ! i
+                             ,aero_refht,aero_scaleht & ! i
+                             ,earth_radius,1 &          ! i
+                             ,ag_s,ao_s,aa_s,refr_deg)  ! o
              ags_a(isolalt) = ag_s / ag_90
              aas_a(isolalt) = aa_s / aa_90
            enddo 
@@ -191,7 +191,7 @@
 
           else ! sun below horizon (twilight / night brightness)
 
-!           See http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.67.2567&rep=rep1&type=pdf 
+!           see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.67.2567&rep=rep1&type=pdf 
 !           patm = 0.85
             z = min(90. - altray,91.)
             airmass_g = 1. / (cosd(z) + 0.025 * exp(-11 * cosd(z)))
@@ -218,7 +218,7 @@
             dist_pp_plane = (horz_dep_r**2 * earth_radius / 2.0) - htmsl ! approx perpendicular dist
             dist_pp_plane_s = dist_pp_plane
 
-!           Enlarge the shadow except when near the sun and near sunrise
+!           enlarge the shadow except when near the sun and near sunrise
 !           shadow_enlarge_high = 13000. * (1.0 - cosd(elong(ialt,jazi)))/2
             if(htmsl .le. 14600.)then
                 elong_arg = min(elong(ialt,jazi),90.)
@@ -252,11 +252,11 @@
               ht_ray_plane = (dist_ray_plane * sind(altray) + bterm) + htmsl
 
               if(ht_ray_plane .le. 99000.)then
-!               Pressure at ray plane intersection in standard atmospheres?
-                patm_ray_plane = min(ZtoPsa(ht_ray_plane)/1013.,1.0) !*patm
+!               pressure at ray plane intersection in standard atmospheres?
+                patm_ray_plane = min(ztopsa(ht_ray_plane)/1013.,1.0) !*patm
               else
-!               Pressure at ray plane intersection in standard atmospheres?
-                patm_ray_plane = min(ZtoPsa(99000.) / 1013.,1.0) !*patm
+!               pressure at ray plane intersection in standard atmospheres?
+                patm_ray_plane = min(ztopsa(99000.) / 1013.,1.0) !*patm
                 scalehts = min((ht_ray_plane - 99000.) / 8000.,10.)
                 patm_ray_plane = patm_ray_plane * exp(-scalehts)
               endif
@@ -308,7 +308,7 @@
                   aod_lit = aod_path * frac_aero_lit
                   aod_unlit = aod_path * (1.-frac_aero_lit)
 !                 arg = aod_lit * 0.5 * (1. - cosd(elong(ialt,jazi)))
-!                 Note: is the 40. factor too large?
+!                 note: is the 40. factor too large?
 !                 aero_red = (1.0 - exp(-40. * aod_lit)) &  ! aod fct (0-1)
                   aero_red = (1.0 - exp(-240. * aod_lit)) &  ! aod fct (0-1)
                            * 0.5 * (1. - cosd(elong(ialt,jazi)))&! elong factor (0-1) 
@@ -329,7 +329,7 @@
               if(mode_twi .eq. 2)then ! rad twilight
                 continue
 
-              else ! absolute illumination (nl), HSI
+              else ! absolute illumination (nl), hsi
                 if(airmass_lit .gt. 1.e-5)then
                     brta = brt(airmass_lit)
 
@@ -347,7 +347,7 @@
                 clear_intf = clear_int / twi_int
               endif
 
-            else ! in Earth's shadow (may need secondary scattering)  
+            else ! in earth's shadow (may need secondary scattering)  
               dist_ray_plane = -999.9
               ht_ray_plane = -999.9
               airmass_lit = 0.
@@ -360,21 +360,21 @@
               aero_red = 0.
             endif ! part of atmosphere is illuminated
 
-!           Apply saturation ramp (=1) at high altitudes or low sun
+!           apply saturation ramp (=1) at high altitudes or low sun
 !                                 (=0) at low altitudes and high sun
             sat_sol_ramp = min(-sol_alt / 3.0,1.0) ! 0-1 (lower sun)
             sat_alt_ramp = sqrt(sind(max(altray,0.)))   ! 0-1 (higher alt)
             sat_ramp = 1.0-((1.0 - sat_alt_ramp) * (1.0 - sat_sol_ramp))
-!           if(airmass_lit .lt. .02)then ! Earth shadow
+!           if(airmass_lit .lt. .02)then ! earth shadow
 !               sat_ramp = sat_ramp * (airmass_lit / .02)
 !           endif
 
-!           Ramp2 is zero with either high sun or high alt
+!           ramp2 is zero with either high sun or high alt
             hue_alt_ramp = (sind(altray))**2.0     ! 0-1 (higher alt)
 !           hue_ramp2 = 1.0 ! sat_sol_ramp * (1.0 - hue_alt_ramp)
             hue_coeff = 0.2 ! max(1.0 + min((sol_alt+3.),0.) /  6.,0.2)
 
-!           The value of 'sat_twi_ramp_nt' should also appear in
+!           the value of 'sat_twi_ramp_nt' should also appear in
 !           subroutine 'get_clr_rad_nt', variable 'sat_twi_ramp'
             sat_twi_ramp_nt = 0.4
 
@@ -398,23 +398,23 @@
                               +  am_term   * (1.0 - frac_twi_ramp)
             endif
 
-            if(mode_twi .eq. 1)then ! HSI twilight
+            if(mode_twi .eq. 1)then ! hsi twilight
 
-!             HSI
+!             hsi
 
-!             Hue
-!             Hue tends to red with high airmass and blue with low airmass
-!             Higher exp coefficient (or low hue) makes it more red
-!             Also set to blue with high alt or high sun (near horizon)
-!             Aero_red reddens due to aerosols (if value is 1)
-!             Increase huea coefficient to redden the horizon?
-!             hue = exp(-airmass_lit*0.75) ! 0:R 1:B 2:G 3:R
+!             hue
+!             hue tends to red with high airmass and blue with low airmass
+!             higher exp coefficient (or low hue) makes it more red
+!             also set to blue with high alt or high sun (near horizon)
+!             aero_red reddens due to aerosols (if value is 1)
+!             increase huea coefficient to redden the horizon?
+!             hue = exp(-airmass_lit*0.75) ! 0:r 1:b 2:g 3:r
               huea = exp(-(airmass_unlit-4.0)*0.40*hue_coeff) 
               hue = min(huea,(1.0 - aero_red)) ! set hue to 0 via aero_red
-              hue2 = (2.8 - 1.8 * hue ** 1.6)  ! 0:R 1:B 2:G 3:R
+              hue2 = (2.8 - 1.8 * hue ** 1.6)  ! 0:r 1:b 2:g 3:r
               hue2 = max(hue2,1.5) ! keep aqua color high up
 
-!             Redden further based on aerosols
+!             redden further based on aerosols
 !             hue2 = min(max(hue2,aero_red/clear_intf),2.7)
 
               if(hue2 .lt. 2.0)then
@@ -423,28 +423,28 @@
                   hue2 = 2.0 + .836 * sqrt(hue2 - 2.0)
               endif
 
-              clear_rad_c(1,ialt,jazi) = hue2                        ! Hue
+              clear_rad_c(1,ialt,jazi) = hue2                        ! hue
 
-!             Saturation
-              if(hue2 .gt. 2.0)then ! Red End                          
+!             saturation
+              if(hue2 .gt. 2.0)then ! red end                          
                   sat_arg = 0.7*abs((hue2-2.0))**2.0
-              else                  ! Blue End
+              else                  ! blue end
                   sat_arg = 0.4*abs((hue2-2.0))**2.0
               endif
               sat_aod_ramp = 1.2 - (aod_vrt * 2.)
-              clear_rad_c(2,ialt,jazi) = 0.10 + (sat_arg) &          ! Sat
+              clear_rad_c(2,ialt,jazi) = 0.10 + (sat_arg) &          ! sat
                                            * sat_ramp &                 
                                            * sat_twi_ramp &
                                            * sat_aod_ramp
 
-!             Intensity
-              clear_rad_c(3,ialt,jazi) = clear_int * rint_alt_ramp   ! Int
+!             intensity
+              clear_rad_c(3,ialt,jazi) = clear_int * rint_alt_ramp   ! int
 
               if(clear_rad_c(3,ialt,jazi) .lt. .0000099)then
-                  write(6,*)' WARNING: low value of clear_rad_c' &
+                  write(6,*)' warning: low value of clear_rad_c' &
                            ,clear_rad_c(3,ialt,jazi),za,airmass_g &
                            ,rint_alt_ramp,clear_int,angle_plane &
-                           ,ht_ray_plane,ZtoPsa(ht_ray_plane)
+                           ,ht_ray_plane,ztopsa(ht_ray_plane)
               endif
 
             else ! rad twilight (experimental)

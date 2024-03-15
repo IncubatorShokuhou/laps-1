@@ -1,12 +1,12 @@
 
         subroutine get_cld_pf(elong_a,alt_a,r_cloud_rad,cloud_rad_w,cloud_od,cloud_od_sp &
-                             ,emis_ang_a,nsp,airmass_2_topo,idebug_a,ni,nj & ! I
-                             ,pf_scat1,pf_scat2,pf_scat,pf_thk_a) ! O
+                             ,emis_ang_a,nsp,airmass_2_topo,idebug_a,ni,nj & ! i
+                             ,pf_scat1,pf_scat2,pf_scat,pf_thk_a) ! o
         include 'trigd.inc'
 
-        use mem_allsky, ONLY: nc
+        use mem_allsky, only: nc
 
-!       Statement functions
+!       statement functions
         trans(od) = exp(-min(od,80.))
         opac(od) = 1.0 - trans(od)
         alb(bt) = bt / (1.+bt)
@@ -33,7 +33,7 @@
 
         logical l_pf_new /.true./
 
-!       Call to phase_func
+!       call to phase_func
         dimension v10(0:13,0:70)
         character*10 nm(0:13,0:70)
 
@@ -47,22 +47,22 @@
 
 !         a substitute for cloud_rad could be arg2 = (cosd(alt))**3.
 
-!         Phase function that depends on degree of fwd scattering in cloud    
+!         phase function that depends on degree of fwd scattering in cloud    
 !         pwr controls angular extent of fwd scattering peak of a thin cloud
-!         General references: 
+!         general references: 
 !         http://www.uni-leipzig.de/~strahlen/web/research/de_index.php?goto=arctic
-!         http://www-evasion.imag.fr/Publications/2008/BNMBC08/clouds.pdf
-!         http://pubs.giss.nasa.gov/docs/1969/1969_Hansen_2.pdf
+!         http://www-evasion.imag.fr/publications/2008/bnmbc08/clouds.pdf
+!         http://pubs.giss.nasa.gov/docs/1969/1969_hansen_2.pdf
 !         http://rtweb.aer.com/rrtm_frame.html
-!         http://wiki.seas.harvard.edu/geos-chem/images/Guide_to_GCRT_Oct2013.pdf
+!         http://wiki.seas.harvard.edu/geos-chem/images/guide_to_gcrt_oct2013.pdf
 !         https://www.osapublishing.org/oe/abstract.cfm?uri=oe-23-9-11995
 
           cloud_od_cice = cloud_od_sp(i,j,2)
           cloud_od_rain = cloud_od_sp(i,j,3)
 
-!         Parameter for looking at normal face of a cloud is set to 1 if
+!         parameter for looking at normal face of a cloud is set to 1 if
 !         we're looking above the horizon, or below the horizon looking
-!         straight down. It is 0 if we're looking much below the horizon near
+!         straight down. it is 0 if we're looking much below the horizon near
 !         the limb.
           if(alt_a(i,j) .le. 0. .and. emis_ang_a(i,j) .gt. 0.)then
               frac_alt = sind(abs(alt_a(i,j)))
@@ -80,8 +80,8 @@
 
             bf = 0.06
 
-!           Check for being optically thin with direct light source
-!           Coefficient of 10. can be lower if needed
+!           check for being optically thin with direct light source
+!           coefficient of 10. can be lower if needed
             clwc_bin1 = exp(-(cloud_od_liq/10.)**2) ! optically thin
             clwc_albedo = (bf * cloud_od_liq) / (1. + (bf * cloud_od_liq))
             clwc_bin1 = clwc_bin1 * r_cloud_rad(i,j)**10. ! direct lighting
@@ -91,21 +91,21 @@
             clwc_bin1d = -0.08 ! opac(0.00*sco)     ! backscattering
             clwc_bin2 = 1.0 - clwc_bin1             ! optically thick 
 
-!           Derived using phase function of Venus (a thick cloud analog)
-!           Specifically the Venus phase angle magnitude corr
+!           derived using phase function of venus (a thick cloud analog)
+!           specifically the venus phase angle magnitude corr
             iplan = 3
             isat = 0
             phase_angle_d = 180. - elong_a(i,j)
             call phase_func(iplan,isat,phase_angle_d,phase_corr)       
             r_ill = (1. + cosd(phase_angle_d)) / 2.
 
-!           Set to 1 or 2 if we're at cloud base?
+!           set to 1 or 2 if we're at cloud base?
             pf_thk = (1.94 / (10.**(phase_corr * 0.4))) / r_ill
             pf_thk = min(pf_thk,600.0) ! limit fwd scattering peak
 !           pf_thk = min(pf_thk,2.0) ! limit fwd scattering peak
             pf_thk1 = pf_thk
 
-!           Eventually sky average r_cloud_rad can help decide the regime for
+!           eventually sky average r_cloud_rad can help decide the regime for
 !           determination of pf_thk? 'scurve' is also available if needed.
 
 !           if(elong_a(i,j) .gt. 90.)then
@@ -173,7 +173,7 @@
 
           endif ! .true.
 
-!         Separate snow (+cice) phase function
+!         separate snow (+cice) phase function
           cloud_od_snow = cloud_od_sp(i,j,4) + cloud_od_sp(i,j,2)
           trans_nonsnow = trans(cloud_od(i,j) - cloud_od_snow)
           cloud_od_tot  = cloud_od(i,j)
@@ -224,7 +224,7 @@
 
           pf_scat2(:,i,j) = pf_snow * snow_factor + pf_scat1(:,i,j) * (1.0 - snow_factor)
 
-!         Suppress/cap phase function if terrain is close in the light ray
+!         suppress/cap phase function if terrain is close in the light ray
 !         if(airmass_2_topo(i,j) .gt. 0. .and. pf_scat2(2,i,j) .gt. 1.0)then ! cloud in front of terrain
           if(airmass_2_topo(i,j) .gt. 0.)then ! cloud in front of terrain
 !             pf_scat(:,i,j) = pf_scat2(:,i,j)**opac(cloud_od_tot)
@@ -234,8 +234,8 @@
               pf_scat(:,i,j) = pf_scat2(:,i,j)
           endif
 
-!         Add rainbows
-!         Ramping this in between an OD range of .01 to .1
+!         add rainbows
+!         ramping this in between an od range of .01 to .1
           if(cloud_od_sp(i,j,3) .gt. 0.1)then
               rain_factor = 1.0
           elseif(cloud_od_sp(i,j,3) .gt. 0.01)then
@@ -257,10 +257,10 @@
             frac_single = 1.0 ! 0.7 + 0.3 * clwc_bin1 ! optically thin
             do ic = 1,nc
 
-!             Reflection inside primary rainbow + supernumerary rainbows
+!             reflection inside primary rainbow + supernumerary rainbows
               bow_hw = 0.8
               if(antisol_rad .lt. anglebow1(ic))then
-!                 Calculate super_omega (degrees phase per degree elongation/radius)
+!                 calculate super_omega (degrees phase per degree elongation/radius)
                   super_omega = 450. + (float(ic-1) * 75.) 
                   super_phase = (anglebow1(ic) - antisol_rad) * super_omega
                   super_amp = 0.4 * (antisol_rad / (anglebow1(ic)))**60.
@@ -275,16 +275,16 @@
                   endif
               endif
 
-!             Primary rainbow (red is 42 degrees radius, blue is 40)
+!             primary rainbow (red is 42 degrees radius, blue is 40)
               bow_hw = 0.8
-              if(abs(antisol_rad-anglebow1(ic)) .le. bow_hw .AND. antisol_rad .ge. anglebow1(ic))then
+              if(abs(antisol_rad-anglebow1(ic)) .le. bow_hw .and. antisol_rad .ge. anglebow1(ic))then
                   bow_frac = abs(antisol_rad-anglebow1(ic)) / bow_hw
 !                 ratio_bow = max(1.0 / pf_scat(ic,i,j) - 1.0, 0.)
                   bow_int = (1.0 - bow_frac) ** 1.0 
                   pf_scat(ic,i,j) = pf_scat(ic,i,j) + (3.0 * frac_single * bow_int * rain_factor * cloud_rad_w(i,j)**cre)
               endif
 
-!             Alexander's dark band
+!             alexander's dark band
               angle_alex = (anglebow1(ic) + anglebow2(ic)) / 2.0     
               alex_hw = 0.5 * (anglebow2(ic)-anglebow1(ic)) - 1.0*bow_hw
               if(abs(antisol_rad-angle_alex) .lt. alex_hw)then
@@ -301,18 +301,18 @@
                   endif
               endif
 
-!             Secondary rainbow (red is 54.5 degrees radius, blue is 52)
+!             secondary rainbow (red is 54.5 degrees radius, blue is 52)
               bow_hw = 0.8
-              if(abs(antisol_rad-anglebow2(ic)) .le. bow_hw .AND. antisol_rad .le. anglebow2(ic))then
+              if(abs(antisol_rad-anglebow2(ic)) .le. bow_hw .and. antisol_rad .le. anglebow2(ic))then
                   bow_frac = abs(antisol_rad-anglebow2(ic)) / bow_hw 
                   bow_int = (1.0 - bow_frac) ** 0.5 
                   pf_scat(ic,i,j) = pf_scat(ic,i,j) + (0.56* frac_single * bow_int * rain_factor * cloud_rad_w(i,j)**cre)
               endif
 
-!             Reflection outside secondary rainbow + supernumerary rainbows
+!             reflection outside secondary rainbow + supernumerary rainbows
               bow_hw = 0.8
-              if(antisol_rad .gt. anglebow2(ic) .AND. antisol_rad .lt. anglebow2(ic) + 30.)then
-!                 Calculate super_omega (degrees phase per degree elongation/radius)
+              if(antisol_rad .gt. anglebow2(ic) .and. antisol_rad .lt. anglebow2(ic) + 30.)then
+!                 calculate super_omega (degrees phase per degree elongation/radius)
                   super_omega = 450. + (float(ic-1) * 75.) 
                   super_phase = (antisol_rad - anglebow2(ic)) * super_omega
                   super_amp = 0.4 * (1.0 - (antisol_rad - anglebow2(ic))/30.)**15.

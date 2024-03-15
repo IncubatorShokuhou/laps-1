@@ -1,342 +1,342 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       parameters
 !
-! PURPOSE:
-!       Module to hold RT model parameter constants
+! purpose:
+!       module to hold rt model parameter constants
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE parameters
+! calling sequence:
+!       use parameters
 !
-! OUTPUTS:
-!       Parameters
+! outputs:
+!       parameters
 !       ----------
-!       MAX_N_ABSORBERS:             INTEGER parameter defining the maximum
+!       max_n_absorbers:             integer parameter defining the maximum
 !                                    number of absorbing species.
 !
-!       MAX_N_PREDICTORS_USED:       INTEGER parameter defining the maximum
+!       max_n_predictors_used:       integer parameter defining the maximum
 !                                    number of predictors used in the absorption
 !                                    coefficient calculation.
 !
-!       MAX_N_STANDARD_PREDICTORS:   INTEGER parameter defining the number of
+!       max_n_standard_predictors:   integer parameter defining the number of
 !                                    standard (i.e. absorber independent) predictors.
 !
-!       MAX_N_INTEGRATED_PREDICTORS: INTEGER parameter defining the number of
+!       max_n_integrated_predictors: integer parameter defining the number of
 !                                    integrated (i.e. absorber dependent) predictors.
 !
-!       MAX_N_PREDICTORS:            INTEGER parameter defining the total number
+!       max_n_predictors:            integer parameter defining the total number
 !                                    of predictors for all absorbers,
-!                                      MAX_N_STANDARD_PREDICTORS + &
-!                                      ( MAX_N_ABSORBERS * MAX_N_INTEGRATED_PREDICTORS )
+!                                      max_n_standard_predictors + &
+!                                      ( max_n_absorbers * max_n_integrated_predictors )
 !
-!       MAX_N_LAYERS:                INTEGER parameter defining the maximum
+!       max_n_layers:                integer parameter defining the maximum
 !                                    number of atmospheric layers allowed for
 !                                    input.
 !
-!       MAX_N_ABSORBER_LAYERS:       INTEGER parameter defining the maximum
+!       max_n_absorber_layers:       integer parameter defining the maximum
 !                                    number of
 !                                    absorber space layers.
 !
-!       The following are defined numerical parameters. Parameter definitions
+!       the following are defined numerical parameters. parameter definitions
 !       for non-integer constants are used throughout the code to facilitate
 !       changes to the default floating point precision if required:
 !
-!       ZERO      = 0.0
-!       ONE       = 1.0
-!       TWO       = 2.0
-!       THREE     = 3.0
-!       POINT_5   = 0.5
-!       POINT_75  = 0.75
+!       zero      = 0.0
+!       one       = 1.0
+!       two       = 2.0
+!       three     = 3.0
+!       point_5   = 0.5
+!       point_75  = 0.75
 !
-!       PI                 = 3.14159265
-!       DEGREES_TO_RADIANS = PI / 180.0
+!       pi                 = 3.14159265
+!       degrees_to_radians = pi / 180.0
 !
-!       TOA_PRESSURE = 0.005
+!       toa_pressure = 0.005
 !
 !
-!       Pseudo-parameters
+!       pseudo-parameters
 !       -----------------
 !
-!       These values are not parameters in the Fortran sense in that they are
+!       these values are not parameters in the fortran sense in that they are
 !       defined at run-time based on user inputs but once defined, they are
 !       (or should be) invariant.
 !
-!       MAX_N_CHANNELS:              INTEGER defining the maximum number of
-!                                    instrument channels. This defines the
+!       max_n_channels:              integer defining the maximum number of
+!                                    instrument channels. this defines the
 !                                    valid channels for the valid satellites
 !                                    that the user has selected.
-!                                    Upon RTM initialisation and destruction
+!                                    upon rtm initialisation and destruction
 !                                    the value is set to -1.
-!                                    The value of MAX_N_CHANNELS can only be
+!                                    the value of max_n_channels can only be
 !                                    accessed through its own methods:
 !                                      - set_max_n_channels()
 !                                      - reset_max_n_channels()
 !                                      - get_max_n_channels()
 !       
 !
-! MODULES:
-!       None.
+! modules:
+!       none.
 !
-! CONTAINS:
-!       None.
+! contains:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 31-Jul-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 31-jul-2000
 !                       pvandelst@ncep.noaa.gov
 !
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE parameters
+module parameters
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
 
-  USE type_kinds, ONLY : fp_kind
+  use type_kinds, only : fp_kind
 
 
   ! ------------------
-  ! Default visibility
+  ! default visibility
   ! ------------------
 
-  PRIVATE
+  private
 
 
   ! ---------------------------
-  ! Current number of absorbers
+  ! current number of absorbers
   ! ---------------------------
 
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_ABSORBERS = 3
+  integer, public, parameter :: max_n_absorbers = 3
 
 
   ! --------------------
-  ! Number of predictors.
+  ! number of predictors.
   ! --------------------
 
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_PREDICTORS_USED = 5
+  integer, public, parameter :: max_n_predictors_used = 5
 
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_STANDARD_PREDICTORS   = 9
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_INTEGRATED_PREDICTORS = 6
+  integer, public, parameter :: max_n_standard_predictors   = 9
+  integer, public, parameter :: max_n_integrated_predictors = 6
 
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_PREDICTORS = MAX_N_STANDARD_PREDICTORS + &
-                                                   ( MAX_N_ABSORBERS * MAX_N_INTEGRATED_PREDICTORS )
+  integer, public, parameter :: max_n_predictors = max_n_standard_predictors + &
+                                                   ( max_n_absorbers * max_n_integrated_predictors )
 
 
 
   ! --------------------------------------
-  ! Number of absorber layers in algorithm
+  ! number of absorber layers in algorithm
   ! --------------------------------------
 
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_ABSORBER_LAYERS = 300
+  integer, public, parameter :: max_n_absorber_layers = 300
 
 
   ! ----------------------------------------------------------
-  ! Number of channels (for ALL satellites - really the number
-  ! of satellites x number of channels USED per satellite)
+  ! number of channels (for all satellites - really the number
+  ! of satellites x number of channels used per satellite)
   !
-  ! This is also the number of lines in the satellite 
+  ! this is also the number of lines in the satellite 
   ! information file.
   !
-  ! Eventually the MAX_N_PROFILES and MAX_N_LAYERS values
+  ! eventually the max_n_profiles and max_n_layers values
   ! will be dynamic, i.e they will be defined by user inputs.
-  ! For now, however, they're hardwired.
+  ! for now, however, they're hardwired.
   ! --------------------------------------------------------
 
-  ! -- Accessed via SET_<name>, RESET_<name>, and GET_<name> routines
-  INTEGER, PRIVATE, PARAMETER :: RESET_VALUE = -1
-  INTEGER, PRIVATE, SAVE      :: MAX_N_CHANNELS = RESET_VALUE
+  ! -- accessed via set_<name>, reset_<name>, and get_<name> routines
+  integer, private, parameter :: reset_value = -1
+  integer, private, save      :: max_n_channels = reset_value
 
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_PROFILES = 128
-  INTEGER, PUBLIC, PARAMETER :: MAX_N_LAYERS   = 100
-!!!  INTEGER, PRIVATE :: MAX_N_PROFILES = RESET_VALUE
-!!!  INTEGER, PRIVATE :: MAX_N_LAYERS   = RESET_VALUE
+  integer, public, parameter :: max_n_profiles = 128
+  integer, public, parameter :: max_n_layers   = 100
+!!!  integer, private :: max_n_profiles = reset_value
+!!!  integer, private :: max_n_layers   = reset_value
 
 
   ! -----
-  ! Flags
+  ! flags
   ! -----
 
-  ! -- Direction flags for transmittance calculation
-  INTEGER, PUBLIC, PARAMETER :: DOWN = 0
-  INTEGER, PUBLIC, PARAMETER :: UP   = 1
+  ! -- direction flags for transmittance calculation
+  integer, public, parameter :: down = 0
+  integer, public, parameter :: up   = 1
 
 
   ! --------------------
-  ! Numerical parameters
+  ! numerical parameters
   ! --------------------
 
-  ! -- Numbers
-  REAL( fp_kind ), PUBLIC, PARAMETER :: ZERO      = 0.0_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: ONE       = 1.0_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: TWO       = 2.0_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: THREE     = 3.0_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: POINT_5   = 0.5_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: POINT_75  = 0.75_fp_kind
+  ! -- numbers
+  real( fp_kind ), public, parameter :: zero      = 0.0_fp_kind
+  real( fp_kind ), public, parameter :: one       = 1.0_fp_kind
+  real( fp_kind ), public, parameter :: two       = 2.0_fp_kind
+  real( fp_kind ), public, parameter :: three     = 3.0_fp_kind
+  real( fp_kind ), public, parameter :: point_5   = 0.5_fp_kind
+  real( fp_kind ), public, parameter :: point_75  = 0.75_fp_kind
 
-  ! -- Precision/tolerance
-  REAL( fp_kind ), PUBLIC, PARAMETER :: TOLERANCE = EPSILON( ONE )
+  ! -- precision/tolerance
+  real( fp_kind ), public, parameter :: tolerance = epsilon( one )
 
-  ! -- Constant to allow degrees->radians conversion
-  REAL( fp_kind ), PUBLIC, PARAMETER :: PI = 3.14159265358979323_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: DEGREES_TO_RADIANS = PI / 180.0_fp_kind
+  ! -- constant to allow degrees->radians conversion
+  real( fp_kind ), public, parameter :: pi = 3.14159265358979323_fp_kind
+  real( fp_kind ), public, parameter :: degrees_to_radians = pi / 180.0_fp_kind
 
-  ! -- Top-Of-Atmosphere pressure in hPa
-  REAL( fp_kind ), PUBLIC, PARAMETER :: TOA_PRESSURE = 0.005_fp_kind
+  ! -- top-of-atmosphere pressure in hpa
+  real( fp_kind ), public, parameter :: toa_pressure = 0.005_fp_kind
 
-  ! -- Reciprocal gravity (scaled by 100 for use with pressure in hPa)
-  REAL( fp_kind ), PUBLIC, PARAMETER :: RECIPROCAL_GRAVITY = ONE / 980.665_fp_kind
+  ! -- reciprocal gravity (scaled by 100 for use with pressure in hpa)
+  real( fp_kind ), public, parameter :: reciprocal_gravity = one / 980.665_fp_kind
 
-  ! -- Diffusivity angle secant = ACOS( 3/5 ) in degrees (~53.13)
-  REAL( fp_kind ), PUBLIC, PARAMETER :: SECANT_DIFFUSIVITY_ANGLE = 5.0_fp_kind / THREE
+  ! -- diffusivity angle secant = acos( 3/5 ) in degrees (~53.13)
+  real( fp_kind ), public, parameter :: secant_diffusivity_angle = 5.0_fp_kind / three
 
-  ! -- Maximum solar zenith angle secant definition. Should be determined
+  ! -- maximum solar zenith angle secant definition. should be determined
   ! -- by the maximum angle secant used in generating the transmittance
-  ! -- model coefficients, i.e. a secant of 2.25 => 63.6deg. Users have
+  ! -- model coefficients, i.e. a secant of 2.25 => 63.6deg. users have
   ! -- requested the value be 85deg => secant of ~11.47.
-  REAL( fp_kind ), PUBLIC, PARAMETER :: MAX_SOLAR_ANGLE = 85.0_fp_kind
-  REAL( fp_kind ), PUBLIC, PARAMETER :: MAX_SECANT_SOLAR_ANGLE = 11.473711738554476_fp_kind
+  real( fp_kind ), public, parameter :: max_solar_angle = 85.0_fp_kind
+  real( fp_kind ), public, parameter :: max_secant_solar_angle = 11.473711738554476_fp_kind
 
-!!!! The following is preferred but not allowed in Fortran 90          !!!!
-!!!! Use of non-integer result intrinsics allowed in Fortran 95 though !!!!
-!  REAL( fp_kind ), PRIVATE, PARAMETER :: MAX_SOLAR_ANGLE = 85.0_fp_kind
-!  REAL( fp_kind ), PUBLIC,  PARAMETER :: MAX_SECANT_SOLAR_ANGLE = ONE / COS( DEGREES_TO_RADIANS * MAX_SOLAR_ANGLE )
+!!!! the following is preferred but not allowed in fortran 90          !!!!
+!!!! use of non-integer result intrinsics allowed in fortran 95 though !!!!
+!  real( fp_kind ), private, parameter :: max_solar_angle = 85.0_fp_kind
+!  real( fp_kind ), public,  parameter :: max_secant_solar_angle = one / cos( degrees_to_radians * max_solar_angle )
                                                                  
 
   ! ---------------------
-  ! Subprogram visibility
+  ! subprogram visibility
   ! ---------------------
 
-  PUBLIC :: set_max_n_channels, reset_max_n_channels, get_max_n_channels
+  public :: set_max_n_channels, reset_max_n_channels, get_max_n_channels
 
 
-CONTAINS
+contains
 
 
   ! -------------------------------------------
-  ! Subroutines to SET and GET the value of the 
-  ! "pseudo-parameter" MAX_N_CHANNELS
+  ! subroutines to set and get the value of the 
+  ! "pseudo-parameter" max_n_channels
   ! -------------------------------------------
 
-  ! -- Set the value
-  SUBROUTINE set_max_n_channels( value )
-    INTEGER, INTENT( IN ) :: value
-    MAX_N_CHANNELS = value
-  END SUBROUTINE set_max_n_channels
+  ! -- set the value
+  subroutine set_max_n_channels( value )
+    integer, intent( in ) :: value
+    max_n_channels = value
+  end subroutine set_max_n_channels
 
-  ! -- REset the value
-  SUBROUTINE reset_max_n_channels()
-    MAX_N_CHANNELS = RESET_VALUE
-  END SUBROUTINE reset_max_n_channels
+  ! -- reset the value
+  subroutine reset_max_n_channels()
+    max_n_channels = reset_value
+  end subroutine reset_max_n_channels
 
-  ! -- Get the value and test if it's been set
-  SUBROUTINE get_max_n_channels( value, is_set )
-    INTEGER, INTENT( OUT )           :: value
-    LOGICAL, INTENT( OUT ), OPTIONAL :: is_set
-    value = MAX_N_CHANNELS
-    IF ( PRESENT( is_set ) ) THEN
-      is_set = .FALSE.
-      IF ( value /= RESET_VALUE ) is_set = .TRUE.
-    END IF
-  END SUBROUTINE get_max_n_channels
+  ! -- get the value and test if it's been set
+  subroutine get_max_n_channels( value, is_set )
+    integer, intent( out )           :: value
+    logical, intent( out ), optional :: is_set
+    value = max_n_channels
+    if ( present( is_set ) ) then
+      is_set = .false.
+      if ( value /= reset_value ) is_set = .true.
+    end if
+  end subroutine get_max_n_channels
 
-END MODULE parameters
+end module parameters
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.8  2001/08/31 21:09:45  paulv
-! - Added the secant of the maximum solar angle as a parameter. The secant
-!   value was calculated and expressed as an explicit number since Fortran 90
+! $log$
+! revision 1.8  2001/08/31 21:09:45  paulv
+! - added the secant of the maximum solar angle as a parameter. the secant
+!   value was calculated and expressed as an explicit number since fortran 90
 !   does not allow intrinsics that have other than integer results in a
 !   parameter initialisation expression.
-! - Changed  MAX_SOLAR_ZENITH_ANGLE name to MAX_SOLAR_ANGLE.
+! - changed  max_solar_zenith_angle name to max_solar_angle.
 !
-! Revision 1.7  2001/08/16 16:44:14  paulv
-! - Updated documentation.
-! - Changed MAX_N_CHANNELS attributes from PUBLIC to PRIVATE, SAVE. The value
-!   of MAX_N_CHANNELS is now accessed via its public methods:
+! revision 1.7  2001/08/16 16:44:14  paulv
+! - updated documentation.
+! - changed max_n_channels attributes from public to private, save. the value
+!   of max_n_channels is now accessed via its public methods:
 !     set_max_n_channels
 !     reset_max_n_channels()
 !    get_max_n_channels()
-! - Added RESET_VALUE parameter.
-! - Removed POINT_333 parameter.
+! - added reset_value parameter.
+! - removed point_333 parameter.
 !
-! Revision 1.6  2001/07/12 16:46:12  paulv
-! - Added PRIVATE statement to prevent definitions in module TYPE_KINDS
+! revision 1.6  2001/07/12 16:46:12  paulv
+! - added private statement to prevent definitions in module type_kinds
 !   being available outside the scope of this module.
 !
-! Revision 1.5  2001/05/29 17:42:55  paulv
-! - Now use TYPE_KINDS module parameter FP_KIND to set the floating point
-!   data type. All REAL declarations are now typed with FP_KIND.
-! - Added direction flags for transmittance calculation.
+! revision 1.5  2001/05/29 17:42:55  paulv
+! - now use type_kinds module parameter fp_kind to set the floating point
+!   data type. all real declarations are now typed with fp_kind.
+! - added direction flags for transmittance calculation.
 !
-! Revision 1.4  2000/11/09 20:32:11  paulv
-! - Removed MAX_N_CHANNELS as a parameter. It is now a "pseudo" parameter
+! revision 1.4  2000/11/09 20:32:11  paulv
+! - removed max_n_channels as a parameter. it is now a "pseudo" parameter
 !   in that it is determined by the number of channels for which coefficients
 !   are defined.
-! - Added some more numerical parameters.
+! - added some more numerical parameters.
 !
-! Revision 1.3  2000/08/31 19:36:33  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.3  2000/08/31 19:36:33  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.2  2000/08/24 15:39:45  paulv
-! - Changed the parameter name that references how many predictors of the
-!   total set to use from MAX_N_PREDICTORS_TO_USE to MAX_N_PREDICTORS_USED.
-!   I felt this would clarify (for me at least) that while the maximum
+! revision 1.2  2000/08/24 15:39:45  paulv
+! - changed the parameter name that references how many predictors of the
+!   total set to use from max_n_predictors_to_use to max_n_predictors_used.
+!   i felt this would clarify (for me at least) that while the maximum
 !   number of predictors is set, the number that is actually used can be
 !   less than that.
-! - Current maximum number of layers is 100. This is a temporary limit for
+! - current maximum number of layers is 100. this is a temporary limit for
 !   testing purposes.
-! - The parameter RECIPROCAL_GRAVITY was removed from this module and placed
-!   in the ABSORBER_PROFILE module where it is used.
+! - the parameter reciprocal_gravity was removed from this module and placed
+!   in the absorber_profile module where it is used.
 !
-! Revision 1.1  2000/08/08 16:57:21  paulv
-! Initial checkin
+! revision 1.1  2000/08/08 16:57:21  paulv
+! initial checkin
 !
 !
 !

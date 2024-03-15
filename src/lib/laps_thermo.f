@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -31,52 +31,52 @@ cdis
 cdis
 
         subroutine put_stability(
-     1           i4time_needed                   ! Input
-     1          ,NX_L,NY_L,NZ_L                  ! Input
-     1          ,heights_3d                      ! Input
-     1          ,lat,lon,topo                    ! Input
-     1          ,laps_cycle_time                 ! Input
-     1          ,temp_3d                         ! Input
-     1          ,rh_3d_pct                       ! Input
-     1          ,temp_sfc_k                      ! Input
-     1          ,pres_sfc_pa                     ! Input
-     1          ,twet_snow                       ! Input
-     1          ,td_3d_k                         ! Output
-     1          ,istatus)                        ! Output
+     1           i4time_needed                   ! input
+     1          ,nx_l,ny_l,nz_l                  ! input
+     1          ,heights_3d                      ! input
+     1          ,lat,lon,topo                    ! input
+     1          ,laps_cycle_time                 ! input
+     1          ,temp_3d                         ! input
+     1          ,rh_3d_pct                       ! input
+     1          ,temp_sfc_k                      ! input
+     1          ,pres_sfc_pa                     ! input
+     1          ,twet_snow                       ! input
+     1          ,td_3d_k                         ! output
+     1          ,istatus)                        ! output
 
-cdoc    Calculate and write out set of 2-D stability grids
+cdoc    calculate and write out set of 2-d stability grids
 
-!       Arrays passed in
-        real temp_3d(NX_L,NY_L,NZ_L)
-        real rh_3d_pct(NX_L,NY_L,NZ_L)
-        real heights_3d(NX_L,NY_L,NZ_L)
-        real temp_sfc_k(NX_L,NY_L)
-        real pres_sfc_pa(NX_L,NY_L)
-        real lat(NX_L,NY_L)
-        real lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
+!       arrays passed in
+        real temp_3d(nx_l,ny_l,nz_l)
+        real rh_3d_pct(nx_l,ny_l,nz_l)
+        real heights_3d(nx_l,ny_l,nz_l)
+        real temp_sfc_k(nx_l,ny_l)
+        real pres_sfc_pa(nx_l,ny_l)
+        real lat(nx_l,ny_l)
+        real lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
 
-!       Output
-        real td_3d_k(NX_L,NY_L,NZ_L)
+!       output
+        real td_3d_k(nx_l,ny_l,nz_l)
 
-!       Local declarations for stability 
-        real t_sfc_f(NX_L,NY_L)
-        real td_sfc_k(NX_L,NY_L)
-        real td_sfc_f(NX_L,NY_L)
+!       local declarations for stability 
+        real t_sfc_f(nx_l,ny_l)
+        real td_sfc_k(nx_l,ny_l)
+        real td_sfc_f(nx_l,ny_l)
 
-        real pbe_2d(NX_L,NY_L)
-        real nbe_2d(NX_L,NY_L)
-        real si_2d(NX_L,NY_L)
-        real tt_2d(NX_L,NY_L)
-        real k_2d(NX_L,NY_L)
-        real lcl_2d(NX_L,NY_L)
-        real wb0_2d(NX_L,NY_L)
-        real wb1_2d(NX_L,NY_L)
+        real pbe_2d(nx_l,ny_l)
+        real nbe_2d(nx_l,ny_l)
+        real si_2d(nx_l,ny_l)
+        real tt_2d(nx_l,ny_l)
+        real k_2d(nx_l,ny_l)
+        real lcl_2d(nx_l,ny_l)
+        real wb0_2d(nx_l,ny_l)
+        real wb1_2d(nx_l,ny_l)
 
-        real li(NX_L,NY_L)
+        real li(nx_l,ny_l)
 
-        real pres_sfc_mb(NX_L,NY_L)
-        real pres_3d(NX_L,NY_L,NZ_L)
+        real pres_sfc_mb(nx_l,ny_l)
+        real pres_3d(nx_l,ny_l,nz_l)
 
         integer nfields
         parameter (nfields=8)
@@ -84,9 +84,9 @@ cdoc    Calculate and write out set of 2-D stability grids
         character*10 units_2d_a(nfields)
         character*125 comment_2d_a(nfields)
         character*3 var_2d_a(nfields)
-        real out_multi_2d(NX_L,NY_L,nfields)
+        real out_multi_2d(nx_l,ny_l,nfields)
 
-        character*31 EXT
+        character*31 ext
 
         character*3 var_2d
         character*10  units_2d
@@ -94,38 +94,38 @@ cdoc    Calculate and write out set of 2-D stability grids
 
         real k_to_f
 
-!       Read in surface dewpoint data
-        var_2d = 'TD'
+!       read in surface dewpoint data
+        var_2d = 'td'
         ext = 'lsx'
         call get_laps_2dgrid(i4time_needed,laps_cycle_time/2
      1                      ,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L       
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l       
      1                      ,td_sfc_k,0,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' LAPS Sfc Dewpoint not available'
-            write(6,*)' Abort put_stability routine'
+            write(6,*)' laps sfc dewpoint not available'
+            write(6,*)' abort put_stability routine'
             return
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)return
 
-!       call get_pres_3d(i4time_needed,NX_L,NY_L,NZ_L,pres_3d,istatus)       
+!       call get_pres_3d(i4time_needed,nx_l,ny_l,nz_l,pres_3d,istatus)       
 !       if(istatus .ne. 1)return
 
-!       Convert RH to Td
-        do k = 1,NZ_L
-        do j = 1,NY_L
-        do i = 1,NX_L
+!       convert rh to td
+        do k = 1,nz_l
+        do j = 1,ny_l
+        do i = 1,nx_l
             if(rh_3d_pct(i,j,k) .ge. 0. .and.
-     1         rh_3d_pct(i,j,k) .le. 100.       )then    ! RH in valid range
+     1         rh_3d_pct(i,j,k) .le. 100.       )then    ! rh in valid range
 
                 t_c = temp_3d(i,j,k)-273.15
                 td_c = dwpt(t_c,rh_3d_pct(i,j,k))
                 td_3d_k(i,j,k) = td_c + 273.15
 
 !               ew = pres_3d(i,j,k)/100. * sh_3d(i,j,k)
-!               td_c = dpt(ew)                        ! Check valid input range
+!               td_c = dpt(ew)                        ! check valid input range
 
 !               td_c = make_td(pres_3d(i,j,k)/100.
 !    1                        ,temp_3d(i,j,k)-273.15
@@ -133,15 +133,15 @@ cdoc    Calculate and write out set of 2-D stability grids
 !    1                        ,-100.)
 
             elseif(rh_3d_pct(i,j,k) .gt. 100. .and.
-     1             rh_3d_pct(i,j,k) .le. 101.       )then ! RH slightly high
+     1             rh_3d_pct(i,j,k) .le. 101.       )then ! rh slightly high
 
                 td_3d_k(i,j,k) = temp_3d(i,j,k)
-                write(6,*)' WARNING: RH out of bounds',rh_3d_pct(i,j,k)       
+                write(6,*)' warning: rh out of bounds',rh_3d_pct(i,j,k)       
      1                   ,' at ',i,j,k,' setting td = t'
 
             else ! invalid value of rh to pass into dwpt
                 td_3d_k(i,j,k) = r_missing_data
-                write(6,*)' ERROR: RH out of bounds',rh_3d_pct(i,j,k)       
+                write(6,*)' error: rh out of bounds',rh_3d_pct(i,j,k)       
      1                   ,' at ',i,j,k
                 istatus = 0
                 return
@@ -152,23 +152,23 @@ cdoc    Calculate and write out set of 2-D stability grids
         enddo ! j
         enddo ! k            
 
-        call laps_be(NX_L,NY_L,NZ_L,twet_snow,lat,lon
+        call laps_be(nx_l,ny_l,nz_l,twet_snow,lat,lon
      1              ,temp_sfc_k,td_sfc_k,pres_sfc_pa
      1              ,temp_3d,td_3d_k,heights_3d,topo,blayr_thk_pa
      1              ,pbe_2d,nbe_2d,si_2d,tt_2d,k_2d,lcl_2d,wb0_2d
      1              ,wb1_2d,r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' WARNING, Bad istatus returned from laps_be'
+            write(6,*)' warning, bad istatus returned from laps_be'
             return
         endif
 
-!       Fill pres_sfc_mb
-        call move(pres_sfc_pa,pres_sfc_mb,NX_L,NY_L)
-        call multcon(pres_sfc_mb,.01,NX_L,NY_L)
+!       fill pres_sfc_mb
+        call move(pres_sfc_pa,pres_sfc_mb,nx_l,ny_l)
+        call multcon(pres_sfc_mb,.01,nx_l,ny_l)
 
-!       Convert T, Td to F
-        do i = 1,NX_L
-        do j = 1,NY_L
+!       convert t, td to f
+        do i = 1,nx_l
+        do j = 1,ny_l
             t_sfc_f(i,j)  = k_to_f(temp_sfc_k(i,j))
             td_sfc_f(i,j) = k_to_f(td_sfc_k(i,j))
         enddo ! j
@@ -176,55 +176,55 @@ cdoc    Calculate and write out set of 2-D stability grids
 
         flag = 0.0
         call li_laps(t_sfc_f,td_sfc_f,pres_sfc_mb
-     1              ,i4time_needed,NX_L,NY_L,li,flag,istatus)
+     1              ,i4time_needed,nx_l,ny_l,li,flag,istatus)
 
 !       call move
-        call move(pbe_2d,out_multi_2d(1,1,1),NX_L,NY_L)
-        call move(nbe_2d,out_multi_2d(1,1,2),NX_L,NY_L)
-        call move(    li,out_multi_2d(1,1,3),NX_L,NY_L)
-        call move( si_2d,out_multi_2d(1,1,4),NX_L,NY_L)
-        call move( tt_2d,out_multi_2d(1,1,5),NX_L,NY_L)
-        call move(  k_2d,out_multi_2d(1,1,6),NX_L,NY_L)
-        call move(lcl_2d,out_multi_2d(1,1,7),NX_L,NY_L)
-        call move(wb0_2d,out_multi_2d(1,1,8),NX_L,NY_L)
+        call move(pbe_2d,out_multi_2d(1,1,1),nx_l,ny_l)
+        call move(nbe_2d,out_multi_2d(1,1,2),nx_l,ny_l)
+        call move(    li,out_multi_2d(1,1,3),nx_l,ny_l)
+        call move( si_2d,out_multi_2d(1,1,4),nx_l,ny_l)
+        call move( tt_2d,out_multi_2d(1,1,5),nx_l,ny_l)
+        call move(  k_2d,out_multi_2d(1,1,6),nx_l,ny_l)
+        call move(lcl_2d,out_multi_2d(1,1,7),nx_l,ny_l)
+        call move(wb0_2d,out_multi_2d(1,1,8),nx_l,ny_l)
 
 !       add var arrays
         ext = 'lst'
 
-        var_2d_a(1) = 'PBE'
-        var_2d_a(2) = 'NBE'
-        var_2d_a(3) = 'LI'
-        var_2d_a(4) = 'SI'
-        var_2d_a(5) = 'TT'
-        var_2d_a(6) = 'K'
-        var_2d_a(7) = 'LCL'
-        var_2d_a(8) = 'WB0'
+        var_2d_a(1) = 'pbe'
+        var_2d_a(2) = 'nbe'
+        var_2d_a(3) = 'li'
+        var_2d_a(4) = 'si'
+        var_2d_a(5) = 'tt'
+        var_2d_a(6) = 'k'
+        var_2d_a(7) = 'lcl'
+        var_2d_a(8) = 'wb0'
 
-        units_2d_a(1) = 'J/KG'
-        units_2d_a(2) = 'J/KG'
-        units_2d_a(3) = 'K'
-        units_2d_a(4) = 'K'
-        units_2d_a(5) = 'K'
-        units_2d_a(6) = 'K'
-        units_2d_a(7) = 'M'
-        units_2d_a(8) = 'M'
+        units_2d_a(1) = 'j/kg'
+        units_2d_a(2) = 'j/kg'
+        units_2d_a(3) = 'k'
+        units_2d_a(4) = 'k'
+        units_2d_a(5) = 'k'
+        units_2d_a(6) = 'k'
+        units_2d_a(7) = 'm'
+        units_2d_a(8) = 'm'
 
-        comment_2d_a(1) = 'CAPE'
-        comment_2d_a(2) = 'CIN'
-        comment_2d_a(3) = 'Lifted_Index'
-        comment_2d_a(4) = 'Showalter_Index'
-        comment_2d_a(5) = 'Total_Totals'
-        comment_2d_a(6) = 'K_Index'
-        comment_2d_a(7) = 'LCL'
-        comment_2d_a(8) = 'Wet_Bulb_Zero'
+        comment_2d_a(1) = 'cape'
+        comment_2d_a(2) = 'cin'
+        comment_2d_a(3) = 'lifted_index'
+        comment_2d_a(4) = 'showalter_index'
+        comment_2d_a(5) = 'total_totals'
+        comment_2d_a(6) = 'k_index'
+        comment_2d_a(7) = 'lcl'
+        comment_2d_a(8) = 'wet_bulb_zero'
 
         call put_laps_multi_2d(i4time_needed,ext,var_2d_a,units_2d_a
-     1                        ,comment_2d_a,out_multi_2d,NX_L,NY_L,8    
+     1                        ,comment_2d_a,out_multi_2d,nx_l,ny_l,8    
      1                        ,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' LST output error'
+            write(6,*)' lst output error'
         else
-            write(6,*)' Successfully wrote LST'
+            write(6,*)' successfully wrote lst'
         endif
 
         return
@@ -237,8 +237,8 @@ cdoc    Calculate and write out set of 2-D stability grids
      1        ,blayr_thk_pa,pbe_2d,nbe_2d,si_2d,tt_2d,k_2d,lcl_2d,wb0_2d
      1        ,wb1_2d,r_missing_data,istatus)
 
-!       1991    Steve Albers
-cdoc    Returns 2-D PBE and NBE in Joules, Parcel is lifted from lowest level
+!       1991    steve albers
+cdoc    returns 2-d pbe and nbe in joules, parcel is lifted from lowest level
 !                                                                    i.e. sfc
 
         real lat(ni,nj)
@@ -251,8 +251,8 @@ cdoc    Returns 2-D PBE and NBE in Joules, Parcel is lifted from lowest level
         real td_3d_k(ni,nj,nk)
         real ht_3d_m(ni,nj,nk)
         real p_1d_pa(nk)
-        real p_1d_mb(nk)                   ! Local
-        real pres_3d(ni,nj,nk)             ! Local
+        real p_1d_mb(nk)                   ! local
+        real pres_3d(ni,nj,nk)             ! local
         real pbe_2d(ni,nj)
         real nbe_2d(ni,nj)
 
@@ -264,17 +264,17 @@ cdoc    Returns 2-D PBE and NBE in Joules, Parcel is lifted from lowest level
         real wb1_2d(ni,nj)
         
         include 'lapsparms.for'
-        integer MXL
-        parameter (MXL=MAX_LVLS+1) ! number of 3D levels plus the sfc level
+        integer mxl
+        parameter (mxl=max_lvls+1) ! number of 3d levels plus the sfc level
 
-        COMMON/INDX/ P(MXL),T(MXL),TD(MXL),HT(MXL),PBECR(20,4)
-     1  ,TDFCR(20,2),VEL(20)
-     1  ,temdif(MXL),partem(MXL),pbe(MXL)
-     #  ,DD85,FF85,DD50,FF50
-        REAL LCL,LI,K_INDEX
+        common/indx/ p(mxl),t(mxl),td(mxl),ht(mxl),pbecr(20,4)
+     1  ,tdfcr(20,2),vel(20)
+     1  ,temdif(mxl),partem(mxl),pbe(mxl)
+     #  ,dd85,ff85,dd50,ff50
+        real lcl,li,k_index
 
-!       Initialize pbe array
-        do i = 1,MXL
+!       initialize pbe array
+        do i = 1,mxl
             pbe(i) = 0.
         enddo ! i
 
@@ -294,7 +294,7 @@ cdoc    Returns 2-D PBE and NBE in Joules, Parcel is lifted from lowest level
         do i = 1,ni
 c       write(6,*)' i = ',i
 
-            IF(j .eq. (j/jint)*jint .AND. i .eq. ni/2)then
+            if(j .eq. (j/jint)*jint .and. i .eq. ni/2)then
                 idebug = 2 ! 1
                 write(6,*)
                 write(6,*)
@@ -309,79 +309,79 @@ c       write(6,*)' i = ',i
             enddo ! k
 
             do k = 1,nk
-                if(p_1d_pa(k) .lt. p_sfc_pa(i,j))then ! First level above sfc
+                if(p_1d_pa(k) .lt. p_sfc_pa(i,j))then ! first level above sfc
                     n_first_level = k
                     goto100
                 endif
             enddo
 
 100         p(1) = p_sfc_pa(i,j) / 100.       ! pa to mb
-            t(1) = t_sfc_k(i,j) - 273.15      ! K to C
-            td(1) = td_sfc_k(i,j) - 273.15    ! K to C
+            t(1) = t_sfc_k(i,j) - 273.15      ! k to c
+            td(1) = td_sfc_k(i,j) - 273.15    ! k to c
             ht(1) = topo(i,j)
 
             n = 1
 
             do k = n_first_level,nk
                 n = n + 1
-                P(N) = p_1d_mb(k)
-                T(N) = t_3d_k(i,j,k)  - 273.15 ! K to C
-                TD(N)= td_3d_k(i,j,k) - 273.15 ! K to C
-!               TD(N)= t(n)
-                HT(N)= ht_3d_m(i,j,k)
+                p(n) = p_1d_mb(k)
+                t(n) = t_3d_k(i,j,k)  - 273.15 ! k to c
+                td(n)= td_3d_k(i,j,k) - 273.15 ! k to c
+!               td(n)= t(n)
+                ht(n)= ht_3d_m(i,j,k)
             enddo ! k
 
             nlevel = n
 
-            IO = 0
+            io = 0
 
-            CALL SINDX(NLEVEL,LI,SI,BLI,TT,SWEAT
-     1                ,twet_snow                                        ! I
-     1                ,HWB0,HWB_snow                                    ! O
-     1                ,PLCL,LCL,CCL
-     1                ,TCONV,IO
-     1                ,ICP,ICT,K_INDEX,TMAX,PBENEG,PBEPOS,T500,PBLI
-     1                ,VELNEG,WATER,IHOUR,idebug,istatus)
+            call sindx(nlevel,li,si,bli,tt,sweat
+     1                ,twet_snow                                        ! i
+     1                ,hwb0,hwb_snow                                    ! o
+     1                ,plcl,lcl,ccl
+     1                ,tconv,io
+     1                ,icp,ict,k_index,tmax,pbeneg,pbepos,t500,pbli
+     1                ,velneg,water,ihour,idebug,istatus)
             if(istatus .ne. 1)then
-                write(6,*)' WARNING: Bad istatus returned from SINDX'
+                write(6,*)' warning: bad istatus returned from sindx'
                 return
             endif
 
-            pbe_2d(i,j) = PBEPOS
-            nbe_2d(i,j) = PBENEG
+            pbe_2d(i,j) = pbepos
+            nbe_2d(i,j) = pbeneg
           
-            si_2d(i,j) = SI
-            tt_2d(i,j) = TT
-            k_2d(i,j)  = K_INDEX
+            si_2d(i,j) = si
+            tt_2d(i,j) = tt
+            k_2d(i,j)  = k_index
 
-            if(LCL .ne. r_missing_data)then
-                lcl_2d(i,j) = LCL                        ! M MSL
+            if(lcl .ne. r_missing_data)then
+                lcl_2d(i,j) = lcl                        ! m msl
             else
                 lcl_2d(i,j) = r_missing_data
             endif
 
-            if(HWB0 .ne. r_missing_data)then
-                wb0_2d(i,j) = HWB0*304.8006 + topo(i,j)      ! KFT AGL to M MSL
+            if(hwb0 .ne. r_missing_data)then
+                wb0_2d(i,j) = hwb0*304.8006 + topo(i,j)      ! kft agl to m msl
             else
                 wb0_2d(i,j) = r_missing_data
             endif
 
-            if(HWB_snow .ne. r_missing_data)then
-                wb1_2d(i,j) = HWB_snow*304.8006 + topo(i,j)  ! KFT AGL to M MSL
+            if(hwb_snow .ne. r_missing_data)then
+                wb1_2d(i,j) = hwb_snow*304.8006 + topo(i,j)  ! kft agl to m msl
             else
                 wb1_2d(i,j) = r_missing_data
             endif
 
             iwarn = 0
             if(nanf(wb0_2d(i,j)) .eq. 1)then
-                write(6,*)' Warning: HWB0 Nan ',i,j
+                write(6,*)' warning: hwb0 nan ',i,j
                 iwarn = 1
             endif
 
-            IF(idebug .ge. 1 .OR. iwarn .eq. 1)then
+            if(idebug .ge. 1 .or. iwarn .eq. 1)then
 
                 write(6,*)
-                write(6,*)' Indices at:',i,j,lat(i,j),lon(i,j)
+                write(6,*)' indices at:',i,j,lat(i,j),lon(i,j)
 
                 write(6,*)' n    p         t         td'
      1                   ,'         ht       tdif       be'
@@ -390,118 +390,118 @@ c       write(6,*)' i = ',i
 301                 format(1x,i2,f8.1,f10.2,f10.2,f10.0,f10.2,f10.1)
                 enddo
 
-                SWEAT=0.0
-!               IF(IFLAG1*IFLAG2.EQ.0)SWEAT=0.0
+                sweat=0.0
+!               if(iflag1*iflag2.eq.0)sweat=0.0
 
-                WRITE(6,420)PBENEG,PBEPOS
- 420            FORMAT(' PBENEG',F8.1,'               PBEPOS',F8.1)
+                write(6,420)pbeneg,pbepos
+ 420            format(' pbeneg',f8.1,'               pbepos',f8.1)
 
-                WRITE(6,430)DD85,FF85,DD50,FF50,T500
- 430            FORMAT(' 850MB WIND',2F5.0,'         500MB WIND',2F5.0
-     #         ,'    500MB TEMP= ',F6.1)
+                write(6,430)dd85,ff85,dd50,ff50,t500
+ 430            format(' 850mb wind',2f5.0,'         500mb wind',2f5.0
+     #         ,'    500mb temp= ',f6.1)
 
-!               IF(IO2.EQ.1)GOTO1000
+!               if(io2.eq.1)goto1000
 
-                WRITE(6,60)LI,SI,BLI
- 60             FORMAT(' LI= ',F5.1,20X,'SI= ',F5.1,15X,'BLI= ',F5.1)
+                write(6,60)li,si,bli
+ 60             format(' li= ',f5.1,20x,'si= ',f5.1,15x,'bli= ',f5.1)
 
-                WRITE(6,61,err=161)TT,SWEAT,HWB0
- 61             FORMAT(' TOTAL TOTALS=',F6.1,10X,'SWEAT= ',F7.1
-     1                ,10X,'W. BULB ZERO=',F5.1,' KFT AGL')
+                write(6,61,err=161)tt,sweat,hwb0
+ 61             format(' total totals=',f6.1,10x,'sweat= ',f7.1
+     1                ,10x,'w. bulb zero=',f5.1,' kft agl')
 
- 161            ITCONV=INT(TCONV+0.5)
+ 161            itconv=int(tconv+0.5)
 
-                WRITE(6,62)LCL*.003281,CCL,ITCONV
- 62             FORMAT(' LCL= ',F5.1,' KFT MSL',11X,'CCL=',F5.1
-     1                ,' KFT AGL',7X,'CONVECTIVE TEMP=',I4,' DEG F')
+                write(6,62)lcl*.003281,ccl,itconv
+ 62             format(' lcl= ',f5.1,' kft msl',11x,'ccl=',f5.1
+     1                ,' kft agl',7x,'convective temp=',i4,' deg f')
 
-                ITMAX=NINT(TMAX)
+                itmax=nint(tmax)
 
-                WRITE(6,63,err=163)K_INDEX,ITMAX,WATER
- 63             FORMAT(' K INDEX =',f7.1,13X,'TMAX =',I4,' F',12X
-     1                ,'PRECIP. WATER=',F5.2,' IN.')
- 163            WRITE(6,*)
-C
-                IF(ICT+ICP.GT.0.OR.IO.GE.2)WRITE(6,71)P(1),PLCL
- 71             FORMAT(' ENERGY ANALYSIS - LIFTING A PARCEL FROM'
-     1                ,F6.0,'MB','   LCL=',f7.1,' MB')
-C
-                DO 600 II=1,ICP
- 600            WRITE(6,64)PBECR(II,1),PBECR(II,2),VEL(II),PBECR(II,4)
- 64             FORMAT(' ENERGY AT',F6.0,'MB=',F10.2
-     1                ,' JOULES/KG       VELOCITY=',F6.2,'M/S   HT='
-     1                ,F7.0,' M')
-C
-                WRITE(6,*)
-                DO 700 II=1,ICT
- 700            WRITE(6,5)TDFCR(II,1),TDFCR(II,2)
- 5              FORMAT(5X,'ENVIRONMENTAL MINUS PARCEL TEMPERATURE AT'
-     1                ,F6.0,'MB  =',F6.1)
-C
-                IF(BLI.LE.0.0)WRITE(6,65)PBENEG,VELNEG
-                IF(BLI.LE.0.0)WRITE(6,66)PBEPOS
- 65             FORMAT('     CAP STRENGTH =',F10.1,' JOULES/KG.'
-     +                ,' VELOCITY NEEDED',F5.1,'M/S')
- 66             FORMAT('     POSITIVE AREA=',F10.1,' JOULES/KG.')
-                GOTO2000
-C
-C  ALTERNATIVE OUTPUTTING
- 1000           CONTINUE
-                WRITE(6,1001)STA,T500,VELNEG,PBEPOS
- 1001           FORMAT(4X,A3/F5.1,F7.1,F7.1)
+                write(6,63,err=163)k_index,itmax,water
+ 63             format(' k index =',f7.1,13x,'tmax =',i4,' f',12x
+     1                ,'precip. water=',f5.2,' in.')
+ 163            write(6,*)
+c
+                if(ict+icp.gt.0.or.io.ge.2)write(6,71)p(1),plcl
+ 71             format(' energy analysis - lifting a parcel from'
+     1                ,f6.0,'mb','   lcl=',f7.1,' mb')
+c
+                do 600 ii=1,icp
+ 600            write(6,64)pbecr(ii,1),pbecr(ii,2),vel(ii),pbecr(ii,4)
+ 64             format(' energy at',f6.0,'mb=',f10.2
+     1                ,' joules/kg       velocity=',f6.2,'m/s   ht='
+     1                ,f7.0,' m')
+c
+                write(6,*)
+                do 700 ii=1,ict
+ 700            write(6,5)tdfcr(ii,1),tdfcr(ii,2)
+ 5              format(5x,'environmental minus parcel temperature at'
+     1                ,f6.0,'mb  =',f6.1)
+c
+                if(bli.le.0.0)write(6,65)pbeneg,velneg
+                if(bli.le.0.0)write(6,66)pbepos
+ 65             format('     cap strength =',f10.1,' joules/kg.'
+     +                ,' velocity needed',f5.1,'m/s')
+ 66             format('     positive area=',f10.1,' joules/kg.')
+                goto2000
+c
+c  alternative outputting
+ 1000           continue
+                write(6,1001)sta,t500,velneg,pbepos
+ 1001           format(4x,a3/f5.1,f7.1,f7.1)
 
 2000        endif
 
         enddo ! i
         enddo ! j
-C
- 9999   CONTINUE
+c
+ 9999   continue
 
-        RETURN
-        END
+        return
+        end
 
 !
-        SUBROUTINE SINDX(NLEVEL,LI,SI,BLI,TT,SWEAT
-     1   ,twet_snow,HWB0,HWB_snow
-     1   ,PLCL_PBE,LCL_PBE_MSL,CCL  
-     1   ,TCONV,IO,ICP,ICT,K,TMAX,PBENEG,PBEPOS,TMAN50
-     1   ,PBLI,VELNEG,WATER,IHOUR,idebug,istatus)
+        subroutine sindx(nlevel,li,si,bli,tt,sweat
+     1   ,twet_snow,hwb0,hwb_snow
+     1   ,plcl_pbe,lcl_pbe_msl,ccl  
+     1   ,tconv,io,icp,ict,k,tmax,pbeneg,pbepos,tman50
+     1   ,pbli,velneg,water,ihour,idebug,istatus)
 
-cdoc    Calculate a variety of stability indices from an input sounding
+cdoc    calculate a variety of stability indices from an input sounding
 
-!       1991    Steve Albers
-!       1999    Steve Albers    Adding more indices to active output
+!       1991    steve albers
+!       1999    steve albers    adding more indices to active output
 
-!       Note that a surface parcel is currently used for the indices
+!       note that a surface parcel is currently used for the indices
 
         include 'lapsparms.for'
-        integer MXL
-        parameter (MXL=MAX_LVLS+1) ! number of 3D levels plus the sfc level
+        integer mxl
+        parameter (mxl=max_lvls+1) ! number of 3d levels plus the sfc level
 
-        DIMENSION Q(MXL),W(MXL),WB(MXL)
-        COMMON/INDX/ P(MXL),T(MXL),TD(MXL),HT(MXL),PBECR(20,4)
-     1              ,TDFCR(20,2),VEL(20),temdif(MXL),partem(MXL)
-     1              ,pbe(MXL),DD85,FF85,DD50,FF50
-        REAL LI,K,LCL_AGL,LCL_PBE_MSL
-!       ESL(X)=6.1078+X*(.443652+X*(.014289+X*(2.65065E-4+X*
-!    1 (3.03124E-6+X*(2.034081E-8+X*(6.13682E-11))))))
-!       TDEW(E)=237.7/((7.5/ALOG10(E/6.11))-1.)
+        dimension q(mxl),w(mxl),wb(mxl)
+        common/indx/ p(mxl),t(mxl),td(mxl),ht(mxl),pbecr(20,4)
+     1              ,tdfcr(20,2),vel(20),temdif(mxl),partem(mxl)
+     1              ,pbe(mxl),dd85,ff85,dd50,ff50
+        real li,k,lcl_agl,lcl_pbe_msl
+!       esl(x)=6.1078+x*(.443652+x*(.014289+x*(2.65065e-4+x*
+!    1 (3.03124e-6+x*(2.034081e-8+x*(6.13682e-11))))))
+!       tdew(e)=237.7/((7.5/alog10(e/6.11))-1.)
 
-        ESL(X)=6.1121*exp(17.67*X/(X+243.5)) 
+        esl(x)=6.1121*exp(17.67*x/(x+243.5)) 
 
         logical l_large_domain
 
-        DATA EPSILN/.6220/,G/9.80665/
-        DATA BLTHCK/50.0/
-        DATA RPD/.0174532925063/
- 1      format('    MIXED PARCEL IS:',F10.1,'MB',F15.3,'C       '
-     1          ,'MIXING RATIO=',F10.7)
+        data epsiln/.6220/,g/9.80665/
+        data blthck/50.0/
+        data rpd/.0174532925063/
+ 1      format('    mixed parcel is:',f10.1,'mb',f15.3,'c       '
+     1          ,'mixing ratio=',f10.7)
 
-c       WRITE(6,15)
- 15     FORMAT('          PRESSURE     TEMP.    DEW PT.     '
-     1          ,'Q      WET BULB')
+c       write(6,15)
+ 15     format('          pressure     temp.    dew pt.     '
+     1          ,'q      wet bulb')
 
-        IOUT=IO
+        iout=io
 
         l_large_domain = .false.
 
@@ -510,199 +510,199 @@ c       WRITE(6,15)
             return
         endif
 
-!       Fill WB array (imported from old code)
- 	DO 100 N=1,NLEVEL                                            
-            IF(TD(N).EQ.-99.0)THEN                                         
-                Q(N)=-99.                                                      
-                WB(N)=-99.                                                     
-  	        IF(IO.GE.2)WRITE(6,3)N,P(N),T(N),TD(N),Q(N),WB(N)    
-                IFL=1                                                
-                TD(N)=T(N)-15.0                                      
-                IF(T(N).LT.-40.)TD(N)=T(N)                           
-            ENDIF                                                           
+!       fill wb array (imported from old code)
+ 	do 100 n=1,nlevel                                            
+            if(td(n).eq.-99.0)then                                         
+                q(n)=-99.                                                      
+                wb(n)=-99.                                                     
+  	        if(io.ge.2)write(6,3)n,p(n),t(n),td(n),q(n),wb(n)    
+                ifl=1                                                
+                td(n)=t(n)-15.0                                      
+                if(t(n).lt.-40.)td(n)=t(n)                           
+            endif                                                           
                                                                           
- 	    Q(N)=(ESL(TD(N))*EPSILN)/P(N)                             
- 	    Q(N)=max(Q(N),0.0001)                                    
- 	    W(N)=Q(N)/(1.-Q(N))                                      
- 	    IOUT=IO                                                  
- 	    IF(N.LE.1)IOUT=IO                                        
+ 	    q(n)=(esl(td(n))*epsiln)/p(n)                             
+ 	    q(n)=max(q(n),0.0001)                                    
+ 	    w(n)=q(n)/(1.-q(n))                                      
+ 	    iout=io                                                  
+ 	    if(n.le.1)iout=io                                        
 
- 	    WB(N)=WTBLB(P(N),T(N),W(N),0,istatus)                            
+ 	    wb(n)=wtblb(p(n),t(n),w(n),0,istatus)                            
             if(istatus .ne. 1)then
-                write(6,*)' Bad istatus return from WTBLB: '
-                write(6,*)'P,T,TD,ES,EPSILN,Q,W = '
-                write(6,*)P(N),T(N),TD(N),ESL(TD(N)),EPSILN,Q(N),W(N)
-!               write(6,*)'ES calc:',
-!    1                         6.1121*exp(17.67*TD(N)/(TD(N)+243.5))
+                write(6,*)' bad istatus return from wtblb: '
+                write(6,*)'p,t,td,es,epsiln,q,w = '
+                write(6,*)p(n),t(n),td(n),esl(td(n)),epsiln,q(n),w(n)
+!               write(6,*)'es calc:',
+!    1                         6.1121*exp(17.67*td(n)/(td(n)+243.5))
                 return
             endif
 
- 	    IF(WB(N).LT.TD(N))WB(N)=TD(N)                            
- 	    IF(WB(N).GT.T(N)) WB(N)=T(N)                             
- 	    IF(IO.GE.2.AND.IFL.EQ.0)
-     1         WRITE(6,3)N,P(N),T(N),TD(N),Q(N),WB(N)     
-            IFL=0                                                            
- 3	    FORMAT(' LVL(',I2,')',3F10.1,F11.6,F10.2)                      
- 100	CONTINUE                                                             
+ 	    if(wb(n).lt.td(n))wb(n)=td(n)                            
+ 	    if(wb(n).gt.t(n)) wb(n)=t(n)                             
+ 	    if(io.ge.2.and.ifl.eq.0)
+     1         write(6,3)n,p(n),t(n),td(n),q(n),wb(n)     
+            ifl=0                                                            
+ 3	    format(' lvl(',i2,')',3f10.1,f11.6,f10.2)                      
+ 100	continue                                                             
 
-!       Here is the new section imported (from old code) for TT,SI,K
-C                                                                         
-C  CALCULATE LIFTED INDEX                                                 
- 	CALL ITPLV(P,T,NLEVEL,500.,TMAN50,IO,istatus)                         
-!WNI Modified to check istatus of ITPLV.  When running LAPS
-!WNI for East Asia, some of the mountains extended above the 500mb
-!WNI level, which cause a complete abort of put stability.  Now,
-!WNI we just fill indices dependent on 500mb to missing if this happens.
-!WNI Brent Shaw, WNI, Dec 2006
-!	WREQ50=ESL(TP500)/500.                                                   
-!	IF(WREQ50.LT.WMEAN)GOTO40                                               
+!       here is the new section imported (from old code) for tt,si,k
+c                                                                         
+c  calculate lifted index                                                 
+ 	call itplv(p,t,nlevel,500.,tman50,io,istatus)                         
+!wni modified to check istatus of itplv.  when running laps
+!wni for east asia, some of the mountains extended above the 500mb
+!wni level, which cause a complete abort of put stability.  now,
+!wni we just fill indices dependent on 500mb to missing if this happens.
+!wni brent shaw, wni, dec 2006
+!	wreq50=esl(tp500)/500.                                                   
+!	if(wreq50.lt.wmean)goto40                                               
 
-C                                                                         
-C  CALCULATE SHOWALTER INDEX                                              
-        SI=r_missing_data
-        TT=r_missing_data
-        SWEAT=r_missing_data
-        K=r_missing_data
-        IF (istatus .EQ. 1) THEN  !WNI .. 500mb below ground
-          IF(P(1).GE.850.0)THEN
-            CALL ITPLV(P,T ,NLEVEL,850.,TMAN85,IO,istatus)
- 	    CALL ITPLV(P,TD,NLEVEL,850.,TDMN85,IO,istatus)
- 	    THETAE=THAE(TMAN85,TDMN85,850.)
- 	    CALL MSAD5(TP500,500.,THETAE,25.,20.,SLOPE,I1,I2,IA,0
+c                                                                         
+c  calculate showalter index                                              
+        si=r_missing_data
+        tt=r_missing_data
+        sweat=r_missing_data
+        k=r_missing_data
+        if (istatus .eq. 1) then  !wni .. 500mb below ground
+          if(p(1).ge.850.0)then
+            call itplv(p,t ,nlevel,850.,tman85,io,istatus)
+ 	    call itplv(p,td,nlevel,850.,tdmn85,io,istatus)
+ 	    thetae=thae(tman85,tdmn85,850.)
+ 	    call msad5(tp500,500.,thetae,25.,20.,slope,i1,i2,ia,0
      1                ,istatus)    
             if(istatus .ne. 1)then
-                write(6,*)' Error, skipping Showlater in SINDX'
+                write(6,*)' error, skipping showlater in sindx'
             else
-!	        IF(WREQ50.LT.WMEAN)GOTO50                                 
-!	        RH=WMEAN/WREQ50                                           
- 50	        SI=TMAN50-TP500                                           
-            endif ! valid results from MSAD5
+!	        if(wreq50.lt.wmean)goto50                                 
+!	        rh=wmean/wreq50                                           
+ 50	        si=tman50-tp500                                           
+            endif ! valid results from msad5
 
-C                                                                         
-C  CALCULATE TOTAL TOTALS AND SWEAT AND K INDICIES                        
- 	    CALL ITPLV(P,T,NLEVEL,700.,TMAN70,IO,istatus)        
- 	    CALL ITPLV(P,TD,NLEVEL,700.,TDMN70,IO,istatus)       
- 	    TT=TMAN85+TDMN85-2.*TMAN50                   
- 	    A=max(TDMN85,0.)                             
- 	    B=max(TT-49.,0.)                             
- 	    C=0.                                         
- 	    IF(FF85.LT.15.OR.FF50.LT.15.)   GOTO500      
- 	    IF(DD85.GT.DD50)                GOTO500      
- 	    IF(DD85.LT.130..OR.DD85.GT.250.)GOTO500      
- 	    IF(DD50.LT.210..OR.DD50.GT.310.)GOTO500      
- 	    C=SIN((DD50-DD85)*RPD)+.2                    
- 500	    SWEAT=12.*A+20.*B+2.*FF85+FF50+125.*C        
- 	    K=TMAN85-TMAN50+TDMN85-TMAN70+TDMN70         
+c                                                                         
+c  calculate total totals and sweat and k indicies                        
+ 	    call itplv(p,t,nlevel,700.,tman70,io,istatus)        
+ 	    call itplv(p,td,nlevel,700.,tdmn70,io,istatus)       
+ 	    tt=tman85+tdmn85-2.*tman50                   
+ 	    a=max(tdmn85,0.)                             
+ 	    b=max(tt-49.,0.)                             
+ 	    c=0.                                         
+ 	    if(ff85.lt.15.or.ff50.lt.15.)   goto500      
+ 	    if(dd85.gt.dd50)                goto500      
+ 	    if(dd85.lt.130..or.dd85.gt.250.)goto500      
+ 	    if(dd50.lt.210..or.dd50.gt.310.)goto500      
+ 	    c=sin((dd50-dd85)*rpd)+.2                    
+ 500	    sweat=12.*a+20.*b+2.*ff85+ff50+125.*c        
+ 	    k=tman85-tman50+tdmn85-tman70+tdmn70         
 
-          ENDIF
-        ELSE  !WNI 
-          PRINT *,"No 500mb level, some indices set to missing" !WNI
-          istatus = 1 ! WNI
-        ENDIF ! WNI
+          endif
+        else  !wni 
+          print *,"no 500mb level, some indices set to missing" !wni
+          istatus = 1 ! wni
+        endif ! wni
 
-C                                                                         
-C  CALCULATE WET BULB ZERO LEVEL                                          
-        twet0 = 0.       ! Deg C
-        call wtblb_lvl(twet0,P,T,Q,WB,MXL,NLEVEL,PWB0,HWB0)
+c                                                                         
+c  calculate wet bulb zero level                                          
+        twet0 = 0.       ! deg c
+        call wtblb_lvl(twet0,p,t,q,wb,mxl,nlevel,pwb0,hwb0)
 
-        call wtblb_lvl(twet_snow,P,T,Q,WB,MXL,NLEVEL,PWB_snow,HWB_snow)       
+        call wtblb_lvl(twet_snow,p,t,q,wb,mxl,nlevel,pwb_snow,hwb_snow)       
 
-!       Calculate theta(e) based on sfc parcel
+!       calculate theta(e) based on sfc parcel
         if(l_large_domain)then
-            THETAE=OE_FAST(T(1),TD(1),P(1)) + 273.15
+            thetae=oe_fast(t(1),td(1),p(1)) + 273.15
         else
-            THETAE=OE(T(1),TD(1),P(1)) + 273.15
+            thetae=oe(t(1),td(1),p(1)) + 273.15
         endif
 
         if(idebug .ge. 2)then
             if(l_large_domain)then
-                THETAE2=OE(T(1),TD(1),P(1)) + 273.15
-                write(6,510)P(1),T(1),TD(1),THETAE,THETAE2
- 510            format(' P/T/TD/THETAE',5f8.2)
-                if(abs(THETAE-THETAE2) .gt. 1.0)then
-                    write(6,*)' ERROR: large difference in THETA values'
+                thetae2=oe(t(1),td(1),p(1)) + 273.15
+                write(6,510)p(1),t(1),td(1),thetae,thetae2
+ 510            format(' p/t/td/thetae',5f8.2)
+                if(abs(thetae-thetae2) .gt. 1.0)then
+                    write(6,*)' error: large difference in theta values'
                     stop
                 endif
             else
-                write(6,510)P(1),T(1),TD(1),THETAE
+                write(6,510)p(1),t(1),td(1),thetae
             endif
         endif
 
-!       Calculate "fast" LCL based on sfc parcel
-        CALL LCL_fast(P(1),T(1),TD(1),LCL_AGL,TLCL_PBE,PLCL_PBE)
+!       calculate "fast" lcl based on sfc parcel
+        call lcl_fast(p(1),t(1),td(1),lcl_agl,tlcl_pbe,plcl_pbe)
 
-!       This LCL is for the surface parcel passed in
-        LCL_PBE_MSL = LCL_AGL + HT(1)
+!       this lcl is for the surface parcel passed in
+        lcl_pbe_msl = lcl_agl + ht(1)
 
-!       Calculate CAPE/CIN based on sfc parcel
-        CALL POTBE(Q,NLEVEL,P(1),T(1),W(1),PLCL_PBE
-     1   ,TLCL_PBE,LCL_PBE_MSL,THETAE,ICP,ICT,IO,PBENEG,PBEPOS
-     1   ,VELNEG,idebug)
-C
-        DO 600 I=1,ICP
-            VEL(I)=SQRT(ABS(2.*PBECR(I,2)))
-            IF(PBECR(I,2).LT.0.)VEL(I)=-VEL(I)
-c           WRITE(6,4)PBECR(I,1),PBECR(I,2),VEL(I)
- 4          format(' ENERGY AT',F6.0,'MB='
-     1            ,F15.2,'JOULES       VELOCITY=',F6.1,'MS')
- 600    CONTINUE
+!       calculate cape/cin based on sfc parcel
+        call potbe(q,nlevel,p(1),t(1),w(1),plcl_pbe
+     1   ,tlcl_pbe,lcl_pbe_msl,thetae,icp,ict,io,pbeneg,pbepos
+     1   ,velneg,idebug)
+c
+        do 600 i=1,icp
+            vel(i)=sqrt(abs(2.*pbecr(i,2)))
+            if(pbecr(i,2).lt.0.)vel(i)=-vel(i)
+c           write(6,4)pbecr(i,1),pbecr(i,2),vel(i)
+ 4          format(' energy at',f6.0,'mb='
+     1            ,f15.2,'joules       velocity=',f6.1,'ms')
+ 600    continue
 
-c       DO 700 I=1,ICT
-c           WRITE(6,5)TDFCR(I,1),TDFCR(I,2)
-c700    CONTINUE
+c       do 700 i=1,ict
+c           write(6,5)tdfcr(i,1),tdfcr(i,2)
+c700    continue
 
- 5      format(' ENVIRONMENTAL - PARCEL TEMPERATURE AT',F7.0
-     1          ,'MB=',F8.2,' DEG C')
+ 5      format(' environmental - parcel temperature at',f7.0
+     1          ,'mb=',f8.2,' deg c')
 
         return
 
-        END
-C
-C
-C
+        end
+c
+c
+c
 c        block data
-c        COMMON/INDX/ P(MXL),T(MXL),TD(MXL),HT(MXL),PBECR(20,4),TDFCR(20,2)
-c     1              ,VEL(20),temdif(MXL),partem(MXL),pbe(MXL)
-c     #              ,DD85,FF85,DD50,FF50
-c        DATA PBE/MXL*0./
+c        common/indx/ p(mxl),t(mxl),td(mxl),ht(mxl),pbecr(20,4),tdfcr(20,2)
+c     1              ,vel(20),temdif(mxl),partem(mxl),pbe(mxl)
+c     #              ,dd85,ff85,dd50,ff50
+c        data pbe/mxl*0./
 c        end
-C
-C
-C
-C
-C
-C
-C
-        SUBROUTINE POTBE(Q,NLEVEL,PMEAN,TMEAN,WMEAN,PLCL
-     #   ,TLCL,LCL,BLTHTE,ICP,ICT,IO,PBENEG,pos_area_max
-     #   ,VELNEG,idebug)
+c
+c
+c
+c
+c
+c
+c
+        subroutine potbe(q,nlevel,pmean,tmean,wmean,plcl
+     #   ,tlcl,lcl,blthte,icp,ict,io,pbeneg,pos_area_max
+     #   ,velneg,idebug)
 
-cdoc    Calculate a PBE/LCL related indices from an input sounding
+cdoc    calculate a pbe/lcl related indices from an input sounding
 
-!       Steve Albers 1991
+!       steve albers 1991
 
         include 'lapsparms.for'
-        integer MXL
-        parameter (MXL=MAX_LVLS+1) ! number of 3D levels plus the sfc level
+        integer mxl
+        parameter (mxl=max_lvls+1) ! number of 3d levels plus the sfc level
 
-        COMMON/INDX/ P(MXL),T(MXL),TD(MXL),HT(MXL),PBECR(20,4)
-     1              ,TDFCR(20,2),VEL(20)
-     1              ,temdif(MXL),partem(MXL),pbe(MXL)
-     #              ,DD85,FF85,DD50,FF50
-        REAL LCL,nbe_min
-        DIMENSION Q(MXL),DELTAH(MXL)
-        real GAMMA
-        parameter (GAMMA = .009760) ! Dry Adiabatic Lapse Rate Deg/m
-        DATA G/9.80665/
+        common/indx/ p(mxl),t(mxl),td(mxl),ht(mxl),pbecr(20,4)
+     1              ,tdfcr(20,2),vel(20)
+     1              ,temdif(mxl),partem(mxl),pbe(mxl)
+     #              ,dd85,ff85,dd50,ff50
+        real lcl,nbe_min
+        dimension q(mxl),deltah(mxl)
+        real gamma
+        parameter (gamma = .009760) ! dry adiabatic lapse rate deg/m
+        data g/9.80665/
 
         if(idebug .ge. 2)then
-            WRITE(6,*)
-            WRITE(6,*)' SUBROUTINE POTBE: BLTHTE = ',BLTHTE
+            write(6,*)
+            write(6,*)' subroutine potbe: blthte = ',blthte
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading r_missing_data: STOP'
+            write(6,*)' error reading r_missing_data: stop'
             stop
         endif
 
@@ -710,657 +710,657 @@ cdoc    Calculate a PBE/LCL related indices from an input sounding
         pos_area_max=0.
 
         partem(1) = t(1)
-        TEMDIF(1) = 0.
-        PBE(1) = 0.
+        temdif(1) = 0.
+        pbe(1) = 0.
 
-c       WRITE(6,606)PMEAN,TMEAN,WMEAN,PLCL,TLCL,LCL
-c 606   format(' PMEAN,TMEAN,WMEAN,PLCL,TLCL,LCL',2F10.2,F10.5,2F10.2
-c     +   ,F5.1)
+c       write(6,606)pmean,tmean,wmean,plcl,tlcl,lcl
+c 606   format(' pmean,tmean,wmean,plcl,tlcl,lcl',2f10.2,f10.5,2f10.2
+c     +   ,f5.1)
 
-        DO 800 N=2,NLEVEL
-            DELTAP=P(N-1)-P(N)
-            n_low=N-1
+        do 800 n=2,nlevel
+            deltap=p(n-1)-p(n)
+            n_low=n-1
 
-            deltah(n) = HT(n) - HT(n-1)
+            deltah(n) = ht(n) - ht(n-1)
 
-            IF(PLCL .lt. P(N-1))then ! Lower level is below LCL
-                IF(PLCL .lt. P(N))then ! Upper level is below LCL
-                    if(idebug .ge. 2)WRITE(6,*)' DRY CASE'
-                    PARTEM(N)=PARTEM(N-1)-GAMMA*DELTAH(N)
-                    TEMDIF(N)=PARTEM(N)-T(N)
-                    PBE(N)=PBE(N-1)+G*(TEMDIF(N)+TEMDIF(N-1))/(T(N)
-     #                          +T(N-1)+546.30)*DELTAH(N)
+            if(plcl .lt. p(n-1))then ! lower level is below lcl
+                if(plcl .lt. p(n))then ! upper level is below lcl
+                    if(idebug .ge. 2)write(6,*)' dry case'
+                    partem(n)=partem(n-1)-gamma*deltah(n)
+                    temdif(n)=partem(n)-t(n)
+                    pbe(n)=pbe(n-1)+g*(temdif(n)+temdif(n-1))/(t(n)
+     #                          +t(n-1)+546.30)*deltah(n)
 
-                else ! Upper level is above LCL
-C                   BRACKETING CASE AROUND LCL - DRY ADIABATIC PART
-                    if(idebug .ge. 2)WRITE(6,*)' DRY ADIABATIC PART'
+                else ! upper level is above lcl
+c                   bracketing case around lcl - dry adiabatic part
+                    if(idebug .ge. 2)write(6,*)' dry adiabatic part'
 
-                    delta_ht_dry = lcl - HT(n-1)
+                    delta_ht_dry = lcl - ht(n-1)
 
-                    if(idebug .ge. 2)WRITE(6,307)TLCL
- 307                format(' PARCEL TEMP AT LCL= ',F10.3)
+                    if(idebug .ge. 2)write(6,307)tlcl
+ 307                format(' parcel temp at lcl= ',f10.3)
 
-                    CALL ITPLV(P,T,NLEVEL,PLCL,SNTLCL,IO,istatus)
+                    call itplv(p,t,nlevel,plcl,sntlcl,io,istatus)
 
-                    t_dif_lcl=TLCL-SNTLCL
+                    t_dif_lcl=tlcl-sntlcl
 
-                    pbe_dry=G*(t_dif_lcl+TEMDIF(N-1))/
-     1                        (SNTLCL+T(N-1)+546.30) * delta_ht_dry
+                    pbe_dry=g*(t_dif_lcl+temdif(n-1))/
+     1                        (sntlcl+t(n-1)+546.30) * delta_ht_dry
 
- 951                format(' pos_area_max,PSI,NEG,NNG,PBECR',5F9.1,I3)
+ 951                format(' pos_area_max,psi,neg,nng,pbecr',5f9.1,i3)
 
-!d                  WRITE(6,777)N,P(N),TLCL,SNTLCL,t_dif_lcl
-!d    #                    ,TEMDIF(N-1),delta_ht_dry,HT(N),PBE(N-1)+pbe_dry
+!d                  write(6,777)n,p(n),tlcl,sntlcl,t_dif_lcl
+!d    #                    ,temdif(n-1),delta_ht_dry,ht(n),pbe(n-1)+pbe_dry
 
-C                   MOIST ADIABATIC PART
-                    if(idebug .ge. 2)WRITE(6,*)' MOIST ADIABATIC PART'
-                    delta_ht_wet=DELTAH(N)-delta_ht_dry
+c                   moist adiabatic part
+                    if(idebug .ge. 2)write(6,*)' moist adiabatic part'
+                    delta_ht_wet=deltah(n)-delta_ht_dry
 
-                    partem(n) = tmlaps_fast(blthte,P(n))
-                    TEMDIF(N)=PARTEM(N)-T(N)
+                    partem(n) = tmlaps_fast(blthte,p(n))
+                    temdif(n)=partem(n)-t(n)
 
-                    pbe_wet = G*(TEMDIF(N)+t_dif_lcl)/
-     1                          (T(N)+SNTLCL+546.30) * delta_ht_wet
+                    pbe_wet = g*(temdif(n)+t_dif_lcl)/
+     1                          (t(n)+sntlcl+546.30) * delta_ht_wet
 
-                    PBE(N)=PBE(N-1) + pbe_dry + pbe_wet
+                    pbe(n)=pbe(n-1) + pbe_dry + pbe_wet
 
-                endif ! Upper level below LCL (Dry or bracket)
+                endif ! upper level below lcl (dry or bracket)
 
-            else ! Lower Level is above LCL
-                partem(n) = tmlaps_fast(blthte,P(n))
+            else ! lower level is above lcl
+                partem(n) = tmlaps_fast(blthte,p(n))
                 if(idebug .ge. 2)then
-                  WRITE(6,*)' MOIST CASE',blthte,P(n),partem(n)
+                  write(6,*)' moist case',blthte,p(n),partem(n)
                 endif
 
-          !     Add Layer
-                TEMDIF(N)=PARTEM(N)-T(N)
-                PBE(N)=PBE(N-1)+G*(TEMDIF(N)+TEMDIF(N-1))/(T(N)
-     #                          +T(N-1)+546.30)*DELTAH(N)
+          !     add layer
+                temdif(n)=partem(n)-t(n)
+                pbe(n)=pbe(n-1)+g*(temdif(n)+temdif(n-1))/(t(n)
+     #                          +t(n-1)+546.30)*deltah(n)
 
             endif
 
 
             if(idebug .ge. 2)then
-                WRITE(6,777)N,P(N),PARTEM(N),T(N)
-     #                ,TEMDIF(N),TEMDIF(N-1),DELTAH(N),HT(N),PBE(N)
-!    #                ,BLTHTE
+                write(6,777)n,p(n),partem(n),t(n)
+     #                ,temdif(n),temdif(n-1),deltah(n),ht(n),pbe(n)
+!    #                ,blthte
             endif
- 777        format(' PBE DATA',I3,F6.1,6F8.2,F12.3,F8.2)
+ 777        format(' pbe data',i3,f6.1,6f8.2,f12.3,f8.2)
 
- 800    CONTINUE
-C
-C  FLAG SIGNIFICANT LEVELS FOR ENERGY
-        ICP=0
-        ICT=0
-        N1 = 2
-c       WRITE(6,382)N1,NLEVEL
- 382    format(' N1,NLEVEL',2I3)
-C
-C  DETERMINE ENERGY EXTREMA - NEUTRAL BUOYANCY
-        DO 1100 N=N1,NLEVEL
-            if(idebug .ge. 2)WRITE(6,940)N
- 940        format(' LOOKING FOR NEUTRAL BUOYANCY - ENERGY EXTREMUM, LEV
-     1EL',I3)
+ 800    continue
+c
+c  flag significant levels for energy
+        icp=0
+        ict=0
+        n1 = 2
+c       write(6,382)n1,nlevel
+ 382    format(' n1,nlevel',2i3)
+c
+c  determine energy extrema - neutral buoyancy
+        do 1100 n=n1,nlevel
+            if(idebug .ge. 2)write(6,940)n
+ 940        format(' looking for neutral buoyancy - energy extremum, lev
+     1el',i3)
 
-            IF((TEMDIF(N)*TEMDIF(N-1)).lt.0.)then
-                ICT=ICT+1
-                SLOPE=(TEMDIF(N)-TEMDIF(N-1))/ALOG((P(N)/P(N-1)))
-                FRAC=TEMDIF(N-1)/(TEMDIF(N-1)-TEMDIF(N))
-                TDFCR(ICT,1)=EXP(ALOG(P(N-1))-TEMDIF(N-1)/SLOPE)
-                TDFCR(ICT,2)=0.
+            if((temdif(n)*temdif(n-1)).lt.0.)then
+                ict=ict+1
+                slope=(temdif(n)-temdif(n-1))/alog((p(n)/p(n-1)))
+                frac=temdif(n-1)/(temdif(n-1)-temdif(n))
+                tdfcr(ict,1)=exp(alog(p(n-1))-temdif(n-1)/slope)
+                tdfcr(ict,2)=0.
                 if(idebug .ge. 2)then
-                    WRITE(6,948)ICT,N,TEMDIF(N-1),TEMDIF(N),SLOPE,FRAC
-     #                         ,TDFCR(ICT,1)
+                    write(6,948)ict,n,temdif(n-1),temdif(n),slope,frac
+     #                         ,tdfcr(ict,1)
                 endif
- 948            format(' NEUT BUOY',2I3,5F12.5)
-                ICP=ICP+1
-                TMID=(1.-FRAC)*T(N-1)+FRAC*T(N)
-                PBECR(ICP,1)=TDFCR(ICT,1)
-                PBECR(ICP,2)=PBE(N-1)+G*TEMDIF(N-1)/(T(N-1)+TMID+546.3)
-     &             *DELTAH(N)*FRAC
-C
+ 948            format(' neut buoy',2i3,5f12.5)
+                icp=icp+1
+                tmid=(1.-frac)*t(n-1)+frac*t(n)
+                pbecr(icp,1)=tdfcr(ict,1)
+                pbecr(icp,2)=pbe(n-1)+g*temdif(n-1)/(t(n-1)+tmid+546.3)
+     &             *deltah(n)*frac
+c
                 if(p(n) .ge. 500.)then
-                    nbe_min=AMIN1(PBECR(ICP,2),nbe_min)
+                    nbe_min=amin1(pbecr(icp,2),nbe_min)
                 endif
 
-                pos_area=PBECR(ICP,2)-nbe_min
+                pos_area=pbecr(icp,2)-nbe_min
                 pos_area_max=max(pos_area,pos_area_max)
 
-                if(idebug .ge. 2)WRITE(6,951)pos_area_max
-     1                       ,pos_area,PBENEG,nbe_min,PBECR(ICP,2),ICP
+                if(idebug .ge. 2)write(6,951)pos_area_max
+     1                       ,pos_area,pbeneg,nbe_min,pbecr(icp,2),icp
 
-                PBECR(ICP,3)=PBECR(ICP,2)-PBECR(max(1,ICP-1),2)
-                PBECR(ICP,4)=HT(N-1)+FRAC*DELTAH(N)
-C
+                pbecr(icp,3)=pbecr(icp,2)-pbecr(max(1,icp-1),2)
+                pbecr(icp,4)=ht(n-1)+frac*deltah(n)
+c
                 if(idebug .ge. 2)then
-                  WRITE(6,949)ICP,PBECR(ICP,1),PBECR(ICP,2),PBECR(ICP,3)
-     &          ,PBECR(ICP,4),pos_area_max,nbe_min
- 949              format(' PBECR',I3,4F10.3,2F10.2)
+                  write(6,949)icp,pbecr(icp,1),pbecr(icp,2),pbecr(icp,3)
+     &          ,pbecr(icp,4),pos_area_max,nbe_min
+ 949              format(' pbecr',i3,4f10.3,2f10.2)
                 endif
 
             endif
 
             goto1100
-C
-C  FIND BUOYANCY MAXIMA
-c           IF(N.lt.NLEVEL)then
-c               IF(TEMDIF(N) .gt. TEMDIF(N-1)
-c       1                               .and. TEMDIF(N) .gt. TEMDIF(N+1))then
-c                   IF(ABS(TEMDIF(N)).ge.ABS(TEMDIF(N-1)).or.
-c     &                 TEMDIF(N)*TEMDIF(N-1).le.0)then
-c                       ICT=ICT+1
-c                       TDFCR(ICT,1)=P(N)
-c                       TDFCR(ICT,2)=-TEMDIF(N)
-c                       PBECR(1,3)=PBECR(1,2)
-c                       WRITE(6,999)ICT,TEMDIF(N)
-c 999                   format(' BUOYANCY MAX, ICT TEMDIF(N)',I3,F5.1)
+c
+c  find buoyancy maxima
+c           if(n.lt.nlevel)then
+c               if(temdif(n) .gt. temdif(n-1)
+c       1                               .and. temdif(n) .gt. temdif(n+1))then
+c                   if(abs(temdif(n)).ge.abs(temdif(n-1)).or.
+c     &                 temdif(n)*temdif(n-1).le.0)then
+c                       ict=ict+1
+c                       tdfcr(ict,1)=p(n)
+c                       tdfcr(ict,2)=-temdif(n)
+c                       pbecr(1,3)=pbecr(1,2)
+c                       write(6,999)ict,temdif(n)
+c 999                   format(' buoyancy max, ict temdif(n)',i3,f5.1)
 c                    endif
 c                endif
 c            endif
-C
-C  LOOK FOR AN LFC (ZERO ENERGY)
-c 1000      CONTINUE
+c
+c  look for an lfc (zero energy)
+c 1000      continue
 
-C  FIND TEMPERATURE DIFFERENCE AS A FUNCTION OF HEIGHT THEN
-C  FIND PBE AS A FUNCTION OF HEIGHT (ABOVE SIG LEVEL)
-C  USE QUADRATIC FORMULA TO FIND ZERO PBE
-c           TAVE=0.5*(T(N)+T(N-1)+546.3)
-c           X=TEMDIF(N-1)
-c           Y=(TEMDIF(N)-TEMDIF(N-1))/DELTAH(N)
-c           TWOA=G*Y/TAVE
-c           B=G*X/TAVE
-c           C=PBE(N-1)
-c           ARG=-B/TWOA
-c           ARGDSC=B*B-2.*TWOA*C
-C
-c           IF(ARGDSC.ge.0)then
-c               DISC=SQRT(ARGDSC)/TWOA
-c               WRITE(6,352)TWOA,B,C,X,Y,ARG,DISC,ARGDSC
-c 352           FORMAT(8F15.5)
+c  find temperature difference as a function of height then
+c  find pbe as a function of height (above sig level)
+c  use quadratic formula to find zero pbe
+c           tave=0.5*(t(n)+t(n-1)+546.3)
+c           x=temdif(n-1)
+c           y=(temdif(n)-temdif(n-1))/deltah(n)
+c           twoa=g*y/tave
+c           b=g*x/tave
+c           c=pbe(n-1)
+c           arg=-b/twoa
+c           argdsc=b*b-2.*twoa*c
+c
+c           if(argdsc.ge.0)then
+c               disc=sqrt(argdsc)/twoa
+c               write(6,352)twoa,b,c,x,y,arg,disc,argdsc
+c 352           format(8f15.5)
 
-c               DO ISIGN=-1,1,2
-c                   HH=ARG+ABS(DISC)*ISIGN
-c                   FRAC=HH/DELTAH(N)
+c               do isign=-1,1,2
+c                   hh=arg+abs(disc)*isign
+c                   frac=hh/deltah(n)
 
-c                   IF(ABS(FRAC-0.5).le.0.5)then ! Zero crossing detected
-c                       ICP=ICP+1
-c                       PBECR(ICP,1)=
-c       1                   EXP((ALOG(P(N))-ALOG(P(N-1)))*FRAC+ALOG(P(N-1)))
-c                       PBECR(ICP,2)=0.
-c                       PBECR(ICP,3)=0.
-c                       PBECR(ICP,4)=HT(N-1)+HH
+c                   if(abs(frac-0.5).le.0.5)then ! zero crossing detected
+c                       icp=icp+1
+c                       pbecr(icp,1)=
+c       1                   exp((alog(p(n))-alog(p(n-1)))*frac+alog(p(n-1)))
+c                       pbecr(icp,2)=0.
+c                       pbecr(icp,3)=0.
+c                       pbecr(icp,4)=ht(n-1)+hh
 
-c                       WRITE(6,1089)N,PBE(N),PBE(N-1),HH,PBECR(ICP,1)
-c     &                          ,PBECR(ICP,4),HT(N),HH,DELTAH(N),FRAC
-c 1089                  FORMAT(I3,9F11.3)
+c                       write(6,1089)n,pbe(n),pbe(n-1),hh,pbecr(icp,1)
+c     &                          ,pbecr(icp,4),ht(n),hh,deltah(n),frac
+c 1089                  format(i3,9f11.3)
 c                   endif
 
 c               enddo
 
 c           endif
 
-1100    CONTINUE
+1100    continue
 
-c       WRITE(6,464)ICP,ICT,N1,NLEVEL
- 464    format(' ICP,ICT,N1,NLEVEL',4I5)
-C
+c       write(6,464)icp,ict,n1,nlevel
+ 464    format(' icp,ict,n1,nlevel',4i5)
+c
 
-!       Case when equlibrium level is above top of domain
-        pos_area_max = max(pos_area_max,PBE(NLEVEL) - nbe_min)
+!       case when equlibrium level is above top of domain
+        pos_area_max = max(pos_area_max,pbe(nlevel) - nbe_min)
 
 
-!       At least one region of positive area in sounding
-        IF(pos_area_max .gt. 0.0)then
-            PBENEG=nbe_min
-            VELNEG=SQRT(2.0*ABS(PBENEG))
+!       at least one region of positive area in sounding
+        if(pos_area_max .gt. 0.0)then
+            pbeneg=nbe_min
+            velneg=sqrt(2.0*abs(pbeneg))
 
-        else ! Case when no positive area exists anywhere in sounding
+        else ! case when no positive area exists anywhere in sounding
             pos_area_max=-1.0
-            PBENEG = r_missing_data ! -1e6
-            VELNEG = 0.
+            pbeneg = r_missing_data ! -1e6
+            velneg = 0.
 
         endif
 
         if(idebug .ge. 2)then
-          WRITE(6,485)pos_area_max,PBENEG,VELNEG
- 485      format(' pos_area_max',F10.1,' PBENEG',F10.1,' VELNEG',F10.1)
+          write(6,485)pos_area_max,pbeneg,velneg
+ 485      format(' pos_area_max',f10.1,' pbeneg',f10.1,' velneg',f10.1)
         endif
 
-        RETURN
-        END
-C
+        return
+        end
+c
 !
-C       1991    Steve Albers
-C
-        FUNCTION WTBLB(P,TC,W,IOUT,istatus)
+c       1991    steve albers
+c
+        function wtblb(p,tc,w,iout,istatus)
 
-cdoc    Calculate Wet Bulb, given P,T,W
+cdoc    calculate wet bulb, given p,t,w
 
-        THETAE=THAEK(P,TC,W)
-        CALL MSAD5(WTBLB_arg,P,THETAE,TC,20.,SLOPE,I1,I2,IA,IOUT
+        thetae=thaek(p,tc,w)
+        call msad5(wtblb_arg,p,thetae,tc,20.,slope,i1,i2,ia,iout
      1            ,istatus)      
 
         if(istatus .ne. 1)then
-            write(6,*)' Error in WTBLB',P,TC,W,IOUT
+            write(6,*)' error in wtblb',p,tc,w,iout
 !           stop
         endif
 
-        WTBLB = WTBLB_arg
-        RETURN
-        END
-C
-C
-C
-        SUBROUTINE BLAYR(P,T,Q,PMEAN,TMEAN,WMEAN,THKNES,NLEVEL,HH,
-     +                    LOWEST,IO)
+        wtblb = wtblb_arg
+        return
+        end
+c
+c
+c
+        subroutine blayr(p,t,q,pmean,tmean,wmean,thknes,nlevel,hh,
+     +                    lowest,io)
 
-cdoc    Calculate boundary layer mean values from an input sounding
+cdoc    calculate boundary layer mean values from an input sounding
 
-!       Steve Albers 1991
+!       steve albers 1991
 
         include 'lapsparms.for'
-        integer MXL
-        parameter (MXL=MAX_LVLS+1) ! number of 3D levels plus the sfc level
+        integer mxl
+        parameter (mxl=max_lvls+1) ! number of 3d levels plus the sfc level
 
-        REAL INTLOG
-        DIMENSION P(MXL),T(MXL),Q(MXL)
-        TVIRT(TT,QQ)=TT/(1.-QQ*.37803)
-        THICK(P1,P2,TC,QQ)=ALOG(P1/P2)*TVIRT((TC+273.15),QQ)*.09604
+        real intlog
+        dimension p(mxl),t(mxl),q(mxl)
+        tvirt(tt,qq)=tt/(1.-qq*.37803)
+        thick(p1,p2,tc,qq)=alog(p1/p2)*tvirt((tc+273.15),qq)*.09604
 
-        IF(NLEVEL.LT.2)GOTO9000
-        ZERO=0.
-        HH=0.
-        SUMWT=0.
-        SUMT=0.
-        SUMQ=0.
-        IF(IO.GE.2)WRITE(6,1)LOWEST,P(LOWEST),T(LOWEST),Q(LOWEST),SUMWT
-     +                        ,SUMWT,SUMT,SUMQ
-C
-        NLOW=LOWEST+1
+        if(nlevel.lt.2)goto9000
+        zero=0.
+        hh=0.
+        sumwt=0.
+        sumt=0.
+        sumq=0.
+        if(io.ge.2)write(6,1)lowest,p(lowest),t(lowest),q(lowest),sumwt
+     +                        ,sumwt,sumt,sumq
+c
+        nlow=lowest+1
 
-        DO 100 I=NLOW,NLEVEL
-        IF((P(LOWEST)-P(I))-THKNES)50,150,200
- 50     WT=P(I)-P(I-1)
-        SUMWT=SUMWT+WT
-        AT=T(I-1)
-        AQ=Q(I-1)
-        ARGI=1./ALOG(P(I)/P(I-1))
-        BT=(T(I)-T(I-1))*ARGI
-        BQ=(Q(I)-Q(I-1))*ARGI
-        INTLOG=P(I)*(ALOG(P(I))-1.)-P(I-1)*(ALOG(P(I-1))-1.)
-        PDELT=P(I)-P(I-1)
-        ARGT=(AT-(BT*ALOG(P(I-1))))*PDELT+BT*INTLOG
-        ARGQ=(AQ-(BQ*ALOG(P(I-1))))*PDELT+BQ*INTLOG
-        SUMT=SUMT+ARGT
-        SUMQ=SUMQ+ARGQ
-        ARGTP=ARGT/PDELT
-        ARGQP=ARGQ/PDELT
-        HH=HH+THICK(P(I-1),P(I),ARGTP,ARGQP)
-        IF(IO.GE.2)WRITE(6,1)I,P(I),T(I),Q(I),WT,SUMWT,SUMT,SUMQ,BT,BQ
-     &  ,ZERO,HH
- 100    CONTINUE
-        GOTO9000
-C
- 150    WT=P(I)-P(I-1)
-        GOTO250
-C
- 200    CONTINUE
-        WT=-(THKNES-P(LOWEST)+P(I-1))
- 250    CONTINUE
-        PBOUND=P(LOWEST)-THKNES
-        SUMWT=SUMWT+WT
-        AT=T(I-1)
-        AQ=Q(I-1)
-        ARGI=1./ALOG(P(I)/P(I-1))
-        BT=(T(I)-T(I-1))*ARGI
-        BQ=(Q(I)-Q(I-1))*ARGI
-        INTLOG=PBOUND*(ALOG(PBOUND)-1.)-P(I-1)*(ALOG(P(I-1))-1.)
-        PDELT=PBOUND-P(I-1)
-        ARGT=(AT-(BT*ALOG(P(I-1))))*PDELT+BT*INTLOG
-        ARGQ=(AQ-(BQ*ALOG(P(I-1))))*PDELT+BQ*INTLOG
-        SUMT=SUMT+ARGT
-        SUMQ=SUMQ+ARGQ
+        do 100 i=nlow,nlevel
+        if((p(lowest)-p(i))-thknes)50,150,200
+ 50     wt=p(i)-p(i-1)
+        sumwt=sumwt+wt
+        at=t(i-1)
+        aq=q(i-1)
+        argi=1./alog(p(i)/p(i-1))
+        bt=(t(i)-t(i-1))*argi
+        bq=(q(i)-q(i-1))*argi
+        intlog=p(i)*(alog(p(i))-1.)-p(i-1)*(alog(p(i-1))-1.)
+        pdelt=p(i)-p(i-1)
+        argt=(at-(bt*alog(p(i-1))))*pdelt+bt*intlog
+        argq=(aq-(bq*alog(p(i-1))))*pdelt+bq*intlog
+        sumt=sumt+argt
+        sumq=sumq+argq
+        argtp=argt/pdelt
+        argqp=argq/pdelt
+        hh=hh+thick(p(i-1),p(i),argtp,argqp)
+        if(io.ge.2)write(6,1)i,p(i),t(i),q(i),wt,sumwt,sumt,sumq,bt,bq
+     &  ,zero,hh
+ 100    continue
+        goto9000
+c
+ 150    wt=p(i)-p(i-1)
+        goto250
+c
+ 200    continue
+        wt=-(thknes-p(lowest)+p(i-1))
+ 250    continue
+        pbound=p(lowest)-thknes
+        sumwt=sumwt+wt
+        at=t(i-1)
+        aq=q(i-1)
+        argi=1./alog(p(i)/p(i-1))
+        bt=(t(i)-t(i-1))*argi
+        bq=(q(i)-q(i-1))*argi
+        intlog=pbound*(alog(pbound)-1.)-p(i-1)*(alog(p(i-1))-1.)
+        pdelt=pbound-p(i-1)
+        argt=(at-(bt*alog(p(i-1))))*pdelt+bt*intlog
+        argq=(aq-(bq*alog(p(i-1))))*pdelt+bq*intlog
+        sumt=sumt+argt
+        sumq=sumq+argq
 
         if(pdelt .ne. 0.)then
-            HH=HH+THICK(P(I-1),PBOUND,ARGT/PDELT,ARGQ/PDELT)
+            hh=hh+thick(p(i-1),pbound,argt/pdelt,argq/pdelt)
         endif
 
-        IF(IO.GE.2)WRITE(6,1)I,P(I),T(I),Q(I),WT,SUMWT,SUMT,SUMQ,BT,BQ
-     +              ,INTLOG,HH
-! Hongli Jiang: W>=D+3 from F6.4 to F7.4 10/14/2013
- 1      FORMAT(1x,I2,F6.0,F6.1,F7.4,2F7.1,2F11.4,F11.6,F9.6,F9.3,F6.2)
-C
-        PMEAN=P(LOWEST)-.5*THKNES
-        SUMWTI=1./SUMWT
-        TMEAN=SUMT*SUMWTI
-        QMEAN=SUMQ*SUMWTI
-        WMEAN=QMEAN/(1.-QMEAN)
-        GOTO9999
-C
- 9000   IF(IO.GE.2)WRITE(6,9001)
- 9001   FORMAT(' NOT ENOUGH LEVELS TOO OBTAIN A BOUNDARY LAYER')
- 9999   RETURN
-        END
-C
-C
-C
-C
-C
-        SUBROUTINE LLCL(LCL,TLCL,PLCL,P,TC,W,IO) ! In Meters
+        if(io.ge.2)write(6,1)i,p(i),t(i),q(i),wt,sumwt,sumt,sumq,bt,bq
+     +              ,intlog,hh
+! hongli jiang: w>=d+3 from f6.4 to f7.4 10/14/2013
+ 1      format(1x,i2,f6.0,f6.1,f7.4,2f7.1,2f11.4,f11.6,f9.6,f9.3,f6.2)
+c
+        pmean=p(lowest)-.5*thknes
+        sumwti=1./sumwt
+        tmean=sumt*sumwti
+        qmean=sumq*sumwti
+        wmean=qmean/(1.-qmean)
+        goto9999
+c
+ 9000   if(io.ge.2)write(6,9001)
+ 9001   format(' not enough levels too obtain a boundary layer')
+ 9999   return
+        end
+c
+c
+c
+c
+c
+        subroutine llcl(lcl,tlcl,plcl,p,tc,w,io) ! in meters
 
-cdoc    Calculate LCL properties from an input parcel
+cdoc    calculate lcl properties from an input parcel
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-        REAL LCL,KAPPA
-        ESL(X)=6.1121*exp(17.67*X/(X+243.5)) 
-        DATA EPSILN/.62197/,GAMMAI/102.4596/ ! Lapse Rate m/deg
-        TK=273.15+TC
-        TLCL=TK
-        KAPPA=.28613105*(1.-.23*W)
-        SLOPE=5.
-        E=(W*P)/(EPSILN+W)
-        ITER=1
-        GOTO140
- 100    CONTINUE
-        ITER=ITER+1
-        IF(IO.GE.1)WRITE(6,25)TLCL,RES,SLOPE,DELTA
- 25     FORMAT(' TLCL=',5F12.5)
-        IF(ABS(RES)-.05)150,150,130
- 130    TLCL=TLCL+DELTA
- 140    RES=(ESL(TLCL-273.15)/E)**KAPPA*TK-TLCL
-        IF(ITER.NE.1)SLOPE=(RES-RESOLD)/DELTA
-        DELTA=-RES/SLOPE
-        RESOLD=RES
-        GOTO100
- 150    TLCL=TLCL-273.15
-        PLCL=P*ESL(TLCL)/E
-        LCL=(TC-TLCL)*GAMMAI
-        RETURN
-        END
-C
-C
-        SUBROUTINE LCL_fast(P,TC,TD,HLCL,TLCL,PLCL)
+        real lcl,kappa
+        esl(x)=6.1121*exp(17.67*x/(x+243.5)) 
+        data epsiln/.62197/,gammai/102.4596/ ! lapse rate m/deg
+        tk=273.15+tc
+        tlcl=tk
+        kappa=.28613105*(1.-.23*w)
+        slope=5.
+        e=(w*p)/(epsiln+w)
+        iter=1
+        goto140
+ 100    continue
+        iter=iter+1
+        if(io.ge.1)write(6,25)tlcl,res,slope,delta
+ 25     format(' tlcl=',5f12.5)
+        if(abs(res)-.05)150,150,130
+ 130    tlcl=tlcl+delta
+ 140    res=(esl(tlcl-273.15)/e)**kappa*tk-tlcl
+        if(iter.ne.1)slope=(res-resold)/delta
+        delta=-res/slope
+        resold=res
+        goto100
+ 150    tlcl=tlcl-273.15
+        plcl=p*esl(tlcl)/e
+        lcl=(tc-tlcl)*gammai
+        return
+        end
+c
+c
+        subroutine lcl_fast(p,tc,td,hlcl,tlcl,plcl)
 
-cdoc    Calculate LCL properties from an input sounding (efficiently)
+cdoc    calculate lcl properties from an input sounding (efficiently)
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-        ESL(X)=6.1121*exp(17.67*X/(X+243.5)) 
-        DATA EPSILN/.62197/,GAMMAI/102.4596/        ! Lapse Rate m/deg
+        esl(x)=6.1121*exp(17.67*x/(x+243.5)) 
+        data epsiln/.62197/,gammai/102.4596/        ! lapse rate m/deg
 
-        TLCL = TD - (0.212 + 0.001571 * TD - 0.000436 * TC) * (TC - TD)
-        PLCL=P*ESL(TLCL)/ESL(TD)
-        HLCL=(TC-TLCL)*GAMMAI
+        tlcl = td - (0.212 + 0.001571 * td - 0.000436 * tc) * (tc - td)
+        plcl=p*esl(tlcl)/esl(td)
+        hlcl=(tc-tlcl)*gammai
 
-        RETURN
-        END
-C
-C
-C
-C
-C
-        SUBROUTINE ITPLV(P,PARAM,NLEVEL,PINT,PARMAN,IO,istatus)
+        return
+        end
+c
+c
+c
+c
+c
+        subroutine itplv(p,param,nlevel,pint,parman,io,istatus)
 
-cdoc    Interpolate any parameter from a pressure sounding to a specific pres
+cdoc    interpolate any parameter from a pressure sounding to a specific pres
 
-!       Steve Albers 1991
+!       steve albers 1991
 
         include 'lapsparms.for'
-        integer MXL
-        parameter (MXL=MAX_LVLS+1) ! number of 3D levels plus the sfc level
+        integer mxl
+        parameter (mxl=max_lvls+1) ! number of 3d levels plus the sfc level
 
-        DIMENSION P(MXL),PARAM(MXL)
+        dimension p(mxl),param(mxl)
 
         if(p(1) .lt. pint)then
-            write(6,*)' Error in ITPLV: p(1) < pint',p(1),pint
+            write(6,*)' error in itplv: p(1) < pint',p(1),pint
             istatus = 0
-            print *, p(:)  ! WNIDB
+            print *, p(:)  ! wnidb
             return
         endif
 
-        DO 100 N=1,NLEVEL
-        IF(P(N)-PINT)300,200,100
- 100    CONTINUE
-C
- 200    PARMAN=PARAM(N)
-        GOTO999
-C
- 300    FRAC=ALOG(PINT/P(N-1))/ALOG(P(N)/P(N-1))
-        PARMAN=PARAM(N-1)+FRAC*(PARAM(N)-PARAM(N-1))
-        IF(IO.GE.2)WRITE(6,666)N,PINT,FRAC,PARMAN,P(N),P(N-1),PARAM(N)
-     #  ,PARAM(N-1)
- 666    FORMAT(' INTERPOLATING TO LEVEL',I3,F10.3,F8.5,F8.3,2F7.1,2F6.1)
-C
+        do 100 n=1,nlevel
+        if(p(n)-pint)300,200,100
+ 100    continue
+c
+ 200    parman=param(n)
+        goto999
+c
+ 300    frac=alog(pint/p(n-1))/alog(p(n)/p(n-1))
+        parman=param(n-1)+frac*(param(n)-param(n-1))
+        if(io.ge.2)write(6,666)n,pint,frac,parman,p(n),p(n-1),param(n)
+     #  ,param(n-1)
+ 666    format(' interpolating to level',i3,f10.3,f8.5,f8.3,2f7.1,2f6.1)
+c
  999    istatus = 1
-        RETURN
-        END
-C
-        SUBROUTINE NEWTN(X,XOLD,Y,YOLD,SLOPE,ITER,IO,FENCE,istatus)
+        return
+        end
+c
+        subroutine newtn(x,xold,y,yold,slope,iter,io,fence,istatus)
 
-cdoc    Newton iteration
+cdoc    newton iteration
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-        IF(ITER.GT.0)SLOPE=(Y-YOLD)/(X-XOLD)
-        DELTA=-Y/SLOPE
-        DELTA=AMAX1(-FENCE,AMIN1(DELTA,FENCE))
-        XOLD=X
-        X=X+DELTA
-        ITER=ITER+1
+        if(iter.gt.0)slope=(y-yold)/(x-xold)
+        delta=-y/slope
+        delta=amax1(-fence,amin1(delta,fence))
+        xold=x
+        x=x+delta
+        iter=iter+1
         if(iter .gt. 100)then
-            write(6,*)' Error in NEWTN: too many iterations',iter
+            write(6,*)' error in newtn: too many iterations',iter
             istatus = 0
             return
         endif
 
-        IF(IO.GE.2)WRITE(6,1)ITER,X,XOLD,Y,YOLD,SLOPE,DELTA
- 1      FORMAT(' NEWTON ITER',I4,2F11.4,2F11.7,2E11.3)
-        YOLD=Y
+        if(io.ge.2)write(6,1)iter,x,xold,y,yold,slope,delta
+ 1      format(' newton iter',i4,2f11.4,2f11.7,2e11.3)
+        yold=y
 
         istatus = 1
-        RETURN
-        END
-C
-C
-        SUBROUTINE MSAD5
-     ^  (TEMNEW,PRESNW,THETAE,TGUESS,SLOPEG,SLOPE,I1,I2,IA,IO,istatus)       
+        return
+        end
+c
+c
+        subroutine msad5
+     ^  (temnew,presnw,thetae,tguess,slopeg,slope,i1,i2,ia,io,istatus)       
 
-cdoc    Calculate along a moist adiabat. Solve for T, given ThetaE and P
+cdoc    calculate along a moist adiabat. solve for t, given thetae and p
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-        DIMENSION TEMPNW(4)
+        dimension tempnw(4)
 
-        if(THETAE .gt. 700.)then
-            write(6,*)' Error: passed in THETAE too large in MSAD5'
-     1                ,THETAE,PRESNW
+        if(thetae .gt. 700.)then
+            write(6,*)' error: passed in thetae too large in msad5'
+     1                ,thetae,presnw
             istatus = 0
             return
         endif
 
-        I1=0
-        I2=0
-        IA=0
-C
-C  ESTIMATE PARCEL TEMP AT 500MB
-        IF(PRESNW.NE.500.)GOTO725
-        TEMPNW(1)=THETAE-(307.260+72.122*EXP((THETAE-382.635)*.0141672))
-        TEMPNW(1)=TEMPNW(1)+0.65*EXP(-(.077*(TEMPNW(1)+27.))**2)
-        TEMPNW(1)=TEMPNW(1)-0.50*EXP(-(.200*(TEMPNW(1)+4.0))**2)
-        IF(THETAE.LT.254.90.OR.THETAE.GT.361.53)GOTO725
-        TEMNEW=TEMPNW(1)
-        GOTO900
-C
- 725    TEMPNW(1)=TGUESS
-        SLOPE=SLOPEG
-C  ENTER ITERATIVE LOOP IF THETAE IS OUT OF RANGE OF APPROXIMATE FORMULA
-C  DETERMINE LATENT HEAT RELEASED ABOVE 500MB
- 750    ITER=1
- 760    EPSILN=THAE(TEMPNW(ITER),TEMPNW(ITER),PRESNW)-THETAE
-        I1=I1+1
+        i1=0
+        i2=0
+        ia=0
+c
+c  estimate parcel temp at 500mb
+        if(presnw.ne.500.)goto725
+        tempnw(1)=thetae-(307.260+72.122*exp((thetae-382.635)*.0141672))
+        tempnw(1)=tempnw(1)+0.65*exp(-(.077*(tempnw(1)+27.))**2)
+        tempnw(1)=tempnw(1)-0.50*exp(-(.200*(tempnw(1)+4.0))**2)
+        if(thetae.lt.254.90.or.thetae.gt.361.53)goto725
+        temnew=tempnw(1)
+        goto900
+c
+ 725    tempnw(1)=tguess
+        slope=slopeg
+c  enter iterative loop if thetae is out of range of approximate formula
+c  determine latent heat released above 500mb
+ 750    iter=1
+ 760    epsiln=thae(tempnw(iter),tempnw(iter),presnw)-thetae
+        i1=i1+1
 
-        if(I1 .gt. 200000)then
-            write(6,*)' Error, too many I1 loops in MSAD5'
+        if(i1 .gt. 200000)then
+            write(6,*)' error, too many i1 loops in msad5'
             istatus = 0
             return
-        elseif(I1 .gt. 199980)then
-            write(6,*)' Warning, too many I1 loops in MSAD5'
-            write(6,*)THETAE,TEMPNW(ITER),PRESNW,EPSILN  
+        elseif(i1 .gt. 199980)then
+            write(6,*)' warning, too many i1 loops in msad5'
+            write(6,*)thetae,tempnw(iter),presnw,epsiln  
         endif
 
-C  TEST FOR CONVERGENCE
-        IF(ABS(EPSILN).LT..01)GOTO890
-        IF(IO.GE.3.AND.ITER.EQ.1)
-     ^  WRITE(6,666)ITER,TEMPNW(ITER),SLOPE,EPSILN,DELTA,EPSOLD,DELOLD
-     ^  ,SLOPEG
-        IF(ITER.GT.1)SLOPE=(EPSILN-EPSOLD)/DELOLD
-        DELTA=-EPSILN/SLOPE
-        ITER=ITER+1
-        IF(IO.GE.3)
-     ^  WRITE(6,666)ITER,TEMPNW(ITER),SLOPE,EPSILN,DELTA,EPSOLD,DELOLD
- 666    FORMAT(' MSAD5',I2,2X,7F11.5)
-        TEMPNW(ITER)=TEMPNW(ITER-1)+DELTA
-        I2=I2+1
-        IF(ITER.EQ.4)GOTO850
-        EPSOLD=EPSILN
-        DELOLD=DELTA
-        GOTO760
-C
-C  USE AITKEN'S FORMULA TO ACCELERATE CONVERGENCE
- 850    RATIO=DELTA/DELOLD
-        RATABS=ABS(RATIO)
-        RATIO=AMIN1(RATABS,.5)*RATIO/RATABS
-        IF(IO.GE.3)WRITE(6,666)
-     ^  ITER,TEMPNW(ITER),DELTA,DELOLD,RATIO
-        TEMPNW(1)=TEMPNW(3)+DELTA/(1.-RATIO)
-        IA=IA+1
-        GOTO750
-C
- 890    TEMNEW=TEMPNW(ITER)
-        IOUT=0
-        IF(IOUT.EQ.0.OR.IO.LT.3)GOTO900
-        WRITE(6,666)ITER,TEMNEW,SLOPE,EPSILN
-        WRITE(6,203)
- 203    FORMAT('  ')
- 900    CONTINUE
-C       WRITE(6,901)THETAE,PRESNW,TEMNEW,I1,I2,IA
-C901    FORMAT(' TRAVELLED DOWN MOIST ADIABAT, THETAE=',F7.2
-C     #  ,' NEW PRESSURE=',F7.2,' NEW TEMP=',F7.2,3I3)
+c  test for convergence
+        if(abs(epsiln).lt..01)goto890
+        if(io.ge.3.and.iter.eq.1)
+     ^  write(6,666)iter,tempnw(iter),slope,epsiln,delta,epsold,delold
+     ^  ,slopeg
+        if(iter.gt.1)slope=(epsiln-epsold)/delold
+        delta=-epsiln/slope
+        iter=iter+1
+        if(io.ge.3)
+     ^  write(6,666)iter,tempnw(iter),slope,epsiln,delta,epsold,delold
+ 666    format(' msad5',i2,2x,7f11.5)
+        tempnw(iter)=tempnw(iter-1)+delta
+        i2=i2+1
+        if(iter.eq.4)goto850
+        epsold=epsiln
+        delold=delta
+        goto760
+c
+c  use aitken's formula to accelerate convergence
+ 850    ratio=delta/delold
+        ratabs=abs(ratio)
+        ratio=amin1(ratabs,.5)*ratio/ratabs
+        if(io.ge.3)write(6,666)
+     ^  iter,tempnw(iter),delta,delold,ratio
+        tempnw(1)=tempnw(3)+delta/(1.-ratio)
+        ia=ia+1
+        goto750
+c
+ 890    temnew=tempnw(iter)
+        iout=0
+        if(iout.eq.0.or.io.lt.3)goto900
+        write(6,666)iter,temnew,slope,epsiln
+        write(6,203)
+ 203    format('  ')
+ 900    continue
+c       write(6,901)thetae,presnw,temnew,i1,i2,ia
+c901    format(' travelled down moist adiabat, thetae=',f7.2
+c     #  ,' new pressure=',f7.2,' new temp=',f7.2,3i3)
         istatus = 1
-        RETURN
-        END
-C
+        return
+        end
+c
 !
-C      1991     Steve Albers
-C
-       FUNCTION THAE(TC,TD,P)
+c      1991     steve albers
+c
+       function thae(tc,td,p)
 
-cdoc   Calculate Theta(e), given T, Td, P
-C
-C   COMPUTES THE EQUIVALENT POTENTIAL TEMPURATURE (K).
-C    (USING THE ROSSBY DEFINITION)
-        ESL(X)=6.1121*exp(17.67*X/(X+243.5)) 
-        T=TC+273.15
-        E=ESL(TD)
-        PMEI=1./(P-E)
-        W=(E*.62197)*PMEI
-        T=T*(1.+W)/(1.+W*.62197)
-       CP=0.2396
-       THAE=THD(P,T,W,PMEI) * EXP(RL(TC)*W/(CP*T))
-       RETURN
-       END
-C
-       FUNCTION THD(P,T,W,PMEI)
+cdoc   calculate theta(e), given t, td, p
+c
+c   computes the equivalent potential tempurature (k).
+c    (using the rossby definition)
+        esl(x)=6.1121*exp(17.67*x/(x+243.5)) 
+        t=tc+273.15
+        e=esl(td)
+        pmei=1./(p-e)
+        w=(e*.62197)*pmei
+        t=t*(1.+w)/(1.+w*.62197)
+       cp=0.2396
+       thae=thd(p,t,w,pmei) * exp(rl(tc)*w/(cp*t))
+       return
+       end
+c
+       function thd(p,t,w,pmei)
 
-cdoc   COMPUTES THE DRY AIR POTENTIAL TEMPERATURE
+cdoc   computes the dry air potential temperature
 
-       real AK
-       parameter (AK=.28613105)
+       real ak
+       parameter (ak=.28613105)
 
-       AKS=AK * (1.0+1.608*W)/(1.0 + 1.941569*W)
-       THD=T * ((1000.0*PMEI)**AKS)
-       RETURN
-       END
+       aks=ak * (1.0+1.608*w)/(1.0 + 1.941569*w)
+       thd=t * ((1000.0*pmei)**aks)
+       return
+       end
 
-       FUNCTION RL(TM2)
-cdoc   LATENT HEAT OF EVAPORATION
-C      TM2=T-273.15
-C      RL=597.31-0.589533*TM2+0.001005333*(TM2*TM2)
-       RL=597.31-((0.589533+0.001005333*TM2)*TM2)
-       RETURN
-       END
-C
-C
-       SUBROUTINE DRYAD(P1,P2,T1,T2,W,IO)
+       function rl(tm2)
+cdoc   latent heat of evaporation
+c      tm2=t-273.15
+c      rl=597.31-0.589533*tm2+0.001005333*(tm2*tm2)
+       rl=597.31-((0.589533+0.001005333*tm2)*tm2)
+       return
+       end
+c
+c
+       subroutine dryad(p1,p2,t1,t2,w,io)
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-cdoc   COMPUTES THE DRY AIR POTENTIAL TEMPERATURE (theta), GIVEN P and T
-       AK=.28613105
-C       AKS=AK * (1.0+1.608*W)/(1.0 + 1.941569*W)
-C       E=W*P1/(0.62197 +W)
-C       PMEI=1./(P1-E)
-C       T2=T1 * ((P2*PMEI)**AKS)
-        T2=T1*(P2/P1)**AK
-        IF(IO.GE.2)WRITE(6,1)P1,P2,T1,T2,W
- 1      FORMAT(' P1,P2,T1,T2,W',4F10.3,F10.5)
-       RETURN
-       END
-C
-       FUNCTION THETE(T,TD,ALT,HGT)
+cdoc   computes the dry air potential temperature (theta), given p and t
+       ak=.28613105
+c       aks=ak * (1.0+1.608*w)/(1.0 + 1.941569*w)
+c       e=w*p1/(0.62197 +w)
+c       pmei=1./(p1-e)
+c       t2=t1 * ((p2*pmei)**aks)
+        t2=t1*(p2/p1)**ak
+        if(io.ge.2)write(6,1)p1,p2,t1,t2,w
+ 1      format(' p1,p2,t1,t2,w',4f10.3,f10.5)
+       return
+       end
+c
+       function thete(t,td,alt,hgt)
 
-cdoc   Compute theta(e), given T, TD, Altimeter setting, and elevation (HGT)
+cdoc   compute theta(e), given t, td, altimeter setting, and elevation (hgt)
 
-C  T TEMP (C), TD DEW PT (C), ALT (ALTIMETER SETTING IN.)
-C  HGT HEIGHT ASL (M).
-C  CONVERT PA FROM INCHES TO MB
-       PA=ALT*33.8639
-C  SFC PRESSURE
-       PA=PA*(1.0/(1.0+HGT*2.2222E-05))**5.25530
-        THETE=THAE(T,TD,PA)
-        RETURN
-        END
-C
-C
-C
-       FUNCTION XMXRAT(PRES,DEWP)
-cdoc   COMPUTE MIXING RATIO (GM/GM) GIVEN DEW POINT TEMP AND THE PRESSURE (MB)
-       RATMIX=EXP(21.16-5415.0/DEWP)
-       RATMIX=RATMIX/PRES
-       IF(RATMIX.LT.(5.0E-05)) RATMIX=5.0E-05
-       XMXRAT=RATMIX
-       RETURN
-       END
-C
-C
-C
-       FUNCTION THAEK(P,TC,W)
-cdoc   COMPUTES THE EQUIVALENT POTENTIAL TEMPURATURE (K).
-cdoc   (USING THE ROSSBY DEFINITION)
-        Q=W/(1.0+W)
-        E=(P*Q)/.62197
-        PMEI=1./(P-E)
-        T=TC+273.15
-        T=T*(1.+W)/(1.+W*.62197)
-       CP=0.2396
-       THAEK=THD(P,T,W,PMEI) * EXP(RL(TC)*W/(CP*T))
-       RETURN
-       END
-C
+c  t temp (c), td dew pt (c), alt (altimeter setting in.)
+c  hgt height asl (m).
+c  convert pa from inches to mb
+       pa=alt*33.8639
+c  sfc pressure
+       pa=pa*(1.0/(1.0+hgt*2.2222e-05))**5.25530
+        thete=thae(t,td,pa)
+        return
+        end
+c
+c
+c
+       function xmxrat(pres,dewp)
+cdoc   compute mixing ratio (gm/gm) given dew point temp and the pressure (mb)
+       ratmix=exp(21.16-5415.0/dewp)
+       ratmix=ratmix/pres
+       if(ratmix.lt.(5.0e-05)) ratmix=5.0e-05
+       xmxrat=ratmix
+       return
+       end
+c
+c
+c
+       function thaek(p,tc,w)
+cdoc   computes the equivalent potential tempurature (k).
+cdoc   (using the rossby definition)
+        q=w/(1.0+w)
+        e=(p*q)/.62197
+        pmei=1./(p-e)
+        t=tc+273.15
+        t=t*(1.+w)/(1.+w*.62197)
+       cp=0.2396
+       thaek=thd(p,t,w,pmei) * exp(rl(tc)*w/(cp*t))
+       return
+       end
+c
 
         function oe_fast(t_in,td_in,pres)
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-!       t  in deg c  (Input) Valid input temp range is -60C to +60C
-!       td in deg c  (Input) Max dewpoint depression allowed is 30
-!       pres in mb   (Input) Min allowed is 500mb
-!       oe_fast in C (Output)
+!       t  in deg c  (input) valid input temp range is -60c to +60c
+!       td in deg c  (input) max dewpoint depression allowed is 30
+!       pres in mb   (input) min allowed is 500mb
+!       oe_fast in c (output)
 
-cdoc    Quick way to get Theta(e) using lookup table
+cdoc    quick way to get theta(e) using lookup table
 
-!       1991    Steve Albers
+!       1991    steve albers
 
         character*31 ext
         character*150 directory
@@ -1403,7 +1403,7 @@ cdoc    Quick way to get Theta(e) using lookup table
                 ext = 'dat'
                 call get_directory(ext,directory,len_dir)
 
-                write(6,*)' Reading thetae_lut.dat from file'
+                write(6,*)' reading thetae_lut.dat from file'
                 open(11,file=directory(1:len_dir)//'thetae_lut.dat'
      1                    ,form='unformatted',status='old',err=10)
                 read(11,err=10)thetae_lut
@@ -1413,11 +1413,11 @@ cdoc    Quick way to get Theta(e) using lookup table
                 close(11)
 
                 write(6,*)
-     1            ' Generating thetae_lut.dat - no valid file exists'
+     1            ' generating thetae_lut.dat - no valid file exists'
                 open(12,file=directory(1:len_dir)//'thetae_lut.dat'
      1                         ,form='unformatted',status='unknown')
             else
-                write(6,*)' Generating thetae lut in memory...'
+                write(6,*)' generating thetae lut in memory...'
             endif
 
             i = 0
@@ -1430,7 +1430,7 @@ cdoc    Quick way to get Theta(e) using lookup table
                     do pres2 = pres2_low,pres2_high,pres2_interval
 
                         td = t-tdprs
-                        thetae_lut(i,j,k) = OE(t,td,pres2)
+                        thetae_lut(i,j,k) = oe(t,td,pres2)
 
                         if(i/10*10 .eq. i .and. j/10*10 .eq. j .and.
      1                                        k/10*10 .eq. k)then
@@ -1473,21 +1473,21 @@ cdoc    Quick way to get Theta(e) using lookup table
         fracj = rj - j
         frack = rk - k
 
-        Z1=thetae_lut(i  , j  ,k)
-        Z2=thetae_lut(i+1, j  ,k)
-        Z3=thetae_lut(i+1, j+1,k)
-        Z4=thetae_lut(i  , j+1,k)
+        z1=thetae_lut(i  , j  ,k)
+        z2=thetae_lut(i+1, j  ,k)
+        z3=thetae_lut(i+1, j+1,k)
+        z4=thetae_lut(i  , j+1,k)
 
-        thetae_low =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                    - (Z2+Z4-Z3-Z1)*fraci*fracj
+        thetae_low =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                    - (z2+z4-z3-z1)*fraci*fracj
 
-        Z1=thetae_lut(i  , j  ,k+1)
-        Z2=thetae_lut(i+1, j  ,k+1)
-        Z3=thetae_lut(i+1, j+1,k+1)
-        Z4=thetae_lut(i  , j+1,k+1)
+        z1=thetae_lut(i  , j  ,k+1)
+        z2=thetae_lut(i+1, j  ,k+1)
+        z3=thetae_lut(i+1, j+1,k+1)
+        z4=thetae_lut(i  , j+1,k+1)
 
-        thetae_high =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                    - (Z2+Z4-Z3-Z1)*fraci*fracj
+        thetae_high =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                    - (z2+z4-z3-z1)*fraci*fracj
 
         oe_fast = thetae_low * (1. - frack) + thetae_high * frack
 
@@ -1500,16 +1500,16 @@ c101    format(1x,3f10.2,f10.4)
 
         function tmlaps_fast(thetae_in,pres_in)
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-cdoc    Quick way to get temperature along a moist adiabat given theta(e)
-cdoc    This uses a lookup table
+cdoc    quick way to get temperature along a moist adiabat given theta(e)
+cdoc    this uses a lookup table
 
-!       thetae in K  (Input)
-!       pres in mb   (Input)
-!       t moist in K (Output)
+!       thetae in k  (input)
+!       pres in mb   (input)
+!       t moist in k (output)
 
-!       1991    Steve Albers
+!       1991    steve albers
 
         character*31 ext
         character*150 directory
@@ -1546,7 +1546,7 @@ cdoc    This uses a lookup table
                 ext = 'dat'
                 call get_directory(ext,directory,len_dir)
 
-                write(6,*)' Reading tmlaps_lut.dat from file'
+                write(6,*)' reading tmlaps_lut.dat from file'
                 open(11,file=directory(1:len_dir)//'tmlaps_lut.dat'
      1                    ,form='unformatted',status='old',err=10)
                 read(11,err=10)t_moist
@@ -1556,11 +1556,11 @@ cdoc    This uses a lookup table
                 close(11)
 
                 write(6,*)
-     1            ' Generating tmlaps_lut.dat - no valid file exists'
+     1            ' generating tmlaps_lut.dat - no valid file exists'
                 open(11,file=directory(1:len_dir)//'tmlaps_lut.dat'
      1                             ,form='unformatted',status='new')
             else
-                write(6,*)' Generating tmlaps lut in memory...'
+                write(6,*)' generating tmlaps lut in memory...'
             endif
 
             i = 0
@@ -1601,13 +1601,13 @@ cdoc    This uses a lookup table
         fraci = ri - i
         fracj = rj - j
 
-        Z1=t_moist(i  , j  )
-        Z2=t_moist(i+1, j  )
-        Z3=t_moist(i+1, j+1)
-        Z4=t_moist(i  , j+1)
+        z1=t_moist(i  , j  )
+        z2=t_moist(i+1, j  )
+        z3=t_moist(i+1, j+1)
+        z4=t_moist(i  , j+1)
 
-        tmlaps_fast =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                    - (Z2+Z4-Z3-Z1)*fraci*fracj
+        tmlaps_fast =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                    - (z2+z4-z3-z1)*fraci*fracj
 
 c       residual = abs(tmlaps_fast - tmlaps(thetae-273.15,pres))
 c       write(6,101)tmlaps_fast,tmlaps(thetae-273.15,pres),residual
@@ -1616,55 +1616,55 @@ c101    format(1x,2f10.2,f10.4)
         return
         end
 
-        FUNCTION DWPT_laps(T,RH)
-C
-cdoc THIS FUNCTION RETURNS THE DEW POINT (CELSIUS) GIVEN THE TEMPERATURE
-cdoc (CELSIUS) AND RELATIVE HUMIDITY (%).
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C
-C       THE FORMULA IS USED IN THE
-C   PROCESSING OF U.S. RAWINSONDE DATA AND IS REFERENCED IN PARRY, H.
-C   DEAN, 1969: "THE SEMIAUTOMATIC COMPUTATION OF RAWINSONDES,"
-C   TECHNICAL MEMORANDUM WBTM EDL 10, U.S. DEPARTMENT OF COMMERCE,
-C   ENVIRONMENTAL SCIENCE SERVICES ADMINISTRATION, WEATHER BUREAU,
-C   OFFICE OF SYSTEMS DEVELOPMENT, EQUIPMENT DEVELOPMENT LABORATORY,
-C   SILVER SPRING, MD (OCTOBER), PAGE 9 AND PAGE II-4, LINE 460.
+        function dwpt_laps(t,rh)
+c
+cdoc this function returns the dew point (celsius) given the temperature
+cdoc (celsius) and relative humidity (%).
+c
+c       baker,schlatter 17-may-1982     original version
+c
+c       the formula is used in the
+c   processing of u.s. rawinsonde data and is referenced in parry, h.
+c   dean, 1969: "the semiautomatic computation of rawinsondes,"
+c   technical memorandum wbtm edl 10, u.s. department of commerce,
+c   environmental science services administration, weather bureau,
+c   office of systems development, equipment development laboratory,
+c   silver spring, md (october), page 9 and page ii-4, line 460.
 
-C   This has been updated to test for out of bounds values (2004 Steve Albers)
+c   this has been updated to test for out of bounds values (2004 steve albers)
 
         if(rh .lt. 0. .or. rh .gt. 100.)then
             call get_r_missing_data(r_missing_data,istatus)
-            DWPT_laps = r_missing_data
+            dwpt_laps = r_missing_data
             return
         endif
 
         if(t .lt. -100. .or. t .gt. +100.)then
             call get_r_missing_data(r_missing_data,istatus)
-            DWPT_laps = r_missing_data
+            dwpt_laps = r_missing_data
             return
         endif
 
-        X = 1.-0.01*RH
-C   COMPUTE DEW POINT DEPRESSION.
-        DPD =(14.55+0.114*T)*X+((2.5+0.007*T)*X)**3+(15.9+0.117*T)*X**14
-        DWPT_laps = T-DPD
-        RETURN
-        END
+        x = 1.-0.01*rh
+c   compute dew point depression.
+        dpd =(14.55+0.114*t)*x+((2.5+0.007*t)*x)**3+(15.9+0.117*t)*x**14
+        dwpt_laps = t-dpd
+        return
+        end
 
 
         function twet_fast(t_c,td_c,pres_mb)
 
-!       Steve Albers 1991
-cdoc    This is a fast approximate Wet Bulb routine using lookup tables
-!       WARNING: This routine is only active below 500mb due to size restriction
-!       of the lookup table. Max dewpoint depression allowed is 30
-!       Further approximation used (twet = t_c) when t_c is outside valid range
+!       steve albers 1991
+cdoc    this is a fast approximate wet bulb routine using lookup tables
+!       warning: this routine is only active below 500mb due to size restriction
+!       of the lookup table. max dewpoint depression allowed is 30
+!       further approximation used (twet = t_c) when t_c is outside valid range
 
-!       twet_fast in C (Output)
+!       twet_fast in c (output)
 
         if(pres_mb .ge. 500. .and. t_c .ge. -60. 
-     1                       .and. t_c .le. +60.)then ! Valid ranges to input
+     1                       .and. t_c .le. +60.)then ! valid ranges to input
             thetae_k = oe_fast(t_c,td_c,pres_mb) + 273.15
             twet_fast = tmlaps_fast(thetae_k,pres_mb)
 
@@ -1679,40 +1679,40 @@ cdoc    This is a fast approximate Wet Bulb routine using lookup tables
        subroutine li_laps(tc,td,pr,i4time,imax,jmax,li,flag
      !                   ,istatus)
 
-cdoc   Compute 2-D grid of LI, given a grid of parcels to launch
+cdoc   compute 2-d grid of li, given a grid of parcels to launch
 
-!      1991     Steve Albers
+!      1991     steve albers
 
-       real tc(imax,jmax) ! Input T  in deg F
-       real td(imax,jmax) ! Input Td in deg F
-       real pr(imax,jmax) ! Input Pr in MB
-       real li(imax,jmax) ! Output Li in Deg K/C
+       real tc(imax,jmax) ! input t  in deg f
+       real td(imax,jmax) ! input td in deg f
+       real pr(imax,jmax) ! input pr in mb
+       real li(imax,jmax) ! output li in deg k/c
 
-       real t500laps(imax,jmax) ! Used Locally Only
+       real t500laps(imax,jmax) ! used locally only
 
        character*13 filename13
 
        call get_r_missing_data(r_missing_data,istatus)
        if(istatus .ne. 1)then
-           write(6,*)' Error reading r_missing_data'
+           write(6,*)' error reading r_missing_data'
            return
        endif
 
        call constant(li,r_missing_data,imax,jmax)
        call get_laps_cycle_time(laps_cycle_time,istatus)
-!      Get 500 mb temp field
-       if(flag .eq. 0.0)then ! Use LT1 (or equivalent) file
-           write(6,*)' Reading 500 temp from LT1 (or equivalent) file'
+!      get 500 mb temp field
+       if(flag .eq. 0.0)then ! use lt1 (or equivalent) file
+           write(6,*)' reading 500 temp from lt1 (or equivalent) file'
            k_level = 500
            call get_temp_2d(i4time,laps_cycle_time,i4time_nearest
      1                          ,k_level,imax,jmax,t500laps,istatus)
 
            if(istatus .ne. 1)then
-               write(6,*)' Aborting Li calculation, no 500 temps'
+               write(6,*)' aborting li calculation, no 500 temps'
                goto999
            endif
 
-       elseif(abs(flag) .ge. 1e6)then ! Use Sounding file
+       elseif(abs(flag) .ge. 1e6)then ! use sounding file
 
            i4time_round = ((i4time+21600)/43200) * 43200
            open(52,file='disk$laps_s90x:'
@@ -1726,10 +1726,10 @@ cdoc   Compute 2-D grid of LI, given a grid of parcels to launch
 10         read(52,*,end=20)pres,temp
 
            if(pres .eq. 500.)then
-               write(6,*)' Using sounding 500mb temp',temp
+               write(6,*)' using sounding 500mb temp',temp
 
-               DO i=1,imax
-               DO j=1,jmax
+               do i=1,imax
+               do j=1,jmax
                    t500laps(i,j) = temp + 273.15
                enddo
                enddo
@@ -1741,24 +1741,24 @@ cdoc   Compute 2-D grid of LI, given a grid of parcels to launch
 
            endif
 
-20         write(6,*)' Could not find 500mb temp'
+20         write(6,*)' could not find 500mb temp'
            istatus = 0
            close(52)
            return
 
 50         close(52)
 
-       else ! Use input temp
-           write(6,*)' USING INPUT 500MB TEMP'
-           DO i=1,imax
-           DO j=1,jmax
+       else ! use input temp
+           write(6,*)' using input 500mb temp'
+           do i=1,imax
+           do j=1,jmax
                 t500laps(i,j) = flag
            enddo
            enddo
 
        endif
 
-!      Calculate Fields
+!      calculate fields
        do j=1,jmax
           do i=1,imax
 
@@ -1769,7 +1769,7 @@ cdoc   Compute 2-D grid of LI, given a grid of parcels to launch
                   tcij_c = (tc(i,j)-32.)/1.8
                   tdij_c = (td(i,j)-32.)/1.8
                   t500laps_c = t500laps(i,j) - 273.15
-                  li(i,j) = func_li(TCij_c,TDij_c,PR(i,j),t500laps_c
+                  li(i,j) = func_li(tcij_c,tdij_c,pr(i,j),t500laps_c
      1                             ,r_missing_data)
               else
                   li(i,j) = r_missing_data
@@ -1783,11 +1783,11 @@ cdoc   Compute 2-D grid of LI, given a grid of parcels to launch
 
         function func_li(t_c,td_c,psta_mb,t500_c,r_missing_data)
 
-cdoc    Calculate LI given an input parcel
+cdoc    calculate li given an input parcel
 
         td_in = min(td_c,t_c)
 
-        thetae = THAE(t_c,td_in,psta_mb)
+        thetae = thae(t_c,td_in,psta_mb)
 
 !       t500_parcel = t500(thetae)
         call thetae_to_t500(thetae,t500_parcel,istatus)
@@ -1797,7 +1797,7 @@ cdoc    Calculate LI given an input parcel
 
         else
             write(6,1,err=2)psta_mb,t_c,td_c
-1           format(' WARNING: setting li to missing - p,t,td= ',3f10.0)       
+1           format(' warning: setting li to missing - p,t,td= ',3f10.0)       
 2           func_li = r_missing_data
 
         endif
@@ -1808,66 +1808,66 @@ cdoc    Calculate LI given an input parcel
 
         subroutine thetae_to_t500(thetae,t500,istatus)
 
-cdoc    Given theta(e), what is T-500mb?
+cdoc    given theta(e), what is t-500mb?
 
         real diff(10)
-C
-C CALCULATE LI
-        ITER=1
-        ITERC1=1
-        ITERC2=1
+c
+c calculate li
+        iter=1
+        iterc1=1
+        iterc2=1
 
-C ESTIMATE PARCEL TEMP AT 500MB
-        T500NW=THETAE-(307.260+72.122*EXP((THETAE-382.635)*.0141672))
-        T500NW=T500NW+0.65*EXPM(-(.077*(T500NW+27.))**2)
-        T500NW=T500NW-0.50*EXPM(-(.200*(T500NW+4.0))**2)
-!       IF(OUTPUT.EQ.1)WRITE(31,*)THETAE,' T500 ',T500NW
-        IF(THETAE.LT.254.90.OR.THETAE.GT.361.53)THEN
-            T500OL=T500NW
-c           WRITE(6,*)' USING ITERATIVE METHOD TO GET 500MB TEMP'
-c           WRITE(31,*)' USING ITERATIVE METHOD TO GET 500MB TEMP'
-C
-C ENTER ITERATIVE LOOP IF THETAE IS OUT OF RANGE OF APPROXIMATE FORMULA
-C DETERMINE LATENT HEAT RELEASED ABOVE 500MB
-750         FUDGE=THAE(T500OL,T500OL,500.)-1.21937*(T500OL+273.15)
-            THP5=THETAE-FUDGE
-            T500NW=(THP5/1.21937)-273.15
-!           WRITE(31,666)
-!       1   ITER,iok,jok,XOK,YOK,IUS,JUS,XUS,YUS,T500NW,T500OL,FUDGE,RATIO
-!666        FORMAT(I1,2I3,F6.2,F4.1,2I3,2F7.3,2X,4F10.5)
-            ITERC1=ITERC1+1
+c estimate parcel temp at 500mb
+        t500nw=thetae-(307.260+72.122*exp((thetae-382.635)*.0141672))
+        t500nw=t500nw+0.65*expm(-(.077*(t500nw+27.))**2)
+        t500nw=t500nw-0.50*expm(-(.200*(t500nw+4.0))**2)
+!       if(output.eq.1)write(31,*)thetae,' t500 ',t500nw
+        if(thetae.lt.254.90.or.thetae.gt.361.53)then
+            t500ol=t500nw
+c           write(6,*)' using iterative method to get 500mb temp'
+c           write(31,*)' using iterative method to get 500mb temp'
+c
+c enter iterative loop if thetae is out of range of approximate formula
+c determine latent heat released above 500mb
+750         fudge=thae(t500ol,t500ol,500.)-1.21937*(t500ol+273.15)
+            thp5=thetae-fudge
+            t500nw=(thp5/1.21937)-273.15
+!           write(31,666)
+!       1   iter,iok,jok,xok,yok,ius,jus,xus,yus,t500nw,t500ol,fudge,ratio
+!666        format(i1,2i3,f6.2,f4.1,2i3,2f7.3,2x,4f10.5)
+            iterc1=iterc1+1
 
-            if(ITERC1 .gt. 1000)then
+            if(iterc1 .gt. 1000)then
                 write(6,*)
-     1               ' WARNING in thetae_to_t500, too many iterations, '       
+     1               ' warning in thetae_to_t500, too many iterations, '       
      1              ,' thetae = ',thetae
                 istatus = 0
                 return
             endif
 
-C TEST FOR CONVERGENCE
-            DIFF(ITER)=T500NW-T500OL
-            IF(ABS(DIFF(ITER)).LT..10)GOTO900
-            ITER=ITER+1
-            ITERC2=ITERC2+1
-C
-C USE AITKEN'S FORMULA TO ACCELERATE CONVERGENCE
-            IF(ITER.EQ.3)THEN
-                RATIO=DIFF(2)/DIFF(1)
-!               WRITE(31,666)
-!       1       ITER,iok,jok,XOK,YOK,IUS,JUS,XUS,YUS,T500NW,DIFF(2)
-!       1           ,DIFF(1),RATIO
-                T500NW=T500OL+DIFF(2)/(1.-RATIO)
-                T500OL=T500NW
-                ITER=1
-                ITERAI=ITERAI+1
-                GOTO750
+c test for convergence
+            diff(iter)=t500nw-t500ol
+            if(abs(diff(iter)).lt..10)goto900
+            iter=iter+1
+            iterc2=iterc2+1
+c
+c use aitken's formula to accelerate convergence
+            if(iter.eq.3)then
+                ratio=diff(2)/diff(1)
+!               write(31,666)
+!       1       iter,iok,jok,xok,yok,ius,jus,xus,yus,t500nw,diff(2)
+!       1           ,diff(1),ratio
+                t500nw=t500ol+diff(2)/(1.-ratio)
+                t500ol=t500nw
+                iter=1
+                iterai=iterai+1
+                goto750
             endif
 
-800         T500OL=T500NW
-            GOTO750
+800         t500ol=t500nw
+            goto750
 
-        ENDIF
+        endif
 
 900     t500 = t500nw
 
@@ -1878,7 +1878,7 @@ C USE AITKEN'S FORMULA TO ACCELERATE CONVERGENCE
 
         function expm(x)
 
-cdoc    Calculate exp function with check to avoid underflow with large inputs.
+cdoc    calculate exp function with check to avoid underflow with large inputs.
 
         if(x .ge. -70.)then
             expm = exp(x)
@@ -1891,15 +1891,15 @@ cdoc    Calculate exp function with check to avoid underflow with large inputs.
 
         function devirt_td(t_k,td_k,p_pa)
 
-cdoc    This function yields the approximate temperature given the virtual temp
+cdoc    this function yields the approximate temperature given the virtual temp
 cdoc    tv from the mthermo library is called. 
 
-!       Please suggest improvements to this routine to Steve Albers at FSL.
+!       please suggest improvements to this routine to steve albers at fsl.
 
-!       t_k       Input temp in K
-!       td_k      Input dew point temp in K
-!       p_pa      Input pressure as pascals
-!       devirt_td Output devirtualized temp as K
+!       t_k       input temp in k
+!       td_k      input dew point temp in k
+!       p_pa      input pressure as pascals
+!       devirt_td output devirtualized temp as k
 
         t_c  = t_k  - 273.15
         td_c = td_k - 273.15
@@ -1916,15 +1916,15 @@ cdoc    tv from the mthermo library is called.
 
         function devirt_sh(t_k,sh,p_pa)
 
-cdoc    This function yields the approximate temperature given the virtual temp
+cdoc    this function yields the approximate temperature given the virtual temp
 cdoc    tv from the mthermo library is called. 
 
-!       Please suggest improvements to this routine to Steve Albers at FSL.
+!       please suggest improvements to this routine to steve albers at fsl.
 
-!       t_k       Input temp in K
-!       sh        Input specific humidity (dimensionless)
-!       p_pa      Input pressure as pascals
-!       devirt_td Output devirtualized temp as K
+!       t_k       input temp in k
+!       sh        input specific humidity (dimensionless)
+!       p_pa      input pressure as pascals
+!       devirt_td output devirtualized temp as k
 
         t_c  = t_k  - 273.15
         p_mb = p_pa / 100.
@@ -1940,15 +1940,15 @@ cdoc    tv from the mthermo library is called.
 
         function devirt_rh(t_k,rh,p_pa)
 
-cdoc    This function yields the approximate temperature given the virtual temp
+cdoc    this function yields the approximate temperature given the virtual temp
 cdoc    devirt_td from the laps library is called. 
 
-!       Please suggest improvements to this routine to Steve Albers at FSL.
+!       please suggest improvements to this routine to steve albers at fsl.
 
-!       t_k       Input temp in K
-!       rh        Input rh as fraction
-!       p_pa      Input pressure as pascals
-!       devirt_rh Output devirtualized temp as K
+!       t_k       input temp in k
+!       rh        input rh as fraction
+!       p_pa      input pressure as pascals
+!       devirt_rh output devirtualized temp as k
 
         t_c  = t_k  - 273.15
 
@@ -1964,108 +1964,108 @@ cdoc    devirt_td from the laps library is called.
         return
         end
 
-        FUNCTION TV_SH(T,SH,P)
-C
-cdoc    THIS FUNCTION RETURNS THE VIRTUAL TEMPERATURE TV (CELSIUS) OF
-cdoc    A PARCEL OF AIR AT TEMPERATURE T (CELSIUS), DEW POINT TD
-cdoc    (CELSIUS), AND PRESSURE P (MILLIBARS). THE EQUATION APPEARS
-cdoc    IN MOST STANDARD METEOROLOGICAL TEXTS.
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C       ALBERS                 1994     Modified for SH Input
-C
-        DATA CTA,EPS/273.16,0.62197/
-C   CTA = DIFFERENCE BETWEEN KELVIN AND CELSIUS TEMPERATURES.
-C   EPS = RATIO OF THE MEAN MOLECULAR WEIGHT OF WATER (18.016 G/MOLE)
-C         TO THAT OF DRY AIR (28.966 G/MOLE)
-        TK = T+CTA
-C   CALCULATE THE DIMENSIONLESS MIXING RATIO.
-        W = SH / (1. - SH)
-        TV_SH = TK*(1.+W/EPS)/(1.+W)-CTA
-        RETURN
-        END
+        function tv_sh(t,sh,p)
+c
+cdoc    this function returns the virtual temperature tv (celsius) of
+cdoc    a parcel of air at temperature t (celsius), dew point td
+cdoc    (celsius), and pressure p (millibars). the equation appears
+cdoc    in most standard meteorological texts.
+c
+c       baker,schlatter 17-may-1982     original version
+c       albers                 1994     modified for sh input
+c
+        data cta,eps/273.16,0.62197/
+c   cta = difference between kelvin and celsius temperatures.
+c   eps = ratio of the mean molecular weight of water (18.016 g/mole)
+c         to that of dry air (28.966 g/mole)
+        tk = t+cta
+c   calculate the dimensionless mixing ratio.
+        w = sh / (1. - sh)
+        tv_sh = tk*(1.+w/eps)/(1.+w)-cta
+        return
+        end
 
-      FUNCTION TSA_fast(OS,P)
-C
-cdoc  THIS FUNCTION RETURNS THE TEMPERATURE TSA (CELSIUS) ON A SATURATION
-cdoc  ADIABAT AT PRESSURE P (MILLIBARS). OS IS THE EQUIVALENT POTENTIAL
-cdoc  TEMPERATURE OF THE PARCEL (CELSIUS). SIGN(A,B) REPLACES THE
-cdoc  ALGEBRAIC SIGN OF A WITH THAT OF B.
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C       Modification for better convergence, Keith Brewster, Feb 1994.
-C
-C   B IS AN EMPIRICAL CONSTANT APPROXIMATELY EQUAL TO THE LATENT HEAT
-C   OF VAPORIZATION FOR WATER DIVIDED BY THE SPECIFIC HEAT AT CONSTANT
-C   PRESSURE FOR DRY AIR.
-C
-      REAL B
-      PARAMETER (B=2.6518986)
-      A= OS+273.15
-C
-C   Above 200 mb figure all the moisture is wrung-out, so
-C   the temperature is that which has potential temp of theta-e.
-C   Otherwise iterate to find combo of moisture and temp corresponding
-C   to thetae.
-C
-      IF( p.lt.200.) THEN
-        TQ=A*((P/1000.)**.286)
-      ELSE
-C   D IS AN INITIAL VALUE USED IN THE ITERATION BELOW.
-        D= 120.
-C   TQ IS THE FIRST GUESS FOR TSA.
-        TQ= 253.15
+      function tsa_fast(os,p)
+c
+cdoc  this function returns the temperature tsa (celsius) on a saturation
+cdoc  adiabat at pressure p (millibars). os is the equivalent potential
+cdoc  temperature of the parcel (celsius). sign(a,b) replaces the
+cdoc  algebraic sign of a with that of b.
+c
+c       baker,schlatter 17-may-1982     original version
+c       modification for better convergence, keith brewster, feb 1994.
+c
+c   b is an empirical constant approximately equal to the latent heat
+c   of vaporization for water divided by the specific heat at constant
+c   pressure for dry air.
+c
+      real b
+      parameter (b=2.6518986)
+      a= os+273.15
+c
+c   above 200 mb figure all the moisture is wrung-out, so
+c   the temperature is that which has potential temp of theta-e.
+c   otherwise iterate to find combo of moisture and temp corresponding
+c   to thetae.
+c
+      if( p.lt.200.) then
+        tq=a*((p/1000.)**.286)
+      else
+c   d is an initial value used in the iteration below.
+        d= 120.
+c   tq is the first guess for tsa.
+        tq= 253.15
         x = 0.
-C
-C   ITERATE TO OBTAIN SUFFICIENT ACCURACY....SEE TABLE 1, P.8
-C   OF STIPANUK (1973) FOR EQUATION USED IN ITERATION.
-        DO 1 I= 1,25
-           TQC= TQ-273.15
-           D= 0.5*D
+c
+c   iterate to obtain sufficient accuracy....see table 1, p.8
+c   of stipanuk (1973) for equation used in iteration.
+        do 1 i= 1,25
+           tqc= tq-273.15
+           d= 0.5*d
 
            x_last = x
 
-           X= A*EXP(-B*W_fast(TQC,P)/TQ)-TQ*((1000./P)**.286)
+           x= a*exp(-b*w_fast(tqc,p)/tq)-tq*((1000./p)**.286)
 
 c          write(6,*)' tsa_fast: t,err= ',i,tqc,x
-           IF (ABS(X).LT.1E-3) GO TO 2
+           if (abs(x).lt.1e-3) go to 2
 c
-           IF (x_last * x .lt. 0.) THEN
+           if (x_last * x .lt. 0.) then
                slope = (x-x_last) / (tq - tq_last)
                delta = - x / slope
                ad = amin1(abs(delta),d)
                tq_last = tq
-               TQ = TQ + SIGN(ad,delta)
-           ELSE
+               tq = tq + sign(ad,delta)
+           else
                tq_last = tq
-               TQ= TQ+SIGN(D,X)
-           END IF
+               tq= tq+sign(d,x)
+           end if
 
- 1      CONTINUE
-        END IF
- 2      TSA_fast = TQ-273.15
+ 1      continue
+        end if
+ 2      tsa_fast = tq-273.15
 c       write(6,*)' tsa_fast: i,t,err= ',i,tsa_fast,x
-        RETURN
-        END
+        return
+        end
 c
 
         subroutine get_tw_approx_2d(t_k,td_k,p_pa,ni,nj,tw_k)
 
-cdoc    Calculate Wet Bulb, using a fast approximate method
+cdoc    calculate wet bulb, using a fast approximate method
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-!       This routine is fast but only accurate near 0 degrees C (273K)
+!       this routine is fast but only accurate near 0 degrees c (273k)
 
-        real t_k(ni,nj)     ! Input
-        real td_k(ni,nj)    ! Input
-        real p_pa(ni,nj)    ! Input
-        real tw_k(ni,nj)    ! Output
+        real t_k(ni,nj)     ! input
+        real td_k(ni,nj)    ! input
+        real p_pa(ni,nj)    ! input
+        real tw_k(ni,nj)    ! output
 
         const = alog(0.5)
 
         if(t_k(1,1) .eq. 0. .or. td_k(1,1) .eq. 0.)then
-            write(6,*)' Bad input data to get_tw_approx_2d'
+            write(6,*)' bad input data to get_tw_approx_2d'
             return
         endif
 
@@ -2093,15 +2093,15 @@ cdoc    Calculate Wet Bulb, using a fast approximate method
 
         subroutine get_tw_2d(t_k,td_k,p_pa,ni,nj,tw_k)
 
-cdoc    Calculate 2-D grid of Wet Bulb, using 'tw_fast'
+cdoc    calculate 2-d grid of wet bulb, using 'tw_fast'
 
-!       Steve Albers 1991
-!       WARNING: This routine may not work because it calls tw_fast
+!       steve albers 1991
+!       warning: this routine may not work because it calls tw_fast
 
-        real t_k(ni,nj)     ! Input
-        real td_k(ni,nj)    ! Input
-        real p_pa(ni,nj)    ! Input
-        real tw_k(ni,nj)    ! Output
+        real t_k(ni,nj)     ! input
+        real td_k(ni,nj)    ! input
+        real p_pa(ni,nj)    ! input
+        real tw_k(ni,nj)    ! output
 
         do j = 1,nj
         do i = 1,ni
@@ -2116,14 +2116,14 @@ cdoc    Calculate 2-D grid of Wet Bulb, using 'tw_fast'
 
         subroutine get_tw_2d_orig(t_k,td_k,p_pa,ni,nj,tw_k)
 
-cdoc    Calculate 2-D grid of Wet Bulb, using 'tw'
+cdoc    calculate 2-d grid of wet bulb, using 'tw'
 
-!       Steve Albers 1991
+!       steve albers 1991
 
-        real t_k(ni,nj)     ! Input
-        real td_k(ni,nj)    ! Input
-        real p_pa(ni,nj)    ! Input
-        real tw_k(ni,nj)    ! Output
+        real t_k(ni,nj)     ! input
+        real td_k(ni,nj)    ! input
+        real p_pa(ni,nj)    ! input
+        real tw_k(ni,nj)    ! output
 
         do j = 1,nj
         do i = 1,ni
@@ -2136,144 +2136,144 @@ cdoc    Calculate 2-D grid of Wet Bulb, using 'tw'
         return
         end
 
-        FUNCTION TW_fast(T,TD,P)
-C
-C
-cdoc    THIS FUNCTION RETURNS THE WET-BULB TEMPERATURE TW (CELSIUS)
-cdoc    GIVEN THE TEMPERATURE T (CELSIUS), DEW POINT TD (CELSIUS)
-cdoc    AND PRESSURE P (MB).  SEE P.13 IN STIPANUK (1973), REFERENCED
-cdoc    ABOVE, FOR A DESCRIPTION OF THE TECHNIQUE.
+        function tw_fast(t,td,p)
+c
+c
+cdoc    this function returns the wet-bulb temperature tw (celsius)
+cdoc    given the temperature t (celsius), dew point td (celsius)
+cdoc    and pressure p (mb).  see p.13 in stipanuk (1973), referenced
+cdoc    above, for a description of the technique.
 
-cdoc    WARNING: This routine may not work because it calls TSA_fast
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C
-C   DETERMINE THE MIXING RATIO LINE THRU TD AND P.
-        AW = W_fast(TD,P)
-C
-C   DETERMINE THE DRY ADIABAT THRU T AND P.
-        AO = O(T,P)
-        PI = P
-C
-C   ITERATE TO LOCATE PRESSURE PI AT THE INTERSECTION OF THE TWO
-C   CURVES .  PI HAS BEEN SET TO P FOR THE INITIAL GUESS.
-        DO 4 I= 1,10
-           X= .02*(TMR(AW,PI)-TDA(AO,PI))
-           IF (ABS(X).LT.0.01) GO TO 5
- 4         PI= PI*(2.**(X))
-C   FIND THE TEMPERATURE ON THE DRY ADIABAT AO AT PRESSURE PI.
- 5      TI= TDA(AO,PI)
-C
-C   THE INTERSECTION HAS BEEN LOCATED...NOW, FIND A SATURATION
-C   ADIABAT THRU THIS POINT. FUNCTION OS RETURNS THE EQUIVALENT
-C   POTENTIAL TEMPERATURE (K) OF A PARCEL SATURATED AT TEMPERATURE
-C   TI AND PRESSURE PI.
-        AOS= OS_fast(TI+273.15,PI)-273.15
-C   FUNCTION TSA RETURNS THE WET-BULB TEMPERATURE (C) OF A PARCEL AT
-C   PRESSURE P WHOSE EQUIVALENT POTENTIAL TEMPERATURE IS AOS.
-        TW_fast = TSA_fast(AOS,P)
-        RETURN
-        END
+cdoc    warning: this routine may not work because it calls tsa_fast
+c
+c       baker,schlatter 17-may-1982     original version
+c
+c   determine the mixing ratio line thru td and p.
+        aw = w_fast(td,p)
+c
+c   determine the dry adiabat thru t and p.
+        ao = o(t,p)
+        pi = p
+c
+c   iterate to locate pressure pi at the intersection of the two
+c   curves .  pi has been set to p for the initial guess.
+        do 4 i= 1,10
+           x= .02*(tmr(aw,pi)-tda(ao,pi))
+           if (abs(x).lt.0.01) go to 5
+ 4         pi= pi*(2.**(x))
+c   find the temperature on the dry adiabat ao at pressure pi.
+ 5      ti= tda(ao,pi)
+c
+c   the intersection has been located...now, find a saturation
+c   adiabat thru this point. function os returns the equivalent
+c   potential temperature (k) of a parcel saturated at temperature
+c   ti and pressure pi.
+        aos= os_fast(ti+273.15,pi)-273.15
+c   function tsa returns the wet-bulb temperature (c) of a parcel at
+c   pressure p whose equivalent potential temperature is aos.
+        tw_fast = tsa_fast(aos,p)
+        return
+        end
 
-        FUNCTION W_fast(T,P) ! Saturation mixing ratio wrt water
-C
-cdoc    THIS FUNCTION RETURNS THE MIXING RATIO (GRAMS OF WATER VAPOR PER
-cdoc    KILOGRAM OF DRY AIR) GIVEN THE TEMPERATURE T (CELSIUS) AND PRESSURE
-cdoc    (MILLIBARS). THE FORMULA IS QUOTED IN MOST METEOROLOGICAL TEXTS.
-cdoc    Note this is a faster version done by Steve Albers.
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C       Albers                 1992     modified for laps
-C
-        X= ESLO(T)
-        W_fast= 622.*X/(P-X)
-        RETURN
-        END
+        function w_fast(t,p) ! saturation mixing ratio wrt water
+c
+cdoc    this function returns the mixing ratio (grams of water vapor per
+cdoc    kilogram of dry air) given the temperature t (celsius) and pressure
+cdoc    (millibars). the formula is quoted in most meteorological texts.
+cdoc    note this is a faster version done by steve albers.
+c
+c       baker,schlatter 17-may-1982     original version
+c       albers                 1992     modified for laps
+c
+        x= eslo(t)
+        w_fast= 622.*x/(p-x)
+        return
+        end
 
-        FUNCTION Wice_fast(T,P) ! Saturation mixing ratio wrt ice
-C
-cdoc    THIS FUNCTION RETURNS THE MIXING RATIO (GRAMS OF WATER VAPOR PER
-cdoc    KILOGRAM OF DRY AIR) GIVEN THE TEMPERATURE T (CELSIUS) AND PRESSURE
-cdoc    (MILLIBARS). THE FORMULA IS QUOTED IN MOST METEOROLOGICAL TEXTS.
-cdoc    Note this is a faster version done by Steve Albers
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C       Albers                 1993     modified for laps
-C
-        X= ESILO(T)
-        Wice_fast= 622.*X/(P-X)
-        RETURN
-        END
+        function wice_fast(t,p) ! saturation mixing ratio wrt ice
+c
+cdoc    this function returns the mixing ratio (grams of water vapor per
+cdoc    kilogram of dry air) given the temperature t (celsius) and pressure
+cdoc    (millibars). the formula is quoted in most meteorological texts.
+cdoc    note this is a faster version done by steve albers
+c
+c       baker,schlatter 17-may-1982     original version
+c       albers                 1993     modified for laps
+c
+        x= esilo(t)
+        wice_fast= 622.*x/(p-x)
+        return
+        end
 
-        FUNCTION OS_fast(TK,P)
-C
-cdoc    THIS FUNCTION RETURNS THE EQUIVALENT POTENTIAL TEMPERATURE OS
-cdoc    (K) FOR A PARCEL OF AIR SATURATED AT TEMPERATURE T (K)
-cdoc    AND PRESSURE P (MILLIBARS).
-cdoc    Note this is a faster version done by Steve Albers
+        function os_fast(tk,p)
+c
+cdoc    this function returns the equivalent potential temperature os
+cdoc    (k) for a parcel of air saturated at temperature t (k)
+cdoc    and pressure p (millibars).
+cdoc    note this is a faster version done by steve albers
 
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C
-        DATA B/2.6518986/
-C   B IS AN EMPIRICAL CONSTANT APPROXIMATELY EQUAL TO THE LATENT HEAT
-C   OF VAPORIZATION FOR WATER DIVIDED BY THE SPECIFIC HEAT AT CONSTANT
-C   PRESSURE FOR DRY AIR.
-        TC = TK - 273.15
+c       baker,schlatter 17-may-1982     original version
+c
+        data b/2.6518986/
+c   b is an empirical constant approximately equal to the latent heat
+c   of vaporization for water divided by the specific heat at constant
+c   pressure for dry air.
+        tc = tk - 273.15
 
-!       From W routine
-        X= ESLO(TC)
-        W= 622.*X/(P-X)
+!       from w routine
+        x= eslo(tc)
+        w= 622.*x/(p-x)
 
-        OS_fast= TK*((1000./P)**.286)*(EXP(B*W/TK))
+        os_fast= tk*((1000./p)**.286)*(exp(b*w/tk))
 
-        RETURN
-        END
+        return
+        end
 
 
-        subroutine wtblb_lvl(twet_c,P,T,Q,WB,MXL,NLEVEL,PWB0,HWB0)
+        subroutine wtblb_lvl(twet_c,p,t,q,wb,mxl,nlevel,pwb0,hwb0)
 
-        real twet_c         ! Input:  wet bulb temperature in degrees C 
-        real P(MXL)         ! Input:  pressure sounding (mb)
-        real T(MXL)         ! Input:  temperature sounding (C)
-        real Q(MXL)         ! Input:  specific humidity sounding
-        real WB(MXL)        ! Input:  wet bulb temperature sounding
-        integer MXL         ! Input:  size of P,T,Q arrays
-        integer nlevel      ! Input:  number of levels in vertical arrays
-        real PWB0           ! Output: pressure of the wet bulb level
-        real HWB0           ! Output: height of the wet bulb level (kft agl)
+        real twet_c         ! input:  wet bulb temperature in degrees c 
+        real p(mxl)         ! input:  pressure sounding (mb)
+        real t(mxl)         ! input:  temperature sounding (c)
+        real q(mxl)         ! input:  specific humidity sounding
+        real wb(mxl)        ! input:  wet bulb temperature sounding
+        integer mxl         ! input:  size of p,t,q arrays
+        integer nlevel      ! input:  number of levels in vertical arrays
+        real pwb0           ! output: pressure of the wet bulb level
+        real hwb0           ! output: height of the wet bulb level (kft agl)
 
-        IO = 0
- 	IOUT=MIN(IO,1)                                                          
- 	IF(WB(1).GE.twet_c)GOTO150                                                  
-!	IF(IO.GE.2)WRITE(6,87)                                                  
- 87	format(' SURFACE WETBULB TEMP IS BELOW twet_c')                          
- 	HWB0=0.                                                                 
- 	PWB0=0.                                                                 
- 	GOTO390                                                                 
-C                                                                         
-!       Test for bracketing of the Wet Bulb Zero
- 150	DO 200 N=2,NLEVEL                                                    
-! 	    IF(WB(N)*WB(N-1))250,250,200                                            
+        io = 0
+ 	iout=min(io,1)                                                          
+ 	if(wb(1).ge.twet_c)goto150                                                  
+!	if(io.ge.2)write(6,87)                                                  
+ 87	format(' surface wetbulb temp is below twet_c')                          
+ 	hwb0=0.                                                                 
+ 	pwb0=0.                                                                 
+ 	goto390                                                                 
+c                                                                         
+!       test for bracketing of the wet bulb zero
+ 150	do 200 n=2,nlevel                                                    
+! 	    if(wb(n)*wb(n-1))250,250,200                                            
             if( (wb(n) - twet_c) * (wb(n-1) - twet_c) )250,250,200 
- 200    CONTINUE                                                           
+ 200    continue                                                           
 
-        write(6,*)' Warning, no wet bulb detected in loop'
+        write(6,*)' warning, no wet bulb detected in loop'
         goto390
 
- 250    frac = (twet_c - WB(N-1)) / (WB(N) - WB(N-1))
-        PWB0 = P(N-1) * (1. - frac) + P(N) * frac
+ 250    frac = (twet_c - wb(n-1)) / (wb(n) - wb(n-1))
+        pwb0 = p(n-1) * (1. - frac) + p(n) * frac
 
-!       Integrate hydrostatically to get height from pressure
- 	CALL BLAYR(P,T,Q,DUM1,DUM2,DUM3,P(1)-PWB0,NLEVEL,HWB0,1,IO) 
-!	IF(IO.GE.1)WRITE(6,351)PWB0,HWB0                            
- 351	format(' WETBULB ZERO IS AT',F6.1,'MB     OR',F6.2,'KFT  AGL')        
+!       integrate hydrostatically to get height from pressure
+ 	call blayr(p,t,q,dum1,dum2,dum3,p(1)-pwb0,nlevel,hwb0,1,io) 
+!	if(io.ge.1)write(6,351)pwb0,hwb0                            
+ 351	format(' wetbulb zero is at',f6.1,'mb     or',f6.2,'kft  agl')        
 
-        goto400                      ! Normal condition
+        goto400                      ! normal condition
 
- 390    HWB0 = r_missing_data        ! Indeterminate condition
-        PWB0 = r_missing_data
+ 390    hwb0 = r_missing_data        ! indeterminate condition
+        pwb0 = r_missing_data
 
- 400    CONTINUE
+ 400    continue
 
         return
         end

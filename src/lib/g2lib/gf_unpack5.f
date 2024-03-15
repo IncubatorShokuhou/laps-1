@@ -1,48 +1,48 @@
       subroutine gf_unpack5(cgrib,lcgrib,iofst,ndpts,idrsnum,idrstmpl,
      &                   mapdrslen,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_unpack5 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-26
+! subprogram:    gf_unpack5 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-26
 !
-! ABSTRACT: This subroutine unpacks Section 5 (Data Representation Section)
-!   starting at octet 6 of that Section.  
+! abstract: this subroutine unpacks section 5 (data representation section)
+!   starting at octet 6 of that section.  
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-26  Gilbert
-! 2002-01-24  Gilbert  - Changed to dynamically allocate arrays
+! program history log:
+! 2000-05-26  gilbert
+! 2002-01-24  gilbert  - changed to dynamically allocate arrays
 !                        and to pass pointers to those arrays through
 !                        the argument list.
 !
-! USAGE:    CALL gf_unpack5(cgrib,lcgrib,iofst,ndpts,idrsnum,idrstmpl,
+! usage:    call gf_unpack5(cgrib,lcgrib,iofst,ndpts,idrsnum,idrstmpl,
 !                        mapdrslen,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array that contains the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     iofst    - Bit offset of the beginning of Section 5.
+!   input argument list:
+!     cgrib    - character array that contains the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     iofst    - bit offset of the beginning of section 5.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     iofst    - Bit offset at the end of Section 5, returned.
-!     ndpts    - Number of data points unpacked and returned.
-!     idrsnum  - Data Representation Template Number ( see Code Table 5.0)
-!     idrstmpl - Pointer to an integer array containing the data values for 
-!                the specified Data Representation
-!                Template ( N=idrsnum ).  Each element of this integer
-!                array contains an entry (in the order specified) of Data
-!                Representation Template 5.N
-!     mapdrslen- Number of elements in idrstmpl().  i.e. number of entries
-!                in Data Representation Template 5.N  ( N=idrsnum ).
-!     ierr     - Error return code.
+!   output argument list:      
+!     iofst    - bit offset at the end of section 5, returned.
+!     ndpts    - number of data points unpacked and returned.
+!     idrsnum  - data representation template number ( see code table 5.0)
+!     idrstmpl - pointer to an integer array containing the data values for 
+!                the specified data representation
+!                template ( n=idrsnum ).  each element of this integer
+!                array contains an entry (in the order specified) of data
+!                representation template 5.n
+!     mapdrslen- number of elements in idrstmpl().  i.e. number of entries
+!                in data representation template 5.n  ( n=idrsnum ).
+!     ierr     - error return code.
 !                0 = no error
 !                6 = memory allocation error
-!                7 = "GRIB" message contains an undefined Data
-!                    Representation Template.
+!                7 = "grib" message contains an undefined data
+!                    representation template.
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -63,16 +63,16 @@
       ierr=0
       nullify(idrstmpl)
 
-      call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+      call gbyte(cgrib,lensec,iofst,32)        ! get length of section
       iofst=iofst+32
       iofst=iofst+8     ! skip section number
       allocate(mapdrs(lensec))
 
-      call gbyte(cgrib,ndpts,iofst,32)    ! Get num of data points
+      call gbyte(cgrib,ndpts,iofst,32)    ! get num of data points
       iofst=iofst+32
-      call gbyte(cgrib,idrsnum,iofst,16)     ! Get Data Rep Template Num.
+      call gbyte(cgrib,idrsnum,iofst,16)     ! get data rep template num.
       iofst=iofst+16
-      !   Gen Data Representation Template
+      !   gen data representation template
       call getdrstemplate(idrsnum,mapdrslen,mapdrs,needext,iret)
       if (iret.ne.0) then
         ierr=7
@@ -80,7 +80,7 @@
         return
       endif
       !
-      !   Unpack each value into array ipdstmpl from the
+      !   unpack each value into array ipdstmpl from the
       !   the appropriate number of octets, which are specified in
       !   corresponding entries in array mappds.
       !
@@ -104,16 +104,16 @@
         iofst=iofst+nbits
       enddo
       !
-      !   Check to see if the Data Representation Template needs to be
+      !   check to see if the data representation template needs to be
       !   extended.
-      !   The number of values in a specific template may vary
+      !   the number of values in a specific template may vary
       !   depending on data specified in the "static" part of the
       !   template.
       !
       if ( needext ) then
         call extdrstemplate(idrsnum,idrstmpl,newmapdrslen,mapdrs)
         call realloc(idrstmpl,mapdrslen,newmapdrslen,istat)
-        !   Unpack the rest of the Data Representation Template
+        !   unpack the rest of the data representation template
         do i=mapdrslen+1,newmapdrslen
           nbits=iabs(mapdrs(i))*8
           if ( mapdrs(i).ge.0 ) then
@@ -129,6 +129,6 @@
       endif
       if( allocated(mapdrs) ) deallocate(mapdrs)
 
-      return    ! End of Section 5 processing
+      return    ! end of section 5 processing
       end
 

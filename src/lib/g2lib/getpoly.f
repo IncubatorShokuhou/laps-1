@@ -1,32 +1,32 @@
       subroutine getpoly(csec3,lcsec3,jj,kk,mm)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    getpoly 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2002-12-11
+! subprogram:    getpoly 
+!   prgmmr: gilbert         org: w/np11    date: 2002-12-11
 !
-! ABSTRACT: This subroutine returns the J, K, and M pentagonal resolution
-!   parameters specified in a GRIB Grid Definition Section used
-!   spherical harmonic coefficients using GDT 5.50 through 5.53
+! abstract: this subroutine returns the j, k, and m pentagonal resolution
+!   parameters specified in a grib grid definition section used
+!   spherical harmonic coefficients using gdt 5.50 through 5.53
 !
-! PROGRAM HISTORY LOG:
-! 2002-12-11  Gilbert
+! program history log:
+! 2002-12-11  gilbert
 !
-! USAGE:    CALL getpoly(csec3,lcsec3,jj,kk,mm)
-!   INPUT ARGUMENT LIST:
-!     csec3    - Character array that contains the packed GRIB2 GDS
-!    lcsec3    - Length (in octets) of section 3
+! usage:    call getpoly(csec3,lcsec3,jj,kk,mm)
+!   input argument list:
+!     csec3    - character array that contains the packed grib2 gds
+!    lcsec3    - length (in octets) of section 3
 !
-!   OUTPUT ARGUMENT LIST:      
-!         JJ   = J - pentagonal resolution parameter
-!         KK   = K - pentagonal resolution parameter
-!         MM   = M - pentagonal resolution parameter
+!   output argument list:      
+!         jj   = j - pentagonal resolution parameter
+!         kk   = k - pentagonal resolution parameter
+!         mm   = m - pentagonal resolution parameter
 !
-! REMARKS:  Returns JJ, KK, and MM set to zero, if grid template
+! remarks:  returns jj, kk, and mm set to zero, if grid template
 !           not recognized.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 !      use grib_mod
@@ -57,8 +57,8 @@
       call gf_unpack3(csec3,lcsec3,iofst,igds,igdstmpl,
      &                 igdtlen,list_opt,num_opt,jerr)
       if (jerr.eq.0) then
-         selectcase( igds(5) )     !  Template number
-           case (50:53)   ! Spherical harmonic coefficients
+         selectcase( igds(5) )     !  template number
+           case (50:53)   ! spherical harmonic coefficients
               jj=igdstmpl(1)
               kk=igdstmpl(2)
               mm=igdstmpl(3)

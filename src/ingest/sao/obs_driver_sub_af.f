@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -38,23 +38,23 @@ cdis
 cdis
 c******************************************************************************
 c
-c	Driver program for the LAPS surface data collection for the
-c       Air Force version of LAPS.  This program gets the correct time 
+c	driver program for the laps surface data collection for the
+c       air force version of laps.  this program gets the correct time 
 c       and other stuff, then calls the routines that read the different 
-c       data files.  Checks are made for stations that have reported but
-c       are missing from the current hour.  Estimates are made for those 
-c       stations, for the basic variables, using a Barnes analysis of the 
-c       trends at nearby stations.  A normal LSO is written that includes 
+c       data files.  checks are made for stations that have reported but
+c       are missing from the current hour.  estimates are made for those 
+c       stations, for the basic variables, using a barnes analysis of the 
+c       trends at nearby stations.  a normal lso is written that includes 
 c       the estimated "obs", and station and trend info is stored in a 
 c       master file.
 c
-c	History:
-c	   P. Stamus  02-20-97  Original (from AF version of obs_driver).
-c                     10-28-97  Made dynamic - newlaps. Add interactive optn.
-c                     12-09-98  Changes for new LSO format.
-c                     03-29-99  Remove moving buoy/ship obs from master file.
-c                     06-11-99  Pass lat/lon and grid size to get_sao_obs.
-c                     06-17-99  Also pass grid_spacing to figure box size.
+c	history:
+c	   p. stamus  02-20-97  original (from af version of obs_driver).
+c                     10-28-97  made dynamic - newlaps. add interactive optn.
+c                     12-09-98  changes for new lso format.
+c                     03-29-99  remove moving buoy/ship obs from master file.
+c                     06-11-99  pass lat/lon and grid size to get_sao_obs.
+c                     06-17-99  also pass grid_spacing to figure box size.
 c
 c******************************************************************************
 c
@@ -66,7 +66,7 @@ c
 c
 c
 	parameter (badflag = -99.9)
-	parameter (num_keep = 12)      !Num hrs to keep in master file.
+	parameter (num_keep = 12)      !num hrs to keep in master file.
 c
 	real fnorm(0:ni-1,0:nj-1)
 c
@@ -137,11 +137,11 @@ c
         character mstn_name_new(maxsta)*5
 c
 c
-c.....	Start here.  Check to see if this is an interactive run.
+c.....	start here.  check to see if this is an interactive run.
 c
 	narg = iargc()
 c
-c.....  Get the time from the scheduler, or from the user if interactive.
+c.....  get the time from the scheduler, or from the user if interactive.
 c
 	if(narg .eq. 0) then
 	   call get_systime(i4time, filename9, istatus)
@@ -150,7 +150,7 @@ c
 	else
 c	   
  970	   write(6,973)
- 973	   format(' Enter input filename (yydddhhmm): ',$)
+ 973	   format(' enter input filename (yydddhhmm): ',$)
 	   read(5,972) filename9
  972	   format(a9)
 	   call i4time_fname_lp(filename9(1:9),i4time,status)
@@ -159,23 +159,23 @@ c
 	endif
 c
 	write(6,900) filename9
-900	format(' Getting surface data for: ',a9)
+900	format(' getting surface data for: ',a9)
 c
-c.....	Get the LAPS lat/lon and topo data here so we can pass them to the 
+c.....	get the laps lat/lon and topo data here so we can pass them to the 
 c.....	routines that need them.
 c
 	call get_directory('static',dir_s,len)
 	ext_s = 'nest7grid'
 c
-	var_s = 'LAT'
+	var_s = 'lat'
         call rd_laps_static(dir_s,ext_s,ni,nj,1,var_s,units,comment,
      &                      lat,grid_spacing,istatus)
 c
-	var_s = 'LON'
+	var_s = 'lon'
         call rd_laps_static(dir_s,ext_s,ni,nj,1,var_s,units,comment,
      &                      lon,grid_spacing,istatus)
 c
-c.....	Find east/west and north/south sides of grid (max extension of grid)
+c.....	find east/west and north/south sides of grid (max extension of grid)
 c
 	grid_east = -999.
 	grid_west = 999.
@@ -190,7 +190,7 @@ c
 	  if(lon(1,j) .lt. grid_west) grid_west = lon(1,j)
 	enddo !j
 c
-c.....	Set up the counters, and zero/blank arrays.
+c.....	set up the counters, and zero/blank arrays.
 c
 	nn = 0
 	n_obs_g = 0
@@ -236,7 +236,7 @@ c
 	   enddo !j
 	enddo !i
 c
-c.....  Get the current surface data.
+c.....  get the current surface data.
 c
 	iobs_flag = 1
 c
@@ -259,24 +259,24 @@ c
 	   go to 250
 	endif
 c
-c.....  Finish the obs counts.
+c.....  finish the obs counts.
 c
 	n_obs_b = nn
 	n_obs_g = n_sao_g 
 c
-c.....  Compute u and v components from dd and ff
+c.....  compute u and v components from dd and ff
 c
 	do i=1,n_obs_b
 	   call decomp_wind(store_3(i,1),store_3(i,2),    !dd, ff
      &                       u_c(i),v_c(i),istatus)
 	enddo !i
 c
-c.....  Find out where the current stations are on/around the LAPS grid.
+c.....  find out where the current stations are on/around the laps grid.
 c
         call find_ij(store_1(1,1),store_1(1,2),lat,lon,n_obs_b,
      &               maxsta,ni,nj,ii,jj,rii,rjj)
 c
-c.....  Fill some arrays.
+c.....  fill some arrays.
 c
  250	continue
 	do i=1,maxsta
@@ -289,11 +289,11 @@ c
 	   n_updates(i) = 0
 	enddo !i
 c
-c.....  Get the station and trend info from the master file.
+c.....  get the station and trend info from the master file.
 c
 	call get_directory('static',master_file,len)
-	master_file = master_file(1:len) // 'SFC_master_file'
-cc	master_file = './SFC_master_file'
+	master_file = master_file(1:len) // 'sfc_master_file'
+cc	master_file = './sfc_master_file'
 	call read_master_file(master_file,maxsta,n_master,
      &               mstn_name,mstn_lat,mstn_lon,mstn_elev,mstn_ii,
      &               mstn_jj,n_updates,mstn_t,mtrend_t,mstn_td,
@@ -302,11 +302,11 @@ cc	master_file = './SFC_master_file'
 c
 	if(istatus .ne. 1) then
 	   print *,
-     &     ' Problem with read_master_file. Using current hr only.'
+     &     ' problem with read_master_file. using current hr only.'
 	   go to 500
 	endif
 c
-c.....  Calculate the trends for the current stations, and tag missing stns.
+c.....  calculate the trends for the current stations, and tag missing stns.
 c
 c
 	do i=1,n_master
@@ -315,7 +315,7 @@ c
 	    if(mstn_name(i)(1:5) .eq. stations(j)(1:5)) then
 	      ifound(i) = 1
 c
-c.....  Do each variable
+c.....  do each variable
 c
 	      if(mstn_t(i)  .ne. badflag .and.
      &           store_2(j,1) .ne. badflag          ) then
@@ -355,8 +355,8 @@ c
 	  enddo !j
 	enddo !i
 c
-c.....  Now calculate trends for missing stations.  Analyze the trends at
-c.....  stations we have to the missing ones using a Barnes-type analysis.
+c.....  now calculate trends for missing stations.  analyze the trends at
+c.....  stations we have to the missing ones using a barnes-type analysis.
 c
 	rom2 = 0.005
 	call dynamic_wts_af(ni,nj,n_obs_b,rom2,d,fnorm)
@@ -442,16 +442,16 @@ c
 	enddo !k
 
 c
-c.....  Update the master file.
+c.....  update the master file.
 c
-c.....  This section updates with current obs found in the master file, 
+c.....  this section updates with current obs found in the master file, 
 c.....  and with current obs not previously in the master file.
 c
  500    continue
 	istn_count = 0
 	do k=1,n_obs_b
-	   if(reptype(k)(1:4) .eq. 'BUOY' .or.
-     &        reptype(k)(1:4) .eq. 'SHIP') go to 410
+	   if(reptype(k)(1:4) .eq. 'buoy' .or.
+     &        reptype(k)(1:4) .eq. 'ship') go to 410
 	   istn_count = istn_count + 1  !count fixed stations
 	   i = istn_count
 	   mstn_name_new(i)(1:5) = stations(k)(1:5)
@@ -474,7 +474,7 @@ c
  410	   continue
 	enddo !k
 c
-c.....  This section updates with stations previously in the master file,
+c.....  this section updates with stations previously in the master file,
 c.....  but not in the current set of obs.
 c
 	icount_m = istn_count  !n_obs_b
@@ -504,9 +504,9 @@ c
 	   endif
 	enddo !i
 	write(6,901) n_obs_b, istn_count, icount_m
- 901	format(' Update master file (all/no moving/total): ',3i8)
+ 901	format(' update master file (all/no moving/total): ',3i8)
 c
-c.....  Write out the updated master file.  It will only have the current
+c.....  write out the updated master file.  it will only have the current
 c.....  obs if there were problems with the read earlier.
 c
 	call write_master_file(master_file,maxsta,icount_m,
@@ -516,14 +516,14 @@ c
      &         mstn_u_new,mtrend_u_new,mstn_v_new,mtrend_v_new,
      &         mstn_alt_new,mtrend_alt_new)
 c
-c.....  Update the store arrays for the LSO.
+c.....  update the store arrays for the lso.
 c
 cc	do i=1,n_obs_b
 cc	   stations(i)(1:3) = stn_c(i)(2:4)
 cc	enddo !i
 c
-c.....  Add estimated values for stations in the master file but not
-c.....  in the current hour to the current hour arrays for LSO.
+c.....  add estimated values for stations in the master file but not
+c.....  in the current hour to the current hour arrays for lso.
 c
 	time = filename9(6:9)
 	read(time,*) rtime
@@ -534,13 +534,13 @@ c
 	      kk = kk + 1
 	      stations(kk)(1:5) = mstn_name(i)(1:5)
 	      write(up_c,299) n_updates(i) + 1
-cc	      obstype(kk)  = 'EST     '
+cc	      obstype(kk)  = 'est     '
 cc	      obstype(kk)(5:7) = up_c
-	      reptype(kk)(1:3) = 'EST'
+	      reptype(kk)(1:3) = 'est'
 	      reptype(kk)(4:6) = up_c
 	      atype(kk)(1:6) = '      '
 	      wmoid(kk) = 0
-	      provider(kk) = 'AFWA       '
+	      provider(kk) = 'afwa       '
 	      weather(kk) = '                         '
 c
 	      store_1(kk,1)  = mstn_lat(i)
@@ -591,7 +591,7 @@ c
 	 endif
  299	 format(i3)
 c
-c.....  Write the LSO file
+c.....  write the lso file
 c
 	 call get_directory('lso',outfile,len)
 	 outfile = outfile(1:len) // filename9(1:9) // '.lso'
@@ -603,9 +603,9 @@ c
      &    store_2ea,store_3ea,store_4ea,store_5ea,store_6ea,
      &    store_cldamt,store_cldht,maxsta,jstatus)
 c
-c.....	That's about it...let's go home.
+c.....	that's about it...let's go home.
 c
-	write(6,*)'Normal completion of OBS_DRIVER_SUB_AF'
+	write(6,*)'normal completion of obs_driver_sub_af'
 
 	end
 c
@@ -613,7 +613,7 @@ c
 	subroutine barnes_af(trend,imax,jmax,i_stn,j_stn,ii,jj,t_ob,
      &                    numsta,badflag,fnorm)
 c
-c.....	Routine to do a Barnes analysis that will consider stations in
+c.....	routine to do a barnes analysis that will consider stations in
 c.....	the 't_ob' array that are outside the boundaries of the domain.
 c
 	real fnorm(0:imax-1,0:jmax-1)
@@ -636,12 +636,12 @@ c
 	enddo !n 
 c
 	if(ncnt .eq. 0) then
-	  print *,' +++ NCNT = 0 in BARNES_WIDE. +++'
+	  print *,' +++ ncnt = 0 in barnes_wide. +++'
 	  trend = badflag
 	  return
 	endif
 cc	write(6,900) ncnt, numsta
-cc900	format('   Selected ',i4,' obs out of ',i4,' total.')
+cc900	format('   selected ',i4,' obs out of ',i4,' total.')
 c
 	    sum2 = 0.
 	    sumwt2 = 0.
@@ -693,42 +693,42 @@ c
 c
 c=====================================================================
 c
-c     Routine to calculate the weights to be used in the Barnes
-c     analysis.  The data density is used to set the cutoff for
-c     the response function.  Then that cutoff is used to calculate
+c     routine to calculate the weights to be used in the barnes
+c     analysis.  the data density is used to set the cutoff for
+c     the response function.  then that cutoff is used to calculate
 c     the exp, based on differences so that no additional distance
-c     calculations are required in the Barnes routine.  All of this
+c     calculations are required in the barnes routine.  all of this
 c     is done in gridpoint space.
 c
-c     Original:  07-14-95  P. Stamus, NOAA/FSL
-c     Changes:   
-c                02-28-97  Air Force version
+c     original:  07-14-95  p. stamus, noaa/fsl
+c     changes:   
+c                02-28-97  air force version
 c
-c     Notes:
+c     notes:
 c
-c       1.  If variable 'rom2' is passed in as zero, it is calculated
-c           from the data density.  Otherwise, the value passed in is
+c       1.  if variable 'rom2' is passed in as zero, it is calculated
+c           from the data density.  otherwise, the value passed in is
 c           used in the weight calculation.
 c
-c       2.  The response for 2d waves is hard-wired in this routine.
-c           This is the 'con' variable, and comes from the eqn:
-c                     D = exp -(pi**2 R**2)/lamba**2
-c           If we set D (the response) to our desired cutoff, set 
+c       2.  the response for 2d waves is hard-wired in this routine.
+c           this is the 'con' variable, and comes from the eqn:
+c                     d = exp -(pi**2 r**2)/lamba**2
+c           if we set d (the response) to our desired cutoff, set 
 c           lamba to the desired wavelength in gridpt space (2d),
-c           then solve for R in terms of d, we get the 'con' value
-c           (i.e.,  R = (con)*d).  Here are some values for different
+c           then solve for r in terms of d, we get the 'con' value
+c           (i.e.,  r = (con)*d).  here are some values for different
 c           cutoffs:
-c                     D = 0.01     R = 1.36616d
-c                         0.10     R = 0.96602d
-c                         0.25     R = 0.74956d
-c                         0.50     R = 0.53002d
+c                     d = 0.01     r = 1.36616d
+c                         0.10     r = 0.96602d
+c                         0.25     r = 0.74956d
+c                         0.50     r = 0.53002d
 c
 c=====================================================================
 c
 	real fnorm(0:imax-1,0:jmax-1)
         integer dx,dy
 c
-c.... First, find the area that each ob covers in gridpt space (this
+c.... first, find the area that each ob covers in gridpt space (this
 c.... of course assumes a uniform coverage).
 c
 cc	con = 0.96602     ! resp of 0.10
@@ -739,15 +739,15 @@ cc	con = 0.74956     ! resp of 0.25
 	   d = sqrt( area )
 	   rom2 = 1. / ((con * con) * (d * d))
 	   write(6,900) n_obs_var, area, d, rom2
- 900	   format(1x,'Num obs: ',i5,'  Area: ',f8.2,'  d: ',f8.2,
+ 900	   format(1x,'num obs: ',i5,'  area: ',f8.2,'  d: ',f8.2,
      &       '  rom2: ',f8.5)
 	else
 	   d = sqrt(1./(con * con * rom2))
 	   write(6,902) rom2, d
- 902	   format(' Using preset rom2 of: ',f8.5,'  Calc d: ',f8.2)
+ 902	   format(' using preset rom2 of: ',f8.5,'  calc d: ',f8.2)
 	endif
 c
-c.... Now calculate the weights for all the possible distances.
+c.... now calculate the weights for all the possible distances.
 c
 	pi = 4. * atan(1.)
 	fno = 1. / (sqrt(2. * pi))
@@ -759,7 +759,7 @@ c
 	enddo !dx
 	enddo !dy
 c
-c.... That's it.
+c.... that's it.
 c
 	return
 	end

@@ -27,7 +27,7 @@
       character*2  c_num
       character*4  cw
 c ---------------------------------------
-c Output for LAPS lsr files as indicated.
+c output for laps lsr files as indicated.
 c
       call get_directory('lsr',dir_lsr,len_lsr)
       ni=index(csatid,' ')-1
@@ -37,8 +37,8 @@ c
 c
       do i=1,nch
          lvl_lsr(i) = 0
-         lvl_coord_lsr(i) = 'AGL'
-         units_lsr(i) = 'Radiance'
+         lvl_coord_lsr(i) = 'agl'
+         units_lsr(i) = 'radiance'
          c_num = ' '
          write(c_num,100)i 
 100      format(i2)
@@ -54,7 +54,7 @@ c
             if(cw(j:j).eq.' ')cw(j:j)='0'
          enddo
 
-         c_lsr(i)=csatid//' SAT sounding radiance: '//cw//' (u)'
+         c_lsr(i)=csatid//' sat sounding radiance: '//cw//' (u)'
 
       enddo !i
 
@@ -78,7 +78,7 @@ c
      &                     istatus)
 
       if(istatus.ne.1)then
-         write(6,*)'Error writing lsr - write_laps_data'
+         write(6,*)'error writing lsr - write_laps_data'
       endif
 
 
@@ -116,7 +116,7 @@ c
       real   data(nxl,nyl)
 
       print*,'checking for <= zero value radiance'
-      print*,'Channel ',k
+      print*,'channel ',k
       izero=0
       do j=1,nyl
       do i=1,nxl

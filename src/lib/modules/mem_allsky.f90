@@ -1,7 +1,7 @@
 
-MODULE mem_allsky
+module mem_allsky
 
-!     Input arrays on model grid
+!     input arrays on model grid
       real, allocatable, dimension(:,:,:) :: pres_3d
       real, allocatable, dimension(:,:,:) :: heights_3d
       real, allocatable, dimension(:,:,:) :: clwc_3d    ! kg/m**3
@@ -10,22 +10,22 @@ MODULE mem_allsky
       real, allocatable, dimension(:,:,:) :: snow_3d    ! kg/m**3
       real, allocatable, dimension(:,:,:) :: aod_3d
 
-!     Local arrays on model grid
+!     local arrays on model grid
       real, allocatable, dimension(:,:,:) :: transm_3d
       real, allocatable, dimension(:,:,:,:) :: transm_4d
       real, allocatable, dimension(:,:,:,:) :: uprad_4d 
       real, allocatable, dimension(:,:,:) :: upxrad_3d 
       real, allocatable, dimension(:,:,:) :: upyrad_3d 
 
-!     2D arrays on sky grid
+!     2d arrays on sky grid
       real, allocatable, dimension(:,:) :: aod_ill_opac
       real, allocatable, dimension(:,:) :: aod_ill_opac_potl
 
-!     Various non-gridded variables
+!     various non-gridded variables
       parameter (nc = 3)
       parameter (day_int0 = 3e9) ! solar relative brightness scaling constant
 
-!     https://www.goes-r.gov/products/ATBDs/baseline/Imagery_v2.0_no_color.pdf
+!     https://www.goes-r.gov/products/atbds/baseline/imagery_v2.0_no_color.pdf
       real nl_2_reflectance
       parameter (nl_2_reflectance = 1. / (4. * day_int0))
       real ghi_sim
@@ -33,13 +33,13 @@ MODULE mem_allsky
       integer mode_aero_cld /1/ ! treat aerosols more as clouds [1,2,3]
       integer mil,mih,mjl,mjh
 
-      PUBLIC alloc_allsky, dealloc_allsky
+      public alloc_allsky, dealloc_allsky
 
-CONTAINS
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     subroutine alloc_allsky(ni,nj,nk,nc,istatus)   ! I/O
+     subroutine alloc_allsky(ni,nj,nk,nc,istatus)   ! i/o
 
-!       Allocate some though not all arrays mentioned above
+!       allocate some though not all arrays mentioned above
 
         allocate(pres_3d(ni,nj,nk))
         allocate(heights_3d(ni,nj,nk))
@@ -58,12 +58,12 @@ CONTAINS
 
         return
    
-     END subroutine alloc_allsky
+     end subroutine alloc_allsky
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      subroutine dealloc_allsky()             
 
-!       Deallocate some though not all arrays mentioned above
+!       deallocate some though not all arrays mentioned above
 
         deallocate(pres_3d)
         deallocate(heights_3d)
@@ -82,8 +82,8 @@ CONTAINS
 
         return
    
-     END subroutine dealloc_allsky
+     end subroutine dealloc_allsky
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-END MODULE mem_allsky
+end module mem_allsky

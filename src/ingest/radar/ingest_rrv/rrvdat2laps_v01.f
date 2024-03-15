@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,7 +29,7 @@ cdis
 cdis 
 cdis 
 cdis 
-       SUBROUTINE rrvdat2laps_v01(imax,jmax,
+       subroutine rrvdat2laps_v01(imax,jmax,
      &                  r_grid_ratio,
      &                  r_missing_data,
      &                  image_v01,
@@ -39,20 +39,20 @@ cdis
      &                  sa,sc,st,
      &                  istatus)
 
-c.....  This routine can be called for any GOES Sounder channel data.
-c.....  This is McAlbers version returing warmest and coldest pixels
-c.....  The warmest go into ST, the "extremum" to SC, the mean to SA
-c       SC is the result of an edge enhancing filter that tries to filter
+c.....  this routine can be called for any goes sounder channel data.
+c.....  this is mcalbers version returing warmest and coldest pixels
+c.....  the warmest go into st, the "extremum" to sc, the mean to sa
+c       sc is the result of an edge enhancing filter that tries to filter
 c       out inbetween pixels in favor of either the warmest or the coldest.
-C
-c       J. Smart          Jul 1995          Orginal Subroutine for GOES 8
-c.....          Changes:  02-OCT-1990       Set up for prodgen.
-c.....          Changes:     SEP-1993       Add average (SA)
-c.....  J. Smart          Dec 1996          Modified the satdat2laps_ir for sounder data
-c.......J. Smart          Jul 1997          Allows for partial domain coverage mapping. Checks
+c
+c       j. smart          jul 1995          orginal subroutine for goes 8
+c.....          changes:  02-oct-1990       set up for prodgen.
+c.....          changes:     sep-1993       add average (sa)
+c.....  j. smart          dec 1996          modified the satdat2laps_ir for sounder data
+c.......j. smart          jul 1997          allows for partial domain coverage mapping. checks
 c                                           for 0 values in lookuptables.
 c
-c.......J. Smart          Nov 1997          Modification for rrv to v01 remapping.
+c.......j. smart          nov 1997          modification for rrv to v01 remapping.
 c
 	implicit none
 
@@ -106,14 +106,14 @@ c
         save
         data iwrite/1/
 
-        CALL ZERO(ST,IMAX,JMAX)
+        call zero(st,imax,jmax)
         istatus = -1
         qcstatus=0
         fcount=0
 c
-c       write(6,*)'   I   J   WarmPix  ColdPix  NPix Nwarm  CldTemp'
+c       write(6,*)'   i   j   warmpix  coldpix  npix nwarm  cldtemp'
 c
-c The "10" loop represents input image resolution < output grid resolution such
+c the "10" loop represents input image resolution < output grid resolution such
 c that there are enough pixels from the input image to get a representative
 c mean value for the remapped output grid value
 c
@@ -129,15 +129,15 @@ c
 
         if(r_grid_ratio .lt. 1.0)then  !0.75)then
 
-          write(6,*)'Grid ratio .lt. 1.0'   !0.75'
-          write(6,*)'Use pixel avg to get dbz from rrv'
+          write(6,*)'grid ratio .lt. 1.0'   !0.75'
+          write(6,*)'use pixel avg to get dbz from rrv'
           maxpix=0
-          DO 10 J=1,JMAX
-          DO 10 I=1,IMAX
+          do 10 j=1,jmax
+          do 10 i=1,imax
 
-          IF(ST(I,J).NE.0.) GO TO 10
+          if(st(i,j).ne.0.) go to 10
 c
-c line/elem are floating point i/j positions in ISPAN grid for input lat/lon
+c line/elem are floating point i/j positions in ispan grid for input lat/lon
 c also, use the lat/lon to real i/j look up table (r_llij_lut) to map out points
 c needed for satellite pixels.
 c****************************************************************************
@@ -155,7 +155,7 @@ c****************************************************************************
 
 c               write(*,*)'insufficient data for lat/lon sector'
 c               write(*,1020)i,j
-1020	        format(1x,'LAPS grid (i,j) = ',i3,1x,i3)
+1020	        format(1x,'laps grid (i,j) = ',i3,1x,i3)
 c               write(6,1021)elem_mx,elem_mn,line_mx,line_mn
 1021            format(1x,'elem mx/mn  line mx/mn ',4f7.1)
 
@@ -167,17 +167,17 @@ c
                 pixsum = 0.
                 itot=itot+1
 
-                DO 3 JJ=jstart,jend
-                DO 3 II=istart,iend
+                do 3 jj=jstart,jend
+                do 3 ii=istart,iend
 
-                 if(image_v01(II,JJ).ne.r_missing_data)then
+                 if(image_v01(ii,jj).ne.r_missing_data)then
                     npix=npix+1
-                    t_array(npix) = image_v01(II,JJ)
+                    t_array(npix) = image_v01(ii,jj)
                  endif
     3           continue  
 c
                 if(npix.gt.0)then
-                   Do ii=1,npix
+                   do ii=1,npix
                       pixsum = pixsum + t_array(ii)
                    enddo
                 else   
@@ -192,7 +192,7 @@ c
                 else
                    sa(i,j)=pixsum
                    sc(i,j)=pixsum
-                   sT(i,j)=pixsum
+                   st(i,j)=pixsum
                 endif ! npix .gt. 1
 
                 if(pixsum.eq.r_missing_data)then
@@ -205,18 +205,18 @@ c
                    icnt_lt_zero=icnt_lt_zero+1
                 endif
 
-             end if  ! Enough data for num_lines .gt. 0
+             end if  ! enough data for num_lines .gt. 0
 
 cd           if(i .eq. i/10*10 .and. j .eq. j/10*10)then
 cd              write(6,5555)i,j,wm,wc,npix,nwarm,sc(i,j)
 cd5555         format(1x,2i4,2f10.2,2i5,f10.2)
 cd           endif
 
-   10     CONTINUE ! I,J
+   10     continue ! i,j
 
-          write(6,*)'Number of pixels with no radar ',icnt
-          write(6,*)'Max num sndr pix for avg: ',maxpix
-          write(6,*)'Number of gridpts missing',fcount
+          write(6,*)'number of pixels with no radar ',icnt
+          write(6,*)'max num sndr pix for avg: ',maxpix
+          write(6,*)'number of gridpts missing',fcount
 
 c ---------------------------------------------------------------------
         elseif(r_grid_ratio .le. 1.1)then
@@ -226,21 +226,21 @@ c this section uses bilinear interpolation to map
 c the four surrounding input pixels to the output grid.
 c
           if(iwrite.eq.1)then
-             write(6,*)'Image res .ge. output grid spacing'
-             write(6,*)'Using bilinear interp for sndr Rad'
+             write(6,*)'image res .ge. output grid spacing'
+             write(6,*)'using bilinear interp for sndr rad'
              iwrite=0
           endif
 
-          DO 20 J=1,JMAX
-          DO 20 I=1,IMAX
+          do 20 j=1,jmax
+          do 20 i=1,imax
 c            if(i_found_it .ne. 1)then
-c              write(6,*)'Enter i and j point'
+c              write(6,*)'enter i and j point'
 c              read(5,*)ipt,jpt
 c              i_found_it = 1
 c            end if
-            IF(ST(I,J).NE.0.) GO TO 20
+            if(st(i,j).ne.0.) go to 20
 c
-c line/elem are floating point i/j positions in ISPAN grid for input lat/lon
+c line/elem are floating point i/j positions in ispan grid for input lat/lon
 c
 c bilinear_interp_extrap checks on boundary conditions and
 c uses r_missing_data if out of bounds.
@@ -267,7 +267,7 @@ c    &                                      istatus)
 
                sa(i,j)=result
                sc(i,j)=sa(i,j)
-               sT(i,j)=sa(i,j)
+               st(i,j)=sa(i,j)
                itot=itot+1
 
                if(result.eq.r_missing_data)then
@@ -290,14 +290,14 @@ c 39          format(1x,'ipt = ',i3,2x,'jpt = ',i3)
 c 49      format(1x,'ir_count = ',1x,f6.1,/,'--------------------',//)
 c            end if
 
-   20     CONTINUE ! I,J
+   20     continue ! i,j
 c          close(29)
 c --------------------------------------------------------------------------
         else       !this for large resolutions in which we take nearest pixel
                    !the nearest pixel method is constrained by using the inverse
 c                   of r_grid_ratio which may lead to more points = r_missing_data.
 
-           write(6,*)'r_grid_ratio > 1.1  Use nearest point'
+           write(6,*)'r_grid_ratio > 1.1  use nearest point'
            f_inv_ratio_l=1.0/r_grid_ratio
            f_inv_ratio_h=1.0-f_inv_ratio_l
            do j=1,jmax
@@ -335,8 +335,8 @@ c                endif
 
         end if     ! r_grid_ratio
 
-c        WRITE(6,1234) IB,I4VTIME,ICT
-c1234       FORMAT(1X,'BAND ',I4,' COUNT FOR I4TIME ',I10,' IS ',I8)
+c        write(6,1234) ib,i4vtime,ict
+c1234       format(1x,'band ',i4,' count for i4time ',i10,' is ',i8)
 
         percent_msng=float(icnt_msng)/float(itot)
         percent_zero=float(icnt_zero)/float(itot)
@@ -345,15 +345,15 @@ c1234       FORMAT(1X,'BAND ',I4,' COUNT FOR I4TIME ',I10,' IS ',I8)
 
         if(icnt_msng .ne. itot)then
            write(*,*)'------------------------------'
-           write(*,*)'Total potential useable points: ',itot
-           write(*,*)'N missing/% ',icnt_msng,percent_msng
-           write(*,*)'N =  zero/% ',icnt_zero,percent_zero
-           write(*,*)'N > zero/% ',icnt_gt_zero,percent_gt_zero
-           write(*,*)'N < zero/% ',icnt_lt_zero,percent_lt_zero
+           write(*,*)'total potential useable points: ',itot
+           write(*,*)'n missing/% ',icnt_msng,percent_msng
+           write(*,*)'n =  zero/% ',icnt_zero,percent_zero
+           write(*,*)'n > zero/% ',icnt_gt_zero,percent_gt_zero
+           write(*,*)'n < zero/% ',icnt_lt_zero,percent_lt_zero
            write(*,*)'------------------------------'
            write(*,*)
         else
-           write(*,*)'All points = missing'
+           write(*,*)'all points = missing'
         endif
 
         istatus = 1

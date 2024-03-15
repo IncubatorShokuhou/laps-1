@@ -11,9 +11,9 @@
      &                        istatus)
 c
 c
-c Note: if isat and jtype are both = 4, this indicates the
-c       processing of GMS satellite data from AFWA. Meteosat
-c       data from AFWA is also jtype = 4.   These settings
+c note: if isat and jtype are both = 4, this indicates the
+c       processing of gms satellite data from afwa. meteosat
+c       data from afwa is also jtype = 4.   these settings
 c       are defined in /data/static/satellite_lvd.nl.
 c
        implicit none
@@ -51,7 +51,7 @@ c
 
        if(isat.eq.4 .and. jtype.eq.4)then
 c
-c GMS data
+c gms data
           call getgmsdata(isat,jtype,
      &                    max_channels,nchannels,chtype,
      &                    i4time_current,lvis_flag,
@@ -63,14 +63,14 @@ c GMS data
      &                    i4time_data,
      &                    istatus)
           if(istatus.ne.0)then
-             print*,'Error returned from getgmsdata'
+             print*,'error returned from getgmsdata'
           endif
 
        elseif( (isat.eq.1 .or. isat.eq.2 .or. isat.eq.3) .and.
      .         (jtype.eq.4) )then
 
 c          
-c GOES08, GOES10, and METEOSAT.
+c goes08, goes10, and meteosat.
           call getsdhsdata(isat,jtype,
      &                     max_channels,nchannels,chtype,
      &                     i4time_current,lvis_flag,
@@ -83,7 +83,7 @@ c GOES08, GOES10, and METEOSAT.
      &                     i4time_data,
      &                     istatus)
           if(istatus.ne.0)then 
-             print*,'Error returned from getsdhsdata'
+             print*,'error returned from getsdhsdata'
           endif
 
        endif
@@ -104,12 +104,12 @@ c =====================================================================
      &                        i4time_data,
      &                        istatus)
 c
-c Note: if isat and jtype are both = 4, then this indicates that
-c       we are dealing with GMS satellite data from AFWA. Since
+c note: if isat and jtype are both = 4, then this indicates that
+c       we are dealing with gms satellite data from afwa. since
 c       /data/static/satellite_lvd.nl will not change (other than
 c       to add another satellite), this will remain a hardwire situtation.
 c
-c 5-11-99: J.Smart  Added METEOSAT from SDHS to this routine. Changed
+c 5-11-99: j.smart  added meteosat from sdhs to this routine. changed
 c                   name from getgoesdata to getsdhsdata.
 
        implicit none
@@ -182,7 +182,7 @@ c
       cfilename=path_to_raw_sat(ispec,jtype,isat)(1:n)//cfname(1:il)
 
          n=index(cfilename,' ')
-         write(6,*)'Reading: ',cfilename(1:n)
+         write(6,*)'reading: ',cfilename(1:n)
 
          if(ispec.eq.1)then
 
@@ -225,16 +225,16 @@ c
      &,fstatus)
             write(6,*)'gwc data loaded: ',c_type(ntm(nft),nft)
          else
-            write(6,*)'No data loaded - ',chtype(i)
+            write(6,*)'no data loaded - ',chtype(i)
             goto 1000
          endif  
 
       enddo
 c
-c In this section we determine the i4time of the data and also check
-c whether the i4times satisfy i_delta_sat_t_sec criterion. Furthermore,
-c we can check to see if the AFWA data files are unique times suggesting
-c nft increment in accordance. nft comes in as 1 by default for AFWA.
+c in this section we determine the i4time of the data and also check
+c whether the i4times satisfy i_delta_sat_t_sec criterion. furthermore,
+c we can check to see if the afwa data files are unique times suggesting
+c nft increment in accordance. nft comes in as 1 by default for afwa.
 c
       if(ntm(nft).gt.2)then
 
@@ -271,7 +271,7 @@ c
           do i=2,ntm(nft)
             i4time_diff1=abs(i4time_data_int(i-1)-i4time_data_int(i))
             if(i4time_diff1.gt.600)then
-               write(6,*)'Warning: Sat data not concurrent'
+               write(6,*)'warning: sat data not concurrent'
             endif
             if(i4time_diff1.lt.i4time_diff_min)then
                i4time_diff_min = i4time_diff1
@@ -290,7 +290,7 @@ c
             if(i4time_diff1.lt.i_delta_sat_t_sec)then
                i4time_data(1)=i4time_data_int(1)
             else
-               write(6,*)'WARNING: Both data file times exceed',
+               write(6,*)'warning: both data file times exceed',
      &' i_delta_sat_t_sec but are the same' 
                i4time_data(1)=i4time_data_int(1)
                istatus=1
@@ -317,11 +317,11 @@ c
                endif
             elseif(i4time_diff1.gt.i_delta_sat_t_sec.and.i4time_diff2
      &.gt.i_delta_sat_t_sec)then
-               print*,'WARNING: Data times for both files exceed',
+               print*,'warning: data times for both files exceed',
      &' i_delta_sat_t_sec.'
                if(i4time_diff1.ne.i4time_diff2)then
-                  print*,'WARNING: Data times are different'
-                  print*,'Set i4time_data separately for each'
+                  print*,'warning: data times are different'
+                  print*,'set i4time_data separately for each'
                   nft=2
                   ntm(1)=1
                   ntm(2)=1
@@ -330,19 +330,19 @@ c
                   c_type(1,2)=c_type(2,1)
                endif
             elseif(i4time_diff1.gt.i_delta_sat_t_sec)then
-               print*,'WARNING: Data time for first file exceeds',
+               print*,'warning: data time for first file exceeds',
      &' i_delta_sat_t_sec'
                ntm(1)=1
                ntm(nft)=ntm(nft)-1
                i4time_data(1)=i4time_data_int(2)
                c_type(ntm(nft),nft)=c_type(1,2)
             elseif(i4time_diff2.gt.i_delta_sat_t_sec)then
-               print*,'WARNING: Data time for second file exceeds',
+               print*,'warning: data time for second file exceeds',
      &' i_delta_sat_t_sec'
                ntm(nft)=ntm(nft)-1
                i4time_data(1)=i4time_data_int(1)
                c_type(ntm(nft),nft)=c_type(1,1)
-               write(6,*)'Found ',ntm,' current files'
+               write(6,*)'found ',ntm,' current files'
             elseif(i4time_diff.gt.900)then
                if(i4time_diff1.lt.i4time_diff2)then
                   ntm(nft)=ntm(nft)-1
@@ -425,7 +425,7 @@ c
       character cfilenames(max_files)*255
       character cname*100
 
-      print*,'Subroutine getgmsdata'
+      print*,'subroutine getgmsdata'
 
       istatus=1
 
@@ -461,22 +461,22 @@ c     cjjjhr='15614'
         cpath=path_to_raw_sat(i,jtype,isat)
         np=index(cpath,' ')-1
         ct=chtype(i)
-c       c_afwa_fname=cpath(1:np)//'GM5_'//cjjjhr//'*'//ct//'.unf'
-        c_afwa_fname=cpath(1:np)//'GM5_'//'*'//ct//'.unf'
+c       c_afwa_fname=cpath(1:np)//'gm5_'//cjjjhr//'*'//ct//'.unf'
+        c_afwa_fname=cpath(1:np)//'gm5_'//'*'//ct//'.unf'
         np=index(c_afwa_fname,' ')-1
         call get_file_names(c_afwa_fname,nfiles,cfilenames,
      +max_files,istatus)
 
         if(istatus.ne.1)then
-          print*,'Error status returned from get_file_names'
-          print*,'Error getting filename for: ',c_afwa_fname(1:np)
+          print*,'error status returned from get_file_names'
+          print*,'error getting filename for: ',c_afwa_fname(1:np)
           goto 1000
         elseif(nfiles.gt.0)then
           print*,'found ',nfiles,' matching ',c_afwa_fname(1:np)
           call s_len(cfilenames(nfiles),lenf)
           cjjjhr=cfilenames(nfiles)(lenf-19:lenf-13)
         else
-          print*,'No files found ',cpath(1:np)
+          print*,'no files found ',cpath(1:np)
           goto 1000
         endif
 
@@ -484,7 +484,7 @@ c       c_afwa_fname=cpath(1:np)//'GM5_'//cjjjhr//'*'//ct//'.unf'
         if(lstatus.ne.0)goto 1000
 c
 c build filename and check to see if this time has already been
-c processed. Assuming for the time being that nfiles should be = 1.
+c processed. assuming for the time being that nfiles should be = 1.
 c
 
 c       do j=1,nfiles
@@ -571,8 +571,8 @@ c might want to put wait for data functionality in here (or near here).
 c
       istatus=0
       goto 1000
-900   print*,'Error: Mismatch between elem/lines for gms data'
+900   print*,'error: mismatch between elem/lines for gms data'
       goto 1000
-995   print*,'Error: reading file ',cfilenames(nfiles)(1:nf)
+995   print*,'error: reading file ',cfilenames(nfiles)(1:nf)
 1000  return
       end

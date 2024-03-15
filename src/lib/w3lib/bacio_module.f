@@ -1,23 +1,23 @@
-C-----------------------------------------------------------------------
-      MODULE BACIO_MODULE
-C$$$  F90-MODULE DOCUMENTATION BLOCK
-C
-C F90-MODULE: BACIO_MODULE   BYTE-ADDRESSABLE I/O MODULE
-C   PRGMMR: IREDELL          ORG: NP23        DATE: 98-06-04
-C
-C ABSTRACT: MODULE TO SHARE FILE DESCRIPTORS
-C   IN THE BYTE-ADDESSABLE I/O PACKAGE.
-C
-C PROGRAM HISTORY LOG:
-C   98-06-04  IREDELL
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C
-C$$$
-      INTEGER,EXTERNAL:: BACIO
-      INTEGER,DIMENSION(999),SAVE:: FD=999*0
-      INTEGER,DIMENSION(20),SAVE:: BAOPTS=0
-      INCLUDE 'baciof.h'
-      END
+c-----------------------------------------------------------------------
+      module bacio_module
+c$$$  f90-module documentation block
+c
+c f90-module: bacio_module   byte-addressable i/o module
+c   prgmmr: iredell          org: np23        date: 98-06-04
+c
+c abstract: module to share file descriptors
+c   in the byte-addessable i/o package.
+c
+c program history log:
+c   98-06-04  iredell
+c
+c attributes:
+c   language: fortran 90
+c
+c$$$
+      integer,external:: bacio
+      integer,dimension(999),save:: fd=999*0
+      integer,dimension(20),save:: baopts=0
+      include 'baciof.h'
+      end
 

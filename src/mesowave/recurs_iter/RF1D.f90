@@ -1,50 +1,50 @@
-SUBROUTINE RF1D(u,n,a,np)
+subroutine rf1d(u,n,a,np)
 
 !****************************************************
-!  This routine applies the recursive filter to u for
+!  this routine applies the recursive filter to u for
 !  np times with alpha value of a.
 !
-!  HISTORY: APR. 2003 by YUANFU XIE.
+!  history: apr. 2003 by yuanfu xie.
 !****************************************************
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: n,np
-  REAL,    INTENT(IN) :: a
-  REAL                :: u(n)
+  integer, intent(in) :: n,np
+  real,    intent(in) :: a
+  real                :: u(n)
 
-  ! Local variables:
-  INTEGER :: i,ip
-  REAL    :: one_a,r(n)
+  ! local variables:
+  integer :: i,ip
+  real    :: one_a,r(n)
 
   one_a = 1.0-a
 
-  ! Recurisve filter number of np times:
-  DO ip=1,np
+  ! recurisve filter number of np times:
+  do ip=1,np
         
-     ! Left to right:
-     IF (ip .EQ. 1) THEN
+     ! left to right:
+     if (ip .eq. 1) then
         r(1) = one_a*u(1) 
-     ELSE IF (ip == 2 ) THEN
+     else if (ip == 2 ) then
         r(1) = u(1) / ( 1.0 + a )
-     ELSE
+     else
         r(1) = one_a * ( u(1) - a**3 * u(2) ) / &
              (1.0-a**2)**2
-     END IF
-     DO i=2,n
+     end if
+     do i=2,n
         r(i) = a*r(i-1)+one_a*u(i)
-     ENDDO
+     enddo
         
-     ! Right to left:
-     IF (ip .EQ. 1) THEN
+     ! right to left:
+     if (ip .eq. 1) then
         u(n) = r(n)/(1.0+a) 
-     ELSE
+     else
         u(n) = one_a * ( r(n) - a**3 * r(n-1) ) / &
              (1.0-a**2)**2
-     END IF
-     DO i=n-1,1,-1
+     end if
+     do i=n-1,1,-1
         u(i) = a*u(i+1)+one_a*r(i)
-     ENDDO
-  ENDDO
+     enddo
+  enddo
 
-END SUBROUTINE RF1D
+end subroutine rf1d

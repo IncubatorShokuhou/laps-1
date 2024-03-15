@@ -1,35 +1,35 @@
-MODULE constants
+module constants
 
-  ! Constants used by wrfpost
+  ! constants used by wrfpost
 
-      REAL,       PARAMETER        :: CM2INCH  =   1.0 / 2.54
-      REAL,       PARAMETER        :: CP       =   1005.7
-      REAL,       PARAMETER        :: GRAV     =      9.81
-      INTEGER,    PARAMETER        :: IMISS    = -99999
-      INTEGER,    PARAMETER        :: ISMTH    =      0
-      INTEGER,    PARAMETER        :: JSMTH    =      0
-      REAL,       PARAMETER        :: LAPSE    =      6.5E-03
-      REAL,       PARAMETER        :: LV       =      2.5E+06
-      REAL,       PARAMETER        :: M2FEET   =      3.281
-      REAL,       PARAMETER        :: MPS2KNTS =      1.944
-      REAL,       PARAMETER        :: MPS2MPH  =      2.237
-      REAL,       PARAMETER        :: PI       =      3.1415927
-      REAL,       PARAMETER        :: P0       =   100000.0
-      REAL,       PARAMETER        :: R        =    287.04
-      REAL,       PARAMETER        :: RV       =    461.5
-      REAL,       PARAMETER        :: T0       =    273.15
-      REAL,       PARAMETER        :: XMISS    = -99999.9
-      REAL,       PARAMETER        :: CPOG     = CP / GRAV
-      REAL,       PARAMETER        :: CPOR     = CP / R
-      REAL,       PARAMETER        :: DEG2RAD  = PI / 180.0
-      REAL,       PARAMETER        :: E        = R / RV
-      REAL,       PARAMETER        :: GOR      = GRAV / R
-      REAL,       PARAMETER        :: KAPPA    = R / CP
-      REAL,       PARAMETER        :: RAD2DEG  = 180.0 / PI
-      REAL,       PARAMETER        :: ROG      = R / GRAV
-      REAL,       PARAMETER        :: RVOLV    = RV / LV
-      REAL,       PARAMETER        :: rmissing = 1.e9
+      real,       parameter        :: cm2inch  =   1.0 / 2.54
+      real,       parameter        :: cp       =   1005.7
+      real,       parameter        :: grav     =      9.81
+      integer,    parameter        :: imiss    = -99999
+      integer,    parameter        :: ismth    =      0
+      integer,    parameter        :: jsmth    =      0
+      real,       parameter        :: lapse    =      6.5e-03
+      real,       parameter        :: lv       =      2.5e+06
+      real,       parameter        :: m2feet   =      3.281
+      real,       parameter        :: mps2knts =      1.944
+      real,       parameter        :: mps2mph  =      2.237
+      real,       parameter        :: pi       =      3.1415927
+      real,       parameter        :: p0       =   100000.0
+      real,       parameter        :: r        =    287.04
+      real,       parameter        :: rv       =    461.5
+      real,       parameter        :: t0       =    273.15
+      real,       parameter        :: xmiss    = -99999.9
+      real,       parameter        :: cpog     = cp / grav
+      real,       parameter        :: cpor     = cp / r
+      real,       parameter        :: deg2rad  = pi / 180.0
+      real,       parameter        :: e        = r / rv
+      real,       parameter        :: gor      = grav / r
+      real,       parameter        :: kappa    = r / cp
+      real,       parameter        :: rad2deg  = 180.0 / pi
+      real,       parameter        :: rog      = r / grav
+      real,       parameter        :: rvolv    = rv / lv
+      real,       parameter        :: rmissing = 1.e9
   
-END MODULE constants
+end module constants
 
 

@@ -1,5 +1,5 @@
 
-Module mem_wind
+module mem_wind
 
 type wind_fields
 real, pointer, dimension(:,:,:)  :: uanl, vanl, wanl
@@ -10,7 +10,7 @@ type(wind_fields) :: wind
 
 integer num_wind_obs
 
-Contains
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -68,4 +68,4 @@ end subroutine nullify_wind_arrays
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-end Module
+end module

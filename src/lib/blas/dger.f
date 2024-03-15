@@ -1,157 +1,157 @@
-      SUBROUTINE DGER  ( M, N, ALPHA, X, INCX, Y, INCY, A, LDA )
-*     .. Scalar Arguments ..
-      DOUBLE PRECISION   ALPHA
-      INTEGER            INCX, INCY, LDA, M, N
-*     .. Array Arguments ..
-      DOUBLE PRECISION   A( LDA, * ), X( * ), Y( * )
+      subroutine dger  ( m, n, alpha, x, incx, y, incy, a, lda )
+*     .. scalar arguments ..
+      double precision   alpha
+      integer            incx, incy, lda, m, n
+*     .. array arguments ..
+      double precision   a( lda, * ), x( * ), y( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DGER   performs the rank 1 operation
+*  dger   performs the rank 1 operation
 *
-*     A := alpha*x*y' + A,
+*     a := alpha*x*y' + a,
 *
 *  where alpha is a scalar, x is an m element vector, y is an n element
-*  vector and A is an m by n matrix.
+*  vector and a is an m by n matrix.
 *
-*  Parameters
+*  parameters
 *  ==========
 *
-*  M      - INTEGER.
-*           On entry, M specifies the number of rows of the matrix A.
-*           M must be at least zero.
-*           Unchanged on exit.
+*  m      - integer.
+*           on entry, m specifies the number of rows of the matrix a.
+*           m must be at least zero.
+*           unchanged on exit.
 *
-*  N      - INTEGER.
-*           On entry, N specifies the number of columns of the matrix A.
-*           N must be at least zero.
-*           Unchanged on exit.
+*  n      - integer.
+*           on entry, n specifies the number of columns of the matrix a.
+*           n must be at least zero.
+*           unchanged on exit.
 *
-*  ALPHA  - DOUBLE PRECISION.
-*           On entry, ALPHA specifies the scalar alpha.
-*           Unchanged on exit.
+*  alpha  - double precision.
+*           on entry, alpha specifies the scalar alpha.
+*           unchanged on exit.
 *
-*  X      - DOUBLE PRECISION array of dimension at least
-*           ( 1 + ( m - 1 )*abs( INCX ) ).
-*           Before entry, the incremented array X must contain the m
+*  x      - double precision array of dimension at least
+*           ( 1 + ( m - 1 )*abs( incx ) ).
+*           before entry, the incremented array x must contain the m
 *           element vector x.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  INCX   - INTEGER.
-*           On entry, INCX specifies the increment for the elements of
-*           X. INCX must not be zero.
-*           Unchanged on exit.
+*  incx   - integer.
+*           on entry, incx specifies the increment for the elements of
+*           x. incx must not be zero.
+*           unchanged on exit.
 *
-*  Y      - DOUBLE PRECISION array of dimension at least
-*           ( 1 + ( n - 1 )*abs( INCY ) ).
-*           Before entry, the incremented array Y must contain the n
+*  y      - double precision array of dimension at least
+*           ( 1 + ( n - 1 )*abs( incy ) ).
+*           before entry, the incremented array y must contain the n
 *           element vector y.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  INCY   - INTEGER.
-*           On entry, INCY specifies the increment for the elements of
-*           Y. INCY must not be zero.
-*           Unchanged on exit.
+*  incy   - integer.
+*           on entry, incy specifies the increment for the elements of
+*           y. incy must not be zero.
+*           unchanged on exit.
 *
-*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
-*           Before entry, the leading m by n part of the array A must
-*           contain the matrix of coefficients. On exit, A is
+*  a      - double precision array of dimension ( lda, n ).
+*           before entry, the leading m by n part of the array a must
+*           contain the matrix of coefficients. on exit, a is
 *           overwritten by the updated matrix.
 *
-*  LDA    - INTEGER.
-*           On entry, LDA specifies the first dimension of A as declared
-*           in the calling (sub) program. LDA must be at least
+*  lda    - integer.
+*           on entry, lda specifies the first dimension of a as declared
+*           in the calling (sub) program. lda must be at least
 *           max( 1, m ).
-*           Unchanged on exit.
+*           unchanged on exit.
 *
 *
-*  Level 2 Blas routine.
+*  level 2 blas routine.
 *
-*  -- Written on 22-October-1986.
-*     Jack Dongarra, Argonne National Lab.
-*     Jeremy Du Croz, Nag Central Office.
-*     Sven Hammarling, Nag Central Office.
-*     Richard Hanson, Sandia National Labs.
+*  -- written on 22-october-1986.
+*     jack dongarra, argonne national lab.
+*     jeremy du croz, nag central office.
+*     sven hammarling, nag central office.
+*     richard hanson, sandia national labs.
 *
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ZERO
-      PARAMETER        ( ZERO = 0.0D+0 )
-*     .. Local Scalars ..
-      DOUBLE PRECISION   TEMP
-      INTEGER            I, INFO, IX, J, JY, KX
-*     .. External Subroutines ..
-      EXTERNAL           XERBLA
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX
+*     .. parameters ..
+      double precision   zero
+      parameter        ( zero = 0.0d+0 )
+*     .. local scalars ..
+      double precision   temp
+      integer            i, info, ix, j, jy, kx
+*     .. external subroutines ..
+      external           xerbla
+*     .. intrinsic functions ..
+      intrinsic          max
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      IF     ( M.LT.0 )THEN
-         INFO = 1
-      ELSE IF( N.LT.0 )THEN
-         INFO = 2
-      ELSE IF( INCX.EQ.0 )THEN
-         INFO = 5
-      ELSE IF( INCY.EQ.0 )THEN
-         INFO = 7
-      ELSE IF( LDA.LT.MAX( 1, M ) )THEN
-         INFO = 9
-      END IF
-      IF( INFO.NE.0 )THEN
-         CALL XERBLA( 'DGER  ', INFO )
-         RETURN
-      END IF
+      info = 0
+      if     ( m.lt.0 )then
+         info = 1
+      else if( n.lt.0 )then
+         info = 2
+      else if( incx.eq.0 )then
+         info = 5
+      else if( incy.eq.0 )then
+         info = 7
+      else if( lda.lt.max( 1, m ) )then
+         info = 9
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'dger  ', info )
+         return
+      end if
 *
-*     Quick return if possible.
+*     quick return if possible.
 *
-      IF( ( M.EQ.0 ).OR.( N.EQ.0 ).OR.( ALPHA.EQ.ZERO ) )
-     $   RETURN
+      if( ( m.eq.0 ).or.( n.eq.0 ).or.( alpha.eq.zero ) )
+     $   return
 *
-*     Start the operations. In this version the elements of A are
-*     accessed sequentially with one pass through A.
+*     start the operations. in this version the elements of a are
+*     accessed sequentially with one pass through a.
 *
-      IF( INCY.GT.0 )THEN
-         JY = 1
-      ELSE
-         JY = 1 - ( N - 1 )*INCY
-      END IF
-      IF( INCX.EQ.1 )THEN
-         DO 20, J = 1, N
-            IF( Y( JY ).NE.ZERO )THEN
-               TEMP = ALPHA*Y( JY )
-               DO 10, I = 1, M
-                  A( I, J ) = A( I, J ) + X( I )*TEMP
-   10          CONTINUE
-            END IF
-            JY = JY + INCY
-   20    CONTINUE
-      ELSE
-         IF( INCX.GT.0 )THEN
-            KX = 1
-         ELSE
-            KX = 1 - ( M - 1 )*INCX
-         END IF
-         DO 40, J = 1, N
-            IF( Y( JY ).NE.ZERO )THEN
-               TEMP = ALPHA*Y( JY )
-               IX   = KX
-               DO 30, I = 1, M
-                  A( I, J ) = A( I, J ) + X( IX )*TEMP
-                  IX        = IX        + INCX
-   30          CONTINUE
-            END IF
-            JY = JY + INCY
-   40    CONTINUE
-      END IF
+      if( incy.gt.0 )then
+         jy = 1
+      else
+         jy = 1 - ( n - 1 )*incy
+      end if
+      if( incx.eq.1 )then
+         do 20, j = 1, n
+            if( y( jy ).ne.zero )then
+               temp = alpha*y( jy )
+               do 10, i = 1, m
+                  a( i, j ) = a( i, j ) + x( i )*temp
+   10          continue
+            end if
+            jy = jy + incy
+   20    continue
+      else
+         if( incx.gt.0 )then
+            kx = 1
+         else
+            kx = 1 - ( m - 1 )*incx
+         end if
+         do 40, j = 1, n
+            if( y( jy ).ne.zero )then
+               temp = alpha*y( jy )
+               ix   = kx
+               do 30, i = 1, m
+                  a( i, j ) = a( i, j ) + x( ix )*temp
+                  ix        = ix        + incx
+   30          continue
+            end if
+            jy = jy + incy
+   40    continue
+      end if
 *
-      RETURN
+      return
 *
-*     End of DGER  .
+*     end of dger  .
 *
-      END
+      end

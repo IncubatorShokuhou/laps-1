@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -34,9 +34,9 @@ cdis
      1                    ,imax,jmax,lat,lon,r_missing_data
      1                                      ,cvr_snow,t_sfc_k,t_gnd_k)
 
-!       This routine returns ground temp under the assumption of clear skies
-!       After this routine is called from clouds, it may be worth filtering
-!       the band 8 temps to expand the cloudy areas slightly. The kernel
+!       this routine returns ground temp under the assumption of clear skies
+!       after this routine is called from clouds, it may be worth filtering
+!       the band 8 temps to expand the cloudy areas slightly. the kernel
 !       of the filter would be the coldest pixel of the nine neighbors
 
         character var*3,comment*125,ext*31,units*10
@@ -52,13 +52,13 @@ cdis
         real t_gnd_k(imax,jmax)   ! output
         real cvr_snow(imax,jmax)  ! local
 
-        var = 'SC'
+        var = 'sc'
         ext = 'lm2'
         call get_laps_2d(i4time-laps_cycle_time,ext,var,units,comment
      1                            ,imax,jmax,cvr_snow,istat_cvr_snow)
 
-        if(istat_cvr_snow .ne. 1)then    ! Try using snow cover field
-            write(6,*)' Error reading snow cover'
+        if(istat_cvr_snow .ne. 1)then    ! try using snow cover field
+            write(6,*)' error reading snow cover'
             do i = 1,imax
             do j = 1,jmax
                 cvr_snow(i,j) = r_missing_data
@@ -68,14 +68,14 @@ cdis
 
 
 
-!       Calculate solar altitude and ground temperature
+!       calculate solar altitude and ground temperature
         do i = 1,imax
         do j = 1,jmax
             call solar_position(lat(i,j),lon(i,j),i4time,solar_alt
      1                                     ,solar_dec,solar_ha)
 
-!           Calculate ground temperature (for now equate to sfc air temp)
-!           Note that function t_ground_k needs to be moved to the lapslib
+!           calculate ground temperature (for now equate to sfc air temp)
+!           note that function t_ground_k needs to be moved to the lapslib
             t_gnd_k(i,j) = t_ground_k(t_sfc_k(i,j)
      1                          ,solar_alt,solar_ha
      1              ,solar_dec,lat(i,j),cvr_snow(i,j),r_missing_data
@@ -110,7 +110,7 @@ cdis
         corr_low = -4.
         corr_ramp = (corr_high - corr_low) / (high_alt - low_alt)
 
-!       Warmer at day, colder at night
+!       warmer at day, colder at night
         if(solar_alt .lt. low_alt)then
             corr = corr_low
 
@@ -129,16 +129,16 @@ cdis
             write(6,*)' high/low alt, corr = ',high_alt,low_alt,corr
         endif
 
-        corr_negonly = min(corr,0.0)            ! Only colder at night
+        corr_negonly = min(corr,0.0)            ! only colder at night
 
         if(cvr_snow .ne. r_missing_data)then
-            t_ground_fullcorr = t_sfc_k + corr  ! Warmer at day, colder at night
-            t_snow_k = t_sfc_k + corr_negonly   ! Only colder at night
-            t_snow_k = min(t_snow_k,273.15)     ! Snow can't be above 0C
+            t_ground_fullcorr = t_sfc_k + corr  ! warmer at day, colder at night
+            t_snow_k = t_sfc_k + corr_negonly   ! only colder at night
+            t_snow_k = min(t_snow_k,273.15)     ! snow can't be above 0c
             t_ground_k = t_ground_fullcorr * (1.-cvr_snow) + t_snow_k *
      1cvr_snow
         else
-            t_ground_k = t_sfc_k + corr_negonly ! Only colder at night
+            t_ground_k = t_sfc_k + corr_negonly ! only colder at night
         endif
 
         return

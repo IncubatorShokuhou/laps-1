@@ -5,17 +5,17 @@
      1                         ,dbz_2d,imax,jmax,i_vrc        
      1                         ,vrc_outdir,r_missing_data,istatus)
 
-!       Stuff from 'put_laps_2d' except how do we handle radar subdir?
+!       stuff from 'put_laps_2d' except how do we handle radar subdir?
 
         character*150 vrc_full_path
-        character*31 EXT
+        character*31 ext
 
         character*125 comment_2d
         character*125 comments_2d(2)
         character*10 units(2)
         character*3 vars(2)
 
-        integer LVL_2D(2)
+        integer lvl_2d(2)
 
         real fields_2d(imax,jmax,2)
         real lat(imax,jmax)
@@ -28,18 +28,18 @@
         character*8 radar_subdir
         character*3 c3_radar_subdir
         character*7 vrc_outdir
-        character*4 LVL_COORD_2D(2)
+        character*4 lvl_coord_2d(2)
 
         call make_fnam_lp(i4time,a9time,istatus)
         if(istatus .ne. 1)return
 
-        write(6,*)' Subroutine put_vrc for ',a9time,' ',vrc_outdir
+        write(6,*)' subroutine put_vrc for ',a9time,' ',vrc_outdir
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)return
 
-!       Calculate closest radar array
-        write(6,*)' Calculating closest radar array (dist to vrc radar)'       
+!       calculate closest radar array
+        write(6,*)' calculating closest radar array (dist to vrc radar)'       
         do i = 1,imax
         do j = 1,jmax
             call latlon_to_radar(lat(i,j),lon(i,j),topo(i,j)
@@ -48,11 +48,11 @@
         enddo ! j
         enddo ! i
 
-!       call vrc_clutter_thresh(      fields_2d(1,1,1)                   ! I/O
-!    1                               ,dist                               ! I
-!    1                               ,imax,jmax,ref_base,r_missing_data) ! I
+!       call vrc_clutter_thresh(      fields_2d(1,1,1)                   ! i/o
+!    1                               ,dist                               ! i
+!    1                               ,imax,jmax,ref_base,r_missing_data) ! i
 
-!       Set up 2 fields for output
+!       set up 2 fields for output
         do i = 1,imax
         do j = 1,jmax
             fields_2d(i,j,1) = dbz_2d(i,j)
@@ -66,17 +66,17 @@
 
         ext = 'vrc'
 
-        vars(1) = 'REF'
-        vars(2) = 'DIS'
+        vars(1) = 'ref'
+        vars(2) = 'dis'
 
-        units(1) = 'DBZ'
-        units(2) = 'M'
+        units(1) = 'dbz'
+        units(2) = 'm'
 
         lvl_2d(1) = 0
         lvl_2d(2) = 0
         
-        lvl_coord_2d(1) = 'MSL'
-        lvl_coord_2d(2) = 'MSL'
+        lvl_coord_2d(1) = 'msl'
+        lvl_coord_2d(2) = 'msl'
 
         comments_2d(1) = comment_2d
         comments_2d(2) = comment_2d
@@ -86,15 +86,15 @@
         
 
         write(6,11)vrc_full_path(1:lenv),ext(1:5),vars
-11      format(' Writing 2d ',a,1x,a5,2(1x,a3))
+11      format(' writing 2d ',a,1x,a5,2(1x,a3))
 
-        CALL WRITE_LAPS_DATA(I4TIME,vrc_full_path,EXT,imax,jmax,
-     1                       2,2,vars,LVL_2D,LVL_COORD_2D,units,
-     1                       comments_2d,fields_2d,ISTATUS)
+        call write_laps_data(i4time,vrc_full_path,ext,imax,jmax,
+     1                       2,2,vars,lvl_2d,lvl_coord_2d,units,
+     1                       comments_2d,fields_2d,istatus)
         if(istatus .eq. 1)then
-            write(6,*)' VRC successfully written'
+            write(6,*)' vrc successfully written'
         else
-            write(6,*)' VRC not successfully written', istatus
+            write(6,*)' vrc not successfully written', istatus
         endif
 
         return
@@ -106,7 +106,7 @@
 
         character*(*) vrc_full_path
         character*(*) vrc_outdir
-        character*150 DIRECTORY1
+        character*150 directory1
         character*3 c3_radar_subdir
 
         write(c3_radar_subdir,801)i_vrc
@@ -132,7 +132,7 @@
 
         else ! 'lapsprd'
             if(i_vrc .gt. 1)then
-                write(6,*)' Warning - lapsprd output when i_vrc > 1'
+                write(6,*)' warning - lapsprd output when i_vrc > 1'
                 write(6,*)' i_vrc = ',i_vrc
                 istatus = 0
                 return

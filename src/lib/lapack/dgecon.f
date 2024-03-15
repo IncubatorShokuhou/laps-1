@@ -1,181 +1,181 @@
-      SUBROUTINE DGECON( NORM, N, A, LDA, ANORM, RCOND, WORK, IWORK,
-     $                   INFO )
+      subroutine dgecon( norm, n, a, lda, anorm, rcond, work, iwork,
+     $                   info )
 *
-*  -- LAPACK routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     February 29, 1992
+*  -- lapack routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     february 29, 1992
 *
-*     .. Scalar Arguments ..
-      CHARACTER          NORM
-      INTEGER            INFO, LDA, N
-      DOUBLE PRECISION   ANORM, RCOND
+*     .. scalar arguments ..
+      character          norm
+      integer            info, lda, n
+      double precision   anorm, rcond
 *     ..
-*     .. Array Arguments ..
-      INTEGER            IWORK( * )
-      DOUBLE PRECISION   A( LDA, * ), WORK( * )
+*     .. array arguments ..
+      integer            iwork( * )
+      double precision   a( lda, * ), work( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DGECON estimates the reciprocal of the condition number of a general
-*  real matrix A, in either the 1-norm or the infinity-norm, using
-*  the LU factorization computed by DGETRF.
+*  dgecon estimates the reciprocal of the condition number of a general
+*  real matrix a, in either the 1-norm or the infinity-norm, using
+*  the lu factorization computed by dgetrf.
 *
-*  An estimate is obtained for norm(inv(A)), and the reciprocal of the
+*  an estimate is obtained for norm(inv(a)), and the reciprocal of the
 *  condition number is computed as
-*     RCOND = 1 / ( norm(A) * norm(inv(A)) ).
+*     rcond = 1 / ( norm(a) * norm(inv(a)) ).
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  NORM    (input) CHARACTER*1
-*          Specifies whether the 1-norm condition number or the
+*  norm    (input) character*1
+*          specifies whether the 1-norm condition number or the
 *          infinity-norm condition number is required:
-*          = '1' or 'O':  1-norm;
-*          = 'I':         Infinity-norm.
+*          = '1' or 'o':  1-norm;
+*          = 'i':         infinity-norm.
 *
-*  N       (input) INTEGER
-*          The order of the matrix A.  N >= 0.
+*  n       (input) integer
+*          the order of the matrix a.  n >= 0.
 *
-*  A       (input) DOUBLE PRECISION array, dimension (LDA,N)
-*          The factors L and U from the factorization A = P*L*U
-*          as computed by DGETRF.
+*  a       (input) double precision array, dimension (lda,n)
+*          the factors l and u from the factorization a = p*l*u
+*          as computed by dgetrf.
 *
-*  LDA     (input) INTEGER
-*          The leading dimension of the array A.  LDA >= max(1,N).
+*  lda     (input) integer
+*          the leading dimension of the array a.  lda >= max(1,n).
 *
-*  ANORM   (input) DOUBLE PRECISION
-*          If NORM = '1' or 'O', the 1-norm of the original matrix A.
-*          If NORM = 'I', the infinity-norm of the original matrix A.
+*  anorm   (input) double precision
+*          if norm = '1' or 'o', the 1-norm of the original matrix a.
+*          if norm = 'i', the infinity-norm of the original matrix a.
 *
-*  RCOND   (output) DOUBLE PRECISION
-*          The reciprocal of the condition number of the matrix A,
-*          computed as RCOND = 1/(norm(A) * norm(inv(A))).
+*  rcond   (output) double precision
+*          the reciprocal of the condition number of the matrix a,
+*          computed as rcond = 1/(norm(a) * norm(inv(a))).
 *
-*  WORK    (workspace) DOUBLE PRECISION array, dimension (4*N)
+*  work    (workspace) double precision array, dimension (4*n)
 *
-*  IWORK   (workspace) INTEGER array, dimension (N)
+*  iwork   (workspace) integer array, dimension (n)
 *
-*  INFO    (output) INTEGER
+*  info    (output) integer
 *          = 0:  successful exit
-*          < 0:  if INFO = -i, the i-th argument had an illegal value
+*          < 0:  if info = -i, the i-th argument had an illegal value
 *
 *  =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE, ZERO
-      PARAMETER          ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. parameters ..
+      double precision   one, zero
+      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      LOGICAL            ONENRM
-      CHARACTER          NORMIN
-      INTEGER            IX, KASE, KASE1
-      DOUBLE PRECISION   AINVNM, SCALE, SL, SMLNUM, SU
+*     .. local scalars ..
+      logical            onenrm
+      character          normin
+      integer            ix, kase, kase1
+      double precision   ainvnm, scale, sl, smlnum, su
 *     ..
-*     .. External Functions ..
-      LOGICAL            LSAME
-      INTEGER            IDAMAX
-      DOUBLE PRECISION   DLAMCH
-      EXTERNAL           LSAME, IDAMAX, DLAMCH
+*     .. external functions ..
+      logical            lsame
+      integer            idamax
+      double precision   dlamch
+      external           lsame, idamax, dlamch
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DLACON, DLATRS, DRSCL, XERBLA
+*     .. external subroutines ..
+      external           dlacon, dlatrs, drscl, xerbla
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          ABS, MAX
+*     .. intrinsic functions ..
+      intrinsic          abs, max
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      ONENRM = NORM.EQ.'1' .OR. LSAME( NORM, 'O' )
-      IF( .NOT.ONENRM .AND. .NOT.LSAME( NORM, 'I' ) ) THEN
-         INFO = -1
-      ELSE IF( N.LT.0 ) THEN
-         INFO = -2
-      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
-         INFO = -4
-      ELSE IF( ANORM.LT.ZERO ) THEN
-         INFO = -5
-      END IF
-      IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DGECON', -INFO )
-         RETURN
-      END IF
+      info = 0
+      onenrm = norm.eq.'1' .or. lsame( norm, 'o' )
+      if( .not.onenrm .and. .not.lsame( norm, 'i' ) ) then
+         info = -1
+      else if( n.lt.0 ) then
+         info = -2
+      else if( lda.lt.max( 1, n ) ) then
+         info = -4
+      else if( anorm.lt.zero ) then
+         info = -5
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'dgecon', -info )
+         return
+      end if
 *
-*     Quick return if possible
+*     quick return if possible
 *
-      RCOND = ZERO
-      IF( N.EQ.0 ) THEN
-         RCOND = ONE
-         RETURN
-      ELSE IF( ANORM.EQ.ZERO ) THEN
-         RETURN
-      END IF
+      rcond = zero
+      if( n.eq.0 ) then
+         rcond = one
+         return
+      else if( anorm.eq.zero ) then
+         return
+      end if
 *
-      SMLNUM = DLAMCH( 'Safe minimum' )
+      smlnum = dlamch( 'safe minimum' )
 *
-*     Estimate the norm of inv(A).
+*     estimate the norm of inv(a).
 *
-      AINVNM = ZERO
-      NORMIN = 'N'
-      IF( ONENRM ) THEN
-         KASE1 = 1
-      ELSE
-         KASE1 = 2
-      END IF
-      KASE = 0
-   10 CONTINUE
-      CALL DLACON( N, WORK( N+1 ), WORK, IWORK, AINVNM, KASE )
-      IF( KASE.NE.0 ) THEN
-         IF( KASE.EQ.KASE1 ) THEN
+      ainvnm = zero
+      normin = 'n'
+      if( onenrm ) then
+         kase1 = 1
+      else
+         kase1 = 2
+      end if
+      kase = 0
+   10 continue
+      call dlacon( n, work( n+1 ), work, iwork, ainvnm, kase )
+      if( kase.ne.0 ) then
+         if( kase.eq.kase1 ) then
 *
-*           Multiply by inv(L).
+*           multiply by inv(l).
 *
-            CALL DLATRS( 'Lower', 'No transpose', 'Unit', NORMIN, N, A,
-     $                   LDA, WORK, SL, WORK( 2*N+1 ), INFO )
+            call dlatrs( 'lower', 'no transpose', 'unit', normin, n, a,
+     $                   lda, work, sl, work( 2*n+1 ), info )
 *
-*           Multiply by inv(U).
+*           multiply by inv(u).
 *
-            CALL DLATRS( 'Upper', 'No transpose', 'Non-unit', NORMIN, N,
-     $                   A, LDA, WORK, SU, WORK( 3*N+1 ), INFO )
-         ELSE
+            call dlatrs( 'upper', 'no transpose', 'non-unit', normin, n,
+     $                   a, lda, work, su, work( 3*n+1 ), info )
+         else
 *
-*           Multiply by inv(U').
+*           multiply by inv(u').
 *
-            CALL DLATRS( 'Upper', 'Transpose', 'Non-unit', NORMIN, N, A,
-     $                   LDA, WORK, SU, WORK( 3*N+1 ), INFO )
+            call dlatrs( 'upper', 'transpose', 'non-unit', normin, n, a,
+     $                   lda, work, su, work( 3*n+1 ), info )
 *
-*           Multiply by inv(L').
+*           multiply by inv(l').
 *
-            CALL DLATRS( 'Lower', 'Transpose', 'Unit', NORMIN, N, A,
-     $                   LDA, WORK, SL, WORK( 2*N+1 ), INFO )
-         END IF
+            call dlatrs( 'lower', 'transpose', 'unit', normin, n, a,
+     $                   lda, work, sl, work( 2*n+1 ), info )
+         end if
 *
-*        Divide X by 1/(SL*SU) if doing so will not cause overflow.
+*        divide x by 1/(sl*su) if doing so will not cause overflow.
 *
-         SCALE = SL*SU
-         NORMIN = 'Y'
-         IF( SCALE.NE.ONE ) THEN
-            IX = IDAMAX( N, WORK, 1 )
-            IF( SCALE.LT.ABS( WORK( IX ) )*SMLNUM .OR. SCALE.EQ.ZERO )
-     $         GO TO 20
-            CALL DRSCL( N, SCALE, WORK, 1 )
-         END IF
-         GO TO 10
-      END IF
+         scale = sl*su
+         normin = 'y'
+         if( scale.ne.one ) then
+            ix = idamax( n, work, 1 )
+            if( scale.lt.abs( work( ix ) )*smlnum .or. scale.eq.zero )
+     $         go to 20
+            call drscl( n, scale, work, 1 )
+         end if
+         go to 10
+      end if
 *
-*     Compute the estimate of the reciprocal condition number.
+*     compute the estimate of the reciprocal condition number.
 *
-      IF( AINVNM.NE.ZERO )
-     $   RCOND = ( ONE / AINVNM ) / ANORM
+      if( ainvnm.ne.zero )
+     $   rcond = ( one / ainvnm ) / anorm
 *
-   20 CONTINUE
-      RETURN
+   20 continue
+      return
 *
-*     End of DGECON
+*     end of dgecon
 *
-      END
+      end

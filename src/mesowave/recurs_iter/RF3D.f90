@@ -1,41 +1,41 @@
-SUBROUTINE RF3D(u,l,n,a,np)
+subroutine rf3d(u,l,n,a,np)
 
 !****************************************************
-!  This routine applies the one-D recursive filter in
+!  this routine applies the one-d recursive filter in
 !  x, y, and z direction np times with alpha value of
-!  a(1),a(2),a(3) to a three-D array u.
+!  a(1),a(2),a(3) to a three-d array u.
 !
-!  HISTORY: APR. 2003 by YUANFU XIE.
+!  history: apr. 2003 by yuanfu xie.
 !****************************************************
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: l(3),n(3),np(3)
-  REAL,    INTENT(IN) :: a(3)
-  REAL                :: u(l(1),l(2),l(3))
+  integer, intent(in) :: l(3),n(3),np(3)
+  real,    intent(in) :: a(3)
+  real                :: u(l(1),l(2),l(3))
 
-  ! Local variables:
-  INTEGER :: j,k
+  ! local variables:
+  integer :: j,k
 
-  ! X direction:
-  DO k=1,n(3)
-     DO j=1,n(2)
-        CALL RF1D(u(1:n(1),j,k),n(1),a(1),np(1))
-     ENDDO
-  ENDDO
+  ! x direction:
+  do k=1,n(3)
+     do j=1,n(2)
+        call rf1d(u(1:n(1),j,k),n(1),a(1),np(1))
+     enddo
+  enddo
 
-  ! Y direction:
-  DO k=1,n(3)
-     DO j=1,n(1)
-        CALL RF1D(u(j,1:n(2),k),n(2),a(2),np(2))
-     ENDDO
-  ENDDO
+  ! y direction:
+  do k=1,n(3)
+     do j=1,n(1)
+        call rf1d(u(j,1:n(2),k),n(2),a(2),np(2))
+     enddo
+  enddo
 
-  ! Z direction:
-  DO k=1,n(2)
-     DO j=1,n(1)
-        CALL RF1D(u(j,k,1:n(3)),n(3),a(3),np(3))
-     ENDDO
-  ENDDO
+  ! z direction:
+  do k=1,n(2)
+     do j=1,n(1)
+        call rf1d(u(j,k,1:n(3)),n(3),a(3),np(3))
+     enddo
+  enddo
 
-END SUBROUTINE RF3D
+end subroutine rf3d

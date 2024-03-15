@@ -1,65 +1,65 @@
       subroutine addgrid(cgrib,lcgrib,igds,igdstmpl,igdstmplen,
      &                   ideflist,idefnum,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    addgrid 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-01
+! subprogram:    addgrid 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-01
 !
-! ABSTRACT: This subroutine packs up a Grid Definition Section (Section 3) 
-!   and adds it to a GRIB2 message.
-!   This routine is used with routines "gribcreate", "addlocal", "addfield",
-!   and "gribend" to create a complete GRIB2 message.  Subroutine
-!   gribcreate must be called first to initialize a new GRIB2 message.
+! abstract: this subroutine packs up a grid definition section (section 3) 
+!   and adds it to a grib2 message.
+!   this routine is used with routines "gribcreate", "addlocal", "addfield",
+!   and "gribend" to create a complete grib2 message.  subroutine
+!   gribcreate must be called first to initialize a new grib2 message.
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-01  Gilbert
+! program history log:
+! 2000-05-01  gilbert
 !
-! USAGE:    CALL addgrid(cgrib,lcgrib,igds,igdstmpl,igdstmplen,
+! usage:    call addgrid(cgrib,lcgrib,igds,igdstmpl,igdstmplen,
 !                        ideflist,idefnum,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array to contain the GRIB2 message
-!     lcgrib   - Maximum length (bytes) of array cgrib.
-!     igds     - Contains information needed for GRIB Grid Definition Section 3.
-!                Must be dimensioned >= 5.
-!                igds(1)=Source of grid definition (see Code Table 3.0)
-!                igds(2)=Number of grid points in the defined grid.
-!                igds(3)=Number of octets needed for each 
+!   input argument list:
+!     cgrib    - character array to contain the grib2 message
+!     lcgrib   - maximum length (bytes) of array cgrib.
+!     igds     - contains information needed for grib grid definition section 3.
+!                must be dimensioned >= 5.
+!                igds(1)=source of grid definition (see code table 3.0)
+!                igds(2)=number of grid points in the defined grid.
+!                igds(3)=number of octets needed for each 
 !                            additional grid points definition.  
-!                            Used to define number of
+!                            used to define number of
 !                            points in each row ( or column ) for
 !                            non-regular grids.  
 !                            = 0, if using regular grid.
-!                igds(4)=Interpretation of list for optional points 
-!                            definition.  (Code Table 3.11)
-!                igds(5)=Grid Definition Template Number (Code Table 3.1)
-!     igdstmpl - Contains the data values for the specified Grid Definition
-!                Template ( NN=igds(5) ).  Each element of this integer 
-!                array contains an entry (in the order specified) of Grid
-!                Defintion Template 3.NN
-!   igdstmplen - Max dimension of igdstmpl()
-!     ideflist - (Used if igds(3) .ne. 0)  This array contains the
+!                igds(4)=interpretation of list for optional points 
+!                            definition.  (code table 3.11)
+!                igds(5)=grid definition template number (code table 3.1)
+!     igdstmpl - contains the data values for the specified grid definition
+!                template ( nn=igds(5) ).  each element of this integer 
+!                array contains an entry (in the order specified) of grid
+!                defintion template 3.nn
+!   igdstmplen - max dimension of igdstmpl()
+!     ideflist - (used if igds(3) .ne. 0)  this array contains the
 !                number of grid points contained in each row ( or column )
-!      idefnum - (Used if igds(3) .ne. 0)  The number of entries
+!      idefnum - (used if igds(3) .ne. 0)  the number of entries
 !                in array ideflist.  i.e. number of rows ( or columns )
 !                for which optional grid points are defined.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     cgrib    - Character array to contain the GRIB2 message
-!     ierr     - Error return code.
+!   output argument list:      
+!     cgrib    - character array to contain the grib2 message
+!     ierr     - error return code.
 !                0 = no error
-!                1 = GRIB message was not initialized.  Need to call
+!                1 = grib message was not initialized.  need to call
 !                    routine gribcreate first.
-!                2 = GRIB message already complete.  Cannot add new section.
-!                3 = Sum of Section byte counts doesn't add to total byte count.
-!                4 = Previous Section was not 1, 2 or 7.
-!                5 = Could not find requested Grid Definition Template.
+!                2 = grib message already complete.  cannot add new section.
+!                3 = sum of section byte counts doesn't add to total byte count.
+!                4 = previous section was not 1, 2 or 7.
+!                5 = could not find requested grid definition template.
 !
-! REMARKS: Note that the Local Use Section ( Section 2 ) can only follow
-!          Section 1 or Section 7 in a GRIB2 message.
+! remarks: note that the local use section ( section 2 ) can only follow
+!          section 1 or section 7 in a grib2 message.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -70,7 +70,7 @@
       integer,intent(in) :: lcgrib,idefnum,igdstmplen
       integer,intent(out) :: ierr
       
-      character(len=4),parameter :: grib='GRIB',c7777='7777'
+      character(len=4),parameter :: grib='grib',c7777='7777'
       character(len=4):: ctemp
       integer:: mapgrid(igdstmplen)
       integer,parameter :: one=1,three=3
@@ -79,92 +79,92 @@
  
       ierr=0
 !
-!  Check to see if beginning of GRIB message exists
+!  check to see if beginning of grib message exists
 !
       ctemp=cgrib(1)//cgrib(2)//cgrib(3)//cgrib(4)
       if ( ctemp.ne.grib ) then
-        print *,'addgrid: GRIB not found in given message.'
-        print *,'addgrid: Call to routine gribcreate required',
-     &          ' to initialize GRIB messge.'
+        print *,'addgrid: grib not found in given message.'
+        print *,'addgrid: call to routine gribcreate required',
+     &          ' to initialize grib messge.'
         ierr=1
         return
       endif
 !
-!  Get current length of GRIB message
+!  get current length of grib message
 !  
       call gbyte(cgrib,lencurr,96,32)
 !
-!  Check to see if GRIB message is already complete
+!  check to see if grib message is already complete
 !  
       ctemp=cgrib(lencurr-3)//cgrib(lencurr-2)//cgrib(lencurr-1)
      &      //cgrib(lencurr)
       if ( ctemp.eq.c7777 ) then
-        print *,'addgrid: GRIB message already complete.  Cannot',
+        print *,'addgrid: grib message already complete.  cannot',
      &          ' add new section.'
         ierr=2
         return
       endif
 !
-!  Loop through all current sections of the GRIB message to
+!  loop through all current sections of the grib message to
 !  find the last section number.
 !
-      len=16    ! length of Section 0
+      len=16    ! length of section 0
       do 
-      !    Get section number and length of next section
+      !    get section number and length of next section
         iofst=len*8
         call gbyte(cgrib,ilen,iofst,32)
         iofst=iofst+32
         call gbyte(cgrib,isecnum,iofst,8)
         len=len+ilen
-      !    Exit loop if last section reached
+      !    exit loop if last section reached
         if ( len.eq.lencurr ) exit
-      !    If byte count for each section doesn't match current
+      !    if byte count for each section doesn't match current
       !    total length, then there is a problem.
         if ( len.gt.lencurr ) then
-          print *,'addgrid: Section byte counts don''t add to total.'
-          print *,'addgrid: Sum of section byte counts = ',len
-          print *,'addgrid: Total byte count in Section 0 = ',lencurr
+          print *,'addgrid: section byte counts don''t add to total.'
+          print *,'addgrid: sum of section byte counts = ',len
+          print *,'addgrid: total byte count in section 0 = ',lencurr
           ierr=3
           return
         endif
       enddo
 !
-!  Section 3 can only be added after sections 1, 2 and 7.
+!  section 3 can only be added after sections 1, 2 and 7.
 !
       if ( (isecnum.ne.1) .and. (isecnum.ne.2) .and. 
      &     (isecnum.ne.7) ) then
-        print *,'addgrid: Section 3 can only be added after Section',
+        print *,'addgrid: section 3 can only be added after section',
      &          ' 1, 2 or 7.'
-        print *,'addgrid: Section ',isecnum,' was the last found in',
-     &          ' given GRIB message.'
+        print *,'addgrid: section ',isecnum,' was the last found in',
+     &          ' given grib message.'
         ierr=4
         return
       endif
 !
-!  Add Section 3  - Grid Definition Section
+!  add section 3  - grid definition section
 !
-      ibeg=lencurr*8        !   Calculate offset for beginning of section 3
+      ibeg=lencurr*8        !   calculate offset for beginning of section 3
       iofst=ibeg+32         !   leave space for length of section
-      call sbyte(cgrib,three,iofst,8)     ! Store section number ( 3 )
+      call sbyte(cgrib,three,iofst,8)     ! store section number ( 3 )
       iofst=iofst+8
-      call sbyte(cgrib,igds(1),iofst,8)     ! Store source of Grid def.
+      call sbyte(cgrib,igds(1),iofst,8)     ! store source of grid def.
       iofst=iofst+8
-      call sbyte(cgrib,igds(2),iofst,32)    ! Store number of data pts.
+      call sbyte(cgrib,igds(2),iofst,32)    ! store number of data pts.
       iofst=iofst+32
-      call sbyte(cgrib,igds(3),iofst,8)     ! Store number of extra octets.
+      call sbyte(cgrib,igds(3),iofst,8)     ! store number of extra octets.
       iofst=iofst+8
-      call sbyte(cgrib,igds(4),iofst,8)     ! Store interp. of extra octets.
+      call sbyte(cgrib,igds(4),iofst,8)     ! store interp. of extra octets.
       iofst=iofst+8
-      !   if Octet 6 is not equal to zero, Grid Definition Template may
+      !   if octet 6 is not equal to zero, grid definition template may
       !   not be supplied.
       if ( igds(1).eq.0 ) then
-        call sbyte(cgrib,igds(5),iofst,16)  ! Store Grid Def Template num.
+        call sbyte(cgrib,igds(5),iofst,16)  ! store grid def template num.
       else
-        call sbyte(cgrib,65535,iofst,16)   ! Store missing value as Grid Def Template num.
+        call sbyte(cgrib,65535,iofst,16)   ! store missing value as grid def template num.
       endif
       iofst=iofst+16
       !
-      !   Get Grid Definition Template
+      !   get grid definition template
       !
       if (igds(1).eq.0) then
         call getgridtemplate(igds(5),mapgridlen,mapgrid,needext,
@@ -174,8 +174,8 @@
           return
         endif
         !
-        !   Extend the Grid Definition Template, if necessary.
-        !   The number of values in a specific template may vary
+        !   extend the grid definition template, if necessary.
+        !   the number of values in a specific template may vary
         !   depending on data specified in the "static" part of the
         !   template.
         !
@@ -186,7 +186,7 @@
         mapgridlen=0
       endif
       !
-      !   Pack up each input value in array igdstmpl into the
+      !   pack up each input value in array igdstmpl into the
       !   the appropriate number of octets, which are specified in
       !   corresponding entries in array mapgrid.
       !
@@ -201,9 +201,9 @@
         iofst=iofst+nbits
       enddo
       !
-      !   If requested,
-      !   Insert optional list of numbers defining number of points
-      !   in each row or column.  This is used for non regular
+      !   if requested,
+      !   insert optional list of numbers defining number of points
+      !   in each row or column.  this is used for non regular
       !   grids.
       !
       if ( igds(3).ne.0 ) then
@@ -212,14 +212,14 @@
          iofst=iofst+(nbits*idefnum)
       endif
       !
-      !   Calculate length of section 3 and store it in octets
+      !   calculate length of section 3 and store it in octets
       !   1-4 of section 3.
       !
       lensec3=(iofst-ibeg)/8
       call sbyte(cgrib,lensec3,ibeg,32)
 
 !
-!  Update current byte total of message in Section 0
+!  update current byte total of message in section 0
 !
       call sbyte(cgrib,lencurr+lensec3,96,32)
 

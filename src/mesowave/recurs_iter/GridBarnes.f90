@@ -1,61 +1,61 @@
-SUBROUTINE GridBarnes(f,l,n,b)
+subroutine gridbarnes(f,l,n,b)
 
 !==========================================================
-!  This routine applied a Barnes analysis to a gridded two
+!  this routine applied a barnes analysis to a gridded two
 !  dimensional function as a filter.
 !
-!  HISTORY: JAN. 2005 by YUANFU XIE.
+!  history: jan. 2005 by yuanfu xie.
 !==========================================================
 
-   IMPLICIT NONE
+   implicit none
 
-   INTEGER, INTENT(IN) :: l(2),n(2)
-   REAL,    INTENT(IN) :: f(l(1),l(2))
-   REAL,    INTENT(OUT) :: b(l(1),l(2))
+   integer, intent(in) :: l(2),n(2)
+   real,    intent(in) :: f(l(1),l(2))
+   real,    intent(out) :: b(l(1),l(2))
 
-   ! Local variables:
-   INTEGER :: i,j,ir,ni,nj,ip
-   REAL    :: gama,s,w,ws,t(l(1),l(2)),tmp
+   ! local variables:
+   integer :: i,j,ir,ni,nj,ip
+   real    :: gama,s,w,ws,t(l(1),l(2)),tmp
 
    gama = 0.2
    s = 2.0e3/gama  ! kapa_0
    ir = 60	   ! neighbors
    
-   ! Clean analysis field:
+   ! clean analysis field:
    b = 0.0
    t = 0.0
 
-   ! Barnes analysis:
-   DO ip=1,1
+   ! barnes analysis:
+   do ip=1,1
 
       s = s*gama
 
-      ! For every gridpoint:
-      DO j=1,n(2)
-         DO i=1,n(1)
+      ! for every gridpoint:
+      do j=1,n(2)
+         do i=1,n(1)
 	    
-	    ! For each neighbor within ir:
+	    ! for each neighbor within ir:
 	    ws = 0.0
 	    tmp = 0.0
-	    DO nj=-ir,ir,2
-	       DO ni=-ir,ir,2
-		  w = EXP(-(FLOAT(ni)**2+FLOAT(nj)**2)/s)
+	    do nj=-ir,ir,2
+	       do ni=-ir,ir,2
+		  w = exp(-(float(ni)**2+float(nj)**2)/s)
 
-		  IF ((i+ni .GE. 1) .AND. (i+ni .LE. n(1)) .AND. &
-		      (j+nj .GE. 1) .AND. (j+nj .LE. n(2))) THEN
+		  if ((i+ni .ge. 1) .and. (i+ni .le. n(1)) .and. &
+		      (j+nj .ge. 1) .and. (j+nj .le. n(2))) then
 		     tmp = tmp+(f(i+ni,j+nj)-t(i+ni,j+nj))*w
 		     ws = ws + w
-		  ENDIF
+		  endif
 
-	       ENDDO
-	    ENDDO
+	       enddo
+	    enddo
 
 	    b(i,j) = b(i,j)+tmp/ws
-         ENDDO
-      ENDDO
+         enddo
+      enddo
 
       t = b
 
-   ENDDO
+   enddo
 
-END SUBROUTINE GridBarnes
+end subroutine gridbarnes

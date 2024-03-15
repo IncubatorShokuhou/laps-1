@@ -1,355 +1,355 @@
-      SUBROUTINE DTRMM ( SIDE, UPLO, TRANSA, DIAG, M, N, ALPHA, A, LDA,
-     $                   B, LDB )
-*     .. Scalar Arguments ..
-      CHARACTER*1        SIDE, UPLO, TRANSA, DIAG
-      INTEGER            M, N, LDA, LDB
-      DOUBLE PRECISION   ALPHA
-*     .. Array Arguments ..
-      DOUBLE PRECISION   A( LDA, * ), B( LDB, * )
+      subroutine dtrmm ( side, uplo, transa, diag, m, n, alpha, a, lda,
+     $                   b, ldb )
+*     .. scalar arguments ..
+      character*1        side, uplo, transa, diag
+      integer            m, n, lda, ldb
+      double precision   alpha
+*     .. array arguments ..
+      double precision   a( lda, * ), b( ldb, * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DTRMM  performs one of the matrix-matrix operations
+*  dtrmm  performs one of the matrix-matrix operations
 *
-*     B := alpha*op( A )*B,   or   B := alpha*B*op( A ),
+*     b := alpha*op( a )*b,   or   b := alpha*b*op( a ),
 *
-*  where  alpha  is a scalar,  B  is an m by n matrix,  A  is a unit, or
-*  non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
+*  where  alpha  is a scalar,  b  is an m by n matrix,  a  is a unit, or
+*  non-unit,  upper or lower triangular matrix  and  op( a )  is one  of
 *
-*     op( A ) = A   or   op( A ) = A'.
+*     op( a ) = a   or   op( a ) = a'.
 *
-*  Parameters
+*  parameters
 *  ==========
 *
-*  SIDE   - CHARACTER*1.
-*           On entry,  SIDE specifies whether  op( A ) multiplies B from
+*  side   - character*1.
+*           on entry,  side specifies whether  op( a ) multiplies b from
 *           the left or right as follows:
 *
-*              SIDE = 'L' or 'l'   B := alpha*op( A )*B.
+*              side = 'l' or 'l'   b := alpha*op( a )*b.
 *
-*              SIDE = 'R' or 'r'   B := alpha*B*op( A ).
+*              side = 'r' or 'r'   b := alpha*b*op( a ).
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  UPLO   - CHARACTER*1.
-*           On entry, UPLO specifies whether the matrix A is an upper or
+*  uplo   - character*1.
+*           on entry, uplo specifies whether the matrix a is an upper or
 *           lower triangular matrix as follows:
 *
-*              UPLO = 'U' or 'u'   A is an upper triangular matrix.
+*              uplo = 'u' or 'u'   a is an upper triangular matrix.
 *
-*              UPLO = 'L' or 'l'   A is a lower triangular matrix.
+*              uplo = 'l' or 'l'   a is a lower triangular matrix.
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  TRANSA - CHARACTER*1.
-*           On entry, TRANSA specifies the form of op( A ) to be used in
+*  transa - character*1.
+*           on entry, transa specifies the form of op( a ) to be used in
 *           the matrix multiplication as follows:
 *
-*              TRANSA = 'N' or 'n'   op( A ) = A.
+*              transa = 'n' or 'n'   op( a ) = a.
 *
-*              TRANSA = 'T' or 't'   op( A ) = A'.
+*              transa = 't' or 't'   op( a ) = a'.
 *
-*              TRANSA = 'C' or 'c'   op( A ) = A'.
+*              transa = 'c' or 'c'   op( a ) = a'.
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  DIAG   - CHARACTER*1.
-*           On entry, DIAG specifies whether or not A is unit triangular
+*  diag   - character*1.
+*           on entry, diag specifies whether or not a is unit triangular
 *           as follows:
 *
-*              DIAG = 'U' or 'u'   A is assumed to be unit triangular.
+*              diag = 'u' or 'u'   a is assumed to be unit triangular.
 *
-*              DIAG = 'N' or 'n'   A is not assumed to be unit
+*              diag = 'n' or 'n'   a is not assumed to be unit
 *                                  triangular.
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  M      - INTEGER.
-*           On entry, M specifies the number of rows of B. M must be at
+*  m      - integer.
+*           on entry, m specifies the number of rows of b. m must be at
 *           least zero.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  N      - INTEGER.
-*           On entry, N specifies the number of columns of B.  N must be
+*  n      - integer.
+*           on entry, n specifies the number of columns of b.  n must be
 *           at least zero.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  ALPHA  - DOUBLE PRECISION.
-*           On entry,  ALPHA specifies the scalar  alpha. When  alpha is
-*           zero then  A is not referenced and  B need not be set before
+*  alpha  - double precision.
+*           on entry,  alpha specifies the scalar  alpha. when  alpha is
+*           zero then  a is not referenced and  b need not be set before
 *           entry.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, k ), where k is m
-*           when  SIDE = 'L' or 'l'  and is  n  when  SIDE = 'R' or 'r'.
-*           Before entry  with  UPLO = 'U' or 'u',  the  leading  k by k
-*           upper triangular part of the array  A must contain the upper
+*  a      - double precision array of dimension ( lda, k ), where k is m
+*           when  side = 'l' or 'l'  and is  n  when  side = 'r' or 'r'.
+*           before entry  with  uplo = 'u' or 'u',  the  leading  k by k
+*           upper triangular part of the array  a must contain the upper
 *           triangular matrix  and the strictly lower triangular part of
-*           A is not referenced.
-*           Before entry  with  UPLO = 'L' or 'l',  the  leading  k by k
-*           lower triangular part of the array  A must contain the lower
+*           a is not referenced.
+*           before entry  with  uplo = 'l' or 'l',  the  leading  k by k
+*           lower triangular part of the array  a must contain the lower
 *           triangular matrix  and the strictly upper triangular part of
-*           A is not referenced.
-*           Note that when  DIAG = 'U' or 'u',  the diagonal elements of
-*           A  are not referenced either,  but are assumed to be  unity.
-*           Unchanged on exit.
+*           a is not referenced.
+*           note that when  diag = 'u' or 'u',  the diagonal elements of
+*           a  are not referenced either,  but are assumed to be  unity.
+*           unchanged on exit.
 *
-*  LDA    - INTEGER.
-*           On entry, LDA specifies the first dimension of A as declared
-*           in the calling (sub) program.  When  SIDE = 'L' or 'l'  then
-*           LDA  must be at least  max( 1, m ),  when  SIDE = 'R' or 'r'
-*           then LDA must be at least max( 1, n ).
-*           Unchanged on exit.
+*  lda    - integer.
+*           on entry, lda specifies the first dimension of a as declared
+*           in the calling (sub) program.  when  side = 'l' or 'l'  then
+*           lda  must be at least  max( 1, m ),  when  side = 'r' or 'r'
+*           then lda must be at least max( 1, n ).
+*           unchanged on exit.
 *
-*  B      - DOUBLE PRECISION array of DIMENSION ( LDB, n ).
-*           Before entry,  the leading  m by n part of the array  B must
-*           contain the matrix  B,  and  on exit  is overwritten  by the
+*  b      - double precision array of dimension ( ldb, n ).
+*           before entry,  the leading  m by n part of the array  b must
+*           contain the matrix  b,  and  on exit  is overwritten  by the
 *           transformed matrix.
 *
-*  LDB    - INTEGER.
-*           On entry, LDB specifies the first dimension of B as declared
-*           in  the  calling  (sub)  program.   LDB  must  be  at  least
+*  ldb    - integer.
+*           on entry, ldb specifies the first dimension of b as declared
+*           in  the  calling  (sub)  program.   ldb  must  be  at  least
 *           max( 1, m ).
-*           Unchanged on exit.
+*           unchanged on exit.
 *
 *
-*  Level 3 Blas routine.
+*  level 3 blas routine.
 *
-*  -- Written on 8-February-1989.
-*     Jack Dongarra, Argonne National Laboratory.
-*     Iain Duff, AERE Harwell.
-*     Jeremy Du Croz, Numerical Algorithms Group Ltd.
-*     Sven Hammarling, Numerical Algorithms Group Ltd.
+*  -- written on 8-february-1989.
+*     jack dongarra, argonne national laboratory.
+*     iain duff, aere harwell.
+*     jeremy du croz, numerical algorithms group ltd.
+*     sven hammarling, numerical algorithms group ltd.
 *
 *
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
-*     .. External Subroutines ..
-      EXTERNAL           XERBLA
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX
-*     .. Local Scalars ..
-      LOGICAL            LSIDE, NOUNIT, UPPER
-      INTEGER            I, INFO, J, K, NROWA
-      DOUBLE PRECISION   TEMP
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE         , ZERO
-      PARAMETER        ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. external functions ..
+      logical            lsame
+      external           lsame
+*     .. external subroutines ..
+      external           xerbla
+*     .. intrinsic functions ..
+      intrinsic          max
+*     .. local scalars ..
+      logical            lside, nounit, upper
+      integer            i, info, j, k, nrowa
+      double precision   temp
+*     .. parameters ..
+      double precision   one         , zero
+      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      LSIDE  = LSAME( SIDE  , 'L' )
-      IF( LSIDE )THEN
-         NROWA = M
-      ELSE
-         NROWA = N
-      END IF
-      NOUNIT = LSAME( DIAG  , 'N' )
-      UPPER  = LSAME( UPLO  , 'U' )
+      lside  = lsame( side  , 'l' )
+      if( lside )then
+         nrowa = m
+      else
+         nrowa = n
+      end if
+      nounit = lsame( diag  , 'n' )
+      upper  = lsame( uplo  , 'u' )
 *
-      INFO   = 0
-      IF(      ( .NOT.LSIDE                ).AND.
-     $         ( .NOT.LSAME( SIDE  , 'R' ) )      )THEN
-         INFO = 1
-      ELSE IF( ( .NOT.UPPER                ).AND.
-     $         ( .NOT.LSAME( UPLO  , 'L' ) )      )THEN
-         INFO = 2
-      ELSE IF( ( .NOT.LSAME( TRANSA, 'N' ) ).AND.
-     $         ( .NOT.LSAME( TRANSA, 'T' ) ).AND.
-     $         ( .NOT.LSAME( TRANSA, 'C' ) )      )THEN
-         INFO = 3
-      ELSE IF( ( .NOT.LSAME( DIAG  , 'U' ) ).AND.
-     $         ( .NOT.LSAME( DIAG  , 'N' ) )      )THEN
-         INFO = 4
-      ELSE IF( M  .LT.0               )THEN
-         INFO = 5
-      ELSE IF( N  .LT.0               )THEN
-         INFO = 6
-      ELSE IF( LDA.LT.MAX( 1, NROWA ) )THEN
-         INFO = 9
-      ELSE IF( LDB.LT.MAX( 1, M     ) )THEN
-         INFO = 11
-      END IF
-      IF( INFO.NE.0 )THEN
-         CALL XERBLA( 'DTRMM ', INFO )
-         RETURN
-      END IF
+      info   = 0
+      if(      ( .not.lside                ).and.
+     $         ( .not.lsame( side  , 'r' ) )      )then
+         info = 1
+      else if( ( .not.upper                ).and.
+     $         ( .not.lsame( uplo  , 'l' ) )      )then
+         info = 2
+      else if( ( .not.lsame( transa, 'n' ) ).and.
+     $         ( .not.lsame( transa, 't' ) ).and.
+     $         ( .not.lsame( transa, 'c' ) )      )then
+         info = 3
+      else if( ( .not.lsame( diag  , 'u' ) ).and.
+     $         ( .not.lsame( diag  , 'n' ) )      )then
+         info = 4
+      else if( m  .lt.0               )then
+         info = 5
+      else if( n  .lt.0               )then
+         info = 6
+      else if( lda.lt.max( 1, nrowa ) )then
+         info = 9
+      else if( ldb.lt.max( 1, m     ) )then
+         info = 11
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'dtrmm ', info )
+         return
+      end if
 *
-*     Quick return if possible.
+*     quick return if possible.
 *
-      IF( N.EQ.0 )
-     $   RETURN
+      if( n.eq.0 )
+     $   return
 *
-*     And when  alpha.eq.zero.
+*     and when  alpha.eq.zero.
 *
-      IF( ALPHA.EQ.ZERO )THEN
-         DO 20, J = 1, N
-            DO 10, I = 1, M
-               B( I, J ) = ZERO
-   10       CONTINUE
-   20    CONTINUE
-         RETURN
-      END IF
+      if( alpha.eq.zero )then
+         do 20, j = 1, n
+            do 10, i = 1, m
+               b( i, j ) = zero
+   10       continue
+   20    continue
+         return
+      end if
 *
-*     Start the operations.
+*     start the operations.
 *
-      IF( LSIDE )THEN
-         IF( LSAME( TRANSA, 'N' ) )THEN
+      if( lside )then
+         if( lsame( transa, 'n' ) )then
 *
-*           Form  B := alpha*A*B.
+*           form  b := alpha*a*b.
 *
-            IF( UPPER )THEN
-               DO 50, J = 1, N
-                  DO 40, K = 1, M
-                     IF( B( K, J ).NE.ZERO )THEN
-                        TEMP = ALPHA*B( K, J )
-                        DO 30, I = 1, K - 1
-                           B( I, J ) = B( I, J ) + TEMP*A( I, K )
-   30                   CONTINUE
-                        IF( NOUNIT )
-     $                     TEMP = TEMP*A( K, K )
-                        B( K, J ) = TEMP
-                     END IF
-   40             CONTINUE
-   50          CONTINUE
-            ELSE
-               DO 80, J = 1, N
-                  DO 70 K = M, 1, -1
-                     IF( B( K, J ).NE.ZERO )THEN
-                        TEMP      = ALPHA*B( K, J )
-                        B( K, J ) = TEMP
-                        IF( NOUNIT )
-     $                     B( K, J ) = B( K, J )*A( K, K )
-                        DO 60, I = K + 1, M
-                           B( I, J ) = B( I, J ) + TEMP*A( I, K )
-   60                   CONTINUE
-                     END IF
-   70             CONTINUE
-   80          CONTINUE
-            END IF
-         ELSE
+            if( upper )then
+               do 50, j = 1, n
+                  do 40, k = 1, m
+                     if( b( k, j ).ne.zero )then
+                        temp = alpha*b( k, j )
+                        do 30, i = 1, k - 1
+                           b( i, j ) = b( i, j ) + temp*a( i, k )
+   30                   continue
+                        if( nounit )
+     $                     temp = temp*a( k, k )
+                        b( k, j ) = temp
+                     end if
+   40             continue
+   50          continue
+            else
+               do 80, j = 1, n
+                  do 70 k = m, 1, -1
+                     if( b( k, j ).ne.zero )then
+                        temp      = alpha*b( k, j )
+                        b( k, j ) = temp
+                        if( nounit )
+     $                     b( k, j ) = b( k, j )*a( k, k )
+                        do 60, i = k + 1, m
+                           b( i, j ) = b( i, j ) + temp*a( i, k )
+   60                   continue
+                     end if
+   70             continue
+   80          continue
+            end if
+         else
 *
-*           Form  B := alpha*B*A'.
+*           form  b := alpha*b*a'.
 *
-            IF( UPPER )THEN
-               DO 110, J = 1, N
-                  DO 100, I = M, 1, -1
-                     TEMP = B( I, J )
-                     IF( NOUNIT )
-     $                  TEMP = TEMP*A( I, I )
-                     DO 90, K = 1, I - 1
-                        TEMP = TEMP + A( K, I )*B( K, J )
-   90                CONTINUE
-                     B( I, J ) = ALPHA*TEMP
-  100             CONTINUE
-  110          CONTINUE
-            ELSE
-               DO 140, J = 1, N
-                  DO 130, I = 1, M
-                     TEMP = B( I, J )
-                     IF( NOUNIT )
-     $                  TEMP = TEMP*A( I, I )
-                     DO 120, K = I + 1, M
-                        TEMP = TEMP + A( K, I )*B( K, J )
-  120                CONTINUE
-                     B( I, J ) = ALPHA*TEMP
-  130             CONTINUE
-  140          CONTINUE
-            END IF
-         END IF
-      ELSE
-         IF( LSAME( TRANSA, 'N' ) )THEN
+            if( upper )then
+               do 110, j = 1, n
+                  do 100, i = m, 1, -1
+                     temp = b( i, j )
+                     if( nounit )
+     $                  temp = temp*a( i, i )
+                     do 90, k = 1, i - 1
+                        temp = temp + a( k, i )*b( k, j )
+   90                continue
+                     b( i, j ) = alpha*temp
+  100             continue
+  110          continue
+            else
+               do 140, j = 1, n
+                  do 130, i = 1, m
+                     temp = b( i, j )
+                     if( nounit )
+     $                  temp = temp*a( i, i )
+                     do 120, k = i + 1, m
+                        temp = temp + a( k, i )*b( k, j )
+  120                continue
+                     b( i, j ) = alpha*temp
+  130             continue
+  140          continue
+            end if
+         end if
+      else
+         if( lsame( transa, 'n' ) )then
 *
-*           Form  B := alpha*B*A.
+*           form  b := alpha*b*a.
 *
-            IF( UPPER )THEN
-               DO 180, J = N, 1, -1
-                  TEMP = ALPHA
-                  IF( NOUNIT )
-     $               TEMP = TEMP*A( J, J )
-                  DO 150, I = 1, M
-                     B( I, J ) = TEMP*B( I, J )
-  150             CONTINUE
-                  DO 170, K = 1, J - 1
-                     IF( A( K, J ).NE.ZERO )THEN
-                        TEMP = ALPHA*A( K, J )
-                        DO 160, I = 1, M
-                           B( I, J ) = B( I, J ) + TEMP*B( I, K )
-  160                   CONTINUE
-                     END IF
-  170             CONTINUE
-  180          CONTINUE
-            ELSE
-               DO 220, J = 1, N
-                  TEMP = ALPHA
-                  IF( NOUNIT )
-     $               TEMP = TEMP*A( J, J )
-                  DO 190, I = 1, M
-                     B( I, J ) = TEMP*B( I, J )
-  190             CONTINUE
-                  DO 210, K = J + 1, N
-                     IF( A( K, J ).NE.ZERO )THEN
-                        TEMP = ALPHA*A( K, J )
-                        DO 200, I = 1, M
-                           B( I, J ) = B( I, J ) + TEMP*B( I, K )
-  200                   CONTINUE
-                     END IF
-  210             CONTINUE
-  220          CONTINUE
-            END IF
-         ELSE
+            if( upper )then
+               do 180, j = n, 1, -1
+                  temp = alpha
+                  if( nounit )
+     $               temp = temp*a( j, j )
+                  do 150, i = 1, m
+                     b( i, j ) = temp*b( i, j )
+  150             continue
+                  do 170, k = 1, j - 1
+                     if( a( k, j ).ne.zero )then
+                        temp = alpha*a( k, j )
+                        do 160, i = 1, m
+                           b( i, j ) = b( i, j ) + temp*b( i, k )
+  160                   continue
+                     end if
+  170             continue
+  180          continue
+            else
+               do 220, j = 1, n
+                  temp = alpha
+                  if( nounit )
+     $               temp = temp*a( j, j )
+                  do 190, i = 1, m
+                     b( i, j ) = temp*b( i, j )
+  190             continue
+                  do 210, k = j + 1, n
+                     if( a( k, j ).ne.zero )then
+                        temp = alpha*a( k, j )
+                        do 200, i = 1, m
+                           b( i, j ) = b( i, j ) + temp*b( i, k )
+  200                   continue
+                     end if
+  210             continue
+  220          continue
+            end if
+         else
 *
-*           Form  B := alpha*B*A'.
+*           form  b := alpha*b*a'.
 *
-            IF( UPPER )THEN
-               DO 260, K = 1, N
-                  DO 240, J = 1, K - 1
-                     IF( A( J, K ).NE.ZERO )THEN
-                        TEMP = ALPHA*A( J, K )
-                        DO 230, I = 1, M
-                           B( I, J ) = B( I, J ) + TEMP*B( I, K )
-  230                   CONTINUE
-                     END IF
-  240             CONTINUE
-                  TEMP = ALPHA
-                  IF( NOUNIT )
-     $               TEMP = TEMP*A( K, K )
-                  IF( TEMP.NE.ONE )THEN
-                     DO 250, I = 1, M
-                        B( I, K ) = TEMP*B( I, K )
-  250                CONTINUE
-                  END IF
-  260          CONTINUE
-            ELSE
-               DO 300, K = N, 1, -1
-                  DO 280, J = K + 1, N
-                     IF( A( J, K ).NE.ZERO )THEN
-                        TEMP = ALPHA*A( J, K )
-                        DO 270, I = 1, M
-                           B( I, J ) = B( I, J ) + TEMP*B( I, K )
-  270                   CONTINUE
-                     END IF
-  280             CONTINUE
-                  TEMP = ALPHA
-                  IF( NOUNIT )
-     $               TEMP = TEMP*A( K, K )
-                  IF( TEMP.NE.ONE )THEN
-                     DO 290, I = 1, M
-                        B( I, K ) = TEMP*B( I, K )
-  290                CONTINUE
-                  END IF
-  300          CONTINUE
-            END IF
-         END IF
-      END IF
+            if( upper )then
+               do 260, k = 1, n
+                  do 240, j = 1, k - 1
+                     if( a( j, k ).ne.zero )then
+                        temp = alpha*a( j, k )
+                        do 230, i = 1, m
+                           b( i, j ) = b( i, j ) + temp*b( i, k )
+  230                   continue
+                     end if
+  240             continue
+                  temp = alpha
+                  if( nounit )
+     $               temp = temp*a( k, k )
+                  if( temp.ne.one )then
+                     do 250, i = 1, m
+                        b( i, k ) = temp*b( i, k )
+  250                continue
+                  end if
+  260          continue
+            else
+               do 300, k = n, 1, -1
+                  do 280, j = k + 1, n
+                     if( a( j, k ).ne.zero )then
+                        temp = alpha*a( j, k )
+                        do 270, i = 1, m
+                           b( i, j ) = b( i, j ) + temp*b( i, k )
+  270                   continue
+                     end if
+  280             continue
+                  temp = alpha
+                  if( nounit )
+     $               temp = temp*a( k, k )
+                  if( temp.ne.one )then
+                     do 290, i = 1, m
+                        b( i, k ) = temp*b( i, k )
+  290                continue
+                  end if
+  300          continue
+            end if
+         end if
+      end if
 *
-      RETURN
+      return
 *
-*     End of DTRMM .
+*     end of dtrmm .
 *
-      END
+      end

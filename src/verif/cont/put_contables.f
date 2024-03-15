@@ -8,8 +8,8 @@
         character*125 comment_3d(nk*nthr),comment_2d
         character*10 units_3d(nk*nthr),units_2d
         character*3 var_3d(nk*nthr),var_2d
-        integer LVL_3d(nk*nthr)
-        character*4 LVL_COORD_3d(nk*nthr)
+        integer lvl_3d(nk*nthr)
+        character*4 lvl_coord_3d(nk*nthr)
         logical ltest_vertical_grid
 
         real o(ni,nj,nk)
@@ -18,8 +18,8 @@
 
         integer contable(0:1,0:1)
 
-!       Write contingency tables as an ASCII free format file
-!       write(6,*)' Write out 3-D contingency table (ASCII) in '
+!       write contingency tables as an ascii free format file
+!       write(6,*)' write out 3-d contingency table (ascii) in '
 !    1             ,cont_dir
 
 !       call s_len(cont_dir,lend)
@@ -28,34 +28,34 @@
 !       write(12,*)cont_4d
 !       close(12)
 
-!       Write NetCDF contingency table with a call to 'write_laps'
+!       write netcdf contingency table with a call to 'write_laps'
         if(.true.)then
             ext = 'cont'
 
             units_2d = ' '
-            comment_2d = ' LAPS radar verification contingency table'
+            comment_2d = ' laps radar verification contingency table'
 
             do ithr = 1,nthr
               idbz = 10 + ithr*10
               write(var_2d,1)idbz
  1            format('t',i2.2)
 
-              write(6,*)' 3D contingency table var = ',var_2d
+              write(6,*)' 3d contingency table var = ',var_2d
 
               do k = 1,nk
 
                 kk = k + (ithr-1)*nk ! calcualate 1d subscript
                 units_3d(kk)   = units_2d
                 comment_3d(kk) = comment_2d
-                if(ltest_vertical_grid('HEIGHT'))then  
+                if(ltest_vertical_grid('height'))then  
                     lvl_3d(kk) = zcoord_of_level(k)/10
-                    lvl_coord_3d(kk) = 'MSL'
-                elseif(ltest_vertical_grid('PRESSURE'))then 
+                    lvl_coord_3d(kk) = 'msl'
+                elseif(ltest_vertical_grid('pressure'))then 
                     lvl_3d(kk) = nint(zcoord_of_level(k))/100
-                    lvl_coord_3d(kk) = 'HPA'
+                    lvl_coord_3d(kk) = 'hpa'
                 else
-                    write(6,*)' Error, vertical grid not supported,'
-     1                     ,' this routine supports PRESSURE or HEIGHT'     
+                    write(6,*)' error, vertical grid not supported,'
+     1                     ,' this routine supports pressure or height'     
                     istatus = 0
                     return  
                 endif
@@ -67,7 +67,7 @@
 
             nf = nk*nthr
 
-            write(6,*)' Calling write_laps where ext is ',ext
+            write(6,*)' calling write_laps where ext is ',ext
 
             call write_laps(i4_valid,i4_valid,cont_dir,ext,
 !           call write_laps(i4_initial,i4_valid,cont_dir,ext,
@@ -76,7 +76,7 @@
      .                      cont_4d,istatus)
             if(istatus .ne. 1)then
                 print *
-     1           ,'Error writing interpolated data to LAPS database.'      
+     1           ,'error writing interpolated data to laps database.'      
                 return
             endif
         endif

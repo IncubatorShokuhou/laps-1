@@ -1,75 +1,75 @@
-      SUBROUTINE FI7516 (IWORK,NPTS,INRNG,ISTART,MAX,MIN,MXVAL,LWIDTH)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7516      SCAN NUMBER OF POINTS
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-01-21
-C
-C ABSTRACT: SCAN FORWARD FROM CURRENT POSITION. COLLECT POINTS AND
-C           DETERMINE MAXIMUM AND MINIMUM VALUES AND THE NUMBER
-C           OF POINTS THAT ARE INCLUDED. FORWARD SEARCH IS TERMINATED
-C           BY ENCOUNTERING A SET OF IDENTICAL VALUES, BY REACHING
-C           THE NUMBER OF POINTS SELECTED OR BY REACHING THE END
-C           OF DATA.
-C
-C PROGRAM HISTORY LOG:
-C   94-01-21  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7516 (IWORK,NPTS,INRNG,ISTART,MAX,MIN,MXVAL,LWIDTH)
-C   INPUT ARGUMENT LIST:
-C     *        - RETURN ADDRESS IF ENCOUNTER SET OF SAME VALUES
-C     IWORK    - DATA ARRAY
-C     NPTS     - NUMBER OF POINTS IN DATA ARRAY
-C     ISTART   - STARTING LOCATION IN DATA
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     INRNG    - NUMBER OF POINTS SELECTED
-C     MAX      - MAXIMUM VALUE OF POINTS
-C     MIN      - MINIMUM VALUE OF POINTS
-C     MXVAL    - MAXIMUM VALUE THAT CAN BE CONTAINED IN LWIDTH BITS
-C     LWIDTH   - NUMBER OF BITS TO CONTAIN MAX DIFF
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-      INTEGER        IWORK(*),NPTS,ISTART,INRNG,MAX,MIN,LWIDTH,MXVAL
-      INTEGER        IBITS(31)
-C
-      DATA           IBITS/1,3,7,15,31,63,127,255,511,1023,2047,
+      subroutine fi7516 (iwork,npts,inrng,istart,max,min,mxval,lwidth)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    fi7516      scan number of points
+c   prgmmr: cavanaugh        org: w/nmc42    date: 94-01-21
+c
+c abstract: scan forward from current position. collect points and
+c           determine maximum and minimum values and the number
+c           of points that are included. forward search is terminated
+c           by encountering a set of identical values, by reaching
+c           the number of points selected or by reaching the end
+c           of data.
+c
+c program history log:
+c   94-01-21  cavanaugh
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call fi7516 (iwork,npts,inrng,istart,max,min,mxval,lwidth)
+c   input argument list:
+c     *        - return address if encounter set of same values
+c     iwork    - data array
+c     npts     - number of points in data array
+c     istart   - starting location in data
+c
+c   output argument list:      (including work arrays)
+c     inrng    - number of points selected
+c     max      - maximum value of points
+c     min      - minimum value of points
+c     mxval    - maximum value that can be contained in lwidth bits
+c     lwidth   - number of bits to contain max diff
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+      integer        iwork(*),npts,istart,inrng,max,min,lwidth,mxval
+      integer        ibits(31)
+c
+      data           ibits/1,3,7,15,31,63,127,255,511,1023,2047,
      *               4095,8191,16383,32767,65535,131071,262143,
      *               524287,1048575,2097151,4194303,8388607,
      *               16777215,33554431,67108863,134217727,268435455,
      *               536870911,1073741823,2147483647/
-C  ----------------------------------------------------------------
-C
-      INRNG  = 1
-      JQ        = ISTART + 19
-      MAX       = IWORK(ISTART)
-      MIN       = IWORK(ISTART)
-      DO 1000 I = ISTART+1, JQ
-          CALL FI7502 (IWORK,I,NPTS,ISAME)
-          IF (ISAME.GE.15) THEN
-              GO TO 5000
-          END IF
-          INRNG  = INRNG + 1
-          IF (IWORK(I).GT.MAX) THEN
-              MAX  = IWORK(I)
-          ELSE IF (IWORK(I).LT.MIN) THEN
-              MIN  = IWORK(I)
-          END IF
- 1000 CONTINUE
- 5000 CONTINUE
-      KRNG   = MAX - MIN
-C
-      DO 9000 LWIDTH = 1, 31
-          IF (KRNG.LE.IBITS(LWIDTH)) THEN
-C             PRINT *,'RETURNED',INRNG,' VALUES'
-              RETURN
-          END IF
- 9000 CONTINUE
-      RETURN
-      END
+c  ----------------------------------------------------------------
+c
+      inrng  = 1
+      jq        = istart + 19
+      max       = iwork(istart)
+      min       = iwork(istart)
+      do 1000 i = istart+1, jq
+          call fi7502 (iwork,i,npts,isame)
+          if (isame.ge.15) then
+              go to 5000
+          end if
+          inrng  = inrng + 1
+          if (iwork(i).gt.max) then
+              max  = iwork(i)
+          else if (iwork(i).lt.min) then
+              min  = iwork(i)
+          end if
+ 1000 continue
+ 5000 continue
+      krng   = max - min
+c
+      do 9000 lwidth = 1, 31
+          if (krng.le.ibits(lwidth)) then
+c             print *,'returned',inrng,' values'
+              return
+          end if
+ 9000 continue
+      return
+      end

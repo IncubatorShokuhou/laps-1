@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -33,9 +33,9 @@ cdis
 !       1       ,temp_sfc_k,td_sfc_k,pres_sta_pa,tw_sfc_k
      1                                          ,ni,nj,r_2d_out)
 
-!           1991                                        Steve Albers, J. Smart
-!       Apr 1994 rate_max parameter disabled            SA
-!       Jan 1998 Remove lapsparms.inc                   SA
+!           1991                                        steve albers, j. smart
+!       apr 1994 rate_max parameter disabled            sa
+!       jan 1998 remove lapsparms.inc                   sa
 
         real z_2d_in(ni,nj)
 !       real temp_sfc_k(ni,nj)
@@ -45,23 +45,23 @@ cdis
         real r_2d_out(ni,nj)
 
         real a,b,rate_max
-        parameter (a = 200.)        ! Z-R relationship
-        parameter (b = 1.6)         ! Z-R relationship
-!       parameter (rate_max = 10.0) ! mm/hr; equiv to 39 dBZ with Z=200R**1.6
+        parameter (a = 200.)        ! z-r relationship
+        parameter (b = 1.6)         ! z-r relationship
+!       parameter (rate_max = 10.0) ! mm/hr; equiv to 39 dbz with z=200r**1.6
         parameter (rate_max = 1000.0) ! disabled
 
         write(6,*)
-     1   ' Converting from 2D Z to Rainfall Rate field'
+     1   ' converting from 2d z to rainfall rate field'
 
         call get_ref_base_useable(ref_base_useable,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting ref_base_useable in zr'
+            write(6,*)' error getting ref_base_useable in zr'
             stop
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting r_missing_data in zr'
+            write(6,*)' error getting r_missing_data in zr'
             stop
         endif
 
@@ -70,7 +70,7 @@ cdis
 
         aterm = alog10(1./a)
         bterm = 1./b
-        cterm = .001 / 3600  ! (M/S) / (MM/HR)
+        cterm = .001 / 3600  ! (m/s) / (mm/hr)
 
         do j = 1,nj
         do i = 1,ni
@@ -86,11 +86,11 @@ cdis
             else
                 n_leq_pts = n_leq_pts + 1
 
-              ! Generate R (mm/hr) in Z=a*R**b
-                r_mm_hr = 10.**(bterm*(aterm + dBZ/10.))
+              ! generate r (mm/hr) in z=a*r**b
+                r_mm_hr = 10.**(bterm*(aterm + dbz/10.))
                 r_2d_out(i,j) = min(r_mm_hr,rate_max) * cterm
 
-!               if(tw_sfc_k(i,j) .gt. 273.65)then ! Wet Bulb > 0.5 Deg C
+!               if(tw_sfc_k(i,j) .gt. 273.65)then ! wet bulb > 0.5 deg c
 !                   r_2d_out(i,j) = 0.
 !                   n_warm_pts = n_warm_pts + 1
 !               endif

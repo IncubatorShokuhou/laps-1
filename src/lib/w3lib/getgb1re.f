@@ -1,81 +1,81 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETGB1RE(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,
-     &                    KPROB,XPROB,KCLUST,KMEMBR,LB,F,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETGB1RE       READS AND UNPACKS A GRIB MESSAGE
-C   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
-C
-C ABSTRACT: READ AND UNPACK A GRIB MESSAGE.
-C
-C PROGRAM HISTORY LOG:
-C   95-10-31  IREDELL
-C   97-02-11  Y.ZHU       INCLUDED PROBABILITY AND CLUSTER ARGUMENTS
-C
-C USAGE:    CALL GETGB1RE(LUGB,LSKIP,LGRIB,KF,KPDS,KGDS,KENS,
-C    &                    KPROB,XPROB,KCLUST,KMEMBR,LB,F,IRET)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE
-C     LSKIP        INTEGER NUMBER OF BYTES TO SKIP
-C     LGRIB        INTEGER NUMBER OF BYTES TO READ
-C   OUTPUT ARGUMENTS:
-C     KF           INTEGER NUMBER OF DATA POINTS UNPACKED
-C     KPDS         INTEGER (200) UNPACKED PDS PARAMETERS
-C     KGDS         INTEGER (200) UNPACKED GDS PARAMETERS
-C     KENS         INTEGER (200) UNPACKED ENSEMBLE PDS PARMS
-C     KPROB        INTEGER (2) PROBABILITY ENSEMBLE PARMS
-C     XPROB        REAL    (2) PROBABILITY ENSEMBLE PARMS
-C     KCLUST       INTEGER (16) CLUSTER ENSEMBLE PARMS
-C     KMEMBR       INTEGER (8) CLUSTER ENSEMBLE PARMS
-C     LB           LOGICAL*1 (KF) UNPACKED BITMAP IF PRESENT
-C     F            REAL (KF) UNPACKED DATA
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    97     ERROR READING GRIB FILE
-C                    OTHER  W3FI63 GRIB UNPACKER RETURN CODE
-C
-C SUBPROGRAMS CALLED:
-C   BAREAD         BYTE-ADDRESSABLE READ
-C   W3FI63         UNPACK GRIB
-C   PDSEUP         UNPACK PDS EXTENSION
-C
-C REMARKS: THERE IS NO PROTECTION AGAINST UNPACKING TOO MUCH DATA.
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C   THIS SUBPROGRAM IS INTENDED FOR PRIVATE USE BY GETGB ROUTINES ONLY.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  CRAY, WORKSTATIONS
-C
-C$$$
-      INTEGER KPDS(200),KGDS(200),KENS(200)
-      INTEGER KPROB(2),KCLUST(16),KMEMBR(80)
-      REAL XPROB(2)
-      LOGICAL*1 LB(*)
-      REAL F(*)
-      INTEGER KPTR(200)
-      CHARACTER GRIB(LGRIB)*1
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  READ GRIB RECORD
-      CALL BAREAD(LUGB,LSKIP,LGRIB,LREAD,GRIB)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  UNPACK GRIB RECORD
-      IF(LREAD.EQ.LGRIB) THEN
-        CALL W3FI63(GRIB,KPDS,KGDS,LB,F,KPTR,IRET)
-        IF(IRET.EQ.0.AND.KPDS(23).EQ.2) THEN
-          CALL PDSEUP(KENS,KPROB,XPROB,KCLUST,KMEMBR,86,GRIB(9))
-        ENDIF
-      ELSE
-        IRET=97
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  RETURN NUMBER OF POINTS
-      IF(IRET.EQ.0) THEN
-        KF=KPTR(10)
-      ELSE
-        KF=0
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+c-----------------------------------------------------------------------
+      subroutine getgb1re(lugb,lskip,lgrib,kf,kpds,kgds,kens,
+     &                    kprob,xprob,kclust,kmembr,lb,f,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getgb1re       reads and unpacks a grib message
+c   prgmmr: iredell          org: w/nmc23     date: 95-10-31
+c
+c abstract: read and unpack a grib message.
+c
+c program history log:
+c   95-10-31  iredell
+c   97-02-11  y.zhu       included probability and cluster arguments
+c
+c usage:    call getgb1re(lugb,lskip,lgrib,kf,kpds,kgds,kens,
+c    &                    kprob,xprob,kclust,kmembr,lb,f,iret)
+c   input arguments:
+c     lugb         integer unit of the unblocked grib data file
+c     lskip        integer number of bytes to skip
+c     lgrib        integer number of bytes to read
+c   output arguments:
+c     kf           integer number of data points unpacked
+c     kpds         integer (200) unpacked pds parameters
+c     kgds         integer (200) unpacked gds parameters
+c     kens         integer (200) unpacked ensemble pds parms
+c     kprob        integer (2) probability ensemble parms
+c     xprob        real    (2) probability ensemble parms
+c     kclust       integer (16) cluster ensemble parms
+c     kmembr       integer (8) cluster ensemble parms
+c     lb           logical*1 (kf) unpacked bitmap if present
+c     f            real (kf) unpacked data
+c     iret         integer return code
+c                    0      all ok
+c                    97     error reading grib file
+c                    other  w3fi63 grib unpacker return code
+c
+c subprograms called:
+c   baread         byte-addressable read
+c   w3fi63         unpack grib
+c   pdseup         unpack pds extension
+c
+c remarks: there is no protection against unpacking too much data.
+c   subprogram can be called from a multiprocessing environment.
+c   do not engage the same logical unit from more than one processor.
+c   this subprogram is intended for private use by getgb routines only.
+c
+c attributes:
+c   language: fortran 77
+c   machine:  cray, workstations
+c
+c$$$
+      integer kpds(200),kgds(200),kens(200)
+      integer kprob(2),kclust(16),kmembr(80)
+      real xprob(2)
+      logical*1 lb(*)
+      real f(*)
+      integer kptr(200)
+      character grib(lgrib)*1
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  read grib record
+      call baread(lugb,lskip,lgrib,lread,grib)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  unpack grib record
+      if(lread.eq.lgrib) then
+        call w3fi63(grib,kpds,kgds,lb,f,kptr,iret)
+        if(iret.eq.0.and.kpds(23).eq.2) then
+          call pdseup(kens,kprob,xprob,kclust,kmembr,86,grib(9))
+        endif
+      else
+        iret=97
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  return number of points
+      if(iret.eq.0) then
+        kf=kptr(10)
+      else
+        kf=0
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

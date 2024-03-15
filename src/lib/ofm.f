@@ -1,40 +1,40 @@
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis       
       subroutine ofm (kk,laps_p,laps_t,laps_q,laps_sfc_t,
-     1     psfc, jday, lat, ZA,
-     1                                Tbest, 
+     1     psfc, jday, lat, za,
+     1                                tbest, 
      1     radest,
      1     sec_za,              !optran 90 variable 
      1     sfc_emis,            !optran 90 variable
@@ -43,46 +43,46 @@ cdis
      1     )
 
 
-c   This routine interfaces GOES 8/10 satellite broadcast network data (and
-c   local GVAR data) to the LAPS moisture analysis.  In 1999, this routine
-c   was modified from an earlier version that used the University of
-c   Wisconsin -- Madison's forward model to a newer model developed at
-c   NESDIS.  OPTRAN (optical transmittance) forward model was developed by
-c   Thomas Kleespies (NESDIS) and questions about this model should be
-c   directed to him.  Forecast Systems Laboratory does not in any way
-c   guarantee the validity of OPTRAN and distributes this software on an
-c   as-is basis.  MOREOVER, FSL HAS PERMISSION TO DISTRIBUTE OPTRAN AS PART
-c   OF LAPS TO FEDERAL AGENCIES.  NON-FEDERAL ENTITIES NEED TO INQUIRE WITH
-c   NESDIS TO ESTABLISH THEIR RIGHTS AND OBLIGATIONS WITH REGARD TO OPTRAN.
+c   this routine interfaces goes 8/10 satellite broadcast network data (and
+c   local gvar data) to the laps moisture analysis.  in 1999, this routine
+c   was modified from an earlier version that used the university of
+c   wisconsin -- madison's forward model to a newer model developed at
+c   nesdis.  optran (optical transmittance) forward model was developed by
+c   thomas kleespies (nesdis) and questions about this model should be
+c   directed to him.  forecast systems laboratory does not in any way
+c   guarantee the validity of optran and distributes this software on an
+c   as-is basis.  moreover, fsl has permission to distribute optran as part
+c   of laps to federal agencies.  non-federal entities need to inquire with
+c   nesdis to establish their rights and obligations with regard to optran.
 c   
-c   The version of OPTRAN with which this software is used, has been
-c   modified by FSL to include both sounder and imager channels for a
-c   particular satellite in one call to the routine.  Thus a user only need
-c   to setup OPTRAN for a particular satellite.  After doing such, either
+c   the version of optran with which this software is used, has been
+c   modified by fsl to include both sounder and imager channels for a
+c   particular satellite in one call to the routine.  thus a user only need
+c   to setup optran for a particular satellite.  after doing such, either
 c   the imager or sounding instrument can be used with the software without
 c   further recompilation.  
       
  
 
-c      USE module_sfc_structure
+c      use module_sfc_structure
 
-      Implicit None
+      implicit none
 
       save
       
-      Include '../include/constants_optran.inc'
+      include '../include/constants_optran.inc'
       
       include '../include/trans.inc'
       
-      integer Mchan
-      parameter (Mchan=18) ! adjusted for optran 90.
+      integer mchan
+      parameter (mchan=18) ! adjusted for optran 90.
       
       integer kk                ! kk the laps profile dim, 
-      integer Nk                ! the size of the composite vectors
+      integer nk                ! the size of the composite vectors
       integer start_level       !lowest level of climo used
       real laps_p(kk),laps_t(kk),laps_q(kk), lat, laps_sfc_t, psfc
-      real ZA                   !zenith angle (degrees)
-      real sec_za               !secant of ZA (for optran 90)
+      real za                   !zenith angle (degrees)
+      real sec_za               !secant of za (for optran 90)
       real sfc_emis             !surface emissivity for optran 90
       real sfc_refl             !surface reflectivity for optran 90
       real sec_solar            !local secant of solar angle for optran 90
@@ -97,8 +97,8 @@ c      USE module_sfc_structure
 
 c     optran 90 variables
 
-      real, dimension (0:Nlevel,1)::  level_p,level_t, level_w, level_o
-      real, dimension (Nlevel,1)  ::  layer_p,layer_t, layer_w,layer_o
+      real, dimension (0:nlevel,1)::  level_p,level_t, level_w, level_o
+      real, dimension (nlevel,1)  ::  layer_p,layer_t, layer_w,layer_o
       integer nk_90 ! optran 90 reduced nk counter
       
 c     climo variables
@@ -114,14 +114,14 @@ c     satellite number
       integer goes_number
       common /sat_id/ goes_number
       
-      Real O(Nlevel)
+      real o(nlevel)
       
-      Real Tbest(Nchan)         ! Brightness temps from estimated tau
+      real tbest(nchan)         ! brightness temps from estimated tau
       real radest(nchan)
       
       integer ichan
       
-      Integer Channels(Mchan) 
+      integer channels(mchan) 
       data channels/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/
       
       integer i
@@ -162,7 +162,7 @@ c     fill pressure level
             p(nk)   = laps_p(i)
          enddo
          
-         write(6,*) 'Ozone levels used = ',nk
+         write(6,*) 'ozone levels used = ',nk
          
 c     grab ozone
          
@@ -216,17 +216,17 @@ c     now at sfc or cloud top
       t(nk,1) = laps_sfc_t
       q(nk,1) = q(nk-1,1)       ! approximation for now
       
-      if(nk.gt.Nlevel) then
-         write(6,*) 'Array dimension error'
-         write(6,*) 'Module ofm.f'
-         write(6,*) 'Parameter Nlevel too small'
+      if(nk.gt.nlevel) then
+         write(6,*) 'array dimension error'
+         write(6,*) 'module ofm.f'
+         write(6,*) 'parameter nlevel too small'
       endif
       
 c0000000000000000000000
 c     end assembling vectors
 c00000000000000000000000
 
-cc insert here new code for OPTRAN 90 INTERFACE  dB  2002
+cc insert here new code for optran 90 interface  db  2002
 c upper level layer computations.
 
       do i = 1,nk
@@ -271,7 +271,7 @@ c      if (nk .eq. 10000) then
      1        sfc_refl,
      1        sec_za,
      1        sec_solar,
-     1        Mchan,
+     1        mchan,
      1        tau90,
      1        flux_tau,
      1        solar_tau,
@@ -285,12 +285,12 @@ c      if (nk .eq. 10000) then
          
          
          
-         Do Ichan = 1 , Mchan
+         do ichan = 1 , mchan
             
-            TbEst (Ichan) = brightness_temperature (ichan) 
+            tbest (ichan) = brightness_temperature (ichan) 
             radest (ichan) = upwelling_radiance(ichan)
             
-         EndDo
+         enddo
          
 
         
@@ -303,4 +303,4 @@ c      if (nk .eq. 10000) then
 
       return
       
-      End
+      end

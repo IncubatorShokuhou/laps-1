@@ -1,124 +1,124 @@
-      SUBROUTINE PK_S7(KFILDO,IPACK,ND5,LOCN,IPOS,IA,NVAL,IBIT,
-     1                 L3264B,IER,*)
-C
-C        MAY     1997   GLAHN   TDL   HP
-C        MARCH   2000   GLAHN   CHANGED NAME FROM PKS4LX;
-C                               IC( ) TO IA( ); NXY TO NVAL;
-C                               * = RETURN1
-C        JANUARY 2001   GLAHN   COMMENTS; IER = 1 CHANGED TO 705;
-C                               STANDARDIZED RETURN
-C
-C        PURPOSE
-C            PACKS NVAL VALUES INTO IPACK( ).  THE PACKED VALUES
-C            ARE TAKEN FROM IA( ).  PK_S7 ELIMINATES THE CALLING OF
-C            PKBG, AND RATHER INCORPORATES IT INTO THE LOOP.
-C            SINCE THIS IS A HIGHLY USED ROUTINE, ALL REASONABLE
-C            ATTEMPTS AT EFFICIENCY MUST BE PURSUED.  THIS IS FOR
-C            SIMPLE PACKING, THE COUNTERPART OF PK_C7 FOR COMPLEX
-C            PACKING.  PK_S7 ACCOMMODATES IBIT = 0
-C
-C        DATA SET USE 
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT) 
-C
-C        VARIABLES 
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT) 
-C            IPACK(J) = THE ARRAY HOLDING THE ACTUAL PACKED MESSAGE
-C                       (J=1,MAX OF ND5).  (INPUT/OUTPUT)
-C                 ND5 = DIMENSION OF IPACK( ).  (INPUT)
-C                LOCN = THE WORD POSITION TO PLACE THE NEXT VALUE.
-C                       (INPUT/OUTPUT)
-C                IPOS = THE BIT POSITION IN LOCN TO START PLACING
-C               IA(K) = DATA TO PACK (K=1,NVAL).  (INPUT)
-C                NVAL = DIMENSION OF IA( ).  THE NUMBER OF VALUES 
-C                       TO BE PACKED.  (INPUT)
-C                IBIT = THE NUMBER OF BITS USED TO PACK EACH VALUE.
-C                       (INPUT)
-C              L3264B = INTEGER WORD LENGTH OF MACHINE BEING USED.
-C                       (INPUT)
-C                 IER = ERROR RETURN.
-C                          2 = IPOS NOT IN THE RANGE 1-L3264B.
-C                          3 = IBIT NOT IN THE RANGE 0-32.
-C                        705 = ND5 IS NOT LARGE ENOUGH TO ACCOMMODATE THE
-C                              BITS NECESSARY TO PACK NVAL VALUES 
-C                              STARTING AT THE VALUES LOCN AND IPOS.
-C                       (OUTPUT)
-C                   * = ALTERNATE RETURN WHEN IER NE 0.
-C
-C        LOCAL VARIABLES
-C         IBIT1,IBIT2 = USED IN PACKING THE DATA USING MVBITS. THEY
-C                       KEEP TRACK OF TEMPORARY BIT POSITIONS.
-C             NEWIPOS = USED TO KEEP TRACK OF THE BIT POSITION TO
-C                       START PACKING AT.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           NONE
-C
-      DIMENSION IPACK(ND5)
-      DIMENSION IA(NVAL)
-C
-      IER=0
-C 
-      IF(IBIT.EQ.0)GO TO 900
-C        WHEN IBIT = 0, NO VALUES ARE PACKED.
-C
-C        CHECK LEGITIMATE VALUE OF IPOS.
-C
-      IF(IPOS.LE.0.OR.IPOS.GT.L3264B)THEN
-         IER=2
-C        WRITE(KFILDO,101)IPOS,IER
-C101     FORMAT(/' IPOS = 'I6,' NOT IN THE RANGE 1 TO L3264B',
-C    1           ' IN PK_S7.  RETURN FROM PK_S7 WITH IER = 'I4)
-         GO TO 900 
-      ENDIF
-C
-C        CHECK LEGITIMATE VALUE OF IBIT.
-C
-      IF(IBIT.LT.0.OR.IBIT.GT.32)THEN
-         IER=3
-C        WRITE(KFILDO,102)IBIT,IER
-C102     FORMAT(/' IBIT = 'I6,' NOT IN THE RANGE 0 TO 32 IN PK_S7.',
-C    1           ' RETURN FROM PK_S7 WITH IER = 'I4)
-         GO TO 900
-      ENDIF
-C
-C        CHECK WHETHER ND5 IS SUFFICIENT FOR ALL NVAL VALUES.
-C
-      IF(IBIT*NVAL.GT.(L3264B+1-IPOS)+(ND5-LOCN)*L3264B)THEN
-         IER=705
-C        WRITE(KFILDO,103)NVAL,IBIT,LOCN,IPOS,ND5,IER
-C103     FORMAT(/' NVAL = 'I9,' AND IBIT = 'I6,' REQUIRE MORE BITS',
-C    1           ' THAN ARE AVAILABLE IN IPACK( ),',
-C    2           ' WITH LOCN ='I8,', IPOS ='I4,', AND ND5 ='I8,'.'/
-C    3           ' RETURN FROM PK_S7 WITH IER ='I4)
-         GO TO 900
-      ENDIF
-C     
-      DO 300 K=1,NVAL 
-C
-      NEWIPOS=IPOS+IBIT
-C
-      IF(NEWIPOS.LE.L3264B+1)THEN
-         CALL MVBITS(IA(K),0,IBIT,IPACK(LOCN),L3264B+1-NEWIPOS)
-C
-         IF(NEWIPOS.LE.L3264B)THEN
-            IPOS=NEWIPOS
-         ELSE
-            IPOS=1
-            LOCN=LOCN+1
-         ENDIF
-C
-      ELSE
-         IBIT1=L3264B+1-IPOS
-         IBIT2=IBIT-IBIT1
-         CALL MVBITS(IA(K),IBIT2,IBIT1,IPACK(LOCN),0)
-         LOCN=LOCN+1
-         CALL MVBITS(IA(K),0,IBIT2,IPACK(LOCN),L3264B-IBIT2)
-         IPOS=IBIT2+1
-      ENDIF
-C
- 300  CONTINUE
-C
- 900  IF(IER.NE.0)RETURN 1
-C
-      RETURN
-      END
+      subroutine pk_s7(kfildo,ipack,nd5,locn,ipos,ia,nval,ibit,
+     1                 l3264b,ier,*)
+c
+c        may     1997   glahn   tdl   hp
+c        march   2000   glahn   changed name from pks4lx;
+c                               ic( ) to ia( ); nxy to nval;
+c                               * = return1
+c        january 2001   glahn   comments; ier = 1 changed to 705;
+c                               standardized return
+c
+c        purpose
+c            packs nval values into ipack( ).  the packed values
+c            are taken from ia( ).  pk_s7 eliminates the calling of
+c            pkbg, and rather incorporates it into the loop.
+c            since this is a highly used routine, all reasonable
+c            attempts at efficiency must be pursued.  this is for
+c            simple packing, the counterpart of pk_c7 for complex
+c            packing.  pk_s7 accommodates ibit = 0
+c
+c        data set use 
+c           kfildo - unit number for output (print) file. (output) 
+c
+c        variables 
+c              kfildo = unit number for output (print) file.  (input) 
+c            ipack(j) = the array holding the actual packed message
+c                       (j=1,max of nd5).  (input/output)
+c                 nd5 = dimension of ipack( ).  (input)
+c                locn = the word position to place the next value.
+c                       (input/output)
+c                ipos = the bit position in locn to start placing
+c               ia(k) = data to pack (k=1,nval).  (input)
+c                nval = dimension of ia( ).  the number of values 
+c                       to be packed.  (input)
+c                ibit = the number of bits used to pack each value.
+c                       (input)
+c              l3264b = integer word length of machine being used.
+c                       (input)
+c                 ier = error return.
+c                          2 = ipos not in the range 1-l3264b.
+c                          3 = ibit not in the range 0-32.
+c                        705 = nd5 is not large enough to accommodate the
+c                              bits necessary to pack nval values 
+c                              starting at the values locn and ipos.
+c                       (output)
+c                   * = alternate return when ier ne 0.
+c
+c        local variables
+c         ibit1,ibit2 = used in packing the data using mvbits. they
+c                       keep track of temporary bit positions.
+c             newipos = used to keep track of the bit position to
+c                       start packing at.
+c
+c        non system subroutines called
+c           none
+c
+      dimension ipack(nd5)
+      dimension ia(nval)
+c
+      ier=0
+c 
+      if(ibit.eq.0)go to 900
+c        when ibit = 0, no values are packed.
+c
+c        check legitimate value of ipos.
+c
+      if(ipos.le.0.or.ipos.gt.l3264b)then
+         ier=2
+c        write(kfildo,101)ipos,ier
+c101     format(/' ipos = 'i6,' not in the range 1 to l3264b',
+c    1           ' in pk_s7.  return from pk_s7 with ier = 'i4)
+         go to 900 
+      endif
+c
+c        check legitimate value of ibit.
+c
+      if(ibit.lt.0.or.ibit.gt.32)then
+         ier=3
+c        write(kfildo,102)ibit,ier
+c102     format(/' ibit = 'i6,' not in the range 0 to 32 in pk_s7.',
+c    1           ' return from pk_s7 with ier = 'i4)
+         go to 900
+      endif
+c
+c        check whether nd5 is sufficient for all nval values.
+c
+      if(ibit*nval.gt.(l3264b+1-ipos)+(nd5-locn)*l3264b)then
+         ier=705
+c        write(kfildo,103)nval,ibit,locn,ipos,nd5,ier
+c103     format(/' nval = 'i9,' and ibit = 'i6,' require more bits',
+c    1           ' than are available in ipack( ),',
+c    2           ' with locn ='i8,', ipos ='i4,', and nd5 ='i8,'.'/
+c    3           ' return from pk_s7 with ier ='i4)
+         go to 900
+      endif
+c     
+      do 300 k=1,nval 
+c
+      newipos=ipos+ibit
+c
+      if(newipos.le.l3264b+1)then
+         call mvbits(ia(k),0,ibit,ipack(locn),l3264b+1-newipos)
+c
+         if(newipos.le.l3264b)then
+            ipos=newipos
+         else
+            ipos=1
+            locn=locn+1
+         endif
+c
+      else
+         ibit1=l3264b+1-ipos
+         ibit2=ibit-ibit1
+         call mvbits(ia(k),ibit2,ibit1,ipack(locn),0)
+         locn=locn+1
+         call mvbits(ia(k),0,ibit2,ipack(locn),l3264b-ibit2)
+         ipos=ibit2+1
+      endif
+c
+ 300  continue
+c
+ 900  if(ier.ne.0)return 1
+c
+      return
+      end

@@ -1,169 +1,169 @@
-      SUBROUTINE INT_MAP(IA,IB,NXY,IS5,NS5,ICLEAN,IBITMAP,
-     1                   MISSP,JER,NDJER,KJER)
-C
-C        MAY      2000   LAWRENCE ORIGINAL CODING
-C        JANUARY  2001   GLAHN    COMMENTS
-C        NOVEMBER 2001   GLAHN    ADDED JER, NDFER, AND KJER TO
-C                                 CALL AND CALLED TRACE
-C
-C        PURPOSE
-C            PROCESSES THE BIT-MAP ASSOCIATED WITH A GRID OF INTEGER
-C            DATA VALUES.  EXACTLY HOW A BIT-MAP IS PROCESSED DEPENDS
-C            PRIMARILY UPON WHICH PACKING METHOD IS BEING USED TO
-C            COMPRESS THE GRIDDED DATA.  THE BIT-MAP INDICATES WHERE
-C            MISSING VALUES ARE LOCATED IN THE DATA FIELD BEING PACKED.
-C            A 0 INDICATES A BAD VALUE WHILE 1 INDICATES A GOOD VALUE.
-C            THERE IS A ONE-TO-ONE CORRESPONDENCE BETWEEN THE VALUES
-C            IN THE BIT-MAP AND THE DATA IN THE DATA FIELD BEFORE 
-C            MISSING VALUES ARE REMOVED.
-C
-C            A BIT-MAP IS REQUIRED WITH SIMPLE PACKING TO
-C            INDICATE WHERE MISSING VALUES ARE LOCATED IN THE
-C            DATA FIELD.  IF A FIELD TO BE PACKED USING THE
-C            SIMPLE METHOD ISN'T ACCOMPANIED BY A BIT-MAP AND
-C            THERE ARE MISSING VALUES EMBEDDED IN THE DATA,
-C            THEN THIS ROUTINE WILL GENERATE A BIT-MAP AND
-C            REMOVE THE MISSING VALUES FROM THE DATA FIELD.
-C
-C            THE COMPLEX PACKING METHOD DOES NOT NEED A BIT-MAP
-C            TO INDICATE WHERE MISSING VALUES ARE LOCATED IN THE
-C            DATA FIELD.  A BIT-MAP CAN BE SUPPLIED BY THE USER
-C            IF THEY ARE PROVIDING A DATA FIELD WITHOUT THE MISSING
-C            VALUES IN IT.  THIS ROUTINE WILL PLACE THE MISSING
-C            VALUES INTO THEIR PROPER PLACES IN THE GRID IN THAT
-C            CASE AND ELIMINATE THE BIT MAP.
-C
-C        DATA SET USE
-C           NONE
-C
-C        VARIABLES
-C               IA(K) = IA( ) CONTAINS THE DATA TO BE COMPRESSED
-C                       (K=1,NXY).  (INPUT/OUTPUT)
-C               IB(K) = THE BIT MAP WHEN ONE IS USED (K=1,NXY).
-C                       IT CAN BE INPUT OR IT CAN BE CALCULATED IF
-C                       THE SIMPLE METHOD IS USED.  COMPLEX AND SPATIAL
-C                       DIFFERENCING METHODS DO NOT USE A BIT MAP,
-C                       BUT WILL ACCEPT ONE AND INSERT THE MISSING
-C                       VALUES INTO THE FIELD BEFORE PACKING.
-C                       (INPUT/OUTPUT)
-C                 NXY = DIMENSION OF IA( ), IB( ),AND IWORK( ).
-C                       (INPUT)
-C              IS5(K) = THE VALUES ASSOCIATED WITH SECTION 5, KEYED
-C                       TO THE OCTET NUMBER(K=1,NS5). THE ELEMENT
-C                       USED IN THIS ROUTINE IS:
-C                       IS5(10), TEMPLATE NUMBER:
-C                         0 = SIMPLE
-C                         1 = NOT SUPPORTED
-C                         2 = COMPLEX
-C                         3 = SPATIAL DIFFERENCING
-C                       (INPUT)
-C                 NS5 = THE DIMENSION OF IS5( ).  (INPUT)
-C              ICLEAN = 1 WHEN THERE ARE NO MISSING VALUES IN IA( ).
-C                       0 OTHERWISE.  (INPUT/OUTPUT)
-C             IBITMAP = 1 WHEN THERE IS A BITMAP IN IB( , ).
-C                       0 OTHERWISE.  (INPUT/OUTPUT)
-C               MISSP = WHEN MISSING POINTS CAN BE PRESENT IN THE DATA,
-C                       THEY WILL HAVE THE VALUE MISSP.  (INPUT)
-C            JER(J,K) = RETURN STATUS CODES AND SEVERITY LEVELS
-C                       (J=1,NDJER)(K=1,2).  VALUES CAN COME FROM
-C                       SUBROUTINES; OTHERWISE: 0 = GOOD RETURN.
-C                       (INPUT/OUTPUT)
-C               NDJER = DIMENSION OF JER( ).  (INPUT)
-C                KJER = NUMBER OF VALUES IN JER( ).  (INPUT/OUTPUT)
-C
-C        LOCAL VARIABLES
-C            IWORK(K) = USED TO CONTAIN THE DATA FIELD WHEN WE
-C                       ARE EXPANDING IT TO CONTAIN MISSING
-C                       VALUES (ONLY DONE WITH THE COMPLEX
-C                       PACKING METHOD).  (AUTOMATIC ARRAY)
-C                   K = A LOOPING/ARRAY INDEXING VARIABLE.
-C                   M = USED TO KEEP TRACK OF THE POSITION OF
-C                       REAL VALUES VERSUS MISSING VALUES IN 
-C                       THE DATA FIELD.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C          NONE 
-C
-      DIMENSION IA(NXY),IB(NXY),IWORK(NXY)
-      DIMENSION IS5(NS5)
-      DIMENSION JER(NDJER,2)
-C
-      IF(IS5(10).EQ.0)THEN
-C
-C           SIMPLE PACKING IS BEING USED. IF THE DATA FIELD
-C           CONTAINS MISSING VALUES, THEN SEE IF THE USER HAS
-C           SUPPLIED A BITMAP. IF ONE HASN'T BEEN SUPPLIED,THEN
-C           GENERATE ONE.
-C
-         IF(ICLEAN.EQ.0)THEN
-C
-            IF(IBITMAP.EQ.0)THEN
-               IBITMAP=1
-C                 IBITMAP BEING OVERRIDDEN AND A BIT MAP BEING
-C                 GENERATED.
-               CALL PK_TRACE(KFILDO,JER,NDJER,KJER,913,0)
-C
-               M=1
-C
-               DO 10 K=1,NXY
-C
-                 IF(IA(K).EQ.MISSP)THEN
-                    IB(K)=0
-                 ELSE
-                    IB(K)=1
-                    IA(M)=IA(K)
-                    M=M+1
-                 ENDIF
-C
- 10            CONTINUE
-C
-               ICLEAN=1
-            ENDIF
-C
-         ENDIF
-C
-C           IF THE USER DOESN'T SUPPLY A BIT-MAP
-C           AND THE FIELD IS INDICATED AS CLEAN,
-C           THEN IT IS ASSUMED THAT THERE ARE NO
-C           MISSING VALUES. IN THAT CASE THE BIT-MAP HAS
-C           ALL ONE'S AND DOES NOT NEED TO BE PACKED IN
-C           SECTION 6 NOR SUPPLIED BY THE USER.
-      ELSEIF(IS5(10).GE.2)THEN
-C
-C           A FORM OF COMPLEX PACKING IS BEING USED.
-C           IF A BIT-MAP HAS BEEN SUPPLIED AND THE FIELD
-C           IS CLEAN, THEN EXPAND THE DATA FIELD TO INCLUDE
-C           THE MISSING VALUES AND DISCARD THE BIT-MAP.
-C
-         IF(IBITMAP.EQ.1)THEN
-C
-            IF(ICLEAN.EQ.1)THEN
-               M=1
-C
-               DO 20 K=1,NXY
-                  IF(IB(K).EQ.0)THEN
-                     IWORK(K)=MISSP
-                  ELSE
-                     IWORK(K)=IA(M)
-                     M=M+1
-                  ENDIF
- 20            CONTINUE
-C
-               DO 30 K=1,NXY
-                  IA(K)=IWORK(K)
- 30            CONTINUE
-C
-               IBITMAP=0
-               ICLEAN=0
-C                 IBITMAP AND ICLEAN BEING OVERRIDDEN AND A
-C                 THE BIT MAP BEING INCORPORATED INTO THE DATA.
-               CALL PK_TRACE(KFILDO,JER,NDJER,KJER,914,0)
-C
-            ENDIF
-C
-         ENDIF
-C
-      ENDIF
-C
-      RETURN
-      END
+      subroutine int_map(ia,ib,nxy,is5,ns5,iclean,ibitmap,
+     1                   missp,jer,ndjer,kjer)
+c
+c        may      2000   lawrence original coding
+c        january  2001   glahn    comments
+c        november 2001   glahn    added jer, ndfer, and kjer to
+c                                 call and called trace
+c
+c        purpose
+c            processes the bit-map associated with a grid of integer
+c            data values.  exactly how a bit-map is processed depends
+c            primarily upon which packing method is being used to
+c            compress the gridded data.  the bit-map indicates where
+c            missing values are located in the data field being packed.
+c            a 0 indicates a bad value while 1 indicates a good value.
+c            there is a one-to-one correspondence between the values
+c            in the bit-map and the data in the data field before 
+c            missing values are removed.
+c
+c            a bit-map is required with simple packing to
+c            indicate where missing values are located in the
+c            data field.  if a field to be packed using the
+c            simple method isn't accompanied by a bit-map and
+c            there are missing values embedded in the data,
+c            then this routine will generate a bit-map and
+c            remove the missing values from the data field.
+c
+c            the complex packing method does not need a bit-map
+c            to indicate where missing values are located in the
+c            data field.  a bit-map can be supplied by the user
+c            if they are providing a data field without the missing
+c            values in it.  this routine will place the missing
+c            values into their proper places in the grid in that
+c            case and eliminate the bit map.
+c
+c        data set use
+c           none
+c
+c        variables
+c               ia(k) = ia( ) contains the data to be compressed
+c                       (k=1,nxy).  (input/output)
+c               ib(k) = the bit map when one is used (k=1,nxy).
+c                       it can be input or it can be calculated if
+c                       the simple method is used.  complex and spatial
+c                       differencing methods do not use a bit map,
+c                       but will accept one and insert the missing
+c                       values into the field before packing.
+c                       (input/output)
+c                 nxy = dimension of ia( ), ib( ),and iwork( ).
+c                       (input)
+c              is5(k) = the values associated with section 5, keyed
+c                       to the octet number(k=1,ns5). the element
+c                       used in this routine is:
+c                       is5(10), template number:
+c                         0 = simple
+c                         1 = not supported
+c                         2 = complex
+c                         3 = spatial differencing
+c                       (input)
+c                 ns5 = the dimension of is5( ).  (input)
+c              iclean = 1 when there are no missing values in ia( ).
+c                       0 otherwise.  (input/output)
+c             ibitmap = 1 when there is a bitmap in ib( , ).
+c                       0 otherwise.  (input/output)
+c               missp = when missing points can be present in the data,
+c                       they will have the value missp.  (input)
+c            jer(j,k) = return status codes and severity levels
+c                       (j=1,ndjer)(k=1,2).  values can come from
+c                       subroutines; otherwise: 0 = good return.
+c                       (input/output)
+c               ndjer = dimension of jer( ).  (input)
+c                kjer = number of values in jer( ).  (input/output)
+c
+c        local variables
+c            iwork(k) = used to contain the data field when we
+c                       are expanding it to contain missing
+c                       values (only done with the complex
+c                       packing method).  (automatic array)
+c                   k = a looping/array indexing variable.
+c                   m = used to keep track of the position of
+c                       real values versus missing values in 
+c                       the data field.
+c
+c        non system subroutines called
+c          none 
+c
+      dimension ia(nxy),ib(nxy),iwork(nxy)
+      dimension is5(ns5)
+      dimension jer(ndjer,2)
+c
+      if(is5(10).eq.0)then
+c
+c           simple packing is being used. if the data field
+c           contains missing values, then see if the user has
+c           supplied a bitmap. if one hasn't been supplied,then
+c           generate one.
+c
+         if(iclean.eq.0)then
+c
+            if(ibitmap.eq.0)then
+               ibitmap=1
+c                 ibitmap being overridden and a bit map being
+c                 generated.
+               call pk_trace(kfildo,jer,ndjer,kjer,913,0)
+c
+               m=1
+c
+               do 10 k=1,nxy
+c
+                 if(ia(k).eq.missp)then
+                    ib(k)=0
+                 else
+                    ib(k)=1
+                    ia(m)=ia(k)
+                    m=m+1
+                 endif
+c
+ 10            continue
+c
+               iclean=1
+            endif
+c
+         endif
+c
+c           if the user doesn't supply a bit-map
+c           and the field is indicated as clean,
+c           then it is assumed that there are no
+c           missing values. in that case the bit-map has
+c           all one's and does not need to be packed in
+c           section 6 nor supplied by the user.
+      elseif(is5(10).ge.2)then
+c
+c           a form of complex packing is being used.
+c           if a bit-map has been supplied and the field
+c           is clean, then expand the data field to include
+c           the missing values and discard the bit-map.
+c
+         if(ibitmap.eq.1)then
+c
+            if(iclean.eq.1)then
+               m=1
+c
+               do 20 k=1,nxy
+                  if(ib(k).eq.0)then
+                     iwork(k)=missp
+                  else
+                     iwork(k)=ia(m)
+                     m=m+1
+                  endif
+ 20            continue
+c
+               do 30 k=1,nxy
+                  ia(k)=iwork(k)
+ 30            continue
+c
+               ibitmap=0
+               iclean=0
+c                 ibitmap and iclean being overridden and a
+c                 the bit map being incorporated into the data.
+               call pk_trace(kfildo,jer,ndjer,kjer,914,0)
+c
+            endif
+c
+         endif
+c
+      endif
+c
+      return
+      end

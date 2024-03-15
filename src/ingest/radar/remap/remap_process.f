@@ -1,140 +1,140 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
-      Subroutine Remap_process(
-     :         i_tilt,                                     ! Integer (input)
-     :         i_last_scan,                                ! Integer (input)
-     :         i_first_scan,                               ! Integer (input)
+      subroutine remap_process(
+     :         i_tilt,                                     ! integer (input)
+     :         i_last_scan,                                ! integer (input)
+     :         i_first_scan,                               ! integer (input)
      :         grid_rvel,grid_rvel_sq,grid_nyq,ngrids_vel,n_pot_vel, ! (output)
      :         grid_ref,ngrids_ref,n_pot_ref,                        ! (output)
-     :         NX_L,NY_L,NZ_L,NX_R,NY_R,                   ! Integer   (input)
+     :         nx_l,ny_l,nz_l,nx_r,ny_r,                   ! integer   (input)
      :         l_offset_radar,ioffset,joffset,             !           (input)
      1         lat,lon,topo,                               !           (input)
      1         i_scan_mode,                                !           (input)
-     :         Slant_ranges_m,                             !           (input)
+     :         slant_ranges_m,                             !           (input)
      :         n_rays,                                     !           (input)
      :         n_gates,                                    !           (input)
-     1         Velocity,Reflect,                           !           (input)
-     1         Az_Array,MAX_RAY_TILT,Elevation_deg,        !           (input)
+     1         velocity,reflect,                           !           (input)
+     1         az_array,max_ray_tilt,elevation_deg,        !           (input)
      1         vel_nyquist,                                !           (input)
-     :         ref_min,min_ref_samples,min_vel_samples,dgr,! Integer (input)
-     :         laps_radar_ext,c3_radar_subdir,             ! Char      (input)
-     :         path_to_vrc,                                ! Char      (input)
-     :         namelist_parms,                             ! Struct    (input)
-     :         i_product_i4time,                           ! Integer (input)
-     :         i_num_finished_products,                    ! Integer (output)
-     :         i_status_tilt,i_status)                     ! Integer (output)
+     :         ref_min,min_ref_samples,min_vel_samples,dgr,! integer (input)
+     :         laps_radar_ext,c3_radar_subdir,             ! char      (input)
+     :         path_to_vrc,                                ! char      (input)
+     :         namelist_parms,                             ! struct    (input)
+     :         i_product_i4time,                           ! integer (input)
+     :         i_num_finished_products,                    ! integer (output)
+     :         i_status_tilt,i_status)                     ! integer (output)
 c
-c     Subroutine remap_process
+c     subroutine remap_process
 c
-c     PURPOSE:
-c       Main process routine for the REMAPPING algorithm
+c     purpose:
+c       main process routine for the remapping algorithm
 c
-c **************************** History Section ****************************
+c **************************** history section ****************************
 c
-c       Windsor, C. R.  10-JUL-1985     Original version
-c       Albers, Steve    7-APR-1986     Update for version 03
-c       Albers, Steve      JUN-1987     Map velocities to LAPS grid
-c       Albers, Steve      MAR-1988     Streamlined and converted to 87 data
-c       Albers, Steve      DEC-1988     FURTHER conversions for RT87 cartesian
-c       Albers, Steve      MAY-1992     Turn off range unfolding for velocities
-c       Albers, Steve      FEB-1993     MIN#, 40% FRAC QC for Reflectivity added
-c       Albers, Steve      MAY-1994     88D Version for SUN RISC BOX
-c       Brewster, Keith    AUG-1994     Clean-out of artifacts
-c       Brewster, Keith    APR-1995     Added INITIAL_GATE parameter
-c                                       Modified volume nyquist determination.
-c       Brewster, Keith    SEP-1995     Added point-by-point Nyquist calc.
-c       Albers, Steve   19-DEC-1995     Changed gate_spacing_m variable to 
+c       windsor, c. r.  10-jul-1985     original version
+c       albers, steve    7-apr-1986     update for version 03
+c       albers, steve      jun-1987     map velocities to laps grid
+c       albers, steve      mar-1988     streamlined and converted to 87 data
+c       albers, steve      dec-1988     further conversions for rt87 cartesian
+c       albers, steve      may-1992     turn off range unfolding for velocities
+c       albers, steve      feb-1993     min#, 40% frac qc for reflectivity added
+c       albers, steve      may-1994     88d version for sun risc box
+c       brewster, keith    aug-1994     clean-out of artifacts
+c       brewster, keith    apr-1995     added initial_gate parameter
+c                                       modified volume nyquist determination.
+c       brewster, keith    sep-1995     added point-by-point nyquist calc.
+c       albers, steve   19-dec-1995     changed gate_spacing_m variable to 
 c                                       gate_spacing_m_ret to prevent 
-c                                       reassigning a parameter value. The 
-c                                       location is the call to read_data_88D 
+c                                       reassigning a parameter value. the 
+c                                       location is the call to read_data_88d 
 c                                       and a new declaration.
-c                                       Environment variable evaluations added
-c                                       for FTPing and purging the output.
-c                                       New streamlined purging function.
-c       Albers, Steve      FEB-1996     Linear reflectivity averaging (via lut)
-c       Albers, Steve      MAY-1996     New igate_lut to reduce processing 
-c       Albers, Steve          1998     More flexibility added
+c                                       environment variable evaluations added
+c                                       for ftping and purging the output.
+c                                       new streamlined purging function.
+c       albers, steve      feb-1996     linear reflectivity averaging (via lut)
+c       albers, steve      may-1996     new igate_lut to reduce processing 
+c       albers, steve          1998     more flexibility added
 
-*********************** Declaration Section **************************
+*********************** declaration section **************************
 c
       include 'trigd.inc'
       implicit none
 c
-c     Input variables
+c     input variables
 c
       integer i_tilt, i_status_tilt
       integer i_last_scan
       integer i_first_scan
       integer i_product_i4time
-      integer MAX_RAY_TILT
-      integer NX_L,NY_L,NZ_L,NX_R,NY_R
+      integer max_ray_tilt
+      integer nx_l,ny_l,nz_l,nx_r,ny_r
       integer ioffset,joffset,io,jo,iomin,iomax,jomin,jomax
 
       integer min_ref_samples,min_vel_samples
 
       real ref_min,dgr
 c
-c     LAPS Grid Dimensions
+c     laps grid dimensions
 c
       include 'remap_constants.dat'
       include 'remap.cmn'
 c
-c     Velocity Obs
+c     velocity obs
 c
-      real grid_rvel(NX_R,NY_R,NZ_L)  !  Radial radar velocities
-      real grid_rvel_sq(NX_R,NY_R,NZ_L)
-      real grid_nyq(NX_R,NY_R,NZ_L)
-      integer ngrids_vel(NX_R,NY_R,NZ_L)
-      integer n_pot_vel(NX_R,NY_R,NZ_L)
+      real grid_rvel(nx_r,ny_r,nz_l)  !  radial radar velocities
+      real grid_rvel_sq(nx_r,ny_r,nz_l)
+      real grid_nyq(nx_r,ny_r,nz_l)
+      integer ngrids_vel(nx_r,ny_r,nz_l)
+      integer n_pot_vel(nx_r,ny_r,nz_l)
 c
-c     Reflectivity Obs
+c     reflectivity obs
 c
-      real grid_ref (NX_R,NY_R,NZ_L)  !  Radar reflectivities
-      integer ngrids_ref (NX_R,NY_R,NZ_L)
-      integer n_pot_ref (NX_R,NY_R,NZ_L)
+      real grid_ref (nx_r,ny_r,nz_l)  !  radar reflectivities
+      integer ngrids_ref (nx_r,ny_r,nz_l)
+      integer n_pot_ref (nx_r,ny_r,nz_l)
 c
-c     Output variables
+c     output variables
 c
       integer i_num_finished_products
       integer i_status
 c
-c     Processing parameters
+c     processing parameters
 c
       real re43
       parameter (re43 = 8503700.) ! 4/3 radius of the earth in meters
@@ -143,7 +143,7 @@ c
       integer max_fields
       parameter (max_fields = 10)
 c
-c     Variables for NetCDF I/O
+c     variables for netcdf i/o
 c
       character*150 dir
 
@@ -157,30 +157,30 @@ c
       character*(*) path_to_vrc
 
 c
-c     Functions
+c     functions
 c
       real height_to_zcoord
       real height_of_level
 c
-c     Misc local variables
+c     misc local variables
 c
       integer igate,i_scan_mode,jray,end_ext,ilut_ref
 c
-      Real  Slant_ranges_m (max_gates),
-     :        Elevation_deg,
-     :        Az_array(MAX_RAY_TILT),
-     :        Velocity(max_gates,MAX_RAY_TILT),
-     :        Reflect(max_gates,MAX_RAY_TILT)
+      real  slant_ranges_m (max_gates),
+     :        elevation_deg,
+     :        az_array(max_ray_tilt),
+     :        velocity(max_gates,max_ray_tilt),
+     :        reflect(max_gates,max_ray_tilt)
 
       real, allocatable, dimension(:,:,:,:) :: out_array_4d
 
       real r_missing_data
 
-      real lat(NX_L,NY_L)      
-      real lon(NX_L,NY_L)      
-      real topo(NX_L,NY_L)     
-      real dum_2d(NX_L,NY_L)   ! Local
-      integer k_eff(NX_L,NY_L) ! Local
+      real lat(nx_l,ny_l)      
+      real lon(nx_l,ny_l)      
+      real topo(nx_l,ny_l)     
+      real dum_2d(nx_l,ny_l)   ! local
+      integer k_eff(nx_l,ny_l) ! local
 c
       logical l_unfold, l_compress_output, l_domain_read, l_offset_radar       
       save l_domain_read
@@ -217,17 +217,17 @@ c
 
       save height_max, k_low, n_obs_vel, n_output_data
 c
-c     Beginning of executable code
+c     beginning of executable code
 c
       idebug = 0 ! more verbose output (0-2 range)
 
       write(6,*)
       write(6,805) i_first_scan,i_last_scan,i_tilt
-  805 format(' REMAP_PROCESS > ifirst,ilast,tilt',4i5)
+  805 format(' remap_process > ifirst,ilast,tilt',4i5)
 
       call get_l_compress_radar(l_compress_output,i_status)
       if(i_status .ne. 1)then
-          write(6,*)' Error in obtaining l_compress_radar'
+          write(6,*)' error in obtaining l_compress_radar'
           return
       endif
 
@@ -237,7 +237,7 @@ c
       c4_radarname = c4_radarname_cmn
 
       if(rlat_radar .eq. 0.)then
-          write(6,*)' ERROR: no radar coords in remap_process'
+          write(6,*)' error: no radar coords in remap_process'
           i_status = 0
           return
       endif
@@ -246,19 +246,19 @@ c
 
       call get_r_missing_data(r_missing_data, i_status)
       if(i_status .ne. 1)then
-          write(6,*)' Error in obtaining r_missing_data'
+          write(6,*)' error in obtaining r_missing_data'
           return
       endif
 c
-c     For first scan, initialize sums and counters to zero.
+c     for first scan, initialize sums and counters to zero.
 c
-      IF (i_first_scan .eq. 1 .or. i_first_scan .eq. 999) THEN
+      if (i_first_scan .eq. 1 .or. i_first_scan .eq. 999) then
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         write(6,806)
   806   format
-     1  (' REMAP_PROCESS > 1st sweep - Initializing vel/ref arrays')
+     1  (' remap_process > 1st sweep - initializing vel/ref arrays')
 
         n_obs_vel = 0
         n_output_data = 0
@@ -272,31 +272,31 @@ c
         n_pot_vel(:,:,:) = 0
         n_pot_ref(:,:,:) = 0
 c
-c       Compute maximum height of data needed.
+c       compute maximum height of data needed.
 c
-        height_max = height_of_level(NZ_L)
+        height_max = height_of_level(nz_l)
 c
-c       Define Lower Limit of Radar Coverage in LAPS grid
+c       define lower limit of radar coverage in laps grid
 c
         k_low = int(height_to_zcoord(rheight_radar,i_status))
         k_low = max(k_low,1)
 
-!       True will map one tilt in each LAPS level (for testing only)
+!       true will map one tilt in each laps level (for testing only)
         if(namelist_parms%l_ppi_mode)then 
             k_low = 1 
         endif
 
-      END IF ! initialize for 1st scan
+      end if ! initialize for 1st scan
 
-c     Former location of 'read_data_88d' call
-      IF (i_status_tilt .ne. 1) GO TO 998 ! abnormal return
+c     former location of 'read_data_88d' call
+      if (i_status_tilt .ne. 1) go to 998 ! abnormal return
 c
       v_nyquist_tilt(i_tilt) = vel_nyquist
 c
-      write(6,*)' REMAP_PROCESS > vel_nyquist for this tilt = '
+      write(6,*)' remap_process > vel_nyquist for this tilt = '
      :        ,i_tilt,vel_nyquist
 c
-c     Compute max range from elevation angle
+c     compute max range from elevation angle
 c
       rmax = -re43 * sind(elevation_deg)
      :  + sqrt(re43*re43*sind(elevation_deg)**2 +
@@ -312,37 +312,37 @@ c
 
       write(6,809) i_scan_mode,n_gates,igate_max,elevation_deg
  809  format
-     :(' REMAP_PROCESS > i_scan_mode,n_gates,igate_max,elevation = '
+     :(' remap_process > i_scan_mode,n_gates,igate_max,elevation = '
      :                                                 ,i3,2i5,f5.1)
 
-!     Calculate effective range/height at grid point centers (done iteratively)
+!     calculate effective range/height at grid point centers (done iteratively)
       
-!     First read domain grid info if needed
+!     first read domain grid info if needed
 !     if(.not. l_domain_read)then
       if(.false.)then
-          write(6,*)' REMAP_PROCESS > call get_laps_domain_95'
-          call get_laps_domain_95(NX_L,NY_L,lat,lon,topo
+          write(6,*)' remap_process > call get_laps_domain_95'
+          call get_laps_domain_95(nx_l,ny_l,lat,lon,topo
      1                           ,dum_2d,grid_spacing_cen_m
      1                           ,istatus)
           if(istatus .ne. 1)then
-              write(6,*)' ERROR return from get_laps_domain_95'
+              write(6,*)' error return from get_laps_domain_95'
               return
           endif
           l_domain_read = .true.
       endif
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
-      write(6,*)' REMAP_PROCESS > calculate k_eff array'
+      write(6,*)' remap_process > calculate k_eff array'
 
       height_guess = height_max
 
-      DO j = 1,NY_L
-      DO i = 1,NX_L
-!         Use guessed height to obtain initial range value
-          call latlon_to_radar(lat(i,j),lon(i,j),height_guess           ! I
-     1                        ,azimuth,range_new,elevation_dum          ! O
-     1                        ,rlat_radar,rlon_radar,rheight_radar)     ! I  
+      do j = 1,ny_l
+      do i = 1,nx_l
+!         use guessed height to obtain initial range value
+          call latlon_to_radar(lat(i,j),lon(i,j),height_guess           ! i
+     1                        ,azimuth,range_new,elevation_dum          ! o
+     1                        ,rlat_radar,rlon_radar,rheight_radar)     ! i  
 
           iter = 0
 
@@ -350,19 +350,19 @@ c
 
             range_dum = r_missing_data
 
-!           Converge on height where radar beam hits the grid point
+!           converge on height where radar beam hits the grid point
             do while (abs(range_dum-range_new).gt.10. .and. iter.lt.10)          
               range_dum = range_new
 
-!             Obtain height where radar beam hits grid point
-              call radar_to_latlon(lat_dum,lon_dum,height_grid          ! O
-     1                            ,azimuth,range_dum,elevation_deg      ! I
-     1                            ,rlat_radar,rlon_radar,rheight_radar) ! I
+!             obtain height where radar beam hits grid point
+              call radar_to_latlon(lat_dum,lon_dum,height_grid          ! o
+     1                            ,azimuth,range_dum,elevation_deg      ! i
+     1                            ,rlat_radar,rlon_radar,rheight_radar) ! i
 
-!             Use corrected height to obtain more accurate range
-              call latlon_to_radar(lat(i,j),lon(i,j),height_grid        ! I
-     1                            ,azimuth,range_new,elevation_dum      ! O
-     1                            ,rlat_radar,rlon_radar,rheight_radar) ! I  
+!             use corrected height to obtain more accurate range
+              call latlon_to_radar(lat(i,j),lon(i,j),height_grid        ! i
+     1                            ,azimuth,range_new,elevation_dum      ! o
+     1                            ,rlat_radar,rlon_radar,rheight_radar) ! i  
 
               iter = iter + 1
 
@@ -377,22 +377,22 @@ c
 
           endif
 
-      ENDDO
-      ENDDO
+      enddo
+      enddo
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 c
-c     Find elevation index in look up table
+c     find elevation index in look up table
 c
-      ielev = nint(((elevation_deg-MIN_ELEV) * LUT_ELEVS)
-     1                  /(MAX_ELEV-MIN_ELEV)                 )
+      ielev = nint(((elevation_deg-min_elev) * lut_elevs)
+     1                  /(max_elev-min_elev)                 )
       ielev = max(ielev,0)
-      ielev = min(ielev,LUT_ELEVS)
-      write(6,*)' REMAP_PROCESS > elev index = ',ielev
+      ielev = min(ielev,lut_elevs)
+      write(6,*)' remap_process > elev index = ',ielev
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
-      write(6,*)' REMAP_PROCESS > Looping through rays and gates'
+      write(6,*)' remap_process > looping through rays and gates'
 
       azimuth_interval = 360. / float(lut_azimuths)
       write(6,*)' azimuth_interval = ',azimuth_interval
@@ -402,7 +402,7 @@ c
       mingate_valid_ref = 99999
       maxgate_valid_ref = 0
 
-      DO 200 jray=1, n_rays
+      do 200 jray=1, n_rays
 
         if(az_array(jray) .ne. r_missing_data)then
             nazi = nint(az_array(jray) / azimuth_interval)
@@ -414,9 +414,9 @@ c
         if(namelist_parms%l_hybrid_first_gate)then
           if(elevation_deg .lt. 1.0)then     ! < 1.0
               hybrid_range = 100000. ! 80000.
-          elseif(elevation_deg .lt. 2.0)then ! Between 1.0 and 2.0
+          elseif(elevation_deg .lt. 2.0)then ! between 1.0 and 2.0
               hybrid_range = 60000. ! 60000.
-          elseif(elevation_deg .lt. 3.0)then ! Between 2.0 and 3.0
+          elseif(elevation_deg .lt. 3.0)then ! between 2.0 and 3.0
               hybrid_range = 28000. ! 30000.
           else
               hybrid_range = 0.
@@ -425,10 +425,10 @@ c
           init_ref_gate_hyb = hybrid_range / gate_spacing_m
 
           if(abs(az_array(jray) - 250.) .lt. 80.)then ! higher terrain
-              init_ref_gate_actual = max(INITIAL_REF_GATE
+              init_ref_gate_actual = max(initial_ref_gate
      1                                  ,init_ref_gate_hyb)       
           else
-              init_ref_gate_actual = INITIAL_REF_GATE
+              init_ref_gate_actual = initial_ref_gate
           endif
 
 !         write(6,*)
@@ -436,24 +436,24 @@ c
 !    1        ,hybrid_range,init_ref_gate_actual
 
         else
-          init_ref_gate_actual = INITIAL_REF_GATE
+          init_ref_gate_actual = initial_ref_gate
 
         endif
 
         igate_interval=1
 
-        DO 180 igate=init_ref_gate_actual,igate_max,igate_interval       
+        do 180 igate=init_ref_gate_actual,igate_max,igate_interval       
 
           if(lgate_lut(igate))then ! we'll process this gate, it may have data
 
-            igate_lut = igate/GATE_INTERVAL
+            igate_lut = igate/gate_interval
 
             iran = gate_elev_to_projran_lut(igate_lut,ielev)
 
             i = azran_to_igrid_lut(nazi,iran)
             j = azran_to_jgrid_lut(nazi,iran)
 
-            IF (i .eq. 0 .OR. j .eq. 0) GO TO 180
+            if (i .eq. 0 .or. j .eq. 0) go to 180
 
             io = i - ioffset
             jo = j - joffset 
@@ -469,45 +469,45 @@ c
                 k = gate_elev_to_z_lut(igate_lut,ielev)
             endif
 
-            IF (k .eq. 0) GO TO 180
+            if (k .eq. 0) go to 180
 
-            IF (k .lt. k_low .and. elevation_deg .ge. 0.)then
-                write(6,*)' Error: inconsistent k values - ',k,k_low
+            if (k .lt. k_low .and. elevation_deg .ge. 0.)then
+                write(6,*)' error: inconsistent k values - ',k,k_low
                 stop
-            ENDIF
+            endif
 
-!           True will map one tilt in each LAPS level (for testing only)
+!           true will map one tilt in each laps level (for testing only)
             if(namelist_parms%l_ppi_mode)then 
                 k = i_tilt 
             endif
 
-            IF( lgate_vel_lut(igate) ) THEN
+            if( lgate_vel_lut(igate) ) then
 
-!           IF( igate .ge. INITIAL_VEL_GATE) THEN
+!           if( igate .ge. initial_vel_gate) then
 c
-c      Velocity Data
+c      velocity data
 c
               n_pot_vel(io,jo,k) = n_pot_vel(io,jo,k) + 1
 c
-c      Map velocity if data present and abs value of velocity is
+c      map velocity if data present and abs value of velocity is
 c      more than 2 ms-1.
 c
-              vel_value = Velocity(igate,jray)
+              vel_value = velocity(igate,jray)
 
-              IF (abs(vel_value) .lt. VEL_MIS_CHECK .and.
-     :            abs(vel_value) .gt. namelist_parms%abs_vel_min ) THEN
+              if (abs(vel_value) .lt. vel_mis_check .and.
+     :            abs(vel_value) .gt. namelist_parms%abs_vel_min ) then
 
-                IF(ngrids_vel(io,jo,k).eq.0 .or. 
-     1             vel_nyquist .eq. r_missing_data) THEN
+                if(ngrids_vel(io,jo,k).eq.0 .or. 
+     1             vel_nyquist .eq. r_missing_data) then
                   rvel =  vel_value
 
-                ELSEIF(vel_nyquist .ne. r_missing_data) THEN ! .and. ngrids > 0
+                elseif(vel_nyquist .ne. r_missing_data) then ! .and. ngrids > 0
                   avgvel=grid_rvel(io,jo,k)/float(ngrids_vel(io,jo,k))
                   nycor=nint(0.5*(avgvel-vel_value)/
      :                     vel_nyquist)
                   rvel=vel_value+((2*nycor)*vel_nyquist)
 
-                END IF
+                end if
 
                 n_obs_vel = n_obs_vel + 1
 !               if(n_obs_vel .le. 100)then
@@ -523,26 +523,26 @@ c
                     grid_nyq(io,jo,k)=grid_nyq(io,jo,k)+vel_nyquist
                 endif
 
-              END IF
+              end if
 
-            END IF
+            end if
 c
-c     Map reflectivity
+c     map reflectivity
 c
-            IF( lgate_ref_lut(igate) ) THEN
+            if( lgate_ref_lut(igate) ) then
 
               n_pot_ref(io,jo,k) = n_pot_ref(io,jo,k) + 1
 
-              ref_value = Reflect(igate,jray)
+              ref_value = reflect(igate,jray)
 
-              IF (abs(ref_value) .lt. REF_MIS_CHECK) THEN ! datum is present
+              if (abs(ref_value) .lt. ref_mis_check) then ! datum is present
 
 c               grid_ref(io,jo,k) =
 c    :          grid_ref(io,jo,k) + ref_value
 
                 if(jray .eq. 1 .and. idebug .ge. 2)then
                     write(6,170)ref_value
- 170                format(45x,'Ref = ',f8.2)
+ 170                format(45x,'ref = ',f8.2)
                 endif
 
                 ilut_ref = nint(ref_value * 10.) ! tenths of a dbz
@@ -553,26 +553,26 @@ c    :          grid_ref(io,jo,k) + ref_value
                 mingate_valid_ref = min(mingate_valid_ref,igate)
                 maxgate_valid_ref = max(maxgate_valid_ref,igate)
 
-              END IF
+              end if
 
-            ENDIF ! l_gate_ref(igate) = .true. and we process the reflectivity
+            endif ! l_gate_ref(igate) = .true. and we process the reflectivity
 
-          ENDIF ! l_gate(igate) = .true. and we need to process this gate
+          endif ! l_gate(igate) = .true. and we need to process this gate
 
-  180   CONTINUE ! igate
-  200 CONTINUE ! jray
+  180   continue ! igate
+  200 continue ! jray
 
       write(6,815,err=816)elevation_deg,n_obs_vel
      1                   ,mingate_valid_ref,maxgate_valid_ref
-  815 format(' REMAP_PROCESS > End Ray/Gate Loop: Elev= ',F10.2
-     :      ,'  n_obs_vel = ',I9,' Min/Max Ref Gates ',2I7)
+  815 format(' remap_process > end ray/gate loop: elev= ',f10.2
+     :      ,'  n_obs_vel = ',i9,' min/max ref gates ',2i7)
 
-  816 I4_elapsed = ishow_timer()
+  816 i4_elapsed = ishow_timer()
 
-      IF (i_last_scan .eq. 1) THEN
+      if (i_last_scan .eq. 1) then
         write(6,820)
   820   format(
-     :  ' REMAP_PROCESS > Last Sweep - Dividing velocity & ref arrays')       
+     :  ' remap_process > last sweep - dividing velocity & ref arrays')       
 
 
         n_vel_grids_prelim = 0
@@ -581,41 +581,41 @@ c    :          grid_ref(io,jo,k) + ref_value
         n_ref_grids_qc_fail = 0
 
 c
-c     Diagnostic print-out
+c     diagnostic print-out
 c
         write(6,825)
-  825   format(' REMAP_PROCESS > Prepare reflectivity Output')
+  825   format(' remap_process > prepare reflectivity output')
 
-        DO 480 k = 1, k_low-1
-        DO 480 jo = 1, NY_R
-        DO 480 io = 1, NX_R
+        do 480 k = 1, k_low-1
+        do 480 jo = 1, ny_r
+        do 480 io = 1, nx_r
           grid_ref(io,jo,k)=r_missing_data
           grid_rvel(io,jo,k)=r_missing_data
           grid_nyq(io,jo,k)=r_missing_data
-  480   CONTINUE
+  480   continue
 
-        DO 500 k = k_low,NZ_L
+        do 500 k = k_low,nz_l
 
           write(6,826) k
-  826     format(' REMAP_PROCESS > Dividing: k = ',i2)
+  826     format(' remap_process > dividing: k = ',i2)
 
-          DO 400 jo = 1,NY_R
-          DO 400 io = 1,NX_R
+          do 400 jo = 1,ny_r
+          do 400 io = 1,nx_r
 c
-c     NOTE MIN_VEL_SAMPLES MUST BE GREATER THAN 1
+c     note min_vel_samples must be greater than 1
 c
-            IF(ngrids_vel(io,jo,k) .ge. MIN_VEL_SAMPLES) THEN ! Good gates
+            if(ngrids_vel(io,jo,k) .ge. min_vel_samples) then ! good gates
               vknt=float(ngrids_vel(io,jo,k))
 
-              IF (vknt .ge. float(n_pot_vel(io,jo,k))
-     1                                          * COVERAGE_MIN_VEL) THEN       
+              if (vknt .ge. float(n_pot_vel(io,jo,k))
+     1                                          * coverage_min_vel) then       
 
                 n_vel_grids_prelim = n_vel_grids_prelim + 1
                 variance=( grid_rvel_sq(io,jo,k) - 
      :                    (grid_rvel(io,jo,k)*grid_rvel(io,jo,k)/vknt) )
      :                     /(vknt-1.)
 
-                IF (variance .lt. RV_VAR_LIM) THEN ! increment good counter
+                if (variance .lt. rv_var_lim) then ! increment good counter
 
                   n_vel_grids_final = n_vel_grids_final + 1
                   grid_rvel(io,jo,k) = grid_rvel(io,jo,k)/vknt
@@ -625,164 +625,164 @@ c
                       grid_nyq(io,jo,k) = r_missing_data
                   endif
 
-                ELSE ! Failed VEL QC test
+                else ! failed vel qc test
 
                   grid_rvel(io,jo,k) = r_missing_data
                   grid_nyq(io,jo,k) = r_missing_data
     
-                END IF ! VEL QC test
+                end if ! vel qc test
 
-              ELSE ! Insufficient coverage
+              else ! insufficient coverage
 
                 grid_rvel(io,jo,k) = r_missing_data
                 grid_nyq(io,jo,k) = r_missing_data
 
-              END IF ! Velocity Coverage check
+              end if ! velocity coverage check
 
-            ELSE ! Insufficient velocity count
+            else ! insufficient velocity count
 
               grid_rvel(io,jo,k) = r_missing_data
               grid_nyq(io,jo,k) = r_missing_data
 
-            END IF ! First check of velocity count
+            end if ! first check of velocity count
 c
-c     Reflectivity data
+c     reflectivity data
 c
-!        QC flags within the gridded reflectivities are as follows...
+!        qc flags within the gridded reflectivities are as follows...
 !
-!            r_missing_data     Insufficient number of "potential gates" in
+!            r_missing_data     insufficient number of "potential gates" in
 !                               the grid volume
 !
-!            -101.              Insufficient fractional coverage of "actual"
+!            -101.              insufficient fractional coverage of "actual"
 !                               gates in grid volume
 !
-!            -102.              Reflectivity less than threshold value
+!            -102.              reflectivity less than threshold value
 
 
-            IF(ngrids_ref(io,jo,k) .ge. MIN_REF_SAMPLES) THEN ! Good gates
+            if(ngrids_ref(io,jo,k) .ge. min_ref_samples) then ! good gates
               rknt=float(ngrids_ref(io,jo,k))
-              IF (rknt .ge. float(n_pot_ref(io,jo,k)) 
-     1                                          * COVERAGE_MIN_REF) THEN       
+              if (rknt .ge. float(n_pot_ref(io,jo,k)) 
+     1                                          * coverage_min_ref) then       
 
-!               Calculate mean value of Z
+!               calculate mean value of z
                 grid_ref(io,jo,k) = grid_ref(io,jo,k)/rknt
 
-!               Convert from Z to dbZ
+!               convert from z to dbz
                 grid_ref(io,jo,k) = alog10(grid_ref(io,jo,k)) * 10.
 
-                IF (grid_ref(io,jo,k) .ge. REF_MIN) THEN
+                if (grid_ref(io,jo,k) .ge. ref_min) then
 
                   n_ref_grids = n_ref_grids + 1
-                  IF(n_ref_grids .lt. 200 .and. idebug .ge. 1)
+                  if(n_ref_grids .lt. 200 .and. idebug .ge. 1)
      :               write(6,835) io,jo,k,grid_ref(io,jo,k)
-  835                format(' Grid loc: ',3(i4,','),'  Refl: ',f6.1)
+  835                format(' grid loc: ',3(i4,','),'  refl: ',f6.1)
 
-                ELSE        ! Failed REF QC test
+                else        ! failed ref qc test
  
                   n_ref_grids_qc_fail = n_ref_grids_qc_fail + 1
                   grid_ref(io,jo,k) = -102.
 
-                END IF      ! Passed REF QC test
+                end if      ! passed ref qc test
 
-              ELSE       ! Insufficent coverage
+              else       ! insufficent coverage
 
                 grid_ref(io,jo,k) = -101.
 
-              END IF     ! coverage check of count
+              end if     ! coverage check of count
 
-            ELSE       ! Insufficent data count
+            else       ! insufficent data count
 
               grid_ref(io,jo,k) = r_missing_data
 
-            END IF     ! first check of count
+            end if     ! first check of count
 
-  400     CONTINUE ! io,jo
-  500   CONTINUE ! k
+  400     continue ! io,jo
+  500   continue ! k
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 c
-c     Call QC routine (Now Disabled)
+c     call qc routine (now disabled)
 c
         istatus_qc = 1
-c       call radar_qc(NX_L,NY_L,NZ_L,grid_rvel,istatus_qc)
-        IF (istatus_qc .ne. 1) THEN
+c       call radar_qc(nx_l,ny_l,nz_l,grid_rvel,istatus_qc)
+        if (istatus_qc .ne. 1) then
           i_num_finished_products = 0
           write(6,840)
-  840     format(' REMAP_PROCESS > Bad data detected, no data written')       
-          GO TO 998 ! abnormal return
-        END IF
+  840     format(' remap_process > bad data detected, no data written')       
+          go to 998 ! abnormal return
+        end if
 
         write(6,842) n_ref_grids_qc_fail,n_ref_grids
-  842   format(' REMAP_PROCESS > N_REF_QC_FAIL/N_REF = ',2I12)
+  842   format(' remap_process > n_ref_qc_fail/n_ref = ',2i12)
 
-        IF (n_ref_grids .lt. REF_GRIDS_CHECK) THEN
+        if (n_ref_grids .lt. ref_grids_check) then
           i_num_finished_products = 0
-          write(6,845) n_ref_grids,REF_GRIDS_CHECK
-  845     format(' REMAP_PROCESS > ',i4,' ref grids < ',i4
+          write(6,845) n_ref_grids,ref_grids_check
+  845     format(' remap_process > ',i4,' ref grids < ',i4
      :                                 ,'no data file written...')
-          GO TO 999 ! normal return
-        END IF
+          go to 999 ! normal return
+        end if
 
         write(6,851)n_ref_obs_old(1),n_ref_grids,i4time_old(1)
      1                                          ,i_product_i4time
 
-  851   format(' REMAP_PROCESS > Ref Obs: Old/New',2i6
-     :        ,' I4time: Old/New',2i11)
+  851   format(' remap_process > ref obs: old/new',2i6
+     :        ,' i4time: old/new',2i11)
 
         i4time_old(1) = i_product_i4time
         n_ref_obs_old(1) = n_ref_grids
 c
-c     Determine filename extension
+c     determine filename extension
         ext = laps_radar_ext
-        write(6,*)' REMAP_PROCESS > laps_ext = ',laps_radar_ext
+        write(6,*)' remap_process > laps_ext = ',laps_radar_ext
 c
-c     Prepare to write out data
+c     prepare to write out data
 c
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 c
-        var_a(1) = 'REF'
-        var_a(2) = 'VEL'
-        var_a(3) = 'NYQ'
-        units_a(1) = 'dBZ'
-        units_a(2) = 'M/S'
-        units_a(3) = 'M/S'
-        comment_a(1) = 'Doppler Reflectivity'
-        comment_a(2) = 'Doppler Velocity'
-        comment_a(3) = 'Nyquist Velocity'
+        var_a(1) = 'ref'
+        var_a(2) = 'vel'
+        var_a(3) = 'nyq'
+        units_a(1) = 'dbz'
+        units_a(2) = 'm/s'
+        units_a(3) = 'm/s'
+        comment_a(1) = 'doppler reflectivity'
+        comment_a(2) = 'doppler velocity'
+        comment_a(3) = 'nyquist velocity'
         nf = 3
 
-c       DO 555 k=7,9
+c       do 555 k=7,9
 c       print *, 'sample data on level ',k
-c       DO 555 jo=1,NY_R
-c       DO 555 io=60,60
+c       do 555 jo=1,ny_r
+c       do 555 io=60,60
 c         print *,io,jo,grid_ref(io,jo,k),grid_rvel(io,jo,k)
-c 555   CONTINUE
+c 555   continue
 c
 
         v_nyquist_vol = -999.
         write(6,875) i_tilt
-  875   format(' Determine v_nyquist for the ',i4,' tilt volume')
+  875   format(' determine v_nyquist for the ',i4,' tilt volume')
 c
-        DO 600 i = 1,i_tilt
+        do 600 i = 1,i_tilt
           write(6,880) i,v_nyquist_tilt(i)
-  880     format(' i_tilt:',I6,'  v_nyquist_tilt:',e12.4)
-          IF (v_nyquist_tilt(i) .gt. 0.) THEN
-            IF (v_nyquist_vol .gt. 0.) THEN
-              IF (v_nyquist_tilt(i) .ne. v_nyquist_vol) THEN
+  880     format(' i_tilt:',i6,'  v_nyquist_tilt:',e12.4)
+          if (v_nyquist_tilt(i) .gt. 0.) then
+            if (v_nyquist_vol .gt. 0.) then
+              if (v_nyquist_tilt(i) .ne. v_nyquist_vol) then
                 v_nyquist_vol = r_missing_data
                 write(6,886)
-  886           format(' Nyquist has changed for the tilt',
+  886           format(' nyquist has changed for the tilt',
      1                 ', set v_nyquist_vol to missing.')
-                GO TO 601
-              END IF
-            ELSE
+                go to 601
+              end if
+            else
               v_nyquist_vol = v_nyquist_tilt(i)
-            END IF
-          END IF
-  600   CONTINUE
-  601   CONTINUE
+            end if
+          end if
+  600   continue
+  601   continue
 c
-c     Write out header type info into the comment array
+c     write out header type info into the comment array
 c
         l_unfold=.false.
         write(comment_a(1),888)rlat_radar,rlon_radar,rheight_radar
@@ -800,49 +800,49 @@ c
         write(6,890)comment_a(3)(1:80)
   890   format(a80)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         if(laps_radar_ext(1:3) .ne. 'vrc')then ! vxx output
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-            call ref_fill_horz(grid_ref,NX_L,NY_L,NZ_L
+            call ref_fill_horz(grid_ref,nx_l,ny_l,nz_l
      1                        ,lat,lon,dgr
-     1                        ,NX_R,NY_R,ioffset,joffset
+     1                        ,nx_r,ny_r,ioffset,joffset
      1                        ,rlat_radar,rlon_radar,rheight_radar
      1                        ,istatus)       
             if(istatus .ne. 1)then
-                write(6,*)' Error calling ref_fill_horz'          
+                write(6,*)' error calling ref_fill_horz'          
                 return
             endif
 
-            allocate( out_array_4d(NX_L,NY_L,NZ_L,3), STAT=istat_alloc )       
+            allocate( out_array_4d(nx_l,ny_l,nz_l,3), stat=istat_alloc )       
             if(istat_alloc .ne. 0)then
-                write(6,*)' ERROR: Could not allocate out_array_4d'
+                write(6,*)' error: could not allocate out_array_4d'
                 stop
             endif
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-            write(6,*)' Filling output arrays'
+            write(6,*)' filling output arrays'
 
             if(l_offset_radar)then
 
-                out_array_4d = r_missing_data ! Initialize
+                out_array_4d = r_missing_data ! initialize
 
                 iomin = max((1-ioffset),1)
-                iomax = min((NX_L-ioffset),NX_R)
+                iomax = min((nx_l-ioffset),nx_r)
 
                 jomin = max((1-joffset),1)
-                jomax = min((NY_L-joffset),NY_R)
+                jomax = min((ny_l-joffset),ny_r)
 
                 write(6,*)' io range: ',iomin,iomax,
      1                    ' jo range: ',jomin,jomax
 
-                do k = 1,NZ_L
-                    do jo = jomin,jomax ! 1,NY_R
+                do k = 1,nz_l
+                    do jo = jomin,jomax ! 1,ny_r
                         j = jo + joffset
-                        do io = iomin,iomax ! 1,NX_R
+                        do io = iomin,iomax ! 1,nx_r
                             i = io + ioffset
                             out_array_4d(i,j,k,1) = grid_ref(io,jo,k)
                             out_array_4d(i,j,k,2) = grid_rvel(io,jo,k)       
@@ -858,7 +858,7 @@ c
 
             endif
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
             call make_fnam_lp(i_product_i4time,a9time,istatus)
             if(istatus .ne. 1)return
@@ -868,69 +868,69 @@ c
             if(l_compress_output)then
                 write(6,865) c4_radarname,ext(1:len_ext),a9time
  865            format(
-     1             ' REMAP_PROCESS > Calling put_compressed_multi_3d'          
+     1             ' remap_process > calling put_compressed_multi_3d'          
      1             ,1x,a4,2x,a,2x,a9)          
 
                 call put_compressed_multi_3d(i_product_i4time,ext,var_a       
      1                                ,units_a,comment_a,out_array_4d
-     1                                ,NX_L,NY_L,NZ_L,nf,istatus)
+     1                                ,nx_l,ny_l,nz_l,nf,istatus)
 
             else
                 write(6,866) c4_radarname,ext(1:len_ext),a9time
- 866            format(' REMAP_PROCESS > Calling put_laps_multi_3d'
+ 866            format(' remap_process > calling put_laps_multi_3d'
      1                 ,1x,a4,2x,a,2x,a9)          
 
                 call put_laps_multi_3d(i_product_i4time,ext,var_a
      1                                ,units_a,comment_a,out_array_4d
-     1                                ,NX_L,NY_L,NZ_L,nf,istatus)
+     1                                ,nx_l,ny_l,nz_l,nf,istatus)
 
             endif
 
             deallocate(out_array_4d)
 
-        else ! Single level of data (as per WFO)
+        else ! single level of data (as per wfo)
             call put_remap_vrc(i_product_i4time,comment_a(1)
      1             ,rlat_radar,rlon_radar,rheight_radar
      1             ,dgr
-     1             ,grid_ref,NX_L,NY_L,NZ_L
+     1             ,grid_ref,nx_l,ny_l,nz_l
      1             ,c3_radar_subdir,path_to_vrc,r_missing_data,istatus)       
 
         endif
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
 !       go to 900
 
 900     continue
 
-      END IF ! i_last_scan
+      end if ! i_last_scan
 
       go to 999 ! normal return
 
-!     Return section
+!     return section
 
 998   i_status = 0
-      write(6,*) ' WARNING: Return from remap_process with 0 status'
-      RETURN
+      write(6,*) ' warning: return from remap_process with 0 status'
+      return
 
 999   i_status = 1
-      RETURN
+      return
 
-      END
+      end
 
 
         subroutine purge(ext,nfiles,ntime_min,i4time_now)
 
-!       Keeps number of files according to nfiles or time span according to
+!       keeps number of files according to nfiles or time span according to
 !       ntime_min, whichever is greater
 
-        integer MAX_FILES
-        parameter (MAX_FILES = 1000)
+        integer max_files
+        parameter (max_files = 1000)
 
         character*9 asc_tim_9
         character*31 ext
         character*255 c_filespec
-        character c_fnames(MAX_FILES)*80
+        character c_fnames(max_files)*80
 
         call s_len(ext,len_ext)
 
@@ -939,28 +939,28 @@ c
 
         write(6,*)c_filespec
 
-        call    Get_file_names(  c_filespec,
+        call    get_file_names(  c_filespec,
      1			 i_nbr_files_ret,
-     1			 c_fnames,MAX_FILES,
+     1			 c_fnames,max_files,
      1			 i_status )
 
         if(i_nbr_files_ret .gt. 0)then
             call get_directory_length(c_fnames(1),lenf)
             write(6,*)i_nbr_files_ret,' file(s) in directory'
-        else ! Error Condition
-            write(6,*)' No files in directory'
+        else ! error condition
+            write(6,*)' no files in directory'
             istatus = 0
             return
         endif
 
         ntime_sec = ntime_min * 60
 
-10      do i=1,i_nbr_files_ret-nfiles ! Loop through excess versions
+10      do i=1,i_nbr_files_ret-nfiles ! loop through excess versions
             asc_tim_9 = c_fnames(i)(lenf+1:lenf+9)
-            call i4time_fname_lp(asc_tim_9,I4time_file,istatus)
-            if(i4time_now - i4time_file .gt. ntime_sec)then ! File is too old
+            call i4time_fname_lp(asc_tim_9,i4time_file,istatus)
+            if(i4time_now - i4time_file .gt. ntime_sec)then ! file is too old
 
-!               Delete the file
+!               delete the file
 !               call rm_file(c_fnames(i)(1:lenf+13),istatus)
                 call rm_file(c_fnames(i),istatus)
 
@@ -999,18 +999,18 @@ c
      1                         ,field_3d,imax,jmax,kmax,c3_radar_subdir        
      1                         ,path_to_vrc,r_missing_data,istatus)
 
-!       Stuff from 'put_laps_2d' except how do we handle radar subdir?
+!       stuff from 'put_laps_2d' except how do we handle radar subdir?
 
-        character*150 DIRECTORY
-        character*150 DIRECTORY1
-        character*31 EXT
+        character*150 directory
+        character*150 directory1
+        character*31 ext
 
         character*125 comment_2d
         character*125 comments_2d(2)
         character*10 units(2)
         character*3 vars(2)
 
-        integer LVL_2D(2)
+        integer lvl_2d(2)
 
         real field_3d(imax,jmax,kmax)
         real fields_2d(imax,jmax,2)
@@ -1023,28 +1023,28 @@ c
         character*8 radar_subdir
         character*3 c3_radar_subdir
         character*(*) path_to_vrc
-        character*4 LVL_COORD_2D(2)
+        character*4 lvl_coord_2d(2)
 
         call make_fnam_lp(i4time,a9time,istatus)
         if(istatus .ne. 1)return
 
-        write(6,*)' Subroutine put_remap_vrc for ',a9time
+        write(6,*)' subroutine put_remap_vrc for ',a9time
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)return
 
-!       Get column max reflectivity (now passing in r_missing_data)
+!       get column max reflectivity (now passing in r_missing_data)
         call get_max_reflect(field_3d,imax,jmax,kmax,r_missing_data
      1                      ,fields_2d(1,1,1) )
 
         call get_laps_domain(imax,jmax,'nest7grid',lat,lon,topo,istatus)       
         if(istatus .ne. 1)then
-            write(6,*)' Error calling get_laps_domain'
+            write(6,*)' error calling get_laps_domain'
             return
         endif
 
-!       Calculate closest radar array
-        write(6,*)' Calculating closest radar array (dist to vrc radar)'       
+!       calculate closest radar array
+        write(6,*)' calculating closest radar array (dist to vrc radar)'       
         do i = 1,imax
         do j = 1,jmax
             call latlon_to_radar(lat(i,j),lon(i,j),topo(i,j)
@@ -1053,20 +1053,20 @@ c
         enddo ! j
         enddo ! i
 
-!       call vrc_clutter_thresh(      fields_2d(1,1,1)                   ! I/O
-!    1                               ,dist                               ! I
-!    1                               ,imax,jmax,ref_base,r_missing_data) ! I
+!       call vrc_clutter_thresh(      fields_2d(1,1,1)                   ! i/o
+!    1                               ,dist                               ! i
+!    1                               ,imax,jmax,ref_base,r_missing_data) ! i
 
         call ref_fill_horz(fields_2d(1,1,1),imax,jmax,1,lat,lon,dgr
      1                    ,imax,jmax,0,0
      1                    ,rlat_radar,rlon_radar,rheight_radar,istatus)       
         if(istatus .ne. 1)then
-            write(6,*)' Error calling ref_fill_horz'          
+            write(6,*)' error calling ref_fill_horz'          
             return
         endif
 
-!       Utilize closest radar array
-        write(6,*)' Utilizing closest radar array (dist to vrc radar)'       
+!       utilize closest radar array
+        write(6,*)' utilizing closest radar array (dist to vrc radar)'       
         do i = 1,imax
         do j = 1,jmax
             if(fields_2d(i,j,1) .ne. r_missing_data)then
@@ -1079,17 +1079,17 @@ c
 
         ext = 'vrc'
 
-        vars(1) = 'REF'
-        vars(2) = 'DIS'
+        vars(1) = 'ref'
+        vars(2) = 'dis'
 
-        units(1) = 'DBZ'
-        units(2) = 'M'
+        units(1) = 'dbz'
+        units(2) = 'm'
 
         lvl_2d(1) = 0
         lvl_2d(2) = 0
         
-        lvl_coord_2d(1) = 'MSL'
-        lvl_coord_2d(2) = 'MSL'
+        lvl_coord_2d(1) = 'msl'
+        lvl_coord_2d(2) = 'msl'
 
         comments_2d(1) = comment_2d
         comments_2d(2) = comment_2d
@@ -1112,26 +1112,26 @@ c
         endif            
 
         write(6,11)directory(1:len_dir),ext(1:5),vars
-11      format(' Writing 2d ',a,1x,a5,2(1x,a3))
+11      format(' writing 2d ',a,1x,a5,2(1x,a3))
 
-        CALL WRITE_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1                       2,2,vars,LVL_2D,LVL_COORD_2D,units,
-     1                       comments_2d,fields_2d,ISTATUS)
+        call write_laps_data(i4time,directory,ext,imax,jmax,
+     1                       2,2,vars,lvl_2d,lvl_coord_2d,units,
+     1                       comments_2d,fields_2d,istatus)
         if(istatus .eq. 1)then
-            write(6,*)' VRC successfully written'
+            write(6,*)' vrc successfully written'
         else
-            write(6,*)' VRC not successfully written', istatus
+            write(6,*)' vrc not successfully written', istatus
         endif
 
 
         return
         end
 
-        subroutine vrc_clutter_thresh(ref                             ! I/O
-     1                               ,dist                            ! I
-     1                               ,ni,nj,ref_base,r_missing_data)  ! I
+        subroutine vrc_clutter_thresh(ref                             ! i/o
+     1                               ,dist                            ! i
+     1                               ,ni,nj,ref_base,r_missing_data)  ! i
 
-!       Apply a range dependent reflectivity threshold to filter ground clutter
+!       apply a range dependent reflectivity threshold to filter ground clutter
 
         real ref(ni,nj), dist(ni,nj)
 

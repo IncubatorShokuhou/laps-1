@@ -1,343 +1,343 @@
-      SUBROUTINE REDUCE(KFILDO,JMIN,JMAX,LBIT,NOV,LX,NDG,IBIT,JBIT,KBIT,
-     1                  NOVREF,IBXX2,IER)            
-C
-C        NOVEMBER 2001   GLAHN   TDL   GRIB2
-C        MARCH    2002   GLAHN   COMMENT IER = 715
-C        MARCH    2002   GLAHN   MODIFIED TO ACCOMMODATE LX=1 ON ENTRY
-C
-C        PURPOSE
-C            DETERMINES WHETHER THE NUMBER OF GROUPS SHOULD BE
-C            INCREASED IN ORDER TO REDUCE THE SIZE OF THE LARGE
-C            GROUPS, AND TO MAKE THAT ADJUSTMENT.  BY REDUCING THE
-C            SIZE OF THE LARGE GROUPS, LESS BITS MAY BE NECESSARY
-C            FOR PACKING THE GROUP SIZES AND ALL THE INFORMATION
-C            ABOUT THE GROUPS.
-C
-C            THE REFERENCE FOR NOV( ) WAS REMOVED IN THE CALLING
-C            ROUTINE SO THAT KBIT COULD BE DETERMINED.  THIS
-C            FURNISHES A STARTING POINT FOR THE ITERATIONS IN REDUCE.
-C            HOWEVER, THE REFERENCE MUST BE CONSIDERED.
-C
-C        DATA SET USE 
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT) 
-C
-C        VARIABLES IN CALL SEQUENCE 
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT)
-C             JMIN(J) = THE MINIMUM OF EACH GROUP (J=1,LX).  IT IS
-C                       POSSIBLE AFTER SPLITTING THE GROUPS, JMIN( )
-C                       WILL NOT BE THE MINIMUM OF THE NEW GROUP.
-C                       THIS DOESN'T MATTER; JMIN( ) IS REALLY THE
-C                       GROUP REFERENCE AND DOESN'T HAVE TO BE THE
-C                       SMALLEST VALUE.  (INPUT/OUTPUT)
-C             JMAX(J) = THE MAXIMUM OF EACH GROUP (J=1,LX). 
-C                       (INPUT/OUTPUT)
-C             LBIT(J) = THE NUMBER OF BITS NECESSARY TO PACK EACH GROUP
-C                       (J=1,LX).  (INPUT/OUTPUT)
-C              NOV(J) = THE NUMBER OF VALUES IN EACH GROUP (J=1,LX).
-C                       (INPUT/OUTPUT)
-C                  LX = THE NUMBER OF GROUPS.  THIS WILL BE INCREASED
-C                       IF GROUPS ARE SPLIT.  (INPUT/OUTPUT)
-C                 NDG = THE DIMENSION OF JMIN( ), JMAX( ), LBIT( ), AND
-C                       NOV( ).  (INPUT)
-C                IBIT = THE NUMBER OF BITS NECESSARY TO PACK THE JMIN(J)
-C                       VALUES, J=1,LX.  (INPUT)
-C                JBIT = THE NUMBER OF BITS NECESSARY TO PACK THE LBIT(J)
-C                       VALUES, J=1,LX.  (INPUT)
-C                KBIT = THE NUMBER OF BITS NECESSARY TO PACK THE NOV(J)
-C                       VALUES, J=1,LX.  IF THE GROUPS ARE SPLIT, KBIT
-C                       IS REDUCED.  (INPUT/OUTPUT)
-C              NOVREF = REFERENCE VALUE FOR NOV( ).  (INPUT)
-C            IBXX2(J) = 2**J (J=0,30).  (INPUT)
-C                 IER = ERROR RETURN.  (OUTPUT)
-C                         0 = GOOD RETURN.
-C                       714 = PROBLEM IN ALGORITHM.  REDUCE ABORTED.
-C                       715 = NGP NOT LARGE ENOUGH.  REDUCE ABORTED.
-C           NTOTBT(J) = THE TOTAL BITS USED FOR THE PACKING BITS J
-C                       (J=1,30).  (INTERNAL)
-C            NBOXJ(J) = NEW BOXES NEEDED FOR THE PACKING BITS J
-C                       (J=1,30).  (INTERNAL)
-C           NEWBOX(L) = NUMBER OF NEW BOXES (GROUPS) FOR EACH ORIGINAL
-C                       GROUP (L=1,LX) FOR THE CURRENT J.  (AUTOMATIC)
-C                       (INTERNAL)
-C          NEWBOXP(L) = SAME AS NEWBOX( ) BUT FOR THE PREVIOUS J.
-C                       THIS ELIMINATES RECOMPUTATION.  (AUTOMATIC)
-C                       (INTERNAL)
-C               CFEED = CONTAINS THE CHARACTER REPRESENTATION
-C                       OF A PRINTER FORM FEED.  (CHARACTER) (INTERNAL)
-C               IFEED = CONTAINS THE INTEGER VALUE OF A PRINTER
-C                       FORM FEED.  (INTERNAL)
-C              IORIGB = THE ORIGINAL NUMBER OF BITS NECESSARY
-C                       FOR THE GROUP VALUES.  (INTERNAL)
-C        1         2         3         4         5         6         7 X
-C
-C        NON SYSTEM SUBROUTINES CALLED 
-C           NONE
+      subroutine reduce(kfildo,jmin,jmax,lbit,nov,lx,ndg,ibit,jbit,kbit,
+     1                  novref,ibxx2,ier)            
 c
-      CHARACTER*1 CFEED
-C
-      DIMENSION JMIN(NDG),JMAX(NDG),LBIT(NDG),NOV(NDG)
-      DIMENSION NEWBOX(NDG),NEWBOXP(NDG)
-C        NEWBOX( ) AND NEWBOXP( ) ARE AUTOMATIC ARRAYS.
-      DIMENSION NTOTBT(31),NBOXJ(31)
-      DIMENSION IBXX2(0:30)
-C
-      DATA IFEED/12/
-C
-      IER=0
-      IF(LX.EQ.1)GO TO 410
-C        IF THERE IS ONLY ONE GROUP, RETURN.
-C
-      CFEED=CHAR(IFEED)
-C
-C        INITIALIZE NUMBER OF NEW BOXES PER GROUP TO ZERO.
-C
-      DO 110 L=1,LX
-         NEWBOX(L)=0
- 110  CONTINUE
-C
-C        INITIALIZE NUMBER OF TOTAL NEW BOXES PER J TO ZERO.
-C
-      DO 112 J=1,31
-         NTOTBT(J)=999999999
-         NBOXJ(J)=0
- 112  CONTINUE
-C
-      IORIGB=(IBIT+JBIT+KBIT)*LX
-C        IBIT = BITS TO PACK THE JMIN( ).
-C        JBIT = BITS TO PACK THE LBIT( ).
-C        KBIT = BITS TO PACK THE NOV( ).
-C        LX = NUMBER OF GROUPS.
-         NTOTBT(KBIT)=IORIGB
-C           THIS IS THE VALUE OF TOTAL BITS FOR THE ORIGINAL LX
-C           GROUPS, WHICH REQUIRES KBITS TO PACK THE GROUP
-C           LENGHTS.  SETTING THIS HERE MAKES ONE LESS LOOPS
-C           NECESSARY BELOW.
-C
-C        COMPUTE BITS NOW USED FOR THE PARAMETERS DEFINED.
-C
-C        DETERMINE OTHER POSSIBILITES BY INCREASING LX AND DECREASING
-C        NOV( ) WITH VALUES GREATER THAN THRESHOLDS.  ASSUME A GROUP IS
-C        SPLIT INTO 2 OR MORE GROUPS SO THAT KBIT IS REDUCED WITHOUT
-C        CHANGING IBIT OR JBIT.
-C
-      JJ=0
-C
-      DO 200 J=MIN(30,KBIT-1),2,-1
-C           VALUES GE KBIT WILL NOT REQUIRE SPLITS.  ONCE THE TOTAL
-C           BITS START INCREASING WITH DECREASING J, STOP.  ALSO, THE
-C           NUMBER OF BITS REQUIRED IS KNOWN FOR KBITS = NTOTBT(KBIT).
-C
-         NEWBOXT=0
-C
-         DO 190 L=1,LX
-C
-            IF(NOV(L).LT.IBXX2(J))THEN
-               NEWBOX(L)=0
-C                 NO SPLITS OR NEW BOXES.
-               GO TO 190
-            ELSE
-               NOVL=NOV(L)
-C
-               M=(NOV(L)-1)/(IBXX2(J)-1)+1
-C                 M IS FOUND BY SOLVING THE EQUATION BELOW FOR M:
-C                 (NOV(L)+M-1)/M LT IBXX2(J)
-C                 M GT (NOV(L)-1)/(IBXX2(J)-1)
-C                 SET M = (NOV(L)-1)/(IBXX2(J)-1)+1
- 130           NOVL=(NOV(L)+M-1)/M
-C                 THE +M-1 IS NECESSARY.  FOR INSTANCE, 15 WILL FIT
-C                 INTO A BOX 4 BITS WIDE, BUT WON'T DIVIDE INTO
-C                 TWO BOXES 3 BITS WIDE EACH.
-C      
-               IF(NOVL.LT.IBXX2(J))THEN
-                  GO TO 185
-               ELSE
-                  M=M+1
-C***                  WRITE(KFILDO,135)L,NOV(L),NOVL,M,J,IBXX2(J)
-C*** 135              FORMAT(/' AT 135--L,NOV(L),NOVL,M,J,IBXX2(J)',6I10)               
-                  GO TO 130
-               ENDIF
-C
-C                 THE ABOVE DO LOOP WILL NEVER COMPLETE.
-            ENDIF
-C
- 185        NEWBOX(L)=M-1
-            NEWBOXT=NEWBOXT+M-1
- 190     CONTINUE
-C
-         NBOXJ(J)=NEWBOXT
-         NTOTPR=NTOTBT(J+1)
-         NTOTBT(J)=(IBIT+JBIT)*(LX+NEWBOXT)+J*(LX+NEWBOXT)
-C
-         IF(NTOTBT(J).GE.NTOTPR)THEN
-            JJ=J+1
-C              THE PLUS IS USED BECAUSE J DECREASES PER ITERATION.
-            GO TO 250
-         ELSE
-C
-C              SAVE THE TOTAL NEW BOXES AND NEWBOX( ) IN CASE THIS
-C              IS THE J TO USE.
-C
-            NEWBOXTP=NEWBOXT
-C
-            DO 195 L=1,LX
-               NEWBOXP(L)=NEWBOX(L)
- 195        CONTINUE
-C
-C           WRITE(KFILDO,197)NEWBOXT,IBXX2(J)
-C197        FORMAT(/' *****************************************'
-C    1             /' THE NUMBER OF NEWBOXES PER GROUP OF THE TOTAL',
-C    2              I10,' FOR GROUP MAXSIZE PLUS 1 ='I10
-C    3             /' *****************************************')
-C           WRITE(KFILDO,198) (NEWBOX(L),L=1,LX)
-C198        FORMAT(/' '20I6/(' '20I6))
+c        november 2001   glahn   tdl   grib2
+c        march    2002   glahn   comment ier = 715
+c        march    2002   glahn   modified to accommodate lx=1 on entry
+c
+c        purpose
+c            determines whether the number of groups should be
+c            increased in order to reduce the size of the large
+c            groups, and to make that adjustment.  by reducing the
+c            size of the large groups, less bits may be necessary
+c            for packing the group sizes and all the information
+c            about the groups.
+c
+c            the reference for nov( ) was removed in the calling
+c            routine so that kbit could be determined.  this
+c            furnishes a starting point for the iterations in reduce.
+c            however, the reference must be considered.
+c
+c        data set use 
+c           kfildo - unit number for output (print) file. (output) 
+c
+c        variables in call sequence 
+c              kfildo = unit number for output (print) file.  (input)
+c             jmin(j) = the minimum of each group (j=1,lx).  it is
+c                       possible after splitting the groups, jmin( )
+c                       will not be the minimum of the new group.
+c                       this doesn't matter; jmin( ) is really the
+c                       group reference and doesn't have to be the
+c                       smallest value.  (input/output)
+c             jmax(j) = the maximum of each group (j=1,lx). 
+c                       (input/output)
+c             lbit(j) = the number of bits necessary to pack each group
+c                       (j=1,lx).  (input/output)
+c              nov(j) = the number of values in each group (j=1,lx).
+c                       (input/output)
+c                  lx = the number of groups.  this will be increased
+c                       if groups are split.  (input/output)
+c                 ndg = the dimension of jmin( ), jmax( ), lbit( ), and
+c                       nov( ).  (input)
+c                ibit = the number of bits necessary to pack the jmin(j)
+c                       values, j=1,lx.  (input)
+c                jbit = the number of bits necessary to pack the lbit(j)
+c                       values, j=1,lx.  (input)
+c                kbit = the number of bits necessary to pack the nov(j)
+c                       values, j=1,lx.  if the groups are split, kbit
+c                       is reduced.  (input/output)
+c              novref = reference value for nov( ).  (input)
+c            ibxx2(j) = 2**j (j=0,30).  (input)
+c                 ier = error return.  (output)
+c                         0 = good return.
+c                       714 = problem in algorithm.  reduce aborted.
+c                       715 = ngp not large enough.  reduce aborted.
+c           ntotbt(j) = the total bits used for the packing bits j
+c                       (j=1,30).  (internal)
+c            nboxj(j) = new boxes needed for the packing bits j
+c                       (j=1,30).  (internal)
+c           newbox(l) = number of new boxes (groups) for each original
+c                       group (l=1,lx) for the current j.  (automatic)
+c                       (internal)
+c          newboxp(l) = same as newbox( ) but for the previous j.
+c                       this eliminates recomputation.  (automatic)
+c                       (internal)
+c               cfeed = contains the character representation
+c                       of a printer form feed.  (character) (internal)
+c               ifeed = contains the integer value of a printer
+c                       form feed.  (internal)
+c              iorigb = the original number of bits necessary
+c                       for the group values.  (internal)
+c        1         2         3         4         5         6         7 x
+c
+c        non system subroutines called 
+c           none
+c
+      character*1 cfeed
+c
+      dimension jmin(ndg),jmax(ndg),lbit(ndg),nov(ndg)
+      dimension newbox(ndg),newboxp(ndg)
+c        newbox( ) and newboxp( ) are automatic arrays.
+      dimension ntotbt(31),nboxj(31)
+      dimension ibxx2(0:30)
+c
+      data ifeed/12/
+c
+      ier=0
+      if(lx.eq.1)go to 410
+c        if there is only one group, return.
+c
+      cfeed=char(ifeed)
+c
+c        initialize number of new boxes per group to zero.
+c
+      do 110 l=1,lx
+         newbox(l)=0
+ 110  continue
+c
+c        initialize number of total new boxes per j to zero.
+c
+      do 112 j=1,31
+         ntotbt(j)=999999999
+         nboxj(j)=0
+ 112  continue
+c
+      iorigb=(ibit+jbit+kbit)*lx
+c        ibit = bits to pack the jmin( ).
+c        jbit = bits to pack the lbit( ).
+c        kbit = bits to pack the nov( ).
+c        lx = number of groups.
+         ntotbt(kbit)=iorigb
+c           this is the value of total bits for the original lx
+c           groups, which requires kbits to pack the group
+c           lenghts.  setting this here makes one less loops
+c           necessary below.
+c
+c        compute bits now used for the parameters defined.
+c
+c        determine other possibilites by increasing lx and decreasing
+c        nov( ) with values greater than thresholds.  assume a group is
+c        split into 2 or more groups so that kbit is reduced without
+c        changing ibit or jbit.
+c
+      jj=0
+c
+      do 200 j=min(30,kbit-1),2,-1
+c           values ge kbit will not require splits.  once the total
+c           bits start increasing with decreasing j, stop.  also, the
+c           number of bits required is known for kbits = ntotbt(kbit).
+c
+         newboxt=0
+c
+         do 190 l=1,lx
+c
+            if(nov(l).lt.ibxx2(j))then
+               newbox(l)=0
+c                 no splits or new boxes.
+               go to 190
+            else
+               novl=nov(l)
+c
+               m=(nov(l)-1)/(ibxx2(j)-1)+1
+c                 m is found by solving the equation below for m:
+c                 (nov(l)+m-1)/m lt ibxx2(j)
+c                 m gt (nov(l)-1)/(ibxx2(j)-1)
+c                 set m = (nov(l)-1)/(ibxx2(j)-1)+1
+ 130           novl=(nov(l)+m-1)/m
+c                 the +m-1 is necessary.  for instance, 15 will fit
+c                 into a box 4 bits wide, but won't divide into
+c                 two boxes 3 bits wide each.
+c      
+               if(novl.lt.ibxx2(j))then
+                  go to 185
+               else
+                  m=m+1
+c***                  write(kfildo,135)l,nov(l),novl,m,j,ibxx2(j)
+c*** 135              format(/' at 135--l,nov(l),novl,m,j,ibxx2(j)',6i10)               
+                  go to 130
+               endif
+c
+c                 the above do loop will never complete.
+            endif
+c
+ 185        newbox(l)=m-1
+            newboxt=newboxt+m-1
+ 190     continue
+c
+         nboxj(j)=newboxt
+         ntotpr=ntotbt(j+1)
+         ntotbt(j)=(ibit+jbit)*(lx+newboxt)+j*(lx+newboxt)
+c
+         if(ntotbt(j).ge.ntotpr)then
+            jj=j+1
+c              the plus is used because j decreases per iteration.
+            go to 250
+         else
+c
+c              save the total new boxes and newbox( ) in case this
+c              is the j to use.
+c
+            newboxtp=newboxt
+c
+            do 195 l=1,lx
+               newboxp(l)=newbox(l)
+ 195        continue
+c
+c           write(kfildo,197)newboxt,ibxx2(j)
+c197        format(/' *****************************************'
+c    1             /' the number of newboxes per group of the total',
+c    2              i10,' for group maxsize plus 1 ='i10
+c    3             /' *****************************************')
+c           write(kfildo,198) (newbox(l),l=1,lx)
+c198        format(/' '20i6/(' '20i6))
     
-         ENDIF
-C        
-C205     WRITE(KFILDO,209)KBIT,IORIGB
-C209     FORMAT(/' ORIGINAL BITS WITH KBIT OF',I5,' =',I10)
-C        WRITE(KFILDO,210)(N,N=2,10),(IBXX2(N),N=2,10),
-C    1                    (NTOTBT(N),N=2,10),(NBOXJ(N),N=2,10),
-C    2                    (N,N=11,20),(IBXX2(N),N=11,20),
-C    3                    (NTOTBT(N),N=11,20),(NBOXJ(N),N=11,20),
-C    4                    (N,N=21,30),(IBXX2(N),N=11,20),
-C    5                    (NTOTBT(N),N=21,30),(NBOXJ(N),N=21,30)
-C210     FORMAT(/' THE TOTAL BYTES FOR MAXIMUM GROUP LENGTHS BY ROW'//
-C    1      '   J         = THE NUMBER OF BITS PER GROUP LENGTH'/
-C    2      '   IBXX2(J)  = THE MAXIMUM GROUP LENGTH PLUS 1 FOR THIS J'/
-C    3      '   NTOTBT(J) = THE TOTAL BITS FOR THIS J'/
-C    4      '   NBOXJ(J)  = THE NEW GROUPS FOR THIS J'/
-C    5      4(/10X,9I10)/4(/10I10)/4(/10I10))
-C
- 200  CONTINUE
-C
- 250  PIMP=((IORIGB-NTOTBT(JJ))/FLOAT(IORIGB))*100.
-C     WRITE(KFILDO,252)PIMP,KBIT,JJ
-C252  FORMAT(/' PERCENT IMPROVEMENT =',F6.1,
-C    1        ' BY DECREASING GROUP LENGTHS FROM',I4,' TO',I4,' BITS')
-      IF(PIMP.GE.2.)THEN
-C
-C        WRITE(KFILDO,255)CFEED,NEWBOXTP,IBXX2(JJ)
-C255     FORMAT(A1,/' *****************************************'
-C    1             /' THE NUMBER OF NEWBOXES PER GROUP OF THE TOTAL',
-C    2             I10,' FOR GROUP MAXSIZE PLUS 1 ='I10
-C    2             /' *****************************************')
-C        WRITE(KFILDO,256) (NEWBOXP(L),L=1,LX)
-C256     FORMAT(/' '20I6)
-C
-C           ADJUST GROUP LENGTHS FOR MAXIMUM LENGTH OF JJ BITS.
-C           THE MIN PER GROUP AND THE NUMBER OF BITS REQUIRED
-C           PER GROUP ARE NOT CHANGED.  THIS MAY MEAN THAT A
-C           GROUP HAS A MIN (OR REFERENCE) THAT IS NOT ZERO.
-C           THIS SHOULD NOT MATTER TO THE UNPACKER.
-C
-         LXNKP=LX+NEWBOXTP
-C           LXNKP = THE NEW NUMBER OF BOXES
-C  
-         IF(LXNKP.GT.NDG)THEN
-C              DIMENSIONS NOT LARGE ENOUGH.  PROBABLY AN ERROR
-C              OF SOME SORT.  ABORT.
-C           WRITE(KFILDO,257)NDG,LXNPK
-C        1         2         3         4         5         6         7 X
-C257        FORMAT(/' DIMENSIONS OF JMIN, ETC. IN REDUCE =',I8,
-C    1              ' NOT LARGE ENOUGH FOR THE EXPANDED NUMBER OF',
-C    2              ' GROUPS =',I8,'.  ABORT REDUCE.')
-            IER=715
-            GO TO 410
-C              AN ABORT CAUSES THE CALLING PROGRAM TO REEXECUTE 
-C              WITHOUT CALLING REDUCE.
-         ENDIF
-C
-         LXN=LXNKP
-C           LXN IS THE NUMBER OF THE BOX IN THE NEW SERIES BEING
-C           FILLED.  IT DECREASES PER ITERATION.
-         IBXX2M1=IBXX2(JJ)-1
-C           IBXX2M1 IS THE MAXIMUM NUMBER OF VALUES PER GROUP.
-C
-         DO 300 L=LX,1,-1
-C
-C              THE VALUES IS NOV( ) REPRESENT THOSE VALUES + NOVREF.
-C              WHEN VALUES ARE MOVED TO ANOTHER BOX, EACH VALUE
-C              MOVED TO A NEW BOX REPRESENTS THAT VALUE + NOVREF.
-C              THIS HAS TO BE CONSIDERED IN MOVING VALUES.
-C
-            IF(NEWBOXP(L)*(IBXX2M1+NOVREF)+NOVREF.GT.NOV(L)+NOVREF)THEN
-C                 IF THE ABOVE TEST IS MET, THEN MOVING IBXX2M1 VALUES
-C                 FOR ALL NEW BOXES WILL LEAVE A NEGATIVE NUMBER FOR
-C                 THE LAST BOX.  NOT A TOLERABLE SITUATION.
-               MOVMIN=(NOV(L)-(NEWBOXP(L))*NOVREF)/NEWBOXP(L)
-               LEFT=NOV(L)
-C                 LEFT = THE NUMBER OF VALUES TO MOVE FROM THE ORIGINAL
-C                 BOX TO EACH NEW BOX EXCEPT THE LAST.  LEFT IS THE
-C                 NUMBER LEFT TO MOVE.
-            ELSE
-               MOVMIN=IBXX2M1
-C                 MOVMIN VALUES CAN BE MOVED FOR EACH NEW BOX.
-               LEFT=NOV(L)
-C                 LEFT IS THE NUMBER OF VALUES LEFT TO MOVE.
-            ENDIF
-C
-            IF(NEWBOXP(L).GT.0)THEN
-               IF((MOVMIN+NOVREF)*NEWBOXP(L)+NOVREF.LE.NOV(L)+NOVREF.
-     1          AND.(MOVMIN+NOVREF)*(NEWBOXP(L)+1).GE.NOV(L)+NOVREF)THEN
-                  GO TO 288
-               ELSE
-C***D                 WRITE(KFILDO,287)L,MOVMIN,NOVREF,NEWBOXP(L),NOV(L)
-C***D287              FORMAT(/' AT 287 IN REDUCE--L,MOVMIN,NOVREF,',
-C***D    1                    'NEWBOXP(L),NOV(L)',5I12
-C***D    2                    ' REDUCE ABORTED.')
-C              WRITE(KFILDO,2870)
-C2870          FORMAT(/' AN ERROR IN REDUCE ALGORITHM.  ABORT REDUCE.')
-               IER=714
-               GO TO 410
-C                 AN ABORT CAUSES THE CALLING PROGRAM TO REEXECUTE 
-C                 WITHOUT CALLING REDUCE.
-               ENDIF
-C
-            ENDIF
-C
- 288        DO 290 J=1,NEWBOXP(L)+1
-               MOVE=MIN(MOVMIN,LEFT)
-               JMIN(LXN)=JMIN(L)
-               JMAX(LXN)=JMAX(L)
-               LBIT(LXN)=LBIT(L)
-               NOV(LXN)=MOVE
-               LXN=LXN-1
-               LEFT=LEFT-(MOVE+NOVREF)
-C                 THE MOVE OF MOVE VALUES REALLY REPRESENTS A MOVE OF
-C                 MOVE + NOVREF VALUES.
- 290        CONTINUE
-C
-            IF(LEFT.NE.-NOVREF)THEN
-C***               WRITE(KFILDO,292)L,LXN,MOVE,LXNKP,IBXX2(JJ),LEFT,NOV(L),
-C***     1                          MOVMIN
-C*** 292           FORMAT(' AT 292 IN REDUCE--L,LXN,MOVE,LXNKP,',
-C***     1                'IBXX2(JJ),LEFT,NOV(L),MOVMIN'/8I12)
-            ENDIF
-C     
- 300     CONTINUE
-C
-         LX=LXNKP
-C           LX IS NOW THE NEW NUMBER OF GROUPS.
-         KBIT=JJ
-C           KBIT IS NOW THE NEW NUMBER OF BITS REQUIRED FOR PACKING
-C           GROUP LENGHTS.
-      ENDIF
-C
-C     WRITE(KFILDO,406)CFEED,LX
-C406  FORMAT(A1,/' *****************************************'
-C    1          /' THE GROUP SIZES NOV( ) AFTER REDUCTION IN SIZE',
-C    2           ' FOR'I10,' GROUPS',
-C    3          /' *****************************************')
-C     WRITE(KFILDO,407) (NOV(J),J=1,LX)
-C407  FORMAT(/' '20I6)
-C     WRITE(KFILDO,408)CFEED,LX
-C408  FORMAT(A1,/' *****************************************'
-C    1          /' THE GROUP MINIMA JMIN( ) AFTER REDUCTION IN SIZE',
-C    2           ' FOR'I10,' GROUPS',
-C    3          /' *****************************************')
-C     WRITE(KFILDO,409) (JMIN(J),J=1,LX)
-C409  FORMAT(/' '20I6)
-C
- 410  RETURN
-      END
+         endif
+c        
+c205     write(kfildo,209)kbit,iorigb
+c209     format(/' original bits with kbit of',i5,' =',i10)
+c        write(kfildo,210)(n,n=2,10),(ibxx2(n),n=2,10),
+c    1                    (ntotbt(n),n=2,10),(nboxj(n),n=2,10),
+c    2                    (n,n=11,20),(ibxx2(n),n=11,20),
+c    3                    (ntotbt(n),n=11,20),(nboxj(n),n=11,20),
+c    4                    (n,n=21,30),(ibxx2(n),n=11,20),
+c    5                    (ntotbt(n),n=21,30),(nboxj(n),n=21,30)
+c210     format(/' the total bytes for maximum group lengths by row'//
+c    1      '   j         = the number of bits per group length'/
+c    2      '   ibxx2(j)  = the maximum group length plus 1 for this j'/
+c    3      '   ntotbt(j) = the total bits for this j'/
+c    4      '   nboxj(j)  = the new groups for this j'/
+c    5      4(/10x,9i10)/4(/10i10)/4(/10i10))
+c
+ 200  continue
+c
+ 250  pimp=((iorigb-ntotbt(jj))/float(iorigb))*100.
+c     write(kfildo,252)pimp,kbit,jj
+c252  format(/' percent improvement =',f6.1,
+c    1        ' by decreasing group lengths from',i4,' to',i4,' bits')
+      if(pimp.ge.2.)then
+c
+c        write(kfildo,255)cfeed,newboxtp,ibxx2(jj)
+c255     format(a1,/' *****************************************'
+c    1             /' the number of newboxes per group of the total',
+c    2             i10,' for group maxsize plus 1 ='i10
+c    2             /' *****************************************')
+c        write(kfildo,256) (newboxp(l),l=1,lx)
+c256     format(/' '20i6)
+c
+c           adjust group lengths for maximum length of jj bits.
+c           the min per group and the number of bits required
+c           per group are not changed.  this may mean that a
+c           group has a min (or reference) that is not zero.
+c           this should not matter to the unpacker.
+c
+         lxnkp=lx+newboxtp
+c           lxnkp = the new number of boxes
+c  
+         if(lxnkp.gt.ndg)then
+c              dimensions not large enough.  probably an error
+c              of some sort.  abort.
+c           write(kfildo,257)ndg,lxnpk
+c        1         2         3         4         5         6         7 x
+c257        format(/' dimensions of jmin, etc. in reduce =',i8,
+c    1              ' not large enough for the expanded number of',
+c    2              ' groups =',i8,'.  abort reduce.')
+            ier=715
+            go to 410
+c              an abort causes the calling program to reexecute 
+c              without calling reduce.
+         endif
+c
+         lxn=lxnkp
+c           lxn is the number of the box in the new series being
+c           filled.  it decreases per iteration.
+         ibxx2m1=ibxx2(jj)-1
+c           ibxx2m1 is the maximum number of values per group.
+c
+         do 300 l=lx,1,-1
+c
+c              the values is nov( ) represent those values + novref.
+c              when values are moved to another box, each value
+c              moved to a new box represents that value + novref.
+c              this has to be considered in moving values.
+c
+            if(newboxp(l)*(ibxx2m1+novref)+novref.gt.nov(l)+novref)then
+c                 if the above test is met, then moving ibxx2m1 values
+c                 for all new boxes will leave a negative number for
+c                 the last box.  not a tolerable situation.
+               movmin=(nov(l)-(newboxp(l))*novref)/newboxp(l)
+               left=nov(l)
+c                 left = the number of values to move from the original
+c                 box to each new box except the last.  left is the
+c                 number left to move.
+            else
+               movmin=ibxx2m1
+c                 movmin values can be moved for each new box.
+               left=nov(l)
+c                 left is the number of values left to move.
+            endif
+c
+            if(newboxp(l).gt.0)then
+               if((movmin+novref)*newboxp(l)+novref.le.nov(l)+novref.
+     1          and.(movmin+novref)*(newboxp(l)+1).ge.nov(l)+novref)then
+                  go to 288
+               else
+c***d                 write(kfildo,287)l,movmin,novref,newboxp(l),nov(l)
+c***d287              format(/' at 287 in reduce--l,movmin,novref,',
+c***d    1                    'newboxp(l),nov(l)',5i12
+c***d    2                    ' reduce aborted.')
+c              write(kfildo,2870)
+c2870          format(/' an error in reduce algorithm.  abort reduce.')
+               ier=714
+               go to 410
+c                 an abort causes the calling program to reexecute 
+c                 without calling reduce.
+               endif
+c
+            endif
+c
+ 288        do 290 j=1,newboxp(l)+1
+               move=min(movmin,left)
+               jmin(lxn)=jmin(l)
+               jmax(lxn)=jmax(l)
+               lbit(lxn)=lbit(l)
+               nov(lxn)=move
+               lxn=lxn-1
+               left=left-(move+novref)
+c                 the move of move values really represents a move of
+c                 move + novref values.
+ 290        continue
+c
+            if(left.ne.-novref)then
+c***               write(kfildo,292)l,lxn,move,lxnkp,ibxx2(jj),left,nov(l),
+c***     1                          movmin
+c*** 292           format(' at 292 in reduce--l,lxn,move,lxnkp,',
+c***     1                'ibxx2(jj),left,nov(l),movmin'/8i12)
+            endif
+c     
+ 300     continue
+c
+         lx=lxnkp
+c           lx is now the new number of groups.
+         kbit=jj
+c           kbit is now the new number of bits required for packing
+c           group lenghts.
+      endif
+c
+c     write(kfildo,406)cfeed,lx
+c406  format(a1,/' *****************************************'
+c    1          /' the group sizes nov( ) after reduction in size',
+c    2           ' for'i10,' groups',
+c    3          /' *****************************************')
+c     write(kfildo,407) (nov(j),j=1,lx)
+c407  format(/' '20i6)
+c     write(kfildo,408)cfeed,lx
+c408  format(a1,/' *****************************************'
+c    1          /' the group minima jmin( ) after reduction in size',
+c    2           ' for'i10,' groups',
+c    3          /' *****************************************')
+c     write(kfildo,409) (jmin(j),j=1,lx)
+c409  format(/' '20i6)
+c
+ 410  return
+      end
       

@@ -1,507 +1,507 @@
-      SUBROUTINE W3FI75 (IBITL,ITYPE,ITOSS,FLD,IFLD,IBMAP,IBDSFL,
-     &  NPTS,BDS11,IPFLD,PFLD,LEN,LENBDS,IBERR,PDS,IGDS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:  W3FI75        GRIB PACK DATA AND FORM BDS OCTETS(1-11)
-C   PRGMMR: FARLEY           ORG: NMC421      DATE:94-11-22
-C
-C ABSTRACT: THIS ROUTINE PACKS A GRIB FIELD AND FORMS OCTETS(1-11)
-C   OF THE BINARY DATA SECTION (BDS).
-C
-C PROGRAM HISTORY LOG:
-C   92-07-10  M. FARLEY   ORIGINAL AUTHOR
-C   92-10-01  R.E.JONES   CORRECTION FOR FIELD OF CONSTANT DATA
-C   92-10-16  R.E.JONES   GET RID OF ARRAYS FP AND INT
-C   93-08-06  CAVANAUGH   ADDED ROUTINES FI7501, FI7502, FI7503
-C                         TO ALLOW SECOND ORDER PACKING IN PDS.
-C   93-07-21 STACKPOLE    ASSORTED REPAIRS TO GET 2ND DIFF PACK IN
-C   93-10-28 CAVANAUGH    COMMENTED OUT NONOPERATIONAL PRINTS AND
-C                         WRITE STATEMENTS
-C   93-12-15  CAVANAUGH   CORRECTED LOCATION OF START OF FIRST ORDER
-C                         VALUES AND START OF SECOND ORDER VALUES TO
-C                         REFLECT A BYTE LOCATION IN THE BDS INSTEAD
-C                         OF AN OFFSET IN SUBROUTINE FI7501.
-C   94-01-27  CAVANAUGH   ADDED IGDS AS INPUT ARGUMENT TO THIS ROUTINE
-C                         AND ADDED PDS AND IGDS ARRAYS TO THE CALL TO
-C                         W3FI82 TO PROVIDE INFORMATION NEEDED FOR
-C                         BOUSTROPHEDONIC PROCESSING.
-C   94-05-25  CAVANAUGH   SUBROUTINE FI7503 HAS BEEN ADDED TO PROVIDE
-C                         FOR ROW BY ROW OR COLUMN BY COLUMN SECOND
-C                         ORDER PACKING.  THIS FEATURE CAN BE ACTIVATED
-C                         BY SETTING IBDSFL(7) TO ZERO.
-C   94-07-08  CAVANAUGH   COMMENTED OUT PRINT STATEMENTS USED FOR DEBUG
-C   94-11-22  FARLEY      ENLARGED WORK ARRAYS TO HANDLE .5DEGREE GRIDS
-C   95-06-01  R.E.JONES   CORRECTION FOR NUMBER OF UNUSED BITS AT END
-C                         OF SECTION 4, IN BDS BYTE 4, BITS 5-8.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL W3FI75 (IBITL,ITYPE,ITOSS,FLD,IFLD,IBMAP,IBDSFL,
-C    &              NPTS,BDS11,IPFLD,PFLD,LEN,LENBDS,IBERR,PDS,IGDS)
-C   INPUT ARGUMENT LIST:
-C     IBITL     - 0, COMPUTER COMPUTES PACKING LENGTH FROM POWER
-C                    OF 2 THAT BEST FITS THE DATA.
-C                 8, 12, ETC. COMPUTER RESCALES DATA TO FIT INTO
-C                    SET NUMBER OF BITS.
-C     ITYPE     - 0 = IF INPUT DATA IS FLOATING POINT (FLD)
-C                 1 = IF INPUT DATA IS INTEGER (IFLD)
-C     ITOSS     - 0 = NO BIT MAP IS INCLUDED (DON'T TOSS DATA)
-C                 1 = TOSS NULL DATA ACCORDING TO IBMAP
-C     FLD       - REAL ARRAY OF DATA TO BE PACKED IF ITYPE=0
-C     IFLD      - INTEGER ARRAY TO BE PACKED IF ITYPE=1
-C     IBMAP     - BIT MAP SUPPLIED FROM USER
-C     IBDSFL    - INTEGER ARRAY CONTAINING TABLE 11 FLAG INFO
-C                 BDS OCTET 4:
-C                 (1) 0 = GRID POINT DATA
-C                     1 = SPHERICAL HARMONIC COEFFICIENTS
-C                 (2) 0 = SIMPLE PACKING
-C                     1 = SECOND ORDER PACKING
-C                 (3) 0 = ORIGINAL DATA WERE FLOATING POINT VALUES
-C                     1 = ORIGINAL DATA WERE INTEGER VALUES
-C                 (4) 0 = NO ADDITIONAL FLAGS AT OCTET 14
-C                     1 = OCTET 14 CONTAINS FLAG BITS 5-12
-C                 (5) 0 = RESERVED - ALWAYS SET TO 0
-C                 (6) 0 = SINGLE DATUM AT EACH GRID POINT
-C                     1 = MATRIX OF VALUES AT EACH GRID POINT
-C                 (7) 0 = NO SECONDARY BIT MAPS
-C                     1 = SECONDARY BIT MAPS PRESENT
-C                 (8) 0 = SECOND ORDER VALUES HAVE CONSTANT WIDTH
-C                     1 = SECOND ORDER VALUES HAVE DIFFERENT WIDTHS
-C     NPTS      - NUMBER OF GRIDPOINTS IN ARRAY TO BE PACKED
-C     IGDS      - ARRAY OF GDS INFORMATION
-C
-C   OUTPUT ARGUMENT LIST:
-C     BDS11     - FIRST 11 OCTETS OF BDS
-C     PFLD      - PACKED GRIB FIELD
-C     LEN       - LENGTH OF PFLD
-C     LENBDS    - LENGTH OF BDS
-C     IBERR     - 1, ERROR CONVERTING IEEE F.P. NUMBER TO IBM370 F.P.
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-C
-      REAL            FLD(*)
-C     REAL            FWORK(260000)
-C
-C     FWORK CAN USE DYNAMIC ALLOCATION OF MEMORY ON CRAY
-C
-      REAL            FWORK(NPTS)
-      REAL            RMIN,REFNCE
-C
-      INTEGER         IPFLD(*)
-      INTEGER         IBDSFL(*)
-      INTEGER         IBMAP(*)
-      INTEGER         IFLD(*),IGDS(*)
-C     INTEGER         IWORK(260000)
-C
-C     IWORK CAN USE DYNAMIC ALLOCATION OF MEMORY ON CRAY
-C
-      INTEGER         IWORK(NPTS)
-C
-      LOGICAL         CONST
-C
-      CHARACTER * 1   BDS11(11),PDS(*)
-      CHARACTER * 1   PFLD(*)
-      CHARACTER * 1   CIEXP(8)
-      CHARACTER * 1   CIMANT(8)
-C
-      EQUIVALENCE     (IEXP,CIEXP(1))
-      EQUIVALENCE     (IMANT,CIMANT(1))
-C
-C            1.0   PACK THE FIELD.
-C
-C            1.1   TOSS DATA IF BITMAP BEING USED,
-C                  MOVING 'DATA' TO WORK AREA...
-C
-      CONST = .FALSE.
-      IBERR = 0
-      IW    = 0
-C
-      IF (ITOSS .EQ. 1) THEN
-        IF (ITYPE .EQ. 0) THEN
-          DO 110 IT=1,NPTS
-            IF (IBMAP(IT) .EQ. 1) THEN
-              IW = IW + 1
-              FWORK(IW) = FLD(IT)
-            ENDIF
-  110     CONTINUE
-          NPTS = IW
-        ELSE IF (ITYPE .EQ. 1) THEN
-          DO 111 IT=1,NPTS
-            IF (IBMAP(IT) .EQ. 1) THEN
-              IW = IW + 1
-              IWORK(IW) = IFLD(IT)
-            ENDIF
-  111     CONTINUE
-          NPTS = IW
-        ENDIF
-C
-C             ELSE, JUST MOVE DATA TO WORK ARRAY
-C
-      ELSE IF (ITOSS .EQ. 0) THEN
-        IF (ITYPE .EQ. 0) THEN
-          DO 112 IT=1,NPTS
-            FWORK(IT) = FLD(IT)
-  112     CONTINUE
-        ELSE IF (ITYPE .EQ. 1) THEN
-          DO 113 IT=1,NPTS
-            IWORK(IT) = IFLD(IT)
-  113     CONTINUE
-        ENDIF
-      ENDIF
-C
-C            1.2   CONVERT DATA IF NEEDED PRIOR TO PACKING.
-C                  (INTEGER TO F.P. OR F.P. TO INTEGER)
-C     ITYPE = 0...FLOATING POINT DATA
-C       IBITL = 0...PACK IN LEAST # BITS...CONVERT TO INTEGER
-C     ITYPE = 1...INTEGER DATA
-C       IBITL > 0...PACK IN FIXED # BITS...CONVERT TO FLOATING POINT
-C
-      IF (ITYPE .EQ. 0 .AND. IBITL .EQ. 0) THEN
-        DO 120 IF=1,NPTS
-          IWORK(IF) = NINT(FWORK(IF))
-  120   CONTINUE
-      ELSE IF (ITYPE .EQ. 1 .AND. IBITL .NE. 0) THEN
-        DO 123 IF=1,NPTS
-          FWORK(IF) = FLOAT(IWORK(IF))
-  123   CONTINUE
-      ENDIF
-C
-C            1.3   PACK THE DATA.
-C
-      IF (IBDSFL(2).NE.0) THEN
-C                                    SECOND ORDER PACKING
-C
-C            PRINT*,'  DOING SECOND ORDER PACKING...'
-          IF (IBITL.EQ.0) THEN
-C
-C             PRINT*,'    AND VARIABLE BIT PACKING'
-C
-C                           WORKING WITH INTEGER VALUES
-C                           SINCE DOING VARIABLE BIT PACKING
-C
-              MAX  = IWORK(1)
-              MIN  = IWORK(1)
-              DO 300 I = 2, NPTS
-                  IF (IWORK(I).LT.MIN) THEN
-                      MIN  = IWORK(I)
-                  ELSE IF (IWORK(I).GT.MAX) THEN
-                      MAX  = IWORK(I)
-                  END IF
-  300         CONTINUE
-C                           EXTRACT MINIMA
-              DO 400 I = 1, NPTS
-C                 IF (IWORK(I).LT.0) THEN
-C                     PRINT *,'MINIMA 400',I,IWORK(I),NPTS
-C                 END IF
-                  IWORK(I)  = IWORK(I) - MIN
-  400         CONTINUE
-              REFNCE  = MIN
-              IDIFF   = MAX - MIN
-C             PRINT *,'REFERENCE VALUE',REFNCE
-C
-C             WRITE (6,FMT='(''  MINIMA REMOVED      = '',/,
-C    &              10(3X,10I10,/))') (IWORK(I),I=1,6)
-C             WRITE (6,FMT='(''  END OF ARRAY  = '',/,
-C    &              10(3X,10I10,/))') (IWORK(I),I=NPTS-5,NPTS)
-C
-C                      FIND BIT WIDTH OF IDIFF
-C
-              CALL FI7505 (IDIFF,KWIDE)
-C             PRINT*,'  BIT WIDTH FOR ORIGINAL DATA', KWIDE
-              ISCAL2 = 0
-C
-C             MULTIPLICATIVE SCALE FACTOR SET TO 1
-C             IN ANTICIPATION OF POSSIBLE USE IN GLAHN 2DN DIFF
-C
-              SCAL2 = 1.
-C
-          ELSE
-C
-C             PRINT*,'   AND FIXED BIT PACKING, IBITL = ', IBITL
-C                               FIXED BIT PACKING
-C                               - LENGTH OF FIELD IN IBITL
-C                               - MUST BE REAL DATA
-C                            FLOATING POINT INPUT
-C
-              RMAX  = FWORK(1)
-              RMIN  = FWORK(1)
-              DO 100 I = 2, NPTS
-                  IF (FWORK(I).LT.RMIN) THEN
-                      RMIN  = FWORK(I)
-                  ELSE IF (FWORK(I).GT.RMAX) THEN
-                      RMAX  = FWORK(I)
-                  END IF
-  100         CONTINUE
-              REFNCE  = RMIN
-C             PRINT *,'100 REFERENCE',REFNCE
-C                             EXTRACT MINIMA
-              DO 200 I = 1, NPTS
-                  FWORK(I)  = FWORK(I) - RMIN
-  200         CONTINUE
-C             PRINT *,'REFERENCE VALUE',REFNCE
-C             WRITE (6,FMT='(''  MINIMA REMOVED      = '',/,
-C    &              10(3X,10F8.2,/))') (FWORK(I),I=1,6)
-C             WRITE (6,FMT='(''  END OF ARRAY  = '',/,
-C    &              10(3X,10F8.2,/))') (FWORK(I),I=NPTS-5,NPTS)
-C                                FIND LARGEST DELTA
-              IDELT  = NINT(RMAX - RMIN)
-C                                DO BINARY SCALING
-C                                   FIND OUT WHAT BINARY SCALE FACTOR
-C                                       PERMITS CONTAINMENT OF
-C                                       LARGEST DELTA
-              CALL FI7505 (IDELT,IWIDE)
-C
-C                                   BINARY SCALING
-C
-              ISCAL2  = IWIDE - IBITL
-C             PRINT *,'SCALING NEEDED TO FIT =',ISCAL2
-C             PRINT*,'  RANGE OF  = ',IDELT
-C
-C                                EXPAND DATA WITH BINARY SCALING
-C                                CONVERT TO INTEGER
-              SCAL2  = 2.0**ISCAL2
-              SCAL2  = 1./ SCAL2
-              DO 600 I = 1, NPTS
-                  IWORK(I)  = NINT(FWORK(I) * SCAL2)
-  600         CONTINUE
-              KWIDE = IBITL
-          END IF
-C
-C  *****************************************************************
-C
-C           FOLLOWING IS FOR GLAHN SECOND DIFFERENCING
-C           NOT STANDARD GRIB
-C
-C            TEST FOR SECOND DIFFERENCE PACKING
-C            BASED OF SIZE OF PDS - SIZE IN FIRST 3 BYTES
-C
-          CALL GBYTE (PDS,IPDSIZ,0,24)
-          IF (IPDSIZ.EQ.50) THEN
-C             PRINT*,'  DO SECOND DIFFERENCE PACKING '
-C
-C                   GLAHN PACKING TO 2ND DIFFS
-C
-C             WRITE (6,FMT='(''  CALL TO W3FI82 WITH = '',/,
-C    &                  10(3X,10I6,/))') (IWORK(I),I=1,NPTS)
-C
-               CALL W3FI82 (IWORK,FVAL1,FDIFF1,NPTS,PDS,IGDS)
-C
-C             PRINT *,'GLAHN',FVAL1,FDIFF1
-C             WRITE (6,FMT='(''  OUT FROM W3FI82 WITH = '',/,
-C    &                  10(3X,10I6,/))') (IWORK(I),I=1,NPTS)
-C
-C             MUST NOW RE-REMOVE THE MINIMUM VALUE
-C             OF THE SECOND DIFFERENCES TO ASSURE
-C             ALL POSITIVE NUMBERS FOR SECOND ORDER GRIB PACKING
-C
-C             ORIGINAL REFERENCE VALUE ADDED TO FIRST POINT
-C             VALUE FROM THE 2ND DIFF PACKER TO BE ADDED
-C             BACK IN WHEN THE 2ND DIFF VALUES ARE
-C             RECONSTRUCTED BACK TO THE BASIC VALUES
-C
-C             ALSO, THE REFERENCE VALUE IS
-C             POWER-OF-TWO SCALED TO MATCH
-C             FVAL1.  ALL OF THIS SCALING
-C             WILL BE REMOVED AFTER THE
-C             GLAHN SECOND DIFFERENCING IS UNDONE.
-C             THE SCALING FACTOR NEEDED TO DO THAT
-C             IS SAVED IN THE PDS AS A SIGNED POSITIVE
-C             TWO BYTE INTEGER
-C
-C             THE SCALING FOR THE 2ND DIF PACKED
-C             VALUES IS PROPERLY SET TO ZERO
-C
-              FVAL1 = FVAL1 + REFNCE*SCAL2
-C                                          FIRST TEST TO SEE IF
-C                                          ON 32 OR 64 BIT COMPUTER
-              CALL W3FI01(LW)
-              IF (LW.EQ.4) THEN
-                  CALL W3FI76 (FVAL1,IEXP,IMANT,32)
-              ELSE
-                  CALL W3FI76 (FVAL1,IEXP,IMANT,64)
-              END IF
-              CALL SBYTE (PDS,IEXP,320,8)
-              CALL SBYTE (PDS,IMANT,328,24)
-C
-              IF (LW.EQ.4) THEN
-                  CALL W3FI76 (FDIFF1,IEXP,IMANT,32)
-              ELSE
-                  CALL W3FI76 (FDIFF1,IEXP,IMANT,64)
-              END IF
-              CALL SBYTE (PDS,IEXP,352,8)
-              CALL SBYTE (PDS,IMANT,360,24)
-C
-C             TURN ISCAL2 INTO SIGNED POSITIVE INTEGER
-C             AND STORE IN TWO BYTES
-C
-              IF(ISCAL2.GE.0)  THEN
-                CALL SBYTE (PDS,ISCAL2,384,16)
-              ELSE
-                CALL SBYTE (PDS,1,384,1)
-                ISCAL2 = - ISCAL2
-                CALL SBYTE( PDS,ISCAL2,385,15)
-              ENDIF
-C
-              MAX  = IWORK(1)
-              MIN  = IWORK(1)
-              DO 700 I = 2, NPTS
-                  IF (IWORK(I).LT.MIN) THEN
-                      MIN  = IWORK(I)
-                  ELSE IF (IWORK(I).GT.MAX) THEN
-                      MAX  = IWORK(I)
-                  END IF
-  700         CONTINUE
-C                           EXTRACT MINIMA
-              DO 710 I = 1, NPTS
-                  IWORK(I)  = IWORK(I) - MIN
-  710         CONTINUE
-              REFNCE  = MIN
-C             PRINT *,'710 REFERENCE',REFNCE
-              ISCAL2 = 0
-C
-C             AND RESET VALUE OF KWIDE - THE BIT WIDTH
-C             FOR THE RANGE OF THE VALUES
-C
-              IDIFF = MAX - MIN
-              CALL FI7505 (IDIFF,KWIDE)
-C
-C             PRINT*,'BIT WIDTH (KWIDE) OF 2ND DIFFS', KWIDE
-C
-C  **************************** END OF GLAHN PACKING  ************
-          ELSE IF (IBDSFL(2).EQ.1.AND.IBDSFL(7).EQ.0) THEN
-C                        HAVE SECOND ORDER PACKING WITH NO SECOND ORDER
-C                        BIT MAP. ERGO ROW BY ROW - COL BY COL
-              CALL FI7503 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-     *              LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE,IGDS)
-              RETURN
-          END IF
-C         WRITE (6,FMT='(''  CALL TO FI7501 WITH = '',/,
-C    &                  10(3X,10I6,/))') (IWORK(I),I=1,NPTS)
-C         WRITE (6,FMT='(''  END OF ARRAY = '',/,
-C    &                  10(3X,10I6,/))') (IWORK(I),I=NPTS-5,NPTS)
-C         PRINT*,' REFNCE,ISCAL2, KWIDE AT CALL TO FI7501',
-C    &             REFNCE, ISCAL2,KWIDE
-C
-C                         SECOND ORDER PACKING
-C
-          CALL FI7501 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-     *             LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE)
-C
-C              BDS COMPLETELY ASSEMBLED IN FI7501 FOR SECOND ORDER
-C              PACKING.
-C
-      ELSE
-C                                      SIMPLE PACKING
-C
-C                PRINT*,'  SIMPLE FIRST ORDER PACKING...'
-          IF (IBITL.EQ.0) THEN
-C                PRINT*,' WITH VARIABLE BIT LENGTH'
-C
-C                  WITH VARIABLE BIT LENGTH, ADJUSTED
-C                  TO ACCOMMODATE LARGEST VALUE
-C                  BINARY SCALING ALWAYS = 0
-C
-              CALL W3FI58(IWORK,NPTS,IWORK,PFLD,NBITS,LEN,KMIN)
-              RMIN   = KMIN
-              REFNCE  = RMIN
-              ISCALE = 0
-C             PRINT*,'  BIT LENGTH CAME OUT AT ...',NBITS
-C
-C           SET CONST .TRUE. IF ALL VALUES ARE THE SAME
-C
-              IF (LEN.EQ.0.AND.NBITS.EQ.0) CONST = .TRUE.
-C
-          ELSE
-C           PRINT*,' FIXED BIT LENGTH, IBITL = ', IBITL
-C
-C             FIXED BIT LENGTH PACKING (VARIABLE PRECISION)
-C             VALUES SCALED BY POWER OF 2 (ISCALE) TO
-C             FIT LARGEST VALUE INTO GIVEN BIT LENGTH (IBITL)
-C
-              CALL W3FI59(FWORK,NPTS,IBITL,IWORK,PFLD,ISCALE,LEN,RMIN)
-              REFNCE = RMIN
-C             PRINT *,' SCALING NEEDED TO FIT IS ...', ISCALE
-              NBITS = IBITL
-C
-C           SET CONST .TRUE. IF ALL VALUES ARE THE SAME
-C
-              IF (LEN.EQ.0) THEN
-                  CONST = .TRUE.
-                  NBITS = 0
-              END IF
-          END IF
-C
-C$        COMPUTE LENGTH OF BDS IN OCTETS
-C
-          INUM  = NPTS * NBITS + 88
-C         PRINT *,'NUMBER OF BITS BEFORE FILL ADDED',INUM
-C
-C                  NUMBER OF FILL BITS
-          NFILL  = 0
-          NLEFT  = MOD(INUM,16)
-          IF (NLEFT.NE.0) THEN
-              INUM  = INUM + 16 - NLEFT
-              NFILL = 16 - NLEFT
-          END IF
-C         PRINT *,'NUMBER OF BITS AFTER FILL ADDED',INUM
-C                  LENGTH OF BDS IN BYTES
-          LENBDS = INUM / 8
-C
-C                2.0   FORM THE BINARY DATA SECTION (BDS).
-C
-C                 CONCANTENATE ALL FIELDS FOR BDS
-C
-C                               BYTES 1-3
-          CALL SBYTE (BDS11,LENBDS,0,24)
-C
-C                               BYTE  4
-C                                       FLAGS
-          CALL SBYTE (BDS11,IBDSFL(1),24,1)
-          CALL SBYTE (BDS11,IBDSFL(2),25,1)
-          CALL SBYTE (BDS11,IBDSFL(3),26,1)
-          CALL SBYTE (BDS11,IBDSFL(4),27,1)
-C                                        NR OF FILL BITS
-          CALL SBYTE (BDS11,NFILL,28,4)
-C
-C$      FILL OCTETS 5-6 WITH THE SCALE FACTOR.
-C
-C                               BYTE  5-6
-          IF (ISCALE.LT.0) THEN
-              CALL SBYTE (BDS11,1,32,1)
-              ISCALE  = - ISCALE
-              CALL SBYTE (BDS11,ISCALE,33,15)
-          ELSE
-              CALL SBYTE (BDS11,ISCALE,32,16)
-          END IF
-C
-C$  FILL OCTET 7-10 WITH THE REFERENCE VALUE
-C   CONVERT THE FLOATING POINT OF YOUR MACHINE TO IBM370 32 BIT
-C   FLOATING POINT NUMBER
-C
-C                               BYTE  7-10
-C                                        REFERENCE VALUE
-C                                          FIRST TEST TO SEE IF
-C                                          ON 32 OR 64 BIT COMPUTER
-          CALL W3FI01(LW)
-          IF (LW.EQ.4) THEN
-              CALL W3FI76 (REFNCE,IEXP,IMANT,32)
-          ELSE
-              CALL W3FI76 (REFNCE,IEXP,IMANT,64)
-          END IF
-          CALL SBYTE (BDS11,IEXP,48,8)
-          CALL SBYTE (BDS11,IMANT,56,24)
-C
-C
-C$                        FILL OCTET 11 WITH THE NUMBER OF BITS.
-C
-C                               BYTE  11
-          CALL SBYTE (BDS11,NBITS,80,8)
-      END IF
-C
-      RETURN
-      END
+      subroutine w3fi75 (ibitl,itype,itoss,fld,ifld,ibmap,ibdsfl,
+     &  npts,bds11,ipfld,pfld,len,lenbds,iberr,pds,igds)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:  w3fi75        grib pack data and form bds octets(1-11)
+c   prgmmr: farley           org: nmc421      date:94-11-22
+c
+c abstract: this routine packs a grib field and forms octets(1-11)
+c   of the binary data section (bds).
+c
+c program history log:
+c   92-07-10  m. farley   original author
+c   92-10-01  r.e.jones   correction for field of constant data
+c   92-10-16  r.e.jones   get rid of arrays fp and int
+c   93-08-06  cavanaugh   added routines fi7501, fi7502, fi7503
+c                         to allow second order packing in pds.
+c   93-07-21 stackpole    assorted repairs to get 2nd diff pack in
+c   93-10-28 cavanaugh    commented out nonoperational prints and
+c                         write statements
+c   93-12-15  cavanaugh   corrected location of start of first order
+c                         values and start of second order values to
+c                         reflect a byte location in the bds instead
+c                         of an offset in subroutine fi7501.
+c   94-01-27  cavanaugh   added igds as input argument to this routine
+c                         and added pds and igds arrays to the call to
+c                         w3fi82 to provide information needed for
+c                         boustrophedonic processing.
+c   94-05-25  cavanaugh   subroutine fi7503 has been added to provide
+c                         for row by row or column by column second
+c                         order packing.  this feature can be activated
+c                         by setting ibdsfl(7) to zero.
+c   94-07-08  cavanaugh   commented out print statements used for debug
+c   94-11-22  farley      enlarged work arrays to handle .5degree grids
+c   95-06-01  r.e.jones   correction for number of unused bits at end
+c                         of section 4, in bds byte 4, bits 5-8.
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call w3fi75 (ibitl,itype,itoss,fld,ifld,ibmap,ibdsfl,
+c    &              npts,bds11,ipfld,pfld,len,lenbds,iberr,pds,igds)
+c   input argument list:
+c     ibitl     - 0, computer computes packing length from power
+c                    of 2 that best fits the data.
+c                 8, 12, etc. computer rescales data to fit into
+c                    set number of bits.
+c     itype     - 0 = if input data is floating point (fld)
+c                 1 = if input data is integer (ifld)
+c     itoss     - 0 = no bit map is included (don't toss data)
+c                 1 = toss null data according to ibmap
+c     fld       - real array of data to be packed if itype=0
+c     ifld      - integer array to be packed if itype=1
+c     ibmap     - bit map supplied from user
+c     ibdsfl    - integer array containing table 11 flag info
+c                 bds octet 4:
+c                 (1) 0 = grid point data
+c                     1 = spherical harmonic coefficients
+c                 (2) 0 = simple packing
+c                     1 = second order packing
+c                 (3) 0 = original data were floating point values
+c                     1 = original data were integer values
+c                 (4) 0 = no additional flags at octet 14
+c                     1 = octet 14 contains flag bits 5-12
+c                 (5) 0 = reserved - always set to 0
+c                 (6) 0 = single datum at each grid point
+c                     1 = matrix of values at each grid point
+c                 (7) 0 = no secondary bit maps
+c                     1 = secondary bit maps present
+c                 (8) 0 = second order values have constant width
+c                     1 = second order values have different widths
+c     npts      - number of gridpoints in array to be packed
+c     igds      - array of gds information
+c
+c   output argument list:
+c     bds11     - first 11 octets of bds
+c     pfld      - packed grib field
+c     len       - length of pfld
+c     lenbds    - length of bds
+c     iberr     - 1, error converting ieee f.p. number to ibm370 f.p.
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+c
+      real            fld(*)
+c     real            fwork(260000)
+c
+c     fwork can use dynamic allocation of memory on cray
+c
+      real            fwork(npts)
+      real            rmin,refnce
+c
+      integer         ipfld(*)
+      integer         ibdsfl(*)
+      integer         ibmap(*)
+      integer         ifld(*),igds(*)
+c     integer         iwork(260000)
+c
+c     iwork can use dynamic allocation of memory on cray
+c
+      integer         iwork(npts)
+c
+      logical         const
+c
+      character * 1   bds11(11),pds(*)
+      character * 1   pfld(*)
+      character * 1   ciexp(8)
+      character * 1   cimant(8)
+c
+      equivalence     (iexp,ciexp(1))
+      equivalence     (imant,cimant(1))
+c
+c            1.0   pack the field.
+c
+c            1.1   toss data if bitmap being used,
+c                  moving 'data' to work area...
+c
+      const = .false.
+      iberr = 0
+      iw    = 0
+c
+      if (itoss .eq. 1) then
+        if (itype .eq. 0) then
+          do 110 it=1,npts
+            if (ibmap(it) .eq. 1) then
+              iw = iw + 1
+              fwork(iw) = fld(it)
+            endif
+  110     continue
+          npts = iw
+        else if (itype .eq. 1) then
+          do 111 it=1,npts
+            if (ibmap(it) .eq. 1) then
+              iw = iw + 1
+              iwork(iw) = ifld(it)
+            endif
+  111     continue
+          npts = iw
+        endif
+c
+c             else, just move data to work array
+c
+      else if (itoss .eq. 0) then
+        if (itype .eq. 0) then
+          do 112 it=1,npts
+            fwork(it) = fld(it)
+  112     continue
+        else if (itype .eq. 1) then
+          do 113 it=1,npts
+            iwork(it) = ifld(it)
+  113     continue
+        endif
+      endif
+c
+c            1.2   convert data if needed prior to packing.
+c                  (integer to f.p. or f.p. to integer)
+c     itype = 0...floating point data
+c       ibitl = 0...pack in least # bits...convert to integer
+c     itype = 1...integer data
+c       ibitl > 0...pack in fixed # bits...convert to floating point
+c
+      if (itype .eq. 0 .and. ibitl .eq. 0) then
+        do 120 if=1,npts
+          iwork(if) = nint(fwork(if))
+  120   continue
+      else if (itype .eq. 1 .and. ibitl .ne. 0) then
+        do 123 if=1,npts
+          fwork(if) = float(iwork(if))
+  123   continue
+      endif
+c
+c            1.3   pack the data.
+c
+      if (ibdsfl(2).ne.0) then
+c                                    second order packing
+c
+c            print*,'  doing second order packing...'
+          if (ibitl.eq.0) then
+c
+c             print*,'    and variable bit packing'
+c
+c                           working with integer values
+c                           since doing variable bit packing
+c
+              max  = iwork(1)
+              min  = iwork(1)
+              do 300 i = 2, npts
+                  if (iwork(i).lt.min) then
+                      min  = iwork(i)
+                  else if (iwork(i).gt.max) then
+                      max  = iwork(i)
+                  end if
+  300         continue
+c                           extract minima
+              do 400 i = 1, npts
+c                 if (iwork(i).lt.0) then
+c                     print *,'minima 400',i,iwork(i),npts
+c                 end if
+                  iwork(i)  = iwork(i) - min
+  400         continue
+              refnce  = min
+              idiff   = max - min
+c             print *,'reference value',refnce
+c
+c             write (6,fmt='(''  minima removed      = '',/,
+c    &              10(3x,10i10,/))') (iwork(i),i=1,6)
+c             write (6,fmt='(''  end of array  = '',/,
+c    &              10(3x,10i10,/))') (iwork(i),i=npts-5,npts)
+c
+c                      find bit width of idiff
+c
+              call fi7505 (idiff,kwide)
+c             print*,'  bit width for original data', kwide
+              iscal2 = 0
+c
+c             multiplicative scale factor set to 1
+c             in anticipation of possible use in glahn 2dn diff
+c
+              scal2 = 1.
+c
+          else
+c
+c             print*,'   and fixed bit packing, ibitl = ', ibitl
+c                               fixed bit packing
+c                               - length of field in ibitl
+c                               - must be real data
+c                            floating point input
+c
+              rmax  = fwork(1)
+              rmin  = fwork(1)
+              do 100 i = 2, npts
+                  if (fwork(i).lt.rmin) then
+                      rmin  = fwork(i)
+                  else if (fwork(i).gt.rmax) then
+                      rmax  = fwork(i)
+                  end if
+  100         continue
+              refnce  = rmin
+c             print *,'100 reference',refnce
+c                             extract minima
+              do 200 i = 1, npts
+                  fwork(i)  = fwork(i) - rmin
+  200         continue
+c             print *,'reference value',refnce
+c             write (6,fmt='(''  minima removed      = '',/,
+c    &              10(3x,10f8.2,/))') (fwork(i),i=1,6)
+c             write (6,fmt='(''  end of array  = '',/,
+c    &              10(3x,10f8.2,/))') (fwork(i),i=npts-5,npts)
+c                                find largest delta
+              idelt  = nint(rmax - rmin)
+c                                do binary scaling
+c                                   find out what binary scale factor
+c                                       permits containment of
+c                                       largest delta
+              call fi7505 (idelt,iwide)
+c
+c                                   binary scaling
+c
+              iscal2  = iwide - ibitl
+c             print *,'scaling needed to fit =',iscal2
+c             print*,'  range of  = ',idelt
+c
+c                                expand data with binary scaling
+c                                convert to integer
+              scal2  = 2.0**iscal2
+              scal2  = 1./ scal2
+              do 600 i = 1, npts
+                  iwork(i)  = nint(fwork(i) * scal2)
+  600         continue
+              kwide = ibitl
+          end if
+c
+c  *****************************************************************
+c
+c           following is for glahn second differencing
+c           not standard grib
+c
+c            test for second difference packing
+c            based of size of pds - size in first 3 bytes
+c
+          call gbyte (pds,ipdsiz,0,24)
+          if (ipdsiz.eq.50) then
+c             print*,'  do second difference packing '
+c
+c                   glahn packing to 2nd diffs
+c
+c             write (6,fmt='(''  call to w3fi82 with = '',/,
+c    &                  10(3x,10i6,/))') (iwork(i),i=1,npts)
+c
+               call w3fi82 (iwork,fval1,fdiff1,npts,pds,igds)
+c
+c             print *,'glahn',fval1,fdiff1
+c             write (6,fmt='(''  out from w3fi82 with = '',/,
+c    &                  10(3x,10i6,/))') (iwork(i),i=1,npts)
+c
+c             must now re-remove the minimum value
+c             of the second differences to assure
+c             all positive numbers for second order grib packing
+c
+c             original reference value added to first point
+c             value from the 2nd diff packer to be added
+c             back in when the 2nd diff values are
+c             reconstructed back to the basic values
+c
+c             also, the reference value is
+c             power-of-two scaled to match
+c             fval1.  all of this scaling
+c             will be removed after the
+c             glahn second differencing is undone.
+c             the scaling factor needed to do that
+c             is saved in the pds as a signed positive
+c             two byte integer
+c
+c             the scaling for the 2nd dif packed
+c             values is properly set to zero
+c
+              fval1 = fval1 + refnce*scal2
+c                                          first test to see if
+c                                          on 32 or 64 bit computer
+              call w3fi01(lw)
+              if (lw.eq.4) then
+                  call w3fi76 (fval1,iexp,imant,32)
+              else
+                  call w3fi76 (fval1,iexp,imant,64)
+              end if
+              call sbyte (pds,iexp,320,8)
+              call sbyte (pds,imant,328,24)
+c
+              if (lw.eq.4) then
+                  call w3fi76 (fdiff1,iexp,imant,32)
+              else
+                  call w3fi76 (fdiff1,iexp,imant,64)
+              end if
+              call sbyte (pds,iexp,352,8)
+              call sbyte (pds,imant,360,24)
+c
+c             turn iscal2 into signed positive integer
+c             and store in two bytes
+c
+              if(iscal2.ge.0)  then
+                call sbyte (pds,iscal2,384,16)
+              else
+                call sbyte (pds,1,384,1)
+                iscal2 = - iscal2
+                call sbyte( pds,iscal2,385,15)
+              endif
+c
+              max  = iwork(1)
+              min  = iwork(1)
+              do 700 i = 2, npts
+                  if (iwork(i).lt.min) then
+                      min  = iwork(i)
+                  else if (iwork(i).gt.max) then
+                      max  = iwork(i)
+                  end if
+  700         continue
+c                           extract minima
+              do 710 i = 1, npts
+                  iwork(i)  = iwork(i) - min
+  710         continue
+              refnce  = min
+c             print *,'710 reference',refnce
+              iscal2 = 0
+c
+c             and reset value of kwide - the bit width
+c             for the range of the values
+c
+              idiff = max - min
+              call fi7505 (idiff,kwide)
+c
+c             print*,'bit width (kwide) of 2nd diffs', kwide
+c
+c  **************************** end of glahn packing  ************
+          else if (ibdsfl(2).eq.1.and.ibdsfl(7).eq.0) then
+c                        have second order packing with no second order
+c                        bit map. ergo row by row - col by col
+              call fi7503 (iwork,ipfld,npts,ibdsfl,bds11,
+     *              len,lenbds,pds,refnce,iscal2,kwide,igds)
+              return
+          end if
+c         write (6,fmt='(''  call to fi7501 with = '',/,
+c    &                  10(3x,10i6,/))') (iwork(i),i=1,npts)
+c         write (6,fmt='(''  end of array = '',/,
+c    &                  10(3x,10i6,/))') (iwork(i),i=npts-5,npts)
+c         print*,' refnce,iscal2, kwide at call to fi7501',
+c    &             refnce, iscal2,kwide
+c
+c                         second order packing
+c
+          call fi7501 (iwork,ipfld,npts,ibdsfl,bds11,
+     *             len,lenbds,pds,refnce,iscal2,kwide)
+c
+c              bds completely assembled in fi7501 for second order
+c              packing.
+c
+      else
+c                                      simple packing
+c
+c                print*,'  simple first order packing...'
+          if (ibitl.eq.0) then
+c                print*,' with variable bit length'
+c
+c                  with variable bit length, adjusted
+c                  to accommodate largest value
+c                  binary scaling always = 0
+c
+              call w3fi58(iwork,npts,iwork,pfld,nbits,len,kmin)
+              rmin   = kmin
+              refnce  = rmin
+              iscale = 0
+c             print*,'  bit length came out at ...',nbits
+c
+c           set const .true. if all values are the same
+c
+              if (len.eq.0.and.nbits.eq.0) const = .true.
+c
+          else
+c           print*,' fixed bit length, ibitl = ', ibitl
+c
+c             fixed bit length packing (variable precision)
+c             values scaled by power of 2 (iscale) to
+c             fit largest value into given bit length (ibitl)
+c
+              call w3fi59(fwork,npts,ibitl,iwork,pfld,iscale,len,rmin)
+              refnce = rmin
+c             print *,' scaling needed to fit is ...', iscale
+              nbits = ibitl
+c
+c           set const .true. if all values are the same
+c
+              if (len.eq.0) then
+                  const = .true.
+                  nbits = 0
+              end if
+          end if
+c
+c$        compute length of bds in octets
+c
+          inum  = npts * nbits + 88
+c         print *,'number of bits before fill added',inum
+c
+c                  number of fill bits
+          nfill  = 0
+          nleft  = mod(inum,16)
+          if (nleft.ne.0) then
+              inum  = inum + 16 - nleft
+              nfill = 16 - nleft
+          end if
+c         print *,'number of bits after fill added',inum
+c                  length of bds in bytes
+          lenbds = inum / 8
+c
+c                2.0   form the binary data section (bds).
+c
+c                 concantenate all fields for bds
+c
+c                               bytes 1-3
+          call sbyte (bds11,lenbds,0,24)
+c
+c                               byte  4
+c                                       flags
+          call sbyte (bds11,ibdsfl(1),24,1)
+          call sbyte (bds11,ibdsfl(2),25,1)
+          call sbyte (bds11,ibdsfl(3),26,1)
+          call sbyte (bds11,ibdsfl(4),27,1)
+c                                        nr of fill bits
+          call sbyte (bds11,nfill,28,4)
+c
+c$      fill octets 5-6 with the scale factor.
+c
+c                               byte  5-6
+          if (iscale.lt.0) then
+              call sbyte (bds11,1,32,1)
+              iscale  = - iscale
+              call sbyte (bds11,iscale,33,15)
+          else
+              call sbyte (bds11,iscale,32,16)
+          end if
+c
+c$  fill octet 7-10 with the reference value
+c   convert the floating point of your machine to ibm370 32 bit
+c   floating point number
+c
+c                               byte  7-10
+c                                        reference value
+c                                          first test to see if
+c                                          on 32 or 64 bit computer
+          call w3fi01(lw)
+          if (lw.eq.4) then
+              call w3fi76 (refnce,iexp,imant,32)
+          else
+              call w3fi76 (refnce,iexp,imant,64)
+          end if
+          call sbyte (bds11,iexp,48,8)
+          call sbyte (bds11,imant,56,24)
+c
+c
+c$                        fill octet 11 with the number of bits.
+c
+c                               byte  11
+          call sbyte (bds11,nbits,80,8)
+      end if
+c
+      return
+      end

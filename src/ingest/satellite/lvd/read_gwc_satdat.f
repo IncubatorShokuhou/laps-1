@@ -7,52 +7,52 @@
      &                       i4time_data,
      &                       istatus)
 c
-      Implicit None
+      implicit none
 
-      Integer     cell_depth
-      Integer     cell_width
+      integer     cell_depth
+      integer     cell_width
       parameter  (cell_depth=64,
      &            cell_width=256)
 
-      Integer     nlines,nelems
+      integer     nlines,nelems
 
-      Integer     n
-      Integer     i4time_current
-      Integer     i4time_data
-      Integer     i4time_diff
-      Integer     istatus
-      Integer     i_delta_t
-      Integer     isat,jtype
-      Integer     nefi,nlfi
-      Integer     lun
+      integer     n
+      integer     i4time_current
+      integer     i4time_data
+      integer     i4time_diff
+      integer     istatus
+      integer     i_delta_t
+      integer     isat,jtype
+      integer     nefi,nlfi
+      integer     lun
 
-      INTEGER DECIMAT
-      INTEGER STRPIX     !Start Pixel
-      INTEGER STRSCNL    !Start Scanline 
-      INTEGER STPPIX     !Stop Pixel
-      INTEGER STPSCNL    !Stop Scanline
-      INTEGER REQOBSTM   !Requested Observation Time
-      INTEGER BEPIXFC
-      INTEGER BESCNFC
-      INTEGER FSCI
-      INTEGER STRBDY1    !Requested Start Boundary 1
-      INTEGER STRBDY2    !Requested Start Boundary 2
-      INTEGER STPBDY1    !Requested Stop Boundary 1 
-      INTEGER STPBDY2    !Requested Stop Boundary 2
-      REAL   GOLONSBP      !GOES Longitude Subpoint
-      REAL   GOLATSBP      !GOES Latitude Subpoint
-      REAL   GOALPHA       !GOES Alpha
+      integer decimat
+      integer strpix     !start pixel
+      integer strscnl    !start scanline 
+      integer stppix     !stop pixel
+      integer stpscnl    !stop scanline
+      integer reqobstm   !requested observation time
+      integer bepixfc
+      integer bescnfc
+      integer fsci
+      integer strbdy1    !requested start boundary 1
+      integer strbdy2    !requested start boundary 2
+      integer stpbdy1    !requested stop boundary 1 
+      integer stpbdy2    !requested stop boundary 2
+      real   golonsbp      !goes longitude subpoint
+      real   golatsbp      !goes latitude subpoint
+      real   goalpha       !goes alpha
 
-      REAL   image_data  (nelems,nlines)
+      real   image_data  (nelems,nlines)
 
-      INTEGER WIDTH      !Tracks in Width of image
-      INTEGER DEPTH      !Tracks in Depth of image
-      CHARACTER*2 IMGTYPE  !Image Type
+      integer width      !tracks in width of image
+      integer depth      !tracks in depth of image
+      character*2 imgtype  !image type
 
-      Character     c_filetime*9
-      Character     cfname*9
-      Character     chtype*3
-      Character     c_filename*255
+      character     c_filetime*9
+      character     cfname*9
+      character     chtype*3
+      character     c_filename*255
 
       logical       lopen,lext
       logical       l_cell_afwa
@@ -63,21 +63,21 @@ c
 
       inquire(file=c_filename,exist=lext,opened=lopen,number=lun)
       if(.not.lext)then
-         print*,'File does not exist: ',c_filename(1:n)
+         print*,'file does not exist: ',c_filename(1:n)
          goto 1000
       endif
       if(lopen)then
-         print*,'File is already open: ',c_filename(1:n)
+         print*,'file is already open: ',c_filename(1:n)
          goto 1000
       endif
-      call read_gwc_header(c_filename(1:n),l_cell_afwa,STRPIX,STRSCNL,
-     +   STPPIX,STPSCNL,REQOBSTM,IMGTYPE,GOLATSBP,GOLONSBP,WIDTH,DEPTH, 
-     +   GOALPHA,STRBDY1,STRBDY2,STPBDY1,STPBDY2,BEPIXFC,BESCNFC,
-     +   FSCI,DECIMAT,istatus)
+      call read_gwc_header(c_filename(1:n),l_cell_afwa,strpix,strscnl,
+     +   stppix,stpscnl,reqobstm,imgtype,golatsbp,golonsbp,width,depth, 
+     +   goalpha,strbdy1,strbdy2,stpbdy1,stpbdy2,bepixfc,bescnfc,
+     +   fsci,decimat,istatus)
       if(istatus.eq.0)then
-         write(6,*)'Got gwc header info'
+         write(6,*)'got gwc header info'
       else
-         write(6,*)'Error reading gwc header '
+         write(6,*)'error reading gwc header '
          goto 1000
       endif
 
@@ -100,18 +100,18 @@ c put check in here for latest file time in lvd subdirectory.
 c
       i4time_data=reqobstm
 
-      i4time_diff = 0  !i4time_current-i4time_data    <---- Don't forget to un-comment.
+      i4time_diff = 0  !i4time_current-i4time_data    <---- don't forget to un-comment.
       if(i4time_diff.gt.i_delta_t)then
-         write(6,*)'Data is too old!'
-         write(6,*)'Data    Time: ',c_filetime
+         write(6,*)'data is too old!'
+         write(6,*)'data    time: ',c_filetime
          call make_fnam_lp(i4time_current,c_filetime,istatus)
-         write(6,*)'Current Time: ',c_filetime
+         write(6,*)'current time: ',c_filetime
          goto 902
       elseif(i4time_diff.lt.0)then
-         write(6,*)'Data time is more recent than current time!?'
-         write(6,*)'This does not make sense!'
+         write(6,*)'data time is more recent than current time!?'
+         write(6,*)'this does not make sense!'
       else
-         write(6,*)'Found AFWA data'
+         write(6,*)'found afwa data'
       endif
 c
 c read afgwc binary data file
@@ -124,18 +124,18 @@ c
          nefi=stppix-strpix+1
       endif
 
-      call Process_SDHS_GVAR_sub(c_filename,chtype,isat,jtype,
+      call process_sdhs_gvar_sub(c_filename,chtype,isat,jtype,
      &nelems,nlines,image_data,nlfi,nefi,depth,width,istatus)
 
       if(istatus.eq.1)then
-         write(6,*)'Got AFWA satellite data'
+         write(6,*)'got afwa satellite data'
       else
-         write(6,*)'Error reading gwc sat data - Process_SDHS_sub'
+         write(6,*)'error reading gwc sat data - process_sdhs_sub'
       endif
 
       goto 1000
 
-902   write(6,*)'Returning without new data'
+902   write(6,*)'returning without new data'
 
 1000  return
       end

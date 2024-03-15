@@ -1,1665 +1,1665 @@
-C
-C  Subroutine to read the file "LDAD automated mesonet data " 
-C
-      subroutine read_ldad_madis_netcdf(nf_fid, maxSensor, recNum, 
-     +     maxPSTEntries, code1PST, code2PST, namePST,
-     +     altimeterQCR, dewpointQCR, firstOverflow, globalInventory, 
-     +     nStaticIds, numericWMOid, precipAccumQCR, precipIntensity, 
-     +     precipRateQCR, precipType, pressChange3HourQCR, 
-     +     pressChangeChar, relHumidityQCR, seaLevelPressureQCR, 
-     +     stationPressureQCR, temperatureQCR, visibilityQCR, 
-     +     windDirQCR, windSpeedQCR, altimeter, dewpoint, elevation, 
-     +     latitude, longitude, meanWeightedTemperature, precipAccum, 
-     +     precipRate, pressChange3Hour, relHumidity, 
-     +     seaLevelPressure, seaSurfaceTemp, soilMoisturePercent, 
-     +     soilTemperature, solarRadiation, stationPressure, 
-     +     temperature, visibility, windDir, windDirMax, windGust, 
-     +     windSpeed, altimeterDD, dataProvider, dewpointDD, 
-     +     precipAccumDD, precipRateDD, presWeather, 
-     +     pressChange3HourDD, providerId, relHumidityDD, 
-     +     seaLevelPressureDD, stationId, stationName, 
-     +     stationPressureDD, stationType, temperatureDD, 
-     +     visibilityDD, windDirDD, windSpeedDD, observationTime, 
-     +     receivedTime, reportTime, rhChangeTime, 
-     +     stationPressChangeTime, tempChangeTime, windDirChangeTime, 
-     +     windGustChangeTime, windSpeedChangeTime,badflag)
-C
+c
+c  subroutine to read the file "ldad automated mesonet data " 
+c
+      subroutine read_ldad_madis_netcdf(nf_fid, maxsensor, recnum, 
+     +     maxpstentries, code1pst, code2pst, namepst,
+     +     altimeterqcr, dewpointqcr, firstoverflow, globalinventory, 
+     +     nstaticids, numericwmoid, precipaccumqcr, precipintensity, 
+     +     preciprateqcr, preciptype, presschange3hourqcr, 
+     +     presschangechar, relhumidityqcr, sealevelpressureqcr, 
+     +     stationpressureqcr, temperatureqcr, visibilityqcr, 
+     +     winddirqcr, windspeedqcr, altimeter, dewpoint, elevation, 
+     +     latitude, longitude, meanweightedtemperature, precipaccum, 
+     +     preciprate, presschange3hour, relhumidity, 
+     +     sealevelpressure, seasurfacetemp, soilmoisturepercent, 
+     +     soiltemperature, solarradiation, stationpressure, 
+     +     temperature, visibility, winddir, winddirmax, windgust, 
+     +     windspeed, altimeterdd, dataprovider, dewpointdd, 
+     +     precipaccumdd, precipratedd, presweather, 
+     +     presschange3hourdd, providerid, relhumiditydd, 
+     +     sealevelpressuredd, stationid, stationname, 
+     +     stationpressuredd, stationtype, temperaturedd, 
+     +     visibilitydd, winddirdd, windspeeddd, observationtime, 
+     +     receivedtime, reporttime, rhchangetime, 
+     +     stationpresschangetime, tempchangetime, winddirchangetime, 
+     +     windgustchangetime, windspeedchangetime,badflag)
+c
       include 'netcdf.inc'
-      integer maxSensor, recNum,nf_fid, nf_vid, nf_status
-      integer code1PST(maxPSTEntries), code2PST(maxPSTEntries), 
-     +     code4PST(maxPSTEntries),
-     +     altimeterQCR(recNum), dewpointQCR(recNum),
-     +     firstOverflow, globalInventory, nStaticIds,
-     +     numericWMOid(recNum), precipAccumQCR(recNum),
-     +     precipIntensity( maxSensor, recNum),
-     +     precipRateQCR(recNum), precipType( maxSensor, recNum),
-     +     pressChange3HourQCR(recNum), pressChangeChar(recNum),
-     +     relHumidityQCR(recNum), seaLevelPressureQCR(recNum),
-     +     stationPressureQCR(recNum), temperatureQCR(recNum),
-     +     visibilityQCR(recNum), windDirQCR(recNum),
-     +     windSpeedQCR(recNum)
-      real altimeter(recNum), dewpoint(recNum), elevation(recNum),
-     +     latitude(recNum), longitude(recNum),
-     +     meanWeightedTemperature(recNum), precipAccum(recNum),
-     +     precipRate(recNum), pressChange3Hour(recNum),
-     +     relHumidity(recNum), seaLevelPressure(recNum),
-     +     seaSurfaceTemp(recNum), soilMoisturePercent(recNum),
-     +     soilTemperature(recNum), solarRadiation(recNum),
-     +     stationPressure(recNum), temperature(recNum),
-     +     visibility(recNum), windDir(recNum), windDirMax(recNum),
-     +     windGust(recNum), windSpeed(recNum)
-      double precision observationTime(recNum), receivedTime(recNum),
-     +     reportTime(recNum), rhChangeTime(recNum),
-     +     stationPressChangeTime(recNum), tempChangeTime(recNum),
-     +     windDirChangeTime(recNum), windGustChangeTime(recNum),
-     +     windSpeedChangeTime(recNum)
-      character temperatureDD(recNum)
-      character precipAccumDD(recNum)
-      character dewpointDD(recNum)
-      character*6 stationId(recNum)
-      character pressChange3HourDD(recNum)
-      character relHumidityDD(recNum)
-      character*25 presWeather(recNum)
-      character*12 providerId(recNum)
-      character visibilityDD(recNum)
-      character windDirDD(recNum)
-      character*11 dataProvider(recNum)
-      character*11 namePST(maxPSTEntries)
-      character altimeterDD(recNum)
-      character*51 stationName(recNum)
-      character precipRateDD(recNum)
-      character*11 stationType(recNum)
-      character stationPressureDD(recNum)
-      character seaLevelPressureDD(recNum)
-      character windSpeedDD(recNum)
+      integer maxsensor, recnum,nf_fid, nf_vid, nf_status
+      integer code1pst(maxpstentries), code2pst(maxpstentries), 
+     +     code4pst(maxpstentries),
+     +     altimeterqcr(recnum), dewpointqcr(recnum),
+     +     firstoverflow, globalinventory, nstaticids,
+     +     numericwmoid(recnum), precipaccumqcr(recnum),
+     +     precipintensity( maxsensor, recnum),
+     +     preciprateqcr(recnum), preciptype( maxsensor, recnum),
+     +     presschange3hourqcr(recnum), presschangechar(recnum),
+     +     relhumidityqcr(recnum), sealevelpressureqcr(recnum),
+     +     stationpressureqcr(recnum), temperatureqcr(recnum),
+     +     visibilityqcr(recnum), winddirqcr(recnum),
+     +     windspeedqcr(recnum)
+      real altimeter(recnum), dewpoint(recnum), elevation(recnum),
+     +     latitude(recnum), longitude(recnum),
+     +     meanweightedtemperature(recnum), precipaccum(recnum),
+     +     preciprate(recnum), presschange3hour(recnum),
+     +     relhumidity(recnum), sealevelpressure(recnum),
+     +     seasurfacetemp(recnum), soilmoisturepercent(recnum),
+     +     soiltemperature(recnum), solarradiation(recnum),
+     +     stationpressure(recnum), temperature(recnum),
+     +     visibility(recnum), winddir(recnum), winddirmax(recnum),
+     +     windgust(recnum), windspeed(recnum)
+      double precision observationtime(recnum), receivedtime(recnum),
+     +     reporttime(recnum), rhchangetime(recnum),
+     +     stationpresschangetime(recnum), tempchangetime(recnum),
+     +     winddirchangetime(recnum), windgustchangetime(recnum),
+     +     windspeedchangetime(recnum)
+      character temperaturedd(recnum)
+      character precipaccumdd(recnum)
+      character dewpointdd(recnum)
+      character*6 stationid(recnum)
+      character presschange3hourdd(recnum)
+      character relhumiditydd(recnum)
+      character*25 presweather(recnum)
+      character*12 providerid(recnum)
+      character visibilitydd(recnum)
+      character winddirdd(recnum)
+      character*11 dataprovider(recnum)
+      character*11 namepst(maxpstentries)
+      character altimeterdd(recnum)
+      character*51 stationname(recnum)
+      character precipratedd(recnum)
+      character*11 stationtype(recnum)
+      character stationpressuredd(recnum)
+      character sealevelpressuredd(recnum)
+      character windspeeddd(recnum)
 
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C     altimeter     "altimeter setting"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'altimeter',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for altimeter'
-       print *,'Set altimeter to badflag'
+c   variables of type real
+c
+c     variable        netcdf long name
+c     altimeter     "altimeter setting"
+c
+      nf_status=nf_inq_varid(nf_fid,'altimeter',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for altimeter'
+       print *,'set altimeter to badflag'
        altimeter = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,altimeter)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for altimeter'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,altimeter)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for altimeter'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - altimeter'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - altimeter'
        else
-        call ck_array_real(altimeter,recNum,valfil
+        call ck_array_real(altimeter,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - altimeter'
        else
-        call ck_array_real(altimeter,recNum,valmis
+        call ck_array_real(altimeter,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     dewpoint      "dew point temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'dewpoint',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for dewpoint'
-       print *,'Set dewpoint to badflag'
+c
+c     variable        netcdf long name
+c     dewpoint      "dew point temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'dewpoint',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for dewpoint'
+       print *,'set dewpoint to badflag'
        dewpoint = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,dewpoint)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for dewpoint'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,dewpoint)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for dewpoint'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - dewpoint'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - dewpoint'
        else
-        call ck_array_real(dewpoint,recNum,valfil
+        call ck_array_real(dewpoint,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - dewpoint'
        else
-        call ck_array_real(dewpoint,recNum,valmis
+        call ck_array_real(dewpoint,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     elevation     "elevation"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'elevation',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for elevation'
-       print *,'Set elevation to badflag'
+c
+c     variable        netcdf long name
+c     elevation     "elevation"
+c
+      nf_status=nf_inq_varid(nf_fid,'elevation',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for elevation'
+       print *,'set elevation to badflag'
        elevation = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,elevation)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for elevation'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,elevation)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for elevation'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - elevation'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - elevation'
        else
-        call ck_array_real(elevation,recNum,valfil
+        call ck_array_real(elevation,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - elevation'
        else
-        call ck_array_real(elevation,recNum,valmis
+        call ck_array_real(elevation,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     latitude      "latitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'latitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for latitude'
-       print *,'Set latitude to badflag'
+c
+c     variable        netcdf long name
+c     latitude      "latitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'latitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for latitude'
+       print *,'set latitude to badflag'
        latitude = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,latitude)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for latitude'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,latitude)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for latitude'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - latitude'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - latitude'
        else
-        call ck_array_real(latitude,recNum,valfil
+        call ck_array_real(latitude,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - latitude'
        else
-        call ck_array_real(latitude,recNum,valmis
+        call ck_array_real(latitude,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     longitude     "longitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'longitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for longitude'
-       print *,'Set longitude to badflag'
+c
+c     variable        netcdf long name
+c     longitude     "longitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'longitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for longitude'
+       print *,'set longitude to badflag'
        longitude = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,longitude)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for longitude'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,longitude)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for longitude'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - longitude'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - longitude'
        else
-        call ck_array_real(longitude,recNum,valfil
+        call ck_array_real(longitude,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - longitude'
        else
-        call ck_array_real(longitude,recNum,valmis
+        call ck_array_real(longitude,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     meanWeightedTemperature"Mean weighted temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'meanWeightedTemperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for meanWeightedTemperature'
-       print *,'Set meanWeightedTemperature to badflag'
-       meanWeightedTemperature = badflag
+c
+c     variable        netcdf long name
+c     meanweightedtemperature"mean weighted temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'meanweightedtemperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for meanweightedtemperature'
+       print *,'set meanweightedtemperature to badflag'
+       meanweightedtemperature = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,meanWeightedTemperature)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for meanWeightedTemperature'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,meanweightedtemperature)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for meanweightedtemperature'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - meanWeightedTemperature'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - meanweightedtemperature'
        else
-        call ck_array_real(meanWeightedTemperature,recNum,valfil
+        call ck_array_real(meanweightedtemperature,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - meanWeightedTemperature'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - meanweightedtemperature'
        else
-        call ck_array_real(meanWeightedTemperature,recNum,valmis
+        call ck_array_real(meanweightedtemperature,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipAccum   "precip accumulation"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipAccum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipAccum'
-       print *,'Set precipAccum to badflag'
-       precipAccum = badflag
+c
+c     variable        netcdf long name
+c     precipaccum   "precip accumulation"
+c
+      nf_status=nf_inq_varid(nf_fid,'precipaccum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for precipaccum'
+       print *,'set precipaccum to badflag'
+       precipaccum = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,precipAccum)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipAccum'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,precipaccum)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for precipaccum'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - precipAccum'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - precipaccum'
        else
-        call ck_array_real(precipAccum,recNum,valfil
+        call ck_array_real(precipaccum,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - precipAccum'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - precipaccum'
        else
-        call ck_array_real(precipAccum,recNum,valmis
+        call ck_array_real(precipaccum,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipRate    "precipitation rate"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipRate',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipRate'
-       print *,'Set precipRate to badflag'
-       precipRate = badflag
+c
+c     variable        netcdf long name
+c     preciprate    "precipitation rate"
+c
+      nf_status=nf_inq_varid(nf_fid,'preciprate',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for preciprate'
+       print *,'set preciprate to badflag'
+       preciprate = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,precipRate)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipRate'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,preciprate)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for preciprate'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - precipRate'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - preciprate'
        else
-        call ck_array_real(precipRate,recNum,valfil
+        call ck_array_real(preciprate,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - precipRate'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - preciprate'
        else
-        call ck_array_real(precipRate,recNum,valmis
+        call ck_array_real(preciprate,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     pressChange3Hour"3 hour pressure change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'pressChange3Hour',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for pressChange3Hour'
-       print *,'Set pressChange3Hour to badflag'
-       pressChange3Hour = badflag
+c
+c     variable        netcdf long name
+c     presschange3hour"3 hour pressure change"
+c
+      nf_status=nf_inq_varid(nf_fid,'presschange3hour',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for presschange3hour'
+       print *,'set presschange3hour to badflag'
+       presschange3hour = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,pressChange3Hour)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for pressChange3Hour'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,presschange3hour)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for presschange3hour'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - pressChange3Hour'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - presschange3hour'
        else
-        call ck_array_real(pressChange3Hour,recNum,valfil
+        call ck_array_real(presschange3hour,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - pressChange3Hour'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - presschange3hour'
        else
-        call ck_array_real(pressChange3Hour,recNum,valmis
+        call ck_array_real(presschange3hour,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     relHumidity   "relative humidity"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'relHumidity',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for relHumidity'
-       print *,'Set relHumidity to badflag'
-       relHumidity = badflag
+c
+c     variable        netcdf long name
+c     relhumidity   "relative humidity"
+c
+      nf_status=nf_inq_varid(nf_fid,'relhumidity',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for relhumidity'
+       print *,'set relhumidity to badflag'
+       relhumidity = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,relHumidity)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for relHumidity'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,relhumidity)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for relhumidity'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - relHumidity'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - relhumidity'
        else
-        call ck_array_real(relHumidity,recNum,valfil
+        call ck_array_real(relhumidity,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - relHumidity'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - relhumidity'
        else
-        call ck_array_real(relHumidity,recNum,valmis
+        call ck_array_real(relhumidity,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     seaLevelPressure"sea level pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'seaLevelPressure',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for seaLevelPressure'
-       print *,'Set seaLevelPressure to badflag'
-       seaLevelPressure = badflag
+c
+c     variable        netcdf long name
+c     sealevelpressure"sea level pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'sealevelpressure',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for sealevelpressure'
+       print *,'set sealevelpressure to badflag'
+       sealevelpressure = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,seaLevelPressure)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for seaLevelPressure'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,sealevelpressure)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for sealevelpressure'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - seaLevelPressure'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - sealevelpressure'
        else
-        call ck_array_real(seaLevelPressure,recNum,valfil
+        call ck_array_real(sealevelpressure,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - seaLevelPressure'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - sealevelpressure'
        else
-        call ck_array_real(seaLevelPressure,recNum,valmis
+        call ck_array_real(sealevelpressure,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     seaSurfaceTemp"sea surface temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'seaSurfaceTemp',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for seaSurfaceTemp'
-       print *,'Set seaSurfaceTemp to badflag'
-       seaSurfaceTemp = badflag
+c
+c     variable        netcdf long name
+c     seasurfacetemp"sea surface temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'seasurfacetemp',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for seasurfacetemp'
+       print *,'set seasurfacetemp to badflag'
+       seasurfacetemp = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,seaSurfaceTemp)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for seaSurfaceTemp'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,seasurfacetemp)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for seasurfacetemp'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - seaSurfaceTemp'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - seasurfacetemp'
        else
-        call ck_array_real(seaSurfaceTemp,recNum,valfil
+        call ck_array_real(seasurfacetemp,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - seaSurfaceTemp'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - seasurfacetemp'
        else
-        call ck_array_real(seaSurfaceTemp,recNum,valmis
+        call ck_array_real(seasurfacetemp,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     soilMoisturePercent  "Soil moisture"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'soilMoisturePercent',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for soilMoisturePercent'
-       print *,'Set soilMoisturePercent to badflag'
-       soilMoisturePercent = badflag
+c
+c     variable        netcdf long name
+c     soilmoisturepercent  "soil moisture"
+c
+      nf_status=nf_inq_varid(nf_fid,'soilmoisturepercent',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for soilmoisturepercent'
+       print *,'set soilmoisturepercent to badflag'
+       soilmoisturepercent = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,soilMoisturePercent)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for soilMoisturePercent'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,soilmoisturepercent)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for soilmoisturepercent'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - soilMoisturePercent'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - soilmoisturepercent'
        else
-        call ck_array_real(soilMoisturePercent,recNum,valfil
+        call ck_array_real(soilmoisturepercent,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - soilMoisturePercent'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - soilmoisturepercent'
        else
-        call ck_array_real(soilMoisturePercent,recNum,valmis
+        call ck_array_real(soilmoisturepercent,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     soilTemperature"Soil temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'soilTemperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for soilTemperature'
-       print *,'Set soilTemperature to badflag'
-       soilTemperature = badflag
+c
+c     variable        netcdf long name
+c     soiltemperature"soil temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'soiltemperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for soiltemperature'
+       print *,'set soiltemperature to badflag'
+       soiltemperature = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,soilTemperature)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for soilTemperature'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,soiltemperature)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for soiltemperature'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - soilTemperature'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - soiltemperature'
        else
-        call ck_array_real(soilTemperature,recNum,valfil
+        call ck_array_real(soiltemperature,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - soilTemperature'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - soiltemperature'
        else
-        call ck_array_real(soilTemperature,recNum,valmis
+        call ck_array_real(soiltemperature,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     solarRadiation"solar radiation"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'solarRadiation',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for solarRadiation'
-       print *,'Set solarRadiation to badflag'
-       solarRadiation = badflag
+c
+c     variable        netcdf long name
+c     solarradiation"solar radiation"
+c
+      nf_status=nf_inq_varid(nf_fid,'solarradiation',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for solarradiation'
+       print *,'set solarradiation to badflag'
+       solarradiation = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,solarRadiation)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for solarRadiation'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,solarradiation)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for solarradiation'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - solarRadiation'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - solarradiation'
        else
-        call ck_array_real(solarRadiation,recNum,valfil
+        call ck_array_real(solarradiation,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - solarRadiation'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - solarradiation'
        else
-        call ck_array_real(solarRadiation,recNum,valmis
+        call ck_array_real(solarradiation,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationPressure"station pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationPressure',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationPressure'
-       print *,'Set stationPressure to badflag'
-       stationPressure = badflag
+c
+c     variable        netcdf long name
+c     stationpressure"station pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationpressure',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationpressure'
+       print *,'set stationpressure to badflag'
+       stationpressure = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,stationPressure)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationPressure'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,stationpressure)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationpressure'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - stationPressure'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - stationpressure'
        else
-        call ck_array_real(stationPressure,recNum,valfil
+        call ck_array_real(stationpressure,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - stationPressure'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - stationpressure'
        else
-        call ck_array_real(stationPressure,recNum,valmis
+        call ck_array_real(stationpressure,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     temperature   "temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperature'
-       print *,'Set temperature to badflag'
+c
+c     variable        netcdf long name
+c     temperature   "temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperature'
+       print *,'set temperature to badflag'
        temperature = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,temperature)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperature'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,temperature)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperature'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - temperature'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - temperature'
        else
-        call ck_array_real(temperature,recNum,valfil
+        call ck_array_real(temperature,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - temperature'
        else
-        call ck_array_real(temperature,recNum,valmis
+        call ck_array_real(temperature,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     visibility    "visibility"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'visibility',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for visibility'
-       print *,'Set visibility to badflag'
+c
+c     variable        netcdf long name
+c     visibility    "visibility"
+c
+      nf_status=nf_inq_varid(nf_fid,'visibility',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for visibility'
+       print *,'set visibility to badflag'
        visibility = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,visibility)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for visibility'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,visibility)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for visibility'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - visibility'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - visibility'
        else
-        call ck_array_real(visibility,recNum,valfil
+        call ck_array_real(visibility,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
      1         ,' for missing_value - visibility'
        else
-        call ck_array_real(visibility,recNum,valmis
+        call ck_array_real(visibility,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windDir       "wind direction"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windDir',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windDir'
-       print *,'Set windDir to badflag'
-       windDir = badflag
+c
+c     variable        netcdf long name
+c     winddir       "wind direction"
+c
+      nf_status=nf_inq_varid(nf_fid,'winddir',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for winddir'
+       print *,'set winddir to badflag'
+       winddir = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,windDir)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windDir'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,winddir)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for winddir'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windDir'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - winddir'
        else
-        call ck_array_real(windDir,recNum,valfil
+        call ck_array_real(winddir,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windDir'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - winddir'
        else
-        call ck_array_real(windDir,recNum,valmis
+        call ck_array_real(winddir,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windDirMax    "wind direction at gust"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windDirMax',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windDirMax'
-       print *,'Set windDirMax to badflag'
-       windDirMax = badflag
+c
+c     variable        netcdf long name
+c     winddirmax    "wind direction at gust"
+c
+      nf_status=nf_inq_varid(nf_fid,'winddirmax',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for winddirmax'
+       print *,'set winddirmax to badflag'
+       winddirmax = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,windDirMax)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windDirMax'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,winddirmax)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for winddirmax'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windDirMax'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - winddirmax'
        else
-        call ck_array_real(windDirMax,recNum,valfil
+        call ck_array_real(winddirmax,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windDirMax'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - winddirmax'
        else
-        call ck_array_real(windDirMax,recNum,valmis
+        call ck_array_real(winddirmax,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windGust      "wind gust"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windGust',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windGust'
-       print *,'Set windGust to badflag'
-       windGust = badflag
+c
+c     variable        netcdf long name
+c     windgust      "wind gust"
+c
+      nf_status=nf_inq_varid(nf_fid,'windgust',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for windgust'
+       print *,'set windgust to badflag'
+       windgust = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,windGust)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windGust'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,windgust)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for windgust'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windGust'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - windgust'
        else
-        call ck_array_real(windGust,recNum,valfil
+        call ck_array_real(windgust,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windGust'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - windgust'
        else
-        call ck_array_real(windGust,recNum,valmis
+        call ck_array_real(windgust,recnum,valmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windSpeed     "wind speed"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windSpeed',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windSpeed'
-       print *,'Set windSpeed to badflag'
-       windSpeed = badflag
+c
+c     variable        netcdf long name
+c     windspeed     "wind speed"
+c
+      nf_status=nf_inq_varid(nf_fid,'windspeed',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for windspeed'
+       print *,'set windspeed to badflag'
+       windspeed = badflag
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,windSpeed)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windSpeed'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,windspeed)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for windspeed'
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',valfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windSpeed'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'_fillvalue',valfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - windspeed'
        else
-        call ck_array_real(windSpeed,recNum,valfil
+        call ck_array_real(windspeed,recnum,valfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_REAL(nf_fid,nf_vid,'missing_value',valmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windSpeed'
+       nf_status=nf_get_att_real(nf_fid,nf_vid,'missing_value',valmis)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - windspeed'
        else
-        call ck_array_real(windSpeed,recNum,valmis
+        call ck_array_real(windspeed,recnum,valmis
      1                    ,badflag)
        endif
       endif
 
-C   Variables of type INT
-C
-C
-C     Variable        NETCDF Long Name
-C     altimeterQCR  "altimeter setting QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'altimeterQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for altimeterQCR'
-       print *,'Set altimeterQCR to -99'
-       altimeterQCR = -99
+c   variables of type int
+c
+c
+c     variable        netcdf long name
+c     altimeterqcr  "altimeter setting qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'altimeterqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for altimeterqcr'
+       print *,'set altimeterqcr to -99'
+       altimeterqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,altimeterQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for altimeterQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,altimeterqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for altimeterqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     dewpointQCR   "dew point QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'dewpointQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for dewpointQCR'
-       print *,'Set dewpointQCR to -99'
-       dewpointQCR = -99
+c
+c     variable        netcdf long name
+c     dewpointqcr   "dew point qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'dewpointqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for dewpointqcr'
+       print *,'set dewpointqcr to -99'
+       dewpointqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,dewpointQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for dewpointQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,dewpointqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for dewpointqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     firstOverflow 
-C
-      nf_status=NF_INQ_VARID(nf_fid,'firstOverflow',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for firstOverflow'
-       print *,'Set firstOverflow to -99'
-       firstOverflow = -99
+c
+c     variable        netcdf long name
+c     firstoverflow 
+c
+      nf_status=nf_inq_varid(nf_fid,'firstoverflow',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for firstoverflow'
+       print *,'set firstoverflow to -99'
+       firstoverflow = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,firstOverflow)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for firstOverflow'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,firstoverflow)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for firstoverflow'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     globalInventory
-C
-      nf_status=NF_INQ_VARID(nf_fid,'globalInventory',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for globalInventory'
-       print *,'Set globalInventory to -99'
-       globalInventory = -99
+c
+c     variable        netcdf long name
+c     globalinventory
+c
+      nf_status=nf_inq_varid(nf_fid,'globalinventory',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for globalinventory'
+       print *,'set globalinventory to -99'
+       globalinventory = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,globalInventory)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for globalInventory'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,globalinventory)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for globalinventory'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     nStaticIds    
-C
-      nf_status=NF_INQ_VARID(nf_fid,'nStaticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for nStaticIds'
-       print *,'Set nStaticIds to -99'
-       nStaticIds = -99
+c
+c     variable        netcdf long name
+c     nstaticids    
+c
+      nf_status=nf_inq_varid(nf_fid,'nstaticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for nstaticids'
+       print *,'set nstaticids to -99'
+       nstaticids = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,nStaticIds)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for nStaticIds'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,nstaticids)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for nstaticids'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     numericWMOid  "numeric WMO identification"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'numericWMOid',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for numericWMOid'
-       print *,'Set numericWMOid to -99'
-       numericWMOid = -99
+c
+c     variable        netcdf long name
+c     numericwmoid  "numeric wmo identification"
+c
+      nf_status=nf_inq_varid(nf_fid,'numericwmoid',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for numericwmoid'
+       print *,'set numericwmoid to -99'
+       numericwmoid = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,numericWMOid)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for numericWMOid'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,numericwmoid)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for numericwmoid'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipAccumQCR"precip amount QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipAccumQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipAccumQCR'
-       print *,'Set precipAccumQCR to -99'
-       precipAccumQCR = -99
+c
+c     variable        netcdf long name
+c     precipaccumqcr"precip amount qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'precipaccumqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for precipaccumqcr'
+       print *,'set precipaccumqcr to -99'
+       precipaccumqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,precipAccumQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipAccumQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,precipaccumqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for precipaccumqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipIntensity"precipitation intensity"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipIntensity',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipIntensity'
-       print *,'Set precipIntensity to -99'
-       precipIntensity = -99
+c
+c     variable        netcdf long name
+c     precipintensity"precipitation intensity"
+c
+      nf_status=nf_inq_varid(nf_fid,'precipintensity',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for precipintensity'
+       print *,'set precipintensity to -99'
+       precipintensity = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,precipIntensity)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipIntensity'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,precipintensity)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for precipintensity'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipRateQCR "precip rate QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipRateQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipRateQCR'
-       print *,'Set precipRateQCR to -99'
-       precipRateQCR = -99
+c
+c     variable        netcdf long name
+c     preciprateqcr "precip rate qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'preciprateqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for preciprateqcr'
+       print *,'set preciprateqcr to -99'
+       preciprateqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,precipRateQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipRateQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,preciprateqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for preciprateqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipType    "precipitation type"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipType',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipType'
-       print *,'Set precipType to -99'
-       precipType = -99
+c
+c     variable        netcdf long name
+c     preciptype    "precipitation type"
+c
+      nf_status=nf_inq_varid(nf_fid,'preciptype',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for preciptype'
+       print *,'set preciptype to -99'
+       preciptype = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,precipType)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipType'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,preciptype)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for preciptype'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     pressChange3HourQCR"3h pressure change QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'pressChange3HourQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for pressChange3HourQCR'
-       print *,'Set pressChange3HourQCR to -99'
-       pressChange3HourQCR = -99
+c
+c     variable        netcdf long name
+c     presschange3hourqcr"3h pressure change qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'presschange3hourqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for presschange3hourqcr'
+       print *,'set presschange3hourqcr to -99'
+       presschange3hourqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,pressChange3HourQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for pressChange3HourQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,presschange3hourqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for presschange3hourqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     pressChangeChar"character of pressure change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'pressChangeChar',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for pressChangeChar'
-       print *,'Set pressChangeChar to -99'
-       pressChangeChar = -99
+c
+c     variable        netcdf long name
+c     presschangechar"character of pressure change"
+c
+      nf_status=nf_inq_varid(nf_fid,'presschangechar',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for presschangechar'
+       print *,'set presschangechar to -99'
+       presschangechar = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,pressChangeChar)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for pressChangeChar'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,presschangechar)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for presschangechar'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     relHumidityQCR"relative humidity QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'relHumidityQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for relHumidityQCR'
-       print *,'Set relHumidityQCR to -99'
-       relHumidityQCR = -99
+c
+c     variable        netcdf long name
+c     relhumidityqcr"relative humidity qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'relhumidityqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for relhumidityqcr'
+       print *,'set relhumidityqcr to -99'
+       relhumidityqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,relHumidityQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for relHumidityQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,relhumidityqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for relhumidityqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     seaLevelPressureQCR"sea level pressure QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'seaLevelPressureQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for seaLevelPressureQCR'
-       print *,'Set seaLevelPressureQCR to -99'
-       seaLevelPressureQCR = -99
+c
+c     variable        netcdf long name
+c     sealevelpressureqcr"sea level pressure qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'sealevelpressureqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for sealevelpressureqcr'
+       print *,'set sealevelpressureqcr to -99'
+       sealevelpressureqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,seaLevelPressureQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for seaLevelPressureQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,sealevelpressureqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for sealevelpressureqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationPressureQCR"station pressure QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationPressureQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationPressureQCR'
-       print *,'Set stationPressureQCR to -99'
-       stationPressureQCR = -99
+c
+c     variable        netcdf long name
+c     stationpressureqcr"station pressure qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationpressureqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationpressureqcr'
+       print *,'set stationpressureqcr to -99'
+       stationpressureqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,stationPressureQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationPressureQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,stationpressureqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationpressureqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     temperatureQCR"temperature QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperatureQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperatureQCR'
-       print *,'Set temperatureQCR to -99'
-       temperatureQCR = -99
+c
+c     variable        netcdf long name
+c     temperatureqcr"temperature qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperatureqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperatureqcr'
+       print *,'set temperatureqcr to -99'
+       temperatureqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,temperatureQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperatureQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,temperatureqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperatureqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     visibilityQCR "visibility QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'visibilityQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for visibilityQCR'
-       print *,'Set visibilityQCR to -99'
-       visibilityQCR = -99
+c
+c     variable        netcdf long name
+c     visibilityqcr "visibility qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'visibilityqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for visibilityqcr'
+       print *,'set visibilityqcr to -99'
+       visibilityqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,visibilityQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for visibilityQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,visibilityqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for visibilityqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windDirQCR    "wind direction QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windDirQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windDirQCR'
-       print *,'Set windDirQCR to -99'
-       windDirQCR = -99
+c
+c     variable        netcdf long name
+c     winddirqcr    "wind direction qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'winddirqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for winddirqcr'
+       print *,'set winddirqcr to -99'
+       winddirqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,windDirQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windDirQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,winddirqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for winddirqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windSpeedQCR  "wind speed QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windSpeedQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windSpeedQCR'
-       print *,'Set windSpeedQCR to -99'
-       windSpeedQCR = -99
+c
+c     variable        netcdf long name
+c     windspeedqcr  "wind speed qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'windspeedqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for windspeedqcr'
+       print *,'set windspeedqcr to -99'
+       windspeedqcr = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,windSpeedQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windSpeedQCR'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,windspeedqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for windspeedqcr'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     code1PST      "precip variable definition"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'code1PST',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for code1PST'
-       print *,'Set code1PST to -99'
-       code1PST = -99
+c
+c     variable        netcdf long name
+c     code1pst      "precip variable definition"
+c
+      nf_status=nf_inq_varid(nf_fid,'code1pst',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for code1pst'
+       print *,'set code1pst to -99'
+       code1pst = -99
       else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,code1PST)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for code1PST'
-       endif
-      endif
-
-C
-C     Variable        NETCDF Long Name
-C     code2PST      "solarRadiation variable definition"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'code2PST',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for code2PST'
-       print *,'Set code2PST to -99'
-       code2PST = -99
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,code2PST)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for code2PST'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,code1pst)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for code1pst'
        endif
       endif
 
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C     observationTime"time of observation"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'observationTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for observationTime'
-       print *,'Set observationTime to badflag'
-       observationTime = badflag
+c
+c     variable        netcdf long name
+c     code2pst      "solarradiation variable definition"
+c
+      nf_status=nf_inq_varid(nf_fid,'code2pst',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for code2pst'
+       print *,'set code2pst to -99'
+       code2pst = -99
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,observationTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for observationTime'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,code2pst)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for code2pst'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - observationTime'
+      endif
+
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c     observationtime"time of observation"
+c
+      nf_status=nf_inq_varid(nf_fid,'observationtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for observationtime'
+       print *,'set observationtime to badflag'
+       observationtime = badflag
+      else
+       nf_status=nf_get_var_double(nf_fid,nf_vid,observationtime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for observationtime'
+       endif
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - observationtime'
        else
-        call ck_array_dble(observationTime,recNum,dvalfil
+        call ck_array_dble(observationtime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - observationTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - observationtime'
        else
-        call ck_array_dble(observationTime,recNum,dvalmis
+        call ck_array_dble(observationtime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     receivedTime  "time data was received"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'receivedTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for receivedTime'
-       print *,'Set receivedTime to badflag'
-       receivedTime = badflag
+c
+c     variable        netcdf long name
+c     receivedtime  "time data was received"
+c
+      nf_status=nf_inq_varid(nf_fid,'receivedtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for receivedtime'
+       print *,'set receivedtime to badflag'
+       receivedtime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,receivedTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for receivedTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,receivedtime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for receivedtime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - receivedTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - receivedtime'
        else
-        call ck_array_dble(receivedTime,recNum,dvalfil
+        call ck_array_dble(receivedtime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - receivedTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - receivedtime'
        else
-        call ck_array_dble(receivedTime,recNum,dvalmis
+        call ck_array_dble(receivedtime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     reportTime    "time data was processed by the provider"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'reportTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for reportTime'
-       print *,'Set reportTime to badflag'
-       reportTime = badflag
+c
+c     variable        netcdf long name
+c     reporttime    "time data was processed by the provider"
+c
+      nf_status=nf_inq_varid(nf_fid,'reporttime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for reporttime'
+       print *,'set reporttime to badflag'
+       reporttime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,reportTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for reportTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,reporttime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for reporttime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - reportTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - reporttime'
        else
-        call ck_array_dble(reportTime,recNum,dvalfil
+        call ck_array_dble(reporttime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - reportTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - reporttime'
        else
-        call ck_array_dble(reportTime,recNum,dvalmis
+        call ck_array_dble(reporttime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     rhChangeTime  "relative humidity time of last change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'rhChangeTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for rhChangeTime'
-       print *,'Set rhChangeTime to badflag'
-       rhChangeTime = badflag
+c
+c     variable        netcdf long name
+c     rhchangetime  "relative humidity time of last change"
+c
+      nf_status=nf_inq_varid(nf_fid,'rhchangetime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for rhchangetime'
+       print *,'set rhchangetime to badflag'
+       rhchangetime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,rhChangeTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for rhChangeTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,rhchangetime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for rhchangetime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - rhChangeTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - rhchangetime'
        else
-        call ck_array_dble(rhChangeTime,recNum,dvalfil
+        call ck_array_dble(rhchangetime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - rhChangeTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - rhchangetime'
        else
-        call ck_array_dble(rhChangeTime,recNum,dvalmis
+        call ck_array_dble(rhchangetime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationPressChangeTime"station press time of last change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationPressChangeTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationPressChangeTime'
-       print *,'Set stationPressChangeTime to badflag'
-       stationPressChangeTime = badflag
+c
+c     variable        netcdf long name
+c     stationpresschangetime"station press time of last change"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationpresschangetime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationpresschangetime'
+       print *,'set stationpresschangetime to badflag'
+       stationpresschangetime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,stationPressChangeTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationPressChangeTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,stationpresschangetime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationpresschangetime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - stationPressChangeTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - stationpresschangetime'
        else
-        call ck_array_dble(stationPressChangeTime,recNum,dvalfil
+        call ck_array_dble(stationpresschangetime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - stationPressChangeTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - stationpresschangetime'
        else
-        call ck_array_dble(stationPressChangeTime,recNum,dvalmis
+        call ck_array_dble(stationpresschangetime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tempChangeTime"temperature time of last change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tempChangeTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tempChangeTime'
-       print *,'Set tempChangeTime to badflag'
-       tempChangeTime = badflag
+c
+c     variable        netcdf long name
+c     tempchangetime"temperature time of last change"
+c
+      nf_status=nf_inq_varid(nf_fid,'tempchangetime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tempchangetime'
+       print *,'set tempchangetime to badflag'
+       tempchangetime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,tempChangeTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tempChangeTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,tempchangetime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tempchangetime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - tempChangeTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - tempchangetime'
        else
-        call ck_array_dble(tempChangeTime,recNum,dvalfil
+        call ck_array_dble(tempchangetime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - tempChangeTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - tempchangetime'
        else
-        call ck_array_dble(tempChangeTime,recNum,dvalmis
+        call ck_array_dble(tempchangetime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windDirChangeTime"wind direction time of last change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windDirChangeTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windDirChangeTime'
-       print *,'Set windDirChangeTime to badflag'
-       windDirChangeTime = badflag
+c
+c     variable        netcdf long name
+c     winddirchangetime"wind direction time of last change"
+c
+      nf_status=nf_inq_varid(nf_fid,'winddirchangetime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for winddirchangetime'
+       print *,'set winddirchangetime to badflag'
+       winddirchangetime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,windDirChangeTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windDirChangeTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,winddirchangetime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for winddirchangetime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windDirChangeTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - winddirchangetime'
        else
-        call ck_array_dble(windDirChangeTime,recNum,dvalfil
+        call ck_array_dble(winddirchangetime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windDirChangeTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - winddirchangetime'
        else
-        call ck_array_dble(windDirChangeTime,recNum,dvalmis
+        call ck_array_dble(winddirchangetime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windGustChangeTime"wind gust time of last change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windGustChangeTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windGustChangeTime'
-       print *,'Set windGustChangeTime to badflag'
-       windGustChangeTime = badflag
+c
+c     variable        netcdf long name
+c     windgustchangetime"wind gust time of last change"
+c
+      nf_status=nf_inq_varid(nf_fid,'windgustchangetime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for windgustchangetime'
+       print *,'set windgustchangetime to badflag'
+       windgustchangetime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,windGustChangeTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windGustChangeTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,windgustchangetime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for windgustchangetime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windGustChangeTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - windgustchangetime'
        else
-        call ck_array_dble(windGustChangeTime,recNum,dvalfil
+        call ck_array_dble(windgustchangetime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windGustChangeTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - windgustchangetime'
        else
-        call ck_array_dble(windGustChangeTime,recNum,dvalmis
+        call ck_array_dble(windgustchangetime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windSpeedChangeTime"wind speed time of last change"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windSpeedChangeTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windSpeedChangeTime'
-       print *,'Set windSpeedChangeTime to badflag'
-       windSpeedChangeTime = badflag
+c
+c     variable        netcdf long name
+c     windspeedchangetime"wind speed time of last change"
+c
+      nf_status=nf_inq_varid(nf_fid,'windspeedchangetime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for windspeedchangetime'
+       print *,'set windspeedchangetime to badflag'
+       windspeedchangetime = badflag
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,windSpeedChangeTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windSpeedChangeTime'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,windspeedchangetime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for windspeedchangetime'
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'_FillValue',dvalfil)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for _FillValue - windSpeedChangeTime'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'_fillvalue',dvalfil)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for _fillvalue - windspeedchangetime'
        else
-        call ck_array_dble(windSpeedChangeTime,recNum,dvalfil
+        call ck_array_dble(windspeedchangetime,recnum,dvalfil
      1                    ,badflag)
        endif
-       nf_status=NF_GET_ATT_DOUBLE(nf_fid,nf_vid,'missing_value'
+       nf_status=nf_get_att_double(nf_fid,nf_vid,'missing_value'
      1                            ,dvalmis)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-     1         ,' for missing_value - windSpeedChangeTime'
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+     1         ,' for missing_value - windspeedchangetime'
        else
-        call ck_array_dble(windSpeedChangeTime,recNum,dvalmis
+        call ck_array_dble(windspeedchangetime,recnum,dvalmis
      1                    ,badflag)
        endif
       endif
 
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C     altimeterDD   "altimeter setting QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'altimeterDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for altimeterDD'
-       print *,'Set altimeterDD to " "'
-       altimeterDD = ' '
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c     altimeterdd   "altimeter setting qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'altimeterdd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for altimeterdd'
+       print *,'set altimeterdd to " "'
+       altimeterdd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,altimeterDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for altimeterDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,altimeterdd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for altimeterdd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     dataProvider  "Local data provider"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'dataProvider',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for dataProvider'
-       print *,'Set dataProvider to " "'
-       dataProvider = ' '
+c
+c     variable        netcdf long name
+c     dataprovider  "local data provider"
+c
+      nf_status=nf_inq_varid(nf_fid,'dataprovider',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for dataprovider'
+       print *,'set dataprovider to " "'
+       dataprovider = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,dataProvider)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for dataProvider'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,dataprovider)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for dataprovider'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     dewpointDD    "dew point QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'dewpointDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for dewpointDD'
-       print *,'Set dewpointDD to " "'
-       dewpointDD = ' '
+c
+c     variable        netcdf long name
+c     dewpointdd    "dew point qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'dewpointdd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for dewpointdd'
+       print *,'set dewpointdd to " "'
+       dewpointdd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,dewpointDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for dewpointDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,dewpointdd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for dewpointdd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     namePST       "PST Provider or Subprovider name"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'namePST',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for namePST'
-       print *,'Set namePST to " "'
-       namePST = ' '
+c
+c     variable        netcdf long name
+c     namepst       "pst provider or subprovider name"
+c
+      nf_status=nf_inq_varid(nf_fid,'namepst',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for namepst'
+       print *,'set namepst to " "'
+       namepst = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,namePST)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for namePST'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,namepst)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for namepst'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipAccumDD "precip amount QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipAccumDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipAccumDD'
-       print *,'Set precipAccumDD to " "'
-       precipAccumDD = ' '
+c
+c     variable        netcdf long name
+c     precipaccumdd "precip amount qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'precipaccumdd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for precipaccumdd'
+       print *,'set precipaccumdd to " "'
+       precipaccumdd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,precipAccumDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipAccumDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,precipaccumdd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for precipaccumdd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipRateDD  "precip rate QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipRateDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipRateDD'
-       print *,'Set precipRateDD to " "'
-       precipRateDD = ' '
+c
+c     variable        netcdf long name
+c     precipratedd  "precip rate qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'precipratedd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for precipratedd'
+       print *,'set precipratedd to " "'
+       precipratedd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,precipRateDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipRateDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,precipratedd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for precipratedd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     presWeather   "present weather"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'presWeather',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for presWeather'
-       print *,'Set presWeather to " "'
-       presWeather = ' '
+c
+c     variable        netcdf long name
+c     presweather   "present weather"
+c
+      nf_status=nf_inq_varid(nf_fid,'presweather',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for presweather'
+       print *,'set presweather to " "'
+       presweather = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,presWeather)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for presWeather'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,presweather)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for presweather'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     pressChange3HourDD"3h pressure change QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'pressChange3HourDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for pressChange3HourDD'
-       print *,'Set pressChange3HourDD to " "'
-       pressChange3HourDD = ' '
+c
+c     variable        netcdf long name
+c     presschange3hourdd"3h pressure change qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'presschange3hourdd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for presschange3hourdd'
+       print *,'set presschange3hourdd to " "'
+       presschange3hourdd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,pressChange3HourDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for pressChange3HourDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,presschange3hourdd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for presschange3hourdd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     providerId    "Data Provider station Id"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'providerId',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for providerId'
-       print *,'Set providerId to " "'
-       providerId = ' '
+c
+c     variable        netcdf long name
+c     providerid    "data provider station id"
+c
+      nf_status=nf_inq_varid(nf_fid,'providerid',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for providerid'
+       print *,'set providerid to " "'
+       providerid = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,providerId)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for providerId'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,providerid)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for providerid'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     relHumidityDD "relative humidity QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'relHumidityDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for relHumidityDD'
-       print *,'Set relHumidityDD to " "'
-       relHumidityDD = ' '
+c
+c     variable        netcdf long name
+c     relhumiditydd "relative humidity qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'relhumiditydd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for relhumiditydd'
+       print *,'set relhumiditydd to " "'
+       relhumiditydd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,relHumidityDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for relHumidityDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,relhumiditydd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for relhumiditydd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     seaLevelPressureDD"Sea level pressure QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'seaLevelPressureDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for seaLevelPressureDD'
-       print *,'Set seaLevelPressureDD to " "'
-       seaLevelPressureDD = ' '
+c
+c     variable        netcdf long name
+c     sealevelpressuredd"sea level pressure qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'sealevelpressuredd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for sealevelpressuredd'
+       print *,'set sealevelpressuredd to " "'
+       sealevelpressuredd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,seaLevelPressureDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for seaLevelPressureDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,sealevelpressuredd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for sealevelpressuredd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationId     "alphanumeric station Id"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationId',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationId'
-       print *,'Set stationId to " "'
-       stationId = ' '
+c
+c     variable        netcdf long name
+c     stationid     "alphanumeric station id"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationid',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationid'
+       print *,'set stationid to " "'
+       stationid = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,stationId)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationId'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,stationid)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationid'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationName   "alphanumeric station name"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationName',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationName'
-       print *,'Set stationName to " "'
-       stationName = ' '
+c
+c     variable        netcdf long name
+c     stationname   "alphanumeric station name"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationname',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationname'
+       print *,'set stationname to " "'
+       stationname = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,stationName)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationName'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,stationname)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationname'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationPressureDD"station pressure QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationPressureDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationPressureDD'
-       print *,'Set stationPressureDD to " "'
-       stationPressureDD = ' '
+c
+c     variable        netcdf long name
+c     stationpressuredd"station pressure qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationpressuredd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationpressuredd'
+       print *,'set stationpressuredd to " "'
+       stationpressuredd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,stationPressureDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationPressureDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,stationpressuredd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationpressuredd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     stationType   "LDAD station type"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'stationType',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for stationType'
-       print *,'Set stationType to " "'
-       stationType = ' '
+c
+c     variable        netcdf long name
+c     stationtype   "ldad station type"
+c
+      nf_status=nf_inq_varid(nf_fid,'stationtype',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stationtype'
+       print *,'set stationtype to " "'
+       stationtype = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,stationType)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for stationType'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,stationtype)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stationtype'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     temperatureDD "temperature QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperatureDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperatureDD'
-       print *,'Set temperatureDD to " "'
-       temperatureDD = ' '
+c
+c     variable        netcdf long name
+c     temperaturedd "temperature qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperaturedd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperaturedd'
+       print *,'set temperaturedd to " "'
+       temperaturedd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,temperatureDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperatureDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,temperaturedd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperaturedd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     visibilityDD  "visibility QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'visibilityDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for visibilityDD'
-       print *,'Set visibilityDD to " "'
-       visibilityDD = ' '
+c
+c     variable        netcdf long name
+c     visibilitydd  "visibility qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'visibilitydd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for visibilitydd'
+       print *,'set visibilitydd to " "'
+       visibilitydd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,visibilityDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for visibilityDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,visibilitydd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for visibilitydd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windDirDD     "wind direction QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windDirDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windDirDD'
-       print *,'Set windDirDD to " "'
-       windDirDD = ' '
+c
+c     variable        netcdf long name
+c     winddirdd     "wind direction qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'winddirdd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for winddirdd'
+       print *,'set winddirdd to " "'
+       winddirdd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,windDirDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windDirDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,winddirdd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for winddirdd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     windSpeedDD   "wind speed QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'windSpeedDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for windSpeedDD'
-       print *,'Set windSpeedDD to " "'
-       windSpeedDD = ' '
+c
+c     variable        netcdf long name
+c     windspeeddd   "wind speed qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'windspeeddd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for windspeeddd'
+       print *,'set windspeeddd to " "'
+       windspeeddd = ' '
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,windSpeedDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for windSpeedDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,windspeeddd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for windspeeddd'
        endif
       endif
 
       nf_status=nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

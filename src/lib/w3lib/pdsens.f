@@ -1,75 +1,75 @@
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    PDSENS.F    PACKS GRIB PDS EXTENSION 41- FOR ENSEMBLE
-C   PRGMMR: RICHARD WOBUS    ORG: W/NP20     DATE: 98-09-28
-C
-C ABSTRACT: PACKS BRIB PDS EXTENSION STARTING ON BYTE 41 FOR ENSEMBLE
-C	FORECAST PRODUCTS. FOR FORMAT OF PDS EXTENSION, SEE NMC OFFICE NOTE 38
-C
-C PROGRAM HISTORY LOG:
-C   95-03-14  ZOLTAN TOTH AND MARK IREDELL
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-09-28  WOBUS       CORRECTED MEMBER ENTRY, BLANK ALL UNUSED FIELDS
-C
-C USAGE:    CALL PDSENS.F(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
-C   INPUT ARGUMENT LIST:
-C     KENS(5)  - BYTES 41-45 (GENERAL SECTION, ALWAYS PRESENT.)
-C     KPROB(2) - BYTES 46-47 (PROBABILITY SECTION, PRESENT ONLY IF NEEDE
-C     XPROB(2) - BYTES 48-51&52-55 (PROBABILITY SECTION, IF NEEDED.)
-C     KCLUST(16)-BYTES 61-76 (CLUSTERING SECTION, IF NEEDED.)
-C     KMEMBR(80)-BYTES 77-86 (CLUSTER MEMBERSHIP SECTION, IF NEEDED.)
-C     ILAST    - LAST BYTE TO BE PACKED (IF GREATER OR EQUAL TO FIRST BY
-C                IN ANY OF FOUR SECTIONS ABOVE, WHOLE SECTION IS PACKED.
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     MSGA     - FULL PDS SECTION, INCLUDING NEW ENSEMBLE EXTENSION
-C
-C REMARKS: USE PDSEUP.F FOR UNPACKING PDS ENSEMBLE EXTENSION.
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  CRAY, WORKSTATIONS
-C
-C$$$
-C	TESTING GRIB EXTENSION 41- PACKER AND UNPACKER SUBROUTINES
-C
-CFPP$ NOCONCUR R
-	  SUBROUTINE PDSENS(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
-	  INTEGER KENS(5),KPROB(2),KCLUST(16),KMEMBR(80)
-      DIMENSION XPROB(2)
-	  CHARACTER*1 MSGA(100)
-	  IF(ILAST.LT.41) THEN
-	  GO TO 333
-	  ENDIF
-C	PACKING IS DONE IN FOUR SECTIONS ENDING AT BYTE IL
-	  IF(ILAST.GE.41) IL=45
-	  IF(ILAST.GE.46) IL=55
-	  IF(ILAST.GE.61) IL=76
-	  IF(ILAST.GE.77) IL=86
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    pdsens.f    packs grib pds extension 41- for ensemble
+c   prgmmr: richard wobus    org: w/np20     date: 98-09-28
+c
+c abstract: packs brib pds extension starting on byte 41 for ensemble
+c	forecast products. for format of pds extension, see nmc office note 38
+c
+c program history log:
+c   95-03-14  zoltan toth and mark iredell
+c   95-10-31  iredell     removed saves and prints
+c   98-09-28  wobus       corrected member entry, blank all unused fields
+c
+c usage:    call pdsens.f(kens,kprob,xprob,kclust,kmembr,ilast,msga)
+c   input argument list:
+c     kens(5)  - bytes 41-45 (general section, always present.)
+c     kprob(2) - bytes 46-47 (probability section, present only if neede
+c     xprob(2) - bytes 48-51&52-55 (probability section, if needed.)
+c     kclust(16)-bytes 61-76 (clustering section, if needed.)
+c     kmembr(80)-bytes 77-86 (cluster membership section, if needed.)
+c     ilast    - last byte to be packed (if greater or equal to first by
+c                in any of four sections above, whole section is packed.
+c
+c   output argument list:      (including work arrays)
+c     msga     - full pds section, including new ensemble extension
+c
+c remarks: use pdseup.f for unpacking pds ensemble extension.
+c   subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: fortran 77
+c   machine:  cray, workstations
+c
+c$$$
+c	testing grib extension 41- packer and unpacker subroutines
+c
+cfpp$ noconcur r
+	  subroutine pdsens(kens,kprob,xprob,kclust,kmembr,ilast,msga)
+	  integer kens(5),kprob(2),kclust(16),kmembr(80)
+      dimension xprob(2)
+	  character*1 msga(100)
+	  if(ilast.lt.41) then
+	  go to 333
+	  endif
+c	packing is done in four sections ending at byte il
+	  if(ilast.ge.41) il=45
+	  if(ilast.ge.46) il=55
+	  if(ilast.ge.61) il=76
+	  if(ilast.ge.77) il=86
           do i=42,il
-            CALL SBYTE(MSGA, 0, i*8, 8)
+            call sbyte(msga, 0, i*8, 8)
           enddo
-C	CHANGING THE NUMBER OF BYTES (FIRST THREE BYTES IN PDS)
-	  CALL SBYTE(MSGA, IL, 0,24)
-C	PACKING FIRST SECTION (GENERAL INTORMATION SECTION)
-      IF(IL.GE.45) CALL SBYTES(MSGA,KENS,40*8,8,0,5)
-C	PACKING 2ND SECTION (PROBABILITY SECTION)
-      IF(IL.GE.55) THEN
-          CALL SBYTES(MSGA,KPROB,45*8,8,0,2)
-	  CALL W3FI01(LW)
-	  CALL W3FI76(XPROB(1),IEXP,IMANT,8*LW)
-	  CALL SBYTE(MSGA,IEXP,47*8,8)
-	  CALL SBYTE(MSGA,IMANT,48*8,24)
-	  CALL W3FI76(XPROB(2),IEXP,IMANT,8*LW)
-	  CALL SBYTE(MSGA,IEXP,51*8,8)
-	  CALL SBYTE(MSGA,IMANT,52*8,24)
-      ENDIF
-C	PACKING 3RD SECTION (CLUSTERING INFORMATION)
-      IF(IL.GE.76) CALL SBYTES(MSGA,KCLUST,60*8,8,0,16)
-C	PACKING 4TH SECTION (CLUSTER MEMBERSHIP)
-      IF(IL.GE.86) CALL SBYTES(MSGA,KMEMBR,76*8,1,0,80)
-C
- 333  CONTINUE
-	  RETURN
-	  END
+c	changing the number of bytes (first three bytes in pds)
+	  call sbyte(msga, il, 0,24)
+c	packing first section (general intormation section)
+      if(il.ge.45) call sbytes(msga,kens,40*8,8,0,5)
+c	packing 2nd section (probability section)
+      if(il.ge.55) then
+          call sbytes(msga,kprob,45*8,8,0,2)
+	  call w3fi01(lw)
+	  call w3fi76(xprob(1),iexp,imant,8*lw)
+	  call sbyte(msga,iexp,47*8,8)
+	  call sbyte(msga,imant,48*8,24)
+	  call w3fi76(xprob(2),iexp,imant,8*lw)
+	  call sbyte(msga,iexp,51*8,8)
+	  call sbyte(msga,imant,52*8,24)
+      endif
+c	packing 3rd section (clustering information)
+      if(il.ge.76) call sbytes(msga,kclust,60*8,8,0,16)
+c	packing 4th section (cluster membership)
+      if(il.ge.86) call sbytes(msga,kmembr,76*8,1,0,80)
+c
+ 333  continue
+	  return
+	  end

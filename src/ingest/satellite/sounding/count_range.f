@@ -55,11 +55,11 @@ c
       enddo
 c
       do k=1,ndimch
-       write(6,*)'Ch/I2Missing/ExceedThresh: ',k,icntm(k),icnteth(k)
+       write(6,*)'ch/i2missing/exceedthresh: ',k,icntm(k),icnteth(k)
       enddo
 
       goto 1000
-999   write(6,*)'Error getting i2_missing_data'
+999   write(6,*)'error getting i2_missing_data'
  
 1000  return
       end

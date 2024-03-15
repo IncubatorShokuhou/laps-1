@@ -15,69 +15,69 @@ c
       character*(*)   filename
 
       include 'netcdf.inc'
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       n=index(filename,' ')-1
-      print*,'Open netCDF file',filename(1:n)
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ',filename(1:n)
+      print*,'open netcdf file',filename(1:n)
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ',filename(1:n)
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of lat
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'lat',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c  fill all dimension values
+c
+c
+c get size of lat
+c
+      nf_status = nf_inq_dimid(nf_fid,'lat',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim lat'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,lat)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,lat)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim lat'
       endif
-C
-C Get size of level
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'level',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of level
+c
+      nf_status = nf_inq_dimid(nf_fid,'level',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim level'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,level)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,level)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim level'
       endif
-C
-C Get size of lon
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'lon',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of lon
+c
+      nf_status = nf_inq_dimid(nf_fid,'lon',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim lon'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,lon)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,lon)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim lon'
       endif
-C
-C Get size of n_2d_grids
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'n_2d_grids',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of n_2d_grids
+c
+      nf_status = nf_inq_dimid(nf_fid,'n_2d_grids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim n_2d_grids'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,n_2d_grids)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,n_2d_grids)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim n_2d_grids'
       endif
       if(lon.ne.nxv01)then
@@ -97,8 +97,8 @@ C
      +cref_com,cvel_com,cnyq_com,refd,veld,nyqd)
 
       end
-C
-C
+c
+c
       subroutine main_sub(nf_fid, lat, level, lon, n_2d_grids,
      +refd_comment,veld_comment,nyqd_comment,refd,veld,nyqd)
       include 'netcdf.inc'
@@ -123,9 +123,9 @@ C
      +     nyqd_fcinv, origin, refd, refd_comment, refd_fcinv, veld,
      +     veld_comment, veld_fcinv, version)
 
-C
-C The netcdf variables are filled - your code goes here
-C
+c
+c the netcdf variables are filled - your code goes here
+c
       return
       end
       subroutine read_netcdf(nf_fid , lat, level, lon, n_2d_grids,
@@ -152,303 +152,303 @@ C
       real nyqd( lon,  lat, level), refd( lon,  lat, level), veld(
      +     lon,  lat, level)
 
-C
-C     Variable        NETCDF Long Name
-C      asctime
-        nf_status = NF_INQ_VARID(nf_fid,'asctime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      asctime
+        nf_status = nf_inq_varid(nf_fid,'asctime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var asctime'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,asctime)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ asctime '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,asctime)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ asctime '
       endif
-C
-C     Variable        NETCDF Long Name
-C      laps_domain_file 
-        nf_status = NF_INQ_VARID(nf_fid,'laps_domain_file',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      laps_domain_file 
+        nf_status = nf_inq_varid(nf_fid,'laps_domain_file',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var laps_domain_file'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,laps_domain_file)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ laps_domain_file '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,laps_domain_file)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ laps_domain_file '
       endif
-C
-C     Variable        NETCDF Long Name
-C      model         
-        nf_status = NF_INQ_VARID(nf_fid,'model',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      model         
+        nf_status = nf_inq_varid(nf_fid,'model',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var model'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,model)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ model '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,model)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ model '
       endif
-C
-C     Variable        NETCDF Long Name
-C      nyqd_comment
-       nf_status = NF_INQ_VARID(nf_fid,'nyqd_comment',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      nyqd_comment
+       nf_status = nf_inq_varid(nf_fid,'nyqd_comment',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var nyqd_comment'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,nyqd_comment)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ nyqd_comment '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,nyqd_comment)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ nyqd_comment '
       endif
-C
-C     Variable        NETCDF Long Name
-C      origin    
-        nf_status = NF_INQ_VARID(nf_fid,'origin',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      origin    
+        nf_status = nf_inq_varid(nf_fid,'origin',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var origin'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,origin)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ origin '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,origin)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ origin '
       endif
-C
-C     Variable        NETCDF Long Name
-C      refd_comment 
-        nf_status = NF_INQ_VARID(nf_fid,'refd_comment',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      refd_comment 
+        nf_status = nf_inq_varid(nf_fid,'refd_comment',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var refd_comment'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,refd_comment)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ refd_comment '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,refd_comment)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ refd_comment '
       endif
-C
-C     Variable        NETCDF Long Name
-C      veld_comment    
-        nf_status = NF_INQ_VARID(nf_fid,'veld_comment',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      veld_comment    
+        nf_status = nf_inq_varid(nf_fid,'veld_comment',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var veld_comment'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,veld_comment)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ veld_comment '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,veld_comment)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ veld_comment '
       endif
-C
-C     Variable        NETCDF Long Name
-C      fctimes_var  "forecast times" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'fctimes',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      fctimes_var  "forecast times" 
+c
+        nf_status = nf_inq_varid(nf_fid,'fctimes',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var fctimes'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,fctimes_var)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ fctimes_var '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,fctimes_var)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ fctimes_var '
       endif
-C
-C     Variable        NETCDF Long Name
-C      imax
-        nf_status = NF_INQ_VARID(nf_fid,'imax',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      imax
+        nf_status = nf_inq_varid(nf_fid,'imax',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var imax'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,imax)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ imax '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,imax)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ imax '
       endif
-C
-C     Variable        NETCDF Long Name
-C      jmax
-        nf_status = NF_INQ_VARID(nf_fid,'jmax',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      jmax
+        nf_status = nf_inq_varid(nf_fid,'jmax',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var jmax'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,jmax)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ jmax '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,jmax)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ jmax '
       endif
-C
-C     Variable        NETCDF Long Name
-C      kdim
-        nf_status = NF_INQ_VARID(nf_fid,'kdim',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      kdim
+        nf_status = nf_inq_varid(nf_fid,'kdim',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var kdim'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,kdim)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ kdim '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,kdim)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ kdim '
       endif
-C
-C     Variable        NETCDF Long Name
-C      kmax
-        nf_status = NF_INQ_VARID(nf_fid,'kmax',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      kmax
+        nf_status = nf_inq_varid(nf_fid,'kmax',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var kmax'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,kmax)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ kmax '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,kmax)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ kmax '
       endif
-C
-C     Variable        NETCDF Long Name
-C      level_var    "level" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'level',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      level_var    "level" 
+c
+        nf_status = nf_inq_varid(nf_fid,'level',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var level'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,level_var)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ level_var '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,level_var)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ level_var '
       endif
-C
-C     Variable        NETCDF Long Name
-C      lvl
-        nf_status = NF_INQ_VARID(nf_fid,'lvl',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      lvl
+        nf_status = nf_inq_varid(nf_fid,'lvl',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lvl'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,lvl)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ lvl '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,lvl)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ lvl '
       endif
-C
-C     Variable        NETCDF Long Name
-C      num_variables
-        nf_status = NF_INQ_VARID(nf_fid,'num_variables',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      num_variables
+        nf_status = nf_inq_varid(nf_fid,'num_variables',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var num_variables'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,num_variables)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ num_variables '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,num_variables)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ num_variables '
       endif
-C
-C     Variable        NETCDF Long Name
-C      nyqd_fcinv
-        nf_status = NF_INQ_VARID(nf_fid,'nyqd_fcinv',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      nyqd_fcinv
+        nf_status = nf_inq_varid(nf_fid,'nyqd_fcinv',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var nyqd_fcinv'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,nyqd_fcinv)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ nyqd_fcinv '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,nyqd_fcinv)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ nyqd_fcinv '
       endif
-C
-C     Variable        NETCDF Long Name
-C      refd_fcinv
-        nf_status = NF_INQ_VARID(nf_fid,'refd_fcinv',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      refd_fcinv
+        nf_status = nf_inq_varid(nf_fid,'refd_fcinv',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var refd_fcinv'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,refd_fcinv)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ refd_fcinv '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,refd_fcinv)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ refd_fcinv '
       endif
-C
-C     Variable        NETCDF Long Name
-C      veld_fcinv
-        nf_status = NF_INQ_VARID(nf_fid,'veld_fcinv',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      veld_fcinv
+        nf_status = nf_inq_varid(nf_fid,'veld_fcinv',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var veld_fcinv'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,veld_fcinv)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ veld_fcinv '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,veld_fcinv)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ veld_fcinv '
       endif
-C
-C     Variable        NETCDF Long Name
-C      version
-        nf_status = NF_INQ_VARID(nf_fid,'version',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      version
+        nf_status = nf_inq_varid(nf_fid,'version',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var version'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,version)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ version '
+        nf_status = nf_get_var_int(nf_fid,nf_vid,version)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ version '
       endif
-C
-C     Variable        NETCDF Long Name
-C      nyqd         "3D radar nyquist velocity" 
-C
-      print*,'Read nyqd'
-      nf_status = NF_INQ_VARID(nf_fid,'nyqd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      nyqd         "3d radar nyquist velocity" 
+c
+      print*,'read nyqd'
+      nf_status = nf_inq_varid(nf_fid,'nyqd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var nyqd'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,nyqd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ nyqd '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,nyqd)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ nyqd '
       endif
-C
-C     Variable        NETCDF Long Name
-C      refd         "3D radar" 
-C
-      print*,'Read refd'
-      nf_status = NF_INQ_VARID(nf_fid,'refd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      refd         "3d radar" 
+c
+      print*,'read refd'
+      nf_status = nf_inq_varid(nf_fid,'refd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var refd'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,refd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ refd '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,refd)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ refd '
       endif
-C
-C     Variable        NETCDF Long Name
-C      veld         "3D radar" 
-C
-      print*,'Read veld'
-      nf_status = NF_INQ_VARID(nf_fid,'veld',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      veld         "3d radar" 
+c
+      print*,'read veld'
+      nf_status = nf_inq_varid(nf_fid,'veld',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var veld'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,veld)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ veld '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,veld)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ veld '
       endif
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

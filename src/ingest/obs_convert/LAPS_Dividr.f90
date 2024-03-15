@@ -1,18 +1,18 @@
-SUBROUTINE LAPS_DIVIDER
+subroutine laps_divider
 
 !==============================================================================
-!  THIS ROUTINE PRINTS A LINE DIVIDER TO FORMAT AN OUTPUT.
+!  this routine prints a line divider to format an output.
 !
-!  HISTORY:
-!	CREATION:	YUANFU XIE	JUN 2007
+!  history:
+!	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  CHARACTER :: SYMBOL
-  INTEGER   :: LOOPVR,NCOUNT
+  character :: symbol
+  integer   :: loopvr,ncount
 
-  SYMBOL = '='
-  NCOUNT = 70
+  symbol = '='
+  ncount = 70
 
-  WRITE(6,*) (SYMBOL,LOOPVR=1,NCOUNT)
+  write(6,*) (symbol,loopvr=1,ncount)
 
-END SUBROUTINE LAPS_DIVIDER
+end subroutine laps_divider

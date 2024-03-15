@@ -1,25 +1,25 @@
        
-         subroutine madis_qc_r(var,DD,level_qc,badflag)
+         subroutine madis_qc_r(var,dd,level_qc,badflag)
 
          real var
-         character*1 DD
+         character*1 dd
          real badflag
 
          if(level_qc .ge. 1)then
 
-             if(DD .eq. 'X')then ! Failed Level 1 QC
+             if(dd .eq. 'x')then ! failed level 1 qc
                  var = badflag
              endif
 
              if(level_qc .ge. 2)then
-                 if(DD .eq. 'Q')then ! Failed Level 2 or 3 QC
+                 if(dd .eq. 'q')then ! failed level 2 or 3 qc
                      var = badflag
                  endif
              endif             
 
          endif
 
-         if(DD .eq. 'B')then ! Subjective QC (reject list)
+         if(dd .eq. 'b')then ! subjective qc (reject list)
              var = badflag
          endif
  
@@ -35,7 +35,7 @@
 
          l_pass = .true.
 
-         if(iqc .eq. -99)then ! missing value of QC word (bit flags)
+         if(iqc .eq. -99)then ! missing value of qc word (bit flags)
              return
          endif
 
@@ -48,9 +48,9 @@
          enddo
 
          do i = 1,8
-             if(l_bit(i) .AND. ibmask(i) .eq. 1)then
+             if(l_bit(i) .and. ibmask(i) .eq. 1)then
                  if(idebug .eq. 1)then
-                     write(6,*)' Failed madis_qc_b test ',iqc,i,var
+                     write(6,*)' failed madis_qc_b test ',iqc,i,var
                  endif
                  var = badflag
                  l_pass = .false.
@@ -58,7 +58,7 @@
          enddo
 
          if(l_pass .and. idebug .eq. 1)then
-             write(6,*)' Passed madis_qc_b tests ',iqc,var
+             write(6,*)' passed madis_qc_b tests ',iqc,var
          endif
 
          return

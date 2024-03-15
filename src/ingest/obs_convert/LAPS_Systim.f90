@@ -1,86 +1,86 @@
-SUBROUTINE READ_SYSTIM(DDMMYYHM,TIMEOFCH,YYMMDDHM,EXSTATUS)
+subroutine read_systim(ddmmyyhm,timeofch,yymmddhm,exstatus)
 
 !==============================================================================
-!  THIS ROUTINE DECODES AN ASCII TIME STRING INTO INTEGERS OF DAY, MONTH, YEAR,
-!  HOUR, MINUTE.
+!  this routine decodes an ascii time string into integers of day, month, year,
+!  hour, minute.
 !
-!  HISTORY:
-!	CREATION:	YUANFU XIE	JUN 2007
+!  history:
+!	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER, INTENT(IN)  :: DDMMYYHM*16
-  CHARACTER, INTENT(OUT) :: TIMEOFCH*14
-  INTEGER,   INTENT(OUT) :: YYMMDDHM(5)
-  INTEGER,   INTENT(OUT) :: EXSTATUS
+  character, intent(in)  :: ddmmyyhm*16
+  character, intent(out) :: timeofch*14
+  integer,   intent(out) :: yymmddhm(5)
+  integer,   intent(out) :: exstatus
 
-  ! LOCAL VARIABLE:
-  INTEGER :: ZERO
+  ! local variable:
+  integer :: zero
 
-  ZERO = ICHAR('0')
-  EXSTATUS = 0
+  zero = ichar('0')
+  exstatus = 0
 
-  ! SECOND:
-  TIMEOFCH(13:14) = '00'
+  ! second:
+  timeofch(13:14) = '00'
 
-  ! DAY:
-  YYMMDDHM(3) = (ICHAR(DDMMYYHM(1:1))-ZERO)*10+ICHAR(DDMMYYHM(2:2))-ZERO
-  TIMEOFCH(7:8) = DDMMYYHM(1:2)
+  ! day:
+  yymmddhm(3) = (ichar(ddmmyyhm(1:1))-zero)*10+ichar(ddmmyyhm(2:2))-zero
+  timeofch(7:8) = ddmmyyhm(1:2)
 
-  ! MONTH:
-  SELECT CASE (DDMMYYHM(4:6))
-  CASE ('JAN') 
-    YYMMDDHM(2) =  1
-    TIMEOFCH(5:6) = '01'
-  CASE ('FEB') 
-    YYMMDDHM(2) =  2
-    TIMEOFCH(5:6) = '02'
-  CASE ('MAR')
-    YYMMDDHM(2) =  3
-    TIMEOFCH(5:6) = '03'
-  CASE ('APR')
-    YYMMDDHM(2) =  4
-    TIMEOFCH(5:6) = '04'
-  CASE ('MAY')
-    YYMMDDHM(2) =  5
-    TIMEOFCH(5:6) = '05'
-  CASE ('JUN')
-    YYMMDDHM(2) =  6
-    TIMEOFCH(5:6) = '06'
-  CASE ('JUL')
-    YYMMDDHM(2) =  7
-    TIMEOFCH(5:6) = '07'
-  CASE ('AUG')
-    YYMMDDHM(2) =  8
-    TIMEOFCH(5:6) = '08'
-  CASE ('SEP')
-    YYMMDDHM(2) =  9
-    TIMEOFCH(5:6) = '09'
-  CASE ('OCT')
-    YYMMDDHM(2) = 10
-    TIMEOFCH(5:6) = '10'
-  CASE ('NOV')
-    YYMMDDHM(2) = 11
-    TIMEOFCH(5:6) = '11'
-  CASE ('DEC')
-    YYMMDDHM(2) = 12
-    TIMEOFCH(5:6) = '12'
-  END SELECT
+  ! month:
+  select case (ddmmyyhm(4:6))
+  case ('jan') 
+    yymmddhm(2) =  1
+    timeofch(5:6) = '01'
+  case ('feb') 
+    yymmddhm(2) =  2
+    timeofch(5:6) = '02'
+  case ('mar')
+    yymmddhm(2) =  3
+    timeofch(5:6) = '03'
+  case ('apr')
+    yymmddhm(2) =  4
+    timeofch(5:6) = '04'
+  case ('may')
+    yymmddhm(2) =  5
+    timeofch(5:6) = '05'
+  case ('jun')
+    yymmddhm(2) =  6
+    timeofch(5:6) = '06'
+  case ('jul')
+    yymmddhm(2) =  7
+    timeofch(5:6) = '07'
+  case ('aug')
+    yymmddhm(2) =  8
+    timeofch(5:6) = '08'
+  case ('sep')
+    yymmddhm(2) =  9
+    timeofch(5:6) = '09'
+  case ('oct')
+    yymmddhm(2) = 10
+    timeofch(5:6) = '10'
+  case ('nov')
+    yymmddhm(2) = 11
+    timeofch(5:6) = '11'
+  case ('dec')
+    yymmddhm(2) = 12
+    timeofch(5:6) = '12'
+  end select
 
-  ! YEAR:
-  YYMMDDHM(1) = (ICHAR(DDMMYYHM(8 : 8))-ZERO)*1000+ &
-                (ICHAR(DDMMYYHM(9 : 9))-ZERO)*100 + &
-                (ICHAR(DDMMYYHM(10:10))-ZERO)*10+ &
-                 ICHAR(DDMMYYHM(11:11))-ZERO
-  TIMEOFCH(1:4) = DDMMYYHM(8:11)
+  ! year:
+  yymmddhm(1) = (ichar(ddmmyyhm(8 : 8))-zero)*1000+ &
+                (ichar(ddmmyyhm(9 : 9))-zero)*100 + &
+                (ichar(ddmmyyhm(10:10))-zero)*10+ &
+                 ichar(ddmmyyhm(11:11))-zero
+  timeofch(1:4) = ddmmyyhm(8:11)
 
-  YYMMDDHM(4) = (ICHAR(DDMMYYHM(13:13))-ZERO)*10+&
-                 ICHAR(DDMMYYHM(14:14))-ZERO
-  TIMEOFCH(9:10) = DDMMYYHM(13:14)
+  yymmddhm(4) = (ichar(ddmmyyhm(13:13))-zero)*10+&
+                 ichar(ddmmyyhm(14:14))-zero
+  timeofch(9:10) = ddmmyyhm(13:14)
 
-  YYMMDDHM(5) = (ICHAR(DDMMYYHM(15:15))-ZERO)*10+&
-                 ICHAR(DDMMYYHM(16:16))-ZERO
-  TIMEOFCH(11:12) = DDMMYYHM(15:16)
+  yymmddhm(5) = (ichar(ddmmyyhm(15:15))-zero)*10+&
+                 ichar(ddmmyyhm(16:16))-zero
+  timeofch(11:12) = ddmmyyhm(15:16)
 
-END SUBROUTINE READ_SYSTIM
+end subroutine read_systim

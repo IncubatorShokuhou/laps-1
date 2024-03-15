@@ -1,31 +1,31 @@
       subroutine getdim(csec3,lcsec3,width,height,iscan)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    getdim 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2002-12-11
+! subprogram:    getdim 
+!   prgmmr: gilbert         org: w/np11    date: 2002-12-11
 !
-! ABSTRACT: This subroutine returns the dimensions and scanning mode of 
-!   a grid definition packed in GRIB2 Grid Definition Section 3 format.
+! abstract: this subroutine returns the dimensions and scanning mode of 
+!   a grid definition packed in grib2 grid definition section 3 format.
 !
-! PROGRAM HISTORY LOG:
-! 2002-12-11  Gilbert
+! program history log:
+! 2002-12-11  gilbert
 !
-! USAGE:    CALL getdim(csec3,lcsec3,width,height,iscan)
-!   INPUT ARGUMENT LIST:
-!     csec3    - Character array that contains the packed GRIB2 GDS
-!    lcsec3    - Length (in octets) of section 3
+! usage:    call getdim(csec3,lcsec3,width,height,iscan)
+!   input argument list:
+!     csec3    - character array that contains the packed grib2 gds
+!    lcsec3    - length (in octets) of section 3
 !
-!   OUTPUT ARGUMENT LIST:      
+!   output argument list:      
 !     width    - x (or i) dimension of the grid.
 !     height   - y (or j) dimension of the grid.
-!     iscan    - Scanning mode ( see Code Table 3.4 )
+!     iscan    - scanning mode ( see code table 3.4 )
 !
-! REMARKS:  Returns width and height set to zero, if grid template
+! remarks:  returns width and height set to zero, if grid template
 !           not recognized.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 !      use grib_mod
@@ -56,32 +56,32 @@
       call gf_unpack3(csec3,lcsec3,iofst,igds,igdstmpl,
      &                 igdtlen,list_opt,num_opt,jerr)
       if (jerr.eq.0) then
-         selectcase( igds(5) )     !  Template number
-           case (0:3)   ! Lat/Lon
+         selectcase( igds(5) )     !  template number
+           case (0:3)   ! lat/lon
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(19)
-           case (10)   ! Mercator
+           case (10)   ! mercator
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(16)
-           case (20)   ! Polar Stereographic
+           case (20)   ! polar stereographic
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(18)
-           case (30)   ! Lambert Conformal
+           case (30)   ! lambert conformal
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(18)
-           case (40:43)   ! Gaussian
+           case (40:43)   ! gaussian
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(19)
-           case (90)   ! Space View/Orthographic
+           case (90)   ! space view/orthographic
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(17)
-           case (110)   ! Equatorial Azimuthal
+           case (110)   ! equatorial azimuthal
               width=igdstmpl(8)
               height=igdstmpl(9)
               iscan=igdstmpl(16)

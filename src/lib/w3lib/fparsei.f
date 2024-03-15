@@ -1,39 +1,39 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE FPARSEI(CARG,MARG,KARG)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:  FPARSER       PARSE INTEGERS FROM A CHARACTER STRING
-C   PRGMMR: IREDELL          ORG: NP23        DATE:1998-09-03
-C
-C ABSTRACT: THIS SUBPROGRAM EXTRACTS INTEGERS FROM A FREE-FORMAT
-C   CHARACTER STRING.  IT IS USEFUL FOR PARSING COMMAND ARGUMENTS.
-C
-C PROGRAM HISTORY LOG:
-C 1998-09-03  IREDELL  
-C
-C USAGE:  CALL FPARSEI(CARG,MARG,KARG)
-C
-C   INPUT ARGUMENT LIST:
-C     CARG     - CHARACTER*(*) STRING OF ASCII DIGITS TO PARSE.
-C                INTEGERS MAY BE SEPARATED BY A COMMA OR BY BLANKS.
-C     MARG     - INTEGER MAXIMUM NUMBER OF INTEGERS TO PARSE.
-C
-C   OUTPUT ARGUMENT LIST:
-C     KARG     - INTEGER (MARG) NUMBERS PARSED.
-C                (FROM 0 TO MARG VALUES MAY BE RETURNED.)
-C
-C REMARKS:
-C   TO DETERMINE THE ACTUAL NUMBER OF INTEGERS FOUND IN THE STRING,
-C   KARG SHOULD BE SET TO FILL VALUES BEFORE THE CALL TO FPARSEI AND
-C   THE NUMBER OF NON-FILL VALUES SHOULD BE COUNTED AFTER THE CALL.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C
-C$$$
-      CHARACTER*(*) CARG
-      INTEGER KARG(MARG)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      READ(CARG,*,IOSTAT=IOS) KARG
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      END
+c-----------------------------------------------------------------------
+      subroutine fparsei(carg,marg,karg)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:  fparser       parse integers from a character string
+c   prgmmr: iredell          org: np23        date:1998-09-03
+c
+c abstract: this subprogram extracts integers from a free-format
+c   character string.  it is useful for parsing command arguments.
+c
+c program history log:
+c 1998-09-03  iredell  
+c
+c usage:  call fparsei(carg,marg,karg)
+c
+c   input argument list:
+c     carg     - character*(*) string of ascii digits to parse.
+c                integers may be separated by a comma or by blanks.
+c     marg     - integer maximum number of integers to parse.
+c
+c   output argument list:
+c     karg     - integer (marg) numbers parsed.
+c                (from 0 to marg values may be returned.)
+c
+c remarks:
+c   to determine the actual number of integers found in the string,
+c   karg should be set to fill values before the call to fparsei and
+c   the number of non-fill values should be counted after the call.
+c
+c attributes:
+c   language: fortran 90
+c
+c$$$
+      character*(*) carg
+      integer karg(marg)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      read(carg,*,iostat=ios) karg
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      end

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -33,12 +33,12 @@ cdis
       implicit none
       include 'lapsparms.cmn'      
       integer istatus
-      Call get_laps_config('nest7grid',IStatus)
-      if(IStatus.eq.1)then
-         write(6,*)'LAPS Parameters obtained'
+      call get_laps_config('nest7grid',istatus)
+      if(istatus.eq.1)then
+         write(6,*)'laps parameters obtained'
       else
-          write(6,*)'IStatus = ',IStatus,'Error - Get_LAPS_Config'
-          write(6,*)'Terminating LAPS-LVD. ISPAN Satellite remapping'
+          write(6,*)'istatus = ',istatus,'error - get_laps_config'
+          write(6,*)'terminating laps-lvd. ispan satellite remapping'
           stop
       end if
 c
@@ -75,20 +75,20 @@ c
       character*200 dir_static
 c
 c
-c Definitions needed for acquiring LAPS latitude and longitude arrays.
+c definitions needed for acquiring laps latitude and longitude arrays.
 c -------------------------------------------------------------------
       call get_directory('static',dir_static,len)
 
-      var_ll(1) = 'LAT'
-      var_ll(2) = 'LON'
+      var_ll(1) = 'lat'
+      var_ll(2) = 'lon'
 
-      write(6,*)'Get LAPS lat/lon grid'
+      write(6,*)'get laps lat/lon grid'
       call rd_laps_static(dir_static,'nest7grid',nx_l,ny_l, 2,
      &     var_ll, units_ll, comment_ll, data, grid_spacing,
      &     istatus)
 
       if(istatus.eq.1)then
-         write(6,*)'LAPS lat/lon grid obtained'
+         write(6,*)'laps lat/lon grid obtained'
          write(6,*)
          do j=1,ny_l
             do i=1,nx_l
@@ -97,7 +97,7 @@ c -------------------------------------------------------------------
             end do
          end do
       else
-         write(6,*)'Unable to get lat/lon data'
+         write(6,*)'unable to get lat/lon data'
          write(6,*)'lvd process terminating'
          stop
       end if
@@ -106,7 +106,7 @@ c      do i=1,n_radar_types
       
       if(c_raddat_type.eq.'wfo')then
 
-         write(6,*)'Gen LUT for Conus lambert (WFO) WSI data '
+         write(6,*)'gen lut for conus lambert (wfo) wsi data '
 c        call gen_vrc_wfo_cdf_lut(2,nx_l,ny_l,lat,lon,istatus)
 c        call 
 
@@ -115,25 +115,25 @@ c        call
      &        ,istatus)
 
          if(istatus.eq.1)then
-            write(6,*)'CDF look-up table generated'
+            write(6,*)'cdf look-up table generated'
          else
-            write(6,*)'Error generating look-up-table'
+            write(6,*)'error generating look-up-table'
             goto 901
          endif
 
       elseif(c_raddat_type.eq.'wsi')then
 
-         write(6,*)'Gen LUT for wsi - Cylindrical Equidistant'
+         write(6,*)'gen lut for wsi - cylindrical equidistant'
 
-         print*,'Using latlon_to_ceij routine'
+         print*,'using latlon_to_ceij routine'
          call gen_rirj_ce(nx_l,ny_l,lat,lon,istatus)
 
       endif
 
       if(istatus.eq.1)then
-         write(6,*)'CDF look-up table generated'
+         write(6,*)'cdf look-up table generated'
       else
-         write(6,*)'Error generating look-up-table'
+         write(6,*)'error generating look-up-table'
          goto 901
       endif
 
@@ -141,7 +141,7 @@ c      enddo
 c
       goto 900
 
-901   write(6,*)'Error - genvrclut.f'
+901   write(6,*)'error - genvrclut.f'
 
 900   stop
       end

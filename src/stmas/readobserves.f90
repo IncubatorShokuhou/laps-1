@@ -1,598 +1,592 @@
-MODULE READOBSERVES
+module readobserves
 !*************************************************
-! READ IN RADAR OBSERVATIONS
-! HISTORY: JANUARY 2008, CODED by ZHONGJIE HE.
+! read in radar observations
+! history: january 2008, coded by zhongjie he.
 !*************************************************
-  USE PRMTRS_STMAS
-  USE GENERALTOOLS, ONLY : VRTCLPSTN, VRTCLPSTN8, GETOBDATE, INTERPLTN, INTERPLTN_XIE, ZPCONVERT, OBSTOGRID
-  USE READ_BACKGRD, ONLY : BK0, X00, Y00, P00, Z00, T00, HEIGHTU, HEIGHTL
+   use prmtrs_stmas
+   use generaltools, only: vrtclpstn, vrtclpstn8, getobdate, interpltn, interpltn_xie, zpconvert, obstogrid
+   use read_backgrd, only: bk0, x00, y00, p00, z00, t00, heightu, heightl
 
-  PRIVATE  HANDLEOBS, HT_TO_PRS, LURAO, LUNDX, LUNEW
-  PUBLIC   RDRADROBS, RDBUFROBS, RDBUFROBS_XIE, ALLOCATOB, DEALOCTOB, RDOBSTEST
-  PUBLIC   NOBSMAX, OBP, OBS, OBE, NST, OBA      !  , NALLOBS
+   private handleobs, ht_to_prs, lurao, lundx, lunew
+   public rdradrobs, rdbufrobs, rdbufrobs_xie, allocatob, dealoctob, rdobstest
+   public nobsmax, obp, obs, obe, nst, oba      !  , nallobs
 
-  PUBLIC   X_RADAR, Y_RADAR                      ! JUST FOR TEST
+   public x_radar, y_radar                      ! just for test
 
-  INTEGER  , PARAMETER :: LURAO=11,LUNDX=21,LUNEW=50,NOBSMAX=10000000
-  REAL     , ALLOCATABLE :: OBP(:,:,:), OBS(:,:), OBE(:,:), OBA(:,:)
-  INTEGER  , ALLOCATABLE :: NST(:)
+   integer, parameter :: lurao = 11, lundx = 21, lunew = 50, nobsmax = 10000000
+   real, allocatable :: obp(:, :, :), obs(:, :), obe(:, :), oba(:, :)
+   integer, allocatable :: nst(:)
 
 !**************************************************
-!COMMENT:
-!   THIS MODULE IS MAINLY USED BY INPUT_BG_AND_OBS.F90.
-!   SUBROUTINES:
-!      ALLOCATOB: MEMORY ALLOCATE FOR OBP, OBS, OBE, OBA AND STT.
-!      DEALOCTOB: MEMORY DEALLOCATE FOR OBP, OBS, OBE, AND STT.
-!      RDRADROBS: READ IN DATA OF RADIAL WIND FROM LAPS.
-!      RDBUFROBS: READ IN CONVENTIONAL DATA FROM LAPS.
-!      HANDLEOBS: DETERMINE THE POSITION OF THE OBSERVATION IN THE BACKGROUND FIELD.
-!      HT_TO_PRS: TRANSLATE THE HEIGHT OF THE OBSERVATION TO PRESURE ACCORDING TO THE BACKGROUND, USED FOR THE CASE OF PRESURE COORDINATE.
-!      RDOBSTEST: JUST A TEST SUBROUTINE FOR READING SOME IDEAL DATAS FOR A TEST CASE.
+!comment:
+!   this module is mainly used by input_bg_and_obs.f90.
+!   subroutines:
+!      allocatob: memory allocate for obp, obs, obe, oba and stt.
+!      dealoctob: memory deallocate for obp, obs, obe, and stt.
+!      rdradrobs: read in data of radial wind from laps.
+!      rdbufrobs: read in conventional data from laps.
+!      handleobs: determine the position of the observation in the background field.
+!      ht_to_prs: translate the height of the observation to presure according to the background, used for the case of presure coordinate.
+!      rdobstest: just a test subroutine for reading some ideal datas for a test case.
 !
-!   ARRAYS:
-!      OBP: POSITION OF EACH OBSERVATION IN THE BACKGROUND.
-!      OBS: VALUE OF OBSERVATION.
-!      OBE: ERROR OF OBSERVATION.
-!      NST: NUMBER OF EACH VARIABLE OBSERVATION DATAS.
-!      OBA: AZIMUTH AND TILT ANGLES OF OBSERVATION.
+!   arrays:
+!      obp: position of each observation in the background.
+!      obs: value of observation.
+!      obe: error of observation.
+!      nst: number of each variable observation datas.
+!      oba: azimuth and tilt angles of observation.
 !
-!   VARIABLE:
-!       X_RADAR: THE LONGITUDE OF RADAR, JUST USED BY output_analysis.f90 TO DRAW PICTURES IN THE TEST CASE
-!       Y_RADAR: THE LATITUDE OF RADAR, JUST USED BY output_analysis.f90 TO DRAW PICTURES IN THE TEST CASE
+!   variable:
+!       x_radar: the longitude of radar, just used by output_analysis.f90 to draw pictures in the test case
+!       y_radar: the latitude of radar, just used by output_analysis.f90 to draw pictures in the test case
 !**************************************************
-CONTAINS
+contains
 
-SUBROUTINE ALLOCATOB
+   subroutine allocatob
 !*************************************************
-! MEMORY ALLOCATE FOR OBP, OBS, OBE, OBA AND STT
-! HISTORY: SEPTEMBER 2007, CODED BY WEI LI
-! HISTORY: JANUARY 2008, DEPARTED FORM THE MODULE 'INPUT_BG_OBS' by ZHONGJIE HE.
+! memory allocate for obp, obs, obe, oba and stt
+! history: september 2007, coded by wei li
+! history: january 2008, departed form the module 'input_bg_obs' by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: S,ER
-! --------------------
-
-  ALLOCATE(OBP(NUMDIMS,NOBSMAX,NUMSTAT+3),STAT=ER)
-  IF(ER.NE.0)STOP 'OBP ALLOCATE WRONG'
-  ALLOCATE(OBS(NOBSMAX,NUMSTAT+3),STAT=ER)
-  IF(ER.NE.0)STOP 'OBS ALLOCATE WRONG'
-  ALLOCATE(OBE(NOBSMAX,NUMSTAT+3),STAT=ER)
-  IF(ER.NE.0)STOP 'OBE ALLOCATE WRONG'
-  ALLOCATE(NST(NUMSTAT+3),STAT=ER)
-  IF(ER.NE.0)STOP 'NST ALLOCATE WRONG'
-  DO S=1,NUMSTAT+3
-    NST(S)=0
-  ENDDO
-  ALLOCATE(OBA(NOBSMAX,3),STAT=ER)
-  IF(ER.NE.0)STOP 'OBA ALLOCATE WRONG'
-
-  ! ALLOCATE GRID SPACE FOR LAPS RADIAL WIND:
-  ! ALLOCATE(IDXRADWN(4,FCSTGRD(1)*FCSTGRD(2)*FCSTGRD(3)*FCSTGRD(4)), &
-  !            LAPSRADW(FCSTGRD(1)*FCSTGRD(2)*FCSTGRD(3)*FCSTGRD(4)), STAT=ER)
-  ! IF (ER .NE. 0) THEN
-  !   print*,'Size too large: ',FCSTGRD(1)*FCSTGRD(2)*FCSTGRD(3)*FCSTGRD(4)
-  !   print*,'Size too large: ',FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),FCSTGRD(4)
-  !   PRINT*,'ALLOCATOB: cannot allocate memory for LAPS radial wind'
-  !   STOP
-  ! ENDIF
-
-  RETURN
-END SUBROUTINE ALLOCATOB
-
-
-SUBROUTINE DEALOCTOB
-!*************************************************
-! MEMORY DEALLOCATE FOR OBP, OBS, OBE, AND STT
-! HISTORY: SEPTEMBER 2007, CODED BY WEI LI
-! HISTORY: JANUARY 2008, DEPARTED FORM THE MODULE 'INPUT_BG_OBS' by ZHONGJIE HE.
-!*************************************************
-  IMPLICIT NONE
+      integer  :: s, er
 ! --------------------
 
-  DEALLOCATE(OBP)
-  DEALLOCATE(OBS)
-  DEALLOCATE(OBE)
-  DEALLOCATE(NST)
-  DEALLOCATE(OBA)
+      allocate (obp(numdims, nobsmax, numstat + 3), stat=er)
+      if (er .ne. 0) stop 'obp allocate wrong'
+      allocate (obs(nobsmax, numstat + 3), stat=er)
+      if (er .ne. 0) stop 'obs allocate wrong'
+      allocate (obe(nobsmax, numstat + 3), stat=er)
+      if (er .ne. 0) stop 'obe allocate wrong'
+      allocate (nst(numstat + 3), stat=er)
+      if (er .ne. 0) stop 'nst allocate wrong'
+      do s = 1, numstat + 3
+         nst(s) = 0
+      end do
+      allocate (oba(nobsmax, 3), stat=er)
+      if (er .ne. 0) stop 'oba allocate wrong'
 
-  ! DEALLOCATE LAPS RADIAL WIND:
-  ! DEALLOCATE(IDXRADWN, LAPSRADW)
+      ! allocate grid space for laps radial wind:
+      ! allocate(idxradwn(4,fcstgrd(1)*fcstgrd(2)*fcstgrd(3)*fcstgrd(4)), &
+      !            lapsradw(fcstgrd(1)*fcstgrd(2)*fcstgrd(3)*fcstgrd(4)), stat=er)
+      ! if (er .ne. 0) then
+      !   print*,'size too large: ',fcstgrd(1)*fcstgrd(2)*fcstgrd(3)*fcstgrd(4)
+      !   print*,'size too large: ',fcstgrd(1),fcstgrd(2),fcstgrd(3),fcstgrd(4)
+      !   print*,'allocatob: cannot allocate memory for laps radial wind'
+      !   stop
+      ! endif
 
-  RETURN
-END SUBROUTINE DEALOCTOB
+      return
+   end subroutine allocatob
 
-SUBROUTINE RDLAPSRDR
+   subroutine dealoctob
 !*************************************************
-!  THIS ROUTINE READS GRIDDED RADAR DATA FROM LAPS
-!  REMAPPED DATASET USING LAPS:
-!               GET_MULTIRADAR_VEL AND
-!               QC_RADAR_OBS
-!       ASSUMING THE BACKGROUND HAS BEEN READ IN.
+! memory deallocate for obp, obs, obe, and stt
+! history: september 2007, coded by wei li
+! history: january 2008, departed form the module 'input_bg_obs' by zhongjie he.
+!*************************************************
+      implicit none
+! --------------------
+
+      deallocate (obp)
+      deallocate (obs)
+      deallocate (obe)
+      deallocate (nst)
+      deallocate (oba)
+
+      ! deallocate laps radial wind:
+      ! deallocate(idxradwn, lapsradw)
+
+      return
+   end subroutine dealoctob
+
+   subroutine rdlapsrdr
+!*************************************************
+!  this routine reads gridded radar data from laps
+!  remapped dataset using laps:
+!               get_multiradar_vel and
+!               qc_radar_obs
+!       assuming the background has been read in.
 !
-!  HISTORY: MARCH 2008, CODED BY YUANFU XIE.
+!  history: march 2008, coded by yuanfu xie.
 !*************************************************
 
-  USE MEM_NAMELIST              ! LAPS WIND PARAMETER MODULE
+      use mem_namelist              ! laps wind parameter module
 
-  IMPLICIT NONE
+      implicit none
 
-  ! LOCAL VARIABLES:
-  CHARACTER*31 :: RADEXT(MAX_RADARS)    ! POSSIBLE RADAR NAME EXTENSIONS
-  CHARACTER*4  :: RADNAM(MAX_RADARS)    ! RADAR STATION NAMES
-  CHARACTER*8  :: SID			! RADAR STATION NAME IN 8 BYTE
-  INTEGER      :: NRADAR                ! NUMBER OF RADAR AVAILABLE
-  INTEGER      :: STTRAD,STTNQY         ! RADAR AND ITS NYQUIST STATUS
-  INTEGER      :: NGRDRD(MAX_RADARS)    ! NUMBER OF GRIDPOINTS WITH MEASURABLE VEL
-  INTEGER      :: RADTIM(MAX_RADARS)    ! RADAR OBSERVATION TIME
-  INTEGER      :: RADIDS(MAX_RADARS)    ! RADAR IDX
-  INTEGER      :: IOFFSET(MAX_RADARS),JOFFSET(MAX_RADARS) ! OFFSET FOR THE NEW get_multiradar_vel
-  INTEGER      :: I,J,K,L,M,IX0,IY0,IX1,IY1	! GRID INDICES, NUMBER OF RADAR, TIME FRAME
-  LOGICAL      :: CLUTTR                ! .TRUE. -- REMOVE 3D RADAR CLUTTER
-  REAL         :: RADVEL(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),MAX(3,MAX_RADARS))  ! 3 To allow cloud liquid read in
-                  ! RADAR 4D VELOCITY GRID
-  REAL         :: RADNQY(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),MAX(3,MAX_RADARS))  ! 3 To allow cloud ice read in
-                  ! RADAR 4D NYQUIST VELOCITY
-  REAL         :: UVZERO(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),3)    ! INCREASED TO 3 SHARING WITH CLOUD READ
-                  ! ZERO UV GRIDS USED FOR CALLING LAPS QC_RADAR_OBS
-  REAL         :: VOLNQY(MAX_RADARS)            ! VOLUME NYQUIST VELOCITY
-  REAL         :: RADLAT(MAX_RADARS),RADLON(MAX_RADARS),RADHGT(MAX_RADARS)
-  REAL         :: UVGRID(2)
+      ! local variables:
+      character*31 :: radext(max_radars)    ! possible radar name extensions
+      character*4  :: radnam(max_radars)    ! radar station names
+      character*8  :: sid                        ! radar station name in 8 byte
+      integer      :: nradar                ! number of radar available
+      integer      :: sttrad, sttnqy         ! radar and its nyquist status
+      integer      :: ngrdrd(max_radars)    ! number of gridpoints with measurable vel
+      integer      :: radtim(max_radars)    ! radar observation time
+      integer      :: radids(max_radars)    ! radar idx
+      integer      :: ioffset(max_radars), joffset(max_radars) ! offset for the new get_multiradar_vel
+      integer      :: i, j, k, l, m, ix0, iy0, ix1, iy1        ! grid indices, number of radar, time frame
+      logical      :: cluttr                ! .true. -- remove 3d radar clutter
+      real         :: radvel(fcstgrd(1), fcstgrd(2), fcstgrd(3), max(3, max_radars))  ! 3 to allow cloud liquid read in
+      ! radar 4d velocity grid
+      real         :: radnqy(fcstgrd(1), fcstgrd(2), fcstgrd(3), max(3, max_radars))  ! 3 to allow cloud ice read in
+      ! radar 4d nyquist velocity
+      real         :: uvzero(fcstgrd(1), fcstgrd(2), fcstgrd(3), 3)    ! increased to 3 sharing with cloud read
+      ! zero uv grids used for calling laps qc_radar_obs
+      real         :: volnqy(max_radars)            ! volume nyquist velocity
+      real         :: radlat(max_radars), radlon(max_radars), radhgt(max_radars)
+      real         :: uvgrid(2)
 
-  INTEGER      :: TOLTIM,INC        ! RADAR DATA TOLERATE WINDOW, TIME INCREMENT
-  REAL         :: XRADAR,YRADAR,ZRADAR  ! RADAR STATION LOCATION IN ANALYSIS GRID
-  REAL         :: HEIGHT_TO_ZCOORD2     ! LAPS ROUTINE FOR CONVERTING HEIGHT TO GRID
-  REAL         :: XSPACE,YSPACE ! SPACINGS
+      integer      :: toltim, inc        ! radar data tolerate window, time increment
+      real         :: xradar, yradar, zradar  ! radar station location in analysis grid
+      real         :: height_to_zcoord2     ! laps routine for converting height to grid
+      real         :: xspace, yspace ! spacings
 
-  ! VARIABLES FOR USING HANDLE OBS ROUTINE:
-  INTEGER      :: IP
-  REAL         :: OP(4),PRSLVL(FCSTGRD(3)),AZ,EA,OB,OE
-  REAL         :: HEIGHT_OF_LEVEL,OH,SR		! OH OBS HEIGHT, SR RADAR SLANT RANGE
+      ! variables for using handle obs routine:
+      integer      :: ip
+      real         :: op(4), prslvl(fcstgrd(3)), az, ea, ob, oe
+      real         :: height_of_level, oh, sr                ! oh obs height, sr radar slant range
 
-  !====== USED BY THE MODIFICATION OF ZHONGJIE HE
-  INTEGER      :: I0,J0        ! INDEX OF THE GRID POINT AT THE WEST-SOUTH CORNER TO RADAR STATION
-  REAL         :: XRDR,YRDR    ! LONGITUDE AND LATITUDE OF RADAR STATION USED TO CALCULATE AZ AND EA
-  REAL         :: RE           ! RADIUS OF EARTH
-  !====== END MODIFICATION OF ZHONGJIE HE
+      !====== used by the modification of zhongjie he
+      integer      :: i0, j0        ! index of the grid point at the west-south corner to radar station
+      real         :: xrdr, yrdr    ! longitude and latitude of radar station used to calculate az and ea
+      real         :: re           ! radius of earth
+      !====== end modification of zhongjie he
 !jhui
-  INTEGER :: TT,TT1,INC1,nn
-  REAL    :: REFSCL
-  REAL    :: lat(FCSTGRD(1),FCSTGRD(2))
-  REAL    :: lon(FCSTGRD(1),FCSTGRD(2))
-  REAL    :: topo(FCSTGRD(1),FCSTGRD(2))
-  REAL    :: rlaps_land_frac(FCSTGRD(1),FCSTGRD(2))
-  REAL    :: grid_spacing_cen_m
-  INTEGER :: istatus, i4_tol,i4_ret,iqc_2dref
-  CHARACTER :: units*10,comment*125,radar_name*4,iext*31,c_filespec*255
-  REAL :: heights_3d(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
-  REAL :: radar_ref_3d(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),FCSTGRD(4))
-  REAL :: closest_radar(FCSTGRD(1),FCSTGRD(2))
-  REAL ::  rlat_radar(5), rlon_radar(5),rheight_radar(5)
-  INTEGER :: n_ref_grids,n_2dref,n_3dref
-!  INTEGER :: istat_radar_2dref_a,istat_radar_3dref_a
-!!Variable's defination are not same with fountion read_multiradar_3dref ,modified by shuyuan 20100525
-  INTEGER :: istat_radar_2dref_a(FCSTGRD(1),FCSTGRD(2))
-  INTEGER :: istat_radar_3dref_a(FCSTGRD(1),FCSTGRD(2))
+      integer :: tt, tt1, inc1, nn
+      real    :: refscl
+      real    :: lat(fcstgrd(1), fcstgrd(2))
+      real    :: lon(fcstgrd(1), fcstgrd(2))
+      real    :: topo(fcstgrd(1), fcstgrd(2))
+      real    :: rlaps_land_frac(fcstgrd(1), fcstgrd(2))
+      real    :: grid_spacing_cen_m
+      integer :: istatus, i4_tol, i4_ret, iqc_2dref
+      character :: units*10, comment*125, radar_name*4, iext*31, c_filespec*255
+      real :: heights_3d(fcstgrd(1), fcstgrd(2), fcstgrd(3))
+      real :: radar_ref_3d(fcstgrd(1), fcstgrd(2), fcstgrd(3), fcstgrd(4))
+      real :: closest_radar(fcstgrd(1), fcstgrd(2))
+      real ::  rlat_radar(5), rlon_radar(5), rheight_radar(5)
+      integer :: n_ref_grids, n_2dref, n_3dref
+!  integer :: istat_radar_2dref_a,istat_radar_3dref_a
+!!variable's defination are not same with fountion read_multiradar_3dref ,modified by shuyuan 20100525
+      integer :: istat_radar_2dref_a(fcstgrd(1), fcstgrd(2))
+      integer :: istat_radar_3dref_a(fcstgrd(1), fcstgrd(2))
 !! liu 20100525
-  character*40 c_vars_req
-  character*180 c_values_req
-  INTEGER :: i4time_radar
-  REAL     :: tempref,make_ssh,make_td,tw,make_rh
+      character*40 c_vars_req
+      character*180 c_values_req
+      integer :: i4time_radar
+      real     :: tempref, make_ssh, make_td, tw, make_rh
 
-! add the following definition since build on 5/23/2011 failed. HJ 5/23/2011
-  integer nx_r, ny_r 
+! add the following definition since build on 5/23/2011 failed. hj 5/23/2011
+      integer nx_r, ny_r
 
-  INCLUDE 'main_sub.inc'
-  INCLUDE 'laps_cloud.inc'
-  REAL :: CLD_PRS(KCLOUD)
-  REAL :: CLOUD3D(FCSTGRD(1),FCSTGRD(2),KCLOUD)
+      include 'main_sub.inc'
+      include 'laps_cloud.inc'
+      real :: cld_prs(kcloud)
+      real :: cloud3d(fcstgrd(1), fcstgrd(2), kcloud)
 
-  IF(IFPCDNT.NE.1) THEN              !   BY ZHONGJIEHE
-    PRINT*, 'ERROR! LAPS IS PRESSURE COORDINATE! PLEASE SET IFPCDNT TO 1!'
-    STOP
-  ENDIF                              !   END OF MODIFIED BY ZHONGJIE HE
+      if (ifpcdnt .ne. 1) then              !   by zhongjiehe
+         print *, 'error! laps is pressure coordinate! please set ifpcdnt to 1!'
+         stop
+      end if                              !   end of modified by zhongjie he
 
-  ! CLUTTR = .TRUE.               ! TRUE. -- REMOVE 3D RADAR CLUTTER for old get_multiradar_vel
-  TOLTIM = 600		! DEFAULT 10 MINUTE TOLERATE TIME WINDOW
-  RE=6365.0E3                   ! ADDED BY ZHONGJIE HE
-  IF (FCSTGRD(4) .GT. 1) TOLTIM = T00(FCSTGRD(4))-T00(1)  
-  ! GET PRESSURE LEVELS:
-  CALL GET_PRES_1D(LAPSI4T,FCSTGRD(3),PRSLVL,STTRAD)
+      ! cluttr = .true.               ! true. -- remove 3d radar clutter for old get_multiradar_vel
+      toltim = 600                ! default 10 minute tolerate time window
+      re = 6365.0e3                   ! added by zhongjie he
+      if (fcstgrd(4) .gt. 1) toltim = t00(fcstgrd(4)) - t00(1)
+      ! get pressure levels:
+      call get_pres_1d(lapsi4t, fcstgrd(3), prslvl, sttrad)
 
-  ! READ RADAR DATA CLOSE TO EACH TIME FRAME:
-  INC = TOLTIM/(FCSTGRD(4)-1)
+      ! read radar data close to each time frame:
+      inc = toltim/(fcstgrd(4) - 1)
 
-  DO M=1,FCSTGRD(4)
-    ! GET UNFOLDED RADAR THROUGH LAPS:
-    CALL GET_MULTIRADAR_VEL(ITIME2(1)+(M-1)*INC,INC/2,RADTIM,MAX_RADARS, &
-                            NRADAR,RADEXT,RMISSING, &
-                            FCSTGRD(1),FCSTGRD(2),FCSTGRD(3), &
-                            LATITUDE,LONGITUD, &
-                            FCSTGRD(1),FCSTGRD(2),0, &
-                            RADVEL,RADNQY,RADIDS,VOLNQY, &
-                            IOFFSET,JOFFSET,CLUTTR,NGRDRD, &
-                            RADLAT,RADLON,RADHGT,RADNAM,STTRAD,STTNQY)
+      do m = 1, fcstgrd(4)
+         ! get unfolded radar through laps:
+         call get_multiradar_vel(itime2(1) + (m - 1)*inc, inc/2, radtim, max_radars, &
+                                 nradar, radext, rmissing, &
+                                 fcstgrd(1), fcstgrd(2), fcstgrd(3), &
+                                 latitude, longitud, &
+                                 fcstgrd(1), fcstgrd(2), 0, &
+                                 radvel, radnqy, radids, volnqy, &
+                                 ioffset, joffset, cluttr, ngrdrd, &
+                                 radlat, radlon, radhgt, radnam, sttrad, sttnqy)
 
-    ! SET UV ZERO GRIDS:
-    UVZERO = 0.0
+         ! set uv zero grids:
+         uvzero = 0.0
 
-    ! NYQUIST UNFOLDING:
-    DO L=1,NRADAR
-      ! QC and unfolding radar nyquist:
-      nx_r = FCSTGRD(1)
-      ny_r = FCSTGRD(2)
-      ioffset = 0
-      joffset = 0
-      CALL QC_RADAR_OBS(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3), &
-                         RMISSING,nx_r,ny_r,ioffset,joffset,RADVEL(1,1,1,L),RADNQY(1,1,1,L),NGRDRD(L), &
-                         LATITUDE,LONGITUD,RADLAT(L),RADLON(L),RADHGT(L), &
-                         UVZERO(1,1,1,1),UVZERO(1,1,1,2),BK0(1,1,1,1,1),BK0(1,1,1,1,2), &
-                         VOLNQY(L),L_CORRECT_UNFOLDING,L_GRID_NORTH,STTRAD)
-      PRINT*,'STATUS OF QC_RADAR_OBS: ',STTRAD,' FOR TIME FRAME: ',M
+         ! nyquist unfolding:
+         do l = 1, nradar
+            ! qc and unfolding radar nyquist:
+            nx_r = fcstgrd(1)
+            ny_r = fcstgrd(2)
+            ioffset = 0
+            joffset = 0
+            call qc_radar_obs(fcstgrd(1), fcstgrd(2), fcstgrd(3), &
+                              rmissing, nx_r, ny_r, ioffset, joffset, radvel(1, 1, 1, l), radnqy(1, 1, 1, l), ngrdrd(l), &
+                              latitude, longitud, radlat(l), radlon(l), radhgt(l), &
+                              uvzero(1, 1, 1, 1), uvzero(1, 1, 1, 2), bk0(1, 1, 1, 1, 1), bk0(1, 1, 1, 1, 2), &
+                              volnqy(l), l_correct_unfolding, l_grid_north, sttrad)
+            print *, 'status of qc_radar_obs: ', sttrad, ' for time frame: ', m
 
-      ! ASSIGN AZIMUTH AND ELEVATION ANGLES: BK0 STORES UVZT
-      CALL LATLON_TO_RLAPSGRID(RADLAT(L),RADLON(L),LATITUDE,LONGITUD,&
-                                FCSTGRD(1),FCSTGRD(2),XRADAR,YRADAR,STTRAD)
+            ! assign azimuth and elevation angles: bk0 stores uvzt
+            call latlon_to_rlapsgrid(radlat(l), radlon(l), latitude, longitud, &
+                                     fcstgrd(1), fcstgrd(2), xradar, yradar, sttrad)
 
-      ! Yuanfu found ZRADAR is not being used: turn off for now 07/2009
-      ! For radar stations outside domain, this caused problem as 
-      ! HEIGHT_TO_ZCOORD2 uses height(xradar,yradar...):
-      !ZRADAR = HEIGHT_TO_ZCOORD2(RADHGT(L),BK0(1,1,1,1,3), &
-      !                           FCSTGRD(1),FCSTGRD(2),FCSTGRD(3), &
-      !                           NINT(XRADAR),NINT(YRADAR),STTRAD)
+            ! yuanfu found zradar is not being used: turn off for now 07/2009
+            ! for radar stations outside domain, this caused problem as
+            ! height_to_zcoord2 uses height(xradar,yradar...):
+            !zradar = height_to_zcoord2(radhgt(l),bk0(1,1,1,1,3), &
+            !                           fcstgrd(1),fcstgrd(2),fcstgrd(3), &
+            !                           nint(xradar),nint(yradar),sttrad)
 
-      ! LAPS GRID SPACING:
-      CALL GET_GRID_SPACING_ACTUAL_XY(RADLAT(L),RADLON(L),XSPACE,YSPACE,STTRAD)
+            ! laps grid spacing:
+            call get_grid_spacing_actual_xy(radlat(l), radlon(l), xspace, yspace, sttrad)
 
-      DO K=1,FCSTGRD(3)
-        ! NOTE LAPS REMAP ROUTINE CURRENTLY USES STANDARD ATMOSPHERE
-        ! FOR OBS HEIGHT. WHEN IT CHANGES, THE HEIGHT FED TO 
-        ! LATLON_TO_RADAR HAS TO CHANGED:
-        OH = HEIGHT_OF_LEVEL(k)
-        DO J=1,FCSTGRD(2)
-          DO I=1,FCSTGRD(1)
+            do k = 1, fcstgrd(3)
+               ! note laps remap routine currently uses standard atmosphere
+               ! for obs height. when it changes, the height fed to
+               ! latlon_to_radar has to changed:
+               oh = height_of_level(k)
+               do j = 1, fcstgrd(2)
+                  do i = 1, fcstgrd(1)
 
-            IF (RADVEL(I,J,K,L) .NE. RMISSING) THEN
+                     if (radvel(i, j, k, l) .ne. rmissing) then
 
-!               PRINT*,'RDLAPSRDR: --RADIAL WIND: ', &
-!		 RADVEL(I,J,K,L),RADNQY(I,J,K,L),I,J,K,L,XRADAR,YRADAR,NGRDRD(L),VOLNQY(L)
+!               print*,'rdlapsrdr: --radial wind: ', &
+!                 radvel(i,j,k,l),radnqy(i,j,k,l),i,j,k,l,xradar,yradar,ngrdrd(l),volnqy(l)
 
-	       ! COMPUTE AZIMUTH AND ELEVATION ANGLES USING LAPS ROUTINE
-	       ! LATLON_TO_RADAR.
-               CALL LATLON_TO_RADAR(LATITUDE(I,J),LONGITUD(I,J),OH,AZ,SR,EA, &
-                                     RADLAT(L),RADLON(L),RADHGT(L))
+                        ! compute azimuth and elevation angles using laps routine
+                        ! latlon_to_radar.
+                        call latlon_to_radar(latitude(i, j), longitud(i, j), oh, az, sr, ea, &
+                                             radlat(l), radlon(l), radhgt(l))
 
-               OP(2) = LATITUDE(I,J)      ! OP(1): LONGITUDE; OP(2): LATITUDE
-               OP(1) = LONGITUD(I,J)
-               OP(3) = PRSLVL(K)          ! IN PASCAL
+                        op(2) = latitude(i, j)      ! op(1): longitude; op(2): latitude
+                        op(1) = longitud(i, j)
+                        op(3) = prslvl(k)          ! in pascal
 
-               ! FOR GIVEN TOLERATED TIME WINDOW, ASSUME AVAILABLE RADAR IS
-               ! AT THE TIME FRAME:
-               OP(4) = RADTIM(L)-ITIME2(1)	! ACTUAL RADAR TIME
-               ! OP(4) = T00(M)
+                        ! for given tolerated time window, assume available radar is
+                        ! at the time frame:
+                        op(4) = radtim(l) - itime2(1)        ! actual radar time
+                        ! op(4) = t00(m)
 
-               IP = 1
-               OB=RADVEL(I,J,K,L)		! POSITIVE WIND IS TOWARD THE STATION BY YUANFU
-               OE=0.5
+                        ip = 1
+                        ob = radvel(i, j, k, l)                ! positive wind is toward the station by yuanfu
+                        oe = 0.5
 !jhui
-!               OE=0.3
-               SID(1:4) = RADNAM(L)
+!               oe=0.3
+                        sid(1:4) = radnam(l)
 
-               CALL HANDLEOBS_SIGMA(OP,OB,OE,NUMSTAT+1,NALLOBS,IP,AZ,EA,SID)
+                        call handleobs_sigma(op, ob, oe, numstat + 1, nallobs, ip, az, ea, sid)
 
-           ENDIF
-          ENDDO	! I
-        ENDDO		! J
-      ENDDO		! K
-    ENDDO		! L -- RADAR LEVELS
+                     end if
+                  end do        ! i
+               end do                ! j
+            end do                ! k
+         end do                ! l -- radar levels
 
-  ENDDO		! M -- TIME FRAMES
-  PRINT*,'NUMBER OF RADAR RADIAL WIND TAKEN AS OBS: ',NST(NUMSTAT+1)
+      end do                ! m -- time frames
+      print *, 'number of radar radial wind taken as obs: ', nst(numstat + 1)
 
-
-  call get_laps_domain_95(FCSTGRD(1),FCSTGRD(2),lat,lon,topo &
-                ,rlaps_land_frac,grid_spacing_cen_m,istatus)
-  if(istatus .ne. 1)then
-       write(6,*)' Error getting LAPS domain'
-       return
-  endif
-  write(6,*)' Actual grid spacing in domain center = ',grid_spacing_cen_m
+      call get_laps_domain_95(fcstgrd(1), fcstgrd(2), lat, lon, topo &
+                              , rlaps_land_frac, grid_spacing_cen_m, istatus)
+      if (istatus .ne. 1) then
+         write (6, *) ' error getting laps domain'
+         return
+      end if
+      write (6, *) ' actual grid spacing in domain center = ', grid_spacing_cen_m
 
 !=======reflectivity==for time cycle ,read multitime data file *.vrz======
-!=========added by shuyuan liu 20100830================== 
-  
-  i4_tol = 900
-  i4_ret = 0
-  ref_base = -10
-  nn =0
-  REFSCL =0.0  
-  iext="vrz"
-  BK0(:,:,:,:,NUMSTAT+1) = 0.0
-  radar_ref_3d = 0.0
-  ! Get radar at current and previous time:
-  DO L=1,2  !for L   time          
-     call get_filespec(iext(1:3),2,c_filespec,istatus)
-     call get_file_time(c_filespec,LAPSI4T+(L-2)*ICYCLE,i4time_radar)
+!=========added by shuyuan liu 20100830==================
 
-     call read_multiradar_3dref(LAPSI4T+(L-2)*ICYCLE,i4_tol,i4_ret,&!I
-                   .true.,ref_base,&                              ! I
-                   FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),iext, &   ! I 
-                   lat,lon,topo,.false.,.false., heights_3d, &  ! I
-                   radar_ref_3d(1,1,1,L), &                                      ! O
-                   rlat_radar,rlon_radar,rheight_radar,radar_name, &  ! O
-                   iqc_2dref,closest_radar, &                          ! O
-                   n_ref_grids,n_2dref,n_3dref,istat_radar_2dref_a, &  ! O
-                   istat_radar_3dref_a)                              ! O
-     DO K = 1, FCSTGRD(3)
-      DO J = 1, FCSTGRD(2)
-       DO I = 1, FCSTGRD(1) 
-       IF(radar_ref_3d(I,J,K,L) .GT. 5. .AND. radar_ref_3d(I,J,K,L) .LT.100) THEN
-            ! modified shuyuan 20100719
-                        
-            tempref=(radar_ref_3d(I,J,K,L)-43.1)/17.5
-            tempref=(10.**tempref)       !g/m3
-             ! shuyuan 20100719
-            REFSCL = REFSCL + tempref**2             
-                 
-            ! CHECK IF RAIN AND SNOW IS ANALYZED:
-            IF (NUMSTAT .LE. 5) GOTO 555 
-            nn = nn + 1
-            OP(2) = LATITUDE(I,J)      ! OP(1): LONGITUDE; OP(2): LATITUDE
-            OP(1) = LONGITUD(I,J)
-            OP(3) = PRSLVL(K)          ! IN PASCAL
-!           OP(4) = RADTIM(L)-ITIME2(1)    ! ACTUAL RADAR TIME
-            OP(4) = T00(L)
-            OB= tempref         
-            OE=0.01  ! shuyuan   test 0.1 0.01 1 
-            SID(1:3) = "vrz"
-            CALL HANDLEOBS_SIGMA(OP,OB,OE,NUMSTAT+3,NALLOBS,IP,AZ,EA,SID) 
-            ! SKIP REFLECTIVITY:
-555         CONTINUE 
+      i4_tol = 900
+      i4_ret = 0
+      ref_base = -10
+      nn = 0
+      refscl = 0.0
+      iext = "vrz"
+      bk0(:, :, :, :, numstat + 1) = 0.0
+      radar_ref_3d = 0.0
+      ! get radar at current and previous time:
+      do l = 1, 2  !for l   time
+         call get_filespec(iext(1:3), 2, c_filespec, istatus)
+         call get_file_time(c_filespec, lapsi4t + (l - 2)*icycle, i4time_radar)
 
-            ! Modified by Yuanfu Xie Nov. 2011 for adding radar reflectivity generated SH obs:
-            !NST(HUMIDITY) = NST(HUMIDITY)+1
-            !OBP(1,NST(HUMIDITY),HUMIDITY) = I-1
-            !OBP(2,NST(HUMIDITY),HUMIDITY) = J-1
-            !OBP(3,NST(HUMIDITY),HUMIDITY) = K-1
-            !OBP(4,NST(HUMIDITY),HUMIDITY) = L-1
-            !OBS(NST(HUMIDITY),HUMIDITY) = MAKE_SSH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15,0.75,-132.0)
-            !OBE(NST(HUMIDITY),HUMIDITY) = 1.0
-            !NALLOBS = NALLOBS+1
-        ENDIF
-       ENDDO
-      ENDDO
-     ENDDO
-  ENDDO  ! for L
-  ! INTERPOLATION TO THE THREE TIME FRAMES OF STMAS ANALYSIS:
-  radar_ref_3d(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),3) = &
-    1.5*radar_ref_3d(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)- &
-    0.5*radar_ref_3d(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
-  radar_ref_3d(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1) = &
-    0.5*radar_ref_3d(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)+ &
-    0.5*radar_ref_3d(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
+         call read_multiradar_3dref(lapsi4t + (l - 2)*icycle, i4_tol, i4_ret, &!i
+                                    .true., ref_base, &                              ! i
+                                    fcstgrd(1), fcstgrd(2), fcstgrd(3), iext, &   ! i
+                                    lat, lon, topo, .false., .false., heights_3d, &  ! i
+                                    radar_ref_3d(1, 1, 1, l), &                                      ! o
+                                    rlat_radar, rlon_radar, rheight_radar, radar_name, &  ! o
+                                    iqc_2dref, closest_radar, &                          ! o
+                                    n_ref_grids, n_2dref, n_3dref, istat_radar_2dref_a, &  ! o
+                                    istat_radar_3dref_a)                              ! o
+         do k = 1, fcstgrd(3)
+            do j = 1, fcstgrd(2)
+               do i = 1, fcstgrd(1)
+               if (radar_ref_3d(i, j, k, l) .gt. 5. .and. radar_ref_3d(i, j, k, l) .lt. 100) then
+                  ! modified shuyuan 20100719
 
-  ! Calculate the SH bounds from radar reflectivity:
-  DO L=1,FCSTGRD(4)
-    DO K=1,FCSTGRD(3)
-      DO J=1,FCSTGRD(2)
-        DO I=1,FCSTGRD(1)
-          IF(radar_ref_3d(I,J,K,L) .GT. 5. .AND. radar_ref_3d(I,J,K,L) .LT.100) THEN
+                  tempref = (radar_ref_3d(i, j, k, l) - 43.1)/17.5
+                  tempref = (10.**tempref)       !g/m3
+                  ! shuyuan 20100719
+                  refscl = refscl + tempref**2
 
-          ! ASSUME 75% satured RH where reflectivity present as SH lower bounds:
-          IF (BK0(I,J,K,L,TEMPRTUR) .GT. 273.15) THEN
-            IF (radar_ref_3d(I,J,K,L) .GT. 45.0) THEN
-              BK0(I,J,K,L,NUMSTAT+1)= &
-                MAKE_SSH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15,1.0,0.0)
-            ELSE
-              BK0(I,J,K,L,NUMSTAT+1)= &
-                MAKE_SSH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15,0.1+0.9*radar_ref_3d(I,J,K,L)/45.0,0.0)
-            ENDIF
-          ELSE
-            IF (radar_ref_3d(I,J,K,L) .GT. 30.0) THEN
-              BK0(I,J,K,L,NUMSTAT+1)= &
-                MAKE_SSH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15,1.0,0.0)
-            ELSE
-              BK0(I,J,K,L,NUMSTAT+1)= &
-                MAKE_SSH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15,0.2+0.8*radar_ref_3d(I,J,K,L)/30.0,0.0)
-            ENDIF
-          ENDIF
+                  ! check if rain and snow is analyzed:
+                  if (numstat .le. 5) goto 555
+                  nn = nn + 1
+                  op(2) = latitude(i, j)      ! op(1): longitude; op(2): latitude
+                  op(1) = longitud(i, j)
+                  op(3) = prslvl(k)          ! in pascal
+!           op(4) = radtim(l)-itime2(1)    ! actual radar time
+                  op(4) = t00(l)
+                  ob = tempref
+                  oe = 0.01  ! shuyuan   test 0.1 0.01 1
+                  sid(1:3) = "vrz"
+                  call handleobs_sigma(op, ob, oe, numstat + 3, nallobs, ip, az, ea, sid)
+                  ! skip reflectivity:
+555               continue
 
-          ENDIF
-        ENDDO 
-      ENDDO 
-    ENDDO 
-  ENDDO 
-  PRINT*,'Range of reflectivity derived bound: ', &
-   maxval(BK0(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2,NUMSTAT+1)), &
-   minval(BK0(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2,NUMSTAT+1))
+                  ! modified by yuanfu xie nov. 2011 for adding radar reflectivity generated sh obs:
+                  !nst(humidity) = nst(humidity)+1
+                  !obp(1,nst(humidity),humidity) = i-1
+                  !obp(2,nst(humidity),humidity) = j-1
+                  !obp(3,nst(humidity),humidity) = k-1
+                  !obp(4,nst(humidity),humidity) = l-1
+                  !obs(nst(humidity),humidity) = make_ssh(prslvl(k)/100.0,bk0(i,j,k,l,temprtur)-273.15,0.75,-132.0)
+                  !obe(nst(humidity),humidity) = 1.0
+                  !nallobs = nallobs+1
+               end if
+               end do
+            end do
+         end do
+      end do  ! for l
+      ! interpolation to the three time frames of stmas analysis:
+      radar_ref_3d(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 3) = &
+         1.5*radar_ref_3d(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) - &
+         0.5*radar_ref_3d(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
+      radar_ref_3d(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1) = &
+         0.5*radar_ref_3d(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) + &
+         0.5*radar_ref_3d(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
 
-  ! Interpolate RADREF to GRDBKGD0 as SH lower bound:
-  IF (MAXGRID(3) .NE. FCSTGRD(3) .OR. MAXGRID(4) .NE. FCSTGRD(4)) THEN
-    PRINT*,'The analysis grid does not match multigrid in Z or T, please check!'
-    PRINT*,'The SH lower bound calculation assumes they are the same'
-    STOP
-  ENDIF
+      ! calculate the sh bounds from radar reflectivity:
+      do l = 1, fcstgrd(4)
+         do k = 1, fcstgrd(3)
+            do j = 1, fcstgrd(2)
+               do i = 1, fcstgrd(1)
+                  if (radar_ref_3d(i, j, k, l) .gt. 5. .and. radar_ref_3d(i, j, k, l) .lt. 100) then
 
-  ! READ IN LAPS CLOUD LIQUID AND ICE:
-  iext = "lwc"
-  DO L=1,2
-    CALL GET_LAPS_3DGRID(LAPSI4T+(L-2)*ICYCLE,i4_tol,i4_ret, &
-               FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),iext,iext, &
-               units,comment,RADVEL(1,1,1,L),STTRAD)
-  ENDDO
-  ! INTERPOLATION TO THE THREE TIME FRAMES OF STMAS ANALYSIS:
-  RADVEL(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),3) = &
-    1.5*RADVEL(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)- &
-    0.5*RADVEL(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
-  RADVEL(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1) = &
-    0.5*RADVEL(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)+ &
-    0.5*RADVEL(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
-  PRINT*,'LAPS cloud liquid: ',minval(RADVEL(:,:,:,2))*1000.0,maxval(RADVEL(:,:,:,2))*1000.0
-  DO L=1,2
-    CALL GET_LAPS_3DGRID(LAPSI4T+(L-2)*ICYCLE,i4_tol,i4_ret, &
-               FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),iext,"ice", &
-               units,comment,RADNQY(1,1,1,L),STTRAD)
-  ENDDO
-  ! INTERPOLATION TO THE THREE TIME FRAMES OF STMAS ANALYSIS:
-  RADNQY(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),3) = &
-    1.5*RADNQY(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)- &
-    0.5*RADNQY(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
-  RADNQY(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1) = &
-    0.5*RADNQY(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)+ &
-    0.5*RADNQY(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
-  PRINT*,'LAPS cloud ice: ',minval(RADNQY(:,:,:,2))*1000.0,maxval(RADNQY(:,:,:,2))*1000.0
+                     ! assume 75% satured rh where reflectivity present as sh lower bounds:
+                     if (bk0(i, j, k, l, temprtur) .gt. 273.15) then
+                        if (radar_ref_3d(i, j, k, l) .gt. 45.0) then
+                           bk0(i, j, k, l, numstat + 1) = &
+                              make_ssh(prslvl(k)/100.0, bk0(i, j, k, l, temprtur) - 273.15, 1.0, 0.0)
+                        else
+                           bk0(i, j, k, l, numstat + 1) = &
+                         make_ssh(prslvl(k)/100.0, bk0(i, j, k, l, temprtur) - 273.15, 0.1 + 0.9*radar_ref_3d(i, j, k, l)/45.0, 0.0)
+                        end if
+                     else
+                        if (radar_ref_3d(i, j, k, l) .gt. 30.0) then
+                           bk0(i, j, k, l, numstat + 1) = &
+                              make_ssh(prslvl(k)/100.0, bk0(i, j, k, l, temprtur) - 273.15, 1.0, 0.0)
+                        else
+                           bk0(i, j, k, l, numstat + 1) = &
+                         make_ssh(prslvl(k)/100.0, bk0(i, j, k, l, temprtur) - 273.15, 0.2 + 0.8*radar_ref_3d(i, j, k, l)/30.0, 0.0)
+                        end if
+                     end if
 
-  ! READ IN LAPS CLOUD ANALYSIS FOR BOUNDS OF SH: USE OF ARRAY UZERO
-  UVZERO = 0.0
-  iext = "lc3"
-  DO L=1,2
-    CALL GET_CLOUDS_3DGRID(LAPSI4T+(L-2)*ICYCLE,J,FCSTGRD(1),FCSTGRD(2), &
-           KCLOUD,iext,CLOUD3D,CLD_HTS,CLD_PRS,I)
-    IF (J .NE. LAPSI4T+(L-2)*ICYCLE) THEN
-      PRINT*,'lc3 time does not match the analysis, skip'
-      cycle
-    ELSE
-      PRINT*,'readobservs: found file -- ',J
-    ENDIF
+                  end if
+               end do
+            end do
+         end do
+      end do
+      print *, 'range of reflectivity derived bound: ', &
+         maxval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2, numstat + 1)), &
+         minval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2, numstat + 1))
 
-    DO K=1,FCSTGRD(3)
-      DO M=1,KCLOUD-1
-        IF (PRSLVL(K) .LE. CLD_PRS(M) .AND. (PRSLVL(K) .GE. CLD_PRS(M+1))) THEN
-          XSPACE = (LOG(CLD_PRS(M))-LOG(PRSLVL(K)))/(LOG(CLD_PRS(M))-LOG(CLD_PRS(M+1)))
-          YSPACE = 1.0-XSPACE
-          DO J=1,FCSTGRD(2)
-          DO I=1,FCSTGRD(1)
-            UVZERO(I,J,K,L) = YSPACE*CLOUD3D(I,J,M)+XSPACE*CLOUD3D(I,J,M+1)
-          ENDDO
-          ENDDO
-        ENDIF
-      ENDDO
-    ENDDO
-  ENDDO
-  ! INTERPOLATION TO THE THREE TIME FRAMES OF STMAS ANALYSIS:
-  UVZERO(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),3) = &
-    1.5*UVZERO(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)- &
-    0.5*UVZERO(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
-  UVZERO(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1) = &
-    0.5*UVZERO(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2)+ &
-    0.5*UVZERO(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),1)
+      ! interpolate radref to grdbkgd0 as sh lower bound:
+      if (maxgrid(3) .ne. fcstgrd(3) .or. maxgrid(4) .ne. fcstgrd(4)) then
+         print *, 'the analysis grid does not match multigrid in z or t, please check!'
+         print *, 'the sh lower bound calculation assumes they are the same'
+         stop
+      end if
 
-  ! CONVERT CLOUD TO SH BOUNDS:
-  DO L=1,3
-    DO K=1,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-    DO I=1,FCSTGRD(1)
-      ! XSPACE = 0.0
-      ! IF (UVZERO(I,J,K,L) .GT. 0.1) THEN
-      !   XSPACE = MAKE_SSH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15, &
-      !                     0.8*(UVZERO(I,J,K,L)**0.2),0.0)
-      ! ENDIF
-      ! IF (XSPACE .GT. BK0(I,J,K,L,NUMSTAT+1)) BK0(I,J,K,L,NUMSTAT+1)=XSPACE
+      ! read in laps cloud liquid and ice:
+      iext = "lwc"
+      do l = 1, 2
+         call get_laps_3dgrid(lapsi4t + (l - 2)*icycle, i4_tol, i4_ret, &
+                              fcstgrd(1), fcstgrd(2), fcstgrd(3), iext, iext, &
+                              units, comment, radvel(1, 1, 1, l), sttrad)
+      end do
+      ! interpolation to the three time frames of stmas analysis:
+      radvel(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 3) = &
+         1.5*radvel(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) - &
+         0.5*radvel(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
+      radvel(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1) = &
+         0.5*radvel(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) + &
+         0.5*radvel(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
+      print *, 'laps cloud liquid: ', minval(radvel(:, :, :, 2))*1000.0, maxval(radvel(:, :, :, 2))*1000.0
+      do l = 1, 2
+         call get_laps_3dgrid(lapsi4t + (l - 2)*icycle, i4_tol, i4_ret, &
+                              fcstgrd(1), fcstgrd(2), fcstgrd(3), iext, "ice", &
+                              units, comment, radnqy(1, 1, 1, l), sttrad)
+      end do
+      ! interpolation to the three time frames of stmas analysis:
+      radnqy(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 3) = &
+         1.5*radnqy(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) - &
+         0.5*radnqy(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
+      radnqy(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1) = &
+         0.5*radnqy(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) + &
+         0.5*radnqy(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
+      print *, 'laps cloud ice: ', minval(radnqy(:, :, :, 2))*1000.0, maxval(radnqy(:, :, :, 2))*1000.0
 
-      ! Adjust SH bounds based on cloud fraction:
-      IF ( (UVZERO(I,J,K,L) .LT. 0.1) .AND. (radar_ref_3d(I,J,K,L) .GT. 5.0) ) THEN
-        ! XSPACE = MAKE_TD(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15, & ! DEW
-        !                  BK0(I,J,K,L,NUMSTAT+1),0.0)
-        ! YSPACE = TW(BK0(I,J,K,L,TEMPRTUR)-273.15,XSPACE,PRSLVL(K)/100.0) ! WET BULB T
-        ! XSPACE = MAKE_RH(PRSLVL(K)/100.0,BK0(I,J,K,L,TEMPRTUR)-273.15,& ! RH
-        !                  BK0(I,J,K,L,NUMSTAT+1),0.0)
-        BK0(I,J,K,L,NUMSTAT+1) = 0.0 !MAKE_SSH(PRSLVL(K)/100.0,YSPACE,XSPACE,0.0)
-      ENDIF
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
-  PRINT*,'Range of reflectivity and cloud derived bound: ', &
-   maxval(BK0(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2,NUMSTAT+1)), &
-   minval(BK0(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),2,NUMSTAT+1))
+      ! read in laps cloud analysis for bounds of sh: use of array uzero
+      uvzero = 0.0
+      iext = "lc3"
+      do l = 1, 2
+         call get_clouds_3dgrid(lapsi4t + (l - 2)*icycle, j, fcstgrd(1), fcstgrd(2), &
+                                kcloud, iext, cloud3d, cld_hts, cld_prs, i)
+         if (j .ne. lapsi4t + (l - 2)*icycle) then
+            print *, 'lc3 time does not match the analysis, skip'
+            cycle
+         else
+            print *, 'readobservs: found file -- ', j
+         end if
 
-  ! ASSIGN REFLECTIVITY DERIVED BOUNDS TO GRDBKGD0:
-  DO I=1,MAXGRID(1)
-    IX0 = FLOAT(I-1)/FLOAT(MAXGRID(1)-1)*(FCSTGRD(1)-1)+1
-    IX1 = MIN(IX0+1,FCSTGRD(1))
-    DO J=1,MAXGRID(2)
-      IY0 = FLOAT(J-1)/FLOAT(MAXGRID(2)-1)*(FCSTGRD(2)-1)+1
-      IY1 = MIN(IY0+1,FCSTGRD(2))
-      DO K=1,MAXGRID(3)
-        DO L=1,MAXGRID(4)
-          ! Simple shift instead of interpolation:
-          GRDBKGD0(I,J,K,L,NUMSTAT+1) = 0.25*(BK0(IX0,IY0,K,L,NUMSTAT+1)+ &
-            BK0(IX1,IY0,K,L,NUMSTAT+1)+BK0(IX0,IY1,K,L,NUMSTAT+1)+BK0(IX1,IY1,K,L,NUMSTAT+1))
-          GRDBKGD0(I,J,K,L,NUMSTAT+2) = 1000.0 !GRDBKGD0(I,J,K,L,NUMSTAT+1) ! TEST UPPER BOUND
-        ENDDO
-      ENDDO
-    ENDDO
-  ENDDO
-  PRINT*,'Max dBZ over finest grid: ',maxval(GRDBKGD0(:,:,:,:,NUMSTAT+1)), &
-                                      minval(GRDBKGD0(:,:,:,:,NUMSTAT+1))
-END SUBROUTINE RDLAPSRDR
+         do k = 1, fcstgrd(3)
+            do m = 1, kcloud - 1
+               if (prslvl(k) .le. cld_prs(m) .and. (prslvl(k) .ge. cld_prs(m + 1))) then
+                  xspace = (log(cld_prs(m)) - log(prslvl(k)))/(log(cld_prs(m)) - log(cld_prs(m + 1)))
+                  yspace = 1.0 - xspace
+                  do j = 1, fcstgrd(2)
+                  do i = 1, fcstgrd(1)
+                     uvzero(i, j, k, l) = yspace*cloud3d(i, j, m) + xspace*cloud3d(i, j, m + 1)
+                  end do
+                  end do
+               end if
+            end do
+         end do
+      end do
+      ! interpolation to the three time frames of stmas analysis:
+      uvzero(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 3) = &
+         1.5*uvzero(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) - &
+         0.5*uvzero(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
+      uvzero(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1) = &
+         0.5*uvzero(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2) + &
+         0.5*uvzero(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 1)
 
+      ! convert cloud to sh bounds:
+      do l = 1, 3
+         do k = 1, fcstgrd(3)
+         do j = 1, fcstgrd(2)
+         do i = 1, fcstgrd(1)
+            ! xspace = 0.0
+            ! if (uvzero(i,j,k,l) .gt. 0.1) then
+            !   xspace = make_ssh(prslvl(k)/100.0,bk0(i,j,k,l,temprtur)-273.15, &
+            !                     0.8*(uvzero(i,j,k,l)**0.2),0.0)
+            ! endif
+            ! if (xspace .gt. bk0(i,j,k,l,numstat+1)) bk0(i,j,k,l,numstat+1)=xspace
 
+            ! adjust sh bounds based on cloud fraction:
+            if ((uvzero(i, j, k, l) .lt. 0.1) .and. (radar_ref_3d(i, j, k, l) .gt. 5.0)) then
+               ! xspace = make_td(prslvl(k)/100.0,bk0(i,j,k,l,temprtur)-273.15, & ! dew
+               !                  bk0(i,j,k,l,numstat+1),0.0)
+               ! yspace = tw(bk0(i,j,k,l,temprtur)-273.15,xspace,prslvl(k)/100.0) ! wet bulb t
+               ! xspace = make_rh(prslvl(k)/100.0,bk0(i,j,k,l,temprtur)-273.15,& ! rh
+               !                  bk0(i,j,k,l,numstat+1),0.0)
+               bk0(i, j, k, l, numstat + 1) = 0.0 !make_ssh(prslvl(k)/100.0,yspace,xspace,0.0)
+            end if
+         end do
+         end do
+         end do
+      end do
+      print *, 'range of reflectivity and cloud derived bound: ', &
+         maxval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2, numstat + 1)), &
+         minval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), 2, numstat + 1))
 
-SUBROUTINE RDRADROBS
+      ! assign reflectivity derived bounds to grdbkgd0:
+      do i = 1, maxgrid(1)
+         ix0 = float(i - 1)/float(maxgrid(1) - 1)*(fcstgrd(1) - 1) + 1
+         ix1 = min(ix0 + 1, fcstgrd(1))
+         do j = 1, maxgrid(2)
+            iy0 = float(j - 1)/float(maxgrid(2) - 1)*(fcstgrd(2) - 1) + 1
+            iy1 = min(iy0 + 1, fcstgrd(2))
+            do k = 1, maxgrid(3)
+               do l = 1, maxgrid(4)
+                  ! simple shift instead of interpolation:
+                  grdbkgd0(i, j, k, l, numstat + 1) = 0.25*(bk0(ix0, iy0, k, l, numstat + 1) + &
+                             bk0(ix1, iy0, k, l, numstat + 1) + bk0(ix0, iy1, k, l, numstat + 1) + bk0(ix1, iy1, k, l, numstat + 1))
+                  grdbkgd0(i, j, k, l, numstat + 2) = 1000.0 !grdbkgd0(i,j,k,l,numstat+1) ! test upper bound
+               end do
+            end do
+         end do
+      end do
+      print *, 'max dbz over finest grid: ', maxval(grdbkgd0(:, :, :, :, numstat + 1)), &
+         minval(grdbkgd0(:, :, :, :, numstat + 1))
+   end subroutine rdlapsrdr
+
+   subroutine rdradrobs
 !*************************************************
-! READ IN RADAR OBSERVATIONS
-! HISTORY: JANUARY 2008, CODED by ZHONGJIE HE.
+! read in radar observations
+! history: january 2008, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER ,PARAMETER :: NH=12,NR=7,ML=1500
-  CHARACTER(LEN=8)       :: SS
-  INTEGER         :: L,NL,IR,DT,NC,NW,O,OS,IS,IP
-  REAL            :: HD(NH)
-  REAL            :: RA(NR,ML)
-  REAL            :: X,Y,P,T,UV,ZZ,TT,UE,MS,EA,AZ,ZE
-  REAL            :: OP(NUMDIMS),OB,OE
+      integer, parameter :: nh = 12, nr = 7, ml = 1500
+      character(len=8)       :: ss
+      integer         :: l, nl, ir, dt, nc, nw, o, os, is, ip
+      real            :: hd(nh)
+      real            :: ra(nr, ml)
+      real            :: x, y, p, t, uv, zz, tt, ue, ms, ea, az, ze
+      real            :: op(numdims), ob, oe
 
-  REAL            :: X0,Y0,T0,SH,AA,ID,TD
-  INTEGER         :: YR,MN,DY,HR
-  INTEGER         :: II
+      real            :: x0, y0, t0, sh, aa, id, td
+      integer         :: yr, mn, dy, hr
+      integer         :: ii
 
-  INTEGER     , EXTERNAL :: IREADSB,IREADMG,I4DY
+      integer, external :: ireadsb, ireadmg, i4dy
 
-!  CHARACTER*150          :: OD
-!  CHARACTER*9            :: A9
-!  INTEGER                :: LD,I4,N4,ST
+!  character*150          :: od
+!  character*9            :: a9
+!  integer                :: ld,i4,n4,st
 
-  CHARACTER*80            :: HDRSTR, DATSTR
+      character*80            :: hdrstr, datstr
 
-  INTEGER          :: FG
+      integer          :: fg
 
-  DATA HDRSTR / 'SSTN CLAT CLON SELV ANAZ ANEL YEAR MNTH DAYS HOUR MINU MGPT' /
-  DATA DATSTR / 'STDM SUPLAT SUPLON HEIT RWND RWAZ RSTD' /
+      data hdrstr/'sstn clat clon selv anaz anel year mnth days hour minu mgpt'/
+      data datstr/'stdm suplat suplon heit rwnd rwaz rstd'/
 
+!  call get_systime(i4,a9,st)
+!  call get_filespec('bufr',2,od,st)
+!  call get_file_time(od,i4,n4)
+!  call s_len(od,ld)
+!  call make_fnam_lp(n4,a9,st)
+!  od(ld+4:ld+9) = od(ld-4:ld)
+!  od(ld-5:ld+3) = a9
+!  ld = ld+9
 
-!  CALL GET_SYSTIME(I4,A9,ST)
-!  CALL GET_FILESPEC('bufr',2,OD,ST)
-!  CALL GET_FILE_TIME(OD,I4,N4)
-!  CALL S_LEN(OD,LD)
-!  CALL MAKE_FNAM_LP(N4,A9,ST)
-!  OD(LD+4:LD+9) = OD(LD-4:LD)
-!  OD(LD-5:LD+3) = A9
-!  LD = LD+9
+      print *, 'reading radar bufr file...........'
+      open (unit=lurao, file='./radarii.bufr', form='unformatted' &
+            , status='old', action='read')
+      call openbf(lurao, 'in', lurao)
 
+      fg = 0
+      nc = 0
+      nw = 0
+!  call get_config(is)
+!  if(is.ne.1)stop 'laps parameters are wrong!!!'
+      o = nallobs
+      do while (ireadmg(lurao, ss, dt) .eq. 0)
 
-  PRINT*, 'READING RADAR BUFR FILE...........'
-  OPEN(UNIT=LURAO,FILE='./radarII.bufr',FORM='UNFORMATTED'   &
-       ,STATUS='OLD',ACTION='READ')
-  CALL OPENBF(LURAO,'IN',LURAO)
+!    write(6,*) 'read_radar: bufr file date is ',dt
 
-  FG=0
-  NC=0
-  NW=0
-!  CALL GET_CONFIG(IS)
-!  IF(IS.NE.1)STOP 'LAPS PARAMETERS ARE WRONG!!!'
-  O=NALLOBS
-  DO WHILE(IREADMG(LURAO,SS,DT).EQ.0)
+         do while (ireadsb(lurao) .eq. 0)
 
-!    WRITE(6,*) 'READ_RADAR: BUFR FILE DATE IS ',DT
+            if (fg .eq. 1) exit             ! just for test, by zhongjie he
 
-    DO WHILE(IREADSB(LURAO).EQ.0)
-
-      IF(FG .EQ.1) EXIT             ! JUST FOR TEST, BY ZHONGJIE HE
-
-!     READ HEADER. EXTRACT STATION INFORMATION
-      CALL UFBINT(LURAO,HD,NH,1,IR,HDRSTR)
+!     read header. extract station information
+            call ufbint(lurao, hd, nh, 1, ir, hdrstr)
 
 !      iyr = hd(7)
 !      imo = hd(8)
@@ -600,1025 +594,1021 @@ SUBROUTINE RDRADROBS
 !      ihr = hd(10)
 !      imn = hd(11)
 !      isc = izero
-      T0=HD(10)*60+HD(11) ! BASE TIME   (HOURS)
-      X0=HD(3)            ! STATION LON (DEGREES)
-      Y0=HD(2)            ! STATION LAT (DEGREES)
-      SH=HD(4)            ! STATION ELEVATION
-      AA=HD(5)            ! AZIMUTH OF RADIA (DEGREES)
-      EA=HD(6)            ! ELEVATION ANGLE    (DEGREES)
-      IF(X0.LT.0.0)   X0=X0+360.0
-      IF(X0.GE.360.0) X0=X0-360.0
+            t0 = hd(10)*60 + hd(11) ! base time   (hours)
+            x0 = hd(3)            ! station lon (degrees)
+            y0 = hd(2)            ! station lat (degrees)
+            sh = hd(4)            ! station elevation
+            aa = hd(5)            ! azimuth of radia (degrees)
+            ea = hd(6)            ! elevation angle    (degrees)
+            if (x0 .lt. 0.0) x0 = x0 + 360.0
+            if (x0 .ge. 360.0) x0 = x0 - 360.0
 
-!     Go THROUGH THE DATA LEVELS
-      CALL UFBINT(LURAO,RA,NR,ML,NL,DATSTR)
+!     go through the data levels
+            call ufbint(lurao, ra, nr, ml, nl, datstr)
 
 ! ===============just for test by zhongjie he
-      PRINT*, 'LON=',X0,'LAT=',Y0
-      IF(X0-150.GE.118 .AND. X0-150.LE.124 .AND. Y0-20.GE.21. .AND. Y0-20.LE.25 .AND. NL.GE.100) THEN
-        FG=1
-      ELSE
-        CYCLE
-      ENDIF
+            print *, 'lon=', x0, 'lat=', y0
+            if (x0 - 150 .ge. 118 .and. x0 - 150 .le. 124 .and. y0 - 20 .ge. 21. .and. y0 - 20 .le. 25 .and. nl .ge. 100) then
+               fg = 1
+            else
+               cycle
+            end if
 
-      X_RADAR=X0-150
-      Y_RADAR=Y0-150
+            x_radar = x0 - 150
+            y_radar = y0 - 150
 !===============
 
-      IF(NL>ML) THEN
-        WRITE(6,*)'READ_RADAR:  ***ERROR*** INCREASE READ_RADAR BUFR SIZE SINCE', & 
-             'NUMBER OF LEVS=', NL,' > MAXLEVS=',ML
-        STOP
-      ENDIF
+            if (nl > ml) then
+               write (6, *) 'read_radar:  ***error*** increase read_radar bufr size since', &
+                  'number of levs=', nl, ' > maxlevs=', ml
+               stop
+            end if
 
-      DO L=1,NL
-        NW=NW+1
+            do l = 1, nl
+               nw = nw + 1
 
-! FOR T LOCATION
-        T=(T0+RA(1,L))/60.         ! UNIT IS HOURS
-! FOR X LOCATION
-        X=RA(3,L)
+! for t location
+               t = (t0 + ra(1, l))/60.         ! unit is hours
+! for x location
+               x = ra(3, l)
 
-        X=X-150                    ! JUST FOR A TEST
-!        PRINT*, 'X=X-150 IS JUST FOR TEST ----------------------'
+               x = x - 150                    ! just for a test
+!        print*, 'x=x-150 is just for test ----------------------'
 
-        IF(X.LT.0.0)   X=X+360.0
-        IF(X.GE.360.0) X=X-360.0        
-! FOR Y LOCATION
-        Y=RA(2,L)
+               if (x .lt. 0.0) x = x + 360.0
+               if (x .ge. 360.0) x = x - 360.0
+! for y location
+               y = ra(2, l)
 
-        Y=Y-20                     ! JUST FOR A TEST
-!        PRINT*, 'Y=Y-20 IS JUST FOR TEST ---------------------'
+               y = y - 20                     ! just for a test
+!        print*, 'y=y-20 is just for test ---------------------'
 
-! FOR ZZ OBSERVATION
-        ZZ=RA(4,L)
-! FOR AZIMUTH OF WIND
-        AZ=RA(6,L)
+! for zz observation
+               zz = ra(4, l)
+! for azimuth of wind
+               az = ra(6, l)
 
-! TRANSFORM
-        OP(1)=X
-        OP(2)=Y
-        IP=1
-        CALL HT_TO_PRS(OP(1),OP(2),ZZ,P,IS)
-        IF(IS.NE.1)CYCLE
-        OP(3)=P
-! FOR RADIAL WIND OBSERVATION
-        UV=RA(5,L)
-        UE=RA(7,L)
-! OUTPUT
-        ZE=2.0
-        OB=UV
-        OE=UE
-        OS=NUMSTAT+1
-        CALL HANDLEOBS(OP,OB,OE,OS,O,IP,AZ,EA)
+! transform
+               op(1) = x
+               op(2) = y
+               ip = 1
+               call ht_to_prs(op(1), op(2), zz, p, is)
+               if (is .ne. 1) cycle
+               op(3) = p
+! for radial wind observation
+               uv = ra(5, l)
+               ue = ra(7, l)
+! output
+               ze = 2.0
+               ob = uv
+               oe = ue
+               os = numstat + 1
+               call handleobs(op, ob, oe, os, o, ip, az, ea)
 
-        NC=NC+1
+               nc = nc + 1
 
-      ENDDO
-    ENDDO
-  ENDDO
-  NALLOBS=O
-  PRINT*,'THE NUMBER OF RADAR DATA IS',NW,'AND',NC,'AVAILABLE'
-  CALL CLOSBF(LURAO)
-  CLOSE(LURAO)
-!  CLOSE(LUNDX)
-!  CLOSE(LUNEW)
-  PRINT*,'NALLOBS=',NALLOBS
-  RETURN
-END SUBROUTINE RDRADROBS
+            end do
+         end do
+      end do
+      nallobs = o
+      print *, 'the number of radar data is', nw, 'and', nc, 'available'
+      call closbf(lurao)
+      close (lurao)
+!  close(lundx)
+!  close(lunew)
+      print *, 'nallobs=', nallobs
+      return
+   end subroutine rdradrobs
 
-SUBROUTINE RDBUFROBS_XIE
+   subroutine rdbufrobs_xie
 !*************************************************
-! READ CONVENSIONAL OBS FROM A BUFR FILE, REPLACE
-! THE OLD RDBUFROBS DEVELOPED BY WEI LI FOR MORE
-! EFFICIENCY.
+! read convensional obs from a bufr file, replace
+! the old rdbufrobs developed by wei li for more
+! efficiency.
 !
-! HISTORY: JAN. 2009 BY YUANFU XIE
-!          APR. 2009 BY YUANFU XIE FOR USING LAPS
-!          ROUTINE FOR HEIGHT COMPUTATION.
+! history: jan. 2009 by yuanfu xie
+!          apr. 2009 by yuanfu xie for using laps
+!          routine for height computation.
 !*************************************************
 
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER ,PARAMETER  :: NH=6,NR=16,LN=255
-  CHARACTER(LEN=8)    :: SS,SID,TYP
-  INTEGER             :: L,NL,IR,DT,NC,NW,O,OS,IS,IP,I,J,K,KK
-  INTEGER             :: IDX(2,NUMDIMS)	! INTERPOLATION INDICES
-  REAL                :: COE(2,NUMDIMS)	! INTERPOLATION COEFFICENTS
-  REAL                :: BD,P1
-  REAL(KIND=8)        :: RA(NR,LN),HD(NH)
-  REAL                :: X,Y,Z,P,T,DEL,UU,VV,TT,ZZ,ZE,OP(NUMDIMS),DI,SP
-  INTEGER, EXTERNAL :: IREADSB,IREADMG,I4DY
-  REAL                :: HEIGHT_TO_PRESSURE,RLEVEL_OF_FIELD	! LAPS FUNCTIONS
+      integer, parameter  :: nh = 6, nr = 16, ln = 255
+      character(len=8)    :: ss, sid, typ
+      integer             :: l, nl, ir, dt, nc, nw, o, os, is, ip, i, j, k, kk
+      integer             :: idx(2, numdims)        ! interpolation indices
+      real                :: coe(2, numdims)        ! interpolation coefficents
+      real                :: bd, p1
+      real(kind=8)        :: ra(nr, ln), hd(nh)
+      real                :: x, y, z, p, t, del, uu, vv, tt, zz, ze, op(numdims), di, sp
+      integer, external :: ireadsb, ireadmg, i4dy
+      real                :: height_to_pressure, rlevel_of_field        ! laps functions
 
-  REAL                :: AZ,EA            ! ADDED BY ZHONGJIE HE
+      real                :: az, ea            ! added by zhongjie he
 
-  ! VARIABLES FOR LAPS OBS: BY YUANFU
-  CHARACTER*150       :: OD
-  CHARACTER*9         :: A9,WFO_FNAME13_TO_FNAME9
-  CHARACTER*13	      :: YYYYMMDD_HHMM
-  INTEGER             :: LD,I4,N4,ST
+      ! variables for laps obs: by yuanfu
+      character*150       :: od
+      character*9         :: a9, wfo_fname13_to_fname9
+      character*13              :: yyyymmdd_hhmm
+      integer             :: ld, i4, n4, st
 !jhui
-  INTEGER :: data_acar
-  INTEGER :: tw_u, tw_t, tw_sh, tw_p
-  EQUIVALENCE(SID,HD(5))
+      integer :: data_acar
+      integer :: tw_u, tw_t, tw_sh, tw_p
+      equivalence(sid, hd(5))
 !jhui
 
-  ! Include a statement function for converting sh to 'rh' = sh/s2r(p) by Yuanfu Xie:
-  include 'sh2rh.inc'
+      ! include a statement function for converting sh to 'rh' = sh/s2r(p) by yuanfu xie:
+      include 'sh2rh.inc'
 
-  data_acar =0
-  tw_u=0
-  tw_t=0
-  tw_sh=0
-  tw_p=0
+      data_acar = 0
+      tw_u = 0
+      tw_t = 0
+      tw_sh = 0
+      tw_p = 0
 
+      call get_filespec('bufr', 2, od, st)        ! get path to bufr directory
+      call get_file_time(od, lapsi4t, n4)        ! get nearest i4time into n4
+      call s_len(od, ld)
+      call make_fnam_lp(n4, a9, st)
+      od(ld + 4:ld + 9) = od(ld - 4:ld)
+      od(ld - 5:ld + 3) = a9
+      ld = ld + 9
 
-  CALL GET_FILESPEC('bufr',2,OD,ST)	! GET PATH TO BUFR DIRECTORY
-  CALL GET_FILE_TIME(OD,LAPSI4T,N4)	! GET NEAREST I4TIME INTO N4
-  CALL S_LEN(OD,LD)
-  CALL MAKE_FNAM_LP(N4,A9,ST)
-  OD(LD+4:LD+9) = OD(LD-4:LD)
-  OD(LD-5:LD+3) = A9
-  LD = LD+9
+      ! open the bufr file:
+      open (unit=lurao, file=od(1:ld), form='unformatted', status='old', action='read')
 
-  ! OPEN THE BUFR FILE:
-  OPEN(UNIT=LURAO,FILE=OD(1:LD),FORM='UNFORMATTED',STATUS='OLD',ACTION='READ')
+      call openbf(lurao, 'in', lurao)        ! open bufr in channel
 
-  CALL OPENBF(LURAO,'IN',LURAO)	! OPEN BUFR IN CHANNEL
+      nc = 0                ! number of valid obs
+      nw = 0                ! number of obs in bufr
 
-  NC=0		! NUMBER OF VALID OBS
-  NW=0		! NUMBER OF OBS IN BUFR
+      o = 0
+      do while (ireadmg(lurao, ss, dt) .eq. 0)                ! open a bufr message
+         do while (ireadsb(lurao) .eq. 0)                ! open a subset
 
-  O=0
-  DO WHILE(IREADMG(LURAO,SS,DT).EQ.0)		! OPEN A BUFR MESSAGE
-    DO WHILE(IREADSB(LURAO).EQ.0)		! OPEN A SUBSET
-
-      CALL UFBINT(LURAO,HD,NH,1,IR,'XOB YOB ELV DHR SID TYP')	! READ HEADER
+            call ufbint(lurao, hd, nh, 1, ir, 'xob yob elv dhr sid typ')        ! read header
 !jhui
-      IF ( SID =="ACAR    ") THEN
-      data_acar = data_acar +1
-      END IF
-      ! READ OBS:
-      CALL UFBINT(LURAO,RA,NR,LN,NL, &
-           'XDR YDR PRSS POB POE HRDR UOB VOB WOE ZOB ZOE TOB TOE QOB QOE PMO')
+            if (sid == "acar    ") then
+               data_acar = data_acar + 1
+            end if
+            ! read obs:
+            call ufbint(lurao, ra, nr, ln, nl, &
+                        'xdr ydr prss pob poe hrdr uob vob woe zob zoe tob toe qob qoe pmo')
 
-      DO L=1,NL		! FOR ALL LEVELS
-        NW=NW+1
+            do l = 1, nl                ! for all levels
+               nw = nw + 1
 
-        ! FOR X LONGITUDE
-        OP(1)=HD(1)
-        IF(RA(1,L) .LT. BUFRMISS) OP(1)=RA(1,L)	! BALLOON DRIFT X
-        IF(OP(1) .GE. BUFRMISS) CYCLE			! INVALID OBS LONGITUDE
-        IF(OP(1) .LT. 0.0) OP(1) = OP(1)+360.0	! EASTWARD LONGITUDE
-        ! FOR Y LATITUDE
-        OP(2) = HD(2)
-        IF(RA(2,L) .LT. BUFRMISS) OP(2) = RA(2,L)	! BALLOON DRIFT Y
-        IF(OP(2) .GE. BUFRMISS) CYCLE			! INVALID OBS LATITUDE
+               ! for x longitude
+               op(1) = hd(1)
+               if (ra(1, l) .lt. bufrmiss) op(1) = ra(1, l)        ! balloon drift x
+               if (op(1) .ge. bufrmiss) cycle                        ! invalid obs longitude
+               if (op(1) .lt. 0.0) op(1) = op(1) + 360.0        ! eastward longitude
+               ! for y latitude
+               op(2) = hd(2)
+               if (ra(2, l) .lt. bufrmiss) op(2) = ra(2, l)        ! balloon drift y
+               if (op(2) .ge. bufrmiss) cycle                        ! invalid obs latitude
 
-        ! CHECK WHETHER THE OBS IN THE HORIZONTAL DOMAIN:
-        IF(IF_TEST.NE.1) THEN
-          CALL LATLON_TO_RLAPSGRID(OP(2),OP(1),Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
-        ELSE
-          CALL OBSTOGRID(OP(2),OP(1),Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
-        ENDIF
-        IF(X .LT. 1.0 .OR. Y .LT. 1.0 .OR. & 
-	   X .GT. FCSTGRD(1) .OR. Y .GT. FCSTGRD(2) .OR. &
-           IS .NE. 1) CYCLE				! OUTSIDE HORIZONTAL DOMAIN
+               ! check whether the obs in the horizontal domain:
+               if (if_test .ne. 1) then
+                  call latlon_to_rlapsgrid(op(2), op(1), y00, x00, fcstgrd(1), fcstgrd(2), x, y, is)
+               else
+                  call obstogrid(op(2), op(1), y00, x00, fcstgrd(1), fcstgrd(2), x, y, is)
+               end if
+               if (x .lt. 1.0 .or. y .lt. 1.0 .or. &
+                   x .gt. fcstgrd(1) .or. y .gt. fcstgrd(2) .or. &
+                   is .ne. 1) cycle                                ! outside horizontal domain
 
-        ! FOR T LOCATION
-        ! FIT INTO LAPS TIME FRAMES BY YUANFU:
-        I4 = MOD(DT,100)*100
-        WRITE(YYYYMMDD_HHMM,1) 20000000+DT/100,'_',I4
-1	FORMAT(I8,A1,I4)
-        A9 = WFO_FNAME13_TO_FNAME9(YYYYMMDD_HHMM)
-        CALL CV_ASC_I4TIME(A9,I4,ST)
-        ! IF (I4 .NE. LAPSI4T) THEN
-        !   WRITE(*,*) 'Analysis time does not match: ',I4,ITIME2(2)
-        !   STOP
-        ! ENDIF
-        T = I4-ITIME2(1)+3600*HD(4)
-        IF (T .LT. T00(1) .OR. T .GT. T00(FCSTGRD(4))) CYCLE	! OUT OF TIME WINDOW
+               ! for t location
+               ! fit into laps time frames by yuanfu:
+               i4 = mod(dt, 100)*100
+               write (yyyymmdd_hhmm, 1) 20000000 + dt/100, '_', i4
+1              format(i8, a1, i4)
+               a9 = wfo_fname13_to_fname9(yyyymmdd_hhmm)
+               call cv_asc_i4time(a9, i4, st)
+               ! if (i4 .ne. lapsi4t) then
+               !   write(*,*) 'analysis time does not match: ',i4,itime2(2)
+               !   stop
+               ! endif
+               t = i4 - itime2(1) + 3600*hd(4)
+               if (t .lt. t00(1) .or. t .gt. t00(fcstgrd(4))) cycle        ! out of time window
 
-        ! FOR P LOCATION
-        P = BUFRMISS
-        ! USE OBSERVED PRESSURE IN PASCAL AS BUFR SAVES IN MB:
-        IF(RA(4,L).LT. BUFRMISS) P = RA(4,L)*100.0D0	
-        ! FOR ZZ OBSERVATION
-        ZZ=BUFRMISS					! INITIAL
-        IF(RA(10,L).LT. BUFRMISS) ZZ = RA(10,L) 	! USE OBSERVED HEIGHT
-        ZE=RA(11,L)					! OBS ERROR IN HEIGHT
-        IF(P.GE. BUFRMISS .AND. ZZ .GE. BUFRMISS) CYCLE ! INVALID VERTICAL OBS
+               ! for p location
+               p = bufrmiss
+               ! use observed pressure in pascal as bufr saves in mb:
+               if (ra(4, l) .lt. bufrmiss) p = ra(4, l)*100.0d0
+               ! for zz observation
+               zz = bufrmiss                                        ! initial
+               if (ra(10, l) .lt. bufrmiss) zz = ra(10, l)         ! use observed height
+               ze = ra(11, l)                                        ! obs error in height
+               if (p .ge. bufrmiss .and. zz .ge. bufrmiss) cycle ! invalid vertical obs
 
-        ! INTERPOLATION: BACKGROUND TO OBS:
-        IDX(1,1) = INT(X)
-        IDX(1,2) = INT(Y)
-        IDX(2,1:2) = MIN0(IDX(1,1:2)+1,FCSTGRD(1:2))
-        COE(1,1) = IDX(2,1)-X
-        COE(1,2) = IDX(2,2)-Y
-        COE(2,1:2) = 1.0-COE(1,1:2)	! ASSUME HORIZONTAL GRID DISTANCE IS 1
-        IF (FCSTGRD(4) .EQ. 1) THEN
-          PRINT*,'RDBUFROBS -- ERROR: TEMPORAL GRID HAS ONE GRIDPOINT!'
-          STOP
-        ENDIF
-        DEL = (ITIME2(2)-ITIME2(1))/(FCSTGRD(4)-1)	! DELTA TIME
-        IDX(1,4) = INT(T/DEL)+1
-        IDX(2,4) = MIN0(IDX(1,4)+1,FCSTGRD(4))
-        COE(2,4) = T/DEL+1-IDX(1,4)
-        COE(1,4) = 1.0-COE(2,4)
+               ! interpolation: background to obs:
+               idx(1, 1) = int(x)
+               idx(1, 2) = int(y)
+               idx(2, 1:2) = min0(idx(1, 1:2) + 1, fcstgrd(1:2))
+               coe(1, 1) = idx(2, 1) - x
+               coe(1, 2) = idx(2, 2) - y
+               coe(2, 1:2) = 1.0 - coe(1, 1:2)        ! assume horizontal grid distance is 1
+               if (fcstgrd(4) .eq. 1) then
+                  print *, 'rdbufrobs -- error: temporal grid has one gridpoint!'
+                  stop
+               end if
+               del = (itime2(2) - itime2(1))/(fcstgrd(4) - 1)        ! delta time
+               idx(1, 4) = int(t/del) + 1
+               idx(2, 4) = min0(idx(1, 4) + 1, fcstgrd(4))
+               coe(2, 4) = t/del + 1 - idx(1, 4)
+               coe(1, 4) = 1.0 - coe(2, 4)
 
-        ! FOR MISSING PRESSURE, CONVERT FROM BACKGROUND HEIGHT:
-        IP=0		! DIRECT PRESSURE OBS; 1 BECOMES HYDROSTATIC OBS
+               ! for missing pressure, convert from background height:
+               ip = 0                ! direct pressure obs; 1 becomes hydrostatic obs
 
-        ! FILL MSLP IF AVAILABLE:
-        IF (ZZ .LE. 10.0 .AND. RA(16,L) .NE. BUFRMISS) P = RA(16,L)*100.0D0
+               ! fill mslp if available:
+               if (zz .le. 10.0 .and. ra(16, l) .ne. bufrmiss) p = ra(16, l)*100.0d0
 
-        IF(P .GE. BUFRMISS) THEN	! USE HYDROSTATIC RELATION	
-          IP=1		! HYDROSTATIC OBS
-          P = HEIGHT_TO_PRESSURE(ZZ,BK0(1,1,1,IDX(1,4),PRESSURE),P00,&
-                    FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),IDX(1,1),IDX(1,2))
-        ENDIF
+               if (p .ge. bufrmiss) then        ! use hydrostatic relation
+                  ip = 1                ! hydrostatic obs
+                  p = height_to_pressure(zz, bk0(1, 1, 1, idx(1, 4), pressure), p00, &
+                                         fcstgrd(1), fcstgrd(2), fcstgrd(3), idx(1, 1), idx(1, 2))
+               end if
 
-        ! FIND THE VERTICAL LEVEL:
-        KK = RLEVEL_OF_FIELD(P,P00,1,1,FCSTGRD(3),1,1,IS)
-        IF (IS .NE. 1) CYCLE	! OUT OF VERTICAL DOMAIN
+               ! find the vertical level:
+               kk = rlevel_of_field(p, p00, 1, 1, fcstgrd(3), 1, 1, is)
+               if (is .ne. 1) cycle        ! out of vertical domain
 
-        ! VERTICAL INTERPOLATION:
-        IF (KK .EQ. FCSTGRD(3)) THEN
-          IDX(1,3) = KK-1
-          COE(1,3) = 0.0
-        ELSE
-          IDX(1,3) = KK
-          COE(1,3) = (P-P00(KK+1))/(P00(KK)-P00(KK+1))
-        ENDIF
-        IDX(2,3) = IDX(1,3)+1
-        COE(2,3) = 1.0-COE(1,3)
-        ! VERTICAL GRID POSITIN:
-        Z = IDX(1,3)+COE(2,3)
+               ! vertical interpolation:
+               if (kk .eq. fcstgrd(3)) then
+                  idx(1, 3) = kk - 1
+                  coe(1, 3) = 0.0
+               else
+                  idx(1, 3) = kk
+                  coe(1, 3) = (p - p00(kk + 1))/(p00(kk) - p00(kk + 1))
+               end if
+               idx(2, 3) = idx(1, 3) + 1
+               coe(2, 3) = 1.0 - coe(1, 3)
+               ! vertical grid positin:
+               z = idx(1, 3) + coe(2, 3)
 
-        ! FOR WIND OBSERVATION
-        IF (RA(9,L) .LT. BUFRMISS .AND. &
-          RA(7,L) .LT. BUFRMISS .AND. RA(8,L) .LT. BUFRMISS) THEN
+               ! for wind observation
+               if (ra(9, l) .lt. bufrmiss .and. &
+                   ra(7, l) .lt. bufrmiss .and. ra(8, l) .lt. bufrmiss) then
 
-          ! SAVE OBS INTO DATA ARRAYS:
-          O = O+2	! TOTAL SINGLE OBS COUNT
-          NST(U_CMPNNT) = NST(U_CMPNNT)+1
-          NST(V_CMPNNT) = NST(V_CMPNNT)+1	! WIND OBS COUNTS
-          OBP(1,NST(U_CMPNNT),U_CMPNNT) = X-1
-          OBP(2,NST(U_CMPNNT),U_CMPNNT) = Y-1
-          OBP(3,NST(U_CMPNNT),U_CMPNNT) = Z-1
-          OBP(4,NST(U_CMPNNT),U_CMPNNT) = T/(T00(2)-T00(1)) ! WIND OBS LOCATIONS
-          OBP(1,NST(V_CMPNNT),V_CMPNNT) = X-1
-          OBP(2,NST(V_CMPNNT),V_CMPNNT) = Y-1
-          OBP(3,NST(V_CMPNNT),V_CMPNNT) = Z-1
-          OBP(4,NST(V_CMPNNT),V_CMPNNT) = T/(T00(2)-T00(1))
+                  ! save obs into data arrays:
+                  o = o + 2        ! total single obs count
+                  nst(u_cmpnnt) = nst(u_cmpnnt) + 1
+                  nst(v_cmpnnt) = nst(v_cmpnnt) + 1        ! wind obs counts
+                  obp(1, nst(u_cmpnnt), u_cmpnnt) = x - 1
+                  obp(2, nst(u_cmpnnt), u_cmpnnt) = y - 1
+                  obp(3, nst(u_cmpnnt), u_cmpnnt) = z - 1
+                  obp(4, nst(u_cmpnnt), u_cmpnnt) = t/(t00(2) - t00(1)) ! wind obs locations
+                  obp(1, nst(v_cmpnnt), v_cmpnnt) = x - 1
+                  obp(2, nst(v_cmpnnt), v_cmpnnt) = y - 1
+                  obp(3, nst(v_cmpnnt), v_cmpnnt) = z - 1
+                  obp(4, nst(v_cmpnnt), v_cmpnnt) = t/(t00(2) - t00(1))
 !jhui
-          IF ( OBP(1,NST(U_CMPNNT),U_CMPNNT) .GT. 38 .AND. &
-               OBP(1,NST(U_CMPNNT),U_CMPNNT) .LT. 112 .AND. &
-               OBP(2,NST(U_CMPNNT),U_CMPNNT) .GT. 33 .AND. &
-               OBP(2,NST(U_CMPNNT),U_CMPNNT) .LT. 107 ) THEN
-          tw_u = tw_u + 1
-          ENDIF
+                  if (obp(1, nst(u_cmpnnt), u_cmpnnt) .gt. 38 .and. &
+                      obp(1, nst(u_cmpnnt), u_cmpnnt) .lt. 112 .and. &
+                      obp(2, nst(u_cmpnnt), u_cmpnnt) .gt. 33 .and. &
+                      obp(2, nst(u_cmpnnt), u_cmpnnt) .lt. 107) then
+                     tw_u = tw_u + 1
+                  end if
 
-          ! SAVE INCREMENT:
-          UU = 0.0
-          VV = 0.0
-          DO KK=1,2
-            DO K=1,2
-              DO J=1,2
-                DO I=1,2
-                  UU = UU+COE(I,1)*COE(J,2)*COE(K,3)*COE(KK,4)* &
-                       BK0(IDX(I,1),IDX(J,2),IDX(K,3),IDX(KK,4),U_CMPNNT)
-                  VV = VV+COE(I,1)*COE(J,2)*COE(K,3)*COE(KK,4)* &
-                       BK0(IDX(I,1),IDX(J,2),IDX(K,3),IDX(KK,4),V_CMPNNT)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-          OBS(NST(U_CMPNNT),U_CMPNNT) =RA(7,L)-UU
-          OBS(NST(V_CMPNNT),V_CMPNNT) =RA(8,L)-VV
-          OBE(NST(U_CMPNNT),U_CMPNNT) =0.5	!RA(9,L)	! WIND ERROR
-          OBE(NST(V_CMPNNT),V_CMPNNT) =0.5	!RA(9,L)
-!jhui	
-!          OBE(NST(U_CMPNNT),U_CMPNNT) =0.3	!RA(9,L)	! WIND ERROR
-!          OBE(NST(V_CMPNNT),V_CMPNNT) =0.3	!RA(9,L)	
-          ! SAVE OBS INTO PIG FILE OF LAPS AS WIND DIRECTION AND SPEED:
-          ! UU = RA(7,L)
-          ! VV = RA(8,L)
-          ! CALL UV_TO_DISP(UU,VV,DI,SP)
-          ! WRITE(PIGOBS_CHANNEL,*) X-1,Y-1,Z-1,DI,SP,SID
-
-          ! Add a threshold check: Yuanfu June 2010
-          IF ((ABS(OBS(NST(U_CMPNNT),U_CMPNNT)) .GT. 20.0) .OR. &
-              (ABS(OBS(NST(V_CMPNNT),V_CMPNNT)) .GT. 20.0) ) THEN
-            ! Over the threshold, remove this data:
-            O = O-2
-            NST(U_CMPNNT) = NST(U_CMPNNT)-1
-            NST(V_CMPNNT) = NST(V_CMPNNT)-1
-          ENDIF
-        ENDIF
-
-        ! FOR TEMPERATURE OBSERVATION
-        IF (RA(12,L) .LT. BUFRMISS .AND. RA(13,L) .LT. BUFRMISS ) THEN
-          ! SAVE OBS INTO DATA ARRAYS:
-          O = O+1	! TOTAL SINGLE OBS COUNT
-          NST(TEMPRTUR) = NST(TEMPRTUR)+1	! TEMPERATURE OBS COUNTS
-          OBP(1,NST(TEMPRTUR),TEMPRTUR) = X-1
-          OBP(2,NST(TEMPRTUR),TEMPRTUR) = Y-1
-          OBP(3,NST(TEMPRTUR),TEMPRTUR) = Z-1
-          OBP(4,NST(TEMPRTUR),TEMPRTUR) = T/(T00(2)-T00(1)) ! TEMPERATUER OBS LOCATION
-          OBS(NST(TEMPRTUR),TEMPRTUR) =RA(12,L)+273.15D0	! IN KELVIN
-          OBE(NST(TEMPRTUR),TEMPRTUR) =0.5	!RA(13,L)			! OBS ERROR
+                  ! save increment:
+                  uu = 0.0
+                  vv = 0.0
+                  do kk = 1, 2
+                     do k = 1, 2
+                        do j = 1, 2
+                           do i = 1, 2
+                              uu = uu + coe(i, 1)*coe(j, 2)*coe(k, 3)*coe(kk, 4)* &
+                                   bk0(idx(i, 1), idx(j, 2), idx(k, 3), idx(kk, 4), u_cmpnnt)
+                              vv = vv + coe(i, 1)*coe(j, 2)*coe(k, 3)*coe(kk, 4)* &
+                                   bk0(idx(i, 1), idx(j, 2), idx(k, 3), idx(kk, 4), v_cmpnnt)
+                           end do
+                        end do
+                     end do
+                  end do
+                  obs(nst(u_cmpnnt), u_cmpnnt) = ra(7, l) - uu
+                  obs(nst(v_cmpnnt), v_cmpnnt) = ra(8, l) - vv
+                  obe(nst(u_cmpnnt), u_cmpnnt) = 0.5        !ra(9,l)        ! wind error
+                  obe(nst(v_cmpnnt), v_cmpnnt) = 0.5        !ra(9,l)
 !jhui
-!          OBE(NST(TEMPRTUR),TEMPRTUR) =0.3	!RA(13,L)			! OBS ERROR
+!          obe(nst(u_cmpnnt),u_cmpnnt) =0.3        !ra(9,l)        ! wind error
+!          obe(nst(v_cmpnnt),v_cmpnnt) =0.3        !ra(9,l)
+                  ! save obs into pig file of laps as wind direction and speed:
+                  ! uu = ra(7,l)
+                  ! vv = ra(8,l)
+                  ! call uv_to_disp(uu,vv,di,sp)
+                  ! write(pigobs_channel,*) x-1,y-1,z-1,di,sp,sid
+
+                  ! add a threshold check: yuanfu june 2010
+                  if ((abs(obs(nst(u_cmpnnt), u_cmpnnt)) .gt. 20.0) .or. &
+                      (abs(obs(nst(v_cmpnnt), v_cmpnnt)) .gt. 20.0)) then
+                     ! over the threshold, remove this data:
+                     o = o - 2
+                     nst(u_cmpnnt) = nst(u_cmpnnt) - 1
+                     nst(v_cmpnnt) = nst(v_cmpnnt) - 1
+                  end if
+               end if
+
+               ! for temperature observation
+               if (ra(12, l) .lt. bufrmiss .and. ra(13, l) .lt. bufrmiss) then
+                  ! save obs into data arrays:
+                  o = o + 1        ! total single obs count
+                  nst(temprtur) = nst(temprtur) + 1        ! temperature obs counts
+                  obp(1, nst(temprtur), temprtur) = x - 1
+                  obp(2, nst(temprtur), temprtur) = y - 1
+                  obp(3, nst(temprtur), temprtur) = z - 1
+                  obp(4, nst(temprtur), temprtur) = t/(t00(2) - t00(1)) ! temperatuer obs location
+                  obs(nst(temprtur), temprtur) = ra(12, l) + 273.15d0        ! in kelvin
+                  obe(nst(temprtur), temprtur) = 0.5        !ra(13,l)                        ! obs error
 !jhui
-          IF ( OBP(1,NST(TEMPRTUR),TEMPRTUR) .GT. 38 .AND. &
-               OBP(1,NST(TEMPRTUR),TEMPRTUR) .LT. 112 .AND. &
-               OBP(2,NST(TEMPRTUR),TEMPRTUR) .GT. 33 .AND. &
-               OBP(2,NST(TEMPRTUR),TEMPRTUR) .LT. 107 ) THEN
-          tw_t = tw_t + 1
-          ENDIF
-
-          ! SAVE OBS INNOVATION:
-          TT = 0.0
-          DO KK=1,2
-            DO K=1,2
-              DO J=1,2
-                DO I=1,2
-                  TT = TT+COE(I,1)*COE(J,2)*COE(K,3)*COE(KK,4)* &
-                       BK0(IDX(I,1),IDX(J,2),IDX(K,3),IDX(KK,4),TEMPRTUR)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-
-          OBS(NST(TEMPRTUR),TEMPRTUR) = OBS(NST(TEMPRTUR),TEMPRTUR)-TT
-
-          ! Add a threshold check: Yuanfu June 2010
-          IF (ABS(OBS(NST(TEMPRTUR),TEMPRTUR)) .GT. 10.0) THEN
-            ! Over the threshold, remove this data:
-            O = O-1
-            NST(TEMPRTUR) = NST(TEMPRTUR)-1
-          ENDIF
-
-        ENDIF
-
-        ! FOR SPECIFIC HUMIDITY OBSERVATION
-        IF (RA(14,L) .LT. BUFRMISS .AND. RA(15,L) .LT. BUFRMISS ) THEN
-          ! SAVE OBS INTO DATA ARRAYS:
-          O = O+1	! TOTAL SINGLE OBS COUNT
-          NST(HUMIDITY) = NST(HUMIDITY)+1	! HUMIDITY OBS COUNTS
-          OBP(1,NST(HUMIDITY),HUMIDITY) = X-1
-          OBP(2,NST(HUMIDITY),HUMIDITY) = Y-1
-          OBP(3,NST(HUMIDITY),HUMIDITY) = Z-1
-          OBP(4,NST(HUMIDITY),HUMIDITY) = T/(T00(2)-T00(1)) ! HUMIDITY OBS LOCATION
-
+!          obe(nst(temprtur),temprtur) =0.3        !ra(13,l)                        ! obs error
 !jhui
-          IF ( OBP(1,NST(HUMIDITY),HUMIDITY) .GT. 38 .AND. &
-               OBP(1,NST(HUMIDITY),HUMIDITY) .LT. 112 .AND. &
-               OBP(2,NST(HUMIDITY),HUMIDITY) .GT. 33 .AND. &
-               OBP(2,NST(HUMIDITY),HUMIDITY) .LT. 107 ) THEN
-          tw_sh = tw_sh + 1
-          ENDIF
-          ! SAVE OBS INNOVATION:
-          TT = 0.0
-          DO KK=1,2
-            DO K=1,2
-              DO J=1,2
-                DO I=1,2
-                  TT = TT+COE(I,1)*COE(J,2)*COE(K,3)*COE(KK,4)* &
-                       BK0(IDX(I,1),IDX(J,2),IDX(K,3),IDX(KK,4),HUMIDITY)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-          ! Convert SH obs to 'RH' = SH/s2r(p) by Yuanfu Xie: Dec. 2013
-          OBS(NST(HUMIDITY),HUMIDITY) =RA(14,L)/1000.0/s2r(p/100.0)-TT	! HUMIDITY OBS: BUFR USES MG/KG
-          OBE(NST(HUMIDITY),HUMIDITY) = 1.0	!RA(15,L)	! OBS ERROR
+                  if (obp(1, nst(temprtur), temprtur) .gt. 38 .and. &
+                      obp(1, nst(temprtur), temprtur) .lt. 112 .and. &
+                      obp(2, nst(temprtur), temprtur) .gt. 33 .and. &
+                      obp(2, nst(temprtur), temprtur) .lt. 107) then
+                     tw_t = tw_t + 1
+                  end if
 
-          ! Add a threshold check: Yuanfu June 2010
-          IF (ABS(OBS(NST(HUMIDITY),HUMIDITY)) .GT. 10.0) THEN
-            ! Over the threshold, remove this data:
-            O = O-1
-            NST(HUMIDITY) = NST(HUMIDITY)-1
-          ENDIF
+                  ! save obs innovation:
+                  tt = 0.0
+                  do kk = 1, 2
+                     do k = 1, 2
+                        do j = 1, 2
+                           do i = 1, 2
+                              tt = tt + coe(i, 1)*coe(j, 2)*coe(k, 3)*coe(kk, 4)* &
+                                   bk0(idx(i, 1), idx(j, 2), idx(k, 3), idx(kk, 4), temprtur)
+                           end do
+                        end do
+                     end do
+                  end do
 
-        ENDIF
-        ! FOR HEIGHT OBSERVATION: IF PRESSURE IS NOT DERIVED FROM HEIGHT:
-        IF (IP .EQ. 0 .AND. ZZ .LT. BUFRMISS .AND. ZE .LT. BUFRMISS ) THEN
+                  obs(nst(temprtur), temprtur) = obs(nst(temprtur), temprtur) - tt
 
-          ! REMOVE ALL HIGH LEVEL HEIGHT OBS:
-          !IF (L .GT. 3) CYCLE
+                  ! add a threshold check: yuanfu june 2010
+                  if (abs(obs(nst(temprtur), temprtur)) .gt. 10.0) then
+                     ! over the threshold, remove this data:
+                     o = o - 1
+                     nst(temprtur) = nst(temprtur) - 1
+                  end if
 
-          ! SAVE OBS INTO DATA ARRAYS:
-          O = O+1	! TOTAL SINGLE OBS COUNT
-          NST(PRESSURE) = NST(PRESSURE)+1	! HEIGHT OBS COUNTS
-          OBP(1,NST(PRESSURE),PRESSURE) = X-1
-          OBP(2,NST(PRESSURE),PRESSURE) = Y-1
-          OBP(3,NST(PRESSURE),PRESSURE) = Z-1
-          OBP(4,NST(PRESSURE),PRESSURE) = T/(T00(2)-T00(1)) ! HEIGHT OBS LOCATION
+               end if
+
+               ! for specific humidity observation
+               if (ra(14, l) .lt. bufrmiss .and. ra(15, l) .lt. bufrmiss) then
+                  ! save obs into data arrays:
+                  o = o + 1        ! total single obs count
+                  nst(humidity) = nst(humidity) + 1        ! humidity obs counts
+                  obp(1, nst(humidity), humidity) = x - 1
+                  obp(2, nst(humidity), humidity) = y - 1
+                  obp(3, nst(humidity), humidity) = z - 1
+                  obp(4, nst(humidity), humidity) = t/(t00(2) - t00(1)) ! humidity obs location
 
 !jhui
-          IF ( OBP(1,NST(PRESSURE),PRESSURE) .GT. 38 .AND. &
-               OBP(1,NST(PRESSURE),PRESSURE) .LT. 112 .AND. &
-               OBP(2,NST(PRESSURE),PRESSURE) .GT. 33 .AND. &
-               OBP(2,NST(PRESSURE),PRESSURE) .LT. 107 ) THEN
-          tw_p = tw_p + 1
-          ENDIF
+                  if (obp(1, nst(humidity), humidity) .gt. 38 .and. &
+                      obp(1, nst(humidity), humidity) .lt. 112 .and. &
+                      obp(2, nst(humidity), humidity) .gt. 33 .and. &
+                      obp(2, nst(humidity), humidity) .lt. 107) then
+                     tw_sh = tw_sh + 1
+                  end if
+                  ! save obs innovation:
+                  tt = 0.0
+                  do kk = 1, 2
+                     do k = 1, 2
+                        do j = 1, 2
+                           do i = 1, 2
+                              tt = tt + coe(i, 1)*coe(j, 2)*coe(k, 3)*coe(kk, 4)* &
+                                   bk0(idx(i, 1), idx(j, 2), idx(k, 3), idx(kk, 4), humidity)
+                           end do
+                        end do
+                     end do
+                  end do
+                  ! convert sh obs to 'rh' = sh/s2r(p) by yuanfu xie: dec. 2013
+                  obs(nst(humidity), humidity) = ra(14, l)/1000.0/s2r(p/100.0) - tt        ! humidity obs: bufr uses mg/kg
+                  obe(nst(humidity), humidity) = 1.0        !ra(15,l)        ! obs error
 
-          ! SAVE OBS INNOVATION:
-          TT = 0.0
-          DO KK=1,2
-            DO K=1,2
-              DO J=1,2
-                DO I=1,2
-                  TT = TT+COE(I,1)*COE(J,2)*COE(K,3)*COE(KK,4)* &
-                       BK0(IDX(I,1),IDX(J,2),IDX(K,3),IDX(KK,4),PRESSURE)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-          OBS(NST(PRESSURE),PRESSURE) =ZZ-TT		! HEIGHT OBS
-          OBE(NST(PRESSURE),PRESSURE) = 2.0	!ZE	! OBS ERROR
+                  ! add a threshold check: yuanfu june 2010
+                  if (abs(obs(nst(humidity), humidity)) .gt. 10.0) then
+                     ! over the threshold, remove this data:
+                     o = o - 1
+                     nst(humidity) = nst(humidity) - 1
+                  end if
 
-          ! Add a threshold check: Yuanfu June 2010
-          IF (ABS(ZZ-TT) .GT. 50) THEN ! Use 50m as the threshold value now.
-            ! Over the threshold, remove this data:
-            O = O-1
-            NST(PRESSURE) = NST(PRESSURE)-1
-          ENDIF
+               end if
+               ! for height observation: if pressure is not derived from height:
+               if (ip .eq. 0 .and. zz .lt. bufrmiss .and. ze .lt. bufrmiss) then
 
-        ENDIF
+                  ! remove all high level height obs:
+                  !if (l .gt. 3) cycle
 
-        NC=NC+1			! NUMBER OF VALID OBS COUNTS
+                  ! save obs into data arrays:
+                  o = o + 1        ! total single obs count
+                  nst(pressure) = nst(pressure) + 1        ! height obs counts
+                  obp(1, nst(pressure), pressure) = x - 1
+                  obp(2, nst(pressure), pressure) = y - 1
+                  obp(3, nst(pressure), pressure) = z - 1
+                  obp(4, nst(pressure), pressure) = t/(t00(2) - t00(1)) ! height obs location
 
-      ENDDO
-    ENDDO
-  ENDDO
-  NALLOBS=O
-  PRINT*,'THE NUMBER OF LOCATION IS',NW,'AND',NC,'AVAILABLE'
-  PRINT*,'RDBUFROBS: NUMBER OF ALL OBS = ',NALLOBS
-  CALL CLOSBF(LURAO)
-  CLOSE(LURAO)
-!  CLOSE(LUNDX)
-!  CLOSE(LUNEW)
+!jhui
+                  if (obp(1, nst(pressure), pressure) .gt. 38 .and. &
+                      obp(1, nst(pressure), pressure) .lt. 112 .and. &
+                      obp(2, nst(pressure), pressure) .gt. 33 .and. &
+                      obp(2, nst(pressure), pressure) .lt. 107) then
+                     tw_p = tw_p + 1
+                  end if
 
-   
-  RETURN
-END SUBROUTINE RDBUFROBS_XIE
+                  ! save obs innovation:
+                  tt = 0.0
+                  do kk = 1, 2
+                     do k = 1, 2
+                        do j = 1, 2
+                           do i = 1, 2
+                              tt = tt + coe(i, 1)*coe(j, 2)*coe(k, 3)*coe(kk, 4)* &
+                                   bk0(idx(i, 1), idx(j, 2), idx(k, 3), idx(kk, 4), pressure)
+                           end do
+                        end do
+                     end do
+                  end do
+                  obs(nst(pressure), pressure) = zz - tt                ! height obs
+                  obe(nst(pressure), pressure) = 2.0        !ze        ! obs error
 
-SUBROUTINE HANDLEOBS(OP,OB,OE,OS,O,IP,AZ,EA)
+                  ! add a threshold check: yuanfu june 2010
+                  if (abs(zz - tt) .gt. 50) then ! use 50m as the threshold value now.
+                     ! over the threshold, remove this data:
+                     o = o - 1
+                     nst(pressure) = nst(pressure) - 1
+                  end if
+
+               end if
+
+               nc = nc + 1                        ! number of valid obs counts
+
+            end do
+         end do
+      end do
+      nallobs = o
+      print *, 'the number of location is', nw, 'and', nc, 'available'
+      print *, 'rdbufrobs: number of all obs = ', nallobs
+      call closbf(lurao)
+      close (lurao)
+!  close(lundx)
+!  close(lunew)
+
+      return
+   end subroutine rdbufrobs_xie
+
+   subroutine handleobs(op, ob, oe, os, o, ip, az, ea)
 !*************************************************
-! CALCULATE THE DIFFERENCE BETWEEN OBSERVATION AND BACKGROUND
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! calculate the difference between observation and background
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,M,N,NP(MAXDIMS),NN(MAXDIMS),IS,O,OS,IP
-  REAL  :: X,Y,P
-  REAL  :: DI,SP	! YUANFU FOR OUTPUT PIG FILE
-  REAL  :: AC(NUMDIMS,NGPTOBS),OC(NUMDIMS),CO(NGPTOBS),HT
-  REAL  :: OP(NUMDIMS),OB,OE
+      integer  :: i, j, k, t, m, n, np(maxdims), nn(maxdims), is, o, os, ip
+      real  :: x, y, p
+      real  :: di, sp        ! yuanfu for output pig file
+      real  :: ac(numdims, ngptobs), oc(numdims), co(ngptobs), ht
+      real  :: op(numdims), ob, oe
 
-  INTEGER  :: UU,VV
-  REAL     :: AZ,TU,TV,EA               ! ADDED BY ZHONGJIE HE
-  REAL     :: D2R                       ! CONVERTER FROM DEG TO RADIAN
+      integer  :: uu, vv
+      real     :: az, tu, tv, ea               ! added by zhongjie he
+      real     :: d2r                       ! converter from deg to radian
 
-  D2R = 3.14159/180.0
+      d2r = 3.14159/180.0
 
 ! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  CALL LATLON_TO_RLAPSGRID(OP(2),OP(1),Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
-!  CALL OBSTOGRID(OP(2),OP(1),Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      call latlon_to_rlapsgrid(op(2), op(1), y00, x00, fcstgrd(1), fcstgrd(2), x, y, is)
+!  call obstogrid(op(2),op(1),y00,x00,fcstgrd(1),fcstgrd(2),x,y,is)
 
-  IF(X.LT.1.0.OR.Y.LT.1.0.OR.X.GT.FCSTGRD(1).OR.Y.GT.FCSTGRD(2).OR.IS.NE.1)RETURN
-  CALL VRTCLPSTN(FCSTGRD(3),LIMIT_3,P00,OP(3),P,IS)
+      if (x .lt. 1.0 .or. y .lt. 1.0 .or. x .gt. fcstgrd(1) .or. y .gt. fcstgrd(2) .or. is .ne. 1) return
+      call vrtclpstn(fcstgrd(3), limit_3, p00, op(3), p, is)
 
-  IF(IS.NE.1)RETURN
-  DO N=1,MAXDIMS
-    NP(N)=1
-  ENDDO
-  NP(1)=INT(X)
-  NP(2)=INT(Y)
-  NP(3)=INT(P)
-  DO N=1,MAXDIMS
-    IF(NP(N).EQ.FCSTGRD(N).AND.FCSTGRD(N).NE.1)NP(N)=FCSTGRD(N)-1
-  ENDDO
-  OC(1)=X
-  OC(2)=Y
-  OC(3)=P
-  M=0
+      if (is .ne. 1) return
+      do n = 1, maxdims
+         np(n) = 1
+      end do
+      np(1) = int(x)
+      np(2) = int(y)
+      np(3) = int(p)
+      do n = 1, maxdims
+         if (np(n) .eq. fcstgrd(n) .and. fcstgrd(n) .ne. 1) np(n) = fcstgrd(n) - 1
+      end do
+      oc(1) = x
+      oc(2) = y
+      oc(3) = p
+      m = 0
 !==============================================================
-!  DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-!  DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-!  DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-!  DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-!    NN(1)=I
-!    NN(2)=J
-!    NN(3)=K
-!    NN(4)=T
-!    M=M+1
-!    DO N=1,NUMDIMS
-!      AC(N,M)=NN(N)*1.0D0
-!    ENDDO
-!  ENDDO
-!  ENDDO
-!  ENDDO
-!  ENDDO
+!  do t=np(4),min0(np(4)+1,fcstgrd(4))
+!  do k=np(3),min0(np(3)+1,fcstgrd(3))
+!  do j=np(2),min0(np(2)+1,fcstgrd(2))
+!  do i=np(1),min0(np(1)+1,fcstgrd(1))
+!    nn(1)=i
+!    nn(2)=j
+!    nn(3)=k
+!    nn(4)=t
+!    m=m+1
+!    do n=1,numdims
+!      ac(n,m)=nn(n)*1.0d0
+!    enddo
+!  enddo
+!  enddo
+!  enddo
+!  enddo
 !======================= modified by zhongjie he ==============
-  DO T=NP(4),NP(4)+1
-  DO K=NP(3),NP(3)+1
-  DO J=NP(2),NP(2)+1
-  DO I=NP(1),NP(1)+1
-    NN(1)=MIN0(I,FCSTGRD(1))
-    NN(2)=MIN0(J,FCSTGRD(2))
-    NN(3)=MIN0(K,FCSTGRD(3))
-    NN(4)=MIN0(T,FCSTGRD(4))
-    M=M+1
-    DO N=1,NUMDIMS
-      AC(N,M)=NN(N)*1.0D0
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+      do t = np(4), np(4) + 1
+      do k = np(3), np(3) + 1
+      do j = np(2), np(2) + 1
+      do i = np(1), np(1) + 1
+         nn(1) = min0(i, fcstgrd(1))
+         nn(2) = min0(j, fcstgrd(2))
+         nn(3) = min0(k, fcstgrd(3))
+         nn(4) = min0(t, fcstgrd(4))
+         m = m + 1
+         do n = 1, numdims
+            ac(n, m) = nn(n)*1.0d0
+         end do
+      end do
+      end do
+      end do
+      end do
 !==============================================================
-  CALL INTERPLTN(NUMDIMS,NGPTOBS,CO,AC,OC)
-  !CALL INTERPLTN_XIE(NUMDIMS,NGPTOBS,CO,AC,OC,3,NUMGRID(3),PPM)
-  HT=0.0
-  M=0
-  TU=0.0
-  TV=0.0
-  IF(OS.LE.NUMSTAT) THEN
-    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      HT=HT+CO(M)*BK0(I,J,K,T,OS)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ELSEIF(OS.EQ.NUMSTAT+1) THEN        ! FOR RADAR DATA , BY ZHONGJIE HE
-    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      TU=TU+CO(M)*BK0(I,J,K,T,UU)
-      TV=TV+CO(M)*BK0(I,J,K,T,VV)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=(TU*SIN(D2R*AZ)+TV*COS(D2R*AZ))*COS(D2R*EA)
-  ELSEIF(OS.EQ.NUMSTAT+2) THEN        ! FOR SFMR DATA , BY ZHONGJIE HE
-    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      TU=TU+CO(M)*BK0(I,J,K,T,UU)
-      TV=TV+CO(M)*BK0(I,J,K,T,VV)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=SQRT(TU*TU+TV*TV)
-  ENDIF
+      call interpltn(numdims, ngptobs, co, ac, oc)
+      !call interpltn_xie(numdims,ngptobs,co,ac,oc,3,numgrid(3),ppm)
+      ht = 0.0
+      m = 0
+      tu = 0.0
+      tv = 0.0
+      if (os .le. numstat) then
+         do t = np(4), min0(np(4) + 1, fcstgrd(4))
+         do k = np(3), min0(np(3) + 1, fcstgrd(3))
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            ht = ht + co(m)*bk0(i, j, k, t, os)
+         end do
+         end do
+         end do
+         end do
+      elseif (os .eq. numstat + 1) then        ! for radar data , by zhongjie he
+         do t = np(4), min0(np(4) + 1, fcstgrd(4))
+         do k = np(3), min0(np(3) + 1, fcstgrd(3))
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            tu = tu + co(m)*bk0(i, j, k, t, uu)
+            tv = tv + co(m)*bk0(i, j, k, t, vv)
+         end do
+         end do
+         end do
+         end do
+         ht = (tu*sin(d2r*az) + tv*cos(d2r*az))*cos(d2r*ea)
+      elseif (os .eq. numstat + 2) then        ! for sfmr data , by zhongjie he
+         do t = np(4), min0(np(4) + 1, fcstgrd(4))
+         do k = np(3), min0(np(3) + 1, fcstgrd(3))
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            tu = tu + co(m)*bk0(i, j, k, t, uu)
+            tv = tv + co(m)*bk0(i, j, k, t, vv)
+         end do
+         end do
+         end do
+         end do
+         ht = sqrt(tu*tu + tv*tv)
+      end if
 
-  IF(OS.EQ.4.AND.ABS(OB-HT).GE.8.0)RETURN
-  IF(OS.EQ.3.AND.ABS(OB-HT).GE.50.0)RETURN
-  IF(IP.EQ.1.AND.OS.EQ.3)RETURN
-  OB=OB-HT
+      if (os .eq. 4 .and. abs(ob - ht) .ge. 8.0) return
+      if (os .eq. 3 .and. abs(ob - ht) .ge. 50.0) return
+      if (ip .eq. 1 .and. os .eq. 3) return
+      ob = ob - ht
 
-  CALL VRTCLPSTN8(MAXGRID(3),LIMIT_3,PP0,OP(3),P,IS)
+      call vrtclpstn8(maxgrid(3), limit_3, pp0, op(3), p, is)
 
-  IF(IS.NE.1)RETURN
+      if (is .ne. 1) return
 
-  OC(3)=P
-  O=O+1
-  NST(OS)=NST(OS)+1
-  IF(O.GT.NOBSMAX)STOP 'NUMBER OF OBSERVATIONS EXCEEDED'
-  DO N=1,NUMDIMS
-    OBP(N,NST(OS),OS)=OC(N)-1.0D0
-  ENDDO
-  OBS(NST(OS),OS)=OB
-  OBE(NST(OS),OS)=OE
-  IF(OS.EQ.NUMSTAT+1) THEN
-    OBA(NST(OS),1)=AZ
-    OBA(NST(OS),2)=EA
-  ENDIF
+      oc(3) = p
+      o = o + 1
+      nst(os) = nst(os) + 1
+      if (o .gt. nobsmax) stop 'number of observations exceeded'
+      do n = 1, numdims
+         obp(n, nst(os), os) = oc(n) - 1.0d0
+      end do
+      obs(nst(os), os) = ob
+      obe(nst(os), os) = oe
+      if (os .eq. numstat + 1) then
+         oba(nst(os), 1) = az
+         oba(nst(os), 2) = ea
+      end if
 
+      return
+   end subroutine handleobs
 
-  RETURN
-END SUBROUTINE HANDLEOBS
-
-SUBROUTINE HT_TO_PRS(X0,Y0,Z,P,IS)
+   subroutine ht_to_prs(x0, y0, z, p, is)
 !*************************************************
-! CONVERT HEIGHT TO PRESSURE TO USE AS MANY DATA AS POSSIBLE
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! convert height to pressure to use as many data as possible
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: IS,I,J,K,T,N,M,NP(2),ZZ
-  INTEGER  :: LM(2)
-  REAL  :: X,Y,X0,Y0
-  REAL  :: Z,P,AC(2,4),OC(2),CO(4),HT(FCSTGRD(3))
+      integer  :: is, i, j, k, t, n, m, np(2), zz
+      integer  :: lm(2)
+      real  :: x, y, x0, y0
+      real  :: z, p, ac(2, 4), oc(2), co(4), ht(fcstgrd(3))
 ! --------------------
-  ZZ=PRESSURE                                                        !  BY ZHONGJIE HE
-  CALL LATLON_TO_RLAPSGRID(Y0,X0,Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
-!   CALL OBSTOGRID(Y0,X0,Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)        !  BY ZHONGJIE HE
+      zz = pressure                                                        !  by zhongjie he
+      call latlon_to_rlapsgrid(y0, x0, y00, x00, fcstgrd(1), fcstgrd(2), x, y, is)
+!   call obstogrid(y0,x0,y00,x00,fcstgrd(1),fcstgrd(2),x,y,is)        !  by zhongjie he
 
-  IF(X.LT.1.0.OR.Y.LT.1.0.OR.X.GT.FCSTGRD(1).OR.Y.GT.FCSTGRD(2).OR.IS.NE.1)THEN
-    IS=0
-    RETURN
-  ENDIF
-  OC(1)=X
-  OC(2)=Y
-  NP(1)=INT(X)
-  NP(2)=INT(Y)
-  DO N=1,2
-    IF(NP(N).EQ.FCSTGRD(N).AND.FCSTGRD(N).NE.1)NP(N)=FCSTGRD(N)-1
-  ENDDO
-  M=0
+      if (x .lt. 1.0 .or. y .lt. 1.0 .or. x .gt. fcstgrd(1) .or. y .gt. fcstgrd(2) .or. is .ne. 1) then
+         is = 0
+         return
+      end if
+      oc(1) = x
+      oc(2) = y
+      np(1) = int(x)
+      np(2) = int(y)
+      do n = 1, 2
+         if (np(n) .eq. fcstgrd(n) .and. fcstgrd(n) .ne. 1) np(n) = fcstgrd(n) - 1
+      end do
+      m = 0
 !==============================================
-!  DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-!  DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-!    M=M+1
-!    AC(1,M)=I*1.0D0
-!    AC(2,M)=J*1.0D0
-!  ENDDO
-!  ENDDO
+!  do j=np(2),min0(np(2)+1,fcstgrd(2))
+!  do i=np(1),min0(np(1)+1,fcstgrd(1))
+!    m=m+1
+!    ac(1,m)=i*1.0d0
+!    ac(2,m)=j*1.0d0
+!  enddo
+!  enddo
 !============== modified by zhongjie he =======
-  DO N=1,2
-    LM(N)=NP(N)+1
-    IF(NUMDIMS.LT.N) LM(N)=NP(N)
-  ENDDO
-  DO J=NP(2),LM(2)
-  DO I=NP(1),LM(1)
-    M=M+1
-    AC(1,M)=MIN0(I,FCSTGRD(1))*1.0
-    AC(2,M)=MIN0(J,FCSTGRD(2))*1.0
-  ENDDO
-  ENDDO
+      do n = 1, 2
+         lm(n) = np(n) + 1
+         if (numdims .lt. n) lm(n) = np(n)
+      end do
+      do j = np(2), lm(2)
+      do i = np(1), lm(1)
+         m = m + 1
+         ac(1, m) = min0(i, fcstgrd(1))*1.0
+         ac(2, m) = min0(j, fcstgrd(2))*1.0
+      end do
+      end do
 !==============================================
-  CALL INTERPLTN(2,4,CO,AC,OC)
-  !CALL INTERPLTN_XIE(2,4,CO,AC,OC,3,NUMGRID(3),PPM)
-  T=1
-  DO K=1,FCSTGRD(3)
-    HT(K)=0.0
-    M=0
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      HT(K)=HT(K)+CO(M)*BK0(I,J,K,T,ZZ)
-    ENDDO
-    ENDDO
-  ENDDO
-  CALL ZPCONVERT(FCSTGRD(3),HT,P00,Z,P,IS)
-  RETURN
-END SUBROUTINE HT_TO_PRS
+      call interpltn(2, 4, co, ac, oc)
+      !call interpltn_xie(2,4,co,ac,oc,3,numgrid(3),ppm)
+      t = 1
+      do k = 1, fcstgrd(3)
+         ht(k) = 0.0
+         m = 0
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            ht(k) = ht(k) + co(m)*bk0(i, j, k, t, zz)
+         end do
+         end do
+      end do
+      call zpconvert(fcstgrd(3), ht, p00, z, p, is)
+      return
+   end subroutine ht_to_prs
 
-
-SUBROUTINE RDOBSTEST
+   subroutine rdobstest
 !*************************************************
-! READ IN TEST DATA
-! HISTORY: FEBRUARY 2008, CODED by ZHONGJIE HE.
+! read in test data
+! history: february 2008, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  CHARACTER*8     :: SID
-  INTEGER         :: L,O,OS,IS,IP
-  REAL            :: X,Y,P,UV,ZZ,UE,EA,AZ,ZE,T
-  REAL            :: OP(NUMDIMS),OB,OE
-  INTEGER         :: NC,NW,LMAX
-  REAL            :: MF                 ! NUMBER FLAG OF MISSED DATA
+      character*8     :: sid
+      integer         :: l, o, os, is, ip
+      real            :: x, y, p, uv, zz, ue, ea, az, ze, t
+      real            :: op(numdims), ob, oe
+      integer         :: nc, nw, lmax
+      real            :: mf                 ! number flag of missed data
 
-  MF=-9999.0
-  NC=0
-  NW=0
-  SID='TEST OBS'
-  O=NALLOBS
-  OPEN(11,FILE='OBS_RADAR_CNVTN.DAT',ACTION='READ')
-!  OPEN(11,FILE='OBS_RADAR.DAT',ACTION='READ')
-    X_RADAR=350.
-    Y_RADAR=150
-    READ(11,*) LMAX
-    DO L=1,LMAX
-      NW=NW+1
-      READ(11,'(8F10.3,I3,F12.3)') X,Y,ZZ,T,AZ,EA,UV,UE,OS,P
-!      READ(11,*) X,Y,ZZ,T,AZ,EA,UV,UE,OS,P
-!      READ(11,'(7F10.3,I3,F12.3)') X,Y,ZZ,AZ,EA,UV,UE,OS,P      !  FOR PRESURE COORDINATE AND P IS CONTENTED IN THE FILE OF OBS
-      IF(ABS(X-MF).LE.1E-5) CYCLE
-      IF(ABS(Y-MF).LE.1E-5) CYCLE
-      IF(ABS(AZ-MF).LE.1E-5) CYCLE
-      IF(ABS(EA-MF).LE.1E-5) CYCLE
-      IF(ABS(UV-MF).LE.1E-5) CYCLE
+      mf = -9999.0
+      nc = 0
+      nw = 0
+      sid = 'test obs'
+      o = nallobs
+      open (11, file='obs_radar_cnvtn.dat', action='read')
+!  open(11,file='obs_radar.dat',action='read')
+      x_radar = 350.
+      y_radar = 150
+      read (11, *) lmax
+      do l = 1, lmax
+         nw = nw + 1
+         read (11, '(8f10.3,i3,f12.3)') x, y, zz, t, az, ea, uv, ue, os, p
+!      read(11,*) x,y,zz,t,az,ea,uv,ue,os,p
+!      read(11,'(7f10.3,i3,f12.3)') x,y,zz,az,ea,uv,ue,os,p      !  for presure coordinate and p is contented in the file of obs
+         if (abs(x - mf) .le. 1e-5) cycle
+         if (abs(y - mf) .le. 1e-5) cycle
+         if (abs(az - mf) .le. 1e-5) cycle
+         if (abs(ea - mf) .le. 1e-5) cycle
+         if (abs(uv - mf) .le. 1e-5) cycle
 
 !================= for test ===============
 !      if(mod(l,11).ne.1) cycle
 !      if(os.eq.numstat+1 ) cycle
 !================= for test ===============
 
-! TRANSFORM
-      OP(1)=X
-      OP(2)=Y
-      IP=0
-      IF(OS.EQ.NUMSTAT+1) IP=1
+! transform
+         op(1) = x
+         op(2) = y
+         ip = 0
+         if (os .eq. numstat + 1) ip = 1
 
-      IF(IFPCDNT.EQ.1) THEN
-        IF(ABS(P-MF).LE.1E-5) THEN
-          CALL HT_TO_PRS(OP(1),OP(2),ZZ,P,IS)
-          IP=1
-          IF(IS.NE.1)CYCLE
-        ENDIF
-        OP(3)=P
-        IF(NUMDIMS.GE.4) OP(4)=T
-        ZE=2.0
-        OB=UV
-        OE=UE
-        CALL HANDLEOBS_SIGMA(OP,OB,OE,OS,O,IP,AZ,EA,SID)
-        NC=NC+1
+         if (ifpcdnt .eq. 1) then
+            if (abs(p - mf) .le. 1e-5) then
+               call ht_to_prs(op(1), op(2), zz, p, is)
+               ip = 1
+               if (is .ne. 1) cycle
+            end if
+            op(3) = p
+            if (numdims .ge. 4) op(4) = t
+            ze = 2.0
+            ob = uv
+            oe = ue
+            call handleobs_sigma(op, ob, oe, os, o, ip, az, ea, sid)
+            nc = nc + 1
 
-        OB=ZZ
-        OE=ZE
-        OS=PRESSURE
-        CALL HANDLEOBS_SIGMA(OP,OB,OE,OS,O,IP,AZ,EA,SID)
-        NC=NC+1
-      ELSE
-        OP(3)=ZZ
-        IF(NUMDIMS.GE.4) OP(4)=T
-        ZE=2.0
-        OB=UV
-        OE=UE
-        CALL HANDLEOBS_SIGMA(OP,OB,OE,OS,O,IP,AZ,EA,SID)
-        NC=NC+1
-      ENDIF
+            ob = zz
+            oe = ze
+            os = pressure
+            call handleobs_sigma(op, ob, oe, os, o, ip, az, ea, sid)
+            nc = nc + 1
+         else
+            op(3) = zz
+            if (numdims .ge. 4) op(4) = t
+            ze = 2.0
+            ob = uv
+            oe = ue
+            call handleobs_sigma(op, ob, oe, os, o, ip, az, ea, sid)
+            nc = nc + 1
+         end if
 
-    ENDDO
-    NALLOBS=O
-  CLOSE(11)
+      end do
+      nallobs = o
+      close (11)
 
-  DO OS=1,NUMSTAT+2
-    IF(OS.EQ.U_CMPNNT) PRINT*, 'THE NUMBER OF OBSERVED U DATA IS:',NST(OS)
-    IF(OS.EQ.V_CMPNNT) PRINT*, 'THE NUMBER OF OBSERVED V DATA IS:',NST(OS)
-    IF(OS.EQ.W_CMPNNT) PRINT*, 'THE NUMBER OF OBSERVED W DATA IS:',NST(OS)
-    IF(OS.EQ.PRESSURE) PRINT*, 'THE NUMBER OF OBSERVED PRESSURE DATA IS:',NST(OS)
-    IF(OS.EQ.TEMPRTUR) PRINT*, 'THE NUMBER OF OBSERVED TEMPRTUR DATA IS:',NST(OS)
-    IF(OS.EQ.NUMSTAT+1 .AND. NST(NUMSTAT+1).GE.1) PRINT*, 'THE NUMBER OF RADAR DATA IS:',NST(OS)
-    IF(OS.EQ.NUMSTAT+2 .AND. NST(NUMSTAT+2).GE.1) PRINT*, 'THE NUMBER OF SFMR DATA IS:',NST(OS)
-  ENDDO
+      do os = 1, numstat + 2
+         if (os .eq. u_cmpnnt) print *, 'the number of observed u data is:', nst(os)
+         if (os .eq. v_cmpnnt) print *, 'the number of observed v data is:', nst(os)
+         if (os .eq. w_cmpnnt) print *, 'the number of observed w data is:', nst(os)
+         if (os .eq. pressure) print *, 'the number of observed pressure data is:', nst(os)
+         if (os .eq. temprtur) print *, 'the number of observed temprtur data is:', nst(os)
+         if (os .eq. numstat + 1 .and. nst(numstat + 1) .ge. 1) print *, 'the number of radar data is:', nst(os)
+         if (os .eq. numstat + 2 .and. nst(numstat + 2) .ge. 1) print *, 'the number of sfmr data is:', nst(os)
+      end do
 
-  RETURN
-END SUBROUTINE RDOBSTEST
+      return
+   end subroutine rdobstest
 
-SUBROUTINE HANDLEOBS_SIGMA(OP,OB,OE,OS,O,IP,AZ,EA,SID)
+   subroutine handleobs_sigma(op, ob, oe, os, o, ip, az, ea, sid)
 !*************************************************
-! CALCULATE THE DIFFERENCE BETWEEN OBSERVATION AND BACKGROUND
-! HISTORY: MARCH 2007, CODED by ZHONGJIE HE.
+! calculate the difference between observation and background
+! history: march 2007, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  CHARACTER*8, INTENT(IN) :: SID	! STATION NAME
-  INTEGER  :: I,J,K,T,M,N,NP(MAXDIMS),NN(MAXDIMS),IS,O,OS,IP
-  INTEGER  :: LM(MAXDIMS)
-  REAL  :: X,Y,P,TM
-  REAL  :: DI,SP		! YUANFU FOR OUTPUT PIG FILE
-  REAL  :: AC(NUMDIMS,NGPTOBS),OC(NUMDIMS),CO(NGPTOBS),HT
-  REAL  :: OP(NUMDIMS),OB,OE
+      character*8, intent(in) :: sid        ! station name
+      integer  :: i, j, k, t, m, n, np(maxdims), nn(maxdims), is, o, os, ip
+      integer  :: lm(maxdims)
+      real  :: x, y, p, tm
+      real  :: di, sp                ! yuanfu for output pig file
+      real  :: ac(numdims, ngptobs), oc(numdims), co(ngptobs), ht
+      real  :: op(numdims), ob, oe
 
-  INTEGER  :: UU,VV,WW
-  REAL     :: AZ,TU,TV,EA,HS,HE,TW
-  REAL     :: D2R
+      integer  :: uu, vv, ww
+      real     :: az, tu, tv, ea, hs, he, tw
+      real     :: d2r
 ! --------------------
 
-  D2R = 3.14159/180.0
+      d2r = 3.14159/180.0
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  WW=W_CMPNNT
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      ww = w_cmpnnt
 
-  IF(IP.EQ.1.AND.OS.EQ.3)RETURN
+      if (ip .eq. 1 .and. os .eq. 3) return
 
-  IF(IF_TEST.NE.1) THEN
-    CALL LATLON_TO_RLAPSGRID(OP(2),OP(1),Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
-  ELSE
-    CALL OBSTOGRID(OP(2),OP(1),Y00,X00,FCSTGRD(1),FCSTGRD(2),X,Y,IS)
-  ENDIF
+      if (if_test .ne. 1) then
+         call latlon_to_rlapsgrid(op(2), op(1), y00, x00, fcstgrd(1), fcstgrd(2), x, y, is)
+      else
+         call obstogrid(op(2), op(1), y00, x00, fcstgrd(1), fcstgrd(2), x, y, is)
+      end if
 
-  IF(X.LT.1.0.OR.Y.LT.1.0.OR.X.GT.FCSTGRD(1).OR.Y.GT.FCSTGRD(2).OR.IS.NE.1)RETURN
+      if (x .lt. 1.0 .or. y .lt. 1.0 .or. x .gt. fcstgrd(1) .or. y .gt. fcstgrd(2) .or. is .ne. 1) return
 
-  IF(IFPCDNT.EQ.1) THEN                      ! FOR PRESSURE COORDINATE
-    CALL VRTCLPSTN(FCSTGRD(3),LIMIT_3,P00,OP(3),P,IS)
-  ELSEIF(IFPCDNT.EQ.2) THEN                  ! FOR HEIGHT COORDINATE
-    CALL VRTCLPSTN(FCSTGRD(3),LIMIT_3,Z00,OP(3),P,IS)
-  ELSEIF(IFPCDNT.EQ.0) THEN                  ! FOR SIGMA COORDINATE
-    DO N=1,2
-      NP(N)=1
-    ENDDO
-    NP(1)=INT(X)
-    NP(2)=INT(Y)
-    NP(3)=1
-    NP(4)=1
-    DO N=1,MAXDIMS
-      IF(NP(N).EQ.FCSTGRD(N).AND.FCSTGRD(N).NE.1)NP(N)=FCSTGRD(N)-1
-    ENDDO
-    OC(1)=X
-    OC(2)=Y
-    OC(3)=1
-    OC(4)=1
-    M=0
+      if (ifpcdnt .eq. 1) then                      ! for pressure coordinate
+         call vrtclpstn(fcstgrd(3), limit_3, p00, op(3), p, is)
+      elseif (ifpcdnt .eq. 2) then                  ! for height coordinate
+         call vrtclpstn(fcstgrd(3), limit_3, z00, op(3), p, is)
+      elseif (ifpcdnt .eq. 0) then                  ! for sigma coordinate
+         do n = 1, 2
+            np(n) = 1
+         end do
+         np(1) = int(x)
+         np(2) = int(y)
+         np(3) = 1
+         np(4) = 1
+         do n = 1, maxdims
+            if (np(n) .eq. fcstgrd(n) .and. fcstgrd(n) .ne. 1) np(n) = fcstgrd(n) - 1
+         end do
+         oc(1) = x
+         oc(2) = y
+         oc(3) = 1
+         oc(4) = 1
+         m = 0
 !============================================================
-!    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-!    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-!    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-!    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-!      NN(1)=I
-!      NN(2)=J
-!      NN(3)=K
-!      NN(4)=T
-!      M=M+1
-!      DO N=1,NUMDIMS
-!        AC(N,M)=NN(N)*1.0D0
-!      ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!=====================MODIFIED BY ZHONGJIE HE ==============
-    DO N=1,MAXDIMS
-      LM(N)=NP(N)+1
-      IF(NUMDIMS.LT.N) LM(N)=NP(N)
-    ENDDO
-    DO T=NP(4),LM(4)
-    DO K=NP(3),LM(3)
-    DO J=NP(2),LM(2)
-    DO I=NP(1),LM(1)
-      NN(1)=MIN0(I,FCSTGRD(1))
-      NN(2)=MIN0(J,FCSTGRD(2))
-      NN(3)=MIN0(K,FCSTGRD(3))
-      NN(4)=MIN0(T,FCSTGRD(4))
-      M=M+1
-      DO N=1,NUMDIMS
-        AC(N,M)=NN(N)*1.0D0
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
+!    do t=np(4),min0(np(4)+1,fcstgrd(4))
+!    do k=np(3),min0(np(3)+1,fcstgrd(3))
+!    do j=np(2),min0(np(2)+1,fcstgrd(2))
+!    do i=np(1),min0(np(1)+1,fcstgrd(1))
+!      nn(1)=i
+!      nn(2)=j
+!      nn(3)=k
+!      nn(4)=t
+!      m=m+1
+!      do n=1,numdims
+!        ac(n,m)=nn(n)*1.0d0
+!      enddo
+!    enddo
+!    enddo
+!    enddo
+!    enddo
+!=====================modified by zhongjie he ==============
+         do n = 1, maxdims
+            lm(n) = np(n) + 1
+            if (numdims .lt. n) lm(n) = np(n)
+         end do
+         do t = np(4), lm(4)
+         do k = np(3), lm(3)
+         do j = np(2), lm(2)
+         do i = np(1), lm(1)
+            nn(1) = min0(i, fcstgrd(1))
+            nn(2) = min0(j, fcstgrd(2))
+            nn(3) = min0(k, fcstgrd(3))
+            nn(4) = min0(t, fcstgrd(4))
+            m = m + 1
+            do n = 1, numdims
+               ac(n, m) = nn(n)*1.0d0
+            end do
+         end do
+         end do
+         end do
+         end do
 !============================================================
-    ! CALL INTERPLTN_XIE(NUMDIMS,NGPTOBS,CO,AC,OC,3,NUMGRID(3),PPM)
-    CALL INTERPLTN(NUMDIMS,NGPTOBS,CO,AC,OC)
-    M=0
-    HS=0.0
-    HE=0.0
-    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      HS=HS+CO(M)*HEIGHTL(I,J)
-      HE=HE+CO(M)*HEIGHTU(I,J)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    OP(3)=(OP(3)-HS)/(HE-HS)
-    CALL VRTCLPSTN(FCSTGRD(3),LIMIT_3,Z00,OP(3),P,IS)
-  ENDIF
+         ! call interpltn_xie(numdims,ngptobs,co,ac,oc,3,numgrid(3),ppm)
+         call interpltn(numdims, ngptobs, co, ac, oc)
+         m = 0
+         hs = 0.0
+         he = 0.0
+         do t = np(4), min0(np(4) + 1, fcstgrd(4))
+         do k = np(3), min0(np(3) + 1, fcstgrd(3))
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            hs = hs + co(m)*heightl(i, j)
+            he = he + co(m)*heightu(i, j)
+         end do
+         end do
+         end do
+         end do
+         op(3) = (op(3) - hs)/(he - hs)
+         call vrtclpstn(fcstgrd(3), limit_3, z00, op(3), p, is)
+      end if
 !jhui
-!  FOR RADAR INGEST DATA that outside 0-3600
-  IF ( OS .GT. NUMSTAT) THEN
-  IF ( OP(4).GT. 3600)  OP(4) = 3600 
-  IF ( OP(4).LT. 0)  OP(4) = 0 
-  IF(NUMDIMS.GE.4) CALL VRTCLPSTN(FCSTGRD(4),LIMIT_4,T00,OP(4),TM,IS)
-!  ELSE
-!  IF(NUMDIMS.GE.4) CALL VRTCLPSTN(FCSTGRD(4),LIMIT_4,T00,OP(4),TM,IS)
-  ENDIF
+!  for radar ingest data that outside 0-3600
+      if (os .gt. numstat) then
+         if (op(4) .gt. 3600) op(4) = 3600
+         if (op(4) .lt. 0) op(4) = 0
+         if (numdims .ge. 4) call vrtclpstn(fcstgrd(4), limit_4, t00, op(4), tm, is)
+!  else
+!  if(numdims.ge.4) call vrtclpstn(fcstgrd(4),limit_4,t00,op(4),tm,is)
+      end if
 
-  IF(IS.NE.1)RETURN
-  DO N=1,MAXDIMS
-    NP(N)=1
-  ENDDO
-  NP(1)=INT(X)
-  NP(2)=INT(Y)
-  NP(3)=INT(P)
-  IF(NUMDIMS.GE.4) NP(4)=INT(TM)
-  DO N=1,MAXDIMS
-    IF(NP(N).EQ.FCSTGRD(N).AND.FCSTGRD(N).NE.1)NP(N)=FCSTGRD(N)-1
-  ENDDO
-  OC(1)=X
-  OC(2)=Y
-  OC(3)=P
-  IF(NUMDIMS.GE.4) OC(4)=TM
-  M=0
+      if (is .ne. 1) return
+      do n = 1, maxdims
+         np(n) = 1
+      end do
+      np(1) = int(x)
+      np(2) = int(y)
+      np(3) = int(p)
+      if (numdims .ge. 4) np(4) = int(tm)
+      do n = 1, maxdims
+         if (np(n) .eq. fcstgrd(n) .and. fcstgrd(n) .ne. 1) np(n) = fcstgrd(n) - 1
+      end do
+      oc(1) = x
+      oc(2) = y
+      oc(3) = p
+      if (numdims .ge. 4) oc(4) = tm
+      m = 0
 !===================================================
-!  DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-!  DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-!  DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-!  DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-!    NN(1)=I
-!    NN(2)=J
-!    NN(3)=K
-!    NN(4)=T
-!    M=M+1
-!    DO N=1,NUMDIMS
-!      AC(N,M)=NN(N)*1.0D0
-!    ENDDO
-!  ENDDO
-!  ENDDO
-!  ENDDO
-!  ENDDO
+!  do t=np(4),min0(np(4)+1,fcstgrd(4))
+!  do k=np(3),min0(np(3)+1,fcstgrd(3))
+!  do j=np(2),min0(np(2)+1,fcstgrd(2))
+!  do i=np(1),min0(np(1)+1,fcstgrd(1))
+!    nn(1)=i
+!    nn(2)=j
+!    nn(3)=k
+!    nn(4)=t
+!    m=m+1
+!    do n=1,numdims
+!      ac(n,m)=nn(n)*1.0d0
+!    enddo
+!  enddo
+!  enddo
+!  enddo
+!  enddo
 !=================== modified by zhongjie he========
-  DO N=1,MAXDIMS
-    LM(N)=NP(N)+1
-    IF(NUMDIMS.LT.N) LM(N)=NP(N)
-  ENDDO
-  DO T=NP(4),LM(4)
-  DO K=NP(3),LM(3)
-  DO J=NP(2),LM(2)
-  DO I=NP(1),LM(1)
-    NN(1)=MIN0(I,FCSTGRD(1))
-    NN(2)=MIN0(J,FCSTGRD(2))
-    NN(3)=MIN0(K,FCSTGRD(3))
-    NN(4)=MIN0(T,FCSTGRD(4))
-    M=M+1
-    DO N=1,NUMDIMS
-      AC(N,M)=NN(N)*1.0D0
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+      do n = 1, maxdims
+         lm(n) = np(n) + 1
+         if (numdims .lt. n) lm(n) = np(n)
+      end do
+      do t = np(4), lm(4)
+      do k = np(3), lm(3)
+      do j = np(2), lm(2)
+      do i = np(1), lm(1)
+         nn(1) = min0(i, fcstgrd(1))
+         nn(2) = min0(j, fcstgrd(2))
+         nn(3) = min0(k, fcstgrd(3))
+         nn(4) = min0(t, fcstgrd(4))
+         m = m + 1
+         do n = 1, numdims
+            ac(n, m) = nn(n)*1.0d0
+         end do
+      end do
+      end do
+      end do
+      end do
 !===================================================
-  ! CALL INTERPLTN_XIE(NUMDIMS,NGPTOBS,CO,AC,OC,3,NUMGRID(3),PPM)
-  CALL INTERPLTN(NUMDIMS,NGPTOBS,CO,AC,OC)
-  HT=0.0
-  M=0
-  TU=0.0
-  TV=0.0
-  TW=0.0
-  IF(OS.LE.NUMSTAT) THEN
-    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      HT=HT+CO(M)*BK0(I,J,K,T,OS)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ELSEIF(OS.EQ.NUMSTAT+1) THEN        ! FOR RADAR DATA , BY ZHONGJIE HE
-    DO T=NP(4),MIN0(NP(4)+1,FCSTGRD(4))
-    DO K=NP(3),MIN0(NP(3)+1,FCSTGRD(3))
-    DO J=NP(2),MIN0(NP(2)+1,FCSTGRD(2))
-    DO I=NP(1),MIN0(NP(1)+1,FCSTGRD(1))
-      M=M+1
-      TU=TU+CO(M)*BK0(I,J,K,T,UU)
-      TV=TV+CO(M)*BK0(I,J,K,T,VV)
-      IF(WW.NE.0) TW=TW+CO(M)*BK0(I,J,K,T,WW)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=(TU*SIN(D2R*AZ)+TV*COS(D2R*AZ))*COS(D2R*EA)+TW*SIN(D2R*EA)
-  ELSEIF(OS.EQ.NUMSTAT+2) THEN        ! FOR SFMR DATA , BY ZHONGJIE HE
-    ! For SFMR data, no substract the background as its operator is nonlinear
-    HT = 0.0
-  ELSEIF(OS.EQ.NUMSTAT+3) THEN        
-    HT =0.0
-  ENDIF
+      ! call interpltn_xie(numdims,ngptobs,co,ac,oc,3,numgrid(3),ppm)
+      call interpltn(numdims, ngptobs, co, ac, oc)
+      ht = 0.0
+      m = 0
+      tu = 0.0
+      tv = 0.0
+      tw = 0.0
+      if (os .le. numstat) then
+         do t = np(4), min0(np(4) + 1, fcstgrd(4))
+         do k = np(3), min0(np(3) + 1, fcstgrd(3))
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            ht = ht + co(m)*bk0(i, j, k, t, os)
+         end do
+         end do
+         end do
+         end do
+      elseif (os .eq. numstat + 1) then        ! for radar data , by zhongjie he
+         do t = np(4), min0(np(4) + 1, fcstgrd(4))
+         do k = np(3), min0(np(3) + 1, fcstgrd(3))
+         do j = np(2), min0(np(2) + 1, fcstgrd(2))
+         do i = np(1), min0(np(1) + 1, fcstgrd(1))
+            m = m + 1
+            tu = tu + co(m)*bk0(i, j, k, t, uu)
+            tv = tv + co(m)*bk0(i, j, k, t, vv)
+            if (ww .ne. 0) tw = tw + co(m)*bk0(i, j, k, t, ww)
+         end do
+         end do
+         end do
+         end do
+         ht = (tu*sin(d2r*az) + tv*cos(d2r*az))*cos(d2r*ea) + tw*sin(d2r*ea)
+      elseif (os .eq. numstat + 2) then        ! for sfmr data , by zhongjie he
+         ! for sfmr data, no substract the background as its operator is nonlinear
+         ht = 0.0
+      elseif (os .eq. numstat + 3) then
+         ht = 0.0
+      end if
 
-  IF(OS.EQ.TEMPRTUR.AND.ABS(OB-HT).GE.8.0)RETURN
-  IF(OS.EQ.PRESSURE.AND.ABS(OB-HT).GE.50.0)RETURN
-  OB=OB-HT
+      if (os .eq. temprtur .and. abs(ob - ht) .ge. 8.0) return
+      if (os .eq. pressure .and. abs(ob - ht) .ge. 50.0) return
+      ob = ob - ht
 
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2) THEN              ! FOR SIGMA AND HEIGHT COORDINATE
-    CALL VRTCLPSTN8(MAXGRID(3),LIMIT_3,ZZB,OP(3),P,IS)
-  ELSE                               ! FOR PRESURE COORDINATE
-    CALL VRTCLPSTN8(MAXGRID(3),LIMIT_3,PP0,OP(3),P,IS)
-  ENDIF
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then              ! for sigma and height coordinate
+         call vrtclpstn8(maxgrid(3), limit_3, zzb, op(3), p, is)
+      else                               ! for presure coordinate
+         call vrtclpstn8(maxgrid(3), limit_3, pp0, op(3), p, is)
+      end if
 
-  IF(IS.NE.1)RETURN
+      if (is .ne. 1) return
 
-  OC(3)=P
-  O=O+1
-  NST(OS)=NST(OS)+1
-  IF(O.GT.NOBSMAX)STOP 'NUMBER OF OBSERVATIONS EXCEEDED'
-  DO N=1,NUMDIMS
-    OBP(N,NST(OS),OS)=OC(N)-1.0D0
-  ENDDO
-  OBS(NST(OS),OS)=OB
-  OBE(NST(OS),OS)=OE
-  IF(OS.EQ.NUMSTAT+1) THEN
-    OBA(NST(OS),1)=AZ
-    OBA(NST(OS),2)=EA
-  ENDIF
-  
-  RETURN
-END SUBROUTINE HANDLEOBS_SIGMA
+      oc(3) = p
+      o = o + 1
+      nst(os) = nst(os) + 1
+      if (o .gt. nobsmax) stop 'number of observations exceeded'
+      do n = 1, numdims
+         obp(n, nst(os), os) = oc(n) - 1.0d0
+      end do
+      obs(nst(os), os) = ob
+      obe(nst(os), os) = oe
+      if (os .eq. numstat + 1) then
+         oba(nst(os), 1) = az
+         oba(nst(os), 2) = ea
+      end if
 
-END MODULE READOBSERVES
+      return
+   end subroutine handleobs_sigma
+
+end module readobserves

@@ -4,15 +4,15 @@
 
         include 'trigd.inc'
 
-        use mem_allsky, ONLY: nc
+        use mem_allsky, only: nc
         include 'rad.inc'
 
 !       http://arxiv.org/pdf/astro-ph/9706111.pdf
-!       http://adsabs.harvard.edu/abs/1986PASP...98..364G
-!       1 nL = 1.31e6  photons (550nm) sec**-1 cm**-2 sterad**-1
-!       1 nL = 1.31e10 photons (550nm) sec**-1  m**-2 sterad**-1
-!       1 Watt = 2.76877e18 photons (550nm) / sec
-!       1 nL = 4.7313e-9 watts m**-2 sterad**-1 (550nm)
+!       http://adsabs.harvard.edu/abs/1986pasp...98..364g
+!       1 nl = 1.31e6  photons (550nm) sec**-1 cm**-2 sterad**-1
+!       1 nl = 1.31e10 photons (550nm) sec**-1  m**-2 sterad**-1
+!       1 watt = 2.76877e18 photons (550nm) / sec
+!       1 nl = 4.7313e-9 watts m**-2 sterad**-1 (550nm)
 !       wm2sr_to_nl(x) = 2.113e8 * x     ! (550nm)
 !       wm2sr_to_nl(x) = 2145.707e9 * x
         wm2srum_to_s10(x) = x / 1.261e-8 ! 550nm
@@ -27,10 +27,10 @@
         real alt_a(minalt:maxalt,minazi:maxazi)
         real azi_a(minalt:maxalt,minazi:maxazi)
         real elong_a(minalt:maxalt,minazi:maxazi)
-        real glow_stars(3,minalt:maxalt,minazi:maxazi) ! log nL
-        real rad_stars(3,minalt:maxalt,minazi:maxazi) ! nL
+        real glow_stars(3,minalt:maxalt,minazi:maxazi) ! log nl
+        real rad_stars(3,minalt:maxalt,minazi:maxazi) ! nl
 
-!       Local arrays
+!       local arrays
         real dec_a(minalt:maxalt,minazi:maxazi)
         real ha_a(minalt:maxalt,minazi:maxazi)
         real ra_a(minalt:maxalt,minazi:maxazi)
@@ -53,20 +53,20 @@
         character*20 starnames(nstars)
         logical l_zod, l_psf /.true./
 
-        DANGDIF(XX,YY)=DMOD(XX-YY+9.4247779607694D0,6.2831853071796D0)-3.1415926535897932D0
-        ANGDIFD(X,Y)=MOD(X-Y+540.,360.)-180.
+        dangdif(xx,yy)=dmod(xx-yy+9.4247779607694d0,6.2831853071796d0)-3.1415926535897932d0
+        angdifd(x,y)=mod(x-y+540.,360.)-180.
 !       addmags(a,b)=log10(10.**(-a*0.4) + 10.**(-b*0.4)) * (-2.5)
         addlogs(x,y) = log10(10.**x + 10.**y)
 
-!       According to Allen's "Astrophysical Quantities" page 134, sky brightness is
+!       according to allen's "astrophysical quantities" page 134, sky brightness is
 !       given in terms of the number of 10th magnitude stars per square degree in the visual band:
 
-!       Air Glow at Zenith....................40                 (6th mag per square degree)
-!       Zodiacal Light........................100                (5th mag per square degree)
-!       Faint Stars...........................320 on Milky Way
-!                  ........................... 95 Off Milky Way
-!       Diffuse Galactic Light................. 20
-!       Total sky brightness at zenith........290                (130 is 4.5 mag per square deg)
+!       air glow at zenith....................40                 (6th mag per square degree)
+!       zodiacal light........................100                (5th mag per square degree)
+!       faint stars...........................320 on milky way
+!                  ........................... 95 off milky way
+!       diffuse galactic light................. 20
+!       total sky brightness at zenith........290                (130 is 4.5 mag per square deg)
 
         write(6,*)' subroutine get_starglow...'
         write(6,*)' lat/lon = ',rlat,rlon             
@@ -81,18 +81,18 @@
         lst_deg = lst / rpd
         write(6,*)' sidereal time (deg) = ',lst_deg               
 
-!       Obtain stars data
+!       obtain stars data
         call read_hyg(nstars,ns,dec_d,ra_d,mag_stars,bmv,starnames,istat_cat)
         if(istat_cat .eq. 0)then
           call read_bsc(nstars,ns,dec_d,ra_d,mag_stars,bmv,starnames)
         endif
 
         do is = 1,ns        
-          RAS = ra_d(is) * rpd
-          DECR=dec_d(is) * rpd
+          ras = ra_d(is) * rpd
+          decr=dec_d(is) * rpd
 
-          HAS(is)=dangdif(lst,RAS)
-          call equ_to_altaz_r(DECR,HAS(is),PHI,ALS,AZS)
+          has(is)=dangdif(lst,ras)
+          call equ_to_altaz_r(decr,has(is),phi,als,azs)
 
           alt_stars(is) = als / rpd
           azi_stars(is) = azs / rpd
@@ -102,19 +102,19 @@
           endif
         enddo ! is
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Obtain planets data (placed at end of star arrays)
+!       obtain planets data (placed at end of star arrays)
         do iobj = 2,6
             ns = ns + 1
-            write(6,*)' Call sun_planet for ',iobj,ns 
+            write(6,*)' call sun_planet for ',iobj,ns 
             call sun_planet(i4time,iobj,rlat,rlon,dec_d(ns),ra_d(ns),alt_stars(ns),azi_stars(ns),elgms_r4,mag_stars(ns))
             has(ns) = 0. ! this isn't being used since we already have alt/azi
             starnames(ns) = 'planet'
             bmv(ns) = 0.
         enddo ! iobj
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         do is = 1,ns        
           patm = 1.0     
@@ -127,23 +127,23 @@
             ext_mag(is) = 0.0
           endif
 
-          if(is .le. 100 .OR. (is .gt. 100 .and. is .ge. ns-4))then
+          if(is .le. 100 .or. (is .gt. 100 .and. is .ge. ns-4))then
             write(6,7)is,starnames(is),dec_d(is),ra_d(is),has(is)/rpd,alt_stars(is),azi_stars(is),mag_stars(is),bmv(is),ext_mag(is)
 7           format('dec/ra/ha/al/az/mg/bmv/ext',i5,1x,a20,1x,f9.1,4f9.3,3f7.1)
           endif
         enddo ! is
 
-!       Zodiacal light
-!       http://www.ing.iac.es/Astronomy/observing/conditions/skybr/skybr.html
+!       zodiacal light
+!       http://www.ing.iac.es/astronomy/observing/conditions/skybr/skybr.html
 !       http://aas.aanda.org/articles/aas/pdf/1998/01/ds1449.pdf
-!       http://download.springer.com/static/pdf/80/art%253A10.1186%252FBF03352136.pdf?auth66=1427760212_d8fc6d84b219c957974dd2b221bc226a&ext=.pdf
-!       http://adsabs.harvard.edu/full/1975A%26A....38..405D
+!       http://download.springer.com/static/pdf/80/art%253a10.1186%252fbf03352136.pdf?auth66=1427760212_d8fc6d84b219c957974dd2b221bc226a&ext=.pdf
+!       http://adsabs.harvard.edu/full/1975a%26a....38..405d
 
         glow_stars = 1.0 ! initialize to cosmic background level
 
         sqarcsec_per_sqdeg = 3600.**2
 
-!       Coordinate conversions
+!       coordinate conversions
         nalt = (maxalt-minalt) + 1
         nazi = (maxazi-minazi) + 1
         c_conv = 'altaz2decra'
@@ -152,9 +152,9 @@
         c_conv = 'decra2galactic'
         call angcoord_2d(c_conv,nalt,nazi,arg1,arg2,dec_a,ra_a,argphi,gallat_a,gallon_a)
 
-!       http://en.wikipedia.org/wiki/Position_of_the_Sun
-        sol_meanlon  = 280.460 + 0.9856474 * (jed-2451545.0D0)
-        sol_meananom = 357.528 + 0.9856003 * (jed-2451545.0D0)
+!       http://en.wikipedia.org/wiki/position_of_the_sun
+        sol_meanlon  = 280.460 + 0.9856474 * (jed-2451545.0d0)
+        sol_meananom = 357.528 + 0.9856003 * (jed-2451545.0d0)
         sollon = sol_meanlon + 1.915 * sind(sol_meananom) + .02 * sind(2. * sol_meananom)
         sollon = mod(sollon,360.)
         write(6,*)' sollon (computed) ',sollon
@@ -162,9 +162,9 @@
         call angcoord_2d(c_conv,nalt,nazi,sollon,arg2,dec_a,ra_a,argphi,helioeclipticlat_a,helioeclipticlon_a)
 
         if(l_zod .eqv. .true.)then
-          write(6,*)' Computing Milky Way / Zodiacal Light / Corona',horz_dep
+          write(6,*)' computing milky way / zodiacal light / corona',horz_dep
         else
-          write(6,*)' Skipping Milky Way / Zodiacal Light / Corona'
+          write(6,*)' skipping milky way / zodiacal light / corona'
         endif
 
         glwmid_mag = (glwmid - 2.925) * 0.4
@@ -191,7 +191,7 @@
 
              if(l_zod .eqv. .true.)then
 
-!             Milky Way (mainly from stars from 6-16 magnitude)
+!             milky way (mainly from stars from 6-16 magnitude)
               explatterm = (abs(gallat_a(ialt,jazi)/20.))**1.5
               explonterm = (angdifd(gallon_a(ialt,jazi),0.)/140.)**2
               s10gal = 25. + 250. * exp(-explatterm) * exp(-explonterm) 
@@ -202,7 +202,7 @@
                 glow_gal = 0.
               endif
 
-!             Zodiacal Light S10 units 140 - 90 sin(beta) ecliptic latitude
+!             zodiacal light s10 units 140 - 90 sin(beta) ecliptic latitude
               elat = helioeclipticlat_a(ialt,jazi)
               elon = helioeclipticlon_a(ialt,jazi)
               if(elon .gt. 180.)elon = 360. - elon
@@ -213,7 +213,7 @@
               s10zod_ecliptic =  900. * cosd((elon)/2.0001)**7.7 + 140. ! + s10geg_ecliptic
 !             s10zod_ecliptic = 4000. * cosd((elon)/2.)**16.0 + 150. +
 !             s10geg_ecliptic
-!             Note the gegenschein of s10 = 40 can be added near
+!             note the gegenschein of s10 = 40 can be added near
 !             helioecliptic 180. to yield a total of 180 s10 units.
               eclp = 1.9 - 0.9*abs(elon/180.)
               eclp = 1.0  ! control ecliptic sharpness
@@ -225,11 +225,11 @@
 !                                 (s10zod_ecliptic) * (1.-ecllatterm) 
 !             s10zod = s10zod*10. ! debug for visibility
 
-!             F/K corona section (inner)
-!             http://arxiv.org/pdf/0909.1722.pdf (far corona in Fig 1.)
+!             f/k corona section (inner)
+!             http://arxiv.org/pdf/0909.1722.pdf (far corona in fig 1.)
 !             https://ase.tufts.edu/cosmos/print_images.asp?id=28
-!             https://www.terrapub.co.jp/journals/EPS/pdf/5006_07/50060493.pdf
-!             "Interplanetary Dust" edited by B. Grun
+!             https://www.terrapub.co.jp/journals/eps/pdf/5006_07/50060493.pdf
+!             "interplanetary dust" edited by b. grun
               sqarcsec_per_sqdeg = 3600.**2
               size_glow_sqdg_sm = 0.2    ! sun/moon area           
               delta_mag = log10(size_glow_sqdg_sm*sqarcsec_per_sqdeg)*2.5
@@ -247,7 +247,7 @@
               if(elong .gt. 0.)then
 !               pcoeff = 1.0 - elon**2/(elon**2 + elat**2)
 !               pcoeff = abs(elat) / sqrt(elon**2 + elat**2)
-!               The last exponent controls ecliptic sharpness
+!               the last exponent controls ecliptic sharpness
                 pcoeff = (abs(elat) / sqrt(elon**2 + elat**2))**1.3 
               else
                 pcoeff = 0.
@@ -257,7 +257,7 @@
               f_s10 = wm2srum_to_s10(f_wm2srum)
 !             f_nl  = wm2srum_to_nl(f_wm2srum)
 
-!             Merge original zodiacal light with corona
+!             merge original zodiacal light with corona
               s10zod2 = max(s10zod,f_s10)
 
               sbu = s10zod2 * 1.25
@@ -271,7 +271,7 @@
 
               iwrite = 0
 
-              if((azig .eq. 0.0 .or. azig .eq. 90. .or. azig .eq. 180. .or. azig .eq. 270.) .AND. &
+              if((azig .eq. 0.0 .or. azig .eq. 90. .or. azig .eq. 180. .or. azig .eq. 270.) .and. &
                   (altg .eq. 0.0 .or. altg .eq. 10. .or. altg .eq. 20. .or. altg .eq. 30. .or. altg .eq. 40. .or. altg .eq. 60. .or. altg .eq. 90.) &
                                                                                                                             )then
                 iwrite = 1
@@ -282,9 +282,9 @@
               endif
 
               if(iwrite .ge. 1)then
-                I4_elapsed = ishow_timer()
+                i4_elapsed = ishow_timer()
                 write(6,*)
-                if(iwrite .eq. 2)write(6,*)' Gegenschein point'
+                if(iwrite .eq. 2)write(6,*)' gegenschein point'
 
                 write(6,71)altg,azig,dec_a(ialt,jazi),ra_a(ialt,jazi) &
                           ,gallat_a(ialt,jazi),gallon_a(ialt,jazi) &
@@ -321,12 +321,12 @@
 
             if(altg .ge. -horz_dep)then
 
-!             Threshold box to consider a star
+!             threshold box to consider a star
               alt_cos = min(altg,89.)
 
                 n_star_loops = n_star_loops + 1
 
-!               Consider varying the size with the magnitude
+!               consider varying the size with the magnitude
 !               size_glow_sqdg_st = 0.1  ! final polar kernel size?
 !               size_glow_sqdg_st = alt_scale**2
 !               strad_dg = sqrt(size_glow_sqdg_st) / 3.14159
@@ -339,7 +339,7 @@
                    strad_dg = strad_dg * sqrt(ratio_bri)
                 endif
 
-!               If the PSF is Gaussian then we can note the area under the
+!               if the psf is gaussian then we can note the area under the
 !               curve is 2 * pi * amplitude * sigmax * sigmay                
                 if(.not. l_psf)then
                    strad_dg = min(strad_dg,0.22)
@@ -350,16 +350,16 @@
                 endif
                 size_glow_sqdg_st = 3.14159 * strad_dg**2
 
-!               Radii of ellipse edge
+!               radii of ellipse edge
 !               alt_dist = alt_scale / 2.0          * 1.3
 !               azi_dist = alt_dist / cosd(alt_cos) * 1.3   
                 alt_dist = strad_dg
                 azi_dist = strad_dg / cosd(alt_cos)
 
-!               Place star in center of grid box
+!               place star in center of grid box
                 alts = nint(alt_stars(is)/alt_scale) * alt_scale
                 azis = nint(azi_stars(is)/azi_scale) * azi_scale
-                if(abs(alts-altg) .le. thr_dist*alt_dist .AND. abs(azis-azig) .le. thr_dist*azi_dist)then
+                if(abs(alts-altg) .le. thr_dist*alt_dist .and. abs(azis-azig) .le. thr_dist*azi_dist)then
                     if(is .le. 20 .or. is .ge. ns-4 .or. is .eq. 272 .or. mag_stars(is) .le. -1.0)then
                       diste = sqrt( ((alts-altg)/alt_dist)**2 + ((azis-azig)/azi_dist)**2) 
                       write(6,81)is,mag_stars(is),strad_dg,size_glow_sqdg_st,ialt,jazi,alt_dist,azi_dist,alts-altg,azis-azig,diste
@@ -376,7 +376,7 @@
                     n_anti_calls = n_anti_calls + 1
                     if(l_psf)then
                       dist_dg = sqrt((ricen/aspect_ratio)**2 + rjcen**2) * alt_scale
-                      dist_dg = max(dist_dg,alt_scale*0.3) ! rough Gaussian average of central pixel
+                      dist_dg = max(dist_dg,alt_scale*0.3) ! rough gaussian average of central pixel
                       frac_lit1 = 0.5 * exp(-((dist_dg/strad_dg)**2))
                     else
                       call antialias_ellipse(radius_pix,ricen,rjcen,aspect_ratio,frac_lit1,0,0,iverb)
@@ -386,7 +386,7 @@
                         delta_mag = log10(size_glow_sqdg_st*sqarcsec_per_sqdeg/frac_lit1)*2.5
                         rmag_per_sqarcsec = mag_stars(is) + delta_mag                  
 
-!                       Convert to log nanolamberts
+!                       convert to log nanolamberts
                         glow_nl = log10(v_to_b(rmag_per_sqarcsec))
                     else
                         delta_mag = 99.
@@ -460,7 +460,7 @@
 !       read(cline(66:70),*,err=6)mag_stars(is)
 6       continue
 
-!       Convert coordinates
+!       convert coordinates
         ra_d(is) = float(ih)*15. + float(im)/4.
 
         starnames(is) = cline(30:49) 
@@ -512,7 +512,7 @@
 !       read(cline(66:70),*,err=6)mag_stars(is)
 6       continue
 
-!       Convert coordinates
+!       convert coordinates
         if(c1_dec .eq. '+')then
             rsign = 1.0
         else
@@ -523,7 +523,7 @@
 
         starnames(is) = cline(5:14) 
 
-        if(dec_d(is) .eq. 0. .and. ra_d(is) .eq. 0)then ! QC
+        if(dec_d(is) .eq. 0. .and. ra_d(is) .eq. 0)then ! qc
             is = is - 1
             iqc = 0
         else
@@ -574,7 +574,7 @@
         write(6,*)' reading hyg catalog'
         
         read(51,*) ! header line
-        read(51,*) ! Sol
+        read(51,*) ! sol
 
 1       continue
         cdum7 = ''
@@ -590,10 +590,10 @@
         mag_stars(is) = dum14
         bmv(is) = dum17
 
-        if(dec_d(is) .eq. 0. .or. ra_d(is) .eq. 0.)then ! QC
+        if(dec_d(is) .eq. 0. .or. ra_d(is) .eq. 0.)then ! qc
             is = is - 1
             iqc = 0
-        elseif(mag_stars(is) .eq. 0. .or. mag_stars(is) .lt. -2.0)then ! QC
+        elseif(mag_stars(is) .eq. 0. .or. mag_stars(is) .lt. -2.0)then ! qc
             is = is - 1
             iqc = 0
         elseif(mag_stars(is) .gt. 1e37)then ! magnitude limit
@@ -603,7 +603,7 @@
             iqc = 1
         endif
 
-!       Check failure to read all the variables for Betelgeuse at line 27919
+!       check failure to read all the variables for betelgeuse at line 27919
         if(is .le. 100)then
             write(6,*)' dum8/9/14 ',nint(dum1),is,dum8,dum9,dum14,iqc
         endif
@@ -639,18 +639,18 @@
                                ,alt_obj2,azi_obj2,emag &
                                ,diam_deg,horz_dep,glow_obj)
 
-        use mem_namelist, ONLY: r_missing_data,earth_radius,aero_scaleht,redp_lvl
-        use cloud_rad, ONLY: ghi_zen_toa
-        use mem_allsky, ONLY: day_int0
+        use mem_namelist, only: r_missing_data,earth_radius,aero_scaleht,redp_lvl
+        use cloud_rad, only: ghi_zen_toa
+        use mem_allsky, only: day_int0
 
         include 'trigd.inc'
 
         parameter (pi = 3.14159265)
 
-        real alt_obj_in ! I (true altitude uncorrected for refraction)
+        real alt_obj_in ! i (true altitude uncorrected for refraction)
         real alt_a(minalt:maxalt,minazi:maxazi)
         real azi_a(minalt:maxalt,minazi:maxazi)
-        real glow_obj(minalt:maxalt,minazi:maxazi) ! log nL
+        real glow_obj(minalt:maxalt,minazi:maxazi) ! log nl
 
         real ext_mag,lst_deg,mag_obj
         real*8 angdif,jed,lst,has,als,azs,ras,x,y,decr
@@ -664,25 +664,25 @@
         maginterp(a,b,f) = bri0tomag(magtobri0(a) * (1.-f) + magtobri0(b) * f)
         addlogs(a,b) = log10(10.**a + 10.**b)
 
-        ANGDIF(X,Y)=DMOD(X-Y+9.4247779607694D0,6.2831853071796D0)-3.1415926535897932D0
+        angdif(x,y)=dmod(x-y+9.4247779607694d0,6.2831853071796d0)-3.1415926535897932d0
 
         write(6,*)' subroutine get_glow_obj...'
         write(6,21)alt_obj_in,azi_obj_in,mag_obj,diam_deg,l_obsc,l_phase,emag,horz_dep
 21      format('   alt/az/mag/diam/lobsc/lphase/emag/hrzdp = ',4f9.3,2l2,f7.4,f9.4)
 
-!       We may want to efficiently apply refraction here to the object 
-!       altitude to convert from true altitude to apparent. It may be more 
+!       we may want to efficiently apply refraction here to the object 
+!       altitude to convert from true altitude to apparent. it may be more 
 !       accurate and slower to calculate refraction down below instead.
 
         iverbose = 0
-        call       get_airmass(alt_obj_in,htmsl,patm &   ! I 
-                              ,redp_lvl,aero_scaleht &   ! I
-                              ,earth_radius,iverbose &   ! I
-                              ,ag,ao,aa,refr_deg)        ! O
+        call       get_airmass(alt_obj_in,htmsl,patm &   ! i 
+                              ,redp_lvl,aero_scaleht &   ! i
+                              ,earth_radius,iverbose &   ! i
+                              ,ag,ao,aa,refr_deg)        ! o
 
         write(6,*)' refr_deg (informational) = ',refr_deg
 
-!       Place object in center of grid box
+!       place object in center of grid box
         if(diam_deg .eq. 0.)then
             alt_obj = nint(alt_obj_in/alt_scale) * alt_scale
             azi_obj = nint(azi_obj_in/azi_scale) * azi_scale
@@ -693,9 +693,9 @@
  
         rpd = 3.14159265 / 180.
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Calculate extinction
+!       calculate extinction
 !       patm = 1.0     
 
         if(alt_obj .gt. 0.0)then
@@ -730,17 +730,17 @@
     
         do ialt = minalt,maxalt
 
-!         This is apparent altitude, and we can use refraction to convert it
+!         this is apparent altitude, and we can use refraction to convert it
 !         to true altitude.
           altg_app = alt_a(ialt,minazi)
           iverbose = 0
-          call       get_airmass(altg_app,htmsl,patm &     ! I 
-                                ,redp_lvl,aero_scaleht &   ! I
-                                ,earth_radius,iverbose &   ! I
-                                ,ag,ao,aa,refr_deg)        ! O
+          call       get_airmass(altg_app,htmsl,patm &     ! i 
+                                ,redp_lvl,aero_scaleht &   ! i
+                                ,earth_radius,iverbose &   ! i
+                                ,ag,ao,aa,refr_deg)        ! o
           altg1 = altg_app - refr_deg ! true altitude of grid
           
-          if(refr_deg .gt. .100 .OR. (refr_deg .gt. 0. .and. htmsl .gt. 100e3 .and. (l_phase .eqv. .false.) ) )then
+          if(refr_deg .gt. .100 .or. (refr_deg .gt. 0. .and. htmsl .gt. 100e3 .and. (l_phase .eqv. .false.) ) )then
             write(6,31)ialt,altg_app,altg1,refr_deg,ag
 31          format('altg_app/altg1/refr_deg/ag',i8,3f10.4,f9.2)
           endif
@@ -764,8 +764,8 @@
                 alt_cos = min(altg,89.)
                 azi_dist = alt_dist / cosd(alt_cos)         
 
-!               Calculate distance in object/grid radii in cyl projection
-!               Calculate distance in degrees in cyl projection
+!               calculate distance in object/grid radii in cyl projection
+!               calculate distance in degrees in cyl projection
                 if(.false.)then
                 distd = sqrt(((alt_obj-altg))**2 + ((azi_obj-azig)*cosd(alt_cos))**2)
                     distr = sqrt(((alt_obj-altg)/alt_dist)**2 + ((azi_obj-azig)/azi_dist)**2)
@@ -775,13 +775,13 @@
                 endif
 
                 if(.not. l_phase)then
-                  if(htmsl .ge. 100e3 .AND. (jazi .eq. (jazi/360)*360) )then
+                  if(htmsl .ge. 100e3 .and. (jazi .eq. (jazi/360)*360) )then
                     write(6,41)ialt,jazi,alt_obj,azi_obj,altg,azig,distd,distr
 41                  format(i8,i6,2f8.3,2x,2f8.3,4x,2f8.3)
                   endif
                 endif
 
-!               Initialize
+!               initialize
                 frac_lit = 1.0
                 frac_lit2 = 0.0
                 grid_frac_obj = 1.0
@@ -796,7 +796,7 @@
                     delta_mag = log10(size_glow_sqdg*sqarcsec_per_sqdeg)*2.5
 !                   distr = sqrt(((alt_obj-alt))**2 + ((azi_obj-azi)*cosd(alt_cos))**2)
 
-!                   Test a call to antialias_ellipse
+!                   test a call to antialias_ellipse
                     if(.false.)then
                       if(distd .ge. 0.25)then ! corona
                         frac_lit = 0.0
@@ -809,10 +809,10 @@
                       rjcen = (alt_obj-altg)/alt_scale
                       aspect_ratio = 1. / cosd(min(abs(alt_obj),89.))
                       if(abs(alt_obj-altg) .le. 0.15)then                  
-!                       write(6,*)' Calling antialias_ellipse with iverbose = 1'
+!                       write(6,*)' calling antialias_ellipse with iverbose = 1'
                         call antialias_ellipse(radius_pix,ricen,rjcen,aspect_ratio,frac_lit,0,0,0)
                       else
-!                       write(6,*)' Calling antialias_ellipse with iverbose = 0'
+!                       write(6,*)' calling antialias_ellipse with iverbose = 0'
                         call antialias_ellipse(radius_pix,ricen,rjcen,aspect_ratio,frac_lit,0,0,0)
                       endif
                     endif
@@ -855,7 +855,7 @@
                     iblock = 3
                     size_glow_sqdg = pi * radius_deg**2 ! sun/moon area           
 
-!                   Calculate fraction of grid box illuminated by object
+!                   calculate fraction of grid box illuminated by object
                     if(htmsl .gt. 100000e3)then ! very simple anti-aliasing 
                       distr_thrl = 1.0 - 0. ! consider size of pixel relative to object radius
                       distr_thrh = 1.0 + 0.
@@ -874,7 +874,7 @@
                         ricen = (azi_obj-azig)/azi_scale
                         rjcen = (alt_obj-altg)/alt_scale
                         aspect_ratio = 1. / cosd(min(abs(alt_obj),89.))
-                        write(6,*)' Calling antialias_phase with iverbose = ',iverbose,distd,distr,va
+                        write(6,*)' calling antialias_phase with iverbose = ',iverbose,distd,distr,va
                         call antialias_phase(radius_pix,ricen,rjcen,aspect_ratio,alt_scale,azi_scale,va,rill,frac_lit1m,0,0,iverbose)
                         call antialias_phase(radius_pix,ricen,rjcen,aspect_ratio,alt_scale,azi_scale,va,1.0 ,frac_lit1e,0,0,0)
                         earthshine = .00001
@@ -891,9 +891,9 @@
                       rjcen = (alt_obj-altg)/alt_scale
                       aspect_ratio = 1. / cosd(min(abs(alt_obj),89.))
 
-!                     Lots of writes can happen with solar eclipses from DSCOVR
+!                     lots of writes can happen with solar eclipses from dscovr
 !                     if(iwrite .le. 100)then
-                      if(iwrite .le. 100 .AND. distd .lt. (radius_deg + alt_scale * 1.42))then
+                      if(iwrite .le. 100 .and. distd .lt. (radius_deg + alt_scale * 1.42))then
 !                     if(jazi .eq. minazi)then
 !                     if(.true.)then
                         iwrite = iwrite + 1
@@ -904,12 +904,12 @@
                         iverb = 0
                       endif
 
-!                     Obtain fraction of pixel that is lit (frac_lit1)
+!                     obtain fraction of pixel that is lit (frac_lit1)
                       call antialias_ellipse(radius_pix,ricen,rjcen,aspect_ratio,frac_lit1,0,0,iverb)
                       area_pix = alt_scale * azi_scale
                     endif
 
-!                   Consider second "object" for obscuration or phase
+!                   consider second "object" for obscuration or phase
                     if(l_obsc)then 
                       rill = 0.5
                       radius_pix2 = radius_pix
@@ -919,8 +919,8 @@
                       call antialias_ellipse(radius_pix2,ricen,rjcen &
                                             ,aspect_ratio,frac_lit2,0,0,0)
 
-!                     Thresholded and Random strategies are being tested. 
-!                     It might work better for the 'antialias_ellipse' 
+!                     thresholded and random strategies are being tested. 
+!                     it might work better for the 'antialias_ellipse' 
 !                     routine to consider both objects simultaneously.
                       if(.false.)then
 !                       frac_lit = min(frac_lit1,(1.-frac_lit2))
@@ -942,7 +942,7 @@
                         write(6,88)aov1,aov2,aov3,fr1,fr2,fr3,approx_overlap,frac_lit
 88                      format(' aov',3f7.2,'  fr',3f7.2,'  overlap/frac_lit',2f7.4)
                       endif
-                    else ! l_obsc = F
+                    else ! l_obsc = f
                       frac_lit = frac_lit1 
                     endif
 
@@ -955,9 +955,9 @@
 !                   write(6,89)ialt,jazi,altg_app,altg,alt_obj,azig,azi_obj,distd,frac_lit1,frac_lit2,frac_lit
 89                  format(' altga-t/alt_obj/azig/azi_obj/distd/frac_lit =',i6,i5,6f9.3,2f7.2,f7.4)
 
-!                   Determine surface brightness of object averaged over the pixel
+!                   determine surface brightness of object averaged over the pixel
                     if(frac_lit .gt. 0.)then
-!                       Average pixel surface brightness accounting for fraction of pixel that is lit
+!                       average pixel surface brightness accounting for fraction of pixel that is lit
                         delta_mag = log10((size_glow_sqdg*sqarcsec_per_sqdeg)/frac_lit)*2.5
                         rmag_per_sqarcsec = mag_obj + delta_mag                  
                     else
@@ -974,8 +974,8 @@
                 endif
 
                 if(rmag_per_sqarcsec .ne. r_missing_data)then
-!                 Convert to nanolamberts. This has an empirical correction for now based on
-!                 sunlight spread over the spherical solid angle being 3e9nl. Max nl should be 5.538e14
+!                 convert to nanolamberts. this has an empirical correction for now based on
+!                 sunlight spread over the spherical solid angle being 3e9nl. max nl should be 5.538e14
                   glow_nl = v_to_b(rmag_per_sqarcsec) / 1.22062
                   glow_obj(ialt,jazi) = addlogs(glow_obj(ialt,jazi),log10(glow_nl))
 
@@ -990,33 +990,33 @@
 91                        format(' rmag_per_sqarcsec/dmag/glow_nl/glow_obj =     ',2i5,f5.2,2f10.3,e12.4,f11.2)
                       else
                           write(6,92)ialt,jazi,diam_deg,rmag_per_sqarcsec,delta_mag,glow_nl,glow_obj(ialt,jazi)
-92                        format(' rmag_per_sqarcsec/dmag/glow_nl/glow_obj =     ',2i5,f5.2,2f10.3,e12.4,f11.2,' ***GLOW***')
+92                        format(' rmag_per_sqarcsec/dmag/glow_nl/glow_obj =     ',2i5,f5.2,2f10.3,e12.4,f11.2,' ***glow***')
                       endif
                   endif
                 else ! missing rmag_per_sqarcsec
                   if(distd .le. 0.15)then
-                    write(6,*)' WARNING: no glow assigned when close to object ',iblock
+                    write(6,*)' warning: no glow assigned when close to object ',iblock
                   endif
                 endif ! within star kernel
             endif ! alt > -2.
           enddo ! jazi
         enddo ! ialt
 
-!       Calculate solar surface brightness for reference
+!       calculate solar surface brightness for reference
         sun_radius_deg = 0.5334 / 2.
         sun_area_sqdg = pi * sun_radius_deg**2
         sun_area_sr = sun_area_sqdg * (pi/180.)**2
         sun_area_sphere = sun_area_sr / (4. * pi)
         sun_nl = day_int0 / sun_area_sphere
         sun_radiance_calc = ghi_zen_toa / sun_area_sr
-        sun_radiance      = 2.009e7 ! W/m^2/sr (via Wikipedia)
+        sun_radiance      = 2.009e7 ! w/m^2/sr (via wikipedia)
 
-!       Solar radiance (Wikipedia) is 2.009e7 W/m^2/sr
+!       solar radiance (wikipedia) is 2.009e7 w/m^2/sr
 
         write(6,93)diam_deg,mag_obj,delta_mag,sun_area_sr,sun_nl,log10(sun_nl)
-93      format(' diam/mag/dmag/sun_sr/sun_nl/glow_sun_nl = ',3f9.3,2e12.4,f9.3,' ***GLOW***')
+93      format(' diam/mag/dmag/sun_sr/sun_nl/glow_sun_nl = ',3f9.3,2e12.4,f9.3,' ***glow***')
 
-        write(6,*)' Solar radiance is ',sun_radiance_calc,sun_radiance
+        write(6,*)' solar radiance is ',sun_radiance_calc,sun_radiance
 
         write(6,*)' sum_fraclit (pixels / sr) = ',sum_fraclit,sum_fraclit_sr
 
@@ -1029,7 +1029,7 @@
         subroutine get_twi_glow_ave(glow,alt_a,azi_a,ni,nj &
                                    ,sol_alt,sol_az,twi_glow_ave)
 
-        ANGDIF(X,Y)=MOD(X-Y+540.,360.)-180.
+        angdif(x,y)=mod(x-y+540.,360.)-180.
 
         real glow(ni,nj)
         real alt_a(ni,nj)
@@ -1038,12 +1038,12 @@
         cnt = 0.
         sum = 0.
 
-!       Compare with -22. - sol_alt (as an integrated magnitude)
-!       Variable would be 'twi_mag'
+!       compare with -22. - sol_alt (as an integrated magnitude)
+!       variable would be 'twi_mag'
         do i = 1,ni
         do j = 1,nj
             diffaz = angdif(azi_a(i,j),sol_az)
-            if( abs(diffaz) .le. 90. .AND. &
+            if( abs(diffaz) .le. 90. .and. &
                (alt_a(i,j)  .le. 20. .and. alt_a(i,j) .ge. 0.) )then            
                 cnt = cnt + 1.0
                 sum = sum + 10.**glow(i,j)
@@ -1054,7 +1054,7 @@
         if(cnt .gt. 0.)then
             twi_glow_ave = log10(sum/cnt)
         else ! tested at -6.2 degrees
-            write(6,*)' WARNING in get_twi_glow_ave - using empirical function'
+            write(6,*)' warning in get_twi_glow_ave - using empirical function'
             twi_glow_ave = 8.8 + (sol_alt*0.3)
             write(6,*)' sol_alt/sol_az/twi_glow_ave = ' &
                        ,sol_alt,sol_az,twi_glow_ave
@@ -1076,7 +1076,7 @@
 
         alt_top = alt_a(ni,1)
 
-!       Average over window
+!       average over window
         cnt = 0.
         sum = 0.
         do i = 1,ni
@@ -1092,11 +1092,11 @@
         if(cnt .gt. 0.)then
             sky_rad_ave_wdw = sum/cnt
         else
-            write(6,*)' ERROR in get_sky_rad_ave'
+            write(6,*)' error in get_sky_rad_ave'
             sky_rad_ave_wdw = 10. 
         endif
 
-!       Average on top row
+!       average on top row
         cnt = 0.
         sum = 0.
         do i = ni,ni
@@ -1112,12 +1112,12 @@
         if(cnt .gt. 0.)then
             sky_rad_ave_top = sum/cnt
         else
-            write(6,*)' WARNING in get_sky_rad_ave'
+            write(6,*)' warning in get_sky_rad_ave'
             write(6,*)' alt_top = ',alt_top
             sky_rad_ave_top = rad(ni,1)
         endif
 
-!       If needed, the average on the top row is extrapolated for the
+!       if needed, the average on the top row is extrapolated for the
 !       portion of the sky above the camera field of view (when alt_top 
 !       is less than 90 degrees).
         if(alt_top .gt. 0.)then
@@ -1135,15 +1135,15 @@
 
         subroutine rad_2_irrad_down(rad,alt_a,azi_a,elong_a,ni,nj,alt_scale,azi_scale,irrad,beam,direct,diffuse)
 
-!       Subroutine name relates to primary output of GHI, with other outputs such as DHI and DNI.          
+!       subroutine name relates to primary output of ghi, with other outputs such as dhi and dni.          
 
-!       Input units can then be solar relative (to solar irradiance spread out over the full
-!       sphere - 4 pi steradians). The (wideband or spectral) irradiance integrates to 1.
+!       input units can then be solar relative (to solar irradiance spread out over the full
+!       sphere - 4 pi steradians). the (wideband or spectral) irradiance integrates to 1.
 !       if the input (wideband or spectral) radiance has a value of 2. over the upper
 !       hemisphere - 2 pi steradians).
 
         include 'trigd.inc'
-        use mem_allsky, ONLY: day_int0
+        use mem_allsky, only: day_int0
 
         parameter (pi=3.14159265)
         parameter (rpd = pi/180.)
@@ -1159,7 +1159,7 @@
 
         alt_top = alt_a(ni,1)
 
-!       Average over window
+!       average over window
         cnt_ghi = 0.
         cnt_dni = 0.
         cnt_diffuse = 0.
@@ -1196,11 +1196,11 @@
         if(cnt_ghi .gt. 0.)then
             sky_rad_sum_wdw = sum_ghi
         else
-            write(6,*)' ERROR in rad_2_irrad_down'
+            write(6,*)' error in rad_2_irrad_down'
             sky_rad_sum_wdw = 10. 
         endif
 
-!       Average on top row
+!       average on top row
         if(alt_top  .lt. 90.)then
           cnt = 0.
           sum = 0.
@@ -1218,13 +1218,13 @@
           if(cnt .gt. 0.)then
             sky_rad_ave_top = sum/cnt
           else
-            write(6,*)' WARNING in get_sky_rad_ave'
+            write(6,*)' warning in get_sky_rad_ave'
             write(6,*)' alt_top = ',alt_top
             sky_rad_ave_top = rad(ni,1)
           endif
         endif
 
-!       If needed, the average on the top row is extrapolated for the
+!       if needed, the average on the top row is extrapolated for the
 !       portion of the sky above the camera field of view (when alt_top 
 !       is less than 90 degrees).
 
@@ -1275,19 +1275,19 @@
 
         subroutine nl_to_sprad(nl,nc,wa,sprad)
 
-        real nl(nc)       ! I (spectral radiance in scaled solar relative units)
-        real wa(nc)       ! I (wavelength in microns)
-        real fa(nc)       ! L (solar spectral irradiance W/(m**2 nm))
-        real sprad(nc)    ! O (spectral radiance in W/(m**2 nm sr)) units)
+        real nl(nc)       ! i (spectral radiance in scaled solar relative units)
+        real wa(nc)       ! i (wavelength in microns)
+        real fa(nc)       ! l (solar spectral irradiance w/(m**2 nm))
+        real sprad(nc)    ! o (spectral radiance in w/(m**2 nm sr)) units)
 
         parameter (pi=3.14159265)
 
-!       constant 3e9      ! L (scaling constant, approx solar illuminance 
-                          !    spread over a spherical solid angle [nL])
+!       constant 3e9      ! l (scaling constant, approx solar illuminance 
+                          !    spread over a spherical solid angle [nl])
 
         iverbose = 0
 
-!       Obtain solar spectral radiance
+!       obtain solar spectral radiance
         call get_fluxsun(wa,nc,iverbose,fa)
 
         do ic = 1,nc
@@ -1301,7 +1301,7 @@
 
         subroutine get_auroraglow(i4time,alt_a,azi_a,minalt,maxalt,minazi,maxazi,rlat,rlon,alt_scale,azi_scale,glow_aurora)
 
-        real glow_aurora(3,minalt:maxalt,minazi:maxazi) ! log nL
+        real glow_aurora(3,minalt:maxalt,minazi:maxazi) ! log nl
         real alt_a(minalt:maxalt,minazi:maxazi)
         real azi_a(minalt:maxalt,minazi:maxazi)
 

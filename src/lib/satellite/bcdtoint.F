@@ -1,7 +1,7 @@
 #include <config.h>
         subroutine bcd_to_int (re8,int4)
 
-c       routine takes real*8 and converts into BCD form
+c       routine takes real*8 and converts into bcd form
 
         implicit none
 
@@ -16,7 +16,7 @@ c       routine takes real*8 and converts into BCD form
      +                              ibits(re8(i),8,8),
      +                              ibits(re8(i),0,8)
 
-#ifdef WORDS_BIGENDIAN
+#ifdef words_bigendian
            read(string1,*) int4 (i)
 #else
            print*,'re8 =',re8,ibits(re8(i),0,8),ibits(re8(i),8,8)

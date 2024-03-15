@@ -1,29 +1,29 @@
 
-        subroutine plot_sounding(i4time_ref,lun,NX_L,NY_L,NZ_L
+        subroutine plot_sounding(i4time_ref,lun,nx_l,ny_l,nz_l
      1                          ,r_missing_data,laps_cycle_time,maxstns
      1                          ,i_overlay,plot_parms,namelist_parms
      1                          ,l_plotobs)       
 
-        use mem_namelist, ONLY: max_snd_grid, max_snd_levels
+        use mem_namelist, only: max_snd_grid, max_snd_levels
 
         include 'lapsplot.inc'
 
-        real pres_3d(NX_L,NY_L,NZ_L)
-        real field_3d(NX_L,NY_L,NZ_L)
-!       real rh_3d(NX_L,NY_L,NZ_L)
+        real pres_3d(nx_l,ny_l,nz_l)
+        real field_3d(nx_l,ny_l,nz_l)
+!       real rh_3d(nx_l,ny_l,nz_l)
 
-        real pres_2d(NX_L,NY_L)
-        real t_2d(NX_L,NY_L)
-        real td_2d(NX_L,NY_L)
-        real u_2d(NX_L,NY_L)
-        real v_2d(NX_L,NY_L)
-        real pw_2d(NX_L,NY_L)
-        real cape_2d(NX_L,NY_L)
-        real lil_2d(NX_L,NY_L)
-        real lic_2d(NX_L,NY_L)
-        real lat(NX_L,NY_L)
-        real lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
+        real pres_2d(nx_l,ny_l)
+        real t_2d(nx_l,ny_l)
+        real td_2d(nx_l,ny_l)
+        real u_2d(nx_l,ny_l)
+        real v_2d(nx_l,ny_l)
+        real pw_2d(nx_l,ny_l)
+        real cape_2d(nx_l,ny_l)
+        real lil_2d(nx_l,ny_l)
+        real lic_2d(nx_l,ny_l)
+        real lat(nx_l,ny_l)
+        real lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
 
         real temp_vert(max_snd_levels)
         real ht_vert(max_snd_levels)
@@ -68,7 +68,7 @@
 
         include 'icolors.inc'
 
-!       Sounding observation declarations
+!       sounding observation declarations
         real ob_pr_ht_obs(max_snd_grid,max_snd_levels)
         real ob_pr_pr_obs(max_snd_grid,max_snd_levels)
         real ob_pr_u_obs(max_snd_grid,max_snd_levels) 
@@ -84,20 +84,20 @@
         character*8 obstype(max_snd_grid)
 
         include 'lapsparms.for'
-        integer MXL
-        parameter (MXL=MAX_LVLS+1) ! number of 3D levels plus the sfc level
+        integer mxl
+        parameter (mxl=max_lvls+1) ! number of 3d levels plus the sfc level
 
-        COMMON/INDX/ P(MXL),T(MXL),TD(MXL),HT(MXL),PBECR(20,4)
-     1  ,TDFCR(20,2),VEL(20)
-     1  ,temdif(MXL),partem(MXL),pbe(MXL)
-     #  ,DD85,FF85,DD50,FF50
-        REAL LCL,LI,K_INDEX
+        common/indx/ p(mxl),t(mxl),td(mxl),ht(mxl),pbecr(20,4)
+     1  ,tdfcr(20,2),vel(20)
+     1  ,temdif(mxl),partem(mxl),pbe(mxl)
+     #  ,dd85,ff85,dd50,ff50
+        real lcl,li,k_index
 
         common /image/ n_image
 
         skewt(t_c,logp) = t_c - (logp - logp_bottom) * 32.
 
-        pbe = 0. ! Initialize
+        pbe = 0. ! initialize
 
         nsmooth = plot_parms%obs_size
         if(nsmooth .ne. 3)then
@@ -113,32 +113,32 @@
 
         ext = 'static'
 
-!       Get the location of the static grid directory
+!       get the location of the static grid directory
         call get_directory(ext,directory,len_dir)
 
-        var_2d='LAT'
-        call read_static_grid(NX_L,NY_L,var_2d,lat,istatus)
+        var_2d='lat'
+        call read_static_grid(nx_l,ny_l,var_2d,lat,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS static-lat'
+            write(6,*)' error reading laps static-lat'
             return
         endif
 
-        var_2d='LON'
-        call read_static_grid(NX_L,NY_L,var_2d,lon,istatus)
+        var_2d='lon'
+        call read_static_grid(nx_l,ny_l,var_2d,lon,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS static-lon'
+            write(6,*)' error reading laps static-lon'
             return
         endif
 
-        var_2d='AVG'
-        call read_static_grid(NX_L,NY_L,var_2d,topo,istatus)
+        var_2d='avg'
+        call read_static_grid(nx_l,ny_l,var_2d,topo,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS static-topo'
+            write(6,*)' error reading laps static-topo'
             return
         endif
 
  80     write(6,*)
-        write(6,*)' Input x grid point (or latitude) for sounding...'
+        write(6,*)' input x grid point (or latitude) for sounding...'
         read(5,*)c20_x
 
         call s_len(c20_x,lenx)
@@ -147,7 +147,7 @@
         if(l_latlon)then ! x value was flagged as latitude with "l" at the end 
             read(c20_x(1:lenx-1),*)soundlat
 
-            write(6,*)' Input longitude for sounding...'       
+            write(6,*)' input longitude for sounding...'       
             read(5,*)c20_y
             call s_len(c20_y,leny)
             if(l_parse(c20_y(1:leny),'l'))then
@@ -157,44 +157,44 @@
             endif
 
             call latlon_to_rlapsgrid(soundlat,soundlon,lat,lon
-     1                              ,NX_L,NY_L,xsound,ysound,istatus)       
+     1                              ,nx_l,ny_l,xsound,ysound,istatus)       
 
             if(istatus .ne. 1)then
-                write(6,*)' Station is outside domain - try again...'
+                write(6,*)' station is outside domain - try again...'
                 return
             endif
 
-            if(xsound .lt. 1. .or. xsound .gt. float(NX_L) .OR.
-     1         ysound .lt. 1. .or. ysound .gt. float(NY_L)    )then
-                write(6,*)' Station is outside domain - try again...'
+            if(xsound .lt. 1. .or. xsound .gt. float(nx_l) .or.
+     1         ysound .lt. 1. .or. ysound .gt. float(ny_l)    )then
+                write(6,*)' station is outside domain - try again...'
                 return
             endif
 
         else
             read(c20_x(1:lenx),*)xsound
-            write(6,*)' Input y grid point for sounding...'
+            write(6,*)' input y grid point for sounding...'
             read(5,*)ysound
         endif
 
- 40     write(6,*)' Enter c_plotobs'
+ 40     write(6,*)' enter c_plotobs'
         read(5,*)c_plotobs
         if(c_plotobs .eq. '1')then
             l_plotobs = .true.
         elseif(c_plotobs .eq. '0')then
             l_plotobs = .false.
         else
-            write(6,*)' Unknown c_plotobs, will quit ',c_plotobs
+            write(6,*)' unknown c_plotobs, will quit ',c_plotobs
             go to 900
         endif
 
         if(.true.)then ! force config with new dataroot
-            write(6,*)' Enter new dataroot:'
+            write(6,*)' enter new dataroot:'
             read(5,17)new_dataroot
  17         format(a)
             call s_len(new_dataroot,lenroot)
 
             if(new_dataroot(1:1) .eq. 'q')then
-                write(6,*)' Unknown dataroot, will quit'
+                write(6,*)' unknown dataroot, will quit'
                 go to 900
             else
                 write(6,*)' new dataroot is ',new_dataroot(1:lenroot) 
@@ -202,18 +202,18 @@
 
             call force_get_laps_config(new_dataroot(1:lenroot),istatus)
             if(istatus .ne. 1)then
-                write(6,*)' Bad status returned from force_laps_config'
+                write(6,*)' bad status returned from force_laps_config'
                 return
             else
-                write(6,*)' Forced config to ',new_dataroot(1:lenroot)
+                write(6,*)' forced config to ',new_dataroot(1:lenroot)
             endif
         endif
 
         tlow_c = -30.
         thigh_c = +50.
 
-!       Get 3-D pressure field
-        call get_pres_3d(i4_valid,NX_L,NY_L,NZ_L,pres_3d,istatus)
+!       get 3-d pressure field
+        call get_pres_3d(i4_valid,nx_l,ny_l,nz_l,pres_3d,istatus)
         if(istatus .ne. 1)go to 900
 
         isound = nint(xsound)
@@ -225,63 +225,63 @@
         write(c16_latlon,101)rlat,rlon
  101    format(2f8.2)
 
-        do iz = 1,NZ_L
+        do iz = 1,nz_l
             pres_1d(iz) = pres_3d(isound,jsound,iz)
             logp_1d(iz) = log(pres_1d(iz))
         enddo ! iz
 
         if(l_plotobs .eqv. .false.)then
 
-          n_lvls_snd = NZ_L
+          n_lvls_snd = nz_l
 
-!         Read appropriate 3-D fields
-50        call input_product_info(i4time_ref            ! I
-     1                         ,laps_cycle_time         ! I
-     1                         ,3                       ! I
-     1                         ,c_prodtype              ! O
-     1                         ,ext                     ! O
-     1                         ,directory               ! O
-     1                         ,a9time                  ! O
-     1                         ,fcst_hhmm               ! O
-     1                         ,i4_initial              ! O
-     1                         ,i4_valid                ! O
-     1                         ,istatus)                ! O
+!         read appropriate 3-d fields
+50        call input_product_info(i4time_ref            ! i
+     1                         ,laps_cycle_time         ! i
+     1                         ,3                       ! i
+     1                         ,c_prodtype              ! o
+     1                         ,ext                     ! o
+     1                         ,directory               ! o
+     1                         ,a9time                  ! o
+     1                         ,fcst_hhmm               ! o
+     1                         ,i4_initial              ! o
+     1                         ,i4_valid                ! o
+     1                         ,istatus)                ! o
 
-!         Read Temperature
-          if(c_prodtype .eq. 'A')then
-            iflag_temp = 1 ! Returns Ambient Temp (K)
+!         read temperature
+          if(c_prodtype .eq. 'a')then
+            iflag_temp = 1 ! returns ambient temp (k)
 
             call get_temp_3d(i4time_ref,i4time_nearest,iflag_temp
-     1                      ,NX_L,NY_L,NZ_L,field_3d,istatus)
+     1                      ,nx_l,ny_l,nz_l,field_3d,istatus)
             if(istatus .ne. 1)goto900
 
             call make_fnam_lp(i4time_nearest,a9time,istatus)
 
             if(nsmooth .eq. 3)then
-                c_label = 'Analysis Sounding (3x3 smoothing)'
+                c_label = 'analysis sounding (3x3 smoothing)'
             else
-                c_label = 'Analysis Sounding'
+                c_label = 'analysis sounding'
             endif
 
-          elseif(c_prodtype .eq. 'N')then
+          elseif(c_prodtype .eq. 'n')then
             call get_directory('balance',directory,len_dir)
             ext = 'lt1'
             directory = directory(1:len_dir)//ext(1:3)
 
-            var_2d = 'T3'
+            var_2d = 't3'
 
             call get_3dgrid_dname(directory
      1                  ,i4time_ref,laps_cycle_time*10000,i4time_nearest       
      1                  ,ext,var_2d,units_2d
-     1                  ,comment_2d,NX_L,NY_L,NZ_L,field_3d,istatus)       
+     1                  ,comment_2d,nx_l,ny_l,nz_l,field_3d,istatus)       
 
             call make_fnam_lp(i4time_nearest,a9time,istatus)
-            c_label = 'Balanced Sounding'
+            c_label = 'balanced sounding'
 
-          elseif(c_prodtype .eq. 'B' .or. c_prodtype .eq. 'F')then ! Bkg or Fcst
-            var_2d = 'T3'
+          elseif(c_prodtype .eq. 'b' .or. c_prodtype .eq. 'f')then ! bkg or fcst
+            var_2d = 't3'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istatus)
@@ -289,19 +289,19 @@
 
             call make_fnam_lp(i4_valid,a9time,istatus)
 
-            if(c_prodtype .eq. 'B')then
-                c_label = 'Background Sounding '//fcst_hhmm
+            if(c_prodtype .eq. 'b')then
+                c_label = 'background sounding '//fcst_hhmm
 
-            elseif(c_prodtype .eq. 'F')then
+            elseif(c_prodtype .eq. 'f')then
 
                 call directory_to_cmodel(directory,c_model)
 
-                c_label = 'Forecast Sounding '//fcst_hhmm//' '
+                c_label = 'forecast sounding '//fcst_hhmm//' '
      1                                               //trim(c_model)
             endif
 
           else
-            write(6,*)' Unknown choice, will quit'
+            write(6,*)' unknown choice, will quit'
             go to 900
 
           endif
@@ -309,44 +309,44 @@
           i_overlay = i_overlay + 1
 
           if(nsmooth .gt. 1)then
-              call smooth_box_3d(field_3d,NX_L,NY_L,NZ_L,nsmooth)
+              call smooth_box_3d(field_3d,nx_l,ny_l,nz_l,nsmooth)
           endif
 
           call interp_3d(field_3d,temp_vert,xsound,xsound,ysound,ysound,       
-     1                   NX_L,NY_L,NZ_L,1,NZ_L,r_missing_data)
+     1                   nx_l,ny_l,nz_l,1,nz_l,r_missing_data)
 
-        else ! plotobs is TRUE
-          iflag_temp = 2 ! Returns Height
+        else ! plotobs is true
+          iflag_temp = 2 ! returns height
 
           call get_temp_3d(i4time_ref,i4time_nearest,iflag_temp
-     1                    ,NX_L,NY_L,NZ_L,field_3d,istatus)
+     1                    ,nx_l,ny_l,nz_l,field_3d,istatus)
           if(istatus .ne. 1)goto900
 
           i4time_snd = (i4time_ref/laps_cycle_time) * laps_cycle_time
           lun_snd = 12
           mode = 3 ! key levels off of any data
           ext = 'snd'
-          write(6,*)' Call read_snd_data for i4time: ',i4time_snd
+          write(6,*)' call read_snd_data for i4time: ',i4time_snd
           n_profiles = 0
 
-          call read_snd_data(lun_snd,i4time_snd,ext                     ! I
-     1                         ,max_snd_grid,max_snd_levels             ! I
-     1                         ,lat,lon,topo,NX_L,NY_L,NZ_L             ! I
-     1                         ,field_3d,.true.                         ! I
-     1                         ,mode                                    ! I
-     1                         ,n_profiles                              ! I/O
-     1                         ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr    ! O
-     1                         ,c5_name_a,i4time_ob_pr,obstype          ! O
-     1                         ,ob_pr_ht_obs,ob_pr_pr_obs               ! O
-     1                         ,ob_pr_u_obs,ob_pr_v_obs                 ! O
-     1                         ,ob_pr_t_obs,ob_pr_td_obs                ! O
-     1                         ,istatus)                                ! O
+          call read_snd_data(lun_snd,i4time_snd,ext                     ! i
+     1                         ,max_snd_grid,max_snd_levels             ! i
+     1                         ,lat,lon,topo,nx_l,ny_l,nz_l             ! i
+     1                         ,field_3d,.true.                         ! i
+     1                         ,mode                                    ! i
+     1                         ,n_profiles                              ! i/o
+     1                         ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr    ! o
+     1                         ,c5_name_a,i4time_ob_pr,obstype          ! o
+     1                         ,ob_pr_ht_obs,ob_pr_pr_obs               ! o
+     1                         ,ob_pr_u_obs,ob_pr_v_obs                 ! o
+     1                         ,ob_pr_t_obs,ob_pr_td_obs                ! o
+     1                         ,istatus)                                ! o
 
           distmin = 999999.
           write(6,*)' n_profiles is ',n_profiles
           do is = 1,n_profiles
             call latlon_to_rlapsgrid(lat_pr(is),lon_pr(is),lat,lon
-     1                              ,NX_L,NY_L,xob,yob,istatus)       
+     1                              ,nx_l,ny_l,xob,yob,istatus)       
             dist = sqrt((xob-xsound)**2 + (yob-ysound)**2)
             write(6,*)is,lat_pr(is),lon_pr(is),c5_name_a(is),dist
             if(dist .lt. distmin)then
@@ -362,7 +362,7 @@
           endif
 
           i_overlay = i_overlay + 1
-          write(6,*)' Sounding ob data, nlevels is: '
+          write(6,*)' sounding ob data, nlevels is: '
      1                                ,nlevels_obs_pr(ismin)
           ll = 0
 
@@ -373,19 +373,19 @@
 
           do il = 1,nlevels_obs_pr(ismin)
               if(ob_pr_ht_obs(ismin,il) .ne. r_missing_data
-     1      .OR. ob_pr_pr_obs(ismin,il) .ne. r_missing_data)then
+     1      .or. ob_pr_pr_obs(ismin,il) .ne. r_missing_data)then
 
-                if(ob_pr_ht_obs(ismin,il) .ne. r_missing_data     ! only HT
-     1       .AND. ob_pr_pr_obs(ismin,il) .eq. r_missing_data)then        
+                if(ob_pr_ht_obs(ismin,il) .ne. r_missing_data     ! only ht
+     1       .and. ob_pr_pr_obs(ismin,il) .eq. r_missing_data)then        
                   pres_std_pa = ztopsa(ob_pr_ht_obs(ismin,il))*100.
                   pres_lvl_pa = pres_std_pa * std_corr              
 
-                elseif(ob_pr_ht_obs(ismin,il) .ne. r_missing_data ! only PRES
-     1       .AND.     ob_pr_pr_obs(ismin,il) .eq. r_missing_data)then        
+                elseif(ob_pr_ht_obs(ismin,il) .ne. r_missing_data ! only pres
+     1       .and.     ob_pr_pr_obs(ismin,il) .eq. r_missing_data)then        
                   pres_lvl_pa = ob_pr_pr_obs(ismin,il)*100.
 
                 else                                              ! both present
-!                 Recalculate correction to standard atmosphere
+!                 recalculate correction to standard atmosphere
                   pres_lvl_pa = ob_pr_pr_obs(ismin,il)*100.
                   pres_std_pa = ztopsa(ob_pr_ht_obs(ismin,il))*100.
                   std_corr = pres_lvl_pa / pres_std_pa
@@ -418,11 +418,11 @@
 
           n_lvls_snd = ll ! nlevels_obs_pr(ismin)
 
-!         c_label = 'Sounding ob '//c5_name_min
+!         c_label = 'sounding ob '//c5_name_min
 !         write(c_label,60)c5_name_min,lat_pr(ismin),lon_pr(ismin)
           write(c_label,60)trim(obstype(ismin)),trim(c5_name_min)
      1                    ,lat_pr(ismin),lon_pr(ismin)
- 60       format(a,' Ob ',a5,2f9.2)
+ 60       format(a,' ob ',a5,2f9.2)
 
           p_sfc_pa = pres_1d(1) ! 110000.
           call make_fnam_lp(i4time_ob_pr(ismin),a9time,istatus)
@@ -434,94 +434,94 @@
 
         if(l_plotobs .eqv. .false.)then
 
-!         Read Height
-          if(c_prodtype .eq. 'A')then
-            iflag_temp = 2 ! Returns Height
+!         read height
+          if(c_prodtype .eq. 'a')then
+            iflag_temp = 2 ! returns height
 
             call get_temp_3d(i4time_ref,i4time_nearest,iflag_temp
-     1                      ,NX_L,NY_L,NZ_L,field_3d,istatus)
+     1                      ,nx_l,ny_l,nz_l,field_3d,istatus)
             if(istatus .ne. 1)goto300
 
-          elseif(c_prodtype .eq. 'N')then
+          elseif(c_prodtype .eq. 'n')then
             call get_directory('balance',directory,len_dir)
             ext = 'lt1'
             directory = directory(1:len_dir)//ext(1:3)
 
-            var_2d = 'HT'
+            var_2d = 'ht'
 
             call get_3dgrid_dname(directory
      1                  ,i4time_ref,laps_cycle_time*10000,i4time_nearest       
      1                  ,ext,var_2d,units_2d
-     1                  ,comment_2d,NX_L,NY_L,NZ_L,field_3d,istatus)       
+     1                  ,comment_2d,nx_l,ny_l,nz_l,field_3d,istatus)       
 
-          elseif(c_prodtype .eq. 'B' .or. c_prodtype .eq. 'F')then ! Bkg or Fcst
-            var_2d = 'HT'
+          elseif(c_prodtype .eq. 'b' .or. c_prodtype .eq. 'f')then ! bkg or fcst
+            var_2d = 'ht'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istatus)
             if(istatus .ne. 1)goto300
 
           else
-            write(6,*)' Unknown choice, will quit'
+            write(6,*)' unknown choice, will quit'
             go to 900
 
           endif
 
           call interp_3d(field_3d,ht_vert,xsound,xsound,ysound,ysound,       
-     1                   NX_L,NY_L,NZ_L,1,NZ_L,r_missing_data)
+     1                   nx_l,ny_l,nz_l,1,nz_l,r_missing_data)
 
-!         Read RH/SH 
+!         read rh/sh 
  300      istat_td = 0
-          if(c_prodtype .eq. 'A')then ! Read RH
-            var_2d = 'RHL'
+          if(c_prodtype .eq. 'a')then ! read rh
+            var_2d = 'rhl'
             ext = 'lh3'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_rh)
             if(istat_rh .ne. 1)goto1000
 
-          elseif(c_prodtype .eq. 'N')then ! Read RH
+          elseif(c_prodtype .eq. 'n')then ! read rh
             call get_directory('balance',directory,len_dir)
             ext = 'lh3'
             directory = directory(1:len_dir)//ext(1:3)
 
-            var_2d = 'RHL'
+            var_2d = 'rhl'
 
             call get_3dgrid_dname(directory
      1                  ,i4time_ref,laps_cycle_time*10000,i4time_nearest       
      1                  ,ext,var_2d,units_2d
-     1                  ,comment_2d,NX_L,NY_L,NZ_L,field_3d,istat_rh)       
+     1                  ,comment_2d,nx_l,ny_l,nz_l,field_3d,istat_rh)       
             if(istat_rh .ne. 1)goto1000
 
-          elseif(c_prodtype .eq. 'B' .or. c_prodtype .eq. 'F')then ! Bkg or Fcst
-            var_2d = 'SH'
+          elseif(c_prodtype .eq. 'b' .or. c_prodtype .eq. 'f')then ! bkg or fcst
+            var_2d = 'sh'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_sh)
             if(istat_sh .ne. 1)goto1000
 
           else
-            write(6,*)' Sorry, RH/SH not yet supported for prodtype: '
+            write(6,*)' sorry, rh/sh not yet supported for prodtype: '
      1               ,c_prodtype
             istat_rh = 0
             goto1000
 
           endif
 
-          if(c_prodtype .eq. 'A' .or. c_prodtype .eq. 'N')then
+          if(c_prodtype .eq. 'a' .or. c_prodtype .eq. 'n')then
             if(nsmooth .gt. 1)then
-                call smooth_box_3d(field_3d,NX_L,NY_L,NZ_L,nsmooth)
+                call smooth_box_3d(field_3d,nx_l,ny_l,nz_l,nsmooth)
             endif
             call interp_3d(field_3d,rh_vert,xsound,xsound,ysound,ysound,       
-     1                     NX_L,NY_L,NZ_L,1,NZ_L,r_missing_data)
+     1                     nx_l,ny_l,nz_l,1,nz_l,r_missing_data)
 
-            do iz = 1,NZ_L
+            do iz = 1,nz_l
                 t_c         = k_to_c(temp_vert(iz)) 
-                td_vert(iz) = DWPT(t_c,rh_vert(iz))
+                td_vert(iz) = dwpt(t_c,rh_vert(iz))
                 p_mb        = pres_1d(iz)/100.
                 sh_vert(iz) = make_ssh(p_mb,t_c,rh_vert(iz),-132.)
             enddo ! iz
@@ -530,13 +530,13 @@
 
           else
             if(nsmooth .gt. 1)then
-                call smooth_box_3d(field_3d,NX_L,NY_L,NZ_L,nsmooth)
+                call smooth_box_3d(field_3d,nx_l,ny_l,nz_l,nsmooth)
             endif
             call interp_3d(field_3d,sh_vert,xsound,xsound,ysound,ysound,       
-     1                     NX_L,NY_L,NZ_L,1,NZ_L,r_missing_data)
+     1                     nx_l,ny_l,nz_l,1,nz_l,r_missing_data)
 
             t_ref = -199.
-            do iz = 1,NZ_L
+            do iz = 1,nz_l
                 t_c         = k_to_c(temp_vert(iz)) 
                 p_mb        = pres_1d(iz)/100.
                 q_gkg       = sh_vert(iz) * 1000.
@@ -548,18 +548,18 @@
 
           endif
 
-!         Read Cloud Liquid
+!         read cloud liquid
           istat_lwc = 0
-          if(c_prodtype .eq. 'A')then ! Read Cloud Liquid
-            var_2d = 'LWC'
+          if(c_prodtype .eq. 'a')then ! read cloud liquid
+            var_2d = 'lwc'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_lwc)
-          elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'LWC'
+          elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'lwc'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_lwc)
@@ -568,24 +568,24 @@
 
           if(istat_lwc .eq. 1)then
             call interp_3d(field_3d,lwc_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             lwc_vert = -999.
           endif
 
-!       Read Cloud Ice
+!       read cloud ice
           istat_ice = 0
-          if(c_prodtype .eq. 'A')then ! Read Cloud Ice
-            var_2d = 'ICE'
+          if(c_prodtype .eq. 'a')then ! read cloud ice
+            var_2d = 'ice'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_ice)
-          elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'ICE'
+          elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'ice'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_ice)
@@ -594,24 +594,24 @@
 
           if(istat_ice .eq. 1)then
             call interp_3d(field_3d,ice_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             ice_vert = -999.
           endif
 
-!         Read Precipitating Rain
+!         read precipitating rain
           istat_rain = 0
-          if(c_prodtype .eq. 'A')then ! Read Precipitating Rain
-            var_2d = 'RAI'
+          if(c_prodtype .eq. 'a')then ! read precipitating rain
+            var_2d = 'rai'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_rain)
-          elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'RAI'
+          elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'rai'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_rain)
@@ -620,24 +620,24 @@
 
           if(istat_rain .eq. 1)then
             call interp_3d(field_3d,rain_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             rain_vert = -999.
           endif
 
-!         Read Precipitating Snow
+!         read precipitating snow
           istat_snow = 0
-          if(c_prodtype .eq. 'A')then ! Read Precipitating Snow
-            var_2d = 'SNO'
+          if(c_prodtype .eq. 'a')then ! read precipitating snow
+            var_2d = 'sno'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_snow)
-          elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'SNO'
+          elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'sno'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_snow)
@@ -646,24 +646,24 @@
 
           if(istat_snow .eq. 1)then
             call interp_3d(field_3d,snow_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             snow_vert = -999.
           endif
 
-!         Read Precipitating Ice
+!         read precipitating ice
           istat_pice = 0
-          if(c_prodtype .eq. 'A')then ! Read Precipitating Ice
-            var_2d = 'PIC'
+          if(c_prodtype .eq. 'a')then ! read precipitating ice
+            var_2d = 'pic'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_pice)
-          elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'PIC'
+          elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'pic'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_pice)
@@ -672,24 +672,24 @@
 
           if(istat_pice .eq. 1)then
             call interp_3d(field_3d,pice_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             pice_vert = -999.
           endif
 
-!         Read 3-D U wind component
+!         read 3-d u wind component
           istat_u = 0
-          if(c_prodtype .eq. 'A')then ! Read 3-D U wind
-            var_2d = 'U3'
+          if(c_prodtype .eq. 'a')then ! read 3-d u wind
+            var_2d = 'u3'
             ext = 'lw3'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_u)
-          elseif(c_prodtype .eq. 'F')then
-            var_2d = 'U3'
+          elseif(c_prodtype .eq. 'f')then
+            var_2d = 'u3'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_u)
@@ -698,24 +698,24 @@
 
           if(istat_u .eq. 1)then
             call interp_3d(field_3d,u_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             u_vert = -999.
           endif
 
-!       Read 3-D V wind component
+!       read 3-d v wind component
           istat_v = 0
-          if(c_prodtype .eq. 'A')then ! Read 3-D V wind
-            var_2d = 'V3'
+          if(c_prodtype .eq. 'a')then ! read 3-d v wind
+            var_2d = 'v3'
             ext = 'lw3'
             call get_laps_3dgrid
-     1          (i4time_nearest,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_nearest,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_v)
-          elseif(c_prodtype .eq. 'F')then
-            var_2d = 'V3'
+          elseif(c_prodtype .eq. 'f')then
+            var_2d = 'v3'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_v)
@@ -724,156 +724,156 @@
 
           if(istat_v .eq. 1)then
             call interp_3d(field_3d,v_vert,xsound,xsound
-     1                    ,ysound,ysound,NX_L,NY_L,NZ_L,1,NZ_L
+     1                    ,ysound,ysound,nx_l,ny_l,nz_l,1,nz_l
      1                    ,r_missing_data)
           else
             u_vert = -999.
           endif
 
-!       Read in sfc data (pressure, temp, dewpoint, u, v, tpw, cape)
-          if(c_prodtype .eq. 'A')then ! Read LSX
+!       read in sfc data (pressure, temp, dewpoint, u, v, tpw, cape)
+          if(c_prodtype .eq. 'a')then ! read lsx
             ext = 'lsx'
 
-            var_2d = 'PS'
+            var_2d = 'ps'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,pres_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'T'
+            var_2d = 't'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,t_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'TD'
+            var_2d = 'td'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,td_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'U'
+            var_2d = 'u'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,u_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'V'
+            var_2d = 'v'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,v_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
             ext = 'lh4'
-            var_2d = 'TPW'
+            var_2d = 'tpw'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,pw_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
             ext = 'lst'
-            var_2d = 'PBE'
+            var_2d = 'pbe'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,cape_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
             ext = 'lil'
-            var_2d = 'LIL'
+            var_2d = 'lil'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,lil_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'LIC'
+            var_2d = 'lic'
             call get_laps_2dgrid(i4time_nearest,0,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,lic_2d,0,istat_lic)
             if(istat_lic .ne. 1)lic_2d = r_missing_data
 
-          elseif(c_prodtype .eq. 'B' .or. c_prodtype .eq. 'F')then ! Bkg or Fcst
-            write(6,*)' Look for Bkg/Fcst sfc fields'
+          elseif(c_prodtype .eq. 'b' .or. c_prodtype .eq. 'f')then ! bkg or fcst
+            write(6,*)' look for bkg/fcst sfc fields'
 
             call s_len(directory,len_dir)
 
-            write(6,*)' Orig directory = ',directory
+            write(6,*)' orig directory = ',directory
             write(6,*)' ext = ',ext
 
-            if(c_prodtype .eq. 'B')then
+            if(c_prodtype .eq. 'b')then
                 directory = directory(1:len_dir)//'../lgb'
-            else ! Fcst
+            else ! fcst
                 ext = 'fsf'
                 call s_len(directory,len_dir)
                 do i = 1,len_dir-2
                     if(directory(i:i+2) .eq. 'fua')then
                         directory(i:i+2) = ext(1:3)
-                        write(6,*)'Substituted directory string'
+                        write(6,*)'substituted directory string'
                     endif
                 enddo ! i
             endif
 
-            write(6,*)' New directory = ',directory
+            write(6,*)' new directory = ',directory
             write(6,*)' ext = ',ext
 
-            var_2d = 'PSF'
+            var_2d = 'psf'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,pres_2d
      1                              ,istat_sfc)
 !           if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'TSF'
+            var_2d = 'tsf'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,t_2d
      1                              ,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'DSF'
+            var_2d = 'dsf'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,td_2d
      1                              ,istat_sfc)
             if(istat_sfc .ne. 1)goto1000
 
-            var_2d = 'TPW'
+            var_2d = 'tpw'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,pw_2d
      1                              ,istat_tpw)
             if(istat_tpw .ne. 1)pw_2d = r_missing_data
 
-            var_2d = 'PBE'
+            var_2d = 'pbe'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,cape_2d
      1                              ,istat_pbe)
             if(istat_pbe .ne. 1)cape_2d = r_missing_data
 
-            var_2d = 'LIL'
+            var_2d = 'lil'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,lil_2d
      1                              ,istat_lil)
             if(istat_lil .ne. 1)lil_2d = r_missing_data
 
-            var_2d = 'LIC'
+            var_2d = 'lic'
             call get_lapsdata_2d(i4_initial,i4_valid
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d
-     1                              ,NX_L,NY_L
+     1                              ,nx_l,ny_l
      1                              ,lic_2d
      1                              ,istat_lic)
             if(istat_lic .ne. 1)lic_2d = r_missing_data
@@ -884,7 +884,7 @@
 
           endif
 
-!         Convert sfc variables
+!         convert sfc variables
           p_sfc_pa = pres_2d(isound,jsound)
           logp_sfc = log(p_sfc_pa)
           t_sfc_k  = t_2d(isound,jsound)
@@ -895,11 +895,11 @@
           lic_sfc  = lic_2d(isound,jsound)
           topo_sfc = topo(isound,jsound)
 
-        endif ! l_plotobs is FALSE
+        endif ! l_plotobs is false
 
         write(6,*)
         write(6,102)c16_latlon,isound,jsound,a9time
- 102    format(' ASCII SOUNDING DATA at lat,lon =',a16
+ 102    format(' ascii sounding data at lat,lon =',a16
      1        ,'   i,j = ',2i5,5x,' time: ',a9)     
         write(6,*)
         write(6,*)' lvl    p(mb)     ht(m)      t(c)'//
@@ -933,26 +933,26 @@
         enddo ! iz
         write(6,*)
 
-!       Compute integrated cloud liquid/ice
-        call integrate_slwc(lwc_vert*1000.,ht_vert,1,1,NZ_L,lil_cpt)
-        call integrate_slwc(ice_vert*1000.,ht_vert,1,1,NZ_L,lic_cpt)
+!       compute integrated cloud liquid/ice
+        call integrate_slwc(lwc_vert*1000.,ht_vert,1,1,nz_l,lil_cpt)
+        call integrate_slwc(ice_vert*1000.,ht_vert,1,1,nz_l,lic_cpt)
 
         td_sfc_c = k_to_c(td_sfc_k)
         p_sfc_mb = p_sfc_pa/100.
         sh_sfc = make_ssh(p_sfc_mb,td_sfc_c,1.0,-132.) / 1000.
 
         call integrate_tpw(sh_vert,sh_sfc,pres_1d,p_sfc_pa
-     1                    ,1,1,NZ_L,pw_cpt)
+     1                    ,1,1,nz_l,pw_cpt)
 
-!       Compute CAPE and other indices
+!       compute cape and other indices
         twet_snow = +1.3 ! also in deriv.nl
         p(1) = p_sfc_mb                                  
         t(1) = k_to_c(t_sfc_k)
         td(1) = td_sfc_c
         ht(1) = topo_sfc 
 
-        do k = 1,NZ_L
-            if(pres_1d(k) .lt. p_sfc_pa)then ! First level above sfc
+        do k = 1,nz_l
+            if(pres_1d(k) .lt. p_sfc_pa)then ! first level above sfc
                 n_first_level = k
                 goto100
             endif
@@ -960,51 +960,51 @@
 100     write(6,*)' n_first_level = ',n_first_level
 
         n = 1
-        do k = n_first_level,NZ_L
+        do k = n_first_level,nz_l
             n = n + 1
-            P(N) = pres_1d(k) / 100.       ! Pa to mb
-            T(N) = k_to_c(temp_vert(k))
-            TD(N)= td_vert(k)
-            HT(N)= ht_vert(k)     
+            p(n) = pres_1d(k) / 100.       ! pa to mb
+            t(n) = k_to_c(temp_vert(k))
+            td(n)= td_vert(k)
+            ht(n)= ht_vert(k)     
         enddo ! k
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        IO = 2
+        io = 2
         idebug = 2
-        NLEVEL = n
-        CALL SINDX(NLEVEL,LI,SI,BLI,TT,SWEAT
-     1                ,twet_snow                                        ! I
-     1                ,HWB0,HWB_snow                                    ! O
-     1                ,PLCL,LCL,CCL
-     1                ,TCONV,IO
-     1                ,ICP,ICT,K_INDEX,TMAX,PBENEG,PBEPOS,T500,PBLI
-     1                ,VELNEG,WATER,IHOUR,idebug,istatus)
+        nlevel = n
+        call sindx(nlevel,li,si,bli,tt,sweat
+     1                ,twet_snow                                        ! i
+     1                ,hwb0,hwb_snow                                    ! o
+     1                ,plcl,lcl,ccl
+     1                ,tconv,io
+     1                ,icp,ict,k_index,tmax,pbeneg,pbepos,t500,pbli
+     1                ,velneg,water,ihour,idebug,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' WARNING: Bad istatus returned from SINDX'
+            write(6,*)' warning: bad istatus returned from sindx'
 !           return
         endif
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        write(6,*)' Sfc P (mb) = ', p_sfc_mb     
-     1           ,' Terrain Height (m)= ',topo_sfc 
-        write(6,*)' Sfc T (c) = ', k_to_c(t_sfc_k)
-        write(6,*)' Sfc Td (c) = ', td_sfc_c
-        write(6,*)' TPW (cm) [read in/computed] = ', 
+        write(6,*)' sfc p (mb) = ', p_sfc_mb     
+     1           ,' terrain height (m)= ',topo_sfc 
+        write(6,*)' sfc t (c) = ', k_to_c(t_sfc_k)
+        write(6,*)' sfc td (c) = ', td_sfc_c
+        write(6,*)' tpw (cm) [read in/computed] = ', 
      1                            pw_sfc*100.,pw_cpt*100.
-        write(6,*)' SBCAPE (J/KG) = ', cape_sfc,PBEPOS
-        write(6,*)' Integrated Cloud Water (mm) [read in/computed] = ',
+        write(6,*)' sbcape (j/kg) = ', cape_sfc,pbepos
+        write(6,*)' integrated cloud water (mm) [read in/computed] = ',
      1                            lil_sfc*1000.,lil_cpt*1000.
-        write(6,*)' Integrated Cloud Ice (mm) [read in/computed] = ',
+        write(6,*)' integrated cloud ice (mm) [read in/computed] = ',
      1                            lic_sfc*1000.,lic_cpt*1000.
         write(6,*)
 
-!       Read Wind (a la xsect)
+!       read wind (a la xsect)
 
  1000   continue
 
-!       Set up scaling for plots
+!       set up scaling for plots
         pbottom = 110000.
         ptop = 10000.
 
@@ -1020,14 +1020,14 @@
         rlabel_low  = box_low  - box_diff / 8.
         rlabel_high = box_high + box_diff/ 8.
 
-!       Scale to allow plotting within box
+!       scale to allow plotting within box
         call set(box_low   , box_high    , box_low , box_high,
      1           tlow_c, thigh_c, logp_bottom, logp_top, 1)
 
-!       call setusv_dum(2hIN,7) ! Yellow
-        call setusv_dum(2hIN,32) ! Yellow
+!       call setusv_dum(2hin,7) ! yellow
+        call setusv_dum(2hin,32) ! yellow
 
-!       Plot temp scale
+!       plot temp scale
         do it = -80, nint(thigh_c), 10
             y1 = logp_bottom
             y2 = logp_top
@@ -1036,8 +1036,8 @@
             call line(x1,y1,x2,y2) 
         enddo ! it
 
-!       Plot mixing ratio scale
-        call setusv_dum(2hIN,23) ! Medium Gray
+!       plot mixing ratio scale
+        call setusv_dum(2hin,23) ! medium gray
         do im = -1,5                      
           w_gkg = 2.**im                  
           do ip = 1000,100,-100
@@ -1052,7 +1052,7 @@
             call line(x1,y1,x2,y2) ! plot a curve
           enddo ! ip
 
-!         Add label for this mixing ratio value
+!         add label for this mixing ratio value
           x = tmr(w_gkg,1060.) - 0.4 
           y = log(106000.) ! + .04 * .8/box_diff   
           if(im .ge. 0)then
@@ -1064,8 +1064,8 @@
           call pwrity (x, y, c3_string, 3, 0, 0, 0)
         enddo ! im
 
-!       Plot theta(e) scale
-        call setusv_dum(2hIN,32) ! Yellow
+!       plot theta(e) scale
+        call setusv_dum(2hin,32) ! yellow
 !       do it = -80, nint(thigh_c), 10
 !           y1 = logp_bottom
 !           y2 = logp_top
@@ -1074,7 +1074,7 @@
 !           call line(x1,y1,x2,y2) ! or plot a curve?
 !       enddo ! it
 
-!       Plot Horizontal lines at 100mb intervals
+!       plot horizontal lines at 100mb intervals
         do ip = 100,1100,100
             p_pa = float(ip) * 100.
             x1 = tlow_c
@@ -1084,7 +1084,7 @@
             call line(x1,y1,x2,y2) 
         enddo ! ip
 
-!       Plot Rest of Box
+!       plot rest of box
         x1 = tlow_c
         y1 = logp_bottom
         x2 = thigh_c
@@ -1109,26 +1109,26 @@
         y2 = logp_top
         call line(x1,y1,x2,y2) 
 
-!       Scale to allow plotting outside box
+!       scale to allow plotting outside box
         call set(rlabel_low, rlabel_high , rlabel_low, rlabel_high,
      1           tlow_c-width/8., thigh_c+width/8., 
      1           logp_bottom-height/8., logp_top+height/8.   , 1)
 
-        call setusv_dum(2hIN,32) ! Yellow
+        call setusv_dum(2hin,32) ! yellow
 
-!       Plot Pressure labels at 100mb intervals
+!       plot pressure labels at 100mb intervals
         do ip = 100,1100,100
             p_pa = float(ip) * 100.
             y = log(p_pa) 
 
-!           Pressure
+!           pressure
             x = tlow_c - 3. * .8/box_diff
             write(c4_string,2014)ip
             call pwrity (x, y, c4_string, 4, 1, 0, 0)
 2014        format(i4)
         enddo ! ip
 
-!       Plot Temperature Labels
+!       plot temperature labels
         do it = nint(tlow_c), nint(thigh_c), 10
             t_c = float(it)
             write(c3_string,2013)it
@@ -1138,26 +1138,26 @@
             call pwrity (x, y, c3_string, 3, 1, 0, 0)
         enddo
 
-!       Plot lat/lon info
+!       plot lat/lon info
         x = thigh_c - 10.
         y = logp_top + height*.05
         call pwrity (x, y, c16_latlon, 16, 1, 0, 0)
 
-!       Do sounding plots on non-skew T, log P scale
+!       do sounding plots on non-skew t, log p scale
         call set(box_low   , box_high    , box_low , box_high,
      1           tlow_c, thigh_c, logp_bottom, logp_top, 1)
 
-        call setusv_dum(2hIN,icolors(i_overlay))
+        call setusv_dum(2hin,icolors(i_overlay))
 
         write(6,*)' sounding overlay is ',i_overlay
 
-!       Plot temp and dewpoint sounding
+!       plot temp and dewpoint sounding
         do iz = 2,n_lvls_snd
 
-            if(istat_sfc .eq. 0      .OR.
+            if(istat_sfc .eq. 0      .or.
      1         pres_1d(iz-1) .le. p_sfc_pa          )then  ! above sfc or no 
 
-                call setusv_dum(2hIN,icolors(i_overlay))   ! sfc data   
+                call setusv_dum(2hin,icolors(i_overlay))   ! sfc data   
                                                                     
                 y1 = logp_1d(iz-1)
                 y2 = logp_1d(iz)
@@ -1169,13 +1169,13 @@
                 if(istat_td .eq. 1)then
                     x1 = skewt(td_vert(iz-1),y1)
                     x2 = skewt(td_vert(iz),y2)
-                    CALL GSLN (itd)
+                    call gsln (itd)
                     call line(x1,y1,x2,y2) 
-                    CALL GSLN (1)
+                    call gsln (1)
                 endif
 
             elseif(pres_1d(iz) .gt. p_sfc_pa)then          ! below sfc
-                call setusv_dum(2hIN,34)
+                call setusv_dum(2hin,34)
 
                 y1 = logp_1d(iz-1)
                 y2 = logp_1d(iz)
@@ -1187,14 +1187,14 @@
                 if(istat_td .eq. 1)then
                     x1 = skewt(td_vert(iz-1),y1)
                     x2 = skewt(td_vert(iz),y2)
-                    CALL GSLN (itd)
+                    call gsln (itd)
                     call line(x1,y1,x2,y2) 
-                    CALL GSLN (1)
+                    call gsln (1)
                 endif
 
             else                                           ! straddles the sfc
-!               Plot line below the sfc              
-                call setusv_dum(2hIN,34)
+!               plot line below the sfc              
+                call setusv_dum(2hin,34)
 
                 y1 = logp_1d(iz-1)
                 y2 = logp_sfc
@@ -1206,13 +1206,13 @@
                 if(istat_td .eq. 1)then
                     x1 = skewt(td_vert(iz-1),y1)
                     x2 = skewt(k_to_c(td_sfc_k),y2)
-                    CALL GSLN (itd)
+                    call gsln (itd)
                     call line(x1,y1,x2,y2) 
-                    CALL GSLN (1)
+                    call gsln (1)
                 endif
 
-!               Plot line above the sfc              
-                call setusv_dum(2hIN,icolors(i_overlay))
+!               plot line above the sfc              
+                call setusv_dum(2hin,icolors(i_overlay))
 
                 y1 = logp_sfc
                 y2 = logp_1d(iz)
@@ -1224,9 +1224,9 @@
                 if(istat_td .eq. 1)then
                     x1 = skewt(k_to_c(td_sfc_k),y1)
                     x2 = skewt(td_vert(iz),y2)
-                    CALL GSLN (itd)
+                    call gsln (itd)
                     call line(x1,y1,x2,y2) 
-                    CALL GSLN (1)
+                    call gsln (1)
                 endif
 
             endif
@@ -1234,7 +1234,7 @@
         enddo ! iz
 
 
-!       Plot time/source label
+!       plot time/source label
         if(box_low .eq. 0.1)then
             call set(0., 1., 0., 1.
      1              ,0., 1., 0., 1., 1)
@@ -1249,27 +1249,27 @@
      1                            ,i_overlay,'sound')
         endif
 
-!       Plot TPW value
+!       plot tpw value
         if(pw_sfc .ne. r_missing_data)then
             ix = 795
             iy = 240
             rsize = .010
-            write(c_pw,890)pw_sfc*100. ! convert M to CM
- 890        format('IWV = ',f5.2)
-            CALL PCHIQU (cpux(ix),cpux(iy),c_pw,rsize,0,-1.0)
+            write(c_pw,890)pw_sfc*100. ! convert m to cm
+ 890        format('iwv = ',f5.2)
+            call pchiqu (cpux(ix),cpux(iy),c_pw,rsize,0,-1.0)
         endif
 
-!       Plot CAPE value
+!       plot cape value
         if(cape_sfc .ne. r_missing_data)then
             ix = 795
             iy = 220
             rsize = .010
             write(c_cape,891)nint(cape_sfc)
- 891        format('CAPE = ',i4)
-            CALL PCHIQU (cpux(ix),cpux(iy),c_cape,rsize,0,-1.0)
+ 891        format('cape = ',i4)
+            call pchiqu (cpux(ix),cpux(iy),c_cape,rsize,0,-1.0)
         endif
 
-        write(6,*)' Sounding has been plotted...'
+        write(6,*)' sounding has been plotted...'
 
         go to 40
 

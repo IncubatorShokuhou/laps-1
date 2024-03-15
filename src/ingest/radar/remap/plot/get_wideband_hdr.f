@@ -1,48 +1,48 @@
 
 c *
-c * To read header info of wideband image data
+c * to read header info of wideband image data
 c *
-      subroutine get_wideband_hdr(FILENAME
-     &          ,rad_dim, Z_dim, V_dim
-     &          ,siteLat,siteLon,siteAlt,VCP
-     &          ,ISTAT)
+      subroutine get_wideband_hdr(filename
+     &          ,rad_dim, z_dim, v_dim
+     &          ,sitelat,sitelon,sitealt,vcp
+     &          ,istat)
 c
       parameter (rad_max = 999, ang_max = 999)
 c * output
-      integer rad_dim, Z_dim, V_dim, VCP
-      real    siteLat,siteLon,siteAlt
-C*************************************
-      CHARACTER FILENAME*72
+      integer rad_dim, z_dim, v_dim, vcp
+      real    sitelat,sitelon,sitealt
+c*************************************
+      character filename*72
 c
       include 'netcdf.inc'
 c
-      STATUS=NF_OPEN(FILENAME,NF_NOWRITE,NCID)
-      if (STATUS .ne. NF_NOERR) then
-           ISTAT = -1
-c           print *, FILENAME,' is not avail'
+      status=nf_open(filename,nf_nowrite,ncid)
+      if (status .ne. nf_noerr) then
+           istat = -1
+c           print *, filename,' is not avail'
            return
       endif
-C
-C * statements to fill Nx and Ny
-C
-      nf_status = NF_INQ_DIMID(NCID,'radial',nf_vid)
-      nf_status = NF_INQ_DIMLEN(NCID,nf_vid,rad_dim)
-      nf_status = NF_INQ_DIMID(NCID,'Z_bin',nf_vid)
-      nf_status = NF_INQ_DIMLEN(NCID,nf_vid,Z_dim)
-      nf_status = NF_INQ_DIMID(NCID,'V_bin',nf_vid)
-      nf_status = NF_INQ_DIMLEN(NCID,nf_vid,V_dim)
-
-      nf_status = NF_INQ_VARID(NCID,'VCP',nf_vid)
-      nf_status = NF_GET_VAR_INT(NCID,nf_vid,VCP)
-      nf_status = NF_INQ_VARID(NCID,'siteLat',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,siteLat)
-      nf_status = NF_INQ_VARID(NCID,'siteLon',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,siteLon)
-      nf_status = NF_INQ_VARID(NCID,'siteAlt',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,siteAlt)
 c
-      nf_status = NF_CLOSE(NCID)
-      ISTAT = 0
+c * statements to fill nx and ny
+c
+      nf_status = nf_inq_dimid(ncid,'radial',nf_vid)
+      nf_status = nf_inq_dimlen(ncid,nf_vid,rad_dim)
+      nf_status = nf_inq_dimid(ncid,'z_bin',nf_vid)
+      nf_status = nf_inq_dimlen(ncid,nf_vid,z_dim)
+      nf_status = nf_inq_dimid(ncid,'v_bin',nf_vid)
+      nf_status = nf_inq_dimlen(ncid,nf_vid,v_dim)
+
+      nf_status = nf_inq_varid(ncid,'vcp',nf_vid)
+      nf_status = nf_get_var_int(ncid,nf_vid,vcp)
+      nf_status = nf_inq_varid(ncid,'sitelat',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,sitelat)
+      nf_status = nf_inq_varid(ncid,'sitelon',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,sitelon)
+      nf_status = nf_inq_varid(ncid,'sitealt',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,sitealt)
+c
+      nf_status = nf_close(ncid)
+      istat = 0
 c *
-      RETURN
-      END
+      return
+      end

@@ -1,32 +1,32 @@
       subroutine simunpack(cpack,len,idrstmpl,ndpts,fld)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    simunpack
-!   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2000-06-21
+! subprogram:    simunpack
+!   prgmmr: gilbert          org: w/np11    date: 2000-06-21
 !
-! ABSTRACT: This subroutine unpacks a data field that was packed using a 
-!   simple packing algorithm as defined in the GRIB2 documention,
-!   using info from the GRIB2 Data Representation Template 5.0.
+! abstract: this subroutine unpacks a data field that was packed using a 
+!   simple packing algorithm as defined in the grib2 documention,
+!   using info from the grib2 data representation template 5.0.
 !
-! PROGRAM HISTORY LOG:
-! 2000-06-21  Gilbert
+! program history log:
+! 2000-06-21  gilbert
 !
-! USAGE:    CALL simunpack(cpack,len,idrstmpl,ndpts,fld)
-!   INPUT ARGUMENT LIST:
-!     cpack    - The packed data field (character*1 array)
+! usage:    call simunpack(cpack,len,idrstmpl,ndpts,fld)
+!   input argument list:
+!     cpack    - the packed data field (character*1 array)
 !     len      - length of packed field cpack().
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.0
-!     ndpts    - The number of data values to unpack
+!     idrstmpl - contains the array of values for data representation
+!                template 5.0
+!     ndpts    - the number of data values to unpack
 !
-!   OUTPUT ARGUMENT LIST:
-!     fld()    - Contains the unpacked data values
+!   output argument list:
+!     fld()    - contains the unpacked data values
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: XL Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: xl fortran 90
+!   machine:  ibm sp
 !
 !$$$
 

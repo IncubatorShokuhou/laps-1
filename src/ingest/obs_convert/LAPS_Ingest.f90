@@ -1,693 +1,693 @@
-SUBROUTINE LAPS_INGEST
+subroutine laps_ingest
 
 !==============================================================================
-!doc  THIS ROUTINE INGESTS OBSERVATION DATA BY LAPS LIBRARIES.
+!doc  this routine ingests observation data by laps libraries.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	MAY 2007
+!doc  history:
+!doc	creation:	yuanfu xie	may 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: ISTATUS
+  integer :: istatus
 
-  ! OPEN CHANNELS FOR LAPSPLOT OUTPUT: TMG, PIG, PRG, SAG ETC:
-  CALL OPEN_LAPSPRD_FILE(PIGOUT_CHANNEL,SYSTEM_IN4TIME,'pig',ISTATUS)
-  CALL OPEN_LAPSPRD_FILE(PRGOUT_CHANNEL,SYSTEM_IN4TIME,'prg',ISTATUS)
-  CALL OPEN_LAPSPRD_FILE(SAGOUT_CHANNEL,SYSTEM_IN4TIME,'sag',ISTATUS)
-  CALL OPEN_LAPSPRD_FILE(TMGOUT_CHANNEL,SYSTEM_IN4TIME,'tmg',ISTATUS)
+  ! open channels for lapsplot output: tmg, pig, prg, sag etc:
+  call open_lapsprd_file(pigout_channel,system_in4time,'pig',istatus)
+  call open_lapsprd_file(prgout_channel,system_in4time,'prg',istatus)
+  call open_lapsprd_file(sagout_channel,system_in4time,'sag',istatus)
+  call open_lapsprd_file(tmgout_channel,system_in4time,'tmg',istatus)
 
-  ! RADAR:
-  ! CALL READ_RADAR		! PREFER TO USE LAPS GRIDDED RADAR DATA FOR NOW YUANFU
+  ! radar:
+  ! call read_radar		! prefer to use laps gridded radar data for now yuanfu
 
-  ! PROFILER:
-  CALL CONV_PROFLR
+  ! profiler:
+  call conv_proflr
 
-  ! RASS:
-  CALL CONV_RASS
+  ! rass:
+  call conv_rass
 
-  ! SONDE:
-  CALL CONV_SONDES
+  ! sonde:
+  call conv_sondes
 
-  ! SURFACE OBS:
-  CALL CONV_SFCOBS
+  ! surface obs:
+  call conv_sfcobs
 
-  ! CDW AND ACARS:
-  CALL CONV_CDWACA
+  ! cdw and acars:
+  call conv_cdwaca
 
-  CLOSE(PIGOUT_CHANNEL)
-  CLOSE(PRGOUT_CHANNEL)
-  CLOSE(TMGOUT_CHANNEL)
-  CLOSE(SAGOUT_CHANNEL)
+  close(pigout_channel)
+  close(prgout_channel)
+  close(tmgout_channel)
+  close(sagout_channel)
 
-END SUBROUTINE LAPS_INGEST
+end subroutine laps_ingest
 
-SUBROUTINE CONV_PROFLR
+subroutine conv_proflr
 
 !==============================================================================
-!doc  THIS ROUTINE READS AND CONVERTS PROFILER OBSERVATION DATA INTO DATA FORMAT
-!doc  REQUESTED.
+!doc  this routine reads and converts profiler observation data into data format
+!doc  requested.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER :: FSPECS*225, EXTNSN*31,C5NAME(MAXNUM_PROFLRS)*5, &
-               OBTYPE(MAXNUM_PROFLRS)*8
-  INTEGER   :: IOFILE,STATUS,NPRFLR,NLEVEL(MAXNUM_PROFLRS)
-  INTEGER   :: I4TIME,OBTIME(MAXNUM_PROFLRS)
-  REAL	    :: PRFLAT(MAXNUM_PROFLRS),PRFLON(MAXNUM_PROFLRS),&
-               PRFELV(MAXNUM_PROFLRS)
-  REAL      :: HGHTOB(MAXNUM_PROFLRS,MAXLVL_PROFLRS)	! HEIGHT OBS
-  REAL      :: UWNDOB(MAXNUM_PROFLRS,MAXLVL_PROFLRS)	! U WIND OBS
-  REAL      :: VWNDOB(MAXNUM_PROFLRS,MAXLVL_PROFLRS)	! V WIND OBS
-  REAL      :: RMSOBS(MAXNUM_PROFLRS,MAXLVL_PROFLRS)	! RMS
-  REAL      :: TSFCOB(MAXNUM_PROFLRS)			! SFC T OBS
-  REAL      :: PSFCOB(MAXNUM_PROFLRS)			! SFC P OBS
-  REAL      :: RHSFCO(MAXNUM_PROFLRS)			! SFC RH OBS
-  REAL      :: USFCOB(MAXNUM_PROFLRS)			! SFC U OBS
-  REAL      :: VSFCOB(MAXNUM_PROFLRS)			! SFC V OBS
+  character :: fspecs*225, extnsn*31,c5name(maxnum_proflrs)*5, &
+               obtype(maxnum_proflrs)*8
+  integer   :: iofile,status,nprflr,nlevel(maxnum_proflrs)
+  integer   :: i4time,obtime(maxnum_proflrs)
+  real	    :: prflat(maxnum_proflrs),prflon(maxnum_proflrs),&
+               prfelv(maxnum_proflrs)
+  real      :: hghtob(maxnum_proflrs,maxlvl_proflrs)	! height obs
+  real      :: uwndob(maxnum_proflrs,maxlvl_proflrs)	! u wind obs
+  real      :: vwndob(maxnum_proflrs,maxlvl_proflrs)	! v wind obs
+  real      :: rmsobs(maxnum_proflrs,maxlvl_proflrs)	! rms
+  real      :: tsfcob(maxnum_proflrs)			! sfc t obs
+  real      :: psfcob(maxnum_proflrs)			! sfc p obs
+  real      :: rhsfco(maxnum_proflrs)			! sfc rh obs
+  real      :: usfcob(maxnum_proflrs)			! sfc u obs
+  real      :: vsfcob(maxnum_proflrs)			! sfc v obs
 
-  IOFILE = 12
-  NLEVEL = 0
+  iofile = 12
+  nlevel = 0
 
-  ! OPEN NEAREST PROFILER FILE TO THE LAPS ANALYSIS TIME:
-  EXTNSN = 'pro'
-  CALL GET_FILESPEC(EXTNSN,2,FSPECS,STATUS)
+  ! open nearest profiler file to the laps analysis time:
+  extnsn = 'pro'
+  call get_filespec(extnsn,2,fspecs,status)
 
-  CALL GET_FILE_TIME(FSPECS,SYSTEM_IN4TIME,I4TIME)
+  call get_file_time(fspecs,system_in4time,i4time)
 
-  ! CHECK IF DATA FILE IS CLOSE TO SYSTEM TIME:
-  IF (ABS(SYSTEM_IN4TIME-I4TIME) .GT. LENGTH_ANATIME) THEN
-    PRINT*,'CONV_PROFLR: No recent profiler data files'
-    RETURN
-  ENDIF
+  ! check if data file is close to system time:
+  if (abs(system_in4time-i4time) .gt. length_anatime) then
+    print*,'conv_proflr: no recent profiler data files'
+    return
+  endif
 
-  ! READ PROFILER DATA: NOTE READ_PRO_DATA RETURNS M/S WIND:
-  CALL READ_PRO_DATA(IOFILE,I4TIME,EXTNSN,MAXNUM_PROFLRS,MAXLVL_PROFLRS, & ! I
-                     NPRFLR,NLEVEL,PRFLAT,PRFLON,PRFELV,C5NAME,OBTIME,   & ! O
-                     OBTYPE,HGHTOB,UWNDOB,VWNDOB,RMSOBS,TSFCOB,PSFCOB,   & ! O
-                     RHSFCO,USFCOB,VSFCOB,STATUS)                          ! O
-  CALL LAPS_DIVIDER
-  WRITE(6,*) 'CONV_PROFLR: Number of profilers data read: ',NPRFLR
-  CALL LAPS_DIVIDER
+  ! read profiler data: note read_pro_data returns m/s wind:
+  call read_pro_data(iofile,i4time,extnsn,maxnum_proflrs,maxlvl_proflrs, & ! i
+                     nprflr,nlevel,prflat,prflon,prfelv,c5name,obtime,   & ! o
+                     obtype,hghtob,uwndob,vwndob,rmsobs,tsfcob,psfcob,   & ! o
+                     rhsfco,usfcob,vsfcob,status)                          ! o
+  call laps_divider
+  write(6,*) 'conv_proflr: number of profilers data read: ',nprflr
+  call laps_divider
 
-  ! CONVERT TO THE REQUESTED FORMAT:
-  IF (NPRFLR .GT. 0) THEN
-    WRITE(6,*) 'CONV_PROFLR: Levels at each profiler: ',NLEVEL(1:NPRFLR)
-    IF      (FORMAT_REQUEST .EQ. 'BUFR') THEN
-      CALL BUFR_PROFLR(NPRFLR,NLEVEL,C5NAME,OBTIME,PRFLAT,PRFLON,PRFELV, &
-                       OBTYPE,MAXNUM_PROFLRS,HGHTOB,UWNDOB,VWNDOB,RMSOBS, &
-                       PSFCOB,TSFCOB,RHSFCO,USFCOB,VSFCOB)
-    ELSE IF (FORMAT_REQUEST .NE. 'WRF') THEN
-      CALL WRFD_PROFLR(NPRFLR,NLEVEL,C5NAME,OBTIME,PRFLAT,PRFLON,PRFELV, &
-                       OBTYPE,MAXNUM_PROFLRS,HGHTOB,UWNDOB,VWNDOB,PSFCOB, &
-                       TSFCOB,RHSFCO,USFCOB,VSFCOB)
-    ENDIF
-  ENDIF
+  ! convert to the requested format:
+  if (nprflr .gt. 0) then
+    write(6,*) 'conv_proflr: levels at each profiler: ',nlevel(1:nprflr)
+    if      (format_request .eq. 'bufr') then
+      call bufr_proflr(nprflr,nlevel,c5name,obtime,prflat,prflon,prfelv, &
+                       obtype,maxnum_proflrs,hghtob,uwndob,vwndob,rmsobs, &
+                       psfcob,tsfcob,rhsfco,usfcob,vsfcob)
+    else if (format_request .ne. 'wrf') then
+      call wrfd_proflr(nprflr,nlevel,c5name,obtime,prflat,prflon,prfelv, &
+                       obtype,maxnum_proflrs,hghtob,uwndob,vwndob,psfcob, &
+                       tsfcob,rhsfco,usfcob,vsfcob)
+    endif
+  endif
 
-END SUBROUTINE CONV_PROFLR
+end subroutine conv_proflr
 
-SUBROUTINE CONV_RASS
+subroutine conv_rass
 
 !==============================================================================
-!doc  THIS ROUTINE READS AND CONVERTS RASS OBSERVATION DATA INTO DATA FORMAT
-!doc  REQUESTED.
+!doc  this routine reads and converts rass observation data into data format
+!doc  requested.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER :: C5NAME(MAXNUM_SONDES)*5,OBTYPE(MAXNUM_SONDES)*8
-  INTEGER   :: STATUS,NRASS,NLEVEL(MAXNUM_SONDES)
-  INTEGER   :: I4TIME,OBTIME(MAXNUM_SONDES)
-  REAL	    :: PRFLAT(MAXNUM_SONDES),PRFLON(MAXNUM_SONDES),&
-               PRFELV(MAXNUM_SONDES)
-  REAL      :: HGHTOB(MAXNUM_SONDES,MAXLVL_SONDES)	! HEIGHT OBS
-  REAL      :: TEMPOB(MAXNUM_SONDES,MAXLVL_SONDES)	! TEMPERATURE OBS
-  REAL      :: ERROBS(MAXNUM_SONDES)			! TEMPERATURE ERROR
+  character :: c5name(maxnum_sondes)*5,obtype(maxnum_sondes)*8
+  integer   :: status,nrass,nlevel(maxnum_sondes)
+  integer   :: i4time,obtime(maxnum_sondes)
+  real	    :: prflat(maxnum_sondes),prflon(maxnum_sondes),&
+               prfelv(maxnum_sondes)
+  real      :: hghtob(maxnum_sondes,maxlvl_sondes)	! height obs
+  real      :: tempob(maxnum_sondes,maxlvl_sondes)	! temperature obs
+  real      :: errobs(maxnum_sondes)			! temperature error
 
-  ! READ PROFILER DATA:
-  CALL READ_RASS_DATA(SYSTEM_IN4TIME,LENGTH_ANATIME,MAXNUM_SONDES, &
-                     MAXLVL_SONDES,RVALUE_MISSING,OBTIME, & ! I
-                     NRASS,NLEVEL,C5NAME,OBTYPE,PRFLAT,PRFLON,PRFELV,ERROBS, &
-                     HGHTOB,TEMPOB,STATUS)                          ! O
-  CALL LAPS_DIVIDER
-  WRITE(6,*) 'CONV_RASS: Number of RASS data read: ',NRASS
-  CALL LAPS_DIVIDER
+  ! read profiler data:
+  call read_rass_data(system_in4time,length_anatime,maxnum_sondes, &
+                     maxlvl_sondes,rvalue_missing,obtime, & ! i
+                     nrass,nlevel,c5name,obtype,prflat,prflon,prfelv,errobs, &
+                     hghtob,tempob,status)                          ! o
+  call laps_divider
+  write(6,*) 'conv_rass: number of rass data read: ',nrass
+  call laps_divider
 
-  ! CONVERT TO THE REQUESTED FORMAT:
-  IF (NRASS .GT. 0) THEN
-    WRITE(6,*) 'CONV_RASS: Levels at each profiler: ',NLEVEL(1:NRASS)
-    IF      (FORMAT_REQUEST .EQ. 'BUFR') THEN
-      CALL BUFR_RASS(NRASS,NLEVEL,C5NAME,OBTIME,PRFLAT,PRFLON,PRFELV, &
-                       OBTYPE,MAXNUM_SONDES,HGHTOB,TEMPOB,ERROBS)
-    ELSE IF (FORMAT_REQUEST .NE. 'WRF') THEN
-      CALL WRFD_RASS(NRASS,NLEVEL,C5NAME,OBTIME,PRFLAT,PRFLON,PRFELV, &
-                       OBTYPE,MAXNUM_SONDES,HGHTOB,TEMPOB)
-    ENDIF
-  ENDIF
+  ! convert to the requested format:
+  if (nrass .gt. 0) then
+    write(6,*) 'conv_rass: levels at each profiler: ',nlevel(1:nrass)
+    if      (format_request .eq. 'bufr') then
+      call bufr_rass(nrass,nlevel,c5name,obtime,prflat,prflon,prfelv, &
+                       obtype,maxnum_sondes,hghtob,tempob,errobs)
+    else if (format_request .ne. 'wrf') then
+      call wrfd_rass(nrass,nlevel,c5name,obtime,prflat,prflon,prfelv, &
+                       obtype,maxnum_sondes,hghtob,tempob)
+    endif
+  endif
 
-END SUBROUTINE CONV_RASS
+end subroutine conv_rass
 
 
-SUBROUTINE CONV_SONDES
+subroutine conv_sondes
 
 !==============================================================================
-!  THIS ROUTINE READS AND CONVERTS SONDING OBSERVATION DATA INTO DATA FORMAT
-!  REQUESTED.
+!  this routine reads and converts sonding observation data into data format
+!  requested.
 !
-!  HISTORY:
-!	CREATION:	YUANFU XIE	JUN 2007
+!  history:
+!	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER :: FSPECS*225, EXTNSN*3,C5NAME(MAXNUM_SONDES)*5, &
-               OBTYPE(MAXNUM_SONDES)*8
-  INTEGER   :: IOFILE,STATUS,NPRFLR,NLEVEL(MAXNUM_SONDES), &
-               WINDOW,MODEOB
-  INTEGER   :: I4TIME,PRFTIM(MAXNUM_SONDES,MAXLVL_SONDES),I
-  REAL	    :: PRFLAT(MAXNUM_SONDES,MAXLVL_SONDES), &
-               PRFLON(MAXNUM_SONDES,MAXLVL_SONDES), &
-               PRFELV(MAXNUM_SONDES)
-  REAL      :: HGHTOB(MAXNUM_SONDES,MAXLVL_SONDES)	! HEIGHT OBS
-  REAL      :: PRSOBS(MAXNUM_SONDES,MAXLVL_SONDES)	! PRESSURE OBS
-  REAL      :: UWNDOB(MAXNUM_SONDES,MAXLVL_SONDES)	! U WIND OBS
-  REAL      :: VWNDOB(MAXNUM_SONDES,MAXLVL_SONDES)	! V WIND OBS
-  REAL      :: TEMPOB(MAXNUM_SONDES,MAXLVL_SONDES)	! T OBS
-  REAL      :: DEWOBS(MAXNUM_SONDES,MAXLVL_SONDES)	! DEW POINT OBS
+  character :: fspecs*225, extnsn*3,c5name(maxnum_sondes)*5, &
+               obtype(maxnum_sondes)*8
+  integer   :: iofile,status,nprflr,nlevel(maxnum_sondes), &
+               window,modeob
+  integer   :: i4time,prftim(maxnum_sondes,maxlvl_sondes),i
+  real	    :: prflat(maxnum_sondes,maxlvl_sondes), &
+               prflon(maxnum_sondes,maxlvl_sondes), &
+               prfelv(maxnum_sondes)
+  real      :: hghtob(maxnum_sondes,maxlvl_sondes)	! height obs
+  real      :: prsobs(maxnum_sondes,maxlvl_sondes)	! pressure obs
+  real      :: uwndob(maxnum_sondes,maxlvl_sondes)	! u wind obs
+  real      :: vwndob(maxnum_sondes,maxlvl_sondes)	! v wind obs
+  real      :: tempob(maxnum_sondes,maxlvl_sondes)	! t obs
+  real      :: dewobs(maxnum_sondes,maxlvl_sondes)	! dew point obs
 
-  IOFILE = 12
-  NLEVEL = 0
-  WINDOW = 0			! I4TIME WINDOW MIMIC READ_PROFILES.F
-  MODEOB = 3			! KEY LEVELS OFF OF WIND DATA
+  iofile = 12
+  nlevel = 0
+  window = 0			! i4time window mimic read_profiles.f
+  modeob = 3			! key levels off of wind data
 
-  ! OPEN NEAREST PROFILER FILE TO THE LAPS ANALYSIS TIME:
-  EXTNSN = 'snd'
-  CALL GET_FILESPEC(EXTNSN,2,FSPECS,STATUS)
+  ! open nearest profiler file to the laps analysis time:
+  extnsn = 'snd'
+  call get_filespec(extnsn,2,fspecs,status)
 
-  CALL GET_FILE_TIME(FSPECS,SYSTEM_IN4TIME,I4TIME)
-  IF (ABS(SYSTEM_IN4TIME-I4TIME) .GT. LENGTH_ANATIME) THEN
-    WRITE(6,*) 'CONV_SONDES: Warning: nearest sonde file is outside window'
-  ELSE
+  call get_file_time(fspecs,system_in4time,i4time)
+  if (abs(system_in4time-i4time) .gt. length_anatime) then
+    write(6,*) 'conv_sondes: warning: nearest sonde file is outside window'
+  else
 
-    ! READ SONDE DATA:
-    CALL READ_SND_DATA2(IOFILE,I4TIME,EXTNSN,MAXNUM_SONDES,MAXLVL_SONDES, & ! I
-                       DOMAIN_LATITDE,DOMAIN_LONGITD,DOMAIN_TOPOGRP,NUMBER_GRIDPTS(1),     & ! I
-                       NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),HEIGHT_GRID3DM,  & ! I
-                       .TRUE.,MODEOB,                                       & ! I
-                       NPRFLR,PRFELV,NLEVEL,C5NAME,OBTYPE,HGHTOB,           & ! O
-                       PRSOBS,UWNDOB,VWNDOB,TEMPOB,DEWOBS,PRFLAT,PRFLON,    & ! O
-                       PRFTIM,STATUS)                                         ! O
-    CALL LAPS_DIVIDER
-    WRITE(6,*) 'CONV_SONDES: Number of sonde data read: ',NPRFLR
-    CALL LAPS_DIVIDER
+    ! read sonde data:
+    call read_snd_data2(iofile,i4time,extnsn,maxnum_sondes,maxlvl_sondes, & ! i
+                       domain_latitde,domain_longitd,domain_topogrp,number_gridpts(1),     & ! i
+                       number_gridpts(2),number_gridpts(3),height_grid3dm,  & ! i
+                       .true.,modeob,                                       & ! i
+                       nprflr,prfelv,nlevel,c5name,obtype,hghtob,           & ! o
+                       prsobs,uwndob,vwndob,tempob,dewobs,prflat,prflon,    & ! o
+                       prftim,status)                                         ! o
+    call laps_divider
+    write(6,*) 'conv_sondes: number of sonde data read: ',nprflr
+    call laps_divider
 
-    ! CONVERT TO THE REQUESTED FORMAT:
-    IF (STATUS .EQ. 1 .AND. NPRFLR .GT. 0) THEN
-      WRITE(6,*) 'CONV_SONDES: Levels at each sonde: '
-      DO I=1,NPRFLR
-        IF (NLEVEL(I) .GT. 0) WRITE(6,*) I,': ',NLEVEL(I)
-      ENDDO
-      IF      (FORMAT_REQUEST .EQ. 'BUFR') THEN
-        CALL BUFR_SONDES(NPRFLR,NLEVEL,C5NAME,PRFTIM,PRFLAT,PRFLON,PRFELV, &
-                         OBTYPE,HGHTOB,PRSOBS,TEMPOB,DEWOBS,UWNDOB,VWNDOB)
-      ELSE IF (FORMAT_REQUEST .NE. 'WRF') THEN
-        CALL WRFD_SONDES(NPRFLR,NLEVEL,C5NAME,PRFTIM,PRFLAT,PRFLON,PRFELV, &
-                         OBTYPE,HGHTOB,PRSOBS,TEMPOB,DEWOBS,UWNDOB,VWNDOB)
-      ENDIF
-    ENDIF
+    ! convert to the requested format:
+    if (status .eq. 1 .and. nprflr .gt. 0) then
+      write(6,*) 'conv_sondes: levels at each sonde: '
+      do i=1,nprflr
+        if (nlevel(i) .gt. 0) write(6,*) i,': ',nlevel(i)
+      enddo
+      if      (format_request .eq. 'bufr') then
+        call bufr_sondes(nprflr,nlevel,c5name,prftim,prflat,prflon,prfelv, &
+                         obtype,hghtob,prsobs,tempob,dewobs,uwndob,vwndob)
+      else if (format_request .ne. 'wrf') then
+        call wrfd_sondes(nprflr,nlevel,c5name,prftim,prflat,prflon,prfelv, &
+                         obtype,hghtob,prsobs,tempob,dewobs,uwndob,vwndob)
+      endif
+    endif
 
-  ENDIF
+  endif
 
-END SUBROUTINE CONV_SONDES
+end subroutine conv_sondes
 
-SUBROUTINE CONV_SFCOBS
+subroutine conv_sfcobs
 
 !==============================================================================
-!  THIS ROUTINE READS AND CONVERTS SURFACE OBSERVATIONS INTO REQUESTED DATA
-!  FORMAT.
+!  this routine reads and converts surface observations into requested data
+!  format.
 !
-!  HISTORY:
-!	CREATION:	YUANFU XIE	JUN 2007
+!  history:
+!	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER*24 :: FILETM		! OBS FILE TIME
-  INTEGER :: MAXSTN,STATUS,I		! MAXIMUM STATIONS
-  INTEGER :: NOBGRD,NOBBOX		! NUMBER OF OBS OVER GRID AND BOX
-  INTEGER :: NSS,NSNGRD,NSNBOX		! NUMBER OF SND OBS OVER GRID AND BOX
+  character*24 :: filetm		! obs file time
+  integer :: maxstn,status,i		! maximum stations
+  integer :: nobgrd,nobbox		! number of obs over grid and box
+  integer :: nss,nsngrd,nsnbox		! number of snd obs over grid and box
 
-  CHARACTER*20,ALLOCATABLE,DIMENSION(:) :: STNAME	! STATION NAMES
-  CHARACTER*11,ALLOCATABLE,DIMENSION(:) :: PVNAME	! PROVIDER NAMES
-  CHARACTER*25,ALLOCATABLE,DIMENSION(:) :: PRSTWX	! PRESENT WEATHER
-  CHARACTER*6, ALLOCATABLE,DIMENSION(:) :: RPTYPE	! REPORT TYPE
-  CHARACTER*6, ALLOCATABLE,DIMENSION(:) :: STNTYP	! STATION TYPE
-  INTEGER,     ALLOCATABLE,DIMENSION(:) :: OBTIME,WMOIDS! OBS TIME/WMO ID
-  INTEGER,     ALLOCATABLE,DIMENSION(:) :: CLDLYR,PRSCHC! CLOUD LAYER/PRS CHG
-  REAL,        ALLOCATABLE,DIMENSION(:) :: &
-    OBSLAT,OBSLON,OBSELV,OBSTMP,ERRTMP,OBSDEW,ERRDEW,OBSRHS,ERRRHS, &
-    OBSDIR,ERRDIR,OBSSPD,ERRSPD,GUSDIR,GUSSPD,OBSALT,ERRALT,STNPRS, &
-    MSLPRS,PRSCH3,ERRPRS,OBSVIS,ERRVIS,OBSSOL,ERRSOL,SFCTMP,ERRSFT, &
-    SFCMOI,ERRSFM,PRECP1,PRECP3,PRECP6,PREC24,ERRPCP,SNOWCV,ERRSNW, &
-    MAXTMP,MINTMP !,igrid,jgrid
+  character*20,allocatable,dimension(:) :: stname	! station names
+  character*11,allocatable,dimension(:) :: pvname	! provider names
+  character*25,allocatable,dimension(:) :: prstwx	! present weather
+  character*6, allocatable,dimension(:) :: rptype	! report type
+  character*6, allocatable,dimension(:) :: stntyp	! station type
+  integer,     allocatable,dimension(:) :: obtime,wmoids! obs time/wmo id
+  integer,     allocatable,dimension(:) :: cldlyr,prschc! cloud layer/prs chg
+  real,        allocatable,dimension(:) :: &
+    obslat,obslon,obselv,obstmp,errtmp,obsdew,errdew,obsrhs,errrhs, &
+    obsdir,errdir,obsspd,errspd,gusdir,gusspd,obsalt,erralt,stnprs, &
+    mslprs,prsch3,errprs,obsvis,errvis,obssol,errsol,sfctmp,errsft, &
+    sfcmoi,errsfm,precp1,precp3,precp6,prec24,errpcp,snowcv,errsnw, &
+    maxtmp,mintmp !,igrid,jgrid
 
-  CHARACTER*4, ALLOCATABLE,DIMENSION(:,:) :: CLDAMT     ! CLOUD AMOUNT
+  character*4, allocatable,dimension(:,:) :: cldamt     ! cloud amount
 
-  REAL,        ALLOCATABLE,DIMENSION(:,:) :: CLDHGT	! CLOUD HEIGHTS
-  REAL,        ALLOCATABLE,DIMENSION(:,:) :: OBSWND, &  ! OBS WIND
-                                             ERRWND	! OBS WIND ERROR
+  real,        allocatable,dimension(:,:) :: cldhgt	! cloud heights
+  real,        allocatable,dimension(:,:) :: obswnd, &  ! obs wind
+                                             errwnd	! obs wind error
 
-  ! GET MAXIMUM NUMBER OF SURFACE STATIONS:
-  CALL GET_MAXSTNS(MAXSTN,STATUS)
-  IF (STATUS .NE. 1) THEN
-    WRITE(6,*) 'CONV_SONDES: ERROR IN READING MAXIMUM SFC STATIONS'
-    STOP
-  ENDIF
+  ! get maximum number of surface stations:
+  call get_maxstns(maxstn,status)
+  if (status .ne. 1) then
+    write(6,*) 'conv_sondes: error in reading maximum sfc stations'
+    stop
+  endif
 
-  ! ADD NUMBER OF SONDE SURFACE:
-  MAXSTN = MAXSTN+MAXNUM_SONDES
+  ! add number of sonde surface:
+  maxstn = maxstn+maxnum_sondes
 
-  ! ALLOCATABLE MEMORY FOR SURFACE VARIABLES:
-  ALLOCATE(OBTIME(MAXSTN),WMOIDS(MAXSTN),STNAME(MAXSTN), &
-           PVNAME(MAXSTN),PRSTWX(MAXSTN),RPTYPE(MAXSTN), &
-           STNTYP(MAXSTN),OBSLAT(MAXSTN),OBSLON(MAXSTN), &
-           OBSELV(MAXSTN),OBSTMP(MAXSTN),OBSDEW(MAXSTN), &
-           OBSRHS(MAXSTN),OBSDIR(MAXSTN),OBSSPD(MAXSTN), &
-           GUSDIR(MAXSTN),GUSSPD(MAXSTN),OBSALT(MAXSTN), &
-           STNPRS(MAXSTN),MSLPRS(MAXSTN),PRSCHC(MAXSTN), &
-           PRSCH3(MAXSTN),OBSVIS(MAXSTN),OBSSOL(MAXSTN), &
-           SFCTMP(MAXSTN),SFCMOI(MAXSTN),PRECP1(MAXSTN), &
-           PRECP3(MAXSTN),PRECP6(MAXSTN),PREC24(MAXSTN), &
-           SNOWCV(MAXSTN),CLDLYR(MAXSTN),MAXTMP(MAXSTN), &
-           MINTMP(MAXSTN),ERRTMP(MAXSTN),ERRDEW(MAXSTN), &
-           ERRRHS(MAXSTN),ERRDIR(MAXSTN),ERRSPD(MAXSTN), &
-           ERRALT(MAXSTN),ERRPRS(MAXSTN),ERRVIS(MAXSTN), &
-           ERRSOL(MAXSTN),ERRSFT(MAXSTN),ERRSFM(MAXSTN), &
-           ERRPCP(MAXSTN),ERRSNW(MAXSTN), & ! igrid(maxstn),jgrid(maxstn), &
-           CLDAMT(MAXSTN,5),CLDHGT(MAXSTN,5), &
-           OBSWND(2,MAXSTN),ERRWND(2,MAXSTN), STAT=STATUS)
-  IF (STATUS .NE. 0) THEN
-    WRITE(6,*) 'CONV_SFCOBS: ERROR IN ALLOCATING MEMORY FOR SURFACE DATA'
-    STOP
-  ENDIF
+  ! allocatable memory for surface variables:
+  allocate(obtime(maxstn),wmoids(maxstn),stname(maxstn), &
+           pvname(maxstn),prstwx(maxstn),rptype(maxstn), &
+           stntyp(maxstn),obslat(maxstn),obslon(maxstn), &
+           obselv(maxstn),obstmp(maxstn),obsdew(maxstn), &
+           obsrhs(maxstn),obsdir(maxstn),obsspd(maxstn), &
+           gusdir(maxstn),gusspd(maxstn),obsalt(maxstn), &
+           stnprs(maxstn),mslprs(maxstn),prschc(maxstn), &
+           prsch3(maxstn),obsvis(maxstn),obssol(maxstn), &
+           sfctmp(maxstn),sfcmoi(maxstn),precp1(maxstn), &
+           precp3(maxstn),precp6(maxstn),prec24(maxstn), &
+           snowcv(maxstn),cldlyr(maxstn),maxtmp(maxstn), &
+           mintmp(maxstn),errtmp(maxstn),errdew(maxstn), &
+           errrhs(maxstn),errdir(maxstn),errspd(maxstn), &
+           erralt(maxstn),errprs(maxstn),errvis(maxstn), &
+           errsol(maxstn),errsft(maxstn),errsfm(maxstn), &
+           errpcp(maxstn),errsnw(maxstn), & ! igrid(maxstn),jgrid(maxstn), &
+           cldamt(maxstn,5),cldhgt(maxstn,5), &
+           obswnd(2,maxstn),errwnd(2,maxstn), stat=status)
+  if (status .ne. 0) then
+    write(6,*) 'conv_sfcobs: error in allocating memory for surface data'
+    stop
+  endif
 
-  ! READ SFC OBS: READ_SURFACE_DATA RETURNS KNOTS FOR WIND:
-  CALL READ_SURFACE_DATA(SYSTEM_IN4TIME,FILETM,NOBGRD,NOBBOX,OBTIME,WMOIDS,&
-                         STNAME,PVNAME,PRSTWX,RPTYPE,STNTYP,OBSLAT,OBSLON, &
-                         OBSELV,OBSTMP,OBSDEW,OBSRHS,OBSDIR,OBSSPD,GUSDIR, &
-                         GUSSPD,OBSALT,STNPRS,MSLPRS,PRSCHC,PRSCH3,OBSVIS, &
-                         OBSSOL,SFCTMP,SFCMOI,PRECP1,PRECP3,PRECP6,PREC24, &
-                         SNOWCV,CLDLYR,MAXTMP,MINTMP,                      &
-                         ERRTMP,ERRDEW,ERRRHS,ERRDIR,ERRSPD,ERRALT,ERRPRS, &
-                         ERRVIS,ERRSOL,ERRSFT,ERRSFM,ERRPCP,ERRSNW,CLDAMT, &
-                         CLDHGT,MAXSTN,STATUS)
+  ! read sfc obs: read_surface_data returns knots for wind:
+  call read_surface_data(system_in4time,filetm,nobgrd,nobbox,obtime,wmoids,&
+                         stname,pvname,prstwx,rptype,stntyp,obslat,obslon, &
+                         obselv,obstmp,obsdew,obsrhs,obsdir,obsspd,gusdir, &
+                         gusspd,obsalt,stnprs,mslprs,prschc,prsch3,obsvis, &
+                         obssol,sfctmp,sfcmoi,precp1,precp3,precp6,prec24, &
+                         snowcv,cldlyr,maxtmp,mintmp,                      &
+                         errtmp,errdew,errrhs,errdir,errspd,erralt,errprs, &
+                         errvis,errsol,errsft,errsfm,errpcp,errsnw,cldamt, &
+                         cldhgt,maxstn,status)
 
-  IF (STATUS .NE. 1) THEN
-    WRITE(6,*) 'CONV_SFCOBS: ERROR IN READING SURFACE OBS'
-    STOP
-  ENDIF
+  if (status .ne. 1) then
+    write(6,*) 'conv_sfcobs: error in reading surface obs'
+    stop
+  endif
 
-  ! READ SONDE SFC OBS: READ_SURFACE_DATA RETURNS KNOTS FOR WIND:
-  NSS = NOBBOX+1
-  NSNGRD = 0		! NOTE: READ_SFC_SND DOES NOT INITIALIZE NSNGRD
-  NSNBOX = 0		! NOTE: READ_SFC_SND DOES NOT INITIALIZE NSNBOX
-  ! THE FOLLOWING CALL COMMAND ALLOWS SND SURFACE DATA INGESTED BUT THESE DATA
-  ! ARE INGESTED FROM SONDE READER ALREADY. 
-  ! CALL READ_SFC_SND(SYSTEM_IN4TIME,FILETM,NSNGRD,NSNBOX,OBTIME(NSS),WMOIDS(NSS),&
-  !                      STNAME(NSS),PVNAME(NSS),PRSTWX(NSS),RPTYPE(NSS), &
-  !                      STNTYP(NSS),OBSLAT(NSS),OBSLON(NSS),OBSELV(NSS), & 
-  !                      OBSTMP(NSS),OBSDEW(NSS),OBSRHS(NSS),OBSDIR(NSS), &
-  !                      OBSSPD(NSS),GUSDIR(NSS),GUSSPD(NSS),OBSALT(NSS), & 
-  !                      STNPRS(NSS),MSLPRS(NSS),PRSCHC(NSS),PRSCH3(NSS), &
-  !                      OBSVIS(NSS),OBSSOL(NSS),SFCTMP(NSS),SFCMOI(NSS), &
-  !                      PRECP1(NSS),PRECP3(NSS),PRECP6(NSS),PREC24(NSS), &
-  !                      SNOWCV(NSS),CLDLYR(NSS),MAXTMP(NSS),MINTMP(NSS), &
-  !                      ERRTMP(NSS),ERRDEW(NSS),ERRRHS(NSS),ERRDIR(NSS), &
-  !                      ERRSPD(NSS),ERRALT(NSS),ERRPRS(NSS),ERRVIS(NSS), &
-  !                      ERRSOL(NSS),ERRSFT(NSS),ERRSFM(NSS),ERRPCP(NSS), &
-  !                      ERRSNW(NSS),CLDAMT(NSS,1),CLDHGT(NSS,1),MAXSTN, &
-  !                      DOMAIN_LATITDE,DOMAIN_LONGITD,NUMBER_GRIDPTS(1), &
-  !                      NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),MAXNUM_SONDES, &
-  !                      MAXLVL_SONDES,DOMAIN_TOPOGRP,STATUS)
+  ! read sonde sfc obs: read_surface_data returns knots for wind:
+  nss = nobbox+1
+  nsngrd = 0		! note: read_sfc_snd does not initialize nsngrd
+  nsnbox = 0		! note: read_sfc_snd does not initialize nsnbox
+  ! the following call command allows snd surface data ingested but these data
+  ! are ingested from sonde reader already. 
+  ! call read_sfc_snd(system_in4time,filetm,nsngrd,nsnbox,obtime(nss),wmoids(nss),&
+  !                      stname(nss),pvname(nss),prstwx(nss),rptype(nss), &
+  !                      stntyp(nss),obslat(nss),obslon(nss),obselv(nss), & 
+  !                      obstmp(nss),obsdew(nss),obsrhs(nss),obsdir(nss), &
+  !                      obsspd(nss),gusdir(nss),gusspd(nss),obsalt(nss), & 
+  !                      stnprs(nss),mslprs(nss),prschc(nss),prsch3(nss), &
+  !                      obsvis(nss),obssol(nss),sfctmp(nss),sfcmoi(nss), &
+  !                      precp1(nss),precp3(nss),precp6(nss),prec24(nss), &
+  !                      snowcv(nss),cldlyr(nss),maxtmp(nss),mintmp(nss), &
+  !                      errtmp(nss),errdew(nss),errrhs(nss),errdir(nss), &
+  !                      errspd(nss),erralt(nss),errprs(nss),errvis(nss), &
+  !                      errsol(nss),errsft(nss),errsfm(nss),errpcp(nss), &
+  !                      errsnw(nss),cldamt(nss,1),cldhgt(nss,1),maxstn, &
+  !                      domain_latitde,domain_longitd,number_gridpts(1), &
+  !                      number_gridpts(2),number_gridpts(3),maxnum_sondes, &
+  !                      maxlvl_sondes,domain_topogrp,status)
   !
-  ! IF (NSNBOX .LT. 1) THEN
-  !   WRITE(6,*) 'CONV_SFCOBS: NO SONDE SFC DATA AVAILABLE'
-  ! ENDIF
-  ! ACCOUNT TOTAL SFC DATA:
-  ! THE FOLLOWING COMMAND ALLOWS SND SURFACE DATA INGESTED BUT THESE DATA
-  ! ARE INGESTED FROM SONDE READER ALREADY. 
-  ! NOBBOX = NOBBOX+NSNBOX
+  ! if (nsnbox .lt. 1) then
+  !   write(6,*) 'conv_sfcobs: no sonde sfc data available'
+  ! endif
+  ! account total sfc data:
+  ! the following command allows snd surface data ingested but these data
+  ! are ingested from sonde reader already. 
+  ! nobbox = nobbox+nsnbox
 
-  ! CONVERT WIND DIRECTION AND SPEED INTO U AND V:
-  DO I=1,NOBBOX
-    IF ((OBSDIR(I) .NE. RVALUE_MISSING) .AND. &
-        (OBSDIR(I) .NE. SFCOBS_INVALID) .AND. &
-        (OBSSPD(I) .NE. RVALUE_MISSING) .AND. &
-        (OBSSPD(I) .NE. SFCOBS_INVALID)) THEN
-      CALL DISP_TO_UV(OBSDIR(I),OBSSPD(I),OBSWND(1,I),OBSWND(2,I))
-      CALL DISP_TO_UV(ERRDIR(I),ERRSPD(I),ERRWND(1,I),ERRWND(2,I))
+  ! convert wind direction and speed into u and v:
+  do i=1,nobbox
+    if ((obsdir(i) .ne. rvalue_missing) .and. &
+        (obsdir(i) .ne. sfcobs_invalid) .and. &
+        (obsspd(i) .ne. rvalue_missing) .and. &
+        (obsspd(i) .ne. sfcobs_invalid)) then
+      call disp_to_uv(obsdir(i),obsspd(i),obswnd(1,i),obswnd(2,i))
+      call disp_to_uv(errdir(i),errspd(i),errwnd(1,i),errwnd(2,i))
 
-      ! CONVERT WIND INTO M/S:
-      OBSWND(1:2,I) = OBSWND(1:2,I)*0.514791
-    ELSE
-      OBSWND(1:2,I) = RVALUE_MISSING
-      ERRWND(1:2,I) = RVALUE_MISSING
-    ENDIF
+      ! convert wind into m/s:
+      obswnd(1:2,i) = obswnd(1:2,i)*0.514791
+    else
+      obswnd(1:2,i) = rvalue_missing
+      errwnd(1:2,i) = rvalue_missing
+    endif
 
-    ! TEMPERATURE AND DEW:
-    IF ((OBSTMP(I) .NE. RVALUE_MISSING) .AND. &
-        (OBSTMP(I) .NE. SFCOBS_INVALID) ) OBSTMP(I) = (OBSTMP(I)-32.0)*5.0/9.0
-    IF ((OBSDEW(I) .NE. RVALUE_MISSING) .AND. &
-        (OBSDEW(I) .NE. SFCOBS_INVALID) ) OBSDEW(I) = (OBSDEW(I)-32.0)*5.0/9.0
-  ENDDO
+    ! temperature and dew:
+    if ((obstmp(i) .ne. rvalue_missing) .and. &
+        (obstmp(i) .ne. sfcobs_invalid) ) obstmp(i) = (obstmp(i)-32.0)*5.0/9.0
+    if ((obsdew(i) .ne. rvalue_missing) .and. &
+        (obsdew(i) .ne. sfcobs_invalid) ) obsdew(i) = (obsdew(i)-32.0)*5.0/9.0
+  enddo
 
-  CALL LAPS_DIVIDER
-  WRITE(6,*) 'CONV_SFCOBS: Number of surface obs data read: ',NOBBOX,NOBGRD
-  CALL LAPS_DIVIDER
+  call laps_divider
+  write(6,*) 'conv_sfcobs: number of surface obs data read: ',nobbox,nobgrd
+  call laps_divider
 
-  ! CONVERT TO THE REQUESTED DATA FORMAT:
-  IF      (FORMAT_REQUEST .EQ. 'BUFR') THEN
-    CALL BUFR_SFCOBS(NOBBOX,OBTIME, &
-                     OBSLAT,OBSLON,STNAME,RPTYPE,PVNAME,OBSELV, &
-                     MSLPRS,ERRPRS,STNPRS,ERRPRS,OBSTMP,ERRTMP, &
-                     OBSWND,ERRWND,OBSRHS,ERRRHS,STNPRS,PRECP1,ERRPCP)
-  ELSE IF (FORMAT_REQUEST .EQ. 'WRF' ) THEN
-    CALL WRFD_SFCOBS(NOBBOX,OBTIME, &
-                     OBSLAT,OBSLON,STNAME,RPTYPE,PVNAME,OBSELV, &
-                     MSLPRS,ERRPRS,STNPRS,ERRPRS,OBSTMP,ERRTMP, &
-                     OBSWND,ERRWND,OBSRHS,ERRRHS,STNPRS,PRECP1,ERRPCP)
-  ENDIF
+  ! convert to the requested data format:
+  if      (format_request .eq. 'bufr') then
+    call bufr_sfcobs(nobbox,obtime, &
+                     obslat,obslon,stname,rptype,pvname,obselv, &
+                     mslprs,errprs,stnprs,errprs,obstmp,errtmp, &
+                     obswnd,errwnd,obsrhs,errrhs,stnprs,precp1,errpcp)
+  else if (format_request .eq. 'wrf' ) then
+    call wrfd_sfcobs(nobbox,obtime, &
+                     obslat,obslon,stname,rptype,pvname,obselv, &
+                     mslprs,errprs,stnprs,errprs,obstmp,errtmp, &
+                     obswnd,errwnd,obsrhs,errrhs,stnprs,precp1,errpcp)
+  endif
 
-  ! DEALLOCATABLE MEMORY FOR SURFACE VARIABLES:
-  DEALLOCATE(OBTIME,WMOIDS,STNAME, &
-             PVNAME,PRSTWX,RPTYPE, &
-             STNTYP,OBSLAT,OBSLON, &
-             OBSELV,OBSTMP,OBSDEW, &
-             OBSRHS,OBSDIR,OBSSPD, &
-             GUSDIR,GUSSPD,OBSALT, &
-             STNPRS,MSLPRS,PRSCHC, &
-             PRSCH3,OBSVIS,OBSSOL, &
-             SFCTMP,SFCMOI,PRECP1, &
-             PRECP3,PRECP6,PREC24, &
-             SNOWCV,CLDLYR,MAXTMP, &
-             MINTMP,ERRTMP,ERRDEW, &
-             ERRRHS,ERRDIR,ERRSPD, &
-             ERRALT,ERRPRS,ERRVIS, &
-             ERRSOL,ERRSFT,ERRSFM, &
-             ERRPCP,ERRSNW, &
-             CLDAMT,CLDHGT, &
-             OBSWND,ERRWND, STAT=STATUS)
-  IF (STATUS .NE. 0) THEN
-    WRITE(6,*) 'CONV_SFCOBS: ERROR IN DEALLOCATING MEMORY FOR SURFACE OBS'
-    STOP
-  ENDIF
+  ! deallocatable memory for surface variables:
+  deallocate(obtime,wmoids,stname, &
+             pvname,prstwx,rptype, &
+             stntyp,obslat,obslon, &
+             obselv,obstmp,obsdew, &
+             obsrhs,obsdir,obsspd, &
+             gusdir,gusspd,obsalt, &
+             stnprs,mslprs,prschc, &
+             prsch3,obsvis,obssol, &
+             sfctmp,sfcmoi,precp1, &
+             precp3,precp6,prec24, &
+             snowcv,cldlyr,maxtmp, &
+             mintmp,errtmp,errdew, &
+             errrhs,errdir,errspd, &
+             erralt,errprs,errvis, &
+             errsol,errsft,errsfm, &
+             errpcp,errsnw, &
+             cldamt,cldhgt, &
+             obswnd,errwnd, stat=status)
+  if (status .ne. 0) then
+    write(6,*) 'conv_sfcobs: error in deallocating memory for surface obs'
+    stop
+  endif
 
-END SUBROUTINE CONV_SFCOBS
+end subroutine conv_sfcobs
 
-SUBROUTINE CONV_CDWACA
+subroutine conv_cdwaca
 
 !==============================================================================
-!  THIS ROUTINE READS AND CONVERTS CLOUD DRIFT WIND AND ACARS (PIREP) DATA INTO
-!  REQUESTED DATA FORMAT
+!  this routine reads and converts cloud drift wind and acars (pirep) data into
+!  requested data format
 !
-!  HISTORY:
-!	CREATION:	YUANFU XIE	JUN 2007
+!  history:
+!	creation:	yuanfu xie	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  ! LOCAL VARIABLES:
-  INTEGER, PARAMETER :: MAXOBS=300000	! LOCALLY DEFINED,CHANGE IT IF NEEDED
-  CHARACTER :: EXTEND*3,OBSTYP*4,ASCTIM*9
-  INTEGER   :: NUMOBS,STATUS
-  INTEGER   :: OBSINT(3,MAXOBS)
-  LOGICAL   :: GEOALT
-  REAL      :: OBSLAT,OBSLON,OBSELV,OBSPRS,OBSDIR,OBSSPD,OBSTMP,OBSNON,ZTOPSA
-  REAL      :: UCMPNT,VCMPNT,RI,RJ,HEIGHT_TO_PRESSURE
-  REAL*8    :: OBARRY(7,MAXOBS)
+  ! local variables:
+  integer, parameter :: maxobs=300000	! locally defined,change it if needed
+  character :: extend*3,obstyp*4,asctim*9
+  integer   :: numobs,status
+  integer   :: obsint(3,maxobs)
+  logical   :: geoalt
+  real      :: obslat,obslon,obselv,obsprs,obsdir,obsspd,obstmp,obsnon,ztopsa
+  real      :: ucmpnt,vcmpnt,ri,rj,height_to_pressure
+  real*8    :: obarry(7,maxobs)
 
-  ! CLOUD DRIFT WIND:
-  NUMOBS = 0
-  ! ACAR (PIREP):
-  EXTEND = 'pin'
+  ! cloud drift wind:
+  numobs = 0
+  ! acar (pirep):
+  extend = 'pin'
 
-  ! 1. TEMP:
-  OBSTYP = 'temp'
-  CALL OPEN_LAPSPRD_FILE_READ(POINTS_CHANNEL,SYSTEM_IN4TIME,EXTEND,STATUS)
-  IF (STATUS .NE. 1) THEN
-    PRINT*,'CONV_CDWACA: No ACAR (PIREP) temp data'
-  ELSE
-    STATUS = 0
-    DO
-      CALL READ_ACARS_OB(POINTS_CHANNEL,OBSTYP,OBSLAT,OBSLON,OBSELV,OBSTMP,OBSNON, &
-                               ASCTIM,0,GEOALT,STATUS)
-      IF (STATUS .NE. 0) EXIT
-      NUMOBS = NUMOBS+1
-      IF (NUMOBS .GT. MAXOBS) THEN
-        PRINT*,'CONV_CDW_ACA: Data array is too small, MAXOBS needs enlarge ',NUMOBS,MAXOBS
-        STOP
-      ENDIF
-      OBARRY(1:7,NUMOBS) = RVALUE_MISSING
-      OBARRY(1,NUMOBS) = OBSLAT
-      OBARRY(2,NUMOBS) = OBSLON
-      IF (GEOALT) THEN
-        ! GEOMETRIC HEIGHT:
-        OBARRY(3,NUMOBS) = OBSELV
-      ELSE
-        ! PRESSURE HEIGHT IN STANDARD ATMOSPHERE:
-        OBARRY(4,NUMOBS) = ZTOPSA(OBSELV)	! ZTOPSA RETURNS PRESSURE IN MB
-      ENDIF
-      OBARRY(7,NUMOBS) = OBSTMP-273.15	! READ_ACARS_OB RETURNS KELVIN
-      OBSINT(1,NUMOBS) = 41		! USE BUFR REPORT TYPE CODE: 
-                                        ! 41 ACARS TEMPERATURE
-      IF (GEOALT) THEN 
-        OBSINT(2,NUMOBS) = 666		! TEMPORARILY USE 666 FOR WIDSOM DATA
-      ELSE
-        OBSINT(2,NUMOBS) = 130		! PILOR REPORT: TEMPERATURE
-      ENDIF
-      CALL CV_ASC_I4TIME(ASCTIM,OBSINT(3,NUMOBS))
-      !PRINT*,'ACAR TEMP: ',OBSLAT,OBSLON,OBSELV,OBSTMP,OBSINT(3,NUMOBS)
-    ENDDO
-  ENDIF
-  CLOSE(POINTS_CHANNEL)
-  PRINT*,'CONV_CDWACA: Total of CDW + ACAR TEMP OBS: ',NUMOBS
+  ! 1. temp:
+  obstyp = 'temp'
+  call open_lapsprd_file_read(points_channel,system_in4time,extend,status)
+  if (status .ne. 1) then
+    print*,'conv_cdwaca: no acar (pirep) temp data'
+  else
+    status = 0
+    do
+      call read_acars_ob(points_channel,obstyp,obslat,obslon,obselv,obstmp,obsnon, &
+                               asctim,0,geoalt,status)
+      if (status .ne. 0) exit
+      numobs = numobs+1
+      if (numobs .gt. maxobs) then
+        print*,'conv_cdw_aca: data array is too small, maxobs needs enlarge ',numobs,maxobs
+        stop
+      endif
+      obarry(1:7,numobs) = rvalue_missing
+      obarry(1,numobs) = obslat
+      obarry(2,numobs) = obslon
+      if (geoalt) then
+        ! geometric height:
+        obarry(3,numobs) = obselv
+      else
+        ! pressure height in standard atmosphere:
+        obarry(4,numobs) = ztopsa(obselv)	! ztopsa returns pressure in mb
+      endif
+      obarry(7,numobs) = obstmp-273.15	! read_acars_ob returns kelvin
+      obsint(1,numobs) = 41		! use bufr report type code: 
+                                        ! 41 acars temperature
+      if (geoalt) then 
+        obsint(2,numobs) = 666		! temporarily use 666 for widsom data
+      else
+        obsint(2,numobs) = 130		! pilor report: temperature
+      endif
+      call cv_asc_i4time(asctim,obsint(3,numobs))
+      !print*,'acar temp: ',obslat,obslon,obselv,obstmp,obsint(3,numobs)
+    enddo
+  endif
+  close(points_channel)
+  print*,'conv_cdwaca: total of cdw + acar temp obs: ',numobs
 
-  ! 1. WIND:
-  OBSTYP = 'wind'
-  CALL OPEN_LAPSPRD_FILE_READ(POINTS_CHANNEL,SYSTEM_IN4TIME,EXTEND,STATUS)
-  IF (STATUS .NE. 1) THEN
-    PRINT*,'CONV_CDWACA: No ACAR (PIREP) wind data'
-  ELSE
-    STATUS = 0
-    DO
-      CALL READ_ACARS_OB(POINTS_CHANNEL,OBSTYP,OBSLAT,OBSLON,OBSELV,OBSDIR,OBSSPD, &
-                               ASCTIM,0,GEOALT,STATUS)
-      IF (STATUS .NE. 0) EXIT
-      NUMOBS = NUMOBS+1
-      IF (NUMOBS .GT. MAXOBS) THEN
-        PRINT*,'CONV_CDWACA: Data array is too small, MAXOBS needs enlarge ',NUMOBS,MAXOBS
-        STOP
-      ENDIF
-      OBARRY(1:7,NUMOBS) = RVALUE_MISSING
-      OBARRY(1,NUMOBS) = OBSLAT
-      OBARRY(2,NUMOBS) = OBSLON
-      IF (GEOALT) THEN 
-        ! GEOMETRIC HEIGHT:
-        OBARRY(3,NUMOBS) = OBSELV
-      ELSE
-        ! PRESSURE HEIGHT IN STANDARD ATMOSPHERE:
-        OBARRY(4,NUMOBS) = ZTOPSA(OBSELV)	! ZTOPSA RETURNS PRESSURE IN MB
-      ENDIF
-      CALL DISP_TO_UV(OBSDIR,OBSSPD,OBSTMP,OBSNON)
-      OBARRY(5,NUMOBS) = OBSTMP !OBSDIR	! WHEN CALLING UVTRUE_TO_UVGRID
-      OBARRY(6,NUMOBS) = OBSNON !OBSSPD
-      OBSINT(1,NUMOBS) = 41		! USE BUFR REPORT TYPE CODE: 
-                                        ! ACARS WIND
-      IF (GEOALT) THEN
-        OBSINT(2,NUMOBS) = 666		! TEMPORARILY USE 666 FOR WISDOM DATA
-      ELSE
-        OBSINT(2,NUMOBS) = 230		! PILOR REPORT: WIND
-      ENDIF
-      CALL CV_ASC_I4TIME(ASCTIM,OBSINT(3,NUMOBS))
-      ! PRINT*,'ACAR WIND: ',OBSLAT,OBSLON,OBSELV,OBSDIR,OBSSPD,OBSINT(3,NUMOBS)
-    ENDDO
-  ENDIF
-  CLOSE(POINTS_CHANNEL)
+  ! 1. wind:
+  obstyp = 'wind'
+  call open_lapsprd_file_read(points_channel,system_in4time,extend,status)
+  if (status .ne. 1) then
+    print*,'conv_cdwaca: no acar (pirep) wind data'
+  else
+    status = 0
+    do
+      call read_acars_ob(points_channel,obstyp,obslat,obslon,obselv,obsdir,obsspd, &
+                               asctim,0,geoalt,status)
+      if (status .ne. 0) exit
+      numobs = numobs+1
+      if (numobs .gt. maxobs) then
+        print*,'conv_cdwaca: data array is too small, maxobs needs enlarge ',numobs,maxobs
+        stop
+      endif
+      obarry(1:7,numobs) = rvalue_missing
+      obarry(1,numobs) = obslat
+      obarry(2,numobs) = obslon
+      if (geoalt) then 
+        ! geometric height:
+        obarry(3,numobs) = obselv
+      else
+        ! pressure height in standard atmosphere:
+        obarry(4,numobs) = ztopsa(obselv)	! ztopsa returns pressure in mb
+      endif
+      call disp_to_uv(obsdir,obsspd,obstmp,obsnon)
+      obarry(5,numobs) = obstmp !obsdir	! when calling uvtrue_to_uvgrid
+      obarry(6,numobs) = obsnon !obsspd
+      obsint(1,numobs) = 41		! use bufr report type code: 
+                                        ! acars wind
+      if (geoalt) then
+        obsint(2,numobs) = 666		! temporarily use 666 for wisdom data
+      else
+        obsint(2,numobs) = 230		! pilor report: wind
+      endif
+      call cv_asc_i4time(asctim,obsint(3,numobs))
+      ! print*,'acar wind: ',obslat,obslon,obselv,obsdir,obsspd,obsint(3,numobs)
+    enddo
+  endif
+  close(points_channel)
 
-  EXTEND = 'cdw'
-  CALL OPEN_LAPSPRD_FILE_READ(POINTS_CHANNEL,SYSTEM_IN4TIME,EXTEND,STATUS)
-  IF (STATUS .NE. 1) THEN
-    PRINT*,'CONV_CDWACA: No cloud drift wind data'
-  ELSE
-    STATUS = 0
-    DO
-      CALL READ_LAPS_CDW_WIND(POINTS_CHANNEL,OBSLAT,OBSLON,OBSPRS,OBSDIR,OBSSPD, &
-                               ASCTIM,STATUS)
-      IF (STATUS .NE. 0) EXIT
-      NUMOBS = NUMOBS+1
-      IF (NUMOBS .GT. MAXOBS) THEN
-        PRINT*,'CONV_CDW_ACA: Data array is too small, MAXOBS needs enlarge ',NUMOBS,MAXOBS
-        STOP
-      ENDIF
-      ! PRINT*,'CONV_CDWACA: FOUND CDW DATA, COMPLETE THIS CODE'
+  extend = 'cdw'
+  call open_lapsprd_file_read(points_channel,system_in4time,extend,status)
+  if (status .ne. 1) then
+    print*,'conv_cdwaca: no cloud drift wind data'
+  else
+    status = 0
+    do
+      call read_laps_cdw_wind(points_channel,obslat,obslon,obsprs,obsdir,obsspd, &
+                               asctim,status)
+      if (status .ne. 0) exit
+      numobs = numobs+1
+      if (numobs .gt. maxobs) then
+        print*,'conv_cdw_aca: data array is too small, maxobs needs enlarge ',numobs,maxobs
+        stop
+      endif
+      ! print*,'conv_cdwaca: found cdw data, complete this code'
 
-      OBARRY(1:7,NUMOBS) = RVALUE_MISSING
-      OBARRY(1,NUMOBS) = OBSLAT
-      OBARRY(2,NUMOBS) = OBSLON
-      OBARRY(4,NUMOBS) = OBSPRS/100.0	! BUFR POB IN MB
+      obarry(1:7,numobs) = rvalue_missing
+      obarry(1,numobs) = obslat
+      obarry(2,numobs) = obslon
+      obarry(4,numobs) = obsprs/100.0	! bufr pob in mb
 
-      ! CONVERT DIR/SPD INTO U/V FOR BUFR
-      CALL DISP_TO_UV(OBSDIR,OBSSPD,UCMPNT,VCMPNT)
-      OBARRY(5,NUMOBS) = UCMPNT
-      OBARRY(6,NUMOBS) = VCMPNT
+      ! convert dir/spd into u/v for bufr
+      call disp_to_uv(obsdir,obsspd,ucmpnt,vcmpnt)
+      obarry(5,numobs) = ucmpnt
+      obarry(6,numobs) = vcmpnt
 
-      OBSINT(1,NUMOBS) = 63		! USE BUFR REPORT TYPE CODE: 
-                                        ! 63 SATELLITE DERIVED WIND
-      OBSINT(2,NUMOBS) = 241		! RERORT TYPE: SATWIND
-      CALL CV_ASC_I4TIME(ASCTIM,OBSINT(3,NUMOBS))
-      ! PRINT*,'CDW: ',OBSLAT,OBSLON,OBSPRS,OBSDIR,OBSSPD,OBSINT(3,NUMOBS)
-    ENDDO
-  ENDIF
-  CLOSE(POINTS_CHANNEL)
-  PRINT*,'CONV_CDWACA: Total of CDW OBS: ',NUMOBS
+      obsint(1,numobs) = 63		! use bufr report type code: 
+                                        ! 63 satellite derived wind
+      obsint(2,numobs) = 241		! rerort type: satwind
+      call cv_asc_i4time(asctim,obsint(3,numobs))
+      ! print*,'cdw: ',obslat,obslon,obsprs,obsdir,obsspd,obsint(3,numobs)
+    enddo
+  endif
+  close(points_channel)
+  print*,'conv_cdwaca: total of cdw obs: ',numobs
 
-  PRINT*,'CONV_CDWACA: Total of CDW + ACAR TEMP + ACAR WIND OBS: ',NUMOBS
+  print*,'conv_cdwaca: total of cdw + acar temp + acar wind obs: ',numobs
 
-  IF (NUMOBS .EQ. 0) RETURN
+  if (numobs .eq. 0) return
 
-  IF (FORMAT_REQUEST .EQ. 'BUFR') THEN
-    CALL BUFR_CDWACA(NUMOBS,OBARRY,OBSINT)
-  ELSE IF (FORMAT_REQUEST .EQ. 'WRF' ) THEN
-    CALL WRFD_CDWACA(NUMOBS,OBARRY,OBSINT)
-  ENDIF
+  if (format_request .eq. 'bufr') then
+    call bufr_cdwaca(numobs,obarry,obsint)
+  else if (format_request .eq. 'wrf' ) then
+    call wrfd_cdwaca(numobs,obarry,obsint)
+  endif
 
-END SUBROUTINE CONV_CDWACA
+end subroutine conv_cdwaca
 
 
-SUBROUTINE READ_RADAR
+subroutine read_radar
 
 !==============================================================================
-!doc  THIS ROUTINE READS MULTIPLE RADAR RADIAL WIND VELOCITY USING LAPS'
-!doc  GET_MULTIRADAR_VEL.
+!doc  this routine reads multiple radar radial wind velocity using laps'
+!doc  get_multiradar_vel.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	MAR 2008
+!doc  history:
+!doc	creation:	yuanfu xie	mar 2008
 !==============================================================================
 
-  USE LAPS_PARAMS
-  USE MEM_NAMELIST		! LAPS WIND PARAMETER MODULE
+  use laps_params
+  use mem_namelist		! laps wind parameter module
 
-  IMPLICIT NONE
+  implicit none
 
-  ! LOCAL VARIABLES:
-  CHARACTER*31 :: RADEXT(MAX_RADARS)	! POSSIBLE RADAR NAME EXTENSIONS
-  CHARACTER*4  :: RADNAM(MAX_RADARS)	! RADAR STATION NAMES
-  INTEGER      :: NRADAR		! NUMBER OF RADAR AVAILABLE
-  INTEGER      :: LCYCLE		! LAPS CYCLE TIME
-  INTEGER      :: STTRAD,STTNQY 	! RADAR AND ITS NYQUIST STATUS
-  INTEGER      :: NGRDRD(MAX_RADARS) 	! NUMBER OF GRIDPOINTS WITH MEASURABLE VEL
-  INTEGER      :: NGRDRD_old(MAX_RADARS) 	! NUMBER OF GRIDPOINTS WITH MEASURABLE VEL
-  INTEGER      :: RADTIM(MAX_RADARS)	! RADAR OBSERVATION TIME
-  INTEGER      :: RADIDS(MAX_RADARS) 	! RADAR IDS
-  INTEGER      :: I,J,K,L
-  LOGICAL      :: CLUTTR		! .TRUE. -- REMOVE 3D RADAR CLUTTER
-  REAL         :: RADVEL_old(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),MAX_RADARS)
-  REAL         :: RADVEL(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),MAX_RADARS)
-                  ! RADAR 4D VELOCITY GRID
-  REAL         :: RADNQY(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),MAX_RADARS)
-                  ! RADAR 4D NYQUIST VELOCITY
-  REAL         :: UVZERO(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),2)
-                  ! ZERO UV GRIDS USED FOR CALLING LAPS QC_RADAR_OBS
-  REAL         :: UVBKGD(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),2)
-                  ! UV BACKGROUND GRIDS USED FOR CALLING LAPS QC_RADAR_OBS
-  REAL         :: UV4DML(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3),-1:1,2)
-                  ! UV BACKGROUND GRIDS USED FOR CALLING LAPS QC_RADAR_OBS
-  REAL         :: VOLNQY(MAX_RADARS)		! VOLUME NYQUIST VELOCITY
-  REAL         :: RADLAT(MAX_RADARS),RADLON(MAX_RADARS),RADHGT(MAX_RADARS)
-  REAL         :: UVGRID(2)
+  ! local variables:
+  character*31 :: radext(max_radars)	! possible radar name extensions
+  character*4  :: radnam(max_radars)	! radar station names
+  integer      :: nradar		! number of radar available
+  integer      :: lcycle		! laps cycle time
+  integer      :: sttrad,sttnqy 	! radar and its nyquist status
+  integer      :: ngrdrd(max_radars) 	! number of gridpoints with measurable vel
+  integer      :: ngrdrd_old(max_radars) 	! number of gridpoints with measurable vel
+  integer      :: radtim(max_radars)	! radar observation time
+  integer      :: radids(max_radars) 	! radar ids
+  integer      :: i,j,k,l
+  logical      :: cluttr		! .true. -- remove 3d radar clutter
+  real         :: radvel_old(number_gridpts(1),number_gridpts(2),number_gridpts(3),max_radars)
+  real         :: radvel(number_gridpts(1),number_gridpts(2),number_gridpts(3),max_radars)
+                  ! radar 4d velocity grid
+  real         :: radnqy(number_gridpts(1),number_gridpts(2),number_gridpts(3),max_radars)
+                  ! radar 4d nyquist velocity
+  real         :: uvzero(number_gridpts(1),number_gridpts(2),number_gridpts(3),2)
+                  ! zero uv grids used for calling laps qc_radar_obs
+  real         :: uvbkgd(number_gridpts(1),number_gridpts(2),number_gridpts(3),2)
+                  ! uv background grids used for calling laps qc_radar_obs
+  real         :: uv4dml(number_gridpts(1),number_gridpts(2),number_gridpts(3),-1:1,2)
+                  ! uv background grids used for calling laps qc_radar_obs
+  real         :: volnqy(max_radars)		! volume nyquist velocity
+  real         :: radlat(max_radars),radlon(max_radars),radhgt(max_radars)
+  real         :: uvgrid(2)
 
-  INCLUDE 'main_sub.inc'
+  include 'main_sub.inc'
 
-  CLUTTR = .TRUE.		! TRUE. -- REMOVE 3D RADAR CLUTTER
-  RADARS_TIMETOL = 900
-  CALL GET_MULTIRADAR_VEL(SYSTEM_IN4TIME,RADARS_TIMETOL,RADTIM,MAX_RADARS, &
-                           NRADAR,RADEXT,RVALUE_MISSING,CLUTTR, &
-                           NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3), &
-                           RADVEL,RADNQY,RADIDS,VOLNQY,NGRDRD,RADLAT,RADLON,RADHGT, &
-                           RADNAM,STTRAD,STTNQY)
+  cluttr = .true.		! true. -- remove 3d radar clutter
+  radars_timetol = 900
+  call get_multiradar_vel(system_in4time,radars_timetol,radtim,max_radars, &
+                           nradar,radext,rvalue_missing,cluttr, &
+                           number_gridpts(1),number_gridpts(2),number_gridpts(3), &
+                           radvel,radnqy,radids,volnqy,ngrdrd,radlat,radlon,radhgt, &
+                           radnam,sttrad,sttnqy)
 
-  ! SET UV ZERO GRIDS:
-  UVZERO = 0.0
+  ! set uv zero grids:
+  uvzero = 0.0
 
-  ! GET LAPS BACKGROUND:
-  CALL GET_LAPS_CYCLE_TIME(LCYCLE,STTRAD)
-  CALL GET_FG_WIND_NEW(SYSTEM_IN4TIME,LCYCLE,NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                        NUMBER_GRIDPTS(3),-1,1,UV4DML(1,1,1,-1,1),UV4DML(1,1,1,-1,2), &
-                        UVBKGD(1,1,1,1),UVBKGD(1,1,1,2),STTRAD)
+  ! get laps background:
+  call get_laps_cycle_time(lcycle,sttrad)
+  call get_fg_wind_new(system_in4time,lcycle,number_gridpts(1),number_gridpts(2), &
+                        number_gridpts(3),-1,1,uv4dml(1,1,1,-1,1),uv4dml(1,1,1,-1,2), &
+                        uvbkgd(1,1,1,1),uvbkgd(1,1,1,2),sttrad)
 
-  ! CONVERT TO GRID NORTH FROM TRUE NORTH:
-  IF (( .NOT. L_GRID_NORTH_BKG) .AND. L_GRID_NORTH_ANAL) THEN
-    WRITE(6,*) ' Rotating first guess (background) to grid north'
+  ! convert to grid north from true north:
+  if (( .not. l_grid_north_bkg) .and. l_grid_north_anal) then
+    write(6,*) ' rotating first guess (background) to grid north'
 
-    DO K=1,NUMBER_GRIDPTS(3)
-      DO J=1,NUMBER_GRIDPTS(2)
-        DO I=1,NUMBER_GRIDPTS(1)
-          CALL UVTRUE_TO_UVGRID(UVBKGD(1,1,1,1),UVBKGD(1,1,1,2), &
-                                 UVGRID(1),UVGRID(2),DOMAIN_LONGITD(I,J))
-          UVBKGD(i,j,k,1:2) = UVGRID(1:2)
-        ENDDO
-      ENDDO
-    ENDDO
-  ENDIF ! END OF CONVERSION TO GRID NORTH
+    do k=1,number_gridpts(3)
+      do j=1,number_gridpts(2)
+        do i=1,number_gridpts(1)
+          call uvtrue_to_uvgrid(uvbkgd(1,1,1,1),uvbkgd(1,1,1,2), &
+                                 uvgrid(1),uvgrid(2),domain_longitd(i,j))
+          uvbkgd(i,j,k,1:2) = uvgrid(1:2)
+        enddo
+      enddo
+    enddo
+  endif ! end of conversion to grid north
 
 
-  RADVEL_old = RADVEL
-  NGRDRD_old = NGRDRD
+  radvel_old = radvel
+  ngrdrd_old = ngrdrd
 
-  ! NYQUIST UNFOLDING:
-!!! UNFINISHED: NEED MORE WORK APR. 2008
-  DO L=1,NRADAR
-    ! QC and unfolding radar nyquist:
-!    CALL QC_RADAR_OBS(NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3), &
-!                       RVALUE_MISSING,RADVEL(1,1,1,L),RADNQY(1,1,1,L),NGRDRD(L), &
-!                       DOMAIN_LATITDE,DOMAIN_LONGITD,RADLAT(L),RADLON(L),RADHGT(L), &
-!                       UVZERO(1,1,1,1),UVZERO(1,1,1,2),UVBKGD(1,1,1,1),UVBKGD(1,1,1,2), &
-!                       VOLNQY(L),L_CORRECT_UNFOLDING,L_GRID_NORTH,STTRAD)
-    PRINT*,'STATUS OF QC_RADAR_OBS: ',STTRAD
+  ! nyquist unfolding:
+!!! unfinished: need more work apr. 2008
+  do l=1,nradar
+    ! qc and unfolding radar nyquist:
+!    call qc_radar_obs(number_gridpts(1),number_gridpts(2),number_gridpts(3), &
+!                       rvalue_missing,radvel(1,1,1,l),radnqy(1,1,1,l),ngrdrd(l), &
+!                       domain_latitde,domain_longitd,radlat(l),radlon(l),radhgt(l), &
+!                       uvzero(1,1,1,1),uvzero(1,1,1,2),uvbkgd(1,1,1,1),uvbkgd(1,1,1,2), &
+!                       volnqy(l),l_correct_unfolding,l_grid_north,sttrad)
+    print*,'status of qc_radar_obs: ',sttrad
 
-  IF (NGRDRD_old(L) .NE. NGRDRD(L)) PRINT*,'Number grid RADAR CHANGE: ',ngrdrd_old(L),ngrdrd(L)
-    DO K=1,NUMBER_GRIDPTS(3)
-      DO J=1,NUMBER_GRIDPTS(2)
-        DO I=1,NUMBER_GRIDPTS(1)
-          IF (RADVEL(I,J,K,L) .NE. RVALUE_MISSING) PRINT*,'RADIAL: ', &
-	      RADVEL(I,J,K,L),RADNQY(I,J,K,L),I,J,K,L,NGRDRD(L),VOLNQY(L)
-          IF (RADVEL_old(i,j,k,L) .NE. RADVEL(i,j,k,L)) print*,'Unfolded: ', &
+  if (ngrdrd_old(l) .ne. ngrdrd(l)) print*,'number grid radar change: ',ngrdrd_old(l),ngrdrd(l)
+    do k=1,number_gridpts(3)
+      do j=1,number_gridpts(2)
+        do i=1,number_gridpts(1)
+          if (radvel(i,j,k,l) .ne. rvalue_missing) print*,'radial: ', &
+	      radvel(i,j,k,l),radnqy(i,j,k,l),i,j,k,l,ngrdrd(l),volnqy(l)
+          if (radvel_old(i,j,k,l) .ne. radvel(i,j,k,l)) print*,'unfolded: ', &
               radvel_old(i,j,k,l),radvel(i,j,k,l)
-        ENDDO
-      ENDDO
-    ENDDO
+        enddo
+      enddo
+    enddo
 
-  ENDDO
+  enddo
 
-  STOP
+  stop
 
-END SUBROUTINE READ_RADAR
+end subroutine read_radar

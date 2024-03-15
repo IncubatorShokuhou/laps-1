@@ -1,143 +1,143 @@
-!dis Forecast Systems Laboratory
-!dis NOAA/OAR/ERL/FSL
-!dis 325 Broadway
-!dis Boulder, CO 80303
+!dis forecast systems laboratory
+!dis noaa/oar/erl/fsl
+!dis 325 broadway
+!dis boulder, co 80303
 !dis
-!dis Forecast Research Division
-!dis Local Analysis and Prediction Branch
-!dis LAPS
+!dis forecast research division
+!dis local analysis and prediction branch
+!dis laps
 !dis
-!dis This software and its documentation are in the public domain and
-!dis are furnished "as is." The United States government, its
+!dis this software and its documentation are in the public domain and
+!dis are furnished "as is." the united states government, its
 !dis instrumentalities, officers, employees, and agents make no
 !dis warranty, express or implied, as to the usefulness of the software
-!dis and documentation for any purpose. They assume no responsibility
+!dis and documentation for any purpose. they assume no responsibility
 !dis (1) for the use of the software and documentation; or (2) to provide
 !dis technical support to users.
 !dis
-!dis Permission to use, copy, modify, and distribute this software is
+!dis permission to use, copy, modify, and distribute this software is
 !dis hereby granted, provided that the entire disclaimer notice appears
-!dis in all copies. All modifications to this software must be clearly
+!dis in all copies. all modifications to this software must be clearly
 !dis documented, and are solely the responsibility of the agent making
-!dis the modifications. If significant modifications or enhancements
-!dis are made to this software, the FSL Software Policy Manager
+!dis the modifications. if significant modifications or enhancements
+!dis are made to this software, the fsl software policy manager
 !dis (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
 
-MODULE MemoryMngr
+module memorymngr
 
 !==========================================================
-!  This module manages memory allocation and deallocation.
+!  this module manages memory allocation and deallocation.
 !
-!  HISTORY:
-!	Creation: YUANFU XIE	8-2005
+!  history:
+!	creation: yuanfu xie	8-2005
 !==========================================================
 
-  USE Definition
+  use definition
 
-CONTAINS
+contains
 
-SUBROUTINE LAPSMemo
+subroutine lapsmemo
 
 !==========================================================
-!  This routine allocates necessary memory for STMAS usage.
+!  this routine allocates necessary memory for stmas usage.
 !
-!  HISTORY: MAY. 2005 by YUANFU XIE.
+!  history: may. 2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: err
+  integer :: err
 
-  ALLOCATE(i4prev(numtmf), &
+  allocate(i4prev(numtmf), &
 	   latgrd(numgrd(1),numgrd(2)), &
 	   longrd(numgrd(1),numgrd(2)), &
 	   topogr(numgrd(1),numgrd(2)), &
 	   rawobs(4,numtmf*mxstts,numvar), &
 	   bkgobs(numtmf*mxstts,numvar), &
-	   stanam(numtmf*mxstts,numvar), &		!Added by min-ken.hsieh: stanam for STMASVer
-	   STAT=err)
-  IF (err .NE. 0) THEN
-    PRINT*,'STMAS>GetMemos: cannot allocate enough memory!'
-    STOP
-  ENDIF
+	   stanam(numtmf*mxstts,numvar), &		!added by min-ken.hsieh: stanam for stmasver
+	   stat=err)
+  if (err .ne. 0) then
+    print*,'stmas>getmemos: cannot allocate enough memory!'
+    stop
+  endif
 
-END SUBROUTINE LAPSMemo
+end subroutine lapsmemo
 
-SUBROUTINE LAPSRels
+subroutine lapsrels
 
 !==========================================================
-!  This routine releases necessary memory for STMAS usage.
+!  this routine releases necessary memory for stmas usage.
 !
-!  HISTORY: MAY. 2005 by YUANFU XIE.
+!  history: may. 2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: err
+  integer :: err
 
 !
 ! modified by min-ken hsieh
 ! because we still need bkgobs for verify
-! we deallocate it in STMASVer subroutine
+! we deallocate it in stmasver subroutine
 !
-  DEALLOCATE(i4prev, &
+  deallocate(i4prev, &
 	     latgrd, &
 	     longrd, &
 	     topogr, &
 	     rawobs, &
-	     STAT=err)
+	     stat=err)
 
-  IF (err .NE. 0) THEN
-    PRINT*,'STMAS>RelsMemo: cannot delete allocated memory!'
-    STOP
-  ENDIF
+  if (err .ne. 0) then
+    print*,'stmas>relsmemo: cannot delete allocated memory!'
+    stop
+  endif
 
-END SUBROUTINE LAPSRels
+end subroutine lapsrels
 
-SUBROUTINE IntrMemo
+subroutine intrmemo
 
 !==========================================================
-!  This routine allocates necessary memory for interactive
+!  this routine allocates necessary memory for interactive
 !  variables.
 !
-!  HISTORY: AUG. 2005 by YUANFU XIE.
+!  history: aug. 2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: err
+  integer :: err
 
-  ALLOCATE(bkgrnd(numgrd(1),numgrd(2),numtmf,numvar), &
-           uncovr(numgrd(1),numgrd(2),numtmf,numvar), &	! Add by min-ken, uncovered used in 
-	   diagnl(numgrd(1),numgrd(2),numvar), &	! Add B's diagonal array for J_b term
-	   lndfac(numgrd(1),numgrd(2)), &		! AddBkgrd and STMASAna
+  allocate(bkgrnd(numgrd(1),numgrd(2),numtmf,numvar), &
+           uncovr(numgrd(1),numgrd(2),numtmf,numvar), &	! add by min-ken, uncovered used in 
+	   diagnl(numgrd(1),numgrd(2),numvar), &	! add b's diagonal array for j_b term
+	   lndfac(numgrd(1),numgrd(2)), &		! addbkgrd and stmasana
 	   qc_obs(4,numtmf*mxstts,numvar), &
 	   weight(numtmf*mxstts,numvar), &
 	   indice(6,numtmf*mxstts,numvar), &
 	   coeffs(6,numtmf*mxstts,numvar), &
-	   STAT=err)
-  IF (err .NE. 0) THEN
-    PRINT*,'STMAS>IntrMemo: cannot allocate memory!'
-    STOP
-  ENDIF
+	   stat=err)
+  if (err .ne. 0) then
+    print*,'stmas>intrmemo: cannot allocate memory!'
+    stop
+  endif
 
-END SUBROUTINE IntrMemo
+end subroutine intrmemo
 
-SUBROUTINE IntrRels
+subroutine intrrels
 
 !==========================================================
-!  This routine releases necessary memory for interactive
+!  this routine releases necessary memory for interactive
 !  variables.
 !
-!  HISTORY: AUG. 2005 by YUANFU XIE.
+!  history: aug. 2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: err
+  integer :: err
 
-  DEALLOCATE(bkgrnd, &
+  deallocate(bkgrnd, &
 	     uncovr, &
              diagnl, &
 	     lndfac, &
@@ -145,58 +145,58 @@ SUBROUTINE IntrRels
 	     weight, &
 	     indice, &
 	     coeffs, &
-	     STAT=err)
-  IF (err .NE. 0) THEN
-    PRINT*,'STMAS>IntrMemo: cannot release memory!'
-    STOP
-  ENDIF
+	     stat=err)
+  if (err .ne. 0) then
+    print*,'stmas>intrmemo: cannot release memory!'
+    stop
+  endif
 
-END SUBROUTINE IntrRels
+end subroutine intrrels
 
-SUBROUTINE STMASMem
+subroutine stmasmem
 
 !==========================================================
-!  This routine allocates necessary memory for STMAS 
+!  this routine allocates necessary memory for stmas 
 !  analysis variables.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: err
+  integer :: err
 
-  ALLOCATE(analys(numgrd(1),numgrd(2),numgrd(3),numvar), &
-	   STAT=err)
-  IF (err .NE. 0) THEN
-    PRINT*,'STMAS>STMASMem: cannot allocate memory!'
-    STOP
-  ENDIF
+  allocate(analys(numgrd(1),numgrd(2),numgrd(3),numvar), &
+	   stat=err)
+  if (err .ne. 0) then
+    print*,'stmas>stmasmem: cannot allocate memory!'
+    stop
+  endif
 
-END SUBROUTINE STMASMem
+end subroutine stmasmem
 
-SUBROUTINE STMARels
+subroutine stmarels
 
 !==========================================================
-!  This routine allocates necessary memory for STMAS 
+!  this routine allocates necessary memory for stmas 
 !  analysis variables.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: err
+  integer :: err
 
-  DEALLOCATE(analys, &
-	     STAT=err)
-  IF (err .NE. 0) THEN
-    PRINT*,'STMAS>STMASMem: cannot release memory!'
-    STOP
-  ENDIF
+  deallocate(analys, &
+	     stat=err)
+  if (err .ne. 0) then
+    print*,'stmas>stmasmem: cannot release memory!'
+    stop
+  endif
 
-END SUBROUTINE STMARels
+end subroutine stmarels
 
-END MODULE MemoryMngr
+end module memorymngr

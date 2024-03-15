@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,26 +29,26 @@ cdis
 cdis 
 cdis 
 cdis 
-       Program ln3_driver
+       program ln3_driver
 c
-c Program transforms WSI/NOWRAD nexrad layer composite/echo tops/VIL 
-c to the laps domain (subroutine NOWRAD_to_LAPS). The data
-c have been mosaiced by WSI corporation and FSL's Facility Division stores them
-c FD decodes these WSI files and stores them as netCDF files
+c program transforms wsi/nowrad nexrad layer composite/echo tops/vil 
+c to the laps domain (subroutine nowrad_to_laps). the data
+c have been mosaiced by wsi corporation and fsl's facility division stores them
+c fd decodes these wsi files and stores them as netcdf files
 c with names yyjjjhhmm_ll _lm and _lh, for layer low (ll), layer middle (lm) and
-c layer high (lh). Echo Tops (et) and VIL (vi).
+c layer high (lh). echo tops (et) and vil (vi).
 c
 
        call get_grid_dim_xy(nx_l,ny_l,istatus)
        if(istatus.eq.1)then
-         write(*,*)'nx_l and ny_l Parameters obtained'
+         write(*,*)'nx_l and ny_l parameters obtained'
        else
-          write(*,*)'IStatus = ',IStatus,' Error - Get_laps_config'
-          write(*,*)'Terminating WSI 3d radar ingest (ln3).'
+          write(*,*)'istatus = ',istatus,' error - get_laps_config'
+          write(*,*)'terminating wsi 3d radar ingest (ln3).'
           stop
        end if
 
-       call ln3_driver_sub(NX_L,NY_L)
+       call ln3_driver_sub(nx_l,ny_l)
        stop
        end
 c
@@ -106,7 +106,7 @@ c
        integer   i4time_data(n_data_types)
        integer   i4time_data_p(n_data_types)
        integer   i4time_now_gg
-       integer   i4_validTime
+       integer   i4_validtime
        integer   istatus
        integer   kstatus
        integer   lstatus
@@ -146,7 +146,7 @@ c
 c
        i4time_cur = i4time_now_gg()
 c
-c get the latest ln3 product (ln3 is laps nexrad 3d incoming from WSI)
+c get the latest ln3 product (ln3 is laps nexrad 3d incoming from wsi)
 c
        call get_directory('ln3',dir_ln3,lend)
        call get_file_time(dir_ln3,i4time_cur,i4time_nearest_ln3) 
@@ -154,12 +154,12 @@ c
 c get file closest in time to the current time.
 c
        n=index(cpathwsi3d,' ')
-       write(*,*)'Data pathname: ',cpathwsi3d(1:n-1)
+       write(*,*)'data pathname: ',cpathwsi3d(1:n-1)
 
        nfiles=0
        do k=1,n_data_types
 
-          write(6,*)'WSI 3d data type: ',c_data_types(k)
+          write(6,*)'wsi 3d data type: ',c_data_types(k)
           c_filespec = cpathwsi3d(1:n-1)//'*'//c_data_types(k)
           call get_file_time(c_filespec
      1          ,i4time_cur,i4time_nearest)
@@ -217,23 +217,23 @@ c     &.and.(i4time_nearest-i4time_nearest_ln3).lt.1500)then
 
        else     !nfiles_p .eq. 0
 
-          write(6,*)'No Current WSI 3d data - Terminating'
+          write(6,*)'no current wsi 3d data - terminating'
           return
 
        endif
 
        do k=1,nfiles_p
 
-          call make_fnam_lp(i4time_data_p(k),c_filetime,ISTATUS)
+          call make_fnam_lp(i4time_data_p(k),c_filetime,istatus)
 
           c_filenames_proc(k)=cpathwsi3d(1:n-1)//c_filetime//'_'//
      &c_type_found_p(k)
           nn=index(c_filenames_proc(k),' ')
-          write(6,*)'Filename Data: ',c_filenames_proc(k)(1:nn-1)
+          write(6,*)'filename data: ',c_filenames_proc(k)(1:nn-1)
  
        enddo
 c
-c This for output.  LAPS ln3 files as indicated.
+c this for output.  laps ln3 files as indicated.
 c
        ext_ln3 = 'ln3'
 
@@ -244,22 +244,22 @@ c
        var_ln3(5)='rco'
        var_ln3(6)='vil'
 
-       comment_ln3(1) = 'WSI NEXRAD low-level layer composite
-     &reflectivity (dBZ)'
-       comment_ln3(2) = 'WSI NEXRAD mid-level layer composite
-     &reflectivity (dBZ)'
-       comment_ln3(3) = 'WSI NEXRAD high-level layer composite
-     &reflectivity (dBZ)'
-       comment_ln3(4) = 'WSI NEXRAD echo tops height (m)'
-       comment_ln3(5) = 'WSI NEXRAD composite reflectivity (dBZ)'
-       comment_ln3(6) = 'WSI NEXRAD vertically integrated liquid
+       comment_ln3(1) = 'wsi nexrad low-level layer composite
+     &reflectivity (dbz)'
+       comment_ln3(2) = 'wsi nexrad mid-level layer composite
+     &reflectivity (dbz)'
+       comment_ln3(3) = 'wsi nexrad high-level layer composite
+     &reflectivity (dbz)'
+       comment_ln3(4) = 'wsi nexrad echo tops height (m)'
+       comment_ln3(5) = 'wsi nexrad composite reflectivity (dbz)'
+       comment_ln3(6) = 'wsi nexrad vertically integrated liquid
      &(g/m3)'
 c
-c Definitions needed for acquiring LAPS latitude and longitude arrays.
+c definitions needed for acquiring laps latitude and longitude arrays.
 c
        call get_directory('static',dir_static,lend)
-       var_ll(1)='LAT'
-       var_ll(2)='LON'
+       var_ll(1)='lat'
+       var_ll(2)='lon'
 
        call find_domain_name(c_generic_dataroot,c_gridfname,istatus)
 
@@ -268,7 +268,7 @@ c
      &     istatus)
 
        if(istatus.eq.1)then
-          write(*,*)'LAPS lat/lon grid obtained'
+          write(*,*)'laps lat/lon grid obtained'
           write(*,*)
           do j=1,ny_l
              do i=1,nx_l
@@ -277,12 +277,12 @@ c
              end do
           end do
        else
-          write(6,*)'Unable to get lat/lon data'
-          write(6,*)'NOWRAD-ln3 process terminating'
+          write(6,*)'unable to get lat/lon data'
+          write(6,*)'nowrad-ln3 process terminating'
           stop
        end if
 c
-c Initialize the laps output data array
+c initialize the laps output data array
 c
        do k=1,n_data_types
        do j=1,ny_l
@@ -297,7 +297,7 @@ c
 c
 c
 c *****************************************************************************
-c process the WSI NEXRAD data. Remap to LAPS domain.  Generate output.
+c process the wsi nexrad data. remap to laps domain.  generate output.
 c *****************************************************************************
 c
        do k=1,nfiles_p
@@ -305,25 +305,25 @@ c
           ctype_data=c_filenames_proc(k)(nn-2:nn-1)
           write(6,*)'ctype data: ',ctype_data
 
-          call NEXRADWSI_to_LAPS(c_filenames_proc(k),
+          call nexradwsi_to_laps(c_filenames_proc(k),
      &                 msng_radar,
      &                 lines,elements,nlevs,
      &                 nx_l,ny_l,
      &                 lat,
      &                 lon,
-     &                 i4_validTime,
+     &                 i4_validtime,
      &                 remapped_prod,
      &                 istatus)
           if(istatus .eq. 1)then
-             write(6,*)'WSI data properly remapped'
+             write(6,*)'wsi data properly remapped'
           else
-             write(6,*)'Problem remapping the data'
+             write(6,*)'problem remapping the data'
           endif
 c
           percent_extreme_70=0.0
           percent_extreme_47=0.0
 c
-c c_data_types(4)='et': c_data_types(6)='vi' {echo tops and VIL}
+c c_data_types(4)='et': c_data_types(6)='vi' {echo tops and vil}
 c
           if( (ctype_data.ne.c_data_types(4)) .and.
      &         ctype_data.ne.c_data_types(6))then
@@ -355,7 +355,7 @@ c
                 call check_radar_data(nx_l,ny_l,baddata,remapped_prod,
      &kstatus)
                 if(kstatus.lt.0)then
-                   write(6,*)'Found Bad data points: ',kstatus
+                   write(6,*)'found bad data points: ',kstatus
                 endif
 c
 c load the appropriate array for output
@@ -374,9 +374,9 @@ c
 
                 write(6,*)'% extreme 70 = ',percent_extreme_70
                 write(6,*)'% extreme 47 = ',percent_extreme_47
-                write(6,*)'Not using this layer data'
-                write(*,*)'i4Time: ',i4time_data(k),
-     &              ' fTime: ',c_filenames_proc(k)(1:nn-1)
+                write(6,*)'not using this layer data'
+                write(*,*)'i4time: ',i4time_data(k),
+     &              ' ftime: ',c_filenames_proc(k)(1:nn-1)
 
              endif
 
@@ -384,11 +384,11 @@ c
 c
 c echo tops
 c
-             baddata=75.   !this is kft. Max value in WSI data = 70,000 ft.
+             baddata=75.   !this is kft. max value in wsi data = 70,000 ft.
              call check_radar_data(nx_l,ny_l,baddata,
      &remapped_prod,kstatus)
              if(kstatus.lt.0)then
-                write(6,*)'Found Bad data points: ',kstatus
+                write(6,*)'found bad data points: ',kstatus
              endif
              do j=1,ny_l
              do i=1,nx_l
@@ -409,7 +409,7 @@ c
              call check_radar_data(nx_l,ny_l,baddata,
      &remapped_prod,kstatus)
              if(kstatus.lt.0)then
-                write(6,*)'Found Bad data points: ',kstatus
+                write(6,*)'found bad data points: ',kstatus
              endif
              do j=1,ny_l
              do i=1,nx_l
@@ -445,20 +445,20 @@ c
      &                      istatus)
 
        if(istatus.eq.1)then
-          write(*,*)'LN3 file successfully written'
+          write(*,*)'ln3 file successfully written'
           do i=1,nfiles
              write(*,*)'for: ',c_filenames_proc(i)(1:nn-1)
           enddo
 
           write(*,*)'i4 time: ',i4time_data(1)
        else
-          write(*,*)'Error writing LN3 file - Terminating'
-          write(*,*)'i4Time: ',i4time_data(1),
-     &             ' fTime: ',c_filenames_proc(k)(1:nn-1)
+          write(*,*)'error writing ln3 file - terminating'
+          write(*,*)'i4time: ',i4time_data(1),
+     &             ' ftime: ',c_filenames_proc(k)(1:nn-1)
 
        end if
 
-1000   write(6,*)'finished in WSI-3dprod-driver'
+1000   write(6,*)'finished in wsi-3dprod-driver'
 
 16     stop
        end

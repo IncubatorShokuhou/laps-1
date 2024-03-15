@@ -7,7 +7,7 @@
 
        include 'trigd.inc'
 
-       IMPLICIT REAL*8(A,B,C,D,E,F,G,H,O,P,Q,R,S,T,U,V,W,X,Y,Z)
+       implicit real*8(a,b,c,d,e,f,g,h,o,p,q,r,s,t,u,v,w,x,y,z)
 
 !      vis of 6.0 means barely visible to the naked eye, lower amounts are more visible
 !      vis of 8.0 means barely visible to binoculars, lower amounts are more visible
@@ -46,9 +46,9 @@
        patm = 0.85
        call calc_extinction(90.,patm,airmass,zenext)
 
-!      Nighttime (based on al1) http://www.asterism.org/tutorials/tut28-1.htm
+!      nighttime (based on al1) http://www.asterism.org/tutorials/tut28-1.htm
 
-!      Moonlight (based on lunar elongations for a full moon)
+!      moonlight (based on lunar elongations for a full moon)
        i = 0
        i = i+1; alts_m(i) = 180. ;  maglim_m(i) = +4.8
        i = i+1; alts_m(i) = 90.  ;  maglim_m(i) = +5.3
@@ -59,7 +59,7 @@
        i = i+1; alts_m(i) =  1.  ;  maglim_m(i) = +1.0
        i = i+1; alts_m(i) =  0.25;  maglim_m(i) = -3.0
 
-!      Twilight (based on altdif)
+!      twilight (based on altdif)
        i = 0
 !      i = i+1; alts_t(i) = 28.   ;  maglim_t(i) =  5.0  ! consider extinction (alt = 12, value = 1.3)
 !      i = i+1; alts_t(i) = 26.   ;  maglim_t(i) =  4.7  ! consider extinction (alt = 10, value = 1.6)
@@ -79,7 +79,7 @@
            endif
        endif
 
-!      Daylight (based on elong)
+!      daylight (based on elong)
        i = 0
        i = i+1; alts_d(i) =180.  ;  maglim_d(i) = -2.75
        i = i+1; alts_d(i) =170.  ;  maglim_d(i) = -2.74
@@ -113,7 +113,7 @@
 
        j = 0 ! debug flag
 
-!      Nighttime limiting magnitude
+!      nighttime limiting magnitude
        if(al1 .gt. 0.0)then
            call correct_skyglow(sbdark,al1,patm,sb2,diff_mag)
            maglimn = b_to_maglim(sb2)
@@ -126,12 +126,12 @@
            call calc_extinction(al1,patm,airmass,extinction)
        endif
 
-!      Moonlight limiting magnitude (when moon is up)
+!      moonlight limiting magnitude (when moon is up)
        if(al2 .lt. al1)then                        
            call interp_1d(alts_m,maglim_m,nmag_m,elgmc,maglimm1,-99.9,j)
            phase_angle_deg = 180. - elgms
 
-!          Phase angle correction for moon's brightness
+!          phase angle correction for moon's brightness
            mode = 1
            call phase_func_moon(phase_angle_deg,mode,area_rel,area_es,phase_corr)
            if(.true.)then                             
@@ -142,7 +142,7 @@
                maglimm1 = b_to_maglim(sb2)
            endif
 
-!          Sky brightness correction based on moon's altitude
+!          sky brightness correction based on moon's altitude
            sb_corr = 2.0 * (1.0 - (sind(alm_best)**0.5))
            if(.true.)then                                      
                sb1 = rmaglim_to_b(maglimm1) - sbdark
@@ -154,7 +154,7 @@
                maglimm1 = b_to_maglim(sb2)
            endif
 
-!          Combined sky brightness correction based on comet's altitude
+!          combined sky brightness correction based on comet's altitude
            if(.true.)then                                      
                sb1 = rmaglim_to_b(maglimm1)                        
                call correct_skyglow(sb1,al1,patm,sb2,diff_mag)
@@ -165,11 +165,11 @@
 
            maglimm = maglimm1 + (zenext - extinction) ! add extinction component
 !          write(13,21)elgmc,phase_corr,alm_best,sb_corr,maglimm1,maglimn,maglimm
-21         format(20x,' Moon is up: elgmc/phase_corr/alm_best/sb_corr/maglimm1/maglimn/maglimm = ',7f9.2)
+21         format(20x,' moon is up: elgmc/phase_corr/alm_best/sb_corr/maglimm1/maglimn/maglimm = ',7f9.2)
        endif
 
-!      Consider extinction/twilight based magnitude at moon rise/set                        
-       if(al2 .lt. al1 .AND. al2 .gt. 0.)then                      
+!      consider extinction/twilight based magnitude at moon rise/set                        
+       if(al2 .lt. al1 .and. al2 .gt. 0.)then                      
            if(al2 .ge. 7.0)then ! extinction at night
                call correct_skyglow(sbdark,al2,patm,sb2,diff_mag)
                maglimdark2 = b_to_maglim(sb2)
@@ -180,10 +180,10 @@
            endif
 
 !          write(13,22)maglimm,maglimn,maglimp
-22         format(20x,' Moon rise/set: maglimm/maglimn/maglimp = ',68x,3f9.2)
+22         format(20x,' moon rise/set: maglimm/maglimn/maglimp = ',68x,3f9.2)
        endif
 
-!      Daylight limiting magnitude
+!      daylight limiting magnitude
        if(idebug .eq. 1)then
            write(6,*)' call interp_1d for elong ',elong
        endif
@@ -191,71 +191,71 @@
        if(idebug .eq. 1)then
            write(6,*)' called interp_1d for elong ',elong,maglimd
        endif
-       if(.true.       .AND. maglimd .gt. -99.9)then ! correct for extinction
-!          Correct for Sky Brightness change for solar altitude
+       if(.true.       .and. maglimd .gt. -99.9)then ! correct for extinction
+!          correct for sky brightness change for solar altitude
            arg = max(als_ct,0.0)
            sb_corr = 2.0 * (1.0 - (sind(arg)**0.5))
            maglimd = maglimd + sb_corr
 
-!          Correct for Sky Brightness change with comet altitude
+!          correct for sky brightness change with comet altitude
            al_t_eff = al_t * min(max(1.0-(od_atm_a-0.05)*1.0, 0.0),1.0)
            call correct_skyglow(1.,al_t_eff,patm,sb2,sb_corr)
            maglimd = maglimd + sb_corr
 
            if(idebug .eq. 1)then
                write(6,31)elong,al_t,als_ct,sb_corr,zenext - extinction,maglimd
-31             format(' Daylight - elong,al_t,als_ct,sb_corr,ext,maglimd: ',6f8.2)
+31             format(' daylight - elong,al_t,als_ct,sb_corr,ext,maglimd: ',6f8.2)
            endif
        else
            if(idebug .eq. 1)then
                write(6,32)elong,al_t,als_ct,sb_corr,maglimd
-32             format(' Skip Daylight - elong,al_t,als_ct,sb_corr,maglimd: ',5f8.2)
+32             format(' skip daylight - elong,al_t,als_ct,sb_corr,maglimd: ',5f8.2)
            endif
        endif
 
-!      Apply for nighttime
+!      apply for nighttime
        if(maglimn .gt. -99.9)then
 !          call correct_skyglow(sbdark,al1,patm,sb2,diff_mag)
 !          maglimn = b_to_maglim(sb2)
            maglim = maglimn
            vis = maglimdark + (magn - maglim)  
-           c_observe = 'N'
-!          write(13,*)' Correct nighttime mag for skyglow al1/maglimn = ',al1,maglimn
+           c_observe = 'n'
+!          write(13,*)' correct nighttime mag for skyglow al1/maglimn = ',al1,maglimn
        endif
 
-!      Apply for moonlight (when moon is up)
-       if(c_observe .eq. 'N' .AND. maglimm .gt. -99.9 &
-                             .AND. maglimm .lt. maglimn)then
+!      apply for moonlight (when moon is up)
+       if(c_observe .eq. 'n' .and. maglimm .gt. -99.9 &
+                             .and. maglimm .lt. maglimn)then
            maglim = maglimm
-           c_observe = 'M'
+           c_observe = 'm'
            vis = maglimdark + (magn - maglim)  
        endif
 
-!      Apply for moonlight (extinction/twilight at moon rise/set time)  
+!      apply for moonlight (extinction/twilight at moon rise/set time)  
        if(                         maglimp .gt. -99.9 &
-                             .AND. maglimp .gt. maglim)then
+                             .and. maglimp .gt. maglim)then
            maglim = maglimp
-           c_observe = 'O' ! Better at moon rise/set       
+           c_observe = 'o' ! better at moon rise/set       
            vis = maglimdark + (magn - maglim)  
        endif
 
-!      Apply for twilight
+!      apply for twilight
        if(maglimt .gt. -99.9)then
-!          if(maglimt .lt. maglimm .OR. maglimm .eq. -99.9)then
+!          if(maglimt .lt. maglimm .or. maglimm .eq. -99.9)then
                maglim = maglimt
                vis = maglimdark + (magn - maglim)  
-               c_observe = 'T'
+               c_observe = 't'
 !          endif
        endif
 
-!      Apply for daylight
-       if(al_t .gt. 0. .AND. maglimd .gt. maglimt .AND. maglimd .gt. maglimn)then
+!      apply for daylight
+       if(al_t .gt. 0. .and. maglimd .gt. maglimt .and. maglimd .gt. maglimn)then
 !          write(13,*)' passed daylight test ',al_t,maglimd,maglimt
            vis_tmp = maglimdark + (magn - maglimd)  
            if(vis_tmp .le. 12.5)then
                maglim = maglimd
                vis = vis_tmp                    
-               c_observe = 'D'
+               c_observe = 'd'
            endif
        endif
 

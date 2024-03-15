@@ -1,4 +1,4 @@
-      Program lsr_driver
+      program lsr_driver
 c
       include      'lsr_dims.inc'
 
@@ -12,7 +12,7 @@ c
 
       call get_grid_dim_xy(nx,ny,istatus)
       if (istatus .ne. 1) then
-         write (6,*) 'Error getting horizontal domain dimensions'
+         write (6,*) 'error getting horizontal domain dimensions'
          stop
       endif
 c
@@ -23,7 +23,7 @@ c
      &,ismsng,pct_req_lsr,istatus)
 
       if(istatus.ne.1)then
-         print*,'Error returned from get_sat_sounder_info'
+         print*,'error returned from get_sat_sounder_info'
          goto 1000
       endif
 
@@ -36,20 +36,20 @@ c
          print*
          if(istatus.ne.1)then
             if(i.eq.n_sat)then
-               print*,'Data was not processed in lsr_driver_sub'
-               print*,'Finished in lsr_driver'
+               print*,'data was not processed in lsr_driver_sub'
+               print*,'finished in lsr_driver'
             else
-               print*,'Data was not processed in lsr_driver_sub'
-               print*,'Try for another satellite'
+               print*,'data was not processed in lsr_driver_sub'
+               print*,'try for another satellite'
             endif
          else
-            print*,'Data was processed in lsr_driver_sub'
+            print*,'data was processed in lsr_driver_sub'
          endif
          print*
 
       enddo
 
-      print*,' *** Finished in lsr_driver ***'
+      print*,' *** finished in lsr_driver ***'
 
 1000  stop
       end
@@ -76,11 +76,11 @@ c
 
       integer     ndimx,ndimy,ndimch
 
-      Real*8        orbitAttitude(336)
-      Real*8        t, f_time
+      real*8        orbitattitude(336)
+      real*8        t, f_time
 
-      Real*8,       allocatable :: lineTimeBeg(:,:)
-      Real*8,       allocatable :: lineTimeEnd(:,:)
+      real*8,       allocatable :: linetimebeg(:,:)
+      real*8,       allocatable :: linetimeend(:,:)
 
       real        lat(nx_l,ny_l)
       real        lon(nx_l,ny_l)
@@ -108,52 +108,52 @@ c
       real        pct_req_lsr
 
       real,       allocatable :: sndr_rad(:,:,:)
-      real,       allocatable :: scalingBias(:,:)
-      real,       allocatable :: scalingGain(:,:)
-      Integer,    allocatable :: isndrdata(:,:,:)
+      real,       allocatable :: scalingbias(:,:)
+      real,       allocatable :: scalinggain(:,:)
+      integer,    allocatable :: isndrdata(:,:,:)
 
-      Integer     ewCycles,ewIncs
-      Integer     nsCycles,nsIncs
-      Integer     nw_pix,nw_line
-      Integer     se_pix,se_line
-      Integer     istatus
-      Integer     iostatus
-      Integer     mstatus
-      Integer     i,j,k,n,lf
-      Integer     lend
-      Integer     time_spec(2)
-      Integer     imcI4
-      Integer     int4(2)
-      Integer     imax,jmax
-      Integer     i4time_data
-      Integer     i4time_data_orig
-      Integer     ires_x,ires_y
-      Integer     imaximum(n_channels)
-      Integer     iminimum(n_channels)
-      Integer     i2_missing_data
-      Integer     ltindex
-      Integer     itstatus
-      Integer     init_timer
-      Integer     ishow_timer
+      integer     ewcycles,ewincs
+      integer     nscycles,nsincs
+      integer     nw_pix,nw_line
+      integer     se_pix,se_line
+      integer     istatus
+      integer     iostatus
+      integer     mstatus
+      integer     i,j,k,n,lf
+      integer     lend
+      integer     time_spec(2)
+      integer     imci4
+      integer     int4(2)
+      integer     imax,jmax
+      integer     i4time_data
+      integer     i4time_data_orig
+      integer     ires_x,ires_y
+      integer     imaximum(n_channels)
+      integer     iminimum(n_channels)
+      integer     i2_missing_data
+      integer     ltindex
+      integer     itstatus
+      integer     init_timer
+      integer     ishow_timer
 c
-      Integer       instr
-      REAL*8        wavelength(n_channels)
-      Character*1   imc(4)
-      Character*255 c_filename_sat
-      Character*255 datapath
+      integer       instr
+      real*8        wavelength(n_channels)
+      character*1   imc(4)
+      character*255 c_filename_sat
+      character*255 datapath
       character*200 c_dataroot
-      Character*200 c_sounding_path
+      character*200 c_sounding_path
       character*125 comment_ll(2)
-      Character*100 filename
+      character*100 filename
       character*10  c10_grid_fname
       character*10  units_ll(2)
       character*9   c_filetime_sat
       character*3   var_ll(2)
       character*2   cch
       character*150 dir_static
-      Character     f9time*9
-      Character     c_sat_id*6
-      Character     cid*2
+      character     f9time*9
+      character     c_sat_id*6
+      character     cid*2
 c
 c =============================================================
 c =============================================================
@@ -164,7 +164,7 @@ c
       call s_len(c10_grid_fname,lf)
 
       n=index(c_sounding_path,' ')-1
-      write(*,*)'Data pathname: ',c_sounding_path(1:n)
+      write(*,*)'data pathname: ',c_sounding_path(1:n)
 
       call get_sounding_info_cdf(c_sat_id,
      &                         c_sounding_path,
@@ -173,17 +173,17 @@ c
      &                         ndimx,ndimy,ndimch,
      &                         istatus)
       if(istatus.eq.1)then
-         write(6,*)'Satellite data obtained'
+         write(6,*)'satellite data obtained'
          write(6,*)
       else
-         write(6,*)'Data NOT obtained for ',c_sounding_path(1:n)
+         write(6,*)'data not obtained for ',c_sounding_path(1:n)
          goto 1000
       endif
 
       call get_r_missing_data(r_missing_data,iostatus)
       call get_i2_missing_data(i2_missing_data,iostatus)
       if(iostatus.ne.1)then
-         write(6,*)'Error getting missing_data flag'
+         write(6,*)'error getting missing_data flag'
          goto 1000
       endif
 c
@@ -191,53 +191,53 @@ c =============================================================
 c read sounder data
 c =============================================================
 c
-      write(6,*)'Read sounder database '
+      write(6,*)'read sounder database '
 
       allocate (isndrdata(ndimx,ndimy,ndimch)
      &         ,linetimebeg(ndimy,ndimch)
      &         ,linetimeend(ndimy,ndimch)
-     &         ,scalingBias(ndimy,ndimch)
-     &         ,scalingGain(ndimy,ndimch) )
+     &         ,scalingbias(ndimy,ndimch)
+     &         ,scalinggain(ndimy,ndimch) )
 
       itstatus=init_timer()
       itstatus=ishow_timer()
 
       isndrdata=0
 
-      Call Read_sounder_db_cdf(c_filename_sat,
+      call read_sounder_db_cdf(c_filename_sat,
      &                         ndimx,ndimy,ndimch,
      &                         isndrdata,
      &                         wavelength,
-     &                         scalingBias,
-     &                         scalingGain,
+     &                         scalingbias,
+     &                         scalinggain,
      &                         nw_pix,nw_line,
      &                         se_pix,se_line,
-     &                         ewCycles,
-     &                         ewIncs,
-     &                         nsCycles,
-     &                         nsIncs,
+     &                         ewcycles,
+     &                         ewincs,
+     &                         nscycles,
+     &                         nsincs,
      &                         f_time,
-     &                         lineTimeBeg,lineTimeEnd,
+     &                         linetimebeg,linetimeend,
      &                         imc,ires_x,ires_y,
-     &                         orbitAttitude,
+     &                         orbitattitude,
      &                         istatus)
 
       if(istatus.ne.1)then
-         print*,'Failed to read sounder data '
+         print*,'failed to read sounder data '
          return
       endif
 
       where (isndrdata .lt. 0) isndrdata=isndrdata+65535
 
       itstatus=ishow_timer()
-      write(6,*)'Elapsed time (sec): ',itstatus
+      write(6,*)'elapsed time (sec): ',itstatus
 c
 c !for sounder data the image motion compensation is off (ie.,=1)
 c
-      write(6,*)'Set missing sat-sndr to i2_missing'
+      write(6,*)'set missing sat-sndr to i2_missing'
       write(6,*)'----------------------------------'
       do i=1,n_channels
-         write(6,*)'Channel # ',i
+         write(6,*)'channel # ',i
          call set_missing_sndr(isndrdata(1,1,i),
      &               ndimx,ndimy,
      &               ismsng,
@@ -247,10 +247,10 @@ c
       end do
 
       if(mstatus .ne. 0)then
-         write(6,*)'Missing data found in isndrdata'
-         write(6,*)'Number found: ',mstatus
+         write(6,*)'missing data found in isndrdata'
+         write(6,*)'number found: ',mstatus
       else
-         write(6,*)'Found all isndrdata good in set_missing_sndr'
+         write(6,*)'found all isndrdata good in set_missing_sndr'
       endif
 c
 c =============================================================
@@ -258,19 +258,19 @@ c                   get laps domain lat/lon
 c =============================================================
 c
       call get_directory('static',dir_static,lend)
-      var_ll(1) = 'LAT'
-      var_ll(2) = 'LON'
+      var_ll(1) = 'lat'
+      var_ll(2) = 'lon'
 
-      write(*,*)'Get LAPS lat/lon grid'
+      write(*,*)'get laps lat/lon grid'
       call rd_laps_static(dir_static,c10_grid_fname,nx_l,ny_l,2,
      &var_ll,units_ll,comment_ll,data,grid_spacing,istatus)
 
       if(istatus.eq.1)then
-         print*,'LAPS lat/lon grid obtained'
+         print*,'laps lat/lon grid obtained'
          lat(:,:)=data(:,:,1)
          lon(:,:)=data(:,:,2)
       else
-         print*,'Unable to get lat/lon data'
+         print*,'unable to get lat/lon data'
          print*,'sounding process terminating'
          stop
       end if
@@ -281,25 +281,25 @@ c =================================================================
 c       generate satellite-to-laps remapping table
 c =================================================================
 c
-      write(6,*)'Compute sat-2-laps look-up-table'
+      write(6,*)'compute sat-2-laps look-up-table'
       call gen_gvrsndr_lut_lsr(c_filename_sat,ndimy,ndimx,wavelength,
      &ires_x,ires_y,r_sndr_res_km,nw_pix,nw_line,se_pix,se_line,
-     &ewCycles,ewIncs,nsCycles,nsIncs,f_time,orbitattitude,ndimch,
+     &ewcycles,ewincs,nscycles,nsincs,f_time,orbitattitude,ndimch,
      &nx_l,ny_l,lat,lon,r_llij_lut_ri,r_llij_lut_rj,pct_req_lsr,istatus)
 
       if(istatus.eq.1)then
 
-         write(6,*)'Sounder Nav computed'
+         write(6,*)'sounder nav computed'
 
       else
 
-         print*,'Found too many points outside of domain '
+         print*,'found too many points outside of domain '
 
          deallocate (isndrdata
-     &              ,lineTimeBeg
-     &              ,lineTimeEnd
-     &              ,scalingBias
-     &              ,scalingGain)
+     &              ,linetimebeg
+     &              ,linetimeend
+     &              ,scalingbias
+     &              ,scalinggain)
          goto 1000
 
       endif
@@ -308,18 +308,18 @@ c ===================================================================
 c       compute count to radiance look up table
 c ===================================================================
 c
-      print*,'Allocate real sndr_rad array'
+      print*,'allocate real sndr_rad array'
       allocate (sndr_rad(ndimx,ndimy,n_channels))
 
       call count_range(ndimx,ndimy,ndimch,isndrdata
      &,imaximum,iminimum,istatus)
 c
-      write(6,*)'Image motion Comp ',imc
-      write(6,*)'framsStartTime: ',f_time
-      write(6,*)'ew cycle/inc: ',ewCycles,ewIncs
-      write(6,*)'ns cycle/inc: ',nsCycles,nsIncs
+      write(6,*)'image motion comp ',imc
+      write(6,*)'framsstarttime: ',f_time
+      write(6,*)'ew cycle/inc: ',ewcycles,ewincs
+      write(6,*)'ns cycle/inc: ',nscycles,nsincs
 
-      write(6,*)'netCDF file properly read'
+      write(6,*)'netcdf file properly read'
       write(6,*)'nw pix/nw line :',nw_pix,nw_line
       write(6,*)
 c
@@ -327,7 +327,7 @@ c ===================================================================
 c scale sounder counts to radiances. load channels desired for proc.
 c ===================================================================
 c
-      print*,'Scale counts to radiance with rsb/rsg'
+      print*,'scale counts to radiance with rsb/rsg'
       print*,'---------------------------------------'
 
       do k=1,n_channels
@@ -341,14 +341,14 @@ c
        icnt(k) = 0
        jcnt(k) = 0
        nradcnt(k)=0
-       rsb=scalingBias(1,k)
-       rsg=scalingGain(1,k)
+       rsb=scalingbias(1,k)
+       rsg=scalinggain(1,k)
 
        if(rsg.gt.0.0)then 
 
         if(k.lt.n_channels)then          !the last channel is visible, so no radiance calc.
 
-           print*,'Scaling Bias/Gain ',k,rsb,rsg
+           print*,'scaling bias/gain ',k,rsb,rsg
 
            do j=1,ndimy
            do i=1,ndimx
@@ -370,9 +370,9 @@ c                print*,'rcount/rsb/rsg: ',rcount,rsb,rsg
            enddo
 
            print*
-           print*,'Ch ',k,' # not used (gt imax or < 0): ',icnt(k)
+           print*,'ch ',k,' # not used (gt imax or < 0): ',icnt(k)
            if(nradcnt(k).gt.0)then
-              print*,' Neg rad found: channel/# ',k,nradcnt(k)
+              print*,' neg rad found: channel/# ',k,nradcnt(k)
            endif
 c       write(6,*)
 
@@ -380,15 +380,15 @@ c       write(6,*)
 
        else
 
-        print*,' Scaling Gain = 0.'
-        print*,' Radiance not computed for channel ',k
+        print*,' scaling gain = 0.'
+        print*,' radiance not computed for channel ',k
 
        endif
 
       enddo
 c 
 c ================================================================
-c          Determine representative time
+c          determine representative time
 c ================================================================
 c
       rmintime=9999999999.
@@ -400,8 +400,8 @@ c
      &      r_llij_lut_ri(i,j).gt.0.            .and.
      &      r_llij_lut_rj(i,j).gt.0.                )then
             ltindex=int(r_llij_lut_rj(i,j)+0.5)
-            rltb=lineTimeBeg(ltindex,1)
-            rlte=lineTimeEnd(ltindex,1)
+            rltb=linetimebeg(ltindex,1)
+            rlte=linetimeend(ltindex,1)
             rmintime=min(rmintime,rltb)
             rmaxtime=max(rmaxtime,rlte)
          endif
@@ -410,28 +410,28 @@ c
       print*,' max/min line times ',rmaxtime,rmintime
       i4time_data_orig=i4time_data
       if(rmaxtime.gt.0.0.and.rmintime.gt.0.0)then
-         print*,' Using max/min average for filetime'
+         print*,' using max/min average for filetime'
          i4time_data=nint((rmaxtime+rmintime)/2.)+315619200
       elseif(rmaxtime.gt.0.0)then
-         print*,' Using max line time for filetime'
+         print*,' using max line time for filetime'
          i4time_data=int(rmaxtime)+315619200
       elseif(rmintime.gt.0.0)then
-         print*,' Using min line time for filetime'
+         print*,' using min line time for filetime'
          i4time_data=int(rmintime)+315619200
       else
-         print*,' Using original i4time for filetime'
+         print*,' using original i4time for filetime'
          i4time_data=i4time_data_orig
       endif
 
       deallocate (isndrdata
-     &           ,lineTimeBeg
-     &           ,lineTimeEnd
-     &           ,scalingBias
-     &           ,scalingGain)
+     &           ,linetimebeg
+     &           ,linetimeend
+     &           ,scalingbias
+     &           ,scalinggain)
 
 c
 c ================================================================
-c        Remap to laps domain
+c        remap to laps domain
 c ================================================================
 c
       r_grid_ratio = r_sndr_res_km/grid_spacing_km
@@ -457,19 +457,19 @@ c
       call write_lsr(nx_l,ny_l,n_channels,c_sat_id,rch_wvlngth,
      &laps_data,i4time_data,istatus)
       if(istatus.ne.1)then
-         write(6,*)'Failed to write lsr'
+         write(6,*)'failed to write lsr'
       else
          call make_fnam_lp(i4time_data_orig,f9time,istatus)
          if(istatus.ne.1)then
-            print*,'Failed to make f9time original'
+            print*,'failed to make f9time original'
          else
-            print*,'Original Data Filetime: ',f9time
+            print*,'original data filetime: ',f9time
          endif
          call make_fnam_lp(i4time_data,f9time,istatus)
          if(istatus.ne.1)then
-            print*,'Failed to make f9time computed'
+            print*,'failed to make f9time computed'
          else
-            print*,'Computed Data Filetime: ',f9time
+            print*,'computed data filetime: ',f9time
          endif
       endif
 
@@ -477,11 +477,11 @@ c
 
       goto 1000
 
-901   write(6,*)'Error opening output file'
+901   write(6,*)'error opening output file'
       goto 1000
-902   write(6,*)'Error writing to output file'
+902   write(6,*)'error writing to output file'
       goto 1000
-998   write(6,*)'Problem reading systime.dat'
+998   write(6,*)'problem reading systime.dat'
 
 1000  return
       end

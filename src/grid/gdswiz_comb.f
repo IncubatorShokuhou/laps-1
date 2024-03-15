@@ -1,889 +1,889 @@
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      SUBROUTINE GDSWIZ03(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                    LROT,CROT,SROT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:  GDSWIZ03   GDS WIZARD FOR LAMBERT CONFORMAL CONICAL
-C   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
-C
-C ABSTRACT: THIS SUBPROGRAM DECODES THE GRIB GRID DESCRIPTION SECTION
-C           (PASSED IN INTEGER FORM AS DECODED BY SUBPROGRAM W3FI63)
-C           AND RETURNS ONE OF THE FOLLOWING:
-C             (IOPT=+1) EARTH COORDINATES OF SELECTED GRID COORDINATES
-C             (IOPT=-1) GRID COORDINATES OF SELECTED EARTH COORDINATES
-C           FOR LAMBERT CONFORMAL CONICAL PROJECTIONS.
-C           IF THE SELECTED COORDINATES ARE MORE THAN ONE GRIDPOINT
-C           BEYOND THE THE EDGES OF THE GRID DOMAIN, THEN THE RELEVANT
-C           OUTPUT ELEMENTS ARE SET TO FILL VALUES.
-C           THE ACTUAL NUMBER OF VALID POINTS COMPUTED IS RETURNED TOO.
-C
-C PROGRAM HISTORY LOG:
-C   96-04-10  IREDELL
-C   96-10-01  IREDELL   PROTECTED AGAINST UNRESOLVABLE POINTS
-C 1999-04-27  GILBERT   CORRECTED MINOR ERROR CALCULATING VARIABLE AN
-C                       FOR THE SECANT PROJECTION CASE (RLATI1.NE.RLATI2).
-C
-C USAGE:    CALL GDSWIZ03(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-C     &                   LROT,CROT,SROT)
-C
-C   INPUT ARGUMENT LIST:
-C     KGDS     - INTEGER (200) GDS PARAMETERS AS DECODED BY W3FI63
-C     IOPT     - INTEGER OPTION FLAG
-C                (+1 TO COMPUTE EARTH COORDS OF SELECTED GRID COORDS)
-C                (-1 TO COMPUTE GRID COORDS OF SELECTED EARTH COORDS)
-C     NPTS     - INTEGER MAXIMUM NUMBER OF COORDINATES
-C     FILL     - REAL FILL VALUE TO SET INVALID OUTPUT DATA
-C                (MUST BE IMPOSSIBLE VALUE; SUGGESTED VALUE: -9999.)
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT>0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT>0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT<0
-C                (ACCEPTABLE RANGE: -360. TO 360.)
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT<0
-C                (ACCEPTABLE RANGE: -90. TO 90.)
-C     LROT     - INTEGER FLAG TO RETURN VECTOR ROTATIONS IF 1
-C
-C   OUTPUT ARGUMENT LIST:
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT<0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT<0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT>0
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT>0
-C     NRET     - INTEGER NUMBER OF VALID POINTS COMPUTED
-C     CROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION COSINES IF LROT=1
-C     SROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION SINES IF LROT=1
-C                (UGRID=CROT*UEARTH-SROT*VEARTH;
-C                 VGRID=SROT*UEARTH+CROT*VEARTH)
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C
-C$$$
-      INTEGER KGDS(200)
-      REAL XPTS(NPTS),YPTS(NPTS),RLON(NPTS),RLAT(NPTS)
-      REAL CROT(NPTS),SROT(NPTS)
-      PARAMETER(RERTH=6.3712E6)
-      PARAMETER(PI=3.14159265358979,DPR=180./PI)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IF(KGDS(1).EQ.003) THEN
-        IM=KGDS(2)
-        JM=KGDS(3)
-        RLAT1=KGDS(4)*1.E-3
-        RLON1=KGDS(5)*1.E-3
-        IROT=MOD(KGDS(6)/8,2)
-        ORIENT=KGDS(7)*1.E-3
-        DX=KGDS(8)
-        DY=KGDS(9)
-        write(6,*) 'IM,JM,RLAT1,RLON1,DX,DY: ', IM,JM,RLAT1,RLON1,DX,DY
-        IPROJ=MOD(KGDS(10)/128,2)
-        ISCAN=MOD(KGDS(11)/128,2)
-        JSCAN=MOD(KGDS(11)/64,2)
-        NSCAN=MOD(KGDS(11)/32,2)
-        RLATI1=KGDS(12)*1.E-3
-        RLATI2=KGDS(13)*1.E-3
-        H=(-1.)**IPROJ
-        HI=(-1.)**ISCAN
-        HJ=(-1.)**(1-JSCAN)
-        DXS=DX*HI
-        DYS=DY*HJ
-        IF(RLATI1.EQ.RLATI2) THEN
-          AN=SIN(H*RLATI1/DPR)
-        ELSE
-          AN=LOG(COS(RLATI1/DPR)/COS(RLATI2/DPR))/
-     &       LOG(TAN((H*90-RLATI1)/2/DPR)/TAN((H*90-RLATI2)/2/DPR))
-        ENDIF
-        DE=RERTH*COS(RLATI1/DPR)*TAN((H*RLATI1+90)/2/DPR)**AN/AN
-        IF(H*RLAT1.EQ.90) THEN
-          XP=1
-          YP=1
-        ELSE
-          DR=DE/TAN((H*RLAT1+90)/2/DPR)**AN
-          DLON1=MOD(RLON1-ORIENT+180+3600,360.)-180
-          XP=1-H*SIN(AN*DLON1/DPR)*DR/DXS
-          YP=1+COS(AN*DLON1/DPR)*DR/DYS
-        ENDIF
-        ANTR=1/(2*AN)
-        DE2=DE**2
-        XMIN=0
-        XMAX=IM+1
-        YMIN=0
-        YMAX=JM+1
-        NRET=0
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE GRID COORDINATES TO EARTH COORDINATES
-        IF(IOPT.EQ.0.OR.IOPT.EQ.1) THEN
-          DO N=1,NPTS
-            IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &         YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-              DI=(XPTS(N)-XP)*DXS
-              DJ=(YPTS(N)-YP)*DYS
-              DR2=DI**2+DJ**2
-              IF(DR2.LT.DE2*1.E-6) THEN
-                RLON(N)=0.
-                RLAT(N)=H*90.
-              ELSE
-                RLON(N)=MOD(ORIENT+H/AN*DPR*ATAN2(DI,-DJ)+3600,360.)
-                RLAT(N)=H*(2*DPR*ATAN((DE2/DR2)**ANTR)-90)
-              ENDIF
-              NRET=NRET+1
-              IF(LROT.EQ.1) THEN
-                IF(IROT.EQ.1) THEN
-                  DLON=MOD(RLON(N)-ORIENT+180+3600,360.)-180
-                  CROT(N)=H*COS(AN*DLON/DPR)
-                  SROT(N)=SIN(AN*DLON/DPR)
-                ELSE
-                  CROT(N)=1
-                  SROT(N)=0
-                ENDIF
-              ENDIF
-            ELSE
-              RLON(N)=FILL
-              RLAT(N)=FILL
-            ENDIF
-          ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE EARTH COORDINATES TO GRID COORDINATES
-        ELSEIF(IOPT.EQ.-1) THEN
-          DO N=1,NPTS
-            IF(ABS(RLON(N)).LE.360.AND.ABS(RLAT(N)).LE.90.AND.
-     &                                 H*RLAT(N).NE.-90) THEN
-              DR=DE*TAN((90-H*RLAT(N))/2/DPR)**AN
-              DLON=MOD(RLON(N)-ORIENT+180+3600,360.)-180
-              XPTS(N)=XP+H*SIN(AN*DLON/DPR)*DR/DXS
-              YPTS(N)=YP-COS(AN*DLON/DPR)*DR/DYS
-              IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &           YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-                NRET=NRET+1
-                IF(LROT.EQ.1) THEN
-                  IF(IROT.EQ.1) THEN
-                    CROT(N)=H*COS(AN*DLON/DPR)
-                    SROT(N)=SIN(AN*DLON/DPR)
-                  ELSE
-                    CROT(N)=1
-                    SROT(N)=0
-                  ENDIF
-                ENDIF
-              ELSE
-                XPTS(N)=FILL
-                YPTS(N)=FILL
-              ENDIF
-            ELSE
-              XPTS(N)=FILL
-              YPTS(N)=FILL
-            ENDIF
-          ENDDO
-        ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  PROJECTION UNRECOGNIZED
-      ELSE
-        IRET=-1
-        IF(IOPT.GE.0) THEN
-          DO N=1,NPTS
-            RLON(N)=FILL
-            RLAT(N)=FILL
-          ENDDO
-        ENDIF
-        IF(IOPT.LE.0) THEN
-          DO N=1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      END
+      subroutine gdswiz03(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                    lrot,crot,srot)
+c$$$  subprogram documentation block
+c
+c subprogram:  gdswiz03   gds wizard for lambert conformal conical
+c   prgmmr: iredell       org: w/nmc23       date: 96-04-10
+c
+c abstract: this subprogram decodes the grib grid description section
+c           (passed in integer form as decoded by subprogram w3fi63)
+c           and returns one of the following:
+c             (iopt=+1) earth coordinates of selected grid coordinates
+c             (iopt=-1) grid coordinates of selected earth coordinates
+c           for lambert conformal conical projections.
+c           if the selected coordinates are more than one gridpoint
+c           beyond the the edges of the grid domain, then the relevant
+c           output elements are set to fill values.
+c           the actual number of valid points computed is returned too.
+c
+c program history log:
+c   96-04-10  iredell
+c   96-10-01  iredell   protected against unresolvable points
+c 1999-04-27  gilbert   corrected minor error calculating variable an
+c                       for the secant projection case (rlati1.ne.rlati2).
+c
+c usage:    call gdswiz03(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+c     &                   lrot,crot,srot)
+c
+c   input argument list:
+c     kgds     - integer (200) gds parameters as decoded by w3fi63
+c     iopt     - integer option flag
+c                (+1 to compute earth coords of selected grid coords)
+c                (-1 to compute grid coords of selected earth coords)
+c     npts     - integer maximum number of coordinates
+c     fill     - real fill value to set invalid output data
+c                (must be impossible value; suggested value: -9999.)
+c     xpts     - real (npts) grid x point coordinates if iopt>0
+c     ypts     - real (npts) grid y point coordinates if iopt>0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt<0
+c                (acceptable range: -360. to 360.)
+c     rlat     - real (npts) earth latitudes in degrees n if iopt<0
+c                (acceptable range: -90. to 90.)
+c     lrot     - integer flag to return vector rotations if 1
+c
+c   output argument list:
+c     xpts     - real (npts) grid x point coordinates if iopt<0
+c     ypts     - real (npts) grid y point coordinates if iopt<0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt>0
+c     rlat     - real (npts) earth latitudes in degrees n if iopt>0
+c     nret     - integer number of valid points computed
+c     crot     - real (npts) clockwise vector rotation cosines if lrot=1
+c     srot     - real (npts) clockwise vector rotation sines if lrot=1
+c                (ugrid=crot*uearth-srot*vearth;
+c                 vgrid=srot*uearth+crot*vearth)
+c
+c attributes:
+c   language: fortran 77
+c
+c$$$
+      integer kgds(200)
+      real xpts(npts),ypts(npts),rlon(npts),rlat(npts)
+      real crot(npts),srot(npts)
+      parameter(rerth=6.3712e6)
+      parameter(pi=3.14159265358979,dpr=180./pi)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      if(kgds(1).eq.003) then
+        im=kgds(2)
+        jm=kgds(3)
+        rlat1=kgds(4)*1.e-3
+        rlon1=kgds(5)*1.e-3
+        irot=mod(kgds(6)/8,2)
+        orient=kgds(7)*1.e-3
+        dx=kgds(8)
+        dy=kgds(9)
+        write(6,*) 'im,jm,rlat1,rlon1,dx,dy: ', im,jm,rlat1,rlon1,dx,dy
+        iproj=mod(kgds(10)/128,2)
+        iscan=mod(kgds(11)/128,2)
+        jscan=mod(kgds(11)/64,2)
+        nscan=mod(kgds(11)/32,2)
+        rlati1=kgds(12)*1.e-3
+        rlati2=kgds(13)*1.e-3
+        h=(-1.)**iproj
+        hi=(-1.)**iscan
+        hj=(-1.)**(1-jscan)
+        dxs=dx*hi
+        dys=dy*hj
+        if(rlati1.eq.rlati2) then
+          an=sin(h*rlati1/dpr)
+        else
+          an=log(cos(rlati1/dpr)/cos(rlati2/dpr))/
+     &       log(tan((h*90-rlati1)/2/dpr)/tan((h*90-rlati2)/2/dpr))
+        endif
+        de=rerth*cos(rlati1/dpr)*tan((h*rlati1+90)/2/dpr)**an/an
+        if(h*rlat1.eq.90) then
+          xp=1
+          yp=1
+        else
+          dr=de/tan((h*rlat1+90)/2/dpr)**an
+          dlon1=mod(rlon1-orient+180+3600,360.)-180
+          xp=1-h*sin(an*dlon1/dpr)*dr/dxs
+          yp=1+cos(an*dlon1/dpr)*dr/dys
+        endif
+        antr=1/(2*an)
+        de2=de**2
+        xmin=0
+        xmax=im+1
+        ymin=0
+        ymax=jm+1
+        nret=0
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate grid coordinates to earth coordinates
+        if(iopt.eq.0.or.iopt.eq.1) then
+          do n=1,npts
+            if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &         ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+              di=(xpts(n)-xp)*dxs
+              dj=(ypts(n)-yp)*dys
+              dr2=di**2+dj**2
+              if(dr2.lt.de2*1.e-6) then
+                rlon(n)=0.
+                rlat(n)=h*90.
+              else
+                rlon(n)=mod(orient+h/an*dpr*atan2(di,-dj)+3600,360.)
+                rlat(n)=h*(2*dpr*atan((de2/dr2)**antr)-90)
+              endif
+              nret=nret+1
+              if(lrot.eq.1) then
+                if(irot.eq.1) then
+                  dlon=mod(rlon(n)-orient+180+3600,360.)-180
+                  crot(n)=h*cos(an*dlon/dpr)
+                  srot(n)=sin(an*dlon/dpr)
+                else
+                  crot(n)=1
+                  srot(n)=0
+                endif
+              endif
+            else
+              rlon(n)=fill
+              rlat(n)=fill
+            endif
+          enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate earth coordinates to grid coordinates
+        elseif(iopt.eq.-1) then
+          do n=1,npts
+            if(abs(rlon(n)).le.360.and.abs(rlat(n)).le.90.and.
+     &                                 h*rlat(n).ne.-90) then
+              dr=de*tan((90-h*rlat(n))/2/dpr)**an
+              dlon=mod(rlon(n)-orient+180+3600,360.)-180
+              xpts(n)=xp+h*sin(an*dlon/dpr)*dr/dxs
+              ypts(n)=yp-cos(an*dlon/dpr)*dr/dys
+              if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &           ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+                nret=nret+1
+                if(lrot.eq.1) then
+                  if(irot.eq.1) then
+                    crot(n)=h*cos(an*dlon/dpr)
+                    srot(n)=sin(an*dlon/dpr)
+                  else
+                    crot(n)=1
+                    srot(n)=0
+                  endif
+                endif
+              else
+                xpts(n)=fill
+                ypts(n)=fill
+              endif
+            else
+              xpts(n)=fill
+              ypts(n)=fill
+            endif
+          enddo
+        endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  projection unrecognized
+      else
+        iret=-1
+        if(iopt.ge.0) then
+          do n=1,npts
+            rlon(n)=fill
+            rlat(n)=fill
+          enddo
+        endif
+        if(iopt.le.0) then
+          do n=1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      end
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      SUBROUTINE GDSWIZ05(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                    LROT,CROT,SROT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:  GDSWIZ05   GDS WIZARD FOR POLAR STEREOGRAPHIC AZIMUTHAL
-C   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
-C
-C ABSTRACT: THIS SUBPROGRAM DECODES THE GRIB GRID DESCRIPTION SECTION
-C           (PASSED IN INTEGER FORM AS DECODED BY SUBPROGRAM W3FI63)
-C           AND RETURNS ONE OF THE FOLLOWING:
-C             (IOPT=+1) EARTH COORDINATES OF SELECTED GRID COORDINATES
-C             (IOPT=-1) GRID COORDINATES OF SELECTED EARTH COORDINATES
-C           FOR POLAR STEREOGRAPHIC AZIMUTHAL PROJECTIONS.
-C           IF THE SELECTED COORDINATES ARE MORE THAN ONE GRIDPOINT
-C           BEYOND THE THE EDGES OF THE GRID DOMAIN, THEN THE RELEVANT
-C           OUTPUT ELEMENTS ARE SET TO FILL VALUES.
-C           THE ACTUAL NUMBER OF VALID POINTS COMPUTED IS RETURNED TOO.
-C
-C PROGRAM HISTORY LOG:
-C   96-04-10  IREDELL
-C
-C USAGE:    CALL GDSWIZ05(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-C     &                   LROT,CROT,SROT)
-C
-C   INPUT ARGUMENT LIST:
-C     KGDS     - INTEGER (200) GDS PARAMETERS AS DECODED BY W3FI63
-C     IOPT     - INTEGER OPTION FLAG
-C                (+1 TO COMPUTE EARTH COORDS OF SELECTED GRID COORDS)
-C                (-1 TO COMPUTE GRID COORDS OF SELECTED EARTH COORDS)
-C     NPTS     - INTEGER MAXIMUM NUMBER OF COORDINATES
-C     FILL     - REAL FILL VALUE TO SET INVALID OUTPUT DATA
-C                (MUST BE IMPOSSIBLE VALUE; SUGGESTED VALUE: -9999.)
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT>0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT>0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT<0
-C                (ACCEPTABLE RANGE: -360. TO 360.)
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT<0
-C                (ACCEPTABLE RANGE: -90. TO 90.)
-C     LROT     - INTEGER FLAG TO RETURN VECTOR ROTATIONS IF 1
-C
-C   OUTPUT ARGUMENT LIST:
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT<0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT<0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT>0
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT>0
-C     NRET     - INTEGER NUMBER OF VALID POINTS COMPUTED
-C     CROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION COSINES IF LROT=1
-C     SROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION SINES IF LROT=1
-C                (UGRID=CROT*UEARTH-SROT*VEARTH;
-C                 VGRID=SROT*UEARTH+CROT*VEARTH)
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C
-C$$$
-      INTEGER KGDS(200)
-      REAL XPTS(NPTS),YPTS(NPTS),RLON(NPTS),RLAT(NPTS)
-      REAL CROT(NPTS),SROT(NPTS)
-      PARAMETER(RERTH=6.3712E6)
-      PARAMETER(PI=3.14159265358979,DPR=180./PI)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IF(KGDS(1).EQ.005) THEN
-        IM=KGDS(2)
-        JM=KGDS(3)
-        RLAT1=KGDS(4)*1.E-3
-        RLON1=KGDS(5)*1.E-3
-        IROT=MOD(KGDS(6)/8,2)
-        ORIENT=KGDS(7)*1.E-3
-        DX=KGDS(8)
-        DY=KGDS(9)
-        IPROJ=MOD(KGDS(10)/128,2)
-        ISCAN=MOD(KGDS(11)/128,2)
-        JSCAN=MOD(KGDS(11)/64,2)
-        NSCAN=MOD(KGDS(11)/32,2)
-        H=(-1.)**IPROJ
-        HI=(-1.)**ISCAN
-        HJ=(-1.)**(1-JSCAN)
-        DXS=DX*HI
-        DYS=DY*HJ
-        DE=(1.+SIN(60./DPR))*RERTH
-        DR=DE*COS(RLAT1/DPR)/(1+H*SIN(RLAT1/DPR))
-        XP=1-H*SIN((RLON1-ORIENT)/DPR)*DR/DXS
-        YP=1+COS((RLON1-ORIENT)/DPR)*DR/DYS
-        DE2=DE**2
-        XMIN=0
-        XMAX=IM+1
-        YMIN=0
-        YMAX=JM+1
-        NRET=0
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE GRID COORDINATES TO EARTH COORDINATES
-        IF(IOPT.EQ.0.OR.IOPT.EQ.1) THEN
-          DO N=1,NPTS
-            IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &         YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-              DI=(XPTS(N)-XP)*DXS
-              DJ=(YPTS(N)-YP)*DYS
-              DR2=DI**2+DJ**2
-              IF(DR2.LT.DE2*1.E-6) THEN
-                RLON(N)=0.
-                RLAT(N)=H*90.
-              ELSE
-                RLON(N)=MOD(ORIENT+H*DPR*ATAN2(DI,-DJ)+3600,360.)
-                RLAT(N)=H*DPR*ASIN((DE2-DR2)/(DE2+DR2))
-              ENDIF
-              NRET=NRET+1
-              IF(LROT.EQ.1) THEN
-                IF(IROT.EQ.1) THEN
-                  CROT(N)=H*COS((RLON(N)-ORIENT)/DPR)
-                  SROT(N)=SIN((RLON(N)-ORIENT)/DPR)
-                ELSE
-                  CROT(N)=1
-                  SROT(N)=0
-                ENDIF
-              ENDIF
-            ELSE
-              RLON(N)=FILL
-              RLAT(N)=FILL
-            ENDIF
-          ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE EARTH COORDINATES TO GRID COORDINATES
-        ELSEIF(IOPT.EQ.-1) THEN
-          DO N=1,NPTS
-            IF(ABS(RLON(N)).LE.360.AND.ABS(RLAT(N)).LE.90.AND.
-     &                                 H*RLAT(N).NE.-90) THEN
-              DR=DE*TAN((90-H*RLAT(N))/2/DPR)
-              XPTS(N)=XP+H*SIN((RLON(N)-ORIENT)/DPR)*DR/DXS
-              YPTS(N)=YP-COS((RLON(N)-ORIENT)/DPR)*DR/DYS
-              IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &           YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-                NRET=NRET+1
-                IF(LROT.EQ.1) THEN
-                  IF(IROT.EQ.1) THEN
-                    CROT(N)=H*COS((RLON(N)-ORIENT)/DPR)
-                    SROT(N)=SIN((RLON(N)-ORIENT)/DPR)
-                  ELSE
-                    CROT(N)=1
-                    SROT(N)=0
-                  ENDIF
-                ENDIF
-              ELSE
-                XPTS(N)=FILL
-                YPTS(N)=FILL
-              ENDIF
-            ELSE
-              XPTS(N)=FILL
-              YPTS(N)=FILL
-            ENDIF
-          ENDDO
-        ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  PROJECTION UNRECOGNIZED
-      ELSE
-        IRET=-1
-        IF(IOPT.GE.0) THEN
-          DO N=1,NPTS
-            RLON(N)=FILL
-            RLAT(N)=FILL
-          ENDDO
-        ENDIF
-        IF(IOPT.LE.0) THEN
-          DO N=1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      END
+      subroutine gdswiz05(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                    lrot,crot,srot)
+c$$$  subprogram documentation block
+c
+c subprogram:  gdswiz05   gds wizard for polar stereographic azimuthal
+c   prgmmr: iredell       org: w/nmc23       date: 96-04-10
+c
+c abstract: this subprogram decodes the grib grid description section
+c           (passed in integer form as decoded by subprogram w3fi63)
+c           and returns one of the following:
+c             (iopt=+1) earth coordinates of selected grid coordinates
+c             (iopt=-1) grid coordinates of selected earth coordinates
+c           for polar stereographic azimuthal projections.
+c           if the selected coordinates are more than one gridpoint
+c           beyond the the edges of the grid domain, then the relevant
+c           output elements are set to fill values.
+c           the actual number of valid points computed is returned too.
+c
+c program history log:
+c   96-04-10  iredell
+c
+c usage:    call gdswiz05(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+c     &                   lrot,crot,srot)
+c
+c   input argument list:
+c     kgds     - integer (200) gds parameters as decoded by w3fi63
+c     iopt     - integer option flag
+c                (+1 to compute earth coords of selected grid coords)
+c                (-1 to compute grid coords of selected earth coords)
+c     npts     - integer maximum number of coordinates
+c     fill     - real fill value to set invalid output data
+c                (must be impossible value; suggested value: -9999.)
+c     xpts     - real (npts) grid x point coordinates if iopt>0
+c     ypts     - real (npts) grid y point coordinates if iopt>0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt<0
+c                (acceptable range: -360. to 360.)
+c     rlat     - real (npts) earth latitudes in degrees n if iopt<0
+c                (acceptable range: -90. to 90.)
+c     lrot     - integer flag to return vector rotations if 1
+c
+c   output argument list:
+c     xpts     - real (npts) grid x point coordinates if iopt<0
+c     ypts     - real (npts) grid y point coordinates if iopt<0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt>0
+c     rlat     - real (npts) earth latitudes in degrees n if iopt>0
+c     nret     - integer number of valid points computed
+c     crot     - real (npts) clockwise vector rotation cosines if lrot=1
+c     srot     - real (npts) clockwise vector rotation sines if lrot=1
+c                (ugrid=crot*uearth-srot*vearth;
+c                 vgrid=srot*uearth+crot*vearth)
+c attributes:
+c   language: fortran 77
+c
+c$$$
+      integer kgds(200)
+      real xpts(npts),ypts(npts),rlon(npts),rlat(npts)
+      real crot(npts),srot(npts)
+      parameter(rerth=6.3712e6)
+      parameter(pi=3.14159265358979,dpr=180./pi)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      if(kgds(1).eq.005) then
+        im=kgds(2)
+        jm=kgds(3)
+        rlat1=kgds(4)*1.e-3
+        rlon1=kgds(5)*1.e-3
+        irot=mod(kgds(6)/8,2)
+        orient=kgds(7)*1.e-3
+        dx=kgds(8)
+        dy=kgds(9)
+        iproj=mod(kgds(10)/128,2)
+        iscan=mod(kgds(11)/128,2)
+        jscan=mod(kgds(11)/64,2)
+        nscan=mod(kgds(11)/32,2)
+        h=(-1.)**iproj
+        hi=(-1.)**iscan
+        hj=(-1.)**(1-jscan)
+        dxs=dx*hi
+        dys=dy*hj
+        de=(1.+sin(60./dpr))*rerth
+        dr=de*cos(rlat1/dpr)/(1+h*sin(rlat1/dpr))
+        xp=1-h*sin((rlon1-orient)/dpr)*dr/dxs
+        yp=1+cos((rlon1-orient)/dpr)*dr/dys
+        de2=de**2
+        xmin=0
+        xmax=im+1
+        ymin=0
+        ymax=jm+1
+        nret=0
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate grid coordinates to earth coordinates
+        if(iopt.eq.0.or.iopt.eq.1) then
+          do n=1,npts
+            if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &         ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+              di=(xpts(n)-xp)*dxs
+              dj=(ypts(n)-yp)*dys
+              dr2=di**2+dj**2
+              if(dr2.lt.de2*1.e-6) then
+                rlon(n)=0.
+                rlat(n)=h*90.
+              else
+                rlon(n)=mod(orient+h*dpr*atan2(di,-dj)+3600,360.)
+                rlat(n)=h*dpr*asin((de2-dr2)/(de2+dr2))
+              endif
+              nret=nret+1
+              if(lrot.eq.1) then
+                if(irot.eq.1) then
+                  crot(n)=h*cos((rlon(n)-orient)/dpr)
+                  srot(n)=sin((rlon(n)-orient)/dpr)
+                else
+                  crot(n)=1
+                  srot(n)=0
+                endif
+              endif
+            else
+              rlon(n)=fill
+              rlat(n)=fill
+            endif
+          enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate earth coordinates to grid coordinates
+        elseif(iopt.eq.-1) then
+          do n=1,npts
+            if(abs(rlon(n)).le.360.and.abs(rlat(n)).le.90.and.
+     &                                 h*rlat(n).ne.-90) then
+              dr=de*tan((90-h*rlat(n))/2/dpr)
+              xpts(n)=xp+h*sin((rlon(n)-orient)/dpr)*dr/dxs
+              ypts(n)=yp-cos((rlon(n)-orient)/dpr)*dr/dys
+              if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &           ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+                nret=nret+1
+                if(lrot.eq.1) then
+                  if(irot.eq.1) then
+                    crot(n)=h*cos((rlon(n)-orient)/dpr)
+                    srot(n)=sin((rlon(n)-orient)/dpr)
+                  else
+                    crot(n)=1
+                    srot(n)=0
+                  endif
+                endif
+              else
+                xpts(n)=fill
+                ypts(n)=fill
+              endif
+            else
+              xpts(n)=fill
+              ypts(n)=fill
+            endif
+          enddo
+        endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  projection unrecognized
+      else
+        iret=-1
+        if(iopt.ge.0) then
+          do n=1,npts
+            rlon(n)=fill
+            rlat(n)=fill
+          enddo
+        endif
+        if(iopt.le.0) then
+          do n=1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      end
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      SUBROUTINE GDSWIZ(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                  LROT,CROT,SROT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:  GDSWIZ     GRID DESCRIPTION SECTION WIZARD
-C   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
-C
-C ABSTRACT: THIS SUBPROGRAM DECODES THE GRIB GRID DESCRIPTION SECTION
-C           (PASSED IN INTEGER FORM AS DECODED BY SUBPROGRAM W3FI63)
-C           AND RETURNS ONE OF THE FOLLOWING:
-C             (IOPT= 0) GRID AND EARTH COORDINATES OF ALL GRID POINTS
-C             (IOPT=+1) EARTH COORDINATES OF SELECTED GRID COORDINATES
-C             (IOPT=-1) GRID COORDINATES OF SELECTED EARTH COORDINATES
-C           THE CURRENT CODE RECOGNIZES THE FOLLOWING PROJECTIONS:
-C             (KGDS(1)=000) EQUIDISTANT CYLINDRICAL
-C             (KGDS(1)=001) MERCATOR CYLINDRICAL
-C             (KGDS(1)=003) LAMBERT CONFORMAL CONICAL
-C             (KGDS(1)=004) GAUSSIAN CYLINDRICAL
-C             (KGDS(1)=005) POLAR STEREOGRAPHIC AZIMUTHAL
-C             (KGDS(1)=201) STAGGERED ROTATED EQUIDISTANT CYLINDRICAL
-C             (KGDS(1)=202) ROTATED EQUIDISTANT CYLINDRICAL
-C             (KGDS(1)=203) STAGGERED ROTATED EQUIDISTANT CYLINDRICAL 2-D
-C           IF THE SELECTED COORDINATES ARE MORE THAN ONE GRIDPOINT
-C           BEYOND THE THE EDGES OF THE GRID DOMAIN, THEN THE RELEVANT
-C           OUTPUT ELEMENTS ARE SET TO FILL VALUES.  ALSO IF IOPT=0,
-C           IF THE NUMBER OF GRID POINTS EXCEEDS THE NUMBER ALLOTTED,
-C           THEN ALL THE OUTPUT ELEMENTS ARE SET TO FILL VALUES.
-C           THE ACTUAL NUMBER OF VALID POINTS COMPUTED IS RETURNED TOO.
-C
-C PROGRAM HISTORY LOG:
-C   96-04-10  IREDELL
-C   98-08-20  BALDWIN  ADD TYPE 203 STAGGERED 2-D ETA GRIDS
-C
-C USAGE:    CALL GDSWIZ(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-C     &                 LROT,CROT,SROT)
-C
-C   INPUT ARGUMENT LIST:
-C     KGDS     - INTEGER (200) GDS PARAMETERS AS DECODED BY W3FI63
-C     IOPT     - INTEGER OPTION FLAG
-C                ( 0 TO COMPUTE EARTH COORDS OF ALL THE GRID POINTS)
-C                (+1 TO COMPUTE EARTH COORDS OF SELECTED GRID COORDS)
-C                (-1 TO COMPUTE GRID COORDS OF SELECTED EARTH COORDS)
-C     NPTS     - INTEGER MAXIMUM NUMBER OF COORDINATES
-C     FILL     - REAL FILL VALUE TO SET INVALID OUTPUT DATA
-C                (MUST BE IMPOSSIBLE VALUE; SUGGESTED VALUE: -9999.)
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT>0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT>0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT<0
-C                (ACCEPTABLE RANGE: -360. TO 360.)
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT<0
-C                (ACCEPTABLE RANGE: -90. TO 90.)
-C     LROT     - INTEGER FLAG TO RETURN VECTOR ROTATIONS IF 1
-C
-C   OUTPUT ARGUMENT LIST:
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT<=0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT<=0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT>=0
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT>=0
-C     NRET     - INTEGER NUMBER OF VALID POINTS COMPUTED
-C                (-1 IF PROJECTION UNRECOGNIZED)
-C     CROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION COSINES IF LROT=1
-C     SROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION SINES IF LROT=1
-C                (UGRID=CROT*UEARTH-SROT*VEARTH;
-C                 VGRID=SROT*UEARTH+CROT*VEARTH)
-C
-C SUBPROGRAMS CALLED:
-C   GDSWIZ00     GDS WIZARD FOR EQUIDISTANT CYLINDRICAL
-C   GDSWIZ01     GDS WIZARD FOR MERCATOR CYLINDRICAL
-C   GDSWIZ03     GDS WIZARD FOR LAMBERT CONFORMAL CONICAL
-C   GDSWIZ04     GDS WIZARD FOR GAUSSIAN CYLINDRICAL
-C   GDSWIZ05     GDS WIZARD FOR POLAR STEREOGRAPHIC AZIMUTHAL
-C   GDSWIZC9     GDS WIZARD FOR ROTATED EQUIDISTANT CYLINDRICAL
-C   GDSWIZCA     GDS WIZARD FOR ROTATED EQUIDISTANT CYLINDRICAL
-C   GDSWIZCB     GDS WIZARD FOR ROTATED EQUIDISTANT CYLINDRICAL 2-D
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C
-C$$$
-      INTEGER KGDS(200)
-      REAL XPTS(NPTS),YPTS(NPTS),RLON(NPTS),RLAT(NPTS)
-      REAL CROT(NPTS),SROT(NPTS)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  COMPUTE GRID COORDINATES FOR ALL GRID POINTS
-      IF(IOPT.EQ.0) THEN
-        IF(KGDS(1).EQ.201) THEN
-          IM=KGDS(7)*2-1
-          JM=KGDS(8)
-          KSCAN=MOD(KGDS(11)/256,2)
-          IF(KSCAN.EQ.0) THEN
-            IS1=(JM+1)/2
-            NM=(IM/2+1)*JM-JM/2
-          ELSE
-            IS1=JM/2
-            NM=IM/2*JM+JM/2
-          ENDIF
-        ELSEIF(KGDS(1).EQ.202) THEN
-          IM=KGDS(7)
-          JM=KGDS(8)
-          NM=IM*JM
-        ELSEIF(KGDS(1).EQ.203) THEN
-          IM=KGDS(2)
-          JM=KGDS(3)
-          NM=IM*JM
-          KSCAN=MOD(KGDS(11)/256,2)
-          IF(KSCAN.EQ.0) THEN
-            IS1=(JM+1)/2
-          ELSE
-            IS1=JM/2
-          ENDIF
-        ELSE
-          IM=KGDS(2)
-          JM=KGDS(3)
-          NM=IM*JM
-        ENDIF
-        NSCAN=MOD(KGDS(11)/32,2)
-        IF(NM.LE.NPTS) THEN
-          IF(KGDS(1).EQ.201) THEN
-            DO N=1,NM
-              NN=2*N-1+KSCAN
-              IF(NSCAN.EQ.0) THEN
-                J=(NN-1)/IM+1
-                I=NN-IM*(J-1)
-              ELSE
-                I=(NN-1)/JM+1
-                J=NN-JM*(I-1)
-              ENDIF
-              XPTS(N)=IS1+(I-(J-KSCAN))/2
-              YPTS(N)=(I+(J-KSCAN))/2
-            ENDDO
-          ELSEIF(KGDS(1).EQ.203) THEN
-            DO N=1,NM
-              IF(NSCAN.EQ.0) THEN
-                J=(N-1)/IM+1
-                I=(N-IM*(J-1))*2-MOD(J+KSCAN,2)
-              ELSE
-                I=(N-1)/JM+1
-                J=(N-JM*(I-1))*2-MOD(I+KSCAN,2)
-              ENDIF
-              XPTS(N)=IS1+(I-(J-KSCAN))/2
-              YPTS(N)=(I+(J-KSCAN))/2
-            ENDDO
-          ELSE
-            DO N=1,NM
-              IF(NSCAN.EQ.0) THEN
-                J=(N-1)/IM+1
-                I=N-IM*(J-1)
-              ELSE
-                I=(N-1)/JM+1
-                J=N-JM*(I-1)
-              ENDIF
-              XPTS(N)=I
-              YPTS(N)=J
-            ENDDO
-          ENDIF
-          DO N=NM+1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ELSE
-          DO N=1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ENDIF
-        IOPF=1
-      ELSE
-        IOPF=IOPT
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  EQUIDISTANT CYLINDRICAL
-      IF(KGDS(1).EQ.000) THEN
-        CALL GDSWIZ00(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  MERCATOR CYLINDRICAL
-      ELSEIF(KGDS(1).EQ.001) THEN
-        CALL GDSWIZ01(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  LAMBERT CONFORMAL CONICAL
-      ELSEIF(KGDS(1).EQ.003) THEN
-        CALL GDSWIZ03(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  GAUSSIAN CYLINDRICAL
-      ELSEIF(KGDS(1).EQ.004) THEN
-!        CALL GDSWIZ04(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-!     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  POLAR STEREOGRAPHIC AZIMUTHAL
-      ELSEIF(KGDS(1).EQ.005) THEN
-        CALL GDSWIZ05(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  STAGGERED ROTATED EQUIDISTANT CYLINDRICAL
-      ELSEIF(KGDS(1).EQ.201) THEN
-!        CALL GDSWIZC9(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-!     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  ROTATED EQUIDISTANT CYLINDRICAL
-      ELSEIF(KGDS(1).EQ.202) THEN
-!        CALL GDSWIZCA(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-!     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  STAGGERED ROTATED EQUIDISTANT CYLINDRICAL
-      ELSEIF(KGDS(1).EQ.203) THEN
-!        CALL GDSWIZCB(KGDS,IOPF,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-!     &                LROT,CROT,SROT)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  PROJECTION UNRECOGNIZED
-      ELSE
-        IRET=-1
-        IF(IOPT.GE.0) THEN
-          DO N=1,NPTS
-            RLON(N)=FILL
-            RLAT(N)=FILL
-          ENDDO
-        ENDIF
-        IF(IOPT.LE.0) THEN
-          DO N=1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      END
+      subroutine gdswiz(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                  lrot,crot,srot)
+c$$$  subprogram documentation block
+c
+c subprogram:  gdswiz     grid description section wizard
+c   prgmmr: iredell       org: w/nmc23       date: 96-04-10
+c
+c abstract: this subprogram decodes the grib grid description section
+c           (passed in integer form as decoded by subprogram w3fi63)
+c           and returns one of the following:
+c             (iopt= 0) grid and earth coordinates of all grid points
+c             (iopt=+1) earth coordinates of selected grid coordinates
+c             (iopt=-1) grid coordinates of selected earth coordinates
+c           the current code recognizes the following projections:
+c             (kgds(1)=000) equidistant cylindrical
+c             (kgds(1)=001) mercator cylindrical
+c             (kgds(1)=003) lambert conformal conical
+c             (kgds(1)=004) gaussian cylindrical
+c             (kgds(1)=005) polar stereographic azimuthal
+c             (kgds(1)=201) staggered rotated equidistant cylindrical
+c             (kgds(1)=202) rotated equidistant cylindrical
+c             (kgds(1)=203) staggered rotated equidistant cylindrical 2-d
+c           if the selected coordinates are more than one gridpoint
+c           beyond the the edges of the grid domain, then the relevant
+c           output elements are set to fill values.  also if iopt=0,
+c           if the number of grid points exceeds the number allotted,
+c           then all the output elements are set to fill values.
+c           the actual number of valid points computed is returned too.
+c
+c program history log:
+c   96-04-10  iredell
+c   98-08-20  baldwin  add type 203 staggered 2-d eta grids
+c
+c usage:    call gdswiz(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+c     &                 lrot,crot,srot)
+c
+c   input argument list:
+c     kgds     - integer (200) gds parameters as decoded by w3fi63
+c     iopt     - integer option flag
+c                ( 0 to compute earth coords of all the grid points)
+c                (+1 to compute earth coords of selected grid coords)
+c                (-1 to compute grid coords of selected earth coords)
+c     npts     - integer maximum number of coordinates
+c     fill     - real fill value to set invalid output data
+c                (must be impossible value; suggested value: -9999.)
+c     xpts     - real (npts) grid x point coordinates if iopt>0
+c     ypts     - real (npts) grid y point coordinates if iopt>0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt<0
+c                (acceptable range: -360. to 360.)
+c     rlat     - real (npts) earth latitudes in degrees n if iopt<0
+c                (acceptable range: -90. to 90.)
+c     lrot     - integer flag to return vector rotations if 1
+c
+c   output argument list:
+c     xpts     - real (npts) grid x point coordinates if iopt<=0
+c     ypts     - real (npts) grid y point coordinates if iopt<=0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt>=0
+c     rlat     - real (npts) earth latitudes in degrees n if iopt>=0
+c     nret     - integer number of valid points computed
+c                (-1 if projection unrecognized)
+c     crot     - real (npts) clockwise vector rotation cosines if lrot=1
+c     srot     - real (npts) clockwise vector rotation sines if lrot=1
+c                (ugrid=crot*uearth-srot*vearth;
+c                 vgrid=srot*uearth+crot*vearth)
+c
+c subprograms called:
+c   gdswiz00     gds wizard for equidistant cylindrical
+c   gdswiz01     gds wizard for mercator cylindrical
+c   gdswiz03     gds wizard for lambert conformal conical
+c   gdswiz04     gds wizard for gaussian cylindrical
+c   gdswiz05     gds wizard for polar stereographic azimuthal
+c   gdswizc9     gds wizard for rotated equidistant cylindrical
+c   gdswizca     gds wizard for rotated equidistant cylindrical
+c   gdswizcb     gds wizard for rotated equidistant cylindrical 2-d
+c
+c attributes:
+c   language: fortran 77
+c
+c$$$
+      integer kgds(200)
+      real xpts(npts),ypts(npts),rlon(npts),rlat(npts)
+      real crot(npts),srot(npts)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  compute grid coordinates for all grid points
+      if(iopt.eq.0) then
+        if(kgds(1).eq.201) then
+          im=kgds(7)*2-1
+          jm=kgds(8)
+          kscan=mod(kgds(11)/256,2)
+          if(kscan.eq.0) then
+            is1=(jm+1)/2
+            nm=(im/2+1)*jm-jm/2
+          else
+            is1=jm/2
+            nm=im/2*jm+jm/2
+          endif
+        elseif(kgds(1).eq.202) then
+          im=kgds(7)
+          jm=kgds(8)
+          nm=im*jm
+        elseif(kgds(1).eq.203) then
+          im=kgds(2)
+          jm=kgds(3)
+          nm=im*jm
+          kscan=mod(kgds(11)/256,2)
+          if(kscan.eq.0) then
+            is1=(jm+1)/2
+          else
+            is1=jm/2
+          endif
+        else
+          im=kgds(2)
+          jm=kgds(3)
+          nm=im*jm
+        endif
+        nscan=mod(kgds(11)/32,2)
+        if(nm.le.npts) then
+          if(kgds(1).eq.201) then
+            do n=1,nm
+              nn=2*n-1+kscan
+              if(nscan.eq.0) then
+                j=(nn-1)/im+1
+                i=nn-im*(j-1)
+              else
+                i=(nn-1)/jm+1
+                j=nn-jm*(i-1)
+              endif
+              xpts(n)=is1+(i-(j-kscan))/2
+              ypts(n)=(i+(j-kscan))/2
+            enddo
+          elseif(kgds(1).eq.203) then
+            do n=1,nm
+              if(nscan.eq.0) then
+                j=(n-1)/im+1
+                i=(n-im*(j-1))*2-mod(j+kscan,2)
+              else
+                i=(n-1)/jm+1
+                j=(n-jm*(i-1))*2-mod(i+kscan,2)
+              endif
+              xpts(n)=is1+(i-(j-kscan))/2
+              ypts(n)=(i+(j-kscan))/2
+            enddo
+          else
+            do n=1,nm
+              if(nscan.eq.0) then
+                j=(n-1)/im+1
+                i=n-im*(j-1)
+              else
+                i=(n-1)/jm+1
+                j=n-jm*(i-1)
+              endif
+              xpts(n)=i
+              ypts(n)=j
+            enddo
+          endif
+          do n=nm+1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        else
+          do n=1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        endif
+        iopf=1
+      else
+        iopf=iopt
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  equidistant cylindrical
+      if(kgds(1).eq.000) then
+        call gdswiz00(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  mercator cylindrical
+      elseif(kgds(1).eq.001) then
+        call gdswiz01(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  lambert conformal conical
+      elseif(kgds(1).eq.003) then
+        call gdswiz03(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  gaussian cylindrical
+      elseif(kgds(1).eq.004) then
+!        call gdswiz04(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+!     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  polar stereographic azimuthal
+      elseif(kgds(1).eq.005) then
+        call gdswiz05(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  staggered rotated equidistant cylindrical
+      elseif(kgds(1).eq.201) then
+!        call gdswizc9(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+!     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  rotated equidistant cylindrical
+      elseif(kgds(1).eq.202) then
+!        call gdswizca(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+!     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  staggered rotated equidistant cylindrical
+      elseif(kgds(1).eq.203) then
+!        call gdswizcb(kgds,iopf,npts,fill,xpts,ypts,rlon,rlat,nret,
+!     &                lrot,crot,srot)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  projection unrecognized
+      else
+        iret=-1
+        if(iopt.ge.0) then
+          do n=1,npts
+            rlon(n)=fill
+            rlat(n)=fill
+          enddo
+        endif
+        if(iopt.le.0) then
+          do n=1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      end
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      SUBROUTINE GDSWIZ01(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                    LROT,CROT,SROT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:  GDSWIZ01   GDS WIZARD FOR MERCATOR CYLINDRICAL
-C   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
-C
-C ABSTRACT: THIS SUBPROGRAM DECODES THE GRIB GRID DESCRIPTION SECTION
-C           (PASSED IN INTEGER FORM AS DECODED BY SUBPROGRAM W3FI63)
-C           AND RETURNS ONE OF THE FOLLOWING:
-C             (IOPT=+1) EARTH COORDINATES OF SELECTED GRID COORDINATES
-C             (IOPT=-1) GRID COORDINATES OF SELECTED EARTH COORDINATES
-C           FOR MERCATOR CYLINDRICAL PROJECTIONS.
-C           IF THE SELECTED COORDINATES ARE MORE THAN ONE GRIDPOINT
-C           BEYOND THE THE EDGES OF THE GRID DOMAIN, THEN THE RELEVANT
-C           OUTPUT ELEMENTS ARE SET TO FILL VALUES.
-C           THE ACTUAL NUMBER OF VALID POINTS COMPUTED IS RETURNED TOO.
-C
-C PROGRAM HISTORY LOG:
-C   96-04-10  IREDELL
-C   96-10-01  IREDELL   PROTECTED AGAINST UNRESOLVABLE POINTS
-C
-C USAGE:    CALL GDSWIZ01(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-C     &                   LROT,CROT,SROT)
-C
-C   INPUT ARGUMENT LIST:
-C     KGDS     - INTEGER (200) GDS PARAMETERS AS DECODED BY W3FI63
-C     IOPT     - INTEGER OPTION FLAG
-C                (+1 TO COMPUTE EARTH COORDS OF SELECTED GRID COORDS)
-C                (-1 TO COMPUTE GRID COORDS OF SELECTED EARTH COORDS)
-C     NPTS     - INTEGER MAXIMUM NUMBER OF COORDINATES
-C     FILL     - REAL FILL VALUE TO SET INVALID OUTPUT DATA
-C                (MUST BE IMPOSSIBLE VALUE; SUGGESTED VALUE: -9999.)
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT>0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT>0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT<0
-C                (ACCEPTABLE RANGE: -360. TO 360.)
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT<0
-C                (ACCEPTABLE RANGE: -90. TO 90.)
-C     LROT     - INTEGER FLAG TO RETURN VECTOR ROTATIONS IF 1
-C
-C   OUTPUT ARGUMENT LIST:
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT<0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT<0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT>0
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT>0
-C     NRET     - INTEGER NUMBER OF VALID POINTS COMPUTED
-C     CROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION COSINES IF LROT=1
-C     SROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION SINES IF LROT=1
-C                (UGRID=CROT*UEARTH-SROT*VEARTH;
-C                 VGRID=SROT*UEARTH+CROT*VEARTH)
+      subroutine gdswiz01(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                    lrot,crot,srot)
+c$$$  subprogram documentation block
+c
+c subprogram:  gdswiz01   gds wizard for mercator cylindrical
+c   prgmmr: iredell       org: w/nmc23       date: 96-04-10
+c
+c abstract: this subprogram decodes the grib grid description section
+c           (passed in integer form as decoded by subprogram w3fi63)
+c           and returns one of the following:
+c             (iopt=+1) earth coordinates of selected grid coordinates
+c             (iopt=-1) grid coordinates of selected earth coordinates
+c           for mercator cylindrical projections.
+c           if the selected coordinates are more than one gridpoint
+c           beyond the the edges of the grid domain, then the relevant
+c           output elements are set to fill values.
+c           the actual number of valid points computed is returned too.
+c
+c program history log:
+c   96-04-10  iredell
+c   96-10-01  iredell   protected against unresolvable points
+c
+c usage:    call gdswiz01(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+c     &                   lrot,crot,srot)
+c
+c   input argument list:
+c     kgds     - integer (200) gds parameters as decoded by w3fi63
+c     iopt     - integer option flag
+c                (+1 to compute earth coords of selected grid coords)
+c                (-1 to compute grid coords of selected earth coords)
+c     npts     - integer maximum number of coordinates
+c     fill     - real fill value to set invalid output data
+c                (must be impossible value; suggested value: -9999.)
+c     xpts     - real (npts) grid x point coordinates if iopt>0
+c     ypts     - real (npts) grid y point coordinates if iopt>0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt<0
+c                (acceptable range: -360. to 360.)
+c     rlat     - real (npts) earth latitudes in degrees n if iopt<0
+c                (acceptable range: -90. to 90.)
+c     lrot     - integer flag to return vector rotations if 1
+c
+c   output argument list:
+c     xpts     - real (npts) grid x point coordinates if iopt<0
+c     ypts     - real (npts) grid y point coordinates if iopt<0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt>0
+c     rlat     - real (npts) earth latitudes in degrees n if iopt>0
+c     nret     - integer number of valid points computed
+c     crot     - real (npts) clockwise vector rotation cosines if lrot=1
+c     srot     - real (npts) clockwise vector rotation sines if lrot=1
+c                (ugrid=crot*uearth-srot*vearth;
+c                 vgrid=srot*uearth+crot*vearth)
 
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C
-C$$$
-      INTEGER KGDS(200)
-      REAL XPTS(NPTS),YPTS(NPTS),RLON(NPTS),RLAT(NPTS)
-      REAL CROT(NPTS),SROT(NPTS)
-      PARAMETER(RERTH=6.3712E6)
-      PARAMETER(PI=3.14159265358979,DPR=180./PI)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IF(KGDS(1).EQ.001) THEN
-        IM=KGDS(2)
-        JM=KGDS(3)
-        RLAT1=KGDS(4)*1.E-3
-        RLON1=KGDS(5)*1.E-3
-        RLAT2=KGDS(7)*1.E-3
-        RLON2=KGDS(8)*1.E-3
-        RLATI=KGDS(9)*1.E-3
-        ISCAN=MOD(KGDS(11)/128,2)
-        JSCAN=MOD(KGDS(11)/64,2)
-        NSCAN=MOD(KGDS(11)/32,2)
-        DX=KGDS(12)
-        DY=KGDS(13)
-        HI=(-1.)**ISCAN
-        HJ=(-1.)**(1-JSCAN)
-        DLON=HI*(MOD(HI*(RLON2-RLON1)-1+3600,360.)+1)/(IM-1)
-        DLAT=HJ*DY/(RERTH*COS(RLATI/DPR))
-        YE=1-LOG(TAN((RLAT1+90)/2/DPR))/DLAT
-        XMIN=0
-        XMAX=IM+1
-        IF(IM.EQ.NINT(360/ABS(DLON))) XMAX=IM+2
-        YMIN=0
-        YMAX=JM+1
-        NRET=0
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE GRID COORDINATES TO EARTH COORDINATES
-        IF(IOPT.EQ.0.OR.IOPT.EQ.1) THEN
-          DO N=1,NPTS
-            IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &         YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-              RLON(N)=MOD(RLON1+DLON*(XPTS(N)-1)+3600,360.)
-              RLAT(N)=2*ATAN(EXP(DLAT*(YPTS(N)-YE)))*DPR-90
-              NRET=NRET+1
-              IF(LROT.EQ.1) THEN
-                CROT(N)=1
-                SROT(N)=0
-              ENDIF
-            ELSE
-              RLON(N)=FILL
-              RLAT(N)=FILL
-            ENDIF
-          ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE EARTH COORDINATES TO GRID COORDINATES
-        ELSEIF(IOPT.EQ.-1) THEN
-          DO N=1,NPTS
-            IF(ABS(RLON(N)).LE.360.AND.ABS(RLAT(N)).LT.90) THEN
-              XPTS(N)=1+HI*MOD(HI*(RLON(N)-RLON1)+3600,360.)/DLON
-              YPTS(N)=YE+LOG(TAN((RLAT(N)+90)/2/DPR))/DLAT
-              IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &           YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-                NRET=NRET+1
-                IF(LROT.EQ.1) THEN
-                  CROT(N)=1
-                  SROT(N)=0
-                ENDIF
-              ELSE
-                XPTS(N)=FILL
-                YPTS(N)=FILL
-              ENDIF
-            ELSE
-              XPTS(N)=FILL
-              YPTS(N)=FILL
-            ENDIF
-          ENDDO
-        ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  PROJECTION UNRECOGNIZED
-      ELSE
-        IRET=-1
-        IF(IOPT.GE.0) THEN
-          DO N=1,NPTS
-            RLON(N)=FILL
-            RLAT(N)=FILL
-          ENDDO
-        ENDIF
-        IF(IOPT.LE.0) THEN
-          DO N=1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      END
+c
+c attributes:
+c   language: fortran 77
+c
+c$$$
+      integer kgds(200)
+      real xpts(npts),ypts(npts),rlon(npts),rlat(npts)
+      real crot(npts),srot(npts)
+      parameter(rerth=6.3712e6)
+      parameter(pi=3.14159265358979,dpr=180./pi)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      if(kgds(1).eq.001) then
+        im=kgds(2)
+        jm=kgds(3)
+        rlat1=kgds(4)*1.e-3
+        rlon1=kgds(5)*1.e-3
+        rlat2=kgds(7)*1.e-3
+        rlon2=kgds(8)*1.e-3
+        rlati=kgds(9)*1.e-3
+        iscan=mod(kgds(11)/128,2)
+        jscan=mod(kgds(11)/64,2)
+        nscan=mod(kgds(11)/32,2)
+        dx=kgds(12)
+        dy=kgds(13)
+        hi=(-1.)**iscan
+        hj=(-1.)**(1-jscan)
+        dlon=hi*(mod(hi*(rlon2-rlon1)-1+3600,360.)+1)/(im-1)
+        dlat=hj*dy/(rerth*cos(rlati/dpr))
+        ye=1-log(tan((rlat1+90)/2/dpr))/dlat
+        xmin=0
+        xmax=im+1
+        if(im.eq.nint(360/abs(dlon))) xmax=im+2
+        ymin=0
+        ymax=jm+1
+        nret=0
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate grid coordinates to earth coordinates
+        if(iopt.eq.0.or.iopt.eq.1) then
+          do n=1,npts
+            if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &         ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+              rlon(n)=mod(rlon1+dlon*(xpts(n)-1)+3600,360.)
+              rlat(n)=2*atan(exp(dlat*(ypts(n)-ye)))*dpr-90
+              nret=nret+1
+              if(lrot.eq.1) then
+                crot(n)=1
+                srot(n)=0
+              endif
+            else
+              rlon(n)=fill
+              rlat(n)=fill
+            endif
+          enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate earth coordinates to grid coordinates
+        elseif(iopt.eq.-1) then
+          do n=1,npts
+            if(abs(rlon(n)).le.360.and.abs(rlat(n)).lt.90) then
+              xpts(n)=1+hi*mod(hi*(rlon(n)-rlon1)+3600,360.)/dlon
+              ypts(n)=ye+log(tan((rlat(n)+90)/2/dpr))/dlat
+              if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &           ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+                nret=nret+1
+                if(lrot.eq.1) then
+                  crot(n)=1
+                  srot(n)=0
+                endif
+              else
+                xpts(n)=fill
+                ypts(n)=fill
+              endif
+            else
+              xpts(n)=fill
+              ypts(n)=fill
+            endif
+          enddo
+        endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  projection unrecognized
+      else
+        iret=-1
+        if(iopt.ge.0) then
+          do n=1,npts
+            rlon(n)=fill
+            rlat(n)=fill
+          enddo
+        endif
+        if(iopt.le.0) then
+          do n=1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      end
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ccccccccccccccccccccccccccccccccccccccccccccccc
 
-      SUBROUTINE GDSWIZ00(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-     &                    LROT,CROT,SROT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:  GDSWIZ00   GDS WIZARD FOR EQUIDISTANT CYLINDRICAL
-C   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
-C
-C ABSTRACT: THIS SUBPROGRAM DECODES THE GRIB GRID DESCRIPTION SECTION
-C           (PASSED IN INTEGER FORM AS DECODED BY SUBPROGRAM W3FI63)
-C           AND RETURNS ONE OF THE FOLLOWING:
-C             (IOPT=+1) EARTH COORDINATES OF SELECTED GRID COORDINATES
-C             (IOPT=-1) GRID COORDINATES OF SELECTED EARTH COORDINATES
-C           FOR EQUIDISTANT CYLINDRICAL PROJECTIONS.
-C           IF THE SELECTED COORDINATES ARE MORE THAN ONE GRIDPOINT
-C           BEYOND THE THE EDGES OF THE GRID DOMAIN, THEN THE RELEVANT
-C           OUTPUT ELEMENTS ARE SET TO FILL VALUES.
-C           THE ACTUAL NUMBER OF VALID POINTS COMPUTED IS RETURNED TOO.
-C
-C PROGRAM HISTORY LOG:
-C   96-04-10  IREDELL
-C
-C USAGE:    CALL GDSWIZ00(KGDS,IOPT,NPTS,FILL,XPTS,YPTS,RLON,RLAT,NRET,
-C     &                   LROT,CROT,SROT)
-C
-C   INPUT ARGUMENT LIST:
-C     KGDS     - INTEGER (200) GDS PARAMETERS AS DECODED BY W3FI63
-C     IOPT     - INTEGER OPTION FLAG
-C                (+1 TO COMPUTE EARTH COORDS OF SELECTED GRID COORDS)
-C                (-1 TO COMPUTE GRID COORDS OF SELECTED EARTH COORDS)
-C     NPTS     - INTEGER MAXIMUM NUMBER OF COORDINATES
-C     FILL     - REAL FILL VALUE TO SET INVALID OUTPUT DATA
-C                (MUST BE IMPOSSIBLE VALUE; SUGGESTED VALUE: -9999.)
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT>0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT>0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT<0
-C                (ACCEPTABLE RANGE: -360. TO 360.)
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT<0
-C                (ACCEPTABLE RANGE: -90. TO 90.)
-C     LROT     - INTEGER FLAG TO RETURN VECTOR ROTATIONS IF 1
-C
-C   OUTPUT ARGUMENT LIST:
-C     XPTS     - REAL (NPTS) GRID X POINT COORDINATES IF IOPT<0
-C     YPTS     - REAL (NPTS) GRID Y POINT COORDINATES IF IOPT<0
-C     RLON     - REAL (NPTS) EARTH LONGITUDES IN DEGREES E IF IOPT>0
-C     RLAT     - REAL (NPTS) EARTH LATITUDES IN DEGREES N IF IOPT>0
-C     NRET     - INTEGER NUMBER OF VALID POINTS COMPUTED
-C     CROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION COSINES IF LROT=1
-C     SROT     - REAL (NPTS) CLOCKWISE VECTOR ROTATION SINES IF LROT=1
-C                (UGRID=CROT*UEARTH-SROT*VEARTH;
-C                 VGRID=SROT*UEARTH+CROT*VEARTH)
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C
-C$$$
-      INTEGER KGDS(200)
-      REAL XPTS(NPTS),YPTS(NPTS),RLON(NPTS),RLAT(NPTS)
-      REAL CROT(NPTS),SROT(NPTS)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IF(KGDS(1).EQ.000) THEN
-        IM=KGDS(2)
-        JM=KGDS(3)
-        RLAT1=KGDS(4)*1.E-3
-        RLON1=KGDS(5)*1.E-3
-        RLAT2=KGDS(7)*1.E-3
-        RLON2=KGDS(8)*1.E-3
-        ISCAN=MOD(KGDS(11)/128,2)
-        JSCAN=MOD(KGDS(11)/64,2)
-        NSCAN=MOD(KGDS(11)/32,2)
-        HI=(-1.)**ISCAN
-        HJ=(-1.)**(1-JSCAN)
-        DLON=HI*(MOD(HI*(RLON2-RLON1)-1+3600,360.)+1)/(IM-1)
-        DLAT=(RLAT2-RLAT1)/(JM-1)
-        XMIN=0
-        XMAX=IM+1
-        IF(IM.EQ.NINT(360/ABS(DLON))) XMAX=IM+2
-        YMIN=0
-        YMAX=JM+1
-        NRET=0
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE GRID COORDINATES TO EARTH COORDINATES
-        IF(IOPT.EQ.0.OR.IOPT.EQ.1) THEN
-          DO N=1,NPTS
-            IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &         YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-              RLON(N)=MOD(RLON1+DLON*(XPTS(N)-1)+3600,360.)
-              RLAT(N)=MIN(MAX(RLAT1+DLAT*(YPTS(N)-1),-90.),90.)
-              NRET=NRET+1
-              IF(LROT.EQ.1) THEN
-                CROT(N)=1
-                SROT(N)=0
-              ENDIF
-            ELSE
-              RLON(N)=FILL
-              RLAT(N)=FILL
-            ENDIF
-          ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  TRANSLATE EARTH COORDINATES TO GRID COORDINATES
-        ELSEIF(IOPT.EQ.-1) THEN
-          DO N=1,NPTS
-            IF(ABS(RLON(N)).LE.360.AND.ABS(RLAT(N)).LE.90) THEN
-              XPTS(N)=1+HI*MOD(HI*(RLON(N)-RLON1)+3600,360.)/DLON
-              YPTS(N)=1+(RLAT(N)-RLAT1)/DLAT
-              IF(XPTS(N).GE.XMIN.AND.XPTS(N).LE.XMAX.AND.
-     &           YPTS(N).GE.YMIN.AND.YPTS(N).LE.YMAX) THEN
-                NRET=NRET+1
-                IF(LROT.EQ.1) THEN
-                  CROT(N)=1
-                  SROT(N)=0
-                ENDIF
-              ELSE
-                XPTS(N)=FILL
-                YPTS(N)=FILL
-              ENDIF
-            ELSE
-              XPTS(N)=FILL
-              YPTS(N)=FILL
-            ENDIF
-          ENDDO
-        ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  PROJECTION UNRECOGNIZED
-      ELSE
-        IRET=-1
-        IF(IOPT.GE.0) THEN
-          DO N=1,NPTS
-            RLON(N)=FILL
-            RLAT(N)=FILL
-          ENDDO
-        ENDIF
-        IF(IOPT.LE.0) THEN
-          DO N=1,NPTS
-            XPTS(N)=FILL
-            YPTS(N)=FILL
-          ENDDO
-        ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      END
+      subroutine gdswiz00(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+     &                    lrot,crot,srot)
+c$$$  subprogram documentation block
+c
+c subprogram:  gdswiz00   gds wizard for equidistant cylindrical
+c   prgmmr: iredell       org: w/nmc23       date: 96-04-10
+c
+c abstract: this subprogram decodes the grib grid description section
+c           (passed in integer form as decoded by subprogram w3fi63)
+c           and returns one of the following:
+c             (iopt=+1) earth coordinates of selected grid coordinates
+c             (iopt=-1) grid coordinates of selected earth coordinates
+c           for equidistant cylindrical projections.
+c           if the selected coordinates are more than one gridpoint
+c           beyond the the edges of the grid domain, then the relevant
+c           output elements are set to fill values.
+c           the actual number of valid points computed is returned too.
+c
+c program history log:
+c   96-04-10  iredell
+c
+c usage:    call gdswiz00(kgds,iopt,npts,fill,xpts,ypts,rlon,rlat,nret,
+c     &                   lrot,crot,srot)
+c
+c   input argument list:
+c     kgds     - integer (200) gds parameters as decoded by w3fi63
+c     iopt     - integer option flag
+c                (+1 to compute earth coords of selected grid coords)
+c                (-1 to compute grid coords of selected earth coords)
+c     npts     - integer maximum number of coordinates
+c     fill     - real fill value to set invalid output data
+c                (must be impossible value; suggested value: -9999.)
+c     xpts     - real (npts) grid x point coordinates if iopt>0
+c     ypts     - real (npts) grid y point coordinates if iopt>0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt<0
+c                (acceptable range: -360. to 360.)
+c     rlat     - real (npts) earth latitudes in degrees n if iopt<0
+c                (acceptable range: -90. to 90.)
+c     lrot     - integer flag to return vector rotations if 1
+c
+c   output argument list:
+c     xpts     - real (npts) grid x point coordinates if iopt<0
+c     ypts     - real (npts) grid y point coordinates if iopt<0
+c     rlon     - real (npts) earth longitudes in degrees e if iopt>0
+c     rlat     - real (npts) earth latitudes in degrees n if iopt>0
+c     nret     - integer number of valid points computed
+c     crot     - real (npts) clockwise vector rotation cosines if lrot=1
+c     srot     - real (npts) clockwise vector rotation sines if lrot=1
+c                (ugrid=crot*uearth-srot*vearth;
+c                 vgrid=srot*uearth+crot*vearth)
+c attributes:
+c   language: fortran 77
+c
+c$$$
+      integer kgds(200)
+      real xpts(npts),ypts(npts),rlon(npts),rlat(npts)
+      real crot(npts),srot(npts)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      if(kgds(1).eq.000) then
+        im=kgds(2)
+        jm=kgds(3)
+        rlat1=kgds(4)*1.e-3
+        rlon1=kgds(5)*1.e-3
+        rlat2=kgds(7)*1.e-3
+        rlon2=kgds(8)*1.e-3
+        iscan=mod(kgds(11)/128,2)
+        jscan=mod(kgds(11)/64,2)
+        nscan=mod(kgds(11)/32,2)
+        hi=(-1.)**iscan
+        hj=(-1.)**(1-jscan)
+        dlon=hi*(mod(hi*(rlon2-rlon1)-1+3600,360.)+1)/(im-1)
+        dlat=(rlat2-rlat1)/(jm-1)
+        xmin=0
+        xmax=im+1
+        if(im.eq.nint(360/abs(dlon))) xmax=im+2
+        ymin=0
+        ymax=jm+1
+        nret=0
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate grid coordinates to earth coordinates
+        if(iopt.eq.0.or.iopt.eq.1) then
+          do n=1,npts
+            if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &         ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+              rlon(n)=mod(rlon1+dlon*(xpts(n)-1)+3600,360.)
+              rlat(n)=min(max(rlat1+dlat*(ypts(n)-1),-90.),90.)
+              nret=nret+1
+              if(lrot.eq.1) then
+                crot(n)=1
+                srot(n)=0
+              endif
+            else
+              rlon(n)=fill
+              rlat(n)=fill
+            endif
+          enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  translate earth coordinates to grid coordinates
+        elseif(iopt.eq.-1) then
+          do n=1,npts
+            if(abs(rlon(n)).le.360.and.abs(rlat(n)).le.90) then
+              xpts(n)=1+hi*mod(hi*(rlon(n)-rlon1)+3600,360.)/dlon
+              ypts(n)=1+(rlat(n)-rlat1)/dlat
+              if(xpts(n).ge.xmin.and.xpts(n).le.xmax.and.
+     &           ypts(n).ge.ymin.and.ypts(n).le.ymax) then
+                nret=nret+1
+                if(lrot.eq.1) then
+                  crot(n)=1
+                  srot(n)=0
+                endif
+              else
+                xpts(n)=fill
+                ypts(n)=fill
+              endif
+            else
+              xpts(n)=fill
+              ypts(n)=fill
+            endif
+          enddo
+        endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  projection unrecognized
+      else
+        iret=-1
+        if(iopt.ge.0) then
+          do n=1,npts
+            rlon(n)=fill
+            rlat(n)=fill
+          enddo
+        endif
+        if(iopt.le.0) then
+          do n=1,npts
+            xpts(n)=fill
+            ypts(n)=fill
+          enddo
+        endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      end

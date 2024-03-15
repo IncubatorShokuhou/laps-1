@@ -1,9 +1,9 @@
 
-        subroutine ingest_madis_map(i4time_sys,NX_L,NY_L,ext,istatus)
+        subroutine ingest_madis_map(i4time_sys,nx_l,ny_l,ext,istatus)
 
-        integer status,MAX_PROFILES,MAX_LEVELS
+        integer status,max_profiles,max_levels
 
-        parameter (MAX_SUBDIRS = 1)
+        parameter (max_subdirs = 1)
 
         character*200 fnam_in
         character*180 dir_in
@@ -19,29 +19,29 @@
         character*40 c_vars_req
         character*180 c_values_req
 
-        character*9 a9_timeObs
-        integer timeObs
+        character*9 a9_timeobs
+        integer timeobs
 
-        real lat(NX_L,NY_L),lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
+        real lat(nx_l,ny_l),lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
 
-        write(6,*)' Start ingest_madis_map, ext = ',ext
+        write(6,*)' start ingest_madis_map, ext = ',ext
 
         lun_out = 1
 
         call get_r_missing_data(r_missing_data,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting r_missing_data'
+           write (6,*) 'error getting r_missing_data'
            return
         endif
  
         r_mspkt = .518
 
-        call get_latlon_perimeter(NX_L,NY_L,1.0
+        call get_latlon_perimeter(nx_l,ny_l,1.0
      1                           ,lat,lon,topo
      1                           ,rnorth,south,east,west,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS perimeter'
+            write(6,*)' error reading laps perimeter'
             return
         endif
 
@@ -56,7 +56,7 @@
             write(6,*)c_vars_req(1:30),' = ',c_values_req
             dir_in = c_values_req
         else
-            write(6,*)' Error getting ',c_vars_req
+            write(6,*)' error getting ',c_vars_req
             return
         endif
 
@@ -68,9 +68,9 @@
 
         n_good_obs = 0
 
-C       READ IN THE RAW PROFILER/RASS DATA
+c       read in the raw profiler/rass data
 
-!       The assumption is that the stated observation time (end of averaging 
+!       the assumption is that the stated observation time (end of averaging 
 !       period) is for the 30 minute period ending at the file name....
 
  500    a13_time = cvt_i4time_wfo_fname13(i4time_raw)
@@ -84,16 +84,16 @@ C       READ IN THE RAW PROFILER/RASS DATA
 
             istatus = 0
 
-            call read_ldad_prof(i4time_sys,i4_prof_window              ! I
-     1                                    ,NX_L,NY_L                   ! I
-     1                                    ,ext                         ! I
-     1                                    ,lun_out                     ! I
-     1                                    ,fnam_in(1:len_fnam_in)      ! I
-     1                                    ,n_good_obs                  ! I/O
-     1                                    ,istatus)                    ! O
+            call read_ldad_prof(i4time_sys,i4_prof_window              ! i
+     1                                    ,nx_l,ny_l                   ! i
+     1                                    ,ext                         ! i
+     1                                    ,lun_out                     ! i
+     1                                    ,fnam_in(1:len_fnam_in)      ! i
+     1                                    ,n_good_obs                  ! i/o
+     1                                    ,istatus)                    ! o
 
             if(istatus.ne.1)then
-                write(6,*)' Warning: bad status in ingest_madis_map'
+                write(6,*)' warning: bad status in ingest_madis_map'
                 goto980
             endif
 
@@ -102,7 +102,7 @@ C       READ IN THE RAW PROFILER/RASS DATA
  980        continue
 
         else
-                write(6,*)' Warning: cannot find file '
+                write(6,*)' warning: cannot find file '
      1                   ,fnam_in(1:len_fnam_in)
 
         endif ! file exists
@@ -111,7 +111,7 @@ C       READ IN THE RAW PROFILER/RASS DATA
 
         if(abs(i4time_raw-i4time_sys) .le. 1800 .and. 
      1                     n_good_obs .eq. 0          )then
-            write(6,*)' Looping back for earlier file time'
+            write(6,*)' looping back for earlier file time'
             goto 500
         endif
 

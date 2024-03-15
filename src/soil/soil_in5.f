@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,17 +29,17 @@ cdis
 cdis 
 cdis 
 cdis 
-C   Subroutine to read in the soil type infomation
-C   Created 5/2/92
-C   Chandran Subramaniam
-C
-C
-      Subroutine Soil_In5(imax,jmax,SoilType,IStatus) 
+c   subroutine to read in the soil type infomation
+c   created 5/2/92
+c   chandran subramaniam
+c
+c
+      subroutine soil_in5(imax,jmax,soiltype,istatus) 
 
       include 'soilm.inc'
       integer imax,jmax
       integer nf
-      integer SoilType(imax,jmax)
+      integer soiltype(imax,jmax)
       real    r_missing_data
       real,allocatable::static_stl(:,:)
       character*150 c_dir
@@ -50,37 +50,37 @@ C
       character*10  units
       character*125 comment
 c
-c Current categories for top layer soil texture types
+c current categories for top layer soil texture types
 c in static file
 c ------------------------------
-c  1          SAND
-c  2          LOAMY SAND
-c  3          SANDY LOAM
-c  4          SILT LOAM
-c  5          SILT
-c  6          LOAM
-c  7          SANDY CLAY LOAM
-c  8          SILTY CLAY LOAM
-c  9          CLAY LOAM
-c 10          SANDY CLAY
-c 11          SILTY CLAY
-c 12          CLAY
-c 13          ORGANIC MATERIALS
-c 14          WATER
-c 15          BEDROCK
-c 16          OTHER (land-ice)
+c  1          sand
+c  2          loamy sand
+c  3          sandy loam
+c  4          silt loam
+c  5          silt
+c  6          loam
+c  7          sandy clay loam
+c  8          silty clay loam
+c  9          clay loam
+c 10          sandy clay
+c 11          silty clay
+c 12          clay
+c 13          organic materials
+c 14          water
+c 15          bedrock
+c 16          other (land-ice)
 c
-c Expected texture types for this lsm
-C 1. loamy sand:
-C 2. sandy loam:
-C 3. loam: 
-C 4. sandy clay loam:
-C 5. silty clay loam:
-C 6. silty clay
+c expected texture types for this lsm
+c 1. loamy sand:
+c 2. sandy loam:
+c 3. loam: 
+c 4. sandy clay loam:
+c 5. silty clay loam:
+c 6. silty clay
 c
-c Mapping between 16 category and 6 category.
+c mapping between 16 category and 6 category.
 c
-c if type = 0 then type = 5 ! By JRS. Cannot have type = 0;
+c if type = 0 then type = 5 ! by jrs. cannot have type = 0;
 c                             default to original setting
 c if type16 = 1 then type6 = 1
 c if type16 = 2 then type6 = 1
@@ -107,31 +107,31 @@ c
       call get_directory(ext,c_dir,lend)
       call get_r_missing_data(r_missing_data,istatus)
 
-c     filename=c_dir(1:lend)//'soil/Soils.dat'
-c     open(Unit = 2, File = filename, Status = 'Old',
-c    1  Access = 'Sequential', Iostat = IERR, ERR = 664)
-c     do J = 1 , Jmax
-c        Read(2,*) (SoilType(I,J), I = 1, Imax)
+c     filename=c_dir(1:lend)//'soil/soils.dat'
+c     open(unit = 2, file = filename, status = 'old',
+c    1  access = 'sequential', iostat = ierr, err = 664)
+c     do j = 1 , jmax
+c        read(2,*) (soiltype(i,j), i = 1, imax)
 c     enddo
 c     close(2)
 c     nf = index(filename,' ')-1
-c     write(6,*) 'Got Soils Data from ',filename(1:nf)
+c     write(6,*) 'got soils data from ',filename(1:nf)
 c     istatus = 0
 c     return
 
-      var='STL'
+      var='stl'
       ext='nest7grid'
       call rd_laps_static(c_dir,ext,imax,jmax,1,var,units
      .,comment,static_stl,gridspace,istatus)
       if(istatus.ne.1)then
-         print*,'Error reading static file for soil type'
+         print*,'error reading static file for soil type'
          return
       endif
 
-c664   write(6,*)'Using Default Soil Types'
-      print*,' Using static STL soil texture '
-      do J = 1 , Jmax
-         do I = 1, Imax
+c664   write(6,*)'using default soil types'
+      print*,' using static stl soil texture '
+      do j = 1 , jmax
+         do i = 1, imax
             if(static_stl(i,j).eq.0..or.
      +         static_stl(i,j).eq.r_missing_data)then
              soiltype(i,j) = 5. !default to 5 if no type for this grid point
@@ -175,9 +175,9 @@ c664   write(6,*)'Using Default Soil Types'
       do i=1,imax
          if(soiltype(i,j).eq.0)then
            print*,'i/j= ',i,j,'soil type = 0 at i/j'
-           print*,'Soil type value = 0 in soil_in5.f'
+           print*,'soil type value = 0 in soil_in5.f'
            print*,'at i/j = ',i,j
-           print*,'!! Terminating !!'
+           print*,'!! terminating !!'
            return
          endif
       enddo
@@ -187,5 +187,5 @@ c664   write(6,*)'Using Default Soil Types'
 
       istatus = 0
 
-      Return
-      End
+      return
+      end

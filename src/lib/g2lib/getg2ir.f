@@ -1,138 +1,138 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETG2IR(LUGB,MSK1,MSK2,MNUM,CBUF,NLEN,NNUM,NMESS,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETG2IR        CREATES AN INDEX OF A GRIB2 FILE
-C   PRGMMR: GILBERT          ORG: W/NP11      DATE: 2002-01-02
-C
-C ABSTRACT: READ A GRIB FILE AND RETURN ITS INDEX CONTENTS.
-C   THE INDEX BUFFER RETURNED CONTAINS INDEX RECORDS WITH THE INTERNAL FORMAT:
-C       BYTE 001 - 004: LENGTH OF INDEX RECORD
-C       BYTE 005 - 008: BYTES TO SKIP IN DATA FILE BEFORE GRIB MESSAGE
-C       BYTE 009 - 012: BYTES TO SKIP IN MESSAGE BEFORE LUS (LOCAL USE)
-C                       SET = 0, IF NO LOCAL USE SECTION IN GRIB2 MESSAGE.
-C       BYTE 013 - 016: BYTES TO SKIP IN MESSAGE BEFORE GDS
-C       BYTE 017 - 020: BYTES TO SKIP IN MESSAGE BEFORE PDS
-C       BYTE 021 - 024: BYTES TO SKIP IN MESSAGE BEFORE DRS
-C       BYTE 025 - 028: BYTES TO SKIP IN MESSAGE BEFORE BMS
-C       BYTE 029 - 032: BYTES TO SKIP IN MESSAGE BEFORE DATA SECTION
-C       BYTE 033 - 040: BYTES TOTAL IN THE MESSAGE
-C       BYTE 041 - 041: GRIB VERSION NUMBER ( CURRENTLY 2 )
-C       BYTE 042 - 042: MESSAGE DISCIPLINE
-C       BYTE 043 - 044: FIELD NUMBER WITHIN GRIB2 MESSAGE
-C       BYTE 045 -  II: IDENTIFICATION SECTION (IDS)
-C       BYTE II+1-  JJ: GRID DEFINITION SECTION (GDS)
-C       BYTE JJ+1-  KK: PRODUCT DEFINITION SECTION (PDS)
-C       BYTE KK+1-  LL: THE DATA REPRESENTATION SECTION (DRS)
-C       BYTE LL+1-LL+6: FIRST 6 BYTES OF THE BIT MAP SECTION (BMS)
-C
-C PROGRAM HISTORY LOG:
-C   95-10-31  IREDELL
-C   96-10-31  IREDELL   AUGMENTED OPTIONAL DEFINITIONS TO BYTE 320
-C 2002-01-02  GILBERT   MODIFIED FROM GETGIR TO CREATE GRIB2 INDEXES
-C
-C USAGE:    CALL GETG2IR(LUGB,MSK1,MSK2,MNUM,CBUF,NLEN,NNUM,NMESS,IRET)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB FILE
-C     MSK1         INTEGER NUMBER OF BYTES TO SEARCH FOR FIRST MESSAGE
-C     MSK2         INTEGER NUMBER OF BYTES TO SEARCH FOR OTHER MESSAGES
-C     MNUM         INTEGER NUMBER OF GRIB MESSAGES TO SKIP (USUALLY 0)
-C   OUTPUT ARGUMENTS:
-C     CBUF         CHARACTER*1 POINTER TO A BUFFER THAT CONTAINS INDEX RECORDS.
-C                  USERS SHOULD FREE MEMORY THAT CBUF POINTS TO
-C                  USING DEALLOCATE(CBUF) WHEN CBUF IS NO LONGER NEEDED.
-C     NLEN         INTEGER TOTAL LENGTH OF INDEX RECORD BUFFER IN BYTES
-C     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C                  (=0 IF NO GRIB MESSAGES ARE FOUND)
-C     NMESS        LAST GRIB MESSAGE IN FILE SUCCESSFULLY PROCESSED
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    1      NOT ENOUGH MEMORY AVAILABLE TO HOLD FULL INDEX 
-C                           BUFFER
-C                    2      NOT ENOUGH MEMORY TO ALLOCATE INITIAL INDEX BUFFER
-C
-C SUBPROGRAMS CALLED:
-C   SKGB           SEEK NEXT GRIB MESSAGE
-C   IXGB2          MAKE INDEX RECORD
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C
-C$$$
-      USE RE_ALLOC          ! NEEDED FOR SUBROUTINE REALLOC
-      PARAMETER(INIT=50000,NEXT=10000)
-      CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-      INTEGER,INTENT(IN) :: LUGB,MSK1,MSK2,MNUM
-      INTEGER,INTENT(OUT) :: NLEN,NNUM,NMESS,IRET
-      CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUFTMP
-      INTERFACE      ! REQUIRED FOR CBUF POINTER
-         SUBROUTINE IXGB2(LUGB,LSKIP,LGRIB,CBUF,NUMFLD,MLEN,IRET)
-           INTEGER,INTENT(IN) :: LUGB,LSKIP,LGRIB
-           CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-           INTEGER,INTENT(OUT) :: NUMFLD,MLEN,IRET
-         END SUBROUTINE IXGB2
-      END INTERFACE
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  INITIALIZE
-      IRET=0
-      IF (ASSOCIATED(CBUF)) NULLIFY(CBUF)
-      MBUF=INIT
-      ALLOCATE(CBUF(MBUF),STAT=ISTAT)    ! ALLOCATE INITIAL SPACE FOR CBUF
-      IF (ISTAT.NE.0) THEN
-         IRET=2
-         RETURN
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  SEARCH FOR FIRST GRIB MESSAGE
-      ISEEK=0
-      CALL SKGB(LUGB,ISEEK,MSK1,LSKIP,LGRIB)
-      DO M=1,MNUM
-        IF(LGRIB.GT.0) THEN
-          ISEEK=LSKIP+LGRIB
-          CALL SKGB(LUGB,ISEEK,MSK2,LSKIP,LGRIB)
-        ENDIF
-      ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  GET INDEX RECORDS FOR EVERY GRIB MESSAGE FOUND
-      NLEN=0
-      NNUM=0
-      NMESS=MNUM
-      DOWHILE(IRET.EQ.0.AND.LGRIB.GT.0)
-        CALL IXGB2(LUGB,LSKIP,LGRIB,CBUFTMP,NUMFLD,NBYTES,IRET1)
-        IF (IRET1.NE.0) PRINT *,' SAGT ',NUMFLD,NBYTES,IRET1
-        IF((NBYTES+NLEN).GT.MBUF) THEN             ! ALLOCATE MORE SPACE, IF
-                                                   ! NECESSARY
-           NEWSIZE=MAX(MBUF+NEXT,MBUF+NBYTES)
-           CALL REALLOC(CBUF,NLEN,NEWSIZE,ISTAT)
-           IF ( ISTAT .NE. 0 ) THEN
-              IRET=1
-              RETURN
-           ENDIF
-           MBUF=NEWSIZE
-        ENDIF
+c-----------------------------------------------------------------------
+      subroutine getg2ir(lugb,msk1,msk2,mnum,cbuf,nlen,nnum,nmess,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getg2ir        creates an index of a grib2 file
+c   prgmmr: gilbert          org: w/np11      date: 2002-01-02
+c
+c abstract: read a grib file and return its index contents.
+c   the index buffer returned contains index records with the internal format:
+c       byte 001 - 004: length of index record
+c       byte 005 - 008: bytes to skip in data file before grib message
+c       byte 009 - 012: bytes to skip in message before lus (local use)
+c                       set = 0, if no local use section in grib2 message.
+c       byte 013 - 016: bytes to skip in message before gds
+c       byte 017 - 020: bytes to skip in message before pds
+c       byte 021 - 024: bytes to skip in message before drs
+c       byte 025 - 028: bytes to skip in message before bms
+c       byte 029 - 032: bytes to skip in message before data section
+c       byte 033 - 040: bytes total in the message
+c       byte 041 - 041: grib version number ( currently 2 )
+c       byte 042 - 042: message discipline
+c       byte 043 - 044: field number within grib2 message
+c       byte 045 -  ii: identification section (ids)
+c       byte ii+1-  jj: grid definition section (gds)
+c       byte jj+1-  kk: product definition section (pds)
+c       byte kk+1-  ll: the data representation section (drs)
+c       byte ll+1-ll+6: first 6 bytes of the bit map section (bms)
+c
+c program history log:
+c   95-10-31  iredell
+c   96-10-31  iredell   augmented optional definitions to byte 320
+c 2002-01-02  gilbert   modified from getgir to create grib2 indexes
+c
+c usage:    call getg2ir(lugb,msk1,msk2,mnum,cbuf,nlen,nnum,nmess,iret)
+c   input arguments:
+c     lugb         integer unit of the unblocked grib file
+c     msk1         integer number of bytes to search for first message
+c     msk2         integer number of bytes to search for other messages
+c     mnum         integer number of grib messages to skip (usually 0)
+c   output arguments:
+c     cbuf         character*1 pointer to a buffer that contains index records.
+c                  users should free memory that cbuf points to
+c                  using deallocate(cbuf) when cbuf is no longer needed.
+c     nlen         integer total length of index record buffer in bytes
+c     nnum         integer number of index records
+c                  (=0 if no grib messages are found)
+c     nmess        last grib message in file successfully processed
+c     iret         integer return code
+c                    0      all ok
+c                    1      not enough memory available to hold full index 
+c                           buffer
+c                    2      not enough memory to allocate initial index buffer
+c
+c subprograms called:
+c   skgb           seek next grib message
+c   ixgb2          make index record
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c   do not engage the same logical unit from more than one processor.
+c
+c attributes:
+c   language: fortran 90
+c
+c$$$
+      use re_alloc          ! needed for subroutine realloc
+      parameter(init=50000,next=10000)
+      character(len=1),pointer,dimension(:) :: cbuf
+      integer,intent(in) :: lugb,msk1,msk2,mnum
+      integer,intent(out) :: nlen,nnum,nmess,iret
+      character(len=1),pointer,dimension(:) :: cbuftmp
+      interface      ! required for cbuf pointer
+         subroutine ixgb2(lugb,lskip,lgrib,cbuf,numfld,mlen,iret)
+           integer,intent(in) :: lugb,lskip,lgrib
+           character(len=1),pointer,dimension(:) :: cbuf
+           integer,intent(out) :: numfld,mlen,iret
+         end subroutine ixgb2
+      end interface
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  initialize
+      iret=0
+      if (associated(cbuf)) nullify(cbuf)
+      mbuf=init
+      allocate(cbuf(mbuf),stat=istat)    ! allocate initial space for cbuf
+      if (istat.ne.0) then
+         iret=2
+         return
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  search for first grib message
+      iseek=0
+      call skgb(lugb,iseek,msk1,lskip,lgrib)
+      do m=1,mnum
+        if(lgrib.gt.0) then
+          iseek=lskip+lgrib
+          call skgb(lugb,iseek,msk2,lskip,lgrib)
+        endif
+      enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  get index records for every grib message found
+      nlen=0
+      nnum=0
+      nmess=mnum
+      dowhile(iret.eq.0.and.lgrib.gt.0)
+        call ixgb2(lugb,lskip,lgrib,cbuftmp,numfld,nbytes,iret1)
+        if (iret1.ne.0) print *,' sagt ',numfld,nbytes,iret1
+        if((nbytes+nlen).gt.mbuf) then             ! allocate more space, if
+                                                   ! necessary
+           newsize=max(mbuf+next,mbuf+nbytes)
+           call realloc(cbuf,nlen,newsize,istat)
+           if ( istat .ne. 0 ) then
+              iret=1
+              return
+           endif
+           mbuf=newsize
+        endif
         !
-        !  IF INDEX RECORDS WERE RETURNED IN CBUFTMP FROM IXGB2,
-        !  COPY CBUFTMP INTO CBUF, THEN DEALLOCATE CBUFTMP WHEN DONE
+        !  if index records were returned in cbuftmp from ixgb2,
+        !  copy cbuftmp into cbuf, then deallocate cbuftmp when done
         !
-        IF ( ASSOCIATED(CBUFTMP) ) THEN
-           CBUF(NLEN+1:NLEN+NBYTES)=CBUFTMP(1:NBYTES)
-           DEALLOCATE(CBUFTMP,STAT=ISTAT)
-           IF (ISTAT.NE.0) THEN
-             PRINT *,' deallocating cbuftmp ... ',istat
+        if ( associated(cbuftmp) ) then
+           cbuf(nlen+1:nlen+nbytes)=cbuftmp(1:nbytes)
+           deallocate(cbuftmp,stat=istat)
+           if (istat.ne.0) then
+             print *,' deallocating cbuftmp ... ',istat
              stop 99
-           ENDIF
-           NULLIFY(CBUFTMP)
-           NNUM=NNUM+NUMFLD
-           NLEN=NLEN+NBYTES
-           NMESS=NMESS+1
-        ENDIF
-        !      LOOK FOR NEXT GRIB MESSAGE
-        ISEEK=LSKIP+LGRIB
-        CALL SKGB(LUGB,ISEEK,MSK2,LSKIP,LGRIB)
-      ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+           endif
+           nullify(cbuftmp)
+           nnum=nnum+numfld
+           nlen=nlen+nbytes
+           nmess=nmess+1
+        endif
+        !      look for next grib message
+        iseek=lskip+lgrib
+        call skgb(lugb,iseek,msk2,lskip,lgrib)
+      enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

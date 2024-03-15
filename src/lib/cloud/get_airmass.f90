@@ -1,27 +1,27 @@
 
-        subroutine get_airmass(alt,htmsl,patm &          ! I (add htagl?)
-                              ,aero_refht,aero_scaleht & ! I
-                              ,earth_radius,iverbose &   ! I
-                              ,ag,ao,aa,refr_deg)        ! O
+        subroutine get_airmass(alt,htmsl,patm &          ! i (add htagl?)
+                              ,aero_refht,aero_scaleht & ! i
+                              ,earth_radius,iverbose &   ! i
+                              ,ag,ao,aa,refr_deg)        ! o
 
-!       INPUTS:
-!       Apparent altitude (90-zenith angle) in degrees     (alt)
+!       inputs:
+!       apparent altitude (90-zenith angle) in degrees     (alt)
 
-!       OUTPUTS:
-!       Airmasses relative to zenith at sea level pressure (ag - gas)
-!       Airmasses relative to zenith at sea level pressure (ao - ozone)
-!       Airmasses relative to zenith at aero refht         (aa - aerosol)
-!       Refraction (apparent altitude - true altitude)     (refr_deg)
+!       outputs:
+!       airmasses relative to zenith at sea level pressure (ag - gas)
+!       airmasses relative to zenith at sea level pressure (ao - ozone)
+!       airmasses relative to zenith at aero refht         (aa - aerosol)
+!       refraction (apparent altitude - true altitude)     (refr_deg)
 
-        use mem_namelist, ONLY: o3_du,h_o3,d_o3
-        use mem_allsky, ONLY: nc
+        use mem_namelist, only: o3_du,h_o3,d_o3
+        use mem_allsky, only: nc
 
         include 'trigd.inc'
         include 'rad_nodata.inc'
 
-!       Traditional aerosol empirical forumla (valid at H = 1900m)
-!       Try using new relationship that includes scale height
-        am_aero(z)=1./(COS(Z)+.0123*EXP(-24.5*COS(Z))) ! radians apparent
+!       traditional aerosol empirical forumla (valid at h = 1900m)
+!       try using new relationship that includes scale height
+        am_aero(z)=1./(cos(z)+.0123*exp(-24.5*cos(z))) ! radians apparent
         am_homo_wiki(z,h,r) = r/h * sqrt(cos(z)**2 + 2.*h/r + (h/r)**2) - (r/h) * cos(z)
 
         zapp = 90. - alt
@@ -30,15 +30,15 @@
         ztrue  = zapp  + refractd_app(alt ,patm)
         ztruei = zappi + refractd_app(abs(alt) ,patm)
 
-!       Altitude relative to limb
+!       altitude relative to limb
         if(htmsl .ge. 0.)then
           alt_limb = alt + acosd(earth_radius/(earth_radius+htmsl))
         else
-          write(6,*)' WARNING in get_airmass, htmsl < 0.'
+          write(6,*)' warning in get_airmass, htmsl < 0.'
           alt_limb = 0.
         endif
 
-!       Altitude relative to surface normal (emission angle)
+!       altitude relative to surface normal (emission angle)
         if(alt .ne. 0.)then
           slope = tand(90. - abs(alt))
           c = ((earth_radius+htmsl) / earth_radius) * slope
@@ -61,10 +61,10 @@
                  ,3f8.3,f11.1,f9.4,f10.0)
         endif
 
-        call get_htmin(alt,patm,htmsl,earth_radius,iverbose & ! I
-                      ,patm2,htmin)                           ! O
+        call get_htmin(alt,patm,htmsl,earth_radius,iverbose & ! i
+                      ,patm2,htmin)                           ! o
 
-!       Gas component for Rayleigh Scattering
+!       gas component for rayleigh scattering
         if(alt .lt. -0.)then ! high looking down
           if(htmin .lt. 0.0)then ! hit ground
             patm_gnd = max(ztopsa(aero_refht)/1013.25,patm) ! assumed ground
@@ -93,7 +93,7 @@
           refr_deg = 0.0
         endif
 
-!       Ozone component
+!       ozone component
         if(alt .lt. 0.)then ! high looking down
           if(htmin .lt. 0.0)then ! hit ground
             patm_refht = patm_o3(min(aero_refht,htmsl))
@@ -124,33 +124,33 @@
           endif
         endif
 
-!       Aerosol component
+!       aerosol component
 
-!       Note that near the horizon the aerosol airmass should
+!       note that near the horizon the aerosol airmass should
 !       exceed the gas component by the inverse square root of the
 !       respective scale heights.
 
         patm_aero = exp(-((htmsl-aero_refht) / aero_scaleht))
         if(alt .lt. 0.)then ! high looking down
           if(htmin .lt. 0.0)then ! hit ground
-            ZZ = zappin * rpd
-!           aa=am_aero(ZZ)                                * (1.0-patm_aero)
-            aa=am_homo_wiki(ZZ,aero_scaleht,earth_radius) * (1.0-patm_aero)
+            zz = zappin * rpd
+!           aa=am_aero(zz)                                * (1.0-patm_aero)
+            aa=am_homo_wiki(zz,aero_scaleht,earth_radius) * (1.0-patm_aero)
             aa = max(aa,0.)
             if(iverbose .eq. 1)then
               write(6,41)zappin,htmin,patm_aero,aa    
 41            format('  high aero  hitting ground',4f9.4)           
             endif
           else ! grazes atmosphere
-            ZZ = zappi * rpd
+            zz = zappi * rpd
             patm2_aero = exp(-((htmin-aero_refht) / aero_scaleht))
-!           aa1=am_aero(ZZ)                                * patm2_aero
-!           aa2=am_aero(ZZ)                                * patm_aero
-            aa2=am_homo_wiki(ZZ,aero_scaleht,earth_radius) * patm_aero
+!           aa1=am_aero(zz)                                * patm2_aero
+!           aa2=am_aero(zz)                                * patm_aero
+            aa2=am_homo_wiki(zz,aero_scaleht,earth_radius) * patm_aero
 
-            ZZ = 90. * rpd
-!           aa3=am_aero(ZZ)                                * patm2_aero
-            aa3=am_homo_wiki(ZZ,aero_scaleht,earth_radius) * patm2_aero
+            zz = 90. * rpd
+!           aa3=am_aero(zz)                                * patm2_aero
+            aa3=am_homo_wiki(zz,aero_scaleht,earth_radius) * patm2_aero
 
             aa = (aa3-aa2) + aa3
             if(iverbose .eq. 1)then
@@ -158,9 +158,9 @@
             endif
           endif
         else
-          ZZ = (min(zapp,90.)) * rpd
-!         aa=am_aero(ZZ)                                * patm_aero
-          aa=am_homo_wiki(ZZ,aero_scaleht,earth_radius) * patm_aero
+          zz = (min(zapp,90.)) * rpd
+!         aa=am_aero(zz)                                * patm_aero
+          aa=am_homo_wiki(zz,aero_scaleht,earth_radius) * patm_aero
           if(iverbose .eq. 1)then
             write(6,*)' standard aero  situation',htmsl,alt,aa       
           endif
@@ -173,11 +173,11 @@
         return
         end
 
-        subroutine get_htmin(alt,patm,htmsl,earth_radius,iverbose & ! I
-                            ,patm2,htmin)                           ! O
+        subroutine get_htmin(alt,patm,htmsl,earth_radius,iverbose & ! i
+                            ,patm2,htmin)                           ! o
 
-!       Find minimum MSL height of a light ray (apparent altitude)
-!       Refraction is taken into account
+!       find minimum msl height of a light ray (apparent altitude)
+!       refraction is taken into account
 
         include 'trigd.inc'
 

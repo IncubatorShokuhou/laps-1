@@ -1,34 +1,34 @@
 !-----------------------------------------------------------------------
       subroutine w3doxdat(idat,jdow,jdoy,jday)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
+!$$$   subprogram  documentation  block
 !
-! SUBPROGRAM: W3DOXDAT       RETURN WEEK DAY, YEAR DAY, AND JULIAN DAY
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
+! subprogram: w3doxdat       return week day, year day, and julian day
+!   author: mark iredell     org: wp23       date: 98-01-05
 !
-! ABSTRACT: THIS SUBPROGRAM RETURNS THE INTEGER DAY OF WEEK, THE DAY
-!   OF YEAR, AND JULIAN DAY GIVEN AN NCEP ABSOLUTE DATE AND TIME.
+! abstract: this subprogram returns the integer day of week, the day
+!   of year, and julian day given an ncep absolute date and time.
 !
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
+! program history log:
+!   98-01-05  mark iredell
 !
-! USAGE:  CALL W3DOXDAT(IDAT,JDOW,JDOY,JDAY)
+! usage:  call w3doxdat(idat,jdow,jdoy,jday)
 !
-!   INPUT VARIABLES:
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
+!   input variables:
+!     idat       integer (8) ncep absolute date and time
+!                (year, month, day, time zone,
+!                 hour, minute, second, millisecond)
 !
-!   OUTPUT VARIABLES:
-!     JDOW       INTEGER DAY OF WEEK (1-7, WHERE 1 IS SUNDAY)
-!     JDOY       INTEGER DAY OF YEAR (1-366, WHERE 1 IS JANUARY 1)
-!     JDAY       INTEGER JULIAN DAY (DAY NUMBER FROM JAN. 1,4713 B.C.)
+!   output variables:
+!     jdow       integer day of week (1-7, where 1 is sunday)
+!     jdoy       integer day of year (1-366, where 1 is january 1)
+!     jday       integer julian day (day number from jan. 1,4713 b.c.)
 !
-! SUBPROGRAMS CALLED:
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
+! subprograms called:
+!     iw3jdn         compute julian day number     
+!     w3fs26         year, month, day from julian day number
 !
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
+! attributes:
+!   language: fortran 90
 !
 !$$$
       integer idat(8)

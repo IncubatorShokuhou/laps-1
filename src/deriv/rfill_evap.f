@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -40,21 +40,21 @@ cdis
      1  ,lat,lon,topo,mode_evap
      1  ,temp_3d,rh_3d_pct,cldpcp_type_3d,heights_3d,istatus,ref_base)       
 
-!       This Routine works with reflectivity read in from the LPS file. This
-!       is originally either 2D or 3D and may have been further processed
+!       this routine works with reflectivity read in from the lps file. this
+!       is originally either 2d or 3d and may have been further processed
 !       within the cloud analysis.
 
-!       ni,nj,nk are input LAPS grid dimensions
+!       ni,nj,nk are input laps grid dimensions
 
-        real ref_3d(ni,nj,nk)                  ! I/O 3D reflctvy grid
-        real temp_3d(ni,nj,nk)                 ! I
-        real rh_3d_pct(ni,nj,nk)               ! I
-        real heights_3d(ni,nj,nk)              ! I
-        integer cldpcp_type_3d(ni,nj,nk)         ! I
-        real lat(ni,nj),lon(ni,nj),topo(ni,nj) ! I
-        real cloud_base(ni,nj)                 ! I
+        real ref_3d(ni,nj,nk)                  ! i/o 3d reflctvy grid
+        real temp_3d(ni,nj,nk)                 ! i
+        real rh_3d_pct(ni,nj,nk)               ! i
+        real heights_3d(ni,nj,nk)              ! i
+        integer cldpcp_type_3d(ni,nj,nk)         ! i
+        real lat(ni,nj),lon(ni,nj),topo(ni,nj) ! i
+        real cloud_base(ni,nj)                 ! i
 
-        real heights_1d(nk)                    ! L
+        real heights_1d(nk)                    ! l
 
         logical l_low_fill,l_high_fill,l_test
 
@@ -68,11 +68,11 @@ cdis
         if(istatus .ne. 1)return
 
         do j = 1,nj
-c       write(6,*)' Doing Column ',j
+c       write(6,*)' doing column ',j
 
         do i = 1,ni
 
-!           Test for vertical existance/variance to characterize reflectivity
+!           test for vertical existance/variance to characterize reflectivity
             reference = r_missing_data
             iref_dim = 0
 
@@ -94,8 +94,8 @@ c       write(6,*)' Doing Column ',j
                 goto 900                              ! don't evaporate 2d data
             endif
 
-!           Determine "Radar Base" to be Cloud Base for 2dref points
-!           and Radar Horizon for 3dref points.
+!           determine "radar base" to be cloud base for 2dref points
+!           and radar horizon for 3dref points.
 
             if(iref_dim .eq. 2)then 
                 k_cloud_base = height_to_zcoord2(cloud_base(i,j)
@@ -108,14 +108,14 @@ c       write(6,*)' Doing Column ',j
                     k_bottom = k_cloud_base
 
                 else
-                    write(6,*)' Warning, radar echo without cloud base'
+                    write(6,*)' warning, radar echo without cloud base'
                     k_bottom = 0
  
                 endif
 
             elseif(iref_dim .eq. 3)then
 
-!               Search for bottom of detected echo
+!               search for bottom of detected echo
                 k_bottom = 0
                 l_test = .false.
 
@@ -143,18 +143,18 @@ c       write(6,*)' Doing Column ',j
 
             endif
 
-            if(iref_dim .gt. 0)then    ! We have an echo
+            if(iref_dim .gt. 0)then    ! we have an echo
                 istatus = 1
 
                 k_topo = max(int(height_to_zcoord2(topo(i,j),heights_3d       
      1                           ,ni,nj,nk,i,j,istatus)),1)
 
                 if(istatus .ne. 1)then
-                    write(6,*)' ERROR return in rfill'
+                    write(6,*)' error return in rfill'
                     return
                 endif
 
-                if(k_bottom .gt. k_topo)then ! Echo above ground
+                if(k_bottom .gt. k_topo)then ! echo above ground
                     height_bottom = heights_3d(i,j,k_bottom)
 
                     call latlon_to_radar(lat(i,j),lon(i,j),height_bottom
@@ -165,10 +165,10 @@ c       write(6,*)' Doing Column ',j
      1                  ,azimuth,slant_range,elev_topo
      1                  ,rlat_radar,rlon_radar,rheight_radar)
 
-                    if(k_bottom .le. k_topo+2 ! Echo base near ground
-!       1         .or. elev_bottom .lt. (elev_topo + 1.5) ! Echo below radar horizon
-     1            .or. elev_bottom .lt. 1.5 ! Echo base near radar horizon
-     1                                                  )then ! Fill in
+                    if(k_bottom .le. k_topo+2 ! echo base near ground
+!       1         .or. elev_bottom .lt. (elev_topo + 1.5) ! echo below radar horizon
+     1            .or. elev_bottom .lt. 1.5 ! echo base near radar horizon
+     1                                                  )then ! fill in
 
                         do k = k_bottom-1,k_topo,-1
 !                           ref_3d(i,j,k) = ref_3d(i,j,k_bottom)
@@ -188,13 +188,13 @@ c       write(6,*)' Doing Column ',j
 
                         n_low_attenuate = n_low_attenuate + 1
 
-                    endif ! Fill in from ground to bottom of echo
+                    endif ! fill in from ground to bottom of echo
 
-                endif ! Bottom of radar echo above ground
+                endif ! bottom of radar echo above ground
 
             endif ! l_low_fill
 
- 900        continue ! Skipped this grid point
+ 900        continue ! skipped this grid point
 
         enddo ! i
         enddo ! j
@@ -207,20 +207,20 @@ c       write(6,*)' Doing Column ',j
         subroutine modify_dbz_level(i,j,k_upper,k_lower,ref_3d,temp_3d
      1  ,rh_3d_pct,cldpcp_type_3d,heights_1d,ni,nj,nk,ref_base,istatus)       
 
-        real ref_3d(ni,nj,nk)                  ! Input/Output 3D reflctvy grid
-        real temp_3d(ni,nj,nk)                 ! Input 3D temp grid
-        real rh_3d_pct(ni,nj,nk)               ! Input 3D rh grid
-        real heights_1d(nk)                    ! Input
-        integer cldpcp_type_3d(ni,nj,nk)       ! Input 3D pcp type grid
+        real ref_3d(ni,nj,nk)                  ! input/output 3d reflctvy grid
+        real temp_3d(ni,nj,nk)                 ! input 3d temp grid
+        real rh_3d_pct(ni,nj,nk)               ! input 3d rh grid
+        real heights_1d(nk)                    ! input
+        integer cldpcp_type_3d(ni,nj,nk)       ! input 3d pcp type grid
 
-        real maxrate_R2V,maxrate_S2V,maxrate_I2V
-!       parameter (maxrate_R2V = 0.83e-5) ! s**-1     (Original Schultz value)
-!       parameter (maxrate_S2V = 1.67e-5) ! s**-1     (Original Schultz value)
-!       parameter (maxrate_I2V = 3.33e-6) ! s**-1     (Original Schultz value)
+        real maxrate_r2v,maxrate_s2v,maxrate_i2v
+!       parameter (maxrate_r2v = 0.83e-5) ! s**-1     (original schultz value)
+!       parameter (maxrate_s2v = 1.67e-5) ! s**-1     (original schultz value)
+!       parameter (maxrate_i2v = 3.33e-6) ! s**-1     (original schultz value)
 
-        parameter (maxrate_R2V = 0.83e-7) ! s**-1     (New Empirical value)
-        parameter (maxrate_S2V = 1.67e-7) ! s**-1     (New Empirical value)
-        parameter (maxrate_I2V = 3.33e-8) ! s**-1     (New Empirical value)
+        parameter (maxrate_r2v = 0.83e-7) ! s**-1     (new empirical value)
+        parameter (maxrate_s2v = 1.67e-7) ! s**-1     (new empirical value)
+        parameter (maxrate_i2v = 3.33e-8) ! s**-1     (new empirical value)
 
         integer i_debug
         data i_debug /0/
@@ -228,15 +228,15 @@ c       write(6,*)' Doing Column ',j
 
         i_debug = i_debug + 1
 
-!       This routine computes the change in radar reflectivity from one
-!       LAPS level to the next lower level due to evaporation.
+!       this routine computes the change in radar reflectivity from one
+!       laps level to the next lower level due to evaporation.
 
-!       Find precip rate at the higher level
+!       find precip rate at the higher level
         dbz_upper = ref_3d(i,j,k_upper)
 
         if(dbz_upper .gt. ref_base)then
             pres_upper = pressure_of_level(k_upper)
-            ipcp_type_upper = cldpcp_type_3d(i,j,k_upper) / 16   ! Pull out precip type
+            ipcp_type_upper = cldpcp_type_3d(i,j,k_upper) / 16   ! pull out precip type
             pcp_rate_upper = dbz_to_rate(dbz_upper,temp_3d(i,j,k_upper)
      1  ,pres_upper,ipcp_type_upper,istatus)
 
@@ -246,11 +246,11 @@ c       write(6,*)' Doing Column ',j
                 call cpt_fall_velocity(ipcp_type_upper,temp_3d(i,j,k_upp
      1er)
      1                                  ,pres_upper,fall_velocity)
-!               Get concentration in g/m**3
+!               get concentration in g/m**3
                 call cpt_concentration(pcp_rate_upper,fall_velocity
      1                                                  ,pcpcnc_upper)
             else
-                write(6,*)' Error in modify_dbz_level, no precip type'
+                write(6,*)' error in modify_dbz_level, no precip type'
      1                          ,i,j,k_upper,dbz_upper
                 istatus = 0
                 return
@@ -258,25 +258,25 @@ c       write(6,*)' Doing Column ',j
 
             delta_t = thickness / fall_velocity
 
-            if(ipcp_type_upper .eq. 1 .or. ipcp_type_upper .eq. 3)then ! R,ZR
+            if(ipcp_type_upper .eq. 1 .or. ipcp_type_upper .eq. 3)then ! r,zr
 
-!               Calculate saturation mixing ratio
-                rvsatliq = W_fast(temp_3d(i,j,k_upper)-273.15
+!               calculate saturation mixing ratio
+                rvsatliq = w_fast(temp_3d(i,j,k_upper)-273.15
      1                         ,pressure_of_level(k)/100.     )       * 
      1.001
 
-                rv = rvsatliq * rh_3d_pct(i,j,k_upper)/100.   ! Ambient mixing ratio
+                rv = rvsatliq * rh_3d_pct(i,j,k_upper)/100.   ! ambient mixing ratio
 
-                call ConvR2V (maxrate_R2V, rv, rvsatliq, rate_evap)
+                call convr2v (maxrate_r2v, rv, rvsatliq, rate_evap)
 
-            elseif(ipcp_type_upper .eq. 2)then                         ! S
+            elseif(ipcp_type_upper .eq. 2)then                         ! s
 
-                rvsatliq = W_fast(temp_3d(i,j,k_upper)-273.15
+                rvsatliq = w_fast(temp_3d(i,j,k_upper)-273.15
      1                         ,pressure_of_level(k)/100.     )       * 
      1.001
 
                 if(temp_3d(i,j,k_upper) .le. 273.15)then
-                    rvsatice = Wice_fast(temp_3d(i,j,k_upper)-273.15
+                    rvsatice = wice_fast(temp_3d(i,j,k_upper)-273.15
      1                         ,pressure_of_level(k)/100.     )       * 
      1.001
 
@@ -285,19 +285,19 @@ c       write(6,*)' Doing Column ',j
 
                 endif
 
-                rv = rvsatliq * rh_3d_pct(i,j,k_upper)/100.   ! Ambient mixing ratio
+                rv = rvsatliq * rh_3d_pct(i,j,k_upper)/100.   ! ambient mixing ratio
 
-                call ConvS2V (maxrate_S2V, rv, rvsatice, rate_evap)
+                call convs2v (maxrate_s2v, rv, rvsatice, rate_evap)
 
             elseif(ipcp_type_upper .eq. 4 .or. ipcp_type_upper .eq. 5)th
-     1en ! IP,A
+     1en ! ip,a
 
-                rvsatliq = W_fast(temp_3d(i,j,k_upper)-273.15
+                rvsatliq = w_fast(temp_3d(i,j,k_upper)-273.15
      1                         ,pressure_of_level(k)/100.     )       * 
      1.001
 
                 if(temp_3d(i,j,k_upper) .le. 273.15)then
-                    rvsatice = Wice_fast(temp_3d(i,j,k_upper)-273.15
+                    rvsatice = wice_fast(temp_3d(i,j,k_upper)-273.15
      1                         ,pressure_of_level(k)/100.     )       * 
      1.001
 
@@ -306,26 +306,26 @@ c       write(6,*)' Doing Column ',j
 
                 endif
 
-                rv = rvsatliq * rh_3d_pct(i,j,k_upper)/100.   ! Ambient mixing ratio
+                rv = rvsatliq * rh_3d_pct(i,j,k_upper)/100.   ! ambient mixing ratio
 
-                call ConvI2V (maxrate_I2V, rv, rvsatice, rate_evap)
+                call convi2v (maxrate_i2v, rv, rvsatice, rate_evap)
 
             endif
 
 
             evaporation = rate_evap * delta_t
 
-!           Calculate Mixing Ratio at the lower level
+!           calculate mixing ratio at the lower level
             r_upper = pcpcnc_upper * .001 ! (g/m**3 to kg/kg)
             r_lower = max(r_upper - evaporation,0.)
 
             pcpcnc_lower = pcpcnc_upper * (r_lower / r_upper)
 
-!           In absence of evaporation, pcp_rate is conserved through the level
+!           in absence of evaporation, pcp_rate is conserved through the level
             pcp_rate_lower = (pcpcnc_lower / 1e6) * fall_velocity
 
             pres_lower = pressure_of_level(k_lower)
-            ipcp_type_lower = cldpcp_type_3d(i,j,k_lower) / 16   ! Pull out precip type
+            ipcp_type_lower = cldpcp_type_3d(i,j,k_lower) / 16   ! pull out precip type
             dbz_lower = rate_to_dbz(pcp_rate_lower,temp_3d(i,j,k_lower)
      1                  ,pres_lower,ref_base,ipcp_type_lower,istatus)
 
@@ -350,15 +350,15 @@ c       write(6,*)' Doing Column ',j
         function dbz_to_rate(dbz,t,p,itype,istatus)
 
         real a,b,rate_max
-        parameter (a = 200.)        ! Z-R relationship
-        parameter (b = 1.6)         ! Z-R relationship
-        parameter (rate_max = 1000.0) ! Currently disabled
+        parameter (a = 200.)        ! z-r relationship
+        parameter (b = 1.6)         ! z-r relationship
+        parameter (rate_max = 1000.0) ! currently disabled
 
         aterm = alog10(1./a)
         bterm = 1./b
-        cterm = .001 / 3600.  ! (M/S) / (MM/HR)
+        cterm = .001 / 3600.  ! (m/s) / (mm/hr)
 
-        r_mm_hr = 10.**(bterm*(aterm + dBZ/10.))
+        r_mm_hr = 10.**(bterm*(aterm + dbz/10.))
 
         dbz_to_rate = (min(r_mm_hr,rate_max) * cterm)
 
@@ -377,15 +377,15 @@ c       write(6,*)' Doing Column ',j
         function rate_to_dbz(rate,t,p,ref_base,itype,istatus)
 
         real a,b
-        parameter (a = 200.)        ! Z-R relationship
-        parameter (b = 1.6)         ! Z-R relationship
+        parameter (a = 200.)        ! z-r relationship
+        parameter (b = 1.6)         ! z-r relationship
 
         if(rate .le. 0)then
             rate_to_dbz = ref_base
             return
         endif
 
-        cterm = .001 / 3600.  ! (M/S) / (MM/HR)
+        cterm = .001 / 3600.  ! (m/s) / (mm/hr)
         cterm_inv = 1. / cterm
 
         if(p .ne. 101300. .or. t .ne. 273.15)then

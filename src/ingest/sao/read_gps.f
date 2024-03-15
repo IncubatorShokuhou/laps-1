@@ -1,272 +1,272 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
-C
-C  Subroutine to read the file 
-C
-      subroutine read_gps(nf_fid, recNum, 
-     +     pressure, staElev, staLat, staLon, temperature, 
-     +     relativeHumidity, timeObs, staNam)
-C
+c
+c  subroutine to read the file 
+c
+      subroutine read_gps(nf_fid, recnum, 
+     +     pressure, staelev, stalat, stalon, temperature, 
+     +     relativehumidity, timeobs, stanam)
+c
       include 'netcdf.inc'
-      integer recNum,nf_fid, nf_vid, nf_status
+      integer recnum,nf_fid, nf_vid, nf_status
 
-      real dryDelay(recNum), formalError(recNum), pressure(recNum),
-     +     staElev(recNum), staLat(recNum), staLon(recNum),
-     +     temperature(recNum), relativeHumidity(recNum), 
-     +     totalDelay(recNum),
-     +     waterVapor(recNum), wetDelay(recNum)
-      double precision timeObs(recNum)
-      character*5 staNam(recNum)
-      character*80 staLongNam(recNum)
+      real drydelay(recnum), formalerror(recnum), pressure(recnum),
+     +     staelev(recnum), stalat(recnum), stalon(recnum),
+     +     temperature(recnum), relativehumidity(recnum), 
+     +     totaldelay(recnum),
+     +     watervapor(recnum), wetdelay(recnum)
+      double precision timeobs(recnum)
+      character*5 stanam(recnum)
+      character*80 stalongnam(recnum)
 
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C      dryDelay     "Dry component GPS signal delay"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'dryDelay',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var dryDelay'
+c   variables of type real
+c
+c     variable        netcdf long name
+c      drydelay     "dry component gps signal delay"
+c
+        nf_status = nf_inq_varid(nf_fid,'drydelay',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var drydelay'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,dryDelay)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var dryDelay'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,drydelay)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var drydelay'
       endif
-C
-C     Variable        NETCDF Long Name
-C      formalError  "Formal Error"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'formalError',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var formalError'
+c
+c     variable        netcdf long name
+c      formalerror  "formal error"
+c
+        nf_status = nf_inq_varid(nf_fid,'formalerror',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var formalerror'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,formalError)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var formalError'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,formalerror)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var formalerror'
       endif
-C
-C     Variable        NETCDF Long Name
-C      pressure     "Pressure used for PWV calculation"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'pressure',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      pressure     "pressure used for pwv calculation"
+c
+        nf_status = nf_inq_varid(nf_fid,'pressure',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var pressure'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,pressure)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,pressure)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var pressure'
       endif
-C
-C     Variable        NETCDF Long Name
-C      staElev      "Station Elevation (above MSL)"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staElev',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staElev'
+c
+c     variable        netcdf long name
+c      staelev      "station elevation (above msl)"
+c
+        nf_status = nf_inq_varid(nf_fid,'staelev',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var staelev'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,staElev)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staElev'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,staelev)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var staelev'
       endif
-C
-C     Variable        NETCDF Long Name
-C      staLat       "Station Latitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLat',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLat'
+c
+c     variable        netcdf long name
+c      stalat       "station latitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'stalat',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalat'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,staLat)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLat'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stalat)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalat'
       endif
-C
-C     Variable        NETCDF Long Name
-C      staLon       "Station Longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLon',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLon'
+c
+c     variable        netcdf long name
+c      stalon       "station longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'stalon',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalon'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,staLon)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLon'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stalon)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalon'
       endif
-C
-C     Variable        NETCDF Long Name
-C      temperature  "Temperature used for calculation"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'temperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      temperature  "temperature used for calculation"
+c
+        nf_status = nf_inq_varid(nf_fid,'temperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var temperature'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,temperature)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,temperature)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var temperature'
       endif
-C
-C     Variable        NETCDF Long Name
-C      RH  "PerCent"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'relativeHumidity',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var relativeHumidity'
+c
+c     variable        netcdf long name
+c      rh  "percent"
+c
+        nf_status = nf_inq_varid(nf_fid,'relativehumidity',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var relativehumidity'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,relativeHumidity)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var relativeHumidity'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,relativehumidity)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var relativehumidity'
       endif
-C
-C     Variable        NETCDF Long Name
-C      totalDelay   "Total GPS signal delay"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'totalDelay',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var totalDelay'
+c
+c     variable        netcdf long name
+c      totaldelay   "total gps signal delay"
+c
+        nf_status = nf_inq_varid(nf_fid,'totaldelay',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var totaldelay'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,totalDelay)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var totalDelay'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,totaldelay)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var totaldelay'
       endif
-C
-C     Variable        NETCDF Long Name
-C      waterVapor   "Water Vapor"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'waterVapor',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var waterVapor'
+c
+c     variable        netcdf long name
+c      watervapor   "water vapor"
+c
+        nf_status = nf_inq_varid(nf_fid,'watervapor',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var watervapor'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,waterVapor)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var waterVapor'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,watervapor)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var watervapor'
       endif
-C
-C     Variable        NETCDF Long Name
-C      wetDelay     "Wet component GPS signal delay"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wetDelay',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var wetDelay'
+c
+c     variable        netcdf long name
+c      wetdelay     "wet component gps signal delay"
+c
+        nf_status = nf_inq_varid(nf_fid,'wetdelay',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var wetdelay'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,wetDelay)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var wetDelay'
-      endif
-
-C   Variables of type INT
-C
-
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C      timeObs      "Time of observation"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'timeObs',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
-      endif
-        nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,timeObs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,wetdelay)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var wetdelay'
       endif
 
+c   variables of type int
+c
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C      staLongNam   "Station Location"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLongNam',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLongNam'
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c      timeobs      "time of observation"
+c
+        nf_status = nf_inq_varid(nf_fid,'timeobs',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,staLongNam)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLongNam'
+        nf_status = nf_get_var_double(nf_fid,nf_vid,timeobs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
       endif
-C
-C     Variable        NETCDF Long Name
-C      staNam       "Alphanumeric station name"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staNam',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staNam'
+
+
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c      stalongnam   "station location"
+c
+        nf_status = nf_inq_varid(nf_fid,'stalongnam',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalongnam'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,staNam)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staNam'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,stalongnam)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalongnam'
+      endif
+c
+c     variable        netcdf long name
+c      stanam       "alphanumeric station name"
+c
+        nf_status = nf_inq_varid(nf_fid,'stanam',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stanam'
+      endif
+        nf_status = nf_get_var_text(nf_fid,nf_vid,stanam)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stanam'
       endif
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

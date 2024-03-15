@@ -1,189 +1,189 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETGB2RP(LUGB,CINDEX,EXTRACT,GRIBM,LENG,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETGB2RP       EXTRACTS A GRIB MESSAGE FROM A FILE
-C   PRGMMR: GILBERT          ORG: W/NMC23     DATE: 2003-12-31
-C
-C ABSTRACT: FIND AND EXTRACTS A GRIB MESSAGE FROM A FILE GIVEN THE 
-C   INDEX FOR THE REQUESTED FIELD.
-C   THE GRIB MESSAGE RETURNED CAN CONTAIN ONLY THE REQUESTED FIELD
-C   (EXTRACT=.TRUE.). OR THE COMPLETE GRIB MESSAGE ORIGINALLY CONTAINING
-C   THE DESIRED FIELD CAN BE RETURNED (EXTRACT=.FALSE.) EVEN IF OTHER
-C   FIELDS WERE INCLUDED IN THE GRIB MESSAGE.
-C   IF THE GRIB FIELD IS NOT FOUND, THEN THE RETURN CODE WILL BE NONZERO.
-C
-C PROGRAM HISTORY LOG:
-C 2003-12-31  GILBERT
-C
-C USAGE:    CALL GETGB2RP(LUGB,CINDEX,EXTRACT,GRIBM,LENG,IRET)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE.
-C                  FILE MUST BE OPENED WITH BAOPEN OR BAOPENR BEFORE CALLING 
-C                  THIS ROUTINE.
-C     CINDEX       INDEX RECORD OF THE GRIB FILE  ( SEE DOCBLOCK OF
-C                  SUBROUTINE IXGB2 FOR DESCRIPTION OF AN INDEX RECORD.)
-C     EXTRACT       LOGICAL VALUE INDICATING WHETHER TO RETURN A GRIB2 
-C                   MESSAGE WITH JUST THE REQUESTED FIELD, OR THE ENTIRE
-C                   GRIB2 MESSAGE CONTAINING THE REQUESTED FIELD.
-C                  .TRUE. = RETURN GRIB2 MESSAGE CONTAINING ONLY THE REQUESTED
-C                           FIELD.
-C                  .FALSE. = RETURN ENTIRE GRIB2 MESSAGE CONTAINING THE
-C                            REQUESTED FIELD.
-C
-C   OUTPUT ARGUMENTS:
-C     GRIBM         RETURNED GRIB MESSAGE.
-C     LENG         LENGTH OF RETURNED GRIB MESSAGE IN BYTES.
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    97     ERROR READING GRIB FILE
-C
-C SUBPROGRAMS CALLED:
-C   BAREAD          BYTE-ADDRESSABLE READ
-C
-C REMARKS: NONE 
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C
-C$$$
+c-----------------------------------------------------------------------
+      subroutine getgb2rp(lugb,cindex,extract,gribm,leng,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getgb2rp       extracts a grib message from a file
+c   prgmmr: gilbert          org: w/nmc23     date: 2003-12-31
+c
+c abstract: find and extracts a grib message from a file given the 
+c   index for the requested field.
+c   the grib message returned can contain only the requested field
+c   (extract=.true.). or the complete grib message originally containing
+c   the desired field can be returned (extract=.false.) even if other
+c   fields were included in the grib message.
+c   if the grib field is not found, then the return code will be nonzero.
+c
+c program history log:
+c 2003-12-31  gilbert
+c
+c usage:    call getgb2rp(lugb,cindex,extract,gribm,leng,iret)
+c   input arguments:
+c     lugb         integer unit of the unblocked grib data file.
+c                  file must be opened with baopen or baopenr before calling 
+c                  this routine.
+c     cindex       index record of the grib file  ( see docblock of
+c                  subroutine ixgb2 for description of an index record.)
+c     extract       logical value indicating whether to return a grib2 
+c                   message with just the requested field, or the entire
+c                   grib2 message containing the requested field.
+c                  .true. = return grib2 message containing only the requested
+c                           field.
+c                  .false. = return entire grib2 message containing the
+c                            requested field.
+c
+c   output arguments:
+c     gribm         returned grib message.
+c     leng         length of returned grib message in bytes.
+c     iret         integer return code
+c                    0      all ok
+c                    97     error reading grib file
+c
+c subprograms called:
+c   baread          byte-addressable read
+c
+c remarks: none 
+c
+c attributes:
+c   language: fortran 90
+c
+c$$$
 
-      INTEGER,INTENT(IN) :: LUGB
-      CHARACTER(LEN=1),INTENT(IN) :: CINDEX(*)
-      LOGICAL,INTENT(IN) :: EXTRACT
-      INTEGER,INTENT(OUT) :: LENG,IRET
-      CHARACTER(LEN=1),POINTER,DIMENSION(:) :: GRIBM
+      integer,intent(in) :: lugb
+      character(len=1),intent(in) :: cindex(*)
+      logical,intent(in) :: extract
+      integer,intent(out) :: leng,iret
+      character(len=1),pointer,dimension(:) :: gribm
  
-      INTEGER,PARAMETER :: ZERO=0
-      CHARACTER(LEN=1),ALLOCATABLE,DIMENSION(:) :: CSEC2,CSEC6,CSEC7
-      CHARACTER(LEN=4) :: Ctemp
+      integer,parameter :: zero=0
+      character(len=1),allocatable,dimension(:) :: csec2,csec6,csec7
+      character(len=4) :: ctemp
 
-      IRET=0
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  EXTRACT GRIB MESSAGE FROM FILE
-      IF ( EXTRACT ) THEN
-         LEN0=16
-         LEN8=4
-         CALL GBYTE(CINDEX,ISKIP,4*8,4*8)    ! BYTES TO SKIP IN FILE
-         CALL GBYTE(CINDEX,ISKP2,8*8,4*8)    ! BYTES TO SKIP FOR section 2
+      iret=0
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  extract grib message from file
+      if ( extract ) then
+         len0=16
+         len8=4
+         call gbyte(cindex,iskip,4*8,4*8)    ! bytes to skip in file
+         call gbyte(cindex,iskp2,8*8,4*8)    ! bytes to skip for section 2
          if ( iskp2 .gt. 0 ) then
-            CALL BAREAD(LUGB,ISKIP+ISKP2,4,LREAD,ctemp)
-            CALL GBYTE(Ctemp,LEN2,0,4*8)      ! LENGTH OF SECTION 2
-            ALLOCATE(csec2(len2))
-            CALL BAREAD(LUGB,ISKIP+ISKP2,LEN2,LREAD,csec2)
+            call baread(lugb,iskip+iskp2,4,lread,ctemp)
+            call gbyte(ctemp,len2,0,4*8)      ! length of section 2
+            allocate(csec2(len2))
+            call baread(lugb,iskip+iskp2,len2,lread,csec2)
          else
-            LEN2=0
+            len2=0
          endif
-         CALL GBYTE(CINDEX,LEN1,44*8,4*8)      ! LENGTH OF SECTION 1
-         IPOS=44+LEN1
-         CALL GBYTE(CINDEX,LEN3,IPOS*8,4*8)      ! LENGTH OF SECTION 3
-         IPOS=IPOS+LEN3
-         CALL GBYTE(CINDEX,LEN4,IPOS*8,4*8)      ! LENGTH OF SECTION 4
-         IPOS=IPOS+LEN4
-         CALL GBYTE(CINDEX,LEN5,IPOS*8,4*8)      ! LENGTH OF SECTION 5
-         IPOS=IPOS+LEN5
-         CALL GBYTE(CINDEX,LEN6,IPOS*8,4*8)      ! LENGTH OF SECTION 6
-         IPOS=IPOS+5
-         CALL GBYTE(CINDEX,IBMAP,IPOS*8,1*8)      ! Bitmap indicator
-         IF ( IBMAP .eq. 254 ) THEN
-            CALL GBYTE(CINDEX,ISKP6,24*8,4*8)    ! BYTES TO SKIP FOR section 6
-            CALL BAREAD(LUGB,ISKIP+ISKP6,4,LREAD,ctemp)
-            CALL GBYTE(Ctemp,LEN6,0,4*8)      ! LENGTH OF SECTION 6
-         ENDIF
+         call gbyte(cindex,len1,44*8,4*8)      ! length of section 1
+         ipos=44+len1
+         call gbyte(cindex,len3,ipos*8,4*8)      ! length of section 3
+         ipos=ipos+len3
+         call gbyte(cindex,len4,ipos*8,4*8)      ! length of section 4
+         ipos=ipos+len4
+         call gbyte(cindex,len5,ipos*8,4*8)      ! length of section 5
+         ipos=ipos+len5
+         call gbyte(cindex,len6,ipos*8,4*8)      ! length of section 6
+         ipos=ipos+5
+         call gbyte(cindex,ibmap,ipos*8,1*8)      ! bitmap indicator
+         if ( ibmap .eq. 254 ) then
+            call gbyte(cindex,iskp6,24*8,4*8)    ! bytes to skip for section 6
+            call baread(lugb,iskip+iskp6,4,lread,ctemp)
+            call gbyte(ctemp,len6,0,4*8)      ! length of section 6
+         endif
          !
-         !  READ IN SECTION 7 from file
+         !  read in section 7 from file
          !
-         CALL GBYTE(CINDEX,ISKP7,28*8,4*8)    ! BYTES TO SKIP FOR section 7
-         CALL BAREAD(LUGB,ISKIP+ISKP7,4,LREAD,ctemp)
-         CALL GBYTE(Ctemp,LEN7,0,4*8)      ! LENGTH OF SECTION 7
-         ALLOCATE(csec7(len7))
-         CALL BAREAD(LUGB,ISKIP+ISKP7,LEN7,LREAD,csec7)
+         call gbyte(cindex,iskp7,28*8,4*8)    ! bytes to skip for section 7
+         call baread(lugb,iskip+iskp7,4,lread,ctemp)
+         call gbyte(ctemp,len7,0,4*8)      ! length of section 7
+         allocate(csec7(len7))
+         call baread(lugb,iskip+iskp7,len7,lread,csec7)
 
-         LENG=LEN0+LEN1+LEN2+LEN3+LEN4+LEN5+LEN6+LEN7+LEN8
-         IF (.NOT. ASSOCIATED(GRIBM)) ALLOCATE(GRIBM(LENG))
+         leng=len0+len1+len2+len3+len4+len5+len6+len7+len8
+         if (.not. associated(gribm)) allocate(gribm(leng))
 
-         ! Create Section 0
+         ! create section 0
          !
-         GRIBM(1)='G'
-         GRIBM(2)='R'
-         GRIBM(3)='I'
-         GRIBM(4)='B'
-         GRIBM(5)=CHAR(0)
-         GRIBM(6)=CHAR(0)
-         GRIBM(7)=CINDEX(42)
-         GRIBM(8)=CINDEX(41)
-         GRIBM(9)=CHAR(0)
-         GRIBM(10)=CHAR(0)
-         GRIBM(11)=CHAR(0)
-         GRIBM(12)=CHAR(0)
-         CALL SBYTE(GRIBM,LENG,12*8,4*8)
+         gribm(1)='g'
+         gribm(2)='r'
+         gribm(3)='i'
+         gribm(4)='b'
+         gribm(5)=char(0)
+         gribm(6)=char(0)
+         gribm(7)=cindex(42)
+         gribm(8)=cindex(41)
+         gribm(9)=char(0)
+         gribm(10)=char(0)
+         gribm(11)=char(0)
+         gribm(12)=char(0)
+         call sbyte(gribm,leng,12*8,4*8)
          !
-         ! Copy Section 1
+         ! copy section 1
          !
-         GRIBM(17:16+LEN1)=CINDEX(45:44+LEN1)
-         lencur=16+LEN1
+         gribm(17:16+len1)=cindex(45:44+len1)
+         lencur=16+len1
          ipos=44+len1
          !
-         ! Copy Section 2, if necessary
+         ! copy section 2, if necessary
          !
          if ( iskp2 .gt. 0 ) then
-           GRIBM(lencur+1:lencur+LEN2)=csec2(1:LEN2)
-           lencur=lencur+LEN2
+           gribm(lencur+1:lencur+len2)=csec2(1:len2)
+           lencur=lencur+len2
          endif
          !
-         ! Copy Sections 3 through 5
+         ! copy sections 3 through 5
          !
-         GRIBM(lencur+1:lencur+LEN3+LEN4+LEN5)=
-     &                      CINDEX(ipos+1:ipos+LEN3+LEN4+LEN5)
-         lencur=lencur+LEN3+LEN4+LEN5
-         ipos=ipos+LEN3+LEN4+LEN5
+         gribm(lencur+1:lencur+len3+len4+len5)=
+     &                      cindex(ipos+1:ipos+len3+len4+len5)
+         lencur=lencur+len3+len4+len5
+         ipos=ipos+len3+len4+len5
          !
-         ! Copy Section 6
+         ! copy section 6
          !
-         if ( LEN6 .eq. 6 .AND. IBMAP .ne. 254 ) then
-            GRIBM(lencur+1:lencur+LEN6)=CINDEX(ipos+1:ipos+LEN6)
-            lencur=lencur+LEN6
+         if ( len6 .eq. 6 .and. ibmap .ne. 254 ) then
+            gribm(lencur+1:lencur+len6)=cindex(ipos+1:ipos+len6)
+            lencur=lencur+len6
          else
-            CALL GBYTE(CINDEX,ISKP6,24*8,4*8)    ! BYTES TO SKIP FOR section 6
-            CALL BAREAD(LUGB,ISKIP+ISKP6,4,LREAD,ctemp)
-            CALL GBYTE(Ctemp,LEN6,0,4*8)      ! LENGTH OF SECTION 6
-            ALLOCATE(csec6(len6))
-            CALL BAREAD(LUGB,ISKIP+ISKP6,LEN6,LREAD,csec6)
-            GRIBM(lencur+1:lencur+LEN6)=csec6(1:LEN6)
-            lencur=lencur+LEN6
-            IF ( allocated(csec6)) DEALLOCATE(csec6)
+            call gbyte(cindex,iskp6,24*8,4*8)    ! bytes to skip for section 6
+            call baread(lugb,iskip+iskp6,4,lread,ctemp)
+            call gbyte(ctemp,len6,0,4*8)      ! length of section 6
+            allocate(csec6(len6))
+            call baread(lugb,iskip+iskp6,len6,lread,csec6)
+            gribm(lencur+1:lencur+len6)=csec6(1:len6)
+            lencur=lencur+len6
+            if ( allocated(csec6)) deallocate(csec6)
          endif
          !
-         ! Copy Section 7
+         ! copy section 7
          !
-         GRIBM(lencur+1:lencur+LEN7)=csec7(1:LEN7)
-         lencur=lencur+LEN7
+         gribm(lencur+1:lencur+len7)=csec7(1:len7)
+         lencur=lencur+len7
          !
-         ! Section 8
+         ! section 8
          !
-         GRIBM(lencur+1)='7'
-         GRIBM(lencur+2)='7'
-         GRIBM(lencur+3)='7'
-         GRIBM(lencur+4)='7'
+         gribm(lencur+1)='7'
+         gribm(lencur+2)='7'
+         gribm(lencur+3)='7'
+         gribm(lencur+4)='7'
 
          !  clean up
          !
-         IF ( allocated(csec2)) DEALLOCATE(csec2)
-         IF ( allocated(csec7)) deallocate(csec7)
+         if ( allocated(csec2)) deallocate(csec2)
+         if ( allocated(csec7)) deallocate(csec7)
 
-      ELSE    ! DO NOT extract field from message :  Get entire message
+      else    ! do not extract field from message :  get entire message
 
-         CALL GBYTE(CINDEX,ISKIP,4*8,4*8)    ! BYTES TO SKIP IN FILE
-         CALL GBYTE(CINDEX,LENG,36*8,4*8)      ! LENGTH OF GRIB MESSAGE
-         IF (.NOT. ASSOCIATED(GRIBM)) ALLOCATE(GRIBM(LENG))
-         CALL BAREAD(LUGB,ISKIP,LENG,LREAD,GRIBM)
-         IF ( LENG .NE. LREAD ) THEN
-            DEALLOCATE(GRIBM)
-            NULLIFY(GRIBM)
-            IRET=97
-            RETURN
-         ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+         call gbyte(cindex,iskip,4*8,4*8)    ! bytes to skip in file
+         call gbyte(cindex,leng,36*8,4*8)      ! length of grib message
+         if (.not. associated(gribm)) allocate(gribm(leng))
+         call baread(lugb,iskip,leng,lread,gribm)
+         if ( leng .ne. lread ) then
+            deallocate(gribm)
+            nullify(gribm)
+            iret=97
+            return
+         endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

@@ -1,8 +1,8 @@
  
       subroutine get_pres_1d(i4time,nk,pres_1d_out,istatus)
 
-cdoc  Returns a 1-D grid of pressures. This is useful if we have a non-uniform
-cdoc  pressure grid. This does not support an arbitrary vertical grid.
+cdoc  returns a 1-d grid of pressures. this is useful if we have a non-uniform
+cdoc  pressure grid. this does not support an arbitrary vertical grid.
 
       include 'grid_fname.cmn'                          ! grid_fnam_common
 
@@ -46,7 +46,7 @@ cdoc  pressure grid. This does not support an arbitrary vertical grid.
         if(pressures(k) .ge. pressures(k-1))goto902       
       enddo                  ! k
 
-!     write(6,*)' Success in get_pres_1d'
+!     write(6,*)' success in get_pres_1d'
       istatus = 1
       return
 
@@ -65,7 +65,7 @@ cdoc  pressure grid. This does not support an arbitrary vertical grid.
       return
 
   903 print*,'error in pressures_nl values in ',filename
-      print*,'values should be an integral multiple of 100 Pa'
+      print*,'values should be an integral multiple of 100 pa'
       write(*,pressures_nl)
       istatus = 0
       return
@@ -74,7 +74,7 @@ cdoc  pressure grid. This does not support an arbitrary vertical grid.
 
       subroutine get_pres_3d(i4time,ni,nj,nk,pres_3d,istatus)
 
-cdoc  Returns a 3-D grid of pressures. This is useful if we have a non-uniform
+cdoc  returns a 3-d grid of pressures. this is useful if we have a non-uniform
 cdoc  pressure grid or other type of arbitrary vertical grid.
 
       integer ni,nj,nk       
@@ -92,11 +92,11 @@ cdoc  pressure grid or other type of arbitrary vertical grid.
             enddo               ! j
          enddo                  ! k
 
-         write(6,*)' Success in get_pres_3d'
+         write(6,*)' success in get_pres_3d'
          return
 
       else
-         write(6,*)' No Success in get_pres_3d'
+         write(6,*)' no success in get_pres_3d'
          return
 
       endif
@@ -107,17 +107,17 @@ cdoc  pressure grid or other type of arbitrary vertical grid.
       subroutine get_sigmap_3d(pres_sfc,prtop,sigma_1d,pres_3d,ni,nj,nk
      1                        ,istatus)
 
-cdoc  Returns a 3-D grid of pressures. This is useful if we have a non-uniform
-cdoc  pressure grid or other type of arbitrary vertical grid. Consistent 
+cdoc  returns a 3-d grid of pressures. this is useful if we have a non-uniform
+cdoc  pressure grid or other type of arbitrary vertical grid. consistent 
 cdoc  pressure units should be used.
 
-      integer ni,nj,nk        !                              I
-      real pres_sfc(ni,nj)    ! Surface pressure             I
-      real prtop              ! Top Pressure                 I
-      real sigma_1d(nk)       ! Sigma (non-dimensional)      I
-      real pres_3d(ni,nj,nk)  ! 3D pressure                  O
+      integer ni,nj,nk        !                              i
+      real pres_sfc(ni,nj)    ! surface pressure             i
+      real prtop              ! top pressure                 i
+      real sigma_1d(nk)       ! sigma (non-dimensional)      i
+      real pres_3d(ni,nj,nk)  ! 3d pressure                  o
 
-!     Sigma is defined to be 1. at the ground and 0. at 'prtop'
+!     sigma is defined to be 1. at the ground and 0. at 'prtop'
       do k = 1,nk
           do j = 1,nj
           do i = 1,ni
@@ -134,8 +134,8 @@ cdoc  pressure units should be used.
       subroutine get_rep_pres_intvl(pres_3d,ni,nj,nk,rep_pres_intvl
      1                             ,istatus)
      
-cdoc  This routine returns a representative pressure interval that is used
-cdoc  in the free atmosphere. This is useful if we have a variable interval
+cdoc  this routine returns a representative pressure interval that is used
+cdoc  in the free atmosphere. this is useful if we have a variable interval
 cdoc  pressure grid (even perhaps an arbitrary vertical grid), especially if 
 cdoc  there are more levels in the boundary layer.
 
@@ -158,7 +158,7 @@ cdoc  there are more levels in the boundary layer.
       rep_pres_intvl = nint( pres_diff / float(nk-klow) )
 
       if(rep_pres_intvl .le. 0.)then
-          write(6,*)' ERROR in get_rep_pres_intvl: rep_pres_intvl < 0 '
+          write(6,*)' error in get_rep_pres_intvl: rep_pres_intvl < 0 '
      1              ,rep_pres_intvl
           istatus = 0
           return

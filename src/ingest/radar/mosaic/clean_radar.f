@@ -2,7 +2,7 @@
 
       subroutine clean_radar(ref,ni,nj,nk)
 
-      use mem_namelist, ONLY: grid_spacing_m, ref_base, r_missing_data
+      use mem_namelist, only: grid_spacing_m, ref_base, r_missing_data
 
       real ref(ni,nj,nk)
       real ref_buf(ni,nj,nk)
@@ -10,10 +10,10 @@
       ref_buf(:,:,:) = ref(:,:,:)
 
       if(grid_spacing_m .gt. 3500.)then
-          write(6,*)' Skip radar cleaning step'
+          write(6,*)' skip radar cleaning step'
           return
       else
-          write(6,*)' Clean radar data from small-scale noise'
+          write(6,*)' clean radar data from small-scale noise'
           if(grid_spacing_m .gt. 750.)then
               ib = 1
           else
@@ -31,7 +31,7 @@
           if(abs(sum9) .le. 1e6)then ! screen out summed missing data values
               sum8 = sum9 - ref(i,j,k)
               ave8 = sum8 / rnumbox
-              if(ref(i,j,k) .gt. (ave8 + 20.) .OR.
+              if(ref(i,j,k) .gt. (ave8 + 20.) .or.
      1           (ave8 .eq. ref_base .and. grid_spacing_m .le. 750.) 
      1                                                             )then        
                   ref_buf(i,j,k) = ave8 ! ref_base
@@ -44,7 +44,7 @@
 
       ref(:,:,:) = ref_buf(:,:,:)
 
-      write(6,*)' Number of grid points cleaned is ',nclean
+      write(6,*)' number of grid points cleaned is ',nclean
 
       return
       end

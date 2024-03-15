@@ -1,22 +1,22 @@
        subroutine rayqckz(ng,nb,iscale,miss,idat,azimu)
 c***********************************************************************
-c Subroutine/Function : rayqckz
+c subroutine/function : rayqckz
 c
-c Usage :
+c usage :
 c    call rayqckz(ng,nb,iscale,miss,idat,azimu)
 c
-c Description      : To QC for ray contining data.
+c description      : to qc for ray contining data.
 c
-c Arguments :
-c  I/O/W   name,      type,       description
-c    I     ng         integer     the number of gate. (the first dimension) 
-c    I     nb         integer     the number of azimuthal angle. (the second dimension)
-c    I     iscale     integer     scale value.
-c    I     miss       integer     the missing data.
-c   I/O   idat(ng,nb) int array   the reflectivity data.
-c    I     azimu(nb)  real array  the azimuthal angles.
+c arguments :
+c  i/o/w   name,      type,       description
+c    i     ng         integer     the number of gate. (the first dimension) 
+c    i     nb         integer     the number of azimuthal angle. (the second dimension)
+c    i     iscale     integer     scale value.
+c    i     miss       integer     the missing data.
+c   i/o   idat(ng,nb) int array   the reflectivity data.
+c    i     azimu(nb)  real array  the azimuthal angles.
 c
-c Called Function : none
+c called function : none
 c***********************************************************************
 
        dimension idat(ng,nb),azimu(nb)

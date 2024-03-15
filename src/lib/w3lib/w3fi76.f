@@ -1,131 +1,131 @@
-      SUBROUTINE W3FI76(PVAL,KEXP,KMANT,KBITS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:  W3FI76        CONVERT TO IBM370 FLOATING POINT
-C   PRGMMR: REJONES          ORG: NMC421      DATE:92-11-16
-C
-C ABSTRACT: CONVERTS FLOATING POINT NUMBER FROM MACHINE
-C   REPRESENTATION TO GRIB REPRESENTATION (IBM370 32 BIT F.P.).
-C
-C PROGRAM HISTORY LOG:
-C   85-09-15  JOHN HENNESSY  ECMWF
-C   92-09-23  JONES R. E.    CHANGE NAME, ADD DOC BLOCK
-C   93-10-27  JONES,R. E.    CHANGE TO AGREE WITH HENNESSY CHANGES
-C   95-10-31  IREDELL        REMOVED SAVES AND PRINTS
-C   98-03-10  B. VUONG       REMOVE THE CDIR$ INTEGER=64 DIRECTIVE
-C
-C USAGE:    CALL W3FI76 (FVAL, KEXP, KMANT, NBITS)
-C   INPUT ARGUMENT LIST:
-C     PVAL     - FLOATING POINT NUMBER TO BE CONVERTED
-C     KBITS    - NUMBER OF BITS IN COMPUTER WORD (32 OR 64)
-C
-C   OUTPUT ARGUMENT LIST:
-C     KEXP     -  8 BIT SIGNED EXPONENT
-C     KMANT    - 24 BIT  MANTISSA  (FRACTION)
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM370 VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS 9000, CRAY Y-MP8/864< CRAY Y-MP EL2/256
-C
-C$$$
-C
-C********************************************************************
-C*
-C*    NAME      : CONFP3
-C*
-C*    FUNCTION  : CONVERT FLOATING POINT NUMBER FROM MACHINE
-C*                REPRESENTATION TO GRIB REPRESENTATION.
-C*
-C*    INPUT     : PVAL  - FLOATING POINT NUMBER TO BE CONVERTED.
-C*    KBITS     : KBITS - NUMBER OF BITS IN COMPUTER WORD
-C*
-C*    OUTPUT    : KEXP  - 8 BIT SIGNED EXPONENT
-C*                KMANT - 24 BIT MANTISSA
-C*                PVAL  - UNCHANGED.
-C*
-C*    JOHN HENNESSY , ECMWF   18.06.91
-C*
-C********************************************************************
-C
-C
-C     IMPLICIT NONE
-C
-      INTEGER IEXP
-      INTEGER ISIGN
-C
-      INTEGER KBITS
-      INTEGER KEXP
-      INTEGER KMANT
-C
-      REAL PVAL
-      REAL ZEPS
-      REAL ZREF
-C
-C     TEST FOR FLOATING POINT ZERO
-C
-      IF (PVAL.EQ.0.0) THEN
-        KEXP  = 0
-        KMANT = 0
-        GO TO 900
-      ENDIF
-C
-C     SET ZEPS TO 1.0E-12 FOR 64 BIT COMPUTERS (CRAY)
-C     SET ZEPS TO 1.0E-8  FOR 32 BIT COMPUTERS
-C
-      IF (KBITS.EQ.32) THEN
-        ZEPS = 1.0E-8
-      ELSE
-        ZEPS = 1.0E-12
-      ENDIF
-      ZREF = PVAL
-C
-C     SIGN OF VALUE
-C
-      ISIGN = 0
-      IF (ZREF.LT.0.0) THEN
-        ISIGN =   128
-        ZREF    = - ZREF
-      ENDIF
-C
-C     EXPONENT
-C
-      IEXP = INT(ALOG(ZREF)*(1.0/ALOG(16.0))+64.0+1.0+ZEPS)
-C
-      IF (IEXP.LT.0  ) IEXP = 0
-      IF (IEXP.GT.127) IEXP = 127
-C
-C     MANTISSA
-C
-C     CLOSEST NUMBER IN GRIB FORMAT TO ORIGINAL NUMBER
-C     (EQUAL TO, GREATER THAN OR LESS THAN ORIGINAL NUMBER).
-C
-      KMANT = NINT (ZREF/16.0**(IEXP-70))
-C
-C     CHECK THAT MANTISSA VALUE DOES NOT EXCEED 24 BITS
-C     16777215 = 2**24 - 1
-C
-      IF (KMANT.GT.16777215) THEN
-         IEXP  = IEXP + 1
-C
-C     CLOSEST NUMBER IN GRIB FORMAT TO ORIGINAL NUMBER
-C     (EQUAL TO, GREATER THAN OR LESS THAN ORIGINAL NUMBER).
-C
-         KMANT = NINT (ZREF/16.0**(IEXP-70))
-C
-C        CHECK MANTISSA VALUE DOES NOT EXCEED 24 BITS AGAIN
-C
-         IF (KMANT.GT.16777215) THEN
-           PRINT *,'BAD MANTISSA VALUE FOR PVAL = ',PVAL
-         ENDIF
-      ENDIF
-C
-C     ADD SIGN BIT TO EXPONENT.
-C
-      KEXP = IEXP + ISIGN
-C
-  900 CONTINUE
-C
-      RETURN
-      END
+      subroutine w3fi76(pval,kexp,kmant,kbits)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:  w3fi76        convert to ibm370 floating point
+c   prgmmr: rejones          org: nmc421      date:92-11-16
+c
+c abstract: converts floating point number from machine
+c   representation to grib representation (ibm370 32 bit f.p.).
+c
+c program history log:
+c   85-09-15  john hennessy  ecmwf
+c   92-09-23  jones r. e.    change name, add doc block
+c   93-10-27  jones,r. e.    change to agree with hennessy changes
+c   95-10-31  iredell        removed saves and prints
+c   98-03-10  b. vuong       remove the cdir$ integer=64 directive
+c
+c usage:    call w3fi76 (fval, kexp, kmant, nbits)
+c   input argument list:
+c     pval     - floating point number to be converted
+c     kbits    - number of bits in computer word (32 or 64)
+c
+c   output argument list:
+c     kexp     -  8 bit signed exponent
+c     kmant    - 24 bit  mantissa  (fraction)
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm370 vs fortran 77, cray cft77 fortran
+c   machine:  hds 9000, cray y-mp8/864< cray y-mp el2/256
+c
+c$$$
+c
+c********************************************************************
+c*
+c*    name      : confp3
+c*
+c*    function  : convert floating point number from machine
+c*                representation to grib representation.
+c*
+c*    input     : pval  - floating point number to be converted.
+c*    kbits     : kbits - number of bits in computer word
+c*
+c*    output    : kexp  - 8 bit signed exponent
+c*                kmant - 24 bit mantissa
+c*                pval  - unchanged.
+c*
+c*    john hennessy , ecmwf   18.06.91
+c*
+c********************************************************************
+c
+c
+c     implicit none
+c
+      integer iexp
+      integer isign
+c
+      integer kbits
+      integer kexp
+      integer kmant
+c
+      real pval
+      real zeps
+      real zref
+c
+c     test for floating point zero
+c
+      if (pval.eq.0.0) then
+        kexp  = 0
+        kmant = 0
+        go to 900
+      endif
+c
+c     set zeps to 1.0e-12 for 64 bit computers (cray)
+c     set zeps to 1.0e-8  for 32 bit computers
+c
+      if (kbits.eq.32) then
+        zeps = 1.0e-8
+      else
+        zeps = 1.0e-12
+      endif
+      zref = pval
+c
+c     sign of value
+c
+      isign = 0
+      if (zref.lt.0.0) then
+        isign =   128
+        zref    = - zref
+      endif
+c
+c     exponent
+c
+      iexp = int(alog(zref)*(1.0/alog(16.0))+64.0+1.0+zeps)
+c
+      if (iexp.lt.0  ) iexp = 0
+      if (iexp.gt.127) iexp = 127
+c
+c     mantissa
+c
+c     closest number in grib format to original number
+c     (equal to, greater than or less than original number).
+c
+      kmant = nint (zref/16.0**(iexp-70))
+c
+c     check that mantissa value does not exceed 24 bits
+c     16777215 = 2**24 - 1
+c
+      if (kmant.gt.16777215) then
+         iexp  = iexp + 1
+c
+c     closest number in grib format to original number
+c     (equal to, greater than or less than original number).
+c
+         kmant = nint (zref/16.0**(iexp-70))
+c
+c        check mantissa value does not exceed 24 bits again
+c
+         if (kmant.gt.16777215) then
+           print *,'bad mantissa value for pval = ',pval
+         endif
+      endif
+c
+c     add sign bit to exponent.
+c
+      kexp = iexp + isign
+c
+  900 continue
+c
+      return
+      end

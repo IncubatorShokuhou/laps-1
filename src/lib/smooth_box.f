@@ -2,7 +2,7 @@
 
        subroutine smooth_box_3d(a,ni,nj,nk,kernsize)
 
-!      3D smoother using a box filter  
+!      3d smoother using a box filter  
 
        real a(ni,nj,nk) 
 
@@ -42,7 +42,7 @@
 
        subroutine smooth_box_2d(a,ni,nj,kernsize)
 
-!      2D smoother using a box filter  
+!      2d smoother using a box filter  
 
        real a(ni,nj) 
 

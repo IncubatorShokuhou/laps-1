@@ -1,72 +1,72 @@
 !dis
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
 !dis
-!dis    This software is distributed under the Open Source Definition,
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
 !dis
-!dis    In particular, redistribution and use in source and binary forms,
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
 !dis
-!dis    - Redistributions of source code must retain this notice, this
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
 !dis
-!dis    - Redistributions in binary form must provide access to this
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
 !dis
-!dis    - All modifications to this software must be clearly documented,
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
 !dis
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
 !dis
 !dis
 
 
 
-Module mem_static
+module mem_static
 
   type static_type
-  integer                     :: nx             ! X grid points
-  integer                     :: ny             ! Y grid points
-  integer                     :: nz             ! Z grid points
-  real                        :: swlat          ! SW Corner Lat
-  real                        :: swlon          ! SE Corner Lon
-  real                        :: nelat          ! NE Corner Lat
-  real                        :: nelon          ! NE Corner Lon
-  real                        :: dx             ! X-direction grid spacing
-  real                        :: dy             ! Y-direction grid spacing
-  real                        :: cenlon         ! center Longitude
-  real                        :: cenlat         ! center Latitude
-  real                        :: stdlon         ! Orientation Longitude (polelon)
-  real                        :: stdlat1        ! Standard Lat 1
-  real                        :: stdlat2        ! Standard Lat 2 (polelat)
-  real, pointer               :: topo(:,:)      ! LAPS Topographic height
-  real, pointer               :: glat(:,:)      ! LAPS Latitude Array
-  real, pointer               :: glon(:,:)      ! LAPS Longitude Array
-  real, pointer               :: ldf(:,:)       ! Land fraction
-  real, pointer               :: pbl(:,:)       ! PBL height
-  real, pointer               :: akk(:,:)       ! Drag coefficient
-  character (len=132)         :: grid_type      ! Map projection type
+  integer                     :: nx             ! x grid points
+  integer                     :: ny             ! y grid points
+  integer                     :: nz             ! z grid points
+  real                        :: swlat          ! sw corner lat
+  real                        :: swlon          ! se corner lon
+  real                        :: nelat          ! ne corner lat
+  real                        :: nelon          ! ne corner lon
+  real                        :: dx             ! x-direction grid spacing
+  real                        :: dy             ! y-direction grid spacing
+  real                        :: cenlon         ! center longitude
+  real                        :: cenlat         ! center latitude
+  real                        :: stdlon         ! orientation longitude (polelon)
+  real                        :: stdlat1        ! standard lat 1
+  real                        :: stdlat2        ! standard lat 2 (polelat)
+  real, pointer               :: topo(:,:)      ! laps topographic height
+  real, pointer               :: glat(:,:)      ! laps latitude array
+  real, pointer               :: glon(:,:)      ! laps longitude array
+  real, pointer               :: ldf(:,:)       ! land fraction
+  real, pointer               :: pbl(:,:)       ! pbl height
+  real, pointer               :: akk(:,:)       ! drag coefficient
+  character (len=132)         :: grid_type      ! map projection type
   end type
 
   type(static_type) :: stgrid
 
   real, pointer, dimension(:,:) :: lat, lon, topo, ldf
 
-Contains
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -160,49 +160,49 @@ stgrid%grid_type        = map_proj
 !,map_proj
 
 
-!         var(1)    = 'LAT'
-!         var(2)    = 'LON'
-!         var(3)    = 'AVG'
-!         var(4)    = 'LDF'
-!         var(5)    = 'USE'
-!         var(6)    = 'ALB'  !now used for max snow alb 2-20-03 JS.
-!         var(7)    = 'STD'
-!         var(8)    = 'SLN'
-!         var(9)    = 'SLT'
-!         var(10)   = 'STL'
-!         var(11)   = 'SBL'
-!         var(12)   = 'LND'  ! Land-Water Mask based on USGS landuse
+!         var(1)    = 'lat'
+!         var(2)    = 'lon'
+!         var(3)    = 'avg'
+!         var(4)    = 'ldf'
+!         var(5)    = 'use'
+!         var(6)    = 'alb'  !now used for max snow alb 2-20-03 js.
+!         var(7)    = 'std'
+!         var(8)    = 'sln'
+!         var(9)    = 'slt'
+!         var(10)   = 'stl'
+!         var(11)   = 'sbl'
+!         var(12)   = 'lnd'  ! land-water mask based on usgs landuse
 !         i=12
 !         do j=1,12
 !            write(cat,'(i2.2)')j
 !            if(cat(1:1).eq.' ')cat(1:1)='0'
 !            if(cat(2:2).eq.' ')cat(2:2)='0'
-!            var(i+j)= 'G'//cat   ! vegetation greenness fraction
+!            var(i+j)= 'g'//cat   ! vegetation greenness fraction
 !         enddo
 !
-!         var(25)='TMP'
+!         var(25)='tmp'
 !         i=25
 !         do j=1,12
 !            write(cat,'(i2.2)')j
 !            if(cat(1:1).eq.' ')cat(1:1)='0'
 !            if(cat(2:2).eq.' ')cat(2:2)='0'
-!            var(i+j)= 'A'//cat   ! monthly albedo
+!            var(i+j)= 'a'//cat   ! monthly albedo
 !         enddo
 !
-!         var(ngrids)   = 'ZIN'
+!         var(ngrids)   = 'zin'
 !
-!         comment(1) = 'Lat: From MODEL by J. Smart/ S. Albers 2-03\0'
-!         comment(2) = 'Lon: From MODEL by J. Smart/ S. Albers 2-03\0'
-!         comment(3) = 'Average terrain elevation (m) \0'
-!         comment(4) = 'Land Fraction: derived from USGS land use \0'
-!         comment(5) = 'Land Use dominant category (USGS 24 Category) \0'
-!         comment(6) = 'Maximum Snow Albedo; defined over land only \0'
-!         comment(7) = 'Standard Deviation of Elevation data (m)\0'
-!         comment(8) = 'Mean longitudinal terrain slope (m/m)\0'
-!         comment(9) = 'Mean latitudinal terrain slope (m/m)\0'
-!         comment(10)= 'Top layer (0-30cm) dominant category soiltype\0'
-!         comment(11)= 'Bot layer (30-90cm) dominant category soiltype\0'
-!         comment(12)= 'Land-Water Mask (0=water; 1 otherwise) \0'
+!         comment(1) = 'lat: from model by j. smart/ s. albers 2-03\0'
+!         comment(2) = 'lon: from model by j. smart/ s. albers 2-03\0'
+!         comment(3) = 'average terrain elevation (m) \0'
+!         comment(4) = 'land fraction: derived from usgs land use \0'
+!         comment(5) = 'land use dominant category (usgs 24 category) \0'
+!         comment(6) = 'maximum snow albedo; defined over land only \0'
+!         comment(7) = 'standard deviation of elevation data (m)\0'
+!         comment(8) = 'mean longitudinal terrain slope (m/m)\0'
+!         comment(9) = 'mean latitudinal terrain slope (m/m)\0'
+!         comment(10)= 'top layer (0-30cm) dominant category soiltype\0'
+!         comment(11)= 'bot layer (30-90cm) dominant category soiltype\0'
+!         comment(12)= 'land-water mask (0=water; 1 otherwise) \0'
 
 return
 end subroutine fill_static

@@ -76,9 +76,9 @@ c first try for the ir
 c
        istatus = 1
        n=index(sat_dir_path,' ')
-       c_filename=sat_dir_path(1:n-1)//'LAPSI.ASC'
+       c_filename=sat_dir_path(1:n-1)//'lapsi.asc'
        n=index(c_filename,' ')
-       write(6,*)'Reading: ',c_filename(1:n)
+       write(6,*)'reading: ',c_filename(1:n)
        call read_ascii_satdat(c_filename,
      &                        i4time_current,
      &                        c_filetime,i_delta_t,
@@ -98,7 +98,7 @@ c
           c_type(ntm)='ir '
           grid_spacing_km(ntm)=grid_spacing
        else
-          write(6,*)'Not successful getting IR image'
+          write(6,*)'not successful getting ir image'
        endif
 c
 c now try for the vis
@@ -106,9 +106,9 @@ c
        if(.not.lvis_flag)then
 
           n=index(sat_dir_path,' ')
-          c_filename=sat_dir_path(1:n-1)//'LAPSV.ASC'
+          c_filename=sat_dir_path(1:n-1)//'lapsv.asc'
           n=index(c_filename,' ')
-          write(6,*)'Reading: ',c_filename(1:n)
+          write(6,*)'reading: ',c_filename(1:n)
           call read_ascii_satdat(c_filename,
      &                        i4time_current,
      &                        c_filetime,i_delta_t,
@@ -130,12 +130,12 @@ c
              grid_spacing_km(ntm)=grid_spacing
 
           else
-             write(6,*)'Not successful getting VIS image'
+             write(6,*)'not successful getting vis image'
           endif
 
        else
 
-          write(6,*)'lvis_flag set! Not reading vis data'
+          write(6,*)'lvis_flag set! not reading vis data'
           istatus_vis=-1
 
        endif
@@ -148,16 +148,16 @@ c
           if(i4time_diff.gt.0)then
              ntm=ntm-1
              c_type(ntm)='ir '
-             write(6,*)'VIS is actually old'
+             write(6,*)'vis is actually old'
              istatus_vis = -1
           elseif(i4time_diff.lt.0)then
              ntm=ntm-1
              c_type(ntm)='vis'
-             write(6,*)'IR is actually old'
+             write(6,*)'ir is actually old'
              istatus_ir = -1
           elseif(i4time_diff.eq.0)then
-             write(6,*)'IR and VIS time are equal'
-             write(6,*)'Using both IR and VIS'
+             write(6,*)'ir and vis time are equal'
+             write(6,*)'using both ir and vis'
           endif
        endif
        write(6,*)
@@ -173,10 +173,10 @@ c
                 i4time_data=i4time_data_ir
              elseif(ntm.eq.1.and.i4time_diff.gt.0)then  !ir is current data
                 i4time_data=i4time_data_ir
-                write(6,*)'Using i4time_data_ir'
+                write(6,*)'using i4time_data_ir'
              elseif(ntm.eq.1.and.i4time_diff.lt.0)then  !vis is current data
                 i4time_data=i4time_data_vis
-                write(6,*)'Use i4time_data_vis for filename'
+                write(6,*)'use i4time_data_vis for filename'
              elseif(ntm.eq.2)then                       !ir and vis current but different times
 c               r4time_data_ir = i4time_data_ir/10000.
 c               r4time_data_vis = i4time_data_vis/10000.
@@ -185,9 +185,9 @@ c               r4time_data_vis = i4time_data_vis/10000.
                 else
                    i4time_data=i4time_data_vis
                 endif
-                write(6,*)'Using most current time between ir and vis'
+                write(6,*)'using most current time between ir and vis'
              else
-                write(6,*)'Something is wrong, ntm > 2!'
+                write(6,*)'something is wrong, ntm > 2!'
                 istatus=-1
              endif
           endif

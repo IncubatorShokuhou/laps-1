@@ -31,7 +31,7 @@
             character(len=1),pointer,dimension(:) :: tmp
 
             istat=0
-            if ( (n<0) .OR. (m<=0) ) then
+            if ( (n<0) .or. (m<=0) ) then
                istat=10
                return
             endif
@@ -64,7 +64,7 @@
             real,pointer,dimension(:) :: tmp
 
             istat=0
-            if ( (n<0) .OR. (m<=0) ) then
+            if ( (n<0) .or. (m<=0) ) then
                istat=10
                return
             endif
@@ -97,7 +97,7 @@
             integer,pointer,dimension(:) :: tmp
 
             istat=0
-            if ( (n<0) .OR. (m<=0) ) then
+            if ( (n<0) .or. (m<=0) ) then
                istat=10
                return
             endif

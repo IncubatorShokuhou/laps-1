@@ -1,250 +1,250 @@
       subroutine get_raob_data_a(nx,ny,i4time_sys,i4time_raob_earliest,
-     1                           i4time_raob_latest,filename,maxRaob,
-     1                           maxM,maxT,maxW,lat,lon,timeSyn,timeRel,
-     1                           numSigT, numSigW, wmoStaNum,staname,
-     1                           typeW,typeT,prSigT, tSigT,tdSigT,
-     1                           htSigT, htSigW, wdSigW,wsSigW, 
-     1                           staLat, staLon, staElev,
-     1                           max_ht_m_proc,min_pres_mb_proc,numRaob, 
+     1                           i4time_raob_latest,filename,maxraob,
+     1                           maxm,maxt,maxw,lat,lon,timesyn,timerel,
+     1                           numsigt, numsigw, wmostanum,staname,
+     1                           typew,typet,prsigt, tsigt,tdsigt,
+     1                           htsigt, htsigw, wdsigw,wssigw, 
+     1                           stalat, stalon, staelev,
+     1                           max_ht_m_proc,min_pres_mb_proc,numraob, 
      1                           n_raobs_avail,verif_missing_data, 
      1                           raob_missing_data,istatus)
 
       implicit none
       include 'netcdf.inc'
 
-!     Input Variables
+!     input variables
       integer     nx,ny,i4time_sys,i4time_raob_earliest,
-     1              i4time_raob_latest,maxRaob,maxM,maxT,maxW
+     1              i4time_raob_latest,maxraob,maxm,maxt,maxw
       character*(*) filename
       real        lat(nx,ny),lon(nx,ny)
 
-!     Variables filled for output
-      integer     timeSyn(maxRaob),timeRel(maxRaob),
-     1              numSigT(maxRaob),numSigW(maxRaob),
+!     variables filled for output
+      integer     timesyn(maxraob),timerel(maxraob),
+     1              numsigt(maxraob),numsigw(maxraob),
      1              istatus
-      integer       numRaob, n_raobs_avail
+      integer       numraob, n_raobs_avail
       real	    verif_missing_data,raob_missing_data
-      character*6   staName(maxRaob)
-      integer	    wmoStaNum(maxRaob),wmoStaNum_f
-      character*1   typeW(maxW,maxRaob),typeT(maxT,maxRaob)
-      real        prSigT(maxT,maxRaob),tSigT(maxT,maxRaob),
-     1              tdSigT(maxT,maxRaob),
-     1              htSigT(maxT,maxRaob),
-     1              htSigW(maxW,maxRaob),wdSigW(maxW,maxRaob),
-     1              wsSigW(maxW,maxRaob),staElev(maxRaob), 
+      character*6   staname(maxraob)
+      integer	    wmostanum(maxraob),wmostanum_f
+      character*1   typew(maxw,maxraob),typet(maxt,maxraob)
+      real        prsigt(maxt,maxraob),tsigt(maxt,maxraob),
+     1              tdsigt(maxt,maxraob),
+     1              htsigt(maxt,maxraob),
+     1              htsigw(maxw,maxraob),wdsigw(maxw,maxraob),
+     1              wssigw(maxw,maxraob),staelev(maxraob), 
      1              max_ht_m_proc, min_pres_mb_proc,
-     1              staLat(maxRaob), staLon(maxRaob) 
+     1              stalat(maxraob), stalon(maxraob) 
 
-!     Other Variables
-      real        htMan(maxM,maxRaob), prMan(maxM,maxRaob),
-     1              tMan(maxM,maxRaob), tdMan(maxM,maxRaob),
-     1              wsMan(maxM,maxRaob), wdMan(maxM,maxRaob),
-     1              prSigTI(maxT,maxRaob),tSigTI(maxT,maxRaob),
-     1              tdSigTI(maxT,maxRaob),
-     1              htSigWI(maxW,maxRaob),wdSigWI(maxW,maxRaob),
-     1              wsSigWI(maxW,maxRaob)
+!     other variables
+      real        htman(maxm,maxraob), prman(maxm,maxraob),
+     1              tman(maxm,maxraob), tdman(maxm,maxraob),
+     1              wsman(maxm,maxraob), wdman(maxm,maxraob),
+     1              prsigti(maxt,maxraob),tsigti(maxt,maxraob),
+     1              tdsigti(maxt,maxraob),
+     1              htsigwi(maxw,maxraob),wdsigwi(maxw,maxraob),
+     1              wssigwi(maxw,maxraob)
 
-      double precision d_timeRel, d_timeSyn
+      double precision d_timerel, d_timesyn
       character*9   a9time_syn, a9time_release, a9time_raob, 
      1              a9time_sys
       character*8   c8_project
-      character*6   staName_f
-      integer     i, j, recNum, sigTLevel, sigWLevel, staNameLen, 
-     1              staNameLen_f, nf_fid, nf_vid, nf_status,
-     1              nObs, i4time_syn, i4time_release, i4time_diff,
-     1              i4time_raob, manLevel, numMan(maxRaob),
+      character*6   staname_f
+      integer     i, j, recnum, sigtlevel, sigwlevel, stanamelen, 
+     1              stanamelen_f, nf_fid, nf_vid, nf_status,
+     1              nobs, i4time_syn, i4time_release, i4time_diff,
+     1              i4time_raob, manlevel, numman(maxraob),
      1              itime_delay,status
-      real        staLat_f, staLon_f, staElev_f, ri, rj,
+      real        stalat_f, stalon_f, staelev_f, ri, rj,
      1              r_nc_missing_data
       integer       index_1(1), start(2), count(2)
 
 !.............................................................................
-! BEGIN
+! begin
 
       n_raobs_avail = 0
 
       istatus = 1    ! assume a good return
-      staNameLen = len(staName(1))
+      stanamelen = len(staname(1))
 
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        write(6,*) NF_STRERROR(nf_status)
-        write(6,*)'NF_OPEN ',filename
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        write(6,*) nf_strerror(nf_status)
+        write(6,*)'nf_open ',filename
         istatus = 0
         return
       else
-        write(6,*) 'Opening file ',filename
+        write(6,*) 'opening file ',filename
       endif
-C
-C  Read dimension values recNum, manLevel, sigTLevel, sigWLevel, staNameLen
-C
-C
-C Get size of recNum
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+c
+c  read dimension values recnum, manlevel, sigtlevel, sigwlevel, stanamelen
+c
+c
+c get size of recnum
+c
+      nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
         istatus = 0
         return
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
         istatus = 0
         return
       endif
-C
-C Get size of manLevel
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'manLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim manLevel'
+c
+c get size of manlevel
+c
+      nf_status = nf_inq_dimid(nf_fid,'manlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim manlevel'
         istatus = 0
         return
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,manLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim manLevel'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,manlevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim manlevel'
         istatus = 0
         return
       endif
-C
-C Get size of sigTLevel
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'sigTLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigTLevel'
+c
+c get size of sigtlevel
+c
+      nf_status = nf_inq_dimid(nf_fid,'sigtlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigtlevel'
         istatus = 0
         return
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,sigTLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigTLevel'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,sigtlevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigtlevel'
         istatus = 0
         return
       endif
-C
-C Get size of sigWLevel
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'sigWLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigWLevel'
+c
+c get size of sigwlevel
+c
+      nf_status = nf_inq_dimid(nf_fid,'sigwlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigwlevel'
         istatus = 0
         return
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,sigWLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigWLevel'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,sigwlevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigwlevel'
         istatus = 0
         return
       endif
-C
-C Get size of staNameLen
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'staNameLen',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim staNameLen'
+c
+c get size of stanamelen
+c
+      nf_status = nf_inq_dimid(nf_fid,'stanamelen',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim stanamelen'
         istatus = 0
         return
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,staNameLen_f)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim staNameLen'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,stanamelen_f)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim stanamelen'
         istatus = 0
         return
       endif
 
-      if (staNameLen_f .gt. staNameLen) then
-        print *, 'staName truncated to ',staNameLen,' characters.'
-        staNameLen_f = staNameLen
+      if (stanamelen_f .gt. stanamelen) then
+        print *, 'staname truncated to ',stanamelen,' characters.'
+        stanamelen_f = stanamelen
       endif
-C
-C     Read missing data value for staLat and staLon
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLat',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staLat'
+c
+c     read missing data value for stalat and stalon
+c
+        nf_status = nf_inq_varid(nf_fid,'stalat',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var stalat'
           istatus = 0
           return
         endif
-        nf_status = NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',
+        nf_status = nf_get_att_real(nf_fid,nf_vid,'_fillvalue',
      1                              r_nc_missing_data)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in att for staLat'
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in att for stalat'
           istatus = 0
           return
         endif
 
-! Read data from netCDF file
-      nObs = 0   !number of RAOBs stored to returning arrays
+! read data from netcdf file
+      nobs = 0   !number of raobs stored to returning arrays
       start(1) = 1
       count(2) = 1
 
-      do i = 1, recNum
+      do i = 1, recnum
         index_1(1) = i
         start(2) = i
-C
-C       Read staName      "Station Identifier"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staName',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staName'
+c
+c       read staname      "station identifier"
+c
+        nf_status = nf_inq_varid(nf_fid,'staname',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var staname'
         endif
 
-        count(1) = staNameLen_f
-        nf_status = NF_GET_VARA_TEXT(nf_fid,nf_vid,start,
-     1                               count,staName_f)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staName'
+        count(1) = stanamelen_f
+        nf_status = nf_get_vara_text(nf_fid,nf_vid,start,
+     1                               count,staname_f)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var staname'
         endif
-C
-C       Read wmoStaNum    "WMO Station Number"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wmoStaNum',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wmoStaNum'
+c
+c       read wmostanum    "wmo station number"
+c
+        nf_status = nf_inq_varid(nf_fid,'wmostanum',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wmostanum'
         endif
-        nf_status = NF_GET_VAR1_INT(nf_fid,nf_vid,index_1,wmoStaNum_f)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wmoStaNum'
+        nf_status = nf_get_var1_int(nf_fid,nf_vid,index_1,wmostanum_f)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wmostanum'
         endif
-C
-C       Read staLat       "Station Latitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLat',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staLat'
+c
+c       read stalat       "station latitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'stalat',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var stalat'
         endif
-        nf_status = NF_GET_VAR1_REAL(nf_fid,nf_vid,index_1,staLat_f)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staLat'
+        nf_status = nf_get_var1_real(nf_fid,nf_vid,index_1,stalat_f)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var stalat'
         endif
-C
-C       Read staLon       "Station Longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLon',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staLon'
+c
+c       read stalon       "station longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'stalon',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var stalon'
         endif
-        nf_status = NF_GET_VAR1_REAL(nf_fid,nf_vid,index_1,staLon_f)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staLon'
+        nf_status = nf_get_var1_real(nf_fid,nf_vid,index_1,stalon_f)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var stalon'
         endif
 
-        if(staLat_f .ge. r_nc_missing_data)then
+        if(stalat_f .ge. r_nc_missing_data)then
           goto 888
         endif
 
@@ -252,63 +252,63 @@ C
           goto 888
         endif
 
-        call latlon_to_rlapsgrid(staLat_f,staLon_f,lat,lon,nx,ny,
+        call latlon_to_rlapsgrid(stalat_f,stalon_f,lat,lon,nx,ny,
      1                           ri,rj,status)
         if (status .ne. 1) then   !raob is not in laps domain
           goto 888
         else
           write(6,*)
-          write(6,*) 'Raob ',wmoStaNum_f,' is in Laps domain',
-     1               staLat_f,' ',staLon_f
+          write(6,*) 'raob ',wmostanum_f,' is in laps domain',
+     1               stalat_f,' ',stalon_f
           n_raobs_avail = n_raobs_avail + 1
         endif
 
-!       Read synTime and relTime and see if raob is in time window
-C
-C       Read relTime      "Sounding Release Time"
+!       read syntime and reltime and see if raob is in time window
+c
+c       read reltime      "sounding release time"
 
-        nf_status = NF_INQ_VARID(nf_fid,'relTime',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var relTime'
+        nf_status = nf_inq_varid(nf_fid,'reltime',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var reltime'
         endif
-        nf_status = NF_GET_VAR1_DOUBLE(nf_fid,nf_vid,index_1,d_timeRel)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var relTime'
+        nf_status = nf_get_var1_double(nf_fid,nf_vid,index_1,d_timerel)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var reltime'
         endif
-C
-C       Read synTime      "Synoptic Time"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'synTime',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var synTime'
+c
+c       read syntime      "synoptic time"
+c
+        nf_status = nf_inq_varid(nf_fid,'syntime',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var syntime'
         endif
-        nf_status = NF_GET_VAR1_DOUBLE(nf_fid,nf_vid,index_1,d_timeSyn)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var synTime'
+        nf_status = nf_get_var1_double(nf_fid,nf_vid,index_1,d_timesyn)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var syntime'
         endif
 
         i4time_raob = 0
 
-        if(abs(d_timeSyn) .lt. 1e10)then
-          i4time_syn  = idint(d_timeSyn)+315619200
+        if(abs(d_timesyn) .lt. 1e10)then
+          i4time_syn  = idint(d_timesyn)+315619200
           i4time_raob = i4time_syn
         else
           i4time_syn = 0
         endif
 c
-c Somewhat bogus but allows synch of delays with time of data
+c somewhat bogus but allows synch of delays with time of data
 c
         call get_c8_project(c8_project,istatus)
         call upcase(c8_project,c8_project)
-        if(c8_project.eq.'AIRDROP')itime_delay=0  !2*3600
+        if(c8_project.eq.'airdrop')itime_delay=0  !2*3600
 
-        if(abs(d_timeRel) .lt. 1e10)then
-          i4time_release = idint(d_timeRel)+315619200
+        if(abs(d_timerel) .lt. 1e10)then
+          i4time_release = idint(d_timerel)+315619200
 
           i4time_diff = i4time_release - i4time_sys
 
           if(abs(i4time_diff) .gt. 20000)then
-            write(6,*)' Warning: i4time_release is not '
+            write(6,*)' warning: i4time_release is not '
      1               ,'consistent with i4time_diff'
      1               ,i4time_release,i4time_sys
             call make_fnam_lp(i4time_sys,a9time_sys,istatus)
@@ -319,7 +319,7 @@ c
 !            endif
           endif
 
-!         Correction for balloon rise time to mid-troposphere
+!         correction for balloon rise time to mid-troposphere
 !         and time delay due to cron and sched inputs.
           i4time_raob = i4time_release + 1800 + itime_delay
         else
@@ -331,9 +331,9 @@ c
           if(i4time_raob .ge. i4time_raob_earliest .and.
      1       i4time_raob .le. i4time_raob_latest)then
 c.or.(abs(i4time_raob-i4time_sys).gt.10800))then
-          else   !Outside time window - reject
-            write(6,*) 'Raob ',wmoStaNum_f,' is outside of time window '
-            write(6,*) 'Raob:',i4time_raob,' window:',
+          else   !outside time window - reject
+            write(6,*) 'raob ',wmostanum_f,' is outside of time window '
+            write(6,*) 'raob:',i4time_raob,' window:',
      1                 i4time_raob_earliest, '-',i4time_raob_latest
             n_raobs_avail = n_raobs_avail - 1
             goto 888
@@ -343,458 +343,458 @@ c.or.(abs(i4time_raob-i4time_sys).gt.10800))then
         endif
         i4time_diff = abs(i4time_raob-i4time_sys)
         if(i4time_diff.gt.10800)then
-           print*,'Raob not valid verification for this cycle'
+           print*,'raob not valid verification for this cycle'
            print*,'i4time_raob/i4time_sys: ',i4time_raob,i4time_sys
            n_raobs_avail = n_raobs_avail - 1
            goto 888
         endif
-! If you get to here, RAOB is in domain and within time window, save it
-! Write what have to return arrays: staName, staLat, staLon, timeSyn, timeRel
+! if you get to here, raob is in domain and within time window, save it
+! write what have to return arrays: staname, stalat, stalon, timesyn, timerel
 
-        nObs = nObs + 1
-        staName(nObs) = staName_f
-        wmoStaNum(nObs) = wmoStaNum_f
-        staLat(nObs) = staLat_f
-        staLon(nObs) = staLon_f
-        timeSyn(nObs) = i4time_syn
-        timeRel(nObs) = i4time_release
+        nobs = nobs + 1
+        staname(nobs) = staname_f
+        wmostanum(nobs) = wmostanum_f
+        stalat(nobs) = stalat_f
+        stalon(nobs) = stalon_f
+        timesyn(nobs) = i4time_syn
+        timerel(nobs) = i4time_release
 
-! read staElev, numMan, numSigT, numSigW, prSigT, tpSigT, tdSigT, htSigW, 
-!               wdSigW, wsSigW, prMan, htMan, tMan, tdMan, wsMan, wdMan 
+! read staelev, numman, numsigt, numsigw, prsigt, tpsigt, tdsigt, htsigw, 
+!               wdsigw, wssigw, prman, htman, tman, tdman, wsman, wdman 
 !   into return arrays
-C
-C       Read staElev      "Station Elevation"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staElev',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staElev'
+c
+c       read staelev      "station elevation"
+c
+        nf_status = nf_inq_varid(nf_fid,'staelev',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var staelev'
         endif
-        nf_status = NF_GET_VAR1_REAL(nf_fid,nf_vid,index_1,
-     1                               staElev(nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var staElev'
+        nf_status = nf_get_var1_real(nf_fid,nf_vid,index_1,
+     1                               staelev(nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var staelev'
         endif
-C
-C       Read numMan      "Number of Mandatory levels"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'numMand',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var numMand'
+c
+c       read numman      "number of mandatory levels"
+c
+        nf_status = nf_inq_varid(nf_fid,'nummand',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var nummand'
         endif
-        nf_status = NF_GET_VAR1_INT(nf_fid,nf_vid,index_1,numMan(nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var numMan'
+        nf_status = nf_get_var1_int(nf_fid,nf_vid,index_1,numman(nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var numman'
         endif
 
-!       Read in prMan and tpMan
-        count(1) = numMan(nObs)
-C
-C       Read prMan       "Pressure - Mandatory level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'prMan',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var prMan' 
+!       read in prman and tpman
+        count(1) = numman(nobs)
+c
+c       read prman       "pressure - mandatory level"
+c
+        nf_status = nf_inq_varid(nf_fid,'prman',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var prman' 
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               prMan(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var prMan'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               prman(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var prman'
         endif
-C
-C       Read missing for prMan...use as missing for rest of data too
-C
-        nf_status = NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue',
+c
+c       read missing for prman...use as missing for rest of data too
+c
+        nf_status = nf_get_att_real(nf_fid,nf_vid,'_fillvalue',
      1                              raob_missing_data)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in _FillValue for prMan'
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in _fillvalue for prman'
           istatus = 0
           return
         endif
-C
-C       Read tpMan       "Temperature - Mandatory level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'tpMan',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tpMan'
+c
+c       read tpman       "temperature - mandatory level"
+c
+        nf_status = nf_inq_varid(nf_fid,'tpman',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tpman'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               tMan(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tpMan'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               tman(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tpman'
         endif
-C
-C       Read tdMan       "Dewpoint - Mandatory level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'tdMan',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tcMan'
+c
+c       read tdman       "dewpoint - mandatory level"
+c
+        nf_status = nf_inq_varid(nf_fid,'tdman',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tcman'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               tdMan(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tdMan'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               tdman(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tdman'
         endif
-C
-C       Read htMan       "Geopotential - Mandatory level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'htMan',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var htMan'
+c
+c       read htman       "geopotential - mandatory level"
+c
+        nf_status = nf_inq_varid(nf_fid,'htman',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var htman'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               htMan(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var htMan'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               htman(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var htman'
         endif
-C
-C       Read wdMan       "Wind Direction - Mandatory level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wdMan',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wdMan'
+c
+c       read wdman       "wind direction - mandatory level"
+c
+        nf_status = nf_inq_varid(nf_fid,'wdman',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wdman'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               wdMan(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wdMan'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               wdman(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wdman'
         endif
-C
-C       Read wsMan       "Wind Speed - Mandatory level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wsMan',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wsMan'
+c
+c       read wsman       "wind speed - mandatory level"
+c
+        nf_status = nf_inq_varid(nf_fid,'wsman',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wsman'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               wsMan(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wsMan'
-        endif
-
-C
-C       Read numSigT      "Number of Significant Levels wrt T"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'numSigT',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var numSigT'
-        endif
-        nf_status = NF_GET_VAR1_INT(nf_fid,nf_vid,index_1,numSigT(nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var numSigT'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               wsman(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wsman'
         endif
 
-!       Read in prSigT and tpSigT
-        count(1) = numSigT(nObs)
-C
-C       Read prSigT       "Pressure - Significant level wrt T"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'prSigT',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var prSigT' 
+c
+c       read numsigt      "number of significant levels wrt t"
+c
+        nf_status = nf_inq_varid(nf_fid,'numsigt',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var numsigt'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               prSigTI(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var prSigT'
-        endif
-C
-C       Read tpSigT       "Temperature - Significant level wrt T"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'tpSigT',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tpSigT'
-        endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               tSigTI(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tpSigT'
+        nf_status = nf_get_var1_int(nf_fid,nf_vid,index_1,numsigt(nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var numsigt'
         endif
 
-C
-C       Read tdSigT       "Dewpoint - Significant level wrt T"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'tdSigT',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tdSigT'
+!       read in prsigt and tpsigt
+        count(1) = numsigt(nobs)
+c
+c       read prsigt       "pressure - significant level wrt t"
+c
+        nf_status = nf_inq_varid(nf_fid,'prsigt',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var prsigt' 
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               tdSigTI(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var tdSigT'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               prsigti(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var prsigt'
+        endif
+c
+c       read tpsigt       "temperature - significant level wrt t"
+c
+        nf_status = nf_inq_varid(nf_fid,'tpsigt',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tpsigt'
+        endif
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               tsigti(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tpsigt'
         endif
 
-C
-C       Read numSigW      "Number of Significant Levels wrt W"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'numSigW',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var numSigW'
+c
+c       read tdsigt       "dewpoint - significant level wrt t"
+c
+        nf_status = nf_inq_varid(nf_fid,'tdsigt',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tdsigt'
         endif
-        nf_status = NF_GET_VAR1_INT(nf_fid,nf_vid,index_1,numSigW(nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var numSigW'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               tdsigti(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var tdsigt'
         endif
 
-!       Read in htSigW, wdSigW and wsSigW
-        count(1) = numSigW(nObs)
-C
-C       Read htSigW       "Geopotential - Significant level wrt W"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'htSigW',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var htSigW'
+c
+c       read numsigw      "number of significant levels wrt w"
+c
+        nf_status = nf_inq_varid(nf_fid,'numsigw',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var numsigw'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               htSigWI(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var htSigW'
+        nf_status = nf_get_var1_int(nf_fid,nf_vid,index_1,numsigw(nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var numsigw'
         endif
-C
-C       Read wdSigW       "Wind Direction - Significant level wrt W"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wdSigW',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wdSigW'
+
+!       read in htsigw, wdsigw and wssigw
+        count(1) = numsigw(nobs)
+c
+c       read htsigw       "geopotential - significant level wrt w"
+c
+        nf_status = nf_inq_varid(nf_fid,'htsigw',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var htsigw'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               wdSigWI(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wdSigW'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               htsigwi(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var htsigw'
         endif
-C
-C       Read wsSigW       "Wind Speed - Significant level wrt W"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wsSigW',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wsSigW'
+c
+c       read wdsigw       "wind direction - significant level wrt w"
+c
+        nf_status = nf_inq_varid(nf_fid,'wdsigw',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wdsigw'
         endif
-        nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,
-     1                               wsSigWI(1,nObs))
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status),'in var wsSigW'
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               wdsigwi(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wdsigw'
+        endif
+c
+c       read wssigw       "wind speed - significant level wrt w"
+c
+        nf_status = nf_inq_varid(nf_fid,'wssigw',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wssigw'
+        endif
+        nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,
+     1                               wssigwi(1,nobs))
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status),'in var wssigw'
         endif
 
 888     continue
       enddo
-      numRaob = nObs
-C
-C     Close netCDF file
-C
-      nf_status = NF_CLOSE(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_CLOSE ',filename
+      numraob = nobs
+c
+c     close netcdf file
+c
+      nf_status = nf_close(nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_close ',filename
       endif
 
-C     convert dewpoint depression to dewpoint
-      do i = 1, numRaob
-        do j = 1, numMan(i)
-          if ((tdMan(j,i) .ne. raob_missing_data) .and.
-     1        (tMan(j,i) .ne. raob_missing_data))
-     1      tdMan(j,i) = tMan(j,i) - tdMan(j,i)
+c     convert dewpoint depression to dewpoint
+      do i = 1, numraob
+        do j = 1, numman(i)
+          if ((tdman(j,i) .ne. raob_missing_data) .and.
+     1        (tman(j,i) .ne. raob_missing_data))
+     1      tdman(j,i) = tman(j,i) - tdman(j,i)
         enddo
  
-        do j = 1, numSigT(i)
-          if ((tdSigTI(j,i) .ne. raob_missing_data) .and.
-     1        (tSigTI(j,i) .ne. raob_missing_data))
-     1      tdSigTI(j,i) = tSigTI(j,i) - tdSigTI(j,i)
+        do j = 1, numsigt(i)
+          if ((tdsigti(j,i) .ne. raob_missing_data) .and.
+     1        (tsigti(j,i) .ne. raob_missing_data))
+     1      tdsigti(j,i) = tsigti(j,i) - tdsigti(j,i)
         enddo
       enddo
 
           
 
-C
-C     interleave Man obs into SigT and SigW obs
-C
-      call mingleManSig(maxM,maxT,maxW,maxRaob,numRaob,
+c
+c     interleave man obs into sigt and sigw obs
+c
+      call minglemansig(maxm,maxt,maxw,maxraob,numraob,
      1                  max_ht_m_proc, min_pres_mb_proc,
-     1                  numSigT,numSigW,numMan,typeW,typeT,
-     1                  htMan,prMan,tMan,tdMan,wsMan,wdMan,
-     1                  staElev,raob_missing_data, 
-     1                  prSigTI,tSigTI,tdSigTI,htSigWI,
-     1                  wsSigWI,wdSigWI,prSigT,tSigT,tdSigT,
-     1                  htSigT,htSigW,wsSigW,wdSigW,
+     1                  numsigt,numsigw,numman,typew,typet,
+     1                  htman,prman,tman,tdman,wsman,wdman,
+     1                  staelev,raob_missing_data, 
+     1                  prsigti,tsigti,tdsigti,htsigwi,
+     1                  wssigwi,wdsigwi,prsigt,tsigt,tdsigt,
+     1                  htsigt,htsigw,wssigw,wdsigw,
      1                  verif_missing_data,istatus)
 
       if (istatus .ne. 1) then
-        write(6,*) 'Error mingling Man and Sig obs '
+        write(6,*) 'error mingling man and sig obs '
         istatus = 0
       endif
 
       return
       end
 !1............................................................................
-      subroutine mingleManSig(maxM,maxT,maxW,maxRaob,numRaob,
+      subroutine minglemansig(maxm,maxt,maxw,maxraob,numraob,
      1                  max_ht_m_proc, min_pres_mb_proc,
-     1                  numSigT,numSigW,numMan,typeW,typeT,
-     1                  htMan,prMan,tMan,tdMan,wsMan,wdMan,
-     1                  staElev,raob_missing_data,
-     1                  prSigTI,tSigTI,tdSigTI,htSigWI,
-     1                  wsSigWI,wdSigWI,prSigT,tSigT,tdSigT,
-     1                  htSigT,htSigW,wsSigW,wdSigW,
+     1                  numsigt,numsigw,numman,typew,typet,
+     1                  htman,prman,tman,tdman,wsman,wdman,
+     1                  staelev,raob_missing_data,
+     1                  prsigti,tsigti,tdsigti,htsigwi,
+     1                  wssigwi,wdsigwi,prsigt,tsigt,tdsigt,
+     1                  htsigt,htsigw,wssigw,wdsigw,
      1                  verif_missing_data,istatus)
 
       implicit none
 
-      integer     maxM,maxT,maxW,maxRaob,numRaob,
-     1              numSigT(maxRaob),numSigW(maxRaob),
-     1              numMan(maxRaob)
+      integer     maxm,maxt,maxw,maxraob,numraob,
+     1              numsigt(maxraob),numsigw(maxraob),
+     1              numman(maxraob)
       real	    max_ht_m_proc, min_pres_mb_proc
-      character*1   typeW(maxW,maxRaob),typeT(maxT,maxRaob)
-      real        htMan(maxM,maxRaob), prMan(maxM,maxRaob),
-     1              tMan(maxM,maxRaob), tdMan(maxM,maxRaob),
-     1              wsMan(maxM,maxRaob), wdMan(maxM,maxRaob),
-     1              staElev(maxRaob), raob_missing_data,
-     1              prSigTI(maxT,maxRaob),tSigTI(maxT,maxRaob),
-     1              tdSigTI(maxT,maxRaob),
-     1              htSigWI(maxW,maxRaob),wdSigWI(maxW,maxRaob),
-     1              wsSigWI(maxW,maxRaob)
-      real        prSigT(maxT,maxRaob),tSigT(maxT,maxRaob),
-     1              tdSigT(maxT,maxRaob),
-     1              htSigT(maxT,maxRaob),
-     1              htSigW(maxW,maxRaob),wdSigW(maxW,maxRaob),
-     1              wsSigW(maxW,maxRaob), htSfc, prSfc,
+      character*1   typew(maxw,maxraob),typet(maxt,maxraob)
+      real        htman(maxm,maxraob), prman(maxm,maxraob),
+     1              tman(maxm,maxraob), tdman(maxm,maxraob),
+     1              wsman(maxm,maxraob), wdman(maxm,maxraob),
+     1              staelev(maxraob), raob_missing_data,
+     1              prsigti(maxt,maxraob),tsigti(maxt,maxraob),
+     1              tdsigti(maxt,maxraob),
+     1              htsigwi(maxw,maxraob),wdsigwi(maxw,maxraob),
+     1              wssigwi(maxw,maxraob)
+      real        prsigt(maxt,maxraob),tsigt(maxt,maxraob),
+     1              tdsigt(maxt,maxraob),
+     1              htsigt(maxt,maxraob),
+     1              htsigw(maxw,maxraob),wdsigw(maxw,maxraob),
+     1              wssigw(maxw,maxraob), htsfc, prsfc,
      1              verif_missing_data
       integer	    istatus
 
-      integer     mPtr, sPtr, jPtr, i, j
+      integer     mptr, sptr, jptr, i, j
 
-C     BEGIN
+c     begin
 
-C     loop through raobs to interleave Man with SigT and Man with SigW
-      do i = 1, numRaob
+c     loop through raobs to interleave man with sigt and man with sigw
+      do i = 1, numraob
 
-C       DEBUG  print out data
+c       debug  print out data
         if(.true.)then
 
-        write(6,*) 'Raob ',i
-        write(6,*) 'htMan, wsMan, wdMan'
-        do j = 1, numMan(i)
-          write(6,*) j,htMan(j,i),wsMan(j,i),wdMan(j,i)
+        write(6,*) 'raob ',i
+        write(6,*) 'htman, wsman, wdman'
+        do j = 1, numman(i)
+          write(6,*) j,htman(j,i),wsman(j,i),wdman(j,i)
         enddo
 
-        write(6,*) 'htSigWI, wsSigWI, wdSigWI'
-        do j = 1, numSigW(i)
-          write(6,*) j,htSigWI(j,i),wsSigWI(j,i),wdSigWI(j,i)
+        write(6,*) 'htsigwi, wssigwi, wdsigwi'
+        do j = 1, numsigw(i)
+          write(6,*) j,htsigwi(j,i),wssigwi(j,i),wdsigwi(j,i)
         enddo
 
-        write(6,*) 'prMan, tMan, tdMan'
-        do j = 1, numMan(i)
-          write(6,*) j,prMan(j,i),tMan(j,i),tdMan(j,i)
+        write(6,*) 'prman, tman, tdman'
+        do j = 1, numman(i)
+          write(6,*) j,prman(j,i),tman(j,i),tdman(j,i)
         enddo
 
-        write(6,*) 'prSigTI, tSigTI, tdSigTI'
-        do j = 1, numSigT(i)
-          write(6,*) j,prSigTI(j,i),tSigTI(j,i),tdSigTI(j,i)
+        write(6,*) 'prsigti, tsigti, tdsigti'
+        do j = 1, numsigt(i)
+          write(6,*) j,prsigti(j,i),tsigti(j,i),tdsigti(j,i)
         enddo
         write(6,*)
 
         endif
 
-C       get surface ht and pr setup
-        jPtr = 1
-        mPtr = 1
-        sPtr = 1
+c       get surface ht and pr setup
+        jptr = 1
+        mptr = 1
+        sptr = 1
 
-C       see if first level of Man is missing
-        if (htMan(1,i) .eq. raob_missing_data) then  !see if it's in htSigW
-          if ((htSigWI(1,i) .eq. raob_missing_data) .or.
-     1        ((htSigWI(1,i) .eq. 0.0) .and.
-     1         (wsSigWI(1,i) .eq. raob_missing_data) .and.
-     1         (wdSigWI(1,i) .eq. raob_missing_data))) then  !skip surface level
-            htSfc = raob_missing_data 
-            mPtr = 2
-            sPtr = 2
+c       see if first level of man is missing
+        if (htman(1,i) .eq. raob_missing_data) then  !see if it's in htsigw
+          if ((htsigwi(1,i) .eq. raob_missing_data) .or.
+     1        ((htsigwi(1,i) .eq. 0.0) .and.
+     1         (wssigwi(1,i) .eq. raob_missing_data) .and.
+     1         (wdsigwi(1,i) .eq. raob_missing_data))) then  !skip surface level
+            htsfc = raob_missing_data 
+            mptr = 2
+            sptr = 2
           else
-            htSfc = htSigWI(1,i)
-            htSigW(jPtr,i) = htSigWI(sPtr,i)
-            wsSigW(jPtr,i) = wsSigWI(sPtr,i)
-            wdSigW(jPtr,i) = wdSigWI(sPtr,i)
-            typeW(jPtr,i) = 'W'
-            mPtr = mPtr + 1  !skip sfc in Man
-            sPtr = sPtr + 1
-            jPtr = jPtr + 1
+            htsfc = htsigwi(1,i)
+            htsigw(jptr,i) = htsigwi(sptr,i)
+            wssigw(jptr,i) = wssigwi(sptr,i)
+            wdsigw(jptr,i) = wdsigwi(sptr,i)
+            typew(jptr,i) = 'w'
+            mptr = mptr + 1  !skip sfc in man
+            sptr = sptr + 1
+            jptr = jptr + 1
           endif
         else
-          htSfc = htMan(1,i)
-          htSigW(jPtr,i) = htMan(mPtr,i)
-          wsSigW(jPtr,i) = wsMan(mPtr,i)
-          wdSigW(jPtr,i) = wdMan(mPtr,i)
-          typeW(jPtr,i) = 'M'
-          mPtr = mPtr + 1
-          sPtr = sPtr + 1  !skip sfc in sigW
-          jPtr = jPtr + 1
+          htsfc = htman(1,i)
+          htsigw(jptr,i) = htman(mptr,i)
+          wssigw(jptr,i) = wsman(mptr,i)
+          wdsigw(jptr,i) = wdman(mptr,i)
+          typew(jptr,i) = 'm'
+          mptr = mptr + 1
+          sptr = sptr + 1  !skip sfc in sigw
+          jptr = jptr + 1
         endif
 
-C       set mPtr and sPtr so ht .gt. htSfc 
-        do while ((mPtr .le. numMan(i)) .and.
-     1            (htMan(mPtr,i) .le. htSfc))
-          mPtr = mPtr + 1
+c       set mptr and sptr so ht .gt. htsfc 
+        do while ((mptr .le. numman(i)) .and.
+     1            (htman(mptr,i) .le. htsfc))
+          mptr = mptr + 1
         enddo
-        do while ((sPtr .le. numSigW(i)) .and.
-     1            (htSigWI(sPtr,i) .le. htSfc))
-          sPtr = sPtr + 1
+        do while ((sptr .le. numsigw(i)) .and.
+     1            (htsigwi(sptr,i) .le. htsfc))
+          sptr = sptr + 1
         enddo
 
-C       mingle Man with SigW - Go until SigW levels exhausted
-        do while (sPtr .le. numSigW(i))  
+c       mingle man with sigw - go until sigw levels exhausted
+        do while (sptr .le. numsigw(i))  
 
-C         make sure mPtr is past any missing htMan
-          do while ((mPtr .le. numMan(i)) .and.
-     1          ((htMan(mPtr,i) .gt. max_ht_m_proc)
-     1      .or. (htMan(mPtr,i) .eq. raob_missing_data)
-     1      .or. (wsMan(mPtr,i) .eq. raob_missing_data) 
-     1      .or. (wdMan(mPtr,i) .eq. raob_missing_data)))
-            mPtr = mPtr + 1
+c         make sure mptr is past any missing htman
+          do while ((mptr .le. numman(i)) .and.
+     1          ((htman(mptr,i) .gt. max_ht_m_proc)
+     1      .or. (htman(mptr,i) .eq. raob_missing_data)
+     1      .or. (wsman(mptr,i) .eq. raob_missing_data) 
+     1      .or. (wdman(mptr,i) .eq. raob_missing_data)))
+            mptr = mptr + 1
           enddo
        
-C         make sure sPtr is past any missing htSigW
-          do while ((sPtr .le. numSigW(i)) .and.
-     1          ((htSigWI(sPtr,i) .gt. max_ht_m_proc)
-     1      .or. (htSigWI(sPtr,i) .eq. raob_missing_data)
-     1      .or. (wsSigWI(mPtr,i) .eq. raob_missing_data) 
-     1      .or. (wdSigWI(mPtr,i) .eq. raob_missing_data)))
-            sPtr = sPtr + 1
+c         make sure sptr is past any missing htsigw
+          do while ((sptr .le. numsigw(i)) .and.
+     1          ((htsigwi(sptr,i) .gt. max_ht_m_proc)
+     1      .or. (htsigwi(sptr,i) .eq. raob_missing_data)
+     1      .or. (wssigwi(mptr,i) .eq. raob_missing_data) 
+     1      .or. (wdsigwi(mptr,i) .eq. raob_missing_data)))
+            sptr = sptr + 1
           enddo
 
-          if (sPtr .gt. numSigW(i)) goto 777  !no sigW obs to mingle
+          if (sptr .gt. numsigw(i)) goto 777  !no sigw obs to mingle
        
-          if (mPtr .le. numMan(i)) then
-            if (htSigWI(sPtr,i) .lt. htMan(mPtr,i)) then
-              htSigW(jPtr,i) = htSigWI(sPtr,i)
-              wsSigW(jPtr,i) = wsSigWI(sPtr,i)
-              wdSigW(jPtr,i) = wdSigWI(sPtr,i)
-              typeW(jPtr,i) = 'W'
-              sPtr = sPtr + 1
-              jPtr = jPtr + 1
+          if (mptr .le. numman(i)) then
+            if (htsigwi(sptr,i) .lt. htman(mptr,i)) then
+              htsigw(jptr,i) = htsigwi(sptr,i)
+              wssigw(jptr,i) = wssigwi(sptr,i)
+              wdsigw(jptr,i) = wdsigwi(sptr,i)
+              typew(jptr,i) = 'w'
+              sptr = sptr + 1
+              jptr = jptr + 1
             else 
-              if (htMan(mPtr,i) .lt. htSigWI(sPtr,i)) then
-                htSigW(jPtr,i) = htMan(mPtr,i)
-                wsSigW(jPtr,i) = wsMan(mPtr,i)
-                wdSigW(jPtr,i) = wdMan(mPtr,i)
-                typeW(jPtr,i) = 'M'
-                mPtr = mPtr + 1
-                jPtr = jPtr + 1
+              if (htman(mptr,i) .lt. htsigwi(sptr,i)) then
+                htsigw(jptr,i) = htman(mptr,i)
+                wssigw(jptr,i) = wsman(mptr,i)
+                wdsigw(jptr,i) = wdman(mptr,i)
+                typew(jptr,i) = 'm'
+                mptr = mptr + 1
+                jptr = jptr + 1
               else
-                if (htMan(mPtr,i) .eq. htSigWI(sPtr,i)) then
-                  htSigW(jPtr,i) = htMan(mPtr,i)
-                  wsSigW(jPtr,i) = wsMan(mPtr,i)
-                  wdSigW(jPtr,i) = wdMan(mPtr,i)
-                  typeW(jPtr,i) = 'M'
-                  mPtr = mPtr + 1
-                  sPtr = sPtr + 1
-                  jPtr = jPtr + 1
+                if (htman(mptr,i) .eq. htsigwi(sptr,i)) then
+                  htsigw(jptr,i) = htman(mptr,i)
+                  wssigw(jptr,i) = wsman(mptr,i)
+                  wdsigw(jptr,i) = wdman(mptr,i)
+                  typew(jptr,i) = 'm'
+                  mptr = mptr + 1
+                  sptr = sptr + 1
+                  jptr = jptr + 1
                 endif
               endif
             endif
           else
-            if (htSigW(jPtr,i) .le. max_ht_m_proc) then
-              htSigW(jPtr,i) = htSigWI(sPtr,i)
-              wsSigW(jPtr,i) = wsSigWI(sPtr,i)
-              wdSigW(jPtr,i) = wdSigWI(sPtr,i)
-              typeW(jPtr,i) = 'W'
-              sPtr = sPtr + 1
-              jPtr = jPtr + 1
+            if (htsigw(jptr,i) .le. max_ht_m_proc) then
+              htsigw(jptr,i) = htsigwi(sptr,i)
+              wssigw(jptr,i) = wssigwi(sptr,i)
+              wdsigw(jptr,i) = wdsigwi(sptr,i)
+              typew(jptr,i) = 'w'
+              sptr = sptr + 1
+              jptr = jptr + 1
             endif
           endif
 
@@ -802,169 +802,169 @@ C         make sure sPtr is past any missing htSigW
 
         enddo
 
-C       Finish rest of man if any are left
-        do while (mPtr .le. numMan(i)) 
-          if ((htMan(mPtr,i) .ne. raob_missing_data) 
-     1      .and. (htMan(mPtr,i) .le. max_ht_m_proc) 
-     1      .and. (wsMan(mPtr,i) .ne. raob_missing_data) 
-     1      .and. (wdMan(mPtr,i) .ne. raob_missing_data))
+c       finish rest of man if any are left
+        do while (mptr .le. numman(i)) 
+          if ((htman(mptr,i) .ne. raob_missing_data) 
+     1      .and. (htman(mptr,i) .le. max_ht_m_proc) 
+     1      .and. (wsman(mptr,i) .ne. raob_missing_data) 
+     1      .and. (wdman(mptr,i) .ne. raob_missing_data))
      1      then
-            htSigW(jPtr,i) = htMan(mPtr,i)
-            wsSigW(jPtr,i) = wsMan(mPtr,i)
-            wdSigW(jPtr,i) = wdMan(mPtr,i)
-            typeW(jPtr,i) = 'M'
-            jPtr = jPtr + 1
+            htsigw(jptr,i) = htman(mptr,i)
+            wssigw(jptr,i) = wsman(mptr,i)
+            wdsigw(jptr,i) = wdman(mptr,i)
+            typew(jptr,i) = 'm'
+            jptr = jptr + 1
           endif
-          mPtr = mPtr + 1
+          mptr = mptr + 1
         enddo
 
-C       set numSigW to mingled value
-        numSigW(i) = jPtr - 1
+c       set numsigw to mingled value
+        numsigw(i) = jptr - 1
 
-        write(6,*) numSigW(i)
-        write(6,*) 'htSigW, typeW, wsSigW, wdSigW '        
-        do j = 1, numSigW(i)
-          write(6,*) j, htSigW(j,i), typeW(j,i), wsSigW(j,i), 
-     1               wdSigW(j,i)         
+        write(6,*) numsigw(i)
+        write(6,*) 'htsigw, typew, wssigw, wdsigw '        
+        do j = 1, numsigw(i)
+          write(6,*) j, htsigw(j,i), typew(j,i), wssigw(j,i), 
+     1               wdsigw(j,i)         
         enddo
 
-C       mingle Man with SigT
-C       get surface pr setup
-        jPtr = 1
-        mPtr = 1
-        sPtr = 1
+c       mingle man with sigt
+c       get surface pr setup
+        jptr = 1
+        mptr = 1
+        sptr = 1
 
-C       see if first level of Man is missing
-        if (prMan(1,i) .eq. raob_missing_data) then  !see if it's in prSigT
-          if ((prSigTI(1,i) .eq. raob_missing_data) .or.
-     1        (tSigTI(1,i) .eq. raob_missing_data))then  !skip surface level
-            prSfc = raob_missing_data 
-            mPtr = 2
-            sPtr = 2
+c       see if first level of man is missing
+        if (prman(1,i) .eq. raob_missing_data) then  !see if it's in prsigt
+          if ((prsigti(1,i) .eq. raob_missing_data) .or.
+     1        (tsigti(1,i) .eq. raob_missing_data))then  !skip surface level
+            prsfc = raob_missing_data 
+            mptr = 2
+            sptr = 2
           else
-            prSfc = prSigTI(1,i)
-            prSigT(jPtr,i) = prSigTI(sPtr,i)
-            tSigT(jPtr,i) = tSigTI(sPtr,i)
-            tdSigT(jPtr,i) = tdSigTI(sPtr,i)
-            htSigT(jPtr,i) = verif_missing_data
-            typeT(jPtr,i) = 'T'
-            mPtr = mPtr + 1  !skip sfc in Man
-            sPtr = sPtr + 1
-            jPtr = jPtr + 1
+            prsfc = prsigti(1,i)
+            prsigt(jptr,i) = prsigti(sptr,i)
+            tsigt(jptr,i) = tsigti(sptr,i)
+            tdsigt(jptr,i) = tdsigti(sptr,i)
+            htsigt(jptr,i) = verif_missing_data
+            typet(jptr,i) = 't'
+            mptr = mptr + 1  !skip sfc in man
+            sptr = sptr + 1
+            jptr = jptr + 1
           endif
         else
-          prSfc = prMan(1,i)
-          prSigT(jPtr,i) = prMan(mPtr,i)
-          tSigT(jPtr,i) = tMan(mPtr,i)
-          tdSigT(jPtr,i) = tdMan(mPtr,i)
-          htSigT(jPtr,i) = htMan(mPtr,i)
-          typeT(jPtr,i) = 'M'
-          mPtr = mPtr + 1
-          sPtr = sPtr + 1  !skip sfc in sigT
-          jPtr = jPtr + 1
+          prsfc = prman(1,i)
+          prsigt(jptr,i) = prman(mptr,i)
+          tsigt(jptr,i) = tman(mptr,i)
+          tdsigt(jptr,i) = tdman(mptr,i)
+          htsigt(jptr,i) = htman(mptr,i)
+          typet(jptr,i) = 'm'
+          mptr = mptr + 1
+          sptr = sptr + 1  !skip sfc in sigt
+          jptr = jptr + 1
         endif
 
-C       set mPtr and sPtr so pr .lt. prSfc
-        do while ((mPtr .le. numMan(i)) .and.
-     1            (prMan(mPtr,i) .ge. prSfc))
-          mPtr = mPtr + 1
+c       set mptr and sptr so pr .lt. prsfc
+        do while ((mptr .le. numman(i)) .and.
+     1            (prman(mptr,i) .ge. prsfc))
+          mptr = mptr + 1
         enddo
-        do while ((sPtr .le. numSigT(i)) .and.
-     1            (prSigTI(sPtr,i) .ge. prSfc))
-          sPtr = sPtr + 1
+        do while ((sptr .le. numsigt(i)) .and.
+     1            (prsigti(sptr,i) .ge. prsfc))
+          sptr = sptr + 1
         enddo
 
-C       mingle Man with SigT - Go until SigT levels exhausted
-        do while (sPtr .le. numSigT(i))  
+c       mingle man with sigt - go until sigt levels exhausted
+        do while (sptr .le. numsigt(i))  
 
-C         make sure mPtr is past any missing prMan
-          do while ((mPtr .le. numMan(i)) .and.
-     1          ((prMan(mPtr,i) .lt. min_pres_mb_proc)
-     1      .or. (prMan(mPtr,i) .eq. raob_missing_data)
-     1      .or. (tMan(mPtr,i) .eq. raob_missing_data)))
-            mPtr = mPtr + 1
+c         make sure mptr is past any missing prman
+          do while ((mptr .le. numman(i)) .and.
+     1          ((prman(mptr,i) .lt. min_pres_mb_proc)
+     1      .or. (prman(mptr,i) .eq. raob_missing_data)
+     1      .or. (tman(mptr,i) .eq. raob_missing_data)))
+            mptr = mptr + 1
           enddo
        
-C         make sure sPtr is past any missing prSigT
-          do while ((sPtr .le. numSigT(i)) .and.
-     1         ((prSigTI(sPtr,i) .lt. min_pres_mb_proc)
-     1      .or.(prSigTI(sPtr,i) .eq. raob_missing_data)
-     1      .or.(tSigTI(mPtr,i) .eq. raob_missing_data)))
-            sPtr = sPtr + 1
+c         make sure sptr is past any missing prsigt
+          do while ((sptr .le. numsigt(i)) .and.
+     1         ((prsigti(sptr,i) .lt. min_pres_mb_proc)
+     1      .or.(prsigti(sptr,i) .eq. raob_missing_data)
+     1      .or.(tsigti(mptr,i) .eq. raob_missing_data)))
+            sptr = sptr + 1
           enddo
 
-          if (sPtr .gt. numSigT(i)) goto 778
+          if (sptr .gt. numsigt(i)) goto 778
 
-          if (mPtr .le. numMan(i)) then
-            if (prSigTI(sPtr,i) .gt. prMan(mPtr,i)) then
-              prSigT(jPtr,i) = prSigTI(sPtr,i)
-              tSigT(jPtr,i) = tSigTI(sPtr,i)
-              tdSigT(jPtr,i) = tdSigTI(sPtr,i)
-              htSigT(jPtr,i) = verif_missing_data
-              typeT(jPtr,i) = 'T'
-              sPtr = sPtr + 1
-              jPtr = jPtr + 1
+          if (mptr .le. numman(i)) then
+            if (prsigti(sptr,i) .gt. prman(mptr,i)) then
+              prsigt(jptr,i) = prsigti(sptr,i)
+              tsigt(jptr,i) = tsigti(sptr,i)
+              tdsigt(jptr,i) = tdsigti(sptr,i)
+              htsigt(jptr,i) = verif_missing_data
+              typet(jptr,i) = 't'
+              sptr = sptr + 1
+              jptr = jptr + 1
             else 
-              if (prMan(mPtr,i) .gt. prSigTI(sPtr,i)) then
-                prSigT(jPtr,i) = prMan(mPtr,i)
-                tSigT(jPtr,i) = tMan(mPtr,i)
-                tdSigT(jPtr,i) = tdMan(mPtr,i)
-                htSigT(jPtr,i) = htMan(mPtr,i)
-                typeT(jPtr,i) = 'M'
-                mPtr = mPtr + 1
-                jPtr = jPtr + 1
+              if (prman(mptr,i) .gt. prsigti(sptr,i)) then
+                prsigt(jptr,i) = prman(mptr,i)
+                tsigt(jptr,i) = tman(mptr,i)
+                tdsigt(jptr,i) = tdman(mptr,i)
+                htsigt(jptr,i) = htman(mptr,i)
+                typet(jptr,i) = 'm'
+                mptr = mptr + 1
+                jptr = jptr + 1
               else
-                if (prMan(mPtr,i) .eq. prSigTI(sPtr,i)) then
-                  prSigT(jPtr,i) = prMan(mPtr,i)
-                  tSigT(jPtr,i) = tMan(mPtr,i)
-                  tdSigT(jPtr,i) = tdMan(mPtr,i)
-                  htSigT(jPtr,i) = htMan(mPtr,i)
-                  typeT(jPtr,i) = 'M'
-                  mPtr = mPtr + 1
-                  sPtr = sPtr + 1
-                  jPtr = jPtr + 1
+                if (prman(mptr,i) .eq. prsigti(sptr,i)) then
+                  prsigt(jptr,i) = prman(mptr,i)
+                  tsigt(jptr,i) = tman(mptr,i)
+                  tdsigt(jptr,i) = tdman(mptr,i)
+                  htsigt(jptr,i) = htman(mptr,i)
+                  typet(jptr,i) = 'm'
+                  mptr = mptr + 1
+                  sptr = sptr + 1
+                  jptr = jptr + 1
                 endif
               endif
             endif
           else
-            prSigT(jPtr,i) = prSigTI(sPtr,i)
-            tSigT(jPtr,i) = tSigTI(sPtr,i)
-            tdSigT(jPtr,i) = tdSigTI(sPtr,i)
-            htSigT(jPtr,i) = verif_missing_data
-            typeT(jPtr,i) = 'T'
-            sPtr = sPtr + 1
-            jPtr = jPtr + 1
+            prsigt(jptr,i) = prsigti(sptr,i)
+            tsigt(jptr,i) = tsigti(sptr,i)
+            tdsigt(jptr,i) = tdsigti(sptr,i)
+            htsigt(jptr,i) = verif_missing_data
+            typet(jptr,i) = 't'
+            sptr = sptr + 1
+            jptr = jptr + 1
           endif
 
 778       continue
 
         enddo
 
-C       Finish rest of man if any are left
-        if (mPtr .le. numMan(i)) then
-          do while (mPtr .le. numMan(i)) 
-            if ((prMan(mPtr,i) .ne. raob_missing_data).and. 
-     1          (tMan(mPtr,i) .ne. raob_missing_data)) then
-              prSigT(jPtr,i) = prMan(mPtr,i)
-              tSigT(jPtr,i) = tMan(mPtr,i)
-              tdSigT(jPtr,i) = tdMan(mPtr,i)
-              htSigT(jPtr,i) = htMan(mPtr,i)
-              typeT(jPtr,i) = 'M'
-              jPtr = jPtr + 1
+c       finish rest of man if any are left
+        if (mptr .le. numman(i)) then
+          do while (mptr .le. numman(i)) 
+            if ((prman(mptr,i) .ne. raob_missing_data).and. 
+     1          (tman(mptr,i) .ne. raob_missing_data)) then
+              prsigt(jptr,i) = prman(mptr,i)
+              tsigt(jptr,i) = tman(mptr,i)
+              tdsigt(jptr,i) = tdman(mptr,i)
+              htsigt(jptr,i) = htman(mptr,i)
+              typet(jptr,i) = 'm'
+              jptr = jptr + 1
             endif
-            mPtr = mPtr + 1
+            mptr = mptr + 1
           enddo
         endif
 
-C       set numSigT to mingled value
-        numSigT(i) = jPtr - 1
+c       set numsigt to mingled value
+        numsigt(i) = jptr - 1
 
-        write(6,*) 'Raob ',i,' after mingle'
-        write(6,*) numSigT(i)
-        write(6,*) 'prSigT, typeT tSigT, tdSigT htSigT'        
-        do j = 1, numSigT(i)
-          write(6,*) j,prSigT(j,i),typeT(j,i),tSigT(j,i), 
-     1               tdSigT(j,i), htSigT(j,i) 
+        write(6,*) 'raob ',i,' after mingle'
+        write(6,*) numsigt(i)
+        write(6,*) 'prsigt, typet tsigt, tdsigt htsigt'        
+        do j = 1, numsigt(i)
+          write(6,*) j,prsigt(j,i),typet(j,i),tsigt(j,i), 
+     1               tdsigt(j,i), htsigt(j,i) 
         enddo
 
       enddo
@@ -1005,7 +1005,7 @@ C       set numSigT to mingled value
         west  = west  - r_buffer
 
        write(6,101)north,south,east,west
-101     format(1x,' Box around LAPS grid - NSEW ',4f9.2)
+101     format(1x,' box around laps grid - nsew ',4f9.2)
 
        return
        end

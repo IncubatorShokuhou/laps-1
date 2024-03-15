@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -33,31 +33,31 @@ cdis
         subroutine latlon_db_rlapsgrid(rlat,rlon,lat,lon,ni,nj,ri,rj
      1                                ,istatus)
 
-!       1991            Steve Albers
-!       1994            Steve Albers - partially added lambert option
-!       1997            Steve Albers - Added both kinds of lambert projections
+!       1991            steve albers
+!       1994            steve albers - partially added lambert option
+!       1997            steve albers - added both kinds of lambert projections
 !                                    - as well as mercator projection
-!       1997            Steve Albers - Added local stereographic
-!       2002            Dan Birkenheuer - added input test for valid lats
+!       1997            steve albers - added local stereographic
+!       2002            dan birkenheuer - added input test for valid lats
 
-cdoc    This routine assumes a polar stereographic, lambert conformal,
+cdoc    this routine assumes a polar stereographic, lambert conformal,
 cdoc    or mercator projection.
 cdoc
-cdoc    Values returned are on the LAPS grid where I ranges from 1,ni and
-cdoc    J ranges from 1,nj. Istatus is set to 1 if a valid I,J was determined
-cdoc    to be in the LAPS domain, except that a buffer of 0.5 grid points 
-cdoc    around the perimenter is allowed. If the point is farther outside
-cdoc    the domain, values of I,J will still be returned, while istatus is set
-cdoc    to 0. I increased from grid west to grid east, and J increases from
+cdoc    values returned are on the laps grid where i ranges from 1,ni and
+cdoc    j ranges from 1,nj. istatus is set to 1 if a valid i,j was determined
+cdoc    to be in the laps domain, except that a buffer of 0.5 grid points 
+cdoc    around the perimenter is allowed. if the point is farther outside
+cdoc    the domain, values of i,j will still be returned, while istatus is set
+cdoc    to 0. i increased from grid west to grid east, and j increases from
 cdoc    grid south to grid north.
         implicit real*8 (a-h,o-z)
 
-        real*8 rlat                         ! Input Lat
-        real*8 rlon                         ! Input Lon
-        real*8 lat(ni,nj),lon(ni,nj)        ! Input (Arrays of LAT/LON)
-        integer ni,nj                       ! Input (LAPS Dimensions)
-        real*8 ri,rj                        ! Output (I,J on LAPS Grid)
-        integer istatus                     ! Input / Output
+        real*8 rlat                         ! input lat
+        real*8 rlon                         ! input lon
+        real*8 lat(ni,nj),lon(ni,nj)        ! input (arrays of lat/lon)
+        integer ni,nj                       ! input (laps dimensions)
+        real*8 ri,rj                        ! output (i,j on laps grid)
+        integer istatus                     ! input / output
 
         save init,umin,umax,vmin,vmax,niprev,njprev
         data init/0/, niprev/0/, njprev/0/
@@ -77,7 +77,7 @@ cdoc    grid south to grid north.
             call latlon_db_uv(lat(ni,nj),lon(ni,nj),umax,vmax,istatus)
 
             write(6,101)umin,umax,vmin,vmax
-101         format(1x,' Initializing latlon_db_rlapsgrid',4f10.5)
+101         format(1x,' initializing latlon_db_rlapsgrid',4f10.5)
             init = nest
             niprev = ni
             njprev = nj
@@ -89,20 +89,20 @@ cdoc    grid south to grid north.
         u0 = umin - uscale
         v0 = vmin - vscale
 
-!       Compute ulaps and vlaps
+!       compute ulaps and vlaps
 
         call latlon_db_uv(rlat,rlon,ulaps,vlaps,istatus)
 
         if(umax .le. umin .or. vmax .le. vmin)then
             write(6,*)
-     1      ' SEVERE ERROR: uvminmax are off in latlon_db_rlapsgrid'
+     1      ' severe error: uvminmax are off in latlon_db_rlapsgrid'
             write(6,*)umin,umax,vmin,vmax
             stop
         endif
 
         if(uscale .eq. 0d0 .or. vscale .eq. 0d0)then
             write(6,*)
-     1        ' SEVERE ERROR: (u|v)scale = 0 in latlon_db_rlapsgrid'
+     1        ' severe error: (u|v)scale = 0 in latlon_db_rlapsgrid'
             write(6,*)lat(1,1),lon(1,1),lat(1,1),lon(ni,nj)
             write(6,*)umin,umax,vmin,vmax
             stop
@@ -111,7 +111,7 @@ cdoc    grid south to grid north.
             rj = (vlaps - v0) / vscale
         endif
 
-!       Set status if location of point rounded off is on the LAPS grid
+!       set status if location of point rounded off is on the laps grid
         if(nint(ri) .ge. 1 .and. nint(ri) .le. ni .and.
      1     nint(rj) .ge. 1 .and. nint(rj) .le. nj         )then
             istatus = 1
@@ -125,19 +125,19 @@ cdoc    grid south to grid north.
         subroutine rlapsgrid_db_latlon(ri,rj,lat,lon,ni,nj,rlat,rlon
      1                                ,istatus)
 
-!       1997            Steve Albers 
+!       1997            steve albers 
 
-cdoc    This routine assumes a polar stereographic, lambert conformal,
+cdoc    this routine assumes a polar stereographic, lambert conformal,
 cdoc    or mercator projection.
 
         implicit real*8 (a-h,o-z)
 
-        real*8 ri,rj                        ! Input (I,J on LAPS Grid)
-        real*8 lat(ni,nj),lon(ni,nj)        ! Input (Arrays of LAT/LON)
-        integer ni,nj                       ! Input (LAPS Dimensions)
-        real*8 rlat                         ! Output Lat
-        real*8 rlon                         ! Output Lon
-        integer istatus                     ! Output
+        real*8 ri,rj                        ! input (i,j on laps grid)
+        real*8 lat(ni,nj),lon(ni,nj)        ! input (arrays of lat/lon)
+        integer ni,nj                       ! input (laps dimensions)
+        real*8 rlat                         ! output lat
+        real*8 rlon                         ! output lon
+        integer istatus                     ! output
 
         save init,umin,umax,vmin,vmax
         data init/0/
@@ -149,7 +149,7 @@ cdoc    or mercator projection.
             call latlon_db_uv(lat(ni,nj),lon(ni,nj),umax,vmax,istatus)
 
             write(6,101)umin,umax,vmin,vmax
-101         format(1x,' Initializing rlapsgrid_db_latlon',4f10.5)
+101         format(1x,' initializing rlapsgrid_db_latlon',4f10.5)
             init = nest 
         endif
 
@@ -159,7 +159,7 @@ cdoc    or mercator projection.
         u0 = umin - uscale
         v0 = vmin - vscale
 
-!       Compute lat,lon
+!       compute lat,lon
         ulaps = u0 + uscale * ri
         vlaps = v0 + vscale * rj
 
@@ -173,12 +173,12 @@ cdoc    or mercator projection.
         
         subroutine latlon_db_uv(rlat,rlon,u,v,istatus)
 
-!       1997            Steve Albers 
+!       1997            steve albers 
 
-cdoc    This routine assumes a polar stereographic, lambert conformal,
+cdoc    this routine assumes a polar stereographic, lambert conformal,
 cdoc    or mercator projection.
 
-        use mem_namelist, ONLY: c6_maproj
+        use mem_namelist, only: c6_maproj
      1                  ,slat1_r4=>standard_latitude
      1                  ,slat2_r4=>standard_latitude2
      1                  ,polat_r4=>standard_latitude2
@@ -200,7 +200,7 @@ cdoc    or mercator projection.
 
         elseif(c6_maproj .eq. 'lambrt')then ! lambert
             if(abs(slat2).eq.90d0 .and. slat2.ne.slat1)then
-               print*,'Error: lambert slat2 = 90.'
+               print*,'error: lambert slat2 = 90.'
                istatus=1
                return
             endif
@@ -213,7 +213,7 @@ c           slon = standard_longitude
         elseif(c6_maproj .eq. 'merctr')then ! mercator
             call get_grid_center(cenlat_dum,cenlon,istatus)
             if(istatus.ne.1)then
-               print*,'Error returned from get_grid_center'
+               print*,'error returned from get_grid_center'
                return
             endif
 c           slat1  = standard_latitude
@@ -224,14 +224,14 @@ c           cenlon = grid_cen_lon_cmn
         elseif(c6_maproj .eq. 'latlon')then ! latlon (cylindrical equidistant)
             call get_grid_center(cenlat_dum,cenlon,istatus)
             if(istatus.ne.1)then
-               print*,'Error returned from get_grid_center'
+               print*,'error returned from get_grid_center'
                return
             endif
 
             call latlon_db_uv_ll(rlat,rlon,cenlon,u,v)
 
         else
-            write(6,*)'ERROR in latlon_db_uv: unrecognized projection '
+            write(6,*)'error in latlon_db_uv: unrecognized projection '
      1                ,c6_maproj       
             stop
 
@@ -250,18 +250,18 @@ c           cenlon = grid_cen_lon_cmn
 
         real*8 dlat_in,dlon_in,dslat,dpolat,dslon,du,dv
 
-!       Convert to single precision input vars
+!       convert to single precision input vars
         rlat_in = dlat_in
         rlon_in = dlon_in
         slat = dslat
         polat = dpolat
         slon = dslon
 
-        if(abs(polat) .eq. 90.)then ! pole at N/S geographic pole
+        if(abs(polat) .eq. 90.)then ! pole at n/s geographic pole
             if(.true.)then
                 polon = slon
-                call GETOPS(rlat,rlon,rlat_in,rlon_in,polat,polon)
-                rlon = rlon - 270.  ! Counteract rotation done in GETOPS
+                call getops(rlat,rlon,rlat_in,rlon_in,polat,polon)
+                rlon = rlon - 270.  ! counteract rotation done in getops
 
             else ! .false. (older simple method)
                 rlat = rlat_in
@@ -274,7 +274,7 @@ c           cenlon = grid_cen_lon_cmn
 
         else                        ! local stereographic
             polon = slon
-            call GETOPS(rlat,rlon,rlat_in,rlon_in,polat,polon)
+            call getops(rlat,rlon,rlat_in,rlon_in,polat,polon)
             b = rlon - 270.         ! rlon has zero angle pointing east
                                     ! b has zero angle pointing south
             s = 1.0
@@ -282,13 +282,13 @@ c           cenlon = grid_cen_lon_cmn
         endif
 
         a=90.-rlat
-        r = tand(a/2.)      ! Consistent with Haltiner & Williams 1-21
+        r = tand(a/2.)      ! consistent with haltiner & williams 1-21
 
 !       b = angle measured counterclockwise from -v axis (zero angle south)
         u =   r * sind(b)
         v = (-r * cosd(b)) * s
 
-!       Convert to double precision output vars
+!       convert to double precision output vars
         du = u
         dv = v
 
@@ -303,8 +303,8 @@ c           cenlon = grid_cen_lon_cmn
 
         real*8 n
 
-!       Difference between two angles, result is between -180. and +180.
-        angdif(X,Y)=MOD(X-Y+540d0,360d0)-180d0
+!       difference between two angles, result is between -180. and +180.
+        angdif(x,y)=mod(x-y+540d0,360d0)-180d0
 
         call lambert_parms_db(slat1,slat2,n,s,rconst)
 
@@ -326,8 +326,8 @@ c           cenlon = grid_cen_lon_cmn
         parameter (pi=3.1415926535897932)
         parameter (rpd=pi/180.)
 
-!       Difference between two angles, result is between -180. and +180.
-        angdif(X,Y)=MOD(X-Y+540d0,360d0)-180d0
+!       difference between two angles, result is between -180. and +180.
+        angdif(x,y)=mod(x-y+540d0,360d0)-180d0
  
         a = 90d0-rlat
         b = cosd(slat)
@@ -349,8 +349,8 @@ c           cenlon = grid_cen_lon_cmn
         parameter (pi=3.1415926535897932d0)
         parameter (rpd=pi/180d0)
 
-!       Difference between two angles, result is between -180. and +180.
-        angdif(X,Y)=MOD(X-Y+540d0,360d0)-180d0
+!       difference between two angles, result is between -180. and +180.
+        angdif(x,y)=mod(x-y+540d0,360d0)-180d0
  
         u = angdif(rlon,cenlon) * rpd 
         v = rlat                * rpd
@@ -362,15 +362,15 @@ c           cenlon = grid_cen_lon_cmn
         
         subroutine uv_db_latlon(u,v,rlat,rlon,istatus)
 
-        use mem_namelist, ONLY: c6_maproj
+        use mem_namelist, only: c6_maproj
      1                  ,slat1_r4=>standard_latitude
      1                  ,slat2_r4=>standard_latitude2
      1                  ,polat_r4=>standard_latitude2
      1                  ,slon_r4=>standard_longitude
 
-!       1997            Steve Albers 
+!       1997            steve albers 
 
-!       This routine assumes a polar stereographic, lambert conformal,
+!       this routine assumes a polar stereographic, lambert conformal,
 !       or mercator projection.
 
         include 'trigd.inc'
@@ -401,7 +401,7 @@ c           slon = standard_longitude
         elseif(c6_maproj .eq. 'merctr')then ! mercator
             call get_grid_center(cenlat_dum,cenlon,istatus)
             if(istatus.ne.1)then
-               print*,'Error returned from get_grid_center'
+               print*,'error returned from get_grid_center'
                return
             endif
 c           slat1  = standard_latitude
@@ -412,14 +412,14 @@ c           cenlon = grid_cen_lon_cmn
         elseif(c6_maproj .eq. 'latlon')then ! latlon (cylindrical equidistant)
             call get_grid_center(cenlat_dum,cenlon,istatus)
             if(istatus.ne.1)then
-               print*,'Error returned from get_grid_center'
+               print*,'error returned from get_grid_center'
                return
             endif
 
             call uv_db_latlon_ll(u,v,cenlon,rlat,rlon)
 
         else
-            write(6,*)'ERROR in uv_db_latlon: unrecognized projection '
+            write(6,*)'error in uv_db_latlon: unrecognized projection '
      1                ,c6_maproj
             stop
 
@@ -452,20 +452,20 @@ c           cenlon = grid_cen_lon_cmn
             rlon=0d0
 
         else                           
-            a=2d0 * atand(r)               ! From Haltiner & Williams 1-21
+            a=2d0 * atand(r)               ! from haltiner & williams 1-21
             rlat=90d0 - a
             rlon = atan2d(s*v,u)
             rlon = rlon + 90d0
         endif
 
-        if(.true.)then ! Rotate considering where the projection pole is
+        if(.true.)then ! rotate considering where the projection pole is
             polon = slon
-!           This routine will rotate the longitude even if polat = +90.
+!           this routine will rotate the longitude even if polat = +90.
             flat = rlat
             flon = rlon
             fpolat = polat
             fpolon = polon
-            call PSTOGE(flat,flon,flat_out,flon_out,fpolat,fpolon)
+            call pstoge(flat,flon,flat_out,flon_out,fpolat,fpolon)
             rlat_out = flat_out
             rlon_out = flon_out
         else
@@ -474,7 +474,7 @@ c           cenlon = grid_cen_lon_cmn
         endif
 
 
-        rlon_out = mod(rlon_out+540d0,360d0) - 180d0 ! Convert to -180/+180 range
+        rlon_out = mod(rlon_out+540d0,360d0) - 180d0 ! convert to -180/+180 range
 
 
         return
@@ -497,7 +497,7 @@ c           cenlon = grid_cen_lon_cmn
         rlat = (90d0- 2d0*atand((-s*v/cosd(angle))**(1d0/n))) / s      
         rlon = slon + angle / n
 
-        rlon = mod(rlon+540d0,360d0) - 180d0       ! Convert to -180/+180 range
+        rlon = mod(rlon+540d0,360d0) - 180d0       ! convert to -180/+180 range
 
         return
         end
@@ -522,7 +522,7 @@ c           cenlon = grid_cen_lon_cmn
         endif
 
         rlon = u/b/rpd + cenlon
-        rlon = mod(rlon+540d0,360d0) - 180d0       ! Convert to -180/+180 range
+        rlon = mod(rlon+540d0,360d0) - 180d0       ! convert to -180/+180 range
 
         return
         end
@@ -539,7 +539,7 @@ c           cenlon = grid_cen_lon_cmn
         rlat = v/rpd
 
         rlon = u/rpd + cenlon
-        rlon = mod(rlon+540d0,360d0) - 180d0       ! Convert to -180/+180 range
+        rlon = mod(rlon+540d0,360d0) - 180d0       ! convert to -180/+180 range
 
         return
         end
@@ -552,11 +552,11 @@ c           cenlon = grid_cen_lon_cmn
 
       real*8 n,n_out
 
-!     We only have to do the calculations once since the inputs are constants
+!     we only have to do the calculations once since the inputs are constants
       data init/0/
       save init,n,s,rconst 
 
-      if(init .eq. 0)then ! Calculate saved variables
+      if(init .eq. 0)then ! calculate saved variables
           if(slat1 .ge. 0)then
               s = +1d0
           else

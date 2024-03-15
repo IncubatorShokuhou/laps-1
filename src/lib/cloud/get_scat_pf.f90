@@ -1,19 +1,19 @@
 
         subroutine get_scat_pf( &
-                elong_a,alt_a,aero_od_src,aero_od_obs,aero_ssa,aero_g      & ! I
-               ,r_cloud_rad,cloud_rad_w,cloud_od,cloud_od_sp,nsp           & ! I
-               ,cloud_od_sp_w                                              & ! I
-               ,emis_ang_a,airmass_2_topo,idebug_a,ni,nj                   & ! I
-               ,pf_scat,mtr_msa)                                             ! O
+                elong_a,alt_a,aero_od_src,aero_od_obs,aero_ssa,aero_g      & ! i
+               ,r_cloud_rad,cloud_rad_w,cloud_od,cloud_od_sp,nsp           & ! i
+               ,cloud_od_sp_w                                              & ! i
+               ,emis_ang_a,airmass_2_topo,idebug_a,ni,nj                   & ! i
+               ,pf_scat,mtr_msa)                                             ! o
 
 !       subroutine get_cld_pf(elong_a,alt_a,r_cloud_rad,cloud_rad_w,cloud_od,cloud_od_sp &
-!                            ,emis_ang_a,nsp,airmass_2_topo,idebug_a,ni,nj & ! I
-!                            ,pf_scat1,pf_scat2,pf_scat,pf_thk_a) ! O
+!                            ,emis_ang_a,nsp,airmass_2_topo,idebug_a,ni,nj & ! i
+!                            ,pf_scat1,pf_scat2,pf_scat,pf_thk_a) ! o
         include 'trigd.inc'
 
-        use mem_namelist, ONLY: aod_asy, fcterm
+        use mem_namelist, only: aod_asy, fcterm
 
-!       Statement functions
+!       statement functions
         trans(od) = exp(-min(od,80.))
         opac(od) = 1.0 - trans(od)
         alb(bt) = bt / (1.+bt)
@@ -42,7 +42,7 @@
              + arg3 * hg( .000      ,elgf) & ! isotropic
              + arg4 * hg(-.600      ,elgf)   ! backscat
 
-!       parameter (nsp=4) ! ERROR when passed into 'get_scat_pf'
+!       parameter (nsp=4) ! error when passed into 'get_scat_pf'
         
         real elong_a(ni,nj)
         real alt_a(ni,nj)
@@ -53,35 +53,35 @@
         real r_cloud_rad(ni,nj)       ! sun to cloud transmissivity (direct+fwd scat)
         real cloud_rad_w(ni,nj)       ! sun to cloud transmissivity (direct+fwd scat) * rad
 
-!       Meteors (mtr) are a composite of hydrometeors and lithometeors (aerosols)
-!       From ground the src OD is important near the sun and obs OD less so    
-!       From space  the src OD is important near the sun and obs OD less so    
-!       From ground the src & obs OD are both important far from the sun
-!       From space  the src & obs OD are both important far from the sun
-!       Aero ssa is presently applied in get_skyglow, add in 'get_cloud_pf'?   
-!       Aero msa is presently applied in get_cloud_rad, add only SSA in 'get_cloud_pf'?
+!       meteors (mtr) are a composite of hydrometeors and lithometeors (aerosols)
+!       from ground the src od is important near the sun and obs od less so    
+!       from space  the src od is important near the sun and obs od less so    
+!       from ground the src & obs od are both important far from the sun
+!       from space  the src & obs od are both important far from the sun
+!       aero ssa is presently applied in get_skyglow, add in 'get_cloud_pf'?   
+!       aero msa is presently applied in get_cloud_rad, add only ssa in 'get_cloud_pf'?
 
-!       Thin clouds
-!       High cloud rad, phase angle is driven by single scattering
+!       thin clouds
+!       high cloud rad, phase angle is driven by single scattering
 
-!       Thick clouds near the sun from ground
-!       Low cloud rad with src OD, phase function mostly from altitude
+!       thick clouds near the sun from ground
+!       low cloud rad with src od, phase function mostly from altitude
 
-!       Thick clouds near the sun from space
-!       High cloud rad with src OD, phase function relates to reflectance and ARF
-!            scatter order and MSA from obs OD
+!       thick clouds near the sun from space
+!       high cloud rad with src od, phase function relates to reflectance and arf
+!            scatter order and msa from obs od
 
-!       Thin aerosols
-!       High cloud rad, phase angle is driven by single scattering, corrected by SSA
-!            scatter order and MSA from obs OD
+!       thin aerosols
+!       high cloud rad, phase angle is driven by single scattering, corrected by ssa
+!            scatter order and msa from obs od
 
-!       Thick aerosols near the sun from ground
-!       Low cloud rad with src OD, phase function mostly from altitude, corrected by MSA
-!            scatter order and MSA from src OD (via cloud_rad)
+!       thick aerosols near the sun from ground
+!       low cloud rad with src od, phase function mostly from altitude, corrected by msa
+!            scatter order and msa from src od (via cloud_rad)
 
-!       Thick aerosols near the sun from space
-!       High cloud rad with src OD, phase function relates to reflectance and ARF, corrected by MSA
-!            scatter order and MSA from obs OD
+!       thick aerosols near the sun from space
+!       high cloud rad with src od, phase function relates to reflectance and arf, corrected by msa
+!            scatter order and msa from obs od
 
         real cloud_od_src_sp(ni,nj,nsp)
 !       real cloud_od_obs_sp(ni,nj,nsp) 
@@ -111,7 +111,7 @@
 
         logical l_pf_new /.true./
 
-!       Call to phase_func
+!       call to phase_func
         dimension v10(0:13,0:70)
         character*10 nm(0:13,0:70)
 
@@ -126,7 +126,7 @@
          do i = 1,ni
 
           do ic = 1,nc
-!           Composite meteor optical properties seen from observer
+!           composite meteor optical properties seen from observer
             mtr_od_obs(ic,i,j) = sum(cloud_od_sp(i,j,:)) + aero_od_obs(ic,i,j)
             mtr_ssa(ic,i,j) = (sum(cloud_od_sp(i,j,:) * cloud_ssa_sp(:)) + aero_od_obs(ic,i,j) * aero_ssa(ic,i,j)) / mtr_od_obs(ic,i,j)
             mtr_asy(ic,i,j) = (sum(cloud_od_sp(i,j,:) * cloud_asy_sp(:)) + aero_od_obs(ic,i,j) * aero_asy(ic,i,j)) / mtr_od_obs(ic,i,j)
@@ -134,7 +134,7 @@
             scatter_order = sqrt(1.0 + mtr_od_obs(ic,i,j)**2)
             mtr_msa(ic,i,j) = mtr_ssa(ic,i,j)**scatter_order
 
-!           Aerosol phase function
+!           aerosol phase function
             fb = aod_asy(3,ic)**scatter_order
             g1 = aod_asy(2,ic)**scatter_order
             g2 = aod_asy(1,ic)**scatter_order
@@ -152,20 +152,20 @@
           
 !         a substitute for cloud_rad could be arg2 = (cosd(alt))**3.
 
-!         Phase function that depends on degree of fwd scattering in cloud    
+!         phase function that depends on degree of fwd scattering in cloud    
 !         pwr controls angular extent of fwd scattering peak of a thin cloud
-!         General references: 
+!         general references: 
 !         http://www.uni-leipzig.de/~strahlen/web/research/de_index.php?goto=arctic
-!         http://www-evasion.imag.fr/Publications/2008/BNMBC08/clouds.pdf
-!         http://pubs.giss.nasa.gov/docs/1969/1969_Hansen_2.pdf
+!         http://www-evasion.imag.fr/publications/2008/bnmbc08/clouds.pdf
+!         http://pubs.giss.nasa.gov/docs/1969/1969_hansen_2.pdf
 !         http://rtweb.aer.com/rrtm_frame.html
-!         http://wiki.seas.harvard.edu/geos-chem/images/Guide_to_GCRT_Oct2013.pdf
+!         http://wiki.seas.harvard.edu/geos-chem/images/guide_to_gcrt_oct2013.pdf
 !         https://www.osapublishing.org/oe/abstract.cfm?uri=oe-23-9-11995
 
           cloud_od_cice = cloud_od_sp(i,j,2)
           cloud_od_rain = cloud_od_sp(i,j,3)
 
-!         Front weighted species factors
+!         front weighted species factors
           sumspw = sum(cloud_od_sp_w(i,j,:)) 
           if(sumspw .gt. 0.)then
              clwc_factor_w = cloud_od_sp_w(i,j,1) / sumspw
@@ -181,9 +181,9 @@
              aero_factor_w = 1. ! approximate
           endif
 
-!         Parameter for looking at normal face of a cloud is set to 1 if
+!         parameter for looking at normal face of a cloud is set to 1 if
 !         we're looking above the horizon, or below the horizon looking
-!         straight down. It is 0 if we're looking much below the horizon near
+!         straight down. it is 0 if we're looking much below the horizon near
 !         the limb.
           if(alt_a(i,j) .le. 0. .and. emis_ang_a(i,j) .gt. 0.)then
               frac_alt = sind(abs(alt_a(i,j)))
@@ -201,8 +201,8 @@
 
             bf = 0.06
 
-!           Check for being optically thin with direct light source
-!           Coefficient of 10. can be lower if needed
+!           check for being optically thin with direct light source
+!           coefficient of 10. can be lower if needed
             clwc_bin1 = exp(-(cloud_od_liq/10.)**2) ! optically thin
             clwc_albedo = (bf * cloud_od_liq) / (1. + (bf * cloud_od_liq))
             clwc_bin1 = clwc_bin1 * r_cloud_rad(i,j)**10. ! direct lighting
@@ -212,22 +212,22 @@
             clwc_bin1d = -0.08 ! opac(0.00*sco)     ! backscattering
             clwc_bin2 = 1.0 - clwc_bin1             ! optically thick 
 
-!           Derived using phase function of Venus (a thick cloud analog)
-!           Specifically the Venus phase angle magnitude corr
+!           derived using phase function of venus (a thick cloud analog)
+!           specifically the venus phase angle magnitude corr
             iplan = 3
             isat = 0
             phase_angle_d = 180. - elong_a(i,j)
             call phase_func(iplan,isat,phase_angle_d,phase_corr)       
             r_ill = (1. + cosd(phase_angle_d)) / 2.
 
-!           This is designed for 'clwc' though we can consider a similar one
+!           this is designed for 'clwc' though we can consider a similar one
 !           for 'cice'.            
-!           Set to 1 or 2 if we're at cloud base?
+!           set to 1 or 2 if we're at cloud base?
             pf_thk_hr = 1. * (1.94 / (10.**(phase_corr * 0.4))) / r_ill
             pf_thk_hr = min(pf_thk_hr,600.0) ! limit fwd scattering peak
 !           pf_thk_hr = min(pf_thk_hr,2.0)   ! limit fwd scattering peak
 
-!           Eventually sky average r_cloud_rad can help decide the regime for
+!           eventually sky average r_cloud_rad can help decide the regime for
 !           determination of pf_thk? 'scurve' is also available if needed.
 
 !           if(elong_a(i,j) .gt. 90.)then
@@ -290,7 +290,7 @@
 
           endif ! .true.
 
-!         Separate snow (+cice) phase function
+!         separate snow (+cice) phase function
           cloud_od_snow = cloud_od_sp(i,j,4) + cloud_od_sp(i,j,2)
           trans_nonsnow = trans(cloud_od(i,j) - cloud_od_snow)
           cloud_od_tot  = cloud_od(i,j)
@@ -306,12 +306,12 @@
           sco = max(cloud_od_snow,1.0) ! multiple scatter order 
           hgp = sco                    ! multiple scatter order
 
-!         Note the 'snow_bin1c' opac first arg of 0.10 is a potential factor
+!         note the 'snow_bin1c' opac first arg of 0.10 is a potential factor
 !         having an impact on when the solar aureole disappears in thick clouds.
-!         Using 0.20 may reduce the tau value where this occurs. Another factor
-!         is recently changed 'radfrac_s' that affects 'pf_thk_snow'. Another
+!         using 0.20 may reduce the tau value where this occurs. another factor
+!         is recently changed 'radfrac_s' that affects 'pf_thk_snow'. another
 !         potential factor (the last coefficient in 'arg1') shows promise in
-!         depending more on cloud OD.          
+!         depending more on cloud od.          
           snow_bin1 = exp(-cloud_od_snow/5.)       ! optically thin snow
           snow_bin1c = opac(0.10*(sco**1.2 - 1.0)) ! backscattering (thick)
           snow_bin1a = (1. - snow_bin1c)
@@ -345,8 +345,8 @@
 
           pf_scat2(:,i,j) = pf_snow * snow_factor + pf_scat1(:,i,j) * (1.0 - snow_factor)
 
-!         Suppress/cap phase function (arg_tn set to 1) if terrain is close in the light ray
-!         Apply when radfrac is low ! and opacity is low
+!         suppress/cap phase function (arg_tn set to 1) if terrain is close in the light ray
+!         apply when radfrac is low ! and opacity is low
 !         if(airmass_2_topo(i,j) .gt. 0. .and. pf_scat2(2,i,j) .gt. 1.0)then ! cloud in front of terrain
           if(airmass_2_topo(i,j) .gt. 0.)then ! cloud in front of terrain
 !             pf_scat(:,i,j) = pf_scat2(:,i,j)**opac(cloud_od_tot)
@@ -363,8 +363,8 @@
               pf_scat(:,i,j) = pf_scat2(:,i,j)
           endif
 
-!         Add rainbows
-!         Ramping this in between an OD range of .01 to .1
+!         add rainbows
+!         ramping this in between an od range of .01 to .1
           if(cloud_od_sp(i,j,3) .gt. 0.1)then
               rain_factor1 = 1.0
           elseif(cloud_od_sp(i,j,3) .gt. 0.01)then
@@ -383,7 +383,7 @@
           
           cre = 3.5
 
-!         Call mscat routine here vs in 'get_cloud_rad'?         
+!         call mscat routine here vs in 'get_cloud_rad'?         
 
           if(rain_factor .gt. 0.)then
             antisol_rad = 180. - elong_a(i,j)
@@ -392,10 +392,10 @@
 !    1                        + trans(cloud_od - 1.)       ! lowrad
             do ic = 1,nc
 
-!             Reflection inside primary rainbow + supernumerary rainbows
+!             reflection inside primary rainbow + supernumerary rainbows
               bow_hw = 0.8
               if(antisol_rad .lt. anglebow1(ic))then
-!                 Calculate super_omega (degrees phase per degree elongation/radius)
+!                 calculate super_omega (degrees phase per degree elongation/radius)
                   super_omega = 450. + (float(ic-1) * 75.) 
                   super_phase = (anglebow1(ic) - antisol_rad) * super_omega
                   super_amp = 0.4 * (antisol_rad / (anglebow1(ic)))**60.
@@ -410,16 +410,16 @@
                   endif
               endif
 
-!             Primary rainbow (red is 42 degrees radius, blue is 40)
+!             primary rainbow (red is 42 degrees radius, blue is 40)
               bow_hw = 0.8
-              if(abs(antisol_rad-anglebow1(ic)) .le. bow_hw .AND. antisol_rad .ge. anglebow1(ic))then
+              if(abs(antisol_rad-anglebow1(ic)) .le. bow_hw .and. antisol_rad .ge. anglebow1(ic))then
                   bow_frac = abs(antisol_rad-anglebow1(ic)) / bow_hw
 !                 ratio_bow = max(1.0 / pf_scat(ic,i,j) - 1.0, 0.)
                   bow_int = (1.0 - bow_frac) ** 1.0 
                   pf_scat(ic,i,j) = pf_scat(ic,i,j) + (3.0 * frac_single * bow_int * rain_factor * cloud_rad_w(i,j)**cre)
               endif
 
-!             Alexander's dark band
+!             alexander's dark band
               angle_alex = (anglebow1(ic) + anglebow2(ic)) / 2.0     
               alex_hw = 0.5 * (anglebow2(ic)-anglebow1(ic)) - 1.0*bow_hw
               if(abs(antisol_rad-angle_alex) .lt. alex_hw)then
@@ -437,18 +437,18 @@
                   endif
               endif
 
-!             Secondary rainbow (red is 54.5 degrees radius, blue is 52)
+!             secondary rainbow (red is 54.5 degrees radius, blue is 52)
               bow_hw = 0.8
-              if(abs(antisol_rad-anglebow2(ic)) .le. bow_hw .AND. antisol_rad .le. anglebow2(ic))then
+              if(abs(antisol_rad-anglebow2(ic)) .le. bow_hw .and. antisol_rad .le. anglebow2(ic))then
                   bow_frac = abs(antisol_rad-anglebow2(ic)) / bow_hw 
                   bow_int = (1.0 - bow_frac) ** 0.5 
                   pf_scat(ic,i,j) = pf_scat(ic,i,j) + (0.56* frac_single * bow_int * rain_factor * cloud_rad_w(i,j)**cre)
               endif
 
-!             Reflection outside secondary rainbow + supernumerary rainbows
+!             reflection outside secondary rainbow + supernumerary rainbows
               bow_hw = 0.8
-              if(antisol_rad .gt. anglebow2(ic) .AND. antisol_rad .lt. anglebow2(ic) + 30.)then
-!                 Calculate super_omega (degrees phase per degree elongation/radius)
+              if(antisol_rad .gt. anglebow2(ic) .and. antisol_rad .lt. anglebow2(ic) + 30.)then
+!                 calculate super_omega (degrees phase per degree elongation/radius)
                   super_omega = 450. + (float(ic-1) * 75.) 
                   super_phase = (antisol_rad - anglebow2(ic)) * super_omega
                   super_amp = 0.4 * (1.0 - (antisol_rad - anglebow2(ic))/30.)**15.

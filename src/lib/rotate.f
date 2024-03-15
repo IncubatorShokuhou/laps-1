@@ -1,35 +1,35 @@
-      SUBROUTINE ROTATE_X(RX,RY,RZ,O)
+      subroutine rotate_x(rx,ry,rz,o)
 
       include 'trigd.inc'
 
-      RY1 = RY
-      RZ1 = RZ
-      RY=RY1*COSD(O)-RZ1*SIND(O)
-      RZ=RY1*SIND(O)+RZ1*COSD(O)
+      ry1 = ry
+      rz1 = rz
+      ry=ry1*cosd(o)-rz1*sind(o)
+      rz=ry1*sind(o)+rz1*cosd(o)
 
-      RETURN
-      END
+      return
+      end
 
-      SUBROUTINE ROTATE_Y(RX,RY,RZ,O)
-
-      include 'trigd.inc'
-
-      RZ1 = RZ
-      RX1 = RX
-      RZ=RZ1*COSD(O)-RX1*SIND(O)
-      RX=RZ1*SIND(O)+RZ1*COSD(O)
-
-      RETURN
-      END
-
-      SUBROUTINE ROTATE_Z(RX,RY,RZ,O)
+      subroutine rotate_y(rx,ry,rz,o)
 
       include 'trigd.inc'
 
-      RX1 = RX
-      RY1 = RY
-      RX=RX1*COSD(O)-RY1*SIND(O)
-      RY=RX1*SIND(O)+RY1*COSD(O)
+      rz1 = rz
+      rx1 = rx
+      rz=rz1*cosd(o)-rx1*sind(o)
+      rx=rz1*sind(o)+rz1*cosd(o)
 
-      RETURN
-      END
+      return
+      end
+
+      subroutine rotate_z(rx,ry,rz,o)
+
+      include 'trigd.inc'
+
+      rx1 = rx
+      ry1 = ry
+      rx=rx1*cosd(o)-ry1*sind(o)
+      ry=rx1*sind(o)+ry1*cosd(o)
+
+      return
+      end

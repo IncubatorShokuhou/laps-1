@@ -1,11 +1,11 @@
 
-        subroutine mscat_phase(tau,ssa,g,iverbose &                     ! I
-                              ,rad &                                    ! I
-                              ,p_order,rel_order,n_order,gmean,ssa_ret) ! O
+        subroutine mscat_phase(tau,ssa,g,iverbose &                     ! i
+                              ,rad &                                    ! i
+                              ,p_order,rel_order,n_order,gmean,ssa_ret) ! o
 
-!       Estimates fraction of received photons of various scattering orders
+!       estimates fraction of received photons of various scattering orders
 
-!       Scattering event:
+!       scattering event:
 !       1 - trans_tau is scattered at least once          
 !       'traus_tau' is in direct beam (scattered zero times)
 !       (1 - trans_tau) * trans_tau is scattered only once
@@ -13,12 +13,12 @@
 !       (1 - trans_tau) * (1 - trans_tau) * (trans_tau) is scattered only twice
 !       (1 - trans_tau) * (1 - trans_tau) * (1. - trans_tau) is scattered at least thrice
 
-!       Presently works for case with low "rad" having light paths traveling through the cloud
-!       Can be extended to work for high "rad" with light scattering off the cloud top or edge          
+!       presently works for case with low "rad" having light paths traveling through the cloud
+!       can be extended to work for high "rad" with light scattering off the cloud top or edge          
 
         real frac_order(0:n_order)
-        real rel_order(1:n_order)  ! P of received photon with this order
-        real p_order(0:n_order)    ! P of emitted photon with this order
+        real rel_order(1:n_order)  ! p of received photon with this order
+        real p_order(0:n_order)    ! p of emitted photon with this order
         real p_scat_cum(0:n_order) 
 
         trans(od) = exp(-min(od,80.))

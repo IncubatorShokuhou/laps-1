@@ -1,53 +1,53 @@
 c
 c
-        subroutine score(TT,T,BB,XB,XT,TA,imax,scf,sca,scb,sco,
+        subroutine score(tt,t,bb,xb,xt,ta,imax,scf,sca,scb,sco,
      &                   thresh,qcstat,m,badflag)
 c
 c*********************************************************************
 c
-c     This routine computes QC efficiency.
+c     this routine computes qc efficiency.
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       15 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          New version.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       15 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          new version.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c     
-        real    TT(m),XT(m),TA(m),T(m),XB(m),BB(m),thresh
+        real    tt(m),xt(m),ta(m),t(m),xb(m),bb(m),thresh
         integer scf(2,2),sca(2,2),scb(2,2),sco(2,2)
         integer i,ii,jj,jjj,qcstat(m),iii 
 c
         do i=1,imax
            if(qcstat(i).eq.1) go to 1
-           if(abs(TT(i)-T(i)).gt.thresh ) then !ob is bad
+           if(abs(tt(i)-t(i)).gt.thresh ) then !ob is bad
               jj=2
            else
               jj=1
            endif
-           if(abs(T(i)-XT(i)).gt.thresh) then !model tosses
+           if(abs(t(i)-xt(i)).gt.thresh) then !model tosses
               ii=2
               qcstat(i)=qcstat(i)+10000
            else
               ii=1
            endif
-           if(abs(T(i)-XB(i)).gt.thresh) then !buddy check tosses ob
+           if(abs(t(i)-xb(i)).gt.thresh) then !buddy check tosses ob
               iii=2
               qcstat(i)=qcstat(i)+1000
            else
               iii=1
            endif
-           if(abs(T(i)-TA(i)).gt.thresh) then !kalman optimum tosses 
+           if(abs(t(i)-ta(i)).gt.thresh) then !kalman optimum tosses 
               jjj=2
               qcstat(i)=qcstat(i)+100000
            else
               jjj=1
            endif
-           if(abs(T(i)-BB(i)).gt.thresh) then !obtend tosses 
+           if(abs(t(i)-bb(i)).gt.thresh) then !obtend tosses 
               iiii=2
               qcstat(i)=qcstat(i)+100
            else
@@ -67,18 +67,18 @@ c
 c
 c*********************************************************************
 c
-c     Pulls out a random value from a normal distribution.  Input is
+c     pulls out a random value from a normal distribution.  input is
 c     an integer seed 'ii' and an interation number 'n'. 'n' should
 c     be >20 for best results.
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       07 Oct 1998  Peter Stamus, NOAA/FSL
-c          Change 'ran' to 'ran1' function for portability.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       07 oct 1998  peter stamus, noaa/fsl
+c          change 'ran' to 'ran1' function for portability.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -101,12 +101,12 @@ c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -139,29 +139,29 @@ c
      1        /float(sc(1,1)+sc(2,1))
       endif 
       write(6,1000) pbot,pbok,pgot,pgok,csi,tss
- 1000 format(/1x,'Fraction of bad obs tossed/kept ',2f6.3/
-     1     1x,'Fraction of good obs tossed/kept ',2f6.3/
-     2     1x,'CSI = ',f6.3,'  TSS = ',f6.3)
+ 1000 format(/1x,'fraction of bad obs tossed/kept ',2f6.3/
+     1     1x,'fraction of good obs tossed/kept ',2f6.3/
+     2     1x,'csi = ',f6.3,'  tss = ',f6.3)
 c
       return
       end
 c
 c
-        Subroutine thet(t,theta,maxstn,elev,m)         
+        subroutine thet(t,theta,maxstn,elev,m)         
 c
 c*********************************************************************
 c
-c     The theta used here is based on height only with an estimate of 
-c     and average temperature which is valid for the domain: theta is C
+c     the theta used here is based on height only with an estimate of 
+c     and average temperature which is valid for the domain: theta is c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       15 Dec 1999  Peter Stamus, NOAA/FSL
-c          Housekeeping...change 'if' structure in do loop.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       15 dec 1999  peter stamus, noaa/fsl
+c          housekeeping...change 'if' structure in do loop.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -171,7 +171,7 @@ c
 c
         kappa=2./7.
         stdlps=-6.5/1000.
-        Tstd=287.16
+        tstd=287.16
         pstd=1013.2
         g=9.808
         rr=287.04
@@ -179,7 +179,7 @@ c
            if(t(l).eq.badflag) then
               theta(l)= badflag
            else
-              tbar=2.*Tstd+stdlps*elev(l)
+              tbar=2.*tstd+stdlps*elev(l)
               ppp=pstd*exp(-elev(l)*g/rr/tbar)
               theta(l)=((t(l)-32.)*.5555556+273.16) * 
      &                 (1000./ppp)**kappa - 273.16
@@ -190,20 +190,20 @@ c
         end
 c
 c
-        Subroutine thet2T(t,theta,maxstn,elev,m)          
+        subroutine thet2t(t,theta,maxstn,elev,m)          
 c
 c*********************************************************************
 c
-c     This subroutine converts from theta (C) to Temp(F).                    
+c     this subroutine converts from theta (c) to temp(f).                    
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       15 Dec 1999  Peter Stamus, NOAA/FSL
-c          Housekeeping...restructure 'if' block in do loop.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       15 dec 1999  peter stamus, noaa/fsl
+c          housekeeping...restructure 'if' block in do loop.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -213,7 +213,7 @@ c
 c
         kappa=2./7.
         stdlps=-6.5/1000.
-        Tstd=287.16
+        tstd=287.16
         pstd=1013.2
         g=9.808
         rr=287.04
@@ -221,7 +221,7 @@ c
            if(theta(l).eq.badflag) then
               t(l)=badflag
            else 
-              tbar=2.*Tstd+stdlps*elev(l)
+              tbar=2.*tstd+stdlps*elev(l)
               ppp=pstd*exp(-elev(l)*g/rr/tbar)
               t(l) = ( (ppp/1000.)**(kappa) * 
      &               (theta(l)+273.16) - 273.16 ) / .5555556 + 32.
@@ -232,19 +232,19 @@ c
         end
 c
 c
-         Subroutine convuv(dd,ff,u,v,maxsta,m,badflag)
+         subroutine convuv(dd,ff,u,v,maxsta,m,badflag)
 c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       15 Dec 1999  Peter Stamus, NOAA/FSL
-c          Housekeeping...restructure 'if' block in do loop.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       15 dec 1999  peter stamus, noaa/fsl
+c          housekeeping...restructure 'if' block in do loop.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -267,7 +267,7 @@ c
          end 
 c
 c
-         Subroutine reorder(ta,tda,dda,ffa,lata,lona,eleva,pstna,
+         subroutine reorder(ta,tda,dda,ffa,lata,lona,eleva,pstna,
      &     pmsla,alta,stna,providera,reptypea,indexa,
      &     tb,tdb,ddb,ffb,latb,lonb,elevb,pstnb,pmslb,altb,stnb,
      &     providerb,reptypeb,indexb,
@@ -276,18 +276,18 @@ c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       07 Oct 1998  Peter Stamus, NOAA/FSL
-c          Added provider and report type variables.
-c       22 Oct 1998  Peter Stamus, NOAA/FSL
-c          Added index variables to track ob location in arrays.
-c       12 Mar 1999  Peter Stamus, NOAA/FSL
-c          Fixed bug with dup station handling.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       07 oct 1998  peter stamus, noaa/fsl
+c          added provider and report type variables.
+c       22 oct 1998  peter stamus, noaa/fsl
+c          added index variables to track ob location in arrays.
+c       12 mar 1999  peter stamus, noaa/fsl
+c          fixed bug with dup station handling.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -314,10 +314,10 @@ c
 c     we've found a duplicate name
 c
                   holdnam = stnb(l)
-                  stnb(l)(5:5)='A'
+                  stnb(l)(5:5)='a'
                   write(*,1021) holdnam, stnb(l)
  1021             format(
-     &      1x,'Station in master list renamed - old/new: ',a5,1x,a5)
+     &      1x,'station in master list renamed - old/new: ',a5,1x,a5)
                endif 
             endif
          enddo !l
@@ -343,14 +343,14 @@ c
                      ix = ix + 1
                      if(ix .gt. 90) then
                         print *,
-     &            ' WARNING. Over 26 dup stn names for ', stna(k)
-                        print *,' Will try to continue...'
+     &            ' warning. over 26 dup stn names for ', stna(k)
+                        print *,' will try to continue...'
                      endif
                      ch = char(ix)
                      stna(k)(5:5) = ch
                      write(*,1020) holdnam,stna(k)
  1020                format(1x,
-     &  'Master/newlist duplicate station renamed - old/new: ',a5,1x,a5)
+     &  'master/newlist duplicate station renamed - old/new: ',a5,1x,a5)
                      go to 3 
                   endif
                endif
@@ -472,18 +472,18 @@ c
 c
 c*********************************************************************
 c
-c     Routine fills array t with an interpolated value if missing
+c     routine fills array t with an interpolated value if missing
 c     uses a pass for theta analysis then the variable
 c     tmx and tmn are the extremes of the variable lapse rate in unit/m)
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       15 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          Add to write code 'if' block (1000 format).
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       15 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          add to write code 'if' block (1000 format).
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -498,7 +498,7 @@ c
         vcutoff=5.              !ht(m) in vertical wt to go to e**-1
         c1=sqrt(expsclr)/hcutoff**2
         c2=hcutoff**2/vcutoff**2
-        thmx=8./1000.           ! C/m
+        thmx=8./1000.           ! c/m
         thmn=-1./1000.
         call regress(elev,theta,maxsta,m,thlapse,sint,thmx,thmn)
         call regress(elev,t,maxsta,m,lapse,sintt,tmx,tmn)
@@ -537,10 +537,10 @@ c compute avg variable
               if(sumwt .ne. 0.) then
                  t(i)=sum/sumwt+tbar+(elev(i)-ebar)*lapse
                  write(6,1000) i, stn(i), t(i)
- 1000            format(1x,' Replaced missing ob at stn ',i5,1x,a5,
-     &                  ' with ',F8.3) 
+ 1000            format(1x,' replaced missing ob at stn ',i5,1x,a5,
+     &                  ' with ',f8.3) 
               else
-                 write(6,*) ' No fill possible for station ', i
+                 write(6,*) ' no fill possible for station ', i
               endif
            endif 
         enddo !i
@@ -554,18 +554,18 @@ c
 c
 c*********************************************************************
 c
-c     Returns a buddy check value for a station location not using 
-c     the station value.  Instead, it uses a pass for theta analysis 
+c     returns a buddy check value for a station location not using 
+c     the station value.  instead, it uses a pass for theta analysis 
 c     then the variable tmx and tmn are the extremes of the variable 
 c     lapse rate in unit/m .
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       04 Aug 1999  Add missing calls to 'regress'.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       04 aug 1999  add missing calls to 'regress'.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -580,7 +580,7 @@ c
         vcutoff=5.              !ht(m) in vertical wt to go to e**-1
         c1=sqrt(expsclr)/hcutoff**2
         c2=hcutoff**2/vcutoff**2
-        thmx=8./1000.           ! C/m
+        thmx=8./1000.           ! c/m
         thmn=-1./1000.
         call regress(elev,theta,maxsta,m,thlapse,sint,thmx,thmn)
         call regress(elev,t,maxsta,m,lapse,sintt,tmx,tmn)
@@ -632,12 +632,12 @@ c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -683,14 +683,14 @@ c     qcstat is 1 if ob is missing; 10 if failed gross err;
 c     100 if ob test fails; 1000 if model test fails; 
 c     10000 opt check fails
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       15 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          New version.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       15 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          new version.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -727,12 +727,12 @@ c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -753,12 +753,12 @@ c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -772,22 +772,22 @@ c
         end 
 c
 c
-        Subroutine errorproc(dt,y,by,md,xt,x,wr,vr,ar,imax,m,qcstat,
+        subroutine errorproc(dt,y,by,md,xt,x,wr,vr,ar,imax,m,qcstat,
      &                  oberr,wm,wo,wb,length,badthr,atime,icnt,nvar)
 c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       07 Oct 1998  Peter Stamus, NOAA/FSL
-c          Change 'ran' to 'ran1' function for portability.
-c       15 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          New version.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       07 oct 1998  peter stamus, noaa/fsl
+c          change 'ran' to 'ran1' function for portability.
+c       15 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          new version.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -800,7 +800,7 @@ c
         integer sca(2,2),scf(2,2),scb(2,2),sco(2,2),imax,qcstat(m)
         integer scat(2,2),scft(2,2),scbt(2,2),scot(2,2),on,off
 c
-c.....  Truth routine and missing ob replacement
+c.....  truth routine and missing ob replacement
 c
         icnt=icnt+1 
         iiiii=icnt
@@ -825,7 +825,7 @@ c
            endif
         enddo !i
 c
-c.....  Compute performance stats
+c.....  compute performance stats
 c
         stdwr=0.
         stdar=0.
@@ -846,19 +846,19 @@ c
         sum3=0.
         do i=1,imax
            sumtot=sumtot+1.
-           WR(i)=xt(i)-tdt(i)
-           sumwr=sumwr+WR(i)
-           stdwr=WR(i)*WR(i)+stdwr
+           wr(i)=xt(i)-tdt(i)
+           sumwr=sumwr+wr(i)
+           stdwr=wr(i)*wr(i)+stdwr
            if(dt(i).ne.badflag) then 
-              VR(i)=dt(i)-tdt(i)
+              vr(i)=dt(i)-tdt(i)
            else 
-              VR(i)=oberr*(-1.)**(int(10.*ran1(i)+1.))
+              vr(i)=oberr*(-1.)**(int(10.*ran1(i)+1.))
            endif 
-           sumvr=sumvr+VR(i)
-           stdvr=VR(i)*VR(i)+stdvr
-           AR(i)=X(i)-TdT(i)
-           sumar=sumar+AR(i)
-           stdar=AR(i)*AR(i)+stdar
+           sumvr=sumvr+vr(i)
+           stdvr=vr(i)*vr(i)+stdvr
+           ar(i)=x(i)-tdt(i)
+           sumar=sumar+ar(i)
+           stdar=ar(i)*ar(i)+stdar
 c
 c  do kalmod errors
            wo(i)=(y(i)-tdt(i))**2+float(length-1)*wo(i)**2
@@ -870,22 +870,22 @@ c  do kalmod errors
            sum1=sum1+wo(i)
            sum2=sum2+wb(i)
            sum3=sum3+wm(i)
-c     write(6,*) 'KALMOD ERRORS - OB - BUD - MOD :',i,wo(i),wb(i),wm(i)
+c     write(6,*) 'kalmod errors - ob - bud - mod :',i,wo(i),wb(i),wm(i)
            if(dt(i).eq.badflag) go to 5
-           sumco=X(i)-dT(i)+sumco
-           sumfo=XT(i)-dT(i)+sumfo
-           stdfo=(XT(i)-dT(i))**2+stdfo
-           stdco=(X(i)-dT(i))**2+stdco
+           sumco=x(i)-dt(i)+sumco
+           sumfo=xt(i)-dt(i)+sumfo
+           stdfo=(xt(i)-dt(i))**2+stdfo
+           stdco=(x(i)-dt(i))**2+stdco
            sumtotb=sumtotb+1.
            b(i)=dt(i)
  5         continue   
         enddo !i
 c
-        print*,'OVERALL FRACTION OB,BUD,NWP '
-        Write(6,*) 'OVERALL FRACTION OB,BUD,NWP '
+        print*,'overall fraction ob,bud,nwp '
+        write(6,*) 'overall fraction ob,bud,nwp '
         print*,.5*(sum2+sum3)/(sum1+sum2+sum3),.5*(sum1+sum3)/
      1       (sum1+sum2+sum3),.5*(sum1+sum2)/(sum1+sum2+sum3) 
-        Write(6,*) .5*(sum2+sum3)/(sum1+sum2+sum3),.5*(sum1+sum3)/
+        write(6,*) .5*(sum2+sum3)/(sum1+sum2+sum3),.5*(sum1+sum3)/
      1       (sum1+sum2+sum3),.5*(sum1+sum2)/(sum1+sum2+sum3) 
         tmb(nvar)=tmb(nvar)+sumwr
         tob(nvar)=tob(nvar)+sumvr 
@@ -927,22 +927,22 @@ c
         endif
         write(6,1061) stdwr,sumwr,stdvr,sumvr,stdar,sumar,stdfo,
      &       sumfo,stdco,sumco 
- 1061   format(1x,'RMS/Bias errors for truth and observation estimates'/
-     &       1x,'F X = XT    - truth RMS ',f8.3,' Bias ',f8.3/
-     &       1x,'Observ      - truth RMS ',f8.3,' Bias ',f8.3/
-     &       1x,'Kalman X    - truth RMS ',f8.3,' Bias ',f8.3/
-     &       1x,'F X = XT    - obser RMS ',f8.3,' Bias ',f8.3/
-     &       1x,'Kalman X    - obser RMS ',f8.3,' Bias ',f8.3)
-        write(6,*) 'RUNNING BIAS AND RMS BY VARIABLE' 
-        write(6,*) 'FX=XT ',(tmb(nvar)/totb(nvar)),sqrt(tmr(nvar)/totr(
+ 1061   format(1x,'rms/bias errors for truth and observation estimates'/
+     &       1x,'f x = xt    - truth rms ',f8.3,' bias ',f8.3/
+     &       1x,'observ      - truth rms ',f8.3,' bias ',f8.3/
+     &       1x,'kalman x    - truth rms ',f8.3,' bias ',f8.3/
+     &       1x,'f x = xt    - obser rms ',f8.3,' bias ',f8.3/
+     &       1x,'kalman x    - obser rms ',f8.3,' bias ',f8.3)
+        write(6,*) 'running bias and rms by variable' 
+        write(6,*) 'fx=xt ',(tmb(nvar)/totb(nvar)),sqrt(tmr(nvar)/totr(
      &                            nvar))
-        write(6,*) 'OBSER ',(tob(nvar)/totb(nvar)),sqrt(tor(nvar)/totr(
+        write(6,*) 'obser ',(tob(nvar)/totb(nvar)),sqrt(tor(nvar)/totr(
      &                            nvar))
-        write(6,*) 'KAL X ',(tcb(nvar)/totb(nvar)),sqrt(tcr(nvar)/totr(
+        write(6,*) 'kal x ',(tcb(nvar)/totb(nvar)),sqrt(tcr(nvar)/totr(
      &                            nvar))
- 1000   format(1x,'TRUE VALUES FOR TIME ',i4)
+ 1000   format(1x,'true values for time ',i4)
 c
-c zero out scoring arraYs
+c zero out scoring arrays
         do i=1,2
         do j=1,2
            scf(i,j)=0
@@ -953,22 +953,22 @@ c zero out scoring arraYs
         enddo !i
         call score(tdt,b,y,by,md,xt,imax,scf,sca,scb,sco,
      1       thresh,qcstat,m,badflag)
-c     write(6,*) 'CONTINGECY TABLES FOR ERROR THRESHOLD OF ',thresh 
+c     write(6,*) 'contingecy tables for error threshold of ',thresh 
 c     write(6,1011) sco(1,1), sco(1,2), sco(2,1),sco(2,2)
- 1011   format(//1x,'QC EFFICIENCY FOR OB TND'/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1011   format(//1x,'qc efficiency for ob tnd'/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(sco,2,2)
 c     write(6,1010) scb(1,1), scb(1,2), scb(2,1),scb(2,2)
- 1010   format(//1x,'QC EFFICIENCY FOR BUDDY'/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1010   format(//1x,'qc efficiency for buddy'/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(scb,2,2)
 c     write(6,1008) scf(1,1), scf(1,2), scf(2,1),scf(2,2)
- 1008   format(//1x,'QC EFFICIENCY FOR NWP    '/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1008   format(//1x,'qc efficiency for nwp    '/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(scf,2,2)
 c     write(6,1009) sca(1,1), sca(1,2), sca(2,1),sca(2,2)
- 1009   format(//1x,'QC EFFICIENCY FOR KAL XT '/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1009   format(//1x,'qc efficiency for kal xt '/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
         do i=1,2
         do j=1,2
            scft(i,j)=scft(i,j)+scf(i,j)
@@ -978,20 +978,20 @@ c     write(6,1009) sca(1,1), sca(1,2), sca(2,1),sca(2,2)
         enddo !j
         enddo !i
 c     write(6,1021) scot(1,1), scot(1,2), scot(2,1),scot(2,2)
- 1021   format(//1x,'CUM QC EFFNCY FOR OB TND'/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1021   format(//1x,'cum qc effncy for ob tnd'/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(scot,2,2)
 c     write(6,1020) scbt(1,1), scbt(1,2), scbt(2,1),scbt(2,2)
- 1020   format(//1x,'CUM QC EFFNCY FOR BUDDY'/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1020   format(//1x,'cum qc effncy for buddy'/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(scbt,2,2)
 c     write(6,1018) scft(1,1), scft(1,2), scft(2,1),scft(2,2)
- 1018   format(//1x,'CUM QC EFFNCY FOR NWP'/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1018   format(//1x,'cum qc effncy for nwp'/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(scft,2,2)
 c     write(6,1019) scat(1,1), scat(1,2), scat(2,1),scat(2,2)
- 1019   format(//1x,'CUM QC EFFNCY FOR XT'/14x,' GOOD OB    BAD OB'
-     1 //1x,' KEPT     ',2I10//1x,' TOSSED   ',2I10)
+ 1019   format(//1x,'cum qc effncy for xt'/14x,' good ob    bad ob'
+     1 //1x,' kept     ',2i10//1x,' tossed   ',2i10)
 c     call stats_qc(scat,2,2)
 c
         return
@@ -1003,12 +1003,12 @@ c
 c*********************************************************************
 c
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -1030,18 +1030,18 @@ c
         end
 c
 c
-        Function pythag(a,b)
+        function pythag(a,b)
 c
 c*********************************************************************
 c
-c     Function computes (a**2+b**2)**.5 without over or underflow.
+c     function computes (a**2+b**2)**.5 without over or underflow.
 c     
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       07 Oct 1998  Peter Stamus, NOAA/FSL
-c          Housekeeping changes for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       07 oct 1998  peter stamus, noaa/fsl
+c          housekeeping changes for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -1069,14 +1069,14 @@ c
 c
 c*********************************************************************
 c
-c     Function to generated a random number.  Use this instead of a
+c     function to generated a random number.  use this instead of a
 c     machine dependent one.
 c     
-c     Original: Peter Stamus, NOAA/FSL  07 Oct 1998
-c     Changes:
+c     original: peter stamus, noaa/fsl  07 oct 1998
+c     changes:
 c
-c     Notes:
-c        From "Numerical Recipes in Fortran", page 271.
+c     notes:
+c        from "numerical recipes in fortran", page 271.
 c
 c*********************************************************************
 c
@@ -1096,7 +1096,7 @@ c
         save iv, iy
         data iv/ntab * 0/, iy/0/
 c
-c.....  Start here.
+c.....  start here.
 c
         if(idum.le.0 .or. iy.eq.0) then  !initialize
            idum = max(-idum,1)           !prevent idum=0
@@ -1125,12 +1125,12 @@ c
 c
 c*********************************************************************
 c
-c     Original: John McGinley, NOAA/FSL  December 1999
-c     Changes:
-c       15 Dec 1999  Peter Stamus, NOAA/FSL
-c          Housekeeping changes for use in LAPS.
+c     original: john mcginley, noaa/fsl  december 1999
+c     changes:
+c       15 dec 1999  peter stamus, noaa/fsl
+c          housekeeping changes for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -1152,12 +1152,12 @@ c
 c
 c*********************************************************************
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       15 Dec 1999  Peter Stamus, NOAA/FSL
-c          Housekeeping changes for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       15 dec 1999  peter stamus, noaa/fsl
+c          housekeeping changes for use in laps.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c

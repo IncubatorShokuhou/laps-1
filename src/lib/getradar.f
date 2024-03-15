@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -31,9 +31,9 @@ cdis
 cdis
 
 
-!       File: getradar.f
+!       file: getradar.f
 !
-cdoc    Module Summary:
+cdoc    module summary:
 cdoc
 cdoc    get_multiradar_vel
 cdoc        now called from wind/lplot
@@ -66,53 +66,53 @@ cdoc    read_vrz_3dref
 cdoc        now called from read_multiradar_3dref
 cdoc
 cdoc
-!       1996 Aug    S. Albers FSL
+!       1996 aug    s. albers fsl
 
 
         subroutine get_multiradar_vel(
      1   i4time_ref,i4time_tol,i4time_radar_a
      1  ,max_radars,n_radars,ext_a,r_missing_data
-     1  ,imax,jmax,kmax,lat,lon                                      ! I
-     1  ,nx_r,ny_r,igrid_r                                           ! I
+     1  ,imax,jmax,kmax,lat,lon                                      ! i
+     1  ,nx_r,ny_r,igrid_r                                           ! i
      1  ,grid_ra_vel,grid_ra_nyq,idx_radar,v_nyquist_in_a
-     1  ,ioffset,joffset                                             ! O
-     1  ,l_offset_radar                                              ! I
+     1  ,ioffset,joffset                                             ! o
+     1  ,l_offset_radar                                              ! i
      1  ,n_vel_a
      1  ,rlat_radar_a,rlon_radar_a,rheight_radar_a,radar_name_a
      1  ,istatus_multi_vel,istatus_multi_nyq)
 
 
-cdoc    Returns Velocity from multiple radars.
-cdoc    Called from wind/lapsplot
+cdoc    returns velocity from multiple radars.
+cdoc    called from wind/lapsplot
 
 
-!       i4time_ref          Input   Desired i4time
-!       i4time_tol          Input   Half Width of allowable time window
-!       i4time_radar_a      Output  Actual times of data you are getting
-!       max_radars          Input   Dimensioning for maximum # of radars
-!       n_radars            Output  Actual number of radars returned with at
+!       i4time_ref          input   desired i4time
+!       i4time_tol          input   half width of allowable time window
+!       i4time_radar_a      output  actual times of data you are getting
+!       max_radars          input   dimensioning for maximum # of radars
+!       n_radars            output  actual number of radars returned with at
 !                                   least one valid velocity measurement
-!       ext_a               Local   Array: Possible extensions
-!       r_missing_data      Input
-!       imax,jmax,kmax      Input   LAPS 3D Grid Dimensions
-!       lat,lon             Input   2D latitude and longitude arrays (degrees)
-!       topo                Input   2D terrain array (meters)
-!       grid_ra_vel         Output  4D Velocity Grid
-!       grid_ra_nyq         Output  4D Nyquist Velocity Grid
-!       idx_radar           Output  1D grid of radar 'vxx' numbers
-!       v_nyquist_in_a      Output  Array: volume nyquist velocity of the radars
-!       i_offset,joffset    Input   offset arrays (1D)
-!       l_offset_radar      Input   use offset arrays?
-!       n_vel_a             Output  Array: # of grid points with measurable velocity
-!       rlat_radar_a        Output  Array: Radar Latitude (Degrees)
-!       rlon_radar_a        Output  Array: Radar Longitude (Degrees)
-!       rheight_radar_a     Output  Array: Radar Height (m MSL)
-!       radar_name_a        Output  Array: Radar Name (Character*4)
-!       istatus_multi_vel   Output  If 1 - data is useable for 3D vel applications
-!       istatus_multi_nyq   Output  If 1 - data is useable for 3D nyq applications
+!       ext_a               local   array: possible extensions
+!       r_missing_data      input
+!       imax,jmax,kmax      input   laps 3d grid dimensions
+!       lat,lon             input   2d latitude and longitude arrays (degrees)
+!       topo                input   2d terrain array (meters)
+!       grid_ra_vel         output  4d velocity grid
+!       grid_ra_nyq         output  4d nyquist velocity grid
+!       idx_radar           output  1d grid of radar 'vxx' numbers
+!       v_nyquist_in_a      output  array: volume nyquist velocity of the radars
+!       i_offset,joffset    input   offset arrays (1d)
+!       l_offset_radar      input   use offset arrays?
+!       n_vel_a             output  array: # of grid points with measurable velocity
+!       rlat_radar_a        output  array: radar latitude (degrees)
+!       rlon_radar_a        output  array: radar longitude (degrees)
+!       rheight_radar_a     output  array: radar height (m msl)
+!       radar_name_a        output  array: radar name (character*4)
+!       istatus_multi_vel   output  if 1 - data is useable for 3d vel applications
+!       istatus_multi_nyq   output  if 1 - data is useable for 3d nyq applications
 
 !
-!       The domain must be specified using grid_fnam_common
+!       the domain must be specified using grid_fnam_common
 
         character*31 ext_a(max_radars)
 
@@ -124,8 +124,8 @@ cdoc    Called from wind/lapsplot
 
         character asc9_tim_radar*9
 
-        Integer       ioffset(max_radars)
-        Integer       joffset(max_radars)
+        integer       ioffset(max_radars)
+        integer       joffset(max_radars)
         logical l_apply_map, l_offset_radar
 
         real grid_ra_vel(nx_r,ny_r,kmax,max_radars)
@@ -148,14 +148,14 @@ cdoc    Called from wind/lapsplot
 
         l_conus_vel = .false.
 
-!       Initialize the flags
+!       initialize the flags
         n_radars = 0
         n_ref = 0
         istatus_multi_vel = 1
         istatus_multi_nyq = 1
         idx_radar = 0
 
-!       Initialize this stuff
+!       initialize this stuff
         do i = 1,max_radars
             if(i .lt. 10)then
                 write(ext_a(i),91)i
@@ -168,15 +168,15 @@ cdoc    Called from wind/lapsplot
         enddo
 
         if(l_conus_vel)then
-!           Read CONUS velocity data
+!           read conus velocity data
 !           call read_raw_conus_vel()
         endif
 
-!       Loop through the potential radars
+!       loop through the potential radars
         do i_radar_pot = 1,max_radars
 
             write(6,*)
-            write(6,*)' Looking for potential radar # ',i_radar_pot
+            write(6,*)' looking for potential radar # ',i_radar_pot
 
             call get_directory(ext_a(i_radar_pot),directory,len_dir)
             c_filespec = directory(1:len_dir)//'*.'//ext_a(i_radar_pot)
@@ -187,7 +187,7 @@ cdoc    Called from wind/lapsplot
 
             if(abs(i4time_radar - i4time_ref) .gt. i4time_tol)then
                 write(6,101)i_radar_pot,i4time_tol,asc9_tim_radar
-101             format(' Radar',i3,' not available within',i6,
+101             format(' radar',i3,' not available within',i6,
      1          ' sec of analysis time, nearest = ',a9)
 
             else
@@ -200,7 +200,7 @@ cdoc    Called from wind/lapsplot
 
                 i4time_radar_a(n_radars) = i4time_radar
 
-                write(6,*)' Reading vel/nyq for actual radar # '
+                write(6,*)' reading vel/nyq for actual radar # '
      1                    ,n_radars
 
                 call read_radar_vel(i4time_radar,l_apply_map,
@@ -214,28 +214,28 @@ cdoc    Called from wind/lapsplot
      1                       istatus_vel,istatus_nyq)
 
                 if(n_vel_a(n_radars) .eq. 0 .or. istatus_vel .ne. 1)then       
-                    write(6,*)' No valid velocities for radar ',n_radars
-                  ! Don't count in a valid radar
+                    write(6,*)' no valid velocities for radar ',n_radars
+                  ! don't count in a valid radar
                     idx_radar(n_radars) = 0
                     n_radars = n_radars - 1
 
                 else ! valid radar
 
                     if(l_offset_radar)then
-                      call get_ij_offset_radars(imax,jmax,1,              ! I
-     1                              igrid_r,l_offset_radar,               ! I   
-     1                              lat,lon,                              ! I
-     1                              rlat_radar_a(n_radars),               ! I
-     1                              rlon_radar_a(n_radars),               ! I
-     1                              ioffset(n_radars),                    ! I
-     1                              joffset(n_radars) )                   ! O  
+                      call get_ij_offset_radars(imax,jmax,1,              ! i
+     1                              igrid_r,l_offset_radar,               ! i   
+     1                              lat,lon,                              ! i
+     1                              rlat_radar_a(n_radars),               ! i
+     1                              rlon_radar_a(n_radars),               ! i
+     1                              ioffset(n_radars),                    ! i
+     1                              joffset(n_radars) )                   ! o  
 
 
 !                     if(rlat_radar_a(n_radars) .eq. r_missing_data .or.
 !    1                   rlon_radar_a(n_radars) .eq. r_missing_data  
 !    1                                                             )then
 !                       write(6,*)
-!    1                        ' No valid or single lat/lon for radar '       
+!    1                        ' no valid or single lat/lon for radar '       
 !    1                           ,n_radars       
 !    1                           ,' ',radar_name(n_radars)
 !                       l_valid_latlon(n_radars) = .false.
@@ -254,16 +254,16 @@ cdoc    Called from wind/lapsplot
 !                           write(6,*)
 !    1                   'computing ri/rj for radar (outside domain)'    
 !                       endif
-!                       write(6,*)'Name: ',radar_name(n_radars)
+!                       write(6,*)'name: ',radar_name(n_radars)
 !     1                          ,ri(n_radars),rj(n_radars),n_radars
 !                       l_valid_latlon(n_radars) = .true.
 
-!                       Offset is location of lower left corner of small array in the large array
+!                       offset is location of lower left corner of small array in the large array
 !                       ioffset(n_radars) = (nint(ri) - igrid_r) - 1
 !                       joffset(n_radars) = (nint(rj) - igrid_r) - 1
 !                     endif
 
-                      I4_elapsed = ishow_timer()
+                      i4_elapsed = ishow_timer()
 
                       write(6,*)' get_multiradar_vel - offset info '
      1           ,'ri,rj,ioffset(n_radars),joffset(n_radars),igrid_r : '
@@ -292,7 +292,7 @@ cdoc    Called from wind/lapsplot
 
                       write(6,*)' nfill = ',nfill
 
-                    else ! fill 4D array with 3D array contents
+                    else ! fill 4d array with 3d array contents
                       grid_ra_vel(:,:,:,n_radars) = grid_ra_vel_3d
                       grid_ra_nyq(:,:,:,n_radars) = grid_ra_nyq_3d
 
@@ -311,13 +311,13 @@ cdoc    Called from wind/lapsplot
                     istatus_multi_nyq = 0
                 endif
 
-            endif ! We scored a radar
+            endif ! we scored a radar
 
         enddo ! i_radar_pot
 
         if(n_radars .gt. max_radars)then
             write(6,*)
-     1           ' ERROR in get_multiradar_vel: n_radars > max_radars'
+     1           ' error in get_multiradar_vel: n_radars > max_radars'
      1           ,n_radars,max_radars
             n_radars = 0
             istatus_multi_vel = 0
@@ -325,13 +325,13 @@ cdoc    Called from wind/lapsplot
         endif
 
         if(n_radars .eq. 0)then
-            write(6,*)' WARNING in get_multiradar_vel: n_radars = 0'
+            write(6,*)' warning in get_multiradar_vel: n_radars = 0'
             istatus_multi_vel = 0
             istatus_multi_nyq = 0
         endif
 
-        if(l_conus_vel)then ! Try to supersede 3-D ref data with CONUS
-!           Read CONUS reflectivity data
+        if(l_conus_vel)then ! try to supersede 3-d ref data with conus
+!           read conus reflectivity data
 !           call read_raw_conus_vel()
 !           istatus_multi_vel = 0
         endif
@@ -348,38 +348,38 @@ cdoc    Called from wind/lapsplot
      1        ,rlat_radar,rlon_radar,rheight_radar
      1        ,istatus_2dref,istatus_3dref)
 
-cdoc    This routine returns 3D radar ref data from the LAPS radar files
-cdoc    Called from lapsplot
+cdoc    this routine returns 3d radar ref data from the laps radar files
+cdoc    called from lapsplot
 
-!       i4time_ref          Input   Desired i4time
-!       i4time_tol          Input   Half Width of allowable time window
-!       i4time_radar        Output  Actual time of data you are getting
-!       mode                Input   (1) normal radar data, (2) return clutter map
-!       l_apply_map         Input   .true. - remove 3D ground clutter
-!       imax,jmax,kmax      Input   LAPS 3D Grid Dimensions
-!       lat,lon             Input   2D latitude and longitude arrays (degrees)
-!       topo                Input   2D terrain array (meters)
-!       l_low_fill          Input   Flag to fill vertical gaps in
+!       i4time_ref          input   desired i4time
+!       i4time_tol          input   half width of allowable time window
+!       i4time_radar        output  actual time of data you are getting
+!       mode                input   (1) normal radar data, (2) return clutter map
+!       l_apply_map         input   .true. - remove 3d ground clutter
+!       imax,jmax,kmax      input   laps 3d grid dimensions
+!       lat,lon             input   2d latitude and longitude arrays (degrees)
+!       topo                input   2d terrain array (meters)
+!       l_low_fill          input   flag to fill vertical gaps in
 !                                   low level reflectivities (normally .true.)
-!       l_high_fill         Input   Flag to fill vertical gaps in
+!       l_high_fill         input   flag to fill vertical gaps in
 !                                   high level reflectivities (normally .true.)
 !       lat,lon,topo are needed if l_low_fill or l_high_fill are true
-!       grid_ra_ref         Output  3D Reflectivity Grid
-!       n_ref               Output  # of grid points with measurable reflectivity
-!       rlat_radar          Output  Radar Latitude (Degrees)
-!       rlon_radar          Output  Radar Longitude (Degrees)
-!       rheight_radar       Output  Radar Height (m MSL)
-!       istatus_2dref       Output  Data is useable for 2D ref applications
-!       istatus_3dref       Output  Data is useable for 3D ref applications
+!       grid_ra_ref         output  3d reflectivity grid
+!       n_ref               output  # of grid points with measurable reflectivity
+!       rlat_radar          output  radar latitude (degrees)
+!       rlon_radar          output  radar longitude (degrees)
+!       rheight_radar       output  radar height (m msl)
+!       istatus_2dref       output  data is useable for 2d ref applications
+!       istatus_3dref       output  data is useable for 3d ref applications
 
-!       Steve Albers           Dec 7 1995
+!       steve albers           dec 7 1995
 
-!       USER NOTE: Only one source of radar data per domain is currently
-!       permitted with get_radar. The constraint on this is setting up
+!       user note: only one source of radar data per domain is currently
+!       permitted with get_radar. the constraint on this is setting up
 !       the inputted time window to work with multiple sources of radar data.
-!       This may be changed in the future.
+!       this may be changed in the future.
 !
-!       The domain must be specified using grid_fnam_common
+!       the domain must be specified using grid_fnam_common
 
         character*255 c_filespec
         character*150  directory
@@ -409,10 +409,10 @@ cdoc    Called from lapsplot
         radarext = 'vrc'
         call get_directory(radarext,directory,len_dir)
 
-!       Build the filespec names
+!       build the filespec names
         c_filespec = directory(1:len_dir)//'*.'//radarext(1:3)
 
-        IF(mode .eq. 2)then ! Get clutter Map only
+        if(mode .eq. 2)then ! get clutter map only
 
         l_clutter_found = .false.
 
@@ -422,25 +422,25 @@ cdoc    Called from lapsplot
      1                  ,status='old',err=1992)
 
 
-!       Check Dimensions
-        read(16,555,end=1990,err=1992)i_dim,j_dim,k_dim ! Read data
+!       check dimensions
+        read(16,555,end=1990,err=1992)i_dim,j_dim,k_dim ! read data
         if(i_dim .ne. imax .or. j_dim .ne. jmax
      1                   .or. k_dim .ne. kmax)then
-            write(6,*)' Clutter map has wrong dimensions'
+            write(6,*)' clutter map has wrong dimensions'
             istatus_2dref = 0
             istatus_3dref = 0
             return
         endif
 
-1400    read(16,1401,end=1990,err=1992)ext_gc,i4time_1,i4time_2 ! Read the time
+1400    read(16,1401,end=1990,err=1992)ext_gc,i4time_1,i4time_2 ! read the time
 1401    format(1x,a3,2(1x,i10))
 
         if(.not. l_clutter_found)n_gc_pot = 0
 
-1500    read(16,555,end=1990,err=1992)i_grid,j_grid,k_grid,l_data ! Read data
+1500    read(16,555,end=1990,err=1992)i_grid,j_grid,k_grid,l_data ! read data
 555     format(1x,3i3,i4)
 
-        if(l_data .eq. 9999)goto1400 ! Update the time if possible (EOData)
+        if(l_data .eq. 9999)goto1400 ! update the time if possible (eodata)
 
         if(i4time_1 .le. i4time_radar .and. i4time_radar .le. i4time_2
      1                    .and. ext_gc .eq. radarext(1:3)
@@ -456,20 +456,20 @@ cdoc    Called from lapsplot
 
 1990    close(16)
 
-1992    write(6,*)' # Grid boxes = ',n_gc_pot
+1992    write(6,*)' # grid boxes = ',n_gc_pot
 
         if(l_clutter_found)then
             istatus_2dref = 1
             istatus_3dref = 1
         else
-            write(6,*)' No Ground Clutter Map Found'
+            write(6,*)' no ground clutter map found'
             istatus_2dref = 0
             istatus_3dref = 0
         endif
 
         return
 
-        ENDIF ! MODE
+        endif ! mode
 
         call get_file_time(c_filespec,i4time_ref,i4time_radar)
 
@@ -477,29 +477,29 @@ cdoc    Called from lapsplot
 
         if(abs(i4time_radar - i4time_ref) .gt. i4time_tol)then
             write(6,101)i4time_tol,asc9_tim_radar
-101         format('  No radar data available within',i6,
+101         format('  no radar data available within',i6,
      1          ' sec of analysis time, nearest = ',a9)
             n_ref = 0
             n_vel = 0
             istatus_2dref = 0
             istatus_3dref = 0
 
-        else ! Radar data is in time window
+        else ! radar data is in time window
 
             if(l_conus_ref .or. l_nowrad_3dref)then
 
                 if(l_conus_ref)then
-!                   Read CONUS reflectivity data
+!                   read conus reflectivity data
 !                   call read_raw_conus_ref()
 !                   istatus_3dref = 1
                 elseif(l_nowrad_3dref)then
-!                   Read NOWRAD 3D reflectivity data
+!                   read nowrad 3d reflectivity data
 !                   call read_nowrad_3dref()
 !                   istatus_3dref = 1
                 endif
 
 
-            else ! Attempt to get reflectivity from V01/VRC
+            else ! attempt to get reflectivity from v01/vrc
 
                 call get_ref_base(ref_base,istatus)
                 if(istatus .ne. 1)then
@@ -510,35 +510,35 @@ cdoc    Called from lapsplot
 
                 i4_tol = 1200
 
-                call read_radar_3dref(i4time_radar,                   ! I
-     1               i4_tol,i4_ret,                                   ! I/O
-     1               l_apply_map,ref_base,                            ! I
-     1               imax,jmax,kmax,radarext,                         ! I
-     1               lat,lon,topo,l_low_fill,l_high_fill,             ! I
-     1               heights_3d,                                      ! I
-     1               grid_ra_ref,                                     ! O
-     1               rlat_radar,rlon_radar,rheight_radar,radar_name,  ! O
-     1               n_ref,istatus_2dref,istatus_3dref)               ! O
+                call read_radar_3dref(i4time_radar,                   ! i
+     1               i4_tol,i4_ret,                                   ! i/o
+     1               l_apply_map,ref_base,                            ! i
+     1               imax,jmax,kmax,radarext,                         ! i
+     1               lat,lon,topo,l_low_fill,l_high_fill,             ! i
+     1               heights_3d,                                      ! i
+     1               grid_ra_ref,                                     ! o
+     1               rlat_radar,rlon_radar,rheight_radar,radar_name,  ! o
+     1               n_ref,istatus_2dref,istatus_3dref)               ! o
 
             endif
 
-        endif ! Radar data is not in time window
+        endif ! radar data is not in time window
 
         return
         end
 
 
-        subroutine read_radar_3dref(i4time_radar,                        ! I
-     1   i4_tol,i4_ret,                                                  ! I/O
-     1   l_apply_map,ref_missing,                                        ! I
-     1   imax,jmax,kmax,radarext,                                        ! I
-     1   lat,lon,topo,l_low_fill,l_high_fill,                            ! I
-     1   heights_3d,                                                     ! I
-     1   grid_ra_ref,                                                    ! O
-     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                 ! O
-     1   n_ref_grids,istatus_2dref,istatus_3dref)                        ! O
+        subroutine read_radar_3dref(i4time_radar,                        ! i
+     1   i4_tol,i4_ret,                                                  ! i/o
+     1   l_apply_map,ref_missing,                                        ! i
+     1   imax,jmax,kmax,radarext,                                        ! i
+     1   lat,lon,topo,l_low_fill,l_high_fill,                            ! i
+     1   heights_3d,                                                     ! i
+     1   grid_ra_ref,                                                    ! o
+     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                 ! o
+     1   n_ref_grids,istatus_2dref,istatus_3dref)                        ! o
 
-!       Now a jacket routine without 'closest_radar' in the argument list
+!       now a jacket routine without 'closest_radar' in the argument list
 
         real grid_ra_ref(imax,jmax,kmax)
         real heights_3d(imax,jmax,kmax)
@@ -554,33 +554,33 @@ cdoc    Called from lapsplot
 
         logical l_low_fill,l_high_fill,l_apply_map
 
-        call read_radar_3dref_new(i4time_radar,                          ! I
-     1   i4_tol,i4_ret,                                                  ! I/O
-     1   l_apply_map,ref_missing,                                        ! I
-     1   imax,jmax,kmax,radarext,                                        ! I
-     1   lat,lon,topo,l_low_fill,l_high_fill,                            ! I
-     1   heights_3d,                                                     ! I
-     1   grid_ra_ref,                                                    ! O
-     1   closest_radar,                                                  ! O
-     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                 ! O
-     1   n_ref_grids,istatus_2dref,istatus_3dref)                        ! O
+        call read_radar_3dref_new(i4time_radar,                          ! i
+     1   i4_tol,i4_ret,                                                  ! i/o
+     1   l_apply_map,ref_missing,                                        ! i
+     1   imax,jmax,kmax,radarext,                                        ! i
+     1   lat,lon,topo,l_low_fill,l_high_fill,                            ! i
+     1   heights_3d,                                                     ! i
+     1   grid_ra_ref,                                                    ! o
+     1   closest_radar,                                                  ! o
+     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                 ! o
+     1   n_ref_grids,istatus_2dref,istatus_3dref)                        ! o
 
         return
         end
 
-        subroutine read_radar_3dref_new(i4time_radar,                    ! I
-     1   i4_tol,i4_ret,                                                  ! I/O
-     1   l_apply_map,ref_missing,                                        ! I
-     1   imax,jmax,kmax,radarext,                                        ! I
-     1   lat,lon,topo,l_low_fill,l_high_fill,                            ! I
-     1   heights_3d,                                                     ! I
-     1   grid_ra_ref,                                                    ! O
-     1   closest_radar,                                                  ! O
-     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                 ! O
-     1   n_ref_grids,istatus_2dref,istatus_3dref)                        ! O
+        subroutine read_radar_3dref_new(i4time_radar,                    ! i
+     1   i4_tol,i4_ret,                                                  ! i/o
+     1   l_apply_map,ref_missing,                                        ! i
+     1   imax,jmax,kmax,radarext,                                        ! i
+     1   lat,lon,topo,l_low_fill,l_high_fill,                            ! i
+     1   heights_3d,                                                     ! i
+     1   grid_ra_ref,                                                    ! o
+     1   closest_radar,                                                  ! o
+     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                 ! o
+     1   n_ref_grids,istatus_2dref,istatus_3dref)                        ! o
 
-cdoc    Steve Albers Feb 1998   This routine will read in a 3D radar
-cdoc                            reflectivity field. It is a jacket that
+cdoc    steve albers feb 1998   this routine will read in a 3d radar
+cdoc                            reflectivity field. it is a jacket that
 cdoc                            calls read_multiradar_3dref.
 
 
@@ -593,7 +593,7 @@ cdoc                            calls read_multiradar_3dref.
 
         real closest_radar(imax,jmax)
 
-!       If a grid "overall" has the following...
+!       if a grid "overall" has the following...
 !       2dref=1, 3dref=1 - echo top from radar has better confidence than
 !                          the associated cloud top from satellite
 !       2dref=1, 3dref=0 - echo top from radar has less confidence
@@ -615,11 +615,11 @@ cdoc                            calls read_multiradar_3dref.
 
         logical l_low_fill,l_high_fill,l_apply_map
 
-        write(6,*)' Subroutine read_radar_3dref'
+        write(6,*)' subroutine read_radar_3dref'
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading ref_base parameter'
+            write(6,*)' error reading ref_base parameter'
             n_2dref = 0
             n_3dref = 0
             goto900
@@ -627,7 +627,7 @@ cdoc                            calls read_multiradar_3dref.
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading ref_base parameter'
+            write(6,*)' error reading ref_base parameter'
             n_2dref = 0
             n_3dref = 0
             goto900
@@ -641,22 +641,22 @@ cdoc                            calls read_multiradar_3dref.
      1   heights_3d,
      1   grid_ra_ref,
      1   rlat_radar,rlon_radar,rheight_radar,radar_name,
-     1   iqc_2dref,closest_radar,                                       ! O
+     1   iqc_2dref,closest_radar,                                       ! o
      1   n_ref_grids,n_2dref,n_3dref,istatus_2dref_a,istatus_3dref_a)       
 
- 900    if(    n_2dref .eq. imax*jmax)then    ! Full coverage
+ 900    if(    n_2dref .eq. imax*jmax)then    ! full coverage
             istatus_2dref = +1                
-        elseif(n_2dref .gt. 0        )then    ! Partly missing
+        elseif(n_2dref .gt. 0        )then    ! partly missing
             istatus_2dref = -1                
-        else                                  ! All missing
+        else                                  ! all missing
             istatus_2dref = 0                 
         endif        
 
-        if(    n_3dref .eq. imax*jmax)then    ! Full coverage
+        if(    n_3dref .eq. imax*jmax)then    ! full coverage
             istatus_3dref = +1                
-        elseif(n_3dref .gt. 0        )then    ! Partly missing
+        elseif(n_3dref .gt. 0        )then    ! partly missing
             istatus_3dref = -1                
-        else                                  ! All missing
+        else                                  ! all missing
             istatus_3dref = 0                 
         endif        
 
@@ -666,32 +666,32 @@ cdoc                            calls read_multiradar_3dref.
         end
 
 
-        subroutine read_multiradar_3dref(i4time_radar,                  ! I
-     1   i4_tol,i4_ret,                                                 ! I
-     1   l_apply_map,ref_missing,                                       ! I
-     1   imax,jmax,kmax,radarext,                                       ! I
-     1   lat,lon,topo,l_low_fill,l_high_fill,                           ! I
-     1   heights_3d,                                                    ! I
-     1   grid_ra_ref,                                                   ! O
-     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                ! O
-     1   iqc_2dref,closest_radar,                                       ! O
-     1   n_ref_grids,n_2dref,n_3dref,istatus_2dref_a,istatus_3dref_a)   ! O 
+        subroutine read_multiradar_3dref(i4time_radar,                  ! i
+     1   i4_tol,i4_ret,                                                 ! i
+     1   l_apply_map,ref_missing,                                       ! i
+     1   imax,jmax,kmax,radarext,                                       ! i
+     1   lat,lon,topo,l_low_fill,l_high_fill,                           ! i
+     1   heights_3d,                                                    ! i
+     1   grid_ra_ref,                                                   ! o
+     1   rlat_radar,rlon_radar,rheight_radar,radar_name,                ! o
+     1   iqc_2dref,closest_radar,                                       ! o
+     1   n_ref_grids,n_2dref,n_3dref,istatus_2dref_a,istatus_3dref_a)   ! o 
 
-!       Steve Albers Nov 1998   This routine will read in a 3D radar
-!                               reflectivity field. It will either read
-!                               in 3D radar refs and do the vertical filling
-!                               procedure, or read in the 2D data and do
-!                               a quick and dirty vertical fill. Information
+!       steve albers nov 1998   this routine will read in a 3d radar
+!                               reflectivity field. it will either read
+!                               in 3d radar refs and do the vertical filling
+!                               procedure, or read in the 2d data and do
+!                               a quick and dirty vertical fill. information
 !                               is passed back about which data is 2d and which
 !                               is 3d.
 !
-!       SA           Jan 2003   The 'all' option is now being tested that 
-!                               merges 3D (vrz) and 2D (vrc) data.
-!                               The 'a01' option should merge (v01) with (vrc)
+!       sa           jan 2003   the 'all' option is now being tested that 
+!                               merges 3d (vrz) and 2d (vrc) data.
+!                               the 'a01' option should merge (v01) with (vrc)
 
         real grid_ra_ref(imax,jmax,kmax)
         real heights_3d(imax,jmax,kmax)
-        real radar_2dref(imax,jmax)                                     ! L
+        real radar_2dref(imax,jmax)                                     ! l
         real closest_vxx(imax,jmax)
         real closest_vrc(imax,jmax)
         real closest_radar(imax,jmax)
@@ -700,14 +700,14 @@ cdoc                            calls read_multiradar_3dref.
         real lon(imax,jmax)
         real topo(imax,jmax)
 
-!       If a grid element has the following...
+!       if a grid element has the following...
 !       2dref=1, 3dref=1 - echo top from radar has better confidence than
 !                          the associated cloud top from satellite
 !       2dref=1, 3dref=0 - echo top from radar has less confidence
 !       2dref=0, 3dref=0 - missing data
 
-!       iqc_2dref = 0 ! less confidence in 2dref data QC
-!       iqc_2dref = 1 ! more confidence in 2dref data (e.g. from NOWRAD)
+!       iqc_2dref = 0 ! less confidence in 2dref data qc
+!       iqc_2dref = 1 ! more confidence in 2dref data (e.g. from nowrad)
 
         integer istatus_2dref
         integer istatus_3dref
@@ -725,7 +725,7 @@ cdoc                            calls read_multiradar_3dref.
 
         logical l_low_fill,l_high_fill,l_apply_map, l_parse
 
-        write(6,*)' Subroutine read_multiradar_3dref'
+        write(6,*)' subroutine read_multiradar_3dref'
 
         istatus_2dref_a = 0
         istatus_3dref_a = 0
@@ -733,20 +733,20 @@ cdoc                            calls read_multiradar_3dref.
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading ref_base parameter'
+            write(6,*)' error reading ref_base parameter'
             goto900
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading ref_base parameter'
+            write(6,*)' error reading ref_base parameter'
             goto900
         endif
 
         closest_vxx = r_missing_data
         closest_radar = r_missing_data
 
-!       Initialize 3d reflectivity array with default value
+!       initialize 3d reflectivity array with default value
         grid_ra_ref = r_missing_data ! ref_base 
         radar_2dref = r_missing_data ! ref_base 
 
@@ -761,10 +761,10 @@ cdoc                            calls read_multiradar_3dref.
      1     radarext(1:2) .eq. 'v8' .or.
      1     radarext(1:2) .eq. 'v9' .or.
      1     radarext(1:3) .eq. 'vrz' .or.
-     1     radarext(1:1) .eq. 'a'   )then     ! Read Doppler 3-D radar ref data
-                                              ! from NetCDF VXX or VRZ file
+     1     radarext(1:1) .eq. 'a'   )then     ! read doppler 3-d radar ref data
+                                              ! from netcdf vxx or vrz file
 
-            write(6,*)' Reading Reflectivity Data from 3D file '
+            write(6,*)' reading reflectivity data from 3d file '
      1                                                 ,radarext
 
             if(radarext(1:3) .eq. 'all')then
@@ -775,8 +775,8 @@ cdoc                            calls read_multiradar_3dref.
                 readext = radarext
             endif
 
-!           Read Reflectivity
-            var_2d = 'REF'
+!           read reflectivity
+            var_2d = 'ref'
 
             if(readext(1:3) .ne. 'vrz')then ! read vxx file
                 call get_laps_3dgrid(i4time_radar,i4_tol,i4_ret
@@ -788,16 +788,16 @@ cdoc                            calls read_multiradar_3dref.
                 call get_max_radars(max_radars,istatus)
                 if(istatus .ne. 1)return
 
-                if(i4_tol .lt. 0)then ! Bypass reading of vrz
+                if(i4_tol .lt. 0)then ! bypass reading of vrz
                     istatus = 0
                 else
-                    call read_vrz_3dref(i4time_radar                     ! I
-     1                                 ,imax,jmax,kmax,max_radars        ! I
-     1                                 ,readext,var_2d                   ! I
-     1                                 ,lat,lon,topo                     ! I
-     1                                 ,grid_ra_ref                      ! O
-     1                                 ,closest_vxx                      ! O
-     1                                 ,istatus)                         ! O
+                    call read_vrz_3dref(i4time_radar                     ! i
+     1                                 ,imax,jmax,kmax,max_radars        ! i
+     1                                 ,readext,var_2d                   ! i
+     1                                 ,lat,lon,topo                     ! i
+     1                                 ,grid_ra_ref                      ! o
+     1                                 ,closest_vxx                      ! o
+     1                                 ,istatus)                         ! o
                     closest_radar = closest_vxx ! initialize
 
                 endif
@@ -812,7 +812,7 @@ cdoc                            calls read_multiradar_3dref.
 558                 format(2f9.3,f8.0,i7,a4)
 
                     if(l_low_fill .or. l_high_fill)then
-                        I4_elapsed = ishow_timer()
+                        i4_elapsed = ishow_timer()
                         call ref_fill_vert(grid_ra_ref,imax,jmax,kmax
      1                          ,l_low_fill,l_high_fill,lat,lon,topo
      1                          ,heights_3d
@@ -820,26 +820,26 @@ cdoc                            calls read_multiradar_3dref.
      1                          ,istatus_rfill)
 
                         if(istatus_rfill .eq. 1)then
-                            write(6,*)' Reflectivity data filled in'
+                            write(6,*)' reflectivity data filled in'
                         else
-                            write(6,*)' Reflectivity data fill error'
+                            write(6,*)' reflectivity data fill error'
                         endif
 
-                        I4_elapsed = ishow_timer()
+                        i4_elapsed = ishow_timer()
 
                     else
-                        write(6,*)' Reflectivity not filled in'
+                        write(6,*)' reflectivity not filled in'
 
                     endif ! vert_fill
 
-                    write(6,*)' Read radar ',radar_name,' Volume'
+                    write(6,*)' read radar ',radar_name,' volume'
 
                 else ! vrz mosaic
                     n_ref_grids = 0
                     rlat_radar = r_missing_data
                     rlon_radar = r_missing_data
                     rheight_radar = r_missing_data
-                    radar_name = 'MOSC' 
+                    radar_name = 'mosc' 
 
                 endif
 
@@ -853,7 +853,7 @@ cdoc                            calls read_multiradar_3dref.
 !                   endif
 !               endif
 
-!               Set status flags and closest 'vxx'
+!               set status flags and closest 'vxx'
 !               if(l_low_fill .or. l_high_fill .or. 
 !    1             radarext(1:3) .eq. 'vrz'                )then
                 if(.true.)then
@@ -887,18 +887,18 @@ cdoc                            calls read_multiradar_3dref.
                 endif
 
             else
-                write(6,*)' Radar reflectivity data cannot be read in: '       
+                write(6,*)' radar reflectivity data cannot be read in: '       
      1                    ,readext
 
-            endif ! Success as reflectivity
+            endif ! success as reflectivity
 
         endif ! 'vxx' or 'vrz'
 
         if(radarext(1:3) .eq. 'vrc' .or. radarext(1:1) .eq. 'a')then       
-50          write(6,*)' Reading NOWRAD/vrc data' ! lumped together for now?
+50          write(6,*)' reading nowrad/vrc data' ! lumped together for now?
 
             readext = 'vrc'
-            var_2d = 'REF'
+            var_2d = 'ref'
             call get_laps_2dgrid(i4time_radar,i4_tol,i4_ret,readext
      1                          ,var_2d,units_2d,comment_2d,imax,jmax
      1                          ,radar_2dref,0,istatus_vrc)
@@ -906,33 +906,33 @@ cdoc                            calls read_multiradar_3dref.
             write(6,*)' istatus_vrc = ',istatus_vrc
 
             if(istatus_vrc .eq. 1 .or. istatus_vrc .eq. -1)then       
-                var_2d = 'DIS'
+                var_2d = 'dis'
                 call get_laps_2d(i4_ret,readext
      1                          ,var_2d,units_2d,comment_2d,imax,jmax      
      1                          ,closest_vrc,istatus_dis)
 
-!               closest_vrc = 180000. ! This can be activated by commenting out
+!               closest_vrc = 180000. ! this can be activated by commenting out
 
                 if(istatus_dis .ne. 1 .and. istatus_dis .ne. -1)then
-                    write(6,*)' ERROR in get_radar: istatus_dis = '
+                    write(6,*)' error in get_radar: istatus_dis = '
      1                       ,istatus_dis
                     goto900
                 endif
 
-                if(l_parse(comment_2d,'WSI'))then
-                    radar_name = 'WSI '
-                    write(6,*)' Read radar ',radar_name
-     1                       ,' Low Level Mosaic'    
-                    iqc_2dref = 1 ! better quality QC
-                elseif(l_parse(comment_2d,'Radar mosaic'))then
+                if(l_parse(comment_2d,'wsi'))then
+                    radar_name = 'wsi '
+                    write(6,*)' read radar ',radar_name
+     1                       ,' low level mosaic'    
+                    iqc_2dref = 1 ! better quality qc
+                elseif(l_parse(comment_2d,'radar mosaic'))then
                     radar_name = '    '
                     write(6,*)
-     1                ' Read radar Narrowband Mosaic: # radars = '
+     1                ' read radar narrowband mosaic: # radars = '
      1                ,comment_2d(26:28)
                 else
                     len_comment = 37
                     radar_name = comment_2d(len_comment-3:len_comment)       
-                    write(6,*)' Read radar ',radar_name,' Low Level'
+                    write(6,*)' read radar ',radar_name,' low level'
                 endif 
                     
                 do i = 1,imax
@@ -943,7 +943,7 @@ cdoc                            calls read_multiradar_3dref.
                 enddo ! j
                 enddo ! i                 
 
-!               Conditionally fill up the 3D reflectivity array 
+!               conditionally fill up the 3d reflectivity array 
 !                          (useful for precip type, get_low_ref)
 
 !               if(l_low_fill .or. l_high_fill)then
@@ -954,7 +954,7 @@ cdoc                            calls read_multiradar_3dref.
 
                         closest_radar(i,j) = closest_vxx(i,j)
 
-!                       Set distant 3D radar points to msg to select NOWRAD/vrc
+!                       set distant 3d radar points to msg to select nowrad/vrc
                         if(closest_vxx(i,j) .ne. r_missing_data
      1               .and. closest_vxx(i,j) .gt. 
      1                                   closest_vrc(i,j) + 25000.)then       
@@ -963,7 +963,7 @@ cdoc                            calls read_multiradar_3dref.
                         endif
 
                         if(istatus_3dref_a(i,j) .eq. 0)then 
-                            do k = 1,kmax ! Fill column with NOWRAD/vrc
+                            do k = 1,kmax ! fill column with nowrad/vrc
 !                               if(grid_ra_ref(i,j,k).eq.r_missing_data      
 !    1                                                             )then       
                                     grid_ra_ref(i,j,k)=radar_2dref(i,j)      
@@ -977,7 +977,7 @@ cdoc                            calls read_multiradar_3dref.
                     enddo ! j
                     enddo ! i
 
-                endif ! l_low_fill OR l_high_fill
+                endif ! l_low_fill or l_high_fill
 
             endif ! good vrc status
 
@@ -991,7 +991,7 @@ cdoc                            calls read_multiradar_3dref.
 
         endif ! 'ln3'
 
-      ! Summary stats
+      ! summary stats
  900    n_2dref = 0
         n_3dref = 0
 
@@ -1018,8 +1018,8 @@ cdoc                            calls read_multiradar_3dref.
         pct_volume_coverage = float(n_3dref)/(imax*jmax) * 100.
 
         write(6,901)pct_radar_coverage,pct_volume_coverage
- 901    format(' Radar coverage is '      ,f6.2,'%    '
-     1        ,' Full volume coverage is ',f6.2,'%')
+ 901    format(' radar coverage is '      ,f6.2,'%    '
+     1        ,' full volume coverage is ',f6.2,'%')
 
         return
         end
@@ -1030,7 +1030,7 @@ cdoc                            calls read_multiradar_3dref.
      1                  imax,jmax,
      1                  ref_2d,istatus_2dref)
 
-!       Steve Albers Feb 1996   Reads Radar data into 2d REF arrays
+!       steve albers feb 1996   reads radar data into 2d ref arrays
 !           now called from (wind-derived via) get_radar_max_pd
 
 
@@ -1043,13 +1043,13 @@ cdoc                            calls read_multiradar_3dref.
 
         character*4 radar_name
 
-        write(6,*)' Subroutine read_radar_2dref'
+        write(6,*)' subroutine read_radar_2dref'
 
-50      write(6,*)' Reading VRC/NOWRAD data'
+50      write(6,*)' reading vrc/nowrad data'
 
-        radar_name = 'WSI '
+        radar_name = 'wsi '
 
-        var_2d = 'REF'
+        var_2d = 'ref'
         ext = 'vrc'
         call get_laps_2d(i4time_radar,ext,var_2d
      1          ,units_2d,comment_2d,imax,jmax,ref_2d,istatus_vrc)
@@ -1059,16 +1059,16 @@ cdoc                            calls read_multiradar_3dref.
         return
         end
 
-        subroutine read_radar_raw2d(i4time_radar,             ! I
-     1                  imax,jmax,                            ! I
-     1                  iradar                                ! I
-     1                  radar_name,                           ! O
-     1                  ref_2d,radar_dist_2d,istatus_2dref)   ! O
+        subroutine read_radar_raw2d(i4time_radar,             ! i
+     1                  imax,jmax,                            ! i
+     1                  iradar                                ! i
+     1                  radar_name,                           ! o
+     1                  ref_2d,radar_dist_2d,istatus_2dref)   ! o
 
-!       Read in unmosaiced radar data from 'vrc' files (under construction)
+!       read in unmosaiced radar data from 'vrc' files (under construction)
 
         real ref_2d(imax,jmax)
-        real radar_dist_2d(imax,jmax) ! Not yet filled
+        real radar_dist_2d(imax,jmax) ! not yet filled
 
         character*3 var_2d
         character*31  ext
@@ -1077,13 +1077,13 @@ cdoc                            calls read_multiradar_3dref.
 
         character*4 radar_name
 
-        write(6,*)' Subroutine read_radar_raw2d'
+        write(6,*)' subroutine read_radar_raw2d'
 
-50      write(6,*)' Reading VRC/NOWRAD data'
+50      write(6,*)' reading vrc/nowrad data'
 
-        radar_name = 'WSI '
+        radar_name = 'wsi '
 
-        var_2d = 'REF'
+        var_2d = 'ref'
         ext = 'vrc'
         call get_laps_2d(i4time_radar,ext,var_2d
      1          ,units_2d,comment_2d,imax,jmax,ref_2d,istatus_vrc)
@@ -1100,17 +1100,17 @@ cdoc                            calls read_multiradar_3dref.
      1   rlat_radar,rlon_radar,rheight_radar,radar_name,
      1   n_vel_grids,istatus_vel,istatus_nyq)
 
-!       Steve Albers Dec 7 1995 Reads Radar data into VEL array
-!                               This routine will be able to select between
+!       steve albers dec 7 1995 reads radar data into vel array
+!                               this routine will be able to select between
 !                               various sources of radar data over various
 !                               domains
 
-!       USER NOTE: Only one source of radar data per domain is currently
-!       permitted with read_radar. The constraint on this is setting up
+!       user note: only one source of radar data per domain is currently
+!       permitted with read_radar. the constraint on this is setting up
 !       the inputted time to work with multiple sources of radar data.
-!       This may be changed in the future. The likely place for the selection
+!       this may be changed in the future. the likely place for the selection
 !       of multiple radars is in the calling routine 'get_radar_data'.
-!       The domain must be specified using grid_fnam_common
+!       the domain must be specified using grid_fnam_common
 
 
         real grid_ra_vel(imax,jmax,kmax)
@@ -1130,33 +1130,33 @@ cdoc                            calls read_multiradar_3dref.
         character*80 grid_fnam_common
         common / grid_fnam_cmn / grid_fnam_common
 
-        write(6,*)' Subroutine read_radar_vel'
+        write(6,*)' subroutine read_radar_vel'
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading ref_base parameter'
+            write(6,*)' error reading ref_base parameter'
             istatus_vel = 0
             istatus_nyq = 0
             return
         endif
 
         if(radarext(1:3) .eq. 'vrc')then
-            write(6,*)' Error NOWRAD has no velocity data'
+            write(6,*)' error nowrad has no velocity data'
             istatus_vel = 0
 
-        else ! Read Doppler radar data from NetCDF files
-            write(6,*)' Reading Doppler Data from 3D file ',radarext
+        else ! read doppler radar data from netcdf files
+            write(6,*)' reading doppler data from 3d file ',radarext
 
             ext = radarext
 
-!           Read Velocity
-            var_2d = 'VEL'
+!           read velocity
+            var_2d = 'vel'
 
             write(6,*)
 
             call get_laps_3d(i4time_radar,imax,jmax,kmax,ext,var_2d
      1                    ,units_2d,comment_2d,grid_ra_vel,istatus_vel)
-            write(6,*)' Status of velocity = ',istatus_vel
+            write(6,*)' status of velocity = ',istatus_vel
 
             read(comment_2d,559,err=560)rlat_radar,rlon_radar
      1            ,rheight_radar
@@ -1166,20 +1166,20 @@ cdoc                            calls read_multiradar_3dref.
             print *, ' v_nyquist_in = ',v_nyquist_in
 
 
-            write(6,*)' Header info for radar: ',radar_name
+            write(6,*)' header info for radar: ',radar_name
             write(6,*)rlat_radar,rlon_radar,rheight_radar
      1                  ,n_vel_grids,v_nyquist_in
 
-!           Read Nyquist Velocity
-            var_2d = 'NYQ'
+!           read nyquist velocity
+            var_2d = 'nyq'
 
             write(6,*)
 
             call get_laps_3d(i4time_radar,imax,jmax,kmax,ext,var_2d
      1                    ,units_2d,comment_2d,grid_ra_nyq,istatus_nyq)
-            write(6,*)' Status of Nyquist velocity = ',istatus_nyq
+            write(6,*)' status of nyquist velocity = ',istatus_nyq
 
-        endif ! Test of extension (hence radar type )
+        endif ! test of extension (hence radar type )
 
         return
         end
@@ -1189,10 +1189,10 @@ cdoc                            calls read_multiradar_3dref.
 
         include 'trigd.inc'
 
-        use mem_namelist, ONLY: grid_spacing_m
+        use mem_namelist, only: grid_spacing_m
 
-!       Consider line segment from radar location to present location
-!       This version approximates the great circle from the radar to the 
+!       consider line segment from radar location to present location
+!       this version approximates the great circle from the radar to the 
 !       grid point using a straight line in map projection space
 
         real lat(ni,nj)
@@ -1264,7 +1264,7 @@ cdoc                            calls read_multiradar_3dref.
         if(          (.not. l_apply_map)
      1                                                  )goto1992
 
-!       Pull out static directory
+!       pull out static directory
         ext = grid_fnam_common
         call get_directory(ext,directory,len_dir)
 
@@ -1272,26 +1272,26 @@ cdoc                            calls read_multiradar_3dref.
      1  ,status='old',err=1991)
 
 
-!       Check Dimensions
-        read(16,555,end=1990,err=1992)i_dim,j_dim,k_dim ! Read data
+!       check dimensions
+        read(16,555,end=1990,err=1992)i_dim,j_dim,k_dim ! read data
         if(i_dim .ne. imax .or. j_dim .ne. jmax
      1                   .or. k_dim .ne. kmax)then
-            write(6,*)' Clutter map has wrong dimensions'
+            write(6,*)' clutter map has wrong dimensions'
             istatus_2dref = 0
             istatus_3dref = 0
             istatus_vel = 0
             return
         endif
 
-1400    read(16,1401,end=1990,err=1992)ext_gc,i4time_1,i4time_2 ! Read the time
+1400    read(16,1401,end=1990,err=1992)ext_gc,i4time_1,i4time_2 ! read the time
 1401    format(1x,a3,2(1x,i10))
 
         if(.not. l_clutter_found)n_gc_pot = 0
 
-1500    read(16,555,end=1990,err=1992)i_grid,j_grid,k_grid,l_data ! Read data
+1500    read(16,555,end=1990,err=1992)i_grid,j_grid,k_grid,l_data ! read data
 555     format(1x,3i3,i4)
 
-        if(l_data .eq. 9999)goto1400 ! Update the time if possible (EOData)
+        if(l_data .eq. 9999)goto1400 ! update the time if possible (eodata)
 
         if(i4time_1 .le. i4time_radar .and. i4time_radar .le. i4time_2
      1                    .and. ext_gc .eq. radarext(1:3)
@@ -1318,7 +1318,7 @@ cdoc                            calls read_multiradar_3dref.
 1991    if(l_clutter_found)then
 !           istatus = 1
         else
-            write(6,*)' No Ground Clutter Map Found'
+            write(6,*)' no ground clutter map found'
             istatus_2dref = 0
             istatus_3dref = 0
             istatus_vel = 0
@@ -1326,7 +1326,7 @@ cdoc                            calls read_multiradar_3dref.
         endif
 
 1992    if(no_laps_diag .eq. 0)
-     1  write(6,*)' # Grid boxes (gc/pot)  = ',n_gc_grids,n_gc_pot
+     1  write(6,*)' # grid boxes (gc/pot)  = ',n_gc_grids,n_gc_pot
 
         return
         end
@@ -1354,11 +1354,11 @@ cdoc                            calls read_multiradar_3dref.
         integer istatus_2dref_a(imax,jmax)
         integer istatus_3dref_a(imax,jmax)
 
-        write(6,*)' Subroutine read_nowrad_3dref'
+        write(6,*)' subroutine read_nowrad_3dref'
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading ref_base parameter'
+            write(6,*)' error reading ref_base parameter'
             istatus_2dref_a = 0
             istatus_3dref_a = 0
             return
@@ -1366,7 +1366,7 @@ cdoc                            calls read_multiradar_3dref.
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading r_missing_data parameter'
+            write(6,*)' error reading r_missing_data parameter'
             istatus_2dref_a = 0
             istatus_3dref_a = 0
             return
@@ -1375,55 +1375,55 @@ cdoc                            calls read_multiradar_3dref.
         icount_ref1 = 0
         icount_ref2 = 0
 
-        var_2d = 'R04'
+        var_2d = 'r04'
         ext = 'ln3'
         call get_laps_2d(i4time_radar,ext,var_2d
      1       ,units_2d,comment_2d,imax,jmax,ref_2d_04,istatus_nowrad)
 
         if(istatus_nowrad .ne. 1 .and. istatus_nowrad .ne. -1)then
-            write(6,*)' Could not read in ',var_2d
+            write(6,*)' could not read in ',var_2d
             istatus_2dref_a = 0
             istatus_3dref_a = 0
             return
         endif
 
-        var_2d = 'R48'
+        var_2d = 'r48'
         ext = 'ln3'
         call get_laps_2d(i4time_radar,ext,var_2d
      1       ,units_2d,comment_2d,imax,jmax,ref_2d_48,istatus_nowrad)
 
         if(istatus_nowrad .ne. 1 .and. istatus_nowrad .ne. -1)then
-            write(6,*)' Could not read in ',var_2d
+            write(6,*)' could not read in ',var_2d
             istatus_2dref_a = 0
             istatus_3dref_a = 0
             return
         endif
 
-        var_2d = 'R8C'
+        var_2d = 'r8c'
         ext = 'ln3'
         call get_laps_2d(i4time_radar,ext,var_2d
      1       ,units_2d,comment_2d,imax,jmax,ref_2d_8c,istatus_nowrad)
 
         if(istatus_nowrad .ne. 1 .and. istatus_nowrad .ne. -1)then
-            write(6,*)' Could not read in ',var_2d
+            write(6,*)' could not read in ',var_2d
             istatus_2dref_a = 0
             istatus_3dref_a = 0
             return
         endif
 
-        var_2d = 'ET'
+        var_2d = 'et'
         ext = 'ln3'
         call get_laps_2d(i4time_radar,ext,var_2d
      1       ,units_2d,comment_2d,imax,jmax,ref_2d_et,istatus_nowrad)
 
         if(istatus_nowrad .ne. 1 .and. istatus_nowrad .ne. -1)then
-            write(6,*)' Could not read in ',var_2d
+            write(6,*)' could not read in ',var_2d
             istatus_2dref_a = 0
             istatus_3dref_a = 0
             return
         endif
 
-!       Now we process the layer reflectivities into the 3-D grid
+!       now we process the layer reflectivities into the 3-d grid
         do k = 1,kmax
         do j = 1,jmax
         do i = 1,imax
@@ -1483,7 +1483,7 @@ cdoc                            calls read_multiradar_3dref.
                 icount_ref1 = icount_ref1 + 1
             endif
 
-!           Determine effective echo top
+!           determine effective echo top
             if(ref_2d_et(i,j) .eq. r_missing_data)then
                 echo_top = 10000.
             elseif(ref_2d_et(i,j) .ge. 10000.)then
@@ -1492,7 +1492,7 @@ cdoc                            calls read_multiradar_3dref.
                 echo_top = 10000.
             endif
 
-!           Clear echo out if we are above echo top
+!           clear echo out if we are above echo top
             if(heights_3d(i,j,k) .gt. echo_top)then ! set echo to ref_base
                 ref_3d(i,j,k) = -10.
             endif
@@ -1515,15 +1515,15 @@ cdoc                            calls read_multiradar_3dref.
         end
 
 
-        subroutine read_vrz_3dref(i4time_radar                      ! I
-     1                           ,imax,jmax,kmax,max_radars         ! I
-     1                           ,ext,var_2d                        ! I
-     1                           ,lat,lon,topo                      ! I
-     1                           ,ref_3d                            ! O
-     1                           ,closest_vxx                       ! O
-     1                           ,istatus)                          ! O
+        subroutine read_vrz_3dref(i4time_radar                      ! i
+     1                           ,imax,jmax,kmax,max_radars         ! i
+     1                           ,ext,var_2d                        ! i
+     1                           ,lat,lon,topo                      ! i
+     1                           ,ref_3d                            ! o
+     1                           ,closest_vxx                       ! o
+     1                           ,istatus)                          ! o
 
-        character*(*) EXT, var_2d
+        character*(*) ext, var_2d
 
         real ref_3d(imax,jmax,kmax)
         real closest_vxx(imax,jmax)
@@ -1544,12 +1544,12 @@ cdoc                            calls read_multiradar_3dref.
         character*40 comment_tmp
         character*10 units_3d(kmax)           
         character*3 var_3d(kmax)
-        integer LVL_3d(kmax)
-        character*4 LVL_COORD_3d(kmax)
+        integer lvl_3d(kmax)
+        character*4 lvl_coord_3d(kmax)
 
         logical ltest_vertical_grid
 
-        write(6,*)' Subroutine read_vrz_3dref'
+        write(6,*)' subroutine read_vrz_3dref'
 
         call get_directory(ext,directory,len_dir)
 
@@ -1570,15 +1570,15 @@ cdoc                            calls read_multiradar_3dref.
 11      format('  read_vrz_3dref: ',a,1x,a,1x,a,1x,a)
 
         do k = 1,kmax
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(k) = zcoord_of_level(k)/10
-                lvl_coord_3d(k) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+                lvl_coord_3d(k) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
                 lvl_3d(k) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(k) = 'MB'
+                lvl_coord_3d(k) = 'mb'
             else
-                write(6,*)' Error, vertical grid not supported,'
-     1                   ,' this routine supports PRESSURE or HEIGHT'
+                write(6,*)' error, vertical grid not supported,'
+     1                   ,' this routine supports pressure or height'
                 istatus = 0
                 return
             endif
@@ -1587,25 +1587,25 @@ cdoc                            calls read_multiradar_3dref.
 
         enddo ! k
 
-        CALL READ_LAPS_DATA(i4time_radar,DIRECTORY,EXT,imax,jmax,
-     1  kmax,kmax,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1                     COMMENT_3D,ref_3d,ISTATUS)
+        call read_laps_data(i4time_radar,directory,ext,imax,jmax,
+     1  kmax,kmax,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1                     comment_3d,ref_3d,istatus)
         if(istatus .ne. 1)return
 
-!       Read radar info from comments
+!       read radar info from comments
         read(comment_3d(1),101)n_radars
  101    format(25x,i3)
 
         if(n_radars .le. max_radars)then
             write(6,*)' n_radars/max_radars = ',n_radars,max_radars       
         else
-            write(6,*)' ERROR in read_vrz_3dref: n_radars > max_radars'       
+            write(6,*)' error in read_vrz_3dref: n_radars > max_radars'       
      1           ,n_radars,max_radars
             istatus = 0
             return
         endif
 
-!       Read comments from 6 columns each 40 characters wide
+!       read comments from 6 columns each 40 characters wide
         nch=40
         do i_radar = 1,n_radars
             if(i_radar .le. (kmax-1) )then       ! read in 1st column
@@ -1622,8 +1622,8 @@ cdoc                            calls read_multiradar_3dref.
      1                               ,c_radar_id(i_radar)
 1               format(2f9.3,f8.0,i7,a4)
 
-                write(6,*)' Read radar ',c_radar_id(i_radar)
-     1                   ,' Volume (via 3d-mosaic)'
+                write(6,*)' read radar ',c_radar_id(i_radar)
+     1                   ,' volume (via 3d-mosaic)'
 
             elseif(i_radar .le. 2*(kmax-1) )then ! read in 2nd column
                 ii = i_radar - (kmax-1) + 1
@@ -1634,8 +1634,8 @@ cdoc                            calls read_multiradar_3dref.
      1                            ,n_ref
      1                            ,c_radar_id(i_radar)
 
-                write(6,*)' Read radar ',c_radar_id(i_radar)
-     1                   ,' Volume (via 3d-mosaic)'
+                write(6,*)' read radar ',c_radar_id(i_radar)
+     1                   ,' volume (via 3d-mosaic)'
 
             elseif(i_radar .le. 3*(kmax-1) )then ! read in 3rd column
                 ii = i_radar - (2*(kmax-1)) + 1
@@ -1646,8 +1646,8 @@ cdoc                            calls read_multiradar_3dref.
      1                            ,n_ref
      1                            ,c_radar_id(i_radar)
 
-                write(6,*)' Read radar ',c_radar_id(i_radar)
-     1                   ,' Volume (via 3d-mosaic)'
+                write(6,*)' read radar ',c_radar_id(i_radar)
+     1                   ,' volume (via 3d-mosaic)'
 
             elseif(i_radar .le. 4*(kmax-1) )then ! read in 4th column
                 ii = i_radar - (3*(kmax-1)) + 1
@@ -1658,8 +1658,8 @@ cdoc                            calls read_multiradar_3dref.
      1                            ,n_ref
      1                            ,c_radar_id(i_radar)
 
-                write(6,*)' Read radar ',c_radar_id(i_radar)
-     1                   ,' Volume (via 3d-mosaic)'
+                write(6,*)' read radar ',c_radar_id(i_radar)
+     1                   ,' volume (via 3d-mosaic)'
 
             elseif(i_radar .le. 5*(kmax-1) )then ! read in 5th column
                 ii = i_radar - (4*(kmax-1)) + 1
@@ -1670,8 +1670,8 @@ cdoc                            calls read_multiradar_3dref.
      1                            ,n_ref
      1                            ,c_radar_id(i_radar)
 
-                write(6,*)' Read radar ',c_radar_id(i_radar)
-     1                   ,' Volume (via 3d-mosaic)'
+                write(6,*)' read radar ',c_radar_id(i_radar)
+     1                   ,' volume (via 3d-mosaic)'
 
             elseif(i_radar .le. 6*(kmax-1) )then ! read in 6th column
                 ii = i_radar - (5*(kmax-1)) + 1
@@ -1682,13 +1682,13 @@ cdoc                            calls read_multiradar_3dref.
      1                            ,n_ref
      1                            ,c_radar_id(i_radar)
 
-                write(6,*)' Read radar ',c_radar_id(i_radar)
-     1                   ,' Volume (via 3d-mosaic)'
+                write(6,*)' read radar ',c_radar_id(i_radar)
+     1                   ,' volume (via 3d-mosaic)'
 
             else
                 write(6,*)
-     1          ' Error: too many radars for comment output'
-                write(6,*)' Limit is ',i_radar-1
+     1          ' error: too many radars for comment output'
+                write(6,*)' limit is ',i_radar-1
                 istatus = 0
                 return
 
@@ -1696,7 +1696,7 @@ cdoc                            calls read_multiradar_3dref.
 
         enddo ! i_radar
 
-!       Create closest radar array (assumes lat/lon projection) 
+!       create closest radar array (assumes lat/lon projection) 
         do j=1,jmax
         do i=1,imax
            distmin=r_missing_data
@@ -1724,8 +1724,8 @@ cdoc                            calls read_multiradar_3dref.
         return
         end
 
-        subroutine get_l_offset_radar(nx_l,ny_l,grid_spacing_cen_m,     ! I
-     1                                nx_r,ny_r,igrid_r,l_offset_radar) ! O    
+        subroutine get_l_offset_radar(nx_l,ny_l,grid_spacing_cen_m,     ! i
+     1                                nx_r,ny_r,igrid_r,l_offset_radar) ! o    
 
         use mem_namelist, only: i_offset_radar
 
@@ -1736,24 +1736,24 @@ cdoc                            calls read_multiradar_3dref.
         nx_r_pot = (2 * igrid_r) + 1
         ny_r_pot = (2 * igrid_r) + 1
         write(6,1)i_offset_radar,nx_r_pot,ny_r_pot,nx_l,ny_l
- 1      format(' Potential offset radar arrays:',i3,2i6,3x,2i6)
+ 1      format(' potential offset radar arrays:',i3,2i6,3x,2i6)
 
         if(i_offset_radar .eq. 1)then
             l_offset_radar = .true.
             if(nx_r_pot**2 .gt. nx_l*ny_l)then ! offset arrays are larger                     
-                write(6,*)' Warning: offset arrays are larger than grid'
+                write(6,*)' warning: offset arrays are larger than grid'
             endif
             nx_r = nx_r_pot
             ny_r = ny_r_pot
         elseif(i_offset_radar .eq. 0)then
             if(nx_r_pot**2 .gt. nx_l*ny_l)then ! offset arrays are larger                     
-                write(6,*)' Offset arrays are larger than grid'
+                write(6,*)' offset arrays are larger than grid'
                 nx_r = nx_l
                 ny_r = ny_l
                 igrid_r = 0 ! dummy value
                 l_offset_radar = .false.
             else
-                write(6,*)' Offset arrays are within grid'
+                write(6,*)' offset arrays are within grid'
                 nx_r = nx_r_pot
                 ny_r = ny_r_pot
                 l_offset_radar = .true.
@@ -1771,10 +1771,10 @@ cdoc                            calls read_multiradar_3dref.
         end
 
 
-        subroutine get_ij_offset_radars(nx_l,ny_l,n_radars,               ! I
-     1                                  igrid_r,l_offset_radar,           ! I   
-     1                                  lat,lon,rlat_radar,rlon_radar,    ! I
-     1                                  ioffset,joffset)                  ! O
+        subroutine get_ij_offset_radars(nx_l,ny_l,n_radars,               ! i
+     1                                  igrid_r,l_offset_radar,           ! i   
+     1                                  lat,lon,rlat_radar,rlon_radar,    ! i
+     1                                  ioffset,joffset)                  ! o
 
         real lat(nx_l,ny_l),lon(nx_l,ny_l)
         real rlat_radar(n_radars),rlon_radar(n_radars)
@@ -1801,7 +1801,7 @@ cdoc                            calls read_multiradar_3dref.
      1               'computing ri/rj for radar (outside domain)'
                 endif
 
-!               Offset is location of lower left corner of small array in the large array
+!               offset is location of lower left corner of small array in the large array
                 ioffset(k) = (nint(ri) - igrid_r) - 1
                 joffset(k) = (nint(rj) - igrid_r) - 1
 

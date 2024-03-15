@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -42,7 +42,7 @@ cdis
      1                      ,clow_in,chigh_in,cint_in,plot_parms
      1                      ,i1,i2,i3,i4)
 
-!     97-Aug-17     Ken Dritz     Commented out assignment to r_missing_data
+!     97-aug-17     ken dritz     commented out assignment to r_missing_data
 !                                 and inserted call to get_r_missing_data
 
       include 'lapsplot.inc'
@@ -56,9 +56,9 @@ cdis
 
       c_blank = '   '
 
-      NF = 51
+      nf = 51
 
-      call gflas1(NF)
+      call gflas1(nf)
       call gflas2()
 
 !     call color
@@ -66,7 +66,7 @@ cdis
 !     r_missing_data = 1.e37
       call get_r_missing_data(r_missing_data,istatus)
       if (istatus .ne. 1) then
-         write (6,*) 'Error getting r_missing_data in conrec_line'
+         write (6,*) 'error getting r_missing_data in conrec_line'
          stop
       endif
 
@@ -91,7 +91,7 @@ cdis
      1                ,clow,chigh,cint,lis,ihl
 
       call plot_contour
-     1  (NF,ni,nii,nj,field,c_blank,cint,cl,ch,c_blank,4,ihl
+     1  (nf,ni,nii,nj,field,c_blank,cint,cl,ch,c_blank,4,ihl
      1      ,clow,chigh,plot_parms,lis,r_missing_data)
 
       return
@@ -99,224 +99,224 @@ cdis
 
 
 
-      SUBROUTINE PLOT_CONTOUR(NF, MX, NX, NY, F, LAB1, FINT, FMIN, FMAX,
-     + TIMELABEL,NC,IHL,clow,chigh,plot_parms,lis,r_missing_data)
-C
-C PURPOSE       Plot contours of F(NX,NY).
-C
-C ARGUMENTS     NF --- I  flash buffer to be used
-C               MX --- I  maximum size of first dimension of F
-C               NX --- I  actual size of first dimension of F
-C               NY --- I  actual size of second dimension of F
-C               F ---- I  two dimensional array to be contoured
-C               LAB1 - I  user-supplied plot label
-C               FINT - I  contour interval (if 0., .1*(FMAX-FMIN) is used)
-C               FMIN -  O minimum grid value
-C               FMAX -  O maximum grid value
-C               TIMELABEL - I string
-C               NC   - I  contour color index
-C               IHL  - I  flag as whether to plot high/low labels
-C
-C
+      subroutine plot_contour(nf, mx, nx, ny, f, lab1, fint, fmin, fmax,
+     + timelabel,nc,ihl,clow,chigh,plot_parms,lis,r_missing_data)
+c
+c purpose       plot contours of f(nx,ny).
+c
+c arguments     nf --- i  flash buffer to be used
+c               mx --- i  maximum size of first dimension of f
+c               nx --- i  actual size of first dimension of f
+c               ny --- i  actual size of second dimension of f
+c               f ---- i  two dimensional array to be contoured
+c               lab1 - i  user-supplied plot label
+c               fint - i  contour interval (if 0., .1*(fmax-fmin) is used)
+c               fmin -  o minimum grid value
+c               fmax -  o maximum grid value
+c               timelabel - i string
+c               nc   - i  contour color index
+c               ihl  - i  flag as whether to plot high/low labels
+c
+c
 
 
       include 'lapsplot.inc'
 
-      PARAMETER (N2X=400)
-      INTEGER NF, MX, NX, NY, IVAR
-      REAL F1(N2X,N2X),HOLD(N2X,2)
-      REAL F(MX,NY), FINT, FMIN, FMAX, machine_epsilon_p
+      parameter (n2x=400)
+      integer nf, mx, nx, ny, ivar
+      real f1(n2x,n2x),hold(n2x,2)
+      real f(mx,ny), fint, fmin, fmax, machine_epsilon_p
 
-      CHARACTER*48 LAB3
-      CHARACTER*48 TIMELABEL
-      CHARACTER*48 LAB1
+      character*48 lab3
+      character*48 timelabel
+      character*48 lab1
 
-      PARAMETER (LRWK=64000, LIWK=64000)
+      parameter (lrwk=64000, liwk=64000)
 
-      REAL RWRK(LRWK)
-      INTEGER IWRK(LIWK)
+      real rwrk(lrwk)
+      integer iwrk(liwk)
 
       integer hic,hlc
 
-      REAL SCALE
-      DATA SCALE /1.1/
+      real scale
+      data scale /1.1/
 
       parameter (machine_epsilon_p = 1.19e-07)  ! from iftran.im - bj
-      COMMON /SAVMAP/
-     .  MX1, MX2, MY1, MY2,
-     .  U1,  U2,  V1,  V2
-      COMMON /FXFY1/ XA, YA, UA, VA, U1A, V1A, DUDI, DVDJ
+      common /savmap/
+     .  mx1, mx2, my1, my2,
+     .  u1,  u2,  v1,  v2
+      common /fxfy1/ xa, ya, ua, va, u1a, v1a, dudi, dvdj
 
-        COMMON /NXNY/ NX1,NY1
+        common /nxny/ nx1,ny1
         common /icol_index/ icol_current
         common /zoom/       zoom
 
 c ... compare,spv def'n from iftran.im/b. jewett
       compare(a,b,c)=((int(sign(1.,c-abs(a-b)))+1)/2)
-      spv(a) = compare(a,SPVAL_P,0.01)
+      spv(a) = compare(a,spval_p,0.01)
 
-        SPVAL_P=r_missing_data
+        spval_p=r_missing_data
 
-        FMIN0 = FMIN
-        FMAX0 = FMAX
+        fmin0 = fmin
+        fmax0 = fmax
 
-        NX1 = NX
-        NY1 = NY
-        NX2X = NX*2-1
-        NY2X = NY*2-1
+        nx1 = nx
+        ny1 = ny
+        nx2x = nx*2-1
+        ny2x = ny*2-1
 
-!       MAXCHR = 'X'
-!       MINCHR = 'N'
+!       maxchr = 'x'
+!       minchr = 'n'
 
-C
-C     CALC MAX AND MIN OF F
-C
-      FMAX = -1.E8
-      FMIN =  1.E8
-      DO 55 J=1,NY
-        DO 60 I=1,NX
-!         IF (SPV(F(I,J)) .EQ. NO_P)
-          IF (SPV(F(I,J)) .EQ. 0)
-     .    THEN
+c
+c     calc max and min of f
+c
+      fmax = -1.e8
+      fmin =  1.e8
+      do 55 j=1,ny
+        do 60 i=1,nx
+!         if (spv(f(i,j)) .eq. no_p)
+          if (spv(f(i,j)) .eq. 0)
+     .    then
 !          if(f(i,j) .ne. r_missing_data)then
-            IF (F(I,J).GT.FMAX) FMAX=F(I,J)
-            IF (F(I,J).LT.FMIN) FMIN=F(I,J)
+            if (f(i,j).gt.fmax) fmax=f(i,j)
+            if (f(i,j).lt.fmin) fmin=f(i,j)
 !          endif
-          END IF
-60      CONTINUE
-55    CONTINUE
-C
-C     TEST FOR ZERO FINT
-C
-      IF (FINT .LE. MACHINE_EPSILON_P) THEN
-        DF = .1*(FMAX-FMIN)
-      ELSE
-        DF = FINT
-      END IF
+          end if
+60      continue
+55    continue
+c
+c     test for zero fint
+c
+      if (fint .le. machine_epsilon_p) then
+        df = .1*(fmax-fmin)
+      else
+        df = fint
+      end if
 
-      WRITE(6,5) FMIN,FMAX,DF
-5     FORMAT(/,' MIN = ',G12.5,5X,'MAX = ',
-     .  G12.5,5X,' PLOT INTERVAL = ',G12.5)
-C
-C    PLOT IF THERE IS ADEQUATE FIELD VARIATION
-C
+      write(6,5) fmin,fmax,df
+5     format(/,' min = ',g12.5,5x,'max = ',
+     .  g12.5,5x,' plot interval = ',g12.5)
+c
+c    plot if there is adequate field variation
+c
 
-        write(LAB3,101)  FMAX,FMIN,DF
-  101   FORMAT(2X,'MAX=',F10.3,2X,'MIN=',F10.3,2X,'INT=',F8.3,2X)
+        write(lab3,101)  fmax,fmin,df
+  101   format(2x,'max=',f10.3,2x,'min=',f10.3,2x,'int=',f8.3,2x)
 
-        call gflas3(NF)
+        call gflas3(nf)
 
-!       CALL SET (0.,1.,0.,1.,0.,1.,0.,1.,1)
+!       call set (0.,1.,0.,1.,0.,1.,0.,1.,1)
 
-        IF (NC.EQ.1) CALL PLCHHQ (0.0,0.88,TIMELABEL,0.018,0.,-1.)
-!       CALL PCSETI ('CC - CHARACTER COLOR', 7+NC)
-!       CALL PLCHHQ (0.45,0.14-(NC-1)*0.02, LAB3   , .01,
+        if (nc.eq.1) call plchhq (0.0,0.88,timelabel,0.018,0.,-1.)
+!       call pcseti ('cc - character color', 7+nc)
+!       call plchhq (0.45,0.14-(nc-1)*0.02, lab3   , .01,
 !    1       0., -1.)
-        CALL PLCHHQ (0.05,0.14-(NC-1)*0.02, LAB1   , .01,
+        call plchhq (0.05,0.14-(nc-1)*0.02, lab1   , .01,
      1       0., -1.)
 
-!       FMIN = CEILING2(FMIN,DF,MACHINE_EPSILON_P)   ! Minimum contour
-        SPVALU=SPVAL_P
-!       CALL FXFY(NF)                               ! Initialize FX and FY fcns
+!       fmin = ceiling2(fmin,df,machine_epsilon_p)   ! minimum contour
+        spvalu=spval_p
+!       call fxfy(nf)                               ! initialize fx and fy fcns
 
 
 
-        NULBLL = 1         ! number of unlabelled lines between labelled ones
-        NHI = -1
+        nulbll = 1         ! number of unlabelled lines between labelled ones
+        nhi = -1
 
-C --- Do contouring
+c --- do contouring
 !       if (ihl.ge.1) then
 
         if (.true.) then
-!         call CPSETR('HLS  - HIGH/LOW LABEL SIZE',.020)
-          call CPSETR('HLS  - HIGH/LOW LABEL SIZE',.013)
-          call CPSETC('ILT',' ')
+!         call cpsetr('hls  - high/low label size',.020)
+          call cpsetr('hls  - high/low label size',.013)
+          call cpsetc('ilt',' ')
 
-          if(FMAX .eq. 100. .and. FMIN .le. 5.0)then ! RH case
-              NSD = 3
-              NLS = 1
-          elseif(FMAX .ge. 1000. .and. FMAX .le. 1100.
-     1     .and. FMIN .gt. 500.  .and. FMIN .lt. 1000.)then ! STNP case
-              NSD = 3
-              NLS = 1
+          if(fmax .eq. 100. .and. fmin .le. 5.0)then ! rh case
+              nsd = 3
+              nls = 1
+          elseif(fmax .ge. 1000. .and. fmax .le. 1100.
+     1     .and. fmin .gt. 500.  .and. fmin .lt. 1000.)then ! stnp case
+              nsd = 3
+              nls = 1
           else ! general case
-              NSD = 2
-              NLS = 1
+              nsd = 2
+              nls = 1
           endif
 
-          call cpseti('NSD',NSD)
-          call cpseti('NLS',NLS)
+          call cpseti('nsd',nsd)
+          call cpseti('nls',nls)
 
-          write(6,*)' FMAX/NSD/NLS = ',FMAX,NSD,NLS
+          write(6,*)' fmax/nsd/nls = ',fmax,nsd,nls
 
-          CALL CPSETI ('HIC', icol_current)
-          CALL CPSETI ('LOC', icol_current)
-          CALL CPSETI ('HLC', icol_current)
+          call cpseti ('hic', icol_current)
+          call cpseti ('loc', icol_current)
+          call cpseti ('hlc', icol_current)
 
-!         if (ihl.ge.2) call cpsetc('HLT',' ')
+!         if (ihl.ge.2) call cpsetc('hlt',' ')
 
         end if
 
-!       call cpsetr ('LLS',.040)
-        call cpseti ('CLS - contour level selection flag',20)
-        call cpsetr ('CIS',DF)
-        call cpseti ('LIS - label interval specifier',lis)
-!       call cpseti ('LLP', 2)
-!       call cpsetr ('CMN',FMIN)
-!       call cpsetr ('CMX',FMAX)
-        call cpsetr ('CMN',clow)
-        call cpsetr ('CMX',chigh)
-        call cpsetr ('SPV',SPVALU)
-!       call cpsetr ('LLS - LINE LABEL SIZE',.025/sqrt(zoom))
-        call cpsetr ('LLS - LINE LABEL SIZE',.025)
-        call cpgetr ('LLS - LINE LABEL SIZE',clls)           
-        call cpgetr ('HLS',hls)           
-        call cpsetr ('CWM',1.00/sqrt(zoom))
+!       call cpsetr ('lls',.040)
+        call cpseti ('cls - contour level selection flag',20)
+        call cpsetr ('cis',df)
+        call cpseti ('lis - label interval specifier',lis)
+!       call cpseti ('llp', 2)
+!       call cpsetr ('cmn',fmin)
+!       call cpsetr ('cmx',fmax)
+        call cpsetr ('cmn',clow)
+        call cpsetr ('cmx',chigh)
+        call cpsetr ('spv',spvalu)
+!       call cpsetr ('lls - line label size',.025/sqrt(zoom))
+        call cpsetr ('lls - line label size',.025)
+        call cpgetr ('lls - line label size',clls)           
+        call cpgetr ('hls',hls)           
+        call cpsetr ('cwm',1.00/sqrt(zoom))
 
 
-        CALL CPRECT (F,NX,NX,NY,RWRK,LRWK,IWRK,LIWK)
-        CALL CPPKCL (F,RWRK,IWRK)
+        call cprect (f,nx,nx,ny,rwrk,lrwk,iwrk,liwk)
+        call cppkcl (f,rwrk,iwrk)
        if (ihl.ge.1) then
         call cplbdr (f,rwrk,lwrk)
        end if
 
 
-        CALL CPGETI ('NCL - NUMBER OF CONTOUR LEVELS', NCON)
-        DO 111 I=1,NCON
-          CALL CPSETI ('PAI - PARAMETER ARRAY INDEX', I)
-          call cpgetr ('CLV - contour level values',cval)
+        call cpgeti ('ncl - number of contour levels', ncon)
+        do 111 i=1,ncon
+          call cpseti ('pai - parameter array index', i)
+          call cpgetr ('clv - contour level values',cval)
           if (cval.lt.0.) then
-            call cpseti ('CLD',61166)
+            call cpseti ('cld',61166)
           else
-            call cpseti ('CLD',65535)
+            call cpseti ('cld',65535)
           end if
-          call cpseti ('CLL',plot_parms%contour_line_width)       ! Line Width
-!         CALL CPSETI ('CLC - CONTOUR LINE COLOR INDEX', 7+NC)
-111     CONTINUE
+          call cpseti ('cll',plot_parms%contour_line_width)       ! line width
+!         call cpseti ('clc - contour line color index', 7+nc)
+111     continue
 
-        CALL CPCLDR (F,RWRK,IWRK)
+        call cpcldr (f,rwrk,iwrk)
 
         isize=7
-        CALL PWRIT (MX1,MY2,' ',1,0,0,0)
-        CALL SFLUSH                                  ! Flush frame buffer
+        call pwrit (mx1,my2,' ',1,0,0,0)
+        call sflush                                  ! flush frame buffer
 
-        CALL cpgeti ('LIU', liu)
-        CALL cpgeti ('LLP', llp)
-        CALL cpgeti ('HIC', hic)
-        CALL cpgeti ('HLC', hlc)
-        CALL cpgeti ('LOC', loc)
+        call cpgeti ('liu', liu)
+        call cpgeti ('llp', llp)
+        call cpgeti ('hic', hic)
+        call cpgeti ('hlc', hlc)
+        call cpgeti ('loc', loc)
 
-        write(6,*)'NCON/IHL / HLS / HIC/HLC/LOC/LLP/LLS/LIS/LIU/ICOL = '
-        write(6,*) NCON,IHL,hls,hic,hlc,loc,llp,clls,lis,liu
+        write(6,*)'ncon/ihl / hls / hic/hlc/loc/llp/lls/lis/liu/icol = '
+        write(6,*) ncon,ihl,hls,hic,hlc,loc,llp,clls,lis,liu
      1             ,icol_current
 
 
-        WRITE(6,155)
-155     FORMAT(' THE FIELD HAS BEEN PLOTTED')
+        write(6,155)
+155     format(' the field has been plotted')
 
 
-      RETURN
-      END
+      return
+      end
 
 cccccccccccccccccccccccccccccc  ceiling2  cccccccccccccccccccccccccccc
 c
@@ -339,136 +339,136 @@ c
         end
 
 
-        SUBROUTINE FILL (XWRK,YWRK,NWRK,IAREA,IGRP,NGRPS)
-C
-        DIMENSION XWRK(*),YWRK(*),IAREA(*),IGRP(*)
+        subroutine fill (xwrk,ywrk,nwrk,iarea,igrp,ngrps)
+c
+        dimension xwrk(*),ywrk(*),iarea(*),igrp(*)
 
-        DO 10, I=1,NGRPS
-          IF (IGRP(I).EQ.3) IAREA3=IAREA(I)
- 10     CONTINUE
+        do 10, i=1,ngrps
+          if (igrp(i).eq.3) iarea3=iarea(i)
+ 10     continue
 
-        IF (IAREA3 .GT. 0) THEN
-C If the area is defined by 3 or more points, fill it
-           CALL GSFACI(IAREA3+1)
-           CALL GFA(NWRK,XWRK,YWRK)
-        ENDIF
+        if (iarea3 .gt. 0) then
+c if the area is defined by 3 or more points, fill it
+           call gsfaci(iarea3+1)
+           call gfa(nwrk,xwrk,ywrk)
+        endif
         return
         end
 
-      SUBROUTINE COLOR(iwhite)
-!     write(6,*)' White or Black background. [Enter 1/2]    ?   :'
+      subroutine color(iwhite)
+!     write(6,*)' white or black background. [enter 1/2]    ?   :'
 !     accept 5, iwhite
 !5     format (i)
 !     iwhite = 2
 
-C    BACKGROUND COLOR
-C  The background is white here for better visibility on paper
+c    background color
+c  the background is white here for better visibility on paper
 
       if (iwhite.eq.1) then
-        write(6,*)' Color: White Background'
-        CALL GSCR (1,0,1.,1.,1.)
-        CALL GSCR (1,1,0.8,0.8,1.)
+        write(6,*)' color: white background'
+        call gscr (1,0,1.,1.,1.)
+        call gscr (1,1,0.8,0.8,1.)
       else
-        write(6,*)' Color: Black Background'
-        CALL GSCR (1,0,0.,0.,0.)
-        CALL GSCR (1,1,0.,0.,0.)
+        write(6,*)' color: black background'
+        call gscr (1,0,0.,0.,0.)
+        call gscr (1,1,0.,0.,0.)
       end if
 
-C
-C     BACKGROUND COLOR
-C     BLACK
-c     CALL GSCR(1,0,0.,0.,0.)
-C
-C     FORGROUND COLORS
-C White
-      CALL GSCR(1,  1, 1.0, 1.0, 1.0)
-        CALL GSCR (1,1,0.8,0.8,1.)
-C white
-      CALL GSCR(1,  2, 1.0, 1.0, 1.0)
-C Red
-      CALL GSCR(1,  3, 1.0, 0.0, 0.0)
-C OrangeRed
-      CALL GSCR(1,  4, 1.0, 0.30, 0.0)
-C Orange
-      CALL GSCR(1,  5, 1.0, 0.65, 0.0)
-C Gold
-      CALL GSCR(1,  6, 1.0, 0.85, 0.0)
-C Yellow
-      CALL GSCR(1,  7, 1.0, 1.0, 0.0)
-C GreenYellow
-      CALL GSCR(1,  8, 0.7, 1.0, 0.2)
-C Chartreuse
-      CALL GSCR(1,  9, 0.5, 1.0, 0.0)
-C Celeste
-      CALL GSCR(1, 10, 0.2, 1.0, 0.5)
-C Green
-!     CALL GSCR(1, 11, 0.2, 0.8, 0.2)
-      CALL GSCR(1, 11, 0.1, 0.9, 0.1)
-C Aqua
-      CALL GSCR(1, 12, 0.0, 0.9, 1.0)
-C DeepSkyBlue
-      CALL GSCR(1, 13, 0.0, 0.75, 1.0)
-!     CALL GSCR(1, 13, 0.0, 0.65, 0.9)
-C RoyalBlue
-      CALL GSCR(1, 14, 0.25, 0.45, 0.95)
-C SlateBlue
-      CALL GSCR(1, 15, 0.4, 0.35, 0.8)
-C DarkViolet
-      CALL GSCR(1, 16, 0.6, 0.0, 0.8)
-C Lavender
-      CALL GSCR(1, 17, 1.00, 0.65, 1.0)
-C Black
-      CALL GSCR (1,21,0.,0.,0.)
-C Quasi Black
-      CALL GSCR (1,22,0.05,0.05,0.05)
-C Medium Gray
-      CALL GSCR (1,23,.3,.3,.3)
-! Unused...
-      CALL GSCR (1,24,.0,.7,.0)
-! Dark Gray
-      CALL GSCR (1,25,.1,.1,.1)
-! Pale Orange
-      CALL GSCR (1,26,.6,.3,.1)
-C Orchid
-      CALL GSCR (1,27, 0.85, 0.45, 0.8)
-! Unused...
-      CALL GSCR (1,28,.0,.0,.95)
-! Paler Yellow
-      CALL GSCR (1,29,.50,.38,.0)
-! Dark Pink
-      CALL GSCR (1,30,.5,.30,.5)
-      CALL GSCR (1,31,.2,.7,.7)
+c
+c     background color
+c     black
+c     call gscr(1,0,0.,0.,0.)
+c
+c     forground colors
+c white
+      call gscr(1,  1, 1.0, 1.0, 1.0)
+        call gscr (1,1,0.8,0.8,1.)
+c white
+      call gscr(1,  2, 1.0, 1.0, 1.0)
+c red
+      call gscr(1,  3, 1.0, 0.0, 0.0)
+c orangered
+      call gscr(1,  4, 1.0, 0.30, 0.0)
+c orange
+      call gscr(1,  5, 1.0, 0.65, 0.0)
+c gold
+      call gscr(1,  6, 1.0, 0.85, 0.0)
+c yellow
+      call gscr(1,  7, 1.0, 1.0, 0.0)
+c greenyellow
+      call gscr(1,  8, 0.7, 1.0, 0.2)
+c chartreuse
+      call gscr(1,  9, 0.5, 1.0, 0.0)
+c celeste
+      call gscr(1, 10, 0.2, 1.0, 0.5)
+c green
+!     call gscr(1, 11, 0.2, 0.8, 0.2)
+      call gscr(1, 11, 0.1, 0.9, 0.1)
+c aqua
+      call gscr(1, 12, 0.0, 0.9, 1.0)
+c deepskyblue
+      call gscr(1, 13, 0.0, 0.75, 1.0)
+!     call gscr(1, 13, 0.0, 0.65, 0.9)
+c royalblue
+      call gscr(1, 14, 0.25, 0.45, 0.95)
+c slateblue
+      call gscr(1, 15, 0.4, 0.35, 0.8)
+c darkviolet
+      call gscr(1, 16, 0.6, 0.0, 0.8)
+c lavender
+      call gscr(1, 17, 1.00, 0.65, 1.0)
+c black
+      call gscr (1,21,0.,0.,0.)
+c quasi black
+      call gscr (1,22,0.05,0.05,0.05)
+c medium gray
+      call gscr (1,23,.3,.3,.3)
+! unused...
+      call gscr (1,24,.0,.7,.0)
+! dark gray
+      call gscr (1,25,.1,.1,.1)
+! pale orange
+      call gscr (1,26,.6,.3,.1)
+c orchid
+      call gscr (1,27, 0.85, 0.45, 0.8)
+! unused...
+      call gscr (1,28,.0,.0,.95)
+! paler yellow
+      call gscr (1,29,.50,.38,.0)
+! dark pink
+      call gscr (1,30,.5,.30,.5)
+      call gscr (1,31,.2,.7,.7)
 
-! Pale Yellow
-      CALL GSCR (1,32,.6,.6,.0)
-! Pale Red
-      CALL GSCR (1,33,.5,.0,.0)
-! Grey
-      CALL GSCR (1,34,.5,.5,.5)
-! DarkViolet
-      CALL GSCR(1, 35, 0.6, 0.0, 0.8)
+! pale yellow
+      call gscr (1,32,.6,.6,.0)
+! pale red
+      call gscr (1,33,.5,.0,.0)
+! grey
+      call gscr (1,34,.5,.5,.5)
+! darkviolet
+      call gscr(1, 35, 0.6, 0.0, 0.8)
 
-! Radar Vel Color Table (about 20 values)
+! radar vel color table (about 20 values)
       i_velcol_offset = 100
       do icol = i_velcol_offset,i_velcol_offset+10
           ivel = i_velcol_offset+10 - icol
           amp = float(ivel) / 10.
           amp_gry = 0.3
           amp_grn = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
-          call GSCR(1,icol,amp_gry,amp_grn,amp_gry)
-!         call GSCR(1,icol,0.,1.0,0.)
-!         write(6,*)' Setting color ' ,icol
+          call gscr(1,icol,amp_gry,amp_grn,amp_gry)
+!         call gscr(1,icol,0.,1.0,0.)
+!         write(6,*)' setting color ' ,icol
       enddo
       do icol = i_velcol_offset+11,i_velcol_offset+20
           ivel = icol - (i_velcol_offset+10)
           amp = float(ivel) / 10.
           amp_gry = 0.3
           amp_red = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
-          call GSCR(1,icol,amp_red,amp_gry,amp_gry)
-!         write(6,*)' Setting color ' ,icol
+          call gscr(1,icol,amp_red,amp_gry,amp_gry)
+!         write(6,*)' setting color ' ,icol
       enddo
 
-! Radar Ref Color Table
+! radar ref color table
       i_refcol_offset = 180
       do idbz = 0,20
           icol = i_refcol_offset + idbz / 5
@@ -476,21 +476,21 @@ C Orchid
           amp_gry = 0.3
           amp_red = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
           amp_blu = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
-          call GSCR(1,icol,amp_red,amp_gry,amp_blu)
+          call gscr(1,icol,amp_red,amp_gry,amp_blu)
       enddo
       do idbz = 21,30
           icol = i_refcol_offset + idbz / 5
           amp = float(idbz-20) / 10.
           amp_gry = 0.3
           amp_grn = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
-          call GSCR(1,icol,0.,amp_grn,0.)
+          call gscr(1,icol,0.,amp_grn,0.)
       enddo
       do idbz = 31,40
           icol = i_refcol_offset + idbz / 5
           amp = float(idbz-30) / 10.
           amp_gry = 0.3
           amp_blu = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
-          call GSCR(1,icol,0.,0.,amp_blu)
+          call gscr(1,icol,0.,0.,amp_blu)
       enddo
       do idbz = 41,50
           icol = i_refcol_offset + idbz / 5
@@ -498,7 +498,7 @@ C Orchid
           amp_gry = 0.3
           amp_red = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
           amp_grn = amp_red * 0.5
-          call GSCR(1,icol,amp_red,amp_grn,0.)
+          call gscr(1,icol,amp_red,amp_grn,0.)
       enddo
       do idbz = 51,60
           icol = i_refcol_offset + idbz / 5
@@ -506,21 +506,21 @@ C Orchid
           amp_gry = 0.3
           amp_red = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
           amp_grn = amp_red
-          call GSCR(1,icol,amp_red,amp_grn,0.)
+          call gscr(1,icol,amp_red,amp_grn,0.)
       enddo
       do idbz = 61,70
           icol = i_refcol_offset + idbz / 5
           amp = float(idbz-60) / 10.
           amp_gry = 0.3
           amp_red = min(amp,1.0) * (1.0 - amp_gry) + amp_gry
-          call GSCR(1,icol,amp_red,0.,0.)
+          call gscr(1,icol,amp_red,0.,0.)
       enddo
 
-!     White
-      CALL GSCR(1, 251, 1.0, 1.0, 1.0)
+!     white
+      call gscr(1, 251, 1.0, 1.0, 1.0)
 
-C Done.
-C
-        RETURN
-C
-      END
+c done.
+c
+        return
+c
+      end

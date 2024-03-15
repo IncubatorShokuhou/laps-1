@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -33,24 +33,24 @@ cdis
         subroutine advect(u,v,array_in,array_buf,grid_spacing_m
      1          ,imax,jmax,array_out,time,frac,lon,r_missing_data)
 
-!       1992                            Steve Albers
+!       1992                            steve albers
 
-        use mem_namelist, ONLY: iverbose
+        use mem_namelist, only: iverbose
 
-        integer imax,jmax            ! Input Array dimensions
-        real u(imax,jmax),v(imax,jmax) ! Input Wind field (WRT True North)
-        real lon(imax,jmax)          ! Input Longitude field
-        real array_in(imax,jmax)     ! Input Field to be advected
-        real array_out(imax,jmax)    ! Output Field to be advected
+        integer imax,jmax            ! input array dimensions
+        real u(imax,jmax),v(imax,jmax) ! input wind field (wrt true north)
+        real lon(imax,jmax)          ! input longitude field
+        real array_in(imax,jmax)     ! input field to be advected
+        real array_out(imax,jmax)    ! output field to be advected
 
-        real array_buf(imax,jmax)    ! Dummy Array
+        real array_buf(imax,jmax)    ! dummy array
         real ugrid(imax,jmax)
         real vgrid(imax,jmax)
 
-        real time                    ! Input Seconds for advection
-        real frac                    ! Input scaling factor (normally 1.0)
+        real time                    ! input seconds for advection
+        real frac                    ! input scaling factor (normally 1.0)
 
-        write(6,*)' Calculating advected field Sec/Ratio:',time,frac
+        write(6,*)' calculating advected field sec/ratio:',time,frac
 
         seconds = time * frac
 
@@ -60,8 +60,8 @@ cdis
         enddo
         enddo
 
-!       Rotate the winds to grid north
-!       Call uvtrue_to_uvgrid_2d for better efficiency
+!       rotate the winds to grid north
+!       call uvtrue_to_uvgrid_2d for better efficiency
         call uvtrue_to_uvgrid_2d(u,v,ugrid,vgrid,lon,imax,jmax)
 
         do j = 1,jmax
@@ -83,7 +83,7 @@ cdis
 
 !               array_buf(inew,jnew) = array_in(i,j)
 
-!               Preserve the Maxima
+!               preserve the maxima
                 if(array_buf(inew,jnew) .eq. r_missing_data)then
                     array_buf(inew,jnew) = array_in(i,j)
                 else
@@ -102,7 +102,7 @@ cdis
         enddo
         enddo
 
-!       Fill in the cracks
+!       fill in the cracks
         nfill1 = 0
         nfill2 = 0
 
@@ -135,7 +135,7 @@ cdis
                     nfill2 = nfill2 + 1
                 endif
 
-c               write(6,*)' Upgrade',array_buf(i,j),array_out(i,j)
+c               write(6,*)' upgrade',array_buf(i,j),array_out(i,j)
 
             else ! array_buf(i,j) .ne. r_missing_data
                 array_out(i,j) = array_buf(i,j)
@@ -146,7 +146,7 @@ c               write(6,*)' Upgrade',array_buf(i,j),array_out(i,j)
         enddo ! j
 
         if(iverbose .ge. 2)then
-            write(6,*)' NFILL1,NFILL2 ',nfill1,nfill2
+            write(6,*)' nfill1,nfill2 ',nfill1,nfill2
         endif
 
         return

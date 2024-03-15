@@ -5,7 +5,7 @@ c    .         ,gproj,lon0_lc,lat1_lc,lat2_lc,istatus)
 c
       implicit none
 
-c JS (4-01) removed projection info
+c js (4-01) removed projection info
 c
 c     integer nx,ny,nz,nvars,recdim,i,j,k,istatus
 
@@ -27,7 +27,7 @@ c
 c
 c____________________________________________________________
 c  pr is input as a single verticle column output as 3d array
-c  No longer true.
+c  no longer true.
       istatus = 1
 
 c
@@ -67,8 +67,8 @@ c     +              rh_sfc(i,j)/100.,0.0)*0.001
       
 
 c
-c *** Fill Lambert-conformal common block variables.
-c *** removed JS (4-01). Now in get_bkgd_model_info.f
+c *** fill lambert-conformal common block variables.
+c *** removed js (4-01). now in get_bkgd_model_info.f
 
       istatus = 0
       return

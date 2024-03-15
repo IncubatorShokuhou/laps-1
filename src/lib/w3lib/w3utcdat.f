@@ -1,38 +1,38 @@
 !-----------------------------------------------------------------------
       subroutine w3utcdat(idat)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
+!$$$   subprogram  documentation  block
 !
-! SUBPROGRAM: W3UTCDAT       RETURN THE UTC DATE AND TIME
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
+! subprogram: w3utcdat       return the utc date and time
+!   author: mark iredell     org: wp23       date: 98-01-05
 !
-! ABSTRACT: THIS SUBPROGRAM RETURNS THE UTC (GREENWICH) DATE AND TIME
-!   IN THE NCEP ABSOLUTE DATE AND TIME DATA STRUCTURE.
+! abstract: this subprogram returns the utc (greenwich) date and time
+!   in the ncep absolute date and time data structure.
 !
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
-! 1999-04-28  Gilbert         - added a patch to check for the proper
-!                               UTC offset.  Needed until the IBM bug
-!                               in date_and_time is fixed.  The patch
-!                               can then be removed.  See comments in
+! program history log:
+!   98-01-05  mark iredell
+! 1999-04-28  gilbert         - added a patch to check for the proper
+!                               utc offset.  needed until the ibm bug
+!                               in date_and_time is fixed.  the patch
+!                               can then be removed.  see comments in
 !                               the section blocked with "&&&&&&&&&&&".
-! 1999-08-12  Gilbert         - Changed so that czone variable is saved
+! 1999-08-12  gilbert         - changed so that czone variable is saved
 !                               and the system call is only done for
 !                               first invocation of this routine.
 !
-! USAGE:  CALL W3UTCDAT(IDAT)
+! usage:  call w3utcdat(idat)
 !
-!   OUTPUT VARIABLES:
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
+!   output variables:
+!     idat       integer (8) ncep absolute date and time
+!                (year, month, day, time zone,
+!                 hour, minute, second, millisecond)
 !
-! SUBPROGRAMS CALLED:
-!     DATE_AND_TIME  FORTRAN 90 SYSTEM DATE INTRINSIC
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3FS26         YEAR, MONTH, DAY FROM JULIAN DAY NUMBER
+! subprograms called:
+!     date_and_time  fortran 90 system date intrinsic
+!     iw3jdn         compute julian day number     
+!     w3fs26         year, month, day from julian day number
 !
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
+! attributes:
+!   language: fortran 90
 !
 !$$$
       integer idat(8)
@@ -42,7 +42,7 @@
       call date_and_time(cdate,ctime,czone,idat)
       read(czone,'(i5)') idat(4)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  convert to hours and minutes to UTC time
+!  convert to hours and minutes to utc time
 !  and possibly adjust the date as well
       idat(6)=idat(6)-mod(idat(4),100)
       idat(5)=idat(5)-idat(4)/100

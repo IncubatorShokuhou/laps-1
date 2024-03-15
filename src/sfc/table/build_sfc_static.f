@@ -1,27 +1,27 @@
 cdis
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -40,68 +40,68 @@ c
         real, allocatable, dimension(:,:) :: topo
         real, allocatable, dimension(:,:) :: ldf
 
-        call get_grid_dim_xy(NX_L, NY_L, istatus)
+        call get_grid_dim_xy(nx_l, ny_l, istatus)
         if (istatus .ne. 1) then
             write(6,*) 'return get_grid_dim_xy, status: ', istatus
             stop
         endif
 
-!       Allocate static arrays (lat, lon, topo, ldf)
-        allocate( lat(NX_L,NY_L), STAT=istat_alloc )
+!       allocate static arrays (lat, lon, topo, ldf)
+        allocate( lat(nx_l,ny_l), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate lat'
+            write(6,*)' error: could not allocate lat'
             stop
         endif
 
-        allocate( lon(NX_L,NY_L), STAT=istat_alloc )
+        allocate( lon(nx_l,ny_l), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate lon'
+            write(6,*)' error: could not allocate lon'
             stop
         endif
 
-        allocate( topo(NX_L,NY_L), STAT=istat_alloc )
+        allocate( topo(nx_l,ny_l), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate topo'
+            write(6,*)' error: could not allocate topo'
             stop
         endif
 
-        allocate( ldf(NX_L,NY_L), STAT=istat_alloc )
+        allocate( ldf(nx_l,ny_l), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate ldf'
+            write(6,*)' error: could not allocate ldf'
             stop
         endif
 
-!       Read static arrays (lat, lon, topo, ldf)
-        call read_static_grid(NX_L,NY_L,'LAT',lat,istatus)
+!       read static arrays (lat, lon, topo, ldf)
+        call read_static_grid(nx_l,ny_l,'lat',lat,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS LAT'
+            write(6,*)' error getting laps lat'
             stop
         endif
 
-        call read_static_grid(NX_L,NY_L,'LON',lon,istatus)
+        call read_static_grid(nx_l,ny_l,'lon',lon,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS LON'
+            write(6,*)' error getting laps lon'
             stop
         endif
 
-        call read_static_grid(NX_L,NY_L,'AVG',topo,istatus)
+        call read_static_grid(nx_l,ny_l,'avg',topo,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS AVG'
+            write(6,*)' error getting laps avg'
             stop
         endif
 
-        call read_static_grid(NX_L,NY_L,'LDF',ldf,istatus)
+        call read_static_grid(nx_l,ny_l,'ldf',ldf,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS LDF'
+            write(6,*)' error getting laps ldf'
             stop
         endif
 
-        call build_sfc_static_sub(NX_L,NY_L,lat,lon,topo)
+        call build_sfc_static_sub(nx_l,ny_l,lat,lon,topo)
 
         lun = 31
         lun_out = 19
 
-        call locpost_radar(NX_L,NY_L,lat,lon,topo,ldf
+        call locpost_radar(nx_l,ny_l,lat,lon,topo,ldf
      1                    ,lun,lun_out,istatus)
 
         end
@@ -110,28 +110,28 @@ c
 c
 c*****************************************************************************
 c
-c	Program to build the necessary static files for the LAPS surface
-c       analysis.  Files created include:
+c	program to build the necessary static files for the laps surface
+c       analysis.  files created include:
 c
-c           REMOVED JUL 95 --> 'fnorm2.lut' (the barnes look-up table), 
-c           REMOVED JAN 97 --> 'bkgwts.wts' (background weights), 
+c           removed jul 95 --> 'fnorm2.lut' (the barnes look-up table), 
+c           removed jan 97 --> 'bkgwts.wts' (background weights), 
 c                 'drag_coef.dat' (surface roughness), 
 c             and 'pbl_top.dat' (boundary layer depth).
 c
-c	Changes:
-c 	P.A. Stamus	04-12-94  Original from the individual programs.
-c                       09-01-94  Porting changes.
-c                       07-26-95  Remove fnorm2 calcs.
-c                       01-08-97  Porting changes. Remove 'stations.in'
+c	changes:
+c 	p.a. stamus	04-12-94  original from the individual programs.
+c                       09-01-94  porting changes.
+c                       07-26-95  remove fnorm2 calcs.
+c                       01-08-97  porting changes. remove 'stations.in'
 c                                  requirement, general clean up.
-c                       04-09-97  Remove equivalences.
+c                       04-09-97  remove equivalences.
 c
 c****************************************************************************
 c
         implicit none
 ccccc	include 'laps_sfc.inc'
 c
-c.....	Grids for the outputs, weights, and stuff 
+c.....	grids for the outputs, weights, and stuff 
 c
         integer ni,nj
 	real akk(ni,nj)
@@ -141,7 +141,7 @@ c
         character*80 grid_fnam_common
         common/grid_fnam_cmn/ grid_fnam_common
 c
-c..... LAPS Lat/lon grids.
+c..... laps lat/lon grids.
 c
 	real lat(ni,nj), lon(ni,nj), topo(ni,nj)
 	integer grid_spacing, len
@@ -154,8 +154,8 @@ c
         real topo_range, d, pbldz, top_adj, topmx, topo_mx, topo_mn
 c
 c
-c.....  START:
-c.....	Get the LAPS lat/lon and topo data here so we can pass them to the 
+c.....  start:
+c.....	get the laps lat/lon and topo data here so we can pass them to the 
 c.....	routines that need them.
 c
 
@@ -189,13 +189,13 @@ c
 	topo_range = topo_mx - topo_mn
 c
 	print *,' '
-	print *,' Topography: '
+	print *,' topography: '
 	write(6,211) topo_mx, i_tmx, j_tmx
- 211	format(1x,'Max of ',f10.1,' at ',i3,',',i3)
+ 211	format(1x,'max of ',f10.1,' at ',i3,',',i3)
 	write(6,212) topo_mn, i_tmn, j_tmn
- 212	format(1x,'Min of ',f10.1,' at ',i3,',',i3)
+ 212	format(1x,'min of ',f10.1,' at ',i3,',',i3)
 	write(6,213) topo_range
- 213	format(1x,'Range of ',f10.1)
+ 213	format(1x,'range of ',f10.1)
 	print *,' '
 c
 	pi = 4. * atan(1.0) 
@@ -204,13 +204,13 @@ c
 c
 c..........................................................................
 c
-c	This section calculates the drag coefficient for the LAPS domain.
+c	this section calculates the drag coefficient for the laps domain.
 c
-c	Original by John McGinley.  Date unknown.
-c	Changes:
-c		P. Stamus	11-12-19  Changes for new LAPS grids.
-c				11-20-91  Changed scaling to reduce akk.
-c                               03-17-95  Auto scaling code for other domains.
+c	original by john mcginley.  date unknown.
+c	changes:
+c		p. stamus	11-12-19  changes for new laps grids.
+c				11-20-91  changed scaling to reduce akk.
+c                               03-17-95  auto scaling code for other domains.
 c
 c..........................................................................
 c
@@ -250,10 +250,10 @@ c
 	ave = ave / float(icnt)
 	std = sqrt(std / float(icnt))
 c
-c.....	We want this factor to serve as a  multiplier on the drag coef 
-c.....  constant in lapsanal.  The scale factor was arbitrarilly set so
-c.....  'akk' ranged between 51 and 1.1.  Here, the range of the topography
-c.....  in the domain is scaled against the Colorado version, so the scaling
+c.....	we want this factor to serve as a  multiplier on the drag coef 
+c.....  constant in lapsanal.  the scale factor was arbitrarilly set so
+c.....  'akk' ranged between 51 and 1.1.  here, the range of the topography
+c.....  in the domain is scaled against the colorado version, so the scaling
 c.....  will adjust to smoother (or rougher) domains.
 c
 	con = co_max_scl * (topo_range / co_topo_range)
@@ -261,7 +261,7 @@ c
 c
 	do j=2,jmaxm1
 	do i=2,imaxm1
-	   akk(i,j) = scale * akk(i,j) / (smin + 1.)  !AKK GOES FROM 51 TO 1.1
+	   akk(i,j) = scale * akk(i,j) / (smin + 1.)  !akk goes from 51 to 1.1
 	   if(akk(i,j) .lt. 1.) akk(i,j) = 1.
 	enddo !i
 	enddo !j
@@ -269,30 +269,30 @@ c
          
 	open(19,file=dir_s(1:len)//'drag_coef.dat',
      &                    form='unformatted',status='unknown')
-	print *,' Drag coef.: '
+	print *,' drag coef.: '
 	write(6,1000)ave,std,smax,imx,jmx,smin,imn,jmn,scale
-1000	format(1x,'Ave: ',f12.4,' Std Dev: ',f12.4,/,' Max: ',f12.4,
-     &         ' at ',2i3,/,' Min: ',f12.4,' at ',2i3,/,
-     &         ' Calc scale factor: ',f12.4)
+1000	format(1x,'ave: ',f12.4,' std dev: ',f12.4,/,' max: ',f12.4,
+     &         ' at ',2i3,/,' min: ',f12.4,' at ',2i3,/,
+     &         ' calc scale factor: ',f12.4)
 	write(19) akk
         close(19)
 	print *,' '
-	print *,' Normal completion of DRAG_COEF.'
+	print *,' normal completion of drag_coef.'
 
 
 
-        goto 9999 ! Bypass PBL top code
+        goto 9999 ! bypass pbl top code
 
 c
 c
 c...........................................................................
 c
-c	This section calculates the top of the pbl across the LAPS domain.
+c	this section calculates the top of the pbl across the laps domain.
 c
-c	Original by John McGinley (somewhere in the depths of time).
-c	Changes:
-c		P. Stamus	11-12-91  Changes for new LAPS grids.
-c				11-15-91  Incr plbtop to prevent hi wnds
+c	original by john mcginley (somewhere in the depths of time).
+c	changes:
+c		p. stamus	11-12-91  changes for new laps grids.
+c				11-15-91  incr plbtop to prevent hi wnds
 c
 c...........................................................................
 c
@@ -318,7 +318,7 @@ c
 	enddo !j
 c
         write(6,302) termx, topmx
- 302   format(1x,' Max. terrain ',f8.0,'; Max. smooth terrain ',f8.0)
+ 302   format(1x,' max. terrain ',f8.0,'; max. smooth terrain ',f8.0)
 c
 !	pbldz=475.	! pbl depth...old value 1000 m
 !	pbldz=775.	! pbl depth...old value 1000 m
@@ -342,10 +342,10 @@ c
 	write(10) top
 	close(10)
 	print *,' '
-	print *,' Normal completion of PBL_TOP'
+	print *,' normal completion of pbl_top'
 c
  9999   print *,' '
-	print *,' Normal completion of build_sfc_static'
+	print *,' normal completion of build_sfc_static'
 c
 	return
 	end
@@ -371,7 +371,7 @@ c
 c
 c.....	loop over field npass times 
 c
-!	print *,' *** In BARNES2 ***'
+!	print *,' *** in barnes2 ***'
         ncnt = 0
         do j=1,jmax
         do i=1,imax
@@ -384,7 +384,7 @@ c
         enddo !i
         enddo !j
 	if(ncnt .eq. 0) then
-	  print *,' *** NCNT = 0 in BARNES2. ***'
+	  print *,' *** ncnt = 0 in barnes2. ***'
 	  return
 	endif
 c
@@ -410,7 +410,7 @@ c
 	      if(ipass .eq. 1) then
 cc	        if(kdim .eq. 1) then
 cc	          print *,
-cc     &              ' *** WARNING. sumwt = 0, kdim = 1 in BARNES2 ***'
+cc     &              ' *** warning. sumwt = 0, kdim = 1 in barnes2 ***'
 cc	          go to 500
 cc	        else
 		   print *,' got into wierd loop.............'
@@ -460,7 +460,7 @@ c
 550	continue
         enddo !ipass
 c
-!	print *,' *** BARNES2 Done. ***'
+!	print *,' *** barnes2 done. ***'
 	return
 	end
 c
@@ -469,34 +469,34 @@ c
 c
 c=====================================================================
 c
-c     Routine to calculate the weights to be used in the Barnes
-c     analysis.  The data density is used to set the cutoff for
-c     the response function.  Then that cutoff is used to calculate
+c     routine to calculate the weights to be used in the barnes
+c     analysis.  the data density is used to set the cutoff for
+c     the response function.  then that cutoff is used to calculate
 c     the exp, based on differences so that no additional distance
-c     calculations are required in the Barnes routine.  All of this
+c     calculations are required in the barnes routine.  all of this
 c     is done in gridpoint space.
 c
-c     Original:  07-14-95  P. Stamus, NOAA/FSL
-c     Changes:
+c     original:  07-14-95  p. stamus, noaa/fsl
+c     changes:
 c
-c     Notes:
+c     notes:
 c
-c       1.  If variable 'rom2' is passed in as zero, it is calculated
-c           from the data density.  Otherwise, the value passed in is
+c       1.  if variable 'rom2' is passed in as zero, it is calculated
+c           from the data density.  otherwise, the value passed in is
 c           used in the weight calculation.
 c
-c       2.  The response for 2d waves is hard-wired in this routine.
-c           This is the 'con' variable, and comes from the eqn:
-c                     D = exp -(pi**2 R**2)/lamba**2
-c           If we set D (the response) to our desired cutoff, set 
+c       2.  the response for 2d waves is hard-wired in this routine.
+c           this is the 'con' variable, and comes from the eqn:
+c                     d = exp -(pi**2 r**2)/lamba**2
+c           if we set d (the response) to our desired cutoff, set 
 c           lamba to the desired wavelength in gridpt space (2d),
-c           then solve for R in terms of d, we get the 'con' value
-c           (i.e.,  R = (con)*d).  Here are some values for different
+c           then solve for r in terms of d, we get the 'con' value
+c           (i.e.,  r = (con)*d).  here are some values for different
 c           cutoffs:
-c                     D = 0.01     R = 1.36616d
-c                         0.10     R = 0.96602d
-c                         0.25     R = 0.74956d
-c                         0.50     R = 0.53002d
+c                     d = 0.01     r = 1.36616d
+c                         0.10     r = 0.96602d
+c                         0.25     r = 0.74956d
+c                         0.50     r = 0.53002d
 c
 c=====================================================================
 c
@@ -508,7 +508,7 @@ c
           
 ccc	include '../../source/sfc/laps_sfc.inc'
 c
-c.... First, find the area that each ob covers in gridpt space (this
+c.... first, find the area that each ob covers in gridpt space (this
 c.... of course assumes a uniform coverage).
 c
 cc	con = 0.96602     ! resp of 0.10
@@ -519,15 +519,15 @@ cc	con = 0.74956     ! resp of 0.25
 	   d = sqrt( area )
 	   rom2 = 1. / ((con * con) * (d * d))
 	   write(6,900) n_obs_var, area, d, rom2
- 900	   format(1x,'Num obs: ',i5,'  Area: ',f8.2,'  d: ',f8.2,
+ 900	   format(1x,'num obs: ',i5,'  area: ',f8.2,'  d: ',f8.2,
      &       '  rom2: ',f8.5)
 	else
 	   d = sqrt(1./(con * con * rom2))
 	   write(6,902) rom2, d
- 902	   format(' Using preset rom2 of: ',f8.5,'  Calc d: ',f8.2)
+ 902	   format(' using preset rom2 of: ',f8.5,'  calc d: ',f8.2)
 	endif
 c
-c.... Now calculate the weights for all the possible distances.
+c.... now calculate the weights for all the possible distances.
 c
 	pi = 4. * atan(1.)
 	fno = 1. / (sqrt(2. * pi))
@@ -539,7 +539,7 @@ c
 	enddo !dx
 	enddo !dy
 c
-c.... That's it.
+c.... that's it.
 c
 	return
 	end

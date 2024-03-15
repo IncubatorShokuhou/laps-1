@@ -1,32 +1,32 @@
 
-        subroutine ingest_rsalrs(i4time_sys,NX_L,NY_L,istatus)
+        subroutine ingest_rsalrs(i4time_sys,nx_l,ny_l,istatus)
 
-        integer cdfid,status,MAX_PROFILES,MAX_LEVELS,file_n_prof       
+        integer cdfid,status,max_profiles,max_levels,file_n_prof       
 
-!       parameter (MAX_PROFILES = 1000)
-!       parameter (MAX_LEVELS = 300)
-        parameter (MAX_SUBDIRS = 2)
+!       parameter (max_profiles = 1000)
+!       parameter (max_levels = 300)
+        parameter (max_subdirs = 2)
 
 !       real ht_out(max_levels)
 !       real di_out(max_levels)
 !       real sp_out(max_levels)
 
-!       character*6 prof_name(MAX_PROFILES)
+!       character*6 prof_name(max_profiles)
 
-        character*255 prof_subdirs(MAX_SUBDIRS)
+        character*255 prof_subdirs(max_subdirs)
 
-!       integer i4_mid_window_pr(MAX_PROFILES)
-!       integer wmo_id(MAX_PROFILES)
+!       integer i4_mid_window_pr(max_profiles)
+!       integer wmo_id(max_profiles)
 
-!       real lat_pr(MAX_PROFILES)
-!       real lon_pr(MAX_PROFILES)
-!       real elev_m_pr(MAX_PROFILES)
-!       real n_lvls_pr(MAX_PROFILES)
-!       real ht_m_pr(MAX_PROFILES,MAX_LEVELS)
-!       real dir_dg_pr(MAX_PROFILES,MAX_LEVELS)
-!       real spd_ms_pr(MAX_PROFILES,MAX_LEVELS)
-!       real u_std_ms_pr(MAX_PROFILES,MAX_LEVELS)
-!       real v_std_ms_pr(MAX_PROFILES,MAX_LEVELS)
+!       real lat_pr(max_profiles)
+!       real lon_pr(max_profiles)
+!       real elev_m_pr(max_profiles)
+!       real n_lvls_pr(max_profiles)
+!       real ht_m_pr(max_profiles,max_levels)
+!       real dir_dg_pr(max_profiles,max_levels)
+!       real spd_ms_pr(max_profiles,max_levels)
+!       real u_std_ms_pr(max_profiles,max_levels)
+!       real v_std_ms_pr(max_profiles,max_levels)
 
         character*200 fnam_in
         character*180 dir_in
@@ -42,27 +42,27 @@
         character*40 c_vars_req
         character*180 c_values_req
 
-        character*9 a9_timeObs
-        integer timeObs
+        character*9 a9_timeobs
+        integer timeobs
 
-        real lat(NX_L,NY_L),lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
+        real lat(nx_l,ny_l),lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
 
         lun_out = 1
 
         call get_r_missing_data(r_missing_data,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting r_missing_data'
+           write (6,*) 'error getting r_missing_data'
            return
         endif
  
         r_mspkt = .518
 
-        call get_latlon_perimeter(NX_L,NY_L,1.0
+        call get_latlon_perimeter(nx_l,ny_l,1.0
      1                           ,lat,lon,topo
      1                           ,rnorth,south,east,west,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS perimeter'
+            write(6,*)' error reading laps perimeter'
             return
         endif
 
@@ -77,7 +77,7 @@
             write(6,*)c_vars_req(1:30),' = ',c_values_req
             dir_in = c_values_req
         else
-            write(6,*)' Error getting ',c_vars_req
+            write(6,*)' error getting ',c_vars_req
             return
         endif
 
@@ -90,14 +90,14 @@
 
         i4_prof_window = 1800 ! could be reset to laps_cycle_time
 
-        do idir = 1,MAX_SUBDIRS
+        do idir = 1,max_subdirs
             call s_len(prof_subdirs(idir),len_subdir)
  
-C           READ IN THE RAW RASS DATA
+c           read in the raw rass data
             a13_time = cvt_i4time_wfo_fname13(i4time_sys)
             fnam_in = dir_in(1:len_dir_in)
      1                //prof_subdirs(idir)(1:len_subdir)
-     1                //'/netCDF/'//a13_time
+     1                //'/netcdf/'//a13_time
             call s_len(fnam_in,len_fnam_in)
             write(6,*)' file = ',fnam_in(1:len_fnam_in)
 
@@ -105,39 +105,39 @@ C           READ IN THE RAW RASS DATA
 
             if(l_exist)then
 
-!               call read_prof_rsa(fnam_in(1:len_fnam_in)              ! I
-!     1                   ,MAX_PROFILES,MAX_LEVELS                     ! I
-!     1                   ,n_profiles                                  ! O
-!     1                   ,n_lvls_pr                                   ! O
-!     1                   ,prof_name,wmo_id                            ! O
-!     1                   ,lat_pr,lon_pr,elev_m_pr                     ! O
-!     1                   ,ht_m_pr,di_dg_pr,sp_ms_pr                   ! O
-!     1                   ,u_std_ms_pr,v_std_ms_pr                     ! O
-!     1                   ,i4_mid_window_pr,istatus)                   ! O
+!               call read_prof_rsa(fnam_in(1:len_fnam_in)              ! i
+!     1                   ,max_profiles,max_levels                     ! i
+!     1                   ,n_profiles                                  ! o
+!     1                   ,n_lvls_pr                                   ! o
+!     1                   ,prof_name,wmo_id                            ! o
+!     1                   ,lat_pr,lon_pr,elev_m_pr                     ! o
+!     1                   ,ht_m_pr,di_dg_pr,sp_ms_pr                   ! o
+!     1                   ,u_std_ms_pr,v_std_ms_pr                     ! o
+!     1                   ,i4_mid_window_pr,istatus)                   ! o
 
                 istatus = 0
 
                 n_good_obs = 0
 
                 if(idir .eq. 1 .or. idir .eq. 2)then
-                    call read_ldad_prof(i4time_sys,i4_prof_window      ! I
-     1                                    ,NX_L,NY_L                   ! I
-     1                                    ,ext                         ! I
-     1                                    ,lun_out                     ! I
-     1                                    ,fnam_in(1:len_fnam_in)      ! I
-     1                                    ,n_good_obs                  ! I/O
-     1                                    ,istatus)                    ! O
+                    call read_ldad_prof(i4time_sys,i4_prof_window      ! i
+     1                                    ,nx_l,ny_l                   ! i
+     1                                    ,ext                         ! i
+     1                                    ,lun_out                     ! i
+     1                                    ,fnam_in(1:len_fnam_in)      ! i
+     1                                    ,n_good_obs                  ! i/o
+     1                                    ,istatus)                    ! o
                 endif ! idir
 
                 if(istatus.ne.1)then
-                    write(6,*)' Warning: bad status on read_ldad_prof'
+                    write(6,*)' warning: bad status on read_ldad_prof'
      1                       ,istatus           
                 else
                     write(6,*)' n_good_obs = ',n_good_obs
                 endif
 
             else
-                write(6,*)' Warning: cannot find file '
+                write(6,*)' warning: cannot find file '
      1                   ,fnam_in(1:len_fnam_in)
 
             endif ! file exists

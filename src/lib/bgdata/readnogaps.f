@@ -16,11 +16,11 @@ c     integer nx,ny,nz,i,j,k,l,it
      .       ,ivarcoord(nvarsmax)
      .       ,ivarid(nvarsmax)
 c
-      real   ht(nx,ny,nz),     !NOGAPS height (m)
-     .       tp(nx,ny,nz),     !NOGAPS temperature (K)
-     .       sh(nx,ny,nz),     !NOGAPS specific humidity (kg/kg) 
-     .       uw(nx,ny,nz),     !NOGAPS u-wind (m/s)
-     .       vw(nx,ny,nz),     !NOGAPS v-wind (m/s)
+      real   ht(nx,ny,nz),     !nogaps height (m)
+     .       tp(nx,ny,nz),     !nogaps temperature (k)
+     .       sh(nx,ny,nz),     !nogaps specific humidity (kg/kg) 
+     .       uw(nx,ny,nz),     !nogaps u-wind (m/s)
+     .       vw(nx,ny,nz),     !nogaps v-wind (m/s)
      .       dummy(nx,ny,nz)
 
       real   ht_sfc(nx,ny)
@@ -42,32 +42,32 @@ c_______________________________________________________________________________
 
       istatus = 1
 c
-c *** Open nogaps file.
-c NOGAPS file already open, only need to read it (J. Smart 9-4-98)
+c *** open nogaps file.
+c nogaps file already open, only need to read it (j. smart 9-4-98)
       print*
-      print*,'Read NOGAPS 3-d variables'
+      print*,'read nogaps 3-d variables'
 c nvar =1
       do k=1,nz
          read(lun,err=50) ((tp(i,j,k),i=1,nx),j=1,ny)
       enddo
 
-c     print*,'Read u'
+c     print*,'read u'
 c nvar=2
       do k=1,nz
          read(lun,err=50) ((uw(i,j,k),i=1,nx),j=1,ny)
       enddo
 
-c     print*,'Read v'
+c     print*,'read v'
 c nvar=3
       do k=1,nz
          read(lun,err=50) ((vw(i,j,k),i=1,nx),j=1,ny)
       enddo
 
-c     print*,'Read Td'
+c     print*,'read td'
 c nvar=4
       nshl=nlevs(4)
       do k=1,nshl
-         read(lun,err=50) ((sh(i,j,k),i=1,nx),j=1,ny) !Read in as dew point depression.
+         read(lun,err=50) ((sh(i,j,k),i=1,nx),j=1,ny) !read in as dew point depression.
       enddo
       do k=nshl+1,nz
       do j=1,ny
@@ -77,7 +77,7 @@ c nvar=4
       enddo
       enddo
 
-c     print*,'Read ht'
+c     print*,'read ht'
       do k=1,nz
          read(lun,err=50) ((ht(i,j,k),i=1,nx),j=1,ny)
       enddo
@@ -92,7 +92,7 @@ c
       read(lun,err=50) ((mslp(i,j),i=1,nx),j=1,ny)
 c
 c nvar = 12
-c currently nogaps does not provide sfc pressure. Also, nogaps only
+c currently nogaps does not provide sfc pressure. also, nogaps only
 c has 10 variables in the file presently (9-4-98).
 c
       if(.false.)then
@@ -106,16 +106,16 @@ c
            enddo
         endif
       enddo
-      print*,'Did not find sfc p data!'
+      print*,'did not find sfc p data!'
 
 188   continue
       endif
 c
       close(lun)
 c
-c *** Convert dew point to specific humidity.
-c this code is now in readdgprep.f (J. Smart 9-2-98)
-c     print*,'Convert Dew point depression to Td'
+c *** convert dew point to specific humidity.
+c this code is now in readdgprep.f (j. smart 9-2-98)
+c     print*,'convert dew point depression to td'
 c
 c return dewpoint temperature in "sh" arrays
       do k=1,nshl
@@ -137,10 +137,10 @@ c
 
       return
 c
-50    print*,'Error reading nogaps files'
+50    print*,'error reading nogaps files'
       return
 
 990   continue
-      print *,'Error finding nogaps file.'
+      print *,'error finding nogaps file.'
 c
       end

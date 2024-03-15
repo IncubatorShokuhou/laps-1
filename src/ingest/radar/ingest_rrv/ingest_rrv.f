@@ -6,24 +6,24 @@
 c
 c ==================================================================
 c
-      Call get_laps_config('nest7grid',IStatus)
+      call get_laps_config('nest7grid',istatus)
       if(istatus.eq.1)then
-         write(*,*)'LAPS Parameters obtained'
+         write(*,*)'laps parameters obtained'
       else
-         write(*,*)'IStatus = ',IStatus,'Error - Get_LAPS_Config'
-         write(*,*)'Terminating LAPS-VRC. WSI remapping'
+         write(*,*)'istatus = ',istatus,'error - get_laps_config'
+         write(*,*)'terminating laps-vrc. wsi remapping'
          stop
       end if
 
       call config_ingest_rrv_parms(nxv01,nyv01,nzv01,istatus)
 
-      call ingest_rrvv01_sub(NX_L_CMN,NY_L_CMN,NK_LAPS,
+      call ingest_rrvv01_sub(nx_l_cmn,ny_l_cmn,nk_laps,
      &nxv01,nyv01,nzv01,istatus)
 
       if(istatus.ne.1)then
-         write(6,*)'Error returned from ingest_rrvv01_sub'
+         write(6,*)'error returned from ingest_rrvv01_sub'
       else
-         write(6,*)'Finished processing in ingest_rrvv01_sub'
+         write(6,*)'finished processing in ingest_rrvv01_sub'
       endif
 
       stop
@@ -97,22 +97,22 @@ c     integer  nxv01,nyv01,nzv01
       character  cvel_comment(nzv01,mxf,max_radars_rrv)*126
       character  cnyq_comment(nzv01,mxf,max_radars_rrv)*126
 
-c ======================== START ==============================
+c ======================== start ==============================
 c -------------------------------------------------------------
-c search for fresh v01 files. Assumming that the order of radars in
+c search for fresh v01 files. assumming that the order of radars in
 c the data statements above matches the files in v01, v02, and v03.
-c That is, alphabetical (KCYS, KFTG, KGLD) -> v01, v02, v03.
+c that is, alphabetical (kcys, kftg, kgld) -> v01, v02, v03.
 c
-c 2/15/98 (JRS) -> For testing we now have KFTG as the 4th radar and
-c the second radar does not exist! (KCYS, , KGLD, KFTG) -> v01, v02, v03, V04).
+c 2/15/98 (jrs) -> for testing we now have kftg as the 4th radar and
+c the second radar does not exist! (kcys, , kgld, kftg) -> v01, v02, v03, v04).
 c
       i4time_cur = i4time_now_gg()
 
-      write(*,*)'Start rrv_ingest'
+      write(*,*)'start rrv_ingest'
       itstatus=init_timer()
       itstatus=ishow_timer()
 
-      write(*,*)'Get lapsprd/vxx filesnames'
+      write(*,*)'get lapsprd/vxx filesnames'
 
       do i=1,max_radars_rrv
          write(c_num,100)i 
@@ -129,12 +129,12 @@ c        call get_file_time(cdir_vxx(i),i4time_cur,i4time_vxx(i))
       enddo
 
       write(*,*)
-      write(*,*)'Find new rrv filenames'
+      write(*,*)'find new rrv filenames'
       n=index(path_to_raw_rrv,' ')-1
       do i=1,max_radars_rrv
          cfname=path_to_raw_rrv(1:n)//c_radar_name(i)//'/*'
          call get_directory_length(cfname,nr)
-         write(6,*)'Search for data ',cfname(1:nr)
+         write(6,*)'search for data ',cfname(1:nr)
 
          call get_file_times(cfname,max_files,cfnames_rrv(1,i)
      1                      ,i4times_rrv(1,i),i_nbr_files_out_rrv(i)
@@ -190,9 +190,9 @@ c -----------------------
      &refd_v01(1,1,1,j,i),veld_v01(1,1,1,j,i),nyqd_v01(1,1,1,j,i),
      &istatus)
          if(istatus.ne.1)then
-            write(*,*)'Error returned from read_radar_v01_cdf'
+            write(*,*)'error returned from read_radar_v01_cdf'
          else
-            write(*,*)'Success'
+            write(*,*)'success'
          endif
 
 c        call check_v01_cdf(veld_v01(1,1,1,i),refd_v01,results,istatus)
@@ -209,22 +209,22 @@ c remap the rrv-v01 files to laps-vxx where xx is 01, 02, 03, ..., v20.
 c ---------------------------------------------------------------------
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         write(6,*)'Error getting r_missing_data'
+         write(6,*)'error getting r_missing_data'
          goto 1000
       endif
       call get_grid_spacing(rlaps_grid_spacing,istatus)
       if(istatus.ne.1)then
-         write(6,*)'Error getting grid_spacing'
+         write(6,*)'error getting grid_spacing'
          goto 1000
       endif
 
       nf=3
-      var_a(1) = 'REF'
-      var_a(2) = 'VEL'
-      var_a(3) = 'NYQ'
-      units_a(1) = 'dBZ'
-      units_a(2) = 'M/S'
-      units_a(3) = 'M/S'
+      var_a(1) = 'ref'
+      var_a(2) = 'vel'
+      var_a(3) = 'nyq'
+      units_a(1) = 'dbz'
+      units_a(2) = 'm/s'
+      units_a(3) = 'm/s'
 
       r_grid_ratio=((dxv01+dyv01)/2.)/rlaps_grid_spacing
       write(6,*)'r_grid_ratio = ',r_grid_ratio
@@ -245,13 +245,13 @@ c ---------------------------------------------------------------------
          call get_time_length(cradar_fname(n,m),nt)
          cfname9=cradar_fname(n,m)(nr+1:nt)
          print*,'========================================='
-         print*,'Radar Name = ',c_radar_name(m), ' Time = ',cfname9
+         print*,'radar name = ',c_radar_name(m), ' time = ',cfname9
          print*,'========================================='
 
          do k=1,nzv01      !nzv01 better = nz_l
 
-            write(*,*)'Processing Level ',k
-            print*,' Type = VEL'
+            write(*,*)'processing level ',k
+            print*,' type = vel'
             call  rrvdat2laps_v01(nx_l,ny_l,
      &                  r_grid_ratio,
      &                  r_missing_data,
@@ -264,11 +264,11 @@ c ---------------------------------------------------------------------
      &                  istatus)
 
             if(istatus .ne. 1)then
-               write(6,*)'Error returned from rrvdat2laps_v01'
+               write(6,*)'error returned from rrvdat2laps_v01'
                goto 900
             endif 
 
-            print*,' Type = REF'
+            print*,' type = ref'
             call  rrvdat2laps_v01(nx_l,ny_l,
      &                  r_grid_ratio,
      &                  r_missing_data,
@@ -281,11 +281,11 @@ c ---------------------------------------------------------------------
      &                  istatus)
 
             if(istatus .ne. 1)then
-               write(6,*)'Error returned from rrvdat2laps_v01'
+               write(6,*)'error returned from rrvdat2laps_v01'
                goto 900
             endif
 
-            print*,' Type = NYQ'
+            print*,' type = nyq'
             call  rrvdat2laps_v01(nx_l,ny_l,
      &                  r_grid_ratio,
      &                  r_missing_data,
@@ -298,7 +298,7 @@ c ---------------------------------------------------------------------
      &                  istatus)
 
             if(istatus .ne. 1)then
-               write(6,*)'Error returned from rrvdat2laps_v01'
+               write(6,*)'error returned from rrvdat2laps_v01'
                goto 900
             endif
             print*,'*****************************************'
@@ -316,25 +316,25 @@ c
      &out_array_4d,istatus)
 
             call put_laps_multi_3d(i4time_data_rrv(n,m),ext,var_a,
-     1              units_a,comment_a,out_array_4d,NX_L,NY_L,NZ_L,nf,
+     1              units_a,comment_a,out_array_4d,nx_l,ny_l,nz_l,nf,
      1              istatus)
 
             if(istatus.ne.1)then
-               write(6,*)'Error status returned from put_laps_multi_3d'
+               write(6,*)'error status returned from put_laps_multi_3d'
             endif
             print*
          else
-            write(6,*)'Not writing output due to error in rrvdat2laps'
+            write(6,*)'not writing output due to error in rrvdat2laps'
          endif
 
        enddo   !irrv = number of new rrv files for this radar
       enddo    !max_radars_rrv
 
       itstatus=ishow_timer()
-      write(*,*)'Elapsed time (sec): ',itstatus
+      write(*,*)'elapsed time (sec): ',itstatus
       goto 1000
 
-999   print*,'No new rrv data'
+999   print*,'no new rrv data'
 
 1000  return
       end

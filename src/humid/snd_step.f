@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -46,18 +46,18 @@ c
 c
 c
       subroutine snd_step (
-     1     i4time,              ! current time I/
-     1     p_3d,                !laps pressure grid I/
-     1     radiometer_switch,   !hight to use data meters I/
-     1     snd_lookback,        !paramter indicating time window I/
-     1     lat,                 !laps lat grid I/
-     1     lon,                 !laps lon grid I/
-     1     laps_t,              !laps lt1 field I/
-     1     ii,jj,kk,            !laps grid dimensions I/
-     1     q_snd,               !data output (q or sh) g/kg /O
-     1     weight_field,        !weight field for this data for variational /O
+     1     i4time,              ! current time i/
+     1     p_3d,                !laps pressure grid i/
+     1     radiometer_switch,   !hight to use data meters i/
+     1     snd_lookback,        !paramter indicating time window i/
+     1     lat,                 !laps lat grid i/
+     1     lon,                 !laps lon grid i/
+     1     laps_t,              !laps lt1 field i/
+     1     ii,jj,kk,            !laps grid dimensions i/
+     1     q_snd,               !data output (q or sh) g/kg /o
+     1     weight_field,        !weight field for this data for variational /o
      1     raob_radius,         !radius of influence (meters)
-     1     abort                !abort flag, 0= abort, 1= go I/O
+     1     abort                !abort flag, 0= abort, 1= go i/o
      1     )
 
 
@@ -83,27 +83,27 @@ c     input parameters (defined above)
 
 c  dynamic dependent parameters  
 
-      real td(ll,nnn)           !sounding dewpoint temp (C)
+      real td(ll,nnn)           !sounding dewpoint temp (c)
       integer ll_n (nnn)        !levels in given sounding n
       real lat_s(ll,nnn)        !sounding lat by level (account for drift)
       real lon_s(ll,nnn)        !sounding lon by level (account for drift)
-      real t(ll,nnn)            !sounding temp by level (C)
-      real rh(ll,nnn)           !sounding RH by level
-      real meter_ht(ll,nnn)     !MSL ht in meters (added for Stick Ware data)
-      real p_s(ll,nnn)          !pressure at sounding level l (hPa)
+      real t(ll,nnn)            !sounding temp by level (c)
+      real rh(ll,nnn)           !sounding rh by level
+      real meter_ht(ll,nnn)     !msl ht in meters (added for stick ware data)
+      real p_s(ll,nnn)          !pressure at sounding level l (hpa)
       character*8 instrument(nnn) !created to track radiometer data 
-      real RH_fields(ii,jj,kk)  !analyzed RH field
+      real rh_fields(ii,jj,kk)  !analyzed rh field
       
       
 
 
 
       integer mask(ii,jj,kk)    !mask for determining weights
-      real climo_w(kk)          !climo for QC checking (unknown use now)
+      real climo_w(kk)          !climo for qc checking (unknown use now)
       
 c     externals
       
-      real Make_rh              ! external function
+      real make_rh              ! external function
       external make_rh
       real ssh2                 ! external function
       external ssh2
@@ -133,13 +133,13 @@ c     normal internal parameters
       real r, rmin
       real d2r,pi
       real tot_weight,tot_scale_weight,scale_used,weight_avg,counter
-      real wt_ck(ii,jj)         ! weight check to test for ample RAOB data
+      real wt_ck(ii,jj)         ! weight check to test for ample raob data
       real rmd
       integer x_sum
       real ave(kk),adev(kk),sdev(kk),var(kk),skew(kk),curt(kk)
       integer satsnd_counter, raob_counter
       
-c     climate model (for QC)
+c     climate model (for qc)
       
       real center_lat
       integer jday
@@ -150,7 +150,7 @@ c     climate model (for QC)
 
 
       write (6,*)
-      write (6,*)' BEGIN SND STEP FOR RAOB INSERTION'
+      write (6,*)' begin snd step for raob insertion'
       write (6,*)
       
       
@@ -196,7 +196,7 @@ c     pathname_in = '../lapsprd/snd/*'
       endif
 
 c     
-c     NEW CODE TO SET UP FOR RERUNS
+c     new code to set up for reruns
 c     
       do i =  numoffiles, 1, -1
          
@@ -226,10 +226,10 @@ c     +++ validate the raob time
          return
       endif
 
-      write (6,*) 'Succeeded in finding RAOB file, ',filename
+      write (6,*) 'succeeded in finding raob file, ',filename
 
 
-c     +++ read SND file  ++++++++++++++  SelectSnd Modify N section++++++++
+c     +++ read snd file  ++++++++++++++  selectsnd modify n section++++++++
       call get_directory('snd',fname,len)
 
       open (12, file = fname(1:len)//filename//'.snd',
@@ -248,7 +248,7 @@ c     read the header record for main data
          write(6,*) idx, 'advertized number of levels in sounding'
 
 
-c     prepare to read individual levels in SND
+c     prepare to read individual levels in snd
          if (n.eq.nnn .or. n.lt.0) then
             write (6,*) 'n is going to be larger than nnn'
             write (6,*) 'or n is going to be zero index'
@@ -331,25 +331,25 @@ c     invoke vaiable nn which is total number of soundings read
       nn = n
 
       if (nn .le. 0 ) then ! no data found
-         write(6,*) 'No usable RAOB data in database'
+         write(6,*) 'no usable raob data in database'
          abort = 0              ! 0 = skip in variational step
          return
       else
-         write(6,*) nn, ' Number of RAOBs considered in analysis'
+         write(6,*) nn, ' number of raobs considered in analysis'
       endif
 
-c     -------end Select SND modify n section  (see SND interface document 1.0)
+c     -------end select snd modify n section  (see snd interface document 1.0)
 c
 c------------------------- modify radiometer soundings ------------------------
 
       do n = 1, nn
-         if (instrument(n) .eq. 'RADIOMTR' ) then
+         if (instrument(n) .eq. 'radiomtr' ) then
             write (6,*) 'n is radiometer', n
             write (6,*) 'calling hypsometric equation for pressure'
             call hypso (meter_ht(1,n),t(1,n),rmd,ll_n(n),p_s(1,n),abort)
 
-c     now perform second correction for Radiometrics data.... data
-c     is only good up until 2km or 2000 meters.  Starting with the surface
+c     now perform second correction for radiometrics data.... data
+c     is only good up until 2km or 2000 meters.  starting with the surface
 c     loop throught the data and re-assign the "top" layer ll_n(n) of
 c     each radiometer sounding to be under 2km.
 
@@ -368,26 +368,26 @@ c     each radiometer sounding to be under 2km.
 
 
 
-c     ++++++++++++++++++++Placeholder for QC step+++++++++++++++++++++++++++++
-c     if there is eventually a QC step as there was for the old RAOB step, it would
-c     go here.  IT should be noted that the QC was deemed most useful for satellite
+c     ++++++++++++++++++++placeholder for qc step+++++++++++++++++++++++++++++
+c     if there is eventually a qc step as there was for the old raob step, it would
+c     go here.  it should be noted that the qc was deemed most useful for satellite
 c     sounding data.  
 
 
 
-c     ----------------------End QC section -------------------------------
+c     ----------------------end qc section -------------------------------
 
-c     +++++++++++++++++++++ Start Comput RH step +++++++++++++++++++++
+c     +++++++++++++++++++++ start comput rh step +++++++++++++++++++++
 
       do n = 1, nn              ! for all soundings
          do l = 1, ll_n(n)      ! for all layers per given sounding
 
-c     convert the dewpoint temp to RH for interpolation later in routine
-c     note that rh is assumed to be WRT liquid at all temps per the standard
-c     raob convention. Temps are in C and pres is in hPa. ssh is g/kg as is the
-c     appropriate input to Make_rh.
+c     convert the dewpoint temp to rh for interpolation later in routine
+c     note that rh is assumed to be wrt liquid at all temps per the standard
+c     raob convention. temps are in c and pres is in hpa. ssh is g/kg as is the
+c     appropriate input to make_rh.
 
-C     rh is a fraction NOT percent at this point.
+c     rh is a fraction not percent at this point.
 
             rh(l,n) = make_rh(p_s(l,n),t(l,n),ssh2(p_s(l,n),t(l,n),
      1           td(l,n),-132.),-132.)
@@ -398,18 +398,18 @@ C     rh is a fraction NOT percent at this point.
 
 c     an rh value is now available for all soundings and all levels
 
-c     ------------------------End Compute RH step -------------------------
+c     ------------------------end compute rh step -------------------------
 
 
 
-c     +++++++++++++++++++++++start analz_SND+++++++++++++++++++++++++++++++++++
+c     +++++++++++++++++++++++start analz_snd+++++++++++++++++++++++++++++++++++
 
 c     this routine is an analog of analz_gvap 
 c     and analz_gps that produces analyzed fields of the 
-c     RH with capability to follow raob or dropsonde drift.
+c     rh with capability to follow raob or dropsonde drift.
 c     this is by far the guts and most complex routine called.
 c     the basic function of this routine are:
-c     1) interpolate RH in 3-space to the laps grid
+c     1) interpolate rh in 3-space to the laps grid
 c     2) generate a snoothed field representing that space
 c     3) generate a corresponding weight field for the variational step
 
@@ -426,17 +426,17 @@ c     3) generate a corresponding weight field for the variational step
      1     lat,
      1     lon,
      1     p_3d,
-     1     RH_fields,
-     1     Weight_field,
+     1     rh_fields,
+     1     weight_field,
      1     ii,jj,kk)
 
 
-c     ----------------------end analz_SND----------------------------------
+c     ----------------------end analz_snd----------------------------------
 
-c     ++++++++++++++++++++++convert to SH++++++++++++++++++++++++++++++++++
+c     ++++++++++++++++++++++convert to sh++++++++++++++++++++++++++++++++++
 c
-c     this module converts the analyzed RH field that is now in the LAPS system
-c     to Q or SH that is ready for 
+c     this module converts the analyzed rh field that is now in the laps system
+c     to q or sh that is ready for 
 c     utilization in the variational analysis system
 
 
@@ -464,10 +464,10 @@ c     utilization in the variational analysis system
 c     data(i,j,k) is now in g/kg sh for introduction to variational scheme
 
       abort = 1                 ! indicates ready for variational scheme
-      write (6,*) 'Success finishing SND_step.f'
+      write (6,*) 'success finishing snd_step.f'
       return
- 18   Write (6,*) 'Error reading or operning file, abort'
-      write (6,*) 'SND Step routine has failed'
+ 18   write (6,*) 'error reading or operning file, abort'
+      write (6,*) 'snd step routine has failed'
       abort = 0
       return
       end

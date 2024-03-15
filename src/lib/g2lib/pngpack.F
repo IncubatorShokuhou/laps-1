@@ -1,49 +1,49 @@
       subroutine pngpack(fld,width,height,idrstmpl,cpack,lcpack)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    pngpack
-!   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-12-21
+! subprogram:    pngpack
+!   prgmmr: gilbert          org: w/np11    date: 2002-12-21
 !
-! ABSTRACT: This subroutine packs up a data field into PNG image format.
-!   After the data field is scaled, and the reference value is subtracted out,
-!   it is treated as a grayscale image and passed to a PNG encoder.
-!   It also fills in GRIB2 Data Representation Template 5.41 or 5.40010 with the
+! abstract: this subroutine packs up a data field into png image format.
+!   after the data field is scaled, and the reference value is subtracted out,
+!   it is treated as a grayscale image and passed to a png encoder.
+!   it also fills in grib2 data representation template 5.41 or 5.40010 with the
 !   appropriate values.
 !
-! PROGRAM HISTORY LOG:
-! 2002-12-21  Gilbert
+! program history log:
+! 2002-12-21  gilbert
 !
-! USAGE:    CALL pngpack(fld,width,height,idrstmpl,cpack,lcpack)
-!   INPUT ARGUMENT LIST:
-!     fld()    - Contains the data values to pack
+! usage:    call pngpack(fld,width,height,idrstmpl,cpack,lcpack)
+!   input argument list:
+!     fld()    - contains the data values to pack
 !     width    - number of points in the x direction
 !     height   - number of points in the y direction
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.41 or 5.40010
-!                (1) = Reference value - ignored on input
-!                (2) = Binary Scale Factor
-!                (3) = Decimal Scale Factor
+!     idrstmpl - contains the array of values for data representation
+!                template 5.41 or 5.40010
+!                (1) = reference value - ignored on input
+!                (2) = binary scale factor
+!                (3) = decimal scale factor
 !                (4) = number of bits for each data value - ignored on input
-!                (5) = Original field type - currently ignored on input
-!                      Data values assumed to be reals.
+!                (5) = original field type - currently ignored on input
+!                      data values assumed to be reals.
 !
-!   OUTPUT ARGUMENT LIST: 
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.41 or 5.40010
-!                (1) = Reference value - set by pngpack routine.
-!                (2) = Binary Scale Factor - unchanged from input
-!                (3) = Decimal Scale Factor - unchanged from input
-!                (4) = Number of bits containing each grayscale pixel value
-!                (5) = Original field type - currently set = 0 on output.
-!                      Data values assumed to be reals.
-!     cpack    - The packed data field (character*1 array)
+!   output argument list: 
+!     idrstmpl - contains the array of values for data representation
+!                template 5.41 or 5.40010
+!                (1) = reference value - set by pngpack routine.
+!                (2) = binary scale factor - unchanged from input
+!                (3) = decimal scale factor - unchanged from input
+!                (4) = number of bits containing each grayscale pixel value
+!                (5) = original field type - currently set = 0 on output.
+!                      data values assumed to be reals.
+!     cpack    - the packed data field (character*1 array)
 !     lcpack   - length of packed field cpack().
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: XL Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: xl fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -59,13 +59,13 @@
       integer,parameter :: zero=0
       integer :: enc_png
       character(len=1),allocatable :: ctemp(:)
-#ifdef USE_PNG
+#ifdef use_png
       
       ndpts=width*height
       bscale=2.0**real(-idrstmpl(2))
       dscale=10.0**real(idrstmpl(3))
 !
-!  Find max and min values in the data
+!  find max and min values in the data
 !
       rmax=fld(1)
       rmin=fld(1)
@@ -75,19 +75,19 @@
       enddo
       maxdif=nint((rmax-rmin)*dscale*bscale)
 !
-!  If max and min values are not equal, pack up field.
-!  If they are equal, we have a constant field, and the reference
+!  if max and min values are not equal, pack up field.
+!  if they are equal, we have a constant field, and the reference
 !  value (rmin) is the value for each point in the field and
 !  set nbits to 0.
 !
-      if (rmin.ne.rmax .AND. maxdif.ne.0) then
+      if (rmin.ne.rmax .and. maxdif.ne.0) then
         !
-        !  Determine which algorithm to use based on user-supplied 
+        !  determine which algorithm to use based on user-supplied 
         !  binary scale factor and number of bits.
         !
         if (idrstmpl(2).eq.0) then
            !
-           !  No binary scaling and calculate minimum number of 
+           !  no binary scaling and calculate minimum number of 
            !  bits in which the data will fit.
            !
            imin=nint(rmin*dscale)
@@ -102,7 +102,7 @@
            enddo
         else
            !
-           !  Use binary scaling factor and calculate minimum number of 
+           !  use binary scaling factor and calculate minimum number of 
            !  bits in which the data will fit.
            !
            rmin=rmin*dscale
@@ -116,7 +116,7 @@
            enddo
         endif
         !
-        !  Pack data into full octets, then do PNG encode.
+        !  pack data into full octets, then do png encode.
         !  and calculate the length of the packed data in bytes
         !
         if (nbits.le.8) then
@@ -132,11 +132,11 @@
         allocate(ctemp(nbytes))
         call sbytes(ctemp,ifld,0,nbits,0,ndpts)
         !
-        !  Encode data into PNG Format.
+        !  encode data into png format.
         !
         lcpack=enc_png(ctemp,width,height,nbits,cpack)
         if (lcpack.le.0) then
-           print *,'pngpack: ERROR Encoding PNG = ',lcpack
+           print *,'pngpack: error encoding png = ',lcpack
         endif
         deallocate(ctemp)
 
@@ -146,9 +146,9 @@
       endif
 
 !
-!  Fill in ref value and number of bits in Template 5.0
+!  fill in ref value and number of bits in template 5.0
 !
-      call mkieee(rmin,ref,1)   ! ensure reference value is IEEE format
+      call mkieee(rmin,ref,1)   ! ensure reference value is ieee format
 !      call gbyte(ref,idrstmpl(1),0,32)
       iref=transfer(ref,iref)
       idrstmpl(1)=iref
@@ -156,6 +156,6 @@
       idrstmpl(5)=0         ! original data were reals
 
 
-#endif /* USE_PNG */
+#endif /* use_png */
       return
       end

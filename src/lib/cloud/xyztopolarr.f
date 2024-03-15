@@ -1,13 +1,13 @@
 
       subroutine xyz_to_polar_r(x,y,z,dec,ra,r)
 
-      IMPLICIT REAL*8(A-Z)
+      implicit real*8(a-z)
 
-      ATAN3(X,Y)=DMOD((DATAN2(X,Y)+6.2831853071796D0),6.2831853071796D0)
+      atan3(x,y)=dmod((datan2(x,y)+6.2831853071796d0),6.2831853071796d0)
 
-      r=DSQRT(x**2+y**2+z**2)
-      dec=ASIN(z/r)
-      ra=ATAN3(y,x)
+      r=dsqrt(x**2+y**2+z**2)
+      dec=asin(z/r)
+      ra=atan3(y,x)
 
       return
       end

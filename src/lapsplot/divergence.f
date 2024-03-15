@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -40,16 +40,16 @@ cdis
         subroutine divergence(uanl,vanl,div,lat,lon,ni,nj
      1                       ,l_grid_north,r_missing_data)
 
-!      ~90            Steve Albers  Original Version
-!       97-Aug-17     Ken Dritz     Added r_missing_data as dummy argument
-!       97-Aug-17     Ken Dritz     Removed include of lapsparms.for
-!       97-Oct        Steve Albers  Add lon in call to fflxc.
+!      ~90            steve albers  original version
+!       97-aug-17     ken dritz     added r_missing_data as dummy argument
+!       97-aug-17     ken dritz     removed include of lapsparms.for
+!       97-oct        steve albers  add lon in call to fflxc.
 
         include 'trigd.inc'
 
-        real m ! Grid points per meter
+        real m ! grid points per meter
 
-        DATA scale/1./
+        data scale/1./
 
         real lat(ni,nj),lon(ni,nj)
         real uanl(ni,nj),vanl(ni,nj)
@@ -68,7 +68,7 @@ cdis
 !       grid_spacing_m = sqrt(
 !    1                 (  lat(1,2) - lat(1,1)                  )**2
 !    1               + ( (lon(1,2) - lon(1,1))*cosd(lat(1,1))  )**2
-!    1                                  )    * 111317. ! Grid spacing m
+!    1                                  )    * 111317. ! grid spacing m
 
         call get_standard_latitudes(slat1,slat2,istatus)
         if(istatus .ne. 1)then
@@ -92,7 +92,7 @@ cdis
             grid_spacing_proj_m = grid_spacing_m
         endif
 
-        write(6,*)' Grid spacings (m) = ',grid_spacing_m
+        write(6,*)' grid spacings (m) = ',grid_spacing_m
      1                                   ,grid_spacing_proj_m
 
         m = 1.0 / grid_spacing_proj_m
@@ -115,7 +115,7 @@ cdis
         enddo ! i
         enddo ! j
 
-        call FFLXC(ni,nj,M,SCALE
+        call fflxc(ni,nj,m,scale
      1  ,uanl_grid,vanl_grid,one,div,lat,lon
      1  ,dum1,dum2,dum3,r_missing_data)
 
@@ -138,14 +138,14 @@ cdis
         subroutine vorticity_abs(uanl,vanl,vort,lat,lon,ni,nj,dx,dy
      1                          ,l_grid_north,r_missing_data)
 
-        real lat(ni,nj),lon(ni,nj)                           ! I
-        real uanl(ni,nj),vanl(ni,nj)                         ! I
-        real coriolis(ni,nj)                                 ! L
-        real vort(ni,nj)                                     ! O
-        real div(ni,nj)                                      ! L
-        real dx(ni,nj), dy(ni,nj)                            ! O
+        real lat(ni,nj),lon(ni,nj)                           ! i
+        real uanl(ni,nj),vanl(ni,nj)                         ! i
+        real coriolis(ni,nj)                                 ! l
+        real vort(ni,nj)                                     ! o
+        real div(ni,nj)                                      ! l
+        real dx(ni,nj), dy(ni,nj)                            ! o
 
-        logical l_grid_north                                 ! I
+        logical l_grid_north                                 ! i
 
         data init/0/
         save init
@@ -200,26 +200,26 @@ c
 
         include 'constants.inc'
 
-        real lat(ni,nj),lon(ni,nj)                           ! I
-        real uanl(ni,nj,nkuv),vanl(ni,nj,nkuv)               ! I
-        real temp_3d(ni,nj,nk)                               ! I
-        real vort_2d(ni,nj)                                  ! L
-        real dx(ni,nj)                                       ! O
-        real dy(ni,nj)                                       ! O
-        real theta(ni,nj,nk)                                 ! L
-        real pres_3d(ni,nj,nk)                               ! L
-        real dtheta_dp(ni,nj,nk)                             ! L
-        real potvort(ni,nj,nk)                               ! O
+        real lat(ni,nj),lon(ni,nj)                           ! i
+        real uanl(ni,nj,nkuv),vanl(ni,nj,nkuv)               ! i
+        real temp_3d(ni,nj,nk)                               ! i
+        real vort_2d(ni,nj)                                  ! l
+        real dx(ni,nj)                                       ! o
+        real dy(ni,nj)                                       ! o
+        real theta(ni,nj,nk)                                 ! l
+        real pres_3d(ni,nj,nk)                               ! l
+        real dtheta_dp(ni,nj,nk)                             ! l
+        real potvort(ni,nj,nk)                               ! o
 
-        logical l_grid_north                                 ! I
+        logical l_grid_north                                 ! i
 
-        write(6,*)' Subroutine calc_potvort'
+        write(6,*)' subroutine calc_potvort'
 
-!       Obtain 3D pressure field
+!       obtain 3d pressure field
         call get_pres_3d(i4time,ni,nj,nk,pres_3d,istatus)
         if(istatus .ne. 1)return
 
-!       Calculate theta
+!       calculate theta
         do k = 1,nk
         do i = 1,ni
         do j = 1,nj
@@ -228,7 +228,7 @@ c
         enddo ! i
         enddo ! k
 
-!       Calculate dtheta / dp
+!       calculate dtheta / dp
         do k = 2,nk-1
             kp1 = k+1
             km1 = k-1
@@ -244,19 +244,19 @@ c
         dtheta_dp(:,:,nk) = dtheta_dp(:,:,nk-1)
 
 
-!       Calculate absolute vorticity
-        if(k_in .gt. 0)then ! 2D
+!       calculate absolute vorticity
+        if(k_in .gt. 0)then ! 2d
             kstart = k_in
             kend = k_in
-        else                ! 3D where k_in = 0
+        else                ! 3d where k_in = 0
             kstart = 1
             kend = nk
         endif
 
         do k = kstart,kend
-            if(k_in .gt. 0)then ! 2D
+            if(k_in .gt. 0)then ! 2d
                 kuv = 1
-            else                ! 3D where k_in = 0
+            else                ! 3d where k_in = 0
                 kuv = k
             endif
 
@@ -265,10 +265,10 @@ c
      1                   ,lat,lon,ni,nj,dx,dy
      1                   ,l_grid_north,r_missing_data)
 
-!           See http://www-das.uwyo.edu/~geerts/cwx/notes/chap12/pot_vort.html
+!           see http://www-das.uwyo.edu/~geerts/cwx/notes/chap12/pot_vort.html
 
             if(k_in .gt. 0)then     ! just returning 2d field (for efficiency)
-                write(6,*)'     calculating 2D potvort - with debugging'       
+                write(6,*)'     calculating 2d potvort - with debugging'       
                 do i = 1,ni
                 do j = 1,nj
                     potvort(i,j,1) = vort_2d(i,j) * dtheta_dp(i,j,k) 
@@ -282,8 +282,8 @@ c
                 enddo ! j
                 enddo ! i
 
-            elseif(k_in .eq. 0)then ! return 3D field
-                write(6,*)'     calculating 3D potvort'
+            elseif(k_in .eq. 0)then ! return 3d field
+                write(6,*)'     calculating 3d potvort'
                 potvort(:,:,k) = vort_2d(:,:) * dtheta_dp(:,:,k) 
      1                                        * grav       
             endif

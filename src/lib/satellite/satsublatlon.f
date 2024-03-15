@@ -1,43 +1,43 @@
-      subroutine sat_sublatlon(ewc4,ewi4,nsc4,nsi4,f_time,imc,orbAt,
-     &SatSubLAT,SatSubLON,istatus)
+      subroutine sat_sublatlon(ewc4,ewi4,nsc4,nsi4,f_time,imc,orbat,
+     &satsublat,satsublon,istatus)
 c
 c
 c
-      Implicit None
+      implicit none
 
       include 'instco.inc'
 
-      Real*8        orbAt(336)
-      Real          time_50,time50
-      Real*8        t50_8
-      Real*8        t
-      Real*8        f_time
-      Real*8        SatSubLAT,SatSubLON
-      Real          pi,radtodeg
+      real*8        orbat(336)
+      real          time_50,time50
+      real*8        t50_8
+      real*8        t
+      real*8        f_time
+      real*8        satsublat,satsublon
+      real          pi,radtodeg
 
-      Integer     ewc4,ewi4
-      Integer     nsc4,nsi4
-      Integer     INSTR
-      Integer     time_spec(2)
-      Integer     imc
-      Integer     istatus
+      integer     ewc4,ewi4
+      integer     nsc4,nsi4
+      integer     instr
+      integer     time_spec(2)
+      integer     imc
+      integer     istatus
 
       istatus = -1
-      INSTR=1          !1=Imager, 2=Sounder
+      instr=1          !1=imager, 2=sounder
 
       pi=3.141592653589793
       radtodeg=180.0/pi
 
-      call bcd_to_int(orbAt(12),time_spec)
+      call bcd_to_int(orbat(12),time_spec)
       time_50 = time50(time_spec)
       t50_8=time_50
       t = f_time /60. + 7305. * 24. * 60.
 
-      call SETCON(INSTR,nsc4,nsi4,ewc4,ewi4)
-      call LMODEL(t,t50_8,OrbAt,imc,SatSubLAT,SatSubLON)
+      call setcon(instr,nsc4,nsi4,ewc4,ewi4)
+      call lmodel(t,t50_8,orbat,imc,satsublat,satsublon)
 
-      write(6,*)'  Sat Subpoint lat (deg) ',SatSubLAT*radtodeg
-      write(6,*)'  Sat Subpoint lon (deg) ',SatSubLON*radtodeg
+      write(6,*)'  sat subpoint lat (deg) ',satsublat*radtodeg
+      write(6,*)'  sat subpoint lon (deg) ',satsublon*radtodeg
 
       istatus=1
 

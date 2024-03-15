@@ -1,111 +1,111 @@
 !-----------------------------------------------------------------------
-      SUBROUTINE INSTRUMENT(K,KALL,TTOT,TMIN,TMAX)
-!$$$  SUBPROGRAM DOCUMENTATION  BLOCK
+      subroutine instrument(k,kall,ttot,tmin,tmax)
+!$$$  subprogram documentation  block
 !                .      .    .                                       .
-! SUBPROGRAM:  INSTRUMENT    MONITOR WALL-CLOCK TIMES, ETC.
-!   PRGMMR: IREDELL          ORG: NP23        DATE:1998-07-16
+! subprogram:  instrument    monitor wall-clock times, etc.
+!   prgmmr: iredell          org: np23        date:1998-07-16
 !
-! ABSTRACT: THIS SUBPROGRAM IS USEFUL IN INSTRUMENTING A CODE
-!   BY MONITORING THE NUMBER OF TIMES EACH GIVEN SECTION
-!   OF A PROGRAM IS INVOKED AS WELL AS THE MINIMUM, MAXIMUM
-!   AND TOTAL WALL-CLOCK TIME SPENT IN THE GIVEN SECTION.
+! abstract: this subprogram is useful in instrumenting a code
+!   by monitoring the number of times each given section
+!   of a program is invoked as well as the minimum, maximum
+!   and total wall-clock time spent in the given section.
 !
-! PROGRAM HISTORY LOG:
-!   1998-07-16  IREDELL
+! program history log:
+!   1998-07-16  iredell
 !
-! USAGE:    CALL INSTRUMENT(K,KALL,TTOT,TMIN,TMAX)
-!   INPUT ARGUMENT LIST:
-!     K        - INTEGER POSITIVE SECTION NUMBER
-!                OR MAXIMUM SECTION NUMBER IN THE FIRST INVOCATION
-!                OR ZERO TO RESET ALL WALL-CLOCK STATISTICS
-!                OR NEGATIVE SECTION NUMBER TO SKIP MONITORING
-!                AND JUST RETURN STATISTICS.
+! usage:    call instrument(k,kall,ttot,tmin,tmax)
+!   input argument list:
+!     k        - integer positive section number
+!                or maximum section number in the first invocation
+!                or zero to reset all wall-clock statistics
+!                or negative section number to skip monitoring
+!                and just return statistics.
 !
-!   OUTPUT ARGUMENT LIST:
-!     KALL     - INTEGER NUMBER OF TIMES SECTION IS CALLED
-!     TTOT     - REAL TOTAL SECONDS SPENT IN SECTION
-!     TMIN     - REAL MINIMUM SECONDS SPENT IN SECTION
-!     TMAX     - REAL MAXIMUM SECONDS SPENT IN SECTION
+!   output argument list:
+!     kall     - integer number of times section is called
+!     ttot     - real total seconds spent in section
+!     tmin     - real minimum seconds spent in section
+!     tmax     - real maximum seconds spent in section
 !
-! SUBPROGRAMS CALLED:
-!   W3UTCDAT     RETURN THE UTC DATE AND TIME
-!   W3DIFDAT     RETURN A TIME INTERVAL BETWEEN TWO DATES
+! subprograms called:
+!   w3utcdat     return the utc date and time
+!   w3difdat     return a time interval between two dates
 !
-! REMARKS:
-!   THIS SUBPROGRAM SHOULD NOT BE INVOKED FROM A MULTITASKING REGION.
-!   NORMALLY, TIME SPENT INSIDE THIS SUBPROGRAM IS NOT COUNTED.
-!   WALL-CLOCK TIMES ARE KEPT TO THE NEAREST MILLISECOND.
+! remarks:
+!   this subprogram should not be invoked from a multitasking region.
+!   normally, time spent inside this subprogram is not counted.
+!   wall-clock times are kept to the nearest millisecond.
 !
-!   EXAMPLE.
-!     CALL INSTRUMENT(2,KALL,TTOT,TMIN,TMAX)    ! KEEP STATS FOR 2 SUBS
-!     DO K=1,N
-!       CALL SUB1
-!       CALL INSTRUMENT(1,KALL,TTOT,TMIN,TMAX)  ! ACCUM STATS FOR SUB1
-!       CALL SUB2
-!       CALL INSTRUMENT(2,KALL,TTOT,TMIN,TMAX)  ! ACCUM STATS FOR SUB2
-!     ENDDO
-!     PRINT *,'SUB2 STATS: ',KALL,TTOT,TMIN,TMAX
-!     CALL INSTRUMENT(-1,KALL,TTOT,TMIN,TMAX)   ! RETURN STATS FOR SUB1
-!     PRINT *,'SUB1 STATS: ',KALL,TTOT,TMIN,TMAX
+!   example.
+!     call instrument(2,kall,ttot,tmin,tmax)    ! keep stats for 2 subs
+!     do k=1,n
+!       call sub1
+!       call instrument(1,kall,ttot,tmin,tmax)  ! accum stats for sub1
+!       call sub2
+!       call instrument(2,kall,ttot,tmin,tmax)  ! accum stats for sub2
+!     enddo
+!     print *,'sub2 stats: ',kall,ttot,tmin,tmax
+!     call instrument(-1,kall,ttot,tmin,tmax)   ! return stats for sub1
+!     print *,'sub1 stats: ',kall,ttot,tmin,tmax
 !
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
+! attributes:
+!   language: fortran 90
 !
 !$$$
-        IMPLICIT NONE
-        INTEGER,INTENT(IN):: K
-        INTEGER,INTENT(OUT):: KALL
-        REAL,INTENT(OUT):: TTOT,TMIN,TMAX
-        INTEGER,SAVE:: KMAX=0
-        INTEGER,DIMENSION(:),ALLOCATABLE,SAVE:: KALLS
-        REAL,DIMENSION(:),ALLOCATABLE,SAVE:: TTOTS,TMINS,TMAXS
-        INTEGER,DIMENSION(8),SAVE:: IDAT
-        INTEGER,DIMENSION(8):: JDAT
-        REAL,DIMENSION(5):: RINC
-        INTEGER:: KA
+        implicit none
+        integer,intent(in):: k
+        integer,intent(out):: kall
+        real,intent(out):: ttot,tmin,tmax
+        integer,save:: kmax=0
+        integer,dimension(:),allocatable,save:: kalls
+        real,dimension(:),allocatable,save:: ttots,tmins,tmaxs
+        integer,dimension(8),save:: idat
+        integer,dimension(8):: jdat
+        real,dimension(5):: rinc
+        integer:: ka
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        KA=ABS(K)
-!  ALLOCATE MONITORING ARRAYS IF INITIAL INVOCATION
-        IF(KMAX.EQ.0) THEN
-          KMAX=K
-          ALLOCATE(KALLS(KMAX))
-          ALLOCATE(TTOTS(KMAX))
-          ALLOCATE(TMINS(KMAX))
-          ALLOCATE(TMAXS(KMAX))
-          KALLS=0
-          KA=0
-!  OR RESET ALL STATISTICS BACK TO ZERO
-        ELSEIF(K.EQ.0) THEN
-          KALLS=0
-!  OR COUNT TIME SINCE LAST INVOCATION AGAINST THIS SECTION
-        ELSEIF(K.GT.0) THEN
-          CALL W3UTCDAT(JDAT)
-          CALL W3DIFDAT(JDAT,IDAT,4,RINC)
-          KALLS(K)=KALLS(K)+1
-          IF(KALLS(K).EQ.1) THEN
-            TTOTS(K)=RINC(4)
-            TMINS(K)=RINC(4)
-            TMAXS(K)=RINC(4)
-          ELSE
-            TTOTS(K)=TTOTS(K)+RINC(4)
-            TMINS(K)=MIN(TMINS(K),RINC(4))
-            TMAXS(K)=MAX(TMAXS(K),RINC(4))
-          ENDIF
-        ENDIF
+        ka=abs(k)
+!  allocate monitoring arrays if initial invocation
+        if(kmax.eq.0) then
+          kmax=k
+          allocate(kalls(kmax))
+          allocate(ttots(kmax))
+          allocate(tmins(kmax))
+          allocate(tmaxs(kmax))
+          kalls=0
+          ka=0
+!  or reset all statistics back to zero
+        elseif(k.eq.0) then
+          kalls=0
+!  or count time since last invocation against this section
+        elseif(k.gt.0) then
+          call w3utcdat(jdat)
+          call w3difdat(jdat,idat,4,rinc)
+          kalls(k)=kalls(k)+1
+          if(kalls(k).eq.1) then
+            ttots(k)=rinc(4)
+            tmins(k)=rinc(4)
+            tmaxs(k)=rinc(4)
+          else
+            ttots(k)=ttots(k)+rinc(4)
+            tmins(k)=min(tmins(k),rinc(4))
+            tmaxs(k)=max(tmaxs(k),rinc(4))
+          endif
+        endif
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  RETURN STATISTICS
-        IF(KA.GE.1.AND.KA.LE.KMAX.AND.KALLS(KA).GT.0) THEN
-          KALL=KALLS(KA)
-          TTOT=TTOTS(KA)
-          TMIN=TMINS(KA)
-          TMAX=TMAXS(KA)
-        ELSE
-          KALL=0
-          TTOT=0
-          TMIN=0
-          TMAX=0
-        ENDIF
+!  return statistics
+        if(ka.ge.1.and.ka.le.kmax.and.kalls(ka).gt.0) then
+          kall=kalls(ka)
+          ttot=ttots(ka)
+          tmin=tmins(ka)
+          tmax=tmaxs(ka)
+        else
+          kall=0
+          ttot=0
+          tmin=0
+          tmax=0
+        endif
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  KEEP CURRENT TIME FOR NEXT INVOCATION
-        IF(K.GE.0) CALL W3UTCDAT(IDAT)
-      END SUBROUTINE INSTRUMENT
+!  keep current time for next invocation
+        if(k.ge.0) call w3utcdat(idat)
+      end subroutine instrument

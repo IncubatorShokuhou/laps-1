@@ -1,848 +1,846 @@
-MODULE GSBCOST_GRAD
+module gsbcost_grad
 !*************************************************
-! CALCULATE COST FUNCTION AND THE RELEVENT GRADIENTS OF GS-BALANCE PENALTY TERM, AND THE PENALTY TERM OF CONTINUAL CONDITION.
-! HISTORY: MODIFIED AND DEPARTED FROM STMAS4D_CORE MODULE BY ZHONGJIE HE, JANUARY 2008.
+! calculate cost function and the relevent gradients of gs-balance penalty term, and the penalty term of continual condition.
+! history: modified and departed from stmas4d_core module by zhongjie he, january 2008.
 !*************************************************
 
-  USE PRMTRS_STMAS
-  USE GENERALTOOLS, ONLY : GDERIVELB, GDERIVEIT, GDERIVERB
+   use prmtrs_stmas
+   use generaltools, only: gderivelb, gderiveit, gderiverb
 
-  PUBLIC  GSBLNCOST_NON_UNIFORM_Z, GSBLNGRAD_NON_UNIFORM_Z, GSBLNCOST_P_HS, GSBLNGRAD_P_HS, CNTNSCOST, CNTNSGRAD, GSBLNCOST_P, GSBLNGRAD_P
+  public  gsblncost_non_uniform_z, gsblngrad_non_uniform_z, gsblncost_p_hs, gsblngrad_p_hs, cntnscost, cntnsgrad, gsblncost_p, gsblngrad_p
 
 !***************************************************
-!!COMMENT:
-!   THIS MODULE IS USED BY THE MODULE OF STMAS4D_CORE TO CALCULATE THE COST FUNCTION AND THE RELEVENT GRADIENTS OF PENALTY TERMS.
-!   SUBROUTINES:
-!      GSBLNCOST_NON_UNIFORM_Z : CALCULATE THE COSTFUNCTION OF GS-BALANCE FOR THE SIGMA AND HEIGHT COORDINATE SYSTEM.
-!      GSBLNGRAD_NON_UNIFORM_Z : CALCULATE GRADIENTS OF COSTFUNCTIONS CORRESPOND TO GSBLNCOST_NON_UNIFORM_Z.
-!      GSBLNCOST_P_HS          : CALCULATE THE COSTFUNCTION FOR THE CASE OF PRESSURE COORDINATE, THE HYDROSTATIC APPROXIMATION IS USED.
-!      GSBLNGRAD_P_HS          : CALCULATE GRADIENTS OF COSTFUNCTIONS CORRESPOND TO GSBLNCOST_P_HS.
-!      CNTNSCOST               : CALCULATE THE PENALTY TERM OF CONTINUAL CONDITIONS.
-!      CNTNSGRAD               : CALCULATE THE GRADIENT OF COSTFUNCTIONS CORRESPOND TO CNTNSCOST.
-!      GSBLNCOST_P             : JUST LIKE GSBLNCOST_P_HS, NOT USE THE HYDROSTATIC APPROXIMATION.
-!      GSBLNGRAD_P             : CALCULATE GRADIENTS OF COSTFUNCTIONS CORRESPOND TO GSBLNCOST_P.
-CONTAINS
+!!comment:
+!   this module is used by the module of stmas4d_core to calculate the cost function and the relevent gradients of penalty terms.
+!   subroutines:
+!      gsblncost_non_uniform_z : calculate the costfunction of gs-balance for the sigma and height coordinate system.
+!      gsblngrad_non_uniform_z : calculate gradients of costfunctions correspond to gsblncost_non_uniform_z.
+!      gsblncost_p_hs          : calculate the costfunction for the case of pressure coordinate, the hydrostatic approximation is used.
+!      gsblngrad_p_hs          : calculate gradients of costfunctions correspond to gsblncost_p_hs.
+!      cntnscost               : calculate the penalty term of continual conditions.
+!      cntnsgrad               : calculate the gradient of costfunctions correspond to cntnscost.
+!      gsblncost_p             : just like gsblncost_p_hs, not use the hydrostatic approximation.
+!      gsblngrad_p             : calculate gradients of costfunctions correspond to gsblncost_p.
+contains
 
-SUBROUTINE GSBLNCOST_NON_UNIFORM_Z
+   subroutine gsblncost_non_uniform_z
 !*************************************************
-! GEOSTROPHIC BALANCE PENALTY TERM OF COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!          FEBRUARY 2008, MODIFIED BY ZHONGJIE HE
+! geostrophic balance penalty term of cost function
+! history: august 2007, coded by wei li.
+!          february 2008, modified by zhongjie he
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,K2,K3,UU,VV,PP
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: GS
-! --------------------
-
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-  IF(PNLT0PU.LT.1.0E-10.AND.PNLT0PV.LT.1.0E-10)RETURN
-
-! CALCULATE THE TERM OF DP/DX=DEN*COR*V
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=ZZZ(I,J,K1,T)
-      Z2=ZZZ(I,J,K2,T)
-      Z3=ZZZ(I,J,K3,T)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-
-      GS=((GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-         /(XXX(I2,J)-XXX(I1,J)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J)))*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-        -((GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-         /(YYY(I,J2)-YYY(I,J1)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1)))*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-         -COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,VV)+GRDBKGND(I,J,K,T,VV))
-
-      COSTFUN=COSTFUN+PNLT_PV*GS**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-
-! CALCULATE THE TERM OF DP/DY=-DEN*COR*U
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=ZZZ(I,J,K1,T)
-      Z2=ZZZ(I,J,K2,T)
-      Z3=ZZZ(I,J,K3,T)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-
-      GS=((GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-         /(YYY(I,J2)-YYY(I,J1)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1)))*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-        +((GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-         /(XXX(I2,J)-XXX(I1,J)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J)))*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-         +COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,UU)+GRDBKGND(I,J,K,T,UU))
-
-      COSTFUN=COSTFUN+PNLT_PU*GS**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE GSBLNCOST_NON_UNIFORM_Z
-
-SUBROUTINE GSBLNGRAD_NON_UNIFORM_Z
-!*************************************************
-! GEOSTROPHIC BALANCE PENALTY TERM OF GRADIENT
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!*************************************************
-  IMPLICIT NONE
-! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,K2,K3,UU,VV,PP
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: GS
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, k2, k3, uu, vv, pp
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: gs
 ! --------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-  IF(PNLT0PU.LT.1.0E-10.AND.PNLT0PV.LT.1.0E-10)RETURN
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=ZZZ(I,J,K1,T)
-      Z2=ZZZ(I,J,K2,T)
-      Z3=ZZZ(I,J,K3,T)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+      if (pnlt0pu .lt. 1.0e-10 .and. pnlt0pv .lt. 1.0e-10) return
 
-      GS=((GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-         /(XXX(I2,J)-XXX(I1,J)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J)))*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-        -((GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-         /(YYY(I,J2)-YYY(I,J1)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1)))*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-         -COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,VV)+GRDBKGND(I,J,K,T,VV))
-!
-      GRADINT(I,J,K,T,VV) =GRADINT(I,J,K,T,VV) +2.0*PNLT_PV*GS*COR(I,J)*DEN(I,J,K,T)*(-1.0)
-!
-      GRADINT(I2,J,K,T,PP)=GRADINT(I2,J,K,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         /(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I1,J,K,T,PP)=GRADINT(I1,J,K,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         /(XXX(I2,J)-XXX(I1,J))*(-1.0)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         *AZ*(-1.0)*(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         *BZ*(-1.0)*(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         *CZ*(-1.0)*(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I,J2,K,T,PP)=GRADINT(I,J2,K,T,PP)-2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         /(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I,J1,K,T,PP)=GRADINT(I,J1,K,T,PP)-2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         /(YYY(I,J2)-YYY(I,J1))*(-1.0)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)-2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         *AZ*(-1.0)*(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)-2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         *BZ*(-1.0)*(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)-2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         *CZ*(-1.0)*(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1))
+! calculate the term of dp/dx=den*cor*v
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = zzz(i, j, k1, t)
+            z2 = zzz(i, j, k2, t)
+            z3 = zzz(i, j, k3, t)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
 
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=ZZZ(I,J,K1,T)
-      Z2=ZZZ(I,J,K2,T)
-      Z3=ZZZ(I,J,K3,T)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      GS=((GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-         /(YYY(I,J2)-YYY(I,J1)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1)))*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-        +((GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-         /(XXX(I2,J)-XXX(I1,J)) &
-         -(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-         *(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J)))*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-         +COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,UU)+GRDBKGND(I,J,K,T,UU))
-!
-      GRADINT(I,J,K,T,UU) =GRADINT(I,J,K,T,UU) +2.0*PNLT_PU*GS*COR(I,J)*DEN(I,J,K,T)
-!
-      GRADINT(I,J2,K,T,PP)=GRADINT(I,J2,K,T,PP)+2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         /(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I,J1,K,T,PP)=GRADINT(I,J1,K,T,PP)+2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         /(YYY(I,J2)-YYY(I,J1))*(-1.0)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)+2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         *AZ*(-1.0)*(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)+2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         *BZ*(-1.0)*(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)+2.0*PNLT_PU*GS*SCL(PP)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         *CZ*(-1.0)*(ZZZ(I,J2,K,T)-ZZZ(I,J1,K,T))/(YYY(I,J2)-YYY(I,J1))
-!
-      GRADINT(I2,J,K,T,PP)=GRADINT(I2,J,K,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         /(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I1,J,K,T,PP)=GRADINT(I1,J,K,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         /(XXX(I2,J)-XXX(I1,J))*(-1.0)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         *AZ*(-1.0)*(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         *BZ*(-1.0)*(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J))
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)+2.0*PNLT_PV*GS*SCL(PP)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         *CZ*(-1.0)*(ZZZ(I2,J,K,T)-ZZZ(I1,J,K,T))/(XXX(I2,J)-XXX(I1,J))
-!
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE GSBLNGRAD_NON_UNIFORM_Z
+            gs = ((grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                  /(xxx(i2, j) - xxx(i1, j)) &
+                  - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                     + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j)))*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                - ((grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                    /(yyy(i, j2) - yyy(i, j1)) &
+                    - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1)))*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                 - cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, vv) + grdbkgnd(i, j, k, t, vv))
 
+            costfun = costfun + pnlt_pv*gs**2
+         end do
+         end do
+         end do
+         end do
+      end if
 
-SUBROUTINE GSBLNCOST_P_HS
+! calculate the term of dp/dy=-den*cor*u
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = zzz(i, j, k1, t)
+            z2 = zzz(i, j, k2, t)
+            z3 = zzz(i, j, k3, t)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+
+            gs = ((grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                  /(yyy(i, j2) - yyy(i, j1)) &
+                  - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                     + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1)))*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                + ((grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                    /(xxx(i2, j) - xxx(i1, j)) &
+                    - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j)))*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                 + cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, uu) + grdbkgnd(i, j, k, t, uu))
+
+            costfun = costfun + pnlt_pu*gs**2
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine gsblncost_non_uniform_z
+
+   subroutine gsblngrad_non_uniform_z
 !*************************************************
-! GEOSTROPHIC BALANCE PENALTY TERM OF COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! geostrophic balance penalty term of gradient
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL ,PARAMETER :: GA=9.8D0
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,UU,VV,PP
-  REAL     :: GS
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, k2, k3, uu, vv, pp
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: gs
 ! --------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-  IF(PNLT0PU.LT.1.0E-10.AND.PNLT0PV.LT.1.0E-10)RETURN
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+      if (pnlt0pu .lt. 1.0e-10 .and. pnlt0pv .lt. 1.0e-10) return
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = zzz(i, j, k1, t)
+            z2 = zzz(i, j, k2, t)
+            z3 = zzz(i, j, k3, t)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
 
-! CALCULATE THE TERM OF DP/DX=DEN*COR*V
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      GS=(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(XXX(I2,J)-XXX(I1,J))*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(VV)*GA*1.0 &
-        -(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(YYY(I,J2)-YYY(I,J1))*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(VV)*GA*0.0 &
-        -COR(I,J)*(GRDANALS(I,J,K,T,VV)+GRDBKGND(I,J,K,T,VV))
-      COSTFUN=COSTFUN+PNLT_PV*GS**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDIF
+            gs = ((grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                  /(xxx(i2, j) - xxx(i1, j)) &
+                  - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                     + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j)))*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                - ((grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                    /(yyy(i, j2) - yyy(i, j1)) &
+                    - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1)))*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                 - cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, vv) + grdbkgnd(i, j, k, t, vv))
+!
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) + 2.0*pnlt_pv*gs*cor(i, j)*den(i, j, k, t)*(-1.0)
+!
+            gradint(i2, j, k, t, pp) = gradint(i2, j, k, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i1, j, k, t, pp) = gradint(i1, j, k, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))*(-1.0)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       *az*(-1.0)*(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       *bz*(-1.0)*(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       *cz*(-1.0)*(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i, j2, k, t, pp) = gradint(i, j2, k, t, pp) - 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i, j1, k, t, pp) = gradint(i, j1, k, t, pp) - 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))*(-1.0)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) - 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       *az*(-1.0)*(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) - 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       *bz*(-1.0)*(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) - 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       *cz*(-1.0)*(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1))
 
-! CALCULATE THE TERM OF DP/DY=-DEN*COR*U
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      GS=(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(YYY(I,J2)-YYY(I,J1))*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(UU)*GA*1.0 &
-        +(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(XXX(I2,J)-XXX(I1,J))*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(UU)*GA*0.0 &
-        +COR(I,J)*(GRDANALS(I,J,K,T,UU)+GRDBKGND(I,J,K,T,UU))
-      COSTFUN=COSTFUN+PNLT_PU*GS**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE GSBLNCOST_P_HS
+         end do
+         end do
+         end do
+         end do
+      end if
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = zzz(i, j, k1, t)
+            z2 = zzz(i, j, k2, t)
+            z3 = zzz(i, j, k3, t)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            gs = ((grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                  /(yyy(i, j2) - yyy(i, j1)) &
+                  - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                     + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1)))*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                + ((grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                    /(xxx(i2, j) - xxx(i1, j)) &
+                    - (grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                  *(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j)))*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                 + cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, uu) + grdbkgnd(i, j, k, t, uu))
+!
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) + 2.0*pnlt_pu*gs*cor(i, j)*den(i, j, k, t)
+!
+            gradint(i, j2, k, t, pp) = gradint(i, j2, k, t, pp) + 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i, j1, k, t, pp) = gradint(i, j1, k, t, pp) + 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))*(-1.0)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) + 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       *az*(-1.0)*(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) + 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       *bz*(-1.0)*(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) + 2.0*pnlt_pu*gs*scl(pp)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       *cz*(-1.0)*(zzz(i, j2, k, t) - zzz(i, j1, k, t))/(yyy(i, j2) - yyy(i, j1))
+!
+            gradint(i2, j, k, t, pp) = gradint(i2, j, k, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i1, j, k, t, pp) = gradint(i1, j, k, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))*(-1.0)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       *az*(-1.0)*(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       *bz*(-1.0)*(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j))
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) + 2.0*pnlt_pv*gs*scl(pp)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       *cz*(-1.0)*(zzz(i2, j, k, t) - zzz(i1, j, k, t))/(xxx(i2, j) - xxx(i1, j))
+!
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine gsblngrad_non_uniform_z
 
-SUBROUTINE GSBLNGRAD_P_HS
+   subroutine gsblncost_p_hs
 !*************************************************
-! GEOSTROPHIC BALANCE PENALTY TERM OF GRADIENT
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! geostrophic balance penalty term of cost function
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL ,PARAMETER :: GA=9.8D0
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,UU,VV,PP
-  REAL     :: GS
-! --------------------
-
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-  IF(PNLT0PU.LT.1.0E-10.AND.PNLT0PV.LT.1.0E-10)RETURN
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      GS=(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(XXX(I2,J)-XXX(I1,J))*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(VV)*GA*1.0 &
-        -(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(YYY(I,J2)-YYY(I,J1))*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(VV)*GA*0.0 &
-        -COR(I,J)*(GRDANALS(I,J,K,T,VV)+GRDBKGND(I,J,K,T,VV))
-!
-      GRADINT(I,J,K,T,VV) =GRADINT(I,J,K,T,VV) +2.0*PNLT_PV*GS*COR(I,J)*(-1.0)
-!
-      GRADINT(I2,J,K,T,PP)=GRADINT(I2,J,K,T,PP)+2.0*PNLT_PV*GS*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(VV)*1.0 &
-	                     /(XXX(I2,J)-XXX(I1,J))*GA
-!
-      GRADINT(I1,J,K,T,PP)=GRADINT(I1,J,K,T,PP)+2.0*PNLT_PV*GS*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(VV)*(-1.0)*1.0 &
-                         /(XXX(I2,J)-XXX(I1,J))*GA
-!
-      GRADINT(I,J2,K,T,PP)=GRADINT(I,J2,K,T,PP)-2.0*PNLT_PU*GS*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(VV)*0.0 &
-                         /(YYY(I,J2)-YYY(I,J1))*GA
-!
-      GRADINT(I,J1,K,T,PP)=GRADINT(I,J1,K,T,PP)-2.0*PNLT_PU*GS*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(VV)*(-1.0)*0.0 &
-                         /(YYY(I,J2)-YYY(I,J1))*GA
-!
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      GS=(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(YYY(I,J2)-YYY(I,J1))*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(UU)*GA*1.0 &
-        +(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(XXX(I2,J)-XXX(I1,J))*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(UU)*GA*0.0 &
-        +COR(I,J)*(GRDANALS(I,J,K,T,UU)+GRDBKGND(I,J,K,T,UU))
-!
-      GRADINT(I,J,K,T,UU) =GRADINT(I,J,K,T,UU) +2.0*PNLT_PU*GS*COR(I,J)
-!
-      GRADINT(I,J2,K,T,PP)=GRADINT(I,J2,K,T,PP)+2.0*PNLT_PU*GS*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(UU)*1.0 &
-                         /(YYY(I,J2)-YYY(I,J1))*GA
-!
-      GRADINT(I,J1,K,T,PP)=GRADINT(I,J1,K,T,PP)+2.0*PNLT_PU*GS*(SCL(PP)*Z_TRANS)/SCP(YSL)/SCP(CSL)/SCL(UU)*(-1.0)*1.0 &
-                         /(YYY(I,J2)-YYY(I,J1))*GA
-!
-      GRADINT(I2,J,K,T,PP)=GRADINT(I2,J,K,T,PP)+2.0*PNLT_PV*GS*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(UU)*0.0 &
-	                     /(XXX(I2,J)-XXX(I1,J))*GA
-!
-      GRADINT(I1,J,K,T,PP)=GRADINT(I1,J,K,T,PP)+2.0*PNLT_PV*GS*(SCL(PP)*Z_TRANS)/SCP(XSL)/SCP(CSL)/SCL(UU)*(-1.0)*0.0 &
-                         /(XXX(I2,J)-XXX(I1,J))*GA
-!
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE GSBLNGRAD_P_HS
-
-SUBROUTINE GSBLNCOST_P
-!*************************************************
-! GEOSTROPHIC BALANCE PENALTY TERM OF COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!*************************************************
-  IMPLICIT NONE
-! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,K2,K3,UU,VV,PP
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: GS
-! --------------------
-
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-  IF(PNLT0PU.LT.1.0E-10.AND.PNLT0PV.LT.1.0E-10)RETURN
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=PPP(K1)
-      Z2=PPP(K2)
-      Z3=PPP(K3)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      GS=(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(XXX(I2,J)-XXX(I1,J))*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-        -(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(YYY(I,J2)-YYY(I,J1))*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-        +COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,VV)+GRDBKGND(I,J,K,T,VV))
-      COSTFUN=COSTFUN+PNLT_PV*GS**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDIF
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=PPP(K1)
-      Z2=PPP(K2)
-      Z3=PPP(K3)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      GS=(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(YYY(I,J2)-YYY(I,J1))*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-        +(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(XXX(I2,J)-XXX(I1,J))*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-        -COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,UU)+GRDBKGND(I,J,K,T,UU))
-      COSTFUN=COSTFUN+PNLT_PU*GS**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE GSBLNCOST_P
-
-SUBROUTINE GSBLNGRAD_P
-!*************************************************
-! GEOSTROPHIC BALANCE PENALTY TERM OF GRADIENT
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!*************************************************
-  IMPLICIT NONE
-! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,K2,K3,UU,VV,PP
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: GS
+      real, parameter :: ga = 9.8d0
+      integer  :: i, j, k, t, i1, i2, j1, j2, uu, vv, pp
+      real     :: gs
 ! --------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-  IF(PNLT0PU.LT.1.0E-10.AND.PNLT0PV.LT.1.0E-10)RETURN
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=PPP(K1)
-      Z2=PPP(K2)
-      Z3=PPP(K3)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      GS=(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(XXX(I2,J)-XXX(I1,J))*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-        -(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(YYY(I,J2)-YYY(I,J1))*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-        +COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,VV)+GRDBKGND(I,J,K,T,VV))
-!
-      GRADINT(I,J,K,T,VV) =GRADINT(I,J,K,T,VV) +2.0*PNLT_PV*GS*COR(I,J)*DEN(I,J,K,T)
-!
-      GRADINT(I2,J,K,T,PP)=GRADINT(I2,J,K,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                             /(XXX(I2,J)-XXX(I1,J)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I1,J,K,T,PP)=GRADINT(I1,J,K,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*(-1.0)*1.0 &
-                         /(XXX(I2,J)-XXX(I1,J)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         *(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP) &
-                          +GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP))/(XXX(I2,J)-XXX(I1,J))*AZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         *(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP) &
-                          +GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP))/(XXX(I2,J)-XXX(I1,J))*BZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*1.0 &
-                         *(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP) &
-                          +GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP))/(XXX(I2,J)-XXX(I1,J))*CZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J2,K,T,PP)=GRADINT(I,J2,K,T,PP)-2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         /(YYY(I,J2)-YYY(I,J1)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I,J1,K,T,PP)=GRADINT(I,J1,K,T,PP)-2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*(-1.0)*0.0 &
-                         /(YYY(I,J2)-YYY(I,J1)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)-2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         *(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP) &
-                          +GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP))/(YYY(I,J2)-YYY(I,J1))*AZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)-2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         *(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP) &
-                          +GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP))/(YYY(I,J2)-YYY(I,J1))*BZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)-2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(VV)/SCP(DSL)*0.0 &
-                         *(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP) &
-                          +GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP))/(YYY(I,J2)-YYY(I,J1))*CZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=PPP(K1)
-      Z2=PPP(K2)
-      Z3=PPP(K3)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      GS=(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP)+GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(YYY(I,J2)-YYY(I,J1))*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-        +(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP)+GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP)) &
-        /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-         +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ) &
-        /(XXX(I2,J)-XXX(I1,J))*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-        -COR(I,J)*DEN(I,J,K,T)*(GRDANALS(I,J,K,T,UU)+GRDBKGND(I,J,K,T,UU))
-!
-      GRADINT(I,J,K,T,UU) =GRADINT(I,J,K,T,UU) +2.0*PNLT_PU*GS*COR(I,J)*DEN(I,J,K,T)*(-1.0)
-!
-      GRADINT(I,J2,K,T,PP)=GRADINT(I,J2,K,T,PP)+2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         /(YYY(I,J2)-YYY(I,J1)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I,J1,K,T,PP)=GRADINT(I,J1,K,T,PP)+2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*(-1.0)*1.0 &
-                         /(YYY(I,J2)-YYY(I,J1)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)+2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         *(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP) &
-                          +GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP))/(YYY(I,J2)-YYY(I,J1))*AZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)+2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         *(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP) &
-                          +GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP))/(YYY(I,J2)-YYY(I,J1))*BZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)+2.0*PNLT_PU*GS*SCP(PSL)/SCP(YSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*1.0 &
-                         *(GRDANALS(I,J2,K,T,PP)-GRDANALS(I,J1,K,T,PP) &
-                          +GRDBKGND(I,J2,K,T,PP)-GRDBKGND(I,J1,K,T,PP))/(YYY(I,J2)-YYY(I,J1))*CZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I2,J,K,T,PP)=GRADINT(I2,J,K,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                             /(XXX(I2,J)-XXX(I1,J)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I1,J,K,T,PP)=GRADINT(I1,J,K,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*(-1.0)*0.0 &
-                         /(XXX(I2,J)-XXX(I1,J)) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)
-!
-      GRADINT(I,J,K1,T,PP)=GRADINT(I,J,K1,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         *(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP) &
-                          +GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP))/(XXX(I2,J)-XXX(I1,J))*AZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K2,T,PP)=GRADINT(I,J,K2,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         *(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP) &
-                          +GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP))/(XXX(I2,J)-XXX(I1,J))*BZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-      GRADINT(I,J,K3,T,PP)=GRADINT(I,J,K3,T,PP)+2.0*PNLT_PV*GS*SCP(PSL)/SCP(XSL)/SCP(CSL)/SCL(UU)/SCP(DSL)*0.0 &
-                         *(GRDANALS(I2,J,K,T,PP)-GRDANALS(I1,J,K,T,PP) &
-                          +GRDBKGND(I2,J,K,T,PP)-GRDBKGND(I1,J,K,T,PP))/(XXX(I2,J)-XXX(I1,J))*CZ*(-1.0) &
-                         /(GRDANALS(I,J,K1,T,PP)*AZ+GRDANALS(I,J,K2,T,PP)*BZ+GRDANALS(I,J,K3,T,PP)*CZ &
-                          +GRDBKGND(I,J,K1,T,PP)*AZ+GRDBKGND(I,J,K2,T,PP)*BZ+GRDBKGND(I,J,K3,T,PP)*CZ)**2
-!
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE GSBLNGRAD_P
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+      if (pnlt0pu .lt. 1.0e-10 .and. pnlt0pv .lt. 1.0e-10) return
 
+! calculate the term of dp/dx=den*cor*v
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            gs = (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(xxx(i2, j) - xxx(i1, j))*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(vv)*ga*1.0 &
+                 - (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(yyy(i, j2) - yyy(i, j1))*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(vv)*ga*0.0 &
+                 - cor(i, j)*(grdanals(i, j, k, t, vv) + grdbkgnd(i, j, k, t, vv))
+            costfun = costfun + pnlt_pv*gs**2
+         end do
+         end do
+         end do
+         end do
+      end if
 
-SUBROUTINE CNTNSCOST
+! calculate the term of dp/dy=-den*cor*u
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            gs = (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(yyy(i, j2) - yyy(i, j1))*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(uu)*ga*1.0 &
+                 + (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(xxx(i2, j) - xxx(i1, j))*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(uu)*ga*0.0 &
+                 + cor(i, j)*(grdanals(i, j, k, t, uu) + grdbkgnd(i, j, k, t, uu))
+            costfun = costfun + pnlt_pu*gs**2
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine gsblncost_p_hs
+
+   subroutine gsblngrad_p_hs
 !*************************************************
-! CONTINOUS EQUATION
-! HISTORY: OCTOBER 2007, CODED by WEI LI.
+! geostrophic balance penalty term of gradient
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,K2,K3,UU,VV,WW
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: CE
+      real, parameter :: ga = 9.8d0
+      integer  :: i, j, k, t, i1, i2, j1, j2, uu, vv, pp
+      real     :: gs
 ! --------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  WW=W_CMPNNT
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=PPP(K1)
-      Z2=PPP(K2)
-      Z3=PPP(K3)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      CE=(GRDANALS(I2,J,K,T,UU)-GRDANALS(I1,J,K,T,UU)+GRDBKGND(I2,J,K,T,UU)-GRDBKGND(I1,J,K,T,UU)) &
-        /(XXX(I2,J)-XXX(I1,J))*SCL(UU)/SCP(XSL)*SCP(PSL)/SCL(WW)*1.0 &
-        -(GRDANALS(I,J2,K,T,UU)-GRDANALS(I,J1,K,T,UU)+GRDBKGND(I,J2,K,T,UU)-GRDBKGND(I,J1,K,T,UU)) &
-        /(YYY(I,J2)-YYY(I,J1))*SCL(UU)/SCP(YSL)*SCP(PSL)/SCL(WW)*0.0 &
-        +(GRDANALS(I,J2,K,T,VV)-GRDANALS(I,J1,K,T,VV)+GRDBKGND(I,J2,K,T,VV)-GRDBKGND(I,J1,K,T,VV)) &
-        /(YYY(I,J2)-YYY(I,J1))*SCL(VV)/SCP(YSL)*SCP(PSL)/SCL(WW)*1.0 &
-        +(GRDANALS(I2,J,K,T,VV)-GRDANALS(I1,J,K,T,VV)+GRDBKGND(I2,J,K,T,VV)-GRDBKGND(I1,J,K,T,VV)) &
-        /(XXX(I2,J)-XXX(I1,J))*SCL(VV)/SCP(XSL)*SCP(PSL)/SCL(WW)*0.0 &
-        +(GRDANALS(I,J,K1,T,WW)*AZ+GRDANALS(I,J,K2,T,WW)*BZ+GRDANALS(I,J,K3,T,WW)*CZ &
-         +GRDBKGND(I,J,K1,T,WW)*AZ+GRDBKGND(I,J,K2,T,WW)*BZ+GRDBKGND(I,J,K3,T,WW)*CZ)
-      COSTFUN=COSTFUN+PNLT0PU*CE**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE CNTNSCOST
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+      if (pnlt0pu .lt. 1.0e-10 .and. pnlt0pv .lt. 1.0e-10) return
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            gs = (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(xxx(i2, j) - xxx(i1, j))*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(vv)*ga*1.0 &
+                 - (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(yyy(i, j2) - yyy(i, j1))*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(vv)*ga*0.0 &
+                 - cor(i, j)*(grdanals(i, j, k, t, vv) + grdbkgnd(i, j, k, t, vv))
+!
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) + 2.0*pnlt_pv*gs*cor(i, j)*(-1.0)
+!
+            gradint(i2, j, k, t, pp) = gradint(i2, j, k, t, pp) + 2.0*pnlt_pv*gs*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(vv)*1.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))*ga
+!
+       gradint(i1, j, k, t, pp) = gradint(i1, j, k, t, pp) + 2.0*pnlt_pv*gs*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(vv)*(-1.0)*1.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))*ga
+!
+            gradint(i, j2, k, t, pp) = gradint(i, j2, k, t, pp) - 2.0*pnlt_pu*gs*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(vv)*0.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))*ga
+!
+       gradint(i, j1, k, t, pp) = gradint(i, j1, k, t, pp) - 2.0*pnlt_pu*gs*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(vv)*(-1.0)*0.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))*ga
+!
+         end do
+         end do
+         end do
+         end do
+      end if
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            gs = (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(yyy(i, j2) - yyy(i, j1))*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(uu)*ga*1.0 &
+                 + (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(xxx(i2, j) - xxx(i1, j))*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(uu)*ga*0.0 &
+                 + cor(i, j)*(grdanals(i, j, k, t, uu) + grdbkgnd(i, j, k, t, uu))
+!
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) + 2.0*pnlt_pu*gs*cor(i, j)
+!
+            gradint(i, j2, k, t, pp) = gradint(i, j2, k, t, pp) + 2.0*pnlt_pu*gs*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(uu)*1.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))*ga
+!
+       gradint(i, j1, k, t, pp) = gradint(i, j1, k, t, pp) + 2.0*pnlt_pu*gs*(scl(pp)*z_trans)/scp(ysl)/scp(csl)/scl(uu)*(-1.0)*1.0 &
+                                       /(yyy(i, j2) - yyy(i, j1))*ga
+!
+            gradint(i2, j, k, t, pp) = gradint(i2, j, k, t, pp) + 2.0*pnlt_pv*gs*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(uu)*0.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))*ga
+!
+       gradint(i1, j, k, t, pp) = gradint(i1, j, k, t, pp) + 2.0*pnlt_pv*gs*(scl(pp)*z_trans)/scp(xsl)/scp(csl)/scl(uu)*(-1.0)*0.0 &
+                                       /(xxx(i2, j) - xxx(i1, j))*ga
+!
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine gsblngrad_p_hs
 
-SUBROUTINE CNTNSGRAD
+   subroutine gsblncost_p
 !*************************************************
-! CONTINOUS EQUATION
-! HISTORY: OCTOBER 2007, CODED by WEI LI.
+! geostrophic balance penalty term of cost function
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,K2,K3,UU,VV,WW
-  REAL     :: Z1,Z2,Z3,AZ,BZ,CZ
-  REAL     :: CE
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, k2, k3, uu, vv, pp
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: gs
 ! --------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  WW=W_CMPNNT
-  IF(NUMGRID(1).GE.2.AND.NUMGRID(2).GE.2.AND.NUMGRID(3).GE.3.AND.NUMSTAT.GE.3)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      K1=MAX0(K-1 ,1)
-      K1=MIN0(K1  ,NUMGRID(3)-2)
-      K2=MIN0(K1+1,NUMGRID(3)-1)
-      K3=MIN0(K2+1,NUMGRID(3))
-      Z1=PPP(K1)
-      Z2=PPP(K2)
-      Z3=PPP(K3)
-      IF(K.EQ.1)CALL GDERIVELB(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.GE.2.AND.K.LE.NUMGRID(3)-1)CALL GDERIVEIT(Z1,Z2,Z3,AZ,BZ,CZ)
-      IF(K.EQ.NUMGRID(3))CALL GDERIVERB(Z1,Z2,Z3,AZ,BZ,CZ)
-      CE=(GRDANALS(I2,J,K,T,UU)-GRDANALS(I1,J,K,T,UU)+GRDBKGND(I2,J,K,T,UU)-GRDBKGND(I1,J,K,T,UU)) &
-        /(XXX(I2,J)-XXX(I1,J))*SCL(UU)/SCP(XSL)*SCP(PSL)/SCL(WW)*1.0 &
-        -(GRDANALS(I,J2,K,T,UU)-GRDANALS(I,J1,K,T,UU)+GRDBKGND(I,J2,K,T,UU)-GRDBKGND(I,J1,K,T,UU)) &
-        /(YYY(I,J2)-YYY(I,J1))*SCL(UU)/SCP(YSL)*SCP(PSL)/SCL(WW)*0.0 &
-        +(GRDANALS(I,J2,K,T,VV)-GRDANALS(I,J1,K,T,VV)+GRDBKGND(I,J2,K,T,VV)-GRDBKGND(I,J1,K,T,VV)) &
-        /(YYY(I,J2)-YYY(I,J1))*SCL(VV)/SCP(YSL)*SCP(PSL)/SCL(WW)*1.0 &
-        +(GRDANALS(I2,J,K,T,VV)-GRDANALS(I1,J,K,T,VV)+GRDBKGND(I2,J,K,T,VV)-GRDBKGND(I1,J,K,T,VV)) &
-        /(XXX(I2,J)-XXX(I1,J))*SCL(VV)/SCP(XSL)*SCP(PSL)/SCL(WW)*0.0 &
-        +(GRDANALS(I,J,K1,T,WW)*AZ+GRDANALS(I,J,K2,T,WW)*BZ+GRDANALS(I,J,K3,T,WW)*CZ &
-         +GRDBKGND(I,J,K1,T,WW)*AZ+GRDBKGND(I,J,K2,T,WW)*BZ+GRDBKGND(I,J,K3,T,WW)*CZ)
-      GRADINT(I2,J,K,T,UU)=GRADINT(I2,J,K,T,UU)+2.0*PNLT0PU*CE &
-                         /(XXX(I2,J)-XXX(I1,J))*SCL(UU)/SCP(XSL)*SCP(PSL)/SCL(WW)*1.0
-      GRADINT(I1,J,K,T,UU)=GRADINT(I1,J,K,T,UU)+2.0*PNLT0PU*CE*(-1.0) &
-                         /(XXX(I2,J)-XXX(I1,J))*SCL(UU)/SCP(XSL)*SCP(PSL)/SCL(WW)*1.0
-      GRADINT(I,J2,K,T,UU)=GRADINT(I,J2,K,T,UU)+2.0*PNLT0PU*CE*(-1.0) &
-                         /(YYY(I,J2)-YYY(I,J1))*SCL(UU)/SCP(YSL)*SCP(PSL)/SCL(WW)*0.0
-      GRADINT(I,J1,K,T,UU)=GRADINT(I,J1,K,T,UU)+2.0*PNLT0PU*CE &
-                         /(YYY(I,J2)-YYY(I,J1))*SCL(UU)/SCP(YSL)*SCP(PSL)/SCL(WW)*0.0
-      GRADINT(I,J2,K,T,VV)=GRADINT(I,J2,K,T,VV)+2.0*PNLT0PU*CE &
-                         /(YYY(I,J2)-YYY(I,J1))*SCL(VV)/SCP(YSL)*SCP(PSL)/SCL(WW)*1.0
-      GRADINT(I,J1,K,T,VV)=GRADINT(I,J1,K,T,VV)+2.0*PNLT0PU*CE*(-1.0) &
-                         /(YYY(I,J2)-YYY(I,J1))*SCL(VV)/SCP(YSL)*SCP(PSL)/SCL(WW)*1.0
-      GRADINT(I2,J,K,T,VV)=GRADINT(I2,J,K,T,VV)+2.0*PNLT0PU*CE &
-                         /(XXX(I2,J)-XXX(I1,J))*SCL(VV)/SCP(XSL)*SCP(PSL)/SCL(WW)*0.0
-      GRADINT(I1,J,K,T,VV)=GRADINT(I1,J,K,T,VV)+2.0*PNLT0PU*CE*(-1.0) &
-                         /(XXX(I2,J)-XXX(I1,J))*SCL(VV)/SCP(XSL)*SCP(PSL)/SCL(WW)*0.0
-      GRADINT(I,J,K1,T,WW)=GRADINT(I,J,K1,T,WW)+2.0*PNLT0PU*CE*AZ
-      GRADINT(I,J,K2,T,WW)=GRADINT(I,J,K2,T,WW)+2.0*PNLT0PU*CE*BZ
-      GRADINT(I,J,K3,T,WW)=GRADINT(I,J,K3,T,WW)+2.0*PNLT0PU*CE*CZ
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE CNTNSGRAD
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+      if (pnlt0pu .lt. 1.0e-10 .and. pnlt0pv .lt. 1.0e-10) return
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = ppp(k1)
+            z2 = ppp(k2)
+            z3 = ppp(k3)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            gs = (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(xxx(i2, j) - xxx(i1, j))*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                 - (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(yyy(i, j2) - yyy(i, j1))*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                 + cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, vv) + grdbkgnd(i, j, k, t, vv))
+            costfun = costfun + pnlt_pv*gs**2
+         end do
+         end do
+         end do
+         end do
+      end if
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = ppp(k1)
+            z2 = ppp(k2)
+            z3 = ppp(k3)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            gs = (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(yyy(i, j2) - yyy(i, j1))*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                 + (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(xxx(i2, j) - xxx(i1, j))*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                 - cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, uu) + grdbkgnd(i, j, k, t, uu))
+            costfun = costfun + pnlt_pu*gs**2
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine gsblncost_p
 
-END MODULE GSBCOST_GRAD
+   subroutine gsblngrad_p
+!*************************************************
+! geostrophic balance penalty term of gradient
+! history: august 2007, coded by wei li.
+!*************************************************
+      implicit none
+! --------------------
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, k2, k3, uu, vv, pp
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: gs
+! --------------------
+
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+      if (pnlt0pu .lt. 1.0e-10 .and. pnlt0pv .lt. 1.0e-10) return
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = ppp(k1)
+            z2 = ppp(k2)
+            z3 = ppp(k3)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            gs = (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(xxx(i2, j) - xxx(i1, j))*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                 - (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(yyy(i, j2) - yyy(i, j1))*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                 + cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, vv) + grdbkgnd(i, j, k, t, vv))
+!
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) + 2.0*pnlt_pv*gs*cor(i, j)*den(i, j, k, t)
+!
+            gradint(i2, j, k, t, pp) = gradint(i2, j, k, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       /(xxx(i2, j) - xxx(i1, j)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+       gradint(i1, j, k, t, pp) = gradint(i1, j, k, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*(-1.0)*1.0 &
+                                       /(xxx(i2, j) - xxx(i1, j)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       *(grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) &
+                                      + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp))/(xxx(i2, j) - xxx(i1, j))*az*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       *(grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) &
+                                      + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp))/(xxx(i2, j) - xxx(i1, j))*bz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(vv)/scp(dsl)*1.0 &
+                                       *(grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) &
+                                      + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp))/(xxx(i2, j) - xxx(i1, j))*cz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j2, k, t, pp) = gradint(i, j2, k, t, pp) - 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       /(yyy(i, j2) - yyy(i, j1)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+       gradint(i, j1, k, t, pp) = gradint(i, j1, k, t, pp) - 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*(-1.0)*0.0 &
+                                       /(yyy(i, j2) - yyy(i, j1)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) - 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       *(grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) &
+                                      + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp))/(yyy(i, j2) - yyy(i, j1))*az*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) - 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       *(grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) &
+                                      + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp))/(yyy(i, j2) - yyy(i, j1))*bz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) - 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(vv)/scp(dsl)*0.0 &
+                                       *(grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) &
+                                      + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp))/(yyy(i, j2) - yyy(i, j1))*cz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+         end do
+         end do
+         end do
+         end do
+      end if
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = ppp(k1)
+            z2 = ppp(k2)
+            z3 = ppp(k3)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            gs = (grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(yyy(i, j2) - yyy(i, j1))*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                 + (grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp)) &
+                 /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                   + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz) &
+                 /(xxx(i2, j) - xxx(i1, j))*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                 - cor(i, j)*den(i, j, k, t)*(grdanals(i, j, k, t, uu) + grdbkgnd(i, j, k, t, uu))
+!
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) + 2.0*pnlt_pu*gs*cor(i, j)*den(i, j, k, t)*(-1.0)
+!
+            gradint(i, j2, k, t, pp) = gradint(i, j2, k, t, pp) + 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       /(yyy(i, j2) - yyy(i, j1)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+       gradint(i, j1, k, t, pp) = gradint(i, j1, k, t, pp) + 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*(-1.0)*1.0 &
+                                       /(yyy(i, j2) - yyy(i, j1)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) + 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       *(grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) &
+                                      + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp))/(yyy(i, j2) - yyy(i, j1))*az*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) + 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       *(grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) &
+                                      + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp))/(yyy(i, j2) - yyy(i, j1))*bz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) + 2.0*pnlt_pu*gs*scp(psl)/scp(ysl)/scp(csl)/scl(uu)/scp(dsl)*1.0 &
+                                       *(grdanals(i, j2, k, t, pp) - grdanals(i, j1, k, t, pp) &
+                                      + grdbkgnd(i, j2, k, t, pp) - grdbkgnd(i, j1, k, t, pp))/(yyy(i, j2) - yyy(i, j1))*cz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i2, j, k, t, pp) = gradint(i2, j, k, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       /(xxx(i2, j) - xxx(i1, j)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+       gradint(i1, j, k, t, pp) = gradint(i1, j, k, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*(-1.0)*0.0 &
+                                       /(xxx(i2, j) - xxx(i1, j)) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                       + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)
+!
+            gradint(i, j, k1, t, pp) = gradint(i, j, k1, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       *(grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) &
+                                      + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp))/(xxx(i2, j) - xxx(i1, j))*az*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k2, t, pp) = gradint(i, j, k2, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       *(grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) &
+                                      + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp))/(xxx(i2, j) - xxx(i1, j))*bz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+            gradint(i, j, k3, t, pp) = gradint(i, j, k3, t, pp) + 2.0*pnlt_pv*gs*scp(psl)/scp(xsl)/scp(csl)/scl(uu)/scp(dsl)*0.0 &
+                                       *(grdanals(i2, j, k, t, pp) - grdanals(i1, j, k, t, pp) &
+                                      + grdbkgnd(i2, j, k, t, pp) - grdbkgnd(i1, j, k, t, pp))/(xxx(i2, j) - xxx(i1, j))*cz*(-1.0) &
+                                      /(grdanals(i, j, k1, t, pp)*az + grdanals(i, j, k2, t, pp)*bz + grdanals(i, j, k3, t, pp)*cz &
+                                    + grdbkgnd(i, j, k1, t, pp)*az + grdbkgnd(i, j, k2, t, pp)*bz + grdbkgnd(i, j, k3, t, pp)*cz)**2
+!
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine gsblngrad_p
+
+   subroutine cntnscost
+!*************************************************
+! continous equation
+! history: october 2007, coded by wei li.
+!*************************************************
+      implicit none
+! --------------------
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, k2, k3, uu, vv, ww
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: ce
+! --------------------
+
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      ww = w_cmpnnt
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = ppp(k1)
+            z2 = ppp(k2)
+            z3 = ppp(k3)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            ce = (grdanals(i2, j, k, t, uu) - grdanals(i1, j, k, t, uu) + grdbkgnd(i2, j, k, t, uu) - grdbkgnd(i1, j, k, t, uu)) &
+                 /(xxx(i2, j) - xxx(i1, j))*scl(uu)/scp(xsl)*scp(psl)/scl(ww)*1.0 &
+                 - (grdanals(i, j2, k, t, uu) - grdanals(i, j1, k, t, uu) + grdbkgnd(i, j2, k, t, uu) - grdbkgnd(i, j1, k, t, uu)) &
+                 /(yyy(i, j2) - yyy(i, j1))*scl(uu)/scp(ysl)*scp(psl)/scl(ww)*0.0 &
+                 + (grdanals(i, j2, k, t, vv) - grdanals(i, j1, k, t, vv) + grdbkgnd(i, j2, k, t, vv) - grdbkgnd(i, j1, k, t, vv)) &
+                 /(yyy(i, j2) - yyy(i, j1))*scl(vv)/scp(ysl)*scp(psl)/scl(ww)*1.0 &
+                 + (grdanals(i2, j, k, t, vv) - grdanals(i1, j, k, t, vv) + grdbkgnd(i2, j, k, t, vv) - grdbkgnd(i1, j, k, t, vv)) &
+                 /(xxx(i2, j) - xxx(i1, j))*scl(vv)/scp(xsl)*scp(psl)/scl(ww)*0.0 &
+                 + (grdanals(i, j, k1, t, ww)*az + grdanals(i, j, k2, t, ww)*bz + grdanals(i, j, k3, t, ww)*cz &
+                    + grdbkgnd(i, j, k1, t, ww)*az + grdbkgnd(i, j, k2, t, ww)*bz + grdbkgnd(i, j, k3, t, ww)*cz)
+            costfun = costfun + pnlt0pu*ce**2
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine cntnscost
+
+   subroutine cntnsgrad
+!*************************************************
+! continous equation
+! history: october 2007, coded by wei li.
+!*************************************************
+      implicit none
+! --------------------
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, k2, k3, uu, vv, ww
+      real     :: z1, z2, z3, az, bz, cz
+      real     :: ce
+! --------------------
+
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      ww = w_cmpnnt
+      if (numgrid(1) .ge. 2 .and. numgrid(2) .ge. 2 .and. numgrid(3) .ge. 3 .and. numstat .ge. 3) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            k1 = max0(k - 1, 1)
+            k1 = min0(k1, numgrid(3) - 2)
+            k2 = min0(k1 + 1, numgrid(3) - 1)
+            k3 = min0(k2 + 1, numgrid(3))
+            z1 = ppp(k1)
+            z2 = ppp(k2)
+            z3 = ppp(k3)
+            if (k .eq. 1) call gderivelb(z1, z2, z3, az, bz, cz)
+            if (k .ge. 2 .and. k .le. numgrid(3) - 1) call gderiveit(z1, z2, z3, az, bz, cz)
+            if (k .eq. numgrid(3)) call gderiverb(z1, z2, z3, az, bz, cz)
+            ce = (grdanals(i2, j, k, t, uu) - grdanals(i1, j, k, t, uu) + grdbkgnd(i2, j, k, t, uu) - grdbkgnd(i1, j, k, t, uu)) &
+                 /(xxx(i2, j) - xxx(i1, j))*scl(uu)/scp(xsl)*scp(psl)/scl(ww)*1.0 &
+                 - (grdanals(i, j2, k, t, uu) - grdanals(i, j1, k, t, uu) + grdbkgnd(i, j2, k, t, uu) - grdbkgnd(i, j1, k, t, uu)) &
+                 /(yyy(i, j2) - yyy(i, j1))*scl(uu)/scp(ysl)*scp(psl)/scl(ww)*0.0 &
+                 + (grdanals(i, j2, k, t, vv) - grdanals(i, j1, k, t, vv) + grdbkgnd(i, j2, k, t, vv) - grdbkgnd(i, j1, k, t, vv)) &
+                 /(yyy(i, j2) - yyy(i, j1))*scl(vv)/scp(ysl)*scp(psl)/scl(ww)*1.0 &
+                 + (grdanals(i2, j, k, t, vv) - grdanals(i1, j, k, t, vv) + grdbkgnd(i2, j, k, t, vv) - grdbkgnd(i1, j, k, t, vv)) &
+                 /(xxx(i2, j) - xxx(i1, j))*scl(vv)/scp(xsl)*scp(psl)/scl(ww)*0.0 &
+                 + (grdanals(i, j, k1, t, ww)*az + grdanals(i, j, k2, t, ww)*bz + grdanals(i, j, k3, t, ww)*cz &
+                    + grdbkgnd(i, j, k1, t, ww)*az + grdbkgnd(i, j, k2, t, ww)*bz + grdbkgnd(i, j, k3, t, ww)*cz)
+            gradint(i2, j, k, t, uu) = gradint(i2, j, k, t, uu) + 2.0*pnlt0pu*ce &
+                                       /(xxx(i2, j) - xxx(i1, j))*scl(uu)/scp(xsl)*scp(psl)/scl(ww)*1.0
+            gradint(i1, j, k, t, uu) = gradint(i1, j, k, t, uu) + 2.0*pnlt0pu*ce*(-1.0) &
+                                       /(xxx(i2, j) - xxx(i1, j))*scl(uu)/scp(xsl)*scp(psl)/scl(ww)*1.0
+            gradint(i, j2, k, t, uu) = gradint(i, j2, k, t, uu) + 2.0*pnlt0pu*ce*(-1.0) &
+                                       /(yyy(i, j2) - yyy(i, j1))*scl(uu)/scp(ysl)*scp(psl)/scl(ww)*0.0
+            gradint(i, j1, k, t, uu) = gradint(i, j1, k, t, uu) + 2.0*pnlt0pu*ce &
+                                       /(yyy(i, j2) - yyy(i, j1))*scl(uu)/scp(ysl)*scp(psl)/scl(ww)*0.0
+            gradint(i, j2, k, t, vv) = gradint(i, j2, k, t, vv) + 2.0*pnlt0pu*ce &
+                                       /(yyy(i, j2) - yyy(i, j1))*scl(vv)/scp(ysl)*scp(psl)/scl(ww)*1.0
+            gradint(i, j1, k, t, vv) = gradint(i, j1, k, t, vv) + 2.0*pnlt0pu*ce*(-1.0) &
+                                       /(yyy(i, j2) - yyy(i, j1))*scl(vv)/scp(ysl)*scp(psl)/scl(ww)*1.0
+            gradint(i2, j, k, t, vv) = gradint(i2, j, k, t, vv) + 2.0*pnlt0pu*ce &
+                                       /(xxx(i2, j) - xxx(i1, j))*scl(vv)/scp(xsl)*scp(psl)/scl(ww)*0.0
+            gradint(i1, j, k, t, vv) = gradint(i1, j, k, t, vv) + 2.0*pnlt0pu*ce*(-1.0) &
+                                       /(xxx(i2, j) - xxx(i1, j))*scl(vv)/scp(xsl)*scp(psl)/scl(ww)*0.0
+            gradint(i, j, k1, t, ww) = gradint(i, j, k1, t, ww) + 2.0*pnlt0pu*ce*az
+            gradint(i, j, k2, t, ww) = gradint(i, j, k2, t, ww) + 2.0*pnlt0pu*ce*bz
+            gradint(i, j, k3, t, ww) = gradint(i, j, k3, t, ww) + 2.0*pnlt0pu*ce*cz
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine cntnsgrad
+
+end module gsbcost_grad

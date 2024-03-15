@@ -1,45 +1,45 @@
 !-----------------------------------------------------------------------
       subroutine w3difdat(jdat,idat,it,rinc)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
+!$$$   subprogram  documentation  block
 !
-! SUBPROGRAM: W3DIFDAT       RETURN A TIME INTERVAL BETWEEN TWO DATES
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
+! subprogram: w3difdat       return a time interval between two dates
+!   author: mark iredell     org: wp23       date: 98-01-05
 !
-! ABSTRACT: THIS SUBPROGRAM RETURNS THE ELAPSED TIME INTERVAL FROM
-!   AN NCEP ABSOLUTE DATE AND TIME GIVEN IN THE SECOND ARGUMENT UNTIL
-!   AN NCEP ABSOLUTE DATE AND TIME GIVEN IN THE FIRST ARGUMENT.
-!   THE OUTPUT TIME INTERVAL IS IN ONE OF SEVEN CANONICAL FORMS
-!   OF THE NCEP RELATIVE TIME INTERVAL DATA STRUCTURE.
+! abstract: this subprogram returns the elapsed time interval from
+!   an ncep absolute date and time given in the second argument until
+!   an ncep absolute date and time given in the first argument.
+!   the output time interval is in one of seven canonical forms
+!   of the ncep relative time interval data structure.
 !
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
+! program history log:
+!   98-01-05  mark iredell
 !
-! USAGE:  CALL W3DIFDAT(JDAT,IDAT,IT,RINC)
+! usage:  call w3difdat(jdat,idat,it,rinc)
 !
-!   INPUT VARIABLES:
-!     JDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!     IDAT       INTEGER (8) NCEP ABSOLUTE DATE AND TIME
-!                (YEAR, MONTH, DAY, TIME ZONE,
-!                 HOUR, MINUTE, SECOND, MILLISECOND)
-!     IT         INTEGER RELATIVE TIME INTERVAL FORMAT TYPE
-!                (-1 FOR FIRST REDUCED TYPE (HOURS ALWAYS POSITIVE),
-!                 0 FOR SECOND REDUCED TYPE (HOURS CAN BE NEGATIVE),
-!                 1 FOR DAYS ONLY, 2 FOR HOURS ONLY, 3 FOR MINUTES ONLY,
-!                 4 FOR SECONDS ONLY, 5 FOR MILLISECONDS ONLY)
+!   input variables:
+!     jdat       integer (8) ncep absolute date and time
+!                (year, month, day, time zone,
+!                 hour, minute, second, millisecond)
+!     idat       integer (8) ncep absolute date and time
+!                (year, month, day, time zone,
+!                 hour, minute, second, millisecond)
+!     it         integer relative time interval format type
+!                (-1 for first reduced type (hours always positive),
+!                 0 for second reduced type (hours can be negative),
+!                 1 for days only, 2 for hours only, 3 for minutes only,
+!                 4 for seconds only, 5 for milliseconds only)
 !
-!   OUTPUT VARIABLES:
-!     RINC       REAL (5) NCEP RELATIVE TIME INTERVAL
-!                (DAYS, HOURS, MINUTES, SECONDS, MILLISECONDS)
-!                (TIME INTERVAL IS POSITIVE IF JDAT IS LATER THAN IDAT.)
+!   output variables:
+!     rinc       real (5) ncep relative time interval
+!                (days, hours, minutes, seconds, milliseconds)
+!                (time interval is positive if jdat is later than idat.)
 !
-! SUBPROGRAMS CALLED:
-!     IW3JDN         COMPUTE JULIAN DAY NUMBER     
-!     W3REDDAT       REDUCE A TIME INTERVAL TO A CANONICAL FORM
+! subprograms called:
+!     iw3jdn         compute julian day number     
+!     w3reddat       reduce a time interval to a canonical form
 !
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
+! attributes:
+!   language: fortran 90
 !
 !$$$
       integer jdat(8),idat(8)

@@ -1,213 +1,213 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       sensor_planck_routines
 !
-! PURPOSE:
-!       Module containing the sensor Planck function routines.
+! purpose:
+!       module containing the sensor planck function routines.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE sensor_planck_routines
+! calling sequence:
+!       use sensor_planck_routines
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       type_kinds:                    Module containing data type kind definitions.
+! modules:
+!       type_kinds:                    module containing data type kind definitions.
 !
-!       parameters:                    Module containing parameter definitions for
-!                                      the RT model.
+!       parameters:                    module containing parameter definitions for
+!                                      the rt model.
 !
-!       spectral_coefficients:         Module containing the RT model spectral
+!       spectral_coefficients:         module containing the rt model spectral
 !                                      coefficients
 !
-! CONTAINS:
-!       sensor_planck_radiance:        PUBLIC subroutine to calculate the instrument
+! contains:
+!       sensor_planck_radiance:        public subroutine to calculate the instrument
 !                                      channel radiance.
 !
-!       sensor_planck_radiance_TL:     PUBLIC subroutine to calculate the tangent-linear
+!       sensor_planck_radiance_tl:     public subroutine to calculate the tangent-linear
 !                                      instrument channel radiance.
 !
-!       sensor_planck_radiance_AD:     PUBLIC subroutine to calculate the adjoint
+!       sensor_planck_radiance_ad:     public subroutine to calculate the adjoint
 !                                      instrument channel radiance.
 !
-!       sensor_planck_temperature:     PUBLIC subroutine to calculate the instrument
+!       sensor_planck_temperature:     public subroutine to calculate the instrument
 !                                      channel brightness temperature.
 !
-!       sensor_planck_temperature_TL:  PUBLIC subroutine to calculate the tangent-linear
+!       sensor_planck_temperature_tl:  public subroutine to calculate the tangent-linear
 !                                      instrument channel brightness temperature.
 !
-!       sensor_planck_temperature_AD:  PUBLIC subroutine to calculate the adjoint
+!       sensor_planck_temperature_ad:  public subroutine to calculate the adjoint
 !                                      instrument channel brightness temperature.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! RESTRICTIONS:
-!       These functions are called frequently so no input checking is
+! restrictions:
+!       these functions are called frequently so no input checking is
 !       performed.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS/SSEC 08-Aug-2001
+! creation history:
+!       written by:     paul van delst, cimss/ssec 08-aug-2001
 !                       paul.vandelst@ssec.wisc.edu
 !
-!  Copyright (C) 2001 Paul van Delst
+!  copyright (c) 2001 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE sensor_planck_routines
+module sensor_planck_routines
 
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
 
-  USE type_kinds, ONLY : fp_kind
-  USE parameters
-  USE spectral_coefficients
+  use type_kinds, only : fp_kind
+  use parameters
+  use spectral_coefficients
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------
-  ! Visibilities
+  ! visibilities
   ! ------------
 
-  PRIVATE
+  private
 
-  PUBLIC  :: sensor_planck_radiance
-  PUBLIC  :: sensor_planck_radiance_TL
-  PUBLIC  :: sensor_planck_radiance_AD
+  public  :: sensor_planck_radiance
+  public  :: sensor_planck_radiance_tl
+  public  :: sensor_planck_radiance_ad
 
-  PUBLIC  :: sensor_planck_temperature
-  PUBLIC  :: sensor_planck_temperature_TL
-  PUBLIC  :: sensor_planck_temperature_AD
+  public  :: sensor_planck_temperature
+  public  :: sensor_planck_temperature_tl
+  public  :: sensor_planck_temperature_ad
 
 
-CONTAINS
+contains
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
+!p+
+! name:
 !       sensor_planck_radiance
 !
-! PURPOSE:
-!       Subroutine to calculate the instrument channel radiance.
+! purpose:
+!       subroutine to calculate the instrument channel radiance.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL sensor_planck_radiance( channel,     &  ! Input
-!                                    temperature, &  ! Input
-!                                    radiance     )  ! Output
+! calling sequence:
+!       call sensor_planck_radiance( channel,     &  ! input
+!                                    temperature, &  ! input
+!                                    radiance     )  ! output
 !
-! INPUT ARGUMENTS:
-!       channel:     Channel index id. This is a unique index
+! input arguments:
+!       channel:     channel index id. this is a unique index
 !                    to a (supported) sensor channel.
-!                    UNITS:      None
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: INTENT( IN )
+!                    units:      none
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: intent( in )
 !
-!       temperature: Temperature for which the Planck radiance is
+!       temperature: temperature for which the planck radiance is
 !                    to be calculated.
-!                    UNITS:      Kelvin, K
-!                    TYPE:       Real
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: INTENT( IN )
+!                    units:      kelvin, k
+!                    type:       real
+!                    dimension:  scalar
+!                    attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       radiance:    Channel Planck radiance.
-!                    UNITS:      mW/(m^2.sr.cm^-1)
-!                    TYPE:       Real
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: INTENT( OUT )
+! output arguments:
+!       radiance:    channel planck radiance.
+!                    units:      mw/(m^2.sr.cm^-1)
+!                    type:       real
+!                    dimension:  scalar
+!                    attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       Spectral coefficients are obtained from the SPECTRAL_COEFFICIENTS module
+! restrictions:
+!       spectral coefficients are obtained from the spectral_coefficients module
 !       so only radiances for those sensors which are included in the spectral
 !       coefficient data file can be calculated.
 !
-! PROCEDURE:
-!       First a polychromatic correction is applied to give an effective
+! procedure:
+!       first a polychromatic correction is applied to give an effective
 !       temperature,
 !
-!         T_eff = bc1 + ( bc2 * T )
+!         t_eff = bc1 + ( bc2 * t )
 !
-!       The sensor radiance is then calculated using the effective temperature:
+!       the sensor radiance is then calculated using the effective temperature:
 !
 !                       pc1
-!         R = ------------------------
-!              EXP( pc2 / T_eff ) - 1
+!         r = ------------------------
+!              exp( pc2 / t_eff ) - 1
 !
-!       The bc1, bc2, pc1, and pc2 values are obtained from the 
-!       SPECTRAL_COEFFICIENTS module which is filled during the initialisation
+!       the bc1, bc2, pc1, and pc2 values are obtained from the 
+!       spectral_coefficients module which is filled during the initialisation
 !       phase.
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE sensor_planck_radiance( channel,     &  ! Input
-                                     temperature, &  ! Input
-                                     radiance     )  ! Output
+  subroutine sensor_planck_radiance( channel,     &  ! input
+                                     temperature, &  ! input
+                                     radiance     )  ! output
 
-    ! -- Arguments
-    INTEGER,         INTENT( IN )  :: channel
-    REAL( fp_kind ), INTENT( IN )  :: temperature
-    REAL( fp_kind ), INTENT( OUT ) :: radiance
+    ! -- arguments
+    integer,         intent( in )  :: channel
+    real( fp_kind ), intent( in )  :: temperature
+    real( fp_kind ), intent( out ) :: radiance
 
-    ! -- Local
-    REAL( fp_kind ) :: effective_temperature
+    ! -- local
+    real( fp_kind ) :: effective_temperature
 
-    INTRINSIC EXP
+    intrinsic exp
 
 
     ! -------------------------------------
-    ! Apply the polychromaticity correction
+    ! apply the polychromaticity correction
     ! to obtain an effective temperature
     ! -------------------------------------
 
@@ -215,422 +215,422 @@ CONTAINS
 
 
     ! -----------------------------
-    ! Calculate the Planck radiance
+    ! calculate the planck radiance
     ! -----------------------------
 
     radiance =                  planck_c1( channel )  / &
     !          -------------------------------------------------------------
-               ( EXP( planck_c2( channel ) / effective_temperature ) - ONE )
+               ( exp( planck_c2( channel ) / effective_temperature ) - one )
 
-  END SUBROUTINE sensor_planck_radiance
+  end subroutine sensor_planck_radiance
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       sensor_planck_radiance_TL
+!p+
+! name:
+!       sensor_planck_radiance_tl
 !
-! PURPOSE:
-!       Subroutine to calculate the tangent-linear instrument channel radiance.
+! purpose:
+!       subroutine to calculate the tangent-linear instrument channel radiance.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL sensor_planck_radiance_TL( channel,        &  ! Input
-!                                       temperature,    &  ! Input
-!                                       temperature_TL, &  ! Input
-!                                       radiance_TL     )  ! Output
+! calling sequence:
+!       call sensor_planck_radiance_tl( channel,        &  ! input
+!                                       temperature,    &  ! input
+!                                       temperature_tl, &  ! input
+!                                       radiance_tl     )  ! output
 !
-! INPUT ARGUMENTS:
-!       channel:        Channel index id. This is a unique index
+! input arguments:
+!       channel:        channel index id. this is a unique index
 !                       to a (supported) sensor channel.
-!                       UNITS:      None
-!                       TYPE:       Integer
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      none
+!                       type:       integer
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       temperature:    Temperature for which the tangent-linear Planck radiance
+!       temperature:    temperature for which the tangent-linear planck radiance
 !                       is to be calculated.
-!                       UNITS:      Kelvin, K
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      kelvin, k
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       temperature_TL: Tangent-linear temperature for which the tangent-linear
-!                       Planck radiance is required.
-!                       UNITS:      Kelvin, K
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!       temperature_tl: tangent-linear temperature for which the tangent-linear
+!                       planck radiance is required.
+!                       units:      kelvin, k
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       radiance_TL:    Tangent-linear Planck radiance.
-!                       UNITS:      mW/(m^2.sr.cm^-1)
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( OUT )
+! output arguments:
+!       radiance_tl:    tangent-linear planck radiance.
+!                       units:      mw/(m^2.sr.cm^-1)
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       Spectral coefficients are obtained from the SPECTRAL_COEFFICIENTS module
+! restrictions:
+!       spectral coefficients are obtained from the spectral_coefficients module
 !       so only radiances for those sensors which are included in the spectral
 !       coefficient data file can be calculated.
 !
-! PROCEDURE:
-!       First a polychromatic correction is applied to give an effective
+! procedure:
+!       first a polychromatic correction is applied to give an effective
 !       temperature,
 !
-!         T_eff = bc1 + ( bc2 . T )
+!         t_eff = bc1 + ( bc2 . t )
 !
-!       The sensor tangent-linear radiance is then calculated by first computing
+!       the sensor tangent-linear radiance is then calculated by first computing
 !       the exponent term,
 !
-!          exponent = EXP( pc2 / T_eff )
+!          exponent = exp( pc2 / t_eff )
 !
 !       and then the actual operator,
 !
 !                 pc1 . pc2 . bc1 . exponent
-!         F = ---------------------------------
-!              ( T_eff . ( exponent - 1 ) )^2
+!         f = ---------------------------------
+!              ( t_eff . ( exponent - 1 ) )^2
 !
-!       which is the derivate of the Planck equation wrt temperature. The
+!       which is the derivate of the planck equation wrt temperature. the
 !       tangent-linear radiance is then determined by,
 !
-!         dR = F . dT
+!         dr = f . dt
 !
-!       where dT is the input tangent-linear temeprature.
+!       where dt is the input tangent-linear temeprature.
 !
-!       The bc1, bc2, pc1, and pc2 values are obtained from the 
-!       SPECTRAL_COEFFICIENTS module which is filled during the initialisation
+!       the bc1, bc2, pc1, and pc2 values are obtained from the 
+!       spectral_coefficients module which is filled during the initialisation
 !       phase.
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE sensor_planck_radiance_TL( channel,        &  ! Input
-                                        temperature,    &  ! Input
-                                        temperature_TL, &  ! Input
-                                        radiance_TL     )  ! Output
+  subroutine sensor_planck_radiance_tl( channel,        &  ! input
+                                        temperature,    &  ! input
+                                        temperature_tl, &  ! input
+                                        radiance_tl     )  ! output
 
-    ! -- Arguments
-    INTEGER,         INTENT( IN )  :: channel
-    REAL( fp_kind ), INTENT( IN )  :: temperature
-    REAL( fp_kind ), INTENT( IN )  :: temperature_TL
-    REAL( fp_kind ), INTENT( OUT ) :: radiance_TL
+    ! -- arguments
+    integer,         intent( in )  :: channel
+    real( fp_kind ), intent( in )  :: temperature
+    real( fp_kind ), intent( in )  :: temperature_tl
+    real( fp_kind ), intent( out ) :: radiance_tl
 
-    ! -- Local
-    REAL( fp_kind ) :: effective_temperature
-    REAL( fp_kind ) :: exponent
-    REAL( fp_kind ) :: F
+    ! -- local
+    real( fp_kind ) :: effective_temperature
+    real( fp_kind ) :: exponent
+    real( fp_kind ) :: f
 
-    INTRINSIC EXP
+    intrinsic exp
 
 
     ! -------------------------------------
-    ! Apply the polychromaticity correction
+    ! apply the polychromaticity correction
     ! -------------------------------------
 
     effective_temperature = band_c1( channel ) + ( band_c2( channel ) * temperature )
 
 
     ! --------------------------------------
-    ! Calculate the Planck function operator
+    ! calculate the planck function operator
     ! --------------------------------------
 
-    ! -- The exponent term
-    exponent = EXP( planck_c2( channel ) / effective_temperature )
+    ! -- the exponent term
+    exponent = exp( planck_c2( channel ) / effective_temperature )
 
-    ! -- The operator, call it F
-    F =  planck_c1( channel ) * planck_c2( channel ) * exponent * band_c2( channel ) / &
+    ! -- the operator, call it f
+    f =  planck_c1( channel ) * planck_c2( channel ) * exponent * band_c2( channel ) / &
     !   -----------------------------------------------------------------------------
-                      ( effective_temperature * ( exponent - ONE ) )**2
+                      ( effective_temperature * ( exponent - one ) )**2
 
 
     ! -------------------------------------
-    ! Calculate the tangent-linear radiance
+    ! calculate the tangent-linear radiance
     ! -------------------------------------
 
-    radiance_TL = F * temperature_TL
+    radiance_tl = f * temperature_tl
 
-  END SUBROUTINE sensor_planck_radiance_TL
+  end subroutine sensor_planck_radiance_tl
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       sensor_planck_radiance_AD
+!p+
+! name:
+!       sensor_planck_radiance_ad
 !
-! PURPOSE:
-!       Subroutine to calculate the adjoint instrument channel radiance.
+! purpose:
+!       subroutine to calculate the adjoint instrument channel radiance.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL sensor_planck_radiance_AD( channel,       &  ! Input
-!                                       temperature,   &  ! Input
-!                                       radiance_AD,   &  ! Input
-!                                       temperature_AD )  ! In/Output
+! calling sequence:
+!       call sensor_planck_radiance_ad( channel,       &  ! input
+!                                       temperature,   &  ! input
+!                                       radiance_ad,   &  ! input
+!                                       temperature_ad )  ! in/output
 !
-! INPUT ARGUMENTS:
-!       channel:        Channel index id. This is a unique index
+! input arguments:
+!       channel:        channel index id. this is a unique index
 !                       to a (supported) sensor channel.
-!                       UNITS:      None
-!                       TYPE:       Integer
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      none
+!                       type:       integer
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       temperature:    Temperature for which the tangent-linear Planck radiance
+!       temperature:    temperature for which the tangent-linear planck radiance
 !                       is to be calculated.
-!                       UNITS:      Kelvin
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      kelvin
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       radiance_AD:    Adjoint Planck radiance.
-!                       UNITS:      mW/(m2.sr.cm-1)
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!       radiance_ad:    adjoint planck radiance.
+!                       units:      mw/(m2.sr.cm-1)
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       temperature_AD: Adjoint Planck temperature
-!                       UNITS:      Kelvin
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN OUT )
+! output arguments:
+!       temperature_ad: adjoint planck temperature
+!                       units:      kelvin
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       The input adjoint radiance argument, radiance_AD, is NOT set to zero
+! side effects:
+!       the input adjoint radiance argument, radiance_ad, is not set to zero
 !       before returning to the calling routine.
 !
-! RESTRICTIONS:
-!       Spectral coefficients are obtained from the SPECTRAL_COEFFICIENTS module
+! restrictions:
+!       spectral coefficients are obtained from the spectral_coefficients module
 !       so only radiances for those sensors which are included in the spectral
 !       coefficient data file can be calculated.
 !
-! PROCEDURE:
-!       First a polychromatic correction is applied to give an effective
+! procedure:
+!       first a polychromatic correction is applied to give an effective
 !       temperature,
 !
-!         T_eff = bc1 + ( bc2 . T )
+!         t_eff = bc1 + ( bc2 . t )
 !
-!       The sensor tangent-linear radiance is then calculated by first computing
+!       the sensor tangent-linear radiance is then calculated by first computing
 !       the exponent term,
 !
-!          exponent = EXP( pc2 / T_eff )
+!          exponent = exp( pc2 / t_eff )
 !
 !       and then the actual operator,
 !
 !                 pc1 . pc2 . bc1 . exponent
-!         F = ---------------------------------
-!              ( T_eff . ( exponent - 1 ) )^2
+!         f = ---------------------------------
+!              ( t_eff . ( exponent - 1 ) )^2
 !
-!       which is the derivate of the Planck equation wrt temperature. The
+!       which is the derivate of the planck equation wrt temperature. the
 !       adjoint temperature is then determined from,
 !
-!         T_AD = T_AD + ( F . R_AD )
+!         t_ad = t_ad + ( f . r_ad )
 !
-!       where T_AD and R_AD on the LHS are the input adjoint temperature and
+!       where t_ad and r_ad on the lhs are the input adjoint temperature and
 !       radiance respectively.
 !
-!       The bc1, bc2, pc1, and pc2 values are obtained from the 
-!       SPECTRAL_COEFFICIENTS module which is filled during the initialisation
+!       the bc1, bc2, pc1, and pc2 values are obtained from the 
+!       spectral_coefficients module which is filled during the initialisation
 !       phase.
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE sensor_planck_radiance_AD( channel,       &  ! Input
-                                        temperature,   &  ! Input
-                                        radiance_AD,   &  ! Input
-                                        temperature_AD )  ! In/Output
+  subroutine sensor_planck_radiance_ad( channel,       &  ! input
+                                        temperature,   &  ! input
+                                        radiance_ad,   &  ! input
+                                        temperature_ad )  ! in/output
 
-    ! -- Arguments
-    INTEGER,         INTENT( IN )     :: channel
-    REAL( fp_kind ), INTENT( IN )     :: temperature
-    REAL( fp_kind ), INTENT( IN )     :: radiance_AD
-    REAL( fp_kind ), INTENT( IN OUT ) :: temperature_AD
+    ! -- arguments
+    integer,         intent( in )     :: channel
+    real( fp_kind ), intent( in )     :: temperature
+    real( fp_kind ), intent( in )     :: radiance_ad
+    real( fp_kind ), intent( in out ) :: temperature_ad
 
-    ! -- Local
-    REAL( fp_kind ) :: effective_temperature
-    REAL( fp_kind ) :: exponent
-    REAL( fp_kind ) :: F
+    ! -- local
+    real( fp_kind ) :: effective_temperature
+    real( fp_kind ) :: exponent
+    real( fp_kind ) :: f
 
-    INTRINSIC EXP
+    intrinsic exp
 
 
     ! -------------------------------------
-    ! Apply the polychromaticity correction
+    ! apply the polychromaticity correction
     ! -------------------------------------
 
     effective_temperature = band_c1( channel ) + ( band_c2( channel ) * temperature )
 
 
     ! --------------------------------------
-    ! Calculate the Planck function operator
+    ! calculate the planck function operator
     ! --------------------------------------
 
-    ! -- The exponent term
-    exponent = EXP( planck_c2( channel ) / effective_temperature )
+    ! -- the exponent term
+    exponent = exp( planck_c2( channel ) / effective_temperature )
 
-    ! -- The operator, call it F
-    F =  planck_c1( channel ) * planck_c2( channel ) * exponent * band_c2( channel ) / &
+    ! -- the operator, call it f
+    f =  planck_c1( channel ) * planck_c2( channel ) * exponent * band_c2( channel ) / &
     !   -----------------------------------------------------------------------------
-                      ( effective_temperature * ( exponent - ONE ) )**2
+                      ( effective_temperature * ( exponent - one ) )**2
 
 
     ! ---------------------------------
-    ! Calculate the adjoint temperature
+    ! calculate the adjoint temperature
     ! ---------------------------------
 
-    temperature_AD = temperature_AD + ( F * radiance_AD )
+    temperature_ad = temperature_ad + ( f * radiance_ad )
 
-  END SUBROUTINE sensor_planck_radiance_AD
+  end subroutine sensor_planck_radiance_ad
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
+!p+
+! name:
 !       sensor_planck_temperature
 !
-! PURPOSE:
-!       Subroutine to calculate the instrument channel brightness temperature.
+! purpose:
+!       subroutine to calculate the instrument channel brightness temperature.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL sensor_planck_temperature( channel,    &  ! Input
-!                                       radiance,   &  ! Input
-!                                       temperature )  ! Output
+! calling sequence:
+!       call sensor_planck_temperature( channel,    &  ! input
+!                                       radiance,   &  ! input
+!                                       temperature )  ! output
 !
-! INPUT ARGUMENTS:
-!       channel:     Channel index id. This is a unique index
+! input arguments:
+!       channel:     channel index id. this is a unique index
 !                    to a (supported) sensor channel.
-!                    UNITS:      None
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: INTENT( IN )
+!                    units:      none
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: intent( in )
 !
-!       radiance:    Radiance for which the Planck temperature is desired.
-!                    UNITS:      mW/(m^2.sr.cm^-1)
-!                    TYPE:       Real
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: INTENT( IN )
+!       radiance:    radiance for which the planck temperature is desired.
+!                    units:      mw/(m^2.sr.cm^-1)
+!                    type:       real
+!                    dimension:  scalar
+!                    attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       temperature: Planck temperature.
-!                    UNITS:      Kelvin, K
-!                    TYPE:       Real
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: INTENT( IN )
+! output arguments:
+!       temperature: planck temperature.
+!                    units:      kelvin, k
+!                    type:       real
+!                    dimension:  scalar
+!                    attributes: intent( in )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       Spectral coefficients are obtained from the SPECTRAL_COEFFICIENTS module
+! restrictions:
+!       spectral coefficients are obtained from the spectral_coefficients module
 !       so only temperatures for those sensors which are included in the spectral
 !       coefficient data file can be calculated.
 !
-! PROCEDURE:
-!       First the effective temperature is calculated from the inverse Planck function,
+! procedure:
+!       first the effective temperature is calculated from the inverse planck function,
 !
 !                        pc2
-!         T_eff = ------------------
-!                  LOG( pc1/R + 1 )
+!         t_eff = ------------------
+!                  log( pc1/r + 1 )
 !
-!       The polychromatic correction is then removed to provide the brightness
+!       the polychromatic correction is then removed to provide the brightness
 !       temperature,
 !
-!              T_eff - bc1
-!         T = -------------
+!              t_eff - bc1
+!         t = -------------
 !                  bc2
 !
-!       The bc1, bc2, pc1, and pc2 values are obtained from the 
-!       SPECTRAL_COEFFICIENTS module which is filled during the initialisation
+!       the bc1, bc2, pc1, and pc2 values are obtained from the 
+!       spectral_coefficients module which is filled during the initialisation
 !       phase.
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE sensor_planck_temperature( channel,    &  ! Input
-                                        radiance,   &  ! Input
-                                        temperature )  ! Output
+  subroutine sensor_planck_temperature( channel,    &  ! input
+                                        radiance,   &  ! input
+                                        temperature )  ! output
 
-    ! -- Arguments
-    INTEGER,         INTENT( IN )  :: channel
-    REAL( fp_kind ), INTENT( IN )  :: radiance
-    REAL( fp_kind ), INTENT( OUT ) :: temperature
+    ! -- arguments
+    integer,         intent( in )  :: channel
+    real( fp_kind ), intent( in )  :: radiance
+    real( fp_kind ), intent( out ) :: temperature
 
-    ! -- Local
-    REAL( fp_kind ) :: effective_temperature
+    ! -- local
+    real( fp_kind ) :: effective_temperature
 
-    INTRINSIC LOG
+    intrinsic log
 
 
     ! -----------------------------------
-    ! Calculate the effective temperature
+    ! calculate the effective temperature
     ! -----------------------------------
 
     effective_temperature =              planck_c2( channel )  / &
     !                       ------------------------------------------------
-                            LOG( ( planck_c1( channel ) / radiance ) + ONE )
+                            log( ( planck_c1( channel ) / radiance ) + one )
 
     ! -------------------------------------
-    ! Apply the polychromatic correction to 
+    ! apply the polychromatic correction to 
     ! obtain the true temperature
     ! -------------------------------------
 
@@ -638,297 +638,297 @@ CONTAINS
     !             ----------------------------------------------
                                 band_c2( channel )
 
-  END SUBROUTINE sensor_planck_temperature
+  end subroutine sensor_planck_temperature
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       sensor_planck_temperature_TL
+!p+
+! name:
+!       sensor_planck_temperature_tl
 !
-! PURPOSE:
-!       Subroutine to calculate the tangent-linear instrument channel
+! purpose:
+!       subroutine to calculate the tangent-linear instrument channel
 !       brightness temperature.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL sensor_planck_temperature_TL( channel,       &  ! Input
-!                                          radiance,      &  ! Input
-!                                          radiance_TL,   &  ! Input
-!                                          temperature_TL )  ! Output
+! calling sequence:
+!       call sensor_planck_temperature_tl( channel,       &  ! input
+!                                          radiance,      &  ! input
+!                                          radiance_tl,   &  ! input
+!                                          temperature_tl )  ! output
 !
-! INPUT ARGUMENTS:
-!       channel:        Channel index id. This is a unique index
+! input arguments:
+!       channel:        channel index id. this is a unique index
 !                       to a (supported) sensor channel.
-!                       UNITS:      None
-!                       TYPE:       Integer
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      none
+!                       type:       integer
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       radiance:       Radiance at which the tangent-linear Planck temperature
+!       radiance:       radiance at which the tangent-linear planck temperature
 !                       is desired.
-!                       UNITS:      mW/(m^2.sr.cm^-1)
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      mw/(m^2.sr.cm^-1)
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       radiance_TL:    Tangent-linear radiance for which the tangent-linear
-!                       Planck temperature is desired.
-!                       UNITS:      mW/(m^2.sr.cm^-1)
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!       radiance_tl:    tangent-linear radiance for which the tangent-linear
+!                       planck temperature is desired.
+!                       units:      mw/(m^2.sr.cm^-1)
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       temperature_TL: Tangent-linear Planck temperature.
-!                       UNITS:      Kelvin, K
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+! output arguments:
+!       temperature_tl: tangent-linear planck temperature.
+!                       units:      kelvin, k
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       Spectral coefficients are obtained from the SPECTRAL_COEFFICIENTS module
+! restrictions:
+!       spectral coefficients are obtained from the spectral_coefficients module
 !       so only temperatures for those sensors which are included in the spectral
 !       coefficient data file can be calculated.
 !
-! PROCEDURE:
-!       First the logarithm argument is calculated,
+! procedure:
+!       first the logarithm argument is calculated,
 !
-!         a = pc1/R + 1
+!         a = pc1/r + 1
 !
-!       The inverse Planck function operator is then calculated,
+!       the inverse planck function operator is then calculated,
 !
 !                      pc1 . pc2
-!         F = ------------------------------
-!              bc2 . a . ( R . LOG( a ) )^2
+!         f = ------------------------------
+!              bc2 . a . ( r . log( a ) )^2
 !
 !       and the tangent-linear temperature is then given by,
 !
-!         dT = F . dR
+!         dt = f . dr
 !
-!       The bc1, bc2, pc1, and pc2 values are obtained from the 
-!       SPECTRAL_COEFFICIENTS module which is filled during the initialisation
+!       the bc1, bc2, pc1, and pc2 values are obtained from the 
+!       spectral_coefficients module which is filled during the initialisation
 !       phase.
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
 
-  SUBROUTINE sensor_planck_temperature_TL( channel,       &  ! Input
-                                           radiance,      &  ! Input
-                                           radiance_TL,   &  ! Input
-                                           temperature_TL )  ! Output
+  subroutine sensor_planck_temperature_tl( channel,       &  ! input
+                                           radiance,      &  ! input
+                                           radiance_tl,   &  ! input
+                                           temperature_tl )  ! output
 
-    ! -- Arguments
-    INTEGER,         INTENT( IN )  :: channel
-    REAL( fp_kind ), INTENT( IN )  :: radiance
-    REAL( fp_kind ), INTENT( IN )  :: radiance_TL
-    REAL( fp_kind ), INTENT( OUT ) :: temperature_TL
+    ! -- arguments
+    integer,         intent( in )  :: channel
+    real( fp_kind ), intent( in )  :: radiance
+    real( fp_kind ), intent( in )  :: radiance_tl
+    real( fp_kind ), intent( out ) :: temperature_tl
 
-    ! -- Local
-    REAL( fp_kind ) :: argument
-    REAL( fp_kind ) :: F
+    ! -- local
+    real( fp_kind ) :: argument
+    real( fp_kind ) :: f
 
-    INTRINSIC LOG
+    intrinsic log
 
 
     ! --------------------------------------
-    ! Calculate the Planck function operator
+    ! calculate the planck function operator
     ! --------------------------------------
 
-    ! -- The logarithm argument
-    argument = ( planck_c1( channel ) / radiance ) + ONE
+    ! -- the logarithm argument
+    argument = ( planck_c1( channel ) / radiance ) + one
 
-    ! -- The operator, call it F
-    F =             planck_c1( channel ) * planck_c2( channel ) / &
+    ! -- the operator, call it f
+    f =             planck_c1( channel ) * planck_c2( channel ) / &
     !   -----------------------------------------------------------------------
-         ( band_c2( channel ) * argument * ( radiance * LOG( argument ) )**2 )
+         ( band_c2( channel ) * argument * ( radiance * log( argument ) )**2 )
 
 
     ! ----------------------------------------
-    ! Calculate the tangent-linear temperature
+    ! calculate the tangent-linear temperature
     ! ----------------------------------------
 
-    temperature_TL = F * radiance_TL
+    temperature_tl = f * radiance_tl
 
-  END SUBROUTINE sensor_planck_temperature_TL
+  end subroutine sensor_planck_temperature_tl
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       sensor_planck_temperature_AD
+!p+
+! name:
+!       sensor_planck_temperature_ad
 !
-! PURPOSE:
-!       Subroutine to calculate the adjoint instrument channel
+! purpose:
+!       subroutine to calculate the adjoint instrument channel
 !       brightness temperature.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL sensor_planck_temperature_AD( channel,        &  ! Input
-!                                          radiance,       &  ! Input
-!                                          temperature_AD, &  ! Input
-!                                          radiance_AD     )  ! In/Output
+! calling sequence:
+!       call sensor_planck_temperature_ad( channel,        &  ! input
+!                                          radiance,       &  ! input
+!                                          temperature_ad, &  ! input
+!                                          radiance_ad     )  ! in/output
 !
-! INPUT ARGUMENTS:
-!       channel:        Channel index id. This is a unique index
+! input arguments:
+!       channel:        channel index id. this is a unique index
 !                       to a (supported) sensor channel.
-!                       UNITS:      None
-!                       TYPE:       Integer
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!                       units:      none
+!                       type:       integer
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       radiance:       Radiance at which the adjoint radiance is desired.
-!                       UNITS:      mW/(m^2.sr.cm^-1)
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!       radiance:       radiance at which the adjoint radiance is desired.
+!                       units:      mw/(m^2.sr.cm^-1)
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-!       temperature_AD: Adjoint Planck temperature.
-!                       UNITS:      Kelvin, K
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN )
+!       temperature_ad: adjoint planck temperature.
+!                       units:      kelvin, k
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       radiance_AD:    Adjoint radiance.
-!                       UNITS:      K.m^2.sr.cm^-1/mW
-!                       TYPE:       Real
-!                       DIMENSION:  Scalar
-!                       ATTRIBUTES: INTENT( IN OUT )
+! output arguments:
+!       radiance_ad:    adjoint radiance.
+!                       units:      k.m^2.sr.cm^-1/mw
+!                       type:       real
+!                       dimension:  scalar
+!                       attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       The input adjoint temperature argument, temperature_AD, is NOT set to zero
+! side effects:
+!       the input adjoint temperature argument, temperature_ad, is not set to zero
 !       before returning to the calling routine.
 !
-! RESTRICTIONS:
-!       Spectral coefficients are obtained from the SPECTRAL_COEFFICIENTS module
+! restrictions:
+!       spectral coefficients are obtained from the spectral_coefficients module
 !       so only temperatures for those sensors which are included in the spectral
 !       coefficient data file can be calculated.
 !
-! PROCEDURE:
-!       First the logarithm argument is calculated,
+! procedure:
+!       first the logarithm argument is calculated,
 !
-!         a = pc1/R + 1
+!         a = pc1/r + 1
 !
-!       The inverse Planck function operator is then calculated,
+!       the inverse planck function operator is then calculated,
 !
 !                      pc1 . pc2
-!         F = ------------------------------
-!              bc2 . a . ( R . LOG( a ) )^2
+!         f = ------------------------------
+!              bc2 . a . ( r . log( a ) )^2
 !
-!       which is the derivate of the Planck temperature wrt radiance. The
+!       which is the derivate of the planck temperature wrt radiance. the
 !       adjoint radiance is then determined from,
 !
-!         R_AD = R_AD + ( F . T_AD )
+!         r_ad = r_ad + ( f . t_ad )
 !
-!       where R_AD and T_AD on the LHS are the input adjoint radiance and
+!       where r_ad and t_ad on the lhs are the input adjoint radiance and
 !       temperature respectively.
 !
-!       The bc1, bc2, pc1, and pc2 values are obtained from the 
-!       SPECTRAL_COEFFICIENTS module which is filled during the initialisation
+!       the bc1, bc2, pc1, and pc2 values are obtained from the 
+!       spectral_coefficients module which is filled during the initialisation
 !       phase.
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
 
-  SUBROUTINE sensor_planck_temperature_AD( channel,        &  ! Input
-                                           radiance,       &  ! Input
-                                           temperature_AD, &  ! Input
-                                           radiance_AD     )  ! In/Output
+  subroutine sensor_planck_temperature_ad( channel,        &  ! input
+                                           radiance,       &  ! input
+                                           temperature_ad, &  ! input
+                                           radiance_ad     )  ! in/output
 
-    ! -- Arguments
-    INTEGER,         INTENT( IN )     :: channel
-    REAL( fp_kind ), INTENT( IN )     :: radiance
-    REAL( fp_kind ), INTENT( IN )     :: temperature_AD
-    REAL( fp_kind ), INTENT( IN OUT ) :: radiance_AD
+    ! -- arguments
+    integer,         intent( in )     :: channel
+    real( fp_kind ), intent( in )     :: radiance
+    real( fp_kind ), intent( in )     :: temperature_ad
+    real( fp_kind ), intent( in out ) :: radiance_ad
 
-    ! -- Local
-    REAL( fp_kind ) :: argument
-    REAL( fp_kind ) :: F
+    ! -- local
+    real( fp_kind ) :: argument
+    real( fp_kind ) :: f
 
-    INTRINSIC LOG
+    intrinsic log
 
 
     ! --------------------------------------
-    ! Calculate the Planck function operator
+    ! calculate the planck function operator
     ! --------------------------------------
 
-    ! -- The logarithm argument
-    argument = ( planck_c1( channel ) / radiance ) + ONE
+    ! -- the logarithm argument
+    argument = ( planck_c1( channel ) / radiance ) + one
 
-    ! -- The operator, call it F
-    F =             planck_c1( channel ) * planck_c2( channel ) / &
+    ! -- the operator, call it f
+    f =             planck_c1( channel ) * planck_c2( channel ) / &
     !   -----------------------------------------------------------------------
-         ( band_c2( channel ) * argument * ( radiance * LOG( argument ) )**2 )
+         ( band_c2( channel ) * argument * ( radiance * log( argument ) )**2 )
 
 
     ! ------------------------------
-    ! Calculate the adjoint radiance
+    ! calculate the adjoint radiance
     ! ------------------------------
 
-    radiance_AD = radiance_AD + ( F * temperature_AD )
+    radiance_ad = radiance_ad + ( f * temperature_ad )
 
-  END SUBROUTINE sensor_planck_temperature_AD
+  end subroutine sensor_planck_temperature_ad
 
-END MODULE sensor_planck_routines
+end module sensor_planck_routines
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.1  2001/08/08 20:04:03  paulv
-! Initial checkin.
-! - Routines were extracted from the RADIANCE module and placed in their
+! $log$
+! revision 1.1  2001/08/08 20:04:03  paulv
+! initial checkin.
+! - routines were extracted from the radiance module and placed in their
 !   own module to facilitate code-sharing.
 !
 !

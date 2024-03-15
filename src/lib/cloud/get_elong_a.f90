@@ -1,10 +1,10 @@
 
 
-        subroutine get_elong_a(ialt_start,ialt_end,ialt_delt  &! I
-                   ,jazi_start,jazi_end,jazi_delt             &! I
-                   ,minalt,maxalt,minazi,maxazi               &! I
-                   ,sol_alt,sol_azi,view_alt,view_az          &! I
-                   ,elong                                   )  ! O
+        subroutine get_elong_a(ialt_start,ialt_end,ialt_delt  &! i
+                   ,jazi_start,jazi_end,jazi_delt             &! i
+                   ,minalt,maxalt,minazi,maxazi               &! i
+                   ,sol_alt,sol_azi,view_alt,view_az          &! i
+                   ,elong                                   )  ! o
 
         include 'trigd.inc'
 

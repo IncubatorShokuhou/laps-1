@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -30,12 +30,12 @@ cdis
 cdis 
 cdis 
 
-       subroutine NOWRADWSI_to_LAPS(ctype,
+       subroutine nowradwsi_to_laps(ctype,
      &                    filename,
      &                    nlines,nelems,
      &                    imax,jmax,
      &                    lat,lon,
-     &                    validTime,
+     &                    validtime,
      &                    rdbz,
      &                    maxradars,
      &                    radar_dist_min,
@@ -44,9 +44,9 @@ c
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-c Routine reads netCDF nowrad (WSI) data using subroutine read_wsi_cdf.
-c Nowrad data is then remapped to LAPS domain given lat/lon of domain.
-c Routine automatically moves the boundary for any domain with the nowrad
+c routine reads netcdf nowrad (wsi) data using subroutine read_wsi_cdf.
+c nowrad data is then remapped to laps domain given lat/lon of domain.
+c routine automatically moves the boundary for any domain with the nowrad
 c confines.
 
       integer maxradars
@@ -79,8 +79,8 @@ c confines.
       real ygrddismx
       real grid_spacing_m
       real dlat,dlon
-      real LoV, Latin, La1,La2,Lo1,Lo2
-      real centerLon,topLat,dx,dy
+      real lov, latin, la1,la2,lo1,lo2
+      real centerlon,toplat,dx,dy
       real nw(2),se(2)
       real pi,rad2dg,rii,rjj
       real r_missing_data
@@ -90,7 +90,7 @@ c confines.
       real ridis,rjdis
 
       integer image_to_dbz(0:15)
-      integer validTime
+      integer validtime
       integer istatus
       integer jstatus
       integer status
@@ -106,15 +106,15 @@ c confines.
       common /cegrid/nx,ny,nz,nw,se,rlatc,rlonc
 
 c ----------------------------------------------------------------
-c Read data and get navigation info to build lat/lon to i/j table
+c read data and get navigation info to build lat/lon to i/j table
 c ----------------------------------------------------------------
       istatus=1
 
       nradars_in = 0 ! initialize this
 
       call read_nowrad_cdf(ctype,filename,nlines,nelems,
-     + dlat,dlon,La1,Lo1,La2,Lo2,centerlon,topLat,validTime,
-     + dx,dy,Lov, Latin, image, istatus)
+     + dlat,dlon,la1,lo1,la2,lo2,centerlon,toplat,validtime,
+     + dx,dy,lov, latin, image, istatus)
 c
 c this routine converts the raw bytes to integers scaled 0 - 64
 c it also determines the wsi grid i/j locations for absent
@@ -125,7 +125,7 @@ c or presently reporting radars.
      +,nsites_absent,absent_site_loc_i,absent_site_loc_j
      +,maxradars,istatus)
       if(istatus .ne. 1)then
-          write(6,*)'Bad status returned from cvt_wsi_nowrad'
+          write(6,*)'bad status returned from cvt_wsi_nowrad'
           return
       endif
 
@@ -136,18 +136,18 @@ c     call cvt_wsi_nowrad(ctype,nelems,nlines,image,istatus)
 
       if(ctype.eq.'wfo')then
 
-         Lo1=-Lo1
-         Lo2=-Lo2
-         if(Lov.lt.-180.0)Lov=Lov+360.
-         if(Lo1.lt.-180.0)Lo1=Lo1+360.
-         if(Lo2.lt.-180.0)Lo2=Lo2+360.
+         lo1=-lo1
+         lo2=-lo2
+         if(lov.lt.-180.0)lov=lov+360.
+         if(lo1.lt.-180.0)lo1=lo1+360.
+         if(lo2.lt.-180.0)lo2=lo2+360.
 
-         if(Lov.gt.180.0)Lov=Lov-360.
-         if(Lo1.gt.180.0)Lo1=Lo1-360.
-         if(Lo2.gt.180.0)Lo2=Lo2-360.
+         if(lov.gt.180.0)lov=lov-360.
+         if(lo1.gt.180.0)lo1=lo1-360.
+         if(lo2.gt.180.0)lo2=lo2-360.
 
          call gen_rirj_lam(imax,jmax,lat,lon,nelems,nlines
-     &        ,La1,Lo1,La2,Lo2,Latin,Lov,dx,dy,ri,rj
+     &        ,la1,lo1,la2,lo2,latin,lov,dx,dy,ri,rj
      &        ,istatus)
 c
  
@@ -162,8 +162,8 @@ c
            nw(2)=lo1
            se(1)=la2
            se(2)=lo2
-           rlatc=(topLat - (dlat*(nlines-1)*0.5))*rad2dg
-           rlonc=centerLon*rad2dg
+           rlatc=(toplat - (dlat*(nlines-1)*0.5))*rad2dg
+           rlonc=centerlon*rad2dg
 
 c--------------------------------------------------
 c compute the wsi grid i/j values for domain lat/lon
@@ -184,12 +184,12 @@ c--------------------------------------------------
 
       endif
 
-      write(*,*)' NOWRAD data prepared for requested time '
+      write(*,*)' nowrad data prepared for requested time '
       write(*,*)
-      write(*,*)'Valid Time ',validTime
+      write(*,*)'valid time ',validtime
 
 c ---------------------------------------------------
-c    Build radar count level to dbz look up
+c    build radar count level to dbz look up
 c ---------------------------------------------------
       increment=5
       i_base_value=7
@@ -201,11 +201,11 @@ c ---------------------------------------------------
 c compute grid ratio 
 c ---------------------------------------------------
       call get_grid_spacing(grid_spacing_m,istatus)
-      r_grid_ratio=sqrt(Dx*Dx + Dy*Dy)/grid_spacing_m
+      r_grid_ratio=sqrt(dx*dx + dy*dy)/grid_spacing_m
 c ---------------------------------------------------
-c  Remap NOWRAD-WSI data to LAPS grid.
+c  remap nowrad-wsi data to laps grid.
 c ---------------------------------------------------
-      Call process_nowrad_z(imax,jmax,
+      call process_nowrad_z(imax,jmax,
      &                  r_grid_ratio,
      &                  image_to_dbz,
      &                  image,
@@ -216,11 +216,11 @@ c ---------------------------------------------------
      &                  istatus)
 
 c----------------------------------------------------
-c Determine which radars in wsi grid are in this domain
+c determine which radars in wsi grid are in this domain
 c and compute/save the minimum distance to radar.
 c----------------------------------------------------
       call get_r_missing_data(r_missing_data,istatus)
-      call  read_static_grid(imax,jmax,'AVG',height_grid,istatus)
+      call  read_static_grid(imax,jmax,'avg',height_grid,istatus)
 
       if(ctype.eq.'wsi')then
 
@@ -253,9 +253,9 @@ c offset.
 
            call latlon_to_rlapsgrid(present_site_lat(i),
      &                              present_site_lon(i),
-     &                              lat,lon,            !LAPS lat/lon arrays
-     &                              imax,jmax,          !LAPS horiz domain
-     &                              rii,rjj,            !Output: real i,j, scalars
+     &                              lat,lon,            !laps lat/lon arrays
+     &                              imax,jmax,          !laps horiz domain
+     &                              rii,rjj,            !output: real i,j, scalars
      &                              jstatus)
 
            ridis=abs(rii)
@@ -291,18 +291,18 @@ c          if(ridis.le.xgrddismx .and. rjdis.le.ygrddismx)then
 
         if(nradars_in.gt.0)then
            print*
-           print*,'Found ',nradars_in,' in this domain'
+           print*,'found ',nradars_in,' in this domain'
            height_mean=height_sum/nradars_in
         else
            print*
-           print*,'Interesting! No radars in domain'
+           print*,'interesting! no radars in domain'
            print*,'set mean radar height to mean grid elev'
            print*,' = ',height_mean_grid
            height_mean = height_mean_grid
         endif
         print*
-        print*,'Found ',nradars_tot,' to consider in min dist array'
-        print*,'Mean height of radars = ',height_mean
+        print*,'found ',nradars_tot,' to consider in min dist array'
+        print*,'mean height of radars = ',height_mean
         print*
 
         do i=1,nradars_tot
@@ -317,7 +317,7 @@ c          if(ridis.le.xgrddismx .and. rjdis.le.ygrddismx)then
 
         where(radar_elev.eq.r_missing_data)radar_elev=height_mean_grid
         
-        print*,'Determine nearest radar distance array'
+        print*,'determine nearest radar distance array'
         print*
 
         do j=1,jmax
@@ -339,11 +339,11 @@ c          if(ridis.le.xgrddismx .and. rjdis.le.ygrddismx)then
       endif
 
       goto 16
-19    print*,'Error in nowrad_2_laps, terminating'
+19    print*,'error in nowrad_2_laps, terminating'
       goto 16
-14    print*,'NOWRAD data not found for given time or'
-      print*,'Data could be bad. No vrc produced'
+14    print*,'nowrad data not found for given time or'
+      print*,'data could be bad. no vrc produced'
 
-16    print*,'Finished in nowrad_2_laps'
+16    print*,'finished in nowrad_2_laps'
       return
       end

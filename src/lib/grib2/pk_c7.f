@@ -1,157 +1,157 @@
-      SUBROUTINE PK_C7(KFILDO,IPACK,ND5,LOCN,IPOS,IA,NXY,NOV,LBIT,LX,
-     1                 L3264B,NCOUNT,IER,*)
-C
-C        MAY     1997   GLAHN    TDL   HP
-C        JULY    1999   LAWRENCE UPDATED THIS ROUTINE SO THAT IT RETURNS A 
-C                                COUNT OF THE VALUES PACKED INTO IPACK.
-C                                THIS IS NEEDED BY PK_CMPLX AND IT IS
-C                                SHARING THIS ROUTINE WITH PK52. 
-C        AUGUST  1999   LAWRENCE UPDATED THE DOCUMENTATION IN THIS ROUTINE 
-C                                IN KEEPING WITH TDL STANDARDS.
-C        MARCH   2000   GLAHN    UPDATED FOR GRIB2; NAME CHANGED FROM;
-C                                PKC4LX; CHANGED LOC TO LOCN
-C        JANUARY 2001   GLAHN    COMMENTS; IER = 1 CHANGED TO IER = 705;
-C                                ADDED RETURN1; CHANGED IER FROM 932 TO 2
-C                                ETC.
-C
-C        PURPOSE 
-C            PACKS UP TO NXY VALUES INTO IPACK( ).  THE PACKED VALUES
-C            ARE TAKEN FROM IA( ) WITH NO REFERENCE VALUE OR 
-C            SCALING CONSIDERED.  PK_C7 ELIMINATES THE CALLING OF
-C            PKBG, AND RATHER INCORPORATES IT INTO THE LOOP.
-C            SINCE THIS IS A HIGHLY USED ROUTINE, ALL REASONABLE
-C            ATTEMPTS AT EFFICIENCY MUST BE PURSUED.  THIS IS
-C            FOR COMPLEX PACKING, THE COUNTERPART OF PK_S7 FOR
-C            SIMPLE PACKING.
-C
-C        DATA SET USE 
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT) 
-C
-C        VARIABLES 
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT) 
-C            IPACK(J) = THE ARRAY HOLDING THE ACTUAL PACKED MESSAGE
-C                       (J=1,MAX OF ND5).  (INPUT/OUTPUT)
-C                 ND5 = DIMENSION OF IPACK( ).  (INPUT)
-C                LOCN = HOLDS WORD POSITION IN IPACK OF NEXT VALUE TO
-C                       PACK.  (INPUT/OUTPUT)
-C                IPOS = HOLDS BIT POSITION IN IPACK(LOCN) OF THE FIRST
-C                       BIT OF THE NEXT VALUE TO PACK.  (INPUT/OUTPUT)
-C               IA(K) = DATA TO PACK (K=1,NXY).  (INPUT)
-C                 NXY = DIMENSION OF IA( ).  ALSO, THE NUMBER OF VALUES 
-C                       TO BE PACKED UNLESS ALL MEMBERS OF A GROUP
-C                       HAVE THE SAME VALUE.  (INPUT)
-C              NOV(K) = THE NUMBER OF VALUES PER GROUP (K=1,LX).(INPUT)
-C             LBIT(K) = THE NUMBER OF BITS TO PACK FOR EACH GROUP
-C                       (K=1,LX).  (INPUT)
-C                  LX = THE NUMBER OF VALUES IN NOV( ) AND LBIT( ).
-C                       (INPUT)
-C              L3264B = INTEGER WORD LENGTH OF MACHINE BEING USED.
-C                       (INPUT)
-C              NCOUNT = THE NUMBER OF VALUES PACKED. THIS VALUE IS
-C                       INITIALLY ZEROED OUT IN THIS ROUTINE.
-C                       (OUTPUT) 
-C                 IER = ERROR RETURN.
-C                         2 = IPOS NOT IN THE RANGE 1-L3264B.
-C                         3 = LBIT( ) NOT IN THE RANGE 0-32.
-C                       705 = ND5 IS NOT LARGE ENOUGH TO ACCOMMODATE THE
-C                             BITS NECESSARY TO PACK THE VALUES STARTING
-C                             AT THE VALUES LOCN AND IPOS.
-C                       (OUTPUT)
-C                   * = ALTERNATE RETURN WHEN IER NE 0.
-C
-C        LOCAL VARIABLES
-C                   K = THE INDEX OF THE CURRENT DATA ITEM WE ARE 
-C                       PACKING.
-C                 L,M = LOOP INDEXING VARIABLE.
-C               LBITL = THE NUMBER OF BITS REQUIRED TO PACK THE
-C                       LARGEST VALUE IN EACH GROUP.
-C       LBITL1,LBITL2 = USED IN PACKING THE DATA USING MVBITS. THEY
-C                       KEEP TRACK OF TEMPORARY BIT POSITIONS.
-C             NEWIPOS = USED TO KEEP TRACK OF THE BIT
-C                       POSITION TO START PACKING AT.
-C
-C        NON SYSTEM SUBROUTINES CALLED 
-C           NONE
-C
-      DIMENSION IPACK(ND5)
-      DIMENSION IA(NXY)
-      DIMENSION NOV(LX),LBIT(LX)
-C
-C        SET ERROR RETURN.
-C
-      IER=0
-      NCOUNT=0
-C
-C        CHECK LEGITIMATE VALUES OF LOCN AND IPOS.
-C
-      IF(IPOS.LE.0.OR.IPOS.GT.L3264B)THEN
-         IER=2
-C        WRITE(KFILDO,101)IPOS,IER
-C101     FORMAT(/' IPOS = 'I6,' NOT IN THE RANGE 1 TO L3264B IN PK_C7.',
-C    1           ' RETURN FROM PK_C7 WITH IER = 'I4)
-         GO TO 900 
-      ENDIF
-C
-      K=0
-C
-      DO 300 L=1,LX
-C
-      LBITL=LBIT(L)
-C
-C        CHECK LEGITIMATE VALUES OF LBIT(L) AND WHETHER
-C        ND5 IS SUFFICIENT FOR ALL NOV(L) VALUES.
-C
-      IF(LBITL.LT.0.OR.LBITL.GT.32)THEN
-         IER=3
-C        WRITE(KFILDO,102)LBITL,L,IER
-C102     FORMAT(/' LBIT(L) = 'I6,' FOR L ='I5,'NOT IN THE RANGE',
-C    1           ' 0 TO 32 IN PK_C7.',
-C    1           ' RETURN FROM PK_C7 WITH IER = 'I4)
-         GO TO 900
-      ENDIF
-C
-      IF(LBITL*NOV(L).GT.(L3264B+1-IPOS)+(ND5-LOCN)*L3264B)THEN
-         IER=705
-C        WRITE(KFILDO,103)NOV(L),LBITL,L,LOCN,IPOS,ND5,IER
-C103     FORMAT(/' NOV(L) = 'I9,' AND LBIT(L) = 'I6,' FOR L ='I5,
-C    1           ' REQUIRE MORE BITS THAN ARE AVAILABLE IN IPACK( ),',
-C    2           ' WITH LOCN ='I8,', IPOS ='I4,', AND ND5 ='I8,'.'/
-C    3           ' RETURN FROM PK_C7 WITH IER ='I4)
-         GO TO 900
-      ENDIF
-C
-      DO 290 M=1,NOV(L)
-      K=K+1
-      IF(LBITL.EQ.0)GO TO 290
-C        A GROUP WITH ALL VALUES THE SAME IS OMITTED.
-C
-      NCOUNT=NCOUNT+1
-      NEWIPOS=IPOS+LBITL
-C
-      IF(NEWIPOS.LE.L3264B+1)THEN
-         CALL MVBITS(IA(K),0,LBITL,IPACK(LOCN),L3264B+1-NEWIPOS)
-C
-         IF(NEWIPOS.LE.L3264B)THEN
-            IPOS=NEWIPOS
-         ELSE
-            IPOS=1
-            LOCN=LOCN+1
-         ENDIF
-C
-      ELSE
-         LBITL1=L3264B+1-IPOS
-         LBITL2=LBITL-LBITL1
-         CALL MVBITS(IA(K),LBITL2,LBITL1,IPACK(LOCN),0)
-         LOCN=LOCN+1
-         CALL MVBITS(IA(K),0,LBITL2,IPACK(LOCN),L3264B-LBITL2)
-         IPOS=LBITL2+1
-      ENDIF
-C
- 290  CONTINUE
-C
- 300  CONTINUE
-C
- 900  IF(IER.NE.0)RETURN1
-C
-      RETURN
-      END
+      subroutine pk_c7(kfildo,ipack,nd5,locn,ipos,ia,nxy,nov,lbit,lx,
+     1                 l3264b,ncount,ier,*)
+c
+c        may     1997   glahn    tdl   hp
+c        july    1999   lawrence updated this routine so that it returns a 
+c                                count of the values packed into ipack.
+c                                this is needed by pk_cmplx and it is
+c                                sharing this routine with pk52. 
+c        august  1999   lawrence updated the documentation in this routine 
+c                                in keeping with tdl standards.
+c        march   2000   glahn    updated for grib2; name changed from;
+c                                pkc4lx; changed loc to locn
+c        january 2001   glahn    comments; ier = 1 changed to ier = 705;
+c                                added return1; changed ier from 932 to 2
+c                                etc.
+c
+c        purpose 
+c            packs up to nxy values into ipack( ).  the packed values
+c            are taken from ia( ) with no reference value or 
+c            scaling considered.  pk_c7 eliminates the calling of
+c            pkbg, and rather incorporates it into the loop.
+c            since this is a highly used routine, all reasonable
+c            attempts at efficiency must be pursued.  this is
+c            for complex packing, the counterpart of pk_s7 for
+c            simple packing.
+c
+c        data set use 
+c           kfildo - unit number for output (print) file. (output) 
+c
+c        variables 
+c              kfildo = unit number for output (print) file.  (input) 
+c            ipack(j) = the array holding the actual packed message
+c                       (j=1,max of nd5).  (input/output)
+c                 nd5 = dimension of ipack( ).  (input)
+c                locn = holds word position in ipack of next value to
+c                       pack.  (input/output)
+c                ipos = holds bit position in ipack(locn) of the first
+c                       bit of the next value to pack.  (input/output)
+c               ia(k) = data to pack (k=1,nxy).  (input)
+c                 nxy = dimension of ia( ).  also, the number of values 
+c                       to be packed unless all members of a group
+c                       have the same value.  (input)
+c              nov(k) = the number of values per group (k=1,lx).(input)
+c             lbit(k) = the number of bits to pack for each group
+c                       (k=1,lx).  (input)
+c                  lx = the number of values in nov( ) and lbit( ).
+c                       (input)
+c              l3264b = integer word length of machine being used.
+c                       (input)
+c              ncount = the number of values packed. this value is
+c                       initially zeroed out in this routine.
+c                       (output) 
+c                 ier = error return.
+c                         2 = ipos not in the range 1-l3264b.
+c                         3 = lbit( ) not in the range 0-32.
+c                       705 = nd5 is not large enough to accommodate the
+c                             bits necessary to pack the values starting
+c                             at the values locn and ipos.
+c                       (output)
+c                   * = alternate return when ier ne 0.
+c
+c        local variables
+c                   k = the index of the current data item we are 
+c                       packing.
+c                 l,m = loop indexing variable.
+c               lbitl = the number of bits required to pack the
+c                       largest value in each group.
+c       lbitl1,lbitl2 = used in packing the data using mvbits. they
+c                       keep track of temporary bit positions.
+c             newipos = used to keep track of the bit
+c                       position to start packing at.
+c
+c        non system subroutines called 
+c           none
+c
+      dimension ipack(nd5)
+      dimension ia(nxy)
+      dimension nov(lx),lbit(lx)
+c
+c        set error return.
+c
+      ier=0
+      ncount=0
+c
+c        check legitimate values of locn and ipos.
+c
+      if(ipos.le.0.or.ipos.gt.l3264b)then
+         ier=2
+c        write(kfildo,101)ipos,ier
+c101     format(/' ipos = 'i6,' not in the range 1 to l3264b in pk_c7.',
+c    1           ' return from pk_c7 with ier = 'i4)
+         go to 900 
+      endif
+c
+      k=0
+c
+      do 300 l=1,lx
+c
+      lbitl=lbit(l)
+c
+c        check legitimate values of lbit(l) and whether
+c        nd5 is sufficient for all nov(l) values.
+c
+      if(lbitl.lt.0.or.lbitl.gt.32)then
+         ier=3
+c        write(kfildo,102)lbitl,l,ier
+c102     format(/' lbit(l) = 'i6,' for l ='i5,'not in the range',
+c    1           ' 0 to 32 in pk_c7.',
+c    1           ' return from pk_c7 with ier = 'i4)
+         go to 900
+      endif
+c
+      if(lbitl*nov(l).gt.(l3264b+1-ipos)+(nd5-locn)*l3264b)then
+         ier=705
+c        write(kfildo,103)nov(l),lbitl,l,locn,ipos,nd5,ier
+c103     format(/' nov(l) = 'i9,' and lbit(l) = 'i6,' for l ='i5,
+c    1           ' require more bits than are available in ipack( ),',
+c    2           ' with locn ='i8,', ipos ='i4,', and nd5 ='i8,'.'/
+c    3           ' return from pk_c7 with ier ='i4)
+         go to 900
+      endif
+c
+      do 290 m=1,nov(l)
+      k=k+1
+      if(lbitl.eq.0)go to 290
+c        a group with all values the same is omitted.
+c
+      ncount=ncount+1
+      newipos=ipos+lbitl
+c
+      if(newipos.le.l3264b+1)then
+         call mvbits(ia(k),0,lbitl,ipack(locn),l3264b+1-newipos)
+c
+         if(newipos.le.l3264b)then
+            ipos=newipos
+         else
+            ipos=1
+            locn=locn+1
+         endif
+c
+      else
+         lbitl1=l3264b+1-ipos
+         lbitl2=lbitl-lbitl1
+         call mvbits(ia(k),lbitl2,lbitl1,ipack(locn),0)
+         locn=locn+1
+         call mvbits(ia(k),0,lbitl2,ipack(locn),l3264b-lbitl2)
+         ipos=lbitl2+1
+      endif
+c
+ 290  continue
+c
+ 300  continue
+c
+ 900  if(ier.ne.0)return1
+c
+      return
+      end

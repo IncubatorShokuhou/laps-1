@@ -1,22 +1,22 @@
        subroutine unfold(nogate,nobeam,dat,beam,velny,bmiss)
 c***********************************************************************
-c description      : To unfold Vr PPI data for LAPS system.
+c description      : to unfold vr ppi data for laps system.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     nogate           integer    gate number in one ray.
-c    I     nobeam           integer    total ray number of PPI sweep scan.
-c   I/O  dat(nogate,nobeam) real array radial velocity in unit of m/s.
-c    I     beam(nobeam)     real array azimthual angle. (degrees)
-c    I     velny            real       Nyquist velocity in unit of m/s.
-c    I     bmiss            real       missing value for radial velocity.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     nogate           integer    gate number in one ray.
+c    i     nobeam           integer    total ray number of ppi sweep scan.
+c   i/o  dat(nogate,nobeam) real array radial velocity in unit of m/s.
+c    i     beam(nobeam)     real array azimthual angle. (degrees)
+c    i     velny            real       nyquist velocity in unit of m/s.
+c    i     bmiss            real       missing value for radial velocity.
 c                                      if( dat(i,j).eq.bmiss )then
 c                                          dat(i,j) is missing data. 
-c Called Function:
+c called function:
 c   get_azimuindex,  del_isolated,  simple_unf,  get_vrgroup,  gpunfold
 c
-c Date :
-c   Jul. 10, 2007 (S.-M. Deng)
+c date :
+c   jul. 10, 2007 (s.-m. deng)
 c***********************************************************************
 
        implicit none
@@ -33,7 +33,7 @@ c***********************************************************************
        integer jend,ivad,ier,jend4
        integer i,j,j1 
 
-c -----to check Nyquist velocity. If velny < 10 m/s, donot do unfold.
+c -----to check nyquist velocity. if velny < 10 m/s, donot do unfold.
 
        if( velny.lt.12. )return
 
@@ -41,9 +41,9 @@ c -----to get the last index along azimthual direction.
 
        call get_azimuindex(nobeam,beam,jend,ivad)
        if( ivad.ne.0 )then
-           print*,'Input Vr PPI data is not periodic azimuthal angle.'
-c          print*,'We unfold periodic azimuthal angle data, '
-c          print*,' so this input Vr data isnot be unfolded.'
+           print*,'input vr ppi data is not periodic azimuthal angle.'
+c          print*,'we unfold periodic azimuthal angle data, '
+c          print*,' so this input vr data isnot be unfolded.'
 c          return
        endif
 
@@ -80,23 +80,23 @@ c ---- to unfold radial velocity data by group method.
        subroutine gpunfold(nogate,nobeam,jend,jend4,dat,velny
      1                    ,bmiss,ivad,idat,ind)
 c***********************************************************************
-c description      : To unfold radial velocity data group method.
+c description      : to unfold radial velocity data group method.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     nogate           integer    gate number in one ray.
-c    I     nobeam           integer    total ray number of PPI sweep scan.
-c    I     jend             integer    the last index along azimthual direction.
-c    I     jend4            integer    =jend+4
-c   I/O  dat(nogate,nobeam) real array radial velocity in unit of m/s.
-c    I     velny            real       Nquist velocity in unit of m/s.
-c    I     bmiss            real       missing value for radial velocity.
-c    I     ivad             integer    ppi scanning message.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     nogate           integer    gate number in one ray.
+c    i     nobeam           integer    total ray number of ppi sweep scan.
+c    i     jend             integer    the last index along azimthual direction.
+c    i     jend4            integer    =jend+4
+c   i/o  dat(nogate,nobeam) real array radial velocity in unit of m/s.
+c    i     velny            real       nquist velocity in unit of m/s.
+c    i     bmiss            real       missing value for radial velocity.
+c    i     ivad             integer    ppi scanning message.
 c                                      =0, is 360 degrees scan;  =1, isnot
-c    W   idat(nogate,jend4) int array  radial velocity in unit of 100 * m/s.
-c    O    ind(nogate,jend4) int array  group index.
+c    w   idat(nogate,jend4) int array  radial velocity in unit of 100 * m/s.
+c    o    ind(nogate,jend4) int array  group index.
 c
-c Called Function: 
+c called function: 
 c    get_ishr,     subgroup,     merge_bound,  get_boundary, sortgp,
 c    mergegp,      get_zeroline, near_unf,     azim_unf,     ray_unf,       
 c    ray_unf1
@@ -639,26 +639,26 @@ c -----to check unfold data again.
 
        subroutine get_zeroline(ng,nb,idat,miss,num,indi,jwz1,jwz2,ier)
 c***********************************************************************
-c Subroutine/Function : get_zeroline
+c subroutine/function : get_zeroline
 c
-c Usage :
+c usage :
 c    call get_zeroline(ng,nb,idat,miss,num,indi,jwz1,jwz2,ier)
 c
-c Description      : To get zero line j-index from zero value data.
+c description      : to get zero line j-index from zero value data.
 c
-c Arguments :
-c  I/O/W   name,      type,       description
-c    I     ng         integer     first dimension of input data. 
-c    I     nb         integer     second dimension of input data.
-c    I    idat(ng,nb) int array   radial velocity.
-c    I     miss       integer     missing or bad value.
-c    O     num        integer     number of output data.
-c    O     indi(ng)   integer     i-index.
-c    O     jwz1(ng)   integer     first zero j-index.
-c    O     jwz2(ng)   integer     second zero j-index.
-c    O     ier        integer     error message. (=0, success; =1, failure)
+c arguments :
+c  i/o/w   name,      type,       description
+c    i     ng         integer     first dimension of input data. 
+c    i     nb         integer     second dimension of input data.
+c    i    idat(ng,nb) int array   radial velocity.
+c    i     miss       integer     missing or bad value.
+c    o     num        integer     number of output data.
+c    o     indi(ng)   integer     i-index.
+c    o     jwz1(ng)   integer     first zero j-index.
+c    o     jwz2(ng)   integer     second zero j-index.
+c    o     ier        integer     error message. (=0, success; =1, failure)
 c
-c Modules Called : find_zero,  find_zero1
+c modules called : find_zero,  find_zero1
 c***********************************************************************
        implicit none
        integer ng,nb,miss,num,ier
@@ -869,23 +869,23 @@ c***********************************************************************
 
        subroutine find_zero1(nb,idat,miss,jz1,ier)
 c***********************************************************************
-c Subroutine/Function : find_zero1
+c subroutine/function : find_zero1
 c
-c Usage :
+c usage :
 c    call find_zero1(nb,idat,miss,jz1,ier)
 c
-c Description      : To find the azimuthal position of zero value.
+c description      : to find the azimuthal position of zero value.
 c
-c Arguments :
-c  I/O/W   name,      type,       description
-c    I     nb         integer     total ray number of input sweep scan layer.
-c    I     idat(nb)   int array   radial velocity.
-c    I     miss       integer     missing or bad value.
-c    O     jz1        integer     the first index of zero value.
+c arguments :
+c  i/o/w   name,      type,       description
+c    i     nb         integer     total ray number of input sweep scan layer.
+c    i     idat(nb)   int array   radial velocity.
+c    i     miss       integer     missing or bad value.
+c    o     jz1        integer     the first index of zero value.
 c                                 =0, if no zero value
-c    O     ier        integer     error message. (=0, success; =1, failure)
+c    o     ier        integer     error message. (=0, success; =1, failure)
 c
-c Modules Called : none
+c modules called : none
 c***********************************************************************
        implicit none
        integer nb,miss,jz1,ier
@@ -977,25 +977,25 @@ c***********************************************************************
 
        subroutine find_zero(nb,idat,miss,jz1,jz2,ier)
 c***********************************************************************
-c Subroutine/Function : find_zero
+c subroutine/function : find_zero
 c
-c Usage :
+c usage :
 c    call find_zero(nb,idat,miss,jz1,jz2,ier)
 c
-c Description      : To find the azimuthal position of zero value.
+c description      : to find the azimuthal position of zero value.
 c
-c Arguments :
-c  I/O/W   name,      type,       description
-c    I     nb         integer     total ray number of input sweep scan layer.
-c    I     idat(nb)   int array   radial velocity.
-c    I     miss       integer     missing or bad value.
-c    O     jz1        integer     the first index of zero value.
+c arguments :
+c  i/o/w   name,      type,       description
+c    i     nb         integer     total ray number of input sweep scan layer.
+c    i     idat(nb)   int array   radial velocity.
+c    i     miss       integer     missing or bad value.
+c    o     jz1        integer     the first index of zero value.
 c                                 =0, if no zero value
-c    O     jz2        integer     the second index of zero value.
+c    o     jz2        integer     the second index of zero value.
 c                                 =0, if no zero value
-c    O     ier        integer     error message. (=0, success; =1, failure)
+c    o     ier        integer     error message. (=0, success; =1, failure)
 c
-c Modules Called : none
+c modules called : none
 c***********************************************************************
        implicit none
        integer nb,miss,jz1,jz2,ier
@@ -1122,23 +1122,23 @@ c***********************************************************************
        subroutine ray_unf1(ng,nb,idat,ind,nquist,shear,num,id,ngp,idst
      1                    ,istatus)
 c***********************************************************************
-c description      : To unfold data by along ray direction mothod.
+c description      : to unfold data by along ray direction mothod.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c   I/O    idat(ng,nb)    int array  input data array
-c   I/O    ind(ng,nb)     int array  group index.
-c    I     nquist           integer    nquist velocity.
-c    I     shear            integer    shear velocity.
-c    I     num              integer    input dimension.
-c    I     id(num)          int array  group index.
-c   I/O    ngp(num)         int array  size of group index.
-c    I     idst             integer    starting group index.
-c    O     istatus          integer    =1, unfold data.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c   i/o    idat(ng,nb)    int array  input data array
+c   i/o    ind(ng,nb)     int array  group index.
+c    i     nquist           integer    nquist velocity.
+c    i     shear            integer    shear velocity.
+c    i     num              integer    input dimension.
+c    i     id(num)          int array  group index.
+c   i/o    ngp(num)         int array  size of group index.
+c    i     idst             integer    starting group index.
+c    o     istatus          integer    =1, unfold data.
 c
-c Called Function: curvefitting
+c called function: curvefitting
 c***********************************************************************
        implicit none
        integer ng,nb
@@ -1314,23 +1314,23 @@ c***********************************************************************
        subroutine ray_unf(ng,nb,idat,ind,nquist,shear,num,id,ngp,idst
      1                   ,istatus)
 c***********************************************************************
-c description      : To unfold data by along ray direction mothod.
+c description      : to unfold data by along ray direction mothod.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c   I/O    idat(ng,nb)    int array  input data array
-c   I/O    ind(ng,nb)     int array  group index.
-c    I     nquist           integer    nquist velocity.
-c    I     shear            integer    shear velocity.
-c    I     num              integer    input dimension.
-c    I     id(num)          int array  group index.
-c   I/O    ngp(num)         int array  size of group index.
-c    I     idst             integer    starting group index.
-c    O     istatus          integer    =1, unfold data.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c   i/o    idat(ng,nb)    int array  input data array
+c   i/o    ind(ng,nb)     int array  group index.
+c    i     nquist           integer    nquist velocity.
+c    i     shear            integer    shear velocity.
+c    i     num              integer    input dimension.
+c    i     id(num)          int array  group index.
+c   i/o    ngp(num)         int array  size of group index.
+c    i     idst             integer    starting group index.
+c    o     istatus          integer    =1, unfold data.
 c
-c Called Function: curvefitting
+c called function: curvefitting
 c***********************************************************************
        implicit none
        integer ng,nb
@@ -1473,14 +1473,14 @@ c***********************************************************************
 
        subroutine curvefitting(ng,dat)
 c***********************************************************************
-c description      : To get data by curving fitting.
+c description      : to get data by curving fitting.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    input dimension.
-c   I/O    dat(ng)          real array input data array.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    input dimension.
+c   i/o    dat(ng)          real array input data array.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng
@@ -1570,23 +1570,23 @@ c***********************************************************************
        subroutine azim_unf(ng,nb,idat,ind,nquist,shear,num,id,ngp,idst
      1                    ,istatus)
 c***********************************************************************
-c description      : To unfold data by along azimuthal direction mothod.
+c description      : to unfold data by along azimuthal direction mothod.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c   I/O    idat(ng,nb)    int array  input data array
-c   I/O    ind(ng,nb)     int array  group index.
-c    I     nquist           integer    nquist velocity.
-c    I     shear            integer    shear velocity.
-c    I     num              integer    input dimension.
-c    I     id(num)          int array  group index.
-c   I/O    ngp(num)         int array  size of group index.
-c    I     idst             integer    starting group index.
-c    O     istatus          integer    =1, unfold data.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c   i/o    idat(ng,nb)    int array  input data array
+c   i/o    ind(ng,nb)     int array  group index.
+c    i     nquist           integer    nquist velocity.
+c    i     shear            integer    shear velocity.
+c    i     num              integer    input dimension.
+c    i     id(num)          int array  group index.
+c   i/o    ngp(num)         int array  size of group index.
+c    i     idst             integer    starting group index.
+c    o     istatus          integer    =1, unfold data.
 c
-c Called Function: sov_coe7
+c called function: sov_coe7
 c***********************************************************************
        implicit none
        integer ng,nb
@@ -1750,16 +1750,16 @@ c***********************************************************************
 
       subroutine sov_coe7(n,th,vr,cc,ier)
 c***********************************************************************
-c description      : To compute Fourier coefficient of Vr by curve-     
+c description      : to compute fourier coefficient of vr by curve-     
 c                    fitting method.                                    
 c                                                                       
-c I/O parameters   :                                                    
+c i/o parameters   :                                                    
 c  input:  name,      type,       description                           
 c          n          integer     the total number.                     
 c          th(n)      real array  the input angle in unit of degrees.   
-c          vr(n)      real array  the input Vr value.                   
+c          vr(n)      real array  the input vr value.                   
 c  output: name,      type,       description                           
-c          cc(7)      real array  the Fourier coefficient of Vr.        
+c          cc(7)      real array  the fourier coefficient of vr.        
 c          ier        integer     the error message.                    
 c                                 =0, no error message.                 
 c                                 =1, cannot compute the coefficient.   
@@ -1767,7 +1767,7 @@ c
 c called fun./sub. : sov_eq7                                            
 c                                                                       
 c note:                                                                 
-c         Vr(th)=cc(1)+cc(2)*cos(th)+cc(3)*sin(th)+                     
+c         vr(th)=cc(1)+cc(2)*cos(th)+cc(3)*sin(th)+                     
 c                     +cc(4)*cos(2*th)+cc(5)*sin(2*th)+                 
 c                     +cc(6)*cos(3*th)+cc(7)*sin(3*th)                  
 c***********************************************************************
@@ -1781,15 +1781,15 @@ c***********************************************************************
 
       if( n.gt.max )then
           ier=1
-          print*,'Input total number too large'
+          print*,'input total number too large'
           print*,'total number: ',n
           print*,'the max. number: ',max
-          print*,'Please modified input number or max. parameter'
+          print*,'please modified input number or max. parameter'
           return
       endif
 
 c-----------------------------------------------------------------------
-c* To compute the 7-D maxtrix.
+c* to compute the 7-d maxtrix.
 
       pi=acos(-1.)
       do i=1,n
@@ -1861,7 +1861,7 @@ c* To compute the 7-D maxtrix.
       a(6,7)=a(7,6)
 
 c-----------------------------------------------------------------------
-c* To compute the Y.
+c* to compute the y.
 
       do k=1,7
          y(k)=0.
@@ -1877,7 +1877,7 @@ c* To compute the Y.
       enddo
 
 c-----------------------------------------------------------------------
-c* To compute the Fourier coefficient of Vr.
+c* to compute the fourier coefficient of vr.
 
       call sov_eq7(a,y,cc,ier)
 
@@ -1886,9 +1886,9 @@ c* To compute the Fourier coefficient of Vr.
 
       subroutine sov_eq7(a,y,x,ier)
 c***********************************************************************
-c description      : To sove 7-linear equation A*X=Y, by  X=(A**-1)*Y.  
+c description      : to sove 7-linear equation a*x=y, by  x=(a**-1)*y.  
 c                                                                       
-c I/O parameters   :                                                    
+c i/o parameters   :                                                    
 c  input:  name,      type,       description                           
 c          a(7,7)     real array  the coefficient matrix.               
 c          y(7)       real array  the input matrix.                     
@@ -1959,13 +1959,13 @@ c***********************************************************************
 
       subroutine det7(a,det)
 c***********************************************************************
-c description      : To compute the determinant of 7-D matrix.          
+c description      : to compute the determinant of 7-d matrix.          
 c                                                                       
-c I/O parameters   :                                                    
+c i/o parameters   :                                                    
 c  input:  name,      type,       description                           
-c          a(7,7)     real array  7-D matrix.                           
+c          a(7,7)     real array  7-d matrix.                           
 c  output: name,      type,       description                           
-c          det        real        determinant of 6-D matrix.            
+c          det        real        determinant of 6-d matrix.            
 c                                                                       
 c called fun./sub. : det6                                               
 c***********************************************************************
@@ -1975,7 +1975,7 @@ c***********************************************************************
       real d11,d21,d31,d41,d51,d61,d71
 
 c-----------------------------------------------------------------------
-c* To assign 6-D matrix.
+c* to assign 6-d matrix.
 
       do j=1,6
       do i=1,6
@@ -1986,7 +1986,7 @@ c* To assign 6-D matrix.
       enddo
 
 c-----------------------------------------------------------------------
-c* To compute 6-D determinant.
+c* to compute 6-d determinant.
 
       call det6(b,d11)
 
@@ -2039,7 +2039,7 @@ c* To compute 6-D determinant.
       call det6(b,d71)
 
 c-----------------------------------------------------------------------
-c* To compute 7-D determinant.
+c* to compute 7-d determinant.
 
       det=a(1,1)*d11-a(2,1)*d21+a(3,1)*d31-a(4,1)*d41+a(5,1)*d51
      *   -a(6,1)*d61+a(7,1)*d71
@@ -2049,13 +2049,13 @@ c* To compute 7-D determinant.
 
       subroutine det6(a,det)
 c***********************************************************************
-c description      : To compute the determinant of 6-D matrix.          
+c description      : to compute the determinant of 6-d matrix.          
 c                                                                       
-c I/O parameters   :                                                    
+c i/o parameters   :                                                    
 c  input:  name,      type,       description                           
-c          a(6,6)     real array  6-D matrix.                           
+c          a(6,6)     real array  6-d matrix.                           
 c  output: name,      type,       description                           
-c          det        real        determinant of 6-D matrix.            
+c          det        real        determinant of 6-d matrix.            
 c                                                                       
 c called fun./sub. : det5                                               
 c***********************************************************************
@@ -2065,7 +2065,7 @@ c***********************************************************************
       real d11,d21,d31,d41,d51,d61
 
 c-----------------------------------------------------------------------
-c* To assign 5-D matrix.
+c* to assign 5-d matrix.
 
       do j=1,5
       do i=1,5
@@ -2076,7 +2076,7 @@ c* To assign 5-D matrix.
       enddo
 
 c-----------------------------------------------------------------------
-c* To compute 5-D determinant.
+c* to compute 5-d determinant.
 
       call det5(b,d11)
 
@@ -2116,7 +2116,7 @@ c* To compute 5-D determinant.
       call det5(b,d61)
 
 c-----------------------------------------------------------------------
-c* To compute 6-D determinant.
+c* to compute 6-d determinant.
 
       det=a(1,1)*d11-a(2,1)*d21+a(3,1)*d31-a(4,1)*d41+a(5,1)*d51
      *   -a(6,1)*d61
@@ -2126,13 +2126,13 @@ c* To compute 6-D determinant.
 
       subroutine det5(a,det)
 c***********************************************************************
-c description      : To compute the determinant of 5-D matrix.          
+c description      : to compute the determinant of 5-d matrix.          
 c                                                                       
-c I/O parameters   :                                                    
+c i/o parameters   :                                                    
 c  input:  name,      type,       description                           
-c          a(5,5)     real array  5-D matrix.                           
+c          a(5,5)     real array  5-d matrix.                           
 c  output: name,      type,       description                           
-c          det        real        determinant of 5-D matrix.            
+c          det        real        determinant of 5-d matrix.            
 c                                                                       
 c called fun./sub. : det4                                               
 c***********************************************************************
@@ -2142,7 +2142,7 @@ c***********************************************************************
       real d11,d21,d31,d41,d51
 
 c-----------------------------------------------------------------------
-c* To assign 4-D matrix.
+c* to assign 4-d matrix.
 
       do j=1,4
       do i=1,4
@@ -2153,7 +2153,7 @@ c* To assign 4-D matrix.
       enddo
 
 c-----------------------------------------------------------------------
-c* To compute 4-D determinant.
+c* to compute 4-d determinant.
 
       call det4(b,d11)
 
@@ -2182,7 +2182,7 @@ c* To compute 4-D determinant.
       call det4(b,d51)
 
 c-----------------------------------------------------------------------
-c* To compute 5-D determinant.
+c* to compute 5-d determinant.
 
       det=a(1,1)*d11-a(2,1)*d21+a(3,1)*d31-a(4,1)*d41+a(5,1)*d51
 
@@ -2191,13 +2191,13 @@ c* To compute 5-D determinant.
 
       subroutine det4(a,det)
 c***********************************************************************
-c description      : To compute the determinant of 4-D matrix.          
+c description      : to compute the determinant of 4-d matrix.          
 c                                                                       
-c I/O parameters   :                                                    
+c i/o parameters   :                                                    
 c  input:  name,      type,       description                           
-c          a(4,4)     real array  4-D matrix.                           
+c          a(4,4)     real array  4-d matrix.                           
 c  output: name,      type,       description                           
-c          det        real        determinant of 4-D matrix.            
+c          det        real        determinant of 4-d matrix.            
 c                                                                       
 c note:                                                                 
 c          det=  a11*(a22*a33*a44+a23*a34*a42+a24*a32*a43               
@@ -2213,7 +2213,7 @@ c***********************************************************************
       real a11,a21,a31,a41
 
 c-----------------------------------------------------------------------
-c* To compute determine of 4-D matrix
+c* to compute determine of 4-d matrix
  
       a11=a(2,2)*a(3,3)*a(4,4)+a(2,3)*a(3,4)*a(4,2)+a(2,4)*a(3,2)*a(4,3)
      *   -a(2,4)*a(3,3)*a(4,2)-a(2,2)*a(3,4)*a(4,3)-a(2,3)*a(3,2)*a(4,4)
@@ -2235,26 +2235,26 @@ c* To compute determine of 4-D matrix
        subroutine near_unf(ng,nb,ivad,idat,ibd,ind,nquist,shear
      1                    ,num,id,ngp,idst,istatus)
 c***********************************************************************
-c description      : To unfold data by near mothod.
+c description      : to unfold data by near mothod.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c    I     ivad             integer    ppi scanning message.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c    i     ivad             integer    ppi scanning message.
 c                                      =0, is 360 degrees scan;  =1, isnot
-c   I/O    idat(ng,nb)      int array  input data array
-c    I     ibd(ng,nb)       int array  boundary index.
-c   I/O    ind(ng,nb)       int array  group index.
-c    I     nquist           integer    nquist velocity.
-c    I     shear            integer    shear velocity.
-c    I     num              integer    input dimension.
-c    I     id(num)          int array  group index.
-c   I/O    ngp(num)         int array  size of group index.
-c    I     idst             integer    starting group index.
-c    O     istatus          integer    =0, no unfold dat; =1, unfold data.
+c   i/o    idat(ng,nb)      int array  input data array
+c    i     ibd(ng,nb)       int array  boundary index.
+c   i/o    ind(ng,nb)       int array  group index.
+c    i     nquist           integer    nquist velocity.
+c    i     shear            integer    shear velocity.
+c    i     num              integer    input dimension.
+c    i     id(num)          int array  group index.
+c   i/o    ngp(num)         int array  size of group index.
+c    i     idst             integer    starting group index.
+c    o     istatus          integer    =0, no unfold dat; =1, unfold data.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng,nb,ivad
@@ -2282,7 +2282,7 @@ c***********************************************************************
           if( id(k).eq.idst )kst=k
        enddo
        if( numid.gt.nmax )then
-           print*,'Please modify parameter: nmax  in get_unfindx.'
+           print*,'please modify parameter: nmax  in get_unfindx.'
            print*,'numid: ',numid,' nmax: ',nmax
            return
        endif
@@ -2600,21 +2600,21 @@ c***********************************************************************
 
        subroutine mergegp(ng,nb,idat,ibd,ind,shear,num,id,ngp)
 c***********************************************************************
-c description      : To merge group index.
+c description      : to merge group index.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c    I     idat(ng,ng)      int array  input data array
-c    I     ibd(ng,nb)       int array  boundary index.
-c   I/O    ind(ng,ng)       int array  group index.
-c    I     shear            integer    wind shear.
-c    I     num              integer    input dimension.
-c    I     id(num)          int array  group index.
-c    I     ngp(num)         int array  size of group index.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c    i     idat(ng,ng)      int array  input data array
+c    i     ibd(ng,nb)       int array  boundary index.
+c   i/o    ind(ng,ng)       int array  group index.
+c    i     shear            integer    wind shear.
+c    i     num              integer    input dimension.
+c    i     id(num)          int array  group index.
+c    i     ngp(num)         int array  size of group index.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng,nb
@@ -2630,7 +2630,7 @@ c***********************************************************************
 
        if( num.le.1 )return 
        if( num.gt.nmax )then
-           print*,'Please modify parameter: nmax  in mergegp.'
+           print*,'please modify parameter: nmax  in mergegp.'
            print*,'num: ',num,' nmax: ',nmax
            return
        endif
@@ -2720,15 +2720,15 @@ c***********************************************************************
 
        subroutine sortgp(num,id,ngp)
 c***********************************************************************
-c description      : To sort the size of group index.
+c description      : to sort the size of group index.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     num              integer    input dimension.
-c   I/O    id(num)          int array  group index.
-c   I/O    ngp(num)         int array  size of group index.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     num              integer    input dimension.
+c   i/o    id(num)          int array  group index.
+c   i/o    ngp(num)         int array  size of group index.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer num
@@ -2755,16 +2755,16 @@ c***********************************************************************
 
        subroutine get_boundary(ng,nb,ind,ibd)
 c***********************************************************************
-c description      : To get boundary index.
+c description      : to get boundary index.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c    I     ind(ng,nb)       int array  group index.
-c    O     ibd(ng,nb)       int array  boundary index.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c    i     ind(ng,nb)       int array  group index.
+c    o     ibd(ng,nb)       int array  boundary index.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng,nb
@@ -2796,17 +2796,17 @@ c***********************************************************************
 
        subroutine merge_bound(ng,nb,gst,ind,istatus)
 c***********************************************************************
-c description      : To merge group index for boundary area.
+c description      : to merge group index for boundary area.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c    I     gst              integer    number of group index.
-c   I/O    ind(ng,nb)       int array  group index.
-c    O     istatus          integer    =0, is done. 
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c    i     gst              integer    number of group index.
+c   i/o    ind(ng,nb)       int array  group index.
+c    o     istatus          integer    =0, is done. 
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng,nb,gst,istatus
@@ -2821,8 +2821,8 @@ c***********************************************************************
 
        if( gst.le.1 )return
        if( gst.gt.nmax )then
-           print*,'Error in subroutine: merge_bound'
-           print*,'Please modify parameter: nmax'
+           print*,'error in subroutine: merge_bound'
+           print*,'please modify parameter: nmax'
            print*,'nmax: ',nmax,' gst: ',gst
            return
        endif
@@ -2882,20 +2882,20 @@ c***********************************************************************
 
        subroutine subgroup(ng,nb,ishr,ind,ist,jst,gst,ier)
 c***********************************************************************
-c description      : To get sub-group index.
+c description      : to get sub-group index.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c    I     ishr(8,ng,nb)    int array  shear index.  
-c   I/O    ind(ng,nb)       int array  group index.
-c    I     ist              integer    i index starting point.
-c    I     jst              integer    j index starting point.
-c    I     gst              integer    group index.
-c    O     ier              integer    error message.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c    i     ishr(8,ng,nb)    int array  shear index.  
+c   i/o    ind(ng,nb)       int array  group index.
+c    i     ist              integer    i index starting point.
+c    i     jst              integer    j index starting point.
+c    i     gst              integer    group index.
+c    o     ier              integer    error message.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng,nb,ist,jst,gst,ier
@@ -3225,20 +3225,20 @@ c***********************************************************************
 
        subroutine del_isolated(nogate,nobeam,jend,dat,velny,bmiss,ivad)
 c***********************************************************************
-c description      : To delete the isolated Vr data.
+c description      : to delete the isolated vr data.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     nogate           integer    gate number in one ray.
-c    I     nobeam           integer    total ray number of PPI sweep scan.
-c    I     jend             integer    the last index along azimthual direction.
-c   I/O  dat(nogate,nobeam) real array radial velocity in unit of m/s.
-c    I     velny            real       Nquist velocity in unit of m/s.
-c    I     bmiss            real       missing value for radial velocity.
-c    I     ivad             integer    ppi scanning message.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     nogate           integer    gate number in one ray.
+c    i     nobeam           integer    total ray number of ppi sweep scan.
+c    i     jend             integer    the last index along azimthual direction.
+c   i/o  dat(nogate,nobeam) real array radial velocity in unit of m/s.
+c    i     velny            real       nquist velocity in unit of m/s.
+c    i     bmiss            real       missing value for radial velocity.
+c    i     ivad             integer    ppi scanning message.
 c                                      =0, is 360 degrees scan;  =1, isnot
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer nogate,nobeam,jend,ivad
@@ -3379,20 +3379,20 @@ c***********************************************************************
  
        subroutine simple_unf(nogate,nobeam,jend,dat,velny,bmiss,ivad)
 c***********************************************************************
-c description      : Simple unfold by 3 x 3 cell.
+c description      : simple unfold by 3 x 3 cell.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     nogate           integer    gate number in one ray.
-c    I     nobeam           integer    total ray number of PPI sweep scan.
-c    I     jend             integer    the last index along azimthual direction.
-c   I/O  dat(nogate,nobeam) real array radial velocity in unit of m/s.
-c    I     velny            real       Nquist velocity in unit of m/s.
-c    I     bmiss            real       missing value for radial velocity.
-c    I     ivad             integer    ppi scanning message.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     nogate           integer    gate number in one ray.
+c    i     nobeam           integer    total ray number of ppi sweep scan.
+c    i     jend             integer    the last index along azimthual direction.
+c   i/o  dat(nogate,nobeam) real array radial velocity in unit of m/s.
+c    i     velny            real       nquist velocity in unit of m/s.
+c    i     bmiss            real       missing value for radial velocity.
+c    i     ivad             integer    ppi scanning message.
 c                                      =0, is 360 degrees scan;  =1, isnot
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer nogate,nobeam,jend,ivad
@@ -3498,16 +3498,16 @@ c***********************************************************************
 
        subroutine get_azimuindex(nobeam,beam,jend,ivad)
 c***********************************************************************
-c description      : To get the last index along azimthual direction.
+c description      : to get the last index along azimthual direction.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     nobeam           integer    total ray number of PPI sweep scan.
-c    I     beam(420)        real array azimthual angle. (degrees)
-c    O     jend             integer    the last index along azimthual direction.
-c    O     ivad             integer    ppi scanning message.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     nobeam           integer    total ray number of ppi sweep scan.
+c    i     beam(420)        real array azimthual angle. (degrees)
+c    o     jend             integer    the last index along azimthual direction.
+c    o     ivad             integer    ppi scanning message.
 c                                      =0, is 360 degrees scan;  =1, isnot
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer nobeam,jend,ivad
@@ -3630,18 +3630,18 @@ c***********************************************************************
 
        subroutine get_ishr(ng,nb,miss,shear,idat,ishr)
 c***********************************************************************
-c description      : To get shear index.
+c description      : to get shear index.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    I     ng               integer    first dimension of input data array.
-c    I     nb               integer    second dimension of input data array.
-c    I     miss             integer    missing value.
-c    I     shear            integer    shear velocity.
-c    I     idat(ng,nb)      int array  input data array
-c    O     ishr(8,ng,nb)    int array  shear index. =1 for small shear.
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    i     ng               integer    first dimension of input data array.
+c    i     nb               integer    second dimension of input data array.
+c    i     miss             integer    missing value.
+c    i     shear            integer    shear velocity.
+c    i     idat(ng,nb)      int array  input data array
+c    o     ishr(8,ng,nb)    int array  shear index. =1 for small shear.
 c
-c Called Function: none
+c called function: none
 c***********************************************************************
        implicit none
        integer ng,nb,miss,shear

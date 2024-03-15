@@ -1,20 +1,20 @@
-       SUBROUTINE XMOVEX(OUT,IN,IBYTES)
-C
-C      THIS SUBROUTINE MAY NOT BE NEEDED, ITS WAS IN
-C      ASSEMBLER LANGUAGE TO MOVE DATA, IT RAN ABOUT THREE
-C      TIMES FASTER THAN A FORTAN DO LOOP, IT WAS USED TO
-C      MAKE SURE THE DATA TO BE UNPACKED WAS ON A WORD BOUNDARY,
-C      THIS MAY NOT BE NEEDED ON SOME BRANDS OF COMPUTERS.
-C
-       CHARACTER * 1 OUT(*)
-       CHARACTER * 1 IN(*)
-C
-       INTEGER       IBYTES
-C
-       DO 100 I = 1,IBYTES
-         OUT(I) = IN(I)
-  100  CONTINUE  
-C
-       RETURN    
-       END
+       subroutine xmovex(out,in,ibytes)
+c
+c      this subroutine may not be needed, its was in
+c      assembler language to move data, it ran about three
+c      times faster than a fortan do loop, it was used to
+c      make sure the data to be unpacked was on a word boundary,
+c      this may not be needed on some brands of computers.
+c
+       character * 1 out(*)
+       character * 1 in(*)
+c
+       integer       ibytes
+c
+       do 100 i = 1,ibytes
+         out(i) = in(i)
+  100  continue  
+c
+       return    
+       end
 

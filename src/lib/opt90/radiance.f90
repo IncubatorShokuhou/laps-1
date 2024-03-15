@@ -1,491 +1,491 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       radiance
 !
-! PURPOSE:
-!       RT model radiance module
+! purpose:
+!       rt model radiance module
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE radiance
+! calling sequence:
+!       use radiance
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       type_kinds:              Module containing data type kind definitions.
+! modules:
+!       type_kinds:              module containing data type kind definitions.
 !
-!       parameters:              Module containing parameter definitions for
-!                                the RT model.
+!       parameters:              module containing parameter definitions for
+!                                the rt model.
 !
-!       spectral_coefficients:   Module containing the RT model spectral
+!       spectral_coefficients:   module containing the rt model spectral
 !                                coefficients.
 !
-!       sensor_planck_routines:  Module containing all the forward, tangent-
-!                                linear, and adjoint Planck radiance and
+!       sensor_planck_routines:  module containing all the forward, tangent-
+!                                linear, and adjoint planck radiance and
 !                                temperature subroutines. 
 !
-! CONTAINS:
-!       compute_radiance:        PUBLIC subroutine to calculate the channel TOA
+! contains:
+!       compute_radiance:        public subroutine to calculate the channel toa
 !                                radiance and brightness temperature.
 !
-!       compute_radiance_TL:     PUBLIC subroutine to calculate the tangent-
-!                                linear TOA radiance and brightness temperature.
+!       compute_radiance_tl:     public subroutine to calculate the tangent-
+!                                linear toa radiance and brightness temperature.
 !
-!       compute_radiance_AD:     PUBLIC subroutine to calculate the adjoint of
-!                                the TOA radiance and brightness temperature.
+!       compute_radiance_ad:     public subroutine to calculate the adjoint of
+!                                the toa radiance and brightness temperature.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS/SSEC 11-Jul-2000
+! creation history:
+!       written by:     paul van delst, cimss/ssec 11-jul-2000
 !                       paul.vandelst@ssec.wisc.edu
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE radiance
+module radiance
 
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
 
-  USE type_kinds, ONLY : fp_kind
-  USE parameters
-  USE spectral_coefficients
-  USE sensor_planck_routines
+  use type_kinds, only : fp_kind
+  use parameters
+  use spectral_coefficients
+  use sensor_planck_routines
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------
-  ! Visibilities
+  ! visibilities
   ! ------------
 
-  PRIVATE
-  PUBLIC  :: compute_radiance
-  PUBLIC  :: compute_radiance_TL
-  PUBLIC  :: compute_radiance_AD
+  private
+  public  :: compute_radiance
+  public  :: compute_radiance_tl
+  public  :: compute_radiance_ad
 
 
-CONTAINS
+contains
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       compute_radiance
 !
-! PURPOSE:
-!       PUBLIC subroutine to calculate the TOA radiance and brightness temperature.
+! purpose:
+!       public subroutine to calculate the toa radiance and brightness temperature.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_radiance( temperature,           &  ! Input, K
+! calling sequence:
+!       call compute_radiance( temperature,           &  ! input, k
 !
-!                              surface_temperature,   &  ! Input, scalar
-!                              surface_emissivity,    &  ! Input, scalar
-!                              surface_reflectivity,  &  ! Input, scalar
+!                              surface_temperature,   &  ! input, scalar
+!                              surface_emissivity,    &  ! input, scalar
+!                              surface_reflectivity,  &  ! input, scalar
 !
-!                              tau,                   &  ! Input, K
-!                              flux_tau,              &  ! Input, K
-!                              solar_tau,             &  ! Input, scalar
+!                              tau,                   &  ! input, k
+!                              flux_tau,              &  ! input, k
+!                              solar_tau,             &  ! input, scalar
 !
-!                              secant_solar_angle,    &  ! Input, scalar
-!                              valid_solar,           &  ! Input, scalar
-!                              channel_index,         &  ! Input, scalar
+!                              secant_solar_angle,    &  ! input, scalar
+!                              valid_solar,           &  ! input, scalar
+!                              channel_index,         &  ! input, scalar
 !
-!                              layer_radiance,        &  ! Output, K
-!                              downwelling_radiance,  &  ! Output, scalar
-!                              upwelling_radiance,    &  ! Output, scalar
+!                              layer_radiance,        &  ! output, k
+!                              downwelling_radiance,  &  ! output, scalar
+!                              upwelling_radiance,    &  ! output, scalar
 !
-!                              brightness_temperature )  ! Output, scalar
+!                              brightness_temperature )  ! output, scalar
 !
 !
-! INPUT ARGUMENTS:
-!       temperature:             Profile LAYER average temperature array.
-!                                UNITS:      Kelvin
-!                                TYPE:       Float
-!                                DIMENSION:  K
-!                                ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       temperature:             profile layer average temperature array.
+!                                units:      kelvin
+!                                type:       float
+!                                dimension:  k
+!                                attributes: intent( in )
 !
-!       surface_temperature:     Surface boundary temperature.
-!                                UNITS:      Kelvin
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!       surface_temperature:     surface boundary temperature.
+!                                units:      kelvin
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-!       surface_emissivity:      Surface boundary emissivity
-!                                UNITS:      None
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!       surface_emissivity:      surface boundary emissivity
+!                                units:      none
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-!       surface_reflectivity:    Surface boundary reflectivity
-!                                UNITS:      None
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity:    surface boundary reflectivity
+!                                units:      none
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-!       tau:                     Layer-to-space transmittance profile for
+!       tau:                     layer-to-space transmittance profile for
 !                                a particular satellite view angle.
-!                                UNITS:      None
-!                                TYPE:       Real
-!                                DIMENSION:  K
-!                                ATTRIBUTES: INTENT( IN )
+!                                units:      none
+!                                type:       real
+!                                dimension:  k
+!                                attributes: intent( in )
 !
-!       flux_tau:                Layer-to-surface transmittance profile for
-!                                either the diffuse approximation angle (IR)
-!                                or the satellite view angle (MW). The latter
+!       flux_tau:                layer-to-surface transmittance profile for
+!                                either the diffuse approximation angle (ir)
+!                                or the satellite view angle (mw). the latter
 !                                assumes specular reflectivity.
-!                                UNITS:      None
-!                                TYPE:       Real
-!                                DIMENSION:  K
-!                                ATTRIBUTES: INTENT( IN )
+!                                units:      none
+!                                type:       real
+!                                dimension:  k
+!                                attributes: intent( in )
 !
-!       solar_tau:               Total space-to-surface transmittance at the
+!       solar_tau:               total space-to-surface transmittance at the
 !                                solar zenith angle.
-!                                UNITS:      None
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!                                units:      none
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-!       secant_solar_angle:      Secant of the solar zenith angle corresponding
+!       secant_solar_angle:      secant of the solar zenith angle corresponding
 !                                to that used in calculating the total solar
 !                                transmittance.
-!                                UNITS:      None
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!                                units:      none
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-!       valid_solar:             Flag indicating if the solar component should
+!       valid_solar:             flag indicating if the solar component should
 !                                be included.
-!                                If = 0, no solar (if sensor channel frequency
+!                                if = 0, no solar (if sensor channel frequency
 !                                        is less than a preset cutoff or if solar
 !                                        zenith angle is greater than its preset
 !                                         cutoff.)
 !                                   = 1, include solar
-!                                UNITS:      None.
-!                                TYPE:       Integer
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!                                units:      none.
+!                                type:       integer
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-!       channel_index:           Channel index id. This is a unique index
+!       channel_index:           channel index id. this is a unique index
 !                                to a (supported) sensor channel.
-!                                UNITS:      None
-!                                TYPE:       Integer
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( IN )
+!                                units:      none
+!                                type:       integer
+!                                dimension:  scalar
+!                                attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       layer_radiance:          Channel Planck radiance for every input layer.
-!                                UNITS:      mW/(m^2.sr.cm^-1)
-!                                TYPE:       Real
-!                                DIMENSION:  K.
-!                                ATTRIBUTES: INTENT( OUT )
+! output arguments:
+!       layer_radiance:          channel planck radiance for every input layer.
+!                                units:      mw/(m^2.sr.cm^-1)
+!                                type:       real
+!                                dimension:  k.
+!                                attributes: intent( out )
 !
-!       downwelling_radiance:    Channel radiance at surface due to downwelling
+!       downwelling_radiance:    channel radiance at surface due to downwelling
 !                                flux and solar components.
-!                                UNITS:      mW/(m^2.sr.cm^-1)
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( OUT )
+!                                units:      mw/(m^2.sr.cm^-1)
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( out )
 !
-!       upwelling_radiance:      Channel TOA radiance simulating the satellite
-!                                sensor measurement. This is composed of the
+!       upwelling_radiance:      channel toa radiance simulating the satellite
+!                                sensor measurement. this is composed of the
 !                                reflected downwelling propagated through the
 !                                atmosphere as well as the upwelling only component.
-!                                UNITS:      mW/(m^2.sr.cm^-1)
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( OUT )
+!                                units:      mw/(m^2.sr.cm^-1)
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( out )
 !
-!       brightness_temperature:  Channel TOA brightness temperature.
-!                                UNITS:      Kelvin
-!                                TYPE:       Real
-!                                DIMENSION:  Scalar
-!                                ATTRIBUTES: INTENT( OUT )
+!       brightness_temperature:  channel toa brightness temperature.
+!                                units:      kelvin
+!                                type:       real
+!                                dimension:  scalar
+!                                attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       sensor_planck_radiance:    Function to compute the Planck radiance
+! calls:
+!       sensor_planck_radiance:    function to compute the planck radiance
 !                                  for a specified channel given the temperature.
-!                                  SOURCE: SENSOR_PLANCK_ROUTINES module
+!                                  source: sensor_planck_routines module
 !
-!       sensor_planck_temperature: Function to compute the Planck temperature
+!       sensor_planck_temperature: function to compute the planck temperature
 !                                  for a specified channel given the radiance.
-!                                  SOURCE: SENSOR_PLANCK_ROUTINES module
+!                                  source: sensor_planck_routines module
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The downwelling radiance is first initialised to the space emissisio
+! procedure:
+!       the downwelling radiance is first initialised to the space emissisio
 !       boundary term using precalculated cosmic background radiances,
 !
-!         R_down = CBR * flux_tau(1)
+!         r_down = cbr * flux_tau(1)
 !
 !       where the emissivity of space is implicitly assumed to be 1.0 and
 !       flux_tau(1) is the space-to-ground transmittance.
 !
-!       The contributions of all the layers EXCEPT THE SURFACE LAYER to the
+!       the contributions of all the layers except the surface layer to the
 !       downwelling flux is accumulated,
 !
-!                            __K-1
+!                            __k-1
 !                           \
-!         R_down = R_down +  >  B(k) * dflux_tau(k)
+!         r_down = r_down +  >  b(k) * dflux_tau(k)
 !                           /__
 !                              k=1
 !
-!       The surface layer contribution is then added explicitly,
+!       the surface layer contribution is then added explicitly,
 !
-!         R_down = R_down + ( B(K) * ( 1 - flux_tau(K) ) )
+!         r_down = r_down + ( b(k) * ( 1 - flux_tau(k) ) )
 !
 !       to avoid exceeding the arrays bounds of flux_tau 
-!       (i.e. flux_tau(K+1) == 1.0 ) or requiring flux_tau to be
-!       dimensioned 0:K.
+!       (i.e. flux_tau(k+1) == 1.0 ) or requiring flux_tau to be
+!       dimensioned 0:k.
 !
-!       The solar term is then added if required,
+!       the solar term is then added if required,
 !
-!         R_down = R_down + ( solar_irradiance * solar_tau * COS(solar_theta) )
+!         r_down = r_down + ( solar_irradiance * solar_tau * cos(solar_theta) )
 !
-!       The downwelling radiance is then reflected off the surface, added
+!       the downwelling radiance is then reflected off the surface, added
 !       to the surface emission term, propagated upwards through the atmosphere
 !       and used to initialise the upwelling radiance term,
 !
-!         R_up = ( ( e_sfc * B_sfc ) + ( r_sfc * R_down ) ) * tau(K)
+!         r_up = ( ( e_sfc * b_sfc ) + ( r_sfc * r_down ) ) * tau(k)
 !
-!       The contributions of all the layers EXCEPT THE TOP LAYER to the
+!       the contributions of all the layers except the top layer to the
 !       upwelling radiance is accumulated,
 !
 !                        __ 2
 !                       \
-!         R_up = R_up +  >  B(k) * dtau(k)
+!         r_up = r_up +  >  b(k) * dtau(k)
 !                       /__
-!                          k=K
+!                          k=k
 !
-!       The top layer contribution is then added explicitly,
+!       the top layer contribution is then added explicitly,
 !
-!         R_up = R_up + ( B(1) * ( 1 - tau(1) ) )
+!         r_up = r_up + ( b(1) * ( 1 - tau(1) ) )
 !
 !       to avoid exceeding the arrays bounds of tau (i.e. tau(0) == 1.0 )
-!       or requiring tau to be dimensioned 0:K.
+!       or requiring tau to be dimensioned 0:k.
 !
-!       The final upwelling radiance is then converted to a brightness
+!       the final upwelling radiance is then converted to a brightness
 !       temperature.
 !
-!S-      
+!s-      
 !--------------------------------------------------------------------------------
 
 
-  SUBROUTINE compute_radiance( temperature,           &  ! Input, K      
+  subroutine compute_radiance( temperature,           &  ! input, k      
 
-                               surface_temperature,   &  ! Input, scalar 
-                               surface_emissivity,    &  ! Input, scalar 
-                               surface_reflectivity,  &  ! Input, scalar 
+                               surface_temperature,   &  ! input, scalar 
+                               surface_emissivity,    &  ! input, scalar 
+                               surface_reflectivity,  &  ! input, scalar 
 
-                               tau,                   &  ! Input, K      
-                               flux_tau,              &  ! Input, K      
-                               solar_tau,             &  ! Input, scalar 
+                               tau,                   &  ! input, k      
+                               flux_tau,              &  ! input, k      
+                               solar_tau,             &  ! input, scalar 
 
-                               secant_solar_angle,    &  ! Input, scalar 
-                               valid_solar,           &  ! Input, scalar 
-                               channel_index,         &  ! Input, scalar 
+                               secant_solar_angle,    &  ! input, scalar 
+                               valid_solar,           &  ! input, scalar 
+                               channel_index,         &  ! input, scalar 
 
-                               layer_radiance,        &  ! Output, K     
-                               downwelling_radiance,  &  ! Output, scalar
-                               upwelling_radiance,    &  ! Output, scalar
+                               layer_radiance,        &  ! output, k     
+                               downwelling_radiance,  &  ! output, scalar
+                               upwelling_radiance,    &  ! output, scalar
 
-                               brightness_temperature )  ! Output, scalar
+                               brightness_temperature )  ! output, scalar
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: temperature
+    real( fp_kind ), dimension( : ), intent( in )  :: temperature
 
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_temperature
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_emissivity
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_reflectivity
+    real( fp_kind ),                 intent( in )  :: surface_temperature
+    real( fp_kind ),                 intent( in )  :: surface_emissivity
+    real( fp_kind ),                 intent( in )  :: surface_reflectivity
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: tau
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: flux_tau
-    REAL( fp_kind ),                 INTENT( IN )  :: solar_tau
+    real( fp_kind ), dimension( : ), intent( in )  :: tau
+    real( fp_kind ), dimension( : ), intent( in )  :: flux_tau
+    real( fp_kind ),                 intent( in )  :: solar_tau
 
-    REAL( fp_kind ),                 INTENT( IN )  :: secant_solar_angle
-    INTEGER,                         INTENT( IN )  :: valid_solar
-    INTEGER,                         INTENT( IN )  :: channel_index
+    real( fp_kind ),                 intent( in )  :: secant_solar_angle
+    integer,                         intent( in )  :: valid_solar
+    integer,                         intent( in )  :: channel_index
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( OUT ) :: layer_radiance
-    REAL( fp_kind ),                 INTENT( OUT ) :: downwelling_radiance
-    REAL( fp_kind ),                 INTENT( OUT ) :: upwelling_radiance
+    real( fp_kind ), dimension( : ), intent( out ) :: layer_radiance
+    real( fp_kind ),                 intent( out ) :: downwelling_radiance
+    real( fp_kind ),                 intent( out ) :: upwelling_radiance
 
-    REAL( fp_kind ),                 INTENT( OUT ) :: brightness_temperature
+    real( fp_kind ),                 intent( out ) :: brightness_temperature
 
  
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_RADIANCE'
+    character( * ), parameter :: routine_name = 'compute_radiance'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k, n_layers
-    INTEGER :: l
+    integer :: k, n_layers
+    integer :: l
 
-    REAL( fp_kind ) :: surface_B
+    real( fp_kind ) :: surface_b
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC SIZE
+    intrinsic size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Determine array dimensions --                       #
+    !#                   -- determine array dimensions --                       #
     !#--------------------------------------------------------------------------#
 
-    n_layers = SIZE( temperature )
+    n_layers = size( temperature )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#              -- Calculate the downwelling thermal flux --                #
+    !#              -- calculate the downwelling thermal flux --                #
     !#--------------------------------------------------------------------------#
 
-    ! -- Assign the channel index to a short name
+    ! -- assign the channel index to a short name
     l = channel_index
 
 
     ! --------------------------------------------
-    ! Initialise the downwelling radiance to the
+    ! initialise the downwelling radiance to the
     ! space emission boundary term reaching the
-    ! surface. Thhe cosmic background radiance is
+    ! surface. thhe cosmic background radiance is
     ! zero for infrared channels and precalculated
-    ! for microwave channels. The emissivity of
+    ! for microwave channels. the emissivity of
     ! space is assumed to be 1.0.
     !
-    ! Cosmic background data from the
-    ! SPECTRAL_COEFFICIENTS module
+    ! cosmic background data from the
+    ! spectral_coefficients module
     ! --------------------------------------------
 
     downwelling_radiance = cosmic_background_radiance( l ) * flux_tau( 1 )
 
 
     ! --------------------------------
-    ! Loop over layers from TOA->SFC-1
+    ! loop over layers from toa->sfc-1
     ! --------------------------------
 
-    k_down_layer_loop: DO k = 1, n_layers - 1
+    k_down_layer_loop: do k = 1, n_layers - 1
 
-      ! -- Calculate the Planck layer radiance
-      CALL sensor_planck_radiance( l,                  &  ! Input
-                                   temperature( k ),   &  ! Input
-                                   layer_radiance( k ) )  ! Output
+      ! -- calculate the planck layer radiance
+      call sensor_planck_radiance( l,                  &  ! input
+                                   temperature( k ),   &  ! input
+                                   layer_radiance( k ) )  ! output
 
-      ! -- Accumulate absorption and emission for current layer.
-      ! -- LTE assumed.
+      ! -- accumulate absorption and emission for current layer.
+      ! -- lte assumed.
       downwelling_radiance = downwelling_radiance + &
                              ( layer_radiance( k ) * ( flux_tau( k+1 ) - flux_tau( k ) ) )
 
-    END DO k_down_layer_loop
+    end do k_down_layer_loop
 
 
     ! ----------------------------------
-    ! Flux bottom layer (closest to SFC)
+    ! flux bottom layer (closest to sfc)
     ! ----------------------------------
 
-    ! -- Lowest layer Planck radiance
-    CALL sensor_planck_radiance( l,                         &  ! Input
-                                 temperature( n_layers ),   &  ! Input
-                                 layer_radiance( n_layers ) )  ! Output
+    ! -- lowest layer planck radiance
+    call sensor_planck_radiance( l,                         &  ! input
+                                 temperature( n_layers ),   &  ! input
+                                 layer_radiance( n_layers ) )  ! output
 
-    ! -- Contribution of lowest layer. Note that at the
+    ! -- contribution of lowest layer. note that at the
     ! -- surface, a transmittance of 1.0 is used.
     downwelling_radiance = downwelling_radiance + &
-                           ( layer_radiance( n_layers ) * ( ONE - flux_tau( n_layers ) ) )
+                           ( layer_radiance( n_layers ) * ( one - flux_tau( n_layers ) ) )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                -- Calculate the downwelling solar terms --               #
+    !#                -- calculate the downwelling solar terms --               #
     !#--------------------------------------------------------------------------#
 
-    solar_term: IF ( valid_solar == 1 ) THEN
+    solar_term: if ( valid_solar == 1 ) then
 
       downwelling_radiance = downwelling_radiance + &
 
@@ -493,644 +493,644 @@ CONTAINS
       !                        ---------------------------------
                                       secant_solar_angle         )
 
-    END IF solar_term
+    end if solar_term
 
 
 
     !#--------------------------------------------------------------------------#
-    !#   -- Reflect the downwelling radiance and add the surface emission --    #
+    !#   -- reflect the downwelling radiance and add the surface emission --    #
     !#   -- and use it to initialise the upwelling radiance               --    #
     !#--------------------------------------------------------------------------#
 
-    ! -- Calculate the surface term
-    CALL sensor_planck_radiance( l,                   &  ! Input
-                                 surface_temperature, &  ! Input
-                                 surface_B            )  ! Output
+    ! -- calculate the surface term
+    call sensor_planck_radiance( l,                   &  ! input
+                                 surface_temperature, &  ! input
+                                 surface_b            )  ! output
 
-    ! -- Initialise upwelling radiance
-    upwelling_radiance = ( ( surface_emissivity   * surface_B            ) + &
+    ! -- initialise upwelling radiance
+    upwelling_radiance = ( ( surface_emissivity   * surface_b            ) + &
                            ( surface_reflectivity * downwelling_radiance )   ) * tau( n_layers )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                  -- Calculate the upwelling radiance --                  #
+    !#                  -- calculate the upwelling radiance --                  #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------
-    ! Loop over layers from SFC->TOA-1
+    ! loop over layers from sfc->toa-1
     ! --------------------------------
 
-    k_up_layer_loop: DO k = n_layers, 2, -1
+    k_up_layer_loop: do k = n_layers, 2, -1
 
       upwelling_radiance = upwelling_radiance + &
                            ( layer_radiance( k ) * ( tau( k-1 ) - tau( k ) ) )
 
-    END DO k_up_layer_loop
+    end do k_up_layer_loop
 
 
     ! --------------------------
-    ! Top layer (closest to TOA)
+    ! top layer (closest to toa)
     ! --------------------------
 
     upwelling_radiance = upwelling_radiance + &
-                         ( layer_radiance( 1 ) * ( ONE - tau( 1 ) ) )
+                         ( layer_radiance( 1 ) * ( one - tau( 1 ) ) )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- Convert the radiances to brightness temperatures --         #
+    !#           -- convert the radiances to brightness temperatures --         #
     !#--------------------------------------------------------------------------#
 
-    CALL sensor_planck_temperature( l,                     &  ! Input
-                                    upwelling_radiance,    &  ! Input
-                                    brightness_temperature )  ! Output
+    call sensor_planck_temperature( l,                     &  ! input
+                                    upwelling_radiance,    &  ! input
+                                    brightness_temperature )  ! output
 
-  END SUBROUTINE compute_radiance
+  end subroutine compute_radiance
 
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_radiance_TL
+!s+
+! name:
+!       compute_radiance_tl
 !
-! PURPOSE:
-!       PUBLIC subroutine to calculate the tangent-linear TOA radiance and
+! purpose:
+!       public subroutine to calculate the tangent-linear toa radiance and
 !       brightness temperature.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_radiance_TL( &
+! calling sequence:
+!       call compute_radiance_tl( &
 !
-!                                 ! -- Forward inputs
-!                                 temperature,              &  ! Input, K
+!                                 ! -- forward inputs
+!                                 temperature,              &  ! input, k
 !
-!                                 surface_temperature,      &  ! Input, scalar
-!                                 surface_emissivity,       &  ! Input, scalar
-!                                 surface_reflectivity,     &  ! Input, scalar
+!                                 surface_temperature,      &  ! input, scalar
+!                                 surface_emissivity,       &  ! input, scalar
+!                                 surface_reflectivity,     &  ! input, scalar
 !
-!                                 tau,                      &  ! Input, K
-!                                 flux_tau,                 &  ! Input, K
-!                                 solar_tau,                &  ! Input, scalar
+!                                 tau,                      &  ! input, k
+!                                 flux_tau,                 &  ! input, k
+!                                 solar_tau,                &  ! input, scalar
 !
-!                                 layer_radiance,           &  ! Input, K
-!                                 downwelling_radiance,     &  ! Input, scalar
-!                                 upwelling_radiance,       &  ! Input, scalar
+!                                 layer_radiance,           &  ! input, k
+!                                 downwelling_radiance,     &  ! input, scalar
+!                                 upwelling_radiance,       &  ! input, scalar
 !
-!                                 ! -- Tangent-linear inputs
-!                                 temperature_TL,           &  ! Input, K
+!                                 ! -- tangent-linear inputs
+!                                 temperature_tl,           &  ! input, k
 !
-!                                 surface_temperature_TL,   &  ! Input, scalar
-!                                 surface_emissivity_TL,    &  ! Input, scalar
-!                                 surface_reflectivity_TL,  &  ! Input, scalar
+!                                 surface_temperature_tl,   &  ! input, scalar
+!                                 surface_emissivity_tl,    &  ! input, scalar
+!                                 surface_reflectivity_tl,  &  ! input, scalar
 !
-!                                 tau_TL,                   &  ! Input, K
-!                                 flux_tau_TL,              &  ! Input, K
-!                                 solar_tau_TL,             &  ! Input, scalar
+!                                 tau_tl,                   &  ! input, k
+!                                 flux_tau_tl,              &  ! input, k
+!                                 solar_tau_tl,             &  ! input, scalar
 !
-!                                 ! -- Other inputs
-!                                 secant_solar_angle,       &  ! Input, scalar
-!                                 valid_solar,              &  ! Input, scalar
-!                                 channel_index,            &  ! Input, scalar
+!                                 ! -- other inputs
+!                                 secant_solar_angle,       &  ! input, scalar
+!                                 valid_solar,              &  ! input, scalar
+!                                 channel_index,            &  ! input, scalar
 !
-!                                 ! -- Tangent-linear outputs
-!                                 layer_radiance_TL,        &  ! Output, K
-!                                 downwelling_radiance_TL,  &  ! Output, scalar
-!                                 upwelling_radiance_TL,    &  ! Output, scalar
+!                                 ! -- tangent-linear outputs
+!                                 layer_radiance_tl,        &  ! output, k
+!                                 downwelling_radiance_tl,  &  ! output, scalar
+!                                 upwelling_radiance_tl,    &  ! output, scalar
 !
-!                                 brightness_temperature_TL )  ! Output, scalar
+!                                 brightness_temperature_tl )  ! output, scalar
 !
 !
-! INPUT ARGUMENTS:
-!       temperature:               Profile LAYER average temperature array.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Float
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       temperature:               profile layer average temperature array.
+!                                  units:      kelvin
+!                                  type:       float
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       surface_temperature:       Surface boundary temperature.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_temperature:       surface boundary temperature.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_emissivity:        Surface boundary emissivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_emissivity:        surface boundary emissivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_reflectivity:      Surface boundary reflectivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity:      surface boundary reflectivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       tau:                       Layer-to-space transmittance profile for
+!       tau:                       layer-to-space transmittance profile for
 !                                  a particular satellite view angle.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k.
+!                                  attributes: intent( in )
 !
-!       flux_tau:                  Layer-to-surface transmittance profile for
-!                                  either the diffuse approximation angle (IR)
-!                                  or the satellite view angle (MW). The latter
+!       flux_tau:                  layer-to-surface transmittance profile for
+!                                  either the diffuse approximation angle (ir)
+!                                  or the satellite view angle (mw). the latter
 !                                  assumes specular reflectivity.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k.
+!                                  attributes: intent( in )
 !
-!       solar_tau:                 Total space-to-surface transmittance at the
+!       solar_tau:                 total space-to-surface transmittance at the
 !                                  solar zenith angle.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       layer_radiance:            Channel Planck radiance for every layer.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_radiance:            channel planck radiance for every layer.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  k.
+!                                  attributes: intent( in )
 !
-!       downwelling_radiance:      Channel radiance at surface due to downwelling
+!       downwelling_radiance:      channel radiance at surface due to downwelling
 !                                  flux and solar components.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       upwelling_radiance:        Channel TOA radiance simulating the satellite
-!                                  sensor measurement. This is composed of the
+!       upwelling_radiance:        channel toa radiance simulating the satellite
+!                                  sensor measurement. this is composed of the
 !                                  reflected downwelling propagated through the
 !                                  atmosphere as well as the upwelling only component.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       temperature_TL:            Tangent-linear temperature profile.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Float
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( IN )
+!       temperature_tl:            tangent-linear temperature profile.
+!                                  units:      kelvin
+!                                  type:       float
+!                                  dimension:  k.
+!                                  attributes: intent( in )
 !
-!       surface_temperature_TL:    Tangent-linear surface boundary temperature.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_temperature_tl:    tangent-linear surface boundary temperature.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_emissivity_TL:     Tangent-linear surface boundary emissivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_emissivity_tl:     tangent-linear surface boundary emissivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_reflectivity_TL:   Tangent-linear surface boundary reflectivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity_tl:   tangent-linear surface boundary reflectivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       tau_TL:                    Tangent-linear layer-to-space transmittance
+!       tau_tl:                    tangent-linear layer-to-space transmittance
 !                                  profile.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k.
+!                                  attributes: intent( in )
 !
-!       flux_tau_TL:               Tangent-linear layer-to-surface flux transmittance
+!       flux_tau_tl:               tangent-linear layer-to-surface flux transmittance
 !                                  profile.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k.
+!                                  attributes: intent( in )
 !
-!       solar_tau_TL:              Tangent-linear total space-to-surface solar
+!       solar_tau_tl:              tangent-linear total space-to-surface solar
 !                                  transmittance.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       secant_solar_angle:        Secant of the solar zenith angle corresponding
+!       secant_solar_angle:        secant of the solar zenith angle corresponding
 !                                  to that used in calculating the total solar
 !                                  transmittance.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       valid_solar:               Flag indicating if the solar component should
+!       valid_solar:               flag indicating if the solar component should
 !                                  be included.
-!                                  If = 0, no solar (if sensor channel frequency
+!                                  if = 0, no solar (if sensor channel frequency
 !                                          is less than a preset cutoff or if solar
 !                                          zenith angle is greater than its preset
 !                                           cutoff.)
 !                                     = 1, include solar
-!                                  UNITS:      None.
-!                                  TYPE:       Integer
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       integer
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       channel_index:             Channel index id. This is a unique index
+!       channel_index:             channel index id. this is a unique index
 !                                  to a (supported) sensor channel.
-!                                  UNITS:      None
-!                                  TYPE:       Integer
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       integer
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       layer_radiance_TL:         Tangent-linear channel Planck radiance for
+! output arguments:
+!       layer_radiance_tl:         tangent-linear channel planck radiance for
 !                                  every layer.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  K.
-!                                  ATTRIBUTES: INTENT( OUT )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  k.
+!                                  attributes: intent( out )
 !
-!       downwelling_radiance_TL:   Tangent-linear channel radiance at surface
+!       downwelling_radiance_tl:   tangent-linear channel radiance at surface
 !                                  due to downwelling flux and solar components.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( OUT )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( out )
 !
-!       upwelling_radiance_TL:     Tangent-linear channel TOA radiance.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( OUT )
+!       upwelling_radiance_tl:     tangent-linear channel toa radiance.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( out )
 !
-!       brightness_temperature_TL: Tangent-linear channel TOA brightness
+!       brightness_temperature_tl: tangent-linear channel toa brightness
 !                                  temperature.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( OUT )
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       sensor_planck_radiance_TL:    Function to compute the tangent-linear
-!                                     Planck radiance.
-!                                     SOURCE: SENSOR_PLANCK_ROUTINES module
+! calls:
+!       sensor_planck_radiance_tl:    function to compute the tangent-linear
+!                                     planck radiance.
+!                                     source: sensor_planck_routines module
 !
-!       sensor_planck_temperature_TL: Function to compute the tangent-linear
-!                                     Planck temperature.
-!                                     SOURCE: SENSOR_PLANCK_ROUTINES module
+!       sensor_planck_temperature_tl: function to compute the tangent-linear
+!                                     planck temperature.
+!                                     source: sensor_planck_routines module
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The downwelling radiance is first initialised to the space emission
+! procedure:
+!       the downwelling radiance is first initialised to the space emission
 !       boundary term using precalculated cosmic background radiances,
 !
-!         R_down_TL = CBR * flux_tau_TL(1)
+!         r_down_tl = cbr * flux_tau_tl(1)
 !
 !       and the emissivity of space is implicitly assumed to be 1.0 and
-!       flux_tau_TL(1) is the tangent-linear form of the space-to-ground
+!       flux_tau_tl(1) is the tangent-linear form of the space-to-ground
 !       transmittance.
 !
-!       The contributions of all the layers EXCEPT THE SURFACE LAYER to the
+!       the contributions of all the layers except the surface layer to the
 !       downwelling flux is accumulated,
 !
-!                                  __K-1
+!                                  __k-1
 !                                 \
-!         R_down_TL = R_down_TL +  >  ( B(k) * dflux_tau_TL(k) ) + ( B_TL(k) * dflux_tau(k) )
+!         r_down_tl = r_down_tl +  >  ( b(k) * dflux_tau_tl(k) ) + ( b_tl(k) * dflux_tau(k) )
 !                                 /__
 !                                    k=1
 !
-!       The surface layer contribution is then added explicitly,
+!       the surface layer contribution is then added explicitly,
 !
-!         R_down_TL = R_down_TL + ( B(K) * ( -flux_tau_TL(K) ) ) + ( B_TL(K) * ( 1 - flux_tau(K) ) )
+!         r_down_tl = r_down_tl + ( b(k) * ( -flux_tau_tl(k) ) ) + ( b_tl(k) * ( 1 - flux_tau(k) ) )
 !
-!       to avoid exceeding the arrays bounds of flux_tau and flux_tau_TL
-!       (i.e. flux_tau(K+1) == 1.0 ) or requiring them to be
-!       dimensioned 0:K.
+!       to avoid exceeding the arrays bounds of flux_tau and flux_tau_tl
+!       (i.e. flux_tau(k+1) == 1.0 ) or requiring them to be
+!       dimensioned 0:k.
 !
-!       The solar term is then added if required,
+!       the solar term is then added if required,
 !
-!         R_down_TL = R_down_TL + ( solar_irradiance * solar_tau_TL * COS(solar_theta) )
+!         r_down_tl = r_down_tl + ( solar_irradiance * solar_tau_tl * cos(solar_theta) )
 !
-!       The downwelling radiance is then reflected off the surface, added
+!       the downwelling radiance is then reflected off the surface, added
 !       to the surface emission term, propagated upwards through the atmosphere
 !       and used to initialise the upwelling radiance term,
 !
-!         R_up_TL = ( e_sfc    * B_sfc_TL  * tau(K) ) + &
-!                   ( e_sfc_TL * B_sfc     * tau(K) ) + &
-!                   ( r_sfc    * R_down_TL * tau(K) ) + &
-!                   ( r_sfc_TL * R_down    * tau(K) ) + &
-!                   ( ( ( e_sfc * B_sfc ) + ( r_sfc * R_down ) ) * tau_TL(K) )
+!         r_up_tl = ( e_sfc    * b_sfc_tl  * tau(k) ) + &
+!                   ( e_sfc_tl * b_sfc     * tau(k) ) + &
+!                   ( r_sfc    * r_down_tl * tau(k) ) + &
+!                   ( r_sfc_tl * r_down    * tau(k) ) + &
+!                   ( ( ( e_sfc * b_sfc ) + ( r_sfc * r_down ) ) * tau_tl(k) )
 !
-!       The contributions of all the layers EXCEPT THE TOP LAYER to the
+!       the contributions of all the layers except the top layer to the
 !       upwelling radiance is accumulated,
 !
 !                              __ 2
 !                             \
-!         R_up_TL = R_up_TL +  >  ( B(k) * dtau_TL(k) ) + ( B_TL(k) * dtau(k) )
+!         r_up_tl = r_up_tl +  >  ( b(k) * dtau_tl(k) ) + ( b_tl(k) * dtau(k) )
 !                             /__
-!                                k=K
+!                                k=k
 !
-!       The top layer contribution is then added explicitly,
+!       the top layer contribution is then added explicitly,
 !
-!         R_up_TL = R_up_TL + ( B(1) * ( -tau_TL(1) ) ) + ( B_TL(1) * ( 1 - tau(1) ) )
+!         r_up_tl = r_up_tl + ( b(1) * ( -tau_tl(1) ) ) + ( b_tl(1) * ( 1 - tau(1) ) )
 !
 !       to avoid exceeding the arrays bounds of tau (i.e. tau(0) == 1.0 )
-!       or tau_TL or requiring them to be dimensioned 0:K.
+!       or tau_tl or requiring them to be dimensioned 0:k.
 !
-!       The final tangent-linear upwelling radiance is then converted to a
+!       the final tangent-linear upwelling radiance is then converted to a
 !       tangent-linear  brightness temperature.
 !
-!S-      
+!s-      
 !--------------------------------------------------------------------------------
 
 
-  SUBROUTINE compute_radiance_TL( &
-                                  ! -- Forward inputs
-                                  temperature,              &  ! Input, K
+  subroutine compute_radiance_tl( &
+                                  ! -- forward inputs
+                                  temperature,              &  ! input, k
 
-                                  surface_temperature,      &  ! Input, scalar
-                                  surface_emissivity,       &  ! Input, scalar
-                                  surface_reflectivity,     &  ! Input, scalar
+                                  surface_temperature,      &  ! input, scalar
+                                  surface_emissivity,       &  ! input, scalar
+                                  surface_reflectivity,     &  ! input, scalar
 
-                                  tau,                      &  ! Input, K
-                                  flux_tau,                 &  ! Input, K
-                                  solar_tau,                &  ! Input, scalar
+                                  tau,                      &  ! input, k
+                                  flux_tau,                 &  ! input, k
+                                  solar_tau,                &  ! input, scalar
 
-                                  layer_radiance,           &  ! Input, K
-                                  downwelling_radiance,     &  ! Input, scalar
-                                  upwelling_radiance,       &  ! Input, scalar
+                                  layer_radiance,           &  ! input, k
+                                  downwelling_radiance,     &  ! input, scalar
+                                  upwelling_radiance,       &  ! input, scalar
 
-                                  ! -- Tangent-linear inputs
-                                  temperature_TL,           &  ! Input, K
+                                  ! -- tangent-linear inputs
+                                  temperature_tl,           &  ! input, k
 
-                                  surface_temperature_TL,   &  ! Input, scalar
-                                  surface_emissivity_TL,    &  ! Input, scalar
-                                  surface_reflectivity_TL,  &  ! Input, scalar
+                                  surface_temperature_tl,   &  ! input, scalar
+                                  surface_emissivity_tl,    &  ! input, scalar
+                                  surface_reflectivity_tl,  &  ! input, scalar
 
-                                  tau_TL,                   &  ! Input, K
-                                  flux_tau_TL,              &  ! Input, K
-                                  solar_tau_TL,             &  ! Input, scalar
+                                  tau_tl,                   &  ! input, k
+                                  flux_tau_tl,              &  ! input, k
+                                  solar_tau_tl,             &  ! input, scalar
 
-                                  ! -- Other inputs
-                                  secant_solar_angle,       &  ! Input, scalar
-                                  valid_solar,              &  ! Input, scalar
-                                  channel_index,            &  ! Input, scalar
+                                  ! -- other inputs
+                                  secant_solar_angle,       &  ! input, scalar
+                                  valid_solar,              &  ! input, scalar
+                                  channel_index,            &  ! input, scalar
 
-                                  ! -- Tangent-linear outputs
-                                  layer_radiance_TL,        &  ! Output, K
-                                  downwelling_radiance_TL,  &  ! Output, scalar
-                                  upwelling_radiance_TL,    &  ! Output, scalar
+                                  ! -- tangent-linear outputs
+                                  layer_radiance_tl,        &  ! output, k
+                                  downwelling_radiance_tl,  &  ! output, scalar
+                                  upwelling_radiance_tl,    &  ! output, scalar
 
-                                  brightness_temperature_TL )  ! Output, scalar
+                                  brightness_temperature_tl )  ! output, scalar
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: temperature
+    ! -- forward input
+    real( fp_kind ), dimension( : ), intent( in )  :: temperature
 
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_temperature
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_emissivity
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_reflectivity
+    real( fp_kind ),                 intent( in )  :: surface_temperature
+    real( fp_kind ),                 intent( in )  :: surface_emissivity
+    real( fp_kind ),                 intent( in )  :: surface_reflectivity
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: tau
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: flux_tau
-    REAL( fp_kind ),                 INTENT( IN )  :: solar_tau
+    real( fp_kind ), dimension( : ), intent( in )  :: tau
+    real( fp_kind ), dimension( : ), intent( in )  :: flux_tau
+    real( fp_kind ),                 intent( in )  :: solar_tau
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: layer_radiance
-    REAL( fp_kind ),                 INTENT( IN )  :: downwelling_radiance
-    REAL( fp_kind ),                 INTENT( IN )  :: upwelling_radiance
+    real( fp_kind ), dimension( : ), intent( in )  :: layer_radiance
+    real( fp_kind ),                 intent( in )  :: downwelling_radiance
+    real( fp_kind ),                 intent( in )  :: upwelling_radiance
 
-    ! -- Tangent-linear input
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: temperature_TL
+    ! -- tangent-linear input
+    real( fp_kind ), dimension( : ), intent( in )  :: temperature_tl
 
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_temperature_TL
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_emissivity_TL
-    REAL( fp_kind ),                 INTENT( IN )  :: surface_reflectivity_TL
+    real( fp_kind ),                 intent( in )  :: surface_temperature_tl
+    real( fp_kind ),                 intent( in )  :: surface_emissivity_tl
+    real( fp_kind ),                 intent( in )  :: surface_reflectivity_tl
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: tau_TL
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )  :: flux_tau_TL
-    REAL( fp_kind ),                 INTENT( IN )  :: solar_tau_TL
+    real( fp_kind ), dimension( : ), intent( in )  :: tau_tl
+    real( fp_kind ), dimension( : ), intent( in )  :: flux_tau_tl
+    real( fp_kind ),                 intent( in )  :: solar_tau_tl
 
-    ! -- Other input
-    REAL( fp_kind ),                 INTENT( IN )  :: secant_solar_angle
-    INTEGER,                         INTENT( IN )  :: valid_solar
-    INTEGER,                         INTENT( IN )  :: channel_index
+    ! -- other input
+    real( fp_kind ),                 intent( in )  :: secant_solar_angle
+    integer,                         intent( in )  :: valid_solar
+    integer,                         intent( in )  :: channel_index
 
-    ! -- Tangent-linear output
-    REAL( fp_kind ), DIMENSION( : ), INTENT( OUT ) :: layer_radiance_TL
-    REAL( fp_kind ),                 INTENT( OUT ) :: downwelling_radiance_TL
-    REAL( fp_kind ),                 INTENT( OUT ) :: upwelling_radiance_TL
+    ! -- tangent-linear output
+    real( fp_kind ), dimension( : ), intent( out ) :: layer_radiance_tl
+    real( fp_kind ),                 intent( out ) :: downwelling_radiance_tl
+    real( fp_kind ),                 intent( out ) :: upwelling_radiance_tl
 
-    REAL( fp_kind ),                 INTENT( OUT ) :: brightness_temperature_TL
+    real( fp_kind ),                 intent( out ) :: brightness_temperature_tl
 
  
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_RADIANCE_TL'
+    character( * ), parameter :: routine_name = 'compute_radiance_tl'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k, n_layers
-    INTEGER :: l
+    integer :: k, n_layers
+    integer :: l
 
-    REAL( fp_kind ) :: surface_B
-    REAL( fp_kind ) :: surface_B_TL
+    real( fp_kind ) :: surface_b
+    real( fp_kind ) :: surface_b_tl
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC SIZE
+    intrinsic size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Determine array dimensions --                       #
+    !#                   -- determine array dimensions --                       #
     !#--------------------------------------------------------------------------#
 
-    n_layers = SIZE( temperature )
+    n_layers = size( temperature )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#       -- Calculate the tangent-linear downwelling thermal flux --        #
+    !#       -- calculate the tangent-linear downwelling thermal flux --        #
     !#--------------------------------------------------------------------------#
 
-    ! -- Assign the channel index to a short name
+    ! -- assign the channel index to a short name
     l = channel_index
 
 
     ! ---------------------------------------------
-    ! Initialise the tangent-linear downwelling
+    ! initialise the tangent-linear downwelling
     ! radiance to the space emission boundary term
-    ! reaching the surface. The cosmic background
+    ! reaching the surface. the cosmic background
     ! radiance is zero for infrared channels and
-    ! precalculated for microwave channels. The
+    ! precalculated for microwave channels. the
     ! emissivity of space is assumed to be 1.0.
     !
-    ! Cosmic background data from the
-    ! SPECTRAL_COEFFICIENTS module
+    ! cosmic background data from the
+    ! spectral_coefficients module
     ! ---------------------------------------------
 
-    downwelling_radiance_TL = cosmic_background_radiance( l ) * flux_tau_TL( 1 )
+    downwelling_radiance_tl = cosmic_background_radiance( l ) * flux_tau_tl( 1 )
 
 
     ! --------------------------------
-    ! Loop over layers from TOA->SFC-1
+    ! loop over layers from toa->sfc-1
     ! --------------------------------
 
-    k_down_layer_loop: DO k = 1, n_layers - 1
+    k_down_layer_loop: do k = 1, n_layers - 1
 
-      ! -- Calculate the tangent-linear layer Planck radiance
-      CALL sensor_planck_radiance_TL( l,                     &  ! Input
-                                      temperature( k ),      &  ! Input
-                                      temperature_TL( k ),   &  ! Input
-                                      layer_radiance_TL( k ) )  ! Output
+      ! -- calculate the tangent-linear layer planck radiance
+      call sensor_planck_radiance_tl( l,                     &  ! input
+                                      temperature( k ),      &  ! input
+                                      temperature_tl( k ),   &  ! input
+                                      layer_radiance_tl( k ) )  ! output
 
-      ! -- Accumulate tangent-linear absorption and emission for current layer.
-      ! -- LTE assumed.
-      downwelling_radiance_TL = downwelling_radiance_TL + &
-                                ( layer_radiance(k)    * ( flux_tau_TL(k+1) - flux_tau_TL(k) ) ) + &
-                                ( layer_radiance_TL(k) * ( flux_tau(k+1)    - flux_tau(k)    ) )
+      ! -- accumulate tangent-linear absorption and emission for current layer.
+      ! -- lte assumed.
+      downwelling_radiance_tl = downwelling_radiance_tl + &
+                                ( layer_radiance(k)    * ( flux_tau_tl(k+1) - flux_tau_tl(k) ) ) + &
+                                ( layer_radiance_tl(k) * ( flux_tau(k+1)    - flux_tau(k)    ) )
 
-    END DO k_down_layer_loop
+    end do k_down_layer_loop
 
 
     ! ----------------------------------
-    ! Flux bottom layer (closest to SFC)
+    ! flux bottom layer (closest to sfc)
     ! ----------------------------------
 
-    ! -- Lowest layer tangent-linear Planck radiance
-    CALL sensor_planck_radiance_TL( l,                            &  ! Input
-                                    temperature( n_layers ),      &  ! Input
-                                    temperature_TL( n_layers ),   &  ! Input
-                                    layer_radiance_TL( n_layers ) )  ! Output
+    ! -- lowest layer tangent-linear planck radiance
+    call sensor_planck_radiance_tl( l,                            &  ! input
+                                    temperature( n_layers ),      &  ! input
+                                    temperature_tl( n_layers ),   &  ! input
+                                    layer_radiance_tl( n_layers ) )  ! output
 
-    ! -- Contribution of lowest layer. Note that at the
+    ! -- contribution of lowest layer. note that at the
     ! -- surface, a transmittance of 1.0 is used.
-    downwelling_radiance_TL = downwelling_radiance_TL + &
-                              ( layer_radiance(n_layers)    * (      -flux_tau_TL(n_layers) ) ) + &
-                              ( layer_radiance_TL(n_layers) * ( ONE - flux_tau(n_layers)    ) )
+    downwelling_radiance_tl = downwelling_radiance_tl + &
+                              ( layer_radiance(n_layers)    * (      -flux_tau_tl(n_layers) ) ) + &
+                              ( layer_radiance_tl(n_layers) * ( one - flux_tau(n_layers)    ) )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#               -- Calculate the tangent-linear solar term --              #
+    !#               -- calculate the tangent-linear solar term --              #
     !#--------------------------------------------------------------------------#
 
-    solar_term: IF ( valid_solar == 1 ) THEN
+    solar_term: if ( valid_solar == 1 ) then
 
-      downwelling_radiance_TL = downwelling_radiance_TL + &
+      downwelling_radiance_tl = downwelling_radiance_tl + &
 
-                                ( solar_irradiance(l) * solar_tau_TL / &
+                                ( solar_irradiance(l) * solar_tau_tl / &
       !                           ------------------------------------
                                            secant_solar_angle          )
 
-    END IF solar_term
+    end if solar_term
 
 
 
     !#--------------------------------------------------------------------------#
-    !#      -- Reflect the tangent-linear downwelling radiance, add the  --     #
+    !#      -- reflect the tangent-linear downwelling radiance, add the  --     #
     !#      -- surface emission and use it to initialise the tangent-    --     #
     !#      -- linear upwelling radiance                                 --     #
     !#--------------------------------------------------------------------------#
 
-    ! -- Calculate the surface terms
-    CALL sensor_planck_radiance( l,                   &  ! Input
-                                 surface_temperature, &  ! Input
-                                 surface_B            )  ! Output
+    ! -- calculate the surface terms
+    call sensor_planck_radiance( l,                   &  ! input
+                                 surface_temperature, &  ! input
+                                 surface_b            )  ! output
 
-    CALL sensor_planck_radiance_TL( l,                      &  ! Input
-                                    surface_temperature,    &  ! Input
-                                    surface_temperature_TL, &  ! Input
-                                    surface_B_TL            )  ! Output
+    call sensor_planck_radiance_tl( l,                      &  ! input
+                                    surface_temperature,    &  ! input
+                                    surface_temperature_tl, &  ! input
+                                    surface_b_tl            )  ! output
 
-    ! -- Initialise the tangent-linear upwelling radiance
-    upwelling_radiance_TL = ( tau(n_layers) * surface_emissivity   * surface_B_TL            ) + &
-                            ( tau(n_layers) * surface_reflectivity * downwelling_radiance_TL ) + &
+    ! -- initialise the tangent-linear upwelling radiance
+    upwelling_radiance_tl = ( tau(n_layers) * surface_emissivity   * surface_b_tl            ) + &
+                            ( tau(n_layers) * surface_reflectivity * downwelling_radiance_tl ) + &
 
-                            ( ((surface_emissivity   * surface_B           ) + &
-                               (surface_reflectivity * downwelling_radiance)) * tau_TL(n_layers) ) + &
+                            ( ((surface_emissivity   * surface_b           ) + &
+                               (surface_reflectivity * downwelling_radiance)) * tau_tl(n_layers) ) + &
 
-                            ( tau(n_layers) * surface_B            * surface_emissivity_TL   ) + &
-                            ( tau(n_layers) * downwelling_radiance * surface_reflectivity_TL )
+                            ( tau(n_layers) * surface_b            * surface_emissivity_tl   ) + &
+                            ( tau(n_layers) * downwelling_radiance * surface_reflectivity_tl )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- Calculate the tangent-linear upwelling radiance --          #
+    !#           -- calculate the tangent-linear upwelling radiance --          #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------
-    ! Loop over layers from SFC->TOA-1
+    ! loop over layers from sfc->toa-1
     ! --------------------------------
 
-    k_up_layer_loop: DO k = n_layers, 2, -1
+    k_up_layer_loop: do k = n_layers, 2, -1
 
-      upwelling_radiance_TL = upwelling_radiance_TL + &
-                              ( layer_radiance(k)    * ( tau_TL(k-1) - tau_TL(k) ) ) + &
-                              ( layer_radiance_TL(k) * ( tau(k-1)    - tau(k)    ) )
+      upwelling_radiance_tl = upwelling_radiance_tl + &
+                              ( layer_radiance(k)    * ( tau_tl(k-1) - tau_tl(k) ) ) + &
+                              ( layer_radiance_tl(k) * ( tau(k-1)    - tau(k)    ) )
 
-    END DO k_up_layer_loop
+    end do k_up_layer_loop
 
 
     ! --------------------------
-    ! Top layer (closest to TOA)
+    ! top layer (closest to toa)
     ! --------------------------
 
-    upwelling_radiance_TL = upwelling_radiance_TL + &
-                            ( layer_radiance(1)    * (      -tau_TL(1) ) ) + &
-                            ( layer_radiance_TL(1) * ( ONE - tau(1)    ) )
+    upwelling_radiance_tl = upwelling_radiance_tl + &
+                            ( layer_radiance(1)    * (      -tau_tl(1) ) ) + &
+                            ( layer_radiance_tl(1) * ( one - tau(1)    ) )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#    -- Convert the tangent-linear radiance to brightness temperature --   #
+    !#    -- convert the tangent-linear radiance to brightness temperature --   #
     !#--------------------------------------------------------------------------#
 
-    CALL sensor_planck_temperature_TL( l,                        &  ! Input
-                                       upwelling_radiance,       &  ! Input
-                                       upwelling_radiance_TL,    &  ! Input
-                                       brightness_temperature_TL )  ! Output
+    call sensor_planck_temperature_tl( l,                        &  ! input
+                                       upwelling_radiance,       &  ! input
+                                       upwelling_radiance_tl,    &  ! input
+                                       brightness_temperature_tl )  ! output
 
-  END SUBROUTINE compute_radiance_TL
+  end subroutine compute_radiance_tl
 
 
 
@@ -1138,761 +1138,761 @@ CONTAINS
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_radiance_AD
+!s+
+! name:
+!       compute_radiance_ad
 !
-! PURPOSE:
-!       PUBLIC subroutine to calculate the adjoint of the TOA radiance and
+! purpose:
+!       public subroutine to calculate the adjoint of the toa radiance and
 !       brightness temperature.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_radiance_AD( &
-!                                 ! -- Forward inputs
-!                                 temperature,               &  ! Input, K
+! calling sequence:
+!       call compute_radiance_ad( &
+!                                 ! -- forward inputs
+!                                 temperature,               &  ! input, k
 !
-!                                 surface_temperature,       &  ! Input, scalar
-!                                 surface_emissivity,        &  ! Input, scalar
-!                                 surface_reflectivity,      &  ! Input, scalar
+!                                 surface_temperature,       &  ! input, scalar
+!                                 surface_emissivity,        &  ! input, scalar
+!                                 surface_reflectivity,      &  ! input, scalar
 !
-!                                 tau,                       &  ! Input, K
-!                                 flux_tau,                  &  ! Input, K
-!                                 solar_tau,                 &  ! Input, scalar
+!                                 tau,                       &  ! input, k
+!                                 flux_tau,                  &  ! input, k
+!                                 solar_tau,                 &  ! input, scalar
 !
-!                                 layer_radiance,            &  ! Input, K
-!                                 downwelling_radiance,      &  ! Input, scalar
-!                                 upwelling_radiance,        &  ! Input, scalar
+!                                 layer_radiance,            &  ! input, k
+!                                 downwelling_radiance,      &  ! input, scalar
+!                                 upwelling_radiance,        &  ! input, scalar
 !
-!                                 ! -- Adjoint inputs
-!                                 layer_radiance_AD,         &  ! In/Output, K
-!                                 downwelling_radiance_AD,   &  ! In/Output, scalar
-!                                 upwelling_radiance_AD,     &  ! In/Output, scalar
+!                                 ! -- adjoint inputs
+!                                 layer_radiance_ad,         &  ! in/output, k
+!                                 downwelling_radiance_ad,   &  ! in/output, scalar
+!                                 upwelling_radiance_ad,     &  ! in/output, scalar
 !
-!                                 brightness_temperature_AD, &  ! In/Output, scalar
+!                                 brightness_temperature_ad, &  ! in/output, scalar
 !
-!                                 ! -- Other inputs
-!                                 secant_solar_angle,        &  ! Input, scalar
-!                                 valid_solar,               &  ! Input, scalar
-!                                 channel_index,             &  ! Input, scalar
+!                                 ! -- other inputs
+!                                 secant_solar_angle,        &  ! input, scalar
+!                                 valid_solar,               &  ! input, scalar
+!                                 channel_index,             &  ! input, scalar
 !
-!                                 ! -- Adjoint outputs
-!                                 temperature_AD,            &  ! In/Output, K
+!                                 ! -- adjoint outputs
+!                                 temperature_ad,            &  ! in/output, k
 !
-!                                 surface_temperature_AD,    &  ! In/Output, scalar
-!                                 surface_emissivity_AD,     &  ! In/Output, scalar
-!                                 surface_reflectivity_AD,   &  ! In/Output, scalar
+!                                 surface_temperature_ad,    &  ! in/output, scalar
+!                                 surface_emissivity_ad,     &  ! in/output, scalar
+!                                 surface_reflectivity_ad,   &  ! in/output, scalar
 !
-!                                 tau_AD,                    &  ! In/Output, K
-!                                 flux_tau_AD,               &  ! In/Output, K
-!                                 solar_tau_AD               )  ! In/Output, scalar
+!                                 tau_ad,                    &  ! in/output, k
+!                                 flux_tau_ad,               &  ! in/output, k
+!                                 solar_tau_ad               )  ! in/output, scalar
 !
 !
-! INPUT ARGUMENTS:
-!       temperature:               Profile LAYER average temperature array.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Float
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       temperature:               profile layer average temperature array.
+!                                  units:      kelvin
+!                                  type:       float
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       surface_temperature:       Surface boundary temperature.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_temperature:       surface boundary temperature.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_emissivity:        Surface boundary emissivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_emissivity:        surface boundary emissivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_reflectivity:      Surface boundary reflectivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity:      surface boundary reflectivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       tau:                       Layer-to-space transmittance profile for
+!       tau:                       layer-to-space transmittance profile for
 !                                  a particular satellite view angle.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       flux_tau:                  Layer-to-surface transmittance profile for
-!                                  either the diffuse approximation angle (IR)
-!                                  or the satellite view angle (MW). The latter
+!       flux_tau:                  layer-to-surface transmittance profile for
+!                                  either the diffuse approximation angle (ir)
+!                                  or the satellite view angle (mw). the latter
 !                                  assumes specular reflectivity.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       solar_tau:                 Total space-to-surface transmittance at the
+!       solar_tau:                 total space-to-surface transmittance at the
 !                                  solar zenith angle.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       layer_radiance:            Channel Planck radiance for every layer.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_radiance:            channel planck radiance for every layer.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       downwelling_radiance:      Channel radiance at surface due to downwelling
+!       downwelling_radiance:      channel radiance at surface due to downwelling
 !                                  flux and solar components.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       upwelling_radiance:        Channel TOA radiance simulating the satellite
-!                                  sensor measurement. This is composed of the
+!       upwelling_radiance:        channel toa radiance simulating the satellite
+!                                  sensor measurement. this is composed of the
 !                                  reflected downwelling propagated through the
 !                                  atmosphere as well as the upwelling only component.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       layer_radiance_AD:         Adjoint of the channel Planck radiance for every
+!       layer_radiance_ad:         adjoint of the channel planck radiance for every
 !                                  layer.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       downwelling_radiance_AD:   Adjoint of the channel radiance at surface due
+!       downwelling_radiance_ad:   adjoint of the channel radiance at surface due
 !                                  to downwelling flux and solar components.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       upwelling_radiance_AD:     Adjoint of the channel TOA radiance simulating
+!       upwelling_radiance_ad:     adjoint of the channel toa radiance simulating
 !                                  the satellite sensor measurement.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       brightness_temperature_AD: Adjoint of the channel TOA brightness temperature.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       brightness_temperature_ad: adjoint of the channel toa brightness temperature.
+!                                  ** this argument is set to zero on output **.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       secant_solar_angle:        Secant of the solar zenith angle corresponding
+!       secant_solar_angle:        secant of the solar zenith angle corresponding
 !                                  to that used in calculating the total solar
 !                                  transmittance.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       valid_solar:               Flag indicating if the solar component should
+!       valid_solar:               flag indicating if the solar component should
 !                                  be included.
-!                                  If = 0, no solar (if sensor channel frequency
+!                                  if = 0, no solar (if sensor channel frequency
 !                                          is less than a preset cutoff or if solar
 !                                          zenith angle is greater than its preset
 !                                           cutoff.)
 !                                     = 1, include solar
-!                                  UNITS:      None.
-!                                  TYPE:       Integer
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       integer
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       channel_index:             Channel index id. This is a unique index
+!       channel_index:             channel index id. this is a unique index
 !                                  to a (supported) sensor channel.
-!                                  UNITS:      None
-!                                  TYPE:       Integer
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       integer
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       temperature_AD:            Adjoint of the profile LAYER average temperature.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Float
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+! output arguments:
+!       temperature_ad:            adjoint of the profile layer average temperature.
+!                                  units:      kelvin
+!                                  type:       float
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       surface_temperature_AD:    Adjoint of the surface boundary temperature.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_temperature_ad:    adjoint of the surface boundary temperature.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_emissivity_AD:     Adjoint of the surface boundary emissivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_emissivity_ad:     adjoint of the surface boundary emissivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       surface_reflectivity_AD:   Adjoint of the surface boundary reflectivity
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity_ad:   adjoint of the surface boundary reflectivity
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-!       tau_AD:                    Adjoint of the layer-to-space transmittance
+!       tau_ad:                    adjoint of the layer-to-space transmittance
 !                                  profile for a particular satellite view angle.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       flux_tau_AD:               Adjoint of the layer-to-surface transmittance
+!       flux_tau_ad:               adjoint of the layer-to-surface transmittance
 !                                  profile for either the diffuse approximation
-!                                  angle (IR) or the satellite view angle (MW).
-!                                  The latter assumes specular reflectivity.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  K
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  angle (ir) or the satellite view angle (mw).
+!                                  the latter assumes specular reflectivity.
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  k
+!                                  attributes: intent( in )
 !
-!       solar_tau_AD:              Adjoint of the total space-to-surface 
+!       solar_tau_ad:              adjoint of the total space-to-surface 
 !                                  transmittance at the solar zenith angle.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  scalar
+!                                  attributes: intent( in )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       sensor_planck_radiance_AD:    Function to compute the adjoint
-!                                     Planck radiance.
-!                                     SOURCE: SENSOR_PLANCK_ROUTINES module
+! calls:
+!       sensor_planck_radiance_ad:    function to compute the adjoint
+!                                     planck radiance.
+!                                     source: sensor_planck_routines module
 !
-!       sensor_planck_temperature_AD: Function to compute the adjoint
-!                                     Planck temperature.
-!                                     SOURCE: SENSOR_PLANCK_ROUTINES module
+!       sensor_planck_temperature_ad: function to compute the adjoint
+!                                     planck temperature.
+!                                     source: sensor_planck_routines module
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       All input adjoint arguments are set to zero on output.
+! side effects:
+!       all input adjoint arguments are set to zero on output.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       This adjoint code is derived directly from the transpose of the
-!       tangent-linear model. Starting with the final statement of the
+! procedure:
+!       this adjoint code is derived directly from the transpose of the
+!       tangent-linear model. starting with the final statement of the
 !       tangent-linear model,
 !
-!         R_up_TL = R_up_TL + ( B(1) * ( -tau_TL(1) ) ) + ( B_TL(1) * ( 1 - tau(1) ) )
+!         r_up_tl = r_up_tl + ( b(1) * ( -tau_tl(1) ) ) + ( b_tl(1) * ( 1 - tau(1) ) )
 !
 !       the adjoint of the components is given by,
 !
-!         tau_AD(1) = -B(1) * R_up_AD
-!         B_AD(1)   = ( 1 - tau(1) ) * R_up_AD
+!         tau_ad(1) = -b(1) * r_up_ad
+!         b_ad(1)   = ( 1 - tau(1) ) * r_up_ad
 !
-!       R_up_AD is not set to zero at this point as it is being summed. The 
+!       r_up_ad is not set to zero at this point as it is being summed. the 
 !       surface to space tangent-linear summation is given by,
 !
 !                              __ 2
 !                             \
-!         R_up_TL = R_up_TL +  >  ( B(k) * dtau_TL(k) ) + ( B_TL(k) * dtau(k) )
+!         r_up_tl = r_up_tl +  >  ( b(k) * dtau_tl(k) ) + ( b_tl(k) * dtau(k) )
 !                             /__
-!                                k=K
+!                                k=k
 !
-!       The adjoint of the components are,
+!       the adjoint of the components are,
 !
-!         B_AD(k)     = dtau(k) * R_up_AD
-!         tau_AD(k)   = tau_AD(k)   - ( B(k) * R_up_AD )
-!         tau_AD(k-1) = tau_AD(k-1) + ( B(k) * R_up_AD )
-!         T_AD(k)     = planck_AD(T(k),B_AD(k))
-!         B_AD(k)     = 0.0
+!         b_ad(k)     = dtau(k) * r_up_ad
+!         tau_ad(k)   = tau_ad(k)   - ( b(k) * r_up_ad )
+!         tau_ad(k-1) = tau_ad(k-1) + ( b(k) * r_up_ad )
+!         t_ad(k)     = planck_ad(t(k),b_ad(k))
+!         b_ad(k)     = 0.0
 !
-!       Next comes the tangent-linea surface term,
+!       next comes the tangent-linea surface term,
 !
-!         R_up_TL = ( e_sfc    * B_sfc_TL  * tau(K) ) + &
-!                   ( e_sfc_TL * B_sfc     * tau(K) ) + &
-!                   ( r_sfc    * R_down_TL * tau(K) ) + &
-!                   ( r_sfc_TL * R_down    * tau(K) ) + &
-!                   ( ( ( e_sfc * B_sfc ) + ( r_sfc * R_down ) ) * tau_TL(K) )
+!         r_up_tl = ( e_sfc    * b_sfc_tl  * tau(k) ) + &
+!                   ( e_sfc_tl * b_sfc     * tau(k) ) + &
+!                   ( r_sfc    * r_down_tl * tau(k) ) + &
+!                   ( r_sfc_tl * r_down    * tau(k) ) + &
+!                   ( ( ( e_sfc * b_sfc ) + ( r_sfc * r_down ) ) * tau_tl(k) )
 !
 !       with the adjoints,
 !
-!         r_AD      = tau(K) * R_down * R_up_AD
-!         e_AD      = tau(K) * B(sfc) * R_up_AD
-!         tau_AD(K) = tau_AD(K) + ( e.B(sfc) + r.R_down ) * R_up_AD
-!         R_down_AD = R_down_AD + ( tau(K) * r * R_up_AD )
-!         B_AD(sfc) =               tau(K) * e * R_up_AD
-!         R_up_AD   = 0.0
-!         T_AD(sfc) = planck_AD(T(sfc),B_AD(sfc))
+!         r_ad      = tau(k) * r_down * r_up_ad
+!         e_ad      = tau(k) * b(sfc) * r_up_ad
+!         tau_ad(k) = tau_ad(k) + ( e.b(sfc) + r.r_down ) * r_up_ad
+!         r_down_ad = r_down_ad + ( tau(k) * r * r_up_ad )
+!         b_ad(sfc) =               tau(k) * e * r_up_ad
+!         r_up_ad   = 0.0
+!         t_ad(sfc) = planck_ad(t(sfc),b_ad(sfc))
 !
-!       The tangent-linear solar term, if used, is
+!       the tangent-linear solar term, if used, is
 !
-!         R_down_TL = R_down_TL + ( solar_irradiance * solar_tau_TL * COS(solar_theta) )
+!         r_down_tl = r_down_tl + ( solar_irradiance * solar_tau_tl * cos(solar_theta) )
 !
 !       with its adjoint being,
 !
-!         solar_tau_AD = solar_tau_AD + ( solar_irradiance * COS(solar_theta) * R_down_AD )
+!         solar_tau_ad = solar_tau_ad + ( solar_irradiance * cos(solar_theta) * r_down_ad )
 !
-!       The tangent-linear surface layer contribution to the downwelling flux
+!       the tangent-linear surface layer contribution to the downwelling flux
 !       is calculated separately,
 !
-!         R_down_TL = R_down_TL + ( B(K) * ( -flux_tau_TL(K) ) ) + ( B_TL(K) * ( 1 - flux_tau(K) ) )
+!         r_down_tl = r_down_tl + ( b(k) * ( -flux_tau_tl(k) ) ) + ( b_tl(k) * ( 1 - flux_tau(k) ) )
 !         
 !       and its component adjoints are,
 !
-!         B_AD(K)        = B_AD(K) + ( 1 - flux_tau(K) ) * R_down_AD
-!         flux_tau_AD(K) = flux_tau_AD(K) - ( B(K) * R_down_AD )
-!         T_AD(K)        = planck_AD(T(K),B_AD(K))
-!         B_AD(K)        = 0.0
+!         b_ad(k)        = b_ad(k) + ( 1 - flux_tau(k) ) * r_down_ad
+!         flux_tau_ad(k) = flux_tau_ad(k) - ( b(k) * r_down_ad )
+!         t_ad(k)        = planck_ad(t(k),b_ad(k))
+!         b_ad(k)        = 0.0
 !
-!       As with the upwelling tangent-linear summation, the downwelling is
+!       as with the upwelling tangent-linear summation, the downwelling is
 !       given by,
 !
-!                                  __K-1
+!                                  __k-1
 !                                 \
-!         R_down_TL = R_down_TL +  >  ( B(k) * dflux_tau_TL(k) ) + ( B_TL(k) * dflux_tau(k) )
+!         r_down_tl = r_down_tl +  >  ( b(k) * dflux_tau_tl(k) ) + ( b_tl(k) * dflux_tau(k) )
 !                                 /__
 !                                    k=1
 !
-!       The adjoint of the components are,
+!       the adjoint of the components are,
 !
-!         B_AD(k)          = B_AD(k ) + ( dflux_tau(k) * R_down_AD )
-!         flux_tau_AD(k)   = flux_tau_AD(k)   - ( B(k) * R_down_AD )
-!         flux_tau_AD(k-1) = flux_tau_AD(k-1) + ( B(k) * R_down_AD )
-!         T_AD(k)          = planck_AD(T(k),B_AD(k))
-!         B_AD(k)          = 0.0
+!         b_ad(k)          = b_ad(k ) + ( dflux_tau(k) * r_down_ad )
+!         flux_tau_ad(k)   = flux_tau_ad(k)   - ( b(k) * r_down_ad )
+!         flux_tau_ad(k-1) = flux_tau_ad(k-1) + ( b(k) * r_down_ad )
+!         t_ad(k)          = planck_ad(t(k),b_ad(k))
+!         b_ad(k)          = 0.0
 !
-!       The final step is to determine the adjoints of the cosmic background
+!       the final step is to determine the adjoints of the cosmic background
 !       tangent-linear term,
 !
-!         R_down_TL = CBR * flux_tau_TL(1)
+!         r_down_tl = cbr * flux_tau_tl(1)
 !
 !       which is
 !
-!         flux_tau_AD(1) = flux_tau_AD(1) + ( CBR * R_down_AD )
-!         R_down_AD      = 0.0
+!         flux_tau_ad(1) = flux_tau_ad(1) + ( cbr * r_down_ad )
+!         r_down_ad      = 0.0
 !
-!S-      
+!s-      
 !--------------------------------------------------------------------------------
 
 
-  SUBROUTINE compute_radiance_AD( &
-                                  ! -- Forward inputs
-                                  temperature,               &  ! Input, K
+  subroutine compute_radiance_ad( &
+                                  ! -- forward inputs
+                                  temperature,               &  ! input, k
 
-                                  surface_temperature,       &  ! Input, scalar
-                                  surface_emissivity,        &  ! Input, scalar
-                                  surface_reflectivity,      &  ! Input, scalar
+                                  surface_temperature,       &  ! input, scalar
+                                  surface_emissivity,        &  ! input, scalar
+                                  surface_reflectivity,      &  ! input, scalar
 
-                                  tau,                       &  ! Input, K
-                                  flux_tau,                  &  ! Input, K
-                                  solar_tau,                 &  ! Input, scalar
+                                  tau,                       &  ! input, k
+                                  flux_tau,                  &  ! input, k
+                                  solar_tau,                 &  ! input, scalar
 
-                                  layer_radiance,            &  ! Input, K
-                                  downwelling_radiance,      &  ! Input, scalar
-                                  upwelling_radiance,        &  ! Input, scalar
+                                  layer_radiance,            &  ! input, k
+                                  downwelling_radiance,      &  ! input, scalar
+                                  upwelling_radiance,        &  ! input, scalar
 
-                                  ! -- Adjoint inputs
-                                  layer_radiance_AD,         &  ! In/Output, K
-                                  downwelling_radiance_AD,   &  ! In/Output, scalar
-                                  upwelling_radiance_AD,     &  ! In/Output, scalar
+                                  ! -- adjoint inputs
+                                  layer_radiance_ad,         &  ! in/output, k
+                                  downwelling_radiance_ad,   &  ! in/output, scalar
+                                  upwelling_radiance_ad,     &  ! in/output, scalar
 
-                                  brightness_temperature_AD, &  ! In/Output, scalar
+                                  brightness_temperature_ad, &  ! in/output, scalar
 
-                                  ! -- Other inputs
-                                  secant_solar_angle,        &  ! Input, scalar
-                                  valid_solar,               &  ! Input, scalar
-                                  channel_index,             &  ! Input, scalar
+                                  ! -- other inputs
+                                  secant_solar_angle,        &  ! input, scalar
+                                  valid_solar,               &  ! input, scalar
+                                  channel_index,             &  ! input, scalar
 
-                                  ! -- Adjoint outputs
-                                  temperature_AD,            &  ! In/Output, K
+                                  ! -- adjoint outputs
+                                  temperature_ad,            &  ! in/output, k
 
-                                  surface_temperature_AD,    &  ! In/Output, scalar
-                                  surface_emissivity_AD,     &  ! In/Output, scalar
-                                  surface_reflectivity_AD,   &  ! In/Output, scalar
+                                  surface_temperature_ad,    &  ! in/output, scalar
+                                  surface_emissivity_ad,     &  ! in/output, scalar
+                                  surface_reflectivity_ad,   &  ! in/output, scalar
 
-                                  tau_AD,                    &  ! In/Output, K
-                                  flux_tau_AD,               &  ! In/Output, K
-                                  solar_tau_AD               )  ! In/Output, scalar
+                                  tau_ad,                    &  ! in/output, k
+                                  flux_tau_ad,               &  ! in/output, k
+                                  solar_tau_ad               )  ! in/output, scalar
 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )     :: temperature
+    ! -- forward input
+    real( fp_kind ), dimension( : ), intent( in )     :: temperature
 
-    REAL( fp_kind ),                 INTENT( IN )     :: surface_temperature
-    REAL( fp_kind ),                 INTENT( IN )     :: surface_emissivity
-    REAL( fp_kind ),                 INTENT( IN )     :: surface_reflectivity
+    real( fp_kind ),                 intent( in )     :: surface_temperature
+    real( fp_kind ),                 intent( in )     :: surface_emissivity
+    real( fp_kind ),                 intent( in )     :: surface_reflectivity
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )     :: tau
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )     :: flux_tau
-    REAL( fp_kind ),                 INTENT( IN )     :: solar_tau
+    real( fp_kind ), dimension( : ), intent( in )     :: tau
+    real( fp_kind ), dimension( : ), intent( in )     :: flux_tau
+    real( fp_kind ),                 intent( in )     :: solar_tau
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN )     :: layer_radiance
-    REAL( fp_kind ),                 INTENT( IN )     :: downwelling_radiance
-    REAL( fp_kind ),                 INTENT( IN )     :: upwelling_radiance
+    real( fp_kind ), dimension( : ), intent( in )     :: layer_radiance
+    real( fp_kind ),                 intent( in )     :: downwelling_radiance
+    real( fp_kind ),                 intent( in )     :: upwelling_radiance
 
-    ! -- Adjoint inputs
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN OUT ) :: layer_radiance_AD
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: downwelling_radiance_AD
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: upwelling_radiance_AD
+    ! -- adjoint inputs
+    real( fp_kind ), dimension( : ), intent( in out ) :: layer_radiance_ad
+    real( fp_kind ),                 intent( in out ) :: downwelling_radiance_ad
+    real( fp_kind ),                 intent( in out ) :: upwelling_radiance_ad
 
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: brightness_temperature_AD
+    real( fp_kind ),                 intent( in out ) :: brightness_temperature_ad
 
-    ! -- Other input
-    REAL( fp_kind ),                 INTENT( IN )     :: secant_solar_angle
-    INTEGER,                         INTENT( IN )     :: valid_solar
-    INTEGER,                         INTENT( IN )     :: channel_index
+    ! -- other input
+    real( fp_kind ),                 intent( in )     :: secant_solar_angle
+    integer,                         intent( in )     :: valid_solar
+    integer,                         intent( in )     :: channel_index
 
-    ! -- Adjoint outputs
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN OUT ) :: temperature_AD
+    ! -- adjoint outputs
+    real( fp_kind ), dimension( : ), intent( in out ) :: temperature_ad
 
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: surface_temperature_AD
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: surface_emissivity_AD
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: surface_reflectivity_AD
+    real( fp_kind ),                 intent( in out ) :: surface_temperature_ad
+    real( fp_kind ),                 intent( in out ) :: surface_emissivity_ad
+    real( fp_kind ),                 intent( in out ) :: surface_reflectivity_ad
 
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN OUT ) :: tau_AD
-    REAL( fp_kind ), DIMENSION( : ), INTENT( IN OUT ) :: flux_tau_AD
-    REAL( fp_kind ),                 INTENT( IN OUT ) :: solar_tau_AD
+    real( fp_kind ), dimension( : ), intent( in out ) :: tau_ad
+    real( fp_kind ), dimension( : ), intent( in out ) :: flux_tau_ad
+    real( fp_kind ),                 intent( in out ) :: solar_tau_ad
 
 
  
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_RADIANCE_AD'
+    character( * ), parameter :: routine_name = 'compute_radiance_ad'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k, n_layers
-    INTEGER :: l
+    integer :: k, n_layers
+    integer :: l
 
-    REAL( fp_kind ) :: surface_B
-    REAL( fp_kind ) :: surface_B_AD
+    real( fp_kind ) :: surface_b
+    real( fp_kind ) :: surface_b_ad
 
-    REAL( fp_kind ) :: B_ur_AD
-    REAL( fp_kind ) :: B_dr_AD
+    real( fp_kind ) :: b_ur_ad
+    real( fp_kind ) :: b_dr_ad
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC SIZE
+    intrinsic size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Determine array dimensions --                       #
+    !#                   -- determine array dimensions --                       #
     !#--------------------------------------------------------------------------#
 
-    n_layers = SIZE( temperature )
+    n_layers = size( temperature )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#         -- Calculate the adjoint of the brightness temperature --        #
+    !#         -- calculate the adjoint of the brightness temperature --        #
     !#--------------------------------------------------------------------------#
 
-    ! -- Assign the channel index to a short name
+    ! -- assign the channel index to a short name
     l = channel_index
 
     ! -- upwelling radiance adjoint
-    CALL sensor_planck_temperature_AD( l,                         &  ! Input
-                                       upwelling_radiance,        &  ! Input
-                                       brightness_temperature_AD, &  ! Input
-                                       upwelling_radiance_AD      )  ! In/Output
-    brightness_temperature_AD = ZERO
+    call sensor_planck_temperature_ad( l,                         &  ! input
+                                       upwelling_radiance,        &  ! input
+                                       brightness_temperature_ad, &  ! input
+                                       upwelling_radiance_ad      )  ! in/output
+    brightness_temperature_ad = zero
 
 
 
     !#--------------------------------------------------------------------------#
-    !#      -- Calculate the adjoints of the upwelling radiance term --         #
+    !#      -- calculate the adjoints of the upwelling radiance term --         #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------
-    ! Top layer (closest to TOA)
+    ! top layer (closest to toa)
     ! --------------------------
 
-    ! -- Adjoint of top layer radiance
-    layer_radiance_AD( 1 ) = layer_radiance_AD( 1 ) + ( ( ONE - tau( 1 ) ) * upwelling_radiance_AD )
+    ! -- adjoint of top layer radiance
+    layer_radiance_ad( 1 ) = layer_radiance_ad( 1 ) + ( ( one - tau( 1 ) ) * upwelling_radiance_ad )
 
-    ! -- Adjoint of top layer dtau
-    tau_AD( 1 ) = tau_AD( 1 ) + ( -layer_radiance( 1 ) * upwelling_radiance_AD )
-    ! NOTE: No upwelling_radiance_AD = 0 here since
+    ! -- adjoint of top layer dtau
+    tau_ad( 1 ) = tau_ad( 1 ) + ( -layer_radiance( 1 ) * upwelling_radiance_ad )
+    ! note: no upwelling_radiance_ad = 0 here since
     !       upwelling_radiance_tl = upwelling_radiance_tl + (...)
 
-    ! -- Adjoint of top layer temperature
-    CALL sensor_planck_radiance_AD( l,                    &  ! Input
-                                    temperature(1),       &  ! Input
-                                    layer_radiance_AD(1), &  ! Input
-                                    temperature_AD(1)     )  ! In/Output
-    layer_radiance_AD( 1 ) = ZERO
+    ! -- adjoint of top layer temperature
+    call sensor_planck_radiance_ad( l,                    &  ! input
+                                    temperature(1),       &  ! input
+                                    layer_radiance_ad(1), &  ! input
+                                    temperature_ad(1)     )  ! in/output
+    layer_radiance_ad( 1 ) = zero
 
 
     ! --------------------------------
-    ! Loop over layers from TOA-1->SFC
+    ! loop over layers from toa-1->sfc
     ! --------------------------------
 
-    k_down_layer_loop: DO k = 2, n_layers
+    k_down_layer_loop: do k = 2, n_layers
 
-      ! -- Adjoint of layer radiance
-      layer_radiance_AD( k ) = layer_radiance_AD( k ) + &
-                               ( ( tau( k-1 ) - tau( k ) ) * upwelling_radiance_AD )
+      ! -- adjoint of layer radiance
+      layer_radiance_ad( k ) = layer_radiance_ad( k ) + &
+                               ( ( tau( k-1 ) - tau( k ) ) * upwelling_radiance_ad )
 
-      ! -- Adjoint of dtau
-      B_ur_AD = layer_radiance( k ) * upwelling_radiance_AD
-      tau_AD( k )   = tau_AD(k)     - B_ur_AD
-      tau_AD( k-1 ) = tau_AD( k-1 ) + B_ur_AD
-      ! NOTE: No upwelling_radiance_AD = 0 here since
+      ! -- adjoint of dtau
+      b_ur_ad = layer_radiance( k ) * upwelling_radiance_ad
+      tau_ad( k )   = tau_ad(k)     - b_ur_ad
+      tau_ad( k-1 ) = tau_ad( k-1 ) + b_ur_ad
+      ! note: no upwelling_radiance_ad = 0 here since
       !       upwelling_radiance_tl = upwelling_radiance_tl + (...)
 
-      ! -- Adjoint of layer temperature
-      CALL sensor_planck_radiance_AD( l,                      &  ! Input
-                                      temperature( k ),       &  ! Input
-                                      layer_radiance_AD( k ), &  ! Input
-                                      temperature_AD( k )     )  ! In/Output
-      layer_radiance_AD( k ) = ZERO
+      ! -- adjoint of layer temperature
+      call sensor_planck_radiance_ad( l,                      &  ! input
+                                      temperature( k ),       &  ! input
+                                      layer_radiance_ad( k ), &  ! input
+                                      temperature_ad( k )     )  ! in/output
+      layer_radiance_ad( k ) = zero
  
-    END DO k_down_layer_loop
+    end do k_down_layer_loop
 
 
 
     !#--------------------------------------------------------------------------#
-    !#     -- Calculate the adjoints of the surface tangent-linear terms --     #
+    !#     -- calculate the adjoints of the surface tangent-linear terms --     #
     !#--------------------------------------------------------------------------#
 
-    ! -- Recalculate surface Planck radiance
-    CALL sensor_planck_radiance( l,                   &  ! Input
-                                 surface_temperature, &  ! Input
-                                 surface_B            )  ! Output
+    ! -- recalculate surface planck radiance
+    call sensor_planck_radiance( l,                   &  ! input
+                                 surface_temperature, &  ! input
+                                 surface_b            )  ! output
 
 
-    ! -- Surface property adjoints
-    surface_reflectivity_AD = surface_reflectivity_AD + &
-                              ( tau( n_layers ) * downwelling_radiance * upwelling_radiance_AD )
+    ! -- surface property adjoints
+    surface_reflectivity_ad = surface_reflectivity_ad + &
+                              ( tau( n_layers ) * downwelling_radiance * upwelling_radiance_ad )
  
-    surface_emissivity_AD   = surface_emissivity_AD + &
-                              ( tau( n_layers ) * surface_B * upwelling_radiance_AD )
+    surface_emissivity_ad   = surface_emissivity_ad + &
+                              ( tau( n_layers ) * surface_b * upwelling_radiance_ad )
  
-    ! -- Total transmittance adjoint
-    tau_AD( n_layers ) = tau_AD( n_layers ) + &
-                         ( ( ( surface_emissivity   * surface_B            ) + &
-                             ( surface_reflectivity * downwelling_radiance ) ) * upwelling_radiance_AD )
+    ! -- total transmittance adjoint
+    tau_ad( n_layers ) = tau_ad( n_layers ) + &
+                         ( ( ( surface_emissivity   * surface_b            ) + &
+                             ( surface_reflectivity * downwelling_radiance ) ) * upwelling_radiance_ad )
  
-    ! -- Downweling radiance adjoint
-    downwelling_radiance_AD = downwelling_radiance_AD + &
-                              ( tau( n_layers ) * surface_reflectivity * upwelling_radiance_AD )
+    ! -- downweling radiance adjoint
+    downwelling_radiance_ad = downwelling_radiance_ad + &
+                              ( tau( n_layers ) * surface_reflectivity * upwelling_radiance_ad )
  
-    ! -- Surface emission adjoint. This quantity
+    ! -- surface emission adjoint. this quantity
     ! -- is initialised each call.
-    surface_B_AD = ( tau( n_layers ) * surface_emissivity * upwelling_radiance_AD )
+    surface_b_ad = ( tau( n_layers ) * surface_emissivity * upwelling_radiance_ad )
 
-    ! -- Set upwelling adjoint to zero.
-    ! --  No more impact on gradient vector
-    upwelling_radiance_AD = ZERO
+    ! -- set upwelling adjoint to zero.
+    ! --  no more impact on gradient vector
+    upwelling_radiance_ad = zero
 
-    ! -- Surface temperature adjoint
-    CALL sensor_planck_radiance_AD( l,                     & ! Input
-                                    surface_temperature,   & ! Input
-                                    surface_B_AD,          & ! Input
-                                    surface_temperature_AD ) ! In/Output
-    ! -- No need to zero surface_B_AD as it is initialised each call.
+    ! -- surface temperature adjoint
+    call sensor_planck_radiance_ad( l,                     & ! input
+                                    surface_temperature,   & ! input
+                                    surface_b_ad,          & ! input
+                                    surface_temperature_ad ) ! in/output
+    ! -- no need to zero surface_b_ad as it is initialised each call.
   
 
 
     !#--------------------------------------------------------------------------#
-    !#      -- Calculate the adjoints of the solar transmittance term --        #
+    !#      -- calculate the adjoints of the solar transmittance term --        #
     !#--------------------------------------------------------------------------#
 
-    solar_term: IF ( valid_solar == 1 ) THEN
+    solar_term: if ( valid_solar == 1 ) then
 
-      solar_tau_AD = solar_tau_AD + &
-                     ( ( solar_irradiance( l ) / secant_solar_angle ) * downwelling_radiance_AD )
+      solar_tau_ad = solar_tau_ad + &
+                     ( ( solar_irradiance( l ) / secant_solar_angle ) * downwelling_radiance_ad )
 
-      ! NOTE: No downwelling_radiance_AD = 0 here since
-      !       downwelling_radiance_TL = downwelling_radiance_TL + (TL solar term)
+      ! note: no downwelling_radiance_ad = 0 here since
+      !       downwelling_radiance_tl = downwelling_radiance_tl + (tl solar term)
 
-    END IF solar_term
+    end if solar_term
 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#        -- Calculate the adjoints of the downwelling flux term --         #
+    !#        -- calculate the adjoints of the downwelling flux term --         #
     !#--------------------------------------------------------------------------#
 
     ! -----------------------------
-    ! Bottom layer (closest to SFC)
+    ! bottom layer (closest to sfc)
     ! -----------------------------
 
-    ! -- Adjoint of bottom layer radiance
-    layer_radiance_AD( n_layers ) = layer_radiance_AD( n_layers ) + &
-                                    ( ( ONE - flux_tau( n_layers ) ) * downwelling_radiance_AD )
+    ! -- adjoint of bottom layer radiance
+    layer_radiance_ad( n_layers ) = layer_radiance_ad( n_layers ) + &
+                                    ( ( one - flux_tau( n_layers ) ) * downwelling_radiance_ad )
 
-    ! -- Adjoint of flux transmittance
-    flux_tau_AD( n_layers ) = flux_tau_AD( n_layers ) - &
-                              ( layer_radiance( n_layers ) * downwelling_radiance_AD )
-    ! NOTE: No downwelling_radiance_AD = 0 here since
-    !       downwelling_radiance_tl = downwelling_radiance_tl + (TL flux term)
+    ! -- adjoint of flux transmittance
+    flux_tau_ad( n_layers ) = flux_tau_ad( n_layers ) - &
+                              ( layer_radiance( n_layers ) * downwelling_radiance_ad )
+    ! note: no downwelling_radiance_ad = 0 here since
+    !       downwelling_radiance_tl = downwelling_radiance_tl + (tl flux term)
  
-    ! -- Adjoint of layer temperature
-    CALL sensor_planck_radiance_AD( l,                             &  ! Input
-                                    temperature( n_layers ),       &  ! Input
-                                    layer_radiance_AD( n_layers ), &  ! Input
-                                    temperature_AD( n_layers )     )  ! In/Output
-    layer_radiance_AD( n_layers ) = ZERO
+    ! -- adjoint of layer temperature
+    call sensor_planck_radiance_ad( l,                             &  ! input
+                                    temperature( n_layers ),       &  ! input
+                                    layer_radiance_ad( n_layers ), &  ! input
+                                    temperature_ad( n_layers )     )  ! in/output
+    layer_radiance_ad( n_layers ) = zero
 
 
     ! --------------------------------
-    ! Loop over layers from SFC-1->TOA
+    ! loop over layers from sfc-1->toa
     ! --------------------------------
 
-    k_up_layer_loop: DO k = n_layers - 1, 1, -1
+    k_up_layer_loop: do k = n_layers - 1, 1, -1
 
-      ! -- Adjoint of layer radiance
-      layer_radiance_AD( k ) = layer_radiance_AD( k ) + &
-                               ( ( flux_tau( k+1 ) - flux_tau( k ) ) * downwelling_radiance_AD )
+      ! -- adjoint of layer radiance
+      layer_radiance_ad( k ) = layer_radiance_ad( k ) + &
+                               ( ( flux_tau( k+1 ) - flux_tau( k ) ) * downwelling_radiance_ad )
 
-      ! -- Adjoint of dtau
-      B_dr_AD = layer_radiance( k ) * downwelling_radiance_AD
-      flux_tau_AD( k )   = flux_tau_AD( k )   - B_dr_AD
-      flux_tau_AD( k+1 ) = flux_tau_AD( k+1 ) + B_dr_AD
-      ! NOTE: No downwelling_radiance_AD = 0 here since
+      ! -- adjoint of dtau
+      b_dr_ad = layer_radiance( k ) * downwelling_radiance_ad
+      flux_tau_ad( k )   = flux_tau_ad( k )   - b_dr_ad
+      flux_tau_ad( k+1 ) = flux_tau_ad( k+1 ) + b_dr_ad
+      ! note: no downwelling_radiance_ad = 0 here since
       !       downwelling_radiance_tl = downwelling_radiance_tl + (...)
 
-      ! -- Adjoint of layer temperature
-      CALL sensor_planck_radiance_AD( l,                 &  ! Input
-                                 temperature( k ),       &  ! Input
-                                 layer_radiance_AD( k ), &  ! Input
-                                 temperature_AD( k )     )  ! In/Output
-      layer_radiance_AD( k ) = ZERO
+      ! -- adjoint of layer temperature
+      call sensor_planck_radiance_ad( l,                 &  ! input
+                                 temperature( k ),       &  ! input
+                                 layer_radiance_ad( k ), &  ! input
+                                 temperature_ad( k )     )  ! in/output
+      layer_radiance_ad( k ) = zero
 
-    END DO k_up_layer_loop
+    end do k_up_layer_loop
 
 
     ! --------------------------------------------
-    ! Background term. Note that the emissivity of
+    ! background term. note that the emissivity of
     ! space is implicitly assumed to 1.0.
     ! --------------------------------------------
 
-    flux_tau_AD( 1 ) = flux_tau_AD( 1 ) + &
-                       ( cosmic_background_radiance( l ) * downwelling_radiance_AD )
+    flux_tau_ad( 1 ) = flux_tau_ad( 1 ) + &
+                       ( cosmic_background_radiance( l ) * downwelling_radiance_ad )
 
-    downwelling_radiance_AD = ZERO
+    downwelling_radiance_ad = zero
 
-  END SUBROUTINE compute_radiance_AD
+  end subroutine compute_radiance_ad
 
-END MODULE radiance
+end module radiance
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 2.4  2001/08/16 17:11:57  paulv
-! - Updated documentation
+! $log$
+! revision 2.4  2001/08/16 17:11:57  paulv
+! - updated documentation
 !
-! Revision 2.3  2001/08/08 20:02:12  paulv
-! - Removed sensor Planck function routines and placed them in their own
-!   module, SENSOR_PLANCK_ROUTINES. Some routines were required for other
-!   uses so their PRIVATE subprogram status wasn't amenable to code-sharing.
-! - Updated header documentation.
+! revision 2.3  2001/08/08 20:02:12  paulv
+! - removed sensor planck function routines and placed them in their own
+!   module, sensor_planck_routines. some routines were required for other
+!   uses so their private subprogram status wasn't amenable to code-sharing.
+! - updated header documentation.
 !
-! Revision 2.2  2001/08/01 16:58:32  paulv
-! - Corrected bug in COMPUTE_RADIANCE() function. The initialisation
+! revision 2.2  2001/08/01 16:58:32  paulv
+! - corrected bug in compute_radiance() function. the initialisation
 !   statement of the downwelling radiance was,
 !      downwelling_radiance = cosmic_background_radiance( l )
 !   and has been changed to,
 !      downwelling_radiance = cosmic_background_radiance( l ) * flux_tau( 1 )
-!   i.e. the transmission of the space emission term to the surface. This
+!   i.e. the transmission of the space emission term to the surface. this
 !   was a holdover from earlier versions of the functions when the transmittances
 !   were calculated and passed as *layer* rather than layer-to-surface
 !   transmittances.
-! - Removed initialisation and zeroing of the adjoint of the surface emissioni
-!   term SURFACE_B_AD. This is used in only one place so there is no need to
+! - removed initialisation and zeroing of the adjoint of the surface emissioni
+!   term surface_b_ad. this is used in only one place so there is no need to
 !   do,
-!     surface_B_AD = ZERO
-!     surface_B_AD = surface_B_AD + &
-!                    ( tau( n_layers ) * surface_emissivity * upwelling_radiance_AD )
-!     ....use surface_B_AD...
-!     surface_B_AD = ZERO
+!     surface_b_ad = zero
+!     surface_b_ad = surface_b_ad + &
+!                    ( tau( n_layers ) * surface_emissivity * upwelling_radiance_ad )
+!     ....use surface_b_ad...
+!     surface_b_ad = zero
 !   when,
-!     surface_B_AD = ( tau( n_layers ) * surface_emissivity * upwelling_radiance_AD )
+!     surface_b_ad = ( tau( n_layers ) * surface_emissivity * upwelling_radiance_ad )
 !   will do.
-! - Updated documentation.
+! - updated documentation.
 !
-! Revision 2.1  2001/05/29 18:05:29  paulv
-! - All tangent-linear and adjoint routines included.
-! - No more optional arguments of downwelling flux and surface reflectivity -
+! revision 2.1  2001/05/29 18:05:29  paulv
+! - all tangent-linear and adjoint routines included.
+! - no more optional arguments of downwelling flux and surface reflectivity -
 !   they are expected.
-! - Altered the method of calculating the layer contributions. Changed code
+! - altered the method of calculating the layer contributions. changed code
 !   from:
-!     layer_radiance(k) = (1-tau)*B(T) + tau*layer_radiance(k-1)
+!     layer_radiance(k) = (1-tau)*b(t) + tau*layer_radiance(k-1)
 !   to:
-!     layer_radiance(k) = B(T) * dtau
+!     layer_radiance(k) = b(t) * dtau
 !
-! Revision 1.5  2001/01/24 20:14:21  paulv
-! - Latest test versions.
+! revision 1.5  2001/01/24 20:14:21  paulv
+! - latest test versions.
 !
-! Revision 1.4  2000/11/09 20:46:07  paulv
-! - Added solar term.
-! - Downwelling flux transmittance term is now an optional argument.
-!   If not specified, the layer radiances are calculated during the
+! revision 1.4  2000/11/09 20:46:07  paulv
+! - added solar term.
+! - downwelling flux transmittance term is now an optional argument.
+!   if not specified, the layer radiances are calculated during the
 !   upwelling radiance integration.
-! - Surface reflectivity is an optional argument. If not specified the
+! - surface reflectivity is an optional argument. if not specified the
 !   surface emissivity is used to generate an isotropic reflectivity.
 !
-! Revision 1.3  2000/08/31 19:36:33  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.3  2000/08/31 19:36:33  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.2  2000/08/24 15:48:34  paulv
-! - Replaced "regular" reflectivity for reflected downwelling thermal with
-!   the isotropic reflectivity in the COMPUTE_RADIANCE subprogram.
-! - Updated module and subprogram documentation.
+! revision 1.2  2000/08/24 15:48:34  paulv
+! - replaced "regular" reflectivity for reflected downwelling thermal with
+!   the isotropic reflectivity in the compute_radiance subprogram.
+! - updated module and subprogram documentation.
 !
-! Revision 1.1  2000/08/21 20:59:34  paulv
-! Initial checkin.
+! revision 1.1  2000/08/21 20:59:34  paulv
+! initial checkin.
 !
 !
 !

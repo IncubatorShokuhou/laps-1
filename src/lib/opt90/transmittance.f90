@@ -1,392 +1,392 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       transmittance
 !
-! PURPOSE:
-!       RT model transmittance module
+! purpose:
+!       rt model transmittance module
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE transmittance
+! calling sequence:
+!       use transmittance
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       type_kinds:                 Module containing data type kind definitions.
+! modules:
+!       type_kinds:                 module containing data type kind definitions.
 !
-!       parameters:                 Module containing parameter definitions for the
-!                                   RT model.
+!       parameters:                 module containing parameter definitions for the
+!                                   rt model.
 !
-!       absorber_space:             Module containing the RT model absorber space
+!       absorber_space:             module containing the rt model absorber space
 !                                   definitions.
 !
-!       transmitance_coefficients:  Module containing the RT model absorber space
+!       transmitance_coefficients:  module containing the rt model absorber space
 !                                   definitions and transmittance coefficients.
 !
-!       predictors:                 Module containing the predictor calculation
+!       predictors:                 module containing the predictor calculation
 !                                   routines and data.
 !
-! CONTAINS:
-!       compute_transmittance:      PUBLIC subroutine to calculate the layer
+! contains:
+!       compute_transmittance:      public subroutine to calculate the layer
 !                                   transmittances of an input atmospheric profile.
 !
-!       compute_transmittance_TL:   PUBLIC subroutine to calculate the tangent-linear
+!       compute_transmittance_tl:   public subroutine to calculate the tangent-linear
 !                                   layer transmittances of an input atmospheric profile.
 !
-!       compute_transmittance_AD:   PUBLIC subroutine to calculate the layer transmittance
+!       compute_transmittance_ad:   public subroutine to calculate the layer transmittance
 !                                   adjoints of an input atmospheric profile.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS/SSEC 11-Jul-2000
+! creation history:
+!       written by:     paul van delst, cimss/ssec 11-jul-2000
 !                       paul.vandelst@ssec.wisc.edu
 !
-!       Adapted from code written by: Thomas J.Kleespies
-!                                     NOAA/NESDIS/ORA
+!       adapted from code written by: thomas j.kleespies
+!                                     noaa/nesdis/ora
 !                                     thomas.j.kleespies@noaa.gov
 !
 !                                     and
 !
-!                                     John Derber
-!                                     NOAA/NCEP/EMC
+!                                     john derber
+!                                     noaa/ncep/emc
 !                                     john.derber@noaa.gov
 !
 !
-!  Copyright (C) 2000 Thomas Kleespies, John Derber, Paul van Delst
+!  copyright (c) 2000 thomas kleespies, john derber, paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE transmittance
+module transmittance
 
   ! ------------
-  ! Module usage
+  ! module usage
   ! ------------
 
-  USE type_kinds, ONLY : fp_kind
-  USE parameters
-  USE transmittance_coefficients
+  use type_kinds, only : fp_kind
+  use parameters
+  use transmittance_coefficients
 
 
   ! -----------------------
-  ! Disable implicit typing
+  ! disable implicit typing
   ! -----------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------
-  ! Visibilities
+  ! visibilities
   ! ------------
 
-  PRIVATE
-  PUBLIC :: compute_transmittance
-  PUBLIC :: compute_transmittance_TL
-  PUBLIC :: compute_transmittance_AD
+  private
+  public :: compute_transmittance
+  public :: compute_transmittance_tl
+  public :: compute_transmittance_ad
 
 
-CONTAINS
+contains
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       compute_transmittance
 !
-! PURPOSE:
-!       PUBLIC subroutine to calculate the layer transmittances given an
+! purpose:
+!       public subroutine to calculate the layer transmittances given an
 !       input atmospheric profile.
 !
-! CALLING SEQUENCE:
-!       CALL compute_transmittance( absorber,      &   ! Input, 0:K x J
-!                                   predictor,     &   ! Input, I x K
-!                                   layer_index,   &   ! Input, K x J
-!                                   channel_index, &   ! Input, scalar
-!                                   direction,     &   ! Input, scalar
+! calling sequence:
+!       call compute_transmittance( absorber,      &   ! input, 0:k x j
+!                                   predictor,     &   ! input, i x k
+!                                   layer_index,   &   ! input, k x j
+!                                   channel_index, &   ! input, scalar
+!                                   direction,     &   ! input, scalar
 !
-!                                   tau            )   ! Output, K
+!                                   tau            )   ! output, k
 !
-! INPUT ARGUMENTS:
-!       absorber:         Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K x J
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       absorber:         profile level integrated absorber amount array.
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k x j
+!                         attributes: intent( in )
 !
-!       predictor:        Profile LAYER predictors array.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( IN )
+!       predictor:        profile layer predictors array.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( in )
 !
-!       layer_index:      Index array array associating the input absorber
+!       layer_index:      index array array associating the input absorber
 !                         layer amount to the bracketing absorber space levels.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  K x J
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  k x j
+!                         attributes: intent( in )
 !
-!       channel_index:    Channel index id. This is a unique index associated
+!       channel_index:    channel index id. this is a unique index associated
 !                         with a (supported) sensor channel.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-!       direction:        Direction identifier.
-!                         If = 0, calculate layer->surface transmittances (i.e. down)
+!       direction:        direction identifier.
+!                         if = 0, calculate layer->surface transmittances (i.e. down)
 !                            = 1, calculate layer->space   transmittances (i.e. up)
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!        None.
+! optional input arguments:
+!        none.
 !
-! OUTPUT ARGUMENTS:
-!        tau:             Layer to boundary transmittances for the input atmosphere
+! output arguments:
+!        tau:             layer to boundary transmittances for the input atmosphere
 !                         and channel.
-!                         UNITS:      None
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( OUT )
+!                         units:      none
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The layer absorption coefficient is calculated using,
+!       the layer absorption coefficient is calculated using,
 !
-!                                   __ I
+!                                   __ i
 !                                  \   _
-!         abs_coeff(k) = b(0,k,l) + >  b(i,k,l).X(k,l)
+!         abs_coeff(k) = b(0,k,l) + >  b(i,k,l).x(k,l)
 !                                  /__
 !                                     i=1
 !             _
 !       where b == interpolated coefficients
-!             X == predictors
+!             x == predictors
 !             i == predictor index
 !             k == layer index
 !             l == channel index
 !
-!       The input coefficients are linearly interpolated in absorber space
+!       the input coefficients are linearly interpolated in absorber space
 !       from the precalculated absorber levels to that defined by the
 !       input profile.
 !
-!       The absorber layer optical depth is then calculated using,
+!       the absorber layer optical depth is then calculated using,
 !
-!         optical_depth(k) = abs_coeff(k) * dA(k)
+!         optical_depth(k) = abs_coeff(k) * da(k)
 !
-!       where dA == layer absorber difference.
+!       where da == layer absorber difference.
 !
-!       The layer transmittance is then calculated using,
+!       the layer transmittance is then calculated using,
 !
-!         tau(k) = EXP( -optical_depth(k) )
-!S-
+!         tau(k) = exp( -optical_depth(k) )
+!s-
 !------------------------------------------------------------------------------
 
-  SUBROUTINE compute_transmittance( absorber,      &   ! Input, 0:K x J
-                                    predictor,     &   ! Input, I x K
-                                    layer_index,   &   ! Input, K x J
-                                    channel_index, &   ! Input, scalar
-                                    direction,     &   ! Input, scalar, 0==down, 1==up
+  subroutine compute_transmittance( absorber,      &   ! input, 0:k x j
+                                    predictor,     &   ! input, i x k
+                                    layer_index,   &   ! input, k x j
+                                    channel_index, &   ! input, scalar
+                                    direction,     &   ! input, scalar, 0==down, 1==up
 
-                                    tau            )   ! Output, K
+                                    tau            )   ! output, k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )  :: absorber         ! Input, 0:K x J
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )  :: predictor        ! Input, I x K
-    INTEGER,         DIMENSION( :, : ),  INTENT( IN )  :: layer_index      ! Input, K x J
-    INTEGER,                             INTENT( IN )  :: channel_index    ! Input, scalar
-    INTEGER,                             INTENT( IN )  :: direction        ! Input, scalar, 0==down, 1==up
+    real( fp_kind ), dimension( 0:, : ), intent( in )  :: absorber         ! input, 0:k x j
+    real( fp_kind ), dimension( :, : ),  intent( in )  :: predictor        ! input, i x k
+    integer,         dimension( :, : ),  intent( in )  :: layer_index      ! input, k x j
+    integer,                             intent( in )  :: channel_index    ! input, scalar
+    integer,                             intent( in )  :: direction        ! input, scalar, 0==down, 1==up
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( OUT ) :: tau              ! Output, K
+    real( fp_kind ), dimension( : ),     intent( out ) :: tau              ! output, k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_TRANSMITTANCE'
+    character( * ), parameter :: routine_name = 'compute_transmittance'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: l
-    INTEGER :: k, k1, k2, dk, n_layers
-    INTEGER :: j, n_absorbers
-    INTEGER :: i, ip, n_predictors
+    integer :: l
+    integer :: k, k1, k2, dk, n_layers
+    integer :: j, n_absorbers
+    integer :: i, ip, n_predictors
 
-    REAL( fp_kind ) :: ave_absorber, d_absorber
-    REAL( fp_kind ) :: gradient, b, b1, b2
-    REAL( fp_kind ) :: absorption_coefficient
-    REAL( fp_kind ) :: total_od, od_tolerance
+    real( fp_kind ) :: ave_absorber, d_absorber
+    real( fp_kind ) :: gradient, b, b1, b2
+    real( fp_kind ) :: absorption_coefficient
+    real( fp_kind ) :: total_od, od_tolerance
 
-    REAL( fp_kind ), DIMENSION( SIZE( tau ) ) :: optical_depth
+    real( fp_kind ), dimension( size( tau ) ) :: optical_depth
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC EXP, &
-              PRESENT, &
-              SIZE
+    intrinsic exp, &
+              present, &
+              size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Determine array dimensions --                       #
+    !#                   -- determine array dimensions --                       #
     !#--------------------------------------------------------------------------#
 
-    ! -- Number of atmospheric layers and absorbers. The "-1"
+    ! -- number of atmospheric layers and absorbers. the "-1"
     ! -- for the layer assign is because absorber is based on
-    ! -- LEVELS.
-    n_layers    = SIZE( absorber, DIM = 1 ) - 1
-    n_absorbers = SIZE( absorber, DIM = 2 )
+    ! -- levels.
+    n_layers    = size( absorber, dim = 1 ) - 1
+    n_absorbers = size( absorber, dim = 2 )
 
-    ! -- Number of predictors *TO USE*. Currently this is
+    ! -- number of predictors *to use*. currently this is
     ! -- pretty much hardwired to 5 but it could change
-    ! -- in the future. This value is explicitly
-    ! -- checked as the TAU_COEFFICIENTS array contained
-    ! -- in the TRANSMITTANCE_COEFFICIENTS module is
+    ! -- in the future. this value is explicitly
+    ! -- checked as the tau_coefficients array contained
+    ! -- in the transmittance_coefficients module is
     ! -- allocated dynamically when initialising the 
     ! -- radiative transfer model.
  
-    ! -- The "-1" is used because the first element of the
+    ! -- the "-1" is used because the first element of the
     ! -- predictor index array is used to determine if there
     ! -- is *any* absorption for a particular absorber species.
-    n_predictors = SIZE( tau_coefficients, DIM = 1 ) - 1
+    n_predictors = size( tau_coefficients, dim = 1 ) - 1
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                -- Calculate the layer optical depths --                  #
+    !#                -- calculate the layer optical depths --                  #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------------------------
-    ! Assign the channel index to a short name
+    ! assign the channel index to a short name
     ! ----------------------------------------
 
     l = channel_index
 
 
     ! ---------------------------
-    ! Initilise the optical depth
+    ! initilise the optical depth
     ! ---------------------------
 
-    optical_depth( : ) = ZERO
+    optical_depth( : ) = zero
 
 
     ! -----------------------------------------------------
-    ! Loop over each absorber for optical depth calculation
+    ! loop over each absorber for optical depth calculation
     ! -----------------------------------------------------
 
-    j_absorber_loop: DO j = 1, n_absorbers
+    j_absorber_loop: do j = 1, n_absorbers
 
 
       ! -----------------------------------------
-      ! Check if there is any absorption for this
+      ! check if there is any absorption for this
       ! absorber/channel combination.
       !
-      ! This check is the reason why all channels
+      ! this check is the reason why all channels
       ! cannot be processed at once and why the
       ! layer loop is within the absorber loop.
       ! -----------------------------------------
 
-      IF ( predictor_index( 0, l, j ) == 0 ) CYCLE j_absorber_loop
+      if ( predictor_index( 0, l, j ) == 0 ) cycle j_absorber_loop
 
 
 
       !#------------------------------------------------------------------------#
-      !#                    -- Begin loop over layers --                        #
+      !#                    -- begin loop over layers --                        #
       !#------------------------------------------------------------------------#
 
-      k_layer_od_loop: DO k = 1, n_layers
+      k_layer_od_loop: do k = 1, n_layers
 
 
         ! -----------------------------------
-        ! Calculate the current layer average
+        ! calculate the current layer average
         ! absorber amount and difference
         ! -----------------------------------
 
-        ave_absorber = POINT_5 * ( absorber( k, j ) + absorber( k-1, j ) )
+        ave_absorber = point_5 * ( absorber( k, j ) + absorber( k-1, j ) )
         d_absorber   = absorber( k, j ) - absorber( k-1, j )
 
 
         ! -----------------------------------------------------------
-        ! To linearly interpolate the tau_coeffs to the actual user
+        ! to linearly interpolate the tau_coeffs to the actual user
         ! space absorber amount, need the gradient across the layer
         ! -----------------------------------------------------------
 
@@ -399,446 +399,446 @@ CONTAINS
 
 
         ! -------------------------------
-        ! Calculate absorption coeficient
+        ! calculate absorption coeficient
         ! -------------------------------
 
-        ! -- Offset term
+        ! -- offset term
         b1 = tau_coefficients( 0, k1, l, j )
         b2 = tau_coefficients( 0, k2, l, j )
         absorption_coefficient = b2 + ( gradient * ( b1 - b2 ) )
 
 
-        i_predictor_loop: DO i = 1, n_predictors
+        i_predictor_loop: do i = 1, n_predictors
 
-          ! -- Current predictor interpolated coefficient
+          ! -- current predictor interpolated coefficient
           b1 = tau_coefficients( i, k1, l, j )
           b2 = tau_coefficients( i, k2, l, j )
           b  = b2 + ( gradient * ( b1 - b2 ) )
 
-          !  - Sum current predictor's contribution
+          !  - sum current predictor's contribution
           ip = predictor_index( i, l, j )
           absorption_coefficient = absorption_coefficient + ( b * predictor( ip, k ) ) 
 
-        END DO i_predictor_loop
+        end do i_predictor_loop
 
 
-        ! -- **** IT WOULD BE NICE TO NOT NEED THIS AT ALL! ****
-        absorption_coefficient = MAX( absorption_coefficient, ZERO )
+        ! -- **** it would be nice to not need this at all! ****
+        absorption_coefficient = max( absorption_coefficient, zero )
 
 
         ! -----------------------
-        ! Calculate optical_depth
+        ! calculate optical_depth
         ! -----------------------
 
         optical_depth( k ) = optical_depth( k ) + &
                              ( absorption_coefficient * d_absorber )
 
 
-      END DO k_layer_od_loop
+      end do k_layer_od_loop
 
-    END DO j_absorber_loop
+    end do j_absorber_loop
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- Calculate the layer->boundary transmittances --             #
+    !#           -- calculate the layer->boundary transmittances --             #
     !#                                                                          #
-    !# This step involves another loop over layers. One *could* reverse the     #
+    !# this step involves another loop over layers. one *could* reverse the     #
     !# order of the j absorber loop and k layer od loop and calculate the tau   #
-    !# values outside the absorber loop. However, this would involve an IF test #
-    !# for every layer even if PREDICTOR_INDEX( 0, l ) == 0. I figured it is    #
+    !# values outside the absorber loop. however, this would involve an if test #
+    !# for every layer even if predictor_index( 0, l ) == 0. i figured it is    #
     !# better to skip the layer loop altogether if there is no absorption for   #
     !# a particular absorber, despite the need for an extra layer loop here to  #
     !# calculate the transmittance.                                             #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------
-    ! Determine loop indices
+    ! determine loop indices
     ! ----------------------
 
-    IF ( direction == UP ) THEN
-      ! -- Transmittance going up, e.g. UPWELLING. Layer 1 => TOA
+    if ( direction == up ) then
+      ! -- transmittance going up, e.g. upwelling. layer 1 => toa
       k1 = 1
       k2 = n_layers
       dk = 1
-    ELSE
-      ! -- Transmittance going down, e.g. DOWNWELLING FLUX, SOLAR. Layer N_LAYERS => SFC
+    else
+      ! -- transmittance going down, e.g. downwelling flux, solar. layer n_layers => sfc
       k1 =  n_layers
       k2 =  1
       dk = -1
-    END IF
+    end if
 
 
     ! ------------------------------------------
-    ! Initialise the total optical depth and set
-    ! its tolerance value. The tolerance value
+    ! initialise the total optical depth and set
+    ! its tolerance value. the tolerance value
     ! should prevent floating point underflows.
     ! ------------------------------------------
 
-    total_od     = ZERO
-    od_tolerance = ABS( LOG( TOLERANCE ) )
+    total_od     = zero
+    od_tolerance = abs( log( tolerance ) )
 
 
     ! ----------------------------------------------
-    ! Loop over layers for transmittance calculation
+    ! loop over layers for transmittance calculation
     ! ----------------------------------------------
 
-    k_layer_tau_loop: DO k = k1, k2, dk
+    k_layer_tau_loop: do k = k1, k2, dk
 
-      ! -- Update total optical depth
+      ! -- update total optical depth
       total_od = total_od + optical_depth( k )
 
-      ! -- If optical depth is < than tolerance, calculate transmittance
-      IF ( total_od < od_tolerance ) THEN
+      ! -- if optical depth is < than tolerance, calculate transmittance
+      if ( total_od < od_tolerance ) then
 
-        tau( k ) = EXP( -total_od )
+        tau( k ) = exp( -total_od )
 
-      ELSE
+      else
 
-        ! -- The following *could* be slow if dk is negative
-        ! -- If so, then tau( k ) = ZERO would work.
-        tau( k:k2:dk ) = ZERO
-        EXIT k_layer_tau_loop
+        ! -- the following *could* be slow if dk is negative
+        ! -- if so, then tau( k ) = zero would work.
+        tau( k:k2:dk ) = zero
+        exit k_layer_tau_loop
 
-      END IF
+      end if
 
-    END DO k_layer_tau_loop
+    end do k_layer_tau_loop
 
-  END SUBROUTINE compute_transmittance
+  end subroutine compute_transmittance
 
 
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_transmittance_TL
+!s+
+! name:
+!       compute_transmittance_tl
 !
-! PURPOSE:
-!       PUBLIC subroutine to calculate the tangent-linear layer transmittances
+! purpose:
+!       public subroutine to calculate the tangent-linear layer transmittances
 !       of an input atmospheric profile.
 !
-! CALLING SEQUENCE:
-!        CALL compute_transmittance_TL( &
-!                                       ! -- Forward input
-!                                       absorber,      &   ! Input, 0:K x J
-!                                       predictor,     &   ! Input, I x K
-!                                       tau,           &   ! Input, K
+! calling sequence:
+!        call compute_transmittance_tl( &
+!                                       ! -- forward input
+!                                       absorber,      &   ! input, 0:k x j
+!                                       predictor,     &   ! input, i x k
+!                                       tau,           &   ! input, k
 !
-!                                       ! -- Tangent-liner input
-!                                       absorber_TL,   &   ! Input, 0:K x J
-!                                       predictor_TL,  &   ! Input, I x K
+!                                       ! -- tangent-liner input
+!                                       absorber_tl,   &   ! input, 0:k x j
+!                                       predictor_tl,  &   ! input, i x k
 !
-!                                       ! -- Other input
-!                                       layer_index,   &   ! Input, K x J
-!                                       channel_index, &   ! Input, scalar
-!                                       direction,     &   ! Input, scalar, 0==down, 1==up
+!                                       ! -- other input
+!                                       layer_index,   &   ! input, k x j
+!                                       channel_index, &   ! input, scalar
+!                                       direction,     &   ! input, scalar, 0==down, 1==up
 !
-!                                       ! -- Tangent-liner output
-!                                       tau_TL         )   ! Output, K
+!                                       ! -- tangent-liner output
+!                                       tau_tl         )   ! output, k
 !
-! INPUT ARGUMENTS:
-!       absorber:         Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K x J
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       absorber:         profile level integrated absorber amount array.
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k x j
+!                         attributes: intent( in )
 !
-!       predictor:        Profile LAYER predictors array.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( IN )
+!       predictor:        profile layer predictors array.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( in )
 !
-!       absorber_TL:      Profile LEVEL tangent-linear integrated absorber
+!       absorber_tl:      profile level tangent-linear integrated absorber
 !                         amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K x J
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k x j
+!                         attributes: intent( in )
 !
-!       predictor_TL:     Profile LAYER tangent-linear predictors array.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( IN )
+!       predictor_tl:     profile layer tangent-linear predictors array.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( in )
 !
-!       layer_index:      Index array array associating the input absorber
+!       layer_index:      index array array associating the input absorber
 !                         layer amount to the bracketing absorber space levels.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  K x J
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  k x j
+!                         attributes: intent( in )
 !
-!       channel_index:    Channel index id. This is a unique index associated
+!       channel_index:    channel index id. this is a unique index associated
 !                         with a (supported) sensor channel.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-!       direction:        Direction identifier.
-!                         If = 0, calculate layer->surface transmittances (i.e. down)
+!       direction:        direction identifier.
+!                         if = 0, calculate layer->surface transmittances (i.e. down)
 !                            = 1, calculate layer->space   transmittances (i.e. up)
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!        None.
+! optional input arguments:
+!        none.
 !
-! OUTPUT ARGUMENTS:
-!        tau_TL:          Layer to boundary tangent-linear transmittances for the
+! output arguments:
+!        tau_tl:          layer to boundary tangent-linear transmittances for the
 !                         input atmosphere and channel.
-!                         UNITS:      None
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( OUT )
+!                         units:      none
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The layer absorption coefficient is calculated using,
+!       the layer absorption coefficient is calculated using,
 !
-!                                   __ I
+!                                   __ i
 !                        _         \   _
-!         abs_coeff(k) = b(0,k,l) + >  b(i,k,l).X(k,l)
+!         abs_coeff(k) = b(0,k,l) + >  b(i,k,l).x(k,l)
 !                                  /__
 !                                     i=1
 !
 !       and the tangent-linear absorption coefficient from,
 !
-!                                         __ I
+!                                         __ i
 !                           _            \   _                    _
-!         abs_coeff_TL(k) = b_TL(0,k,l) + >  b_TL(i,k,l).X(k,l) + b(i,k,l).X_TL(k,l)
+!         abs_coeff_tl(k) = b_tl(0,k,l) + >  b_tl(i,k,l).x(k,l) + b(i,k,l).x_tl(k,l)
 !                                        /__
 !                                           i=1
 !             _  _
-!       where b, b_TL == interpolated coefficients
-!             X, X_TL == predictors
+!       where b, b_tl == interpolated coefficients
+!             x, x_tl == predictors
 !             i       == predictor index
 !             k       == layer index
 !             l       == channel index
 !
-!       The input coefficients are linearly interpolated in absorber space
+!       the input coefficients are linearly interpolated in absorber space
 !       from the precalculated absorber levels to that defined by the
 !       input profile.
 !
-!       The absorber layer optical depth is then calculated using,
+!       the absorber layer optical depth is then calculated using,
 !
-!         optical_depth(k) = abs_coeff(k).dA(k)
+!         optical_depth(k) = abs_coeff(k).da(k)
 !
 !       and the tangent-linear term is determined from,
 !
-!         optical_depth_TL(k) = abs_coeff_TL(k).dA(k) + abs_coeff(k).dA_TL(k)
+!         optical_depth_tl(k) = abs_coeff_tl(k).da(k) + abs_coeff(k).da_tl(k)
 !
-!       where dA, dA_TL == layer absorber difference.
+!       where da, da_tl == layer absorber difference.
 !
-!       The tangent-linear transmittance is then calculated using,
+!       the tangent-linear transmittance is then calculated using,
 !
-!                               __ K
+!                               __ k
 !                              \
-!         tau_TL(k) = -tau(k) . >  optical_depth_TL(i)
+!         tau_tl(k) = -tau(k) . >  optical_depth_tl(i)
 !                              /__
 !                                 i=k
 !
-!S-
+!s-
 !------------------------------------------------------------------------------
 
-  SUBROUTINE compute_transmittance_TL( &
-                                       ! -- Forward input
-                                       absorber,      &   ! Input, 0:K x J
-                                       predictor,     &   ! Input, I x K
-                                       tau,           &   ! Input, K
+  subroutine compute_transmittance_tl( &
+                                       ! -- forward input
+                                       absorber,      &   ! input, 0:k x j
+                                       predictor,     &   ! input, i x k
+                                       tau,           &   ! input, k
 
-                                       ! -- Tangent-liner input
-                                       absorber_TL,   &   ! Input, 0:K x J
-                                       predictor_TL,  &   ! Input, I x K
+                                       ! -- tangent-liner input
+                                       absorber_tl,   &   ! input, 0:k x j
+                                       predictor_tl,  &   ! input, i x k
 
-                                       ! -- Other input
-                                       layer_index,   &   ! Input, K x J
-                                       channel_index, &   ! Input, scalar
-                                       direction,     &   ! Input, scalar, 0==down, 1==up
+                                       ! -- other input
+                                       layer_index,   &   ! input, k x j
+                                       channel_index, &   ! input, scalar
+                                       direction,     &   ! input, scalar, 0==down, 1==up
 
-                                       ! -- Tangent-liner output
-                                       tau_TL         )   ! Output, K
+                                       ! -- tangent-liner output
+                                       tau_tl         )   ! output, k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )  :: absorber         ! 0:K x J
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )  :: predictor        ! I x K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: tau              ! K
+    ! -- forward input
+    real( fp_kind ), dimension( 0:, : ), intent( in )  :: absorber         ! 0:k x j
+    real( fp_kind ), dimension( :, : ),  intent( in )  :: predictor        ! i x k
+    real( fp_kind ), dimension( : ),     intent( in )  :: tau              ! k
 
-    ! -- Tangent_linear input
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )  :: absorber_TL      ! 0:K x J
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )  :: predictor_TL     ! I x K
+    ! -- tangent_linear input
+    real( fp_kind ), dimension( 0:, : ), intent( in )  :: absorber_tl      ! 0:k x j
+    real( fp_kind ), dimension( :, : ),  intent( in )  :: predictor_tl     ! i x k
 
-    ! -- Other input
-    INTEGER,         DIMENSION( :, : ),  INTENT( IN )  :: layer_index      ! K x J
-    INTEGER,                             INTENT( IN )  :: channel_index    ! scalar
-    INTEGER,                             INTENT( IN )  :: direction        ! scalar, 0==down, 1==up
+    ! -- other input
+    integer,         dimension( :, : ),  intent( in )  :: layer_index      ! k x j
+    integer,                             intent( in )  :: channel_index    ! scalar
+    integer,                             intent( in )  :: direction        ! scalar, 0==down, 1==up
 
-    ! -- Tangent_linear output
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( OUT ) :: tau_TL           ! K
+    ! -- tangent_linear output
+    real( fp_kind ), dimension( : ),     intent( out ) :: tau_tl           ! k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_TRANSMITTANCE_TL'
+    character( * ), parameter :: routine_name = 'compute_transmittance_tl'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: l
-    INTEGER :: k, k1, k2, dk, n_layers
-    INTEGER :: j, n_absorbers
-    INTEGER :: i, ip, n_predictors
+    integer :: l
+    integer :: k, k1, k2, dk, n_layers
+    integer :: j, n_absorbers
+    integer :: i, ip, n_predictors
 
-    REAL( fp_kind ) :: ave_absorber,    d_absorber
-    REAL( fp_kind ) :: ave_absorber_TL, d_absorber_TL
+    real( fp_kind ) :: ave_absorber,    d_absorber
+    real( fp_kind ) :: ave_absorber_tl, d_absorber_tl
 
-    REAL( fp_kind ) :: b1, b2
-    REAL( fp_kind ) :: gradient,    b
-    REAL( fp_kind ) :: gradient_TL, b_TL
+    real( fp_kind ) :: b1, b2
+    real( fp_kind ) :: gradient,    b
+    real( fp_kind ) :: gradient_tl, b_tl
 
-    REAL( fp_kind ) :: absorption_coefficient
-    REAL( fp_kind ) :: absorption_coefficient_TL
+    real( fp_kind ) :: absorption_coefficient
+    real( fp_kind ) :: absorption_coefficient_tl
 
-    REAL( fp_kind ) :: total_od_TL
+    real( fp_kind ) :: total_od_tl
 
-    REAL( fp_kind ), DIMENSION( SIZE( tau ) ) :: optical_depth_TL
+    real( fp_kind ), dimension( size( tau ) ) :: optical_depth_tl
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC EXP, &
-              PRESENT, &
-              SIZE
+    intrinsic exp, &
+              present, &
+              size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Determine array dimensions --                       #
+    !#                   -- determine array dimensions --                       #
     !#--------------------------------------------------------------------------#
 
-    ! -- Number of atmospheric layers and absorbers. The "-1"
+    ! -- number of atmospheric layers and absorbers. the "-1"
     ! -- for the layer assign is because absorber is based on
-    ! -- LEVELS.
-    n_layers    = SIZE( absorber, DIM = 1 ) - 1
-    n_absorbers = SIZE( absorber, DIM = 2 )
+    ! -- levels.
+    n_layers    = size( absorber, dim = 1 ) - 1
+    n_absorbers = size( absorber, dim = 2 )
 
-    ! -- Number of predictors *TO USE*. Currently this is
+    ! -- number of predictors *to use*. currently this is
     ! -- pretty much hardwired to 5 but it could change
-    ! -- in the future. This value is explicitly
-    ! -- checked as the TAU_COEFFICIENTS array contained
-    ! -- in the TRANSMITTANCE_COEFFICIENTS module is
+    ! -- in the future. this value is explicitly
+    ! -- checked as the tau_coefficients array contained
+    ! -- in the transmittance_coefficients module is
     ! -- allocated dynamically when initialising the 
     ! -- radiative transfer model.
  
-    ! -- The "-1" is used because the first element of the
+    ! -- the "-1" is used because the first element of the
     ! -- predictor index array is used to determine if there
     ! -- is *any* absorption for a particular absorber species.
-    n_predictors = SIZE( tau_coefficients, DIM = 1 ) - 1
+    n_predictors = size( tau_coefficients, dim = 1 ) - 1
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                -- Calculate the layer optical depths --                  #
+    !#                -- calculate the layer optical depths --                  #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------------------------
-    ! Assign the channel index to a short name
+    ! assign the channel index to a short name
     ! ----------------------------------------
 
     l = channel_index
 
 
     ! ------------------------------------------
-    ! Initilise the tangent-linear optical depth
+    ! initilise the tangent-linear optical depth
     ! ------------------------------------------
 
-    optical_depth_TL( : ) = ZERO
+    optical_depth_tl( : ) = zero
 
 
     ! -----------------------------------------------------
-    ! Loop over each absorber for optical depth calculation
+    ! loop over each absorber for optical depth calculation
     ! -----------------------------------------------------
 
-    j_absorber_loop: DO j = 1, n_absorbers
+    j_absorber_loop: do j = 1, n_absorbers
 
 
       ! -----------------------------------------
-      ! Check if there is any absorption for this
+      ! check if there is any absorption for this
       ! absorber/channel combination.
       !
-      ! This check is the reason why all channels
+      ! this check is the reason why all channels
       ! cannot be processed at once and why the
       ! layer loop is within the absorber loop.
       ! -----------------------------------------
 
-      IF ( predictor_index( 0, l, j ) == 0 ) CYCLE j_absorber_loop
+      if ( predictor_index( 0, l, j ) == 0 ) cycle j_absorber_loop
 
 
 
       !#------------------------------------------------------------------------#
-      !#                    -- Begin loop over layers --                        #
+      !#                    -- begin loop over layers --                        #
       !#------------------------------------------------------------------------#
 
-      k_layer_od_loop: DO k = 1, n_layers
+      k_layer_od_loop: do k = 1, n_layers
 
 
         ! -----------------------------------
-        ! Calculate the current layer average
+        ! calculate the current layer average
         ! absorber amounts and differences
         ! -----------------------------------
 
-        ave_absorber    = POINT_5 * ( absorber(    k, j ) + absorber(    k-1, j ) )
-        ave_absorber_TL = POINT_5 * ( absorber_TL( k, j ) + absorber_TL( k-1, j ) )
+        ave_absorber    = point_5 * ( absorber(    k, j ) + absorber(    k-1, j ) )
+        ave_absorber_tl = point_5 * ( absorber_tl( k, j ) + absorber_tl( k-1, j ) )
 
         d_absorber    = absorber(    k, j ) - absorber(    k-1, j )
-        d_absorber_TL = absorber_TL( k, j ) - absorber_TL( k-1, j )
+        d_absorber_tl = absorber_tl( k, j ) - absorber_tl( k-1, j )
 
 
         ! -----------------------------------------------------------
-        ! To linearly interpolate the tau_coeffs to the actual user
+        ! to linearly interpolate the tau_coeffs to the actual user
         ! space absorber amount, need the gradient across the layer
         ! -----------------------------------------------------------
 
@@ -849,452 +849,452 @@ CONTAINS
         !          -------------------------------------------------------------------
                    ( absorber_space_levels( k2, j ) - absorber_space_levels( k1, j ) )
 
-        gradient_TL =                        ( -ave_absorber_TL )                         / &
+        gradient_tl =                        ( -ave_absorber_tl )                         / &
         !             -------------------------------------------------------------------
                       ( absorber_space_levels( k2, j ) - absorber_space_levels( k1, j ) )
 
 
         ! --------------------------------
-        ! Calculate absorption coeficients
+        ! calculate absorption coeficients
         ! --------------------------------
 
-        ! -- Offset term
+        ! -- offset term
         b1 = tau_coefficients( 0, k1, l, j )
         b2 = tau_coefficients( 0, k2, l, j )
 
         absorption_coefficient    = b2 + ( gradient    * ( b1 - b2 ) )
-        absorption_coefficient_TL =        gradient_TL * ( b1 - b2 )
+        absorption_coefficient_tl =        gradient_tl * ( b1 - b2 )
 
 
-        i_predictor_loop: DO i = 1, n_predictors
+        i_predictor_loop: do i = 1, n_predictors
 
-          ! -- Current predictor interpolated coefficient
+          ! -- current predictor interpolated coefficient
           b1 = tau_coefficients( i, k1, l, j )
           b2 = tau_coefficients( i, k2, l, j )
 
           b     = b2 + ( gradient    * ( b1 - b2 ) )
-          b_TL  =        gradient_TL * ( b1 - b2 )
+          b_tl  =        gradient_tl * ( b1 - b2 )
 
-          !  - Sum current predictor's contribution
+          !  - sum current predictor's contribution
           ip = predictor_index( i, l, j )
 
           absorption_coefficient    = absorption_coefficient + ( b * predictor( ip, k ) ) 
-          absorption_coefficient_TL = absorption_coefficient_TL        + &
-                                      ( b_TL * predictor(    ip, k ) ) + &
-                                      ( b    * predictor_TL( ip, k ) )
+          absorption_coefficient_tl = absorption_coefficient_tl        + &
+                                      ( b_tl * predictor(    ip, k ) ) + &
+                                      ( b    * predictor_tl( ip, k ) )
 
-        END DO i_predictor_loop
+        end do i_predictor_loop
 
 
-        ! -- **** IT WOULD BE NICE TO NOT NEED THIS AT ALL! ****
-        absorption_coefficient = MAX( absorption_coefficient, ZERO )
+        ! -- **** it would be nice to not need this at all! ****
+        absorption_coefficient = max( absorption_coefficient, zero )
 
 
         ! --------------------------------------
-        ! Calculate tangent-linear optical depth
+        ! calculate tangent-linear optical depth
         ! --------------------------------------
 
-        optical_depth_TL( k ) = optical_depth_TL( k ) + &
-                                ( absorption_coefficient_TL * d_absorber    ) + &
-                                ( absorption_coefficient    * d_absorber_TL )
+        optical_depth_tl( k ) = optical_depth_tl( k ) + &
+                                ( absorption_coefficient_tl * d_absorber    ) + &
+                                ( absorption_coefficient    * d_absorber_tl )
 
-      END DO k_layer_od_loop
+      end do k_layer_od_loop
 
-    END DO j_absorber_loop
+    end do j_absorber_loop
 
 
 
     !#--------------------------------------------------------------------------#
-    !#    -- Calculate the layer->boundary tangent-linear transmittances --     #
+    !#    -- calculate the layer->boundary tangent-linear transmittances --     #
     !#                                                                          #
-    !# This step involves another loop over layers. One *could* reverse the     #
+    !# this step involves another loop over layers. one *could* reverse the     #
     !# order of the j absorber loop and k layer od loop and calculate the tau   #
-    !# values outside the absorber loop. However, this would involve an IF test #
-    !# for every layer even if PREDICTOR_INDEX( 0, l ) == 0. I figured it is    #
+    !# values outside the absorber loop. however, this would involve an if test #
+    !# for every layer even if predictor_index( 0, l ) == 0. i figured it is    #
     !# better to skip the layer loop altogether if there is no absorption for   #
     !# a particular absorber, despite the need for an extra layer loop here to  #
     !# calculate the transmittance.                                             #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------
-    ! Determine loop indices
+    ! determine loop indices
     ! ----------------------
 
-    IF ( direction == UP ) THEN
-      ! -- Transmittance going up, e.g. UPWELLING. Layer 1 => TOA
+    if ( direction == up ) then
+      ! -- transmittance going up, e.g. upwelling. layer 1 => toa
       k1 = 1
       k2 = n_layers
       dk = 1
-    ELSE
-      ! -- Transmittance going down, e.g. DOWNWELLING FLUX, SOLAR. Layer N_LAYERS => SFC
+    else
+      ! -- transmittance going down, e.g. downwelling flux, solar. layer n_layers => sfc
       k1 =  n_layers
       k2 =  1
       dk = -1
-    END IF
+    end if
 
 
     ! ----------------------------------------------
-    ! Loop over layers for transmittance calculation
+    ! loop over layers for transmittance calculation
     ! ----------------------------------------------
 
-    total_od_TL = ZERO
+    total_od_tl = zero
 
-    k_layer_tau_loop: DO k = k1, k2, dk
+    k_layer_tau_loop: do k = k1, k2, dk
 
-      total_od_TL = total_od_TL + optical_depth_TL( k )
-      tau_TL( k ) = -tau( k ) * total_od_TL
+      total_od_tl = total_od_tl + optical_depth_tl( k )
+      tau_tl( k ) = -tau( k ) * total_od_tl
 
-    END DO k_layer_tau_loop
+    end do k_layer_tau_loop
 
-  END SUBROUTINE compute_transmittance_TL
+  end subroutine compute_transmittance_tl
 
 
 
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_transmittance_AD
+!s+
+! name:
+!       compute_transmittance_ad
 !
-! PURPOSE:
-!       PUBLIC subroutine to calculate the adjoint of the layer transmittances
+! purpose:
+!       public subroutine to calculate the adjoint of the layer transmittances
 !       of an input atmospheric profile.
 !
-! CALLING SEQUENCE:
-!       CALL compute_transmittance_AD( &
-!                                      ! -- Forward input
-!                                      absorber,      &   ! Input, 0:K x J
-!                                      predictor,     &   ! Input, I x K
-!                                      tau,           &   ! Input, K
+! calling sequence:
+!       call compute_transmittance_ad( &
+!                                      ! -- forward input
+!                                      absorber,      &   ! input, 0:k x j
+!                                      predictor,     &   ! input, i x k
+!                                      tau,           &   ! input, k
 !
-!                                      ! -- Adjoint input
-!                                      tau_AD,        &   ! In/Output, K
+!                                      ! -- adjoint input
+!                                      tau_ad,        &   ! in/output, k
 !
-!                                      ! -- Other input
-!                                      layer_index,   &   ! Input, K x J
-!                                      channel_index, &   ! Input, scalar
-!                                      direction,     &   ! Input, scalar, 0==down, 1==up
+!                                      ! -- other input
+!                                      layer_index,   &   ! input, k x j
+!                                      channel_index, &   ! input, scalar
+!                                      direction,     &   ! input, scalar, 0==down, 1==up
 !
-!                                      ! -- Adjoint output
-!                                      absorber_AD,   &   ! In/Output, 0:K x J
-!                                      predictor_AD   )   ! In/Output, I x K
+!                                      ! -- adjoint output
+!                                      absorber_ad,   &   ! in/output, 0:k x j
+!                                      predictor_ad   )   ! in/output, i x k
 !
-! INPUT ARGUMENTS:
-!       absorber:         Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K x J
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       absorber:         profile level integrated absorber amount array.
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k x j
+!                         attributes: intent( in )
 !
-!       predictor:        Profile LAYER predictors array.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( IN )
+!       predictor:        profile layer predictors array.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( in )
 !
-!       tau:              Layer to boundary transmittances for the input
+!       tau:              layer to boundary transmittances for the input
 !                         atmosphere and channel.
-!                         UNITS:      None
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( OUT )
+!                         units:      none
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( out )
 !
-!       tau_AD:           Adjoint of the layer to boundary transmittances
+!       tau_ad:           adjoint of the layer to boundary transmittances
 !                         for the input atmosphere and channel.
-!                         **THIS ARGUMENT IS SET TO ZERO ON OUTPUT.**
-!                         UNITS:      None
-!                         TYPE:       Real
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!                         **this argument is set to zero on output.**
+!                         units:      none
+!                         type:       real
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       layer_index:      Index array array associating the input absorber
+!       layer_index:      index array array associating the input absorber
 !                         layer amount to the bracketing absorber space levels.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  K x J
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  k x j
+!                         attributes: intent( in )
 !
-!       channel_index:    Channel index id. This is a unique index associated
+!       channel_index:    channel index id. this is a unique index associated
 !                         with a (supported) sensor channel.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-!       direction:        Direction identifier.
-!                         If = 0, calculate layer->surface transmittances (i.e. down)
+!       direction:        direction identifier.
+!                         if = 0, calculate layer->surface transmittances (i.e. down)
 !                            = 1, calculate layer->space   transmittances (i.e. up)
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       absorber_AD:      Adjoint of the profile LEVEL integrated absorber
+! output arguments:
+!       absorber_ad:      adjoint of the profile level integrated absorber
 !                         amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K x J
-!                         ATTRIBUTES: INTENT( IN OUT )
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k x j
+!                         attributes: intent( in out )
 !
-!       predictor_AD:     Adjoint of the profile LAYER predictors.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       predictor_ad:     adjoint of the profile layer predictors.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       The input argument TAU_AD is set to zero upon output.
+! side effects:
+!       the input argument tau_ad is set to zero upon output.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!S-
+!s-
 !------------------------------------------------------------------------------
 
-  SUBROUTINE compute_transmittance_AD( &
-                                       ! -- Forward input
-                                       absorber,      &   ! Input, 0:K x J
-                                       predictor,     &   ! Input, I x K
-                                       tau,           &   ! Input, K
+  subroutine compute_transmittance_ad( &
+                                       ! -- forward input
+                                       absorber,      &   ! input, 0:k x j
+                                       predictor,     &   ! input, i x k
+                                       tau,           &   ! input, k
 
-                                       ! -- Adjoint input
-                                       tau_AD,        &   ! In/Output, K
+                                       ! -- adjoint input
+                                       tau_ad,        &   ! in/output, k
 
-                                       ! -- Other input
-                                       layer_index,   &   ! Input, K x J
-                                       channel_index, &   ! Input, scalar
-                                       direction,     &   ! Input, scalar, 0==down, 1==up
+                                       ! -- other input
+                                       layer_index,   &   ! input, k x j
+                                       channel_index, &   ! input, scalar
+                                       direction,     &   ! input, scalar, 0==down, 1==up
 
-                                       ! -- Adjoint output
-                                       absorber_AD,   &   ! In/Output, 0:K x J
-                                       predictor_AD   )   ! In/Output, I x K
+                                       ! -- adjoint output
+                                       absorber_ad,   &   ! in/output, 0:k x j
+                                       predictor_ad   )   ! in/output, i x k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )     :: absorber       ! 0:K x J
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: predictor      ! I x K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: tau            ! K
+    ! -- forward input
+    real( fp_kind ), dimension( 0:, : ), intent( in )     :: absorber       ! 0:k x j
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: predictor      ! i x k
+    real( fp_kind ), dimension( : ),     intent( in )     :: tau            ! k
 
-    ! -- Adjoint input
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: tau_AD         ! K
+    ! -- adjoint input
+    real( fp_kind ), dimension( : ),     intent( in out ) :: tau_ad         ! k
 
-    ! -- Other input
-    INTEGER,         DIMENSION( :, : ),  INTENT( IN )     :: layer_index    ! K x J
-    INTEGER,                             INTENT( IN )     :: channel_index  ! scalar
-    INTEGER,                             INTENT( IN )     :: direction      ! scalar, 0==down, 1==up
+    ! -- other input
+    integer,         dimension( :, : ),  intent( in )     :: layer_index    ! k x j
+    integer,                             intent( in )     :: channel_index  ! scalar
+    integer,                             intent( in )     :: direction      ! scalar, 0==down, 1==up
 
-    ! -- Adjoint output
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN OUT ) :: absorber_AD    ! 0:K x J
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: predictor_AD   ! I x K
+    ! -- adjoint output
+    real( fp_kind ), dimension( 0:, : ), intent( in out ) :: absorber_ad    ! 0:k x j
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: predictor_ad   ! i x k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_TRANSMITTANCE_AD'
+    character( * ), parameter :: routine_name = 'compute_transmittance_ad'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: l
-    INTEGER :: k, k1, k2, dk, n_layers
-    INTEGER :: j, n_absorbers
-    INTEGER :: i, ip, n_predictors
+    integer :: l
+    integer :: k, k1, k2, dk, n_layers
+    integer :: j, n_absorbers
+    integer :: i, ip, n_predictors
 
-    REAL( fp_kind ) :: ave_absorber,    d_absorber
-    REAL( fp_kind ) :: ave_absorber_AD, d_absorber_AD
+    real( fp_kind ) :: ave_absorber,    d_absorber
+    real( fp_kind ) :: ave_absorber_ad, d_absorber_ad
 
-    REAL( fp_kind ) :: d_absorber_space
+    real( fp_kind ) :: d_absorber_space
 
-    REAL( fp_kind ) :: b1o, b2o
-    REAL( fp_kind ) :: b1,  b2
-    REAL( fp_kind ) :: gradient,    b
-    REAL( fp_kind ) :: gradient_AD, b_AD
+    real( fp_kind ) :: b1o, b2o
+    real( fp_kind ) :: b1,  b2
+    real( fp_kind ) :: gradient,    b
+    real( fp_kind ) :: gradient_ad, b_ad
 
-    REAL( fp_kind ) :: absorption_coefficient
-    REAL( fp_kind ) :: absorption_coefficient_AD
+    real( fp_kind ) :: absorption_coefficient
+    real( fp_kind ) :: absorption_coefficient_ad
 
-    REAL( fp_kind ) :: total_od_AD
+    real( fp_kind ) :: total_od_ad
 
-    REAL( fp_kind ), DIMENSION( SIZE( tau ) ) :: optical_depth_AD
+    real( fp_kind ), dimension( size( tau ) ) :: optical_depth_ad
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC SIZE
+    intrinsic size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Determine array dimensions --                       #
+    !#                   -- determine array dimensions --                       #
     !#--------------------------------------------------------------------------#
 
-    ! -- Number of atmospheric layers and absorbers. The "-1"
+    ! -- number of atmospheric layers and absorbers. the "-1"
     ! -- for the layer assign is because absorber is based on
-    ! -- LEVELS.
-    n_layers    = SIZE( absorber, DIM = 1 ) - 1
-    n_absorbers = SIZE( absorber, DIM = 2 )
+    ! -- levels.
+    n_layers    = size( absorber, dim = 1 ) - 1
+    n_absorbers = size( absorber, dim = 2 )
 
-    ! -- Number of predictors *TO USE*. Currently this is
+    ! -- number of predictors *to use*. currently this is
     ! -- pretty much hardwired to 5 but it could change
-    ! -- in the future. This value is explicitly
-    ! -- checked as the TAU_COEFFICIENTS array contained
-    ! -- in the TRANSMITTANCE_COEFFICIENTS module is
+    ! -- in the future. this value is explicitly
+    ! -- checked as the tau_coefficients array contained
+    ! -- in the transmittance_coefficients module is
     ! -- allocated dynamically when initialising the 
     ! -- radiative transfer model.
  
-    ! -- The "-1" is used because the first element of the
+    ! -- the "-1" is used because the first element of the
     ! -- predictor index array is used to determine if there
     ! -- is *any* absorption for a particular absorber species.
-    n_predictors = SIZE( tau_coefficients, DIM = 1 ) - 1
+    n_predictors = size( tau_coefficients, dim = 1 ) - 1
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                       -- SOME INITIALISATIONS --                         #
+    !#                       -- some initialisations --                         #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------------------------
-    ! Assign the channel index to a short name
+    ! assign the channel index to a short name
     ! ----------------------------------------
 
     l = channel_index
 
 
     ! -------------------------------------
-    ! Initilise the local adjoint variables
+    ! initilise the local adjoint variables
     ! -------------------------------------
 
-    optical_depth_AD( : ) = ZERO
+    optical_depth_ad( : ) = zero
 
-    total_od_AD = ZERO
-    gradient_AD = ZERO
+    total_od_ad = zero
+    gradient_ad = zero
 
 
 
     !#--------------------------------------------------------------------------#
-    !#       -- CALCULATE THE LAYER->BOUNDARY TRANSMITTANCE ADJOINT --          #
+    !#       -- calculate the layer->boundary transmittance adjoint --          #
     !#                                                                          #
-    !# This step involves another loop over layers. One *could* reverse the     #
+    !# this step involves another loop over layers. one *could* reverse the     #
     !# order of the j absorber loop and k layer od loop and calculate the tau   #
-    !# values outside the absorber loop. However, this would involve an IF test #
-    !# for every layer even if PREDICTOR_INDEX( 0, l ) == 0. I figured it is    #
+    !# values outside the absorber loop. however, this would involve an if test #
+    !# for every layer even if predictor_index( 0, l ) == 0. i figured it is    #
     !# better to skip the layer loop altogether if there is no absorption for   #
     !# a particular absorber, despite the need for an extra layer loop here to  #
     !# calculate the transmittance.                                             #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------------
-    ! Determine loop indices. Same direction
-    ! as FORWARD and TANGENT-LINEAR models
+    ! determine loop indices. same direction
+    ! as forward and tangent-linear models
     ! --------------------------------------
 
-    IF ( direction == UP ) THEN
-      ! -- Transmittance going up, e.g. UPWELLING. Layer 1 => TOA
+    if ( direction == up ) then
+      ! -- transmittance going up, e.g. upwelling. layer 1 => toa
       k1 = 1
       k2 = n_layers
       dk = 1
-    ELSE
-      ! -- Transmittance going down, e.g. DOWNWELLING FLUX, SOLAR. Layer N_LAYERS => SFC
+    else
+      ! -- transmittance going down, e.g. downwelling flux, solar. layer n_layers => sfc
       k1 =  n_layers
       k2 =  1
       dk = -1
-    END IF
+    end if
 
 
     ! -----------------------------------------------
-    ! Loop over layers for transmittance calculation.
-    ! Note the loop index reversal.
+    ! loop over layers for transmittance calculation.
+    ! note the loop index reversal.
     ! -----------------------------------------------
 
-    k_layer_tau_loop: DO k = k2, k1, -dk
+    k_layer_tau_loop: do k = k2, k1, -dk
 
-      total_od_AD = total_od_AD - ( tau( k ) * tau_AD( k ) )
-      tau_AD( k ) = ZERO
+      total_od_ad = total_od_ad - ( tau( k ) * tau_ad( k ) )
+      tau_ad( k ) = zero
 
-      optical_depth_AD( k ) = optical_depth_AD( k ) + total_od_AD
-      ! Note: No total_od_AD = ZERO here because
-      !       total_od_TL = total_od_TL + (....)
+      optical_depth_ad( k ) = optical_depth_ad( k ) + total_od_ad
+      ! note: no total_od_ad = zero here because
+      !       total_od_tl = total_od_tl + (....)
 
-    END DO k_layer_tau_loop
+    end do k_layer_tau_loop
 
 
     !#--------------------------------------------------------------------------#
-    !#                        -- LOOP OVER ABSORBERS --                         #
+    !#                        -- loop over absorbers --                         #
     !#--------------------------------------------------------------------------#
 
-    j_absorber_loop: DO j = 1, n_absorbers
+    j_absorber_loop: do j = 1, n_absorbers
 
 
       ! -----------------------------------------
-      ! Check if there is any absorption for this
+      ! check if there is any absorption for this
       ! absorber/channel combination.
       !
-      ! This check is the reason why all channels
+      ! this check is the reason why all channels
       ! cannot be processed at once and why the
       ! layer loop is within the absorber loop.
       ! -----------------------------------------
 
-      IF ( predictor_index( 0, l, j ) == 0 ) CYCLE j_absorber_loop
+      if ( predictor_index( 0, l, j ) == 0 ) cycle j_absorber_loop
 
 
 
       !#------------------------------------------------------------------------#
-      !#                        -- LOOP OVER LAYERS --                          #
+      !#                        -- loop over layers --                          #
       !#------------------------------------------------------------------------#
 
-      k_layer_od_loop: DO k = n_layers, 1, -1
+      k_layer_od_loop: do k = n_layers, 1, -1
 
 
         ! -----------------------------------
-        ! Calculate the current layer average
+        ! calculate the current layer average
         ! absorber amounts and differences
         ! -----------------------------------
 
-        ave_absorber = POINT_5 * ( absorber( k, j ) + absorber( k-1, j ) )
+        ave_absorber = point_5 * ( absorber( k, j ) + absorber( k-1, j ) )
         d_absorber   = absorber( k, j ) - absorber( k-1, j )
 
 
         ! -----------------------------------
-        ! Assign absorber space layer indices
+        ! assign absorber space layer indices
         ! -----------------------------------
 
         k2 = layer_index( k, j )
@@ -1303,12 +1303,12 @@ CONTAINS
 
 
         !#----------------------------------------------------------------------#
-        !#           -- HERE REPEAT THE FORWARD CALCULATION OF THE   --         #
-        !#           -- ABSORPTION COEFFICIENT FOR THE CURRENT LAYER --         #
+        !#           -- here repeat the forward calculation of the   --         #
+        !#           -- absorption coefficient for the current layer --         #
         !#----------------------------------------------------------------------#
 
         ! ---------------------------------------------------------
-        ! To linearly interpolate the tau_coeffs to the actual user
+        ! to linearly interpolate the tau_coeffs to the actual user
         ! space absorber amount, need the gradient across the layer
         ! ---------------------------------------------------------
 
@@ -1320,236 +1320,236 @@ CONTAINS
 
 
         ! --------------------------------
-        ! Calculate absorption coeficients
+        ! calculate absorption coeficients
         ! --------------------------------
 
-        ! -- Offset term (save these values for later)
+        ! -- offset term (save these values for later)
         b1o = tau_coefficients( 0, k1, l, j )
         b2o = tau_coefficients( 0, k2, l, j )
 
         absorption_coefficient = b2o + ( gradient * ( b1o - b2o ) )
 
 
-        i_predictor_loop_FWD: DO i = 1, n_predictors
+        i_predictor_loop_fwd: do i = 1, n_predictors
 
-          ! -- Current predictor interpolated coefficient
+          ! -- current predictor interpolated coefficient
           b1 = tau_coefficients( i, k1, l, j )
           b2 = tau_coefficients( i, k2, l, j )
 
           b = b2 + ( gradient * ( b1 - b2 ) )
 
-          !  - Sum current predictor's contribution
+          !  - sum current predictor's contribution
           ip = predictor_index( i, l, j )
           absorption_coefficient = absorption_coefficient + ( b * predictor( ip, k ) ) 
 
-        END DO i_predictor_loop_FWD
+        end do i_predictor_loop_fwd
 
 
-        ! -- **** IT WOULD BE NICE TO NOT NEED THIS AT ALL! ****
-        absorption_coefficient = MAX( absorption_coefficient, ZERO )
+        ! -- **** it would be nice to not need this at all! ****
+        absorption_coefficient = max( absorption_coefficient, zero )
 
 
 
         !#----------------------------------------------------------------------#
-        !#                  -- BEGIN ADJOINT CALCULATIONS --                    #
+        !#                  -- begin adjoint calculations --                    #
         !#----------------------------------------------------------------------#
 
         ! ---------------------------------------------------------------
-        ! Adjoints of the optical depth.
+        ! adjoints of the optical depth.
         !
-        ! These quantities are local to the k_layer_od_loop
+        ! these quantities are local to the k_layer_od_loop
         ! and are equal to zero at this point so a straight
         ! initialisation is used, i.e. there is no
-        !   d_adbsorber_AD            = d_absorber_AD + (...)
-        !   absorption_coefficient_AD = absorption_coefficient_AD + (...)
-        ! This also eliminates the need to zero out the two
+        !   d_adbsorber_ad            = d_absorber_ad + (...)
+        !   absorption_coefficient_ad = absorption_coefficient_ad + (...)
+        ! this also eliminates the need to zero out the two
         ! quanitities later in the loop once they no longer
         ! have an impact on the gradient vector result.
         !
-        ! Also not that there is no
-        !   optical_depth_AD( k ) = ZERO
+        ! also not that there is no
+        !   optical_depth_ad( k ) = zero
         ! because
-        !   optical_depth_TL( k ) = optical_depth_TL( k ) + (....)
+        !   optical_depth_tl( k ) = optical_depth_tl( k ) + (....)
         ! ---------------------------------------------------------------
 
-        d_absorber_AD = absorption_coefficient * optical_depth_AD( k )   ! .... (1)
-        absorption_coefficient_AD = d_absorber * optical_depth_AD( k )
+        d_absorber_ad = absorption_coefficient * optical_depth_ad( k )   ! .... (1)
+        absorption_coefficient_ad = d_absorber * optical_depth_ad( k )
 
 
         ! ---------------------------------
-        ! Adjoint of absorption coefficient
+        ! adjoint of absorption coefficient
         ! ---------------------------------
 
-        ! -- Loop over predictors
-        ! -- Note that b_AD is local to this loop only
+        ! -- loop over predictors
+        ! -- note that b_ad is local to this loop only
         ! -- hence rather than
-        ! --   b_AD = b_AD + (....)
+        ! --   b_ad = b_ad + (....)
         ! -- and, at end of loop,
-        ! --   b_AD = ZERO
+        ! --   b_ad = zero
         ! -- it is simply initialised each iteration
-        i_predictor_loop_AD: DO i = n_predictors, 1, -1
+        i_predictor_loop_ad: do i = n_predictors, 1, -1
 
-          ! -- Current predictor interpolated coefficient
+          ! -- current predictor interpolated coefficient
           b1 = tau_coefficients( i, k1, l, j )
           b2 = tau_coefficients( i, k2, l, j )
 
           b = b2 + ( gradient * ( b1 - b2 ) )
 
-          ! -- Adjoints of the absorption coefficient
+          ! -- adjoints of the absorption coefficient
           ip = predictor_index( i, l, j )
 
-          predictor_AD( ip, k ) = predictor_AD( ip, k ) + ( b * absorption_coefficient_AD )
-          b_AD = predictor( ip, k ) * absorption_coefficient_AD
-          ! NOTE: No absorption_coefficient_AD = ZERO here because
-          !       absorption_coefficient_TL = absorption_coefficient_TL + (....)
+          predictor_ad( ip, k ) = predictor_ad( ip, k ) + ( b * absorption_coefficient_ad )
+          b_ad = predictor( ip, k ) * absorption_coefficient_ad
+          ! note: no absorption_coefficient_ad = zero here because
+          !       absorption_coefficient_tl = absorption_coefficient_tl + (....)
 
-          ! -- Coefficient adjoint
-          gradient_AD = gradient_AD + ( ( b1 - b2 ) * b_AD )
+          ! -- coefficient adjoint
+          gradient_ad = gradient_ad + ( ( b1 - b2 ) * b_ad )
 
-        END DO i_predictor_loop_AD
+        end do i_predictor_loop_ad
 
 
-        ! -- Offset term.
-        ! -- Note that absorption_coefficient_AD is not set to zero
+        ! -- offset term.
+        ! -- note that absorption_coefficient_ad is not set to zero
         ! -- after this statement due to its initialisation each layer.
-        gradient_AD = gradient_AD + ( ( b1o - b2o ) * absorption_coefficient_AD )
+        gradient_ad = gradient_ad + ( ( b1o - b2o ) * absorption_coefficient_ad )
 
 
         ! -------------------------------------------------
-        ! Adjoint of coefficient layer gradient.
+        ! adjoint of coefficient layer gradient.
         !
-        ! The ave_absorber_AD quantity is also local to the
+        ! the ave_absorber_ad quantity is also local to the
         ! k_layer_od_loop so a straight initialisation can
         ! be used rather than,
-        !   ave_absorber_AD = ave_absorber_AD - (....)
+        !   ave_absorber_ad = ave_absorber_ad - (....)
         ! -------------------------------------------------
 
-        ave_absorber_AD = -( gradient_AD / d_absorber_space )   ! .... (2)
-        gradient_AD = ZERO
+        ave_absorber_ad = -( gradient_ad / d_absorber_space )   ! .... (2)
+        gradient_ad = zero
 
 
         ! ---------------------------------------------------
-        ! Adjoints of the current layer average
+        ! adjoints of the current layer average
         ! absorber amount and difference.
         !
-        ! Neither d_absorber_AD nor ave_absorber_AD need
+        ! neither d_absorber_ad nor ave_absorber_ad need
         ! to be set to zero after this as they are explicitly
         ! reassigned each layer iteration at (1) and (2) above
         ! respectively.
         ! ---------------------------------------------------
 
-        absorber_AD( k-1, j ) = absorber_AD( k-1, j ) - d_absorber_AD + ( POINT_5 * ave_absorber_AD )
-        absorber_AD( k,   j ) = absorber_AD( k,   j ) + d_absorber_AD + ( POINT_5 * ave_absorber_AD )
+        absorber_ad( k-1, j ) = absorber_ad( k-1, j ) - d_absorber_ad + ( point_5 * ave_absorber_ad )
+        absorber_ad( k,   j ) = absorber_ad( k,   j ) + d_absorber_ad + ( point_5 * ave_absorber_ad )
 
-      END DO k_layer_od_loop
+      end do k_layer_od_loop
 
-    END DO j_absorber_loop
+    end do j_absorber_loop
 
-  END SUBROUTINE compute_transmittance_AD
+  end subroutine compute_transmittance_ad
 
-END MODULE transmittance
+end module transmittance
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.8  2001/08/16 17:19:11  paulv
-! - Updated documentation
+! $log$
+! revision 1.8  2001/08/16 17:19:11  paulv
+! - updated documentation
 !
-! Revision 1.7  2001/08/01 17:04:00  paulv
-! - The absorber space levels are no longer calculated during model
+! revision 1.7  2001/08/01 17:04:00  paulv
+! - the absorber space levels are no longer calculated during model
 !   initialisation, but are precalculated and stored in the transmittance
-!   coefficient data file. This means that,
-!     USE absorber_space, ONLY : absorber_space_levels
+!   coefficient data file. this means that,
+!     use absorber_space, only : absorber_space_levels
 !   was deleted as the absorber space level array is now available from
-!   the TRANSMITTANCE_COEFFICIENTS module.
+!   the transmittance_coefficients module.
 !
-! Revision 1.6  2001/07/12 18:38:28  paulv
-! - Use of ABSORBER_SPACE module now includes an ONLY clause so that the
+! revision 1.6  2001/07/12 18:38:28  paulv
+! - use of absorber_space module now includes an only clause so that the
 !   absorber_space_levels is all that is available.
-! - Direction specification changed from
-!     IF ( direction == 0 ) THEN
-!       ...do DOWNWELLING STUFF...
-!     ELSE
-!       ...do UPWELLING STUFF...
-!     END IF
+! - direction specification changed from
+!     if ( direction == 0 ) then
+!       ...do downwelling stuff...
+!     else
+!       ...do upwelling stuff...
+!     end if
 !   to
-!     IF ( direction == UP ) THEN
-!       ...do UPWELLING STUFF...
-!     ELSE
-!       ...do DOWNWELLING STUFF...
-!     END IF
+!     if ( direction == up ) then
+!       ...do upwelling stuff...
+!     else
+!       ...do downwelling stuff...
+!     end if
 !   since the upwelling case is required for every call, but the downwelling
-!   may not be. Also, the parameter UP is now used in the IF rather than
+!   may not be. also, the parameter up is now used in the if rather than
 !   an actual number (0 in this case).
-! - Changed
-!      od_tolerance = ABS( ALOG( TOLERANCE ) )
+! - changed
+!      od_tolerance = abs( alog( tolerance ) )
 !   to
-!      od_tolerance = ABS( LOG( TOLERANCE ) )
-! - Corrected bug in the forward calculation of the absorption coefficient
-!   in TRANSMITTANCE_AD. The offset coefficients are defined as
+!      od_tolerance = abs( log( tolerance ) )
+! - corrected bug in the forward calculation of the absorption coefficient
+!   in transmittance_ad. the offset coefficients are defined as
 !     b1o = tau_coefficients( 0, k1, l, j )
 !     b2o = tau_coefficients( 0, k2, l, j )
 !   and the offset term was initialised as
 !     absorption_coefficient = b2 + ( gradient * ( b1o - b2o ) )
 !   instead of
 !     absorption_coefficient = b2o + ( gradient * ( b1o - b2o ) )
-!   where in the former, B2 was specified rather than B2O
+!   where in the former, b2 was specified rather than b2o
 !
-! Revision 1.5  2001/05/29 18:00:08  paulv
-! - Added adjoint form of the transmittance calculation.
-! - Removed the FIND_ABSORBER_SPACE_LAYER  routine. Now resides in the
-!   ABSORBER_PROFILE module. The absorber space bracket layer indices are
+! revision 1.5  2001/05/29 18:00:08  paulv
+! - added adjoint form of the transmittance calculation.
+! - removed the find_absorber_space_layer  routine. now resides in the
+!   absorber_profile module. the absorber space bracket layer indices are
 !   now passed as arguments from the calling routine.
-! - The predictor indices and transmittance coefficients are no longer passed
+! - the predictor indices and transmittance coefficients are no longer passed
 !   as arguments but read from the transmittance_coefficients module.
 !
-! Revision 1.4  2000/11/14 18:42:32  paulv
-! - Merged branch incorporating tangent-linear code into main truck.
-!   Optical depth debug code still present.
+! revision 1.4  2000/11/14 18:42:32  paulv
+! - merged branch incorporating tangent-linear code into main truck.
+!   optical depth debug code still present.
 !
-! Revision 1.3.1.2  2000/11/14 18:34:56  paulv
-! - Finished adding tangent-linear code. Optical depth debug code still
+! revision 1.3.1.2  2000/11/14 18:34:56  paulv
+! - finished adding tangent-linear code. optical depth debug code still
 !   present - output sent to unit numbers 51 and 61.
 !
-! Revision 1.3.1.1  2000/11/09 20:49:35  paulv
-! - Adding tangent linear forms of the optical depth and transmittance
-!   computation. IN PROGRESS AND INCOMPLETE.
-! - Removed code that finds the absorber space bracket layers into its own
-!   subroutine. Both the forward and tangent linear routines use the same
+! revision 1.3.1.1  2000/11/09 20:49:35  paulv
+! - adding tangent linear forms of the optical depth and transmittance
+!   computation. in progress and incomplete.
+! - removed code that finds the absorber space bracket layers into its own
+!   subroutine. both the forward and tangent linear routines use the same
 !   search method.
 !
-! Revision 1.3  2000/08/31 19:36:33  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.3  2000/08/31 19:36:33  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.2  2000/08/24 16:55:33  paulv
-! - Added optional NO_STANDARD input argument to the COMPUTE_TRANSMITTANCE
+! revision 1.2  2000/08/24 16:55:33  paulv
+! - added optional no_standard input argument to the compute_transmittance
 !   subprogram to prevent the (angle independent) standard predictors from being
 !   recalculated when only the path angle has changed in the calling procedure.
-! - The  profile data integration has been removed from the COMPUTE_TRANSMITTANCE
-!   subprogram and is now performed outside of this module in the ABSORBER_PROFILE
-!   module. This has a number of consequences:
-!   o The VIEW_ANGLE input argument was removed and replaced with the path-angle
-!     scaled ABSORBER_AMOUNTS argument.
-!   o The interface pressure and ozone profile data are no longer required
+! - the  profile data integration has been removed from the compute_transmittance
+!   subprogram and is now performed outside of this module in the absorber_profile
+!   module. this has a number of consequences:
+!   o the view_angle input argument was removed and replaced with the path-angle
+!     scaled absorber_amounts argument.
+!   o the interface pressure and ozone profile data are no longer required
 !     and have been removed from the input argument list.
-! - All profile integration and predictor calculation code has been removed
-!   from the COMPUTE_TRANSMITTANCE subprogram.
-! - Updated module and subprogram documentation.
+! - all profile integration and predictor calculation code has been removed
+!   from the compute_transmittance subprogram.
+! - updated module and subprogram documentation.
 !
-! Revision 1.1  2000/08/22 15:57:26  paulv
-! Initial checkin.
+! revision 1.1  2000/08/22 15:57:26  paulv
+! initial checkin.
 !
 !
 !

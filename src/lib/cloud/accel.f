@@ -1,137 +1,137 @@
 
 
-      SUBROUTINE ACCEL(ISCRPT,NPLAN,NREL,NMASS,NPINMS,T)
-      IMPLICIT REAL*8 (A,B,C,D,E,F,G,H,O,P,Q,R,S,T,U,V,W,X,Y,Z)
-      DOUBLE PRECISION MASS,KSQ,KSDM15,LMA
-      DIMENSION MASS(13),X(13),Y(13),Z(13),XDD(13),YDD(13),ZDD(13)
-     .,UX(13),UY(13),UZ(13)
-      REAL*8 MX,MY,MZ
-      COMMON XP(13,59),YP(13,59),ZP(13,59),XDDP(13,59),YDDP(13,59)
-     .,ZDDP(13,59),XD(13),YD(13),ZD(13),KSQ
-      DATA MASS/3.040432924D-6,1.660136795D-7,2.447839598D-6
-     .         ,3.227149362D-7,9.547861040D-4,2.858367872D-4
-     .         ,4.372731645D-5,5.177591384D-5,3.333333333D-7
-     .         ,5.9       D-10,1.3       D-10,1.2       D-10,0.D0/
-      DATA FOURM/3.948251502D-8/,CM2/3.335661215D-5/
-      DATA EMRAT/81.3007D0/,F1/.9878494351D0/,F2/.0121505649/
-      DATA CLTY,CLTZ/-.3978811766D0,.9174369566D0/
-      DATA EMRATP1/82.3007D0/,T1950/2433282.423D0/
+      subroutine accel(iscrpt,nplan,nrel,nmass,npinms,t)
+      implicit real*8 (a,b,c,d,e,f,g,h,o,p,q,r,s,t,u,v,w,x,y,z)
+      double precision mass,ksq,ksdm15,lma
+      dimension mass(13),x(13),y(13),z(13),xdd(13),ydd(13),zdd(13)
+     .,ux(13),uy(13),uz(13)
+      real*8 mx,my,mz
+      common xp(13,59),yp(13,59),zp(13,59),xddp(13,59),yddp(13,59)
+     .,zddp(13,59),xd(13),yd(13),zd(13),ksq
+      data mass/3.040432924d-6,1.660136795d-7,2.447839598d-6
+     .         ,3.227149362d-7,9.547861040d-4,2.858367872d-4
+     .         ,4.372731645d-5,5.177591384d-5,3.333333333d-7
+     .         ,5.9       d-10,1.3       d-10,1.2       d-10,0.d0/
+      data fourm/3.948251502d-8/,cm2/3.335661215d-5/
+      data emrat/81.3007d0/,f1/.9878494351d0/,f2/.0121505649/
+      data clty,cltz/-.3978811766d0,.9174369566d0/
+      data emratp1/82.3007d0/,t1950/2433282.423d0/
 
-      DO I=1,NPLAN
-          X(I)=XP(I,ISCRPT)
-          Y(I)=YP(I,ISCRPT)
-          Z(I)=ZP(I,ISCRPT)
+      do i=1,nplan
+          x(i)=xp(i,iscrpt)
+          y(i)=yp(i,iscrpt)
+          z(i)=zp(i,iscrpt)
       enddo
-C
-C CALCULATE MUTUAL ACCELERATIONS BETWEEN SUN AND EACH PLANET
-      DO I=1,NPLAN
-          RLCM1=1.D0/SQRT(X(I)*X(I)+Y(I)*Y(I)+Z(I)*Z(I))
-          RLCM3=RLCM1*RLCM1*RLCM1
+c
+c calculate mutual accelerations between sun and each planet
+      do i=1,nplan
+          rlcm1=1.d0/sqrt(x(i)*x(i)+y(i)*y(i)+z(i)*z(i))
+          rlcm3=rlcm1*rlcm1*rlcm1
 
-          IF(I.eq.1)then
+          if(i.eq.1)then
 
-!             CALCULATE NEWTONIAN SOLAR ACCELERATION OF EARTH MOON SYSTEM
+!             calculate newtonian solar acceleration of earth moon system
 
-!             Get Earth Moon vector for equinox of date
-              CALL MOON_BRWN(T,MX,MY,MZ)
+!             get earth moon vector for equinox of date
+              call moon_brwn(t,mx,my,mz)
 
-!             Convert vector to 1950 coordinates
-              CALL PRECES(T,T1950,MX,MY,MZ,1)
+!             convert vector to 1950 coordinates
+              call preces(t,t1950,mx,my,mz,1)
 
-              PX = -MX/EMRATP1
-              PY = -MY/EMRATP1
-              PZ = -MZ/EMRATP1
+              px = -mx/emratp1
+              py = -my/emratp1
+              pz = -mz/emratp1
 
-              XE=X(1)+PX
-              YE=Y(1)+PY
-              ZE=Z(1)+PZ
+              xe=x(1)+px
+              ye=y(1)+py
+              ze=z(1)+pz
 
-              XM=X(1)-PX*EMRAT
-              YM=Y(1)-PY*EMRAT
-              ZM=Z(1)-PZ*EMRAT
+              xm=x(1)-px*emrat
+              ym=y(1)-py*emrat
+              zm=z(1)-pz*emrat
 
-              ARGE=-KSQ/SQRT(XE*XE+YE*YE+ZE*ZE)**3
-              ARGM=-KSQ/SQRT(XM*XM+YM*YM+ZM*ZM)**3
+              arge=-ksq/sqrt(xe*xe+ye*ye+ze*ze)**3
+              argm=-ksq/sqrt(xm*xm+ym*ym+zm*zm)**3
 
-              XDD(I)=ARGE*XE*F1+ARGM*XM*F2
-              YDD(I)=ARGE*YE*F1+ARGM*YM*F2
-              ZDD(I)=ARGE*ZE*F1+ARGM*ZM*F2
+              xdd(i)=arge*xe*f1+argm*xm*f2
+              ydd(i)=arge*ye*f1+argm*ym*f2
+              zdd(i)=arge*ze*f1+argm*zm*f2
 
           else
-              ARG=-KSQ*RLCM3
-              XDD(I)=ARG*X(I)
-              YDD(I)=ARG*Y(I)
-              ZDD(I)=ARG*Z(I)
+              arg=-ksq*rlcm3
+              xdd(i)=arg*x(i)
+              ydd(i)=arg*y(i)
+              zdd(i)=arg*z(i)
 
-          endif ! I .eq. 1
+          endif ! i .eq. 1
 
-30        IF(NREL.GE.I)THEN
+30        if(nrel.ge.i)then
 
-!             ADD PERTURBATIVE ACCELERATION DUE TO GENERAL RELATIVITY
-              RDRD=X(I)*XD(I)+Y(I)*YD(I)+Z(I)*ZD(I)
-              VSQ=XD(I)*XD(I)+YD(I)*YD(I)+ZD(I)*ZD(I)
-              A=FOURM*RLCM1-VSQ*CM2
-              B=FOURM*RDRD*RLCM3
-              XDD(I)=XDD(I)*(1.D0-A)+B*XD(I)
-              YDD(I)=YDD(I)*(1.D0-A)+B*YD(I)
-              ZDD(I)=ZDD(I)*(1.D0-A)+B*ZD(I)
+!             add perturbative acceleration due to general relativity
+              rdrd=x(i)*xd(i)+y(i)*yd(i)+z(i)*zd(i)
+              vsq=xd(i)*xd(i)+yd(i)*yd(i)+zd(i)*zd(i)
+              a=fourm*rlcm1-vsq*cm2
+              b=fourm*rdrd*rlcm3
+              xdd(i)=xdd(i)*(1.d0-a)+b*xd(i)
+              ydd(i)=ydd(i)*(1.d0-a)+b*yd(i)
+              zdd(i)=zdd(i)*(1.d0-a)+b*zd(i)
 
           endif
 
-          UX(I)=XDD(I)*MASS(I)
-          UY(I)=YDD(I)*MASS(I)
-          UZ(I)=ZDD(I)*MASS(I)
+          ux(i)=xdd(i)*mass(i)
+          uy(i)=ydd(i)*mass(i)
+          uz(i)=zdd(i)*mass(i)
 
-      enddo ! N = 1,nplan
+      enddo ! n = 1,nplan
 
-C
-C ADD IN MUTUAL ACCELERATIONS BETWEEN PAIRS OF PLANETS
-      DO I=1,NPINMS
-          I1=I+1
-          DO J=I1,NPLAN
-              XDELT=X(J)-X(I)
-              YDELT=Y(J)-Y(I)
-              ZDELT=Z(J)-Z(I)
-              KSDM15=KSQ/SQRT(XDELT*XDELT+YDELT*YDELT+ZDELT*ZDELT)**3
-              ARG=KSDM15*MASS(J)
-              XDD(I)=XDD(I)+ARG*XDELT
-              YDD(I)=YDD(I)+ARG*YDELT
-              ZDD(I)=ZDD(I)+ARG*ZDELT
-              ARG=-KSDM15*MASS(I)
-              XDD(J)=XDD(J)+ARG*XDELT
-              YDD(J)=YDD(J)+ARG*YDELT
-              ZDD(J)=ZDD(J)+ARG*ZDELT
+c
+c add in mutual accelerations between pairs of planets
+      do i=1,npinms
+          i1=i+1
+          do j=i1,nplan
+              xdelt=x(j)-x(i)
+              ydelt=y(j)-y(i)
+              zdelt=z(j)-z(i)
+              ksdm15=ksq/sqrt(xdelt*xdelt+ydelt*ydelt+zdelt*zdelt)**3
+              arg=ksdm15*mass(j)
+              xdd(i)=xdd(i)+arg*xdelt
+              ydd(i)=ydd(i)+arg*ydelt
+              zdd(i)=zdd(i)+arg*zdelt
+              arg=-ksdm15*mass(i)
+              xdd(j)=xdd(j)+arg*xdelt
+              ydd(j)=ydd(j)+arg*ydelt
+              zdd(j)=zdd(j)+arg*zdelt
 
           enddo
 
       enddo
-C
-C CALCULATE TOTAL ACCELERATION OF SUN
-      SUMUX=UX(1)
-      SUMUY=UY(1)
-      SUMUZ=UZ(1)
+c
+c calculate total acceleration of sun
+      sumux=ux(1)
+      sumuy=uy(1)
+      sumuz=uz(1)
 
-      DO I=2,NMASS
-          SUMUX=SUMUX+UX(I)
-          SUMUY=SUMUY+UY(I)
-          SUMUZ=SUMUZ+UZ(I)
+      do i=2,nmass
+          sumux=sumux+ux(i)
+          sumuy=sumuy+uy(i)
+          sumuz=sumuz+uz(i)
 
       enddo
-C
-C COMPUTE ACC. RELATIVE TO SUN = TOTAL ACC. - ACC. OF SUN
-      DO I=1,NPLAN
-          XDD(I)=XDD(I)+SUMUX
-          YDD(I)=YDD(I)+SUMUY
-          ZDD(I)=ZDD(I)+SUMUZ
+c
+c compute acc. relative to sun = total acc. - acc. of sun
+      do i=1,nplan
+          xdd(i)=xdd(i)+sumux
+          ydd(i)=ydd(i)+sumuy
+          zdd(i)=zdd(i)+sumuz
       enddo
 
-C
-C PLACE ACCELERATIONS IN TWO DIMENSIONAL ARRAY
-      DO I=1,NPLAN
-          XDDP(I,ISCRPT)=XDD(I)
-          YDDP(I,ISCRPT)=YDD(I)
-          ZDDP(I,ISCRPT)=ZDD(I)
+c
+c place accelerations in two dimensional array
+      do i=1,nplan
+          xddp(i,iscrpt)=xdd(i)
+          yddp(i,iscrpt)=ydd(i)
+          zddp(i,iscrpt)=zdd(i)
       enddo
 
-      RETURN
-      END
+      return
+      end

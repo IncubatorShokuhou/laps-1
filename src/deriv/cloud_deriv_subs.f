@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -43,33 +43,33 @@ cdis
      1        ,thresh_thin_lwc_ice
      1        ,pres_3d,slwc,cice,istatus)
 
-        use mem_namelist, ONLY: r_missing_data
+        use mem_namelist, only: r_missing_data
         use cloud_rad
 
         include 'laps_cloud.inc'
 
-!       Insert LWC and ICE in areas of thin cloud layers
-        real clouds_3d(ni,nj,kcld)       ! Input cloud fraction   
-        real clouds_3d_pres(ni,nj,nk)    ! Input
-        real cldalb_in(ni,nj)            ! Input
-        real heights_3d(ni,nj,nk)        ! Input
-        real temp_3d(ni,nj,nk)           ! Input
-        real slwc(ni,nj,nk)              ! Input/Output (g/m**3)
-        real cice(ni,nj,nk)              ! Input/Output (g/m**3)
-        real pres_3d(ni,nj,nk)           ! Input
-        real pressures_pa(nk)            ! Local
+!       insert lwc and ice in areas of thin cloud layers
+        real clouds_3d(ni,nj,kcld)       ! input cloud fraction   
+        real clouds_3d_pres(ni,nj,nk)    ! input
+        real cldalb_in(ni,nj)            ! input
+        real heights_3d(ni,nj,nk)        ! input
+        real temp_3d(ni,nj,nk)           ! input
+        real slwc(ni,nj,nk)              ! input/output (g/m**3)
+        real cice(ni,nj,nk)              ! input/output (g/m**3)
+        real pres_3d(ni,nj,nk)           ! input
+        real pressures_pa(nk)            ! local
         real k_to_c
 
         integer max_layers
         parameter (max_layers=100)
 
-        real a(max_layers)       ! Cloud fractions of layers
-        integer ik(max_layers)   ! Height level representative of cloud layers
-        integer ktop(max_layers) ! Height level representative of cloud layers
-        integer kbot(max_layers) ! Height level representative of cloud layers
-        integer lyr_indx(KCLOUD) ! Layer index for each cloud analysis level
+        real a(max_layers)       ! cloud fractions of layers
+        integer ik(max_layers)   ! height level representative of cloud layers
+        integer ktop(max_layers) ! height level representative of cloud layers
+        integer kbot(max_layers) ! height level representative of cloud layers
+        integer lyr_indx(kcloud) ! layer index for each cloud analysis level
 
-        write(6,*)' Subroutine insert_thin_lwc_ice'
+        write(6,*)' subroutine insert_thin_lwc_ice'
 
         zero = 0.
 
@@ -79,10 +79,10 @@ cdis
      1  '  i   j   k thick    tau     cvr    t_c     slwc     cice' 
      1  ,'   ilyr nlyr'
 
-!       Convert from cloud cover to discreet cloud layer indices (cvr to a)
+!       convert from cloud cover to discreet cloud layer indices (cvr to a)
         do i = 1,ni
         do j = 1,nj
-          if(i .eq. idb .AND. j .eq. jdb)then
+          if(i .eq. idb .and. j .eq. jdb)then
             idebug = 1
           else
             idebug = 0
@@ -102,7 +102,7 @@ cdis
              endif
 
              if(clouds_3d(i,j,k)   .ge. thresh_thin_lwc_ice .and.
-     1          clouds_3d_u        .lt. thresh_thin_lwc_ice)then ! Top of layer
+     1          clouds_3d_u        .lt. thresh_thin_lwc_ice)then ! top of layer
                 nlyr = nlyr + 1
                 a(nlyr) = clouds_3d(i,j,k)
                 ik(nlyr) = k
@@ -110,25 +110,25 @@ cdis
 
              else
                 if(nlyr .ge. 1)then
-                    if(clouds_3d(i,j,k) .gt. a(nlyr))then ! Max within layer
+                    if(clouds_3d(i,j,k) .gt. a(nlyr))then ! max within layer
                         a(nlyr) = clouds_3d(i,j,k)
                         ik(nlyr) = k
                     endif
                 endif
              endif
 
-             if(clouds_3d(i,j,k) .ge. thresh_thin_lwc_ice)then   ! Still Within layer
+             if(clouds_3d(i,j,k) .ge. thresh_thin_lwc_ice)then   ! still within layer
                  lyr_indx(k) = nlyr
                  kbot(nlyr) = k
-             else                               ! Below layer
+             else                               ! below layer
                  lyr_indx(k) = 0
              endif
 
           enddo ! k
 
-!         Set up layer thickness, mean svp arrays
+!         set up layer thickness, mean svp arrays
 
-!         Find thickness of layer
+!         find thickness of layer
           do ilyr = 1,nlyr
               if(kbot(ilyr) .eq. 1)then
                   cloud_base = cld_hts(1)
@@ -137,8 +137,8 @@ cdis
      1                              +  cld_hts(kbot(ilyr)-1)  )
               endif
 
-              if(ktop(ilyr) .eq. KCLOUD)then
-                  cloud_top = cld_hts(KCLOUD)
+              if(ktop(ilyr) .eq. kcloud)then
+                  cloud_top = cld_hts(kcloud)
               else
                   cloud_top =  0.5 * ( cld_hts(ktop(ilyr)  )
      1                              +  cld_hts(ktop(ilyr)+1)  )
@@ -146,15 +146,15 @@ cdis
 
               thickness = max(cloud_top - cloud_base,1.)
 
-!             Compute the condensate concentration within the layer, the maximum
+!             compute the condensate concentration within the layer, the maximum
 !             cloud cover for the layer is assummed to represent average of
 !             the whole layer.
 
-!             Improvements are being considered based on this reference:
-!             http://curry.eas.gatech.edu/MAP/pdf/mcfheyms97.pdf
+!             improvements are being considered based on this reference:
+!             http://curry.eas.gatech.edu/map/pdf/mcfheyms97.pdf
 
               if(a(ilyr) .lt. 0.999)then
-                  tau = -log(1. - a(ilyr))                        ! Optical depth
+                  tau = -log(1. - a(ilyr))                        ! optical depth
                   tau = min(tau,30.)      
               else
                   tau = 30.
@@ -162,8 +162,8 @@ cdis
 
               scattering_coeff = tau / thickness                  ! meters**-1
 
-!             Convert from implied albedo to column optical depth
-!             Should maximum albedo of whole cloud column be used instead of
+!             convert from implied albedo to column optical depth
+!             should maximum albedo of whole cloud column be used instead of
 !             just this layer?
 !             albarg = min(a(ilyr),0.930) ! bounded cloud fraction
 
@@ -183,21 +183,21 @@ cdis
 
               if(idebug .eq. 1)then
                   write(6,11)ilyr,a(ilyr),albarg,cloud_od_l,cloud_od_i
-11                format(' CTR ilyr,a,albarg/cloud_od_l/cloud_od_i'
+11                format(' ctr ilyr,a,albarg/cloud_od_l/cloud_od_i'
      1                             ,i3,4f9.4)
               endif
 
               scattering_coeff_l = tau_l / thickness              ! meters**-1
               scattering_coeff_i = tau_i / thickness              ! meters**-1
 
-!             Note tau = 3./2. * LWP / reff
-!                  LWP = (tau / 1.5) * reff
-!                  Density = (alpha / 1.5) * reff
-!             Is scattering efficiency (Q) being accounted for and is density 
-!             being overestimated by a factor of ~2? Consider adding new
-!             Q parameters from module 'cloud_rad'.
+!             note tau = 3./2. * lwp / reff
+!                  lwp = (tau / 1.5) * reff
+!                  density = (alpha / 1.5) * reff
+!             is scattering efficiency (q) being accounted for and is density 
+!             being overestimated by a factor of ~2? consider adding new
+!             q parameters from module 'cloud_rad'.
 
-!             Ice Clouds
+!             ice clouds
               rmvd = .000060                                      ! meters     (60 microns)
               rma =         3.14 * (rmvd/2.) ** 2                 ! meters**2  (pi r**2)
               rmv = 4./3. * 3.14 * (rmvd/2.) ** 3                 ! meters**3  (4/3 pi r**3)
@@ -208,7 +208,7 @@ cdis
               density_ave_i = (scattering_coeff_i/1.5) * reff_cice
      1                                                 * h20_density
 
-!             Liquid Clouds
+!             liquid clouds
               rmvd = .000020                                      ! meters     (20 microns)
               rma =         3.14 * (rmvd/2.) ** 2                 ! meters**2  (pi r**2)
               rmv = 4./3. * 3.14 * (rmvd/2.) ** 3                 ! meters**3  (4/3 pi r**3)
@@ -219,12 +219,12 @@ cdis
               density_ave_l = (scattering_coeff_l/1.5) * reff_clwc
      1                                                 * h20_density
 
-!             Determine LAPS pressure levels of cloud base and top
-!             QC cases where cloud layer on the height grid is near or above 
-!                                                the top LAPS pressure level
+!             determine laps pressure levels of cloud base and top
+!             qc cases where cloud layer on the height grid is near or above 
+!                                                the top laps pressure level
 
               if(cloud_base .gt. heights_3d(i,j,nk) - 2.)then ! skip layer
-                  write(6,*)' WARNING: Skip layer '
+                  write(6,*)' warning: skip layer '
      1                     ,i,j,cloud_base,cloud_top
                   go to 100            
               endif
@@ -235,7 +235,7 @@ cdis
               if(cloud_top  .gt. heights_3d(i,j,nk))then
                   cloud_top_before = cloud_top
                   cloud_top  =   heights_3d(i,j,nk)
-                  write(6,*)' WARNING: Clip layer ',i,j,cloud_base
+                  write(6,*)' warning: clip layer ',i,j,cloud_base
      1                     ,cloud_top_before,cloud_top      
                   k_1d_top = nk ! avoids roundoff error at very top of domain
                   istatus_top = 1
@@ -247,11 +247,11 @@ cdis
 
               endif
 
-!             We have now defined a cloud base and top
+!             we have now defined a cloud base and top
               if(       k_1d_base .lt. 1 .or. k_1d_base .gt. nk  
      1             .or. k_1d_top  .lt. 1 .or. k_1d_top  .gt. nk
      1             .or. istatus_base .ne. 1 .or. istatus_top .ne. 1)then       
-                  write(6,*)' ERROR: Bad return from height_to_zcoord3'       
+                  write(6,*)' error: bad return from height_to_zcoord3'       
                   write(6,*)k_1d_base,istatus_base,cloud_base
      1                     ,heights_3d(i,j,1)
                   write(6,*)k_1d_top,istatus_top,cloud_top
@@ -260,18 +260,18 @@ cdis
                   return
               endif
 
-!             Insert density value into LWC/ICE field
+!             insert density value into lwc/ice field
               do k = k_1d_base,k_1d_top
 
-!                 Test if no condensate is currently at the grid point from the
-!                 modified S-F method that was only applied to thick clouds
+!                 test if no condensate is currently at the grid point from the
+!                 modified s-f method that was only applied to thick clouds
                   if((slwc(i,j,k) .eq. zero .and. 
      1                cice(i,j,k) .eq. zero       )  
-     1                          .OR. ! use density value from cloud
-     1                               ! optical depth when available, instead of S-F
+     1                          .or. ! use density value from cloud
+     1                               ! optical depth when available, instead of s-f
      1               cldalb_in(i,j) .ne. r_missing_data)then
 
-!                   Density is normalized according to cloud fraction within layer
+!                   density is normalized according to cloud fraction within layer
                     density_l = density_ave_l * clouds_3d_pres(i,j,k) 
      1                                      / a(ilyr)
 
@@ -284,13 +284,13 @@ cdis
                     temp1_k = c_to_k(temp1_c)
                     temp2_k = c_to_k(temp2_c)
 
-                    if(temp_3d(i,j,k) .le. temp2_k)then          ! ICE
+                    if(temp_3d(i,j,k) .le. temp2_k)then          ! ice
                         cice(i,j,k) = density_i
                         tau_eff = tau_i 
-                    elseif(temp_3d(i,j,k) .ge. temp1_k)then      ! LWC
+                    elseif(temp_3d(i,j,k) .ge. temp1_k)then      ! lwc
                         slwc(i,j,k) = density_l
                         tau_eff = tau_l 
-                    else                                        ! Mixed
+                    else                                        ! mixed
                         frac = (temp_3d(i,j,k) - temp2_k) 
      1                               / (temp1_k - temp2_k)
                         slwc(i,j,k) = density_l * frac
@@ -299,7 +299,7 @@ cdis
                     endif
 
 
-                    if(iwrite .lt. 30. .OR. idebug .eq. 1)then
+                    if(iwrite .lt. 30. .or. idebug .eq. 1)then
                         iwrite = iwrite + 1
                         write(6,1)i,j,k,thickness,tau_eff               
      1                           ,clouds_3d_pres(i,j,k)
@@ -309,15 +309,15 @@ cdis
 1                       format(3i4,f7.0,2f7.3,f7.1,2f9.4,2i5)
                     endif
 
-                  else ! Write out some thick cloud values
-                    if(iwrite .lt. 30. .OR. idebug .eq. 1)then
+                  else ! write out some thick cloud values
+                    if(iwrite .lt. 30. .or. idebug .eq. 1)then
                         iwrite = iwrite + 1
                         write(6,2)i,j,k,thickness,tau             
      1                           ,clouds_3d_pres(i,j,k)
      1                           ,k_to_c(temp_3d(i,j,k))
      1                           ,slwc(i,j,k),cice(i,j,k)
      1                           ,ilyr,nlyr
-2                       format(3i4,f7.0,f8.3,f7.3,f7.1,2f9.4,2i5,' K')
+2                       format(3i4,f7.0,f8.3,f7.3,f7.1,2f9.4,2i5,' k')
                     endif
 
                   endif
@@ -340,7 +340,7 @@ cdis
      1              ,t_sfc_k
      1              ,cloud_ceiling,r_missing_data)
 
-!       Adds drizzle to sfc precip type using SAO WX string data
+!       adds drizzle to sfc precip type using sao wx string data
 
         real cloud_ceiling(ni,nj)
         real pcp_type_2d(ni,nj)
@@ -348,25 +348,25 @@ cdis
         real lat(ni,nj),lon(ni,nj)
         real t_sfc_k(ni,nj)
 
-!       Declarations for LSO file stuff
+!       declarations for lso file stuff
         real lat_s(maxstns), lon_s(maxstns)
         character wx_s(maxstns)*8, obstype(maxstns)*8
 
         logical l_valid_sta(maxstns)
 
-        write(6,*)' Adding drizzle information from SAOs'
+        write(6,*)' adding drizzle information from saos'
 
         n_valid_sta = 0
 
-!       Set Up I's and J's of the SAOs
+!       set up i's and j's of the saos
         do ista = 1,n_obs_pos_b
             call latlon_to_rlapsgrid(lat_s(ista),lon_s(ista)
      1                   ,lat,lon,ni,nj,ri_s(ista),rj_s(ista),istatus)
 
             l_valid_sta(ista) = .false.
 
-!           Does this station report precip?
-            if(wx_s(ista)(1:7) .ne. 'UNKNOWN')then
+!           does this station report precip?
+            if(wx_s(ista)(1:7) .ne. 'unknown')then
                 l_valid_sta(ista) = .true.
                 n_valid_sta = n_valid_sta + 1
             endif
@@ -387,19 +387,19 @@ cdis
                 if(pcp_type_2d(i,j) .eq. 0.)then
                     n_no_pcp = n_no_pcp + 1
 
-!                   Determine nearest station to the grid point
-!                   Can be inside or outside the domain
+!                   determine nearest station to the grid point
+!                   can be inside or outside the domain
                     distsq_min = 999999.
                     ista_nearest = 0
 
                     do ista = 1,n_obs_pos_b
 
-!                       Does this station report precip?
+!                       does this station report precip?
                         if(l_valid_sta(ista))then
-!                           Calculate distance of stations (grid points **2)
+!                           calculate distance of stations (grid points **2)
                             distsq = (float(i) - ri_s(ista))**2
      1                             + (float(j) - rj_s(ista))**2
-                            if(distsq .lt. distsq_min)then ! Nearest Station
+                            if(distsq .lt. distsq_min)then ! nearest station
                                 distsq_min = distsq
                                 ista_nearest = ista
                             endif
@@ -407,25 +407,25 @@ cdis
 
                     enddo ! ista
 
-                    if(ista_nearest .ne. 0)then ! We found a reporting station
-!                       Parse nearest station
+                    if(ista_nearest .ne. 0)then ! we found a reporting station
+!                       parse nearest station
                         i_l = 0
 
-                        call parse_wx_pcp(wx_s(ista_nearest),'L'
+                        call parse_wx_pcp(wx_s(ista_nearest),'l'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_l = 1
 
-                        call parse_wx_pcp(wx_s(ista_nearest),'F'
+                        call parse_wx_pcp(wx_s(ista_nearest),'f'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_l = 1
 
-                        if(i_l .eq. 1)then ! L or ZL Present
+                        if(i_l .eq. 1)then ! l or zl present
                             if(t_sfc_k(i,j) .gt. 273.15)then
                                 n_l = n_l + 1
-                                pcp_type_2d(i,j) = 6.0 ! Drizzle
+                                pcp_type_2d(i,j) = 6.0 ! drizzle
                             else
                                 n_zl = n_zl + 1
-                                pcp_type_2d(i,j) = 7.0 ! Freezing Drizzle
+                                pcp_type_2d(i,j) = 7.0 ! freezing drizzle
                             endif
                         endif
                     endif
@@ -451,9 +451,9 @@ cdis
      1              ,dbz_low_2d
      1              ,cvr_max,r_missing_data)
 
-!       Adds snow to sfc precip type using SAO WX string data
-!       1995 Nov 29 S. Albers - Improve use of SAO's to add snow in PTT field.
-!                               Cloud ceiling threshold replaced with
+!       adds snow to sfc precip type using sao wx string data
+!       1995 nov 29 s. albers - improve use of sao's to add snow in ptt field.
+!                               cloud ceiling threshold replaced with
 !                               thresholds on cloud cover and sfc dewpoint
 !                               depression.
 
@@ -467,18 +467,18 @@ cdis
 
         integer ipresent_s(maxstns)
 
-!       Declarations for LSO file stuff
+!       declarations for lso file stuff
         real lat_s(maxstns), lon_s(maxstns)
         character wx_s(maxstns)*8, obstype(maxstns)*8
 
         logical l_valid_sta(maxstns)
 
-        write(6,*)' Adding snow information from SAOs'
+        write(6,*)' adding snow information from saos'
 
         n_valid_sta = 0
         ipresent_s = 0
 
-!       Set Up I's and J's of the SAOs
+!       set up i's and j's of the saos
         do ista = 1,n_obs_pos_b
             call latlon_to_rlapsgrid(lat_s(ista),lon_s(ista)
      1                   ,lat,lon,ni,nj,ri_s(ista),rj_s(ista),istatus)
@@ -491,11 +491,11 @@ cdis
             if(    i_sta .ge. 1 .and. i_sta .le. ni
      1       .and. j_sta .ge. 1 .and. j_sta .le. nj)then
 
-!               Does this station report precip and snow?
-                if(wx_s(ista)(1:7) .ne. 'UNKNOWN')then
+!               does this station report precip and snow?
+                if(wx_s(ista)(1:7) .ne. 'unknown')then
                     l_valid_sta(ista) = .true.
                     n_valid_sta = n_valid_sta + 1
-                    call parse_wx_pcp(wx_s(ista),'S',ipresent_s(ista)
+                    call parse_wx_pcp(wx_s(ista),'s',ipresent_s(ista)
      1                               ,istatus)    
 
                 endif
@@ -512,36 +512,36 @@ cdis
 
         do i = 1,ni
         do j = 1,nj
-            if(cvr_max(i,j) .gt. 0.5)then ! Ample Cloud Cover
+            if(cvr_max(i,j) .gt. 0.5)then ! ample cloud cover
               n_cvr = n_cvr + 1
 
-              if( (t_sfc_k(i,j) - td_sfc_k(i,j)) .lt. 10.)then ! Moist air
+              if( (t_sfc_k(i,j) - td_sfc_k(i,j)) .lt. 10.)then ! moist air
                 n_moist = n_moist + 1
 
-                if(pcp_type_2d(i,j) .eq. 0.)then ! No snow diagnosed at grid pt
+                if(pcp_type_2d(i,j) .eq. 0.)then ! no snow diagnosed at grid pt
                   n_no_pcp = n_no_pcp + 1
 
-!                 Approx Wet Bulb Temp
+!                 approx wet bulb temp
                   tw_c = 0.5 * (t_sfc_k(i,j)
      1                       + td_sfc_k(i,j)) - 273.15
                   if(tw_c .le. twet_snow)then ! cold enough for snow
                     n_cold = n_cold + 1
 
-!                   Determine nearest station to the grid point
-!                   Must be inside the domain
+!                   determine nearest station to the grid point
+!                   must be inside the domain
                     distsq_min = 999999.
                     ista_nearest = 0
                     dbz_at_sta = 999.
 
                     do ista = 1,n_obs_pos_b
 
-!                       Valid station is in domain and reports precip
+!                       valid station is in domain and reports precip
                         if(l_valid_sta(ista))then
 
-!                           Calculate distance of stations (grid points **2)
+!                           calculate distance of stations (grid points **2)
                             distsq = (float(i) - ri_s(ista))**2
      1                             + (float(j) - rj_s(ista))**2
-                            if(distsq .lt. distsq_min)then ! Nearest Station
+                            if(distsq .lt. distsq_min)then ! nearest station
                                 distsq_min = distsq
                                 ista_nearest = ista
                                 i_sta = nint(ri_s(ista))
@@ -552,18 +552,18 @@ cdis
 
                     enddo ! ista
 
-                    if(ista_nearest .ne. 0)then ! We found a reporting station
-!                       Parse nearest station
+                    if(ista_nearest .ne. 0)then ! we found a reporting station
+!                       parse nearest station
                         i_s = 0
 
                         if(ipresent_s(ista_nearest) .eq. 1)i_s = 1
 
-                        if(i_s .eq. 1)then ! S present
-                            if(dbz_at_sta .le. 0.)then ! Station has no echo
+                        if(i_s .eq. 1)then ! s present
+                            if(dbz_at_sta .le. 0.)then ! station has no echo
                                 n_s = n_s + 1
-                                pcp_type_2d(i,j) = 2.0 ! Snow
+                                pcp_type_2d(i,j) = 2.0 ! snow
                             endif
-                        endif ! S present
+                        endif ! s present
                     endif ! we found a reporting station
 
                   endif ! cold enough for snow
@@ -574,7 +574,7 @@ cdis
         enddo
 
         write(6,*)' # of grid points with cvr > 0.5 = ',n_cvr
-        write(6,*)' # of grid points also with T-Td < 10 = ',n_moist
+        write(6,*)' # of grid points also with t-td < 10 = ',n_moist
         write(6,*)' # of grid points also with no precip = ',n_no_pcp
         write(6,*)' # of grid points also cold enough = ',n_cold
         write(6,*)' # of grid points with snow added =     ',n_s
@@ -590,9 +590,9 @@ cdis
      1              ,dbz_low_2d
      1              ,cvr_max,r_missing_data)
 
-!       Adds rain to sfc precip type using SAO WX string data
-!       1996 Oct 31 S. Albers - Improve use of SAO's to add rain/freezing 
-!                               rain in PTT field. Cloud ceiling threshold 
+!       adds rain to sfc precip type using sao wx string data
+!       1996 oct 31 s. albers - improve use of sao's to add rain/freezing 
+!                               rain in ptt field. cloud ceiling threshold 
 !                               replaced with thresholds on cloud cover 
 
         real cvr_max(ni,nj)
@@ -603,17 +603,17 @@ cdis
         real ri_s(maxstns), rj_s(maxstns)
         real lat(ni,nj),lon(ni,nj)
 
-!       Declarations for LSO file stuff
+!       declarations for lso file stuff
         real lat_s(maxstns), lon_s(maxstns)
         character wx_s(maxstns)*8, obstype(maxstns)*8
 
         logical l_valid_sta(maxstns)
 
-        write(6,*)' Adding rain information from stations'
+        write(6,*)' adding rain information from stations'
 
         n_valid_sta = 0
 
-!       Set Up I's and J's of the SAOs
+!       set up i's and j's of the saos
         do ista = 1,n_obs_pos_b
             call latlon_to_rlapsgrid(lat_s(ista),lon_s(ista)
      1                   ,lat,lon,ni,nj,ri_s(ista),rj_s(ista),istatus)
@@ -626,8 +626,8 @@ cdis
             if(    i_sta .ge. 1 .and. i_sta .le. ni
      1       .and. j_sta .ge. 1 .and. j_sta .le. nj)then
 
-!               Does this station report precip?
-                if(wx_s(ista)(1:7) .ne. 'UNKNOWN')then
+!               does this station report precip?
+                if(wx_s(ista)(1:7) .ne. 'unknown')then
                     l_valid_sta(ista) = .true.
                     n_valid_sta = n_valid_sta + 1
                 endif
@@ -647,25 +647,25 @@ cdis
 
         do i = 1,ni
         do j = 1,nj
-            if(cvr_max(i,j) .gt. 0.5)then ! Ample Cloud Cover
+            if(cvr_max(i,j) .gt. 0.5)then ! ample cloud cover
                 n_cvr = n_cvr + 1
-                if(pcp_type_2d(i,j) .eq. 0.)then ! No rain diagnosed at grid pt
+                if(pcp_type_2d(i,j) .eq. 0.)then ! no rain diagnosed at grid pt
                     n_no_pcp = n_no_pcp + 1
 
-!                   Determine nearest station to the grid point
-!                   Must be inside the domain
+!                   determine nearest station to the grid point
+!                   must be inside the domain
                     distsq_min = 999999.
                     ista_nearest = 0
                     dbz_at_sta = 999.
 
                     do ista = 1,n_obs_pos_b
-!                       Valid station is in domain and reports precip
+!                       valid station is in domain and reports precip
                         if(l_valid_sta(ista))then
 
-!                           Calculate distance of stations (grid points **2)
+!                           calculate distance of stations (grid points **2)
                             distsq = (float(i) - ri_s(ista))**2
      1                             + (float(j) - rj_s(ista))**2
-                            if(distsq .lt. distsq_min)then ! Nearest Station
+                            if(distsq .lt. distsq_min)then ! nearest station
                                 distsq_min = distsq
                                 ista_nearest = ista
                                 i_sta = nint(ri_s(ista))
@@ -675,42 +675,42 @@ cdis
                       endif ! valid station
                     enddo ! ista
 
-                    if(ista_nearest .ne. 0)then ! We found a reporting station
-!                       Parse nearest station
-                        call parse_wx_pcp(wx_s(ista_nearest),'R'
+                    if(ista_nearest .ne. 0)then ! we found a reporting station
+!                       parse nearest station
+                        call parse_wx_pcp(wx_s(ista_nearest),'r'
      1                                             ,ipresent_r,istatus)       
 
-                        call parse_wx_pcp(wx_s(ista_nearest),'Z'
+                        call parse_wx_pcp(wx_s(ista_nearest),'z'
      1                                             ,ipresent_zr,istatus)       
 
-                        if(ipresent_r .eq. 1)then ! R/ZR present
+                        if(ipresent_r .eq. 1)then ! r/zr present
                             n_r_sta = n_r_sta + 1
 
-                            if(dbz_at_sta .le. 0.)then ! Station has no echo
+                            if(dbz_at_sta .le. 0.)then ! station has no echo
                                 n_sta_noecho = n_sta_noecho + 1
 
-!                               Approx Wet Bulb Temp
+!                               approx wet bulb temp
                                 tw_c = 0.5 * (t_sfc_k(i,j)
      1                                     + td_sfc_k(i,j)) - 273.15
 
-                                if(ipresent_zr .eq. 0)then     ! Stn has rain
+                                if(ipresent_zr .eq. 0)then     ! stn has rain
                                     if(tw_c .gt. twet_snow)then
                                         n_r = n_r + 1
                                         pcp_type_2d(i,j) = 1.0 ! rain
-                                    else ! Wet bulb below zero (indeterminate)
+                                    else ! wet bulb below zero (indeterminate)
                                     endif
-                                elseif(ipresent_zr .eq. 1)then ! Stn has ZR    
+                                elseif(ipresent_zr .eq. 1)then ! stn has zr    
                                     n_zr_sta = n_zr_sta + 1
                                     if(t_sfc_k(i,j) .gt. 273.15)then
                                         n_r = n_r + 1
                                         pcp_type_2d(i,j) = 1.0 ! rain
-                                    else ! Dry bulb below zero
+                                    else ! dry bulb below zero
                                         n_zr = n_zr + 1
                                         pcp_type_2d(i,j) = 3.0 ! frz rain
                                     endif
                                 endif
                             endif
-                        endif ! R present
+                        endif ! r present
                     endif ! we found a reporting station
 
                 endif ! no rain diagnosed
@@ -745,10 +745,10 @@ cdis
      1              ,dbz_low_2d
      1              ,cvr_max,r_missing_data)
 
-!       Increase radar reflectivity threshold for precip if the radar has
+!       increase radar reflectivity threshold for precip if the radar has
 !       echo over the nearest station, but that station says no precip.
-!       This routine sets the precip type at such grid points to "no precip".
-!       The highest allowable reflectivity threshold for precip is 10 dbz.
+!       this routine sets the precip type at such grid points to "no precip".
+!       the highest allowable reflectivity threshold for precip is 10 dbz.
 
         real cvr_max(ni,nj)
         real pcp_type_2d(ni,nj)
@@ -758,17 +758,17 @@ cdis
         real ri_s(maxstns), rj_s(maxstns)
         real lat(ni,nj),lon(ni,nj)
 
-!       Declarations for LSO file stuff
+!       declarations for lso file stuff
         real lat_s(maxstns), lon_s(maxstns)
         character wx_s(maxstns)*8, obstype(maxstns)*8
 
-!       This routine blanks the precip type if the neighboring station has no
+!       this routine blanks the precip type if the neighboring station has no
 !       precip and the reflectivity at the grid point is less than the
 !       reflectivity at the station.
 
-        write(6,*)' Adjusting Radar Reflectivity Threshold around stns'
+        write(6,*)' adjusting radar reflectivity threshold around stns'
 
-!       Set Up I's and J's of the stns
+!       set up i's and j's of the stns
         do ista = 1,n_obs_pos_b
             call latlon_to_rlapsgrid(lat_s(ista),lon_s(ista)
      1                   ,lat,lon,ni,nj,ri_s(ista),rj_s(ista),istatus)
@@ -782,11 +782,11 @@ cdis
 
         do i = 1,ni
         do j = 1,nj
-                if(pcp_type_2d(i,j) .gt. 0.)then ! Precip diagnosed at grid pt
+                if(pcp_type_2d(i,j) .gt. 0.)then ! precip diagnosed at grid pt
                     n_pcp = n_pcp + 1
 
-!                   Determine nearest station to the grid point
-!                   Must be inside the domain
+!                   determine nearest station to the grid point
+!                   must be inside the domain
                     distsq_min = 999999.
                     ista_nearest = 0
                     dbz_at_sta = 999.
@@ -798,17 +798,17 @@ cdis
                       if(    i_sta .ge. 1 .and. i_sta .le. ni
      1                 .and. j_sta .ge. 1 .and. j_sta .le. nj)then
 
-!                       Does this station report precip?
+!                       does this station report precip?
                         if(      
-!    1                           obstype(ista)(1:4) .ne. 'MESO'
-!    1                     .and. obstype(ista)(1:4) .ne. 'CDOT'
-!    1                     .and. obstype(ista)(7:8) .ne. '1A'
-     1                           wx_s(ista)(1:7)    .ne. 'UNKNOWN'
+!    1                           obstype(ista)(1:4) .ne. 'meso'
+!    1                     .and. obstype(ista)(1:4) .ne. 'cdot'
+!    1                     .and. obstype(ista)(7:8) .ne. '1a'
+     1                           wx_s(ista)(1:7)    .ne. 'unknown'
      1                                                           )then
-!                           Calculate distance of stations (grid points **2)
+!                           calculate distance of stations (grid points **2)
                             distsq = (float(i) - ri_s(ista))**2
      1                             + (float(j) - rj_s(ista))**2
-                            if(distsq .lt. distsq_min)then ! Nearest Station
+                            if(distsq .lt. distsq_min)then ! nearest station
                                 distsq_min = distsq
                                 ista_nearest = ista
                                 dbz_at_sta = dbz_low_2d(i_sta,j_sta)
@@ -817,52 +817,52 @@ cdis
                       endif ! station in domain
                     enddo ! ista
 
-                    if(ista_nearest .ne. 0)then ! We found a reporting station
+                    if(ista_nearest .ne. 0)then ! we found a reporting station
 
-!                       Parse nearest station
+!                       parse nearest station
                         i_precip_sta = 0
 
-!                       SNOW
-                        call parse_wx_pcp(wx_s(ista_nearest),'S'
+!                       snow
+                        call parse_wx_pcp(wx_s(ista_nearest),'s'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_precip_sta = 1
 
-!                       RAIN
-                        call parse_wx_pcp(wx_s(ista_nearest),'R'
+!                       rain
+                        call parse_wx_pcp(wx_s(ista_nearest),'r'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_precip_sta = 1
 
-!                       DRIZZLE
-                        call parse_wx_pcp(wx_s(ista_nearest),'L'
+!                       drizzle
+                        call parse_wx_pcp(wx_s(ista_nearest),'l'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_precip_sta = 1
 
-!                       FRZ DRIZZLE
-                        call parse_wx_pcp(wx_s(ista_nearest),'F'
+!                       frz drizzle
+                        call parse_wx_pcp(wx_s(ista_nearest),'f'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_precip_sta = 1
 
-!                       ICE PELLETS
-                        call parse_wx_pcp(wx_s(ista_nearest),'I'
+!                       ice pellets
+                        call parse_wx_pcp(wx_s(ista_nearest),'i'
      1                                              ,ipresent,istatus)       
                         if(ipresent .eq. 1)i_precip_sta = 1
 
-                        if(i_precip_sta .eq. 0)then ! Precip absent at station
+                        if(i_precip_sta .eq. 0)then ! precip absent at station
 
                             n_no_pcp_sta = n_no_pcp_sta + 1
 
-                            if(dbz_at_sta .ge. 0.)then ! Station has echo
+                            if(dbz_at_sta .ge. 0.)then ! station has echo
                                 n_no_pcp_sta_echo =
      1                          n_no_pcp_sta_echo + 1
                                 if(dbz_low_2d(i,j) .le. dbz_at_sta .and.
      1                             dbz_low_2d(i,j) .le. 10.        )then
                                     n_subtract = n_subtract + 1
-                                    pcp_type_2d(i,j) = 0.0 ! No Precip
+                                    pcp_type_2d(i,j) = 0.0 ! no precip
                                 else
                                     n_keep_precip = n_keep_precip + 1
                                 endif
                             endif
-                        endif ! Precip present
+                        endif ! precip present
                     endif ! we found a reporting station
 
                 endif ! precip diagnosed
@@ -891,49 +891,49 @@ cdis
  
         ipresent = 0
 
-!       SNOW
-        if(c1_pcp .eq. 'S')then
-            call parse_wx_string(c8_wx,'SN',iparse,istatus)           
+!       snow
+        if(c1_pcp .eq. 's')then
+            call parse_wx_string(c8_wx,'sn',iparse,istatus)           
             if(iparse .eq. 1)ipresent = 1
 
-            call parse_wx_string(c8_wx,'SG',iparse,istatus)           
+            call parse_wx_string(c8_wx,'sg',iparse,istatus)           
             if(iparse .eq. 1)ipresent = 1
 
-            call parse_wx_string(c8_wx,'IC',iparse,istatus)           
-            if(iparse .eq. 1)ipresent = 1
-        endif
-
-!       RAIN
-        if(c1_pcp .eq. 'R')then
-            call parse_wx_string(c8_wx,'RA',iparse,istatus)           
+            call parse_wx_string(c8_wx,'ic',iparse,istatus)           
             if(iparse .eq. 1)ipresent = 1
         endif
 
-!       FREEZING RAIN
-        if(c1_pcp .eq. 'Z')then
-            call parse_wx_string(c8_wx,'FZ',iparse_fz,istatus)           
-            call parse_wx_string(c8_wx,'RA',iparse_ra,istatus)           
+!       rain
+        if(c1_pcp .eq. 'r')then
+            call parse_wx_string(c8_wx,'ra',iparse,istatus)           
+            if(iparse .eq. 1)ipresent = 1
+        endif
+
+!       freezing rain
+        if(c1_pcp .eq. 'z')then
+            call parse_wx_string(c8_wx,'fz',iparse_fz,istatus)           
+            call parse_wx_string(c8_wx,'ra',iparse_ra,istatus)           
             if(iparse_fz .eq. 1 .and. iparse_ra .eq. 1)ipresent = 1
         endif
 
-!       DRIZZLE
-        if(c1_pcp .eq. 'L')then
-            call parse_wx_string(c8_wx,'DZ',iparse,istatus)           
+!       drizzle
+        if(c1_pcp .eq. 'l')then
+            call parse_wx_string(c8_wx,'dz',iparse,istatus)           
             if(iparse .eq. 1)ipresent = 1
         endif
 
-!       FREEZING DRIZZLE
-        if(c1_pcp .eq. 'F')then
-            call parse_wx_string(c8_wx,'FZ',iparse_fz,istatus)           
-            call parse_wx_string(c8_wx,'DZ',iparse_dz,istatus)           
+!       freezing drizzle
+        if(c1_pcp .eq. 'f')then
+            call parse_wx_string(c8_wx,'fz',iparse_fz,istatus)           
+            call parse_wx_string(c8_wx,'dz',iparse_dz,istatus)           
             if(iparse_fz .eq. 1 .and. iparse_dz .eq. 1)ipresent = 1
         endif
 
-!       ICE PELLETS
-        if(c1_pcp .eq. 'I')then
-            call parse_wx_string(c8_wx,'PE',iparse,istatus)           
+!       ice pellets
+        if(c1_pcp .eq. 'i')then
+            call parse_wx_string(c8_wx,'pe',iparse,istatus)           
             if(iparse .eq. 1)ipresent = 1
-            call parse_wx_string(c8_wx,'PL',iparse,istatus)           
+            call parse_wx_string(c8_wx,'pl',iparse,istatus)           
             if(iparse .eq. 1)ipresent = 1
         endif
 
@@ -963,88 +963,88 @@ cdis
         end
 
 
-        subroutine put_laps_3d_multi(i4time,EXT,var_3d
+        subroutine put_laps_3d_multi(i4time,ext,var_3d
      1                                     ,units_3d,comment_3d
      1                                     ,array1,array2
      1                                     ,array3,array4
      1                                     ,array5,array6
-     1                                     ,NX_L_1,NY_L_1,NZ_L_1
-     1                                     ,NX_L_2,NY_L_2,NZ_L_2
-     1                                     ,NX_L_3,NY_L_3,NZ_L_3
-     1                                     ,NX_L_4,NY_L_4,NZ_L_4
-     1                                     ,NX_L_5,NY_L_5,NZ_L_5
-     1                                     ,NX_L_6,NY_L_6,NZ_L_6
-     1                                     ,N_3D_FIELDS,istatus)       
+     1                                     ,nx_l_1,ny_l_1,nz_l_1
+     1                                     ,nx_l_2,ny_l_2,nz_l_2
+     1                                     ,nx_l_3,ny_l_3,nz_l_3
+     1                                     ,nx_l_4,ny_l_4,nz_l_4
+     1                                     ,nx_l_5,ny_l_5,nz_l_5
+     1                                     ,nx_l_6,ny_l_6,nz_l_6
+     1                                     ,n_3d_fields,istatus)       
 
 
-        real array1(NX_L_1,NY_L_1,NZ_L_1)
-        real array2(NX_L_2,NY_L_2,NZ_L_2)
-        real array3(NX_L_3,NY_L_3,NZ_L_3)
-        real array4(NX_L_4,NY_L_4,NZ_L_4)
-        real array5(NX_L_5,NY_L_5,NZ_L_5)
-        real array6(NX_L_6,NY_L_6,NZ_L_6)
-        character*125 comment_3D(N_3D_FIELDS)
-        character*10 units_3D(N_3D_FIELDS)
-        character*3 var_3D(N_3D_FIELDS)
-        character*(*) EXT
+        real array1(nx_l_1,ny_l_1,nz_l_1)
+        real array2(nx_l_2,ny_l_2,nz_l_2)
+        real array3(nx_l_3,ny_l_3,nz_l_3)
+        real array4(nx_l_4,ny_l_4,nz_l_4)
+        real array5(nx_l_5,ny_l_5,nz_l_5)
+        real array6(nx_l_6,ny_l_6,nz_l_6)
+        character*125 comment_3d(n_3d_fields)
+        character*10 units_3d(n_3d_fields)
+        character*3 var_3d(n_3d_fields)
+        character*(*) ext
 
-        write(6,*)' Subroutine put_laps_3d_multi...'
+        write(6,*)' subroutine put_laps_3d_multi...'
 
         l = 1
-        call put_laps_multi_3d(i4time,EXT,var_3d(l),units_3d(l),
-     1     comment_3d(l),array1,NX_L_1,NY_L_1,NZ_L_1,1,istatus)       
+        call put_laps_multi_3d(i4time,ext,var_3d(l),units_3d(l),
+     1     comment_3d(l),array1,nx_l_1,ny_l_1,nz_l_1,1,istatus)       
         if(istatus .ne. 1)return
-        if(l .eq. N_3D_FIELDS)return
+        if(l .eq. n_3d_fields)return
 
         l = 2
-        call put_laps_multi_3d_append(i4time,EXT,var_3d(l),units_3d(l),       
-     1     comment_3d(l),array2,NX_L_2,NY_L_2,NZ_L_2,1,istatus)       
+        call put_laps_multi_3d_append(i4time,ext,var_3d(l),units_3d(l),       
+     1     comment_3d(l),array2,nx_l_2,ny_l_2,nz_l_2,1,istatus)       
         if(istatus .ne. 1)return
-        if(l .eq. N_3D_FIELDS)return
+        if(l .eq. n_3d_fields)return
 
         l = 3
-        call put_laps_multi_3d_append(i4time,EXT,var_3d(l),units_3d(l),       
-     1     comment_3d(l),array3,NX_L_3,NY_L_3,NZ_L_3,1,istatus)       
+        call put_laps_multi_3d_append(i4time,ext,var_3d(l),units_3d(l),       
+     1     comment_3d(l),array3,nx_l_3,ny_l_3,nz_l_3,1,istatus)       
         if(istatus .ne. 1)return
-        if(l .eq. N_3D_FIELDS)return
+        if(l .eq. n_3d_fields)return
 
         l = 4
-        call put_laps_multi_3d_append(i4time,EXT,var_3d(l),units_3d(l),       
-     1     comment_3d(l),array4,NX_L_4,NY_L_4,NZ_L_4,1,istatus)       
+        call put_laps_multi_3d_append(i4time,ext,var_3d(l),units_3d(l),       
+     1     comment_3d(l),array4,nx_l_4,ny_l_4,nz_l_4,1,istatus)       
         if(istatus .ne. 1)return
-        if(l .eq. N_3D_FIELDS)return
+        if(l .eq. n_3d_fields)return
 
         l = 5
-        call put_laps_multi_3d_append(i4time,EXT,var_3d(l),units_3d(l),       
-     1     comment_3d(l),array5,NX_L_5,NY_L_5,NZ_L_5,1,istatus)       
+        call put_laps_multi_3d_append(i4time,ext,var_3d(l),units_3d(l),       
+     1     comment_3d(l),array5,nx_l_5,ny_l_5,nz_l_5,1,istatus)       
         if(istatus .ne. 1)return
-        if(l .eq. N_3D_FIELDS)return
+        if(l .eq. n_3d_fields)return
 
         l = 6
-        call put_laps_multi_3d_append(i4time,EXT,var_3d(l),units_3d(l),       
-     1     comment_3d(l),array6,NX_L_6,NY_L_6,NZ_L_6,1,istatus)       
+        call put_laps_multi_3d_append(i4time,ext,var_3d(l),units_3d(l),       
+     1     comment_3d(l),array6,nx_l_6,ny_l_6,nz_l_6,1,istatus)       
         if(istatus .ne. 1)return
-        if(l .eq. N_3D_FIELDS)return
+        if(l .eq. n_3d_fields)return
 
-        write(6,*)' Error: N_3D_FIELDS exceeds limit ',N_3D_FIELDS
+        write(6,*)' error: n_3d_fields exceeds limit ',n_3d_fields
 
         return
         end
 
 
-        subroutine put_laps_multi_3d_append(i4time,EXT,var_2d,units_2d,
+        subroutine put_laps_multi_3d_append(i4time,ext,var_2d,units_2d,
      1                          comment_2d,field_3d,ni,nj,nk,nf,istatus)
 
         logical ltest_vertical_grid
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_3d(nk*nf),comment_2d(nf)
         character*10 units_3d(nk*nf),units_2d(nf)
         character*3 var_3d(nk*nf),var_2d(nf)
-        integer LVL_3d(nk*nf)
-        character*4 LVL_COORD_3d(nk*nf)
+        integer lvl_3d(nk*nf)
+        character*4 lvl_coord_3d(nk*nf)
 
         real field_3d(ni,nj,nk,nf)
 
@@ -1054,7 +1054,7 @@ cdis
 
         do l = 1,nf
             write(6,11)directory,ext(1:5),var_2d(l)
-11          format(' Writing 3d ',a50,1x,a5,1x,a3)
+11          format(' writing 3d ',a50,1x,a5,1x,a3)
         enddo ! l
 
         do l = 1,nf
@@ -1064,15 +1064,15 @@ cdis
 
             units_3d(iscript_3d)   = units_2d(l)
             comment_3d(iscript_3d) = comment_2d(l)
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(iscript_3d) = zcoord_of_level(k)/10
-                lvl_coord_3d(iscript_3d) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+                lvl_coord_3d(iscript_3d) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
                 lvl_3d(iscript_3d) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(iscript_3d) = 'HPA'
+                lvl_coord_3d(iscript_3d) = 'hpa'
             else
-                write(6,*)' Error, vertical grid not supported,'
-     1                   ,' this routine supports PRESSURE or HEIGHT'
+                write(6,*)' error, vertical grid not supported,'
+     1                   ,' this routine supports pressure or height'
                 istatus = 0
                 return
             endif
@@ -1082,9 +1082,9 @@ cdis
           enddo ! k
         enddo ! l
 
-        CALL WRITE_LAPS_MULTI(I4TIME,DIRECTORY,EXT,ni,nj,
-     1  nk*nf,nk*nf,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1                     COMMENT_3D,field_3d,ISTATUS)
+        call write_laps_multi(i4time,directory,ext,ni,nj,
+     1  nk*nf,nk*nf,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1                     comment_3d,field_3d,istatus)
 
         if(istatus .ne. 1)return
 

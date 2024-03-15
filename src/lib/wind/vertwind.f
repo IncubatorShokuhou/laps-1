@@ -1,74 +1,74 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
 
-        subroutine vert_wind(uanl,vanl                              ! I ! /O
-     1          ,u_sfc,v_sfc,ni,nj,nk                               ! I
-     1          ,wanl                                               ! O
-     1          ,topo,lat,lon,grid_spacing_m                        ! I
-     1          ,rk_terrain,r_missing_data,l_grid_north             ! I
-     1          ,istatus)                                           ! O
+        subroutine vert_wind(uanl,vanl                              ! i ! /o
+     1          ,u_sfc,v_sfc,ni,nj,nk                               ! i
+     1          ,wanl                                               ! o
+     1          ,topo,lat,lon,grid_spacing_m                        ! i
+     1          ,rk_terrain,r_missing_data,l_grid_north             ! i
+     1          ,istatus)                                           ! o
 
-!      ~1990        Steve Albers  Orig version
-!       1997 Jun    Ken Dritz     Added ni and nj as dummy
+!      ~1990        steve albers  orig version
+!       1997 jun    ken dritz     added ni and nj as dummy
 !                                 arguments, thus making wsum and one and
 !                                 several other arrays automatic.
-!       1997 Jun    Ken Dritz     Initialize wsum and one dynamically, instead
-!                                 of by DATA statements.
-!       1997 Jun    Ken Dritz     Added r_missing_data as dummy argument.
-!       1997 Jun    Ken Dritz     Removed include of 'lapsparms.for'.
-!       1997 Oct    Steve Albers  Pass lon to fflxc. Misc Cleanup.
-!       1997 Dec    Steve Albers  Changed NX_L_MAX/NY_L_MAX to ni/nj
-!       1998 Nov    Steve Albers  Change to M, hopefully cancels out change to
+!       1997 jun    ken dritz     initialize wsum and one dynamically, instead
+!                                 of by data statements.
+!       1997 jun    ken dritz     added r_missing_data as dummy argument.
+!       1997 jun    ken dritz     removed include of 'lapsparms.for'.
+!       1997 oct    steve albers  pass lon to fflxc. misc cleanup.
+!       1997 dec    steve albers  changed nx_l_max/ny_l_max to ni/nj
+!       1998 nov    steve albers  change to m, hopefully cancels out change to
 !                                 fflxc/sigma
 
         include 'trigd.inc'
-        real m ! Grid points per meter
+        real m ! grid points per meter
 
         real wsum(ni,nj)
         real  one(ni,nj)
 
-        logical l_grid_north ! Sfc & 3D winds
+        logical l_grid_north ! sfc & 3d winds
 
         real rk_terrain(ni,nj)
         integer k_terrain(ni,nj)
 
-        DATA scale/1./
+        data scale/1./
 
         real uanl(ni,nj,nk),vanl(ni,nj,nk)
         real wanl(ni,nj,nk) ! omega (pascals/second)
@@ -106,7 +106,7 @@ cdis
 !       grid_spacing_m = sqrt(
 !       1                      (  lat(1,2) - lat(1,1)                  )**2
 !       1                    + ( (lon(1,2) - lon(1,1))*cosd(lat(1,1))  )**2
-!       1                                       )    * 111317. ! Grid spacing m
+!       1                                       )    * 111317. ! grid spacing m
 
         call get_standard_latitudes(slat1,slat2,istatus)
         if(istatus .ne. 1)then
@@ -125,7 +125,7 @@ cdis
             grid_spacing_proj_m = grid_spacing_m
         endif
 
-        write(6,*)' Grid spacings (m) = ',grid_spacing_m
+        write(6,*)' grid spacings (m) = ',grid_spacing_m
      1                                   ,grid_spacing_proj_m
 
         m = 1.0 / grid_spacing_proj_m
@@ -133,17 +133,17 @@ cdis
         imaxm1 = ni - 1
         jmaxm1 = nj - 1
 
-!       Calculate surface pressure array
+!       calculate surface pressure array
         do j=1,nj
         do i=1,ni
             topo_pa(i,j) = ztopsa(topo(i,j)) * 100.
         enddo
         enddo
 
-!       Rotate Sfc Winds
+!       rotate sfc winds
         if(.not. l_grid_north)then
-          write(6,*)' Rotating SFC winds to calculate terrain forcing'
-          write(6,*)' Calculating Beta Factor'
+          write(6,*)' rotating sfc winds to calculate terrain forcing'
+          write(6,*)' calculating beta factor'
           do j=1,nj
           do i=1,ni
             if(u_sfc(i,j) .ne. r_missing_data
@@ -162,7 +162,7 @@ cdis
           enddo
           enddo
 
-        else ! Winds are already rotated
+        else ! winds are already rotated
           do j=1,nj
           do i=1,ni
               u_sfc_grid(i,j) = u_sfc(i,j)
@@ -179,25 +179,25 @@ cdis
             return
         endif
 
-!       Calculate terrain induced omega
+!       calculate terrain induced omega
         do j=2,jmaxm1
         do i=2,imaxm1
 
-!           Units of dterdx are pascals/meter
+!           units of dterdx are pascals/meter
             dterdx=(topo_pa(i+1,j) - topo_pa(i-1,j)) * .5/grid_spacing_m       
             dterdy=(topo_pa(i,j+1) - topo_pa(i,j-1)) * .5/grid_spacing_m
 
-!           Units of ubar,vbar are m/s
+!           units of ubar,vbar are m/s
             ubar=(u_sfc_grid(i-1,j-1) + u_sfc_grid(i,j-1)) *.5
             vbar=(v_sfc_grid(i-1,j-1) + v_sfc_grid(i-1,j)) *.5
 
-!           Units of terrain_w are pascals/second
-            terrain_w(i,j) = UBAR*DTERDX+VBAR*DTERDY
+!           units of terrain_w are pascals/second
+            terrain_w(i,j) = ubar*dterdx+vbar*dterdy
 
         enddo ! i
         enddo ! j
 
-!       Fill in edges
+!       fill in edges
         do i = 1,ni
             terrain_w(i,   1) = terrain_w(i,     2)
             terrain_w(i,nj)   = terrain_w(i,jmaxm1)
@@ -219,7 +219,7 @@ cdis
      1corr'
 
         do k = 1,nk
-            call FFLXC(ni,nj,M,SCALE
+            call fflxc(ni,nj,m,scale
      1                ,uanl(1,1,k),vanl(1,1,k),one,conv,lat,lon
      1                ,flu,flv,sigma,r_missing_data)
 
@@ -255,7 +255,7 @@ cdis
                 if(abs(conv(i,j)) .gt. 1.0)then
                     ierrcnt = ierrcnt + 1
                     if(ierrcnt .lt. 20)then
-                        write(6,*)' Error: Large Convergence'
+                        write(6,*)' error: large convergence'
      1                          ,i,j,k,k_terrain(i,j),conv(i,j)
                     endif
 

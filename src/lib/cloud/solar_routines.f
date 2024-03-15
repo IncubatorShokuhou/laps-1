@@ -70,7 +70,7 @@
         solar_direct = toa_irradiance * exp(-tau_path)
 
         if(iverbose .eq. 1)then
-            write(6,*)' Subroutine direct_solar:'
+            write(6,*)' subroutine direct_solar:'
             write(6,*)' aod,clear_sky_od,clear_sky_trans',
      1                  aod,clear_sky_od,clear_sky_trans
             write(6,*)' airmass is ',airmass

@@ -1,46 +1,46 @@
-      SUBROUTINE XERBLA( SRNAME, INFO )
+      subroutine xerbla( srname, info )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     September 30, 1994
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     september 30, 1994
 *
-*     .. Scalar Arguments ..
-      CHARACTER*6        SRNAME
-      INTEGER            INFO
+*     .. scalar arguments ..
+      character*6        srname
+      integer            info
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  XERBLA  is an error handler for the LAPACK routines.
-*  It is called by an LAPACK routine if an input parameter has an
-*  invalid value.  A message is printed and execution stops.
+*  xerbla  is an error handler for the lapack routines.
+*  it is called by an lapack routine if an input parameter has an
+*  invalid value.  a message is printed and execution stops.
 *
-*  Installers may consider modifying the STOP statement in order to
+*  installers may consider modifying the stop statement in order to
 *  call system-specific exception-handling facilities.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  SRNAME  (input) CHARACTER*6
-*          The name of the routine which called XERBLA.
+*  srname  (input) character*6
+*          the name of the routine which called xerbla.
 *
-*  INFO    (input) INTEGER
-*          The position of the invalid parameter in the parameter list
+*  info    (input) integer
+*          the position of the invalid parameter in the parameter list
 *          of the calling routine.
 *
 * =====================================================================
 *
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      WRITE( *, FMT = 9999 )SRNAME, INFO
+      write( *, fmt = 9999 )srname, info
 *
-      STOP
+      stop
 *
- 9999 FORMAT( ' ** On entry to ', A6, ' parameter number ', I2, ' had ',
+ 9999 format( ' ** on entry to ', a6, ' parameter number ', i2, ' had ',
      $      'an illegal value' )
 *
-*     End of XERBLA
+*     end of xerbla
 *
-      END
+      end

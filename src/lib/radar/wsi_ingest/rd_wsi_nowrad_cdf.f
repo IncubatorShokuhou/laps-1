@@ -1,12 +1,12 @@
       subroutine read_nowrad_cdf(ctype,cfname_in,lines,elems,
-     + dlat,dlon,La1,Lo1,La2,Lo2,centerLon,topLat,validtime,
-     + Dx,Dy,Lov, Latin, image, istatus)
+     + dlat,dlon,la1,lo1,la2,lo2,centerlon,toplat,validtime,
+     + dx,dy,lov, latin, image, istatus)
 
       include 'netcdf.inc'
       integer elems, lines,nf_fid, nf_vid, nf_status
-      integer Nx, Ny, image( elems, lines), validTime
-      real Dx, Dy, La1, La2, Lo1, Lo2, centerLon, diffLon,
-     +     dlat, dlon, topLat, LoV, Latin
+      integer nx, ny, image( elems, lines), validtime
+      real dx, dy, la1, la2, lo1, lo2, centerlon, difflon,
+     +     dlat, dlon, toplat, lov, latin
 
       character*200 x_dim
       character*200 y_dim
@@ -14,32 +14,32 @@
       character*200 grid_type
       character*(*)  cfname_in
       character*(*)  ctype
-C
-      call read_nowrad_head(ctype,cfname_in,Nx,Ny,validTime,
-     + Dx, Dy, La1, La2, Lo1, Lo2, centerLon, diffLon,dlat,dlon,
-     + topLat, grid_name, grid_type,x_dim,y_dim,LoV,Latin)
+c
+      call read_nowrad_head(ctype,cfname_in,nx,ny,validtime,
+     + dx, dy, la1, la2, lo1, lo2, centerlon, difflon,dlat,dlon,
+     + toplat, grid_name, grid_type,x_dim,y_dim,lov,latin)
 
       call read_wsi_image(cfname_in,elems,lines,image)
 
       return
       end
-C
-C  ===============================================================
-C  Subroutine to read the file "WSI NOWRAD Data Header" 
-C  ===============================================================
-C
-      subroutine read_nowrad_head(ctype,cfname_in,Nx,Ny, 
-     +     validTime, Dx, Dy, La1, La2, Lo1, Lo2, centerLon, diffLon, 
-     +     radsPerElem, radsPerLine, topLat, grid_name, grid_type, 
-     +     x_dim, y_dim, LoV, Latin)
-C
+c
+c  ===============================================================
+c  subroutine to read the file "wsi nowrad data header" 
+c  ===============================================================
+c
+      subroutine read_nowrad_head(ctype,cfname_in,nx,ny, 
+     +     validtime, dx, dy, la1, la2, lo1, lo2, centerlon, difflon, 
+     +     radsperelem, radsperline, toplat, grid_name, grid_type, 
+     +     x_dim, y_dim, lov, latin)
+c
       include 'netcdf.inc'
       integer elems, lines,nf_fid, nf_vid, nf_status
-      integer Nx, Ny, validTime
-      real Dx, Dy, La1, La2, Lo1, Lo2, centerLon, diffLon,
-     +     radsPerElem, radsPerLine, topLat, LoV, Latin
+      integer nx, ny, validtime
+      real dx, dy, la1, la2, lo1, lo2, centerlon, difflon,
+     +     radsperelem, radsperline, toplat, lov, latin
 
-      real*8 valTime
+      real*8 valtime
       integer attlen
       character c_atvalue*80
       character*(*) x_dim
@@ -48,119 +48,119 @@ C
       character*(*) grid_type
       character*(*) cfname_in
       character*(*) ctype
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       call s_len(cfname_in,nc)
-      nf_status = NF_OPEN(cfname_in,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', cfname_in(1:nc)
+      nf_status = nf_open(cfname_in,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', cfname_in(1:nc)
         return
       endif
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C      Dx           
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Dx',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dx'
+c   variables of type real
+c
+c     variable        netcdf long name
+c      dx           
+c
+        nf_status = nf_inq_varid(nf_fid,'dx',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dx'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Dx)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dx'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,dx)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dx'
       endif
 
-      call NCAINQ(nf_fid,nf_vid,'units',itype,attlen,istatus)
-      call NCAGTC(nf_fid,nf_vid,'units',c_atvalue,attlen,istatus)
+      call ncainq(nf_fid,nf_vid,'units',itype,attlen,istatus)
+      call ncagtc(nf_fid,nf_vid,'units',c_atvalue,attlen,istatus)
       if(istatus.ne.0)then
-         write(6,*)'Error getting attribute - Dx'
+         write(6,*)'error getting attribute - dx'
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      Dy           
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Dy',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dy'
+c
+c     variable        netcdf long name
+c      dy           
+c
+        nf_status = nf_inq_varid(nf_fid,'dy',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dy'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Dy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dy'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,dy)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dy'
       endif
 c
-c wsi-type is degrees. wfo-type may be kilometers. Dx and Dy must = m.
+c wsi-type is degrees. wfo-type may be kilometers. dx and dy must = m.
 c
       if(c_atvalue(1:4).eq.'kilo')then
-         Dx=Dx*1000.
-         Dy=Dy*1000.
+         dx=dx*1000.
+         dy=dy*1000.
       elseif(c_atvalue(1:4).eq.'degr')then
-         Dx=Dx*111.1*1000.
-         Dy=Dy*111.1*1000.
+         dx=dx*111.1*1000.
+         dy=dy*111.1*1000.
       endif
-C
-C     Variable        NETCDF Long Name
-C      La1          
-C
-        nf_status = NF_INQ_VARID(nf_fid,'La1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+c
+c     variable        netcdf long name
+c      la1          
+c
+        nf_status = nf_inq_varid(nf_fid,'la1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      La2          
-C
-        nf_status = NF_INQ_VARID(nf_fid,'La2',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La2'
+c
+c     variable        netcdf long name
+c      la2          
+c
+        nf_status = nf_inq_varid(nf_fid,'la2',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la2'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La2)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var La2'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la2)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var la2'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lo1          
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+c
+c     variable        netcdf long name
+c      lo1          
+c
+        nf_status = nf_inq_varid(nf_fid,'lo1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lo2          
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo2',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo2'
+c
+c     variable        netcdf long name
+c      lo2          
+c
+        nf_status = nf_inq_varid(nf_fid,'lo2',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo2'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo2)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Lo2'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo2)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lo2'
         endif
       endif
 
@@ -168,254 +168,254 @@ c ******** wsi type variables ***********
 
       if(ctype.eq.'wsi')then
 
-C
-C     Variable        NETCDF Long Name
-C      centerLon    "Center Longitude"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'centerLon',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var centerLon'
+c
+c     variable        netcdf long name
+c      centerlon    "center longitude"
+c
+          nf_status = nf_inq_varid(nf_fid,'centerlon',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var centerlon'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,centerLon)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var centerLon'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,centerlon)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var centerlon'
         endif
-C
-C     Variable        NETCDF Long Name
-C      diffLon      "Difference Longitude"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'diffLon',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var diffLon'
+c
+c     variable        netcdf long name
+c      difflon      "difference longitude"
+c
+          nf_status = nf_inq_varid(nf_fid,'difflon',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var difflon'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,diffLon)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var diffLon'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,difflon)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var difflon'
         endif
-C
-C     Variable        NETCDF Long Name
-C      radsPerElem  "Radians per element"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'radsPerElem',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var radsPerElem'
+c
+c     variable        netcdf long name
+c      radsperelem  "radians per element"
+c
+          nf_status = nf_inq_varid(nf_fid,'radsperelem',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var radsperelem'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,radsPerElem)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var radsPerElem'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,radsperelem)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var radsperelem'
         endif
-C
-C     Variable        NETCDF Long Name
-C      radsPerLine  "Radians per line"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'radsPerLine',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var radsPerLine'
+c
+c     variable        netcdf long name
+c      radsperline  "radians per line"
+c
+          nf_status = nf_inq_varid(nf_fid,'radsperline',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var radsperline'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,radsPerLine)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var radsPerLine'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,radsperline)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var radsperline'
         endif
-C
-C     Variable        NETCDF Long Name
-C      topLat       "Top Latitude"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'topLat',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var topLat'
+c
+c     variable        netcdf long name
+c      toplat       "top latitude"
+c
+          nf_status = nf_inq_varid(nf_fid,'toplat',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var toplat'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,topLat)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var topLat'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,toplat)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var toplat'
         endif
 
-C ------------------------------
+c ------------------------------
 
       elseif(ctype.eq.'wfo')then
 
-C
-C     Variable        NETCDF Long Name
-C      Latin       "Latitude of Tangent"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'Latin',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Latin'
+c
+c     variable        netcdf long name
+c      latin       "latitude of tangent"
+c
+          nf_status = nf_inq_varid(nf_fid,'latin',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var latin'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Latin)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Latin'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,latin)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var latin'
         endif
-C
-C     Variable        NETCDF Long Name
-C      LoV       "Longitude of Vertical"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'LoV',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var LoV'
+c
+c     variable        netcdf long name
+c      lov       "longitude of vertical"
+c
+          nf_status = nf_inq_varid(nf_fid,'lov',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lov'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,LoV)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var LoV'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,lov)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lov'
         endif
 
       else
 
-        print*,'Invalid radar type in ctype ',ctype
+        print*,'invalid radar type in ctype ',ctype
 
       endif
 
-C   Variables of type INT
-C
-C
-C     Variable        NETCDF Long Name
-C      Nx           "Number of x Points"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Nx',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Nx'
+c   variables of type int
+c
+c
+c     variable        netcdf long name
+c      nx           "number of x points"
+c
+        nf_status = nf_inq_varid(nf_fid,'nx',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var nx'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,Nx)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Nx'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,nx)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var nx'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Ny           "Number of y Points"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Ny',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Ny'
+c
+c     variable        netcdf long name
+c      ny           "number of y points"
+c
+        nf_status = nf_inq_varid(nf_fid,'ny',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var ny'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,Ny)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Ny'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,ny)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var ny'
       endif
 
       if(ctype.eq.'wsi')then
-C
-C     Variable        NETCDF Long Name
-C      validTime    "Valid Time"
-C
-          nf_status = NF_INQ_VARID(nf_fid,'validTime',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var validTime'
+c
+c     variable        netcdf long name
+c      validtime    "valid time"
+c
+          nf_status = nf_inq_varid(nf_fid,'validtime',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var validtime'
         endif
-          nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,validTime)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var validTime'
+          nf_status = nf_get_var_int(nf_fid,nf_vid,validtime)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var validtime'
         endif
 
       elseif(ctype.eq.'wfo')then
 
-C
-C     Variable        NETCDF Long Name
-C      validTime    "Valid Time"
-C
-        nf_status=NF_INQ_VARID(nf_fid,'valtime',nf_vid)
+c
+c     variable        netcdf long name
+c      validtime    "valid time"
+c
+        nf_status=nf_inq_varid(nf_fid,'valtime',nf_vid)
         if(nf_status.ne.0)then
-           nf_status=NF_INQ_VARID(nf_fid,'validTime',nf_vid)
+           nf_status=nf_inq_varid(nf_fid,'validtime',nf_vid)
            if(nf_status.ne.0)then
-              write(6,*)'Error getting variable - valtime'
+              write(6,*)'error getting variable - valtime'
               return
            endif
         endif
-        nf_status=NF_GET_VAR1_DOUBLE(nf_fid,nf_vid,1,valtime)
-        validTime=int(valTime)
+        nf_status=nf_get_var1_double(nf_fid,nf_vid,1,valtime)
+        validtime=int(valtime)
 
       endif
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C      grid_name    "Grid Name"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'grid_name',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c      grid_name    "grid name"
+c
+        nf_status = nf_inq_varid(nf_fid,'grid_name',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var grid_name'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,grid_name)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_text(nf_fid,nf_vid,grid_name)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var grid_name'
       endif
-C
-C     Variable        NETCDF Long Name
-C      grid_type    "Grid Type"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'grid_type',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      grid_type    "grid type"
+c
+        nf_status = nf_inq_varid(nf_fid,'grid_type',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var grid_type'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,grid_type)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_text(nf_fid,nf_vid,grid_type)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var grid_type'
       endif
-C
-C     Variable        NETCDF Long Name
-C      x_dim        "Longitude Dimension"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'x_dim',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      x_dim        "longitude dimension"
+c
+        nf_status = nf_inq_varid(nf_fid,'x_dim',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var x_dim'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,x_dim)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_text(nf_fid,nf_vid,x_dim)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var x_dim'
       endif
-C
-C     Variable        NETCDF Long Name
-C      y_dim        "Latitude Dimension"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'y_dim',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      y_dim        "latitude dimension"
+c
+        nf_status = nf_inq_varid(nf_fid,'y_dim',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var y_dim'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,y_dim)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_text(nf_fid,nf_vid,y_dim)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var y_dim'
       endif
 c
 c close file
 c
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 
       return
       end
-C
-C ================================================================
-C
+c
+c ================================================================
+c
       subroutine read_wsi_image(cfname_in,elems,lines,image)
 
       include 'netcdf.inc'
@@ -423,36 +423,36 @@ C
       integer elems, lines,nf_fid, nf_vid, nf_status
       integer image(elems,lines)
       character*(*) cfname_in
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       call s_len(cfname_in,nc)
-      nf_status = NF_OPEN(cfname_in,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', cfname_in(1:nc)
+      nf_status = nf_open(cfname_in,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', cfname_in(1:nc)
         return
       endif
-C
-C     Variable        NETCDF Long Name
-C      image        "Image Pixel Values"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'image',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      image        "image pixel values"
+c
+        nf_status = nf_inq_varid(nf_fid,'image',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var image'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,image)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_int(nf_fid,nf_vid,image)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var image'
       endif
 
 c close file
 c
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 
@@ -460,7 +460,7 @@ c
       end
 c
 c ============================================================
-c Routine to convert NETCDF data base (bytes) to NOWRAD scaled
+c routine to convert netcdf data base (bytes) to nowrad scaled
 c integers.
 c ============================================================
 
@@ -526,19 +526,19 @@ c     write(6,*) i, j, i_value
          enddo
       enddo
 c
-      write(6,*)'Number of bad data points (> ',bad_data_flag,' )'
+      write(6,*)'number of bad data points (> ',bad_data_flag,' )'
       write(6,*)'prior to calling c_scan_adjust: ',icount_bad
-      write(6,*)'Max value found in image array: ',imax_image_value
-      write(6,*)'Min value found in image array: ',imin_image_value
+      write(6,*)'max value found in image array: ',imax_image_value
+      write(6,*)'min value found in image array: ',imin_image_value
       write(6,*)
-      write(6,*)'Data found out-of-bounds (icount_out) ',icount_out
+      write(6,*)'data found out-of-bounds (icount_out) ',icount_out
       if(icount_out.gt.0)then
          istatus = -1
          return
       endif
 
 
-C       new C version of scan_adjust implemented 05-apr-96
+c       new c version of scan_adjust implemented 05-apr-96
 ccc      call c_scan_adjust(image,lines,elems,bad_data_flag)
 
       nsites_present=0
@@ -576,14 +576,14 @@ c
       character*(*) ctype
       character*10  cvarname(2)
 
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       call s_len(cfname,nc)
-      nf_status = NF_OPEN(cfname,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', cfname(1:nc)
+      nf_status = nf_open(cfname,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', cfname(1:nc)
         return
       endif
       cvarname(1)='x'
@@ -593,38 +593,38 @@ C
          cvarname(2)='lines'
       endif
       call s_len(cvarname(1),il)
-C
-C Get size of elems
-C
-      nf_status = NF_INQ_DIMID(nf_fid,cvarname(1)(1:il),nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of elems
+c
+      nf_status = nf_inq_dimid(nf_fid,cvarname(1)(1:il),nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim elems'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,elems)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,elems)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim elems'
       endif
-C
-C Get size of lines
-C
-      nf_status = NF_INQ_DIMID(nf_fid,cvarname(2)(1:il),nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of lines
+c
+      nf_status = nf_inq_dimid(nf_fid,cvarname(2)(1:il),nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim lines'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,lines)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,lines)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim lines'
       endif
 c
 c close file
 c
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

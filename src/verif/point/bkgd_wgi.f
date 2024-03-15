@@ -43,14 +43,14 @@ c     endif
          call make_fnam_lp(i4time,a9_time,istatus)
       endif
 
-c this only works temporarily for Airdrop since there
+c this only works temporarily for airdrop since there
 c is only one cron job which is delayed purposefully.
-c In the future, a9_time will be input from the verif
-c software (ie., it computes the delay). Thus, we'll
+c in the future, a9_time will be input from the verif
+c software (ie., it computes the delay). thus, we'll
 c know which "wgi" file to open.
 c     call get_systime(i4time_sys,a9_time,istatus)
 c     if(istatus.ne.1)then
-c        print*,'Error returned: get_systime'
+c        print*,'error returned: get_systime'
 c        return
 c     endif
 
@@ -68,7 +68,7 @@ c     endif
             if(cline_wgi(7:16).eq."determine")
      .      then
                istatus = 0
-               print*,'Warning: bkgd not determined in ',cfilespec
+               print*,'warning: bkgd not determined in ',cfilespec
                return
             endif
          enddo
@@ -87,8 +87,8 @@ c     endif
       endif
 
 c first, check to be sure a model background was determined in wgi
-      if(cline_wgi(1:lenw).eq.'BACKGROUND FIELDS:')then
-         print*,'Bkgd field not avail in ',cfilespec(1:lens)
+      if(cline_wgi(1:lenw).eq.'background fields:')then
+         print*,'bkgd field not avail in ',cfilespec(1:lens)
          istatus=0
          return
       endif
@@ -111,9 +111,9 @@ c first, check to be sure a model background was determined in wgi
       cmdltype=cline_wgi(5:lenw-14)
       istatus=1
       return  
-995   print*,'Error converting a9 time string'
+995   print*,'error converting a9 time string'
       print*,'a9time = ',a9time_init
       return
-990   print*,'Error opening file ',cfilespec(1:lens)
+990   print*,'error opening file ',cfilespec(1:lens)
       return
       end

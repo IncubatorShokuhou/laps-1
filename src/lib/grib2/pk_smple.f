@@ -1,120 +1,120 @@
-      SUBROUTINE PK_SMPLE(KFILDO,IA,NVAL,IPACK,ND5,LOCN,IPOS,IBIT,
-     1                    L3264B,IER,*)
-C
-C        MARCH    2000   GLAHN   TDL   HP   FOR GRIB2 
-C        JANUARY  2001   GLAHN   CHANGED ALGORITHM FOR COMPUTING IBIT;
-C                                COMMENTS
-C        NOVEMBER 2001   GLAHN   PUT * IN FRONT OF 900 IN LAST CALL
-C                                TO PKBG
-C        JANUARY  2002   GLAHN   ADDED ERROR IER = 706
-C
-C        PURPOSE
-C            PACKS DATA AT "UNITS" RESOLUTION PROVIDED IN
-C            IA( ) USING THE 'SIMPLE' PACKING METHOD DETAILED IN
-C            THE GRIB2 WMO STANDARDS.
-C
-C            THE FOLLOWING EQUATION IS USED TO PACK THE DATA:
-C               X1 = [(Y - R) * (2 ** -E) * (10 ** -D)]
-C                    X1 = THE PACKED VALUE
-C                     Y = THE VALUE WE ARE PACKING
-C                     R = THE REFERENCE VALUE (FIRST ORDER MINIMA)
-C                     E = THE BINARY SCALE FACTOR
-C                     D = THE DECIMAL SCALE FACTOR
-C            R HAS ALREADY BEEN REMOVED UPON ENTRY.
-C
-C
-C        DATA SET USE
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT) 
-C
-C        VARIABLES 
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT) 
-C               IA(K) = DATA TO PACK (K=1,NVAL). (INPUT)
-C                NVAL = NUMBER OF VALUES IN IA( ).  (INPUT)
-C            IPACK(J) = THE ARRAY TO HOLD THE ACTUAL PACKED MESSAGE
-C                       (J=1,MAX OF ND5).  (INPUT/OUTPUT)
-C                 ND5 = DIMENSION OF IPACK( ).  (INPUT)
-C                LOCN = THE WORD POSITION TO PLACE THE NEXT VALUE.
-C                       (INPUT/OUTPUT)
-C                IPOS = THE BIT POSITION IN LOCN TO START PLACING
-C                       THE NEXT VALUE. (INPUT/OUTPUT)
-C                IBIT = THE NUMBER OF BITS REQUIRED TO PACK EACH
-C                       VALUE IN IA( ).  (OUTPUT) 
-C              L3264B = CONTAINS THE NUMBER OF BITS IN A WORD
-C                       IMPLEMENTED ON THIS PARTICULAR PLATFORM.
-C                       (INPUT).
-C                 IER = STATUS ERROR RETURN. (OUTPUT)
-C                         0 = GOOD RETURN.
-C                         1 = PACKING WOULD OVERFLOW IPACK( ).
-C                         2 = IPOS NOT IN RANGE 1 TO L3264B.
-C                         3 = NBIT NOT IN RANGE 0 TO 32.
-C                         4 = NBIT EQ 0, BUT NVALUE NE 0.
-C                       706 = VALUE WILL NOT PACK IN 30 BITS.
-C                   * = ALTERNATE RETURN WHEN IER NE 0.
-C
-C         LOCAL VARIABLES
-C               IFILL = NUMBER OF BITS TO PAD SECTION 7 TO A WHOLE
-C                       OCTET.
-C               IZERO = CONTAINS 0.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           PKBG, PK_S7
-C
-      DIMENSION IA(NVAL)
-      DIMENSION IPACK(ND5)
-C
-      DATA IZERO/0/
-C
-C        DETERMINE IBIT, THE NUMBER OF BITS REQUIRED TO PACK IA( ).
-C        THE INITIAL LOOP IS TO SEE WHETHER THERE ARE ANY NON-ZERO
-C        VALUES.  IF THERE AREN'T, THEN ONLY THE REFERENCE IS
-C        NEEDED, AND THE NVAL POINTS ARE PACKED ZERO BITS EACH.
-C
-      IER=0
-C
-      DO 110 K=1,NVAL
-         IF(IA(K).GT.0)GO TO 112
- 110  CONTINUE
-C
-C        DROP THROUGH HERE MEANS ALL VALUES ARE ZERO.
-C 
-      IBIT=0
-      GO TO 130 
-C
- 112  IBIT=1
-      IBXX2=2
-C
- 114  DO 120 L=K,NVAL
-         IF(IA(L).LT.IBXX2)GO TO 120
-         IBIT=IBIT+1
-C 
-         IF(IBIT.GE.31)THEN
-            IER=706
-C           WRITE(KFILDO,115)IA(L),IER
-C115        FORMAT(' ****ERROR IN PK_SMPLE.  VALUE ='I12,
-C    1             ' WILL NOT PACK IN 30 BITS.  ERROR CODE =',I5)    
-            GO TO 900
-         ENDIF
-C                 
-         IBXX2=IBXX2*2
-         GO TO 114
-C
- 120  CONTINUE      
-C
-C        PACK THE VALUES IN IA( ).
-C
- 130  CALL PK_S7(KFILDO,IPACK,ND5,LOCN,IPOS,IA,NVAL,IBIT,
-     1           L3264B,IER,*900)
-C
-C        PAD WITH ZEROS TO FILL OUT AN OCTET, IF NECESSARY.
-C
-      IFILL=MOD(33-IPOS,8)
-C
-      IF(IFILL.NE.0)THEN
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IZERO,IFILL,L3264B,
-     1             IER,*900)
-      ENDIF
-C
- 900  IF(IER.NE.0)RETURN1
-C
-      RETURN
-      END
+      subroutine pk_smple(kfildo,ia,nval,ipack,nd5,locn,ipos,ibit,
+     1                    l3264b,ier,*)
+c
+c        march    2000   glahn   tdl   hp   for grib2 
+c        january  2001   glahn   changed algorithm for computing ibit;
+c                                comments
+c        november 2001   glahn   put * in front of 900 in last call
+c                                to pkbg
+c        january  2002   glahn   added error ier = 706
+c
+c        purpose
+c            packs data at "units" resolution provided in
+c            ia( ) using the 'simple' packing method detailed in
+c            the grib2 wmo standards.
+c
+c            the following equation is used to pack the data:
+c               x1 = [(y - r) * (2 ** -e) * (10 ** -d)]
+c                    x1 = the packed value
+c                     y = the value we are packing
+c                     r = the reference value (first order minima)
+c                     e = the binary scale factor
+c                     d = the decimal scale factor
+c            r has already been removed upon entry.
+c
+c
+c        data set use
+c           kfildo - unit number for output (print) file. (output) 
+c
+c        variables 
+c              kfildo = unit number for output (print) file.  (input) 
+c               ia(k) = data to pack (k=1,nval). (input)
+c                nval = number of values in ia( ).  (input)
+c            ipack(j) = the array to hold the actual packed message
+c                       (j=1,max of nd5).  (input/output)
+c                 nd5 = dimension of ipack( ).  (input)
+c                locn = the word position to place the next value.
+c                       (input/output)
+c                ipos = the bit position in locn to start placing
+c                       the next value. (input/output)
+c                ibit = the number of bits required to pack each
+c                       value in ia( ).  (output) 
+c              l3264b = contains the number of bits in a word
+c                       implemented on this particular platform.
+c                       (input).
+c                 ier = status error return. (output)
+c                         0 = good return.
+c                         1 = packing would overflow ipack( ).
+c                         2 = ipos not in range 1 to l3264b.
+c                         3 = nbit not in range 0 to 32.
+c                         4 = nbit eq 0, but nvalue ne 0.
+c                       706 = value will not pack in 30 bits.
+c                   * = alternate return when ier ne 0.
+c
+c         local variables
+c               ifill = number of bits to pad section 7 to a whole
+c                       octet.
+c               izero = contains 0.
+c
+c        non system subroutines called
+c           pkbg, pk_s7
+c
+      dimension ia(nval)
+      dimension ipack(nd5)
+c
+      data izero/0/
+c
+c        determine ibit, the number of bits required to pack ia( ).
+c        the initial loop is to see whether there are any non-zero
+c        values.  if there aren't, then only the reference is
+c        needed, and the nval points are packed zero bits each.
+c
+      ier=0
+c
+      do 110 k=1,nval
+         if(ia(k).gt.0)go to 112
+ 110  continue
+c
+c        drop through here means all values are zero.
+c 
+      ibit=0
+      go to 130 
+c
+ 112  ibit=1
+      ibxx2=2
+c
+ 114  do 120 l=k,nval
+         if(ia(l).lt.ibxx2)go to 120
+         ibit=ibit+1
+c 
+         if(ibit.ge.31)then
+            ier=706
+c           write(kfildo,115)ia(l),ier
+c115        format(' ****error in pk_smple.  value ='i12,
+c    1             ' will not pack in 30 bits.  error code =',i5)    
+            go to 900
+         endif
+c                 
+         ibxx2=ibxx2*2
+         go to 114
+c
+ 120  continue      
+c
+c        pack the values in ia( ).
+c
+ 130  call pk_s7(kfildo,ipack,nd5,locn,ipos,ia,nval,ibit,
+     1           l3264b,ier,*900)
+c
+c        pad with zeros to fill out an octet, if necessary.
+c
+      ifill=mod(33-ipos,8)
+c
+      if(ifill.ne.0)then
+         call pkbg(kfildo,ipack,nd5,locn,ipos,izero,ifill,l3264b,
+     1             ier,*900)
+      endif
+c
+ 900  if(ier.ne.0)return1
+c
+      return
+      end

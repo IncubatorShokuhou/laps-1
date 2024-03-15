@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -32,35 +32,35 @@ cdis
 
         subroutine get_max_ref(grid_ra_ref,imax,jmax,kmax,radar_array)
 
-!       This routine converts 3D reflectivity volume data to a 2D reflectivity
-!       field. This is done by vertically projecting the maximum reflectivity
+!       this routine converts 3d reflectivity volume data to a 2d reflectivity
+!       field. this is done by vertically projecting the maximum reflectivity
 !       onto a horizontal surface.
 
-!       Steve Albers            1990
-!       Steve Albers            1994     Test for missing data values
+!       steve albers            1990
+!       steve albers            1994     test for missing data values
 
-        real grid_ra_ref(imax,jmax,kmax)      ! Input 3D Array
-        real radar_array(imax,jmax)           ! Output 2D Array
+        real grid_ra_ref(imax,jmax,kmax)      ! input 3d array
+        real radar_array(imax,jmax)           ! output 2d array
 
         common /laps_diag/ no_laps_diag
 
         if(no_laps_diag .eq. 0)
-     1   write(6,*)' Projecting maximum reflectivity onto horizontal sur
+     1   write(6,*)' projecting maximum reflectivity onto horizontal sur
      1face'
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in get_max_ref, STOP'
+            write(6,*)' error in get_max_ref, stop'
             stop
         endif
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in get_max_ref, STOP'
+            write(6,*)' error in get_max_ref, stop'
             stop
         endif
 
-!       Initialize Radar Array
+!       initialize radar array
         do j = 1,jmax
         do i = 1,imax
             radar_array(i,j) = ref_base
@@ -83,35 +83,35 @@ cdis
         subroutine get_max_reflect(grid_ra_ref,imax,jmax,kmax
      1                            ,r_missing_out,radar_array)
 
-!       This routine converts 3D reflectivity volume data to a 2D reflectivity
-!       field. This is done by vertically projecting the maximum reflectivity
+!       this routine converts 3d reflectivity volume data to a 2d reflectivity
+!       field. this is done by vertically projecting the maximum reflectivity
 !       onto a horizontal surface.
 
-!       Steve Albers            FSL
+!       steve albers            fsl
 
-        real grid_ra_ref(imax,jmax,kmax)      ! Input 3D Array
-        real r_missing_out                    ! Input - flag value for 
+        real grid_ra_ref(imax,jmax,kmax)      ! input 3d array
+        real r_missing_out                    ! input - flag value for 
                                                 !         missing output
-        real radar_array(imax,jmax)           ! Output 2D Array
+        real radar_array(imax,jmax)           ! output 2d array
 
         common /laps_diag/ no_laps_diag
 
         write(6,*)
-     1  ' Projecting maximum reflectivity onto horizontal surface'
+     1  ' projecting maximum reflectivity onto horizontal surface'
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in get_max_reflect, STOP'
+            write(6,*)' error in get_max_reflect, stop'
             stop
         endif
 
         call get_ref_base(ref_base,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in get_max_reflect, STOP'
+            write(6,*)' error in get_max_reflect, stop'
             stop
         endif
 
-!       Initialize Radar Array
+!       initialize radar array
         radar_array = r_missing_data
 
         do k = 1,kmax
@@ -129,18 +129,18 @@ cdis
         enddo
         enddo
 
-!       Update Radar Array with proper missing output flag if needed 
+!       update radar array with proper missing output flag if needed 
         do j = 1,jmax
         do i = 1,imax
             if(r_missing_out    .eq. ref_base)then
                 if(     radar_array(i,j) .eq. r_missing_data 
-     1             .or. radar_array(i,j) .eq. -101.          ! QC flags
+     1             .or. radar_array(i,j) .eq. -101.          ! qc flags
      1             .or. radar_array(i,j) .eq. -102.    )then       
                     radar_array(i,j) = ref_base
                 endif
 
             else ! r_missing_out = r_missing_data
-                if(     radar_array(i,j) .eq. -101.          ! QC flags
+                if(     radar_array(i,j) .eq. -101.          ! qc flags
      1             .or. radar_array(i,j) .eq. -102.    )then       
                     radar_array(i,j) = ref_base
                 endif

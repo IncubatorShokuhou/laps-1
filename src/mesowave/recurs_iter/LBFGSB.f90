@@ -1,23 +1,23 @@
 
 !====================================================
-!  This header file declares necessary variables for
-!  the optimization package: LBFGSB.
+!  this header file declares necessary variables for
+!  the optimization package: lbfgsb.
 !
-!  Author: YUANFU XIE   NOAA/FSL
-!  Date:   AUGUST 2000
+!  author: yuanfu xie   noaa/fsl
+!  date:   august 2000
 !
 !====================================================
       
-!.....Variables required by LBFGS_B:
+!.....variables required by lbfgs_b:
 
-INTEGER, PARAMETER :: msave=7
-INTEGER, PARAMETER :: mvar = mx*my*mt
-CHARACTER*60       :: ctask,csave
-DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:) :: &
+integer, parameter :: msave=7
+integer, parameter :: mvar = mx*my*mt
+character*60       :: ctask,csave
+double precision,allocatable,dimension(:) :: &
 	wk,bdlow,bdupp
-DOUBLE PRECISION   :: factr,dsave(29)
-INTEGER            :: iprnt,isbmn,isave(44)
-INTEGER,ALLOCATABLE,DIMENSION(:) :: nbund,iwrka
-LOGICAL            :: lsave(4)
+double precision   :: factr,dsave(29)
+integer            :: iprnt,isbmn,isave(44)
+integer,allocatable,dimension(:) :: nbund,iwrka
+logical            :: lsave(4)
 
-!.....End of LBFGS_B declarations.
+!.....end of lbfgs_b declarations.

@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -45,7 +45,7 @@ cdis
       subroutine analz_snd (rh,ll_n,lat_s,lon_s,p_s,ll,nnn,nn,
      1     raob_radius,
      1     lat,lon,p_3d,
-     1     RH_fields,W_field,ii,jj,kk)
+     1     rh_fields,w_field,ii,jj,kk)
 
 c     another legacy in software
 
@@ -58,19 +58,19 @@ c     input variables
       real rh(ll,nnn)           ! snd rh by level and nnn soundings
       integer ll_n(nnn)         ! number of levels at each sounding
       real raob_radius          ! radius of influence (meters)
-      real lat_s(ll,nnn)        ! latitude of SND lvl data
-      real lon_s(ll,nnn)        ! longitude of SND lvl data
-      real p_s(ll,nnn)          ! pressure of SND data
-      integer ii,jj,kk          ! dimensions of LAPS data fields
+      real lat_s(ll,nnn)        ! latitude of snd lvl data
+      real lon_s(ll,nnn)        ! longitude of snd lvl data
+      real p_s(ll,nnn)          ! pressure of snd data
+      integer ii,jj,kk          ! dimensions of laps data fields
       real lat(ii,jj)           ! laps grid lats
       real lon(ii,jj)           ! laps grid lons
-      real p_3d(ii,jj,kk)       ! laps 3D pressure field
-      real RH_fields(ii,jj,kk)  ! laps analyzed RH field
-      real W_field(ii,jj,kk)    ! SND horizontal weights for variational step
+      real p_3d(ii,jj,kk)       ! laps 3d pressure field
+      real rh_fields(ii,jj,kk)  ! laps analyzed rh field
+      real w_field(ii,jj,kk)    ! snd horizontal weights for variational step
 
 c     internal variables
 
-      real rh_k(kk)             ! interpolated RH at k level
+      real rh_k(kk)             ! interpolated rh at k level
       real lat_k(kk)            ! interpolated lat at k level 
       real lon_k(kk)            ! interpolate lon at k level
       integer i,j,k,l,n         ! indexes
@@ -83,7 +83,7 @@ c     internal variables
       integer pn(kk)            ! number of points in each level of points
 
 c     interp each sounding in three dimensions and place the result value
-c     into the 3-D array.
+c     into the 3-d array.
 
 c     first step is to interp in the horizontal, this is because the
 c     pressure grid is not uniform in the horizontal and to get a good
@@ -138,7 +138,7 @@ c     write the 3d pressure vector into pres
                
                call locate (pres,kk,p_s(l,n),k) ! returns k level
 
-c     now i,j,k is known for the data element RH_s and can be transferred
+c     now i,j,k is known for the data element rh_s and can be transferred
 c     to the correct 3-d location.
 
 c     transfer data to 3-d array and 3-d vsn of points

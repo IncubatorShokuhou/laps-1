@@ -1,14 +1,14 @@
 
      subroutine get_clr_src_dir(solalt,viewalt,od_g_msl,od_g_vert,od_a_vert,ext_haero,htmsl,ssa,agv,ao,aav,aod_ref,redp_lvl,scale_ht_a,ags,aas,od_o_msl,ic,idebug,istart,iend,srcdir,sumi_g,sumi_a,opac_slant,nsteps,ds,tausum_a)
 
-     use mem_namelist, ONLY: earth_radius, aod_ha, o3_du,h_o3,d_o3
-     use constants_laps, ONLY: R_GAS, GRAV
-     use mem_allsky, ONLY: nc
+     use mem_namelist, only: earth_radius, aod_ha, o3_du,h_o3,d_o3
+     use constants_laps, only: r_gas, grav
+     use mem_allsky, only: nc
 
      include 'trigd.inc'
      include 'rad_nodata.inc'
 
-!    Input idebug for select angles
+!    input idebug for select angles
 
      trans(od) = exp(-min(od,80.))
      opac(od) = 1.0 - trans(od)
@@ -16,7 +16,7 @@
      real*8 dsdst,dradius_start,daltray,dcurvat2
      dcurvat2(dsdst,dradius_start,daltray) = &
               sqrt(dsdst**2 + dradius_start**2 &
-       - (2D0*dsdst*dradius_start*cosd(90D0+daltray))) - dradius_start      
+       - (2d0*dsdst*dradius_start*cosd(90d0+daltray))) - dradius_start      
 
      real tausum_a(istart:iend)
      real*8 sbar,htbar
@@ -37,18 +37,18 @@
      patm_htmsl = ztopsa(htmsl) / 1013.25
      rearg = 2.0 + 0.667 * patm_htmsl
 
-!    Calculate src term of gas+aerosol along ray normalized by TOA radiance
+!    calculate src term of gas+aerosol along ray normalized by toa radiance
      od_g_slant = od_g_vert * agv        
      od_o_slant = od_o_msl  * ao
      od_a_slant = od_a_vert * aav        
      od_slant = od_g_slant + od_o_slant + od_a_slant
-     od_slant = max(od_slant,1e-30) ! QC check
+     od_slant = max(od_slant,1e-30) ! qc check
      r_e = 6371.e3
 
-     scale_ht_g = R_GAS * ztotsa(htmsl) / GRAV
+     scale_ht_g = r_gas * ztotsa(htmsl) / grav
      alpha_sfc_g = od_g_vert / scale_ht_g
 
-     scale_ht_g = R_GAS * ztotsa(0.) / GRAV
+     scale_ht_g = r_gas * ztotsa(0.) / grav
      alpha_ref_g = od_g_msl  / scale_ht_g
 
      alpha_sfc_a = od_a_vert / scale_ht_a
@@ -64,7 +64,7 @@
          opac_slant = od_slant
      endif
 
-!    Integral [0 to x] a * exp(-b*x) = a * (1. - exp*(-b*x)) / b
+!    integral [0 to x] a * exp(-b*x) = a * (1. - exp*(-b*x)) / b
 !    ds = 25.
 
      if(idebug .eq. 1)then
@@ -114,11 +114,11 @@
          if(htmsl .le. 1000e3)then ! low altitude
            htbar = sbar * sind(viewalt)
            xybar = sbar * cosd(viewalt)
-!          htbar = htbar + curvat(xybar,earth_radius*(4./3.)) ! Earth Curvature
-           htbar = htbar + xybar**2 / (rearg * r_e) ! Earth Curvature
+!          htbar = htbar + curvat(xybar,earth_radius*(4./3.)) ! earth curvature
+           htbar = htbar + xybar**2 / (rearg * r_e) ! earth curvature
          else                      ! high altitude
            radius_start_eff = earth_radius + htmsl      
-!          Is this showing up negative at nadir?
+!          is this showing up negative at nadir?
            htbar = dcurvat2(sbar,dble(radius_start_eff),dble(viewalt)) 
          endif
          htbar_msl = htbar+htmsl
@@ -127,7 +127,7 @@
          od_solar_slant_o3 = od_o_msl * patm_o3(htbar_msl) * airmasso(zapp,htbar_msl)
 
          patm_bar = ztopsa(htbar_msl) / 1013.25
-         scale_ht_g = R_GAS * ztotsa(htbar_msl) / GRAV
+         scale_ht_g = r_gas * ztotsa(htbar_msl) / grav
          alphabar_g = (od_g_msl * patm_bar) / scale_ht_g
 
 !        od_solar_slant_g = od_g_vert * ags * exp(-htbar/scale_ht_g)
@@ -141,7 +141,7 @@
 !        alphabar_a = alpha_sfc_a * exp(-htbar/scale_ht_a)  
          alphabar_a = alpha_ref_a * exp(-(htbar_msl-redp_lvl)/scale_ht_a)
 
-!        AOD stratospheric = .012 (nighttime - layer extends above observer)
+!        aod stratospheric = .012 (nighttime - layer extends above observer)
          if(htbar_msl .gt. h1_ha .and. htbar_msl .le. h2_ha .and. solalt .lt. 333. .and. aod_ha .gt. 0.)then
              alphabar_a = alphabar_a + alpha_ha * ext_haero
          elseif(htbar_msl .gt. h2_ha .and. htbar_msl .lt. h3_ha)then
@@ -167,7 +167,7 @@
          if(opac_curr .eq. 0.)opac_curr = tausum ! very small od
          do = opac_curr - opac_last
 
-!        Experiment with in tandem with 'skyglow_phys'
+!        experiment with in tandem with 'skyglow_phys'
 !        rad = 1.0
          rad = trans(od_solar_slant)
 !        bksct_f = 0.2 ! backscatter fraction < 1 allows diffuse light
@@ -219,17 +219,17 @@
      return
      end
 
-     subroutine get_clr_src_dir_low(solalt,solazi,viewalt,viewazi &      ! I
-           ,od_g_msl,od_g_vert,od_o_msl,od_o_vert                 &      ! I
-           ,od_a_vert,ext_haero,htmsl                             &      ! I
-           ,ssa,agv,ao,aav,od_a_slant,aod_ref,redp_lvl,scale_ht_a &      ! I
-           ,ags_in,aas_in,ags_a,aas_a,isolalt_lo,isolalt_hi,del_solalt & ! I
-           ,ic,idebug,refdist_solalt,solalt_ref &                        ! I
+     subroutine get_clr_src_dir_low(solalt,solazi,viewalt,viewazi &      ! i
+           ,od_g_msl,od_g_vert,od_o_msl,od_o_vert                 &      ! i
+           ,od_a_vert,ext_haero,htmsl                             &      ! i
+           ,ssa,agv,ao,aav,od_a_slant,aod_ref,redp_lvl,scale_ht_a &      ! i
+           ,ags_in,aas_in,ags_a,aas_a,isolalt_lo,isolalt_hi,del_solalt & ! i
+           ,ic,idebug,refdist_solalt,solalt_ref &                        ! i
            ,srcdir,sumi_g,sumi_a,opac_slant,nsteps,ds,tausum_a)
 
-     use mem_namelist, ONLY: earth_radius, aod_ha, o3_du,h_o3,d_o3
-     use constants_laps, ONLY: R_GAS, GRAV
-     use mem_allsky, ONLY: nc
+     use mem_namelist, only: earth_radius, aod_ha, o3_du,h_o3,d_o3
+     use constants_laps, only: r_gas, grav
+     use mem_allsky, only: nc
 
      include 'trigd.inc'
      include 'rad_nodata.inc'
@@ -239,7 +239,7 @@
 
      trans(od) = exp(-min(od,80d0))
      opac(od) = 1d0 - trans(od)
-     angdif(X,Y)=MOD(X-Y+540.,360.)-180.
+     angdif(x,y)=mod(x-y+540.,360.)-180.
      scurve(x) = (-0.5 * cos(x*3.14159265)) + 0.5
      logint(y1,y2,f) = exp(log(y1)*(1.-f) + log(y2)*f)
      curvat2(sdst,radius_start,altray) = &
@@ -248,7 +248,7 @@
      real*8 dsdst,dradius_start,daltray,dcurvat2
      dcurvat2(dsdst,dradius_start,daltray) = &
               sqrt(dsdst**2 + dradius_start**2 &
-       - (2D0*dsdst*dradius_start*cosd(90D0+daltray))) - dradius_start      
+       - (2d0*dsdst*dradius_start*cosd(90d0+daltray))) - dradius_start      
      expbl(x) = exp(max(x,-80.))
 
      real tausum_a(nsteps)
@@ -275,7 +275,7 @@
      radius_earth_eff = earth_radius * (1. + (0.33333 * patm_htmsl))
      radius_start_eff = radius_earth_eff + htmsl
 
-!    High aerosols (just during low sun)
+!    high aerosols (just during low sun)
      if(solalt .lt. 333.)then
          od_h_vert = aod_ha * patm_ah(htmsl,h1_ha,h2_ha)
      else
@@ -289,23 +289,23 @@
          ah = am_homo_lyr(90.-viewalt,0.,h2_ha-htmsl,earth_radius)
      endif
 
-!    Calculate src term of gas+aerosol along ray normalized by TOA radiance
+!    calculate src term of gas+aerosol along ray normalized by toa radiance
      od_g_slant = od_g_vert * agv        
      od_o_slant = od_o_msl  * ao
 !    if(idebug .eq. 1)write(6,*)' od_a_slant1/2 = ',od_a_slant,od_a_vert * aav
 !    od_a_slant = od_a_vert * aav      !  (testing commenting out)
      od_h_slant = od_h_vert * ah
      od_slant = od_g_slant + od_o_slant + od_a_slant + od_h_slant
-     od_slant = max(od_slant,1e-30) ! QC check
+     od_slant = max(od_slant,1e-30) ! qc check
      r_e = 6371.e3
 
-     scale_ht_g = R_GAS * ztotsa(htmsl) / GRAV
+     scale_ht_g = r_gas * ztotsa(htmsl) / grav
      alpha_sfc_g = od_g_vert / scale_ht_g
 
-     scale_ht_g = R_GAS * ztotsa(0.) / GRAV
+     scale_ht_g = r_gas * ztotsa(0.) / grav
      alpha_ref_g = od_g_msl  / scale_ht_g
 
-!    scale_ht_a = 1500. ! Input this?
+!    scale_ht_a = 1500. ! input this?
 !    alpha_sfc_a = od_a_vert / scale_ht_a
      alpha_ref_a = aod_ref / scale_ht_a
 
@@ -319,7 +319,7 @@
          opac_slant = od_slant
      endif
 
-!    Integral [0 to x] a * exp(-b*x) = a * (1. - exp*(-b*x)) / b
+!    integral [0 to x] a * exp(-b*x) = a * (1. - exp*(-b*x)) / b
      ds = 100. / max(sind(viewalt),0.1)
      istart = max(1,nint((htmsl-100000.)/ds))
 
@@ -379,24 +379,24 @@
      do i = istart,iend ! nsteps
          sbar = (float(i)-0.5) * ds
 
-!        htbar = sbar * sind(viewalt)            ! Works at low altitude
-!        htbar = htbar + sbar**2 / (rearg * r_e) ! Works at LEO   
-!        htbar = curvat2(sbar,radius_start_eff,viewalt) ! Works at GEO
-!        Works from moon
+!        htbar = sbar * sind(viewalt)            ! works at low altitude
+!        htbar = htbar + sbar**2 / (rearg * r_e) ! works at leo   
+!        htbar = curvat2(sbar,radius_start_eff,viewalt) ! works at geo
+!        works from moon
          htbar = dcurvat2(dble(sbar),dble(radius_start_eff),dble(viewalt)) 
 
          htbar_msl = htbar+htmsl
          xybar = (sbar - refdist_solalt) * cosd(viewalt)
 
          patm_bar = ztopsa(htbar_msl) / 1013.25
-         scale_ht_g = R_GAS * ztotsa(htbar_msl) / GRAV
+         scale_ht_g = r_gas * ztotsa(htbar_msl) / grav
          alphabar_g = (od_g_msl * patm_bar) / scale_ht_g
 
          alphabar_o = alpha_o3(od_o_msl,htbar_msl)
 !        alphabar_a = alpha_sfc_a * exp(-htbar/scale_ht_a)  
          alphabar_a = alpha_ref_a * expbl(-(htbar_msl-redp_lvl)/scale_ht_a) 
 
-!        AOD stratospheric = .012 (nighttime - layer extends above observer)
+!        aod stratospheric = .012 (nighttime - layer extends above observer)
          if(htbar_msl .gt. h1_ha .and. htbar_msl .le. h2_ha .and. solalt .lt. 333. .and. aod_ha .gt. 0.)then
              alphabar_a = alphabar_a + alpha_ha * ext_haero
          elseif(htbar_msl .gt. h2_ha .and. htbar_msl .lt. h3_ha)then
@@ -418,7 +418,7 @@
          opac_curr = opac(tausum)
          do = opac_curr - opac_last
 
-!        Update ags,aas
+!        update ags,aas
          dsolalt = dsolalt_ref + dsolalt_dxy * xybar
          dsolalt = min(max(dsolalt,-90.),+90.)
          solalt_step = solalt + dsolalt
@@ -432,11 +432,11 @@
            ags = logint(ags_a(isolaltl),ags_a(isolalth),fsolalt)
            aas = logint(aas_a(isolaltl),aas_a(isolalth),fsolalt)
          else
-           write(6,*)' ERROR: with isolalt',isolaltl,isolalt_lo,dsolalt,del_solalt,dsolaltb,float(isolalt_lo)/del_solalt
+           write(6,*)' error: with isolalt',isolaltl,isolalt_lo,dsolalt,del_solalt,dsolaltb,float(isolalt_lo)/del_solalt
            stop
          endif
 
-!        Considering smoothing out with solar disk
+!        considering smoothing out with solar disk
          patm = exp(-(htbar_msl/scale_ht_g))
          refr_max = 0.5 * (2.0 - patm) ! consider max apparent refraction
          horz_dep = horz_depf(htbar_msl,earth_radius)
@@ -456,7 +456,7 @@
            ztruei = zappi + refractd_app(abs(solalt_step) ,patm)
            patmo  = patm_o3(htbar_msl)
 
-!          This can being tested iteratively
+!          this can being tested iteratively
            refr_min_ray = 0.5
            do iter = 1,5
              solalt_step_app = solalt_step+refr_min_ray
@@ -491,7 +491,7 @@
          if(sol_occ .gt. 0.)then
 
            if(htmsl .le. 150e3 .and. .false.)then
-!                        M         L              S
+!                        m         l              s
              od_solar_slant = &
                     od_g_vert * ags * exp(-htbar/scale_ht_g)  &
                   + od_solar_slant_o3 &
@@ -529,7 +529,7 @@
            od_solar_slant = 999.
            rad = 0. ; di_g = 0. ; di_a = 0. ; di = 0.
 
-!          Secondary twilight
+!          secondary twilight
            solalt_limb = solalt_step + refr_max + horz_dep
 !          rad = .0001 * exp(solalt_limb/1.38)
            rad = .0100 * exp(solalt_limb/0.69)
@@ -562,10 +562,10 @@
            if((i .le. 10 .or. i .eq. (i/25)*25) .and. htbar_msl .gt. 0. .and. htbar_msl .le. 110e3)then
              if(sol_occ.gt.0. .and. solalt_step .lt. 0.)then
 
-!              Compare htmin with more accurate routine (inputting apparent alt)
+!              compare htmin with more accurate routine (inputting apparent alt)
 !              write(6,*)' calling get_htmin'
-               call get_htmin(solalt_step_app,patm,htbar_msl,earth_radius,1  & ! I
-                             ,patm_htmin,htmin_view2)                          ! O
+               call get_htmin(solalt_step_app,patm,htbar_msl,earth_radius,1  & ! i
+                             ,patm_htmin,htmin_view2)                          ! o
 
                write(6,12)horz_dep,xybar,solalt_step,refr_min_ray,solalt_step_app,htmin_ray,htmin_view2,sol_occ ! ,ao2,ao3,ao
 12             format(33x,'   horz_dep/xybar/sol|alt-refr-app/htmin-2/sol_occ = ',f8.2,f11.0,3f8.2,2f9.0,f8.3,3f9.4)
@@ -591,23 +591,23 @@
      end
 
 
-     subroutine get_clr_src_dir_topo(solalt,solazi,viewalt,viewazi &   ! I
-           ,emis_ang,r_missing_data &                                  ! I
-           ,od_g_msl,od_g_vert,od_o_msl,od_a_vert,htmsl,dist_to_topo & ! I
-           ,ssa,agv,aav,aod_ref,redp_lvl,scale_ht_a &                  ! I
-           ,ags_a,aas_a,isolalt_lo,isolalt_hi,del_solalt &             ! I
-           ,ic,idebug,nsteps,refdist_solalt,solalt_ref &               ! I
-           ,sumi_g,sumi_a,opac_slant,tausum_a)                         ! O
+     subroutine get_clr_src_dir_topo(solalt,solazi,viewalt,viewazi &   ! i
+           ,emis_ang,r_missing_data &                                  ! i
+           ,od_g_msl,od_g_vert,od_o_msl,od_a_vert,htmsl,dist_to_topo & ! i
+           ,ssa,agv,aav,aod_ref,redp_lvl,scale_ht_a &                  ! i
+           ,ags_a,aas_a,isolalt_lo,isolalt_hi,del_solalt &             ! i
+           ,ic,idebug,nsteps,refdist_solalt,solalt_ref &               ! i
+           ,sumi_g,sumi_a,opac_slant,tausum_a)                         ! o
 
-     use mem_namelist, ONLY: earth_radius, o3_du,h_o3,d_o3
-     use constants_laps, ONLY: R_GAS, GRAV
-     use mem_allsky, ONLY: nc
+     use mem_namelist, only: earth_radius, o3_du,h_o3,d_o3
+     use constants_laps, only: r_gas, grav
+     use mem_allsky, only: nc
      include 'trigd.inc'
      include 'rad_nodata.inc'
 
      trans(od) = exp(-min(od,80.))
      opac(od) = 1.0 - trans(od)
-     angdif(X,Y)=MOD(X-Y+540.,360.)-180.
+     angdif(x,y)=mod(x-y+540.,360.)-180.
      curvat(hdst,radius) = hdst**2 / (2. * radius)
      curvat2(sdst,radius_start,altray) = &
              sqrt(sdst**2 + radius_start**2 &
@@ -616,14 +616,14 @@
      real*8 send,sbar,htbar,dist_to_topo,ds
      dcurvat2(dsdst,dradius_start,daltray) = &
               sqrt(dsdst**2 + dradius_start**2 &
-       - (2D0*dsdst*dradius_start*cosd(90D0+daltray))) - dradius_start      
+       - (2d0*dsdst*dradius_start*cosd(90d0+daltray))) - dradius_start      
      expbl(x) = exp(max(x,-80.))
 
      real tausum_a(nsteps)
      real ags_a(isolalt_lo:isolalt_hi) ! gas rel to zen val fr obs ht/salt
      real aas_a(isolalt_lo:isolalt_hi) ! aero rel to zen val fr obs ht/salt
 
-!    Calculate src term of gas+aerosol along ray normalized by TOA radiance
+!    calculate src term of gas+aerosol along ray normalized by toa radiance
      od_g_slant = od_g_vert * agv        
      od_a_slant = od_a_vert * aav        
      od_slant = od_g_slant + od_a_slant
@@ -632,11 +632,11 @@
      radius_earth_eff = earth_radius * (1. + (0.33333 * patm_htmsl))
      radius_start_eff = radius_earth_eff + htmsl
 
-     scale_ht_g = R_GAS * ztotsa(htmsl) / GRAV
+     scale_ht_g = r_gas * ztotsa(htmsl) / grav
 !    alpha_sfc_g = od_g_vert / scale_ht_g
 
 !    scale_ht_g = 8000.
-     scale_ht_g = R_GAS * ztotsa(0.) / GRAV
+     scale_ht_g = r_gas * ztotsa(0.) / grav
      alpha_ref_g = od_g_msl  / scale_ht_g
 
 !    alpha_sfc_a = od_a_vert / scale_ht_a
@@ -651,7 +651,7 @@
          opac_slant = od_g_slant + od_a_slant
      endif
 
-!    Integral [0 to x] a * exp(-b*x) = a * (1. - exp*(-b*x)) / b
+!    integral [0 to x] a * exp(-b*x) = a * (1. - exp*(-b*x)) / b
      ds = min(dist_to_topo/10d0,1000d0)           
      if(dist_to_topo .le. 10000d0)then
        nsteps_topo = nint(dist_to_topo/ds) ! max(10,int(htmsl/1000.))
@@ -704,9 +704,9 @@
        send =  dble(i)        * ds
 !      htbar = sbar * sind(viewalt)
 !      xybar = sbar * cosd(viewalt)
-!      htbar = htbar + curvat(xybar,earth_radius*(4./3.)) ! Earth Curvature
-!      htbar = curvat2(sbar,radius_start_eff,viewalt) ! From GEO
-       htbar = dcurvat2(sbar,dble(radius_start_eff),dble(viewalt)) !Fm Moon
+!      htbar = htbar + curvat(xybar,earth_radius*(4./3.)) ! earth curvature
+!      htbar = curvat2(sbar,radius_start_eff,viewalt) ! from geo
+       htbar = dcurvat2(sbar,dble(radius_start_eff),dble(viewalt)) !fm moon
        htbar_msl_last = htbar_msl
        htbar_msl = htbar+htmsl
        ht_msl_last = ht_msl
@@ -723,7 +723,7 @@
            xybar = (sbar - refdist_solalt) * cosd(viewalt)
          endif
 
-!        Update ags,aas
+!        update ags,aas
          dsolalt = dsolalt_ref + dsolalt_dxy * xybar
          dsolalt = min(max(dsolalt,-90.),+90.)
          solalt_step = solalt + dsolalt
@@ -734,7 +734,7 @@
          ags = ags_a(isolaltl) * (1.-fsolalt) + ags_a(isolalth) * fsolalt
          aas = aas_a(isolaltl) * (1.-fsolalt) + aas_a(isolalth) * fsolalt
 
-!        Considering smoothing out with solar disk
+!        considering smoothing out with solar disk
          horz_dep = horz_depf(htbar_msl,earth_radius)
          if(solalt_step + 0.5 .lt. -horz_dep)then 
             sol_occ = 0.0 ! invisible
@@ -778,7 +778,7 @@
 !        alphabar_g = alpha_sfc_g * exp(-htbar/scale_ht_g) 
 !        alphabar_g = alpha_ref_g * exp(-htbar_msl/scale_ht_g) 
          patm_bar = ztopsa(htbar_msl) / 1013.25
-         scale_ht_g = R_GAS * ztotsa(htbar_msl) / GRAV
+         scale_ht_g = r_gas * ztotsa(htbar_msl) / grav
          alphabar_g = (od_g_msl * patm_bar) / scale_ht_g
 
 !        alphabar_a = alpha_sfc_a * exp(-htbar/scale_ht_a)  

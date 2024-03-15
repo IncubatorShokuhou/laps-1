@@ -59,27 +59,27 @@ c
 
       print*,'linestart =         ',ilinestart
       if(ilinestart.lt.0)then
-         write(6,*)'WARNING: LAPS exceeds nrthrn Sat bndry!'
+         write(6,*)'warning: laps exceeds nrthrn sat bndry!'
          rlinestart=0.0
          istatus = 0
       endif
 
       print*,'lineend/max_lines = ',ilineend,max_lines
       if(ilineend.gt.max_lines)then
-         write(6,*)'WARNING: LAPS exceeds sothrn Sat bndry!'
+         write(6,*)'warning: laps exceeds sothrn sat bndry!'
          istatus = 0
       endif
 
       print*,'elemstart =         ',ielemstart
       if(ielemstart.lt.0)then
-         write(6,*)'WARNING: LAPS exceeds westrn Sat bndry!'
+         write(6,*)'warning: laps exceeds westrn sat bndry!'
          relemstart=0.0
          istatus = 0
       endif
 
       print*,'elemend/max_elems = ',ielemend,max_elems
       if(ielemend.gt.max_elems)then
-         write(6,*)'WARNING: LAPS exceeds eastrn Sat bndry!'
+         write(6,*)'warning: laps exceeds eastrn sat bndry!'
          istatus = 0
       endif
 

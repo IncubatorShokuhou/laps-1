@@ -1,95 +1,95 @@
       subroutine w3reddat(it,rinc,dinc)
-!$$$   SUBPROGRAM  DOCUMENTATION  BLOCK
+!$$$   subprogram  documentation  block
 !
-! SUBPROGRAM: W3REDDAT       REDUCE A TIME INTERVAL TO A CANONICAL FORM
-!   AUTHOR: MARK IREDELL     ORG: WP23       DATE: 98-01-05
+! subprogram: w3reddat       reduce a time interval to a canonical form
+!   author: mark iredell     org: wp23       date: 98-01-05
 !
-! ABSTRACT: THIS SUBPROGRAM REDUCES AN NCEP RELATIVE TIME INTERVAL
-!   INTO ONE OF SEVEN CANONICAL FORMS, DEPENDING ON THE INPUT IT VALUE.
+! abstract: this subprogram reduces an ncep relative time interval
+!   into one of seven canonical forms, depending on the input it value.
 !
-!   First reduced format type (IT=-1):
-!        RINC(1) is an arbitrary integer.
-!        RINC(2) is an integer between 00 and 23, inclusive.
-!        RINC(3) is an integer between 00 and 59, inclusive.
-!        RINC(4) is an integer between 00 and 59, inclusive.
-!        RINC(5) is an integer between 000 and 999, inclusive.
-!      If RINC(1) is negative, then the time interval is negative.
+!   first reduced format type (it=-1):
+!        rinc(1) is an arbitrary integer.
+!        rinc(2) is an integer between 00 and 23, inclusive.
+!        rinc(3) is an integer between 00 and 59, inclusive.
+!        rinc(4) is an integer between 00 and 59, inclusive.
+!        rinc(5) is an integer between 000 and 999, inclusive.
+!      if rinc(1) is negative, then the time interval is negative.
 !    
-!   Second reduced format type (IT=0):
-!      If the time interval is not negative, then the format is:
-!        RINC(1) is zero or a positive integer. 
-!        RINC(2) is an integer between 00 and 23, inclusive.
-!        RINC(3) is an integer between 00 and 59, inclusive.
-!        RINC(4) is an integer between 00 and 59, inclusive.
-!        RINC(5) is an integer between 000 and 999, inclusive.
-!      Otherwise if the time interval is negative, then the format is:
-!        RINC(1) is zero or a negative integer. 
-!        RINC(2) is an integer between 00 and -23, inclusive.
-!        RINC(3) is an integer between 00 and -59, inclusive.
-!        RINC(4) is an integer between 00 and -59, inclusive.
-!        RINC(5) is an integer between 000 and -999, inclusive.
+!   second reduced format type (it=0):
+!      if the time interval is not negative, then the format is:
+!        rinc(1) is zero or a positive integer. 
+!        rinc(2) is an integer between 00 and 23, inclusive.
+!        rinc(3) is an integer between 00 and 59, inclusive.
+!        rinc(4) is an integer between 00 and 59, inclusive.
+!        rinc(5) is an integer between 000 and 999, inclusive.
+!      otherwise if the time interval is negative, then the format is:
+!        rinc(1) is zero or a negative integer. 
+!        rinc(2) is an integer between 00 and -23, inclusive.
+!        rinc(3) is an integer between 00 and -59, inclusive.
+!        rinc(4) is an integer between 00 and -59, inclusive.
+!        rinc(5) is an integer between 000 and -999, inclusive.
 !    
-!   Days format type (IT=1):
-!        RINC(1) is arbitrary.
-!        RINC(2) is zero.
-!        RINC(3) is zero.
-!        RINC(4) is zero.
-!        RINC(5) is zero.
+!   days format type (it=1):
+!        rinc(1) is arbitrary.
+!        rinc(2) is zero.
+!        rinc(3) is zero.
+!        rinc(4) is zero.
+!        rinc(5) is zero.
 !    
-!   Hours format type (IT=2):
-!        RINC(1) is zero.
-!        RINC(2) is arbitrary.
-!        RINC(3) is zero.
-!        RINC(4) is zero.
-!        RINC(5) is zero.
-!      (This format should not express time intervals longer than 300 years.)
+!   hours format type (it=2):
+!        rinc(1) is zero.
+!        rinc(2) is arbitrary.
+!        rinc(3) is zero.
+!        rinc(4) is zero.
+!        rinc(5) is zero.
+!      (this format should not express time intervals longer than 300 years.)
 !    
-!   Minutes format type (IT=3):
-!        RINC(1) is zero.
-!        RINC(2) is zero.
-!        RINC(3) is arbitrary.
-!        RINC(4) is zero.
-!        RINC(5) is zero.
-!      (This format should not express time intervals longer than five years.)
+!   minutes format type (it=3):
+!        rinc(1) is zero.
+!        rinc(2) is zero.
+!        rinc(3) is arbitrary.
+!        rinc(4) is zero.
+!        rinc(5) is zero.
+!      (this format should not express time intervals longer than five years.)
 !    
-!   Seconds format type (IT=4):
-!        RINC(1) is zero.
-!        RINC(2) is zero.
-!        RINC(3) is zero.
-!        RINC(4) is arbitrary.
-!        RINC(5) is zero.
-!      (This format should not express time intervals longer than one month.)
+!   seconds format type (it=4):
+!        rinc(1) is zero.
+!        rinc(2) is zero.
+!        rinc(3) is zero.
+!        rinc(4) is arbitrary.
+!        rinc(5) is zero.
+!      (this format should not express time intervals longer than one month.)
 !    
-!   Milliseconds format type (IT=5):
-!        RINC(1) is zero.
-!        RINC(2) is zero.
-!        RINC(3) is zero.
-!        RINC(4) is zero.
-!        RINC(5) is arbitrary.
-!     (This format should not express time intervals longer than one hour.)
+!   milliseconds format type (it=5):
+!        rinc(1) is zero.
+!        rinc(2) is zero.
+!        rinc(3) is zero.
+!        rinc(4) is zero.
+!        rinc(5) is arbitrary.
+!     (this format should not express time intervals longer than one hour.)
 !
-! PROGRAM HISTORY LOG:
-!   98-01-05  MARK IREDELL
+! program history log:
+!   98-01-05  mark iredell
 !
-! USAGE:  CALL W3REDDAT(IT,RINC,DINC)
+! usage:  call w3reddat(it,rinc,dinc)
 !
-!   INPUT VARIABLES:
-!     IT         INTEGER RELATIVE TIME INTERVAL FORMAT TYPE
-!                (-1 FOR FIRST REDUCED TYPE (HOURS ALWAYS POSITIVE),
-!                 0 FOR SECOND REDUCED TYPE (HOURS CAN BE NEGATIVE),
-!                 1 FOR DAYS ONLY, 2 FOR HOURS ONLY, 3 FOR MINUTES ONLY,
-!                 4 FOR SECONDS ONLY, 5 FOR MILLISECONDS ONLY)
-!     RINC       REAL (5) NCEP RELATIVE TIME INTERVAL
-!                (DAYS, HOURS, MINUTES, SECONDS, MILLISECONDS)
+!   input variables:
+!     it         integer relative time interval format type
+!                (-1 for first reduced type (hours always positive),
+!                 0 for second reduced type (hours can be negative),
+!                 1 for days only, 2 for hours only, 3 for minutes only,
+!                 4 for seconds only, 5 for milliseconds only)
+!     rinc       real (5) ncep relative time interval
+!                (days, hours, minutes, seconds, milliseconds)
 !
-!   OUTPUT VARIABLES:
-!     DINC       REAL (5) NCEP RELATIVE TIME INTERVAL
-!                (DAYS, HOURS, MINUTES, SECONDS, MILLISECONDS)
+!   output variables:
+!     dinc       real (5) ncep relative time interval
+!                (days, hours, minutes, seconds, milliseconds)
 !
-! SUBPROGRAMS CALLED:
+! subprograms called:
 !
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
+! attributes:
+!   language: fortran 90
 !
 !$$$
       real rinc(5),dinc(5)

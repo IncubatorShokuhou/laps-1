@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -42,40 +42,40 @@ cdis
 c
 c**************************************************************************
 c
-c       Routine to collect satellite data for the LAPS analyses.
+c       routine to collect satellite data for the laps analyses.
 c
-c       Changes:
-c        P.A. Stamus       12-01-92       Original (from 'get_vas_bt' routine).
-c                     01-11-93       Write output in LAPS standard format.
-c                     02-01-93       Add snooze call for vis data.
-c                     09-16-93       Add Bands 3,4,5,12 data.
-c       J.R. Smart    03-01-94	     Implement on the Sun.  Adapt to ISPAN
-c                             grids. This required removing all references to
-c                             GOES mdals/ground station satellite receiving.
-c          "          10-26-94       modified for goes-8 data. No need to compute
+c       changes:
+c        p.a. stamus       12-01-92       original (from 'get_vas_bt' routine).
+c                     01-11-93       write output in laps standard format.
+c                     02-01-93       add snooze call for vis data.
+c                     09-16-93       add bands 3,4,5,12 data.
+c       j.r. smart    03-01-94	     implement on the sun.  adapt to ispan
+c                             grids. this required removing all references to
+c                             goes mdals/ground station satellite receiving.
+c          "          10-26-94       modified for goes-8 data. no need to compute
 c                                    radiance and btemp as this conversion is included
 c                                    in icnt_lut.
-c          "          11-28-95       Extract IR processing from original sub (process_satellite)
-c                                    to isolate the IR processing in one subroutine.
-c          "           3-8-96        Removed icnt_lut.
+c          "          11-28-95       extract ir processing from original sub (process_satellite)
+c                                    to isolate the ir processing in one subroutine.
+c          "           3-8-96        removed icnt_lut.
 c
-c       Notes:
-c       This program gets satellite data from ISPAN satellite database, does
-c       some processing, then writes the data on the LAPS grids to the
-c       LVD file.  LVD is written in standard LAPS NETCDF form.
-c       The ISPAN data will only initially contain  band-8 (11.2)
-c       and visible data.  More bands should be available when GOES-I becomes
+c       notes:
+c       this program gets satellite data from ispan satellite database, does
+c       some processing, then writes the data on the laps grids to the
+c       lvd file.  lvd is written in standard laps netcdf form.
+c       the ispan data will only initially contain  band-8 (11.2)
+c       and visible data.  more bands should be available when goes-i becomes
 c       operational.
 c
 c
-c       Variables:
-c       ta8              RA       O       Band 8 Brightness temps (averaged)
-c       tb8              RA       O       Band 8 Brightness temps (warm pixel)
-c       tc8              RA       O       Band 8 Brightness temps (filtered)
+c       variables:
+c       ta8              ra       o       band 8 brightness temps (averaged)
+c       tb8              ra       o       band 8 brightness temps (warm pixel)
+c       tc8              ra       o       band 8 brightness temps (filtered)
 c
 c
-c       Note: For details on the filtering and averaging methods, see the
-c       VASDAT2 routine or talk to S. Albers.
+c       note: for details on the filtering and averaging methods, see the
+c       vasdat2 routine or talk to s. albers.
 c
 c****************************************************************************
 c
@@ -83,13 +83,13 @@ c
 c
        integer ni,nj
 c
-c..... Grids to put the satellite data on.
+c..... grids to put the satellite data on.
 c
        real ta8(ni,nj)
        real tb8(ni,nj)
        real tc8(ni,nj)
 c 
-c..... LAPS lat/lon files.
+c..... laps lat/lon files.
 c
        real lat(ni,nj)
        real lon(ni,nj)
@@ -114,21 +114,21 @@ c
 
        character c_type*3
 c
-c using the original lvd output required 14 fields. We will stay with this
+c using the original lvd output required 14 fields. we will stay with this
 c so to keep the lvd output and reduce (eliminate) impact on other processes.
 c
        istatus = -1
 
 c      bad = 1.e6 - 2.
 c
-c these values are bases upon the GVAR cnt-to-btemp lookup tables.
-c they are good estimates for satellites other than GOES.
+c these values are bases upon the gvar cnt-to-btemp lookup tables.
+c they are good estimates for satellites other than goes.
 c
        if(c_type.eq.'wv '.or.c_type.eq.'iwv'.or.c_type.eq.'wvp')then
           badlow=148.486
           badhigh=291.182
        elseif(c_type.eq.'4u'.or.c_type.eq.'i39')then
-c per Eric Gregow 22 Aug 2008 -- get the IR channels ingested without any exclusion
+c per eric gregow 22 aug 2008 -- get the ir channels ingested without any exclusion
 c of points (that were previously set to missing values)
 c         badlow=205.908
           badlow=185.
@@ -158,10 +158,10 @@ c         badlow=205.908
        enddo
        enddo
 c
-c.....  Call the satellite data processing subroutine for each Band required.
+c.....  call the satellite data processing subroutine for each band required.
 c
        write(6,900)c_type 
-900    format('Proc Channel Type ',a3,' Satellite data.')
+900    format('proc channel type ',a3,' satellite data.')
 c --------------------------------------------------------------------------
        call satdat2laps_ir(imax,jmax,
      &                     r_grid_ratio,
@@ -175,12 +175,12 @@ c --------------------------------------------------------------------------
 
        if(istatus_r .ne. 1) then
           write(6,920)istatus_r, c_type
-920       format(' +++ WARNING. Bad status',i3          
-     &          ,' from SATDAT2LAPS_IR for band ',a2)
+920       format(' +++ warning. bad status',i3          
+     &          ,' from satdat2laps_ir for band ',a2)
        endif
 c
 c----------------------------------------------------------------------------
-c.....       Do a quick check on the data. 
+c.....       do a quick check on the data. 
 c
        ik=0
        do j=1,jmax
@@ -206,7 +206,7 @@ c
        if(istatus_a .lt. 0)then
           write(6,910) istatus_a
           if(istatus_a .eq. -(ni*nj))then ! entire array is missing
-              write(6,*)' Entire ta8 array is missing'
+              write(6,*)' entire ta8 array is missing'
               istatus = 0
           endif
        else
@@ -215,7 +215,7 @@ c
        if(istatus_w .lt. 0)then
           write(6,911) istatus_w
           if(istatus_w .eq. -(ni*nj))then ! entire array is missing
-              write(6,*)' Entire tb8 array is missing'
+              write(6,*)' entire tb8 array is missing'
               istatus = 0
           endif
        else
@@ -224,15 +224,15 @@ c
        if(istatus_f .lt. 0)then
           write(6,912) istatus_f
           if(istatus_f .eq. -(ni*nj))then ! entire array is missing
-              write(6,*)' Entire tc8 array is missing'
+              write(6,*)' entire tc8 array is missing'
               istatus = 0
           endif
        else
           write(6,*)'tc8 checked out ok'
        end if
-910    format(' WARNING! ta8 check istatus_a = ',i8)
-911    format(' WARNING! tb8 check istatus_w = ',i8)
-912    format(' WARNING! tc8 check istatus_f = ',i8)
+910    format(' warning! ta8 check istatus_a = ',i8)
+911    format(' warning! tb8 check istatus_w = ',i8)
+912    format(' warning! tc8 check istatus_f = ',i8)
 
 999   return
       end

@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -39,14 +39,14 @@ cdis
 
         subroutine bilinear_laps(ri,rj,imax,jmax,array_2d,result)
 
-cdoc    Interpolate 2-d array to find the field value at a fractional grid
+cdoc    interpolate 2-d array to find the field value at a fractional grid
 cdoc    point.
 
         real array_2d(imax,jmax)
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in bilinear_laps: STOP'
+            write(6,*)' error in bilinear_laps: stop'
             stop
         endif
 
@@ -62,18 +62,18 @@ cdoc    point.
             fraci = ri - i
             fracj = rj - j
 
-            Z1=array_2d(i  , j  )
-            Z2=array_2d(i+1, j  )
-            Z3=array_2d(i+1, j+1)
-            Z4=array_2d(i  , j+1)
+            z1=array_2d(i  , j  )
+            z2=array_2d(i+1, j  )
+            z3=array_2d(i+1, j+1)
+            z4=array_2d(i  , j+1)
 
             if(  z1 .ne. r_missing_data
      1     .and. z2 .ne. r_missing_data
      1     .and. z3 .ne. r_missing_data
      1     .and. z4 .ne. r_missing_data)then
 
-                result =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                - (Z2+Z4-Z3-Z1)*fraci*fracj
+                result =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                - (z2+z4-z3-z1)*fraci*fracj
 
             else
                 result = r_missing_data
@@ -91,15 +91,15 @@ cdoc    point.
         subroutine bilinear_interp_extrap(ri,rj,imax,jmax
      1                                   ,array_2d,result,istatus)
 
-cdoc    Interpolate 2-d array to find the field value at a fractional grid
-cdoc    point. This one allows you to extrapolate very slightly outside the 
+cdoc    interpolate 2-d array to find the field value at a fractional grid
+cdoc    point. this one allows you to extrapolate very slightly outside the 
 cdoc    grid.
 
         real array_2d(imax,jmax)
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in bilinear_interp_extrap'
+            write(6,*)' error in bilinear_interp_extrap'
             return
         endif
 
@@ -115,18 +115,18 @@ cdoc    grid.
 
 c standard bilinear interpolation
 
-              Z1=array_2d(i  , j  )
-              Z2=array_2d(i+1, j  )
-              Z3=array_2d(i+1, j+1)
-              Z4=array_2d(i  , j+1)
+              z1=array_2d(i  , j  )
+              z2=array_2d(i+1, j  )
+              z3=array_2d(i+1, j+1)
+              z4=array_2d(i  , j+1)
 
               if(    z1 .ne. r_missing_data
      1         .and. z2 .ne. r_missing_data
      1         .and. z3 .ne. r_missing_data
      1         .and. z4 .ne. r_missing_data)then
 
-                  result =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                   - (Z2+Z4-Z3-Z1)*fraci*fracj
+                  result =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                   - (z2+z4-z3-z1)*fraci*fracj
               else
                   result = r_missing_data
               endif
@@ -141,9 +141,9 @@ c standard bilinear interpolation
               else
                  frac1 = 1-(ri-int(ri))
                  frac2 = 1-frac1
-                 Z1=array_2d(i  , j  )
-                 Z2=array_2d(i+1, j  )
-                 result = Z1*frac1+Z2*frac2
+                 z1=array_2d(i  , j  )
+                 z2=array_2d(i+1, j  )
+                 result = z1*frac1+z2*frac2
               endif
 
         elseif(i .eq. imax .or. i .eq. 1)then
@@ -152,9 +152,9 @@ c standard bilinear interpolation
               else
                  frac1 = 1-(rj-int(rj))
                  frac2 = 1-frac1
-                 Z1=array_2d(i  , j  )
-                 Z2=array_2d(i, j+1  )
-                 result = Z1*frac1+Z2*frac2
+                 z1=array_2d(i  , j  )
+                 z2=array_2d(i, j+1  )
+                 result = z1*frac1+z2*frac2
               endif
 
         endif
@@ -167,16 +167,16 @@ c standard bilinear interpolation
         subroutine bilinear_laps_3do(ri_a,rj_a,imax,jmax,nx_laps,ny_laps
      1                             ,nz_laps,array_3d,result)
 
-cdoc    Interpolate 3-d array to find the field values at fractional grid
+cdoc    interpolate 3-d array to find the field values at fractional grid
 cdoc    points.
 
-        real array_3d(imax,jmax,nz_laps)                 ! I
-        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! I
-        real result(nx_laps,ny_laps,nz_laps)             ! O
+        real array_3d(imax,jmax,nz_laps)                 ! i
+        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! i
+        real result(nx_laps,ny_laps,nz_laps)             ! o
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in bilinear_laps: STOP'
+            write(6,*)' error in bilinear_laps: stop'
             stop
         endif
 
@@ -200,18 +200,18 @@ cdoc    points.
             fraci = ri - i
             fracj = rj - j
 
-            Z1=array_3d(i  , j  ,k)
-            Z2=array_3d(i+1, j  ,k)
-            Z3=array_3d(i+1, j+1,k)
-            Z4=array_3d(i  , j+1,k)
+            z1=array_3d(i  , j  ,k)
+            z2=array_3d(i+1, j  ,k)
+            z3=array_3d(i+1, j+1,k)
+            z4=array_3d(i  , j+1,k)
 
             if(  z1 .ne. r_missing_data
      1     .and. z2 .ne. r_missing_data
      1     .and. z3 .ne. r_missing_data
      1     .and. z4 .ne. r_missing_data)then
 
-                result(il,jl,k) =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                          - (Z2+Z4-Z3-Z1)*fraci*fracj
+                result(il,jl,k) =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                          - (z2+z4-z3-z1)*fraci*fracj
 
             else
                 result(il,jl,k) = r_missing_data
@@ -233,20 +233,20 @@ cdoc    points.
         subroutine bilinear_laps_3df(ri_a,rj_a,imax,jmax,nx_laps,ny_laps
      1                             ,nz_laps,array_3d,result)
 
-cdoc    Interpolate 3-d array to find the field values at fractional grid
+cdoc    interpolate 3-d array to find the field values at fractional grid
 cdoc    points.
 
-        real array_3d(imax,jmax,nz_laps)                 ! I
-        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! I
-        real result(nx_laps,ny_laps,nz_laps)             ! O
+        real array_3d(imax,jmax,nz_laps)                 ! i
+        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! i
+        real result(nx_laps,ny_laps,nz_laps)             ! o
 
         real z1(nz_laps),z2(nz_laps),z3(nz_laps),z4(nz_laps)
 
-        write(6,*)' Subroutine bilinear_laps_3df...'
+        write(6,*)' subroutine bilinear_laps_3df...'
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in bilinear_laps: STOP'
+            write(6,*)' error in bilinear_laps: stop'
             stop
         endif
 
@@ -270,20 +270,20 @@ cdoc    points.
             fracj = rj - j
             fracij = fraci*fracj
 
-            Z1(:)=array_3d(i  , j  ,:)
-            Z2(:)=array_3d(i+1, j  ,:)
-            Z3(:)=array_3d(i+1, j+1,:)
-            Z4(:)=array_3d(i  , j+1,:)
+            z1(:)=array_3d(i  , j  ,:)
+            z2(:)=array_3d(i+1, j  ,:)
+            z3(:)=array_3d(i+1, j+1,:)
+            z4(:)=array_3d(i  , j+1,:)
 
 !           result(il,jl,:) 
-!    1                  =  Z1(:)+(Z2(:)-Z1(:))*fraci+(Z4(:)-Z1(:))*fracj
-!    1                  - (Z2(:)+Z4(:)-Z3(:)-Z1(:))*fracij
+!    1                  =  z1(:)+(z2(:)-z1(:))*fraci+(z4(:)-z1(:))*fracj
+!    1                  - (z2(:)+z4(:)-z3(:)-z1(:))*fracij
 
             result(il,jl,:) 
-     1                  =  Z1(:) * (1.0 - fraci - fracj + fracij)             
-     1                  +  Z2(:) * (      fraci         - fracij) 
-     1                  +  Z3(:) * (                      fracij) 
-     1                  +  Z4(:) * (              fracj - fracij) 
+     1                  =  z1(:) * (1.0 - fraci - fracj + fracij)             
+     1                  +  z2(:) * (      fraci         - fracij) 
+     1                  +  z3(:) * (                      fracij) 
+     1                  +  z4(:) * (              fracj - fracij) 
 
             where(abs(result(il,jl,:)) .gt. 1e10)
      1          result(il,jl,:) = r_missing_data
@@ -302,12 +302,12 @@ cdoc    points.
         subroutine bilinear_laps_3d(ri_a,rj_a,imax,jmax,nx_laps,ny_laps
      1                             ,nz_laps,array_3d,result)
 
-cdoc    Interpolate 3-d array to find the field values at fractional grid
-cdoc    points. Hopefully it's more efficient to call bilinear_laps_2d.
+cdoc    interpolate 3-d array to find the field values at fractional grid
+cdoc    points. hopefully it's more efficient to call bilinear_laps_2d.
 
-        real array_3d(imax,jmax,nz_laps)                 ! I
-        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! I
-        real result(nx_laps,ny_laps,nz_laps)             ! O
+        real array_3d(imax,jmax,nz_laps)                 ! i
+        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! i
+        real result(nx_laps,ny_laps,nz_laps)             ! o
 
         do k = 1,nz_laps
            call bilinear_laps_2d(ri_a,rj_a,imax,jmax,nx_laps,ny_laps
@@ -320,16 +320,16 @@ cdoc    points. Hopefully it's more efficient to call bilinear_laps_2d.
         subroutine bilinear_laps_2d(ri_a,rj_a,imax,jmax,nx_laps,ny_laps
      1                             ,array_2d,result)
 
-cdoc    Interpolate 2-d array to find the field values at fractional grid
+cdoc    interpolate 2-d array to find the field values at fractional grid
 cdoc    points.
 
-        real array_2d(imax,jmax)                         ! I
-        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! I
-        real result(nx_laps,ny_laps)                     ! O
+        real array_2d(imax,jmax)                         ! i
+        real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! i
+        real result(nx_laps,ny_laps)                     ! o
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in bilinear_laps_2d: STOP'
+            write(6,*)' error in bilinear_laps_2d: stop'
             stop
         endif
 
@@ -352,18 +352,18 @@ cdoc    points.
             fraci = ri - i
             fracj = rj - j
 
-            Z1=array_2d(i  , j  )
-            Z2=array_2d(i+1, j  )
-            Z3=array_2d(i+1, j+1)
-            Z4=array_2d(i  , j+1)
+            z1=array_2d(i  , j  )
+            z2=array_2d(i+1, j  )
+            z3=array_2d(i+1, j+1)
+            z4=array_2d(i  , j+1)
 
             if(  z1 .ne. r_missing_data
      1     .and. z2 .ne. r_missing_data
      1     .and. z3 .ne. r_missing_data
      1     .and. z4 .ne. r_missing_data)then
 
-                result(il,jl) =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                          - (Z2+Z4-Z3-Z1)*fraci*fracj
+                result(il,jl) =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                          - (z2+z4-z3-z1)*fraci*fracj
 
             else
                 result(il,jl) = r_missing_data

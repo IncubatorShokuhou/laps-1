@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -54,20 +54,20 @@ c
 c
 c*****************************************************************************
 c
-c	Routine to gather data from the buoy files for LAPS.   
+c	routine to gather data from the buoy files for laps.   
 c
-c	Changes:
-c		P. Stamus  08-10-98  Original version (from get_metar_obs).
-c                          06-21-99  Change ob location check to gridpt space.
-c                                      Figure box size in gridpoint space from
+c	changes:
+c		p. stamus  08-10-98  original version (from get_metar_obs).
+c                          06-21-99  change ob location check to gridpt space.
+c                                      figure box size in gridpoint space from
 c                                      user-defined size (deg) and grid_spacing.
-c                          10-19-99  Added checks on each variable when doing
+c                          10-19-99  added checks on each variable when doing
 c                                      units conversion.
-c                          01-11-00  Fixed check on ob time (overall).
+c                          01-11-00  fixed check on ob time (overall).
 c
-c       Notes:
-c         1. This routine is not set up to collect cloud data (from ship
-c            reports).  It could be done at some point if the LAPS cloud
+c       notes:
+c         1. this routine is not set up to collect cloud data (from ship
+c            reports).  it could be done at some point if the laps cloud
 c            analysis could make use of the cloud ob as its reported (limited
 c            detail).
 c
@@ -75,12 +75,12 @@ c*****************************************************************************
 c
 	include 'netcdf.inc'
 c
-c.....  Read arrays.
+c.....  read arrays.
 c
         integer maxobs ! raw data file
-        integer maxsta ! output LSO file
-        integer    maxSkyCover
-        parameter (maxSkyCover = 2)
+        integer maxsta ! output lso file
+        integer    maxskycover
+        parameter (maxskycover = 2)
 
 	real*8  timeobs(maxobs)
 	real  lats(maxobs), lons(maxobs), elev(maxobs)
@@ -90,11 +90,11 @@ c
 	real  vis(maxobs), dp(maxobs)
 	real  pcp1(maxobs), pcp3(maxobs), pcp6(maxobs), pcp24(maxobs)       
 	real  equivspd(maxobs), sea_temp(maxobs), t_wet(maxobs)
-        real  skyLayerBase(maxSkyCover,maxobs)
+        real  skylayerbase(maxskycover,maxobs)
         real    lat(ni,nj), lon(ni,nj)
         real  k_to_f
 c
-c.....  Output arrays.
+c.....  output arrays.
 c
 	real  store_1(maxsta,4), 
      &          store_2(maxsta,3), store_2ea(maxsta,3),
@@ -108,7 +108,7 @@ c
 	integer    i4time_ob, i4time_before, i4time_after
         integer    wmoid_in(maxobs), wmoid(maxsta)
 	integer    rtime, dpchar(maxobs), iplat_type(maxobs)
-	integer    recNum, nf_fid, nf_vid, nf_status
+	integer    recnum, nf_fid, nf_vid, nf_status
 c
 	character  stname(maxobs)*8, save_stn(maxobs)*8
 	character  data_file*150, a9time*9, a8time*8, a9_to_a8*8, time*4       
@@ -118,13 +118,13 @@ c
 	character  stations(maxsta)*20, provider(maxsta)*11
 	character  store_cldamt(maxsta,5)*4
         character  path_to_buoy_data*(*), buoy_format*(*)
-        character  skyCover(maxSkyCover,maxobs)
+        character  skycover(maxskycover,maxobs)
 c
 c
-c.....  Start.
+c.....  start.
 c
 c
-c.....	Set jstatus flag for the buoy data to bad until we find otherwise.
+c.....	set jstatus flag for the buoy data to bad until we find otherwise.
 c
 	jstatus = -1
 
@@ -134,7 +134,7 @@ c
         call get_sfc_badflag(badflag,istatus)
         if(istatus .ne. 1)return
 c
-c.....  Figure out the size of the "box" in gridpoints.  User defines
+c.....  figure out the size of the "box" in gridpoints.  user defines
 c.....  the 'box_size' variable in degrees, then we convert that to an
 c.....  average number of gridpoints based on the grid spacing.
 c
@@ -144,34 +144,34 @@ c
         box_length = box_size * 111.137 !km/deg lat (close enough for lon)
         ibox_points = box_length / (grid_spacing / 1000.)  !in km
 c
-c.....	Zero out the counters.
+c.....	zero out the counters.
 c
 	n_buoy_g = 0		! # of buoy obs in the laps grid
 	n_buoy_b = 0		! # of buoy obs in the box
 c
-c.....  Set up the time window.
+c.....  set up the time window.
 c
 	i4time_before = i4time_sys - itime_before
 	i4time_after  = i4time_sys + itime_after
 
         call s_len(buoy_format, len_buoy_format)
-        if(buoy_format(1:len_buoy_format) .ne. 'CWB')then ! FSL NetCDF format
+        if(buoy_format(1:len_buoy_format) .ne. 'cwb')then ! fsl netcdf format
             ix = 1
 
-!           Ob times contained in each file
-            if(buoy_format(1:len_buoy_format) .eq. 'NIMBUS')then 
+!           ob times contained in each file
+            if(buoy_format(1:len_buoy_format) .eq. 'nimbus')then 
                 i4_contains_early = 900
                 i4_contains_late = 2699
                 i4_file_interval = 3600
 
-            elseif(buoy_format(1:len_buoy_format) .eq. 'WFO'
-     1        .or. buoy_format(1:len_buoy_format) .eq. 'MADIS')then         
+            elseif(buoy_format(1:len_buoy_format) .eq. 'wfo'
+     1        .or. buoy_format(1:len_buoy_format) .eq. 'madis')then         
                 i4_contains_early = 0 
                 i4_contains_late = 3600
                 i4_file_interval = 3600
 
             else
-                write(6,*)' ERROR: unknown buoy format ',buoy_format     
+                write(6,*)' error: unknown buoy format ',buoy_format     
                 istatus = 0
                 return
 
@@ -187,13 +187,13 @@ c
 
                 call make_fnam_lp(i4time_file,a9time,istatus)
 
-                if(buoy_format(1:len_buoy_format) .eq. 'NIMBUS')then
+                if(buoy_format(1:len_buoy_format) .eq. 'nimbus')then
                     len_path = index(path_to_buoy_data,' ') - 1
 	            data_file = path_to_buoy_data(1:len_path)
      1                            //a9time// '0100o'
 
-                elseif(buoy_format(1:len_buoy_format) .eq. 'WFO'
-     1            .or. buoy_format(1:len_buoy_format) .eq. 'MADIS')then   
+                elseif(buoy_format(1:len_buoy_format) .eq. 'wfo'
+     1            .or. buoy_format(1:len_buoy_format) .eq. 'madis')then   
                     filename13=fname9_to_wfo_fname13(a9time)       
 
                     len_path = index(path_to_buoy_data,' ') - 1
@@ -201,48 +201,48 @@ c
      &                    path_to_buoy_data(1:len_path) // filename13
 
                 else
-                    write(6,*)' ERROR: unknown buoy format ',buoy_format     
+                    write(6,*)' error: unknown buoy format ',buoy_format     
                     istatus = 0
                     return
 
                 endif
 
-                print*,'Getting buoy/ship data ', data_file
+                print*,'getting buoy/ship data ', data_file
 c
-c.....          Get the data from the NetCDF file.  First, open the file.
-c.....          If not there, return.
+c.....          get the data from the netcdf file.  first, open the file.
+c.....          if not there, return.
 c
-	        nf_status = NF_OPEN(data_file,NF_NOWRITE,nf_fid)
+	        nf_status = nf_open(data_file,nf_nowrite,nf_fid)
 
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
 	           print *, data_file
                    n_buoy_file=0
                    go to 190
 	        endif
 c
-c.....          Get the dimension of some of the variables.
+c.....          get the dimension of some of the variables.
 c
-c.....          "recNum"
+c.....          "recnum"
 c
-	        nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
-	           print *,'dim recNum'
+	        nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
+	           print *,'dim recnum'
 	        endif
-	        nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
-	           print *,'dim recNum'
+	        nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
+	           print *,'dim recnum'
 	        endif
 
                 if(recnum .gt. maxobs-ix+1)then
                     write(6,*)
-     1              ' ERROR: exceeded maxobs limits in get_maritime_obs'       
+     1              ' error: exceeded maxobs limits in get_maritime_obs'       
                     go to 190
                 endif
 
-	        call read_maritime(nf_fid , recNum, iplat_type(ix),
+	        call read_maritime(nf_fid , recnum, iplat_type(ix),
      &             td(ix), elev(ix), equivspd(ix), lats(ix), lons(ix), 
      &             pcp1(ix), pcp24(ix), pcp6(ix),
      &             wx(ix), dp(ix), dpchar(ix),
@@ -253,10 +253,10 @@ c
 
  		if(istatus .ne. 1)then
                     write(6,*)
-     1              '     Warning: bad status return from READ_MARITIME'
+     1              '     warning: bad status return from read_maritime'
                     n_buoy_file = 0
                 else
-                    n_buoy_file = recNum
+                    n_buoy_file = recnum
                     write(6,*)'     n_buoy_file = ',n_buoy_file
                 endif
 
@@ -271,11 +271,11 @@ c
                 wmoid_in(i) = ibadflag
             enddo ! i
 c
-        else ! Read buoy/ship obs in CWB format
+        else ! read buoy/ship obs in cwb format
 
             ix = 1
 
-!           Ob times contained in each file
+!           ob times contained in each file
             i4_contains_early = 7200 
             i4_contains_late = 3600
             i4_file_interval = 10800
@@ -295,23 +295,23 @@ c
      1                                           //a8time//'.dat'      
 
                 call s_len(data_file,len_file)
-                write(6,*)' CWB Buoy Data: ',data_file(1:len_file)
+                write(6,*)' cwb buoy data: ',data_file(1:len_file)
 
                 recnum = maxobs-ix+1
 
-	        call read_buoy_cwb(data_file, maxSkyCover, recNum, 
+	        call read_buoy_cwb(data_file, maxskycover, recnum, 
      &          iplat_type(ix),
      &          td(ix), elev(ix), equivspd(ix), lats(ix), lons(ix), 
      &          pcp1(ix), pcp24(ix), pcp3(ix), pcp6(ix),
      &          wx, dp(ix), dpchar(ix), mslp(ix), sea_temp(ix), 
-     &          skyCover(1,ix), skyLayerBase(1,ix),
+     &          skycover(1,ix), skylayerbase(1,ix),
      &          stname(ix), t(ix), timeobs(ix), vis(ix), t_wet(ix), 
      &          dd(ix), ffg(ix), ff(ix),             
      &          wmoid_in(ix), badflag, n_buoy_file, istatus)
 
 	        if(istatus .ne. 1)then
                     write(6,*)
-     1              '     Warning: bad status return from READ_BUOY_CWB'       
+     1              '     warning: bad status return from read_buoy_cwb'       
                     n_buoy_file = 0
                 else
                     write(6,*)'     n_buoy_file = ',n_buoy_file
@@ -321,7 +321,7 @@ c
 
 590	    enddo		! i4time_file
 
-!           Ob times contained in each file
+!           ob times contained in each file
             i4_contains_early = 0 
             i4_contains_late = 0
             i4_file_interval = 10800
@@ -341,23 +341,23 @@ c
      1                                           //a8time//'.dat'      
 
                 call s_len(data_file,len_file)
-                write(6,*)' CWB Ship Data: ',data_file(1:len_file)
+                write(6,*)' cwb ship data: ',data_file(1:len_file)
 
                 recnum = maxobs-ix+1
 
-	        call read_ship_cwb(data_file, maxSkyCover, recNum, 
+	        call read_ship_cwb(data_file, maxskycover, recnum, 
      &          iplat_type(ix),
      &          td(ix), elev(ix), equivspd(ix), lats(ix), lons(ix), 
      &          pcp1(ix), pcp24(ix), pcp3(ix), pcp6(ix),
      &          wx, dp(ix), dpchar(ix), mslp(ix), sea_temp(ix), 
-     &          skyCover(1,ix), skyLayerBase(1,ix),
+     &          skycover(1,ix), skylayerbase(1,ix),
      &          stname(ix), t(ix), timeobs(ix), vis(ix), t_wet(ix), 
      &          dd(ix), ffg(ix), ff(ix),             
      &          wmoid_in(ix), badflag, n_ship_file, istatus)
 
 	        if(istatus .ne. 1)then
                     write(6,*)
-     1              '     Warning: bad status return from READ_SHIP_CWB'       
+     1              '     warning: bad status return from read_ship_cwb'       
                     n_ship_file = 0
                 else
                     write(6,*)'     n_ship_file = ',n_ship_file
@@ -375,13 +375,13 @@ c
         write(6,*)' n_maritime_all = ',n_maritime_all
 
 c
-c.....  First check the data coming from the NetCDF file.  There can be
-c.....  "FloatInf" (used as fill value) in some of the variables.  These
-c.....  are not handled the same by different operating systems.  For 
-c.....  example, IBM systems make "FloatInf" into "NaN" and store them that
-c.....  way in the file, which messes up other LAPS routines.  This code
-c.....  checks for "FloatInf" and sets the variable to 'badflag'.  If the
-c.....  "FloatInf" is in the lat, lon, elevation, or time of observation,
+c.....  first check the data coming from the netcdf file.  there can be
+c.....  "floatinf" (used as fill value) in some of the variables.  these
+c.....  are not handled the same by different operating systems.  for 
+c.....  example, ibm systems make "floatinf" into "nan" and store them that
+c.....  way in the file, which messes up other laps routines.  this code
+c.....  checks for "floatinf" and sets the variable to 'badflag'.  if the
+c.....  "floatinf" is in the lat, lon, elevation, or time of observation,
 c.....  we toss the whole ob since we can't be sure where it is.
 c
 
@@ -389,9 +389,9 @@ c
       
 	do i=1,n_maritime_all
 c
-c.....  Toss the ob if lat/lon/elev or observation time are bad by setting 
+c.....  toss the ob if lat/lon/elev or observation time are bad by setting 
 c.....  lat to badflag (-99.9), which causes the bounds check to think that
-c.....  the ob is outside the LAPS domain.
+c.....  the ob is outside the laps domain.
 c
 	   if( nanf( lats(i) ) .eq. 1 ) lats(i)  = badflag
 	   if( nanf( lons(i) ) .eq. 1 ) lats(i)  = badflag
@@ -418,7 +418,7 @@ c
 	enddo !i
 c
 c..................................
-c.....	Now loop over all the obs.
+c.....	now loop over all the obs.
 c..................................
 c
 	jfirst = 1
@@ -430,8 +430,8 @@ c
 
            call filter_string(stname(i))
 c
-c.....  Bounds check: is station in the box?  Find the ob i,j location
-c.....  on the LAPS grid, then check if outside past box boundary.
+c.....  bounds check: is station in the box?  find the ob i,j location
+c.....  on the laps grid, then check if outside past box boundary.
 c
            if(lats(i)      .lt. -90.) go to 125 ! badflag (-99.9)...from nan ck
            if(abs(lons(i)) .gt. 180.) go to 125 
@@ -448,7 +448,7 @@ c
                go to 125
            endif
 c
-c.....  Elevation ok?
+c.....  elevation ok?
 c
            if(elev(i).gt.5200. .or. elev(i).lt.-400.) then
                if(i .le. max_write)then
@@ -459,7 +459,7 @@ c
                go to 125
            endif
 c
-c.....  Check to see if its in the desired time window.
+c.....  check to see if its in the desired time window.
 c
 	   i4time_ob = nint(timeobs(i)) + i4time_offset
    	   call make_fnam_lp(i4time_ob,a9time,istatus)
@@ -475,12 +475,12 @@ c
                go to 125
            endif
 c
-c.....  Right time, right location...
+c.....  right time, right location...
 
 	  time = a9time(6:9)
 	  read(time,*) rtime
 c
-c.....  Check if station is reported more than once this
+c.....  check if station is reported more than once this
 c.....  time period.
 c
 	  if(jfirst .eq. 1) then
@@ -500,37 +500,37 @@ c
  150	  nn = nn + 1
 
           if(nn .gt. maxsta)then
-              write(6,*)' ERROR: maxsta exceeded in get_maritime_obs '       
+              write(6,*)' error: maxsta exceeded in get_maritime_obs '       
      1                 ,nn,maxsta
               stop
           endif
 
 	  n_buoy_b = n_buoy_b + 1     !station is in the box
 c
-c.....  Check if its in the LAPS grid.
+c.....  check if its in the laps grid.
 c
           if(ri_loc.lt.1. .or. ri_loc.gt.float(ni)) go to 151  !off grid
           if(rj_loc.lt.1. .or. rj_loc.gt.float(nj)) go to 151  !off grid
 	  n_buoy_g = n_buoy_g + 1  !on grid...count it
  151	  continue
 c
-c.....	Figure out the cloud data.
-c.....  NOTE: Not reading cloud data from ship/buoy file.  The data
-c.....        is too ambiguous for LAPS use at this time.
+c.....	figure out the cloud data.
+c.....  note: not reading cloud data from ship/buoy file.  the data
+c.....        is too ambiguous for laps use at this time.
 c
 	  kkk = 0               ! number of cloud layers
 c
 c
-c.....  Convert units for storage.
+c.....  convert units for storage.
 c
-c.....  Temperature and dewpoint
+c.....  temperature and dewpoint
 c
 	temp_k = t(i)                         
 	if(temp_k.lt.190. .or. temp_k.gt.345.) temp_k = badflag
 	if(temp_k .le. badflag) then          !t bad?
 	   temp_f = badflag                   !          bag
 	else
-	   temp_f = ((temp_k - 273.16) * 9./5.) + 32.  ! K to F
+	   temp_f = ((temp_k - 273.16) * 9./5.) + 32.  ! k to f
 	endif
 c
 	dewp_k = td(i)
@@ -538,10 +538,10 @@ c
 	if(dewp_k .le. badflag) then           !dp bad?
 	   dewp_f = badflag                    !         bag
 	else
-	   dewp_f = ((dewp_k - 273.16) * 9./5.) + 32.  ! K to F
+	   dewp_f = ((dewp_k - 273.16) * 9./5.) + 32.  ! k to f
 	endif
 c
-c..... Wind speed and direction
+c..... wind speed and direction
 c
 	ddg = badflag
 	if(dd(i).lt.0. .or. dd(i).gt.360.) then
@@ -560,16 +560,16 @@ c
 	   ddg = dd(i)
 	endif
 c
-c..... Pressure...MSL and 3-h pressure change
+c..... pressure...msl and 3-h pressure change
 c
 	if(mslp(i).lt.85000. .or. mslp(i).gt.120000.) then
 	   mslp(i) = badflag
 	else
-	   mslp(i) = mslp(i) * 0.01 !Pa to mb
+	   mslp(i) = mslp(i) * 0.01 !pa to mb
 	endif
-	if(dp(i)   .ne. badflag)   dp(i) =   dp(i) * 0.01 !Pa to mb
+	if(dp(i)   .ne. badflag)   dp(i) =   dp(i) * 0.01 !pa to mb
 c
-c..... Visibility
+c..... visibility
 c
 	if(vis(i).lt.0. .or. vis(i).gt.330000.) then
 	   vis(i) = badflag
@@ -578,7 +578,7 @@ c
 	   vis(i) = 0.621371 * vis(i)  !km to miles
 	endif
 c
-c..... Climo-type stuff...Precip, sea surface temps
+c..... climo-type stuff...precip, sea surface temps
 c
 	if(pcp1(i)  .ne. badflag)  pcp1(i) =  pcp1(i) * 39.370079 ! m to in
 	if(pcp6(i)  .ne. badflag)  pcp6(i) =  pcp6(i) * 39.370079 ! m to in
@@ -592,38 +592,38 @@ c
 	endif
         call sfc_climo_qc_r('t_f',seatemp_f)
 c
-c..... Fill the expected accuracy arrays.  Values are based on information
-c..... in the 'Coastal-Marine Automated Network (C-MAN) Users Guide', and 
-c..... we assume that they are about the same for buoys, ships, and C-MAN
-c..... sites.  Note that we convert the units to match what we're using here.
+c..... fill the expected accuracy arrays.  values are based on information
+c..... in the 'coastal-marine automated network (c-man) users guide', and 
+c..... we assume that they are about the same for buoys, ships, and c-man
+c..... sites.  note that we convert the units to match what we're using here.
 c
-c..... Temperature (deg F)
+c..... temperature (deg f)
 c
-	fon = 9. / 5.  !ratio when converting C to F
+	fon = 9. / 5.  !ratio when converting c to f
 	store_2ea(nn,1) = 5.0 * fon        ! start...we don't know what we have
 	if(temp_f .ne. badflag) then
 	   if(temp_f.ge.c2f(-40.) .and. temp_f.le.c2f(50.)) then
-	      store_2ea(nn,1) = 1.0 * fon  ! conv to deg F
+	      store_2ea(nn,1) = 1.0 * fon  ! conv to deg f
 	   endif
 	endif
 c
-c..... Dew point (deg F).  Also estimate a RH accuracy based on the dew point.
-c..... Estimates for the RH expected accuracy are from playing around with the
-c..... Psychrometric Tables for various T/Td combinations.
+c..... dew point (deg f).  also estimate a rh accuracy based on the dew point.
+c..... estimates for the rh expected accuracy are from playing around with the
+c..... psychrometric tables for various t/td combinations.
 c
 	 store_2ea(nn,2) = 5.0 * fon       ! start...don't know what we have 
-	 store_2ea(nn,3) = 50.0            ! Relative Humidity %
+	 store_2ea(nn,3) = 50.0            ! relative humidity %
 	 if(dewp_f .ne. badflag) then
 	    if(dewp_f.ge.c2f(-35.) .and. dewp_f.le.c2f(-2.)) then
-	       store_2ea(nn,2) = 2.0 * fon ! conv to deg F
-	       store_2ea(nn,3) = 20.0      ! RH (%) 
+	       store_2ea(nn,2) = 2.0 * fon ! conv to deg f
+	       store_2ea(nn,3) = 20.0      ! rh (%) 
 	    elseif(dewp_f.gt.c2f(-2.) .and. dewp_f.le.c2f(30.)) then
-	       store_2ea(nn,2) = 1.0 * fon ! conv to deg F
-	       store_2ea(nn,3) = 8.0       ! RH (%) 
+	       store_2ea(nn,2) = 1.0 * fon ! conv to deg f
+	       store_2ea(nn,3) = 8.0       ! rh (%) 
 	    endif
 	 endif
 c
-c..... Wind direction (deg) and speed (kts)
+c..... wind direction (deg) and speed (kts)
 c
 	 store_3ea(nn,1) = 15.0    ! deg 
 	 store_3ea(nn,2) =  1.0    ! kt
@@ -639,17 +639,17 @@ c
 	    endif
 	 endif
 c
-c..... Pressure and altimeter (mb)
+c..... pressure and altimeter (mb)
 c
 	 store_4ea(nn,1) = 1.00            ! pressure (mb)
 	 store_4ea(nn,2) = 0.00            ! altimeter (mb)
 c
-c..... Visibility (miles).  Use a guess based on the range between 
+c..... visibility (miles).  use a guess based on the range between 
 c..... reportable values (e.g., for reported visibility between 
-c..... 0 and 3/8th mile, set accuracy to 1/16th mile).  This is close
-c..... to the stated accuracies in the C-MAN user guide.
+c..... 0 and 3/8th mile, set accuracy to 1/16th mile).  this is close
+c..... to the stated accuracies in the c-man user guide.
 c
-	 store_5ea(nn,1) = 10.00         ! Start with this (miles)
+	 store_5ea(nn,1) = 10.00         ! start with this (miles)
 	 if(vis(i) .ne. badflag) then
 	    if(vis(i) .le. 0.375) then
 	       store_5ea(nn,1) = 0.0625	! miles
@@ -664,29 +664,29 @@ c
 	    endif
 	 endif
 c
-c..... Other stuff.  Note that precip isn't very good.
+c..... other stuff.  note that precip isn't very good.
 c
 	 store_5ea(nn,2) = 0.0             ! solar radiation 
-	 store_5ea(nn,3) = 1.0 * fon       ! soil/water temperature (F)
+	 store_5ea(nn,3) = 1.0 * fon       ! soil/water temperature (f)
 	 store_5ea(nn,4) = 0.0             ! soil moisture
 c
 	 store_6ea(nn,1) = 0.20            ! precipitation (in)
 	 store_6ea(nn,2) = 0.0             ! snow cover (in) 
 c
 c
-c..... Output the data to the storage arrays
+c..... output the data to the storage arrays
 c
 	 call s_len(stname(i), len)
 	 stations(nn)(1:len) = stname(i)(1:len) ! station name
-	 provider(nn)(1:11) = 'NWS        '     ! data provider (all from NWS)
-	 reptype(nn)(1:6) = 'MARTIM'            ! station type
+	 provider(nn)(1:11) = 'nws        '     ! data provider (all from nws)
+	 reptype(nn)(1:6) = 'martim'            ! station type
 	 atype(nn)(1:6) ='      '               ! used here for moving/fixed stns
 	 if(iplat_type(i) .eq. 0) then
-	    atype(nn)(1:6) = 'FIX   '
+	    atype(nn)(1:6) = 'fix   '
 	 elseif(iplat_type(i) .eq. 1) then
-	    atype(nn)(1:6) = 'MVG   '
+	    atype(nn)(1:6) = 'mvg   '
 	 endif
-	 wmoid(nn) = wmoid_in(i)                ! WMO id
+	 wmoid(nn) = wmoid_in(i)                ! wmo id
 	 weather(nn)(1:25) = wx(i)(1:25)        ! present weather
          call filter_string(weather(nn))
 c       
@@ -697,7 +697,7 @@ c
 c
 	 store_2(nn,1) = temp_f                 ! temperature (deg f)
 	 store_2(nn,2) = dewp_f                 ! dew point (deg f)
-	 store_2(nn,3) = badflag                ! Relative Humidity
+	 store_2(nn,3) = badflag                ! relative humidity
 c
 	 store_3(nn,1) = dd(i)                  ! wind dir (deg)
 	 store_3(nn,2) = ff(i)                  ! wind speed (kt)
@@ -706,7 +706,7 @@ c
 c
 	 store_4(nn,1) = badflag                ! altimeter setting (mb)
 	 store_4(nn,2) = badflag                ! station pressure (mb)
-	 store_4(nn,3) = mslp(i)                ! MSL pressure (mb)
+	 store_4(nn,3) = mslp(i)                ! msl pressure (mb)
 
          if(dpchar(i) .ne. ibadflag)then        ! 3-h press change character
   	     store_4(nn,4) = float(dpchar(i))       
@@ -718,7 +718,7 @@ c
 c
 	 store_5(nn,1) = vis(i)                 ! visibility (miles)
 	 store_5(nn,2) = badflag                ! solar radiation 
-	 store_5(nn,3) = seatemp_f              ! soil/water temperature (F)
+	 store_5(nn,3) = seatemp_f              ! soil/water temperature (f)
 	 store_5(nn,4) = badflag                ! soil moisture 
 c
 	 store_6(nn,1) = pcp1(i)                ! 1-h precipitation (in)
@@ -731,7 +731,7 @@ c
 	 store_7(nn,2) = badflag                ! 24-h max temperature
 	 store_7(nn,3) = badflag                ! 24-h min temperature
 c
-c.....	Store cloud info if we have any. 
+c.....	store cloud info if we have any. 
 c
 	 if(kkk .gt. 0) then
 	   do ii=1,kkk
@@ -745,17 +745,17 @@ c
   125	 continue
 c
 c
-c.....  That's it...lets go home.
+c.....  that's it...lets go home.
 c
-	 print *,' Found ',n_buoy_b,' maritime obs in the LAPS box'
-	 print *,' Found ',n_buoy_g,' maritime obs in the LAPS grid'
+	 print *,' found ',n_buoy_b,' maritime obs in the laps box'
+	 print *,' found ',n_buoy_g,' maritime obs in the laps grid'
 	 print *,' '
 	 jstatus = 1		! everything's ok...
 	 return
 c
  990	 continue		! no data available
 	 jstatus = 0
-	 print *,' No Maritime data available'
+	 print *,' no maritime data available'
 	 return
 c
 	 end

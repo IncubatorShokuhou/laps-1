@@ -6,25 +6,25 @@
 
       include 'lapsparms.cmn'
 
-!     This routine accesses the run time variables from the 'nest7grid.parms'
+!     this routine accesses the run time variables from the 'nest7grid.parms'
 !     file via the common block or by reading the actual file.
 
-!     May 1996 Steve Albers - FSL
+!     may 1996 steve albers - fsl
 
-! ----------------- ARGUMENT LIST ---------------------------------------------
+! ----------------- argument list ---------------------------------------------
 
-!     Array of 1 or more requested runtime parameter names
-      character*40 c_vars_req                             ! Input
+!     array of 1 or more requested runtime parameter names
+      character*40 c_vars_req                             ! input
 
-!     Array of runtime parameter values - stuffed into character variables.
-!     These need to be decoded into integer, real, etc, by the caller.
-      character*(*) c_values_req_in                       ! Output
-      character*150 c_values_req                          ! Local
+!     array of runtime parameter values - stuffed into character variables.
+!     these need to be decoded into integer, real, etc, by the caller.
+      character*(*) c_values_req_in                       ! output
+      character*150 c_values_req                          ! local
 
-!     Number of variables requested
-      integer n_vars_req                                  ! Input
+!     number of variables requested
+      integer n_vars_req                                  ! input
 
-      integer istatus                                     ! Output
+      integer istatus                                     ! output
 
 ! -----------------------------------------------------------------------------
 
@@ -35,23 +35,23 @@
 
 ! -----------------------------------------------------------------------------
 
-!     Let's make sure we have the run time variables in the common block
+!     let's make sure we have the run time variables in the common block
 
       call get_config(istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error detected in calling get_config'
+          write(6,*)' error detected in calling get_config'
           istatus = 0
           return
       endif
 
       if(n_vars_req .ne. 1)then
-          write(6,*)' Error detected in get_static_info, n_vars_req = '       
+          write(6,*)' error detected in get_static_info, n_vars_req = '       
      1              ,n_vars_req
           istatus = 0
           return
       endif
 
-!     List the variable names
+!     list the variable names
       c_vars_list(1) = 'laps_cycle_time'
       c_vars_list(2) = 'i_delta_sat_t_sec'
       c_vars_list(3) = 'r_msng_sat_flag_cdf'
@@ -89,7 +89,7 @@
               if(c_vars_req(1:len_req) .eq.
      1           c_vars_list(i_list)(1:len_list))then ! we have a match
 
-               !  Write this variable into the character array
+               !  write this variable into the character array
 
                   if(i_list .eq. 1)goto1
                   if(i_list .eq. 2)goto2
@@ -221,7 +221,7 @@
 
           enddo ! i_list
 
-        ! No match
+        ! no match
           write(6,*)' get_static_info: no match for variable '
      1             ,c_vars_req
           write(6,*)' get_static_info: returning on error '

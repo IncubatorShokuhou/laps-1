@@ -1,87 +1,87 @@
-      LOGICAL          FUNCTION LSAME( CA, CB )
+      logical          function lsame( ca, cb )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     September 30, 1994
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     september 30, 1994
 *
-*     .. Scalar Arguments ..
-      CHARACTER          CA, CB
+*     .. scalar arguments ..
+      character          ca, cb
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  LSAME returns .TRUE. if CA is the same letter as CB regardless of
+*  lsame returns .true. if ca is the same letter as cb regardless of
 *  case.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  CA      (input) CHARACTER*1
-*  CB      (input) CHARACTER*1
-*          CA and CB specify the single characters to be compared.
+*  ca      (input) character*1
+*  cb      (input) character*1
+*          ca and cb specify the single characters to be compared.
 *
 * =====================================================================
 *
-*     .. Intrinsic Functions ..
-      INTRINSIC          ICHAR
+*     .. intrinsic functions ..
+      intrinsic          ichar
 *     ..
-*     .. Local Scalars ..
-      INTEGER            INTA, INTB, ZCODE
+*     .. local scalars ..
+      integer            inta, intb, zcode
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test if the characters are equal
+*     test if the characters are equal
 *
-      LSAME = CA.EQ.CB
-      IF( LSAME )
-     $   RETURN
+      lsame = ca.eq.cb
+      if( lsame )
+     $   return
 *
-*     Now test for equivalence if both characters are alphabetic.
+*     now test for equivalence if both characters are alphabetic.
 *
-      ZCODE = ICHAR( 'Z' )
+      zcode = ichar( 'z' )
 *
-*     Use 'Z' rather than 'A' so that ASCII can be detected on Prime
-*     machines, on which ICHAR returns a value with bit 8 set.
-*     ICHAR('A') on Prime machines returns 193 which is the same as
-*     ICHAR('A') on an EBCDIC machine.
+*     use 'z' rather than 'a' so that ascii can be detected on prime
+*     machines, on which ichar returns a value with bit 8 set.
+*     ichar('a') on prime machines returns 193 which is the same as
+*     ichar('a') on an ebcdic machine.
 *
-      INTA = ICHAR( CA )
-      INTB = ICHAR( CB )
+      inta = ichar( ca )
+      intb = ichar( cb )
 *
-      IF( ZCODE.EQ.90 .OR. ZCODE.EQ.122 ) THEN
+      if( zcode.eq.90 .or. zcode.eq.122 ) then
 *
-*        ASCII is assumed - ZCODE is the ASCII code of either lower or
-*        upper case 'Z'.
+*        ascii is assumed - zcode is the ascii code of either lower or
+*        upper case 'z'.
 *
-         IF( INTA.GE.97 .AND. INTA.LE.122 ) INTA = INTA - 32
-         IF( INTB.GE.97 .AND. INTB.LE.122 ) INTB = INTB - 32
+         if( inta.ge.97 .and. inta.le.122 ) inta = inta - 32
+         if( intb.ge.97 .and. intb.le.122 ) intb = intb - 32
 *
-      ELSE IF( ZCODE.EQ.233 .OR. ZCODE.EQ.169 ) THEN
+      else if( zcode.eq.233 .or. zcode.eq.169 ) then
 *
-*        EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or
-*        upper case 'Z'.
+*        ebcdic is assumed - zcode is the ebcdic code of either lower or
+*        upper case 'z'.
 *
-         IF( INTA.GE.129 .AND. INTA.LE.137 .OR.
-     $       INTA.GE.145 .AND. INTA.LE.153 .OR.
-     $       INTA.GE.162 .AND. INTA.LE.169 ) INTA = INTA + 64
-         IF( INTB.GE.129 .AND. INTB.LE.137 .OR.
-     $       INTB.GE.145 .AND. INTB.LE.153 .OR.
-     $       INTB.GE.162 .AND. INTB.LE.169 ) INTB = INTB + 64
+         if( inta.ge.129 .and. inta.le.137 .or.
+     $       inta.ge.145 .and. inta.le.153 .or.
+     $       inta.ge.162 .and. inta.le.169 ) inta = inta + 64
+         if( intb.ge.129 .and. intb.le.137 .or.
+     $       intb.ge.145 .and. intb.le.153 .or.
+     $       intb.ge.162 .and. intb.le.169 ) intb = intb + 64
 *
-      ELSE IF( ZCODE.EQ.218 .OR. ZCODE.EQ.250 ) THEN
+      else if( zcode.eq.218 .or. zcode.eq.250 ) then
 *
-*        ASCII is assumed, on Prime machines - ZCODE is the ASCII code
-*        plus 128 of either lower or upper case 'Z'.
+*        ascii is assumed, on prime machines - zcode is the ascii code
+*        plus 128 of either lower or upper case 'z'.
 *
-         IF( INTA.GE.225 .AND. INTA.LE.250 ) INTA = INTA - 32
-         IF( INTB.GE.225 .AND. INTB.LE.250 ) INTB = INTB - 32
-      END IF
-      LSAME = INTA.EQ.INTB
+         if( inta.ge.225 .and. inta.le.250 ) inta = inta - 32
+         if( intb.ge.225 .and. intb.le.250 ) intb = intb - 32
+      end if
+      lsame = inta.eq.intb
 *
-*     RETURN
+*     return
 *
-*     End of LSAME
+*     end of lsame
 *
-      END
+      end

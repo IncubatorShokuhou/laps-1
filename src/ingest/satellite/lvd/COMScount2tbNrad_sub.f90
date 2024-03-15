@@ -1,5 +1,5 @@
 
-subroutine COMScount2tbNrad_sub(path_to_raw_sat,max_files &
+subroutine comscount2tbnrad_sub(path_to_raw_sat,max_files &
                                ,n_lines_ir,n_pixels_ir &
                                ,n_vis_lines,n_vis_elem &
                                ,n_wv_lines,n_wv_elem &
@@ -11,36 +11,36 @@ subroutine COMScount2tbNrad_sub(path_to_raw_sat,max_files &
 
 
 !****************************************************************************
-!*This Fortran code converts from COMS count value (Binary)                 *
-!*                                     to temperature and radiance (ASCII). *
+!*this fortran code converts from coms count value (binary)                 *
+!*                                     to temperature and radiance (ascii). *
 !*                                                                          *
-!*INPUT                                                                     *
-!*nx and ny : Array size of COMS data                                       *
-!* FD :  1375 * 1429                                                        * 
-!* ENH : 1934 * 1544                                                        *
-!*Input units number 10 to 11 : Temperature and radiance conversion tables  *
-!*Input units number 20 to 24 : COMS count data                             *
-!*Each unit is assigned chanel in ascending order(IR1, IR2, WV, SWIR, VIS). *
-!*Example code uses Jan 1, 2016, 02:45 UTC data.                            *
-!*Input units number 40 (optional) : latitude and longitude conversion table*
+!*input                                                                     *
+!*nx and ny : array size of coms data                                       *
+!* fd :  1375 * 1429                                                        * 
+!* enh : 1934 * 1544                                                        *
+!*input units number 10 to 11 : temperature and radiance conversion tables  *
+!*input units number 20 to 24 : coms count data                             *
+!*each unit is assigned chanel in ascending order(ir1, ir2, wv, swir, vis). *
+!*example code uses jan 1, 2016, 02:45 utc data.                            *
+!*input units number 40 (optional) : latitude and longitude conversion table*
 !*                                                                          *
-!*OUTPUT                                                                    *
-!*chanel_tb.dat : Temperature of each chanel obtained from count value      *
-!*chanel_rad.dat : Radiance of each chanel obtained from count value        *
-!*Their unit numbers are 30 to 39.                                          *
+!*output                                                                    *
+!*chanel_tb.dat : temperature of each chanel obtained from count value      *
+!*chanel_rad.dat : radiance of each chanel obtained from count value        *
+!*their unit numbers are 30 to 39.                                          *
 !*                                                                          *
-!*Optional commands                                                         *
-!*There are several lines for additional analysis.                          *
-!*Line number 42, 43 and 154 to 162 are commented.                          *
-!*If users want to know latitude and longitude of each cell,                *
+!*optional commands                                                         *
+!*there are several lines for additional analysis.                          *
+!*line number 42, 43 and 154 to 162 are commented.                          *
+!*if users want to know latitude and longitude of each cell,                *
 !*                                     relevant to same row of latticepoint.*
-!*Each column of latticepoint denotes column number and row number of cell. *
-!*And each column of latlon represents latitude and longitude of cell,      *
+!*each column of latticepoint denotes column number and row number of cell. *
+!*and each column of latlon represents latitude and longitude of cell,      *
 !*                                     relevant to same row of latticepoint.*
 !*                                                                          *
-!*Author : Gyeong-Gyeun Ha                                                  *
-!*Affiliation : National Meteorological Satellite Center (of KMA)           *
-!*Date: Nov.2016                                                            *
+!*author : gyeong-gyeun ha                                                  *
+!*affiliation : national meteorological satellite center (of kma)           *
+!*date: nov.2016                                                            *
 !****************************************************************************
 
 integer :: i, j
@@ -55,10 +55,10 @@ character*12 a12time_coms
 character*13 a13time,fname9_to_wfo_fname13
 integer cvt_wfo_fname13_i4time
 
-! Inputs
+! inputs
 character*200 path_to_raw_sat
 
-! Outputs
+! outputs
 integer i4time_data(max_files)
 real, dimension(n_pixels_ir,n_lines_ir) :: ir1_tb_out
 real, dimension(n_pixels_ir,n_lines_ir) :: ir2_tb_out
@@ -66,7 +66,7 @@ real, dimension(n_pixels_ir,n_lines_ir) :: wv_tb_out
 real, dimension(n_pixels_ir,n_lines_ir) :: swir_tb_out
 real, dimension(n_pixels_ir,n_lines_ir) :: vis_rad_out
 
-write(6,*)' Subroutine COMScounttbNrad ',nx,ny,n_pixels_ir,n_lines_ir
+write(6,*)' subroutine comscounttbnrad ',nx,ny,n_pixels_ir,n_lines_ir
 
 if(.true.)then
   call get_systime(i4time,a9_time,istatus)
@@ -79,9 +79,9 @@ else
   i4time_data(1)=cvt_wfo_fname13_i4time(a13time)
 endif
 
-write(6,*)' Read binary data for ',a12time_coms,' ',a13time,i4time_data(1)
+write(6,*)' read binary data for ',a12time_coms,' ',a13time,i4time_data(1)
 
-! Read binary data
+! read binary data
 
 open(20,file=trim(path_to_raw_sat)//'/coms_le1b_ir1_ch1_cn_'//a12time_coms//'.bin',& 
         form='unformatted', recl=nx*ny*nbyte, access='direct',&
@@ -111,11 +111,11 @@ close(23)
 close(24)
 
 
-write(6,*)' Read temperature and radiance table'
+write(6,*)' read temperature and radiance table'
 
-! Read temperature and radiance table
+! read temperature and radiance table
 
-open(10,file=trim(path_to_raw_sat)//'/coms_mi_conversion_table_TB.dat')
+open(10,file=trim(path_to_raw_sat)//'/coms_mi_conversion_table_tb.dat')
 open(11,file=trim(path_to_raw_sat)//'/coms_mi_conversion_table_radiance.dat')
 
 do i=1, sizeofctab
@@ -126,13 +126,13 @@ enddo
 close(10)
 close(11)
 
-write(6,*)' Convert count value to TB and Albedo'
+write(6,*)' convert count value to tb and albedo'
 
-! Convert count value to TB and Albedo
+! convert count value to tb and albedo
 
 do i=1,nx
 	do j=1,ny
-		ir1_tb(i,j)=tb(ir1(i,j)+1,1)      ! Add 1 to assign array index start from 1 in Fortran 
+		ir1_tb(i,j)=tb(ir1(i,j)+1,1)      ! add 1 to assign array index start from 1 in fortran 
 		ir1_rad(i,j)=rad(ir1(i,j)+1,1)
 
 		ir2_tb(i,j)=tb(ir2(i,j)+1,2)
@@ -153,7 +153,7 @@ iwrite = 0
 
 if(iwrite .eq. 1)then
 
-! Save output in ASCII (Example) 
+! save output in ascii (example) 
 
     open(30,file='./ir1_tb.dat')
     open(31,file='./ir1_rad.dat')
@@ -167,20 +167,20 @@ if(iwrite .eq. 1)then
     open(39,file='./vis_rad.dat')
 
     do i=1,nx
-	write(30, '(1543(F8.4,x),F8.4)') ir1_tb(i,:)    ! To deal with FD or LA, put 'ny-1' value in 1543.
-	write(31, '(1543(ES11.5,x),ES11.5)') ir1_rad(i,:)
+	write(30, '(1543(f8.4,x),f8.4)') ir1_tb(i,:)    ! to deal with fd or la, put 'ny-1' value in 1543.
+	write(31, '(1543(es11.5,x),es11.5)') ir1_rad(i,:)
 
-	write(32, '(1543(F8.4,x),F8.4)') ir2_tb(i,:)
-	write(33, '(1543(ES11.5,x),ES11.5)') ir2_rad(i,:)
+	write(32, '(1543(f8.4,x),f8.4)') ir2_tb(i,:)
+	write(33, '(1543(es11.5,x),es11.5)') ir2_rad(i,:)
 
-	write(34, '(1543(F8.4,x),F8.4)') wv_tb(i,:)
-	write(35, '(1543(ES11.5,x),ES11.5)') wv_rad(i,:)
+	write(34, '(1543(f8.4,x),f8.4)') wv_tb(i,:)
+	write(35, '(1543(es11.5,x),es11.5)') wv_rad(i,:)
 
-	write(36, '(1543(F8.4,x),F8.4)') swir_tb(i,:)
-	write(37, '(1543(ES11.5,x),ES11.5)') swir_rad(i,:)
+	write(36, '(1543(f8.4,x),f8.4)') swir_tb(i,:)
+	write(37, '(1543(es11.5,x),es11.5)') swir_rad(i,:)
 
-	write(38, '(1543(F8.4,x),F8.4)') vis_tb(i,:)
-	write(39, '(1543(ES11.5,x),ES11.5)') vis_rad(i,:)
+	write(38, '(1543(f8.4,x),f8.4)') vis_tb(i,:)
+	write(39, '(1543(es11.5,x),es11.5)') vis_rad(i,:)
     enddo
 
     close(30)
@@ -203,18 +203,18 @@ else
 
 endif
 
-! Read latitude and longitude (optional)
-! To deal with FD or LA, put proper latitude-longitude table in open command.
-! Example code uses latitude-longitude table for ENH mode.  
+! read latitude and longitude (optional)
+! to deal with fd or la, put proper latitude-longitude table in open command.
+! example code uses latitude-longitude table for enh mode.  
 
-write(6,*)' Initialize latlon data'
+write(6,*)' initialize latlon data'
 image_lat_ir = r_missing_data
 image_lon_ir = r_missing_data
 
-write(6,*)' Open latlon data ',trim(path_to_raw_sat)//'/cn_latlon.txt'
+write(6,*)' open latlon data ',trim(path_to_raw_sat)//'/cn_latlon.txt'
 open(40,file=trim(path_to_raw_sat)//'/cn_latlon.txt',status='old',err=998)
 
-write(6,*)' Read latlon data'
+write(6,*)' read latlon data'
 do i=1, nx*ny 
   read(40,*)lattice1, lattice2, rlat, rlon
 ! write(6,*)lattice1,lattice2,rlat,rlon
@@ -226,20 +226,20 @@ do i=1, nx*ny
 enddo 
 close(40)
 
-write(6,*)' Center ir_tb_out value ',ir1_tb_out(nx/2,ny/2)
-write(6,*)' Corner ir_tb_out value ',ir1_tb_out(1,1)
-write(6,*)' Center vis_rad_out value ',vis_rad_out(nx/2,ny/2)
-write(6,*)' Corner vis_rad_out value ',vis_rad_out(1,1)
-write(6,*)' Center lat/lon ',image_lat_ir(nx/2,ny/2),image_lon_ir(nx/2,ny/2)
-write(6,*)' Corner lat/lon ',image_lat_ir(1,1),image_lon_ir(1,1)
-write(6,*)' Range lat      ',minval(image_lat_ir),maxval(image_lat_ir)
-write(6,*)' Range lon      ',minval(image_lon_ir),maxval(image_lon_ir)
+write(6,*)' center ir_tb_out value ',ir1_tb_out(nx/2,ny/2)
+write(6,*)' corner ir_tb_out value ',ir1_tb_out(1,1)
+write(6,*)' center vis_rad_out value ',vis_rad_out(nx/2,ny/2)
+write(6,*)' corner vis_rad_out value ',vis_rad_out(1,1)
+write(6,*)' center lat/lon ',image_lat_ir(nx/2,ny/2),image_lon_ir(nx/2,ny/2)
+write(6,*)' corner lat/lon ',image_lat_ir(1,1),image_lon_ir(1,1)
+write(6,*)' range lat      ',minval(image_lat_ir),maxval(image_lat_ir)
+write(6,*)' range lon      ',minval(image_lon_ir),maxval(image_lon_ir)
 
 istatus = 1
 return ! normal return
 
-998 write(6,*)' ERROR reading COMS lat/lon cn_latlon.txt data'
+998 write(6,*)' error reading coms lat/lon cn_latlon.txt data'
 istatus = 0
 return ! error return
 
-end subroutine COMScount2tbNrad_sub
+end subroutine comscount2tbnrad_sub

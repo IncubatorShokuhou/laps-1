@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -30,7 +30,7 @@ cdis
 cdis 
 cdis 
          subroutine readcsc(i4time_cur,imax,jmax,cscnew)
-C
+c
          use mem_namelist, only: laps_cycle_time,precip_cycle_time
 
          integer  imax,jmax
@@ -42,7 +42,7 @@ C
          real missval,cscnew(imax,jmax)
          integer i4time,i4time_cur
          integer i4time_csc(imax,jmax),i4time_snow(imax,jmax)
-         CHARACTER*24 TIME
+         character*24 time
 c ************************************************************
 c
          do j=1,jmax
@@ -56,7 +56,7 @@ c
 
         call get_r_missing_data(missval,istatus)
         if(istatus.ne.1)then
-           write(6,*)'Error - get_r_missing_data'
+           write(6,*)'error - get_r_missing_data'
            return
         endif
 
@@ -83,8 +83,8 @@ c           if(time(13:14).eq.'13')goto 52
            write(6,101)time
  101       format(1x,'csc laps_cycle_time loop time: ',a17)
 c
-	   CALL GETLAPSLCV(I4TIME,LCV,CSC,IMAX,JMAX,ISTATUS)
-	   IF (ISTATUS .NE. 1)go to 522
+	   call getlapslcv(i4time,lcv,csc,imax,jmax,istatus)
+	   if (istatus .ne. 1)go to 522
 
            icsc=icsc+1
            nspts=0
@@ -106,14 +106,14 @@ c
            nmpts=(imax*jmax)-nspts-nrpts
            nspts=nspts-nrpts
            write(6,501)itime,nmpts,nspts,nrpts
- 501       format(' Cycle ',i4,' nmiss/nsnow/nreject ',3i9)
+ 501       format(' cycle ',i4,' nmiss/nsnow/nreject ',3i9)
  522       continue
 c
            i4time=i4time+laps_cycle_time
         enddo
 c
         if(icsc.eq.0)then
-        write(6,*) '**** No lcv data available over 48 hours ****'
+        write(6,*) '**** no lcv data available over 48 hours ****'
           do i=1,imax
           do j=1,jmax
              csctot(i,j)=missval
@@ -125,7 +125,7 @@ c
 c
 c now loop through past 48 hours, looking for latest snow_total and
 c  latest csc obs. snow_total only applies to a point - it is not
-c  spread horizontally. If there are then any later csc obs at that 
+c  spread horizontally. if there are then any later csc obs at that 
 c  point, then the csctot point is set to the csc ob.
 c
         i4time=i4time_cur-48*3600
@@ -138,12 +138,12 @@ c
            call cv_i4tim_asc_lp(i4time,time,istatus)
 c          if(time(13:14).eq.'13')goto 52
            write(6,102)time
- 102       format(1x,'Second loop data search time: ',a17)
+ 102       format(1x,'second loop data search time: ',a17)
 c
-c First get csc field again. Will not analyze - just use this to
+c first get csc field again. will not analyze - just use this to
 c   write over any previous time's snow_total obs.
-	   CALL GETLAPSLCV(I4TIME,LCV,CSC,IMAX,JMAX,ISTATUS)
-	   IF (ISTATUS .NE. 1)goto 52
+	   call getlapslcv(i4time,lcv,csc,imax,jmax,istatus)
+	   if (istatus .ne. 1)goto 52
 
            do i=1,imax
            do j=1,jmax
@@ -164,26 +164,26 @@ c   write over any previous time's snow_total obs.
         enddo
 c
 c now get snow_total obs
-c J.Smart (11-3-97). Compute 48 hour snow accumulation instead of
+c j.smart (11-3-97). compute 48 hour snow accumulation instead of
 c                    snow total to avoid false snow cover from "old"
 c                    snow total accumulation.
-c Recent snow is given more weight
+c recent snow is given more weight
 c
         i4time=i4time_cur-48*3600
         i4time=(i4time/precip_cycle_time) * precip_cycle_time
         ncycle_times=48*int(3600./float(precip_cycle_time))
         write(6,*)
-        write(6,'(" Accumulate Precip Cycle Snow for 48 hour total")')
+        write(6,'(" accumulate precip cycle snow for 48 hour total")')
         write(6,*) '----------------------------------------------'
 
         do itime=1,ncycle_times
 
            call cv_i4tim_asc_lp(i4time,time,istatus)
            write(6,103)time
- 103       format(1x,'Snow Accum data search time: ',a17)
+ 103       format(1x,'snow accum data search time: ',a17)
 
-           CALL GETLAPSL1S(I4TIME,snow_accum,imax,jmax,1,ISTATUS)
-           IF (ISTATUS .EQ. 1)then   
+           call getlapsl1s(i4time,snow_accum,imax,jmax,1,istatus)
+           if (istatus .eq. 1)then   
              do j=1,jmax
              do i=1,imax
                snow_total(i,j)=snow_total(i,j)
@@ -196,20 +196,20 @@ c
              call array_range(snow_accum,imax,jmax,rmin1,rmax1,missval)          
              call array_range(snow_total,imax,jmax,rmin2,rmax2,missval)          
              write(6,111)rmin1,rmax1,rmin2,rmax2 
-111          format(' L1S/S01, snow total ranges ',4f9.5)
+111          format(' l1s/s01, snow total ranges ',4f9.5)
            else
-             write(6,*)'WARNING - L1S/S01 unavailable'
+             write(6,*)'warning - l1s/s01 unavailable'
            endif     
 
            i4time=i4time+precip_cycle_time
         enddo
 c
-c Adjust snow cover field based upon snow total. ------
+c adjust snow cover field based upon snow total. ------
 c   if snowfall total >= 2cm, then set snow cover to 1.
 c   if snowfall total  = 1cm, then set snow cover to 0.5
 c   if snowfall total between 1 and 2cm, then ramp snow cover 0.5 to 1.
 c
-c We added an extra condition that snowfall is more recent than satellite
+c we added an extra condition that snowfall is more recent than satellite
 c data.                                                                   
 
         nrecent_snow = 0
@@ -240,7 +240,7 @@ c    1         cscnew(i,j)=snow_total(i,j)/0.02
         enddo
         enddo     
 
-        write(6,*)' recent snow(S01)/csc(sat)/none = ',nrecent_snow
+        write(6,*)' recent snow(s01)/csc(sat)/none = ',nrecent_snow
      1                                                ,nrecent_csc2nd
      1                                                ,n_neither
 c
@@ -251,53 +251,53 @@ c       enddo
 c
         return
         end
-C-------------------------------------------------------------------------------
-C
-      SUBROUTINE GETLAPSLCV(I4TIME,LCV,CSC,IMAX,JMAX,ISTATUS)
-C
-      Integer*4 imax,jmax
-      Integer*4 kmax
+c-------------------------------------------------------------------------------
+c
+      subroutine getlapslcv(i4time,lcv,csc,imax,jmax,istatus)
+c
+      integer*4 imax,jmax
+      integer*4 kmax
       parameter(kmax = 2)
 c
-      INTEGER*4 I4TIME,LVL(KMAX),I,J,ERROR(2),ISTATUS
-C
-      REAL*4 lcv(imax,jmax),csc(imax,jmax)
-      Real*4 readv(imax,jmax,kmax)
-C
-      CHARACTER*150 LDIR
-      CHARACTER*31 EXT
-      CHARACTER*3 VAR(KMAX)
-      CHARACTER*4 LVL_COORD(KMAX)
-      CHARACTER*10 UNITS(KMAX)
-      CHARACTER*125 COMMENT(KMAX)
-C
-C-------------------------------------------------------------------------------
-C
-	ERROR(1)=1
-	ERROR(2)=0
-C
+      integer*4 i4time,lvl(kmax),i,j,error(2),istatus
+c
+      real*4 lcv(imax,jmax),csc(imax,jmax)
+      real*4 readv(imax,jmax,kmax)
+c
+      character*150 ldir
+      character*31 ext
+      character*3 var(kmax)
+      character*4 lvl_coord(kmax)
+      character*10 units(kmax)
+      character*125 comment(kmax)
+c
+c-------------------------------------------------------------------------------
+c
+	error(1)=1
+	error(2)=0
+c
         call get_directory('lcv',ldir,len)
 
-	EXT='lcv'
-	VAR(1)='LCV'
-	VAR(2)='CSC'
-	LVL(1)=0
-	LVL(2)=0
-C
-C ****  Read LAPS lcv and csc.
-C
-	CALL READ_LAPS_DATA(I4TIME,LDIR,EXT,IMAX,JMAX,KMAX,KMAX,VAR,LVL,
-     1      LVL_COORD,UNITS,COMMENT,readv,ISTATUS)
-C
-	IF (ISTATUS .NE. 1) THEN
-		ISTATUS=ERROR(2)
-		RETURN
-	ENDIF
-C
+	ext='lcv'
+	var(1)='lcv'
+	var(2)='csc'
+	lvl(1)=0
+	lvl(2)=0
+c
+c ****  read laps lcv and csc.
+c
+	call read_laps_data(i4time,ldir,ext,imax,jmax,kmax,kmax,var,lvl,
+     1      lvl_coord,units,comment,readv,istatus)
+c
+	if (istatus .ne. 1) then
+		istatus=error(2)
+		return
+	endif
+c
         do j=1,jmax
         do i=1,imax
-          csc(i,j)=readv(i,j,2) !Cloud analysis implied snow cover
-          lcv(i,j)=readv(i,j,1) !LAPS cloud cover
+          csc(i,j)=readv(i,j,2) !cloud analysis implied snow cover
+          lcv(i,j)=readv(i,j,1) !laps cloud cover
         enddo
         enddo
 c
@@ -314,50 +314,50 @@ c        enddo
 c        print *,'csc(21,55)=',csc(21,55)
 c 20     format(1x,i2,1x,20f4.1)
 c
-	ISTATUS=ERROR(1)
-	RETURN
-C
-	END
-C
-C-------------------------------------------------------------------------------
-C
-      SUBROUTINE GETLAPSL1S(I4TIME,snow_accum,imax,jmax,kmax,
-     &ISTATUS)
-C
+	istatus=error(1)
+	return
+c
+	end
+c
+c-------------------------------------------------------------------------------
+c
+      subroutine getlapsl1s(i4time,snow_accum,imax,jmax,kmax,
+     &istatus)
+c
       integer*4 imax,jmax,kmax
 c
-      INTEGER*4 I4TIME,LVL(KMAX),I,J,ERROR(2),ISTATUS
-C
-      REAL*4 snow_accum(imax,jmax),readv(imax,jmax,kmax)		
-C
-      CHARACTER*150 LDIR
-      CHARACTER*31 EXT
-      CHARACTER*3 VAR(KMAX)
-      CHARACTER*4 LVL_COORD(KMAX)
-      CHARACTER*10 UNITS(KMAX)
-      CHARACTER*125 COMMENT(KMAX)
-C
-C-------------------------------------------------------------------------------
-C
-	ERROR(1)=1
-	ERROR(2)=0
-C
+      integer*4 i4time,lvl(kmax),i,j,error(2),istatus
+c
+      real*4 snow_accum(imax,jmax),readv(imax,jmax,kmax)		
+c
+      character*150 ldir
+      character*31 ext
+      character*3 var(kmax)
+      character*4 lvl_coord(kmax)
+      character*10 units(kmax)
+      character*125 comment(kmax)
+c
+c-------------------------------------------------------------------------------
+c
+	error(1)=1
+	error(2)=0
+c
         call get_directory('l1s',ldir,len)
 
-	EXT='L1S'
-	VAR(1)='S01'
-	LVL(1)=0
-C
-C ****  Read LAPS l1s
-C
-	CALL READ_LAPS_DATA(I4TIME,LDIR,EXT,IMAX,JMAX,KMAX,KMAX,VAR,LVL,
-     1      LVL_COORD,UNITS,COMMENT,readv,ISTATUS)
-C
-	IF (ISTATUS .NE. 1) THEN
-		ISTATUS=ERROR(2)
-		RETURN
-	ENDIF
-C
+	ext='l1s'
+	var(1)='s01'
+	lvl(1)=0
+c
+c ****  read laps l1s
+c
+	call read_laps_data(i4time,ldir,ext,imax,jmax,kmax,kmax,var,lvl,
+     1      lvl_coord,units,comment,readv,istatus)
+c
+	if (istatus .ne. 1) then
+		istatus=error(2)
+		return
+	endif
+c
         do j=1,jmax
         do i=1,imax
           snow_accum(i,j)=readv(i,j,1)
@@ -365,15 +365,15 @@ C
         enddo
 c
 c
-	ISTATUS=ERROR(1)
-	RETURN
-C
-	END
-C
-C
-C-------------------------------------------------------------------------------
+	istatus=error(1)
+	return
+c
+	end
+c
+c
+c-------------------------------------------------------------------------------
          subroutine analyze(csctot,cscnew,imax,jmax,missval)
-C
+c
          integer imax,jmax
          integer nboxes, nruns
          parameter(nboxes=100,nruns=5)
@@ -401,21 +401,21 @@ c
 c  
 c **************************************************************
 c
-c Don't know ahead of time how much missing data, so:
-c   1) Take average for whole grid, apply to missing points (create
+c don't know ahead of time how much missing data, so:
+c   1) take average for whole grid, apply to missing points (create
 c        cscnew grid).
-c   2) Divide grid into 4 boxes. Take average from original grid 
-c        in each box. If there are some non-missing points in the
+c   2) divide grid into 4 boxes. take average from original grid 
+c        in each box. if there are some non-missing points in the
 c        box, apply average to missing points (modify cscnew grid). 
-c   3) Divide grid into 9 boxes. Take average from original grid 
-c        in each box. If there are some non-missing points in the
+c   3) divide grid into 9 boxes. take average from original grid 
+c        in each box. if there are some non-missing points in the
 c        box, apply average to missing points (modify cscnew grid).
-c     -> Actually do this again for 36 and 100 box subdivisions.
-c        Thus the cscnew grid will contain the average values from
-c        the smallest boxes (from the 100 box subdivision). The
+c     -> actually do this again for 36 and 100 box subdivisions.
+c        thus the cscnew grid will contain the average values from
+c        the smallest boxes (from the 100 box subdivision). the
 c        missing grid points receive this value while the non-missing
 c        grid points get overwritten with the original csc values.
-c   4) Apply original grid non-missing values to cscnew grid.
+c   4) apply original grid non-missing values to cscnew grid.
 c
        do nrun=1,nruns
 c 
@@ -434,7 +434,7 @@ c
 c          print *,'all values missing for this box'
 c          print *,'nrun,nbox=',nrun,nn
 c          if(nrun.eq.1)then
-c             print *,'ALL VALUES MISSING - CANNOT CONTINUE'
+c             print *,'all values missing - cannot continue'
 c             stop
 c          endif
           go to 50

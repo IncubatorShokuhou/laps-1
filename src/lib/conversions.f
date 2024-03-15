@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -30,17 +30,17 @@ cdis
 cdis
 cdis
 
-!       Miscellaneous Conversion Routines
+!       miscellaneous conversion routines
 
-!       Steve Albers           1990
+!       steve albers           1990
 
         function omega_to_w(omega,pressure_pa)
 
-cdoc    Convert Omega to W
+cdoc    convert omega to w
 
-!       Omega units are Pascals / Second
-!       Pressure units are Pascals
-!       W units are meters / second        
+!       omega units are pascals / second
+!       pressure units are pascals
+!       w units are meters / second        
 
         real omega_to_w
 
@@ -54,11 +54,11 @@ cdoc    Convert Omega to W
 
         function w_to_omega(w,pressure_pa)
 
-cdoc    Convert W to Omega
+cdoc    convert w to omega
 
-!       Omega units are Pascals / Second
-!       Pressure units are Pascals
-!       W units are meters / second        
+!       omega units are pascals / second
+!       pressure units are pascals
+!       w units are meters / second        
 
         real w_to_omega
 
@@ -74,14 +74,14 @@ cdoc    Convert W to Omega
      1                            ,azimuth,slant_range,elev
      1                            ,rlat_radar,rlon_radar,rheight_radar)       
 
-cdoc    Convert Lat/Lon/Elev to Radar Azimuth / Slant Range / Elevation Angle
+cdoc    convert lat/lon/elev to radar azimuth / slant range / elevation angle
 
         include 'trigd.inc'
 
         implicit real (a-z)
 
         if(rlat_radar .eq. 0.0)then
-            write(6,*)' Warning, Radar Coords NOT Initialized'
+            write(6,*)' warning, radar coords not initialized'
         endif
 
         rpd = 3.141592653589/180.
@@ -138,16 +138,16 @@ c       1                       ,hor_dist,curvature
 
 
 
-        function height_to_zcoord(height_m,istatus) ! Using standard atmosphere
+        function height_to_zcoord(height_m,istatus) ! using standard atmosphere
 
-!       Steve Albers FSL
-cdoc    Convert Height to fractional Z-coordinate
-cdoc    Note that this routine works with the standard atmosphere.
-cdoc    When the vertical grid is pressure, the height is converted to
+!       steve albers fsl
+cdoc    convert height to fractional z-coordinate
+cdoc    note that this routine works with the standard atmosphere.
+cdoc    when the vertical grid is pressure, the height is converted to
 cdoc    pressure, then the interpolation to the vertical grid is performed.
-cdoc    Thus if the height is midway between two LAPS levels in height space,
+cdoc    thus if the height is midway between two laps levels in height space,
 cdoc    the value of height_to_zcoord will not have a fraction of 0.5.
-cdoc    If the pressure is midway between two LAPS levels, then the
+cdoc    if the pressure is midway between two laps levels, then the
 cdoc    value of height_to_zcoord will have a fraction of 0.5.
 
         implicit real (a-z)
@@ -159,12 +159,12 @@ cdoc    value of height_to_zcoord will have a fraction of 0.5.
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)return
 
-        if(ltest_vertical_grid('HEIGHT'))then
-           print*, 'Call is obsolete, please report this message to '
+        if(ltest_vertical_grid('height'))then
+           print*, 'call is obsolete, please report this message to '
            print*, 'and how it occured to laps-bugs@fsl.noaa.gov'
-!           height_to_zcoord = height_m / HEIGHT_INTERVAL
+!           height_to_zcoord = height_m / height_interval
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
+        elseif(ltest_vertical_grid('pressure'))then
             pressure_pa = ztopsa(height_m) * 100.
             if(pressure_pa .eq. 9999900.)pressure_pa = 1e-2
             height_to_zcoord = zcoord_of_pressure(pressure_pa)
@@ -175,8 +175,8 @@ cdoc    value of height_to_zcoord will have a fraction of 0.5.
             endif
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
@@ -190,17 +190,17 @@ cdoc    value of height_to_zcoord will have a fraction of 0.5.
         function height_to_zcoord2(height_m,heights_3d
      1                            ,ni,nj,nk,i,j,istatus)
 
-!       1994 Steve Albers FSL (Original)
-!       1998 Steve Albers FSL (Overhaul)
+!       1994 steve albers fsl (original)
+!       1998 steve albers fsl (overhaul)
 
-cdoc    Convert from Height to fractional Z-coordinate. 3-D Heights 
+cdoc    convert from height to fractional z-coordinate. 3-d heights 
 cdoc    are used as a reference.
-cdoc    Note that this routine works with the real atmosphere.
-cdoc    When the vertical grid is pressure (e.g.), the height is converted to
+cdoc    note that this routine works with the real atmosphere.
+cdoc    when the vertical grid is pressure (e.g.), the height is converted to
 cdoc    pressure, then the interpolation to the vertical grid is performed.
-cdoc    Thus if the height is midway between two LAPS levels in height space,
+cdoc    thus if the height is midway between two laps levels in height space,
 cdoc    the value of 'height_to_zcoord2' will not have a fraction of 0.5.
-cdoc    If the pressure is midway between two LAPS levels, then the
+cdoc    if the pressure is midway between two laps levels, then the
 cdoc    value of 'height_to_zcoord2' will have a fraction of 0.5.
 
         implicit real (a-z)
@@ -217,31 +217,31 @@ cdoc    value of 'height_to_zcoord2' will have a fraction of 0.5.
         data init /0/
         save init,l_valid_grid
 
-        if(init .eq. 0)then ! Do this just one time for efficiency
+        if(init .eq. 0)then ! do this just one time for efficiency
            l_valid_grid = .false.
-           if(ltest_vertical_grid('HEIGHT'))then
-              print*, 'HEIGHT grid not supported in height_to_zcoord2'
-!             height_to_zcoord2 = height_m / HEIGHT_INTERVAL
+           if(ltest_vertical_grid('height'))then
+              print*, 'height grid not supported in height_to_zcoord2'
+!             height_to_zcoord2 = height_m / height_interval
               istatus = 0
               return
-           elseif(ltest_vertical_grid('PRESSURE'))then
+           elseif(ltest_vertical_grid('pressure'))then
               l_valid_grid = .true.
-           elseif(ltest_vertical_grid('SIGMA_P'))then
+           elseif(ltest_vertical_grid('sigma_p'))then
               l_valid_grid = .true.
            else
            endif
            init = 1
         endif
 
-        if(l_valid_grid)then ! valid (pressure) grid with 3-D heights supplied
-            height_to_zcoord2 = nk+1 ! Default value is off the grid
+        if(l_valid_grid)then ! valid (pressure) grid with 3-d heights supplied
+            height_to_zcoord2 = nk+1 ! default value is off the grid
 
             k = k_ref
 
             if(height_m .gt. heights_3d(i,j,nk))then
                 height_to_zcoord2 = nk+1 
 !               write(6,101)k_ref,height_m,heights_3d(i,j,nk)
-!101            format('  Note: above domain in height_to_zcoord2,'       
+!101            format('  note: above domain in height_to_zcoord2,'       
 !    1                ,' k_ref,h,h(nk)',i3,2e11.4)
                 istatus = 0
                 return
@@ -249,7 +249,7 @@ cdoc    value of 'height_to_zcoord2' will have a fraction of 0.5.
             elseif(height_m .lt. heights_3d(i,j,1))then
                 height_to_zcoord2 = 0
                 write(6,102)k_ref,height_m,heights_3d(i,j,1)
-102             format('  Warning: below domain in height_to_zcoord2,'
+102             format('  warning: below domain in height_to_zcoord2,'
      1                ,' k_ref,h,h(1)',i3,2e11.4)
                 istatus = 0
                 return
@@ -281,19 +281,19 @@ cdoc    value of 'height_to_zcoord2' will have a fraction of 0.5.
             enddo ! iter
 
             height_to_zcoord2 = 0
-            write(6,*)' Error, iteration limit in height_to_zcoord2'
+            write(6,*)' error, iteration limit in height_to_zcoord2'
             istatus = 0
             return
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
         endif
 
-999     k_ref = k       ! Successful return
+999     k_ref = k       ! successful return
         istatus = 1
         return
 
@@ -303,17 +303,17 @@ cdoc    value of 'height_to_zcoord2' will have a fraction of 0.5.
         function height_to_zcoord3(height_m,heights_3d,zcoords_1d
      1                            ,ni,nj,nk,i,j,istatus)
 
-!       2000 Steve Albers
+!       2000 steve albers
 
-cdoc    Convert from Height to fractional Z-coordinate. 3-D Heights and
-cdoc    1-D Z-coordinate values are used as a reference.
-cdoc    Note that this routine works with the real atmosphere.
-cdoc    The type of interpolation is similar to that in 'height_to_zcoord2'.
-cdoc    When the vertical grid is pressure (e.g.), the height is converted to
+cdoc    convert from height to fractional z-coordinate. 3-d heights and
+cdoc    1-d z-coordinate values are used as a reference.
+cdoc    note that this routine works with the real atmosphere.
+cdoc    the type of interpolation is similar to that in 'height_to_zcoord2'.
+cdoc    when the vertical grid is pressure (e.g.), the height is converted to
 cdoc    pressure, then the interpolation to the vertical grid is performed.
-cdoc    Thus if the height is midway between two LAPS levels in height space,
+cdoc    thus if the height is midway between two laps levels in height space,
 cdoc    the value of 'height_to_zcoord3' will not have a fraction of 0.5.
-cdoc    If the pressure is midway between two LAPS levels, then the
+cdoc    if the pressure is midway between two laps levels, then the
 cdoc    value of 'height_to_zcoord3' will have a fraction of 0.5.
 
         implicit real (a-z)
@@ -328,20 +328,20 @@ cdoc    value of 'height_to_zcoord3' will have a fraction of 0.5.
         data k_ref /1/
         save k_ref
 
-        if(ltest_vertical_grid('HEIGHT'))then
-           print*, 'Call is obsolete, please report this message to '
+        if(ltest_vertical_grid('height'))then
+           print*, 'call is obsolete, please report this message to '
            print*, 'and how it occured to laps-bugs@fsl.noaa.gov'
-!          height_to_zcoord3 = height_m / HEIGHT_INTERVAL
+!          height_to_zcoord3 = height_m / height_interval
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
-            height_to_zcoord3 = nk+1 ! Default value is off the grid
+        elseif(ltest_vertical_grid('pressure'))then
+            height_to_zcoord3 = nk+1 ! default value is off the grid
 
             k = k_ref
 
             if(height_m .gt. heights_3d(i,j,nk))then
                 height_to_zcoord3 = nk+1 
 !               write(6,101)k_ref,height_m,heights_3d(i,j,nk)
-!101            format('  Note: above domain in height_to_zcoord3,'       
+!101            format('  note: above domain in height_to_zcoord3,'       
 !    1                ,' k_ref,h,h(nk)',i3,2e11.4)
                 istatus = 0
                 return
@@ -349,7 +349,7 @@ cdoc    value of 'height_to_zcoord3' will have a fraction of 0.5.
             elseif(height_m .lt. heights_3d(i,j,1))then
                 height_to_zcoord3 = 0
                 write(6,102)k_ref,height_m,heights_3d(i,j,1)
-102             format('  Warning: below domain in height_to_zcoord3,'
+102             format('  warning: below domain in height_to_zcoord3,'
      1                ,' k_ref,h,h(1)',i3,2e11.4)
                 istatus = 0
                 return
@@ -381,19 +381,19 @@ cdoc    value of 'height_to_zcoord3' will have a fraction of 0.5.
             enddo ! iter
 
             height_to_zcoord3 = 0
-            write(6,*)' Error, iteration limit in height_to_zcoord3'
+            write(6,*)' error, iteration limit in height_to_zcoord3'
             istatus = 0
             return
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
         endif
 
-999     k_ref = k       ! Successful return
+999     k_ref = k       ! successful return
         istatus = 1
         return
 
@@ -403,7 +403,7 @@ cdoc    value of 'height_to_zcoord3' will have a fraction of 0.5.
         function height_to_pressure(height_m,heights_3d
      1                             ,pressures_1d,ni,nj,nk,i,j)
 
-cdoc    Convert height to pressure, using 3-D heights and 1-D pressures as
+cdoc    convert height to pressure, using 3-d heights and 1-d pressures as
 cdoc    a reference.
 
         implicit real (a-z)
@@ -414,12 +414,12 @@ cdoc    a reference.
         real heights_3d(ni,nj,nk)
         real pressures_1d(nk)
 
-        if(ltest_vertical_grid('HEIGHT'))then
-           print*, 'Call is obsolete, please report this message to '
+        if(ltest_vertical_grid('height'))then
+           print*, 'call is obsolete, please report this message to '
            print*, 'and how it occured to laps-bugs@fsl.noaa.gov'
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
-            height_to_pressure = -999. ! Default value is off the grid
+        elseif(ltest_vertical_grid('pressure'))then
+            height_to_pressure = -999. ! default value is off the grid
             do k = 1,nk-1
                 if(heights_3d(i,j,k+1) .ge. height_m .and.
      1           heights_3d(i,j,k)   .le. height_m         )then
@@ -435,8 +435,8 @@ cdoc    a reference.
             enddo ! k
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
@@ -449,17 +449,17 @@ cdoc    a reference.
         subroutine pressure_to_height(pres_pa,heights_3d
      1                               ,ni,nj,nk,i,j,height_out,istatus)       
 
-cdoc    Convert Pressure to Height, using a 3-D Height field for reference
+cdoc    convert pressure to height, using a 3-d height field for reference
 
         real heights_3d(ni,nj,nk)
 
         logical ltest_vertical_grid
 
-        if(ltest_vertical_grid('HEIGHT'))then
+        if(ltest_vertical_grid('height'))then
             istatus = 0
             return
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
+        elseif(ltest_vertical_grid('pressure'))then
             if(pres_pa .lt. pressure_of_level(nk) .or.
      1         pres_pa .gt. pressure_of_level(1)       )then
                 istatus = 0
@@ -492,8 +492,8 @@ cdoc    Convert Pressure to Height, using a 3-D Height field for reference
             endif ! rk is within domain
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
@@ -506,8 +506,8 @@ cdoc    Convert Pressure to Height, using a 3-D Height field for reference
         subroutine pres_to_ht(pres_pa,pres_3d,heights_3d
      1                       ,ni,nj,nk,i,j,height_out,istatus)       
 
-cdoc    Convert Pressure to Height, using 3-D Pres & Ht fields for reference
-cdoc    This currently does a linear interpolation in the vertical. We can 
+cdoc    convert pressure to height, using 3-d pres & ht fields for reference
+cdoc    this currently does a linear interpolation in the vertical. we can 
 cdoc    change this to a log interpolation later if needed.
 
         real pres_3d(ni,nj,nk)
@@ -555,19 +555,19 @@ cdoc    change this to a log interpolation later if needed.
         real height_out_2d(ni,nj)
 
         include 'constants.inc'
-        real C1
-        PARAMETER (C1 = EP_1) 
+        real c1
+        parameter (c1 = ep_1) 
 
-        real C2
-        PARAMETER (C2 = r_d / grav)  
+        real c2
+        parameter (c2 = r_d / grav)  
 
-!       Interpolate to find heights on the input pressure surface
-!       Simplified for now until we take the layer mean temp
+!       interpolate to find heights on the input pressure surface
+!       simplified for now until we take the layer mean temp
 
         do i = 1,ni
         do j = 1,nj
 
-!         Find closest pressure level
+!         find closest pressure level
           delta_p_min = 1e10
           do k = 1,nk
               delta_p_abs = abs(pres_pa_2d(i,j) - pres_pa_3d(i,j,k))
@@ -582,7 +582,7 @@ cdoc    change this to a log interpolation later if needed.
 
           alog_term = alog(pres_pa_2d(i,j) / pres_pa_3d(i,j,kref))
           t_k = temp_3d(i,j,kref)
-          delta_h = -C2 * t_k * alog_term
+          delta_h = -c2 * t_k * alog_term
 
           height_out_2d(i,j) = heights_3d(i,j,kref) + delta_h
 
@@ -595,8 +595,8 @@ cdoc    change this to a log interpolation later if needed.
 
         function height_of_level(level)
 
-cdoc    Calculate the height of a given pressure level, using standard atmos.
-cdoc    Works only for constant pressure levels
+cdoc    calculate the height of a given pressure level, using standard atmos.
+cdoc    works only for constant pressure levels
 
         implicit real (a-z)
 
@@ -604,17 +604,17 @@ cdoc    Works only for constant pressure levels
 
         logical ltest_vertical_grid
 
-        if(ltest_vertical_grid('HEIGHT'))then
-           print*, 'Call is obsolete, please report this message to '
+        if(ltest_vertical_grid('height'))then
+           print*, 'call is obsolete, please report this message to '
            print*, 'and how it occured to laps-bugs@fsl.noaa.gov'
-!            height_of_level = HEIGHT_INTERVAL * level
+!            height_of_level = height_interval * level
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
+        elseif(ltest_vertical_grid('pressure'))then
             height_of_level = psatoz(pressure_of_level(level) * .01)
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
@@ -626,17 +626,17 @@ cdoc    Works only for constant pressure levels
 
         function zcoord_of_level(level)
 
-cdoc    Calculate zcoord (e.g. pressure) of a given level. 
-cdoc    Works only for constant pressure levels
+cdoc    calculate zcoord (e.g. pressure) of a given level. 
+cdoc    works only for constant pressure levels
  
-        use mem_namelist, ONLY: nk_laps
+        use mem_namelist, only: nk_laps
 
         real, allocatable, dimension(:) :: sigma_1d_out
 
         logical ltest_vertical_grid_lc
 
         if(ltest_vertical_grid_lc('height'))then
-           print*, 'Call is obsolete, please report this message to '
+           print*, 'call is obsolete, please report this message to '
            print*, 'and how it occured to laps-bugs@fsl.noaa.gov'
 !           zcoord_of_level = height_interval * level
 
@@ -650,8 +650,8 @@ cdoc    Works only for constant pressure levels
             deallocate (sigma_1d_out)
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
@@ -664,8 +664,8 @@ cdoc    Works only for constant pressure levels
 
         function pressure_of_level(level)
 
-cdoc    Calculate pressure of a given integer level. 
-cdoc    Works only for constant pressure levels
+cdoc    calculate pressure of a given integer level. 
+cdoc    works only for constant pressure levels
 
         real, allocatable, dimension(:) :: pres_1d
 
@@ -674,9 +674,9 @@ cdoc    Works only for constant pressure levels
         call get_laps_dimensions(nk,istatus)
         if(istatus .ne. 1)stop
 
-        allocate(pres_1d(nk), STAT=istat_alloc )
+        allocate(pres_1d(nk), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate pres_1d'
+            write(6,*)' error: could not allocate pres_1d'
             stop
         endif
 
@@ -694,8 +694,8 @@ cdoc    Works only for constant pressure levels
 
         function pressure_of_rlevel(rlevel)
 
-cdoc    Obtain pressure of a given real (fractional) level. 
-cdoc    Works only for constant pressure levels
+cdoc    obtain pressure of a given real (fractional) level. 
+cdoc    works only for constant pressure levels
 
         call get_laps_dimensions(nk,istatus)
         if(istatus .ne. 1)stop
@@ -717,7 +717,7 @@ cdoc    Works only for constant pressure levels
 
         function rlevel_of_field(value,field_3d,ni,nj,nk,i,j,istatus)       
 
-cdoc    Find z coordinate given a field value, i, j, and the whole 3-D field
+cdoc    find z coordinate given a field value, i, j, and the whole 3-d field
 
         implicit real (a-z)
 
@@ -739,14 +739,14 @@ cdoc    Find z coordinate given a field value, i, j, and the whole 3-D field
                 isign = -1
             endif
 
-            rlevel_of_field = nk+1 ! Default value is off the grid
+            rlevel_of_field = nk+1 ! default value is off the grid
 
             k = k_ref
 
             if((value - field_3d(i,j,nk)) * rsign .gt. 0.)then
                 rlevel_of_field = nk+1 
 !               write(6,101)k_ref,value,field_3d(i,j,nk)
-!101            format('  Note: above domain in rlevel_of_field,'       
+!101            format('  note: above domain in rlevel_of_field,'       
 !    1                ,' k_ref,h,h(nk)',i3,2e11.4)
                 istatus = 0
                 return
@@ -754,7 +754,7 @@ cdoc    Find z coordinate given a field value, i, j, and the whole 3-D field
             elseif((value - field_3d(i,j,1)) * rsign .lt. 0.)then
                 rlevel_of_field = 0
                 write(6,102)isign,value,field_3d(i,j,1),field_3d(i,j,nk)
-102             format('  Warning: below domain in rlevel_of_field,'
+102             format('  warning: below domain in rlevel_of_field,'
      1                ,' isign,h,h(1),h(nk)',i3,3e11.4)
                 write(6,*)i,j,field_3d(i,j,:)
                 istatus = 0
@@ -783,13 +783,13 @@ cdoc    Find z coordinate given a field value, i, j, and the whole 3-D field
             enddo ! iter
 
             rlevel_of_field = 0
-            write(6,*)' Error, iteration limit in rlevel_of_field'
+            write(6,*)' error, iteration limit in rlevel_of_field'
             istatus = 0
             return
 
         endif
 
-999     k_ref = k       ! Successful return
+999     k_ref = k       ! successful return
         istatus = 1
 
         return
@@ -798,8 +798,8 @@ cdoc    Find z coordinate given a field value, i, j, and the whole 3-D field
 
         function rlevel_of_logfield(value,field_3d,ni,nj,nk,i,j,istatus)       
 
-cdoc    Find z coordinate given a field value, i, j, and the whole 3-D field
-cdoc    Log vertical interpolation is used. 
+cdoc    find z coordinate given a field value, i, j, and the whole 3-d field
+cdoc    log vertical interpolation is used. 
 
         implicit real (a-z)
 
@@ -812,12 +812,12 @@ cdoc    Log vertical interpolation is used.
         data k_ref /1/
         save k_ref
 
-        if(ltest_vertical_grid('HEIGHT'))then
-            print*, 'Call is obsolete, please report this message to '       
+        if(ltest_vertical_grid('height'))then
+            print*, 'call is obsolete, please report this message to '       
             print*, 'and how it occured to laps-bugs@fsl.noaa.gov'
-!           rlevel_of_logfield = value / HEIGHT_INTERVAL
+!           rlevel_of_logfield = value / height_interval
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
+        elseif(ltest_vertical_grid('pressure'))then
             if(field_3d(i,j,nk) .gt. field_3d(i,j,1))then
                 rsign = 1.0
                 isign = 1
@@ -826,14 +826,14 @@ cdoc    Log vertical interpolation is used.
                 isign = -1
             endif
 
-            rlevel_of_logfield = nk+1 ! Default value is off the grid
+            rlevel_of_logfield = nk+1 ! default value is off the grid
 
             k = k_ref
 
             if((value - field_3d(i,j,nk)) * rsign .gt. 0.)then
                 rlevel_of_logfield = nk+1 
 !               write(6,101)k_ref,value,field_3d(i,j,nk)
-!101            format('  Note: above domain in rlevel_of_logfield,'       
+!101            format('  note: above domain in rlevel_of_logfield,'       
 !    1                ,' k_ref,h,h(nk)',i3,2e11.4)
                 istatus = 0
                 return
@@ -841,7 +841,7 @@ cdoc    Log vertical interpolation is used.
             elseif((value - field_3d(i,j,1)) * rsign .lt. 0.)then
                 rlevel_of_logfield = 0
                 write(6,102)k_ref,value,field_3d(i,j,1)
-102             format('  Warning: below domain in rlevel_of_logfield,'
+102             format('  warning: below domain in rlevel_of_logfield,'
      1                ,' k_ref,h,h(1)',i3,2e11.4)
                 istatus = 0
                 return
@@ -871,19 +871,19 @@ cdoc    Log vertical interpolation is used.
             enddo ! iter
 
             rlevel_of_logfield = 0
-            write(6,*)' Error, iteration limit in rlevel_of_logfield'
+            write(6,*)' error, iteration limit in rlevel_of_logfield'
             istatus = 0
             return
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
         endif
 
-999     k_ref = k       ! Successful return
+999     k_ref = k       ! successful return
         istatus = 1
 
         return
@@ -892,8 +892,8 @@ cdoc    Log vertical interpolation is used.
 
         function zcoord_of_pressure(pres_pa)
 
-cdoc    Convert pressure to a real (fractional) level. 
-cdoc    Works only for constant pressure levels.
+cdoc    convert pressure to a real (fractional) level. 
+cdoc    works only for constant pressure levels.
 
         real, allocatable, dimension(:) :: pres_1d
 
@@ -902,13 +902,13 @@ cdoc    Works only for constant pressure levels.
         data init /0/
         save init,l_valid_grid
 
-        if(init .eq. 0)then ! Do this just one time for efficiency
+        if(init .eq. 0)then ! do this just one time for efficiency
            l_valid_grid = .false.
-           if(ltest_vertical_grid('HEIGHT'))then
-              print*, 'HEIGHT grid not supported in height_to_zcoord2'
+           if(ltest_vertical_grid('height'))then
+              print*, 'height grid not supported in height_to_zcoord2'
               istatus = 0
               return
-           elseif(ltest_vertical_grid('PRESSURE'))then
+           elseif(ltest_vertical_grid('pressure'))then
               l_valid_grid = .true.
            endif
            init = 1
@@ -918,9 +918,9 @@ cdoc    Works only for constant pressure levels.
             call get_laps_dimensions(nk,istatus)
             if(istatus .ne. 1)stop
 
-            allocate(pres_1d(nk), STAT=istat_alloc )
+            allocate(pres_1d(nk), stat=istat_alloc )
             if(istat_alloc .ne. 0)then
-                write(6,*)' ERROR: Could not allocate pres_1d'
+                write(6,*)' error: could not allocate pres_1d'
                 stop
             endif
 
@@ -942,8 +942,8 @@ cdoc    Works only for constant pressure levels.
             deallocate(pres_1d)
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' zcoord_of_pressure supports PRESSURE or HEIGHT'  
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' zcoord_of_pressure supports pressure or height'  
             istatus = 0
             return
 
@@ -956,14 +956,14 @@ cdoc    Works only for constant pressure levels.
 
         function zcoord_of_logpressure(pres_pa)
 
-cdoc    Convert pressure to a real (fractional) level in log space. 
-cdoc    Works only for constant pressure levels.
+cdoc    convert pressure to a real (fractional) level in log space. 
+cdoc    works only for constant pressure levels.
 
         logical ltest_vertical_grid
 
-        if(ltest_vertical_grid('HEIGHT'))then
+        if(ltest_vertical_grid('height'))then
 
-        elseif(ltest_vertical_grid('PRESSURE'))then
+        elseif(ltest_vertical_grid('pressure'))then
             call get_r_missing_data(r_missing_data,istatus)
 
             rz = zcoord_of_pressure(pres_pa)
@@ -988,8 +988,8 @@ cdoc    Works only for constant pressure levels.
             zcoord_of_logpressure = int(rz) + frac
 
         else
-            write(6,*)' Error, vertical grid not supported,'
-     1               ,' this routine supports PRESSURE or HEIGHT'
+            write(6,*)' error, vertical grid not supported,'
+     1               ,' this routine supports pressure or height'
             istatus = 0
             return
 
@@ -1000,15 +1000,15 @@ cdoc    Works only for constant pressure levels.
         end
 
 
-        subroutine   uvgrid_to_radar(u_grid,     ! I
-     1                               v_grid,     ! I
-     1                               t_radar,    ! O
-     1                               r_radar,    ! O
-     1                               azimuth,    ! I
-     1                               latitude,   ! I
-     1                               longitude)  ! I
+        subroutine   uvgrid_to_radar(u_grid,     ! i
+     1                               v_grid,     ! i
+     1                               t_radar,    ! o
+     1                               r_radar,    ! o
+     1                               azimuth,    ! i
+     1                               latitude,   ! i
+     1                               longitude)  ! i
 
-cdoc    Convert U and V (grid north) to Tangential and Radial velocity,
+cdoc    convert u and v (grid north) to tangential and radial velocity,
 cdoc    given the radar azimuth and geographic longitude.
 
         real longitude
@@ -1030,13 +1030,13 @@ cdoc    given the radar azimuth and geographic longitude.
         end
 
 
-        subroutine   uvtrue_to_radar(u_true,  ! I
-     1                               v_true,  ! I
-     1                               t_radar, ! O
-     1                               r_radar, ! O
-     1                               azimuth) ! I
+        subroutine   uvtrue_to_radar(u_true,  ! i
+     1                               v_true,  ! i
+     1                               t_radar, ! o
+     1                               r_radar, ! o
+     1                               azimuth) ! i
 
-cdoc    Convert U and V (true north) to Tangential and Radial velocity,
+cdoc    convert u and v (true north) to tangential and radial velocity,
 cdoc    given the radar azimuth.
 
         call   uv_to_disp(u_true,
@@ -1054,14 +1054,14 @@ cdoc    given the radar azimuth.
         end
 
 
-        subroutine   uvgrid_to_disptrue(u_grid,    ! I
-     1                                  v_grid,    ! I
-     1                                  di_true,   ! O
-     1                                  speed,     ! O
-     1                                  latitude,  ! I
-     1                                  longitude) ! I
+        subroutine   uvgrid_to_disptrue(u_grid,    ! i
+     1                                  v_grid,    ! i
+     1                                  di_true,   ! o
+     1                                  speed,     ! o
+     1                                  latitude,  ! i
+     1                                  longitude) ! i
 
-cdoc    Convert U and V (grid north) to DIR and SPEED (true north),
+cdoc    convert u and v (grid north) to dir and speed (true north),
 cdoc    given the longitude.
 
         real latitude, longitude
@@ -1069,7 +1069,7 @@ cdoc    given the longitude.
         call get_config(istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' ERROR, get_laps_config not successfully called'       
+            write(6,*)' error, get_laps_config not successfully called'       
             stop
         endif
 
@@ -1077,7 +1077,7 @@ cdoc    given the longitude.
 
         if(speed .gt. 0)then
             di_grid = atan3d(-u_grid,-v_grid)
-!           Switched the sign on this (in 2016)
+!           switched the sign on this (in 2016)
             di_true = di_grid - projrot_latlon(latitude,longitude
      1                                        ,istatus)
             di_true = mod(di_true+360.,360.)
@@ -1090,13 +1090,13 @@ cdoc    given the longitude.
 
 
 
-        subroutine   disptrue_to_radar(di_true, ! I
-     1                                 speed,   ! I
-     1                                 t_radar, ! O
-     1                                 r_radar, ! O
-     1                                 azimuth) ! I
+        subroutine   disptrue_to_radar(di_true, ! i
+     1                                 speed,   ! i
+     1                                 t_radar, ! o
+     1                                 r_radar, ! o
+     1                                 azimuth) ! i
 
-cdoc    Convert DIR and SPEED (true north) to Tangential and Radial velocity,
+cdoc    convert dir and speed (true north) to tangential and radial velocity,
 cdoc    given the radar azimuth.
 
         include 'trigd.inc'
@@ -1111,15 +1111,15 @@ cdoc    given the radar azimuth.
         end
 
 
-        subroutine   radar_to_uvgrid(t_radar,   ! I
-     1                               r_radar,   ! I
-     1                               u_grid,    ! O
-     1                               v_grid,    ! O
-     1                               azimuth,   ! I
-     1                               latitude,  ! I
-     1                               longitude) ! I
+        subroutine   radar_to_uvgrid(t_radar,   ! i
+     1                               r_radar,   ! i
+     1                               u_grid,    ! o
+     1                               v_grid,    ! o
+     1                               azimuth,   ! i
+     1                               latitude,  ! i
+     1                               longitude) ! i
 
-cdoc    Convert Tangential and Radial velocity to U and V (grid north),
+cdoc    convert tangential and radial velocity to u and v (grid north),
 cdoc    given the radar azimuth and geographic longitude.
 
         real latitude, longitude
@@ -1140,13 +1140,13 @@ cdoc    given the radar azimuth and geographic longitude.
         return
         end
 
-        subroutine   radar_to_uvtrue(t_radar,  ! I
-     1                               r_radar,  ! I
-     1                               u_true,   ! O
-     1                               v_true,   ! O
-     1                               azimuth)  ! I
+        subroutine   radar_to_uvtrue(t_radar,  ! i
+     1                               r_radar,  ! i
+     1                               u_true,   ! o
+     1                               v_true,   ! o
+     1                               azimuth)  ! i
 
-cdoc    Convert Tangential and Radial velocity to U and V (true north),
+cdoc    convert tangential and radial velocity to u and v (true north),
 cdoc    given the radar azimuth.
 
         call radar_to_disptrue(di_true,
@@ -1164,13 +1164,13 @@ cdoc    given the radar azimuth.
         return
         end
 
-        subroutine   radar_to_disptrue(di_true,  ! O
-     1                                 speed,    ! O
-     1                                 t_radar,  ! I
-     1                                 r_radar,  ! I
-     1                                 azimuth)  ! I
+        subroutine   radar_to_disptrue(di_true,  ! o
+     1                                 speed,    ! o
+     1                                 t_radar,  ! i
+     1                                 r_radar,  ! i
+     1                                 azimuth)  ! i
 
-cdoc    Convert Tangential and Radial velocity to DIR and SPEED (true north),
+cdoc    convert tangential and radial velocity to dir and speed (true north),
 cdoc    given the radar azimuth.
 
 !       real longitude
@@ -1187,26 +1187,26 @@ cdoc    given the radar azimuth.
         return
         end
 
-        subroutine   disptrue_to_uvgrid(di_true,     ! I
-     1                                  speed,       ! I
-     1                                  u_grid,      ! O
-     1                                  v_grid,      ! O
-     1                                  longitude)   ! I
+        subroutine   disptrue_to_uvgrid(di_true,     ! i
+     1                                  speed,       ! i
+     1                                  u_grid,      ! o
+     1                                  v_grid,      ! o
+     1                                  longitude)   ! i
 
-cdoc    Convert DIR and SPEED (true north) to U and V (grid north)
+cdoc    convert dir and speed (true north) to u and v (grid north)
 
         real latitude, longitude
 
         call get_config(istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' ERROR, get_laps_config not successfully called'       
+            write(6,*)' error, get_laps_config not successfully called'       
             stop
         endif
 
-        latitude = -999. ! Since lat is not yet passed in
+        latitude = -999. ! since lat is not yet passed in
 
-!       Switched the sign on this (in 2016)
+!       switched the sign on this (in 2016)
         di_grid = di_true + projrot_latlon(latitude,longitude
      1                                             ,istatus)
 
@@ -1218,24 +1218,24 @@ cdoc    Convert DIR and SPEED (true north) to U and V (grid north)
         return
         end
 
-        subroutine   uvtrue_to_uvgrid(u_true,    ! I
-     1                                v_true,    ! I
-     1                                u_grid,    ! O
-     1                                v_grid,    ! O
-     1                                longitude) ! I
+        subroutine   uvtrue_to_uvgrid(u_true,    ! i
+     1                                v_true,    ! i
+     1                                u_grid,    ! o
+     1                                v_grid,    ! o
+     1                                longitude) ! i
 
-cdoc    Convert wind vector from true north to grid north, given the longitude.
+cdoc    convert wind vector from true north to grid north, given the longitude.
 
         real latitude, longitude
 
         call get_config(istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' ERROR, get_laps_config not successfully called'       
+            write(6,*)' error, get_laps_config not successfully called'       
             stop
         endif
 
-        latitude = -999. ! Since lat is not yet passed in
+        latitude = -999. ! since lat is not yet passed in
 
         angle = projrot_latlon(latitude,longitude,istatus)
 
@@ -1248,15 +1248,15 @@ cdoc    Convert wind vector from true north to grid north, given the longitude.
         return
         end
 
-        subroutine   uvtrue_to_uvgrid_2d(u_true,    ! I
-     1                                   v_true,    ! I
-     1                                   u_grid,    ! O
-     1                                   v_grid,    ! O
-     1                                   longitude, ! I
-     1                                   ni,        ! I
-     1                                   nj)        ! I
+        subroutine   uvtrue_to_uvgrid_2d(u_true,    ! i
+     1                                   v_true,    ! i
+     1                                   u_grid,    ! o
+     1                                   v_grid,    ! o
+     1                                   longitude, ! i
+     1                                   ni,        ! i
+     1                                   nj)        ! i
 
-cdoc    Convert wind vector from true north to grid north, given the longitude.
+cdoc    convert wind vector from true north to grid north, given the longitude.
 
         real u_true(ni,nj), v_true(ni,nj)
         real u_grid(ni,nj), v_grid(ni,nj)
@@ -1267,11 +1267,11 @@ cdoc    Convert wind vector from true north to grid north, given the longitude.
         call get_config(istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' ERROR, get_laps_config not successfully called'       
+            write(6,*)' error, get_laps_config not successfully called'       
             stop
         endif
 
-        latitude = -999. ! Since lat is not yet passed in
+        latitude = -999. ! since lat is not yet passed in
  
         call projrot_latlon_2d(latitude,longitude,ni,nj,angle,istatus)
 
@@ -1285,24 +1285,24 @@ cdoc    Convert wind vector from true north to grid north, given the longitude.
         return
         end
 
-        subroutine   uvgrid_to_uvtrue(u_grid,    ! I
-     1                                v_grid,    ! I
-     1                                u_true,    ! O
-     1                                v_true,    ! O
-     1                                longitude) ! I
+        subroutine   uvgrid_to_uvtrue(u_grid,    ! i
+     1                                v_grid,    ! i
+     1                                u_true,    ! o
+     1                                v_true,    ! o
+     1                                longitude) ! i
 
-cdoc    Convert wind vector from grid north to true north, given the longitude
+cdoc    convert wind vector from grid north to true north, given the longitude
 
         real latitude, longitude
 
         call get_config(istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' ERROR, get_laps_config not successfully called'       
+            write(6,*)' error, get_laps_config not successfully called'       
             stop
         endif
 
-        latitude = -999. ! Since lat is not yet passed in
+        latitude = -999. ! since lat is not yet passed in
 
         angle = -projrot_latlon(latitude,longitude,istatus)
 
@@ -1320,7 +1320,7 @@ cdoc    Convert wind vector from grid north to true north, given the longitude
 
       subroutine rotate_vec(u1,v1,u2,v2,angle)
 
-cdoc  Rotate vector (u1,v1) through a clockwise angle to obtain vector (u2,v2)
+cdoc  rotate vector (u1,v1) through a clockwise angle to obtain vector (u2,v2)
 cdoc  u points east and v points north
 
       include 'trigd.inc'
@@ -1332,7 +1332,7 @@ cdoc  u points east and v points north
 
       subroutine rotate_vec_2d(u1,v1,u2,v2,angle,ni,nj)
 
-cdoc  Rotate vector (u1,v1) through a clockwise angle to obtain vector (u2,v2)
+cdoc  rotate vector (u1,v1) through a clockwise angle to obtain vector (u2,v2)
 cdoc  u points east and v points north
 
       parameter (pi = 3.1415926535897932)
@@ -1353,7 +1353,7 @@ cdoc  u points east and v points north
      1                          speed,
      1                          u,
      1                          v)
-cdoc    Convert DIR and SPEED to U and V
+cdoc    convert dir and speed to u and v
 
         include 'trigd.inc'
         u  = - sind(dir) * speed
@@ -1368,7 +1368,7 @@ cdoc    Convert DIR and SPEED to U and V
      1                          dir,
      1                          speed)
 
-cdoc    Convert U and V to DIR and SPEED
+cdoc    convert u and v to dir and speed
 
         speed = sqrt( u**2 + v**2 )
 
@@ -1383,43 +1383,43 @@ cdoc    Convert U and V to DIR and SPEED
         end
 
         function k_to_f(x)
-cdoc    Convert Kelvin to Fahrenheit
+cdoc    convert kelvin to fahrenheit
         real k_to_f
         k_to_f = (x - 273.15) * 1.8 + 32.
         return
         end
 
         function f_to_k(x)
-cdoc    Convert Fahrenheit to Kelvin
+cdoc    convert fahrenheit to kelvin
         real f_to_k
         f_to_k = (x - 32.) / 1.8 + 273.15
         return
         end
 
         function k_to_c(x)
-cdoc    Convert Kelvin to Celsius
+cdoc    convert kelvin to celsius
         real k_to_c
         k_to_c = (x - 273.15)
         return
         end
 
         function c_to_k(x)
-cdoc    Convert Celsius to Kelvin
+cdoc    convert celsius to kelvin
         real c_to_k
         c_to_k = (x + 273.15)
         return
         end
 
         function f_to_c(x)
-cdoc    Convert Fahrenheit to Celsius
+cdoc    convert fahrenheit to celsius
         real f_to_c
         f_to_c = (x - 32.) / 1.8 
         return
         end
 c
         function c_to_f(t_c)
-cdoc    Convert Celsius to Fahrenheit
-        c_to_f = (t_c * 9./5.) + 32.             ! C to F
+cdoc    convert celsius to fahrenheit
+        c_to_f = (t_c * 9./5.) + 32.             ! c to f
         return
         end
 c
@@ -1431,8 +1431,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         subroutine conv_meters_to_inches(data_in, numarr,prodno,
      1  imax, jmax)
 c   subroutine to convert accumulations meters to inches
-        REAL data_in(imax, jmax, numarr)
-        Integer Prodno
+        real data_in(imax, jmax, numarr)
+        integer prodno
 c   begin
         do j=1,jmax
         do i=1,imax

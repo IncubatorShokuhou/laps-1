@@ -1,14 +1,14 @@
 
         program ensemble_mean_main
 
-! Program calculates ensmble mean as well as time mean
-! Isidora Jankov, Linda Wharton and Steve Albers July 2010
+! program calculates ensmble mean as well as time mean
+! isidora jankov, linda wharton and steve albers july 2010
 
 
         character*9 a9time
 	character*300 laps_data_root,dir_t,filenamet
         character*250 stlaps
-        integer      NX_L,NY_L,NZ_L,i4time,i,istatus 
+        integer      nx_l,ny_l,nz_l,i4time,i,istatus 
         integer      model_cycle_time_sec, len_dir_t
         real         r_missing_data
         integer, parameter :: nprmax=150
@@ -17,7 +17,7 @@
 
 	include 'lapsparms.for'
 
-! Parameter for model cycle interval
+! parameter for model cycle interval
         model_cycle_time_sec = 10800
 !
 
@@ -35,48 +35,48 @@
         close(lun)
         call i4time_fname_lp(a9time,i4time,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting i4time ',a9time
+           write (6,*) 'error getting i4time ',a9time
            go to 999
         endif
 
-        call get_grid_dim_xy(NX_L,NY_L,istatus)
+        call get_grid_dim_xy(nx_l,ny_l,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting horizontal domain dimensions'
+           write (6,*) 'error getting horizontal domain dimensions'
            go to 999
         endif
 
-        call get_laps_dimensions(NZ_L,istatus)
+        call get_laps_dimensions(nz_l,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting vertical domain dimension'
+           write (6,*) 'error getting vertical domain dimension'
            go to 999
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting r_missing_data'
+           write (6,*) 'error getting r_missing_data'
            go to 999
         endif
 
-	call get_pres_1d(i4time,NZ_L,pressures,istatus)
+	call get_pres_1d(i4time,nz_l,pressures,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting 1d pressures'
+           write (6,*) 'error getting 1d pressures'
            go to 999
         endif
 
 	
 
-! Determine number of isobaric levels by checking pressure data.
-!   (Assume there is at least one level, and that data is ordered correctly)
+! determine number of isobaric levels by checking pressure data.
+!   (assume there is at least one level, and that data is ordered correctly)
 
-        do i=1,NZ_L
+        do i=1,nz_l
            if (pressures(i+1) > 200000.) exit
         enddo
 
 
 
         call ensemble_mean(i4time,model_cycle_time_sec,
-     1                  NX_L,NY_L,
-     1                  NZ_L,
+     1                  nx_l,ny_l,
+     1                  nz_l,
      1                  pressures,	
      1                  r_missing_data,
      1                  istatus)
@@ -88,8 +88,8 @@
 !******************************************************************
           
        subroutine ensemble_mean(i4time,model_cycle_time_sec,
-     1                  NX_L,NY_L,
-     1                  NZ_L,
+     1                  nx_l,ny_l,
+     1                  nz_l,
      1                  pressures,	
      1                  r_missing_data,
      1                  istatus)
@@ -111,21 +111,21 @@
        character(len=132), allocatable, dimension(:) :: com2d
 
 
-       integer,intent(in) ::   NX_L,NY_L,NZ_L
+       integer,intent(in) ::   nx_l,ny_l,nz_l
 
         integer n_fields
         parameter (n_fields=4)
 
-        real var_fcst_3d(NX_L,NY_L,NZ_L)
-        real var_fcst_2d(NX_L,NY_L)
-	real cdl_levels(NZ_L)
-        real pressures(NZ_L) 
+        real var_fcst_3d(nx_l,ny_l,nz_l)
+        real var_fcst_2d(nx_l,ny_l)
+	real cdl_levels(nz_l)
+        real pressures(nz_l) 
 
-        real mean_fcst_3d(NX_L,NY_L,NZ_L)
-        real mean_fcst_2d(NX_L,NY_L)
+        real mean_fcst_3d(nx_l,ny_l,nz_l)
+        real mean_fcst_2d(nx_l,ny_l)
 
-        real mean_fcst_3d_model(NX_L,NY_L,NZ_L*n_fields)
-        real mean_fcst_2d_model(NX_L,NY_L,n_fields)
+        real mean_fcst_3d_model(nx_l,ny_l,nz_l*n_fields)
+        real mean_fcst_2d_model(nx_l,ny_l,n_fields)
 
 !        logical write_to_lapsdir
 
@@ -139,7 +139,7 @@
         parameter (max_fcst_times=200)
 
 	integer ensemble_len,len_dir,i,ct,ctpz
-        character EXT*31, directory*255, c_model*30
+        character ext*31, directory*255, c_model*30
 
         character*10  units_2d
         character*125 comment_2d
@@ -158,12 +158,12 @@
         character*250 output_dir,cdl_dir,output_file
         character*250 stlaps
 
-!       Specify what is being verified
-        data ext_fcst_a /'fua','fua','fua','fua'/ ! 3-D
+!       specify what is being verified
+        data ext_fcst_a /'fua','fua','fua','fua'/ ! 3-d
         data ext_anal_a /'lt1','lw3','lw3','lt1'/
         data var_a      /'ht','u3','v3','t3'/
 
-        data ext_fcst_a_2d /'fsf','fsf','fsf','fsf'/ ! 2-D
+        data ext_fcst_a_2d /'fsf','fsf','fsf','fsf'/ ! 2-d
         data ext_anal_a_2d /'lsx','lsx','l1s','lsx'/
         data var_a_2d      /'tsf','dsf','r01','fwx'/
 
@@ -178,9 +178,9 @@
         lun_in = 21
 
 
-	allocate(name3d(n_fields*NZ_L),units3d(n_fields*NZ_L)  
-     1   ,lvltype3d(n_fields*NZ_L),com3d(n_fields*NZ_L)
-     1   ,lvls3d(n_fields*NZ_L))
+	allocate(name3d(n_fields*nz_l),units3d(n_fields*nz_l)  
+     1   ,lvltype3d(n_fields*nz_l),com3d(n_fields*nz_l)
+     1   ,lvls3d(n_fields*nz_l))
 
 	allocate(name2d(n_fields),units2d(n_fields)  
      1   ,lvltype2d(n_fields),com2d(n_fields)
@@ -193,7 +193,7 @@
         n_fcst_times = 38 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!       Get fdda_model_source from static file
+!       get fdda_model_source from static file
         call get_fdda_model_source(c_fdda_mdl_src,n_fdda_models,istatus)
 
         write(6,*)' n_fdda_models = ',n_fdda_models
@@ -210,10 +210,10 @@
 
           write(6,*)
           write(6,*)
-          write(6,*)' Processing time ',itime_fcst,' ',a9time_valid
+          write(6,*)' processing time ',itime_fcst,' ',a9time_valid
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!         3D fields
+!         3d fields
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
           do ifield = 1,n_fields
@@ -237,7 +237,7 @@
 
             if(c_model(1:3) .ne. 'lga')then
 
-              write(6,*)' Processing model ',c_model
+              write(6,*)' processing model ',c_model
 
               call s_len(c_model,len_model)
 
@@ -246,22 +246,22 @@
               ensm_dir = ensemble_dir(1:len_ensemble)//'mean/'
               call s_len(ensm_dir,len_ensm)
 
-!                 Read 3d forecast fields
+!                 read 3d forecast fields
 
                   ext = ext_fcst_a(ifield)
                   call get_directory(ext,directory,len_dir)
-                  DIRECTORY=directory(1:len_dir)//c_model(1:len_model)
+                  directory=directory(1:len_dir)//c_model(1:len_model)
      1                                          //'/'
 
                   call get_lapsdata_3d(i4_initial,i4_valid
-     1                          ,NX_L,NY_L,NZ_L       
+     1                          ,nx_l,ny_l,nz_l       
      1                          ,directory,var_3d
      1                          ,units_2d,comment_2d,var_fcst_3d
      1                          ,istatus)
 
                   write(*,*)'>',var_3d,'<>',var_fcst_3d(1,1,1),'<'
                   if(istatus .ne. 1)then
-                       write(6,*)' Error reading 3D Forecast',c_model
+                       write(6,*)' error reading 3d forecast',c_model
                   else 
                     mean_fcst_3d=mean_fcst_3d+var_fcst_3d
 
@@ -283,7 +283,7 @@
 
          write(*,*) 'ct filling mean_fcst_3d_model ',ct
          mean_fcst_3d=mean_fcst_3d/float(n_models_read) 
-         mean_fcst_3d_model(:,:,ct:ct+NZ_L-1)=mean_fcst_3d(:,:,:) 
+         mean_fcst_3d_model(:,:,ct:ct+nz_l-1)=mean_fcst_3d(:,:,:) 
          call s_len(comment,lencom)
          if (n_models_read .lt. 10) then
            c_models_read = '  '//char(n_models_read +48)
@@ -297,8 +297,8 @@
            c_models_read = '>99'
          endif
          comment = comment(1:lencom)//'models='//c_models_read
-         com3d(ct:ct+NZ_L-1)=comment       
-         ct=ct+NZ_L
+         com3d(ct:ct+nz_l-1)=comment       
+         ct=ct+nz_l
        
          write(6,*)'min and max vals (mean_fcst_3d) for ' 
      1               ,var_a(ifield),': '
@@ -311,7 +311,7 @@
 
 	write(*,*)'n_fdda_models',n_fdda_models
 
-! Write out the 3D stuff using LAPS library routine
+! write out the 3d stuff using laps library routine
 
         call get_directory('cdl',cdl_dir,len_cdl)
         cdl_dir = cdl_dir(1:len_cdl)
@@ -320,34 +320,34 @@
 
 
         ct=1
-        name3d(ct:ct+NZ_L-1)='HT ' 
-        lvls3d(ct:ct+NZ_L-1)=nint(pressures(1:NZ_L)*0.01) 
+        name3d(ct:ct+nz_l-1)='ht ' 
+        lvls3d(ct:ct+nz_l-1)=nint(pressures(1:nz_l)*0.01) 
         j = 1
-        do i=NZ_L, 1, -1
+        do i=nz_l, 1, -1
           cdl_levels(j) = float(lvls3d(i))
           j = j + 1
         enddo
-        ct=ct+NZ_L
+        ct=ct+nz_l
 
-!	name3d(ct:ct+NZ_L-1)='RH3'
-!        lvls3d(ct:ct+NZ_L-1)=nint(pressures(1:NZ_L)*0.01)
-!        ct=ct+NZ_L
+!	name3d(ct:ct+nz_l-1)='rh3'
+!        lvls3d(ct:ct+nz_l-1)=nint(pressures(1:nz_l)*0.01)
+!        ct=ct+nz_l
 
-!	name3d(ct:ct+NZ_L-1)='SH ' 
-!	lvls3d(ct:ct+NZ_L-1)=nint(pressures(1:NZ_L)*0.01)
-!	ct=ct+NZ_L
+!	name3d(ct:ct+nz_l-1)='sh ' 
+!	lvls3d(ct:ct+nz_l-1)=nint(pressures(1:nz_l)*0.01)
+!	ct=ct+nz_l
 
-	name3d(ct:ct+NZ_L-1)='U3 '
-	lvls3d(ct:ct+NZ_L-1)=nint(pressures(1:NZ_L)*0.01)
-	ct=ct+NZ_L
+	name3d(ct:ct+nz_l-1)='u3 '
+	lvls3d(ct:ct+nz_l-1)=nint(pressures(1:nz_l)*0.01)
+	ct=ct+nz_l
 
-	name3d(ct:ct+NZ_L-1)='V3 '
-        lvls3d(ct:ct+NZ_L-1)=nint(pressures(1:NZ_L)*0.01)
-        ct=ct+NZ_L
+	name3d(ct:ct+nz_l-1)='v3 '
+        lvls3d(ct:ct+nz_l-1)=nint(pressures(1:nz_l)*0.01)
+        ct=ct+nz_l
 
-        name3d(ct:ct+NZ_L-1)='T3 '
-        lvls3d(ct:ct+NZ_L-1)=nint(pressures(1:NZ_L)*0.01)
-        ct=ct+NZ_L
+        name3d(ct:ct+nz_l-1)='t3 '
+        lvls3d(ct:ct+nz_l-1)=nint(pressures(1:nz_l)*0.01)
+        ct=ct+nz_l
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -357,22 +357,22 @@
      1   ,maxval(mean_fcst_3d_model(:,:,:))
 	
 
-       	print*,'Writing LAPS 3D (fua) netcdf file.'
-       	print*,'Output directory is: ',ensm_dir(1:len_ensm)
-       	print*,'Output directory is: ',trim(ensm_dir)
-       	print*,'CDL Directory is: ',trim(cdl_dir)
+       	print*,'writing laps 3d (fua) netcdf file.'
+       	print*,'output directory is: ',ensm_dir(1:len_ensm)
+       	print*,'output directory is: ',trim(ensm_dir)
+       	print*,'cdl directory is: ',trim(cdl_dir)
         call write_laps_lfm(i4_initial,i4_valid,trim(ensm_dir)
      1                ,trim(cdl_dir),'fua'                                          
-     1                ,NX_L,NY_L,NZ_L*n_fields,NZ_L*n_fields
+     1                ,nx_l,ny_l,nz_l*n_fields,nz_l*n_fields
      1                ,name3d,lvls3d
-     1                ,lvltype3d,units3d,com3d,NZ_L,cdl_levels          
+     1                ,lvltype3d,units3d,com3d,nz_l,cdl_levels          
      1                ,mean_fcst_3d_model,istatus)
 
 
 	  if (istatus /= 1) then
-     		print*,'Error writing LAPS 3D (fua) netcdf file.'
+     		print*,'error writing laps 3d (fua) netcdf file.'
  	  else
-     		print*,'Done writing 3d netcdf file.'
+     		print*,'done writing 3d netcdf file.'
   	  endif
 
         enddo ! itime_fcst
@@ -380,8 +380,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!       2D fields
-	write(*,*)'We are starting to deal with 2D fields!!!!!!!!!!!!!'
+!       2d fields
+	write(*,*)'we are starting to deal with 2d fields!!!!!!!!!!!!!'
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -399,7 +399,7 @@
 
           call make_fnam_lp(i4_valid,a9time_valid,istatus)
 
-!	  Read 2d forecast fields
+!	  read 2d forecast fields
           do ifield = 1,n_fields
 
            comment = ' '
@@ -417,24 +417,24 @@
 
             if(c_model(1:3) .ne. 'lga')then
 
-              write(6,*)' Processing model ',c_model
+              write(6,*)' processing model ',c_model
 
               call s_len(c_model,len_model)
 
 
                   ext = ext_fcst_a_2d(ifield)
                   call get_directory(ext,directory,len_dir)
-                  DIRECTORY=directory(1:len_dir)//c_model(1:len_model)
+                  directory=directory(1:len_dir)//c_model(1:len_model)
      1                                          //'/'
 
 
                   call get_lapsdata_2d(i4_initial,i4_valid,directory
-     1                  ,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                  ,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                  ,var_fcst_2d,istatus)
 
                   write(*,*)'>',var_2d,'<>',var_fcst_2d(1,1),'<'
                   if(istatus .ne. 1)then
-                       write(6,*)' Error reading 2D Forecast'
+                       write(6,*)' error reading 2d forecast'
                   else
                     mean_fcst_2d=mean_fcst_2d+var_fcst_2d
                     n_models_read = n_models_read + 1
@@ -468,26 +468,26 @@
         
         enddo ! fields
 
-! Write out the 2D stuff using LAPS library routine
+! write out the 2d stuff using laps library routine
 
         call get_directory('cdl',cdl_dir,len_cdl)
         cdl_dir = cdl_dir(1:len_cdl)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ct=1
-        name2d(ct:ct)='TSF'
+        name2d(ct:ct)='tsf'
         lvls2d(ct:ct)=0
         ct=ct+1
 
-        name2d(ct:ct)='DSF'
+        name2d(ct:ct)='dsf'
         lvls2d(ct:ct)=0
         ct=ct+1
 
-        name2d(ct:ct)='R01'
+        name2d(ct:ct)='r01'
         lvls2d(ct:ct)=0
         ct=ct+1
 
-        name2d(ct:ct)='FWX'
+        name2d(ct:ct)='fwx'
         lvls2d(ct:ct)=0
         ct=ct+1
 
@@ -495,22 +495,22 @@
 
       call write_laps_lfm(i4_initial,i4_valid,trim(ensm_dir)
      1                ,trim(cdl_dir),'fsf'
-     1                ,NX_L,NY_L,n_fields,n_fields
+     1                ,nx_l,ny_l,n_fields,n_fields
      1                ,name2d,lvls2d
      1                ,lvltype2d,units2d,com2d,1,0.
      1                ,mean_fcst_2d_model,istatus)
 
 
           if (istatus /= 1) then
-                print*,'Error writing LAPS 2D (fsf) netcdf file.'
+                print*,'error writing laps 2d (fsf) netcdf file.'
           else
-                print*,'Done writing 2d netcdf file.'
+                print*,'done writing 2d netcdf file.'
           endif
 
         enddo ! itime_fcst
 
 
- 999    write(6,*)' End of subroutine ensemble_mean'
+ 999    write(6,*)' end of subroutine ensemble_mean'
 
 
 

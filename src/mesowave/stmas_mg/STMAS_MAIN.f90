@@ -1,153 +1,153 @@
-!dis    Forecast Systems Laboratory
-!dis    NOAA/OAR/ERL/FSL
-!dis    325 Broadway
-!dis    Boulder, CO     80303
+!dis    forecast systems laboratory
+!dis    noaa/oar/erl/fsl
+!dis    325 broadway
+!dis    boulder, co     80303
 !dis
-!dis    Forecast Research Division
-!dis    Local Analysis and Prediction Branch
-!dis    LAPS
+!dis    forecast research division
+!dis    local analysis and prediction branch
+!dis    laps
 !dis
-!dis    This software and its documentation are in the public domain and
-!dis    are furnished "as is."  The United States government, its
+!dis    this software and its documentation are in the public domain and
+!dis    are furnished "as is."  the united states government, its
 !dis    instrumentalities, officers, employees, and agents make no
 !dis    warranty, express or implied, as to the usefulness of the software
-!dis    and documentation for any purpose.  They assume no responsibility
+!dis    and documentation for any purpose.  they assume no responsibility
 !dis    (1) for the use of the software and documentation; or (2) to provide
 !dis    technical support to users.
 !dis
-!dis    Permission to use, copy, modify, and distribute this software is
+!dis    permission to use, copy, modify, and distribute this software is
 !dis    hereby granted, provided that the entire disclaimer notice appears
-!dis    in all copies.  All modifications to this software must be clearly
+!dis    in all copies.  all modifications to this software must be clearly
 !dis    documented, and are solely the responsibility of the agent making
-!dis    the modifications.  If significant modifications or enhancements
-!dis    are made to this software, the FSL Software Policy Manager
+!dis    the modifications.  if significant modifications or enhancements
+!dis    are made to this software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
 
-PROGRAM STMAS_MG
+program stmas_mg
 
 !==========================================================
-!  This program is to analyze surface data using time and
+!  this program is to analyze surface data using time and
 !  space observation through a multigrid technique.
 !
-!  HISTORY: 
-! 	Creation: YUANFU XIE	6-2005
+!  history: 
+! 	creation: yuanfu xie	6-2005
 !==========================================================
 
-  USE Definition
-  USE LAPSDatSrc
-  USE MemoryMngr
-  USE PrePostPrc
-  USE STMASAnalz
+  use definition
+  use lapsdatsrc
+  use memorymngr
+  use prepostprc
+  use stmasanalz
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: i,j,k,mi,mj,mk,nnn
+  integer :: i,j,k,mi,mj,mk,nnn
   real :: a
 
-  ! Namelist:
-  CALL PrPstNLs
+  ! namelist:
+  call prpstnls
 
-  ! LAPS parameters:
-  CALL LAPSInfo
+  ! laps parameters:
+  call lapsinfo
 
-  ! Allocate memory for LAPS and interactive vars:
-  CALL LAPSMemo		! For LAPS usage
-  CALL IntrMemo		! For interactive variables
+  ! allocate memory for laps and interactive vars:
+  call lapsmemo		! for laps usage
+  call intrmemo		! for interactive variables
 
-  ! LAPS grid configuration:
-  CALL LAPSConf
+  ! laps grid configuration:
+  call lapsconf
 
-  ! Background fields:
-  CALL LAPSBKGD
+  ! background fields:
+  call lapsbkgd
 
-  ! Surface LSO obs:
-  CALL LAPSOBSV(mxstts)
+  ! surface lso obs:
+  call lapsobsv(mxstts)
 
-  ! Convert to units consistent with background:
-  CALL LAPSUnit
+  ! convert to units consistent with background:
+  call lapsunit
 
-  ! STMAS QC:
-  CALL DATE_AND_TIME(date0,time0,zone0,timing0)
-  CALL LAPS_QCs
-  CALL DATE_AND_TIME(date1,time1,zone1,timing1)
-  PRINT*,'Time used for LAPS_QCs: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
-  PRINT*,'Times used for LAPS_QCs: ',timing1(6),timing0(6),timing1(7),timing0(7)
+  ! stmas qc:
+  call date_and_time(date0,time0,zone0,timing0)
+  call laps_qcs
+  call date_and_time(date1,time1,zone1,timing1)
+  print*,'time used for laps_qcs: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
+  print*,'times used for laps_qcs: ',timing1(6),timing0(6),timing1(7),timing0(7)
 
-  ! Add background to obs where obs is spare !by min-ken hseih
-  CALL DATE_AND_TIME(date0,time0,zone0,timing0)
-  ! CALL AddBkgrd
-  CALL JbGridpt
-  ! uncovr = .FALSE.
-  CALL DATE_AND_TIME(date1,time1,zone1,timing1)
-  PRINT*,'Time used for AddBkgrd: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
-  PRINT*,'Times used for AddBkgrd: ',timing1(6),timing0(6),timing1(7),timing0(7)
+  ! add background to obs where obs is spare !by min-ken hseih
+  call date_and_time(date0,time0,zone0,timing0)
+  ! call addbkgrd
+  call jbgridpt
+  ! uncovr = .false.
+  call date_and_time(date1,time1,zone1,timing1)
+  print*,'time used for addbkgrd: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
+  print*,'times used for addbkgrd: ',timing1(6),timing0(6),timing1(7),timing0(7)
 
-  ! Release memory for LAPS:
-  CALL LAPSRels
+  ! release memory for laps:
+  call lapsrels
 
-  ! Allocate memory for STMAS:
-  CALL STMASMem
+  ! allocate memory for stmas:
+  call stmasmem
 
-  ! Test analytic function:
-  ! CALL STMASTst
+  ! test analytic function:
+  ! call stmastst
 
-  ! STMAS Analyses:
-  DO i=1,numvar
-    WRITE(*,*) 'STMAS_MAIN: Start analyzing ',varnam(i)
-    ! Check if there is any obs for analysis:
-    IF (numobs(i) .GT. 0) THEN
+  ! stmas analyses:
+  do i=1,numvar
+    write(*,*) 'stmas_main: start analyzing ',varnam(i)
+    ! check if there is any obs for analysis:
+    if (numobs(i) .gt. 0) then
       ! modified by min-ken hsieh
-      ! pass stanam, varnam into STMASAna
+      ! pass stanam, varnam into stmasana
       !
-      CALL DATE_AND_TIME(date0,time0,zone0,timing0)
-      CALL STMASAna(analys(1,1,1,i),numgrd,grdspc, &
+      call date_and_time(date0,time0,zone0,timing0)
+      call stmasana(analys(1,1,1,i),numgrd,grdspc, &
 	domain,bkgrnd(1,1,1,i),numtmf, &
 	qc_obs(1,1,i),numobs(i),weight(1,i), stanam(1,i),&
 	obsspc(1,i),indice(1,1,i),coeffs(1,1,i), &
 	bounds(i),stmasi,stmasr,varnam(i),pnlt_v(i), &
         slevel(i),uncovr(1,1,1,i),diagnl(1,1,i))
-      CALL DATE_AND_TIME(date1,time1,zone1,timing1)
-      PRINT*,'Time used for STMASAna ',i,(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
-      PRINT*,'Times used for STMASAna: ',timing1(6),timing0(6),timing1(7),timing0(7)
-    ELSE
-      ! No analysis:
+      call date_and_time(date1,time1,zone1,timing1)
+      print*,'time used for stmasana ',i,(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
+      print*,'times used for stmasana: ',timing1(6),timing0(6),timing1(7),timing0(7)
+    else
+      ! no analysis:
       analys(1:numgrd(1),1:numgrd(2),1:numgrd(3),i) = 0.0
-    ENDIF
-  ENDDO
+    endif
+  enddo
 
-  ! Add increment to the background:
+  ! add increment to the background:
 
-  CALL DATE_AND_TIME(date0,time0,zone0,timing0)
-  CALL STMASInc
-  CALL DATE_AND_TIME(date1,time1,zone1,timing1)
-  PRINT*,'Time used for STMASInc: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
-  PRINT*,'Times used for STMASInc: ',timing1(6),timing0(6),timing1(7),timing0(7)
+  call date_and_time(date0,time0,zone0,timing0)
+  call stmasinc
+  call date_and_time(date1,time1,zone1,timing1)
+  print*,'time used for stmasinc: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
+  print*,'times used for stmasinc: ',timing1(6),timing0(6),timing1(7),timing0(7)
 
-  ! Write analyses to LSX
-  IF (savdat .EQ. 1) THEN
-    WRITE(*,*) numgrd,numvar
-    WRITE(11,*) analys
-  ENDIF
-  CALL DATE_AND_TIME(date0,time0,zone0,timing0)
-  CALL PrPstLSX
-  CALL DATE_AND_TIME(date1,time1,zone1,timing1)
-  PRINT*,'Time used for PrPstLSX: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
-  PRINT*,'Times used for PrPstLSX: ',timing1(6),timing0(6),timing1(7),timing0(7)
+  ! write analyses to lsx
+  if (savdat .eq. 1) then
+    write(*,*) numgrd,numvar
+    write(11,*) analys
+  endif
+  call date_and_time(date0,time0,zone0,timing0)
+  call prpstlsx
+  call date_and_time(date1,time1,zone1,timing1)
+  print*,'time used for prpstlsx: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
+  print*,'times used for prpstlsx: ',timing1(6),timing0(6),timing1(7),timing0(7)
 
   ! modified by min-ken hsieh
-  ! Verify STMAS Analysis
-  CALL DATE_AND_TIME(date0,time0,zone0,timing0)
-  CALL STMASVer
-  CALL DATE_AND_TIME(date1,time1,zone1,timing1)
-  PRINT*,'Time used for STMASVer: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
-  PRINT*,'Times used for STMASVer: ',timing1(6),timing0(6),timing1(7),timing0(7)
+  ! verify stmas analysis
+  call date_and_time(date0,time0,zone0,timing0)
+  call stmasver
+  call date_and_time(date1,time1,zone1,timing1)
+  print*,'time used for stmasver: ',(timing1(6)-timing0(6))+(timing1(7)-timing0(7))/60.0
+  print*,'times used for stmasver: ',timing1(6),timing0(6),timing1(7),timing0(7)
 
-  ! Release dynamic memory:
-  CALL IntrRels
-  CALL STMARels
+  ! release dynamic memory:
+  call intrrels
+  call stmarels
 
-  ! End of analysis:
-  WRITE(*,*) 'STMAS analysis succeeds'
+  ! end of analysis:
+  write(*,*) 'stmas analysis succeeds'
 
-END PROGRAM STMAS_MG
+end program stmas_mg

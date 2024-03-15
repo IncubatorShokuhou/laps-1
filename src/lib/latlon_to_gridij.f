@@ -3,9 +3,9 @@
      1                                lat_s,lon_s,gri,grj,nx_s,ny_s,
      1                                istatus)
 
-        ANGDIF(XX,Y)=MOD(XX-Y+540.,360.)-180.
+        angdif(xx,y)=mod(xx-y+540.,360.)-180.
 
-!       Determine i/j satellite/mdl coordinates for each LAPS grid point
+!       determine i/j satellite/mdl coordinates for each laps grid point
 
         real lat_l(nx_l,ny_l)
         real lon_l(nx_l,ny_l)
@@ -35,13 +35,13 @@
 
         itstatus=ishow_timer()
 
-        write(6,*)' Subroutine latlon_to_grij...'
+        write(6,*)' subroutine latlon_to_grij...'
 
         istatus = 1
 
         call get_r_missing_data(r_missing_data,istatus)
 
-!       Initialize
+!       initialize
         gri = r_missing_data
         grj = r_missing_data
 
@@ -66,13 +66,13 @@
 
         epsilon = .00040 ! degrees
 
-!       Initialize other variables
+!       initialize other variables
         iclo = -1
         jclo = -1
         dist_min_last = -999.
 
-!       Start with i/j LAPS coordinate for each satellite grid point
-        write(6,*)' Fill ri/rj LAPS values for each sat grid point'
+!       start with i/j laps coordinate for each satellite grid point
+        write(6,*)' fill ri/rj laps values for each sat grid point'
 
         do is = 1,nx_s
         do js = 1,ny_s
@@ -83,7 +83,7 @@
               iwrite = 0
             endif
 
-            if(lat_s(is,js) .ne. r_missing_data .AND.
+            if(lat_s(is,js) .ne. r_missing_data .and.
      1         lon_s(is,js) .ne. r_missing_data       )then
                 call latlon_to_rlapsgrid(lat_s(is,js),lon_s(is,js)
      1                                  ,lat_l,lon_l
@@ -114,22 +114,22 @@
         enddo ! js
         enddo ! is
 
-        write(6,*)' Sat lon center                  : ',sloncen
-        write(6,*)' Sat lat range                   : ',slatmin,slatmax
-        write(6,*)' Sat lon range (diff from center): ',slonmin,slonmax
-        write(6,*)' Sat lon range                   : ',slonmin+sloncen
+        write(6,*)' sat lon center                  : ',sloncen
+        write(6,*)' sat lat range                   : ',slatmin,slatmax
+        write(6,*)' sat lon range (diff from center): ',slonmin,slonmax
+        write(6,*)' sat lon range                   : ',slonmin+sloncen
      1                                                 ,slonmax+sloncen
 
         itstatus=ishow_timer()
 
-!       Create buffer within sat lat/lon range
+!       create buffer within sat lat/lon range
         sat_ll_buf = 0.2
         slatmin = slatmin + sat_ll_buf
         slatmax = slatmax - sat_ll_buf
         slonmin = slonmin + sat_ll_buf
         slonmax = slonmax - sat_ll_buf
 
-!       New solution method
+!       new solution method
         do is = 1,nx_s-1
         do js = 1,ny_s-1
 
@@ -139,13 +139,13 @@
             iwrite = 0
           endif
 
-!         Obtain derivatives
+!         obtain derivatives
           dlidsi = rilaps_s(is+1,js) - rilaps_s(is,js)
           dlidsj = rilaps_s(is,js+1) - rilaps_s(is,js)
           dljdsi = rjlaps_s(is+1,js) - rjlaps_s(is,js)
           dljdsj = rjlaps_s(is,js+1) - rjlaps_s(is,js)
 
-!         Locate model grid points inside the satellite parallelogram
+!         locate model grid points inside the satellite parallelogram
           rilmn = min(rilaps_s(is,js),rilaps_s(is+1,js)
      1               ,rilaps_s(is,js+1),rilaps_s(is+1,js+1))
 
@@ -169,15 +169,15 @@
      1                             int(rjlmn),int(rjlmx)  
             endif
 
-!           Loop through model grid points inside the satellite parallelogram
+!           loop through model grid points inside the satellite parallelogram
             do il = int(rilmn)-1,int(rilmx)+1
             do jl = int(rjlmn)-1,int(rjlmx)+1
 
               if(il .ge. 1 .and. il .le. nx_l .and.
      1           jl .ge. 1 .and. jl .le. ny_l       )then
 
-!               Set up system of linear equations
-!               If x,y = 0 we are at the lower left of the satellite parallelogram
+!               set up system of linear equations
+!               if x,y = 0 we are at the lower left of the satellite parallelogram
 !               ax + by = p
 !               cx + dy = q
 
@@ -232,7 +232,7 @@
         enddo ! jl
         enddo ! il
 
-        write(6,*)' Number of good/miss points is ',icount_good
+        write(6,*)' number of good/miss points is ',icount_good
      1                                             ,icount_miss
 
         itstatus=ishow_timer()
@@ -244,7 +244,7 @@
      1                              (rlat,rlon,r_missing_data	
      1                              ,lat_s,lon_s,nx_s,ny_s 
      1                              ,iclo_loop,i_loop
-     1                              ,rlat_last,rlon_last,dist_min_last ! I/O
+     1                              ,rlat_last,rlon_last,dist_min_last ! i/o
      1                              ,iclo,jclo,dist_min)                
 
         include 'trigd.inc'
@@ -252,10 +252,10 @@
         real lat_s(nx_s,ny_s)
         real lon_s(nx_s,ny_s)
 
-!       Determine satellite grid point having the closest lat/lon
-!       to the LAPS grid point
+!       determine satellite grid point having the closest lat/lon
+!       to the laps grid point
 
-!       Check if we've moved far enough since the last full calculation
+!       check if we've moved far enough since the last full calculation
         delt_pt = sqrt((rlat_last-rlat)**2 + (rlon_last-rlon)**2)
         if((dist_min_last - delt_pt) .gt. 1.0)then
             i_loop = 0
@@ -271,7 +271,7 @@
 
         do i = 1,nx_s
         do j = 1,ny_s
-          if(lat_s(i,j) .ne. r_missing_data .AND.
+          if(lat_s(i,j) .ne. r_missing_data .and.
      1       lon_s(i,j) .ne. r_missing_data       )then
             delta_lat = abs(lat_s(i,j) - rlat)
             delta_lon = abs(lon_s(i,j) - rlon) * scale_lon

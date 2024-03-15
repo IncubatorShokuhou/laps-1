@@ -1,226 +1,226 @@
       subroutine gf_getfld(cgrib,lcgrib,ifldnum,unpack,expand,gfld,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_getfld 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-26
+! subprogram:    gf_getfld 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-26
 !
-! ABSTRACT: This subroutine returns the Grid Definition, Product Definition,
-!   Bit-map ( if applicable ), and the unpacked data for a given data
-!   field.  All of the information returned is stored in a derived
-!   type variable, gfld.  Gfld is of type gribfield, which is defined
+! abstract: this subroutine returns the grid definition, product definition,
+!   bit-map ( if applicable ), and the unpacked data for a given data
+!   field.  all of the information returned is stored in a derived
+!   type variable, gfld.  gfld is of type gribfield, which is defined
 !   in module grib_mod, so users of this routine will need to include
-!   the line "USE GRIB_MOD" in their calling routine.  Each component of the 
-!   gribfield type is described in the OUTPUT ARGUMENT LIST section below.
+!   the line "use grib_mod" in their calling routine.  each component of the 
+!   gribfield type is described in the output argument list section below.
 !
-!   Since there can be multiple data fields packed into a GRIB2
+!   since there can be multiple data fields packed into a grib2
 !   message, the calling routine indicates which field is being requested
 !   with the ifldnum argument.
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-26  Gilbert
-! 2002-01-24  Gilbert  - Changed to pass back derived type gribfield
+! program history log:
+! 2000-05-26  gilbert
+! 2002-01-24  gilbert  - changed to pass back derived type gribfield
 !                        variable through argument list, instead of
 !                        having many different arguments.
-! 2004-05-20  Gilbert  - Added check to see if previous a bit-map is specified,
+! 2004-05-20  gilbert  - added check to see if previous a bit-map is specified,
 !                        but none was found.
 !
-! USAGE:    CALL gf_getfld(cgrib,lcgrib,ifldnum,unpack,expand,gfld,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array that contains the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     ifldnum  - Specifies which field in the GRIB2 message to return.
-!     unpack   - Logical value indicating whether to unpack bitmap/data
+! usage:    call gf_getfld(cgrib,lcgrib,ifldnum,unpack,expand,gfld,ierr)
+!   input argument list:
+!     cgrib    - character array that contains the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     ifldnum  - specifies which field in the grib2 message to return.
+!     unpack   - logical value indicating whether to unpack bitmap/data
 !                .true. = unpack bitmap and data values
 !                .false. = do not unpack bitmap and data values
-!     expand   - Boolean value indicating whether the data points should be
+!     expand   - boolean value indicating whether the data points should be
 !                expanded to the correspond grid, if a bit-map is present.
 !                1 = if possible, expand data field to grid, inserting zero
 !                    values at gridpoints that are bitmapped out.
-!                    (SEE REMARKS2)
+!                    (see remarks2)
 !                0 = do not expand data field, leaving it an array of
 !                    consecutive data points for each "1" in the bitmap.
-!                This argument is ignored if unpack == 0 OR if the
+!                this argument is ignored if unpack == 0 or if the
 !                returned field does not contain a bit-map.
 !
-!   OUTPUT ARGUMENT LIST:      
+!   output argument list:      
 !     gfld - derived type gribfield ( defined in module grib_mod )
-!            ( NOTE: See Remarks Section )
-!        gfld%version = GRIB edition number ( currently 2 )
-!        gfld%discipline = Message Discipline ( see Code Table 0.0 )
-!        gfld%idsect() = Contains the entries in the Identification
-!                        Section ( Section 1 )
-!                        This element is actually a pointer to an array
+!            ( note: see remarks section )
+!        gfld%version = grib edition number ( currently 2 )
+!        gfld%discipline = message discipline ( see code table 0.0 )
+!        gfld%idsect() = contains the entries in the identification
+!                        section ( section 1 )
+!                        this element is actually a pointer to an array
 !                        that holds the data.
-!            gfld%idsect(1)  = Identification of originating Centre 
-!                                    ( see Common Code Table C-1 )
-!                             7 - US National Weather Service
-!            gfld%idsect(2)  = Identification of originating Sub-centre
-!            gfld%idsect(3)  = GRIB Master Tables Version Number
-!                                    ( see Code Table 1.0 )
-!                             0 - Experimental
-!                             1 - Initial operational version number
-!            gfld%idsect(4)  = GRIB Local Tables Version Number
-!                                    ( see Code Table 1.1 )
-!                             0     - Local tables not used
-!                             1-254 - Number of local tables version used
-!            gfld%idsect(5)  = Significance of Reference Time (Code Table 1.2)
-!                             0 - Analysis
-!                             1 - Start of forecast
-!                             2 - Verifying time of forecast
-!                             3 - Observation time
-!            gfld%idsect(6)  = Year ( 4 digits )
-!            gfld%idsect(7)  = Month
-!            gfld%idsect(8)  = Day
-!            gfld%idsect(9)  = Hour
-!            gfld%idsect(10)  = Minute
-!            gfld%idsect(11)  = Second
-!            gfld%idsect(12)  = Production status of processed data
-!                                    ( see Code Table 1.3 )
-!                              0 - Operational products
-!                              1 - Operational test products
-!                              2 - Research products
-!                              3 - Re-analysis products
-!            gfld%idsect(13)  = Type of processed data ( see Code Table 1.4 )
-!                              0  - Analysis products
-!                              1  - Forecast products
-!                              2  - Analysis and forecast products
-!                              3  - Control forecast products
-!                              4  - Perturbed forecast products
-!                              5  - Control and perturbed forecast products
-!                              6  - Processed satellite observations
-!                              7  - Processed radar observations
-!        gfld%idsectlen = Number of elements in gfld%idsect().
-!        gfld%local() = Pointer to character array containing contents
-!                       of Local Section 2, if included
+!            gfld%idsect(1)  = identification of originating centre 
+!                                    ( see common code table c-1 )
+!                             7 - us national weather service
+!            gfld%idsect(2)  = identification of originating sub-centre
+!            gfld%idsect(3)  = grib master tables version number
+!                                    ( see code table 1.0 )
+!                             0 - experimental
+!                             1 - initial operational version number
+!            gfld%idsect(4)  = grib local tables version number
+!                                    ( see code table 1.1 )
+!                             0     - local tables not used
+!                             1-254 - number of local tables version used
+!            gfld%idsect(5)  = significance of reference time (code table 1.2)
+!                             0 - analysis
+!                             1 - start of forecast
+!                             2 - verifying time of forecast
+!                             3 - observation time
+!            gfld%idsect(6)  = year ( 4 digits )
+!            gfld%idsect(7)  = month
+!            gfld%idsect(8)  = day
+!            gfld%idsect(9)  = hour
+!            gfld%idsect(10)  = minute
+!            gfld%idsect(11)  = second
+!            gfld%idsect(12)  = production status of processed data
+!                                    ( see code table 1.3 )
+!                              0 - operational products
+!                              1 - operational test products
+!                              2 - research products
+!                              3 - re-analysis products
+!            gfld%idsect(13)  = type of processed data ( see code table 1.4 )
+!                              0  - analysis products
+!                              1  - forecast products
+!                              2  - analysis and forecast products
+!                              3  - control forecast products
+!                              4  - perturbed forecast products
+!                              5  - control and perturbed forecast products
+!                              6  - processed satellite observations
+!                              7  - processed radar observations
+!        gfld%idsectlen = number of elements in gfld%idsect().
+!        gfld%local() = pointer to character array containing contents
+!                       of local section 2, if included
 !        gfld%locallen = length of array gfld%local()
-!        gfld%ifldnum = field number within GRIB message
-!        gfld%griddef = Source of grid definition (see Code Table 3.0)
-!                      0 - Specified in Code table 3.1
-!                      1 - Predetermined grid Defined by originating centre
-!        gfld%ngrdpts = Number of grid points in the defined grid.
-!        gfld%numoct_opt = Number of octets needed for each 
+!        gfld%ifldnum = field number within grib message
+!        gfld%griddef = source of grid definition (see code table 3.0)
+!                      0 - specified in code table 3.1
+!                      1 - predetermined grid defined by originating centre
+!        gfld%ngrdpts = number of grid points in the defined grid.
+!        gfld%numoct_opt = number of octets needed for each 
 !                          additional grid points definition.  
-!                          Used to define number of
+!                          used to define number of
 !                          points in each row ( or column ) for
 !                          non-regular grids.  
 !                          = 0, if using regular grid.
-!        gfld%interp_opt = Interpretation of list for optional points 
-!                          definition.  (Code Table 3.11)
-!        gfld%igdtnum = Grid Definition Template Number (Code Table 3.1)
-!        gfld%igdtmpl() = Contains the data values for the specified Grid 
-!                         Definition Template ( NN=gfld%igdtnum ).  Each 
+!        gfld%interp_opt = interpretation of list for optional points 
+!                          definition.  (code table 3.11)
+!        gfld%igdtnum = grid definition template number (code table 3.1)
+!        gfld%igdtmpl() = contains the data values for the specified grid 
+!                         definition template ( nn=gfld%igdtnum ).  each 
 !                         element of this integer array contains an entry (in 
-!                         the order specified) of Grid Defintion Template 3.NN
-!                         This element is actually a pointer to an array
+!                         the order specified) of grid defintion template 3.nn
+!                         this element is actually a pointer to an array
 !                         that holds the data.
-!        gfld%igdtlen = Number of elements in gfld%igdtmpl().  i.e. number of
-!                       entries in Grid Defintion Template 3.NN  
-!                       ( NN=gfld%igdtnum ).
-!        gfld%list_opt() = (Used if gfld%numoct_opt .ne. 0)  This array 
+!        gfld%igdtlen = number of elements in gfld%igdtmpl().  i.e. number of
+!                       entries in grid defintion template 3.nn  
+!                       ( nn=gfld%igdtnum ).
+!        gfld%list_opt() = (used if gfld%numoct_opt .ne. 0)  this array 
 !                          contains the number of grid points contained in 
-!                          each row ( or column ).  (part of Section 3)
-!                          This element is actually a pointer to an array
-!                          that holds the data.  This pointer is nullified
+!                          each row ( or column ).  (part of section 3)
+!                          this element is actually a pointer to an array
+!                          that holds the data.  this pointer is nullified
 !                          if gfld%numoct_opt=0.
-!        gfld%num_opt = (Used if gfld%numoct_opt .ne. 0)  The number of entries
+!        gfld%num_opt = (used if gfld%numoct_opt .ne. 0)  the number of entries
 !                       in array ideflist.  i.e. number of rows ( or columns )
-!                       for which optional grid points are defined.  This value
+!                       for which optional grid points are defined.  this value
 !                       is set to zero, if gfld%numoct_opt=0.
-!        gfdl%ipdtnum = Product Definition Template Number (see Code Table 4.0)
-!        gfld%ipdtmpl() = Contains the data values for the specified Product 
-!                         Definition Template ( N=gfdl%ipdtnum ).  Each element
+!        gfdl%ipdtnum = product definition template number (see code table 4.0)
+!        gfld%ipdtmpl() = contains the data values for the specified product 
+!                         definition template ( n=gfdl%ipdtnum ).  each element
 !                         of this integer array contains an entry (in the 
-!                         order specified) of Product Defintion Template 4.N.
-!                         This element is actually a pointer to an array
+!                         order specified) of product defintion template 4.n.
+!                         this element is actually a pointer to an array
 !                         that holds the data.
-!        gfld%ipdtlen = Number of elements in gfld%ipdtmpl().  i.e. number of
-!                       entries in Product Defintion Template 4.N  
-!                       ( N=gfdl%ipdtnum ).
-!        gfld%coord_list() = Real array containing floating point values 
+!        gfld%ipdtlen = number of elements in gfld%ipdtmpl().  i.e. number of
+!                       entries in product defintion template 4.n  
+!                       ( n=gfdl%ipdtnum ).
+!        gfld%coord_list() = real array containing floating point values 
 !                            intended to document the vertical discretisation
 !                            associated to model data on hybrid coordinate
-!                            vertical levels.  (part of Section 4)
-!                            This element is actually a pointer to an array
+!                            vertical levels.  (part of section 4)
+!                            this element is actually a pointer to an array
 !                            that holds the data.
 !        gfld%num_coord = number of values in array gfld%coord_list().
-!        gfld%ndpts = Number of data points unpacked and returned.
-!        gfld%idrtnum = Data Representation Template Number 
-!                       ( see Code Table 5.0)
-!        gfld%idrtmpl() = Contains the data values for the specified Data 
-!                         Representation Template ( N=gfld%idrtnum ).  Each 
+!        gfld%ndpts = number of data points unpacked and returned.
+!        gfld%idrtnum = data representation template number 
+!                       ( see code table 5.0)
+!        gfld%idrtmpl() = contains the data values for the specified data 
+!                         representation template ( n=gfld%idrtnum ).  each 
 !                         element of this integer array contains an entry 
-!                         (in the order specified) of Product Defintion 
-!                         Template 5.N.
-!                         This element is actually a pointer to an array
+!                         (in the order specified) of product defintion 
+!                         template 5.n.
+!                         this element is actually a pointer to an array
 !                         that holds the data.
-!        gfld%idrtlen = Number of elements in gfld%idrtmpl().  i.e. number 
-!                       of entries in Data Representation Template 5.N 
-!                       ( N=gfld%idrtnum ).
+!        gfld%idrtlen = number of elements in gfld%idrtmpl().  i.e. number 
+!                       of entries in data representation template 5.n 
+!                       ( n=gfld%idrtnum ).
 !        gfld%unpacked = logical value indicating whether the bitmap and
-!                        data values were unpacked.  If false, 
+!                        data values were unpacked.  if false, 
 !                        gfld%bmap and gfld%fld pointers are nullified.
-!        gfld%expanded = Logical value indicating whether the data field
+!        gfld%expanded = logical value indicating whether the data field
 !                         was expanded to the grid in the case where a
-!                         bit-map is present.  If true, the data points in
+!                         bit-map is present.  if true, the data points in
 !                         gfld%fld match the grid points and zeros were
 !                         inserted at grid points where data was bit-mapped
-!                         out.  If false, the data values in gfld%fld were
+!                         out.  if false, the data values in gfld%fld were
 !                         not expanded to the grid and are just a consecutive
 !                         array of data points corresponding to each value of
 !                         "1" in gfld%bmap.
-!        gfld%ibmap = Bitmap indicator ( see Code Table 6.0 )
-!                     0 = bitmap applies and is included in Section 6.
-!                     1-253 = Predefined bitmap applies
-!                     254 = Previously defined bitmap applies to this field
-!                     255 = Bit map does not apply to this product.
-!        gfld%bmap() = Logical*1 array containing decoded bitmap, 
-!                      if ibmap=0 or ibap=254.  Otherwise nullified.
-!                      This element is actually a pointer to an array
+!        gfld%ibmap = bitmap indicator ( see code table 6.0 )
+!                     0 = bitmap applies and is included in section 6.
+!                     1-253 = predefined bitmap applies
+!                     254 = previously defined bitmap applies to this field
+!                     255 = bit map does not apply to this product.
+!        gfld%bmap() = logical*1 array containing decoded bitmap, 
+!                      if ibmap=0 or ibap=254.  otherwise nullified.
+!                      this element is actually a pointer to an array
 !                      that holds the data.
-!        gfld%fld() = Array of gfld%ndpts unpacked data points.
-!                     This element is actually a pointer to an array
+!        gfld%fld() = array of gfld%ndpts unpacked data points.
+!                     this element is actually a pointer to an array
 !                     that holds the data.
-!     ierr     - Error return code.
+!     ierr     - error return code.
 !                0 = no error
-!                1 = Beginning characters "GRIB" not found.
-!                2 = GRIB message is not Edition 2.
-!                3 = The data field request number was not positive.
-!                4 = End string "7777" found, but not where expected.
-!                6 = GRIB message did not contain the requested number of
+!                1 = beginning characters "grib" not found.
+!                2 = grib message is not edition 2.
+!                3 = the data field request number was not positive.
+!                4 = end string "7777" found, but not where expected.
+!                6 = grib message did not contain the requested number of
 !                    data fields.
-!                7 = End string "7777" not found at end of message.
-!                8 = Unrecognized Section encountered.
-!                9 = Data Representation Template 5.NN not yet implemented.
-!               15 = Error unpacking Section 1.
-!               16 = Error unpacking Section 2.
-!               10 = Error unpacking Section 3.
-!               11 = Error unpacking Section 4.
-!               12 = Error unpacking Section 5.
-!               13 = Error unpacking Section 6.
-!               14 = Error unpacking Section 7.
-!               17 = Previous bitmap specified, but none exists.
+!                7 = end string "7777" not found at end of message.
+!                8 = unrecognized section encountered.
+!                9 = data representation template 5.nn not yet implemented.
+!               15 = error unpacking section 1.
+!               16 = error unpacking section 2.
+!               10 = error unpacking section 3.
+!               11 = error unpacking section 4.
+!               12 = error unpacking section 5.
+!               13 = error unpacking section 6.
+!               14 = error unpacking section 7.
+!               17 = previous bitmap specified, but none exists.
 !
-! REMARKS: Note that derived type gribfield contains pointers to many
-!          arrays of data.  The memory for these arrays is allocated
+! remarks: note that derived type gribfield contains pointers to many
+!          arrays of data.  the memory for these arrays is allocated
 !          when the values in the arrays are set, to help minimize
-!          problems with array overloading.  Because of this users
+!          problems with array overloading.  because of this users
 !          are encouraged to free up this memory, when it is no longer
 !          needed, by an explicit call to subroutine gf_free.
-!          ( i.e.   CALL GF_FREE(GFLD) )
+!          ( i.e.   call gf_free(gfld) )
 !
-!          Subroutine gb_info can be used to first determine
-!          how many data fields exist in a given GRIB message.
+!          subroutine gb_info can be used to first determine
+!          how many data fields exist in a given grib message.
 !
-! REMARKS2: It may not always be possible to expand a bit-mapped data field.
-!           If a pre-defined bit-map is used and not included in the GRIB2
+! remarks2: it may not always be possible to expand a bit-mapped data field.
+!           if a pre-defined bit-map is used and not included in the grib2
 !           message itself, this routine would not have the necessary
-!           information to expand the data.  In this case, gfld%expanded would
+!           information to expand the data.  in this case, gfld%expanded would
 !           would be set to 0 (false), regardless of the value of input
 !           argument expand.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
       use grib_mod
@@ -237,7 +237,7 @@
 !      logical*1,intent(out) :: bmap(*)
 !      real,intent(out) :: fld(*),coordlist(*)
       
-      character(len=4),parameter :: grib='GRIB',c7777='7777'
+      character(len=4),parameter :: grib='grib',c7777='7777'
       character(len=4) :: ctemp
       real,pointer,dimension(:) :: newfld
       integer:: listsec0(2),igds(5)
@@ -320,15 +320,15 @@
       nullify(gfld%list_opt,gfld%igdtmpl,gfld%ipdtmpl)
       nullify(gfld%coord_list,gfld%idrtmpl,gfld%bmap,gfld%fld)
 !
-!  Check for valid request number
+!  check for valid request number
 !  
       if (ifldnum.le.0) then
-        print *,'gf_getfld: Request for field number must be positive.'
+        print *,'gf_getfld: request for field number must be positive.'
         ierr=3
         return
       endif
 !
-!  Check for beginning of GRIB message in the first 100 bytes
+!  check for beginning of grib message in the first 100 bytes
 !
       istart=0
       do j=1,100
@@ -339,42 +339,42 @@
         endif
       enddo
       if (istart.eq.0) then
-        print *,'gf_getfld:  Beginning characters GRIB not found.'
+        print *,'gf_getfld:  beginning characters grib not found.'
         ierr=1
         return
       endif
 !
-!  Unpack Section 0 - Indicator Section 
+!  unpack section 0 - indicator section 
 !
       iofst=8*(istart+5)
-      call gbyte(cgrib,listsec0(1),iofst,8)     ! Discipline
+      call gbyte(cgrib,listsec0(1),iofst,8)     ! discipline
       iofst=iofst+8
-      call gbyte(cgrib,listsec0(2),iofst,8)     ! GRIB edition number
+      call gbyte(cgrib,listsec0(2),iofst,8)     ! grib edition number
       iofst=iofst+8
       iofst=iofst+32
-      call gbyte(cgrib,lengrib,iofst,32)        ! Length of GRIB message
+      call gbyte(cgrib,lengrib,iofst,32)        ! length of grib message
       iofst=iofst+32
       lensec0=16
       ipos=istart+lensec0
 !
-!  Currently handles only GRIB Edition 2.
+!  currently handles only grib edition 2.
 !  
       if (listsec0(2).ne.2) then
-        print *,'gf_getfld: can only decode GRIB edition 2.'
+        print *,'gf_getfld: can only decode grib edition 2.'
         ierr=2
         return
       endif
 !
-!  Loop through the remaining sections keeping track of the 
-!  length of each.  Also keep the latest Grid Definition Section info.
-!  Unpack the requested field number.
+!  loop through the remaining sections keeping track of the 
+!  length of each.  also keep the latest grid definition section info.
+!  unpack the requested field number.
 !
       do
-        !    Check to see if we are at end of GRIB message
+        !    check to see if we are at end of grib message
         ctemp=cgrib(ipos)//cgrib(ipos+1)//cgrib(ipos+2)//cgrib(ipos+3)
         if (ctemp.eq.c7777 ) then
           ipos=ipos+4
-          !    If end of GRIB message not where expected, issue error
+          !    if end of grib message not where expected, issue error
           if (ipos.ne.(istart+lengrib)) then
             print *,'gf_getfld: "7777" found, but not where expected.'
             ierr=4
@@ -382,23 +382,23 @@
           endif
           exit
         endif
-        !     Get length of Section and Section number
+        !     get length of section and section number
         iofst=(ipos-1)*8
-        call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+        call gbyte(cgrib,lensec,iofst,32)        ! get length of section
         iofst=iofst+32
-        call gbyte(cgrib,isecnum,iofst,8)         ! Get Section number
+        call gbyte(cgrib,isecnum,iofst,8)         ! get section number
         iofst=iofst+8
         !print *,' lensec= ',lensec,'    secnum= ',isecnum
         !
-        !  Check to see if section number is valid
+        !  check to see if section number is valid
         !
-        if ( (isecnum.lt.1).OR.(isecnum.gt.7) ) then
-          print *,'gf_getfld: Unrecognized Section Encountered=',isecnum     
+        if ( (isecnum.lt.1).or.(isecnum.gt.7) ) then
+          print *,'gf_getfld: unrecognized section encountered=',isecnum     
           ierr=8
           return
         endif
         !
-        !   If found Section 1, decode elements in Identification Section
+        !   if found section 1, decode elements in identification section
         !
         if (isecnum.eq.1) then
           iofst=iofst-40       ! reset offset to beginning of section
@@ -410,8 +410,8 @@
           endif
         endif
         !
-        !   If found Section 2, Grab local section
-        !   Save in case this is the latest one before the requested field.
+        !   if found section 2, grab local section
+        !   save in case this is the latest one before the requested field.
         !
         if (isecnum.eq.2) then
           iofst=iofst-40       ! reset offset to beginning of section
@@ -424,8 +424,8 @@
           endif
         endif
         !
-        !   If found Section 3, unpack the GDS info using the 
-        !   appropriate template.  Save in case this is the latest
+        !   if found section 3, unpack the gds info using the 
+        !   appropriate template.  save in case this is the latest
         !   grid before the requested field.
         !
         if (isecnum.eq.3) then
@@ -447,7 +447,7 @@
           endif
         endif
         !
-        !   If found Section 4, check to see if this field is the
+        !   if found section 4, check to see if this field is the
         !   one requested.
         !
         if (isecnum.eq.4) then
@@ -471,7 +471,7 @@
           endif
         endif
         !
-        !   If found Section 5, check to see if this field is the
+        !   if found section 5, check to see if this field is the
         !   one requested.
         !
         if ((isecnum.eq.5).and.(numfld.eq.ifldnum)) then
@@ -486,8 +486,8 @@
           endif
         endif
         !
-        !   If found Section 6, Unpack bitmap.
-        !   Save in case this is the latest
+        !   if found section 6, unpack bitmap.
+        !   save in case this is the latest
         !   bitmap before the requested field.
         !
         if (isecnum.eq.6) then
@@ -502,7 +502,7 @@
                  if ( associated(bmpsave) ) then
                     gfld%bmap=>bmpsave
                  else
-                    print *,'gf_getfld:  Previous bit-map specified,',
+                    print *,'gf_getfld:  previous bit-map specified,',
      &                       ' but none exists,'
                     ierr=17
                     return
@@ -515,12 +515,12 @@
               return
             endif
           else    ! do not unpack bitmap
-            call gbyte(cgrib,gfld%ibmap,iofst,8)      ! Get BitMap Indicator
+            call gbyte(cgrib,gfld%ibmap,iofst,8)      ! get bitmap indicator
             have6=.true.
           endif
         endif
         !
-        !   If found Section 7, check to see if this field is the
+        !   if found section 7, check to see if this field is the
         !   one requested.
         !
         if ((isecnum.eq.7).and.(numfld.eq.ifldnum).and.unpack) then
@@ -531,9 +531,9 @@
      &                    gfld%fld,jerr)
           if (jerr.eq.0) then
             have7=.true.
-            !  If bitmap is used with this field, expand data field
+            !  if bitmap is used with this field, expand data field
             !  to grid, if possible.
-            if ( gfld%ibmap .ne. 255 .AND. associated(gfld%bmap) ) then
+            if ( gfld%ibmap .ne. 255 .and. associated(gfld%bmap) ) then
                if ( expand ) then
                   allocate(newfld(gfld%ngrdpts))
                   !newfld(1:gfld%ngrdpts)=0.0
@@ -563,37 +563,37 @@
           endif
         endif
         !
-        !   Check to see if we read pass the end of the GRIB
+        !   check to see if we read pass the end of the grib
         !   message and missed the terminator string '7777'.
         !
-        ipos=ipos+lensec                 ! Update beginning of section pointer
+        ipos=ipos+lensec                 ! update beginning of section pointer
         if (ipos.gt.(istart+lengrib)) then
-          print *,'gf_getfld: "7777"  not found at end of GRIB message.'
+          print *,'gf_getfld: "7777"  not found at end of grib message.'
           ierr=7
           return
         endif
         !
-        !  If unpacking requested, return when all sections have been
+        !  if unpacking requested, return when all sections have been
         !  processed
         !
         if (unpack.and.have3.and.have4.and.have5.and.have6.and.have7)
      &      return
         !
-        !  If unpacking is not requested, return when sections 
+        !  if unpacking is not requested, return when sections 
         !  3 through 6 have been processed
         !
-        if ((.NOT.unpack).and.have3.and.have4.and.have5.and.have6)
+        if ((.not.unpack).and.have3.and.have4.and.have5.and.have6)
      &      return
         
       enddo
 
 !
-!  If exited from above loop, the end of the GRIB message was reached
+!  if exited from above loop, the end of the grib message was reached
 !  before the requested field was found.
 !
-      print *,'gf_getfld: GRIB message contained ',numlocal,
+      print *,'gf_getfld: grib message contained ',numlocal,
      &        ' different fields.'
-      print *,'gf_getfld: The request was for the ',ifldnum,
+      print *,'gf_getfld: the request was for the ',ifldnum,
      &        ' field.'
       ierr=6
 

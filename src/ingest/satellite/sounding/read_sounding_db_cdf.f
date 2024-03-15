@@ -1,21 +1,21 @@
-      Subroutine Read_sounder_db_cdf(filename,
+      subroutine read_sounder_db_cdf(filename,
      &                               imax,jmax,nch,
      &                               sounding,
      &                               wavelength,
-     &                               scalingBias,
-     &                               scalingGain,
+     &                               scalingbias,
+     &                               scalinggain,
      &                               northwest_sdr_pixel,
      &                               northwest_sdr_line,
      &                               southeast_sdr_pixel,
      &                               southeast_sdr_line,
-     &                               eastWestCycles,
-     &                               eastWestIncs,
-     &                               northSouthCycles,
-     &                               northSouthIncs,
-     &                               frameStartTime,
-     &                               lineTimeBegin,lineTimeEnd,
+     &                               eastwestcycles,
+     &                               eastwestincs,
+     &                               northsouthcycles,
+     &                               northsouthincs,
+     &                               framestarttime,
+     &                               linetimebegin,linetimeend,
      &                               imc,ires_x,ires_y,
-     &                               orbitAttitude,
+     &                               orbitattitude,
      &                               istatus)
 c
 c
@@ -24,65 +24,65 @@ c
       integer irec_max
       parameter (irec_max=5000)
 
-      Integer  NVARS
-      PARAMETER (NVARS=60) !NUMBER OF VARIABLES
-C     VARIABLE IDS RUN SEQUENTIALLY FROM 1 TO NVARS= 60
-      INTEGER RCODE
-C     ****VARIABLES FOR THIS NETCDF FILE****
+      integer  nvars
+      parameter (nvars=60) !number of variables
+c     variable ids run sequentially from 1 to nvars= 60
+      integer rcode
+c     ****variables for this netcdf file****
 c
-c the following declarations are for testing using the original netCDF read
-c routine. Ie., read the entire array all at once
+c the following declarations are for testing using the original netcdf read
+c routine. ie., read the entire array all at once
 c
 
-      Integer   imax,jmax,nch
-      Integer   sounding(imax,jmax,nch)
-      Integer   i,j,k,n
-      Integer   dim_id_y
+      integer   imax,jmax,nch
+      integer   sounding(imax,jmax,nch)
+      integer   i,j,k,n
+      integer   dim_id_y
 
-      REAL*8      wavelength      ( nch )
-      Real      scalingBias     (jmax,nch)
-      Real      scalingGain     (jmax,nch)
-      Real      scaling_rec     (irec_max)
+      real*8      wavelength      ( nch )
+      real      scalingbias     (jmax,nch)
+      real      scalinggain     (jmax,nch)
+      real      scaling_rec     (irec_max)
 
-      INTEGER   northwest_sdr_pixel
-      INTEGER   northwest_sdr_line
-      INTEGER   southeast_sdr_pixel
-      INTEGER   southeast_sdr_line
-      INTEGER   varid
-      CHARACTER*1 imc                      (   4)
-      Real      imcEnableTime
-      INTEGER   eastWestCycles                 
-      INTEGER   eastWestIncs                   
-      INTEGER   northSouthCycles               
-      INTEGER   northSouthIncs                 
-      Integer   ires_x,ires_y
-      REAL*8      frameStartTime                 
-      REAL*8      orbitAttitude            (336)
-      Real*8      lineTimeBegin(jmax,nch)
-      Real*8      lineTimeEnd(jmax,nch)
-      Real*8      ltrec(irec_max)
+      integer   northwest_sdr_pixel
+      integer   northwest_sdr_line
+      integer   southeast_sdr_pixel
+      integer   southeast_sdr_line
+      integer   varid
+      character*1 imc                      (   4)
+      real      imcenabletime
+      integer   eastwestcycles                 
+      integer   eastwestincs                   
+      integer   northsouthcycles               
+      integer   northsouthincs                 
+      integer   ires_x,ires_y
+      real*8      framestarttime                 
+      real*8      orbitattitude            (336)
+      real*8      linetimebegin(jmax,nch)
+      real*8      linetimeend(jmax,nch)
+      real*8      ltrec(irec_max)
 
-      Integer Istatus
-      Integer ndsize_sb(nch)
-      Integer ndsize_ltb(nch)
-      Integer ndsize_lte(nch)
-      Integer ndsize, ncid
+      integer istatus
+      integer ndsize_sb(nch)
+      integer ndsize_ltb(nch)
+      integer ndsize_lte(nch)
+      integer ndsize, ncid
 
-      Integer NVDIM
-      Integer NTP,NVS
-      Integer LENSTR
-      INTEGER START(10)
-      INTEGER COUNT(10)
-      INTEGER VDIMS(10) !ALLOW UP TO 10 DIMENSIONS
-      CHARACTER*31 DUMMY
-      CHARACTER*255 filename
-C
+      integer nvdim
+      integer ntp,nvs
+      integer lenstr
+      integer start(10)
+      integer count(10)
+      integer vdims(10) !allow up to 10 dimensions
+      character*31 dummy
+      character*255 filename
+c
       istatus = 1
 
-      RCODE=NF_OPEN(filename,NF_NOWRITE,NCID)
+      rcode=nf_open(filename,nf_nowrite,ncid)
       if(rcode.ne.0)then
          n=index(filename,' ')
-         write(6,*)'Error openning netCDF file'
+         write(6,*)'error openning netcdf file'
          write(6,*)'filename: ',filename(1:n-1)
          istatus = -1
          return
@@ -90,406 +90,406 @@ C
 c
 c code to get dimension size and read individual element of sounding array
 c get dimensions for sounding array (x,y,lambda) [lambda is # of wavelengths]
-c This code has now been subroutine-ized; rdimg_line_elem_sub.f.
+c this code has now been subroutine-ized; rdimg_line_elem_sub.f.
 c
 c
       call rddata_line_elem(ncid,imax,jmax,nch,sounding,istatus)
 
       if(istatus .ne. 1)then
-         write(6,*)'Error reading sounding - rddata_img_line_elem'
+         write(6,*)'error reading sounding - rddata_img_line_elem'
          return
       endif
 c -------------------------------------
-C
-C    statements to fill wavelength                     
-C
-      rcode=NF_INQ_VARID(ncid,'wavelength',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  20 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  20  CONTINUE
-      RCODE=NF_GET_VARA_DOUBLE(NCID,varid,START,COUNT,wavelength)
-C
-C    statements to fill northwest_sdr_pixel            
-C
-      rcode=NF_INQ_VARID(ncid,'northwest_sdr_pixel',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  50 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  50  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,northwest_sdr_pixel)
-C
-C    statements to fill northwest_sdr_line             
-C
-      rcode=NF_INQ_VARID(ncid,'northwest_sdr_line',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  60 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  60  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,northwest_sdr_line)
-C
-C    statements to fill frameStartTime                 
-C
-      rcode=NF_INQ_VARID(ncid,'frameStartTime',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 70 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 70   CONTINUE
-      RCODE=NF_GET_VARA_DOUBLE(NCID,varid,START,COUNT,frameStartTime)
-C
-C    statements to fill imc                            
-C
-      rcode=NF_INQ_VARID(ncid,'imc',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 180 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 180  CONTINUE
-      RCODE= NF_GET_VARA_TEXT(NCID,varid,START,COUNT,imc)
-C
-C    statements to fill imcEnableTime                  
-C
-      rcode=NF_INQ_VARID(ncid,'imcEnableTime',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 260 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 260  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,imcEnableTime)
-C
-C    statements to fill eastWestCycles                 
-C
-      rcode=NF_INQ_VARID(ncid,'eastWestCycles',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 300 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 300  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,eastWestCycles)
-C
-C    statements to fill eastWestIncs                   
-C
-      rcode=NF_INQ_VARID(ncid,'eastWestIncs',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 310 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 310  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,eastWestIncs)
-C
-C    statements to fill northSouthCycles               
-C
-      rcode=NF_INQ_VARID(ncid,'northSouthCycles',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 320 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 320  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,northSouthCycles)
-C
-C    statements to fill northSouthIncs                 
-C
-      rcode=NF_INQ_VARID(ncid,'northSouthIncs',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 330 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 330  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,northSouthIncs)
-C
-C    statements to fill orbitAttitude                  
-C
-      rcode=NF_INQ_VARID(ncid,'orbitAttitude',varid)
-      if(rcode.ne.0) return
-      CALL NCVINQ(NCID,varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO 340 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
- 340  CONTINUE
-      RCODE=NF_GET_VARA_DOUBLE(NCID,varid,START,COUNT,orbitAttitude)
 c
-c new: 11-21-96. JRSmart. Retrieve scalinggain and scalingbias. These needed
+c    statements to fill wavelength                     
+c
+      rcode=nf_inq_varid(ncid,'wavelength',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  20 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  20  continue
+      rcode=nf_get_vara_double(ncid,varid,start,count,wavelength)
+c
+c    statements to fill northwest_sdr_pixel            
+c
+      rcode=nf_inq_varid(ncid,'northwest_sdr_pixel',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  50 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  50  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,northwest_sdr_pixel)
+c
+c    statements to fill northwest_sdr_line             
+c
+      rcode=nf_inq_varid(ncid,'northwest_sdr_line',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  60 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  60  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,northwest_sdr_line)
+c
+c    statements to fill framestarttime                 
+c
+      rcode=nf_inq_varid(ncid,'framestarttime',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 70 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 70   continue
+      rcode=nf_get_vara_double(ncid,varid,start,count,framestarttime)
+c
+c    statements to fill imc                            
+c
+      rcode=nf_inq_varid(ncid,'imc',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 180 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 180  continue
+      rcode= nf_get_vara_text(ncid,varid,start,count,imc)
+c
+c    statements to fill imcenabletime                  
+c
+      rcode=nf_inq_varid(ncid,'imcenabletime',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 260 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 260  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,imcenabletime)
+c
+c    statements to fill eastwestcycles                 
+c
+      rcode=nf_inq_varid(ncid,'eastwestcycles',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 300 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 300  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,eastwestcycles)
+c
+c    statements to fill eastwestincs                   
+c
+      rcode=nf_inq_varid(ncid,'eastwestincs',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 310 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 310  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,eastwestincs)
+c
+c    statements to fill northsouthcycles               
+c
+      rcode=nf_inq_varid(ncid,'northsouthcycles',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 320 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 320  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,northsouthcycles)
+c
+c    statements to fill northsouthincs                 
+c
+      rcode=nf_inq_varid(ncid,'northsouthincs',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 330 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 330  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,northsouthincs)
+c
+c    statements to fill orbitattitude                  
+c
+      rcode=nf_inq_varid(ncid,'orbitattitude',varid)
+      if(rcode.ne.0) return
+      call ncvinq(ncid,varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do 340 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+ 340  continue
+      rcode=nf_get_vara_double(ncid,varid,start,count,orbitattitude)
+c
+c new: 11-21-96. jrsmart. retrieve scalinggain and scalingbias. these needed
 c to convert counts to useable brightness temps and radiances.
 c
-      dim_id_y = NCDID(ncid, 'y', rcode)
+      dim_id_y = ncdid(ncid, 'y', rcode)
 
-      rcode=NF_INQ_VARID(ncid,'scalingBias',varid)
+      rcode=nf_inq_varid(ncid,'scalingbias',varid)
       if(rcode.ne.0)then
-         write(6,*)'Error getting scalingBias '
+         write(6,*)'error getting scalingbias '
          istatus = -1
       endif
 
       if(rcode.ne.0)then
-         write(6,*)'Error getting scalingbias id code - returning'
+         write(6,*)'error getting scalingbias id code - returning'
          istatus = -1
          return
       endif
 
-      write(6,*)'Reading ScalingBias'
+      write(6,*)'reading scalingbias'
       do k = 1,nch  !# of channels in sounding database (= 19).
 
-c        write(6,*)'Reading ScalingBias for channel ',k
+c        write(6,*)'reading scalingbias for channel ',k
 
-         call NCDINQ(NCID,dim_id_y,dummy,NDSIZE_SB(k),RCODE)
+         call ncdinq(ncid,dim_id_y,dummy,ndsize_sb(k),rcode)
          if(rcode.ne.0)then
-            write(6,*)'Error getting SB dimension - NDSIZE_SB'
+            write(6,*)'error getting sb dimension - ndsize_sb'
          endif
 
-         if(NDSIZE_SB(k).gt.jmax.or.NDSIZE_SB(k).le.0)then
-            write(6,*)'SB dimension size > nlines_max or <= 0'
+         if(ndsize_sb(k).gt.jmax.or.ndsize_sb(k).le.0)then
+            write(6,*)'sb dimension size > nlines_max or <= 0'
             write(6,*)'ndsize_db(k) = ', ndsize_sb(k)
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
             return
          endif
 
-         COUNT(1)=NDSIZE_SB(k)
-         START(2)=k
+         count(1)=ndsize_sb(k)
+         start(2)=k
 c
 c read record
 c
-      rcode=NF_GET_VARA_REAL(NCID,varid,START,COUNT,scaling_rec)
+      rcode=nf_get_vara_real(ncid,varid,start,count,scaling_rec)
          if(rcode.ne.0)then 
-            write(6,*)'Error reading scaling database'
+            write(6,*)'error reading scaling database'
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
          endif
 c
 c load values for all lines into the 3d output array
 c
-         do i = 1,NDSIZE_SB(k)
+         do i = 1,ndsize_sb(k)
             scalingbias(i,k) = scaling_rec(i)
          enddo
 
       enddo
 c
-c  statements to fill scalingGain
+c  statements to fill scalinggain
 c
-      rcode=NF_INQ_VARID(ncid,'scalingGain',varid)
+      rcode=nf_inq_varid(ncid,'scalinggain',varid)
       if(rcode.ne.0)then
-         write(6,*)'Error getting scalingGain '
+         write(6,*)'error getting scalinggain '
          istatus = -1
       endif
 
-      write(6,*)'Reading ScalingGain'
+      write(6,*)'reading scalinggain'
       do k = 1,nch  !# of channels in sounding database (= 19).
 
-c        write(6,*)'Reading ScalingGain for channel ',k
+c        write(6,*)'reading scalinggain for channel ',k
 
-         call NCDINQ(NCID,dim_id_y,dummy,NDSIZE_SB(k),RCODE)
+         call ncdinq(ncid,dim_id_y,dummy,ndsize_sb(k),rcode)
          if(rcode.ne.0)then
-            write(6,*)'Error getting SG dimension - NDSIZE_SB'
+            write(6,*)'error getting sg dimension - ndsize_sb'
          endif
 
-         if(NDSIZE_SB(k).gt.jmax.or.NDSIZE_SB(k).le.0)then
-            write(6,*)'SB dimension size > jmax or <= 0'
+         if(ndsize_sb(k).gt.jmax.or.ndsize_sb(k).le.0)then
+            write(6,*)'sb dimension size > jmax or <= 0'
             write(6,*)'nsize_sb(k) = ',ndsize_sb(k)
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
             return
          endif
 
-         COUNT(1)=NDSIZE_SB(k)
-         START(2)=k
+         count(1)=ndsize_sb(k)
+         start(2)=k
 c
 c read record
 c
-      rcode=NF_GET_VARA_REAL(NCID,varid,START,COUNT,scaling_rec)
+      rcode=nf_get_vara_real(ncid,varid,start,count,scaling_rec)
          if(rcode.ne.0)then
-            write(6,*)'Error reading scaling database'
+            write(6,*)'error reading scaling database'
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
          endif
 c
 c load values for all lines into the 3d output array
 c
-         do i = 1,NDSIZE_SB(k)
-            scalingGain(i,k) = scaling_rec(i)
+         do i = 1,ndsize_sb(k)
+            scalinggain(i,k) = scaling_rec(i)
          enddo
 
       enddo
 c
-c 11-14-97 (J.Smart). Acquire lineTimeBegin and lineTimeEnd.
+c 11-14-97 (j.smart). acquire linetimebegin and linetimeend.
 c
-      rcode=NF_INQ_VARID(ncid,'lineTimeBegin',varid)
+      rcode=nf_inq_varid(ncid,'linetimebegin',varid)
       if(rcode.ne.0)then
-         write(6,*)'Error getting lineTimeBegin '
+         write(6,*)'error getting linetimebegin '
          istatus = -1
       endif
-      write(6,*)'Reading lineTimeBegin'
+      write(6,*)'reading linetimebegin'
       do k = 1,nch  !# of channels in sounding database (= 19).
-         call NCDINQ(NCID,dim_id_y,dummy,NDSIZE_LTB(k),RCODE)
+         call ncdinq(ncid,dim_id_y,dummy,ndsize_ltb(k),rcode)
          if(rcode.ne.0)then
-            write(6,*)'Error getting LTB dimension - NDSIZE_LTB'
+            write(6,*)'error getting ltb dimension - ndsize_ltb'
          endif
-         if(NDSIZE_LTB(k).gt.jmax.or.NDSIZE_LTB(k).le.0)then
-            write(6,*)'LTB dimension size > jmax or <= 0'
+         if(ndsize_ltb(k).gt.jmax.or.ndsize_ltb(k).le.0)then
+            write(6,*)'ltb dimension size > jmax or <= 0'
             write(6,*)'nsize_ltb(k) = ',ndsize_ltb(k)
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
             return
          endif
-         COUNT(1)=NDSIZE_LTB(k)
-         START(2)=k
+         count(1)=ndsize_ltb(k)
+         start(2)=k
 c
 c read record, use scaling_rec for the i/o.
 c
-      rcode=NF_GET_VARA_DOUBLE(NCID,varid,START,COUNT,ltrec)
+      rcode=nf_get_vara_double(ncid,varid,start,count,ltrec)
          if(rcode.ne.0)then
-            write(6,*)'Error reading scaling database'
+            write(6,*)'error reading scaling database'
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
          endif
 c
 c load values for all lines into the 3d output array
 c
-         do i = 1,NDSIZE_LTB(k)
-            lineTimeBegin(i,k) = ltrec(i)
+         do i = 1,ndsize_ltb(k)
+            linetimebegin(i,k) = ltrec(i)
          enddo
       enddo
 c -----------
-c lineTimeEnd
+c linetimeend
 c
-      rcode=NF_INQ_VARID(ncid,'lineTimeEnd',varid)
+      rcode=nf_inq_varid(ncid,'linetimeend',varid)
       if(rcode.ne.0)then
-         write(6,*)'Error getting lineTimeBegin '
+         write(6,*)'error getting linetimebegin '
          istatus = -1
       endif
-      write(6,*)'Reading lineTimeEnd'
+      write(6,*)'reading linetimeend'
       do k = 1,nch  !# of channels in sounding database (= 19).
-         call NCDINQ(NCID,dim_id_y,dummy,NDSIZE_LTE(k),RCODE)
+         call ncdinq(ncid,dim_id_y,dummy,ndsize_lte(k),rcode)
          if(rcode.ne.0)then
-            write(6,*)'Error getting LTE dimension - NDSIZE_LTE'
+            write(6,*)'error getting lte dimension - ndsize_lte'
          endif
-         if(NDSIZE_LTE(k).gt.jmax.or.NDSIZE_LTE(k).le.0)then
-            write(6,*)'LTE dimension size > jmax or <= 0'
+         if(ndsize_lte(k).gt.jmax.or.ndsize_lte(k).le.0)then
+            write(6,*)'lte dimension size > jmax or <= 0'
             write(6,*)'nsize_lte(k) = ',ndsize_lte(k)
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
             return
          endif
-         COUNT(1)=NDSIZE_LTE(k)
-         START(2)=k
+         count(1)=ndsize_lte(k)
+         start(2)=k
 c
 c read record, use scaling_rec for the i/o.
 c
-      rcode=NF_GET_VARA_DOUBLE(NCID,varid,START,COUNT,ltrec)
+      rcode=nf_get_vara_double(ncid,varid,start,count,ltrec)
          if(rcode.ne.0)then
-            write(6,*)'Error reading scaling database'
+            write(6,*)'error reading scaling database'
             istatus = -1
-            write(6,*)'Returning to main, istatus = ',istatus
+            write(6,*)'returning to main, istatus = ',istatus
          endif
 c
 c load values for all lines into the 3d output array
 c
-         do i = 1,NDSIZE_LTE(k)
-            lineTimeEnd(i,k) = ltrec(i)
+         do i = 1,ndsize_lte(k)
+            linetimeend(i,k) = ltrec(i)
          enddo
       enddo
-C
-C    statements to fill x_resolution and y_resolution
-C
-      rcode=NF_INQ_VARID(ncid,'x_resolution',varid)
+c
+c    statements to fill x_resolution and y_resolution
+c
+      rcode=nf_inq_varid(ncid,'x_resolution',varid)
       if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  53 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  53  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,ires_x)
-C
-      rcode=NF_INQ_VARID(ncid,'y_resolution',varid)
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  53 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  53  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,ires_x)
+c
+      rcode=nf_inq_varid(ncid,'y_resolution',varid)
       if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  54 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  54  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,ires_y)
-C
-C    statements to fill southeast_sdr_pixel
-C
-      rcode=NF_INQ_VARID(ncid,'southeast_sdr_pixel',varid)
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  54 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  54  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,ires_y)
+c
+c    statements to fill southeast_sdr_pixel
+c
+      rcode=nf_inq_varid(ncid,'southeast_sdr_pixel',varid)
       if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  80 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  80  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,southeast_sdr_pixel)
-C
-C    statements to fill southeast_sdr_line
-C
-      rcode=NF_INQ_VARID(ncid,'southeast_sdr_line',varid)
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  80 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  80  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,southeast_sdr_pixel)
+c
+c    statements to fill southeast_sdr_line
+c
+      rcode=nf_inq_varid(ncid,'southeast_sdr_line',varid)
       if(rcode.ne.0) return
-      CALL NCVINQ(NCID, varid,DUMMY,NTP,NVDIM,VDIMS,NVS,RCODE)
-      LENSTR=1
-      DO  90 J=1,NVDIM
-      CALL NCDINQ(NCID,VDIMS(J),DUMMY,NDSIZE,RCODE)
-      LENSTR=LENSTR*NDSIZE
-      START(J)=1
-      COUNT(J)=NDSIZE
-  90  CONTINUE
-      RCODE=NF_GET_VARA_INT(NCID,varid,START,COUNT,southeast_sdr_line)
+      call ncvinq(ncid, varid,dummy,ntp,nvdim,vdims,nvs,rcode)
+      lenstr=1
+      do  90 j=1,nvdim
+      call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+      lenstr=lenstr*ndsize
+      start(j)=1
+      count(j)=ndsize
+  90  continue
+      rcode=nf_get_vara_int(ncid,varid,start,count,southeast_sdr_line)
 
-      Return
-      END
+      return
+      end
 c
 c get x/y dimensions for satellite data
 c
@@ -520,57 +520,57 @@ c
       call s_len(filename,ln)
       print*,'open file for x/y/ch dimension read'
       print*,'filename: ',filename(1:ln)
-      RCODE=NF_OPEN(filename,NF_NOWRITE,NCID)
+      rcode=nf_open(filename,nf_nowrite,ncid)
       if(rcode.ne.0)then
-         print*,'Error openning netCDF file'
+         print*,'error openning netcdf file'
          print*,'filename: ',filename(1:ln)
          return
       endif
 c
-c This is the number of lines
+c this is the number of lines
 c
-      dim_id_y = NCDID(ncid, 'y', rcode)
+      dim_id_y = ncdid(ncid, 'y', rcode)
       if(rcode.ne.0)then
-         print*,'Error getting y id code - returning'
+         print*,'error getting y id code - returning'
          return
       endif
-      CALL NCDINQ(NCID, dim_id_y,dummy,nlines,RCODE)
+      call ncdinq(ncid, dim_id_y,dummy,nlines,rcode)
       if(rcode.ne.0)then
-         print*,'Error getting y dimension - nlines'
+         print*,'error getting y dimension - nlines'
          return
       endif
 c
 c get x dimension id
 c
-      dim_id_x = NCDID(ncid, 'x', rcode)
+      dim_id_x = ncdid(ncid, 'x', rcode)
       if(rcode.ne.0)then
-         print*,'Error getting x id code - returning'
+         print*,'error getting x id code - returning'
          return
       endif
 
-      call NCDINQ(NCID,dim_id_x,dummy,nelems,RCODE)
+      call ncdinq(ncid,dim_id_x,dummy,nelems,rcode)
       if(rcode.ne.0)then
-         print*,'Error getting x dimension - nelems'
+         print*,'error getting x dimension - nelems'
          return
       endif
 c
 c get wavelength dimension id (this is the number of channels)
 c
-      dim_id_x = NCDID(ncid, 'wavelength', rcode)
+      dim_id_x = ncdid(ncid, 'wavelength', rcode)
       if(rcode.ne.0)then
-         print*,'Error getting wavelength id code - returning'
+         print*,'error getting wavelength id code - returning'
          return
       endif
 
-      call NCDINQ(NCID,dim_id_x,dummy,nchannels,RCODE)
+      call ncdinq(ncid,dim_id_x,dummy,nchannels,rcode)
       if(rcode.ne.0)then
-         print*,'Error getting wavelength dimension - nchannels'
+         print*,'error getting wavelength dimension - nchannels'
          return
       endif
 
       rcode = nf_close(ncid)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         print *,'nf_close'
         return
       endif

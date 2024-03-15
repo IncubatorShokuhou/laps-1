@@ -1,256 +1,256 @@
-!dis    Forecast Systems Laboratory
-!dis    NOAA/OAR/ERL/FSL
-!dis    325 Broadway
-!dis    Boulder, CO     80303
+!dis    forecast systems laboratory
+!dis    noaa/oar/erl/fsl
+!dis    325 broadway
+!dis    boulder, co     80303
 !dis
-!dis    Forecast Research Division
-!dis    Local Analysis and Prediction Branch
-!dis    LAPS
+!dis    forecast research division
+!dis    local analysis and prediction branch
+!dis    laps
 !dis
-!dis    This software and its documentation are in the public domain and
-!dis    are furnished "as is."  The United States government, its
+!dis    this software and its documentation are in the public domain and
+!dis    are furnished "as is."  the united states government, its
 !dis    instrumentalities, officers, employees, and agents make no
 !dis    warranty, express or implied, as to the usefulness of the software
-!dis    and documentation for any purpose.  They assume no responsibility
+!dis    and documentation for any purpose.  they assume no responsibility
 !dis    (1) for the use of the software and documentation; or (2) to provide
 !dis    technical support to users.
 !dis
-!dis    Permission to use, copy, modify, and distribute this software is
+!dis    permission to use, copy, modify, and distribute this software is
 !dis    hereby granted, provided that the entire disclaimer notice appears
-!dis    in all copies.  All modifications to this software must be clearly
+!dis    in all copies.  all modifications to this software must be clearly
 !dis    documented, and are solely the responsibility of the agent making
-!dis    the modifications.  If significant modifications or enhancements
-!dis    are made to this software, the FSL Software Policy Manager
+!dis    the modifications.  if significant modifications or enhancements
+!dis    are made to this software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
 
-MODULE STMASAnalz
+module stmasanalz
 
 !==========================================================
-!  This module contains STMAS variational analysis based
+!  this module contains stmas variational analysis based
 !  a multigrid fitting technique.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
-!       Modification:
+!  history:
+!	creation: 9-2005 by yuanfu xie.
+!       modification:
 !                 10-2008 by min-ken hsieh
 !                 11-2008 by min-ken hsieh
-!                 STMASAna
-!                 Functn3D
-!                 Gradnt3D
+!                 stmasana
+!                 functn3d
+!                 gradnt3d
 !==========================================================
 
-  USE Definition
+  use definition
 
-CONTAINS
+contains
 
-SUBROUTINE STMASAna(anal,ngrd,dxyt,domn,bkgd,nfrm, &
+subroutine stmasana(anal,ngrd,dxyt,domn,bkgd,nfrm, &
 		    obsv,nobs,wght,stna,ospc,indx, &
 		    coef, bund,ipar,rpar,vnam,pnlt,&
                     slvl,ucvr,diag)
 		    
 
 !==========================================================
-!  This routine reads into necessary namelists for STMAS
+!  this routine reads into necessary namelists for stmas
 !  analysis through a multigrid technique.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
-!       Modification:
+!  history:
+!	creation: 9-2005 by yuanfu xie.
+!       modification:
 !                 08-2008 by min-ken hsieh
-!                 add parameter stna to map each obs its stn name for STMASVer
-!       Modification:
+!                 add parameter stna to map each obs its stn name for stmasver
+!       modification:
 !                 10-2008 by min-ken hsieh
 !                 bound option only apply to last level
 !                 pass in penalty for each var
 !                 pass in slevel for each var
-!       Modification:
+!       modification:
 !                 11-2008 by min-ken hsieh
 !                 pass in uncovr for each var
-!                 call IntplBkg to interpolate bkg to multigrid
-!                 and pass interpolated bkg and uncover (hbg/huc) to Minimize
-!       Modification:
-!                 12-2008 by Yuanfu Xie
-!                 pass in diag(nol) array for J_b term.
-!       Modification:
-!                 01-2009 by Yuanfu Xie
+!                 call intplbkg to interpolate bkg to multigrid
+!                 and pass interpolated bkg and uncover (hbg/huc) to minimize
+!       modification:
+!                 12-2008 by yuanfu xie
+!                 pass in diag(nol) array for j_b term.
+!       modification:
+!                 01-2009 by yuanfu xie
 !                 calculate number of multigrid levels using slvl
 !                 assuming level 1 with gridpoint 3 3 3.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: ngrd(3)	! Grid numbers
-  INTEGER, INTENT(IN) :: nfrm		! Bkgd time frames
-  INTEGER, INTENT(INOUT) :: nobs	! Number of obs
-  INTEGER, INTENT(IN) :: indx(6,nobs)	! Indices (intepolate)
-  INTEGER, INTENT(IN) :: bund		! Bound constraints
-  INTEGER, INTENT(IN) :: ipar(1)	! Integer parameter
-  INTEGER, INTENT(IN) :: slvl           ! Level to start analysis. added by min-ken
-  REAL, INTENT(IN) :: dxyt(3)		! Grid spacing
-  REAL, INTENT(IN) :: domn(2,3)		! Domain
-  REAL, INTENT(IN) :: bkgd(ngrd(1),ngrd(2),nfrm)
-  REAL, INTENT(INOUT) :: obsv(4,nobs)
-  REAL, INTENT(INOUT) :: wght(nobs)	! Obs weightings
-  REAL, INTENT(IN) :: pnlt		! penalty for each variable
-  CHARACTER*20, INTENT(INOUT):: stna(nobs)
-					! Obs station name by min-ken hsieh
-  CHARACTER*4, INTENT(IN):: vnam        ! variable name(used in lvl addition and output each level result)
-  REAL, INTENT(IN) :: ospc(3)		! Obs spacing
-  REAL, INTENT(IN) :: coef(6,nobs)	! Coeffients
-  REAL, INTENT(IN) :: rpar(1)		! Real parameter
-  REAL, INTENT(IN) :: diag(ngrd(1),ngrd(2))! Diagnol array for J_b
+  integer, intent(in) :: ngrd(3)	! grid numbers
+  integer, intent(in) :: nfrm		! bkgd time frames
+  integer, intent(inout) :: nobs	! number of obs
+  integer, intent(in) :: indx(6,nobs)	! indices (intepolate)
+  integer, intent(in) :: bund		! bound constraints
+  integer, intent(in) :: ipar(1)	! integer parameter
+  integer, intent(in) :: slvl           ! level to start analysis. added by min-ken
+  real, intent(in) :: dxyt(3)		! grid spacing
+  real, intent(in) :: domn(2,3)		! domain
+  real, intent(in) :: bkgd(ngrd(1),ngrd(2),nfrm)
+  real, intent(inout) :: obsv(4,nobs)
+  real, intent(inout) :: wght(nobs)	! obs weightings
+  real, intent(in) :: pnlt		! penalty for each variable
+  character*20, intent(inout):: stna(nobs)
+					! obs station name by min-ken hsieh
+  character*4, intent(in):: vnam        ! variable name(used in lvl addition and output each level result)
+  real, intent(in) :: ospc(3)		! obs spacing
+  real, intent(in) :: coef(6,nobs)	! coeffients
+  real, intent(in) :: rpar(1)		! real parameter
+  real, intent(in) :: diag(ngrd(1),ngrd(2))! diagnol array for j_b
 
-  REAL, INTENT(INOUT) :: anal(ngrd(1),ngrd(2),ngrd(3))
+  real, intent(inout) :: anal(ngrd(1),ngrd(2),ngrd(3))
 
-  LOGICAL, INTENT(IN) :: ucvr(ngrd(1),ngrd(2),ngrd(3)) !uncovered array by min-ken
+  logical, intent(in) :: ucvr(ngrd(1),ngrd(2),ngrd(3)) !uncovered array by min-ken
 
-  ! Local variables:
-  INTEGER :: lvl(3)			! Number of multigrid levels
-  INTEGER :: lvc(3)			! Account of the levels
-  INTEGER :: mgd(3)			! Multigrid points
-  INTEGER :: mld(3)			! Leading dimensions
-  INTEGER :: inc(3)			! Grid change increment
-  INTEGER :: mcl			! Number of multigrid cycles
-  INTEGER :: mlv			! Maximum number levels
-  INTEGER :: idx(6,nobs)		! Indices at a multigrid
-  INTEGER :: i,j,k,l,ier,ii,ij,ik
-  REAL :: dis,rsz			! Distance and resizes
-  REAL :: dgd(3)			! Grid spacing at a multigrid
-  REAL :: coe(6,nobs)			! Coefficients at a multigrid
-  REAL, ALLOCATABLE, DIMENSION(:,:,:) &
-       :: sln				! Multigrid solutions
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:) &
-       :: huc				! Interpolated uncover by min-ken
+  ! local variables:
+  integer :: lvl(3)			! number of multigrid levels
+  integer :: lvc(3)			! account of the levels
+  integer :: mgd(3)			! multigrid points
+  integer :: mld(3)			! leading dimensions
+  integer :: inc(3)			! grid change increment
+  integer :: mcl			! number of multigrid cycles
+  integer :: mlv			! maximum number levels
+  integer :: idx(6,nobs)		! indices at a multigrid
+  integer :: i,j,k,l,ier,ii,ij,ik
+  real :: dis,rsz			! distance and resizes
+  real :: dgd(3)			! grid spacing at a multigrid
+  real :: coe(6,nobs)			! coefficients at a multigrid
+  real, allocatable, dimension(:,:,:) &
+       :: sln				! multigrid solutions
+  integer, allocatable, dimension(:,:,:) &
+       :: huc				! interpolated uncover by min-ken
 
 
-  ! Number of multigrid V-cycles:
+  ! number of multigrid v-cycles:
   mcl = 0
 
-  ! Calculate total multigrid levels needed:
-  DO i=1,3
+  ! calculate total multigrid levels needed:
+  do i=1,3
     lvl(i) = 0
-    ! Initial grid distance 3 gridpoints:
+    ! initial grid distance 3 gridpoints:
     dis = (domn(2,i)-domn(1,i))/2.0
-1   CONTINUE
-    IF (dis .GT. ospc(i)) THEN
+1   continue
+    if (dis .gt. ospc(i)) then
       lvl(i) = lvl(i)+1
       dis = dis*0.5
-      GOTO 1
-    ENDIF
-    ! LVL counts addition multigrid levels except the current 3x3x3 level
-    lvl(i) = MIN0(lvl(i),INT(ALOG(FLOAT(ngrd(i)-1))/ALOG(2.0))-1)
-  ENDDO
-  IF (verbal .EQ. 1) WRITE(*,2) lvl(1:3)
-2 FORMAT('STMASAna: Number of levels: ',3I3)
+      goto 1
+    endif
+    ! lvl counts addition multigrid levels except the current 3x3x3 level
+    lvl(i) = min0(lvl(i),int(alog(float(ngrd(i)-1))/alog(2.0))-1)
+  enddo
+  if (verbal .eq. 1) write(*,2) lvl(1:3)
+2 format('stmasana: number of levels: ',3i3)
 
-  ! Leading dimensions according to the total levels:
+  ! leading dimensions according to the total levels:
   mld = 2**(lvl+1)+1
 
-  ! Allocate memory for mutligrid solutions:
-  ALLOCATE(sln(mld(1),mld(2),mld(3)), STAT=ier)
+  ! allocate memory for mutligrid solutions:
+  allocate(sln(mld(1),mld(2),mld(3)), stat=ier)
   
-  ! Allocate interpolated bkg and uncover
-  ALLOCATE(huc(mld(1),mld(2),mld(3)), STAT=ier)
+  ! allocate interpolated bkg and uncover
+  allocate(huc(mld(1),mld(2),mld(3)), stat=ier)
   
-  ! Start multigrid analysis:
+  ! start multigrid analysis:
 
   ! modified by min-ken hsieh
   ! mgd should be determinated by slvl,
   ! but it cannot be bigger than mld
-  DO i=1,3
-    mgd(i) = MIN0(2**(slvl-1)+1,mld(i))
-  ENDDO
-  ! Maximum multigrid levels:
-  mlv = MAXVAL(lvl(1:3))-slvl+1
+  do i=1,3
+    mgd(i) = min0(2**(slvl-1)+1,mld(i))
+  enddo
+  ! maximum multigrid levels:
+  mlv = maxval(lvl(1:3))-slvl+1
 
-  ! Multigrid cycles:
-  DO l=1,mcl*2+1
+  ! multigrid cycles:
+  do l=1,mcl*2+1
 
-    ! Down/Up cycle:
-    IF (MOD(l,2) .EQ. 1) THEN
+    ! down/up cycle:
+    if (mod(l,2) .eq. 1) then
       rsz = 2.0
-    ELSE
+    else
       rsz = 0.5
-    ENDIF
+    endif
 
-    ! Through all possible levels:
+    ! through all possible levels:
     ! modified by min-ken hsieh
     ! because we start from slvl
     ! lvc are no longer starting from 0
     !lvc = 0
     lvc = slvl - 1
 
-    DO k=1,mlv
+    do k=1,mlv
 
-      ! Redefine number of gridpoints:
-      DO j=1,3
-        IF (lvc(j) .LE. lvl(j)) THEN
+      ! redefine number of gridpoints:
+      do j=1,3
+        if (lvc(j) .le. lvl(j)) then
 	  mgd(j) = (mgd(j)-1)*rsz+1
 	  inc(j) = 2			! grid change
 	  lvc(j) = lvc(j)+1		! count levels
-	ELSE
+	else
 	  inc(j) = 1			! grid unchange
-	ENDIF
-      ENDDO
+	endif
+      enddo
 
-      ! Interpolate a multigrid to observations:
-      dgd = (domn(2,1:3)-domn(1,1:3))/FLOAT(mgd-1)
-      CALL Grid2Obs(idx,coe,obsv,nobs,wght,stna,mgd,dgd,domn)
+      ! interpolate a multigrid to observations:
+      dgd = (domn(2,1:3)-domn(1,1:3))/float(mgd-1)
+      call grid2obs(idx,coe,obsv,nobs,wght,stna,mgd,dgd,domn)
 
       ! added by min-ken hsieh
-      ! Interpolate a background to multigrid
-      CALL IntplBkg(ucvr,ngrd,huc,mgd,mld,dgd,dxyt,domn)
+      ! interpolate a background to multigrid
+      call intplbkg(ucvr,ngrd,huc,mgd,mld,dgd,dxyt,domn)
 
-      ! Initial guesses:
-      IF ((l .EQ. 1) .AND. (k .EQ. 1)) &
-	!sln = 0.5*(MAXVAL(obsv(1,1:nobs))-MINVAL(obsv(1,1:nobs)))
+      ! initial guesses:
+      if ((l .eq. 1) .and. (k .eq. 1)) &
+	!sln = 0.5*(maxval(obsv(1,1:nobs))-minval(obsv(1,1:nobs)))
 	sln = 0.0
 
-      ! Down and up cycle:
-      IF (MOD(l,2) .EQ. 0) THEN
-	CALL Projectn(sln,mld,mgd,inc)	! Up cycle
-      ELSE
-	CALL Interpln(sln,mld,mgd,inc)	! Down cycle
-      ENDIF
+      ! down and up cycle:
+      if (mod(l,2) .eq. 0) then
+	call projectn(sln,mld,mgd,inc)	! up cycle
+      else
+	call interpln(sln,mld,mgd,inc)	! down cycle
+      endif
 
       ! added by min-ken hsieh
-      ! Smooth:
-      !CALL Smoother(sln,mld,mgd)
+      ! smooth:
+      !call smoother(sln,mld,mgd)
 
-      ! Analyzing:
+      ! analyzing:
       !bound the pcp analysis on finest level
-      IF (k.EQ.mlv) THEN
-        CALL Minimize(sln,mld,mgd,obsv,nobs,idx,coe,wght,bund,pnlt,huc)
-      ELSE
-        CALL Minimize(sln,mld,mgd,obsv,nobs,idx,coe,wght,0,pnlt,huc)
-      ENDIF
+      if (k.eq.mlv) then
+        call minimize(sln,mld,mgd,obsv,nobs,idx,coe,wght,bund,pnlt,huc)
+      else
+        call minimize(sln,mld,mgd,obsv,nobs,idx,coe,wght,0,pnlt,huc)
+      endif
 
-    ENDDO
-  ENDDO
+    enddo
+  enddo
 
-  ! Map the multigrid solution to the grid requested:
-  CALL Mul2Grid(sln,mld,mgd,anal,ngrd,domn)
+  ! map the multigrid solution to the grid requested:
+  call mul2grid(sln,mld,mgd,anal,ngrd,domn)
 
-  ! Deallocate multigrid:
-  DEALLOCATE(sln,STAT=ier)
-  DEALLOCATE(huc,STAT=ier)
+  ! deallocate multigrid:
+  deallocate(sln,stat=ier)
+  deallocate(huc,stat=ier)
 
-END SUBROUTINE STMASAna
+end subroutine stmasana
 
-SUBROUTINE Smoother(sltn,mlds,ngrd)
+subroutine smoother(sltn,mlds,ngrd)
 
 !==========================================================
-!  This routine smooth a grid with its neighbor values 
+!  this routine smooth a grid with its neighbor values 
 !
-!  HISTORY:
-!	Creation: 9-2008 by min-ken hsieh
+!  history:
+!	creation: 9-2008 by min-ken hsieh
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: mlds(3),ngrd(3)
-  REAL, INTENT(INOUT) :: sltn(mlds(1),mlds(2),mlds(3))
+  integer, intent(in) :: mlds(3),ngrd(3)
+  real, intent(inout) :: sltn(mlds(1),mlds(2),mlds(3))
 
 
   ! smooth:
@@ -267,445 +267,445 @@ SUBROUTINE Smoother(sltn,mlds,ngrd)
     0.5*sltn(1:ngrd(1),1:ngrd(2),1:ngrd(3)-2)+ &
     0.5*sltn(1:ngrd(1),1:ngrd(2),3:ngrd(3)) 
 
-END SUBROUTINE Smoother
+end subroutine smoother
 
-SUBROUTINE Projectn(sltn,mlds,ngrd,incr)
+subroutine projectn(sltn,mlds,ngrd,incr)
 
 !==========================================================
-!  This routine projects a grid value function to a coarse
+!  this routine projects a grid value function to a coarse
 !  resolution whose numbers of gridpoints are ngrd.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: mlds(3),incr(3),ngrd(3)
-  REAL, INTENT(INOUT) :: sltn(mlds(1),mlds(2),mlds(3))
+  integer, intent(in) :: mlds(3),incr(3),ngrd(3)
+  real, intent(inout) :: sltn(mlds(1),mlds(2),mlds(3))
 
-  ! Local variables:
-  INTEGER :: mgd(3)
+  ! local variables:
+  integer :: mgd(3)
 
   mgd = incr*(ngrd-1)+1
 
-  ! Projection based grid increments:
+  ! projection based grid increments:
   sltn(1:ngrd(1),1:ngrd(2),1:ngrd(3)) = &
     sltn(1:mgd(1):incr(1),1:mgd(2):incr(2),1:mgd(3):incr(3))
 
-END SUBROUTINE Projectn
+end subroutine projectn
 
-SUBROUTINE Interpln(sltn,mlds,ngrd,incr)
+subroutine interpln(sltn,mlds,ngrd,incr)
 
 !==========================================================
-!  This routine interpolates a grid value function to a 
+!  this routine interpolates a grid value function to a 
 !  fine resolution with ngrd gridpoints.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: mlds(3),ngrd(3),incr(3)
-  REAL, INTENT(INOUT) :: sltn(mlds(1),mlds(2),mlds(3))
+  integer, intent(in) :: mlds(3),ngrd(3),incr(3)
+  real, intent(inout) :: sltn(mlds(1),mlds(2),mlds(3))
 
-  ! Local variables:
-  INTEGER :: mgd(3)
+  ! local variables:
+  integer :: mgd(3)
 
   mgd = (ngrd-1)/incr+1
 
-  ! Projection based grid increments:
+  ! projection based grid increments:
   sltn(1:ngrd(1):incr(1),1:ngrd(2):incr(2),1:ngrd(3):incr(3)) = &
     sltn(1:mgd(1),1:mgd(2),1:mgd(3))
 
-  ! Interpolate:
+  ! interpolate:
   
-  ! X direction:
-  IF (incr(1) .EQ. 2) &
+  ! x direction:
+  if (incr(1) .eq. 2) &
     sltn(2:ngrd(1)-1:2,1:ngrd(2):incr(2),1:ngrd(3):incr(3)) = &
       0.5*( &
       sltn(1:ngrd(1)-2:2,1:ngrd(2):incr(2),1:ngrd(3):incr(3))+ &
       sltn(3:ngrd(1)  :2,1:ngrd(2):incr(2),1:ngrd(3):incr(3)) )
 
-  ! Y direction:
-  IF (incr(2) .EQ. 2) &
+  ! y direction:
+  if (incr(2) .eq. 2) &
     sltn(1:ngrd(1),2:ngrd(2)-1:2,1:ngrd(3):incr(3)) = 0.5*( &
       sltn(1:ngrd(1),1:ngrd(2)-2:2,1:ngrd(3):incr(3))+ &
       sltn(1:ngrd(1),3:ngrd(2)  :2,1:ngrd(3):incr(3)) )
 
-  ! T direction:
-  IF (incr(3) .EQ. 2) &
+  ! t direction:
+  if (incr(3) .eq. 2) &
     sltn(1:ngrd(1),1:ngrd(2),2:ngrd(3)-1:2) = 0.5*( &
       sltn(1:ngrd(1),1:ngrd(2),1:ngrd(3)-2:2)+ &
       sltn(1:ngrd(1),1:ngrd(2),3:ngrd(3)  :2) )
 
-END SUBROUTINE Interpln
+end subroutine interpln
 
-SUBROUTINE Mul2Grid(sltn,mled,mgrd,anal,ngrd,domn)
+subroutine mul2grid(sltn,mled,mgrd,anal,ngrd,domn)
 
 !==========================================================
-!  This routine projects a grid value function to a coarse
+!  this routine projects a grid value function to a coarse
 !  resolution.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: mled(3),mgrd(3),ngrd(3)
-  REAL, INTENT(IN) :: sltn(mled(1),mled(2),mled(3)),domn(2,3)
-  REAL, INTENT(OUT) :: anal(ngrd(1),ngrd(2),ngrd(3))
+  integer, intent(in) :: mled(3),mgrd(3),ngrd(3)
+  real, intent(in) :: sltn(mled(1),mled(2),mled(3)),domn(2,3)
+  real, intent(out) :: anal(ngrd(1),ngrd(2),ngrd(3))
 
-  ! Local variables:
-  INTEGER :: i,j,k,idx(6),ix,iy,it,ier
-  REAL :: xyt(3),dsm(3),dsn(3),coe(6)
+  ! local variables:
+  integer :: i,j,k,idx(6),ix,iy,it,ier
+  real :: xyt(3),dsm(3),dsn(3),coe(6)
 
-  ! Grid spacings:
-  dsm = (domn(2,1:3)-domn(1,1:3))/FLOAT(mgrd-1)
-  dsn = (domn(2,1:3)-domn(1,1:3))/FLOAT(ngrd-1)
+  ! grid spacings:
+  dsm = (domn(2,1:3)-domn(1,1:3))/float(mgrd-1)
+  dsn = (domn(2,1:3)-domn(1,1:3))/float(ngrd-1)
 
-  ! Interpolate:
-  DO k=1,ngrd(3)
+  ! interpolate:
+  do k=1,ngrd(3)
     xyt(3) = domn(1,3)+(k-1)*dsn(3)
-    DO j=1,ngrd(2)
+    do j=1,ngrd(2)
       xyt(2) = domn(1,2)+(j-1)*dsn(2)
-      DO i=1,ngrd(1)
+      do i=1,ngrd(1)
 	xyt(1) = domn(1,1)+(i-1)*dsn(1)
 
-	CALL Intplt3d(xyt,mgrd,dsm,domn,idx,coe,ier)
+	call intplt3d(xyt,mgrd,dsm,domn,idx,coe,ier)
 
-	! Evaluate:
+	! evaluate:
 	anal(i,j,k) = 0.0
-	DO it=3,6,3
-	  DO iy=2,5,3
-	    DO ix=1,4,3
+	do it=3,6,3
+	  do iy=2,5,3
+	    do ix=1,4,3
 	      anal(i,j,k) = anal(i,j,k)+ &
 		sltn(idx(ix),idx(iy),idx(it))* &
 		coe(ix)*coe(iy)*coe(it)
-	    ENDDO
-	  ENDDO
-	ENDDO
+	    enddo
+	  enddo
+	enddo
 
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
-END SUBROUTINE Mul2Grid
+end subroutine mul2grid
 
-SUBROUTINE Minimize(sltn,mlds,ngrd,obsv,nobs,indx,coef, &
+subroutine minimize(sltn,mlds,ngrd,obsv,nobs,indx,coef, &
 		    wght,bund,pnlt,huc)
 
 !==========================================================
-!  This routine minimizes the STMAS cost function.
+!  this routine minimizes the stmas cost function.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
-!       Modified: 10-2008 by min-ken hsieh.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
+!       modified: 10-2008 by min-ken hsieh.
 !                 pass in penalty for each var
-!       Modified: 11-2008 by min-ken hsieh.
-!                 pass in hbg,huc to calcualte Jb
-!       Modified: 12-2013 by YUANFU XIE:
-!                 New LBFGSB 3.0 fixes machine eps calculation
-!                 Yuanfu adjust LBFGSB 3.0 for solving a super
+!       modified: 11-2008 by min-ken hsieh.
+!                 pass in hbg,huc to calcualte jb
+!       modified: 12-2013 by yuanfu xie:
+!                 new lbfgsb 3.0 fixes machine eps calculation
+!                 yuanfu adjust lbfgsb 3.0 for solving a super
 !                 large minimization.
-!                 a) Switch to LBFGSB.3.0 with Yuanfu's
+!                 a) switch to lbfgsb.3.0 with yuanfu's
 !                    modification for super large minimization
-!                 b) Adjust wkspc dimension for new LBFGSB and
-!                    add a new parameter pg for new LBFGSB
-!                 c) Change automatic arrays of wkspc, wrka, 
+!                 b) adjust wkspc dimension for new lbfgsb and
+!                    add a new parameter pg for new lbfgsb
+!                 c) change automatic arrays of wkspc, wrka, 
 !                    bdlow, bdupp, nbund to allocatables
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: mlds(3),ngrd(3),nobs,indx(6,nobs)
-  INTEGER, INTENT(IN) :: bund
-  REAL, INTENT(IN) :: obsv(4,nobs),coef(6,nobs),wght(nobs)
-  REAL, INTENT(INOUT) :: sltn(mlds(1),mlds(2),mlds(3))
-  REAL, INTENT(IN) :: pnlt	!penalty for each variable
+  integer, intent(in) :: mlds(3),ngrd(3),nobs,indx(6,nobs)
+  integer, intent(in) :: bund
+  real, intent(in) :: obsv(4,nobs),coef(6,nobs),wght(nobs)
+  real, intent(inout) :: sltn(mlds(1),mlds(2),mlds(3))
+  real, intent(in) :: pnlt	!penalty for each variable
 
-  INTEGER, INTENT(IN) :: huc(mlds(1),mlds(2),mlds(3))	! interpolated uncover array by min-ken
+  integer, intent(in) :: huc(mlds(1),mlds(2),mlds(3))	! interpolated uncover array by min-ken
 
-  !** LBFGS_B variables:
-  INTEGER, PARAMETER :: msave=7		! Max iter save
+  !** lbfgs_b variables:
+  integer, parameter :: msave=7		! max iter save
 
-  CHARACTER*60 :: ctask,csave		! Evaluation flag
+  character*60 :: ctask,csave		! evaluation flag
 
-  REAL, ALLOCATABLE :: wkspc(:),bdlow(:),bdupp(:)
-  REAL :: factr,pg,dsave(29)            ! Yuanfu added pg for using setulb
+  real, allocatable :: wkspc(:),bdlow(:),bdupp(:)
+  real :: factr,pg,dsave(29)            ! yuanfu added pg for using setulb
 
-  INTEGER :: iprnt,isbmn,isave(44)
-  INTEGER, ALLOCATABLE :: nbund(:) ! Bound flags
-  INTEGER, ALLOCATABLE :: iwrka(:)
+  integer :: iprnt,isbmn,isave(44)
+  integer, allocatable :: nbund(:) ! bound flags
+  integer, allocatable :: iwrka(:)
 
-  LOGICAL :: lsave(4)
+  logical :: lsave(4)
 
-  !** End of LBFGS_B declarations.
+  !** end of lbfgs_b declarations.
 
-  ! Local variables:
-  INTEGER :: itr,sts,nvr,i,j,k,istatus
-  REAL :: fcn,fnp,fnm,ggg,eps
-  REAL :: gdt(ngrd(1),ngrd(2),ngrd(3))	! Gradients
-  REAL :: grd(ngrd(1),ngrd(2),ngrd(3))  ! Grid function
-  REAL :: egd(ngrd(1),ngrd(2),ngrd(3))  ! Grid function
+  ! local variables:
+  integer :: itr,sts,nvr,i,j,k,istatus
+  real :: fcn,fnp,fnm,ggg,eps
+  real :: gdt(ngrd(1),ngrd(2),ngrd(3))	! gradients
+  real :: grd(ngrd(1),ngrd(2),ngrd(3))  ! grid function
+  real :: egd(ngrd(1),ngrd(2),ngrd(3))  ! grid function
   
-  ! Dec 2013: Yuanfu changed the wkspc dimension from (2*msave+4)
-  ! to (2*msave+5) for both old and new versions of LBFGSB:
+  ! dec 2013: yuanfu changed the wkspc dimension from (2*msave+4)
+  ! to (2*msave+5) for both old and new versions of lbfgsb:
   allocate(wkspc(ngrd(1)*ngrd(2)*ngrd(3)*(2*msave+5)+ &
                 12*msave*msave+12*msave), &
-           iwrka(3*ngrd(1)*ngrd(2)*ngrd(3)), STAT=istatus)
+           iwrka(3*ngrd(1)*ngrd(2)*ngrd(3)), stat=istatus)
   allocate(bdlow(ngrd(1)*ngrd(2)*ngrd(3)), &
            bdupp(ngrd(1)*ngrd(2)*ngrd(3)), &
-           nbund(ngrd(1)*ngrd(2)*ngrd(3)), STAT=istatus)
+           nbund(ngrd(1)*ngrd(2)*ngrd(3)), stat=istatus)
            
 
-  ! Start LBFGS_B:
-  ctask = 'START'
-  nvr = ngrd(1)*ngrd(2)*ngrd(3)		! Number of controls
+  ! start lbfgs_b:
+  ctask = 'start'
+  nvr = ngrd(1)*ngrd(2)*ngrd(3)		! number of controls
   factr = 1.0d2
-  pg = 1.0e-4        ! Yuanfu added for using setulb
+  pg = 1.0e-4        ! yuanfu added for using setulb
   iprnt = 1
   isbmn = 1
 
-  ! Simple bound constraints for controls (only low bound used here):
+  ! simple bound constraints for controls (only low bound used here):
   nbund = bund
-  if (bund .EQ. 1) bdlow = 0.0
+  if (bund .eq. 1) bdlow = 0.0
 
-  ! Initial:
+  ! initial:
   itr = 0
   grd = sltn(1:ngrd(1),1:ngrd(2),1:ngrd(3))
 
-  ! Iterations:
-1 CONTINUE
+  ! iterations:
+1 continue
 
-  CALL SETULB(nvr,msave,grd,bdlow,bdupp,nbund,fcn,gdt,factr, &
+  call setulb(nvr,msave,grd,bdlow,bdupp,nbund,fcn,gdt,factr, &
 	      pg,wkspc,iwrka,ctask,iprnt,csave,lsave,isave,dsave)
 
-  ! Exit iteration if succeed:
-  IF (ctask(1:11) .EQ. 'CONVERGENCE') GOTO 2
+  ! exit iteration if succeed:
+  if (ctask(1:11) .eq. 'convergence') goto 2
 
-  ! Function and gradient values are needed:
-  IF (ctask(1:2) .EQ. 'FG') THEN
+  ! function and gradient values are needed:
+  if (ctask(1:2) .eq. 'fg') then
 
-    ! Function value:
-    CALL Functn3D(fcn,grd,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
+    ! function value:
+    call functn3d(fcn,grd,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
 
-    ! Gradient values:
-    CALL Gradnt3D(gdt,grd,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
+    ! gradient values:
+    call gradnt3d(gdt,grd,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
 
-    ! Check gradients:
+    ! check gradients:
     ! i=int(0.5*ngrd(1))
     ! j=int(0.3*ngrd(2))
     ! k=3
     ! eps = 1.0e-1
     ! egd = grd
     ! egd(i,j,k) = egd(i,j,k)+eps
-    ! CALL Functn3D(fnp,egd,ngrd,obsv,nobs,indx,coef,wght)
+    ! call functn3d(fnp,egd,ngrd,obsv,nobs,indx,coef,wght)
     ! egd(i,j,k) = egd(i,j,k)-2.0*eps
-    ! CALL Functn3D(fnm,egd,ngrd,obsv,nobs,indx,coef,wght)
+    ! call functn3d(fnm,egd,ngrd,obsv,nobs,indx,coef,wght)
     ! ggg = (fnp-fnm)*0.5/eps
-    ! WRITE(*,9) ggg,gdt(i,j,k),i,j,k
+    ! write(*,9) ggg,gdt(i,j,k),i,j,k
 
-  ENDIF
-9 FORMAT('STMAS>STMASMin: Gradient check: ',2E12.4,3I6)
+  endif
+9 format('stmas>stmasmin: gradient check: ',2e12.4,3i6)
 
-  ! Exit if irregularity is encountered:
-  IF ((ctask(1:2) .NE. 'FG') .AND. (ctask(1:5) .NE. 'NEW_X')) THEN
-    WRITE(*,*) 'STMAS>STMASMin: Irregularity termination of LBFGSB'
-    GOTO 2
-  ENDIF
+  ! exit if irregularity is encountered:
+  if ((ctask(1:2) .ne. 'fg') .and. (ctask(1:5) .ne. 'new_x')) then
+    write(*,*) 'stmas>stmasmin: irregularity termination of lbfgsb'
+    goto 2
+  endif
 
-  ! A new iteration point:
-  IF (ctask(1:5) .EQ. 'NEW_X') itr = itr+1
-  IF (itr .LT. maxitr) GOTO 1
+  ! a new iteration point:
+  if (ctask(1:5) .eq. 'new_x') itr = itr+1
+  if (itr .lt. maxitr) goto 1
 
-  ! Exit of LBFGSB iteration:
-2 CONTINUE
+  ! exit of lbfgsb iteration:
+2 continue
 
-  ! Save the solution:
+  ! save the solution:
   sltn(1:ngrd(1),1:ngrd(2),1:ngrd(3)) = grd
 
-END SUBROUTINE Minimize
+end subroutine minimize
 
-SUBROUTINE Functn3D(fctn,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
+subroutine functn3d(fctn,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
 
 !==========================================================
-!  This routine evaluates the STMAS cost function.
+!  this routine evaluates the stmas cost function.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
-!       Modified: 10-2008 by min-ken hsieh.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
+!       modified: 10-2008 by min-ken hsieh.
 !                 pass in penalty for each var
-!       Modified: 11-2008 by min-ken hsieh.
-!                 pass in bkg params to calcualte Jb
+!       modified: 11-2008 by min-ken hsieh.
+!                 pass in bkg params to calcualte jb
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: ngrd(3),mlds(3),nobs,indx(6,nobs)
-  REAL, INTENT(IN) :: grid(ngrd(1),ngrd(2),ngrd(3))
-  REAL, INTENT(IN) :: coef(6,nobs),obsv(4,nobs),wght(nobs)
-  REAL, INTENT(IN) :: pnlt
-  REAL, INTENT(OUT) :: fctn
+  integer, intent(in) :: ngrd(3),mlds(3),nobs,indx(6,nobs)
+  real, intent(in) :: grid(ngrd(1),ngrd(2),ngrd(3))
+  real, intent(in) :: coef(6,nobs),obsv(4,nobs),wght(nobs)
+  real, intent(in) :: pnlt
+  real, intent(out) :: fctn
 
-  INTEGER, INTENT(IN) :: huc(mlds(1),mlds(2),mlds(3))	! uncover by min-ken
+  integer, intent(in) :: huc(mlds(1),mlds(2),mlds(3))	! uncover by min-ken
 
-  ! Local variables:
-  INTEGER :: i,j,k,io
-  REAL    :: gvl,pnl
+  ! local variables:
+  integer :: i,j,k,io
+  real    :: gvl,pnl
 
-  ! Initial:
+  ! initial:
   fctn = 0.0
   penalt = pnlt
 
-  ! Jb term:
-  DO k=1,ngrd(3)
-    DO j=1,ngrd(2)
-      DO i=1,ngrd(1)
+  ! jb term:
+  do k=1,ngrd(3)
+    do j=1,ngrd(2)
+      do i=1,ngrd(1)
         fctn = fctn+huc(i,j,k)*(grid(i,j,k)**2)
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
-  ! Jo term:
-  DO io=1,nobs
+  ! jo term:
+  do io=1,nobs
 
-    ! Grid value at obs position:
+    ! grid value at obs position:
     gvl = 0.0
-    DO k=3,6,3
-      DO j=2,5,3
-	DO i=1,4,3
+    do k=3,6,3
+      do j=2,5,3
+	do i=1,4,3
 	  gvl = gvl+grid(indx(i,io), &
 			 indx(j,io), &
 			 indx(k,io))* &
 		coef(i,io)*coef(j,io)*coef(k,io)
-	ENDDO
-      ENDDO
-    ENDDO
+	enddo
+      enddo
+    enddo
 
-    ! Residual:
+    ! residual:
     fctn = fctn+(obsv(1,io)-gvl)**2
 
-  ENDDO
+  enddo
 
   fctn = fctn*0.5
 
-  ! Penalty term: Penalize the laplacian:
+  ! penalty term: penalize the laplacian:
 
-  ! X:
+  ! x:
   pnl = 0.0
-  DO k=1,ngrd(3)
-    DO j=1,ngrd(2)
-      DO i=2,ngrd(1)-1
+  do k=1,ngrd(3)
+    do j=1,ngrd(2)
+      do i=2,ngrd(1)-1
         pnl = pnl + &
           (grid(i-1,j,k)-2.0*grid(i,j,k)+grid(i+1,j,k))**2
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
-  ! Y:
-  DO k=1,ngrd(3)
-    DO j=2,ngrd(2)-1
-      DO i=1,ngrd(1)
+  ! y:
+  do k=1,ngrd(3)
+    do j=2,ngrd(2)-1
+      do i=1,ngrd(1)
         pnl = pnl + &
           (grid(i,j-1,k)-2.0*grid(i,j,k)+grid(i,j+1,k))**2
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
-  ! T:
-  DO k=2,ngrd(3)-1
-    DO j=1,ngrd(2)
-      DO i=1,ngrd(1)
+  ! t:
+  do k=2,ngrd(3)-1
+    do j=1,ngrd(2)
+      do i=1,ngrd(1)
         pnl = pnl + &
           (grid(i,j,k-1)-2.0*grid(i,j,k)+grid(i,j,k+1))**2
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
   fctn = fctn+penalt*pnl
 
-END SUBROUTINE Functn3D
+end subroutine functn3d
 
-SUBROUTINE Gradnt3D(grdt,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
+subroutine gradnt3d(grdt,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
 
 !==========================================================
-!  This routine evaluates gradients of STMAS cost function.
+!  this routine evaluates gradients of stmas cost function.
 !
-!  HISTORY:
-!	Creation: JUN. 2005 by YUANFU XIE.
-!       Modified: 10-2008 by min-ken hsieh.
+!  history:
+!	creation: jun. 2005 by yuanfu xie.
+!       modified: 10-2008 by min-ken hsieh.
 !                 pass in penalty for each var
-!       Modified: 11-2008 by min-ken hsieh.
-!                 pass in hbg, huc to calcualte Jb
+!       modified: 11-2008 by min-ken hsieh.
+!                 pass in hbg, huc to calcualte jb
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: ngrd(3),mlds(3),nobs,indx(6,nobs)
-  REAL, INTENT(IN) :: grid(ngrd(1),ngrd(2),ngrd(3))
-  REAL, INTENT(IN) :: coef(6,nobs),obsv(4,nobs),wght(nobs)
-  REAL, INTENT(IN) :: pnlt
-  REAL, INTENT(OUT) :: grdt(ngrd(1),ngrd(2),ngrd(3))
+  integer, intent(in) :: ngrd(3),mlds(3),nobs,indx(6,nobs)
+  real, intent(in) :: grid(ngrd(1),ngrd(2),ngrd(3))
+  real, intent(in) :: coef(6,nobs),obsv(4,nobs),wght(nobs)
+  real, intent(in) :: pnlt
+  real, intent(out) :: grdt(ngrd(1),ngrd(2),ngrd(3))
 
-  INTEGER, INTENT(IN) :: huc(mlds(1),mlds(2),mlds(3))	! uncover array by min-ken
+  integer, intent(in) :: huc(mlds(1),mlds(2),mlds(3))	! uncover array by min-ken
 
-  ! Local variables:
-  INTEGER :: i,j,k,io
-  REAL :: gvl,pnl
-  REAL :: lpl(ngrd(1),ngrd(2),ngrd(3))
-  REAL :: gll(ngrd(1),ngrd(2),ngrd(3))
+  ! local variables:
+  integer :: i,j,k,io
+  real :: gvl,pnl
+  real :: lpl(ngrd(1),ngrd(2),ngrd(3))
+  real :: gll(ngrd(1),ngrd(2),ngrd(3))
 
-  ! Initial:
+  ! initial:
   grdt = 0.0
   penalt = pnlt
 
-  ! Jb term:
+  ! jb term:
   
-  DO k=1,ngrd(3)
-    DO j=1,ngrd(2)
-      DO i=1,ngrd(1)
+  do k=1,ngrd(3)
+    do j=1,ngrd(2)
+      do i=1,ngrd(1)
         grdt(i,j,k) = huc(i,j,k)*(grid(i,j,k))
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
 
-  ! Jo term:
-  DO io=1,nobs
+  ! jo term:
+  do io=1,nobs
 
-    ! Grid value at obs position:
+    ! grid value at obs position:
     gvl = 0.0
-    DO k=3,6,3
-      DO j=2,5,3
-	DO i=1,4,3
+    do k=3,6,3
+      do j=2,5,3
+	do i=1,4,3
 	  gvl = gvl+grid(indx(i,io), &
 			 indx(j,io), &
 			 indx(k,io))* &
 		coef(i,io)*coef(j,io)*coef(k,io)
-	ENDDO
-      ENDDO
-    ENDDO
+	enddo
+      enddo
+    enddo
 
-    ! Gradient:
-    DO k=3,6,3
-      DO j=2,5,3
-        DO i=1,4,3
+    ! gradient:
+    do k=3,6,3
+      do j=2,5,3
+        do i=1,4,3
           grdt(indx(i,io),indx(j,io),indx(k,io)) = &
             grdt(indx(i,io),indx(j,io),indx(k,io))- &
             (obsv(1,io)-gvl)*coef(i,io)*coef(j,io)*coef(k,io)
-        ENDDO
-      ENDDO
-    ENDDO
+        enddo
+      enddo
+    enddo
 
-  ENDDO
+  enddo
 
-  ! Penalty:
+  ! penalty:
 
   gll = 0.0
-  ! X:
+  ! x:
   lpl(2:ngrd(1)-1,1:ngrd(2),1:ngrd(3)) = &
          grid(1:ngrd(1)-2,1:ngrd(2),1:ngrd(3)) &
     -2.0*grid(2:ngrd(1)-1,1:ngrd(2),1:ngrd(3)) &
@@ -720,7 +720,7 @@ SUBROUTINE Gradnt3D(grdt,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
   gll(2:ngrd(1)-1,1:ngrd(2),1:ngrd(3)) - &
     2.0*lpl(2:ngrd(1)-1,1:ngrd(2),1:ngrd(3))
 
-  ! Y:
+  ! y:
   lpl(1:ngrd(1),2:ngrd(2)-1,1:ngrd(3)) = &
          grid(1:ngrd(1),1:ngrd(2)-2,1:ngrd(3)) &
     -2.0*grid(1:ngrd(1),2:ngrd(2)-1,1:ngrd(3)) &
@@ -735,7 +735,7 @@ SUBROUTINE Gradnt3D(grdt,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
   gll(1:ngrd(1),2:ngrd(2)-1,1:ngrd(3)) - &
     2.0*lpl(1:ngrd(1),2:ngrd(2)-1,1:ngrd(3))
 
-  ! T:
+  ! t:
   lpl(1:ngrd(1),1:ngrd(2),2:ngrd(3)-1) = &
          grid(1:ngrd(1),1:ngrd(2),1:ngrd(3)-2) &
     -2.0*grid(1:ngrd(1),1:ngrd(2),2:ngrd(3)-1) &
@@ -750,113 +750,113 @@ SUBROUTINE Gradnt3D(grdt,grid,ngrd,obsv,nobs,indx,coef,wght,pnlt,huc,mlds)
   gll(1:ngrd(1),1:ngrd(2),2:ngrd(3)-1) - &
     2.0*lpl(1:ngrd(1),1:ngrd(2),2:ngrd(3)-1)
 
-  ! Add gll to grdt:
+  ! add gll to grdt:
   grdt(1:ngrd(1),1:ngrd(2),1:ngrd(3)) = &
     grdt(1:ngrd(1),1:ngrd(2),1:ngrd(3)) + &
     2.0*penalt*gll(1:ngrd(1),1:ngrd(2),1:ngrd(3))
 
-END SUBROUTINE Gradnt3D
+end subroutine gradnt3d
 
-SUBROUTINE STMASInc
+subroutine stmasinc
 
 !==========================================================
-!  This routine adds the analysis increments to background
-!  fields using the LAPS land/water factors.
+!  this routine adds the analysis increments to background
+!  fields using the laps land/water factors.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  ! Local variables:
-  INTEGER i,j,k,l
+  ! local variables:
+  integer i,j,k,l
 
-  DO l=1,numvar
-    IF (needbk(l) .EQ. 1) THEN
-      DO k=1,numtmf
+  do l=1,numvar
+    if (needbk(l) .eq. 1) then
+      do k=1,numtmf
 
-        ! Add increment to the background:
+        ! add increment to the background:
 	analys(1:numgrd(1),1:numgrd(2),k,l) = &
 	  analys(1:numgrd(1),1:numgrd(2),k,l)+ &
 	  bkgrnd(1:numgrd(1),1:numgrd(2),k,l)
 
-	! Treat land factor:
+	! treat land factor:
 !	analys(1:numgrd(1),1:numgrd(2),k,l) = &
 !	  lndfac(1:numgrd(1),1:numgrd(2))* &
 !	  analys(1:numgrd(1),1:numgrd(2),k,l)+ &
 !	  (1.0-lndfac(1:numgrd(1),1:numgrd(2)))* &
 !	  bkgrnd(1:numgrd(1),1:numgrd(2),k,l)
-      ENDDO
-    ENDIF
-  ENDDO
+      enddo
+    endif
+  enddo
 
-END SUBROUTINE STMASInc
+end subroutine stmasinc
 
-SUBROUTINE IntplBkg(ucvr,ngrd,huc,mgd,mld,dgd,dxyt,domn)
+subroutine intplbkg(ucvr,ngrd,huc,mgd,mld,dgd,dxyt,domn)
 
 !==========================================================
-!  This routine interpolate background field and uncover to
+!  this routine interpolate background field and uncover to
 !  multigrid.
 !
-!  HISTORY:
-!	Creation: 11-2008 by min-ken hsieh
+!  history:
+!	creation: 11-2008 by min-ken hsieh
 !
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: ngrd(3),mgd(3),mld(3)
-  REAL, INTENT(IN) :: dgd(3),dxyt(3),domn(2,3)
-  LOGICAL, INTENT(IN) :: ucvr(ngrd(1),ngrd(2),ngrd(3))
+  integer, intent(in) :: ngrd(3),mgd(3),mld(3)
+  real, intent(in) :: dgd(3),dxyt(3),domn(2,3)
+  logical, intent(in) :: ucvr(ngrd(1),ngrd(2),ngrd(3))
 
-  INTEGER, INTENT(OUT) :: huc(mld(1),mld(2),mld(3))
+  integer, intent(out) :: huc(mld(1),mld(2),mld(3))
 
-  ! Local variables:
-  INTEGER :: ier,i,j,k,ix,iy,it
-  REAL :: xyt(3)
-  INTEGER :: idx(6,mgd(1),mgd(2),mgd(3))
-  REAL :: coe(6,mgd(1),mgd(2),mgd(3))
-  LOGICAL :: lhuc(mld(1),mld(2),mld(3))
+  ! local variables:
+  integer :: ier,i,j,k,ix,iy,it
+  real :: xyt(3)
+  integer :: idx(6,mgd(1),mgd(2),mgd(3))
+  real :: coe(6,mgd(1),mgd(2),mgd(3))
+  logical :: lhuc(mld(1),mld(2),mld(3))
 
-  ! Interpolation for each background grid:
-  DO k=1,mgd(3)
+  ! interpolation for each background grid:
+  do k=1,mgd(3)
     xyt(3) = domn(1,3)+(k-1)*dgd(3)
-    DO j=1,mgd(2)
+    do j=1,mgd(2)
       xyt(2) = domn(1,2)+(j-1)*dgd(2)
-      DO i=1,mgd(1)
+      do i=1,mgd(1)
         xyt(1) = domn(1,1)+(i-1)*dgd(1)
-        CALL Intplt3D(xyt(1:3),ngrd,dxyt,domn, &
+        call intplt3d(xyt(1:3),ngrd,dxyt,domn, &
 	    	      idx(1,i,j,k),coe(1,i,j,k),ier)
 
-        ! Check:
-        IF (ier .NE. 0) THEN
-          PRINT*, 'BACKGROUND INTERPOLATION ERROR!!',i,j,k,xyt(1),xyt(2),xyt(3)
-        ELSE
-          ! Evaluate:
+        ! check:
+        if (ier .ne. 0) then
+          print*, 'background interpolation error!!',i,j,k,xyt(1),xyt(2),xyt(3)
+        else
+          ! evaluate:
           huc(i,j,k) = 0
-	  lhuc(i,j,k) = .TRUE.
-	  DO it=3,6,3
-	    DO iy=2,5,3
-	      DO ix=1,4,3
+	  lhuc(i,j,k) = .true.
+	  do it=3,6,3
+	    do iy=2,5,3
+	      do ix=1,4,3
 		! see if this grid is uncovered
-		lhuc(i,j,k) = lhuc(i,j,k) .AND. &
+		lhuc(i,j,k) = lhuc(i,j,k) .and. &
 		  ucvr(idx(ix,i,j,k),idx(iy,i,j,k),idx(it,i,j,k))
 		   
-	      ENDDO
-	    ENDDO
-	  ENDDO
+	      enddo
+	    enddo
+	  enddo
 
-          IF(lhuc(i,j,k)) THEN
+          if(lhuc(i,j,k)) then
             huc(i,j,k) = 1
-          ENDIF
+          endif
 
-        ENDIF
+        endif
         
-      ENDDO
-    ENDDO
-  ENDDO
+      enddo
+    enddo
+  enddo
 
-END SUBROUTINE IntplBkg
+end subroutine intplbkg
 
-END MODULE STMASAnalz
+end module stmasanalz

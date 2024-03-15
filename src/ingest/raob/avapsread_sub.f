@@ -49,7 +49,7 @@
 
         call get_r_missing_data(r_missing_data,istatus)
         if ( istatus .ne. 1 ) then
-           write (6,*) ' Error getting r_missing_data'
+           write (6,*) ' error getting r_missing_data'
            return
         endif
         
@@ -67,17 +67,17 @@
 
         j = 1
 
-        write(6,*)' Reading levels from the sounding'
+        write(6,*)' reading levels from the sounding'
 
  2      read (lun,99,end=105)line(1:20)
-        if(l_parse(line,'Data') .and. l_parse(line,'Type'))then
-            write(6,*)' New Sounding Detected - backspace lun'
+        if(l_parse(line,'data') .and. l_parse(line,'type'))then
+            write(6,*)' new sounding detected - backspace lun'
             backspace lun
             go to 105
 
-        elseif(l_parse(line,'Project') .and. l_parse(line,'ID'))then
-            write(6,*)' New Sounding Detected - backspace lun'
-            write(6,*)' WARNING: already reading second header line'
+        elseif(l_parse(line,'project') .and. l_parse(line,'id'))then
+            write(6,*)' new sounding detected - backspace lun'
+            write(6,*)' warning: already reading second header line'
             write(6,*)'          an extra backspace will be done'
             backspace lun
             backspace lun
@@ -90,10 +90,10 @@
         endif
 
         write(6,*)line(1:130)
-        read (line,100,end=105)elapsed_time(j),P(j),T(j),Td(j),RH(j),
-     1                        u(j),v(j),WS(j),WD(j),dZ(j),lon(j),
-     2                        lat(j),rng(j),az(j),alt(j),Qp(j),Qt(j),
-     3                        Qh(j),Qu(j),Qv(j),Quv(j)
+        read (line,100,end=105)elapsed_time(j),p(j),t(j),td(j),rh(j),
+     1                        u(j),v(j),ws(j),wd(j),dz(j),lon(j),
+     2                        lat(j),rng(j),az(j),alt(j),qp(j),qt(j),
+     3                        qh(j),qu(j),qv(j),quv(j)
 100     format (f6.1,f7.1,3f6.1,2f7.1,3f6.1,f9.3,f8.3,2f6.1,f8.1,
      1          6f5.1)
         if (lon(j).ne.999.0 .and. lat(j).ne.999.0) then
@@ -102,7 +102,7 @@
         endif
 
         if(elapsed_time(j) .le. 5.)then
-            write(6,*)'Nearing end of sounding'
+            write(6,*)'nearing end of sounding'
         endif
 c
         j = j + 1
@@ -110,9 +110,9 @@ c
 c
 105     j = j - 1
 
-        write(6,*)' Completed sounding read, # of levels = ',j
+        write(6,*)' completed sounding read, # of levels = ',j
 
-!       Get Launch Location
+!       get launch location
         read(header_line(4),4)lon_s,lat_s,ralt
         write(6,*)' lat_s,lon_s,ralt',lat_s,lon_s,ralt
  4      format(59x,f8.0,1x,f7.0,1x,f8.0)
@@ -123,13 +123,13 @@ c
 !           staelev = ralt
 !       endif
 
-!       Get Launch Time
+!       get launch time
         read(header_line(5),5)iy,mon,id,ih,min,is
  5      format(35x,i4,2x,i2,2x,i2,1x,3(1x,i2))
         write(6,*)'iy,mon,id,ih,min,is',iy,mon,id,ih,min,is
 
-        i4time_1960 = I4TIME_INT_LP (iy,mon,id,ih,min,is,istatus)
-!       i4time_1970 = i4time_1960 - 315619200 ! Convert from LAPS i4time
+        i4time_1960 = i4time_int_lp (iy,mon,id,ih,min,is,istatus)
+!       i4time_1970 = i4time_1960 - 315619200 ! convert from laps i4time
 
         i4time_launch = i4time_1960
         write(6,*)'i4time_launch = ',i4time_launch
@@ -156,7 +156,7 @@ c
             if(p(lvl) .ne. 9999.)then
                 lvl_out = lvl_out + 1
                 i4time = i4time_launch + nint(elapsed_time(lvl))
-                call make_fnam_lp (I4TIME, a9time_a(lvl_out), ISTATUS)
+                call make_fnam_lp (i4time, a9time_a(lvl_out), istatus)
                 p_out(lvl_out) = p(lvl) ! *100.
                 ht_out(lvl_out) = r_missing_data
 
@@ -189,7 +189,7 @@ c
                     if(p_out(lvl_out) .ge. p_out(lvl_out-1))then
                         if(isort_status .eq. 1)then
                             write(6,*)
-     1                    ' NOTE: AVAPS pressures increase with height'       
+     1                    ' note: avaps pressures increase with height'       
                             write(6,*)lvl_out,p_out(lvl_out)
      1                                       ,p_out(lvl_out-1)
                         endif
@@ -197,7 +197,7 @@ c
                         isort_status = 0
 
                         if(isort .eq. 2)then
-                            write(6,*)' ERROR: sounding not monotonic'
+                            write(6,*)' error: sounding not monotonic'
                             istatus = 0
                             return
                         endif
@@ -208,7 +208,7 @@ c
           enddo ! lvl
 
           if(isort_status .eq. 1)then
-              write(6,*)' Good sort of levels, we will proceed'
+              write(6,*)' good sort of levels, we will proceed'
               go to 200
           endif
 
@@ -219,37 +219,37 @@ c
         if(i4time_launch .ge. i4time_drpsnd_earliest .and.
      1     i4time_launch .le. i4time_drpsnd_latest        )then
 
-!           Call write_snd for this sounding
+!           call write_snd for this sounding
             lat_a = lat_s
             lon_a = lon_s
 
             i_snd_out = i_snd_out + 1
             write(c5_staid,201)i_snd_out
-201         format('AVP',i2.2)
+201         format('avp',i2.2)
 
-            call write_snd(lun_out                         ! I
-     1                    ,1,lvl_out,1                     ! I
-     1                    ,iwmostanum                      ! I
-     1                    ,lat_a,lon_a,staelev             ! I
-     1                    ,c5_staid,a9time_a,'DROPSND '    ! I
-     1                    ,lvl_out                         ! I
-     1                    ,ht_out                          ! I
-     1                    ,p_out                           ! I
-     1                    ,t_out                           ! I
-     1                    ,td_out                          ! I
-     1                    ,wd_out                          ! I
-     1                    ,ws_out                          ! I
-     1                    ,istatus)                        ! O
+            call write_snd(lun_out                         ! i
+     1                    ,1,lvl_out,1                     ! i
+     1                    ,iwmostanum                      ! i
+     1                    ,lat_a,lon_a,staelev             ! i
+     1                    ,c5_staid,a9time_a,'dropsnd '    ! i
+     1                    ,lvl_out                         ! i
+     1                    ,ht_out                          ! i
+     1                    ,p_out                           ! i
+     1                    ,t_out                           ! i
+     1                    ,td_out                          ! i
+     1                    ,wd_out                          ! i
+     1                    ,ws_out                          ! i
+     1                    ,istatus)                        ! o
 
         else
-            write(6,*)' This dropsonde is outside time window'
+            write(6,*)' this dropsonde is outside time window'
 
         endif ! within time window
 
-        write(6,*)' Looping back to look for rest of new sounding'
+        write(6,*)' looping back to look for rest of new sounding'
         go to 40
 
-1000    write(6,*)' End of file reached'
+1000    write(6,*)' end of file reached'
         
         return
         end

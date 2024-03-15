@@ -1,43 +1,43 @@
-      SUBROUTINE FI7505 (N,NBITS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C SUBPROGRAM:    FI7505      DETERMINE NUMBER OF BITS TO CONTAIN VALUE
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-06-23
-C
-C ABSTRACT: CALCULATE NUMBER OF BITS TO CONTAIN VALUE N, WITH A
-C            MAXIMUM OF 32 BITS.
-C
-C PROGRAM HISTORY LOG:
-C   93-06-23  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7505 (N,NBITS)
-C   INPUT ARGUMENT LIST:
-C     N        - INTEGER VALUE
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     NBITS    - NUMBER OF BITS TO CONTAIN N
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-      INTEGER        N,NBITS
-      INTEGER        IBITS(31)
-C
-      DATA           IBITS/1,3,7,15,31,63,127,255,511,1023,2047,
+      subroutine fi7505 (n,nbits)
+c$$$  subprogram documentation block
+c subprogram:    fi7505      determine number of bits to contain value
+c   prgmmr: cavanaugh        org: w/nmc42    date: 93-06-23
+c
+c abstract: calculate number of bits to contain value n, with a
+c            maximum of 32 bits.
+c
+c program history log:
+c   93-06-23  cavanaugh
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call fi7505 (n,nbits)
+c   input argument list:
+c     n        - integer value
+c
+c   output argument list:      (including work arrays)
+c     nbits    - number of bits to contain n
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+      integer        n,nbits
+      integer        ibits(31)
+c
+      data           ibits/1,3,7,15,31,63,127,255,511,1023,2047,
      *               4095,8191,16383,32767,65535,131071,262143,
      *               524287,1048575,2097151,4194303,8388607,
      *               16777215,33554431,67108863,134217727,268435455,
      *               536870911,1073741823,2147483647/
-C  ----------------------------------------------------------------
-C
-      DO 1000 NBITS = 1, 31
-          IF (N.LE.IBITS(NBITS)) THEN
-              RETURN
-          END IF
- 1000 CONTINUE
-      RETURN
-      END
+c  ----------------------------------------------------------------
+c
+      do 1000 nbits = 1, 31
+          if (n.le.ibits(nbits)) then
+              return
+          end if
+ 1000 continue
+      return
+      end

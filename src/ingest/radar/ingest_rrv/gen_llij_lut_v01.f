@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -86,7 +86,7 @@ c
       character*255 path
       character*200 cname
       character*150 cdir
-      character*4   cid     !Radar id {KFTG, KGLD, KCYS, etc}
+      character*4   cid     !radar id {kftg, kgld, kcys, etc}
 c
 c =================================
 c
@@ -106,18 +106,18 @@ c    &dx,dy,nx3,ny3,la1,lo1,latin,lov,lap,
 c    &elemstart,elemend,linestart,lineend,
 c    &istatus)
 c     if(istatus.ne.1)then
-c        write(6,*)'Error getting sat parms - gen_cdf_lut'
+c        write(6,*)'error getting sat parms - gen_cdf_lut'
 c        goto 1000
 c     endif
 c
 c fsl-conus fixed parameters
 c ----------------------
       latin=25.00000
-      Lov=-95.00000
+      lov=-95.00000
       lap=25.00000
 
-      write(6,*)'Parameters for ',cid
-      write(6,*)'Radar lat/lon  ',radlat,radlon
+      write(6,*)'parameters for ',cid
+      write(6,*)'radar lat/lon  ',radlat,radlon
       write(6,*)'dx     ',dx
       write(6,*)'dy     ',dy
       write(6,*)'nx3    ',nx3
@@ -125,7 +125,7 @@ c ----------------------
       write(6,*)'la1    ',la1
       write(6,*)'lo1    ',lo1
       write(6,*)'latin  ',latin
-      write(6,*)'Lov    ',Lov
+      write(6,*)'lov    ',lov
       write(6,*)'lap    ',lap
 c
       if(la1.ne.0.0 .and. lo1.ne.0.0 .and.
@@ -141,7 +141,7 @@ c
 c
 c compute corner point ri/rj pairs used to determine # of i and j
 c
-      write(6,*)'Compute corner points'
+      write(6,*)'compute corner points'
 
       lapterm=(lap*pi)/180.
       lovterm=(lov*pi)/180.
@@ -180,12 +180,12 @@ c
       call uv_ij (ny3,u_orig,v_orig,du,dv,u,v,radri,radrj)
 c     radrj=nyv01-radrj
 c
-      write(6,*)'Radar ri/rj corners for domain'
-      write(6,*)'ri1/rj1 (SW) ',ri1,rj1
-      write(6,*)'ri2/rj2 (SE) ',ri2,rj2
-      write(6,*)'ri3/rj3 (NW) ',ri3,rj3
-      write(6,*)'ri4/rj4 (NE) ',ri4,rj4
-      write(6,*)'Radar ri/rj  ',radri,radrj
+      write(6,*)'radar ri/rj corners for domain'
+      write(6,*)'ri1/rj1 (sw) ',ri1,rj1
+      write(6,*)'ri2/rj2 (se) ',ri2,rj2
+      write(6,*)'ri3/rj3 (nw) ',ri3,rj3
+      write(6,*)'ri4/rj4 (ne) ',ri4,rj4
+      write(6,*)'radar ri/rj  ',radri,radrj
 c
 c first get uv in lambert grid
 c
@@ -208,7 +208,7 @@ c
       endif
 
       else
-        print*,'Not able to compute lut given those parms'
+        print*,'not able to compute lut given those parms'
       endif
 
 c     if(.false)then
@@ -216,12 +216,12 @@ c     cname=path(1:n1)//cid//'-llij-'//cchtyp
 c     n2=index(cname,' ')-1
 c     table_path = cname(1:n2)//'-'//cdtyp//'.lut'
 c     n2=index(table_path,' ')
-c     write(6,*)'Write lat/lon to i/j look up table'
+c     write(6,*)'write lat/lon to i/j look up table'
 c     write(6,*)table_path(1:n2)
 
 c     call write_table (table_path,nx,ny,lat,lon,ri,rj,istatus)
 c     if(istatus .ne. 1)then
-c        write(6,*)'Error writing look-up table'
+c        write(6,*)'error writing look-up table'
 c        goto 1000
 c     endif
 

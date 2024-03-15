@@ -42,11 +42,11 @@ c
 
        goto 1000
 
-900    write(6,*)'Error opening file: ',filename(1:n)
+900    write(6,*)'error opening file: ',filename(1:n)
        istatus = -1
        goto 1000
 
-901    write(6,*)'Error reading file: ',filename(1:n)
+901    write(6,*)'error reading file: ',filename(1:n)
        istatus = -1
 
 1000   return

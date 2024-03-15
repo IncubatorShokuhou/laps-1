@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis cdis
 cdis
@@ -98,7 +98,7 @@ c     regular internal variables
       integer i,j,k
       real cgsum                ! cloud grid sum for vertical cloud check
       real frac                 ! fraction used in linear 
-                                ! interpolation BL moisture
+                                ! interpolation bl moisture
       integer
      1     npts,                !npfilepts in calling routine
      1     istatus
@@ -127,8 +127,8 @@ c     compute level of bl (qk)
             
 c     check integrity
             if (ph(i,j) .le. 0.0)then
-               write(6,*) 'SEVERE error in routine analq.f '
-               write(6,*) 'Aborting analq.f'
+               write(6,*) 'severe error in routine analq.f '
+               write(6,*) 'aborting analq.f'
                return           ! this cannot be 0.0
             endif
             
@@ -153,12 +153,12 @@ c     check integrity
             qk_max = max (qk(i,j), qk_max)
          enddo
       enddo
-      write(6,*) 'QK max of field is', qk_max
+      write(6,*) 'qk max of field is', qk_max
 
       call check_nan2(ph,ii,jj,istatus)
 
       if(istatus.ne.1) then
-         write(6,*) 'NaN detected in var:ph  routine:analq.f'
+         write(6,*) 'nan detected in var:ph  routine:analq.f'
          return
       endif
 
@@ -175,8 +175,8 @@ c     ----------  mixing step
                   
 c     new method is simple linear approximation in pressure space.
 c     this method is independent of grid spacing, the old method was
-c     not going to be consistent if vertical grid were to vary.  However, 
-c     the old method didn't overestimate Q so badily.  So to emulate that
+c     not going to be consistent if vertical grid were to vary.  however, 
+c     the old method didn't overestimate q so badily.  so to emulate that
 c     aspect, the new analysis will average the "background" with the
 c     linear approximation at all levels.
                   
@@ -192,13 +192,13 @@ c
 c                  data (i,j,k) = data (i,j,k) /2.
 
 c     new experimental method 10/29/99 should eliminate problems with
-c     over saturating aloft as above case does.  In effect the mixing
+c     over saturating aloft as above case does.  in effect the mixing
 c     is bottom up and is limited by mixing length theory.  50% possible
 c     at 50 hpa, and exponentially down from there,  using pressure as
 c     independent variable.
-c     0.01386294 <--> 50 hPa 
+c     0.01386294 <--> 50 hpa 
 c     0.006931471 <--> 100
-c     0.027725887 <-->  25 hPa
+c     0.027725887 <-->  25 hpa
 c     0.092103403 <-->  10% at 25 hpa
 c     0.11982929 <-->  5% at 25 hpa
 
@@ -219,7 +219,7 @@ c     0.11982929 <-->  5% at 25 hpa
       
       call check_nan3(data,ii,jj,kk,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'NaN detected in var:data  routine:analq.f'
+         write(6,*) 'nan detected in var:data  routine:analq.f'
          write(6,*) 'check after frac computation'
          return
       endif
@@ -229,7 +229,7 @@ c     integrate the tpw field
 
       call check_nan2(tpw,ii,jj,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'NaN detected in var:tpw  routine:analq.f'
+         write(6,*) 'nan detected in var:tpw  routine:analq.f'
          return
       endif
       
@@ -367,7 +367,7 @@ c     integrate the tpw field one pass and beleive it to be good
 
          call check_nan2(tpw,ii,jj,istatus)
          if(istatus.ne.1) then
-            write(6,*) 'NaN detected in var:tpw  routine:analq.f'
+            write(6,*) 'nan detected in var:tpw  routine:analq.f'
             return
          endif
       

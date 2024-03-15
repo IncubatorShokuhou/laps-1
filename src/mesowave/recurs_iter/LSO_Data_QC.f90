@@ -1,295 +1,295 @@
-SUBROUTINE LSO_Data
+subroutine lso_data
 
 !==========================================================
-!  This routine reads the LSO from LAPS.
+!  this routine reads the lso from laps.
 !
-!  HISTORY: MAY. 2004 by YUANFU XIE.
+!  history: may. 2004 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  REAL, PARAMETER :: temp0 = 273.16
-  REAL :: badsfc
+  real, parameter :: temp0 = 273.16
+  real :: badsfc
 
-  INTEGER :: maxtime,mintime,hour,minute,seconds,midnight
-  INTEGER :: imx,imm,mem_error,i,j,nsts,iobs
-  INTEGER, ALLOCATABLE, DIMENSION(:) :: idsts
-  INTEGER, ALLOCATABLE, DIMENSION(:,:) :: naccn
-  REAL    :: vmx,vmm
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: numob
-  REAL,    ALLOCATABLE, DIMENSION(:,:,:) :: stobs
+  integer :: maxtime,mintime,hour,minute,seconds,midnight
+  integer :: imx,imm,mem_error,i,j,nsts,iobs
+  integer, allocatable, dimension(:) :: idsts
+  integer, allocatable, dimension(:,:) :: naccn
+  real    :: vmx,vmm
+  integer, allocatable, dimension(:,:,:) :: numob
+  real,    allocatable, dimension(:,:,:) :: stobs
 
-  ! Get the value for bad surface data:
-  CALL get_sfc_badflag(badsfc,istatus)
+  ! get the value for bad surface data:
+  call get_sfc_badflag(badsfc,istatus)
 
-  CALL get_laps_info(nx,ny,stanlat,stanlat2,stanlon, &
+  call get_laps_info(nx,ny,stanlat,stanlat2,stanlon, &
                      laps_cycle_time,badflag,maxstations,maproj)
 
-  PRINT*,'START to allocate space'
+  print*,'start to allocate space'
 
-  ALLOCATE(lat(nx,ny), lon(nx,ny), ldf(nx,ny),STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     print*,'LSO_Data_QC: cannot allocate space for lat/lon/ldf'
-     STOP
-  ENDIF
-  ALLOCATE (olaps(nvlaps,maxstations*ncycles), &
+  allocate(lat(nx,ny), lon(nx,ny), ldf(nx,ny),stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: cannot allocate space for lat/lon/ldf'
+     stop
+  endif
+  allocate (olaps(nvlaps,maxstations*ncycles), &
             olat(maxstations*ncycles),olon(maxstations*ncycles), &
             otime(maxstations*ncycles),wght(maxstations*ncycles), &
-            STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     print*,'LSO_Data_QC: cannot allocate space for olaps,olat,olon,otime,wght'
-     STOP
-  ENDIF
+            stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: cannot allocate space for olaps,olat,olon,otime,wght'
+     stop
+  endif
 
-  ! Space for background fields:
-  ALLOCATE(bkgd(nx,ny,ncycles,nvlaps),STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     print*,'LSO_Data: cannot allocate space for background fields'
-     STOP
-  ENDIF
+  ! space for background fields:
+  allocate(bkgd(nx,ny,ncycles,nvlaps),stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data: cannot allocate space for background fields'
+     stop
+  endif
 
-  PRINT*,'Space allocated'
+  print*,'space allocated'
 	
   ext_s = 'nest7grid'
-  var_s = 'LAT'
-  CALL rd_laps_static(dir_s,ext_s,nx,ny,1,var_s,units, &
+  var_s = 'lat'
+  call rd_laps_static(dir_s,ext_s,nx,ny,1,var_s,units, &
                       comment,lat ,grid_spacingy,istatus)
-  ! Debug: 
-  print*,'Gridspace Y: ',grid_spacingy
+  ! debug: 
+  print*,'gridspace y: ',grid_spacingy
 
-  var_s = 'LON'
-  CALL rd_laps_static(dir_s,ext_s,nx,ny,1,var_s,units, &
+  var_s = 'lon'
+  call rd_laps_static(dir_s,ext_s,nx,ny,1,var_s,units, &
                       comment,lon ,grid_spacingx,istatus)
-  ! Debug: 
-  print*,'Gridspace X: ',grid_spacingx
+  ! debug: 
+  print*,'gridspace x: ',grid_spacingx
 
-  var_s = 'LDF'
-  CALL rd_laps_static(dir_s,ext_s,nx,ny,1,var_s,units, &
+  var_s = 'ldf'
+  call rd_laps_static(dir_s,ext_s,nx,ny,1,var_s,units, &
                       comment,ldf ,grid_spacingx,istatus)
-  DO j=1,ny
-     DO i=1,nx
-	IF (ldf(i,j) .GT. 1.0) ldf(i,j) = 1.0
-	IF (ldf(i,j) .LT. 0.0) ldf(i,j) = 0.0
-     ENDDO
-  ENDDO
+  do j=1,ny
+     do i=1,nx
+	if (ldf(i,j) .gt. 1.0) ldf(i,j) = 1.0
+	if (ldf(i,j) .lt. 0.0) ldf(i,j) = 0.0
+     enddo
+  enddo
 
   ! clear unused portion of the array:
   olaps = badflag
   otime = -1.0   ! to search the maximum hour
   bkgd = 0.0
-  CALL lso_reader_meso(maxstations,nvlaps,ncycles, &
+  call lso_reader_meso(maxstations,nvlaps,ncycles, &
        laps_cycle_time,badflag,olaps,wght,olat,olon, &
        otime,istarttime,nx,ny,bkgd)
 
-  ! Debug: PRINT*,'Max: ',maxstations,laps_cycle_time
-  ! Debug: PRINT*,'OBS: ',olaps(1:6,1),lat(1,1),lon(1,1)
-  ! Debug: PRINT*,'OBS: ',olaps(1:6,2),lat(nx,ny),lon(nx,ny)
+  ! debug: print*,'max: ',maxstations,laps_cycle_time
+  ! debug: print*,'obs: ',olaps(1:6,1),lat(1,1),lon(1,1)
+  ! debug: print*,'obs: ',olaps(1:6,2),lat(nx,ny),lon(nx,ny)
 
-  ! Convert John's data to iterative recursive filter data:
+  ! convert john's data to iterative recursive filter data:
   dm(1,1:2) = 1.0-nfic
-  dm(2,1) = FLOAT(nx)+nfic
-  dm(2,2) = FLOAT(ny)+nfic
+  dm(2,1) = float(nx)+nfic
+  dm(2,2) = float(ny)+nfic
 
-  ! Midnight:
+  ! midnight:
   midnight = 0
-  IF (MAXVAL(otime) .GE. 2300.00) midnight = 1
+  if (maxval(otime) .ge. 2300.00) midnight = 1
 
-  ! Space for QC analysis: 
-  ALLOCATE(idsts(ncycles*maxstations*nvlaps), STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error in allocating space for idsts'
-     STOP
-  ENDIF
+  ! space for qc analysis: 
+  allocate(idsts(ncycles*maxstations*nvlaps), stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error in allocating space for idsts'
+     stop
+  endif
 
   nobs = 0
   maxtime = -100
   mintime = 100000000
-  DO ilaps=1,maxstations*ncycles
-     DO ivar=1,nvlaps
-	IF ((olaps(ivar,ilaps) .NE. badflag) .AND. &
-            (olaps(ivar,ilaps) .NE. badsfc)) THEN
+  do ilaps=1,maxstations*ncycles
+     do ivar=1,nvlaps
+	if ((olaps(ivar,ilaps) .ne. badflag) .and. &
+            (olaps(ivar,ilaps) .ne. badsfc)) then
 
- 	   ! Valid obs:
+ 	   ! valid obs:
 	   nobs = nobs+1
-	   IF (nobs .GT. mobs) THEN
-	      PRINT*,'LSO_Data: too many obs!'
-	      STOP
-	   ENDIF
+	   if (nobs .gt. mobs) then
+	      print*,'lso_data: too many obs!'
+	      stop
+	   endif
 
-	   ! Separating hours and minutes:
+	   ! separating hours and minutes:
 	   hour = otime(ilaps)/100
 	   minute = otime(ilaps)-hour*100
 
-	   ! Handle data cross midnight:
- 	   IF ((midnight .EQ. 1) .AND. (hour .LE. 2)) hour = 24+hour
+	   ! handle data cross midnight:
+ 	   if ((midnight .eq. 1) .and. (hour .le. 2)) hour = 24+hour
 
-	   ! Debug: PRINT*,'oll: ',ivar,olaps(ivar,ilaps), &
+	   ! debug: print*,'oll: ',ivar,olaps(ivar,ilaps), &
            ! olat(ilaps),olon(ilaps),otime(ilaps),hour,minute
 
 	   seconds = hour*3600.0+minute*60.0
 
-	   IF (maxtime .LT. seconds) maxtime = seconds
-	   IF (mintime .GT. seconds) mintime = seconds
+	   if (maxtime .lt. seconds) maxtime = seconds
+	   if (mintime .gt. seconds) mintime = seconds
 
            vid(nobs) = ivar
 	   o(1,nobs) = olaps(ivar,ilaps)
 
-	   ! Convert F to K:
-	   IF ((ivar .EQ. 1) .OR. (ivar .EQ. 5)) &
+	   ! convert f to k:
+	   if ((ivar .eq. 1) .or. (ivar .eq. 5)) &
 	      o(1,nobs) = (o(1,nobs)-32.0)*5.0/9.0+temp0
 
-           ! Convert Altimeter to pascal:
-           IF ((ivar .EQ. 4) .OR. (ivar .EQ. 6)) &
+           ! convert altimeter to pascal:
+           if ((ivar .eq. 4) .or. (ivar .eq. 6)) &
               o(1,nobs) = o(1,nobs)*100.0
 
-           CALL latlon_to_rlapsgrid(olat(ilaps),olon(ilaps),lat,lon, &
+           call latlon_to_rlapsgrid(olat(ilaps),olon(ilaps),lat,lon, &
                                  nx,ny,o(2,nobs),o(3,nobs),istatus)
-	   ! Debug: print*,'Grid loc: ',o(2,nobs),o(3,nobs),nobs
+	   ! debug: print*,'grid loc: ',o(2,nobs),o(3,nobs),nobs
            o(4,nobs) = seconds
 
-	   ! Weight:
+	   ! weight:
 	   w(nobs) = 1.0
-	ENDIF
-     ENDDO
-  ENDDO
-  PRINT*,'MAX TIME: ',maxtime/3600,MOD(maxtime,3600)/60
-  PRINT*,'MIN TIME: ',mintime/3600,MOD(mintime,3600)/60
-  PRINT*,'ISTARTTIME: ',istarttime,MOD(istarttime,86400)/3600.0
-  IF ((maxtime-mintime)/3600 .GT. 3) THEN
-     PRINT*,'LSO_Data_QC: it is hard coded to run'
-     PRINT*,' the analysis less than 3 hour!'
-     STOP
-  ENDIF
+	endif
+     enddo
+  enddo
+  print*,'max time: ',maxtime/3600,mod(maxtime,3600)/60
+  print*,'min time: ',mintime/3600,mod(mintime,3600)/60
+  print*,'istarttime: ',istarttime,mod(istarttime,86400)/3600.0
+  if ((maxtime-mintime)/3600 .gt. 3) then
+     print*,'lso_data_qc: it is hard coded to run'
+     print*,' the analysis less than 3 hour!'
+     stop
+  endif
 
-  PRINT*,'Total number of OBS: ',nobs
+  print*,'total number of obs: ',nobs
 
-  ! QC:
-  ! 1. Find out number of different stations and identical ones:
+  ! qc:
+  ! 1. find out number of different stations and identical ones:
   nsts = 0
-  DO iobs=1,nobs
-     DO i=1,iobs-1
-        IF ((ABS(o(2,i)-o(2,iobs)) .LT. 1.0e-3) .AND. &
-            (ABS(o(3,i)-o(3,iobs)) .LT. 1.0e-3)) THEN
+  do iobs=1,nobs
+     do i=1,iobs-1
+        if ((abs(o(2,i)-o(2,iobs)) .lt. 1.0e-3) .and. &
+            (abs(o(3,i)-o(3,iobs)) .lt. 1.0e-3)) then
            idsts(iobs) = idsts(i)
-           GOTO 11
-        ENDIF
-     ENDDO
+           goto 11
+        endif
+     enddo
      nsts = nsts+1
      idsts(iobs) = nsts
-11   CONTINUE
-  ENDDO
-  PRINT*,'Number of obs stations: ',nsts
+11   continue
+  enddo
+  print*,'number of obs stations: ',nsts
   
-  ALLOCATE(stobs(ncycles*15,nvlaps,nsts), STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error to allocate space for stobs'
-     STOP
-  ENDIF
-  ALLOCATE(numob(ncycles*15,nvlaps,nsts), STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error to allocate space for numob'
-     STOP
-  ENDIF
-  ALLOCATE(naccn(nvlaps,nsts), STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error to allocate space for naccn'
-     STOP
-  ENDIF
+  allocate(stobs(ncycles*15,nvlaps,nsts), stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error to allocate space for stobs'
+     stop
+  endif
+  allocate(numob(ncycles*15,nvlaps,nsts), stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error to allocate space for numob'
+     stop
+  endif
+  allocate(naccn(nvlaps,nsts), stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error to allocate space for naccn'
+     stop
+  endif
   naccn = 0
-  DO iobs=1,nobs
+  do iobs=1,nobs
      naccn(vid(iobs),idsts(iobs)) = naccn(vid(iobs),idsts(iobs))+1
      numob(naccn(vid(iobs),idsts(iobs)),vid(iobs),idsts(iobs)) = iobs
      stobs(naccn(vid(iobs),idsts(iobs)),vid(iobs),idsts(iobs)) = o(1,iobs)
-  ENDDO
+  enddo
 
-  PRINT*,'naccn(1,1) = ',naccn(1,1),stobs(1:naccn(1,1),1,1)
-  DO iobs=1,naccn(1,1)
-     PRINT*,'First: ',o(2:4,numob(iobs,1,1)),olat(numob(iobs,1,1)), &
+  print*,'naccn(1,1) = ',naccn(1,1),stobs(1:naccn(1,1),1,1)
+  do iobs=1,naccn(1,1)
+     print*,'first: ',o(2:4,numob(iobs,1,1)),olat(numob(iobs,1,1)), &
                                              olon(numob(iobs,1,1))
-  ENDDO
+  enddo
 
-  ! Time interval:
-  dm(1,3) = MOD(istarttime,86400)  	! Second of the time
+  ! time interval:
+  dm(1,3) = mod(istarttime,86400)  	! second of the time
   dm(2,3) = dm(1,3)+(ncycles-1)*laps_cycle_time
 
-  ! Spacings: x, y and t
-  d(1:3) = (dm(2,1:3)-dm(1,1:3))/FLOAT(n(1:3)-1)
+  ! spacings: x, y and t
+  d(1:3) = (dm(2,1:3)-dm(1,1:3))/float(n(1:3)-1)
 
-  PRINT*,'Analysis start TIME: ',INT(dm(1,3))/3600,MOD(INT(dm(1,3)),3600)/60
-  PRINT*,'Analysis endng TIME: ',INT(dm(2,3))/3600,MOD(INT(dm(2,3)),3600)/60
+  print*,'analysis start time: ',int(dm(1,3))/3600,mod(int(dm(1,3)),3600)/60
+  print*,'analysis endng time: ',int(dm(2,3))/3600,mod(int(dm(2,3)),3600)/60
 
-  ! Check dimension for variables:
-  IF (nvlaps .GT. mv) THEN
-     PRINT*,'ReadObsn: Too much variables'
-     STOP
-  ENDIF
-  ! Check if number of obs is fit into the array:
-  IF (nobs .GT. mobs) THEN
-     PRINT*,'ReadObsn: Too many obs'
-     STOP
-  ENDIF
-  IF (nobs .LE. 0) THEN
-     PRINT*,'ReadObsn: no obs to analyze'
-     STOP
-  ENDIF
+  ! check dimension for variables:
+  if (nvlaps .gt. mv) then
+     print*,'readobsn: too much variables'
+     stop
+  endif
+  ! check if number of obs is fit into the array:
+  if (nobs .gt. mobs) then
+     print*,'readobsn: too many obs'
+     stop
+  endif
+  if (nobs .le. 0) then
+     print*,'readobsn: no obs to analyze'
+     stop
+  endif
 
-  PRINT*,'Spacing: ',d
+  print*,'spacing: ',d
 
-  ! WRITE surface.dat for testing:
-  ! OPEN(unit=10,file='surface.dat',form='formatted')
+  ! write surface.dat for testing:
+  ! open(unit=10,file='surface.dat',form='formatted')
 
-  ! Domain info:
-  PRINT*,'DOMAIN: ', dm(1,1),dm(2,1),dm(1,2),dm(2,2),dm(1,3),dm(2,3)
+  ! domain info:
+  print*,'domain: ', dm(1,1),dm(2,1),dm(1,2),dm(2,2),dm(1,3),dm(2,3)
   vmx = -1000.0
   vmm = 1000.0
-  DO ilaps=1,nobs
+  do ilaps=1,nobs
 
-     IF (vid(ilaps) .EQ. 2) THEN
-	IF (vmx .LT. o(1,ilaps)) THEN
+     if (vid(ilaps) .eq. 2) then
+	if (vmx .lt. o(1,ilaps)) then
 	   vmx = o(1,ilaps)
 	   imx = ilaps
-        ENDIF
-        IF (vmm .GT. o(1,ilaps)) THEN
+        endif
+        if (vmm .gt. o(1,ilaps)) then
 	   vmm = o(1,ilaps)
 	   imm = ilaps
-        ENDIF
-     ENDIF
-     ! WRITE(10,1) vid(ilaps),o(1:4,ilaps),w(ilaps)
+        endif
+     endif
+     ! write(10,1) vid(ilaps),o(1:4,ilaps),w(ilaps)
 
-  ENDDO
-1 FORMAT(i2,5e14.6)
-  ! CLOSE(10)
-  PRINT*,'MAX/MIN U obs: ',vmx,vmm,imx,imm,w(imm)
+  enddo
+1 format(i2,5e14.6)
+  ! close(10)
+  print*,'max/min u obs: ',vmx,vmm,imx,imm,w(imm)
 
-  PRINT*,'Time interval: ',MINVAL(o(4,1:nobs)),MAXVAL(o(4,1:nobs))
+  print*,'time interval: ',minval(o(4,1:nobs)),maxval(o(4,1:nobs))
 
-  ! Deallocate the memory:
-  DEALLOCATE(lat,lon,STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error in deallocating lat/lon'
-     STOP
-  ENDIF
-  DEALLOCATE(olaps,olat,olon,otime,wght,STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     print*,'LSO_Data_QC: error in deallocating olaps,olat,olon,otime,wght'
-     STOP
-  ENDIF
+  ! deallocate the memory:
+  deallocate(lat,lon,stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error in deallocating lat/lon'
+     stop
+  endif
+  deallocate(olaps,olat,olon,otime,wght,stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error in deallocating olaps,olat,olon,otime,wght'
+     stop
+  endif
   
-  DEALLOCATE(stobs, STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error to deallocate space for stobs'
-     STOP
-  ENDIF
-  DEALLOCATE(numob, STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error to deallocate space for numob'
-     STOP
-  ENDIF
-  DEALLOCATE(naccn, STAT=mem_error)
-  IF (mem_error .NE. 0) THEN
-     PRINT*,'LSO_Data_QC: error to deallocate space for naccn'
-     STOP
-  ENDIF
-  DEALLOCATE(idsts,STAT=mem_error)
+  deallocate(stobs, stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error to deallocate space for stobs'
+     stop
+  endif
+  deallocate(numob, stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error to deallocate space for numob'
+     stop
+  endif
+  deallocate(naccn, stat=mem_error)
+  if (mem_error .ne. 0) then
+     print*,'lso_data_qc: error to deallocate space for naccn'
+     stop
+  endif
+  deallocate(idsts,stat=mem_error)
 
-END SUBROUTINE LSO_Data
+end subroutine lso_data

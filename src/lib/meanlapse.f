@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -36,32 +36,32 @@ c
 c
 c*******************************************************************************
 c
-c       Routine to calculate a mean lapse rate from observed surface data.
-c       Values returned are the coefficients for the regression equations
-c       for the temperatures and dew points.  Also calculates the mean
+c       routine to calculate a mean lapse rate from observed surface data.
+c       values returned are the coefficients for the regression equations
+c       for the temperatures and dew points.  also calculates the mean
 c       elevation for the surface stations.
 c
-c       Changes:
-c               P.A. Stamus     12-01-88        Original (from J. McGinley)
-c                               12-22-88        Added consistency check on td.
+c       changes:
+c               p.a. stamus     12-01-88        original (from j. mcginley)
+c                               12-22-88        added consistency check on td.
 c
-c       Inputs/Outputs:
+c       inputs/outputs:
 c
-c          Variable     Var Type    I/O   Description
+c          variable     var type    i/o   description
 c         ----------   ----------  ----- -------------
-c          num_sfc         I         I    Number of surface stations.
-c          elev            RA        I    Station elevation.
-c          t               RA        I    Temperature.
-c          td              RA        I    Dew point temperature.
-c          a_t             R         O    'a' regression value for temp.(intrcp)
-c          b_t             R         O    'b'      "       "    "    "  (lapse)
-c          a_td            R         O    'a'      "       "    "  dewpt.
-c          b_td            R         O    'b'      "       "    "    "
-c          hbar            R         O    Mean elevation of the stations.
+c          num_sfc         i         i    number of surface stations.
+c          elev            ra        i    station elevation.
+c          t               ra        i    temperature.
+c          td              ra        i    dew point temperature.
+c          a_t             r         o    'a' regression value for temp.(intrcp)
+c          b_t             r         o    'b'      "       "    "    "  (lapse)
+c          a_td            r         o    'a'      "       "    "  dewpt.
+c          b_td            r         o    'b'      "       "    "    "
+c          hbar            r         o    mean elevation of the stations.
 c
-c       User Notes:
+c       user notes:
 c
-c       1. Units are not changed in this routine.
+c       1. units are not changed in this routine.
 c
 c*******************************************************************************
 c
@@ -69,7 +69,7 @@ c
 c
         badflag = -99.9
 c
-c.....  Set up storage variables.
+c.....  set up storage variables.
 c
         cnt = 0.
         cntd = 0.
@@ -81,10 +81,10 @@ c
         sumtd = 0.
         sumhtd = 0.
 c
-c.....  Gather sums and then calculate the 'a' and 'b' for the regression
-c.....  equation y = bz + a, for both the temperature and dew point.  The
+c.....  gather sums and then calculate the 'a' and 'b' for the regression
+c.....  equation y = bz + a, for both the temperature and dew point.  the
 c.....  'a' is the intercept with sea level, and the 'b' is the lapse rate.
-c.....  Also calculate the mean elevation of the stations.
+c.....  also calculate the mean elevation of the stations.
 c
         do 10 i=1,num_sfc
           if(elev(i).le.badflag .or. t(i).le.badflag) go to 10
@@ -108,24 +108,24 @@ c
 c
         hbar = sumh / cnt
 c
-c.....  Do a consistency check on the dewpoint regression.  If msl intercept
+c.....  do a consistency check on the dewpoint regression.  if msl intercept
 c.....  is below zero or if the dewpoint lapse rate is positive, set td slope
 c.....  to t slope and slide intercept over.
 c
         if(a_td.lt.0. .or. b_td.gt.0.) then
           write(6,900)
-900       format(1x,'++ Suspect dewpoint regression in MEAN_LAPSE. ++')
+900       format(1x,'++ suspect dewpoint regression in mean_lapse. ++')
           write(6,901) a_td, b_td
-901       format(1x,'  MSL intercept = ',e12.4,'  Slope = ',e12.4)
+901       format(1x,'  msl intercept = ',e12.4,'  slope = ',e12.4)
           b_td = b_t
           diff = (sumt / cnt) - (sumtd / cntd)
           a_td = a_t - diff
           write(6,902)
-902       format(1x,'  Setting values to:')
+902       format(1x,'  setting values to:')
           write(6,901) a_td, b_td
         endif
 c
-c.....  End of routine
+c.....  end of routine
 c
         return
         end

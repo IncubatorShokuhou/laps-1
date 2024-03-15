@@ -1,17 +1,17 @@
       subroutine polar_stereographic
 c
-c *** Routines to convert from geographical lat, lon to 
+c *** routines to convert from geographical lat, lon to 
 c        polar stereographic grid i, j and vice-versa.
-c     Equations and code mostly obtained from RAMS.
+c     equations and code mostly obtained from rams.
 c     snook (12/20/95)
 c
 ccc      implicit none
 c
       integer np,n
 c
-      real glat(np),glon(np),    !Earth lat (deg N), lon (deg +E)
-     .       pslat,pslon,          !Pol ste. lat, lon (deg N, deg +E)
-     .       psi(np),psj(np),      !Pol ste. i, j
+      real glat(np),glon(np),    !earth lat (deg n), lon (deg +e)
+     .       pslat,pslon,          !pol ste. lat, lon (deg n, deg +e)
+     .       psi(np),psj(np),      !pol ste. i, j
      .       xmin,ymin,dx,dy
 c
       common /pscorner/xmin,ymin,dx,dy
@@ -48,176 +48,176 @@ c
 c
 c===============================================================================
 c
-      subroutine geoll_2_psll(glat,glon,PLA,PLO)
-C
-C     Convert geographical lat/lon coordinates to polar stereographic
-C     ditto with the pol.ste. pole at RLAT,WLON1 (these names are
-C     used to be compatible to the RAMSIN-parameters)
-C     longitude:-180 ; 180 positive east (on input)
-C              :   0 ; 360 positive east (on output)
-C     latitude : -90 ;  90 posive on northern hemisphere
+      subroutine geoll_2_psll(glat,glon,pla,plo)
+c
+c     convert geographical lat/lon coordinates to polar stereographic
+c     ditto with the pol.ste. pole at rlat,wlon1 (these names are
+c     used to be compatible to the ramsin-parameters)
+c     longitude:-180 ; 180 positive east (on input)
+c              :   0 ; 360 positive east (on output)
+c     latitude : -90 ;  90 posive on northern hemisphere
       include 'trigd.inc'
-C     The result is rotated 270 degrees relative to 'standard pol.ste.'
-C     WLON1 is defined in the same way as the input
-C     approach so as to get the x-axis to point towards the east, and the
-C     y-axis towards the north along 0 degrees (at NP south along 180)
-C
-C     TSP 20/06-89
+c     the result is rotated 270 degrees relative to 'standard pol.ste.'
+c     wlon1 is defined in the same way as the input
+c     approach so as to get the x-axis to point towards the east, and the
+c     y-axis towards the north along 0 degrees (at np south along 180)
+c
+c     tsp 20/06-89
       double precision pi180,c1,c2,c3,c4,c5,c6,arg2a,bb,pla1,alpha
      +   ,plo1,pla90,argu2
 c
-      integer nx,ny,nz           !No. of PS domain grid points
-      real RLAT,WLON1,rota,       !Pol ste. std lat, lon and rotation
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
-      common /psgrid/nx,ny,nz,RLAT,WLON1,rota,sw,ne
+      integer nx,ny,nz           !no. of ps domain grid points
+      real rlat,wlon1,rota,       !pol ste. std lat, lon and rotation
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
+      common /psgrid/nx,ny,nz,rlat,wlon1,rota,sw,ne
 c_______________________________________________________________________________
-C
-C     constants
-C
+c
+c     constants
+c
       c1=1.
-      PI180 = dasin(c1)/90.
-C
-C     Set flag for N/S hemisphere and convert longitude to <0 ; 360> interval
-C
-      IF(RLAT.GE.0.0) THEN
-         HSIGN= 1.0
-      ELSE
-         HSIGN=-1.0
-      END IF
-      GLOR=GLON
-      IF(GLOR.LT.0.0) GLOR=360.0+GLOR
-      RWLON1=WLON1
-      IF(RWLON1.LT.0.0) RWLON1=360.0+WLON1
-C
-C     Test for a N/S pole case
-C
-      IF(RLAT.EQ.90.0) THEN
-         PLA=GLAT
-         PLO=AMOD(GLOR+270.0-WLON1,360.0)
-         GO TO 2000
-      END IF
-      IF(RLAT.EQ.-90.0) THEN
-         PLA=-GLAT
-         PLO=AMOD(GLOR+270.0,360.0)
-         GO TO 2000
-      END IF
-C
-C     Test for longitude on 'Greenwich or date line'
-C
-      IF(GLOR.EQ.RWLON1) THEN
-         IF(GLAT.GT.RLAT) THEN
-            PLA=90.0-GLAT+RLAT
-            PLO=90.0
-         ELSE
-            PLA=90.0-RLAT+GLAT
-            PLO=270.0
-         END IF
-         GO TO 2000
-      END IF      
-      IF(AMOD(GLOR+180.0,360.0).EQ.RWLON1) THEN
-         PLA=RLAT-90.0+GLAT
-         IF(PLA.LT.-90.0) THEN
-            PLA=-180.0-PLA
-            PLO=270.0
-         ELSE
-            PLO= 90.0
-         END IF
-         GO TO 2000         
-      END IF
-C
-C     Determine longitude distance relative to RWLON1 so it belongs to
-C     the absolute interval 0 - 180
-C
-      ARGU1 = GLOR-RWLON1
-      IF(ARGU1.GT. 180.0) ARGU1 = ARGU1-360.0
-      IF(ARGU1.LT.-180.0) ARGU1 = ARGU1+360.0
-C
-C     1. Get the help circle BB and angle ALPHA (legalize arguments)
-C
+      pi180 = dasin(c1)/90.
+c
+c     set flag for n/s hemisphere and convert longitude to <0 ; 360> interval
+c
+      if(rlat.ge.0.0) then
+         hsign= 1.0
+      else
+         hsign=-1.0
+      end if
+      glor=glon
+      if(glor.lt.0.0) glor=360.0+glor
+      rwlon1=wlon1
+      if(rwlon1.lt.0.0) rwlon1=360.0+wlon1
+c
+c     test for a n/s pole case
+c
+      if(rlat.eq.90.0) then
+         pla=glat
+         plo=amod(glor+270.0-wlon1,360.0)
+         go to 2000
+      end if
+      if(rlat.eq.-90.0) then
+         pla=-glat
+         plo=amod(glor+270.0,360.0)
+         go to 2000
+      end if
+c
+c     test for longitude on 'greenwich or date line'
+c
+      if(glor.eq.rwlon1) then
+         if(glat.gt.rlat) then
+            pla=90.0-glat+rlat
+            plo=90.0
+         else
+            pla=90.0-rlat+glat
+            plo=270.0
+         end if
+         go to 2000
+      end if      
+      if(amod(glor+180.0,360.0).eq.rwlon1) then
+         pla=rlat-90.0+glat
+         if(pla.lt.-90.0) then
+            pla=-180.0-pla
+            plo=270.0
+         else
+            plo= 90.0
+         end if
+         go to 2000         
+      end if
+c
+c     determine longitude distance relative to rwlon1 so it belongs to
+c     the absolute interval 0 - 180
+c
+      argu1 = glor-rwlon1
+      if(argu1.gt. 180.0) argu1 = argu1-360.0
+      if(argu1.lt.-180.0) argu1 = argu1+360.0
+c
+c     1. get the help circle bb and angle alpha (legalize arguments)
+c
       c2=glat*pi180
       c3=argu1*pi180
-      ARG2A = dCOS(c2)*dCOS(c3)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)         
-      BB    = dACOS(ARG2A)
-C
+      arg2a = dcos(c2)*dcos(c3)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)         
+      bb    = dacos(arg2a)
+c
       c4=hsign*glat*pi180
-      ARG2A = dSIN(c4)/dSIN(BB)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)
-      ALPHA = dASIN(ARG2A)
-C
-C     2. Get PLA and PLO (still legalizing arguments)
-C
+      arg2a = dsin(c4)/dsin(bb)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)
+      alpha = dasin(arg2a)
+c
+c     2. get pla and plo (still legalizing arguments)
+c
       c5=rlat*pi180
       c6=hsign*rlat*pi180
-      ARG2A = dCOS(c5)*dCOS(BB)+
-     +        dSIN(c6)*dSIN(c4)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)         
-      PLA1   = dASIN(ARG2A)
-C
-      ARG2A = dSIN(BB)*dCOS(ALPHA)/dCOS(PLA1)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)
-      PLO1   = dASIN(ARG2A)
-C
-C    Test for passage of the 90 degree longitude (duallity in PLO)
-C         Get PLA for which PLO=90 when GLAT is the latitude
-C
-      ARG2A = dSIN(c4)/dSIN(c6)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)         
-      PLA90 = dASIN(ARG2A)
-C
-C         Get help arc BB and angle ALPHA
-C
-      ARG2A = dCOS(c5)*dSIN(PLA90)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)
-      BB    = dACOS(ARG2A)
+      arg2a = dcos(c5)*dcos(bb)+
+     +        dsin(c6)*dsin(c4)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)         
+      pla1   = dasin(arg2a)
+c
+      arg2a = dsin(bb)*dcos(alpha)/dcos(pla1)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)
+      plo1   = dasin(arg2a)
+c
+c    test for passage of the 90 degree longitude (duallity in plo)
+c         get pla for which plo=90 when glat is the latitude
+c
+      arg2a = dsin(c4)/dsin(c6)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)         
+      pla90 = dasin(arg2a)
+c
+c         get help arc bb and angle alpha
+c
+      arg2a = dcos(c5)*dsin(pla90)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)
+      bb    = dacos(arg2a)
 
-      ARG2A = dSIN(c4)/dSIN(BB)
-      ARG2A = dMAX1(ARG2A,-c1)
-      ARG2A = dMIN1(ARG2A, c1)        
-      ALPHA = dASIN(ARG2A)
-C
-C         Get GLOLIM - it is nesc. to test for the existence of solution
-C
-      ARGU2  = dCOS(c2)*dCOS(BB)/
-     +            (1.-dSIN(c4)*dSIN(BB)*dSIN(ALPHA))
-      IF(dABS(ARGU2).GT.c1) THEN
-      GLOLIM = 999.0
-      ELSE
-        GLOLIM = dACOS(ARGU2)/PI180
-      END IF
-C
-C     Modify (if nesc.) the PLO solution
-C
-      IF((ABS(ARGU1).GT.GLOLIM.AND.GLAT.LE.RLAT).OR.
-     +   GLAT.GT.RLAT) THEN
-            PLO1 = PI180*180.0 - PLO1
-      END IF
-C
-C     The solution is symmetric so the direction must be if'ed
-C
-      IF(ARGU1.LT.0.0) THEN
-         PLO1 = -PLO1
-      END IF
-C
-C     Convert the radians to degrees
-C
-      PLA = PLA1/PI180        
-      PLO = PLO1/PI180
-C
-C     To obtain a rotated value (ie so x-axis in pol.ste. points east)
-C     add 270 to longitude
-C
-      PLO=AMOD(PLO+270.0,360.0)
-C
- 2000 CONTINUE      
-      RETURN
-      END                                  
+      arg2a = dsin(c4)/dsin(bb)
+      arg2a = dmax1(arg2a,-c1)
+      arg2a = dmin1(arg2a, c1)        
+      alpha = dasin(arg2a)
+c
+c         get glolim - it is nesc. to test for the existence of solution
+c
+      argu2  = dcos(c2)*dcos(bb)/
+     +            (1.-dsin(c4)*dsin(bb)*dsin(alpha))
+      if(dabs(argu2).gt.c1) then
+      glolim = 999.0
+      else
+        glolim = dacos(argu2)/pi180
+      end if
+c
+c     modify (if nesc.) the plo solution
+c
+      if((abs(argu1).gt.glolim.and.glat.le.rlat).or.
+     +   glat.gt.rlat) then
+            plo1 = pi180*180.0 - plo1
+      end if
+c
+c     the solution is symmetric so the direction must be if'ed
+c
+      if(argu1.lt.0.0) then
+         plo1 = -plo1
+      end if
+c
+c     convert the radians to degrees
+c
+      pla = pla1/pi180        
+      plo = plo1/pi180
+c
+c     to obtain a rotated value (ie so x-axis in pol.ste. points east)
+c     add 270 to longitude
+c
+      plo=amod(plo+270.0,360.0)
+c
+ 2000 continue      
+      return
+      end                                  
 c
 c===============================================================================
 c
@@ -226,8 +226,8 @@ c
 ccc      implicit none
 c
       include 'trigd.inc'
-      real pslat,pslon,      !Pol ste. lat, lon (deg N, deg +E)
-     .       psi,psj,          !Pol ste. i,j
+      real pslat,pslon,      !pol ste. lat, lon (deg n, deg +e)
+     .       psi,psj,          !pol ste. i,j
      .       x,y,xmin,ymin,dx,dy,
      .       mag
 c
@@ -239,7 +239,7 @@ c
       y=mag*sind(pslon)
       psi=(x-xmin)/dx+1.
       psj=(y-ymin)/dy+1.
-C
+c
       return
       end
 c
@@ -250,8 +250,8 @@ c
 ccc      implicit none
 c
       include 'trigd.inc'
-      real psi,psj,          !Pol ste. i,j
-     .       pslat,pslon,      !Pol ste. lat, lon (deg N, deg +E)
+      real psi,psj,          !pol ste. i,j
+     .       pslat,pslon,      !pol ste. lat, lon (deg n, deg +e)
      .       x,y,dist,
      .       xmin,ymin,dx,dy 
 c
@@ -287,127 +287,127 @@ c
 c===============================================================================
 c
       subroutine psll_2_geoll(pla,plo,glat,glon)
-C
-C     Convert polar stereographic coordinates to geographical lat/lon
-C     ditto with the pol.ste. pole at rlat,wlon1 (these names are
-C     used to be compatible to the ramsin-parameters)
-C     longitude:   0 ; 360 positive east (on input)
-C               -180 ; 180 positive east (on output)
-C     latitude : -90 ;  90 posive on northern hemisphere
-C     It is assumed that the polar stereographic coordinates have been
-      include 'trigd.inc'
-C     rotated to the standard format with 0 degrees longitude along wlon1
-C
-C     TSP 21 JUNE 89
 c
-      integer nx,ny,nz           !No. of PS domain grid points
-      real RLAT,WLON1,rota,      !Pol ste. std lat, lon and rotation
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
-      common /psgrid/nx,ny,nz,RLAT,WLON1,rota,sw,ne
+c     convert polar stereographic coordinates to geographical lat/lon
+c     ditto with the pol.ste. pole at rlat,wlon1 (these names are
+c     used to be compatible to the ramsin-parameters)
+c     longitude:   0 ; 360 positive east (on input)
+c               -180 ; 180 positive east (on output)
+c     latitude : -90 ;  90 posive on northern hemisphere
+c     it is assumed that the polar stereographic coordinates have been
+      include 'trigd.inc'
+c     rotated to the standard format with 0 degrees longitude along wlon1
+c
+c     tsp 21 june 89
+c
+      integer nx,ny,nz           !no. of ps domain grid points
+      real rlat,wlon1,rota,      !pol ste. std lat, lon and rotation
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
+      common /psgrid/nx,ny,nz,rlat,wlon1,rota,sw,ne
 c_______________________________________________________________________________
-C
-C     set flag for n/s hemisphere
-C
+c
+c     set flag for n/s hemisphere
+c
       c1 = 1.
-      PI180 = asin(c1)/90.
-C      
-      IF(RLAT.GE.0.0) THEN
-         HSIGN= 1.0
-      ELSE
-         HSIGN=-1.0
-      END IF
-C
-C     test for a n/s pole case
-C
-      IF(RLAT.EQ.90.0) THEN
-       GLAT=PLA
-         GLON=MOD(PLO+WLON1,360.0)
-         GO TO 2000
-      END IF
-      IF(RLAT.EQ.-90.0) THEN
-         GLAT=-PLA
-         GLON=MOD(PLO+WLON1,360.0)
-         GO TO 2000
-      END IF
-C
-C     test for longitude on 'greenwich or date line'
-C
-      IF(PLO.EQ.0) THEN
-         GLAT=RLAT-90.0+PLA
-         IF(GLAT.LT.-90.0) THEN
-            GLAT=-180.0-GLAT
-            GLON=MOD(WLON1+180.0,360.0)
-         ELSE
-            GLON=WLON1
-         END IF
-         GO TO 2000
-      END IF      
-      IF(PLO.EQ.180.0) THEN
-         GLAT=RLAT+90.0-PLA
-         IF(GLAT.GT.90.0) THEN
-            GLAT=180.0-GLAT
-            GLON=MOD(WLON1+180.0,360.0)
-         ELSE
-            GLON=WLON1
-         END IF
-         GO TO 2000         
-      END IF
-C
-C     Determine longitude distance relative to wlon1 so it belongs to
-C     the absolute interval 0 - 180
-C
-      ARGU1=PLO
-      IF(PLO.GT.180.0) ARGU1 = PLO-360.0
-C
-C     Get the latitude, the help circle BB and the longitude by first
-C     calculating the argument and legalize it - then take the inverse fct.
-C
-      IF(HSIGN.GT.0.0) THEN
-         ARG2A = SIN(PLA*PI180)*SIN(HSIGN*RLAT*PI180)+
-     +        COS(PLA*PI180)*COS(RLAT*PI180)*COS((180.0-ARGU1)*PI180)
-      ELSE
-         ARG2A = SIN(PLA*PI180)*SIN(HSIGN*RLAT*PI180)+
-     +        COS(PLA*PI180)*COS(RLAT*PI180)*COS(ARGU1*PI180)
-      END IF
-      ARG2A = MIN(ARG2A, 1.0)
-      ARG2A = MAX(ARG2A,-1.0)
-      GLAT  = HSIGN*ASIN(ARG2A)
-C
-      IF(HSIGN.GT.0.0) THEN
-         ARG2A = COS(RLAT*PI180)*SIN(PLA*PI180)+
-     +        SIN(RLAT*PI180)*COS(PLA*PI180)*COS(ARGU1*PI180)
-      ELSE
-         ARG2A = COS(RLAT*PI180)*SIN(PLA*PI180)+
-     +       SIN(-RLAT*PI180)*COS(PLA*PI180)*COS((180.0-ARGU1)*PI180)
-      END IF
-      ARG2A = MIN(ARG2A, 1.0)
-      ARG2A = MAX(ARG2A,-1.0)      
-      BB    = ACOS(ARG2A)
-C
-      ARG2A = COS(GLAT)*COS(BB)/(1.0-SIN(GLAT)**2)
-      ARG2A = MIN(ARG2A, 1.0)
-      ARG2A = MAX(ARG2A,-1.0)      
-      GLON  = ACOS(ARG2A)
-C     
-C     convert the radians to degrees 
-C
-        GLAT = GLAT/PI180
-        GLON = GLON/PI180
-C
-C       the solution is symmetric so the direction must be if'ed
-C
-        IF(ARGU1.LT.0.0) THEN
-           GLON = 360.0-GLON
-        END IF
-        GLON=AMOD(GLON+WLON1,360.0)
-C
- 2000 CONTINUE
-C
-C     the resultant longitude must be in the interval from -180, 180
-C      
-      IF(GLON.GT.180.0) GLON=GLON-360.0
-      RETURN
-      END
+      pi180 = asin(c1)/90.
+c      
+      if(rlat.ge.0.0) then
+         hsign= 1.0
+      else
+         hsign=-1.0
+      end if
+c
+c     test for a n/s pole case
+c
+      if(rlat.eq.90.0) then
+       glat=pla
+         glon=mod(plo+wlon1,360.0)
+         go to 2000
+      end if
+      if(rlat.eq.-90.0) then
+         glat=-pla
+         glon=mod(plo+wlon1,360.0)
+         go to 2000
+      end if
+c
+c     test for longitude on 'greenwich or date line'
+c
+      if(plo.eq.0) then
+         glat=rlat-90.0+pla
+         if(glat.lt.-90.0) then
+            glat=-180.0-glat
+            glon=mod(wlon1+180.0,360.0)
+         else
+            glon=wlon1
+         end if
+         go to 2000
+      end if      
+      if(plo.eq.180.0) then
+         glat=rlat+90.0-pla
+         if(glat.gt.90.0) then
+            glat=180.0-glat
+            glon=mod(wlon1+180.0,360.0)
+         else
+            glon=wlon1
+         end if
+         go to 2000         
+      end if
+c
+c     determine longitude distance relative to wlon1 so it belongs to
+c     the absolute interval 0 - 180
+c
+      argu1=plo
+      if(plo.gt.180.0) argu1 = plo-360.0
+c
+c     get the latitude, the help circle bb and the longitude by first
+c     calculating the argument and legalize it - then take the inverse fct.
+c
+      if(hsign.gt.0.0) then
+         arg2a = sin(pla*pi180)*sin(hsign*rlat*pi180)+
+     +        cos(pla*pi180)*cos(rlat*pi180)*cos((180.0-argu1)*pi180)
+      else
+         arg2a = sin(pla*pi180)*sin(hsign*rlat*pi180)+
+     +        cos(pla*pi180)*cos(rlat*pi180)*cos(argu1*pi180)
+      end if
+      arg2a = min(arg2a, 1.0)
+      arg2a = max(arg2a,-1.0)
+      glat  = hsign*asin(arg2a)
+c
+      if(hsign.gt.0.0) then
+         arg2a = cos(rlat*pi180)*sin(pla*pi180)+
+     +        sin(rlat*pi180)*cos(pla*pi180)*cos(argu1*pi180)
+      else
+         arg2a = cos(rlat*pi180)*sin(pla*pi180)+
+     +       sin(-rlat*pi180)*cos(pla*pi180)*cos((180.0-argu1)*pi180)
+      end if
+      arg2a = min(arg2a, 1.0)
+      arg2a = max(arg2a,-1.0)      
+      bb    = acos(arg2a)
+c
+      arg2a = cos(glat)*cos(bb)/(1.0-sin(glat)**2)
+      arg2a = min(arg2a, 1.0)
+      arg2a = max(arg2a,-1.0)      
+      glon  = acos(arg2a)
+c     
+c     convert the radians to degrees 
+c
+        glat = glat/pi180
+        glon = glon/pi180
+c
+c       the solution is symmetric so the direction must be if'ed
+c
+        if(argu1.lt.0.0) then
+           glon = 360.0-glon
+        end if
+        glon=amod(glon+wlon1,360.0)
+c
+ 2000 continue
+c
+c     the resultant longitude must be in the interval from -180, 180
+c      
+      if(glon.gt.180.0) glon=glon-360.0
+      return
+      end
 c
 c===============================================================================
 c
@@ -420,9 +420,9 @@ c
      .       xmin,xmax,ymin,ymax,
      .       dx,dy,mag
 c
-      integer nx,ny,nz           !No. of PS domain grid points
-      real lat0,lon0,rota,       !Pol ste. std lat, lon and rotation
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
+      integer nx,ny,nz           !no. of ps domain grid points
+      real lat0,lon0,rota,       !pol ste. std lat, lon and rotation
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
       common /psgrid/nx,ny,nz,lat0,lon0,rota,sw,ne
 c
 c_______________________________________________________________________________
@@ -446,18 +446,18 @@ c===============================================================================
 c
       subroutine conical_equidistant
 c
-c *** Routines to convert from geographical lat, lon to 
+c *** routines to convert from geographical lat, lon to 
 c        conical-equidistant grid i, j vice-versa.
-c     Equations obtained from Adrian Marroquin and Tom Black (NCEP).
+c     equations obtained from adrian marroquin and tom black (ncep).
 c     snook (12/20/95)
 c
 ccc      implicit none
 c
       integer np,n
 c
-      real glat(np),glon(np),      !Earth lat, lon (deg N, deg +E)
-     .       celat,celon,            !Con eq. lat, lon (deg N, deg +E)
-     .       cei(np),cej(np)         !Con eq. i,j
+      real glat(np),glon(np),      !earth lat, lon (deg n, deg +e)
+     .       celat,celon,            !con eq. lat, lon (deg n, deg +e)
+     .       cei(np),cej(np)         !con eq. i,j
 c
 c===============================================================================
 c
@@ -490,8 +490,8 @@ c
 ccc      implicit none
 c
       include 'trigd.inc'
-      real glat,glon,      !Earth lat, lon (deg N, deg +E)
-     .       celat,celon,    !Con eq. lat, lon (deg N, deg +E)
+      real glat,glon,      !earth lat, lon (deg n, deg +e)
+     .       celat,celon,    !con eq. lat, lon (deg n, deg +e)
      .       x,y,z
 c
       integer nx,ny,nz
@@ -516,8 +516,8 @@ c
 c
 ccc      implicit none
 c
-      real celat,celon,      !Con eq. lat, lon (deg N, deg +E)
-     .       cei,cej           !Con eq. i,j
+      real celat,celon,      !con eq. lat, lon (deg n, deg +e)
+     .       cei,cej           !con eq. i,j
 c
       integer nxt
 c
@@ -539,8 +539,8 @@ c
 c
 ccc      implicit none
 c
-      real cei,cej,          !Con eq. i,j
-     .       celat,celon       !Con eq. lat, lon (deg N, deg +E)
+      real cei,cej,          !con eq. i,j
+     .       celat,celon       !con eq. lat, lon (deg n, deg +e)
 c
       integer nyt
 c
@@ -563,8 +563,8 @@ c
 ccc      implicit none
 c
       include 'trigd.inc'
-      real celat,celon,    !Con eq. lat, lon (deg N, deg +E)
-     .       glat,glon       !Earth lat, lon (deg N, deg +E)
+      real celat,celon,    !con eq. lat, lon (deg n, deg +e)
+     .       glat,glon       !earth lat, lon (deg n, deg +e)
 c
       integer nx,ny,nz
       real lat0,lon0,dphi,dlam
@@ -589,9 +589,9 @@ c===============================================================================
 c
       subroutine lambert_conformal
 c
-c *** Routines to convert from geographical lat, lon to 
-c        Lambert-conformal grid i, j and vice-versa.
-c     Equations obtained from NCAR graphics documentation.
+c *** routines to convert from geographical lat, lon to 
+c        lambert-conformal grid i, j and vice-versa.
+c     equations obtained from ncar graphics documentation.
 c     snook (12/20/95)
 c
 ccc      implicit none
@@ -599,14 +599,14 @@ c
       include 'trigd.inc'
       integer np,n
 c
-      real glat(np),glon(np),    !Earth lat (deg N), lon (deg +E)
-     .       lci(np),lcj(np),      !Lambert-confomal i, j
+      real glat(np),glon(np),    !earth lat (deg n), lon (deg +e)
+     .       lci(np),lcj(np),      !lambert-confomal i, j
      .       s,cone,r,
      .       xmin,ymin,dx,dy,x,y
 c
-      real lat1,lat2,lon0,       !Lambert-conformal std lat1, lat2, lon
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
-      integer nx,ny,nz           !No. of LC domain grid points
+      real lat1,lat2,lon0,       !lambert-conformal std lat1, lat2, lon
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
+      integer nx,ny,nz           !no. of lc domain grid points
       common /lcgrid/nx,ny,nz,lat1,lat2,lon0,sw,ne
 c
 c===============================================================================
@@ -656,9 +656,9 @@ c
      .       xmin,xmax,ymin,ymax,
      .       dx,dy
 c
-      real lat1,lat2,lon0,       !Lambert-conformal std lat1, lat2, lon
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
-      integer nx,ny,nz           !No. of LC domain grid points
+      real lat1,lat2,lon0,       !lambert-conformal std lat1, lat2, lon
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
+      integer nx,ny,nz           !no. of lc domain grid points
       common /lcgrid/nx,ny,nz,lat1,lat2,lon0,sw,ne
 c_______________________________________________________________________________
 c
@@ -691,21 +691,21 @@ c===============================================================================
 c
       subroutine lat_lon
 c
-c *** Routines to convert from geographical lat, lon to 
+c *** routines to convert from geographical lat, lon to 
 c        lat-lon grid i, j and vice-versa.
 c     snook (11/5/96)
 c     smart/pw li (04/1/03)
 c
       integer np,n
-      integer nx,ny,nz             !No. of LL domain grid points
+      integer nx,ny,nz             !no. of ll domain grid points
  
-      real   glat(np),glon(np)     !Earth lat, lon (deg N, deg +E)
-      real   lli(np),llj(np)       !Lat-lon grid i,j
+      real   glat(np),glon(np)     !earth lat, lon (deg n, deg +e)
+      real   lli(np),llj(np)       !lat-lon grid i,j
       real   diff
 c     real   sw(2),ne(2)
 c     common /llgrid/nx,ny,sw,ne,cgrddef
 
-      real   lat0,lon0,dlat,dlon     !SW corner lat, lon, lat, lon spacing
+      real   lat0,lon0,dlat,dlon     !sw corner lat, lon, lat, lon spacing
       character*1 cgrddef
       common /llgrid/nx,ny,nz,lat0,lon0,dlat,dlon,cgrddef
 c
@@ -729,24 +729,24 @@ c     enddo
       rlon_width = float(nx) * dlond
       write(6,*)' latlon_2_llij: rlon_width = ',rlon_width
       
-      if(cgrddef.eq.'S')then
+      if(cgrddef.eq.'s')then
          do n=1,np
             diff=glon(n)-lon0
             if(rlon_width .lt. 170.)then ! regional
                if (diff .lt. -180.) diff=diff+360.
-            else ! global (e.g. GFS)
+            else ! global (e.g. gfs)
                if (diff .lt. 0.)   diff=diff+360.
                if (diff .ge. 360.) diff=diff-360.
             endif
             lli(n)=diff/dlond+1.
             llj(n)=(glat(n)-lat0)/dlatd+1.
          enddo
-      elseif(cgrddef.eq.'N')then
+      elseif(cgrddef.eq.'n')then
          do n=1,np
             diff=glon(n)-lon0
             if(rlon_width .lt. 170.)then ! regional
                if (diff .lt. -180.) diff=diff+360.
-            else ! global (e.g. GFS)
+            else ! global (e.g. gfs)
                if (diff .lt. 0.)   diff=diff+360.
                if (diff .ge. 360.) diff=diff-360.
             endif
@@ -757,7 +757,7 @@ c     enddo
 
       else
          print*,'you must specify whether the standard
-     .           lat is Southern or Northern boundary'
+     .           lat is southern or northern boundary'
       endif
 
       return
@@ -767,7 +767,7 @@ c
       entry llij_2_latlon(np,lli,llj,glat,glon)
 c_______________________________________________________________________________
 c
-c Note: if lat0=northern boundary of ll grid set dlat=-dlat
+c note: if lat0=northern boundary of ll grid set dlat=-dlat
       do n=1,np
          glon(n)=(lli(n)-1.)*dlon+lon0
          glat(n)=(llj(n)-1.)*dlat+lat0
@@ -782,15 +782,15 @@ c
       subroutine fixed_grid
 c
       integer np,n,isat_fgf
-      integer nx,ny,nz             !No. of FX domain grid points
+      integer nx,ny,nz             !no. of fx domain grid points
  
-      real   glat(np),glon(np)     !Earth lat, lon (deg N, deg +E)
-      real   fxi(np),fxj(np)       !Lat-lon grid i,j
+      real   glat(np),glon(np)     !earth lat, lon (deg n, deg +e)
+      real   fxi(np),fxj(np)       !lat-lon grid i,j
       real   diff
 c     real   sw(2),ne(2)
 c     common /llgrid/nx,ny,sw,ne,cgrddef
 
-      real   lat0,lon0,dlat,dlon     !SW corner lat, lon, lat, lon spacing
+      real   lat0,lon0,dlat,dlon     !sw corner lat, lon, lat, lon spacing
       real*8 dlond,dlatd,glond,glatd
       real*8 scale_x,scale_y,offset_x,offset_y
       real*8 sub_lon_degrees,fgf_x,fgf_y,xmin,ymin
@@ -845,7 +845,7 @@ c
       entry fxij_2_latlon(np,fxi,fxj,glat,glon)
 c_______________________________________________________________________________
 c
-c Note: if lat0=northern boundary of fx grid set dlat=-dlat
+c note: if lat0=northern boundary of fx grid set dlat=-dlat
       do n=1,np
          glon(n)=(fxi(n)-1.)*dlon+lon0
          glat(n)=(fxj(n)-1.)*dlat+lat0
@@ -861,20 +861,20 @@ c
       subroutine cylindrical_equidistant
 c
 c routine to convert from cylindrical equidistant to grid ri/rj
-c used for mapping the WSI radar data to laps.
+c used for mapping the wsi radar data to laps.
 c
-c     J. Smart 11-19-98   Original Working Version
-c                         Basic equation set from
-c                         Map Projections Used by the U.S. Geological Survey
-c                         (Snyder, J.P. 1983 Geological Survey Bulletin - 1532)
+c     j. smart 11-19-98   original working version
+c                         basic equation set from
+c                         map projections used by the u.s. geological survey
+c                         (snyder, j.p. 1983 geological survey bulletin - 1532)
 c
       include 'trigd.inc'
       implicit none
       integer np,n
  
-      real glat(np),glon(np),      !Earth lat, lon (deg N, deg +E)
-     .       lli(np),llj(np),        !Lat-lon grid i,j
-     .       nw(2),se(2)             !NW grid lat/lon; SE grid lat/lon
+      real glat(np),glon(np),      !earth lat, lon (deg n, deg +e)
+     .       lli(np),llj(np),        !lat-lon grid i,j
+     .       nw(2),se(2)             !nw grid lat/lon; se grid lat/lon
 
       double precision     diff,x,y
      .                    ,xmin,ymin
@@ -890,8 +890,8 @@ c
 
       real  r
  
-      integer nx,ny,nz             !No. of LL domain grid points
-      real  rlatc,rlonc          !Grid center lat, lon
+      integer nx,ny,nz             !no. of ll domain grid points
+      real  rlatc,rlonc          !grid center lat, lon
 
 c     real coslatc
 
@@ -903,7 +903,7 @@ c
       entry latlon_2_ceij(np,glat,glon,lli,llj)
 c_______________________________________________________________________________
 c
-c Note: WSI grid (1,1) is NW corner. Adjustment made for rj using ny since
+c note: wsi grid (1,1) is nw corner. adjustment made for rj using ny since
 c       equation set assumes y-axis is on equator.
 c
       pi=acos(-1.0)
@@ -943,7 +943,7 @@ c
       entry ceij_2_latlon(np,lli,llj,glat,glon)
 c
 c equation set: rlat (phi) = y/r
-c               rlon (lambda) = rlonc + x/(R cos(rlatc))
+c               rlon (lambda) = rlonc + x/(r cos(rlatc))
 c        where:
 c               r= earth radius
 c               rlonc= central meridian
@@ -999,20 +999,20 @@ cc     implicit none
       real xmax,ymax
       real xmin,ymin
       real dx,dy
-      real R,PI
+      real r,pi
       real deg2rad
       common /mcgrid/rlonc,rlatc,nx,ny,sw,ne
 
-      call get_earth_radius(R,istatus)
+      call get_earth_radius(r,istatus)
 
-      PI=acos(-1.)
-      deg2rad=PI/180.
+      pi=acos(-1.)
+      deg2rad=pi/180.
 
-      ymax=R*(log(tan(PI/4.+0.5*(ne(1)-rlatc)*deg2rad)))
-      ymin=R*(log(tan(PI/4.+0.5*(sw(1)-rlatc)*deg2rad)))
+      ymax=r*(log(tan(pi/4.+0.5*(ne(1)-rlatc)*deg2rad)))
+      ymin=r*(log(tan(pi/4.+0.5*(sw(1)-rlatc)*deg2rad)))
 
-      xmax=R*(deg2rad*(ne(2)-rlonc))
-      xmin=R*(deg2rad*(sw(2)-rlonc))
+      xmax=r*(deg2rad*(ne(2)-rlonc))
+      xmin=r*(deg2rad*(sw(2)-rlonc))
 
       dx=(xmax-xmin)/float(nx-1)
       dy=(ymax-ymin)/float(ny-1)
@@ -1022,8 +1022,8 @@ cc     implicit none
          dlat=rlat(i)-rlatc
          if(dlon.gt.180.)dlon=dlon-360.
          if(dlon.lt.-180.)dlon=dlon+360.
-         x=R*(deg2rad*dlon)
-         y=R*(log(tan(PI/4.+0.5*(dlat*deg2rad))))
+         x=r*(deg2rad*dlon)
+         y=r*(log(tan(pi/4.+0.5*(dlat*deg2rad))))
          ri(i)=(x-xmin)/dx + 1.
          rj(i)=(y-ymin)/dy + 1.
       enddo
@@ -1036,7 +1036,7 @@ c
       subroutine latlon_2_npij(n,rlat,rlon,ri,rj)
 c
 c this is conversion of lat/lon to ri/rj in a
-c lat-lon grid. Very similar to latlon_2_llij.
+c lat-lon grid. very similar to latlon_2_llij.
 c
       integer n,i
       integer nx,ny
@@ -1045,7 +1045,7 @@ c
       real dx,dy
       common /npgrid/nx,ny,sw,ne
 
-c     print *, ' Inside latlon_2_npij'
+c     print *, ' inside latlon_2_npij'
 c     print *, nx,ny,dx,dy
 c     print *, sw(1), sw(2),ne(1),ne(2)
 
@@ -1063,10 +1063,10 @@ c     print *, sw(1), sw(2),ne(1),ne(2)
 c -------------------------------------------------------
 
       subroutine init_gridconv_cmn(gproj,nxbg,nybg,nzbg
-     &,dlat,dlon,cenlat,cenlon,Lat0,Lat1,Lon0
+     &,dlat,dlon,cenlat,cenlon,lat0,lat1,lon0
      &,sw1,sw2,ne1,ne2,cgrddef,istatus)
 c
-c JS 4-01
+c js 4-01
 c
       implicit none
 
@@ -1075,14 +1075,14 @@ c
       integer        istatus
       integer        nxbg,nybg,nzbg
       real           dlat,dlon
-      real           Lat0,Lat1
-      real           Lon0,Lon1,Lon2
+      real           lat0,lat1
+      real           lon0,lon1,lon2
       real           sw1,ne1
       real           sw2,ne2
       real           cenlat,cenlon
 
 c
-c *** Common block variables for lat-lon grid.
+c *** common block variables for lat-lon grid.
 c
       integer   nx_ll,ny_ll,nz_ll
       real    lat0_ll,lon0_ll,d_lat,d_lon
@@ -1090,24 +1090,24 @@ c
       common /llgrid/nx_ll,ny_ll,nz_ll,lat0_ll,lon0_ll
      &,d_lat,d_lon,cgrddef_ll
 c
-c *** Common block variables for lambert-conformal grid.
+c *** common block variables for lambert-conformal grid.
 c
       integer   nx_lc,ny_lc,nz_lc
       real    lat1_lc,lat2_lc,lon0_lc,sw_lc(2),ne_lc(2)
       common /lcgrid/nx_lc,ny_lc,nz_lc,lat1_lc,lat2_lc
      &,lon0_lc,sw_lc,ne_lc
 c
-c *** Common block variables for cyclindrical equidistant grid.
+c *** common block variables for cyclindrical equidistant grid.
 c
       integer   nx,ny,nz
       real    rlatc,rlonc,nw(2),se(2),dx,dy
       common /cegrid/nx,ny,nz,nw,se,rlatc,rlonc
 c
-c *** Common block variables for polar stereographic grid.
+c *** common block variables for polar stereographic grid.
 c
-      integer nx_ps,ny_ps,nz_ps    !No. of PS domain grid points
-      real lat0_ps,lon0_ps,rota  !Pol ste. std lat, lon and rotation
-     .      ,sw_ps(2),ne_ps(2)     !SW lat, lon, NE lat, lon
+      integer nx_ps,ny_ps,nz_ps    !no. of ps domain grid points
+      real lat0_ps,lon0_ps,rota  !pol ste. std lat, lon and rotation
+     .      ,sw_ps(2),ne_ps(2)     !sw lat, lon, ne lat, lon
       common /psgrid/nx_ps,ny_ps,nz_ps,lat0_ps,lon0_ps
      .              ,rota,sw_ps,ne_ps
 
@@ -1115,38 +1115,38 @@ c
       real    sw_np(2),ne_np(2)
       common /npgrid/nx_np,ny_np,sw_np,ne_np
 c
-c *** Common block variables for mercator grid.
+c *** common block variables for mercator grid.
 c
-      integer nx_mc,ny_mc          !No. of domain grid points
-      real    sw_mc(2),ne_mc(2)    !SW lat, lon, NE lat, lon
-      real    rlatc_mc,rlonc_mc    !Center lat/lon of domain
+      integer nx_mc,ny_mc          !no. of domain grid points
+      real    sw_mc(2),ne_mc(2)    !sw lat, lon, ne lat, lon
+      real    rlatc_mc,rlonc_mc    !center lat/lon of domain
       common /mcgrid/rlonc_mc,rlatc_mc,nx_mc,ny_mc,sw_mc,ne_mc
 
-      if(gproj.eq.'LC')then
+      if(gproj.eq.'lc')then
          nx_lc=nxbg
          ny_lc=nybg
          nz_lc=nzbg
-         lat1_lc=Lat0
-         lat2_lc=Lat1
-         lon0_lc=Lon0
+         lat1_lc=lat0
+         lat2_lc=lat1
+         lon0_lc=lon0
          sw_lc(1)=sw1
          sw_lc(2)=sw2
          ne_lc(1)=ne1
          ne_lc(2)=ne2
       endif
 
-      if(gproj.eq.'LL')then
+      if(gproj.eq.'ll')then
          nx_ll=nxbg
          ny_ll=nybg
          nz_ll=nzbg
-         lat0_ll=Lat0
-         lon0_ll=Lon0
+         lat0_ll=lat0
+         lon0_ll=lon0
          d_lat=dlat
          d_lon=dlon
          cgrddef_ll=cgrddef
       endif
 
-      if(gproj.eq.'LE')then
+      if(gproj.eq.'le')then
          nx=nxbg
          ny=nybg
          nz=nzbg
@@ -1158,19 +1158,19 @@ c
          nw(2)=ne2
       endif
 
-      if(gproj.eq.'PS')then
+      if(gproj.eq.'ps')then
          nx_ps=nxbg
          ny_ps=nybg
          nz_ps=nzbg
-         lat0_ps=Lat0
-         lon0_ps=Lon0
+         lat0_ps=lat0
+         lon0_ps=lon0
          sw_ps(1)=sw1
          sw_ps(2)=sw2
          ne_ps(1)=ne1
          ne_ps(2)=ne2
       endif
 
-      if(gproj.eq.'MC')then
+      if(gproj.eq.'mc')then
          nx_mc=nxbg
          ny_mc=nybg
          rlatc_mc=cenlat
@@ -1222,34 +1222,34 @@ c_______________________________________________________________________________
 c
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne. 1)then
-         print*,'Error getting r_missing_data - init_hinterp'
+         print*,'error getting r_missing_data - init_hinterp'
          return
       endif
 c
-c *** Determine location of LAPS grid point in background data i,j space.
+c *** determine location of laps grid point in background data i,j space.
 c
-      if (gproj .eq. 'PS') then
+      if (gproj .eq. 'ps') then
 
 c      print*,nxc,nyc,nzc,lat0,lon0,rota,sw,ne
 
          call latlon_2_psij(nx_laps*ny_laps,lat,lon,grx,gry)
-      elseif (gproj .eq. 'LC') then
+      elseif (gproj .eq. 'lc') then
          call latlon_2_lcij(nx_laps*ny_laps,lat,lon,grx,gry)
-      elseif (gproj .eq. 'CE') then
+      elseif (gproj .eq. 'ce') then
          call latlon_2_coneqij(nx_laps*ny_laps,lat,lon,grx,gry)
-      elseif (gproj .eq. 'LL') then
+      elseif (gproj .eq. 'll') then
          call latlon_2_llij(nx_laps*ny_laps,lat,lon,grx,gry)
-      elseif (gproj .eq. 'LE') then
+      elseif (gproj .eq. 'le') then
          call latlon_2_ceij(nx_laps*ny_laps,lat,lon,grx,gry)
-      elseif (gproj .eq. 'NP') then
+      elseif (gproj .eq. 'np') then
          call latlon_2_npij(nx_laps*ny_laps,lat,lon,grx,gry)
-      elseif (gproj .eq. 'MC') then
+      elseif (gproj .eq. 'mc') then
          call latlon_2_mcij(nx_laps*ny_laps,lat,lon,grx,gry)
       else
-         print*,"Error: Unknown gproj spec in gridconv ",gproj
+         print*,"error: unknown gproj spec in gridconv ",gproj
       endif
 c
-c *** Check that all LAPS grid points are within the background data coverage.
+c *** check that all laps grid points are within the background data coverage.
 c
 
 c set tolerance based upon the grid spacing as a function of grx/gry
@@ -1272,57 +1272,57 @@ c set tolerance based upon the grid spacing as a function of grx/gry
       print*,'horiz mapping tolerance x/y: ',tolx,toly,wrapped
       lprintmessage=.true.
 c
-c *** First, check for wrapping if a global data set.
+c *** first, check for wrapping if a global data set.
 c
-cWNI WNI COMMENT:  THIS SECTION NOT NEEDED BECAUSE
-cWNI  THE LATLON_2_LLIJ ALREADY HANDLES THIS
+cwni wni comment:  this section not needed because
+cwni  the latlon_2_llij already handles this
       call s_len(cmodel,lenc)
 
       if ( bgmodel .eq. 6 .or. 
      .     bgmodel .eq. 8) then
-CWNI     do j=1,ny_laps
-CWNI        do i=1,nx_laps
-CWNI           if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
-CWNI           if (grx(i,j) .gt. nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
-CWNI           if (gry(i,j) .lt. 1.) then
-CWNI              gry(i,j)=2.-gry(i,j)
-CWNI              grx(i,j)=grx(i,j)-float(nx_bg/2)
-CWNI              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
-CWNI              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
-CWNI           endif
-CWNI           if (gry(i,j) .gt. ny_bg) then
-CWNI              gry(i,j)=float(2*ny_bg)-gry(i,j)
-CWNI              grx(i,j)=grx(i,j)-float(nx_bg/2)
-CWNI              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
-CWNI              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
-CWNI           endif
-CWNI           if (grx(i,j) .lt. 1) then
-CWNI              grx(i,j)=grx(i,j)+1.
-CWNI           endif
-CWNI        enddo
-CWNI     enddo
-CWNI  elseif(bgmodel.eq.4.and.cmodel(1:lenc).eq.'AVN_SBN_CYLEQ')then
-      elseif( (bgmodel.eq.4.and.cmodel(1:lenc).eq.'AVN_SBN_CYLEQ') .OR. !WNI
-     .        (bgmodel .eq. 10 .and. cmodel .eq. 'GFS_ISO')) then      !WNI
+cwni     do j=1,ny_laps
+cwni        do i=1,nx_laps
+cwni           if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
+cwni           if (grx(i,j) .gt. nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
+cwni           if (gry(i,j) .lt. 1.) then
+cwni              gry(i,j)=2.-gry(i,j)
+cwni              grx(i,j)=grx(i,j)-float(nx_bg/2)
+cwni              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
+cwni              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
+cwni           endif
+cwni           if (gry(i,j) .gt. ny_bg) then
+cwni              gry(i,j)=float(2*ny_bg)-gry(i,j)
+cwni              grx(i,j)=grx(i,j)-float(nx_bg/2)
+cwni              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
+cwni              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
+cwni           endif
+cwni           if (grx(i,j) .lt. 1) then
+cwni              grx(i,j)=grx(i,j)+1.
+cwni           endif
+cwni        enddo
+cwni     enddo
+cwni  elseif(bgmodel.eq.4.and.cmodel(1:lenc).eq.'avn_sbn_cyleq')then
+      elseif( (bgmodel.eq.4.and.cmodel(1:lenc).eq.'avn_sbn_cyleq') .or. !wni
+     .        (bgmodel .eq. 10 .and. cmodel .eq. 'gfs_iso')) then      !wni
 
-CWNI     do j=1,ny_laps
-CWNI        do i=1,nx_laps
-CWNI           if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
-CWNI           if (grx(i,j) .gt. nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
-CWNI           if (gry(i,j) .lt. 1.) then
-CWNI              gry(i,j)=2.-gry(i,j)
-CWNI              grx(i,j)=grx(i,j)-float(nx_bg/2)
-CWNI              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
-CWNI              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
-CWNI           endif
-CWNI           if (gry(i,j) .gt. ny_bg) then
-CWNI              gry(i,j)=float(2*ny_bg)-gry(i,j)
-CWNI              grx(i,j)=grx(i,j)-float(nx_bg/2)
-CWNI              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
-CWNI              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
-CWNI           endif
-CWNI        enddo
-CWNI     enddo
+cwni     do j=1,ny_laps
+cwni        do i=1,nx_laps
+cwni           if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
+cwni           if (grx(i,j) .gt. nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
+cwni           if (gry(i,j) .lt. 1.) then
+cwni              gry(i,j)=2.-gry(i,j)
+cwni              grx(i,j)=grx(i,j)-float(nx_bg/2)
+cwni              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
+cwni              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
+cwni           endif
+cwni           if (gry(i,j) .gt. ny_bg) then
+cwni              gry(i,j)=float(2*ny_bg)-gry(i,j)
+cwni              grx(i,j)=grx(i,j)-float(nx_bg/2)
+cwni              if (grx(i,j) .lt. 1.) grx(i,j)=grx(i,j)+float(nx_bg)
+cwni              if (grx(i,j).gt.nx_bg) grx(i,j)=grx(i,j)-float(nx_bg)
+cwni           endif
+cwni        enddo
+cwni     enddo
 
       elseif( wrapped ) then ! e.g. global dataset
          if (grx(i,j) .lt. 1 .or. grx(i,j) .gt. nx_bg .or.
@@ -1330,7 +1330,7 @@ CWNI     enddo
            do j=1,ny_laps
              do i=1,nx_laps
                if(lprintmessage)then
-                  print*,'Domain gridpt outside of bkgd data coverage.'
+                  print*,'domain gridpt outside of bkgd data coverage.'
                   print*,'   data i,j,lat,lon - ',i,j,lat(i,j),lon(i,j)
                   print*,'   grx, gry:',grx(i,j),gry(i,j)
                   lprintmessage=.false.
@@ -1340,14 +1340,14 @@ c                 stop 'init_hinterp'
            enddo
          endif
 
-c ****** If not a global data set, then check that LAPS domain is fully
+c ****** if not a global data set, then check that laps domain is fully
 c           within background domain.
 c
       else
          do j=1,ny_laps
             do i=1,nx_laps
 c
-c LAPS must fit into model grid which must also fit into LAPS grid thus we
+c laps must fit into model grid which must also fit into laps grid thus we
 c introduce a small fudge factor on the grid boundaries.
 c               
 
@@ -1366,7 +1366,7 @@ c
                   gry(i,j) = r_missing_data
 
            if(lprintmessage)then
-              print*,'Domain gridpt outside of bkgd data coverage.'
+              print*,'domain gridpt outside of bkgd data coverage.'
               print*,'   data i,j,lat,lon - ',i,j,lat(i,j),lon(i,j)
               print*,'   grx, gry:',grx(i,j),gry(i,j)
               lprintmessage=.false.
@@ -1390,9 +1390,9 @@ c
 
       logical wrapped
 c
-c *** Input vertically interpolated field - 2D should be slightly faster than
+c *** input vertically interpolated field - 2d should be slightly faster than
 c     'hinterp_field_3d'
-c *** Output Laps field
+c *** output laps field
 c
       real fvi(nx_bg,ny_bg,nz),
      .       flaps(nx_laps,ny_laps,nz),
@@ -1403,15 +1403,15 @@ c
       real    r_missing_data
 c
 
-      write(6,*)' Subroutine hinterp_field'
+      write(6,*)' subroutine hinterp_field'
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data - hinterp_field'
+         print*,'error getting r_missing_data - hinterp_field'
          return
       endif
 c
-c *** Horizontally interpolate variable.
+c *** horizontally interpolate variable.
 c
       do k=1,nz
          do j=1,ny_laps
@@ -1443,8 +1443,8 @@ c
 
       logical wrapped
 c
-c *** Input vertically interpolated field - optimized for 3D.
-c *** Output Laps field
+c *** input vertically interpolated field - optimized for 3d.
+c *** output laps field
 c
       real fvi(nx_bg,ny_bg,nz),
      .       flaps(nx_laps,ny_laps,nz),
@@ -1454,22 +1454,22 @@ c
       integer istatus
       real    r_missing_data
 c
-      write(6,*)' Subroutine hinterp_field_3d ',wrapped
+      write(6,*)' subroutine hinterp_field_3d ',wrapped
 
       iwrite = 0
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data - hinterp_field'
+         print*,'error getting r_missing_data - hinterp_field'
          return
       endif
 
-      write(6,*)' Center input column',fvi(nx_bg/2,ny_bg/2,:)
+      write(6,*)' center input column',fvi(nx_bg/2,ny_bg/2,:)
 
-      write(6,*)' Center grx,gry ',grx(nx_laps/2,ny_laps/2)
+      write(6,*)' center grx,gry ',grx(nx_laps/2,ny_laps/2)
      1                            ,gry(nx_laps/2,ny_laps/2)
 c
-c *** Horizontally interpolate variable.
+c *** horizontally interpolate variable.
 c
       ix = nx_bg
       iy = ny_bg
@@ -1486,7 +1486,7 @@ c
           stay = gry(il,jl)
             
 !         dimension ab(ix,iy),r(4),scr(4)
-!         logical wrapped ! WNI added
+!         logical wrapped ! wni added
 !         include 'bgdata.inc'
 c_______________________________________________________________________________
 c
@@ -1494,13 +1494,13 @@ c
           if(stay.lt.1.0)iy1=1.0
           iy2=iy1+3
           ix1=int(stax)-1
-          if(stax.lt.1.0) THEN 
-            IF (wrapped) THEN   ! WNI
+          if(stax.lt.1.0) then 
+            if (wrapped) then   ! wni
               ix1 = ix1 + ix
-            ELSE ! WNI
+            else ! wni
               ix1=1.0
-            ENDIF ! WNI
-          endif ! WNI
+            endif ! wni
+          endif ! wni
           ix2=ix1+3
           fiym2=float(iy1)-1
           fixm2=float(ix1)-1
@@ -1510,9 +1510,9 @@ c
             do iii=ix1,ix2
                i=iii
 c
-c ****** Account for wrapping around effect of global data at Greenwich.
+c ****** account for wrapping around effect of global data at greenwich.
 c
-               if (wrapped) then    ! WNI
+               if (wrapped) then    ! wni
                   if (i .lt. 1) i=i+ix  
                   if (i .gt. ix) i=i-ix
                endif
@@ -1523,9 +1523,9 @@ c
                   do jjj=iy1,iy2
                      j=jjj
 c
-c ************ Account for N-S wrapping effect of global data.
+c ************ account for n-s wrapping effect of global data.
 c
-                     if (wrapped) THEN  !WNI
+                     if (wrapped) then  !wni
                         if (j .lt. 1) then
                            j=2-j
                            i=i-ix/2
@@ -1726,8 +1726,8 @@ c
 
       logical wrapped
 c
-c *** Input vertically interpolated field.
-c *** Output Laps field
+c *** input vertically interpolated field.
+c *** output laps field
 c
       real fvi(nx_bg,ny_bg,nz),
      .       flaps(nx_laps,ny_laps,nz),
@@ -1737,15 +1737,15 @@ c
       integer istatus
       real    r_missing_data
 c
-      write(6,*)' Subroutine hinterp_field_2d'
+      write(6,*)' subroutine hinterp_field_2d'
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data - hinterp_field'
+         print*,'error getting r_missing_data - hinterp_field'
          return
       endif
 c
-c *** Horizontally interpolate variable.
+c *** horizontally interpolate variable.
 c
       ix = nx_bg
       iy = ny_bg
@@ -1763,7 +1763,7 @@ c
             stay = gry(il,jl)
             
 !           dimension ab(ix,iy),r(4),scr(4)
-!           logical wrapped ! WNI added
+!           logical wrapped ! wni added
 !           include 'bgdata.inc'
 c_______________________________________________________________________________
 c
@@ -1771,13 +1771,13 @@ c
             if(stay.lt.1.0)iy1=1.0
             iy2=iy1+3
             ix1=int(stax)-1
-            if(stax.lt.1.0) THEN 
-              IF (wrapped) THEN   ! WNI
+            if(stax.lt.1.0) then 
+              if (wrapped) then   ! wni
                 ix1 = ix1 + ix
-              ELSE ! WNI
+              else ! wni
                 ix1=1.0
-              ENDIF ! WNI
-            endif ! WNI
+              endif ! wni
+            endif ! wni
             ix2=ix1+3
             staval=missingflag
             fiym2=float(iy1)-1
@@ -1786,9 +1786,9 @@ c
             do iii=ix1,ix2
                i=iii
 c
-c ****** Account for wrapping around effect of global data at Greenwich.
+c ****** account for wrapping around effect of global data at greenwich.
 c
-               if (wrapped) then    ! WNI
+               if (wrapped) then    ! wni
                   if (i .lt. 1) i=i+ix  
                   if (i .gt. ix) i=i-ix
                endif
@@ -1799,9 +1799,9 @@ c
                   do jjj=iy1,iy2
                      j=jjj
 c
-c ************ Account for N-S wrapping effect of global data.
+c ************ account for n-s wrapping effect of global data.
 c
-                     if (wrapped) THEN  !WNI
+                     if (wrapped) then  !wni
                         if (j .lt. 1) then
                            j=2-j
                            i=i-ix/2
@@ -1955,16 +1955,16 @@ c===============================================================================
 c
       subroutine gdtost(ab,ix,iy,stax,stay,staval,wrapped)
 c
-c *** Subroutine to return stations back-interpolated values(staval)
+c *** subroutine to return stations back-interpolated values(staval)
 c        from uniform grid points using overlapping-quadratics.
 c        gridded values of input array a dimensioned ab(ix,iy), where
-c        ix = grid points in x, iy = grid points in y.  Station
+c        ix = grid points in x, iy = grid points in y.  station
 c        location given in terms of grid relative station x (stax)
 c        and station column.
-c *** Values greater than 1.0e30 indicate missing data.
+c *** values greater than 1.0e30 indicate missing data.
 c
       dimension ab(ix,iy),r(4),scr(4)
-      logical wrapped ! WNI added
+      logical wrapped ! wni added
       include 'bgdata.inc'
 c_______________________________________________________________________________
 c
@@ -1972,13 +1972,13 @@ c
       if(stay.lt.1.0)iy1=1.0
       iy2=iy1+3
       ix1=int(stax)-1
-      if(stax.lt.1.0) THEN 
-        IF (wrapped) THEN   ! WNI
+      if(stax.lt.1.0) then 
+        if (wrapped) then   ! wni
           ix1 = ix1 + ix
-        ELSE ! WNI
+        else ! wni
           ix1=1.0
-        ENDIF ! WNI
-      endif ! WNI
+        endif ! wni
+      endif ! wni
       ix2=ix1+3
       staval=missingflag
       fiym2=float(iy1)-1
@@ -1987,9 +1987,9 @@ c
       do iii=ix1,ix2
          i=iii
 c
-c ****** Account for wrapping around effect of global data at Greenwich.
+c ****** account for wrapping around effect of global data at greenwich.
 c
-         if (wrapped) then    ! WNI
+         if (wrapped) then    ! wni
             if (i .lt. 1) i=i+ix  
             if (i .gt. ix) i=i-ix
          endif
@@ -2000,9 +2000,9 @@ c
             do jjj=iy1,iy2
                j=jjj
 c
-c ************ Account for N-S wrapping effect of global data.
+c ************ account for n-s wrapping effect of global data.
 c
-               if (wrapped) THEN  !WNI
+               if (wrapped) then  !wni
                   if (j .lt. 1) then
                      j=2-j
                      i=i-ix/2
@@ -2052,16 +2052,16 @@ c===============================================================================
 c
       subroutine gdtost_i(ab,ix,iy,stax,stay,staval,wrapped)
 c
-c *** Subroutine to return stations back-interpolated values(staval)
+c *** subroutine to return stations back-interpolated values(staval)
 c        from uniform grid points using overlapping-quadratics.
 c        gridded values of input array a dimensioned ab(ix,iy), where
-c        ix = grid points in x, iy = grid points in y.  Station
+c        ix = grid points in x, iy = grid points in y.  station
 c        location given in terms of grid relative station x (stax)
 c        and station column.
-c *** Values greater than 1.0e30 indicate missing data.
+c *** values greater than 1.0e30 indicate missing data.
 c
       dimension ab(ix,iy),r(4),scr(4)
-      logical wrapped ! WNI added
+      logical wrapped ! wni added
       include 'bgdata.inc'
 c_______________________________________________________________________________
 c
@@ -2069,13 +2069,13 @@ c
       if(stay.lt.1.0)iy1=1.0
       iy2=iy1+3
       ix1=int(stax)-1
-      if(stax.lt.1.0) THEN 
-        IF (wrapped) THEN   ! WNI
+      if(stax.lt.1.0) then 
+        if (wrapped) then   ! wni
           ix1 = ix1 + ix
-        ELSE ! WNI
+        else ! wni
           ix1=1.0
-        ENDIF ! WNI
-      endif ! WNI
+        endif ! wni
+      endif ! wni
       ix2=ix1+3
       staval=missingflag
       fiym2=float(iy1)-1
@@ -2084,9 +2084,9 @@ c
       do iii=ix1,ix2
          i=iii
 c
-c ****** Account for wrapping around effect of global data at Greenwich.
+c ****** account for wrapping around effect of global data at greenwich.
 c
-         if (wrapped) then    ! WNI
+         if (wrapped) then    ! wni
             if (i .lt. 1) i=i+ix  
             if (i .gt. ix) i=i-ix
          endif
@@ -2097,9 +2097,9 @@ c
             do jjj=iy1,iy2
                j=jjj
 c
-c ************ Account for N-S wrapping effect of global data.
+c ************ account for n-s wrapping effect of global data.
 c
-               if (wrapped) THEN  !WNI
+               if (wrapped) then  !wni
                   if (j .lt. 1) then
                      j=2-j
                      i=i-ix/2
@@ -2229,54 +2229,54 @@ c
 
       endif
 c
-C      if(staval.eq.missingflag)then
-C         print*,'gdtost_i: staval = missingflag'
-C      endif
+c      if(staval.eq.missingflag)then
+c         print*,'gdtost_i: staval = missingflag'
+c      endif
       return
       end
 
 c
 c===============================================================================
 c
-      SUBROUTINE GDTOST2(A,IX,IY,STAX,STAY,STAVAL)
-*  SUBROUTINE TO RETURN STATIONS BACK-INTERPOLATED VALUES(STAVAL)
-*  FROM UNIFORM GRID POINTS USING OVERLAPPING-QUADRATICS.
-*  GRIDDED VALUES OF INPUT ARRAY A DIMENSIONED A(IX,IY),WHERE
-*  IX=GRID POINTS IN X, IY = GRID POINTS IN Y .  STATION
-*  LOCATION GIVEN IN TERMS OF GRID RELATIVE STATION X (STAX)
-*  AND STATION COLUMN.
-*  VALUES GREATER THAN 1.0E30 INDICATE MISSING DATA.
+      subroutine gdtost2(a,ix,iy,stax,stay,staval)
+*  subroutine to return stations back-interpolated values(staval)
+*  from uniform grid points using overlapping-quadratics.
+*  gridded values of input array a dimensioned a(ix,iy),where
+*  ix=grid points in x, iy = grid points in y .  station
+*  location given in terms of grid relative station x (stax)
+*  and station column.
+*  values greater than 1.0e30 indicate missing data.
 *
-      real A(IX,IY),R(4),SCR(4),stax,stay,staval
+      real a(ix,iy),r(4),scr(4),stax,stay,staval
      +  ,fixm2,fiym2,yy,xx
-      IY1=INT(STAY)-1
-      IY2=IY1+3
-      IX1=INT(STAX)-1
-      IX2=IX1+3
-      STAVAL=1E30
-      FIYM2=FLOAT(IY1)-1
-      FIXM2=FLOAT(IX1)-1
-      II=0
-      DO 100 I=IX1,IX2
-      II=II+1
-      IF(I.GE.1.AND.I.LE.IX) GO TO 101
-      SCR(II)=1E30
-      GO TO 100
-101   JJ=0
-      DO 111 J=IY1,IY2
-      JJ=JJ+1
-      IF(J.GE.1.AND.J.LE.IY) GO TO 112
-      R(JJ)=1E30
-      GO TO 111
-112   R(JJ)=A(I,J)
-111   CONTINUE
-      YY=STAY-FIYM2
-      CALL BINOM(1.,2.,3.,4.,R(1),R(2),R(3),R(4),YY,SCR(II))
-100   CONTINUE
-      XX=STAX-FIXM2
-      CALL BINOM(1.,2.,3.,4.,SCR(1),SCR(2),SCR(3),SCR(4),XX,STAVAL)
-      RETURN
-      END
+      iy1=int(stay)-1
+      iy2=iy1+3
+      ix1=int(stax)-1
+      ix2=ix1+3
+      staval=1e30
+      fiym2=float(iy1)-1
+      fixm2=float(ix1)-1
+      ii=0
+      do 100 i=ix1,ix2
+      ii=ii+1
+      if(i.ge.1.and.i.le.ix) go to 101
+      scr(ii)=1e30
+      go to 100
+101   jj=0
+      do 111 j=iy1,iy2
+      jj=jj+1
+      if(j.ge.1.and.j.le.iy) go to 112
+      r(jj)=1e30
+      go to 111
+112   r(jj)=a(i,j)
+111   continue
+      yy=stay-fiym2
+      call binom(1.,2.,3.,4.,r(1),r(2),r(3),r(4),yy,scr(ii))
+100   continue
+      xx=stax-fixm2
+      call binom(1.,2.,3.,4.,scr(1),scr(2),scr(3),scr(4),xx,staval)
+      return
+      end
 c
 cc ------------------------------------------------------------------
 c

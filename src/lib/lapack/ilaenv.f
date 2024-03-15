@@ -1,506 +1,506 @@
-      INTEGER          FUNCTION ILAENV( ISPEC, NAME, OPTS, N1, N2, N3,
-     $                 N4 )
+      integer          function ilaenv( ispec, name, opts, n1, n2, n3,
+     $                 n4 )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     September 30, 1994
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     september 30, 1994
 *
-*     .. Scalar Arguments ..
-      CHARACTER*( * )    NAME, OPTS
-      INTEGER            ISPEC, N1, N2, N3, N4
+*     .. scalar arguments ..
+      character*( * )    name, opts
+      integer            ispec, n1, n2, n3, n4
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  ILAENV is called from the LAPACK routines to choose problem-dependent
-*  parameters for the local environment.  See ISPEC for a description of
+*  ilaenv is called from the lapack routines to choose problem-dependent
+*  parameters for the local environment.  see ispec for a description of
 *  the parameters.
 *
-*  This version provides a set of parameters which should give good,
+*  this version provides a set of parameters which should give good,
 *  but not optimal, performance on many of the currently available
-*  computers.  Users are encouraged to modify this subroutine to set
+*  computers.  users are encouraged to modify this subroutine to set
 *  the tuning parameters for their particular machine using the option
 *  and problem size information in the arguments.
 *
-*  This routine will not function correctly if it is converted to all
-*  lower case.  Converting it to all upper case is allowed.
+*  this routine will not function correctly if it is converted to all
+*  lower case.  converting it to all upper case is allowed.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  ISPEC   (input) INTEGER
-*          Specifies the parameter to be returned as the value of
-*          ILAENV.
+*  ispec   (input) integer
+*          specifies the parameter to be returned as the value of
+*          ilaenv.
 *          = 1: the optimal blocksize; if this value is 1, an unblocked
 *               algorithm will give the best performance.
 *          = 2: the minimum block size for which the block routine
 *               should be used; if the usable block size is less than
 *               this value, an unblocked routine should be used.
-*          = 3: the crossover point (in a block routine, for N less
+*          = 3: the crossover point (in a block routine, for n less
 *               than this value, an unblocked routine should be used)
 *          = 4: the number of shifts, used in the nonsymmetric
 *               eigenvalue routines
 *          = 5: the minimum column dimension for blocking to be used;
 *               rectangular blocks must have dimension at least k by m,
-*               where k is given by ILAENV(2,...) and m by ILAENV(5,...)
-*          = 6: the crossover point for the SVD (when reducing an m by n
+*               where k is given by ilaenv(2,...) and m by ilaenv(5,...)
+*          = 6: the crossover point for the svd (when reducing an m by n
 *               matrix to bidiagonal form, if max(m,n)/min(m,n) exceeds
-*               this value, a QR factorization is used first to reduce
+*               this value, a qr factorization is used first to reduce
 *               the matrix to a triangular form.)
 *          = 7: the number of processors
-*          = 8: the crossover point for the multishift QR and QZ methods
+*          = 8: the crossover point for the multishift qr and qz methods
 *               for nonsymmetric eigenvalue problems.
 *
-*  NAME    (input) CHARACTER*(*)
-*          The name of the calling subroutine, in either upper case or
+*  name    (input) character*(*)
+*          the name of the calling subroutine, in either upper case or
 *          lower case.
 *
-*  OPTS    (input) CHARACTER*(*)
-*          The character options to the subroutine NAME, concatenated
-*          into a single character string.  For example, UPLO = 'U',
-*          TRANS = 'T', and DIAG = 'N' for a triangular routine would
-*          be specified as OPTS = 'UTN'.
+*  opts    (input) character*(*)
+*          the character options to the subroutine name, concatenated
+*          into a single character string.  for example, uplo = 'u',
+*          trans = 't', and diag = 'n' for a triangular routine would
+*          be specified as opts = 'utn'.
 *
-*  N1      (input) INTEGER
-*  N2      (input) INTEGER
-*  N3      (input) INTEGER
-*  N4      (input) INTEGER
-*          Problem dimensions for the subroutine NAME; these may not all
+*  n1      (input) integer
+*  n2      (input) integer
+*  n3      (input) integer
+*  n4      (input) integer
+*          problem dimensions for the subroutine name; these may not all
 *          be required.
 *
-* (ILAENV) (output) INTEGER
-*          >= 0: the value of the parameter specified by ISPEC
-*          < 0:  if ILAENV = -k, the k-th argument had an illegal value.
+* (ilaenv) (output) integer
+*          >= 0: the value of the parameter specified by ispec
+*          < 0:  if ilaenv = -k, the k-th argument had an illegal value.
 *
-*  Further Details
+*  further details
 *  ===============
 *
-*  The following conventions have been used when calling ILAENV from the
-*  LAPACK routines:
-*  1)  OPTS is a concatenation of all of the character options to
-*      subroutine NAME, in the same order that they appear in the
-*      argument list for NAME, even if they are not used in determining
-*      the value of the parameter specified by ISPEC.
-*  2)  The problem dimensions N1, N2, N3, N4 are specified in the order
-*      that they appear in the argument list for NAME.  N1 is used
-*      first, N2 second, and so on, and unused problem dimensions are
+*  the following conventions have been used when calling ilaenv from the
+*  lapack routines:
+*  1)  opts is a concatenation of all of the character options to
+*      subroutine name, in the same order that they appear in the
+*      argument list for name, even if they are not used in determining
+*      the value of the parameter specified by ispec.
+*  2)  the problem dimensions n1, n2, n3, n4 are specified in the order
+*      that they appear in the argument list for name.  n1 is used
+*      first, n2 second, and so on, and unused problem dimensions are
 *      passed a value of -1.
-*  3)  The parameter value returned by ILAENV is checked for validity in
-*      the calling subroutine.  For example, ILAENV is used to retrieve
-*      the optimal blocksize for STRTRI as follows:
+*  3)  the parameter value returned by ilaenv is checked for validity in
+*      the calling subroutine.  for example, ilaenv is used to retrieve
+*      the optimal blocksize for strtri as follows:
 *
-*      NB = ILAENV( 1, 'STRTRI', UPLO // DIAG, N, -1, -1, -1 )
-*      IF( NB.LE.1 ) NB = MAX( 1, N )
+*      nb = ilaenv( 1, 'strtri', uplo // diag, n, -1, -1, -1 )
+*      if( nb.le.1 ) nb = max( 1, n )
 *
 *  =====================================================================
 *
-*     .. Local Scalars ..
-      LOGICAL            CNAME, SNAME
-      CHARACTER*1        C1
-      CHARACTER*2        C2, C4
-      CHARACTER*3        C3
-      CHARACTER*6        SUBNAM
-      INTEGER            I, IC, IZ, NB, NBMIN, NX
+*     .. local scalars ..
+      logical            cname, sname
+      character*1        c1
+      character*2        c2, c4
+      character*3        c3
+      character*6        subnam
+      integer            i, ic, iz, nb, nbmin, nx
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          CHAR, ICHAR, INT, MIN, REAL
+*     .. intrinsic functions ..
+      intrinsic          char, ichar, int, min, real
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      GO TO ( 100, 100, 100, 400, 500, 600, 700, 800 ) ISPEC
+      go to ( 100, 100, 100, 400, 500, 600, 700, 800 ) ispec
 *
-*     Invalid value for ISPEC
+*     invalid value for ispec
 *
-      ILAENV = -1
-      RETURN
+      ilaenv = -1
+      return
 *
-  100 CONTINUE
+  100 continue
 *
-*     Convert NAME to upper case if the first character is lower case.
+*     convert name to upper case if the first character is lower case.
 *
-      ILAENV = 1
-      SUBNAM = NAME
-      IC = ICHAR( SUBNAM( 1:1 ) )
-      IZ = ICHAR( 'Z' )
-      IF( IZ.EQ.90 .OR. IZ.EQ.122 ) THEN
+      ilaenv = 1
+      subnam = name
+      ic = ichar( subnam( 1:1 ) )
+      iz = ichar( 'z' )
+      if( iz.eq.90 .or. iz.eq.122 ) then
 *
-*        ASCII character set
+*        ascii character set
 *
-         IF( IC.GE.97 .AND. IC.LE.122 ) THEN
-            SUBNAM( 1:1 ) = CHAR( IC-32 )
-            DO 10 I = 2, 6
-               IC = ICHAR( SUBNAM( I:I ) )
-               IF( IC.GE.97 .AND. IC.LE.122 )
-     $            SUBNAM( I:I ) = CHAR( IC-32 )
-   10       CONTINUE
-         END IF
+         if( ic.ge.97 .and. ic.le.122 ) then
+            subnam( 1:1 ) = char( ic-32 )
+            do 10 i = 2, 6
+               ic = ichar( subnam( i:i ) )
+               if( ic.ge.97 .and. ic.le.122 )
+     $            subnam( i:i ) = char( ic-32 )
+   10       continue
+         end if
 *
-      ELSE IF( IZ.EQ.233 .OR. IZ.EQ.169 ) THEN
+      else if( iz.eq.233 .or. iz.eq.169 ) then
 *
-*        EBCDIC character set
+*        ebcdic character set
 *
-         IF( ( IC.GE.129 .AND. IC.LE.137 ) .OR.
-     $       ( IC.GE.145 .AND. IC.LE.153 ) .OR.
-     $       ( IC.GE.162 .AND. IC.LE.169 ) ) THEN
-            SUBNAM( 1:1 ) = CHAR( IC+64 )
-            DO 20 I = 2, 6
-               IC = ICHAR( SUBNAM( I:I ) )
-               IF( ( IC.GE.129 .AND. IC.LE.137 ) .OR.
-     $             ( IC.GE.145 .AND. IC.LE.153 ) .OR.
-     $             ( IC.GE.162 .AND. IC.LE.169 ) )
-     $            SUBNAM( I:I ) = CHAR( IC+64 )
-   20       CONTINUE
-         END IF
+         if( ( ic.ge.129 .and. ic.le.137 ) .or.
+     $       ( ic.ge.145 .and. ic.le.153 ) .or.
+     $       ( ic.ge.162 .and. ic.le.169 ) ) then
+            subnam( 1:1 ) = char( ic+64 )
+            do 20 i = 2, 6
+               ic = ichar( subnam( i:i ) )
+               if( ( ic.ge.129 .and. ic.le.137 ) .or.
+     $             ( ic.ge.145 .and. ic.le.153 ) .or.
+     $             ( ic.ge.162 .and. ic.le.169 ) )
+     $            subnam( i:i ) = char( ic+64 )
+   20       continue
+         end if
 *
-      ELSE IF( IZ.EQ.218 .OR. IZ.EQ.250 ) THEN
+      else if( iz.eq.218 .or. iz.eq.250 ) then
 *
-*        Prime machines:  ASCII+128
+*        prime machines:  ascii+128
 *
-         IF( IC.GE.225 .AND. IC.LE.250 ) THEN
-            SUBNAM( 1:1 ) = CHAR( IC-32 )
-            DO 30 I = 2, 6
-               IC = ICHAR( SUBNAM( I:I ) )
-               IF( IC.GE.225 .AND. IC.LE.250 )
-     $            SUBNAM( I:I ) = CHAR( IC-32 )
-   30       CONTINUE
-         END IF
-      END IF
+         if( ic.ge.225 .and. ic.le.250 ) then
+            subnam( 1:1 ) = char( ic-32 )
+            do 30 i = 2, 6
+               ic = ichar( subnam( i:i ) )
+               if( ic.ge.225 .and. ic.le.250 )
+     $            subnam( i:i ) = char( ic-32 )
+   30       continue
+         end if
+      end if
 *
-      C1 = SUBNAM( 1:1 )
-      SNAME = C1.EQ.'S' .OR. C1.EQ.'D'
-      CNAME = C1.EQ.'C' .OR. C1.EQ.'Z'
-      IF( .NOT.( CNAME .OR. SNAME ) )
-     $   RETURN
-      C2 = SUBNAM( 2:3 )
-      C3 = SUBNAM( 4:6 )
-      C4 = C3( 2:3 )
+      c1 = subnam( 1:1 )
+      sname = c1.eq.'s' .or. c1.eq.'d'
+      cname = c1.eq.'c' .or. c1.eq.'z'
+      if( .not.( cname .or. sname ) )
+     $   return
+      c2 = subnam( 2:3 )
+      c3 = subnam( 4:6 )
+      c4 = c3( 2:3 )
 *
-      GO TO ( 110, 200, 300 ) ISPEC
+      go to ( 110, 200, 300 ) ispec
 *
-  110 CONTINUE
+  110 continue
 *
-*     ISPEC = 1:  block size
+*     ispec = 1:  block size
 *
-*     In these examples, separate code is provided for setting NB for
-*     real and complex.  We assume that NB will take the same value in
+*     in these examples, separate code is provided for setting nb for
+*     real and complex.  we assume that nb will take the same value in
 *     single or double precision.
 *
-      NB = 1
+      nb = 1
 *
-      IF( C2.EQ.'GE' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            IF( SNAME ) THEN
-               NB = 64
-            ELSE
-               NB = 64
-            END IF
-         ELSE IF( C3.EQ.'QRF' .OR. C3.EQ.'RQF' .OR. C3.EQ.'LQF' .OR.
-     $            C3.EQ.'QLF' ) THEN
-            IF( SNAME ) THEN
-               NB = 32
-            ELSE
-               NB = 32
-            END IF
-         ELSE IF( C3.EQ.'HRD' ) THEN
-            IF( SNAME ) THEN
-               NB = 32
-            ELSE
-               NB = 32
-            END IF
-         ELSE IF( C3.EQ.'BRD' ) THEN
-            IF( SNAME ) THEN
-               NB = 32
-            ELSE
-               NB = 32
-            END IF
-         ELSE IF( C3.EQ.'TRI' ) THEN
-            IF( SNAME ) THEN
-               NB = 64
-            ELSE
-               NB = 64
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'PO' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            IF( SNAME ) THEN
-               NB = 64
-            ELSE
-               NB = 64
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'SY' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            IF( SNAME ) THEN
-               NB = 64
-            ELSE
-               NB = 64
-            END IF
-         ELSE IF( SNAME .AND. C3.EQ.'TRD' ) THEN
-            NB = 1
-         ELSE IF( SNAME .AND. C3.EQ.'GST' ) THEN
-            NB = 64
-         END IF
-      ELSE IF( CNAME .AND. C2.EQ.'HE' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            NB = 64
-         ELSE IF( C3.EQ.'TRD' ) THEN
-            NB = 1
-         ELSE IF( C3.EQ.'GST' ) THEN
-            NB = 64
-         END IF
-      ELSE IF( SNAME .AND. C2.EQ.'OR' ) THEN
-         IF( C3( 1:1 ).EQ.'G' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NB = 32
-            END IF
-         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NB = 32
-            END IF
-         END IF
-      ELSE IF( CNAME .AND. C2.EQ.'UN' ) THEN
-         IF( C3( 1:1 ).EQ.'G' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NB = 32
-            END IF
-         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NB = 32
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'GB' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            IF( SNAME ) THEN
-               IF( N4.LE.64 ) THEN
-                  NB = 1
-               ELSE
-                  NB = 32
-               END IF
-            ELSE
-               IF( N4.LE.64 ) THEN
-                  NB = 1
-               ELSE
-                  NB = 32
-               END IF
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'PB' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            IF( SNAME ) THEN
-               IF( N2.LE.64 ) THEN
-                  NB = 1
-               ELSE
-                  NB = 32
-               END IF
-            ELSE
-               IF( N2.LE.64 ) THEN
-                  NB = 1
-               ELSE
-                  NB = 32
-               END IF
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'TR' ) THEN
-         IF( C3.EQ.'TRI' ) THEN
-            IF( SNAME ) THEN
-               NB = 64
-            ELSE
-               NB = 64
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'LA' ) THEN
-         IF( C3.EQ.'UUM' ) THEN
-            IF( SNAME ) THEN
-               NB = 64
-            ELSE
-               NB = 64
-            END IF
-         END IF
-      ELSE IF( SNAME .AND. C2.EQ.'ST' ) THEN
-         IF( C3.EQ.'EBZ' ) THEN
-            NB = 1
-         END IF
-      END IF
-      ILAENV = NB
-      RETURN
+      if( c2.eq.'ge' ) then
+         if( c3.eq.'trf' ) then
+            if( sname ) then
+               nb = 64
+            else
+               nb = 64
+            end if
+         else if( c3.eq.'qrf' .or. c3.eq.'rqf' .or. c3.eq.'lqf' .or.
+     $            c3.eq.'qlf' ) then
+            if( sname ) then
+               nb = 32
+            else
+               nb = 32
+            end if
+         else if( c3.eq.'hrd' ) then
+            if( sname ) then
+               nb = 32
+            else
+               nb = 32
+            end if
+         else if( c3.eq.'brd' ) then
+            if( sname ) then
+               nb = 32
+            else
+               nb = 32
+            end if
+         else if( c3.eq.'tri' ) then
+            if( sname ) then
+               nb = 64
+            else
+               nb = 64
+            end if
+         end if
+      else if( c2.eq.'po' ) then
+         if( c3.eq.'trf' ) then
+            if( sname ) then
+               nb = 64
+            else
+               nb = 64
+            end if
+         end if
+      else if( c2.eq.'sy' ) then
+         if( c3.eq.'trf' ) then
+            if( sname ) then
+               nb = 64
+            else
+               nb = 64
+            end if
+         else if( sname .and. c3.eq.'trd' ) then
+            nb = 1
+         else if( sname .and. c3.eq.'gst' ) then
+            nb = 64
+         end if
+      else if( cname .and. c2.eq.'he' ) then
+         if( c3.eq.'trf' ) then
+            nb = 64
+         else if( c3.eq.'trd' ) then
+            nb = 1
+         else if( c3.eq.'gst' ) then
+            nb = 64
+         end if
+      else if( sname .and. c2.eq.'or' ) then
+         if( c3( 1:1 ).eq.'g' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nb = 32
+            end if
+         else if( c3( 1:1 ).eq.'m' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nb = 32
+            end if
+         end if
+      else if( cname .and. c2.eq.'un' ) then
+         if( c3( 1:1 ).eq.'g' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nb = 32
+            end if
+         else if( c3( 1:1 ).eq.'m' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nb = 32
+            end if
+         end if
+      else if( c2.eq.'gb' ) then
+         if( c3.eq.'trf' ) then
+            if( sname ) then
+               if( n4.le.64 ) then
+                  nb = 1
+               else
+                  nb = 32
+               end if
+            else
+               if( n4.le.64 ) then
+                  nb = 1
+               else
+                  nb = 32
+               end if
+            end if
+         end if
+      else if( c2.eq.'pb' ) then
+         if( c3.eq.'trf' ) then
+            if( sname ) then
+               if( n2.le.64 ) then
+                  nb = 1
+               else
+                  nb = 32
+               end if
+            else
+               if( n2.le.64 ) then
+                  nb = 1
+               else
+                  nb = 32
+               end if
+            end if
+         end if
+      else if( c2.eq.'tr' ) then
+         if( c3.eq.'tri' ) then
+            if( sname ) then
+               nb = 64
+            else
+               nb = 64
+            end if
+         end if
+      else if( c2.eq.'la' ) then
+         if( c3.eq.'uum' ) then
+            if( sname ) then
+               nb = 64
+            else
+               nb = 64
+            end if
+         end if
+      else if( sname .and. c2.eq.'st' ) then
+         if( c3.eq.'ebz' ) then
+            nb = 1
+         end if
+      end if
+      ilaenv = nb
+      return
 *
-  200 CONTINUE
+  200 continue
 *
-*     ISPEC = 2:  minimum block size
+*     ispec = 2:  minimum block size
 *
-      NBMIN = 2
-      IF( C2.EQ.'GE' ) THEN
-         IF( C3.EQ.'QRF' .OR. C3.EQ.'RQF' .OR. C3.EQ.'LQF' .OR.
-     $       C3.EQ.'QLF' ) THEN
-            IF( SNAME ) THEN
-               NBMIN = 2
-            ELSE
-               NBMIN = 2
-            END IF
-         ELSE IF( C3.EQ.'HRD' ) THEN
-            IF( SNAME ) THEN
-               NBMIN = 2
-            ELSE
-               NBMIN = 2
-            END IF
-         ELSE IF( C3.EQ.'BRD' ) THEN
-            IF( SNAME ) THEN
-               NBMIN = 2
-            ELSE
-               NBMIN = 2
-            END IF
-         ELSE IF( C3.EQ.'TRI' ) THEN
-            IF( SNAME ) THEN
-               NBMIN = 2
-            ELSE
-               NBMIN = 2
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'SY' ) THEN
-         IF( C3.EQ.'TRF' ) THEN
-            IF( SNAME ) THEN
-               NBMIN = 8
-            ELSE
-               NBMIN = 8
-            END IF
-         ELSE IF( SNAME .AND. C3.EQ.'TRD' ) THEN
-            NBMIN = 2
-         END IF
-      ELSE IF( CNAME .AND. C2.EQ.'HE' ) THEN
-         IF( C3.EQ.'TRD' ) THEN
-            NBMIN = 2
-         END IF
-      ELSE IF( SNAME .AND. C2.EQ.'OR' ) THEN
-         IF( C3( 1:1 ).EQ.'G' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NBMIN = 2
-            END IF
-         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NBMIN = 2
-            END IF
-         END IF
-      ELSE IF( CNAME .AND. C2.EQ.'UN' ) THEN
-         IF( C3( 1:1 ).EQ.'G' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NBMIN = 2
-            END IF
-         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NBMIN = 2
-            END IF
-         END IF
-      END IF
-      ILAENV = NBMIN
-      RETURN
+      nbmin = 2
+      if( c2.eq.'ge' ) then
+         if( c3.eq.'qrf' .or. c3.eq.'rqf' .or. c3.eq.'lqf' .or.
+     $       c3.eq.'qlf' ) then
+            if( sname ) then
+               nbmin = 2
+            else
+               nbmin = 2
+            end if
+         else if( c3.eq.'hrd' ) then
+            if( sname ) then
+               nbmin = 2
+            else
+               nbmin = 2
+            end if
+         else if( c3.eq.'brd' ) then
+            if( sname ) then
+               nbmin = 2
+            else
+               nbmin = 2
+            end if
+         else if( c3.eq.'tri' ) then
+            if( sname ) then
+               nbmin = 2
+            else
+               nbmin = 2
+            end if
+         end if
+      else if( c2.eq.'sy' ) then
+         if( c3.eq.'trf' ) then
+            if( sname ) then
+               nbmin = 8
+            else
+               nbmin = 8
+            end if
+         else if( sname .and. c3.eq.'trd' ) then
+            nbmin = 2
+         end if
+      else if( cname .and. c2.eq.'he' ) then
+         if( c3.eq.'trd' ) then
+            nbmin = 2
+         end if
+      else if( sname .and. c2.eq.'or' ) then
+         if( c3( 1:1 ).eq.'g' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nbmin = 2
+            end if
+         else if( c3( 1:1 ).eq.'m' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nbmin = 2
+            end if
+         end if
+      else if( cname .and. c2.eq.'un' ) then
+         if( c3( 1:1 ).eq.'g' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nbmin = 2
+            end if
+         else if( c3( 1:1 ).eq.'m' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nbmin = 2
+            end if
+         end if
+      end if
+      ilaenv = nbmin
+      return
 *
-  300 CONTINUE
+  300 continue
 *
-*     ISPEC = 3:  crossover point
+*     ispec = 3:  crossover point
 *
-      NX = 0
-      IF( C2.EQ.'GE' ) THEN
-         IF( C3.EQ.'QRF' .OR. C3.EQ.'RQF' .OR. C3.EQ.'LQF' .OR.
-     $       C3.EQ.'QLF' ) THEN
-            IF( SNAME ) THEN
-               NX = 128
-            ELSE
-               NX = 128
-            END IF
-         ELSE IF( C3.EQ.'HRD' ) THEN
-            IF( SNAME ) THEN
-               NX = 128
-            ELSE
-               NX = 128
-            END IF
-         ELSE IF( C3.EQ.'BRD' ) THEN
-            IF( SNAME ) THEN
-               NX = 128
-            ELSE
-               NX = 128
-            END IF
-         END IF
-      ELSE IF( C2.EQ.'SY' ) THEN
-         IF( SNAME .AND. C3.EQ.'TRD' ) THEN
-            NX = 1
-         END IF
-      ELSE IF( CNAME .AND. C2.EQ.'HE' ) THEN
-         IF( C3.EQ.'TRD' ) THEN
-            NX = 1
-         END IF
-      ELSE IF( SNAME .AND. C2.EQ.'OR' ) THEN
-         IF( C3( 1:1 ).EQ.'G' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NX = 128
-            END IF
-         END IF
-      ELSE IF( CNAME .AND. C2.EQ.'UN' ) THEN
-         IF( C3( 1:1 ).EQ.'G' ) THEN
-            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
-     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
-     $          C4.EQ.'BR' ) THEN
-               NX = 128
-            END IF
-         END IF
-      END IF
-      ILAENV = NX
-      RETURN
+      nx = 0
+      if( c2.eq.'ge' ) then
+         if( c3.eq.'qrf' .or. c3.eq.'rqf' .or. c3.eq.'lqf' .or.
+     $       c3.eq.'qlf' ) then
+            if( sname ) then
+               nx = 128
+            else
+               nx = 128
+            end if
+         else if( c3.eq.'hrd' ) then
+            if( sname ) then
+               nx = 128
+            else
+               nx = 128
+            end if
+         else if( c3.eq.'brd' ) then
+            if( sname ) then
+               nx = 128
+            else
+               nx = 128
+            end if
+         end if
+      else if( c2.eq.'sy' ) then
+         if( sname .and. c3.eq.'trd' ) then
+            nx = 1
+         end if
+      else if( cname .and. c2.eq.'he' ) then
+         if( c3.eq.'trd' ) then
+            nx = 1
+         end if
+      else if( sname .and. c2.eq.'or' ) then
+         if( c3( 1:1 ).eq.'g' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nx = 128
+            end if
+         end if
+      else if( cname .and. c2.eq.'un' ) then
+         if( c3( 1:1 ).eq.'g' ) then
+            if( c4.eq.'qr' .or. c4.eq.'rq' .or. c4.eq.'lq' .or.
+     $          c4.eq.'ql' .or. c4.eq.'hr' .or. c4.eq.'tr' .or.
+     $          c4.eq.'br' ) then
+               nx = 128
+            end if
+         end if
+      end if
+      ilaenv = nx
+      return
 *
-  400 CONTINUE
+  400 continue
 *
-*     ISPEC = 4:  number of shifts (used by xHSEQR)
+*     ispec = 4:  number of shifts (used by xhseqr)
 *
-      ILAENV = 6
-      RETURN
+      ilaenv = 6
+      return
 *
-  500 CONTINUE
+  500 continue
 *
-*     ISPEC = 5:  minimum column dimension (not used)
+*     ispec = 5:  minimum column dimension (not used)
 *
-      ILAENV = 2
-      RETURN
+      ilaenv = 2
+      return
 *
-  600 CONTINUE 
+  600 continue 
 *
-*     ISPEC = 6:  crossover point for SVD (used by xGELSS and xGESVD)
+*     ispec = 6:  crossover point for svd (used by xgelss and xgesvd)
 *
-      ILAENV = INT( REAL( MIN( N1, N2 ) )*1.6E0 )
-      RETURN
+      ilaenv = int( real( min( n1, n2 ) )*1.6e0 )
+      return
 *
-  700 CONTINUE
+  700 continue
 *
-*     ISPEC = 7:  number of processors (not used)
+*     ispec = 7:  number of processors (not used)
 *
-      ILAENV = 1
-      RETURN
+      ilaenv = 1
+      return
 *
-  800 CONTINUE
+  800 continue
 *
-*     ISPEC = 8:  crossover point for multishift (used by xHSEQR)
+*     ispec = 8:  crossover point for multishift (used by xhseqr)
 *
-      ILAENV = 50
-      RETURN
+      ilaenv = 50
+      return
 *
-*     End of ILAENV
+*     end of ilaenv
 *
-      END
+      end

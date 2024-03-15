@@ -1,32 +1,32 @@
       subroutine pngunpack(cpack,len,idrstmpl,ndpts,fld)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    pngunpack
-!   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2000-06-21
+! subprogram:    pngunpack
+!   prgmmr: gilbert          org: w/np11    date: 2000-06-21
 !
-! ABSTRACT: This subroutine unpacks a data field that was packed into a
-!   PNG image format 
-!   using info from the GRIB2 Data Representation Template 5.41 or 5.40010.
+! abstract: this subroutine unpacks a data field that was packed into a
+!   png image format 
+!   using info from the grib2 data representation template 5.41 or 5.40010.
 !
-! PROGRAM HISTORY LOG:
-! 2000-06-21  Gilbert
+! program history log:
+! 2000-06-21  gilbert
 !
-! USAGE:    CALL pngunpack(cpack,len,idrstmpl,ndpts,fld)
-!   INPUT ARGUMENT LIST:
-!     cpack    - The packed data field (character*1 array)
+! usage:    call pngunpack(cpack,len,idrstmpl,ndpts,fld)
+!   input argument list:
+!     cpack    - the packed data field (character*1 array)
 !     len      - length of packed field cpack().
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.41 or 5.40010
-!     ndpts    - The number of data values to unpack
+!     idrstmpl - contains the array of values for data representation
+!                template 5.41 or 5.40010
+!     ndpts    - the number of data values to unpack
 !
-!   OUTPUT ARGUMENT LIST:
-!     fld()    - Contains the unpacked data values
+!   output argument list:
+!     fld()    - contains the unpacked data values
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: XL Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: xl fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -40,7 +40,7 @@
       integer(4) :: ieee
       real :: ref,bscale,dscale
       integer :: dec_png,width,height
-#ifdef USE_PNG
+#ifdef use_png
 
       ieee = idrstmpl(1)
       call rdieee(ieee,ref,1)
@@ -56,7 +56,7 @@
          allocate(ctemp(ndpts*4))
 !        iret=dec_png(cpack,width,height,ctemp)
          write(6,*)
-     1     ' ERROR in pngunpack.F: attempt to use unavailable routines' 
+     1     ' error in pngunpack.f: attempt to use unavailable routines' 
          stop
          call gbytes(ctemp,ifld,0,nbits,0,ndpts)
          deallocate(ctemp)
@@ -70,6 +70,6 @@
       endif
 
 
-#endif /* USE_PNG */
+#endif /* use_png */
       return
       end

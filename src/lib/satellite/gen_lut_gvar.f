@@ -1,20 +1,20 @@
-      Subroutine gen_gvarimage_lut(isat,jtype,kchl,
+      subroutine gen_gvarimage_lut(isat,jtype,kchl,
      &nx_l,ny_l,lat,lon,ri_laps,rj_laps,istatus)
 c
       implicit none
 c
-      Include       'instco.inc'
+      include       'instco.inc'
 
-      Integer     nx_l,ny_l
-      Integer     isat
-      Integer     jtype
-      Integer     kchl
+      integer     nx_l,ny_l
+      integer     isat
+      integer     jtype
+      integer     kchl
 
-      Integer       idx
+      integer       idx
       parameter    (idx=20)
 
-      Integer       nxe,nye
-      Integer       nx,ny
+      integer       nxe,nye
+      integer       nx,ny
 c
       real        lat(nx_l,ny_l)
       real        lon(nx_l,ny_l)
@@ -62,78 +62,78 @@ c
       real        time_50,time50
 
       real*8        r8lat,r8lon
-      real*8        ELEV,SCAN
-      real*8        RL, RP
-      real*8        orbAt(336)
+      real*8        elev,scan
+      real*8        rl, rp
+      real*8        orbat(336)
       real*8        t50_8, t, f_time
-      real*8       SatSubLAT,SatSubLON
+      real*8       satsublat,satsublon
 c
-      Integer     start_line
-      Integer     start_pix
-      Integer     i1,j1
-      Integer     x_step
-      Integer     y_step
-      Integer     xres,yres
-      Integer     cstatus
-      Integer     istatus
-      Integer     gstatus
-      Integer     ustatus
-      Integer     wstatus
-      Integer     IERR
-      Integer     expansion,ifactor
-      Integer     instr
-      Integer     i,j,ii,jj
-      Integer     n,n1,n2,nc,nl
-      Integer     ils,ile
-      Integer     nsCycles,nsIncs
-      Integer     ewCycles,ewIncs
-      Integer     time_spec(2)
-      Integer     npoints_out
-      Integer     nijout
-      Integer     lend
-      Integer     strpix,strscnl,stppix,stpscnl 
-      Integer     reqobstm,decimat
-      Integer     istrbdy1,istrbdy2,istpbdy1,istpbdy2
-      Integer     bepixfc,bescnfc,iwidth,idepth,fsci
+      integer     start_line
+      integer     start_pix
+      integer     i1,j1
+      integer     x_step
+      integer     y_step
+      integer     xres,yres
+      integer     cstatus
+      integer     istatus
+      integer     gstatus
+      integer     ustatus
+      integer     wstatus
+      integer     ierr
+      integer     expansion,ifactor
+      integer     instr
+      integer     i,j,ii,jj
+      integer     n,n1,n2,nc,nl
+      integer     ils,ile
+      integer     nscycles,nsincs
+      integer     ewcycles,ewincs
+      integer     time_spec(2)
+      integer     npoints_out
+      integer     nijout
+      integer     lend
+      integer     strpix,strscnl,stppix,stpscnl 
+      integer     reqobstm,decimat
+      integer     istrbdy1,istrbdy2,istpbdy1,istpbdy2
+      integer     bepixfc,bescnfc,iwidth,idepth,fsci
 
       logical     lwrite 
       data lwrite/.true./
 
-      Integer     linestart,lineend
-      Integer     elemstart,elemend
+      integer     linestart,lineend
+      integer     elemstart,elemend
 
-      Integer     linestart_orig
-      Integer     lineend_orig
-      Integer     elemstart_orig
-      Integer     elemend_orig
+      integer     linestart_orig
+      integer     lineend_orig
+      integer     elemstart_orig
+      integer     elemend_orig
 
-      Integer     idiff_org
-      Integer     idiff_new
-      Integer     jdiff_org
-      Integer     jdiff_new
+      integer     idiff_org
+      integer     idiff_new
+      integer     jdiff_org
+      integer     jdiff_new
       integer     indx
 
-      Real        rdum
-      Integer     strtpix,strtline
-      Integer     stoppix,stopline
+      real        rdum
+      integer     strtpix,strtline
+      integer     stoppix,stopline
 
-      Character     cfilename*255
-c     Character     filename_sat*200
-      Character     path*255
-      Character     cname*100
-      Character     c_afwa_fname*100
-      Character     cdir*200
-      Character     table_path*200
-c     Character     cmode*10
+      character     cfilename*255
+c     character     filename_sat*200
+      character     path*255
+      character     cname*100
+      character     c_afwa_fname*100
+      character     cdir*200
+      character     table_path*200
+c     character     cmode*10
       character     c_imc(4)*1
       character     ct*3,csattype*3,cty*3
-      Character     image_type*2
+      character     image_type*2
       character     c6_maproj_ret*6
       character     cchantype*3
 c
-c The technique used here is to make a slightly larger domain
+c the technique used here is to make a slightly larger domain
 c (1 grid point larger on each side) and use this to compute
-c the remapping lut. This insures that we have enough data on
+c the remapping lut. this insures that we have enough data on
 c the edges when either interpolating or averaging during the
 c remapping process (ie, in lvd_sat_ingest).
 c
@@ -184,7 +184,7 @@ c        if(.not.lfirst(jtype,isat))then
 c           lfirst(jtype,isat)=.true.
 c        else
 c
-c only need to generate IR lut once. Removed by JS: 10-5-06
+c only need to generate ir lut once. removed by js: 10-5-06
 c
 c           return
 
@@ -206,21 +206,21 @@ c
      &                         csattype,l_cell_afwa,
      &                         cchantype,
      &             path_to_raw_sat(kchl,jtype,isat),
-     &                         ewCycles,ewIncs,
-     &                         nsCycles,nsIncs,
+     &                         ewcycles,ewincs,
+     &                         nscycles,nsincs,
      &                         f_time,
      &                         c_imc,
      &                         xres,yres,
      &                         start_pix,start_line,
-     &                         orbAt,
-     &                         SatSubLAT,SatSubLON,
+     &                         orbat,
+     &                         satsublat,satsublon,
      &                         x_step,y_step,
      &                         nx,ny,
      &                         ustatus)
 
       if(ustatus.ne.0)then
          if(ustatus.eq.1)then
-            print*,'GVAR parameters not obtained cannot proceed'
+            print*,'gvar parameters not obtained cannot proceed'
             istatus =-1
             return
          else
@@ -228,11 +228,11 @@ c
          endif
       endif
 
-      write(6,*)' Returned from update_gvarimg_parms'
+      write(6,*)' returned from update_gvarimg_parms'
       write(6,*)' xres/yres = ',xres,yres
       write(6,*)' x_step/y_step = ',x_step,y_step
 c
-c get expanded domain lats/lons. Some of this code follows what
+c get expanded domain lats/lons. some of this code follows what
 c happens in gridgen_model.
 c
       if(xres.eq.0.0.or.yres.eq.0.0)then
@@ -245,13 +245,13 @@ c
             xres=8.
             yres=8.
          endif
-         write(6,*)' WARNING: Reset values from update_gvarimg_parms'
+         write(6,*)' warning: reset values from update_gvarimg_parms'
          write(6,*)' xres/yres = ',xres,yres
       endif
 
       call get_grid_spacing(grid_spacing_m,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error return from get_grid_spacing'     
+          write(6,*)' error return from get_grid_spacing'     
           return
       endif
 
@@ -270,9 +270,9 @@ c
         grid_spacing_m=(gssumx/(nx_l*ny_l)+gssumy/(nx_l*ny_l))/2.
       endif
 
-      print*,'Grid spacing (m): ',grid_spacing_m
+      print*,'grid spacing (m): ',grid_spacing_m
       if(grid_spacing_m.le.0.0)then
-        print*,'Oh no, grid spacing = 0'
+        print*,'oh no, grid spacing = 0'
         istatus = -1
         return
       endif
@@ -288,14 +288,14 @@ c
 
       call get_grid_center(mdlat,mdlon,istatus)
       if(istatus .ne. 1)then
-         write(6,*)' Error calling laps routine'
+         write(6,*)' error calling laps routine'
          return
       endif
       write(6,*)' grid_center = ',mdlat,mdlon
 
       call get_c6_maproj(c6_maproj_ret,istatus)
       if(istatus .ne. 1)then
-         print*,'Error return from get_c6_maproj'
+         print*,'error return from get_c6_maproj'
          return
       endif
       call downcase(c6_maproj_ret,c6_maproj_ret) 
@@ -314,7 +314,7 @@ c
       endif
 
       deltay=deltax
-      call POLAR_GPG(mdlat,mdlon,XMN(1),YMN(1),deltax,deltay,nxe,nye)
+      call polar_gpg(mdlat,mdlon,xmn(1),ymn(1),deltax,deltay,nxe,nye)
 
       do i=2,nxe
          xmn(i)=xmn(i-1)+deltax
@@ -335,7 +335,7 @@ c
 
       call get_earth_radius(erad,istatus)
       if(istatus .ne. 1)then
-         write(6,*)' Error calling get_earth_radius'
+         write(6,*)' error calling get_earth_radius'
          return
       endif
 
@@ -346,16 +346,16 @@ c
       enddo
 
 c if the gvar image data file ever changes, for example, data thinning is
-c applied, then the following values should change as well. These now obtained
+c applied, then the following values should change as well. these now obtained
 c from gvar data files.
 c
 c     x_step=1.0
 c     y_step=1.0
 c
-c currently AFWA goespatch is every other pixel and every scan line.
+c currently afwa goespatch is every other pixel and every scan line.
 c use r_thin to adjust appropriately
 c
-      print*,'Earth Location to line/elem look-up-table: '
+      print*,'earth location to line/elem look-up-table: '
      &,c_sat_id(isat)
       print*
 
@@ -365,11 +365,11 @@ c
         if(csattype.eq.'gwc')r_thin=2.0
         x_step=x_step*r_thin
 
-c JS: Test using the 4 vars below taken directly from the netCDF file
-c       ewCycles=i_ewCycles(jtype,isat)
-c       ewIncs=i_ewIncs(jtype,isat)
-c       nsCycles=i_nsCycles(jtype,isat)
-c       nsIncs=i_nsIncs(jtype,isat)
+c js: test using the 4 vars below taken directly from the netcdf file
+c       ewcycles=i_ewcycles(jtype,isat)
+c       ewincs=i_ewincs(jtype,isat)
+c       nscycles=i_nscycles(jtype,isat)
+c       nsincs=i_nsincs(jtype,isat)
 
         if(.true.)then ! new experimental code
             rp_div = xres
@@ -379,28 +379,28 @@ c       nsIncs=i_nsIncs(jtype,isat)
             rl_div = 4.0*y_step      !channels 2, 4, and 5 (3.9u, 11u, and 12u)
 
             if(ct(1:nc).eq.'wv '.and.csattype.ne.'gwc') then
-              rl_div = 8.0*y_step          !channel 3 = water vapor; only FSL public
+              rl_div = 8.0*y_step          !channel 3 = water vapor; only fsl public
             elseif (ct(1:nc).eq.'vis') then
               rp_div = x_step              !channel 1 = visible
               rl_div = y_step
             endif
         endif
 
-        instr=1          !1=Imager, 2=Sounder
+        instr=1          !1=imager, 2=sounder
         pi=3.141592653589793
         radtodeg=180.d0/pi
         degtorad=1./radtodeg
 
-        call bcd_to_int(orbAt(12),time_spec)
+        call bcd_to_int(orbat(12),time_spec)
         time_50 = time50(time_spec)
         t50_8=time_50
         t = f_time /60. + 7305. * 24. * 60.
 
-        call SETCON(instr,nsCycles,nsIncs,ewCycles,ewIncs)
-        call LMODEL(t,t50_8,OrbAt,imc,SatSubLAT,SatSubLON)
+        call setcon(instr,nscycles,nsincs,ewcycles,ewincs)
+        call lmodel(t,t50_8,orbat,imc,satsublat,satsublon)
 
-        write(6,*)'Sat Subpoint lat (deg) ',SatSubLAT*radtodeg
-        write(6,*)'Sat Subpoint lon (deg) ',SatSubLON*radtodeg
+        write(6,*)'sat subpoint lat (deg) ',satsublat*radtodeg
+        write(6,*)'sat subpoint lon (deg) ',satsublon*radtodeg
         write(6,*)'***********************************'
 
         cstatus = 0
@@ -412,42 +412,42 @@ c       nsIncs=i_nsIncs(jtype,isat)
           r8lat=xlat(i,j)*degtorad
           r8lon=xlon(i,j)*degtorad
 
-          call GPOINT(r8lat,r8lon,ELEV,SCAN,IERR)
-          if(IERR.ne.0)then
+          call gpoint(r8lat,r8lon,elev,scan,ierr)
+          if(ierr.ne.0)then
 
-c           write(6,*)'Error computing Elev/Scan in GPOINT from'
-c           write(6,*)'Lat/Lon ', xlat(i,j),xlon(i,j)
+c           write(6,*)'error computing elev/scan in gpoint from'
+c           write(6,*)'lat/lon ', xlat(i,j),xlon(i,j)
              rline(i,j)=-2.
              rpix(i,j)=-2.
              cstatus=cstatus-1
 
           else
 
-             call EVSC2L(instr,ELEV,SCAN,RL,RP)
+             call evsc2l(instr,elev,scan,rl,rp)
 
 c save corners
              if(i.eq.1.and.j.eq.1)then
-                swpixabs=RP
-                swlinabs=RL
+                swpixabs=rp
+                swlinabs=rl
              endif
              if(i.eq.1.and.j.eq.nye)then
-               nwpixabs=RP
-               nwlinabs=RL
+               nwpixabs=rp
+               nwlinabs=rl
              endif
              if(i.eq.nxe.and.j.eq.1)then
-                sepixabs=RP
-                selinabs=RL
+                sepixabs=rp
+                selinabs=rl
              endif
              if(i.eq.nxe.and.j.eq.nye)then
-                nepixabs=RP
-                nelinabs=RL
+                nepixabs=rp
+                nelinabs=rl
              endif
 
              if( idnint(rl).gt.0 .and. idnint(rl).le.25000 .and.
      &           idnint(rp).gt.0 .and. idnint(rp).le.30000) then
 
-                rline(i,j)=(RL-start_line+rl_div)/rl_div 
-                rpix(i,j)= (RP-start_pix+rp_div)/rp_div
+                rline(i,j)=(rl-start_line+rl_div)/rl_div 
+                rpix(i,j)= (rp-start_pix+rp_div)/rp_div
 
              else
 
@@ -462,7 +462,7 @@ c save corners
 
       else
 c
-c METEOSAT
+c meteosat
 c
         cdir=path_to_raw_sat(kchl,jtype,isat)
         cty=cchantype                             
@@ -476,7 +476,7 @@ c
      &iwidth,idepth,goalpha,istrbdy1,istrbdy2,istpbdy1,
      &istpbdy2,bepixfc,bescnfc,fsci,decimat,gstatus)
         if(gstatus.ne.0)then
-           write(6,*)'Error in read_gwc_header'
+           write(6,*)'error in read_gwc_header'
            istatus=-1
            goto 900
         endif
@@ -502,7 +502,7 @@ c
           rpix(i,j)= rmetx
 
           if(istatus.ne.0)then
-             print*,'Error in fc01_conv_pts_el_to_met_1'
+             print*,'error in fc01_conv_pts_el_to_met_1'
              goto 903
           endif
 
@@ -512,7 +512,7 @@ c
       endif
 
       if(lwrite)then
-         write(6,*)'Satellite points of LAPS domain corners'
+         write(6,*)'satellite points of laps domain corners'
          print*,   '---------------------------------------'
          print*,'lat/lon/x/y (1,1) = ',xlat(1,1),xlon(1,1),
      .rpix(1,1),rline(1,1)
@@ -523,7 +523,7 @@ c
          print*,'lat/lon/x/y (nx,ny) = ',xlat(nxe,nye),xlon(nxe,nye)
      .,rpix(nxe,nye),rline(nxe,nye)
 
-!        print*,'Absolute Satellite Pix/Line Coords:'
+!        print*,'absolute satellite pix/line coords:'
 !        print*,'-----------------------------------'
 !        do j = 1,nye,100
 !        do i = 1,nxe,100
@@ -536,41 +536,41 @@ c
 c     if(c_sat_id(isat) .eq. 'meteos')goto 777
 
       if(cstatus.lt.0)then
-        write(6,*)'WARNING! Some rl/rp values not computed '
-        write(6,*)'For Look-Up-Table ',csattype
+        write(6,*)'warning! some rl/rp values not computed '
+        write(6,*)'for look-up-table ',csattype
      +,' status = ',cstatus
-        write(6,*)'Earth location may not be viewable from',
+        write(6,*)'earth location may not be viewable from',
      +' satellite'
-        write(6,*)'Use data with caution!'
+        write(6,*)'use data with caution!'
 
 c       goto 903
       endif
 
       if(npoints_out .gt. 0)then
-         write(6,*)'WARNING! Some rl/rp values out of bounds'
-         write(6,*)'These would be absolute sat coordinates'
+         write(6,*)'warning! some rl/rp values out of bounds'
+         write(6,*)'these would be absolute sat coordinates'
       endif
 c
 c print corners
 c
-      write(6,*)'Absolute Sat Coords - Expanded Laps Domain'
+      write(6,*)'absolute sat coords - expanded laps domain'
       write(6,*)'------------------------------------------'
       write(6,120)nwpixabs,nwlinabs,nepixabs,nelinabs
       write(6,121)swpixabs,swlinabs,sepixabs,selinabs
 
-120   format(5x,'NW Pix/Line ',2f10.4,10x,'NE Pix/Line ',2f10.4)
-121   format(5x,'SW Pix/Line ',2f10.4,10x,'SE Pix/Line ',2f10.4)
+120   format(5x,'nw pix/line ',2f10.4,10x,'ne pix/line ',2f10.4)
+121   format(5x,'sw pix/line ',2f10.4,10x,'se pix/line ',2f10.4)
  
       write(6,*)
 c
 c compute relative lut
 c
-      write(6,*)' Call get_sat_boundary...'
+      write(6,*)' call get_sat_boundary...'
       call get_sat_boundary(nx_l,ny_l,nxe,nye,idx,ny,nx
      &,rpix,rline,linestart,lineend,elemstart,elemend,
      &rls,rle,res,ree,istatus)
       if(istatus.ne.1)then
-         write(6,*)'Note: Laps domain outside satellite data!'
+         write(6,*)'note: laps domain outside satellite data!'
       endif
 c
       idiff_org = elemend_orig - elemstart_orig
@@ -586,22 +586,22 @@ c
       else
 
          write(6,*)'gvar array sizes have changed!'
-         write(6,*)'Elem diffs: orig/new: ',idiff_org,idiff_new
-         write(6,*)'Line diffs: orig/new: ',jdiff_org,jdiff_new
+         write(6,*)'elem diffs: orig/new: ',idiff_org,idiff_new
+         write(6,*)'line diffs: orig/new: ',jdiff_org,jdiff_new
 
       endif
 
       if(elemstart_orig.ne.elemstart)then
-         write(6,*)'Element Start .ne. Original'
+         write(6,*)'element start .ne. original'
       endif
       if(elemend_orig.ne.elemend)then
-         write(6,*)'Element End .ne. Original'
+         write(6,*)'element end .ne. original'
       endif
       if(linestart_orig.ne.linestart)then
-         write(6,*)'Line Start .ne. Original'
+         write(6,*)'line start .ne. original'
       endif
       if(lineend_orig.ne.lineend)then
-         write(6,*)'Line End .ne. Original'
+         write(6,*)'line end .ne. original'
       endif
 c
 c compute ri, rj relative look up table for expanded domain.
@@ -647,12 +647,12 @@ c
       enddo
 c
       if(nijout.gt.0)then
-         print*,'Found ',nijout,' points outside domain'
+         print*,'found ',nijout,' points outside domain'
       endif
 
 777   if(lwrite)then
 
-         write(6,*)' Domain corner ri/rj_laps info:'
+         write(6,*)' domain corner ri/rj_laps info:'
          do j = 1,ny_l,ny_l-1
          do i = 1,nx_l,nx_l-1
             write(6,*)'i,j,ri,rj: ',i,j,ri_laps(i,j),rj_laps(i,j)
@@ -675,8 +675,8 @@ c
 c     call write_table (table_path,nx_l,ny_l,lat,lon,
 c    &ri_laps,rj_laps,wstatus)
 
-      r_sat_sub_lat(isat) = SatSubLAT
-      r_sat_sub_lon(isat) = SatSubLON
+      r_sat_sub_lat(isat) = satsublat
+      r_sat_sub_lon(isat) = satsublon
 
       if(elemstart.le.0)elemstart=1
       if(elemend.gt.nx)elemend=nx
@@ -685,11 +685,11 @@ c    &ri_laps,rj_laps,wstatus)
 
       print*,' 5-8-08 '
       print*,'-----------------------------------'
-      print*,'*** NOT USING compute_sat_res_m ***'
+      print*,'*** not using compute_sat_res_m ***'
       print*,'-----------------------------------'
 c
 c ------------------------------------------------------------------------
-c compute image resolution in meters. This done with the original line/pix
+c compute image resolution in meters. this done with the original line/pix
 c values since we use gimloc here.
 c ------------------------------------------------------------------------
 c
@@ -736,35 +736,35 @@ c     endif
 
       endif
  
-      if(.false.)call write_orb_att(path,c_sat_id(isat),336,orbAt)
+      if(.false.)call write_orb_att(path,c_sat_id(isat),336,orbat)
 
       istatus = 1
 
       goto 1000
 
-900   write(6,*)'Error opening ascii test file'
+900   write(6,*)'error opening ascii test file'
       istatus=-1
       goto 1000
 
-901   write(6,*)'Error in update_gvarimg_parmfile'
+901   write(6,*)'error in update_gvarimg_parmfile'
       istatus = -1
       goto 1000
 
-903   write(6,*)'Error computing rline/rpix - terminating'
+903   write(6,*)'error computing rline/rpix - terminating'
       istatus = -1
       goto 1000
 
-905   write(6,*)'Error writing gvarimg parmfile'
+905   write(6,*)'error writing gvarimg parmfile'
       istatus = -1
       goto 1000
 
-906   write(6,*)'Error writing satsector file'
+906   write(6,*)'error writing satsector file'
       goto 1000
 
-907   write(6,*)'Error - lvd_file_specifier'
+907   write(6,*)'error - lvd_file_specifier'
       goto 1000
 
-908   write(6,*)'Error in update_gvarimage_parmfile'
+908   write(6,*)'error in update_gvarimage_parmfile'
       istatus = -1
       goto 1000
 
@@ -773,41 +773,41 @@ c     endif
 
 c -------------------
 
-       SUBROUTINE POLAR_GPG(LAT,LON,X,Y,DX,DY,NX,NY)
-C
+       subroutine polar_gpg(lat,lon,x,y,dx,dy,nx,ny)
+c
       include 'trigd.inc'
-       REAL   LAT,LON,X,Y,DX,DY,
-     1        ERAD,TLAT,TLON                                      ! ,PLAT,PLON,
-     1        XDIF,YDIF
-C
-       INTEGER   NX,NY
-C
-       RAD=3.141592654/180.
+       real   lat,lon,x,y,dx,dy,
+     1        erad,tlat,tlon                                      ! ,plat,plon,
+     1        xdif,ydif
+c
+       integer   nx,ny
+c
+       rad=3.141592654/180.
 
        call get_earth_radius(erad,istatus)
        if(istatus .ne. 1)then
-           write(6,*)' Error calling get_earth_radius'
+           write(6,*)' error calling get_earth_radius'
            stop
        endif
 
-       TLAT=90.0
+       tlat=90.0
        call get_standard_longitude(std_lon,istatus)
        if(istatus .ne. 1)then
-           write(6,*)' Error calling laps routine'
+           write(6,*)' error calling laps routine'
            stop
        endif
-       TLON=std_lon
-C
-C      CALL GETOPS(PLAT,PLON,LAT,LON,TLAT,TLON)
-C      CALL PSTOXY(XDIF,YDIF,PLAT,PLON,ERAD)
+       tlon=std_lon
+c
+c      call getops(plat,plon,lat,lon,tlat,tlon)
+c      call pstoxy(xdif,ydif,plat,plon,erad)
 
-C      call latlon_to_xy(LAT,LON,TLAT,TLON,ERAD,XDIF,YDIF)
-       call latlon_to_xy(LAT,LON,ERAD,XDIF,YDIF)
+c      call latlon_to_xy(lat,lon,tlat,tlon,erad,xdif,ydif)
+       call latlon_to_xy(lat,lon,erad,xdif,ydif)
 
-C
-       X=XDIF+(1.-FLOAT(NX)/2.)*DX
-       Y=YDIF+(1.-FLOAT(NY)/2.)*DY
-C
-       RETURN
-C
-       END
+c
+       x=xdif+(1.-float(nx)/2.)*dx
+       y=ydif+(1.-float(ny)/2.)*dy
+c
+       return
+c
+       end

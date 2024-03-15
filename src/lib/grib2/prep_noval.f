@@ -1,105 +1,105 @@
-      SUBROUTINE PREP_NOVAL(IB,NXY,IBITMAP,IPKOPT,IER)
-C
-C        MAY      2000   LAWRENCE  ORIGINAL CODING
-C        JANUARY  2001   GLAHN     COMMENTS
-C        FEBRUARY 2002   GLAHN     IPKOPT SET = 2 WHEN A BIT MUST
-C                                  BE PAKCED 
-C        MARCH    2002   GLAHN     COMMENTS
-C
-C        PURPOSE
-C            TO HANDLE THE SITUATION WHERE THERE ARE NO VALUES
-C            IN THE GRID. THREE POSSIBILITIES ARE CHECKED BY THIS
-C            ROUTINE:
-C
-C            1) THERE ARE NO VALUES IN THE GRID, BUT THERE IS A
-C               BIT-MAP AND IT INDICATES THAT THERE SHOULD BE. THIS
-C               IS TREATED AS AN ERROR.
-C            2) THERE ARE NO VALUES IN THE GRID, AND THE BIT-MAP
-C               INDICATES THAT THERE ARE NO VALUES IN THE GRID.
-C               THE USER IS NOTIFIED AND THE FIELD IS
-C               PACKED USING THE SIMPLE METHOD.
-C            3) THERE ARE NO VALUES IN THE GRID, AND THERE IS NO
-C               ACCOMPANYING BIT-MAP. THIS IS NOT CONSIDERED TO
-C               BE A REASONABLE SITUATION. IT IS TREATED AS AN
-C               ERROR.
-C
-C        DATA SET USE
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT)
-C
-C        VARIABLES
-C               IB(K) = THE BIT MAP WHEN ONE IS USED.  (INPUT/OUTPUT)
-C                       IT CAN BE INPUT OR IN CAN BE CALCULATED IF
-C                       THE SIMPLE METHOD IS USED (K=1,NXY).
-C                       COMPLEX AND SPATIAL DIFFERENCING DO NOT
-C                       USE A BIT MAP, BUT WILL ACCEPT ONE AND INSERT
-C                       THE MISSING VALUES.
-C                 NXY = DIMENSION OF IB( ).  (INPUT)
-C             IBITMAP = 1 WHEN THERE IS A BITMAP IN IB( ).
-C                       0 OTHERWISE.
-C                       (INPUT)
-C              IPKOPT = PACKING INDICATOR:
-C                       0 = ERROR, DON'T PACK
-C                       1 = PACK IA( ), SIMPLE
-C                       2 = PACK IA( ) AND IB( ), SIMPLE
-C                       3 = PACK COMPLEX OR SPATIAL DIFFERENCING
-C                       4 = PACK COMPLEX.
-C                       (OUTPUT)
-C                 IER = RETURN STATUS CODES. VALUES CAN COME FROM
-C                       SUBROUTINES; OTHERWISE:
-C                       0 = GOOD RETURN.
-C                     902 = THERE ARE NO "GOOD" VALUES IN THE GRID
-C                           AND THE BIT-MAP INDICATES THAT.  NOT TREATED
-C                           AS FATAL IN PREPR.
-C                     903 = THERE ARE NO VALUES IN THE GRID AND THE
-C                           BIT-MAP INDICATES THAT THERE SHOULD BE.
-C                           TREATED AS FATAL IN PREPR.
-C                     904 = THERE ARE NO VALUES IN THE GRID, AND THERE
-C                           IS NO BIT-MAP.  TREATED AS FATAL IN PREPR.
-C                    
-C        LOCAL VARIABLES
-C                     K = A LOOP INDEX VARIABLE.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           NONE
-C
-      DIMENSION IB(NXY)
-C
-C        THIS SECTION WHEN THERE ARE NO VALUES IN
-C        THE DATA FIELD. THAT IS, NVAL = 0.
-      IF(IBITMAP.EQ.1)THEN
-C
-         DO 10 K=1,NXY
-C
-            IF(IB(K).EQ.1)THEN
-C                 THERE IS A BIT MAP.
-C                 THERE ARE NO VALUES IN THE GRID
-C                 AND THE BIT MAP INDICATES THERE
-C                 SHOULD BE. DON'T PACK.
-               IER=903
-               IPKOPT=0
-               GO TO 900
-            ENDIF
-C
- 10      CONTINUE
-C
-C           THERE IS A BIT MAP.
-C           THERE ARE NO VALUES IN THE GRID
-C           AND THE BIT MAP INDICATES NO VALUES.
-C           NOTIFY USER AND PACK.  EVEN THOUGH ALL VALUES
-C           IN THE BIT MAP ARE ZERO, THE WMO STANDARDS
-C           EVIDENTLY DO NOT ALLOW FOR NOT PACKING THE 
-C           BIT MAP.
-         IER=902
-         IPKOPT=2
-C
-      ELSE
-C           THERE ARE NO VALUES IN GRID AND NO
-C           BIT MAP.  NOT A REASONABLE SITUATION.
-C           DON'T PACK.
-         IER=904
-         IPKOPT=0
-         GO TO 900
-      ENDIF
-C
- 900  RETURN
-      END
+      subroutine prep_noval(ib,nxy,ibitmap,ipkopt,ier)
+c
+c        may      2000   lawrence  original coding
+c        january  2001   glahn     comments
+c        february 2002   glahn     ipkopt set = 2 when a bit must
+c                                  be pakced 
+c        march    2002   glahn     comments
+c
+c        purpose
+c            to handle the situation where there are no values
+c            in the grid. three possibilities are checked by this
+c            routine:
+c
+c            1) there are no values in the grid, but there is a
+c               bit-map and it indicates that there should be. this
+c               is treated as an error.
+c            2) there are no values in the grid, and the bit-map
+c               indicates that there are no values in the grid.
+c               the user is notified and the field is
+c               packed using the simple method.
+c            3) there are no values in the grid, and there is no
+c               accompanying bit-map. this is not considered to
+c               be a reasonable situation. it is treated as an
+c               error.
+c
+c        data set use
+c           kfildo - unit number for output (print) file. (output)
+c
+c        variables
+c               ib(k) = the bit map when one is used.  (input/output)
+c                       it can be input or in can be calculated if
+c                       the simple method is used (k=1,nxy).
+c                       complex and spatial differencing do not
+c                       use a bit map, but will accept one and insert
+c                       the missing values.
+c                 nxy = dimension of ib( ).  (input)
+c             ibitmap = 1 when there is a bitmap in ib( ).
+c                       0 otherwise.
+c                       (input)
+c              ipkopt = packing indicator:
+c                       0 = error, don't pack
+c                       1 = pack ia( ), simple
+c                       2 = pack ia( ) and ib( ), simple
+c                       3 = pack complex or spatial differencing
+c                       4 = pack complex.
+c                       (output)
+c                 ier = return status codes. values can come from
+c                       subroutines; otherwise:
+c                       0 = good return.
+c                     902 = there are no "good" values in the grid
+c                           and the bit-map indicates that.  not treated
+c                           as fatal in prepr.
+c                     903 = there are no values in the grid and the
+c                           bit-map indicates that there should be.
+c                           treated as fatal in prepr.
+c                     904 = there are no values in the grid, and there
+c                           is no bit-map.  treated as fatal in prepr.
+c                    
+c        local variables
+c                     k = a loop index variable.
+c
+c        non system subroutines called
+c           none
+c
+      dimension ib(nxy)
+c
+c        this section when there are no values in
+c        the data field. that is, nval = 0.
+      if(ibitmap.eq.1)then
+c
+         do 10 k=1,nxy
+c
+            if(ib(k).eq.1)then
+c                 there is a bit map.
+c                 there are no values in the grid
+c                 and the bit map indicates there
+c                 should be. don't pack.
+               ier=903
+               ipkopt=0
+               go to 900
+            endif
+c
+ 10      continue
+c
+c           there is a bit map.
+c           there are no values in the grid
+c           and the bit map indicates no values.
+c           notify user and pack.  even though all values
+c           in the bit map are zero, the wmo standards
+c           evidently do not allow for not packing the 
+c           bit map.
+         ier=902
+         ipkopt=2
+c
+      else
+c           there are no values in grid and no
+c           bit map.  not a reasonable situation.
+c           don't pack.
+         ier=904
+         ipkopt=0
+         go to 900
+      endif
+c
+ 900  return
+      end

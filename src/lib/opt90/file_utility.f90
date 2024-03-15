@@ -1,287 +1,287 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       file_utility
 !
-! PURPOSE:
-!       Module containing generic file utility routines
+! purpose:
+!       module containing generic file utility routines
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE file_utility
+! calling sequence:
+!       use file_utility
 !
-! OUTPUTS:
-!       None
+! outputs:
+!       none
 !
-! MODULES:
-!       None.
+! modules:
+!       none.
 !
-! CONTAINS:
-!       get_lun:     PUBLIC function to return a free logical unit number for
+! contains:
+!       get_lun:     public function to return a free logical unit number for
 !                    file access.
 !
-!       file_exists: PUBLIC function to determine if a named file exists.
+!       file_exists: public function to determine if a named file exists.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 12-Jul-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 12-jul-2000
 !                       pvandelst@ncep.noaa.gov
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE file_utility
+module file_utility
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------------
-  ! Default visibility
+  ! default visibility
   ! ------------------
 
-  PRIVATE
+  private
 
 
   ! ----------------------------------
-  ! Explicit visibility of subprograms
+  ! explicit visibility of subprograms
   ! ----------------------------------
 
-  PUBLIC :: get_lun, &
+  public :: get_lun, &
             file_exists
 
 
-CONTAINS
+contains
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       get_lun
 !
-! PURPOSE:
-!       PUBLIC function to obtain a free logical unit number for file access
+! purpose:
+!       public function to obtain a free logical unit number for file access
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = get_lun()
 !
-! INPUT ARGUMENTS:
-!       None.
+! input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       None.
+! output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Function returns a default integer that can be used as a logical unit
+! function result:
+!       function returns a default integer that can be used as a logical unit
 !       number to open and access a file.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The search for a free logical unit number begins at 10. The logical
-!       unit number if tested to see if it is connected to an open file. If
-!       so, it is incremented by 1. This is repeated until a free logical
+! procedure:
+!       the search for a free logical unit number begins at 10. the logical
+!       unit number if tested to see if it is connected to an open file. if
+!       so, it is incremented by 1. this is repeated until a free logical
 !       unit number is found.
-!S-
+!s-
 !------------------------------------------------------------------------------
 
-  FUNCTION get_lun() RESULT( lun )
+  function get_lun() result( lun )
 
 
     ! -----------------
-    ! Type declarations
+    ! type declarations
     ! -----------------
  
-    INTEGER :: lun
-    LOGICAL :: file_open
+    integer :: lun
+    logical :: file_open
 
 
     ! --------------------------------------------
-    ! Initialise logical unit number and file_open
+    ! initialise logical unit number and file_open
     ! --------------------------------------------
 
     lun = 9
-    file_open = .TRUE.
+    file_open = .true.
 
 
     ! ------------------------------
-    ! Start open loop for lun search
+    ! start open loop for lun search
     ! ------------------------------
 
-    lun_search: DO
+    lun_search: do
 
-      ! -- Increment logical unit number
+      ! -- increment logical unit number
       lun = lun + 1
 
-      ! -- Check if file is open
-      INQUIRE( lun, OPENED = file_open )
+      ! -- check if file is open
+      inquire( lun, opened = file_open )
 
-      ! -- Is this lun available?
-      IF ( .NOT. file_open ) EXIT lun_search
+      ! -- is this lun available?
+      if ( .not. file_open ) exit lun_search
 
-    END DO lun_search
+    end do lun_search
 
-  END FUNCTION get_lun
+  end function get_lun
 
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       file_exists
 !
-! PURPOSE:
-!       PUBLIC function to determine if a file exists.
+! purpose:
+!       public function to determine if a file exists.
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = file_exists( file_name )
 !
-! INPUT ARGUMENTS:
-!       file_name:  Name of the file the existence of which is to be determined.
-!                   UNITS:      None
-!                   TYPE:       Character
-!                   DIMENSION:  Scalar
-!                   ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       file_name:  name of the file the existence of which is to be determined.
+!                   units:      none
+!                   type:       character
+!                   dimension:  scalar
+!                   attributes: intent( in )
 !
-! OUTPUT ARGUMENTS:
-!       None.
+! output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Function returns a logical result.
+! function result:
+!       function returns a logical result.
 !
-!       result = .TRUE.  => file exists
-!              = .FALSE. => file does not exist
+!       result = .true.  => file exists
+!              = .false. => file does not exist
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The file name is INQUIREd by FILE keyword. The result of the inquiry
+! procedure:
+!       the file name is inquired by file keyword. the result of the inquiry
 !       is the function result.
-!S-
+!s-
 !------------------------------------------------------------------------------
 
-  FUNCTION file_exists( file_name ) RESULT ( existence )
+  function file_exists( file_name ) result ( existence )
 
 
     ! -----------------
-    ! Type declarations
+    ! type declarations
     ! -----------------
  
-    CHARACTER( * ), INTENT( IN ) :: file_name
-    LOGICAL :: existence
+    character( * ), intent( in ) :: file_name
+    logical :: existence
 
 
     ! ---------------
-    ! Inquire by name
+    ! inquire by name
     ! ---------------
 
-    INQUIRE( FILE = file_name, EXIST = existence )
+    inquire( file = file_name, exist = existence )
 
-  END FUNCTION file_exists
+  end function file_exists
 
-END MODULE file_utility
+end module file_utility
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.3  2000/08/31 19:36:32  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! $log$
+! revision 1.3  2000/08/31 19:36:32  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.2  2000/08/24 15:33:42  paulv
-! - In the GET_LUN subprogram, the loop to search for a free unit number
+! revision 1.2  2000/08/24 15:33:42  paulv
+! - in the get_lun subprogram, the loop to search for a free unit number
 !   was changed from:
 !
-!     DO WHILE ( file_open )
+!     do while ( file_open )
 !       ...search
-!     END DO
+!     end do
 !
 !   to
 !
-!     lun_search: DO
+!     lun_search: do
 !       ...search
-!       IF ( .NOT. file_open ) EXIT lun_search
-!     END DO lun_search
+!       if ( .not. file_open ) exit lun_search
+!     end do lun_search
 !
-!   The earlier version is a deprecated use of the DO with WHILE.
+!   the earlier version is a deprecated use of the do with while.
 !
-! - The subprogram FILE_EXISTS was added. Note that the INQUIRE statement
-!   required the FILE =  keyword to work. Simply using the file name in
-!   the INQUIRE returned an error (compiler assumed it was an inquire by
+! - the subprogram file_exists was added. note that the inquire statement
+!   required the file =  keyword to work. simply using the file name in
+!   the inquire returned an error (compiler assumed it was an inquire by
 !   unit number?)
-! - Updated module and subprogram documentation.
+! - updated module and subprogram documentation.
 !
-! Revision 1.1  2000/07/12 16:08:10  paulv
-! Initial checked in version
+! revision 1.1  2000/07/12 16:08:10  paulv
+! initial checked in version
 !
 !
 !

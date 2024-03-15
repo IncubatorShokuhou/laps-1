@@ -1,101 +1,101 @@
-      SUBROUTINE PKBG(KFILDO,IPACK,ND5,LOC,IPOS,NVALUE,NBIT,L3264B,
-     1                IER,*)
-C
-C        DECEMBER 1994   GLAHN   TDL   MOS-2000
-C        MAY      1997   GLAHN   MODIFIED TO USE MVBITS RATHER THAN
-C                                SHIFTING AND ORING, AND ELIMINATED
-C                                USE OF MOD FUNCTION
-C 
-C        PURPOSE 
-C            PACKS NBIT BITS IN THE POSITIVE INTEGER NVALUE INTO ARRAY
-C            IPACK(ND5) STARTING IN WORD LOC, BIT IPOS.  THE WORD
-C            POINTER LOC AND BIT POSITION POINTER IPOS ARE UPDATED
-C            AS NECESSARY.  PACKING WILL NOT OCCUR IF IPACK( ) WOULD
-C            BE OVERFLOWED.  IN THAT CASE, RETURN IS WITH IER=1
-C            RATHER THAN FOR THE GOOD RETURN IER=0.  WHEN NBIT EQ 0
-C            AND NVALUE EQ 0, NO PACKING IS DONE.  THIS ROUTINE ACTS
-C            AS "INSERTION" RATHER THAN "ADDITION."  THAT IS, THE
-C            BITS, IF ANY, TO THE RIGHT OF THE PACKED VALUE
-C            ARE RETAINED.  THIS MEANS THAT THE IPACK( ) ARRAY SHOULD
-C            BE ZEROED OUT BEFORE USING.  ALSO, ANY INSERTION MUST BE
-C            BE INTO AN AREA THAT HAS ALL ZERO BITS.  THE INTEGER WORD
-C            LENGTH OF THE MACHINE BEING USED IS L32B4B.  THIS PACKING
-C            ROUTINE WILL WORK ON EITHER A 32- OR 64-BIT MACHINE.
-C            A MAXIMUM OF 32 BITS CAN BE PACKED ON A SINGLE CALL.
-C
-C        DATA SET USE 
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT) 
-C
-C        VARIABLES 
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT)
-C            IPACK(J) = ARRAY TO PACK INTO (J=1,ND5).  (INPUT-OUTPUT)
-C                 ND5 = DIMENSION OF IPACK( ).  (INPUT)
-C                 LOC = WORD IN IPACK( ) TO START PACKING.  UPDATED
-C                       AS NECESSARY AFTER PACKING IS COMPLETED.
-C                       (INPUT-OUTPUT)
-C                IPOS = BIT POSITION (COUNTING LEFTMOST BIT IN WORD
-C                       AS 1) TO START PACKING.  MUST BE GE 1 AND
-C                       LE L3264B.  UPDATED AS NECESSARY
-C                       AFTER PACKING IS COMPLETED.  (INPUT-OUTPUT)
-C              NVALUE = THE RIGHTMOST NBIT BITS IN NVALUE WILL
-C                       BE PACKED.  (INPUT)
-C                NBIT = SEE NVALUE.  MUST BE GE 0 AND LE 32.  (INPUT)   
-C              L3264B = INTEGER WORD LENGTH OF MACHINE BEING USED.
-C                       (INPUT)
-C                 IER = STATUS RETURN:
-C                       0 = GOOD RETURN.
-C                       1 = PACKING WOULD OVERFLOW IPACK( ).
-C                       2 = IPOS NOT IN RANGE 1 TO L3264B.
-C                       3 = NBIT NOT IN RANGE 0 TO 32.
-C                       4 = NBIT EQ 0, BUT NVALUE NE 0.
-C                   * = ALTERNATE RETURN WHEN IER NE 0.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C            NONE
-C
-      DIMENSION IPACK(ND5)
-C
-C        CHECK CORRECTNESS OF INPUT AND SET STATUS RETURN.
-C
-      IER=0
-      IF(NBIT.EQ.0.AND.NVALUE.EQ.0)GO TO 150
-      IF(NBIT.NE.0)GO TO 111
-      IER=4
-C        WHEN NBIT=0, NVALUE MUST BE ALSO.
- 111  IF(LOC.LT.1.OR.LOC.GT.ND5)IER=1
-C        PACKING WOULD OVERFLOW IPACK( ).
-      IF(IPOS.LE.0.OR.IPOS.GT.L3264B)IER=2
-      IF(NBIT.LT.0.OR.NBIT.GT.32)IER=3
-      IF(IER.NE.0)RETURN 1      
-C
-      NEWIPOS=IPOS+NBIT
-C
-C        WHEN NEWIPOS LE L3264+1, THEN ONLY ONE WORD IS PACKED INTO.
-C        ELSE TWO WORDS ARE INVOLVED.
-C
-      IF(NEWIPOS.LE.L3264B+1)THEN
-         CALL MVBITS(NVALUE,0,NBIT,IPACK(LOC),L3264B+1-NEWIPOS)
-C
-         IF(NEWIPOS.LE.L3264B)THEN
-            IPOS=NEWIPOS
-         ELSE
-            IPOS=1
-            LOC=LOC+1
-         ENDIF
-C
-      ELSE
-         NBIT1=L3264B+1-IPOS
-         NBIT2=NBIT-NBIT1
-         CALL MVBITS(NVALUE,NBIT2,NBIT1,IPACK(LOC),0)
-         LOC=LOC+1
-C
-         IF(LOC.LE.ND5)GO TO 130
-         IER=1
-         RETURN 1
-C
- 130     CALL MVBITS(NVALUE,0,NBIT2,IPACK(LOC),L3264B-NBIT2)
-         IPOS=NBIT2+1
-      ENDIF
-C
- 150  RETURN
-      END
+      subroutine pkbg(kfildo,ipack,nd5,loc,ipos,nvalue,nbit,l3264b,
+     1                ier,*)
+c
+c        december 1994   glahn   tdl   mos-2000
+c        may      1997   glahn   modified to use mvbits rather than
+c                                shifting and oring, and eliminated
+c                                use of mod function
+c 
+c        purpose 
+c            packs nbit bits in the positive integer nvalue into array
+c            ipack(nd5) starting in word loc, bit ipos.  the word
+c            pointer loc and bit position pointer ipos are updated
+c            as necessary.  packing will not occur if ipack( ) would
+c            be overflowed.  in that case, return is with ier=1
+c            rather than for the good return ier=0.  when nbit eq 0
+c            and nvalue eq 0, no packing is done.  this routine acts
+c            as "insertion" rather than "addition."  that is, the
+c            bits, if any, to the right of the packed value
+c            are retained.  this means that the ipack( ) array should
+c            be zeroed out before using.  also, any insertion must be
+c            be into an area that has all zero bits.  the integer word
+c            length of the machine being used is l32b4b.  this packing
+c            routine will work on either a 32- or 64-bit machine.
+c            a maximum of 32 bits can be packed on a single call.
+c
+c        data set use 
+c           kfildo - unit number for output (print) file. (output) 
+c
+c        variables 
+c              kfildo = unit number for output (print) file.  (input)
+c            ipack(j) = array to pack into (j=1,nd5).  (input-output)
+c                 nd5 = dimension of ipack( ).  (input)
+c                 loc = word in ipack( ) to start packing.  updated
+c                       as necessary after packing is completed.
+c                       (input-output)
+c                ipos = bit position (counting leftmost bit in word
+c                       as 1) to start packing.  must be ge 1 and
+c                       le l3264b.  updated as necessary
+c                       after packing is completed.  (input-output)
+c              nvalue = the rightmost nbit bits in nvalue will
+c                       be packed.  (input)
+c                nbit = see nvalue.  must be ge 0 and le 32.  (input)   
+c              l3264b = integer word length of machine being used.
+c                       (input)
+c                 ier = status return:
+c                       0 = good return.
+c                       1 = packing would overflow ipack( ).
+c                       2 = ipos not in range 1 to l3264b.
+c                       3 = nbit not in range 0 to 32.
+c                       4 = nbit eq 0, but nvalue ne 0.
+c                   * = alternate return when ier ne 0.
+c
+c        non system subroutines called
+c            none
+c
+      dimension ipack(nd5)
+c
+c        check correctness of input and set status return.
+c
+      ier=0
+      if(nbit.eq.0.and.nvalue.eq.0)go to 150
+      if(nbit.ne.0)go to 111
+      ier=4
+c        when nbit=0, nvalue must be also.
+ 111  if(loc.lt.1.or.loc.gt.nd5)ier=1
+c        packing would overflow ipack( ).
+      if(ipos.le.0.or.ipos.gt.l3264b)ier=2
+      if(nbit.lt.0.or.nbit.gt.32)ier=3
+      if(ier.ne.0)return 1      
+c
+      newipos=ipos+nbit
+c
+c        when newipos le l3264+1, then only one word is packed into.
+c        else two words are involved.
+c
+      if(newipos.le.l3264b+1)then
+         call mvbits(nvalue,0,nbit,ipack(loc),l3264b+1-newipos)
+c
+         if(newipos.le.l3264b)then
+            ipos=newipos
+         else
+            ipos=1
+            loc=loc+1
+         endif
+c
+      else
+         nbit1=l3264b+1-ipos
+         nbit2=nbit-nbit1
+         call mvbits(nvalue,nbit2,nbit1,ipack(loc),0)
+         loc=loc+1
+c
+         if(loc.le.nd5)go to 130
+         ier=1
+         return 1
+c
+ 130     call mvbits(nvalue,0,nbit2,ipack(loc),l3264b-nbit2)
+         ipos=nbit2+1
+      endif
+c
+ 150  return
+      end

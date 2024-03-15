@@ -2,12 +2,12 @@
 
         function rh_to_cldcv(rh)
 
-!       1999 Steve Albers FSL
+!       1999 steve albers fsl
 
-!       Convert fractional rh into fractional cloud cover. This is defined
+!       convert fractional rh into fractional cloud cover. this is defined
 !       as a total cloud cover through a particular cloud layer.
-!       It is recommended that the input RH be calculated with subroutine
-!       'make_rh' using a 't_ref' between 0C and -10C.
+!       it is recommended that the input rh be calculated with subroutine
+!       'make_rh' using a 't_ref' between 0c and -10c.
 
         ramp_thresh = 0.80
 

@@ -6,8 +6,8 @@
      &,istatus)
 c
 c routine to read binary satellite data file from
-c Taiwan CWB.
-c B.S. Wang (CWB)  and J.R. Smart (FSL)   June 2001
+c taiwan cwb.
+c b.s. wang (cwb)  and j.r. smart (fsl)   june 2001
 c
       implicit none
 
@@ -58,11 +58,11 @@ c
 
          call lvd_file_specifier(chtype(k),ispec,istatus)
          if(istatus.ne.0)then
-            print*,'Error setting ispec from lvd_file_specifier'
+            print*,'error setting ispec from lvd_file_specifier'
             return
          endif
 
-c add file-time source here. CWB names are yyjjjhhmm_"type"
+c add file-time source here. cwb names are yyjjjhhmm_"type"
 
          call s_len(path_to_raw_sat(ispec),lp)
          fname_sat=path_to_raw_sat(ispec)(1:lp)//'/*_'
@@ -71,11 +71,11 @@ c add file-time source here. CWB names are yyjjjhhmm_"type"
          call s_len(fname_sat,ls)
 
          print*
-         print*,'Get latest satellite time'
+         print*,'get latest satellite time'
          call get_latest_file_time(fname_sat,i4time_latest_sat) 
          call make_fnam_lp(i4time_latest_sat,fname9_sat,istatus)
 
-         print*,'Get latest lvd time'
+         print*,'get latest lvd time'
          call get_directory('lvd',fname_lvd,lv)
          fname_lvd=fname_lvd(1:lv)//csatid//'/*.lvd'
          call get_latest_file_time(fname_lvd,i4time_latest_lvd)
@@ -83,7 +83,7 @@ c add file-time source here. CWB names are yyjjjhhmm_"type"
 c check if this is new data
 
          if(i4time_latest_sat.le.i4time_latest_lvd)then
-            print*,'No new data found for twn/gmssat/',chtype(k)
+            print*,'no new data found for twn/gmssat/',chtype(k)
             goto 20
          endif
 
@@ -155,7 +155,7 @@ c load block for known i-j start/end locations
       istatus = 1
       return
 
-99    print*,'Error opening twn file: ',filename(1:lf)
+99    print*,'error opening twn file: ',filename(1:lf)
       nft=0
       return
       end 
@@ -184,7 +184,7 @@ c load block for known i-j start/end locations
       rmsngdata = 0.0
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data'
+         print*,'error getting r_missing_data'
          return
       endif
 
@@ -196,7 +196,7 @@ c load block for known i-j start/end locations
          print*,'iend - istart + 1 /!=/ nelems: ',iend-istart+1,nelems
       endif
 
-c reverse order (CWB data is 1,1 in NW corner)
+c reverse order (cwb data is 1,1 in nw corner)
       do j = 1,nyt
       do i = 1,nxt
          r_imagetmp(i,j)=float(ichar(c_imagedata(i,nyt-j+1)))

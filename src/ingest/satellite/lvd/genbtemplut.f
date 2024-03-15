@@ -15,7 +15,7 @@ c
 
       istatus=1
 c
-c Meteosat coefficients are for METEOSAT-7 IR2 and WV1
+c meteosat coefficients are for meteosat-7 ir2 and wv1
 c
       if(cstype.eq.'meteos')then
 
@@ -41,7 +41,7 @@ c
          enddo
 
       elseif(ctype.eq.'gnp')then
-         write(6,*)' Generating btemp lut for gnp type'
+         write(6,*)' generating btemp lut for gnp type'
 !        offset = 173.15
 !        scale = 0.03931624
          offset = 89.62
@@ -50,7 +50,7 @@ c
            cnt2btemp(i) = float(i) * scale + offset
          enddo ! i
          
-      elseif(chid.ne.2)then                      !WFO switch; channels 3,4, and 5 have same
+      elseif(chid.ne.2)then                      !wfo switch; channels 3,4, and 5 have same
                                                  !enhancement curve atm (10-27-99).
          do i=0,180
             cnt2btemp(i)=(660.0-float(i))/2.0
@@ -71,17 +71,17 @@ c
             cnt2btemp(i)=0.0
          enddo
 c
-c commented out the separate wv btemp calc. Now the same as ch 4 and 5.
+c commented out the separate wv btemp calc. now the same as ch 4 and 5.
 c 10-21-99.
 c        elseif(chid.eq.3)then
-Count range 255 --> 0, T = (1349.27 - C)/5.141.   4/26/96. Recommendation from D. Birkenheuer
-Channel 3 
-Count range 255 --> 0, T = (1354.235 - C)/5.1619  5/14/96.   "
+count range 255 --> 0, t = (1349.27 - c)/5.141.   4/26/96. recommendation from d. birkenheuer
+channel 3 
+count range 255 --> 0, t = (1354.235 - c)/5.1619  5/14/96.   "
 c           do i=0,255
-C           cnt2btemp(i) = 249.346 - 0.12945*float(i)
-C           cnt2btemp(i) = (1354.235 - float(i))/5.1619
-C           cnt2btemp(i) = (1349.27 - float(i))/5.141
-C           cnt2btemp(i) = (1344.38 - float(i))/5.12 
+c           cnt2btemp(i) = 249.346 - 0.12945*float(i)
+c           cnt2btemp(i) = (1354.235 - float(i))/5.1619
+c           cnt2btemp(i) = (1349.27 - float(i))/5.141
+c           cnt2btemp(i) = (1344.38 - float(i))/5.12 
 c
 c new as of 10-3-96.
 c              cnt2btemp(i) = (1348.925 - float(i) ) / 5.1417
@@ -89,7 +89,7 @@ c           enddo
 c
       else
 
-         write(6,*)'Channel # error, it doesnt exist'
+         write(6,*)'channel # error, it doesnt exist'
          istatus=0
 
       endif

@@ -1,245 +1,245 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       predictors
 !
-! PURPOSE:
-!       RT model predictor module
+! purpose:
+!       rt model predictor module
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE predictors
+! calling sequence:
+!       use predictors
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       type_kinds:     Module containing data type kind definitions.
+! modules:
+!       type_kinds:     module containing data type kind definitions.
 !
-!       parameters:     Module containing parameter definitions for the
-!                       RT model.
+!       parameters:     module containing parameter definitions for the
+!                       rt model.
 !
-!       error_handler:  Module to define error codes and handle error
+!       error_handler:  module to define error codes and handle error
 !                       conditions
 !
-! CONTAINS:
-!       compute_predictors:             PUBLIC subroutine to calculate all
-!                                       the predictors. This routine calls the
+! contains:
+!       compute_predictors:             public subroutine to calculate all
+!                                       the predictors. this routine calls the
 !                                       private functions that follow.
 !
-!       compute_std_predictors:         PRIVATE function to compute the standard,
+!       compute_std_predictors:         private function to compute the standard,
 !                                       absorber independent predictor set.
 !
-!       compute_int_predictors:         PRIVATE function to compute the integrated,
+!       compute_int_predictors:         private function to compute the integrated,
 !                                       absorber dependent predictor set.
 !
-!       compute_predictors_TL:          PUBLIC subroutine to calculate all
-!                                       tangent-linear predictors. This routine
+!       compute_predictors_tl:          public subroutine to calculate all
+!                                       tangent-linear predictors. this routine
 !                                       calls the private functions that follow.
 !
-!       compute_std_predictors_TL:      PRIVATE function to compute the standard,
+!       compute_std_predictors_tl:      private function to compute the standard,
 !                                       absorber independent tangent-linear 
 !                                       predictor set.
 !
-!       compute_int_predictors_TL:      PRIVATE function to compute the integrated,
+!       compute_int_predictors_tl:      private function to compute the integrated,
 !                                       absorber dependent tangent-linear predictor
 !                                       set.
 !
-!       compute_predictors_AD:          PUBLIC subroutine to calculate the
-!                                       predictor adjoints. This routine calls
+!       compute_predictors_ad:          public subroutine to calculate the
+!                                       predictor adjoints. this routine calls
 !                                       the functions that follow.
 !
-!       compute_std_predictors_AD:      PRIVATE function to compute the adjoint of
+!       compute_std_predictors_ad:      private function to compute the adjoint of
 !                                       the standard, absorber independent predictor
 !                                       set.
 !
-!       compute_int_predictors_AD:      PRIVATE function to compute the adjoint of
+!       compute_int_predictors_ad:      private function to compute the adjoint of
 !                                       integrated, absorber dependent predictor set.
 !
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 11-Jul-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 11-jul-2000
 !                       pvandelst@ncep.noaa.gov
 !
-!       Adapted from code written by: Thomas J.Kleespies
-!                                     NOAA/NESDIS/ORA
+!       adapted from code written by: thomas j.kleespies
+!                                     noaa/nesdis/ora
 !                                     tkleespies@nesdis.noaa.gov
 !
 !                                     and modified by:
 !
-!                                     John Derber
-!                                     NOAA/NCEP/EMC
+!                                     john derber
+!                                     noaa/ncep/emc
 !                                     jderber@ncep.noaa.gov
 !
 !
-!  Copyright (C) 2000 Thomas Kleespies, John Derber, Paul van Delst
+!  copyright (c) 2000 thomas kleespies, john derber, paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE predictors
+module predictors
 
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
 
-  USE type_kinds, ONLY : fp_kind
-  USE parameters
-  USE error_handler
+  use type_kinds, only : fp_kind
+  use parameters
+  use error_handler
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------
-  ! Visibilities
+  ! visibilities
   ! ------------
 
-  PRIVATE
-  PUBLIC :: compute_predictors
-  PUBLIC :: compute_predictors_TL
-  PUBLIC :: compute_predictors_AD
+  private
+  public :: compute_predictors
+  public :: compute_predictors_tl
+  public :: compute_predictors_ad
 
 
-CONTAINS
+contains
 
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       compute_predictors
 !
-! PURPOSE:
-!       PUBLIC routine to calculate the forward transmittance model predictors.
+! purpose:
+!       public routine to calculate the forward transmittance model predictors.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_predictors ( pressure,    &  ! Input,  K
-!                                 temperature, &  ! Input,  K
-!                                 water_vapor, &  ! Input,  K
-!                                 absorber,    &  ! Input,  0:K x J
+! calling sequence:
+!       call compute_predictors ( pressure,    &  ! input,  k
+!                                 temperature, &  ! input,  k
+!                                 water_vapor, &  ! input,  k
+!                                 absorber,    &  ! input,  0:k x j
 !
-!                                 predictor,   &  ! Output, I x K
+!                                 predictor,   &  ! output, i x k
 !
-!                                 no_standard  )  ! Optional input
+!                                 no_standard  )  ! optional input
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER average pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer average pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER average temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer average temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       water_vapor:      Profile LAYER average water vapor mixing ratio array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       water_vapor:      profile layer average water vapor mixing ratio array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       absorber:         Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K x J
-!                         ATTRIBUTES: INTENT( IN )
+!       absorber:         profile level integrated absorber amount array.
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k x j
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       no_standard:      If present, the standard predictors are not calculated.
-!                         This prevents recalculation of the standard predictors
+! optional input arguments:
+!       no_standard:      if present, the standard predictors are not calculated.
+!                         this prevents recalculation of the standard predictors
 !                         is only the view angle has changed - which only affects
 !                         the integrated predictors.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       predictor:        Profile LAYER predictors array.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( OUT ), TARGET
+! output arguments:
+!       predictor:        profile layer predictors array.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( out ), target
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       compute_std_predictors:   PRIVATE function to compute the standard
+! calls:
+!       compute_std_predictors:   private function to compute the standard
 !                                 (absorber independent) predictor set.
 !
-!       compute_int_predictors:   PRIVATE function to compute the absorber
+!       compute_int_predictors:   private function to compute the absorber
 !                                 integrated predictor set.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The predictors used in the NCEP transmittance model are organised in
+!       the predictors used in the ncep transmittance model are organised in
 !       the following manner:
 !
 !       --------------------------------------------
@@ -252,246 +252,246 @@ CONTAINS
 !                  |                      |
 !                  v                      v
 !
-!              Standard               Integrated
-!             Predictors            Predictors for
+!              standard               integrated
+!             predictors            predictors for
 !                                   each absorber
 !
-!       Pointers are used to reference the module scope predictor data array
+!       pointers are used to reference the module scope predictor data array
 !       before the calls are made to the standard and integrated predictor
-!       calculation functions. This eliminates array copying.
-!S-
+!       calculation functions. this eliminates array copying.
+!s-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_predictors ( pressure,    &  ! Input,  K
-                                  temperature, &  ! Input,  K
-                                  water_vapor, &  ! Input,  K
-                                  absorber,    &  ! Input,  0:K x J
+  subroutine compute_predictors ( pressure,    &  ! input,  k
+                                  temperature, &  ! input,  k
+                                  water_vapor, &  ! input,  k
+                                  absorber,    &  ! input,  0:k x j
 
-                                  predictor,   &  ! Output, I x K
+                                  predictor,   &  ! output, i x k
 
-                                  no_standard  )  ! Optional input
+                                  no_standard  )  ! optional input
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: pressure      ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: temperature   ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: water_vapor   ! K
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )           :: absorber      ! 0:K x J
+    real( fp_kind ), dimension( : ),     intent( in )           :: pressure      ! k
+    real( fp_kind ), dimension( : ),     intent( in )           :: temperature   ! k
+    real( fp_kind ), dimension( : ),     intent( in )           :: water_vapor   ! k
+    real( fp_kind ), dimension( 0:, : ), intent( in )           :: absorber      ! 0:k x j
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( OUT ), TARGET  :: predictor     ! I x K
+    real( fp_kind ), dimension( :, : ),  intent( out ), target  :: predictor     ! i x k
 
-    INTEGER,                             INTENT( IN ), OPTIONAL :: no_standard
+    integer,                             intent( in ), optional :: no_standard
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_PREDICTORS'
+    character( * ), parameter :: routine_name = 'compute_predictors'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    CHARACTER( 80 ) :: message
+    character( 80 ) :: message
 
-    INTEGER :: i1, i2, j
+    integer :: i1, i2, j
 
-    REAL( fp_kind ), POINTER, DIMENSION( :, : ) :: std_predictors   ! Istd x K
-    REAL( fp_kind ), POINTER, DIMENSION( :, : ) :: int_predictors   ! Iint x K
+    real( fp_kind ), pointer, dimension( :, : ) :: std_predictors   ! istd x k
+    real( fp_kind ), pointer, dimension( :, : ) :: int_predictors   ! iint x k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#            -- Calculate the standard predictors if needed --             #
+    !#            -- calculate the standard predictors if needed --             #
     !#--------------------------------------------------------------------------#
 
-    IF ( .NOT. PRESENT( no_standard ) ) THEN
+    if ( .not. present( no_standard ) ) then
 
-      ! -- Alias the input predictor array
-      std_predictors => predictor( 1:MAX_N_STANDARD_PREDICTORS, : )
+      ! -- alias the input predictor array
+      std_predictors => predictor( 1:max_n_standard_predictors, : )
 
-      CALL compute_std_predictors( pressure,      &
+      call compute_std_predictors( pressure,      &
                                    temperature,   &
                                    water_vapor,   &
                                    std_predictors )
 
-    END IF
+    end if
 
 
                                                    
     !#--------------------------------------------------------------------------#
-    !#                -- Calculate the integrated predictors --                 #
+    !#                -- calculate the integrated predictors --                 #
     !#--------------------------------------------------------------------------#
 
-    j_absorber_loop: DO j = 1, SIZE( absorber, DIM = 2 )
+    j_absorber_loop: do j = 1, size( absorber, dim = 2 )
 
-      ! -- Determine indices of current absorber predictors
-      i1 = MAX_N_STANDARD_PREDICTORS + ( ( j - 1 ) * MAX_N_INTEGRATED_PREDICTORS ) + 1
-      i2 = i1 + MAX_N_INTEGRATED_PREDICTORS - 1
+      ! -- determine indices of current absorber predictors
+      i1 = max_n_standard_predictors + ( ( j - 1 ) * max_n_integrated_predictors ) + 1
+      i2 = i1 + max_n_integrated_predictors - 1
 
-      ! -- Alias the input predictor array
+      ! -- alias the input predictor array
       int_predictors => predictor( i1:i2, : )
 
-      ! -- Compute the predictors for the current absorber
-      CALL compute_int_predictors( pressure,          &
+      ! -- compute the predictors for the current absorber
+      call compute_int_predictors( pressure,          &
                                    temperature,       &
                                    absorber( 0:, j ), &
                                    int_predictors     )
 
-    END DO j_absorber_loop
+    end do j_absorber_loop
 
-  END SUBROUTINE compute_predictors
+  end subroutine compute_predictors
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
+!p+
+! name:
 !       compute_std_predictors
 !
-! PURPOSE:
-!       PRIVATE function to compute the standard, absorber independent
+! purpose:
+!       private function to compute the standard, absorber independent
 !       predictor set for the forward transmittance model.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_std_predictors( pressure,    &
+! calling sequence:
+!       call compute_std_predictors( pressure,    &
 !                                    temperature, &
 !                                    water_vapor, &
 !                                    predictor    )
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER average pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer average pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER average temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer average temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       water_vapor:      Profile LAYER average water vapor mixing ratio array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       water_vapor:      profile layer average water vapor mixing ratio array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None
+! optional input arguments:
+!       none
 !
-! OUTPUT ARGUMENTS:
-!       predictor:        Array containing the calculated standard predictor set.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  Istd x K
-!                         ATTRIBUTES: INTENT( OUT )
+! output arguments:
+!       predictor:        array containing the calculated standard predictor set.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  istd x k
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None
+! optional output arguments:
+!       none
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The standard predictors are the following:
+!       the standard predictors are the following:
 !
-!         1) Temperature, T
-!         2) Pressure, P
-!         3) T^2
-!         4) P^2
-!         5) T.P
-!         6) T^2.P
-!         7) T.P^2
-!         8) T^2.P^2
-!         9) Water vapor mixing ratio, Q
-!P-
+!         1) temperature, t
+!         2) pressure, p
+!         3) t^2
+!         4) p^2
+!         5) t.p
+!         6) t^2.p
+!         7) t.p^2
+!         8) t^2.p^2
+!         9) water vapor mixing ratio, q
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_std_predictors( p,        &  ! Input,  K
-                                     t,        &  ! Input,  K
-                                     w,        &  ! Input,  K
-                                     predictor )  ! Output, Istd x K
+  subroutine compute_std_predictors( p,        &  ! input,  k
+                                     t,        &  ! input,  k
+                                     w,        &  ! input,  k
+                                     predictor )  ! output, istd x k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: p          ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: t          ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: w          ! K
+    real( fp_kind ), dimension( : ),     intent( in )  :: p          ! k
+    real( fp_kind ), dimension( : ),     intent( in )  :: t          ! k
+    real( fp_kind ), dimension( : ),     intent( in )  :: w          ! k
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( OUT ) :: predictor  ! Istd x K
+    real( fp_kind ), dimension( :, : ),  intent( out ) :: predictor  ! istd x k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_STD_PREDICTORS'
+    character( * ), parameter :: routine_name = 'compute_std_predictors'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k
+    integer :: k
 
-    REAL( fp_kind ) :: p2
-    REAL( fp_kind ) :: t2
+    real( fp_kind ) :: p2
+    real( fp_kind ) :: t2
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                -- Calculate the standard predictor set --                #
+    !#                -- calculate the standard predictor set --                #
     !#--------------------------------------------------------------------------#
 
-    k_layer_loop: DO k = 1, SIZE( p )
+    k_layer_loop: do k = 1, size( p )
 
 
-      ! -- Precalculate the squared terms
+      ! -- precalculate the squared terms
       p2 = p( k ) * p( k )
       t2 = t( k ) * t( k )
 
-      ! -- Calculate and assign the absorber independent predictors
+      ! -- calculate and assign the absorber independent predictors
       predictor( 1, k ) = t( k )
       predictor( 2, k ) = p( k )
       predictor( 3, k ) = t2
@@ -502,9 +502,9 @@ CONTAINS
       predictor( 8, k ) = t2     * p2
       predictor( 9, k ) = w( k )
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_std_predictors
+  end subroutine compute_std_predictors
 
 
 
@@ -512,341 +512,341 @@ CONTAINS
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
+!p+
+! name:
 !       compute_int_predictors
 !
-! PURPOSE:
-!       PRIVATE function to compute the integrated, absorber dependent
+! purpose:
+!       private function to compute the integrated, absorber dependent
 !       predictor set for the forward transmittance model.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_int_predictors( pressure,    &
+! calling sequence:
+!       call compute_int_predictors( pressure,    &
 !                                    temperature, &
 !                                    absorber,    &
 !                                    predictor    )
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER average pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer average pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER average temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer average temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       absorber:         Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K
-!                         ATTRIBUTES: INTENT( IN )
+!       absorber:         profile level integrated absorber amount array.
+!                         units:      varies with absorber
+!                         type:       real( fp_kind )
+!                         dimension:  0:k
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None
+! optional input arguments:
+!       none
 !
-! OUTPUT ARGUMENTS:
-!       predictor:        Array containing the calculated integrated predictor set
+! output arguments:
+!       predictor:        array containing the calculated integrated predictor set
 !                         for the passed absorber.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  Iint x K
-!                         ATTRIBUTES: INTENT( OUT )
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  iint x k
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None
+! optional output arguments:
+!       none
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The integrated predictors consist of six that are repeated for every
+!       the integrated predictors consist of six that are repeated for every
 !       absorber:
 !
-!         1) T*
-!         2) P*
-!         3) T**
-!         4) P**
-!         5) T***
-!         6) P***
+!         1) t*
+!         2) p*
+!         3) t**
+!         4) p**
+!         5) t***
+!         6) p***
 !
-!       The reference above details the predictor value for input LEVEL values. In
-!       the equations below, the "X" quantities can be replaced with temperature, T, 
-!       of pressure, P, to determine the required predictor:
+!       the reference above details the predictor value for input level values. in
+!       the equations below, the "x" quantities can be replaced with temperature, t, 
+!       of pressure, p, to determine the required predictor:
 !
 !                           __ k
 !                    1     \ 
-!         X*(k) = --------  >  ( X(i) + X(i-1) ) ( A(i) - A(i-1) )
-!                  c.A(k)  /__
+!         x*(k) = --------  >  ( x(i) + x(i-1) ) ( a(i) - a(i-1) )
+!                  c.a(k)  /__
 !                             i=1
 !
 !                            __ k
 !                     1     \
-!        X**(k) = ---------  >  ( X(i)A(i) + X(i-1)A(i-1) ) ( A(i) - A(i-1) )
-!                  c.A^2(k) /__
+!        x**(k) = ---------  >  ( x(i)a(i) + x(i-1)a(i-1) ) ( a(i) - a(i-1) )
+!                  c.a^2(k) /__
 !                              i=1
 !
 !                            __ k
 !                     1     \ 
-!       X***(k) = ---------  >  ( X(i)A^2(i) + X(i-1)A^2(i-1) ) ( A(i) - A(i-1) )
-!                  c.A^3(k) /__
+!       x***(k) = ---------  >  ( x(i)a^2(i) + x(i-1)a^2(i-1) ) ( a(i) - a(i-1) )
+!                  c.a^3(k) /__
 !                              i=1
 !
-!       To accomodate input LAYER values (i.e. layer average values) from the
-!       NCEP GDAS, the predictor formulations were modified to:
+!       to accomodate input layer values (i.e. layer average values) from the
+!       ncep gdas, the predictor formulations were modified to:
 !
 !                   __ k                        __k-1
 !                  \                           \ 
-!                   >  X(i)( A(i)-A(i-1) )      >  X(i)( A(i)-A(i-1) )
+!                   >  x(i)( a(i)-a(i-1) )      >  x(i)( a(i)-a(i-1) )
 !                  /__                         /__ 
 !                     i=1                         i=1
-!         X*(k) = ------------------------- + -------------------------
-!                            2.A(k)                    2.A(k-1)
+!         x*(k) = ------------------------- + -------------------------
+!                            2.a(k)                    2.a(k-1)
 !
 !                   __ k
 !                  \ 
-!                   >  X(i)( A(i) + A(i-1) ) ( A(i) - A(i-1) )
+!                   >  x(i)( a(i) + a(i-1) ) ( a(i) - a(i-1) )
 !                  /__
 !                     i=1
-!        X**(k) = --------------------------------------------- +
-!                                       2.A^2(k) 
+!        x**(k) = --------------------------------------------- +
+!                                       2.a^2(k) 
 !                   
 !                   __k-1
 !                  \ 
-!                   >  X(i)( A(i) + A(i-1) ) ( A(i) - A(i-1) )
+!                   >  x(i)( a(i) + a(i-1) ) ( a(i) - a(i-1) )
 !                  /__
 !                     i=1
 !                 ---------------------------------------------
-!                                       2.A^2(k-1)
+!                                       2.a^2(k-1)
 !
 !                      __ k
 !                     \ 
-!                 3 .  >  X(i)( A^2(i) + A^2(i-1) ) ( A(i) - A(i-1) )
+!                 3 .  >  x(i)( a^2(i) + a^2(i-1) ) ( a(i) - a(i-1) )
 !                     /__
 !                        i=1
-!       X***(k) = ---------------------------------------------------- +
-!                                       4.A^3(k)                    
+!       x***(k) = ---------------------------------------------------- +
+!                                       4.a^3(k)                    
 !
 !                      __k-1
 !                     \ 
-!                 3 .  >  X(i)( A^2(i) + A^2(i-1) ) ( A(i) - A(i-1) )
+!                 3 .  >  x(i)( a^2(i) + a^2(i-1) ) ( a(i) - a(i-1) )
 !                     /__
 !                        i=1
 !                 ----------------------------------------------------
-!                                       4.A^3(k-1)
+!                                       4.a^3(k-1)
 !
-!       Thus the transmittance model coefficients calculated using the LEVEL
+!       thus the transmittance model coefficients calculated using the level
 !       predictor formulation are used with the predictors constructed above 
-!       with LAYER values.
-!P-
+!       with layer values.
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_int_predictors( pressure,    &  ! Input,  K
-                                     temperature, &  ! Input,  K
-                                     absorber,    &  ! Input,  0:K
-                                     predictor    )  ! Output, Iint x K
+  subroutine compute_int_predictors( pressure,    &  ! input,  k
+                                     temperature, &  ! input,  k
+                                     absorber,    &  ! input,  0:k
+                                     predictor    )  ! output, iint x k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )  :: pressure     ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )  :: temperature  ! K
-    REAL( fp_kind ), DIMENSION( 0: ),   INTENT( IN )  :: absorber     ! 0:K
+    real( fp_kind ), dimension( : ),    intent( in )  :: pressure     ! k
+    real( fp_kind ), dimension( : ),    intent( in )  :: temperature  ! k
+    real( fp_kind ), dimension( 0: ),   intent( in )  :: absorber     ! 0:k
 
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( OUT ) :: predictor    ! Iint x K
+    real( fp_kind ), dimension( :, : ), intent( out ) :: predictor    ! iint x k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_INT_PREDICTORS'
+    character( * ), parameter :: routine_name = 'compute_int_predictors'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: i, k
-    INTEGER :: n_layers
-    INTEGER :: n_predictors
+    integer :: i, k
+    integer :: n_layers
+    integer :: n_predictors
 
-    REAL( fp_kind ) :: d_absorber
-    REAL( fp_kind ) :: factor_1
-    REAL( fp_kind ) :: factor_2
-    REAL( fp_kind ) :: inverse_1
-    REAL( fp_kind ) :: inverse_2
-    REAL( fp_kind ) :: inverse_3
-    REAL( fp_kind ) :: absorber_3
-
-
-    ! -- Square of the absorber amount. 0:K
-    REAL( fp_kind ), DIMENSION( 0:SIZE( pressure ) ) :: absorber_2
-
-    ! -- Intermediate summation array. Iint
-    REAL( fp_kind ), DIMENSION( SIZE( predictor, DIM=1 ) ) :: s
-
-    ! -- LEVEL predictor, Iint x 0:K
-    REAL( fp_kind ), DIMENSION( SIZE( predictor, DIM=1 ), 0:SIZE( pressure ) ) :: x
+    real( fp_kind ) :: d_absorber
+    real( fp_kind ) :: factor_1
+    real( fp_kind ) :: factor_2
+    real( fp_kind ) :: inverse_1
+    real( fp_kind ) :: inverse_2
+    real( fp_kind ) :: inverse_3
+    real( fp_kind ) :: absorber_3
 
 
+    ! -- square of the absorber amount. 0:k
+    real( fp_kind ), dimension( 0:size( pressure ) ) :: absorber_2
 
-    !#--------------------------------------------------------------------------#
-    !#                  -- Determine the number predictors --                   #
-    !#--------------------------------------------------------------------------#
+    ! -- intermediate summation array. iint
+    real( fp_kind ), dimension( size( predictor, dim=1 ) ) :: s
 
-    n_predictors = SIZE( predictor, DIM = 1 )
+    ! -- level predictor, iint x 0:k
+    real( fp_kind ), dimension( size( predictor, dim=1 ), 0:size( pressure ) ) :: x
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Initialise values --                          #
+    !#                  -- determine the number predictors --                   #
     !#--------------------------------------------------------------------------#
 
-    absorber_2( 0 ) = ZERO
-
-    s( : )    = ZERO
-    x( :, 0 ) = ZERO
+    n_predictors = size( predictor, dim = 1 )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#               -- Calculate the integrated predictor set --               #
+    !#                         -- initialise values --                          #
     !#--------------------------------------------------------------------------#
 
-    k_layer_loop: DO k = 1, SIZE( pressure )
+    absorber_2( 0 ) = zero
+
+    s( : )    = zero
+    x( :, 0 ) = zero
+
+
+
+    !#--------------------------------------------------------------------------#
+    !#               -- calculate the integrated predictor set --               #
+    !#--------------------------------------------------------------------------#
+
+    k_layer_loop: do k = 1, size( pressure )
 
 
       ! -----------------------------------------
-      ! Calculate absorber multiplicative factors
+      ! calculate absorber multiplicative factors
       ! -----------------------------------------
 
       absorber_2( k ) = absorber( k ) * absorber( k )
 
-      d_absorber = absorber( k ) - absorber( k-1 )                      ! For * terms
-      factor_1   = ( absorber( k )   + absorber( k-1 )   ) * d_absorber ! For ** terms
-      factor_2   = ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber ! For *** terms
+      d_absorber = absorber( k ) - absorber( k-1 )                      ! for * terms
+      factor_1   = ( absorber( k )   + absorber( k-1 )   ) * d_absorber ! for ** terms
+      factor_2   = ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber ! for *** terms
 
 
       ! -------------------------------
-      ! Calculate the intermediate sums
+      ! calculate the intermediate sums
       ! -------------------------------
 
-      s( 1 ) = s( 1 ) + ( temperature( k ) * d_absorber )  ! T*
-      s( 2 ) = s( 2 ) + ( pressure( k )    * d_absorber )  ! P*
+      s( 1 ) = s( 1 ) + ( temperature( k ) * d_absorber )  ! t*
+      s( 2 ) = s( 2 ) + ( pressure( k )    * d_absorber )  ! p*
 
-      s( 3 ) = s( 3 ) + ( temperature( k ) * factor_1 )    ! T**
-      s( 4 ) = s( 4 ) + ( pressure( k )    * factor_1 )    ! P**
+      s( 3 ) = s( 3 ) + ( temperature( k ) * factor_1 )    ! t**
+      s( 4 ) = s( 4 ) + ( pressure( k )    * factor_1 )    ! p**
 
-      s( 5 ) = s( 5 ) + ( temperature( k ) * factor_2 )    ! T***
-      s( 6 ) = s( 6 ) + ( pressure( k )    * factor_2 )    ! P***
+      s( 5 ) = s( 5 ) + ( temperature( k ) * factor_2 )    ! t***
+      s( 6 ) = s( 6 ) + ( pressure( k )    * factor_2 )    ! p***
 
 
       ! -------------------------------------------------------
-      ! Calculate the normalising factors for the integrated
-      ! predictors. Note that the checks below, the IF tests to
+      ! calculate the normalising factors for the integrated
+      ! predictors. note that the checks below, the if tests to
       ! determine if the absorber products are represenatble
-      ! are to minimise the number of calcs. I.e if inverse_1
+      ! are to minimise the number of calcs. i.e if inverse_1
       ! is toast because absorber(k) is too small there's no
       ! need to check any further.
       ! -------------------------------------------------------
 
-      ! -- Is inverse_1 representable?
-      inverse_1_check: IF ( absorber( k ) > TOLERANCE ) THEN
+      ! -- is inverse_1 representable?
+      inverse_1_check: if ( absorber( k ) > tolerance ) then
 
-        inverse_1 = ONE / absorber( k )
+        inverse_1 = one / absorber( k )
 
-        ! -- Is inverse_2 representable
-        inverse_2_check: IF ( absorber_2( k ) > TOLERANCE ) THEN
+        ! -- is inverse_2 representable
+        inverse_2_check: if ( absorber_2( k ) > tolerance ) then
 
           inverse_2  = inverse_1 * inverse_1
           absorber_3 = absorber( k ) * absorber_2( k )
          
-          ! -- Is inverse_3 representable
-          inverse_3_check: IF ( absorber_3 > TOLERANCE ) THEN
+          ! -- is inverse_3 representable
+          inverse_3_check: if ( absorber_3 > tolerance ) then
 
             inverse_3 = inverse_2 * inverse_1
 
-          ELSE
+          else
 
-            inverse_3 = ZERO
+            inverse_3 = zero
 
-          END IF inverse_3_check
+          end if inverse_3_check
 
-        ELSE
+        else
 
-          inverse_2 = ZERO
-          inverse_3 = ZERO
+          inverse_2 = zero
+          inverse_3 = zero
 
-        END IF inverse_2_check
+        end if inverse_2_check
 
-      ELSE
+      else
 
-        inverse_1 = ZERO
-        inverse_2 = ZERO
-        inverse_3 = ZERO
+        inverse_1 = zero
+        inverse_2 = zero
+        inverse_3 = zero
 
-      END IF inverse_1_check
+      end if inverse_1_check
 
 
       ! ---------------------------------------------
-      ! Scale and normalise the integrated predictors
+      ! scale and normalise the integrated predictors
       ! ---------------------------------------------
 
-      x( 1, k ) = POINT_5  * s( 1 ) * inverse_1  ! T*
-      x( 2, k ) = POINT_5  * s( 2 ) * inverse_1  ! P*
+      x( 1, k ) = point_5  * s( 1 ) * inverse_1  ! t*
+      x( 2, k ) = point_5  * s( 2 ) * inverse_1  ! p*
 
-      x( 3, k ) = POINT_5  * s( 3 ) * inverse_2  ! T**
-      x( 4, k ) = POINT_5  * s( 4 ) * inverse_2  ! P**
+      x( 3, k ) = point_5  * s( 3 ) * inverse_2  ! t**
+      x( 4, k ) = point_5  * s( 4 ) * inverse_2  ! p**
 
-      x( 5, k ) = POINT_75 * s( 5 ) * inverse_3  ! T***
-      x( 6, k ) = POINT_75 * s( 6 ) * inverse_3  ! P***
+      x( 5, k ) = point_75 * s( 5 ) * inverse_3  ! t***
+      x( 6, k ) = point_75 * s( 6 ) * inverse_3  ! p***
 
 
       ! ----------------------------
-      ! Sum predictors across layers
+      ! sum predictors across layers
       ! ----------------------------
 
-      DO i = 1, n_predictors
+      do i = 1, n_predictors
 
         predictor( i, k ) = x( i, k ) + x( i, k-1 )
 
-      END DO
+      end do
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_int_predictors
+  end subroutine compute_int_predictors
 
 
 
@@ -854,136 +854,136 @@ CONTAINS
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_predictors_TL
+!s+
+! name:
+!       compute_predictors_tl
 !
-! PURPOSE:
-!       PUBLIC routine to calculate the tangent-linear transmittance model
+! purpose:
+!       public routine to calculate the tangent-linear transmittance model
 !       predictors.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_predictors_TL ( pressure,       &  ! Input,  K
-!                                    temperature,    &  ! Input,  K
-!                                    water_vapor,    &  ! Input,  K
-!                                    absorber,       &  ! Input,  0:K x J
+! calling sequence:
+!       call compute_predictors_tl ( pressure,       &  ! input,  k
+!                                    temperature,    &  ! input,  k
+!                                    water_vapor,    &  ! input,  k
+!                                    absorber,       &  ! input,  0:k x j
 !
-!                                    pressure_TL,    &  ! Input,  K
-!                                    temperature_TL, &  ! Input,  K
-!                                    water_vapor_TL, &  ! Input,  K
-!                                    absorber_TL,    &  ! Input,  0:K x J
+!                                    pressure_tl,    &  ! input,  k
+!                                    temperature_tl, &  ! input,  k
+!                                    water_vapor_tl, &  ! input,  k
+!                                    absorber_tl,    &  ! input,  0:k x j
 !
-!                                    predictor_TL,   &  ! Output, I x K
+!                                    predictor_tl,   &  ! output, i x k
 !
-!                                    no_standard     )  ! Optional input
+!                                    no_standard     )  ! optional input
 !
-! INPUT ARGUMENTS:
-!       pressure:            Profile LAYER average pressure array.
-!                            UNITS:      hPa
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:            profile layer average pressure array.
+!                            units:      hpa
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       temperature:         Profile LAYER average temperature array.
-!                            UNITS:      Kelvin
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!       temperature:         profile layer average temperature array.
+!                            units:      kelvin
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       water_vapor:         Profile LAYER average water vapor mixing ratio array.
-!                            UNITS:      g/kg
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!       water_vapor:         profile layer average water vapor mixing ratio array.
+!                            units:      g/kg
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       absorber:            Profile LEVEL integrated absorber amount array.
-!                            UNITS:      Varies with absorber
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!       absorber:            profile level integrated absorber amount array.
+!                            units:      varies with absorber
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       pressure_TL:         Profile tangent-linear pressure array, i.e. the
+!       pressure_tl:         profile tangent-linear pressure array, i.e. the
 !                            pressure perturbation.
-!                            UNITS:      hPa
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!                            units:      hpa
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       temperature_TL:      Profile tangent-linear LAYER average temperature array
+!       temperature_tl:      profile tangent-linear layer average temperature array
 !                            i.e. the temperature perturbation.
-!                            UNITS:      Kelvin
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!                            units:      kelvin
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       water_vapor_TL:      Profile tangent-linear water vapor mixing
+!       water_vapor_tl:      profile tangent-linear water vapor mixing
 !                            ratio array, i.e. the water vapor mixing
 !                            ratio perturbation.
-!                            UNITS:      g/kg
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!                            units:      g/kg
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-!       absorber_TL:         Profile LEVEL integrated tangent-linear 
+!       absorber_tl:         profile level integrated tangent-linear 
 !                            absorber amount array.
-!                            UNITS:      Varies with absorber
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  K
-!                            ATTRIBUTES: INTENT( IN )
+!                            units:      varies with absorber
+!                            type:       real( fp_kind )
+!                            dimension:  k
+!                            attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       no_standard:         If present, the standard predictors are not calculated.
-!                            This prevents recalculation of the standard predictors
+! optional input arguments:
+!       no_standard:         if present, the standard predictors are not calculated.
+!                            this prevents recalculation of the standard predictors
 !                            is only the view angle has changed - which only affects
 !                            the integrated predictors.
-!                            UNITS:      None
-!                            TYPE:       Integer
-!                            DIMENSION:  Scalar
-!                            ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                            units:      none
+!                            type:       integer
+!                            dimension:  scalar
+!                            attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       predictor_TL:        Profile LAYER tangent-linear predictors array.
-!                            UNITS:      Varies with predictor type.
-!                            TYPE:       REAL( fp_kind )
-!                            DIMENSION:  Iint x K
-!                            ATTRIBUTES: INTENT( OUT ), TARGET
+! output arguments:
+!       predictor_tl:        profile layer tangent-linear predictors array.
+!                            units:      varies with predictor type.
+!                            type:       real( fp_kind )
+!                            dimension:  iint x k
+!                            attributes: intent( out ), target
 !
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       compute_std_predictors_TL:   PRIVATE function to compute the tangent-
+! calls:
+!       compute_std_predictors_tl:   private function to compute the tangent-
 !                                    linear form of the standard (absorber
 !                                    independent) predictor set.
 !
-!       compute_int_predictors_TL:   PRIVATE function to compute the tangent-
+!       compute_int_predictors_tl:   private function to compute the tangent-
 !                                    linear form of the absorber integrated
 !                                    predictor set.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The predictors used in the NCEP transmittance model are organised in
+!       the predictors used in the ncep transmittance model are organised in
 !       the following manner:
 !
 !       --------------------------------------------
@@ -996,1035 +996,1035 @@ CONTAINS
 !                  |                      |
 !                  v                      v
 !
-!              Standard               Integrated
-!             Predictors            Predictors for
+!              standard               integrated
+!             predictors            predictors for
 !                                   each absorber
 !
-!       Pointers are used to reference the module scope predictor data array
+!       pointers are used to reference the module scope predictor data array
 !       before the calls are made to the standard and integrated predictor
-!       calculation functions. This eliminates array copying.
-!S-
+!       calculation functions. this eliminates array copying.
+!s-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_predictors_TL ( pressure,       &  ! Input,  K
-                                     temperature,    &  ! Input,  K
-                                     water_vapor,    &  ! Input,  K
-                                     absorber,       &  ! Input,  0:K x J
+  subroutine compute_predictors_tl ( pressure,       &  ! input,  k
+                                     temperature,    &  ! input,  k
+                                     water_vapor,    &  ! input,  k
+                                     absorber,       &  ! input,  0:k x j
 
-                                     pressure_TL,    &  ! Input,  K
-                                     temperature_TL, &  ! Input,  K
-                                     water_vapor_TL, &  ! Input,  K
-                                     absorber_TL,    &  ! Input,  0:K x J
+                                     pressure_tl,    &  ! input,  k
+                                     temperature_tl, &  ! input,  k
+                                     water_vapor_tl, &  ! input,  k
+                                     absorber_tl,    &  ! input,  0:k x j
 
-                                     predictor_TL,   &  ! Output, I x K
+                                     predictor_tl,   &  ! output, i x k
 
-                                     no_standard     )  ! Optional input
+                                     no_standard     )  ! optional input
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: pressure        ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: temperature     ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: water_vapor     ! K
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )           :: absorber        ! 0:K x J
+    real( fp_kind ), dimension( : ),     intent( in )           :: pressure        ! k
+    real( fp_kind ), dimension( : ),     intent( in )           :: temperature     ! k
+    real( fp_kind ), dimension( : ),     intent( in )           :: water_vapor     ! k
+    real( fp_kind ), dimension( 0:, : ), intent( in )           :: absorber        ! 0:k x j
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: pressure_TL     ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: temperature_TL  ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )           :: water_vapor_TL  ! K
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )           :: absorber_TL     ! 0:K x J
+    real( fp_kind ), dimension( : ),     intent( in )           :: pressure_tl     ! k
+    real( fp_kind ), dimension( : ),     intent( in )           :: temperature_tl  ! k
+    real( fp_kind ), dimension( : ),     intent( in )           :: water_vapor_tl  ! k
+    real( fp_kind ), dimension( 0:, : ), intent( in )           :: absorber_tl     ! 0:k x j
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( OUT ), TARGET  :: predictor_TL    ! I x K
+    real( fp_kind ), dimension( :, : ),  intent( out ), target  :: predictor_tl    ! i x k
 
-    INTEGER,                             INTENT( IN ), OPTIONAL :: no_standard
+    integer,                             intent( in ), optional :: no_standard
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_PREDICTORS_TL'
+    character( * ), parameter :: routine_name = 'compute_predictors_tl'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    CHARACTER( 80 ) :: message
+    character( 80 ) :: message
 
-    INTEGER :: i1, i2, j
+    integer :: i1, i2, j
 
-    REAL( fp_kind ), POINTER, DIMENSION( :, : ) :: std_predictors_TL   ! Istd x K
-    REAL( fp_kind ), POINTER, DIMENSION( :, : ) :: int_predictors_TL   ! Iint x K
+    real( fp_kind ), pointer, dimension( :, : ) :: std_predictors_tl   ! istd x k
+    real( fp_kind ), pointer, dimension( :, : ) :: int_predictors_tl   ! iint x k
 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#     -- Calculate the tangent-linear standard predictors if needed --     #
+    !#     -- calculate the tangent-linear standard predictors if needed --     #
     !#--------------------------------------------------------------------------#
 
-    IF ( .NOT. PRESENT( no_standard ) ) THEN
+    if ( .not. present( no_standard ) ) then
 
-      ! -- Alias the input predictor array
-      std_predictors_TL => predictor_TL( 1:MAX_N_STANDARD_PREDICTORS, : )
+      ! -- alias the input predictor array
+      std_predictors_tl => predictor_tl( 1:max_n_standard_predictors, : )
 
-      CALL compute_std_predictors_TL( pressure,         &
+      call compute_std_predictors_tl( pressure,         &
                                       temperature,      &
                                       water_vapor,      &
 
-                                      pressure_TL,      &
-                                      temperature_TL,   &
-                                      water_vapor_TL,   &
+                                      pressure_tl,      &
+                                      temperature_tl,   &
+                                      water_vapor_tl,   &
 
-                                      std_predictors_TL )
+                                      std_predictors_tl )
 
-    END IF
+    end if
 
 
                                                    
     !#--------------------------------------------------------------------------#
-    !#                -- Calculate the integrated predictors --                 #
+    !#                -- calculate the integrated predictors --                 #
     !#--------------------------------------------------------------------------#
 
-    j_absorber_loop: DO j = 1, SIZE( absorber_TL, DIM = 2 )
+    j_absorber_loop: do j = 1, size( absorber_tl, dim = 2 )
 
-      ! -- Determine indices of current absorber predictors
-      i1 = MAX_N_STANDARD_PREDICTORS + ( ( j - 1 ) * MAX_N_INTEGRATED_PREDICTORS ) + 1
-      i2 = i1 + MAX_N_INTEGRATED_PREDICTORS - 1
+      ! -- determine indices of current absorber predictors
+      i1 = max_n_standard_predictors + ( ( j - 1 ) * max_n_integrated_predictors ) + 1
+      i2 = i1 + max_n_integrated_predictors - 1
 
-      ! -- Alias the input predictor array
-      int_predictors_TL => predictor_TL( i1:i2, : )
+      ! -- alias the input predictor array
+      int_predictors_tl => predictor_tl( i1:i2, : )
 
-      ! -- Calculate tangent-linear predictors for current absorber
-      CALL compute_int_predictors_TL( pressure,             &
+      ! -- calculate tangent-linear predictors for current absorber
+      call compute_int_predictors_tl( pressure,             &
                                       temperature,          &
                                       absorber( 0:, j ),    &
 
-                                      pressure_TL,          &
-                                      temperature_TL,       &
-                                      absorber_TL( 0:, j ), &
+                                      pressure_tl,          &
+                                      temperature_tl,       &
+                                      absorber_tl( 0:, j ), &
 
-                                      int_predictors_TL     )
+                                      int_predictors_tl     )
 
-    END DO j_absorber_loop
+    end do j_absorber_loop
 
-  END SUBROUTINE compute_predictors_TL
+  end subroutine compute_predictors_tl
 
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       compute_std_predictors_TL
+!p+
+! name:
+!       compute_std_predictors_tl
 !
-! PURPOSE:
-!       PRIVATE function to compute the standard, absorber independent
+! purpose:
+!       private function to compute the standard, absorber independent
 !       predictor set for the tangent-linear transmittance model.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_std_predictors_TL( pressure,       &  ! Input,  K
-!                                       temperature,    &  ! Input,  K
-!                                       water_vapor,    &  ! Input,  K
+! calling sequence:
+!       call compute_std_predictors_tl( pressure,       &  ! input,  k
+!                                       temperature,    &  ! input,  k
+!                                       water_vapor,    &  ! input,  k
 !
-!                                       pressure_TL,    &  ! Input,  K
-!                                       temperature_TL, &  ! Input,  K
-!                                       water_vapor_TL, &  ! Input,  K
+!                                       pressure_tl,    &  ! input,  k
+!                                       temperature_tl, &  ! input,  k
+!                                       water_vapor_tl, &  ! input,  k
 !
-!                                       predictors_TL   )  ! Output, Istd x K
+!                                       predictors_tl   )  ! output, istd x k
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER average pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer average pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER average temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer average temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       water_vapor:      Profile LAYER average water vapor mixing ratio array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       water_vapor:      profile layer average water vapor mixing ratio array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       pressure_TL:      Profile LAYER tangent-linear pressure array, i.e. the
+!       pressure_tl:      profile layer tangent-linear pressure array, i.e. the
 !                         pressure perturbation.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature_TL:   Profile LAYER tangent-linear LAYER average temperature array
+!       temperature_tl:   profile layer tangent-linear layer average temperature array
 !                         i.e. the temperature perturbation.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       water_vapor_TL:   Profile LAYER tangent-linear water vapor mixing
+!       water_vapor_tl:   profile layer tangent-linear water vapor mixing
 !                         ratio array, i.e. the water vapor mixing
 !                         ratio perturbation.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None
+! optional input arguments:
+!       none
 !
-! OUTPUT ARGUMENTS:
-!       predictor_TL:     Array containing the calculated tangent-linear
+! output arguments:
+!       predictor_tl:     array containing the calculated tangent-linear
 !                         standard predictor set.
-!                         UNITS:      Varies depending on predictor index.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  Istd x K
-!                         ATTRIBUTES: INTENT( OUT )
+!                         units:      varies depending on predictor index.
+!                         type:       real( fp_kind )
+!                         dimension:  istd x k
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None
+! optional output arguments:
+!       none
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The standard predictors are the following:
+!       the standard predictors are the following:
 !
-!         1) Temperature, T
-!         2) Pressure, P
-!         3) T^2
-!         4) P^2
-!         5) T.P
-!         6) T^2.P
-!         7) T.P^2
-!         8) T^2.P^2
-!         9) Water vapor mixing ratio, Q
+!         1) temperature, t
+!         2) pressure, p
+!         3) t^2
+!         4) p^2
+!         5) t.p
+!         6) t^2.p
+!         7) t.p^2
+!         8) t^2.p^2
+!         9) water vapor mixing ratio, q
 !
-!       Thus the tangent-linear form of these are
+!       thus the tangent-linear form of these are
 !
-!         1) dT
-!         2) dP
-!         3) 2T.dT
-!         4) 2P.dP
-!         5) P.dT + T.dP
-!         6) 2TP.dT + T^2.dP
-!         7) 2TP.dP + P^2.dT
-!         8) 2T(P^2).dT + 2(T^2)P.dP
-!         9) dQ
+!         1) dt
+!         2) dp
+!         3) 2t.dt
+!         4) 2p.dp
+!         5) p.dt + t.dp
+!         6) 2tp.dt + t^2.dp
+!         7) 2tp.dp + p^2.dt
+!         8) 2t(p^2).dt + 2(t^2)p.dp
+!         9) dq
 !
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_std_predictors_TL( p,           &  ! Input,  K
-                                        t,           &  ! Input,  K
-                                        w,           &  ! Input,  K
+  subroutine compute_std_predictors_tl( p,           &  ! input,  k
+                                        t,           &  ! input,  k
+                                        w,           &  ! input,  k
 
-                                        p_TL,        &  ! Input,  K
-                                        t_TL,        &  ! Input,  K
-                                        w_TL,        &  ! Input,  K
+                                        p_tl,        &  ! input,  k
+                                        t_tl,        &  ! input,  k
+                                        w_tl,        &  ! input,  k
 
-                                        predictor_TL  )  ! Output, Istd x K
+                                        predictor_tl  )  ! output, istd x k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: p              ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: t             ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: w             ! Input,  K
+    real( fp_kind ), dimension( : ),     intent( in )  :: p              ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: t             ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: w             ! input,  k
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: p_TL          ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: t_TL          ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: w_TL          ! Input,  K
+    real( fp_kind ), dimension( : ),     intent( in )  :: p_tl          ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: t_tl          ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: w_tl          ! input,  k
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( OUT ) :: predictor_TL  ! Output, Istd x K
+    real( fp_kind ), dimension( :, : ),  intent( out ) :: predictor_tl  ! output, istd x k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_STD_PREDICTORS_TL'
+    character( * ), parameter :: routine_name = 'compute_std_predictors_tl'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k
+    integer :: k
 
-    REAL( fp_kind ) :: p2, p2_TL
-    REAL( fp_kind ) :: t2, t2_TL
+    real( fp_kind ) :: p2, p2_tl
+    real( fp_kind ) :: t2, t2_tl
 
 
 
     !#--------------------------------------------------------------------------#
-    !#        -- Calculate the tangent-linear standard predictor set --         #
+    !#        -- calculate the tangent-linear standard predictor set --         #
     !#--------------------------------------------------------------------------#
 
-    k_layer_loop: DO k = 1, SIZE( p )
+    k_layer_loop: do k = 1, size( p )
 
 
-      ! -- Precalculate the squared terms
+      ! -- precalculate the squared terms
       p2 = p( k ) * p( k )
       t2 = t( k ) * t( k )
 
-      ! -- Tangent-linear of squared terms
-      p2_TL = TWO * p( k ) * p_TL( k )
-      t2_TL = TWO * t( k ) * t_TL( k )
+      ! -- tangent-linear of squared terms
+      p2_tl = two * p( k ) * p_tl( k )
+      t2_tl = two * t( k ) * t_tl( k )
       
-      ! -- Calculate and assign the absorber independent predictors
-      predictor_TL( 1, k ) = t_TL( k )
-      predictor_TL( 2, k ) = p_TL( k )
-      predictor_TL( 3, k ) = t2_TL
-      predictor_TL( 4, k ) = p2_TL
-      predictor_TL( 5, k ) = ( t( k ) * p_TL( k ) ) + ( p( k ) * t_TL( k ) )
-      predictor_TL( 6, k ) = ( p( k ) * t2_TL     ) + ( t2     * p_TL( k ) )
-      predictor_TL( 7, k ) = ( t( k ) * p2_TL     ) + ( p2     * t_TL( k ) )
-      predictor_TL( 8, k ) = ( t2     * p2_TL     ) + ( p2     * t2_TL     )
-      predictor_TL( 9, k ) = w_TL( k )
+      ! -- calculate and assign the absorber independent predictors
+      predictor_tl( 1, k ) = t_tl( k )
+      predictor_tl( 2, k ) = p_tl( k )
+      predictor_tl( 3, k ) = t2_tl
+      predictor_tl( 4, k ) = p2_tl
+      predictor_tl( 5, k ) = ( t( k ) * p_tl( k ) ) + ( p( k ) * t_tl( k ) )
+      predictor_tl( 6, k ) = ( p( k ) * t2_tl     ) + ( t2     * p_tl( k ) )
+      predictor_tl( 7, k ) = ( t( k ) * p2_tl     ) + ( p2     * t_tl( k ) )
+      predictor_tl( 8, k ) = ( t2     * p2_tl     ) + ( p2     * t2_tl     )
+      predictor_tl( 9, k ) = w_tl( k )
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_std_predictors_TL
+  end subroutine compute_std_predictors_tl
 
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       compute_int_predictors_TL
+!p+
+! name:
+!       compute_int_predictors_tl
 !
-! PURPOSE:
-!       PRIVATE function to compute the integrated, absorber dependent
+! purpose:
+!       private function to compute the integrated, absorber dependent
 !       predictor set for the tangent-linear transmittance model.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_int_predictors_TL( pressure,       &  ! Input, K
-!                                       temperature,    &  ! Input, K
-!                                       absorber,       &  ! Input, 0:K
+! calling sequence:
+!       call compute_int_predictors_tl( pressure,       &  ! input, k
+!                                       temperature,    &  ! input, k
+!                                       absorber,       &  ! input, 0:k
 !
-!                                       pressure_TL,    &  ! Input, K
-!                                       temperature_TL, &  ! Input, K
-!                                       absorber_TL,    &  ! Input, 0:K
+!                                       pressure_tl,    &  ! input, k
+!                                       temperature_tl, &  ! input, k
+!                                       absorber_tl,    &  ! input, 0:k
 !
-!                                       predictor_TL    )  ! Input, Iint x K
+!                                       predictor_tl    )  ! input, iint x k
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       absorber_TL:      Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       absorber_tl:      profile level integrated absorber amount array.
+!                         units:      varies with absorber
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       pressure_TL:      Profile LAYER tangent-linear pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       pressure_tl:      profile layer tangent-linear pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature_TL:   Profile LAYER tangent-linear temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature_tl:   profile layer tangent-linear temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       absorber_TL:      Profile LEVEL tangent-linear integrated absorber
+!       absorber_tl:      profile level tangent-linear integrated absorber
 !                         amount array.
-!                         UNITS:      Varies with absorber
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      varies with absorber
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None
+! optional input arguments:
+!       none
 !
-! OUTPUT ARGUMENTS:
-!       predictor_TL:     Array containing the calculated tangent-linear
+! output arguments:
+!       predictor_tl:     array containing the calculated tangent-linear
 !                         integrated predictor set for every absorber.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  Iint x K
-!                         ATTRIBUTES: INTENT( OUT )
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  iint x k
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None
+! optional output arguments:
+!       none
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The integrated predictors consist of six that are repeated for every
+!       the integrated predictors consist of six that are repeated for every
 !       absorber:
 !
-!         1) T*
-!         2) P*
-!         3) T**
-!         4) P**
-!         5) T***
-!         6) P***
+!         1) t*
+!         2) p*
+!         3) t**
+!         4) p**
+!         5) t***
+!         6) p***
 !
-!       The reference above details the predictor value for input LEVEL values. In
-!       the equations below, the "X" quantities can be replaced with temperature, T, 
-!       of pressure, P, to determine the required predictor, and A is the LEVEL
+!       the reference above details the predictor value for input level values. in
+!       the equations below, the "x" quantities can be replaced with temperature, t, 
+!       of pressure, p, to determine the required predictor, and a is the level
 !       absorber amount:
 !
 !                           __ k
 !                    1     \ 
-!         X*(k) = --------  >  ( X(i) + X(i-1) ) ( A(i) - A(i-1) )
-!                  c.A(k)  /__
+!         x*(k) = --------  >  ( x(i) + x(i-1) ) ( a(i) - a(i-1) )
+!                  c.a(k)  /__
 !                             i=1
 !
 !                            __ k
 !                     1     \
-!        X**(k) = ---------  >  ( X(i)A(i) + X(i-1)A(i-1) ) ( A(i) - A(i-1) )
-!                  c.A^2(k) /__
+!        x**(k) = ---------  >  ( x(i)a(i) + x(i-1)a(i-1) ) ( a(i) - a(i-1) )
+!                  c.a^2(k) /__
 !                              i=1
 !
 !                            __ k
 !                     1     \ 
-!       X***(k) = ---------  >  ( X(i)A^2(i) + X(i-1)A^2(i-1) ) ( A(i) - A(i-1) )
-!                  c.A^3(k) /__
+!       x***(k) = ---------  >  ( x(i)a^2(i) + x(i-1)a^2(i-1) ) ( a(i) - a(i-1) )
+!                  c.a^3(k) /__
 !                              i=1
 !
-!       To accomodate input LAYER values (i.e. layer average values) from the
-!       NCEP GDAS, the predictor formulations were modified to:
+!       to accomodate input layer values (i.e. layer average values) from the
+!       ncep gdas, the predictor formulations were modified to:
 !
 !                   __ k                        __k-1
 !                  \                           \ 
-!                   >  X(i)( A(i)-A(i-1) )      >  X(i)( A(i)-A(i-1) )
+!                   >  x(i)( a(i)-a(i-1) )      >  x(i)( a(i)-a(i-1) )
 !                  /__                         /__ 
 !                     i=1                         i=1
-!         X*(k) = ------------------------- + -------------------------
-!                            2.A(k)                    2.A(k-1)
+!         x*(k) = ------------------------- + -------------------------
+!                            2.a(k)                    2.a(k-1)
 !
 !                   __ k
 !                  \ 
-!                   >  X(i)( A(i) + A(i-1) ) ( A(i) - A(i-1) )
+!                   >  x(i)( a(i) + a(i-1) ) ( a(i) - a(i-1) )
 !                  /__
 !                     i=1
-!        X**(k) = --------------------------------------------- +
-!                                       2.A^2(k) 
+!        x**(k) = --------------------------------------------- +
+!                                       2.a^2(k) 
 !                   
 !                   __k-1
 !                  \ 
-!                   >  X(i)( A(i) + A(i-1) ) ( A(i) - A(i-1) )
+!                   >  x(i)( a(i) + a(i-1) ) ( a(i) - a(i-1) )
 !                  /__
 !                     i=1
 !                 ---------------------------------------------
-!                                       2.A^2(k-1)
+!                                       2.a^2(k-1)
 !
 !                      __ k
 !                     \ 
-!                 3 .  >  X(i)( A^2(i) + A^2(i-1) ) ( A(i) - A(i-1) )
+!                 3 .  >  x(i)( a^2(i) + a^2(i-1) ) ( a(i) - a(i-1) )
 !                     /__
 !                        i=1
-!       X***(k) = ---------------------------------------------------- +
-!                                       4.A^3(k)                    
+!       x***(k) = ---------------------------------------------------- +
+!                                       4.a^3(k)                    
 !
 !                      __k-1
 !                     \ 
-!                 3 .  >  X(i)( A^2(i) + A^2(i-1) ) ( A(i) - A(i-1) )
+!                 3 .  >  x(i)( a^2(i) + a^2(i-1) ) ( a(i) - a(i-1) )
 !                     /__
 !                        i=1
 !                 ----------------------------------------------------
-!                                       4.A^3(k-1)
+!                                       4.a^3(k-1)
 !
 !
-!       The tangent-linear form of these LAYER predictor formulations are:
+!       the tangent-linear form of these layer predictor formulations are:
 !
 !                    __ k                                             
 !                   \                                                 
-!                    >  dX(i)( A(i)-A(i-1) ) + X(i)( dA(i)-dA(i-1) )  
+!                    >  dx(i)( a(i)-a(i-1) ) + x(i)( da(i)-da(i-1) )  
 !                   /__                                               
 !                      i=1                                            
-!         dX*(k) = -------------------------------------------------- -
-!                                       2.A(k)                        
+!         dx*(k) = -------------------------------------------------- -
+!                                       2.a(k)                        
 !
 !                           __ k
 !                          \
-!                   dA(k) . >  X(i)( A(i)-A(i-1) )
+!                   da(k) . >  x(i)( a(i)-a(i-1) )
 !                          /__
 !                             i=1
 !                  -------------------------------- +
-!                               2.A^2(k)
+!                               2.a^2(k)
 !                 
 !                    __k-1                                              
 !                   \                                                   
-!                    >  dX(i)( A(i)-A(i-1) ) + X(i)( dA(i)-dA(i-1) )    
+!                    >  dx(i)( a(i)-a(i-1) ) + x(i)( da(i)-da(i-1) )    
 !                   /__                                                 
 !                      i=1                                              
 !                  -------------------------------------------------- - 
-!                                      2.A(k-1)                         
+!                                      2.a(k-1)                         
 !
 !                             __k-1
 !                            \
-!                   dA(k-1) . >  X(i)( A(i)-A(i-1) )
+!                   da(k-1) . >  x(i)( a(i)-a(i-1) )
 !                            /__
 !                               i=1
 !                  ----------------------------------
-!                              2.A^2(k-1)
+!                              2.a^2(k-1)
 !
 !                 
 !                 
 !                    __ k                                                                                                       
 !                   \                                                                                                           
-!                    >  [dX(i)( A(i)+A(i-1) ) + X(i)( dA(i)+dA(i-1) )]( A(i)-A(i-1) ) + X(i)( A(i)+A(i-1) )( dA(i)-dA(i-1) )    
+!                    >  [dx(i)( a(i)+a(i-1) ) + x(i)( da(i)+da(i-1) )]( a(i)-a(i-1) ) + x(i)( a(i)+a(i-1) )( da(i)-da(i-1) )    
 !                   /__                                                                                                         
 !                      i=1                                                                                                      
-!        dX**(k) = ---------------------------------------------------------------------------------------------------------- - 
-!                                                                  2.A^2(k)                                                     
+!        dx**(k) = ---------------------------------------------------------------------------------------------------------- - 
+!                                                                  2.a^2(k)                                                     
 !
 !                           __ k
 !                          \
-!                   dA(k) . >  X(i)( A(i)+A(i-1) )( A(i)-A(i-1) )
+!                   da(k) . >  x(i)( a(i)+a(i-1) )( a(i)-a(i-1) )
 !                          /__
 !                             i=1
 !                  ----------------------------------------------- +
-!                                      A^3(k)
+!                                      a^3(k)
 !
 !                    __k-1                                                                                                      
 !                   \                                                                                                           
-!                    >  [dX(i)( A(i)+A(i-1) ) + X(i)( dA(i)+dA(i-1) )]( A(i)-A(i-1) ) + X(i)( A(i)+A(i-1) )( dA(i)-dA(i-1) )    
+!                    >  [dx(i)( a(i)+a(i-1) ) + x(i)( da(i)+da(i-1) )]( a(i)-a(i-1) ) + x(i)( a(i)+a(i-1) )( da(i)-da(i-1) )    
 !                   /__                                                                                                         
 !                      i=1                                                                                                      
 !                  ---------------------------------------------------------------------------------------------------------- - 
-!                                                                 2.A^2(k-1)                                                    
+!                                                                 2.a^2(k-1)                                                    
 !
 !                             __k-1
 !                            \
-!                   dA(k-1) . >  X(i)( A(i)+A(i-1) )( A(i)-A(i-1) )
+!                   da(k-1) . >  x(i)( a(i)+a(i-1) )( a(i)-a(i-1) )
 !                            /__
 !                               i=1
 !                  -------------------------------------------------
-!                                      A^3(k-1)
+!                                      a^3(k-1)
 !
 !
 !                 
 !                      __ k                                                                                                       
 !                     \            2    2                 2     2                                2    2                           
-!                  3 . >  [dX(i)( A(i)+A(i-1) ) + X(i)( dA(i)+dA(i-1) )]( A(i)-A(i-1) ) + X(i)( A(i)+A(i-1) )( dA(i)-dA(i-1) )    
+!                  3 . >  [dx(i)( a(i)+a(i-1) ) + x(i)( da(i)+da(i-1) )]( a(i)-a(i-1) ) + x(i)( a(i)+a(i-1) )( da(i)-da(i-1) )    
 !                     /__                                                                                                         
 !                        i=1                                                                                                      
-!       dX***(k) = ------------------------------------------------------------------------------------------------------------ - 
-!                                                                  4.A^3(k)                                                       
+!       dx***(k) = ------------------------------------------------------------------------------------------------------------ - 
+!                                                                  4.a^3(k)                                                       
 !
 !                            __ k
 !                           \          2    2
-!                  9.dA(k) . >  X(i)( A(i)+A(i-1) )( A(i)-A(i-1) )
+!                  9.da(k) . >  x(i)( a(i)+a(i-1) )( a(i)-a(i-1) )
 !                           /__
 !                              i=1
 !                  ------------------------------------------------ +
-!                                      4.A^4(k)
+!                                      4.a^4(k)
 !
 !                      __k-1                                                                                                      
 !                     \            2    2                 2     2                                2    2                           
-!                  3 . >  [dX(i)( A(i)+A(i-1) ) + X(i)( dA(i)+dA(i-1) )]( A(i)-A(i-1) ) + X(i)( A(i)+A(i-1) )( dA(i)-dA(i-1) )    
+!                  3 . >  [dx(i)( a(i)+a(i-1) ) + x(i)( da(i)+da(i-1) )]( a(i)-a(i-1) ) + x(i)( a(i)+a(i-1) )( da(i)-da(i-1) )    
 !                     /__                                                                                                         
 !                        i=1                                                                                                      
 !                  ------------------------------------------------------------------------------------------------------------ - 
-!                                                                 4.A^3(k-1)                                                      
+!                                                                 4.a^3(k-1)                                                      
 !
 !                            __k-1
 !                           \          2    2
-!                  9.dA(k) . >  X(i)( A(i)+A(i-1) )( A(i)-A(i-1) )
+!                  9.da(k) . >  x(i)( a(i)+a(i-1) )( a(i)-a(i-1) )
 !                           /__
 !                              i=1
 !                  ------------------------------------------------
-!                                      4.A^4(k-1)
+!                                      4.a^4(k-1)
 !
 !
-!       Thus the transmittance model coefficients calculated using the LEVEL
+!       thus the transmittance model coefficients calculated using the level
 !       predictor formulation are used with the tangent-linear predictors
-!       constructed above with LAYER values.
+!       constructed above with layer values.
 !
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_int_predictors_TL( pressure,       &  ! Input,  K
-                                        temperature,    &  ! Input,  K
-                                        absorber,       &  ! Input,  0:K
+  subroutine compute_int_predictors_tl( pressure,       &  ! input,  k
+                                        temperature,    &  ! input,  k
+                                        absorber,       &  ! input,  0:k
 
-                                        pressure_TL,    &  ! Input,  K
-                                        temperature_TL, &  ! Input,  K
-                                        absorber_TL,    &  ! Input,  0:K
+                                        pressure_tl,    &  ! input,  k
+                                        temperature_tl, &  ! input,  k
+                                        absorber_tl,    &  ! input,  0:k
 
-                                        predictor_TL    )  ! Output, Iint x K
+                                        predictor_tl    )  ! output, iint x k
  
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )  :: pressure        ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )  :: temperature     ! K
-    REAL( fp_kind ), DIMENSION( 0: ),   INTENT( IN )  :: absorber        ! 0:K
+    real( fp_kind ), dimension( : ),    intent( in )  :: pressure        ! k
+    real( fp_kind ), dimension( : ),    intent( in )  :: temperature     ! k
+    real( fp_kind ), dimension( 0: ),   intent( in )  :: absorber        ! 0:k
 
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )  :: pressure_TL     ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )  :: temperature_TL  ! K
-    REAL( fp_kind ), DIMENSION( 0: ),   INTENT( IN )  :: absorber_TL     ! 0:K
+    real( fp_kind ), dimension( : ),    intent( in )  :: pressure_tl     ! k
+    real( fp_kind ), dimension( : ),    intent( in )  :: temperature_tl  ! k
+    real( fp_kind ), dimension( 0: ),   intent( in )  :: absorber_tl     ! 0:k
 
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( OUT ) :: predictor_TL    ! Iint x K
+    real( fp_kind ), dimension( :, : ), intent( out ) :: predictor_tl    ! iint x k
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_INT_PREDICTORS_TL'
+    character( * ), parameter :: routine_name = 'compute_int_predictors_tl'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: i, k
-    INTEGER :: n_predictors
+    integer :: i, k
+    integer :: n_predictors
 
-    REAL( fp_kind ) :: d_absorber
-    REAL( fp_kind ) :: d_absorber_TL
-    REAL( fp_kind ) :: factor_1
-    REAL( fp_kind ) :: factor_1_TL
-    REAL( fp_kind ) :: factor_2
-    REAL( fp_kind ) :: factor_2_TL
-    REAL( fp_kind ) :: inverse_1
-    REAL( fp_kind ) :: inverse_2
-    REAL( fp_kind ) :: inverse_3
-    REAL( fp_kind ) :: inverse_4
-    REAL( fp_kind ) :: absorber_3
-    REAL( fp_kind ) :: absorber_4
-    REAL( fp_kind ) :: inverse_1_TL
-    REAL( fp_kind ) :: inverse_2_TL
-    REAL( fp_kind ) :: inverse_3_TL
-
-
-    ! -- Square of the absorber amount. 0:K
-    REAL( fp_kind ), DIMENSION( 0:SIZE( pressure ) ) :: absorber_2
-
-    ! -- Intermediate summation arrays. Iint
-    REAL( fp_kind ), DIMENSION( SIZE( predictor_TL, DIM=1 ) ) :: s
-    REAL( fp_kind ), DIMENSION( SIZE( predictor_TL, DIM=1 ) ) :: s_TL
-
-    ! -- LEVEL predictor, Iint x 0:K
-    REAL( fp_kind ), DIMENSION( SIZE( predictor_TL, DIM=1 ), 0:SIZE( pressure ) ) :: x_TL
+    real( fp_kind ) :: d_absorber
+    real( fp_kind ) :: d_absorber_tl
+    real( fp_kind ) :: factor_1
+    real( fp_kind ) :: factor_1_tl
+    real( fp_kind ) :: factor_2
+    real( fp_kind ) :: factor_2_tl
+    real( fp_kind ) :: inverse_1
+    real( fp_kind ) :: inverse_2
+    real( fp_kind ) :: inverse_3
+    real( fp_kind ) :: inverse_4
+    real( fp_kind ) :: absorber_3
+    real( fp_kind ) :: absorber_4
+    real( fp_kind ) :: inverse_1_tl
+    real( fp_kind ) :: inverse_2_tl
+    real( fp_kind ) :: inverse_3_tl
 
 
+    ! -- square of the absorber amount. 0:k
+    real( fp_kind ), dimension( 0:size( pressure ) ) :: absorber_2
 
-    !#--------------------------------------------------------------------------#
-    !#          -- Determine the number of layers and predictors --             #
-    !#--------------------------------------------------------------------------#
+    ! -- intermediate summation arrays. iint
+    real( fp_kind ), dimension( size( predictor_tl, dim=1 ) ) :: s
+    real( fp_kind ), dimension( size( predictor_tl, dim=1 ) ) :: s_tl
 
-    n_predictors = SIZE( predictor_TL, DIM = 1 )
+    ! -- level predictor, iint x 0:k
+    real( fp_kind ), dimension( size( predictor_tl, dim=1 ), 0:size( pressure ) ) :: x_tl
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Initialise values --                          #
+    !#          -- determine the number of layers and predictors --             #
     !#--------------------------------------------------------------------------#
 
-    absorber_2( 0 ) = ZERO
-
-    s( : )       = ZERO
-    s_TL( : )    = ZERO
-    x_TL( :, 0 ) = ZERO
+    n_predictors = size( predictor_tl, dim = 1 )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#               -- Calculate the integrated predictor set --               #
+    !#                         -- initialise values --                          #
     !#--------------------------------------------------------------------------#
 
-    k_layer_loop: DO k = 1, SIZE( pressure )
+    absorber_2( 0 ) = zero
+
+    s( : )       = zero
+    s_tl( : )    = zero
+    x_tl( :, 0 ) = zero
+
+
+
+    !#--------------------------------------------------------------------------#
+    !#               -- calculate the integrated predictor set --               #
+    !#--------------------------------------------------------------------------#
+
+    k_layer_loop: do k = 1, size( pressure )
 
 
       ! --------------------------------
-      ! Calculate multiplicative factors
+      ! calculate multiplicative factors
       ! --------------------------------
 
       absorber_2( k ) = absorber( k ) * absorber( k )
 
-      ! -- For the * terms
+      ! -- for the * terms
       d_absorber    = absorber( k )    - absorber( k-1 )
-      d_absorber_TL = absorber_TL( k ) - absorber_TL( k-1 )
+      d_absorber_tl = absorber_tl( k ) - absorber_tl( k-1 )
 
-      ! -- For the ** terms
+      ! -- for the ** terms
       factor_1    = ( absorber( k ) + absorber( k-1 ) ) * d_absorber
-      factor_1_TL = ( ( absorber( k )    + absorber( k-1 )    ) * d_absorber_TL ) + &
-                    ( ( absorber_TL( k ) + absorber_TL( k-1 ) ) * d_absorber    )
+      factor_1_tl = ( ( absorber( k )    + absorber( k-1 )    ) * d_absorber_tl ) + &
+                    ( ( absorber_tl( k ) + absorber_tl( k-1 ) ) * d_absorber    )
 
-      ! -- For the *** terms       
+      ! -- for the *** terms       
       factor_2    = ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber
-      factor_2_TL = ( ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber_TL ) + &
-                    ( TWO * ( ( absorber( k )   * absorber_TL( k )   ) + &
-                              ( absorber( k-1 ) * absorber_TL( k-1 ) ) ) * d_absorber )
+      factor_2_tl = ( ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber_tl ) + &
+                    ( two * ( ( absorber( k )   * absorber_tl( k )   ) + &
+                              ( absorber( k-1 ) * absorber_tl( k-1 ) ) ) * d_absorber )
 
 
       ! -------------------------------
-      ! Calculate the intermediate sums
+      ! calculate the intermediate sums
       ! -------------------------------
 
-      ! -- T*
-      s( 1 )    = s( 1 )    + ( temperature( k )    * d_absorber    )     ! Forward predictor
-      s_TL( 1 ) = s_TL( 1 ) + ( temperature_TL( k ) * d_absorber    ) + &
-                              ( temperature( k )    * d_absorber_TL )
+      ! -- t*
+      s( 1 )    = s( 1 )    + ( temperature( k )    * d_absorber    )     ! forward predictor
+      s_tl( 1 ) = s_tl( 1 ) + ( temperature_tl( k ) * d_absorber    ) + &
+                              ( temperature( k )    * d_absorber_tl )
 
-      ! -- P*
-      s( 2 )    = s( 2 )    + ( pressure( k )       * d_absorber    )     ! Forward predictor
-      s_TL( 2 ) = s_TL( 2 ) + ( pressure_TL( k )    * d_absorber    ) + &
-                              ( pressure( k )       * d_absorber_TL )
+      ! -- p*
+      s( 2 )    = s( 2 )    + ( pressure( k )       * d_absorber    )     ! forward predictor
+      s_tl( 2 ) = s_tl( 2 ) + ( pressure_tl( k )    * d_absorber    ) + &
+                              ( pressure( k )       * d_absorber_tl )
 
-      ! -- T**
-      s( 3 )    = s( 3 )    + ( temperature( k )    * factor_1    )       ! Forward predictor
-      s_TL( 3 ) = s_TL( 3 ) + ( temperature_TL( k ) * factor_1    ) + &
-                              ( temperature( k )    * factor_1_TL )
+      ! -- t**
+      s( 3 )    = s( 3 )    + ( temperature( k )    * factor_1    )       ! forward predictor
+      s_tl( 3 ) = s_tl( 3 ) + ( temperature_tl( k ) * factor_1    ) + &
+                              ( temperature( k )    * factor_1_tl )
 
-      ! -- P**
-      s( 4 )    = s( 4 )    + ( pressure( k )       * factor_1    )       ! Forward predictor
-      s_TL( 4 ) = s_TL( 4 ) + ( pressure_TL( k )    * factor_1    ) + &
-                              ( pressure( k )       * factor_1_TL )
+      ! -- p**
+      s( 4 )    = s( 4 )    + ( pressure( k )       * factor_1    )       ! forward predictor
+      s_tl( 4 ) = s_tl( 4 ) + ( pressure_tl( k )    * factor_1    ) + &
+                              ( pressure( k )       * factor_1_tl )
 
-      ! -- T***
-      s( 5 )    = s( 5 )    + ( temperature( k )    * factor_2    )       ! Forward predictor
-      s_TL( 5 ) = s_TL( 5 ) + ( temperature_TL( k ) * factor_2    ) + &
-                              ( temperature( k )    * factor_2_TL )
+      ! -- t***
+      s( 5 )    = s( 5 )    + ( temperature( k )    * factor_2    )       ! forward predictor
+      s_tl( 5 ) = s_tl( 5 ) + ( temperature_tl( k ) * factor_2    ) + &
+                              ( temperature( k )    * factor_2_tl )
 
-      ! -- P***
-      s( 6 )    = s( 6 )    + ( pressure( k )       * factor_2    )       ! Forward predictor
-      s_TL( 6 ) = s_TL( 6 ) + ( pressure_TL( k )    * factor_2    ) + &
-                              ( pressure( k )       * factor_2_TL )
+      ! -- p***
+      s( 6 )    = s( 6 )    + ( pressure( k )       * factor_2    )       ! forward predictor
+      s_tl( 6 ) = s_tl( 6 ) + ( pressure_tl( k )    * factor_2    ) + &
+                              ( pressure( k )       * factor_2_tl )
 
 
       ! ------------------------------------------------------
-      ! Calculate the normalising factors for the integrated
-      ! tangent-linear predictors. Note that the checks below,
-      ! the IF tests to determine if the absorber products are
-      ! represenatble are to minimise the number of calcs. I.e
+      ! calculate the normalising factors for the integrated
+      ! tangent-linear predictors. note that the checks below,
+      ! the if tests to determine if the absorber products are
+      ! represenatble are to minimise the number of calcs. i.e
       ! if inverse_1 is toast because absorber(k) is too small
       ! there's no need to check any further.
       ! ------------------------------------------------------
 
-      ! -- Is inverse_1 representable?
-      inverse_1_check: IF ( absorber( k ) > TOLERANCE ) THEN
+      ! -- is inverse_1 representable?
+      inverse_1_check: if ( absorber( k ) > tolerance ) then
 
-        inverse_1 = ONE / absorber( k )
+        inverse_1 = one / absorber( k )
 
-        ! -- Is inverse_2 representable
-        inverse_2_check: IF ( absorber_2( k ) > TOLERANCE ) THEN
+        ! -- is inverse_2 representable
+        inverse_2_check: if ( absorber_2( k ) > tolerance ) then
 
           inverse_2    =  inverse_1 * inverse_1
-          inverse_1_TL = -inverse_2 * absorber_TL( k )
+          inverse_1_tl = -inverse_2 * absorber_tl( k )
           absorber_3   =  absorber( k ) * absorber_2( k )
          
-          ! -- Is inverse_3 representable
-          inverse_3_check: IF ( absorber_3 > TOLERANCE ) THEN
+          ! -- is inverse_3 representable
+          inverse_3_check: if ( absorber_3 > tolerance ) then
 
             inverse_3    =  inverse_2 * inverse_1
-            inverse_2_TL = -inverse_3 * absorber_TL( k ) * TWO
+            inverse_2_tl = -inverse_3 * absorber_tl( k ) * two
             absorber_4   =  absorber( k ) * absorber_3
 
-            ! -- Is inverse_4 represenatble?
-            inverse_4_check: IF ( absorber_4 > TOLERANCE ) THEN
+            ! -- is inverse_4 represenatble?
+            inverse_4_check: if ( absorber_4 > tolerance ) then
 
               inverse_4    =  inverse_3 * inverse_1
-              inverse_3_TL = -inverse_4 * absorber_TL( k ) * THREE
+              inverse_3_tl = -inverse_4 * absorber_tl( k ) * three
 
-            ELSE
+            else
 
-              inverse_3_TL = ZERO
+              inverse_3_tl = zero
 
-            END IF inverse_4_check
+            end if inverse_4_check
 
-          ELSE
+          else
 
-            inverse_3 = ZERO
+            inverse_3 = zero
 
-            inverse_2_TL = ZERO
-            inverse_3_TL = ZERO
+            inverse_2_tl = zero
+            inverse_3_tl = zero
 
-          END IF inverse_3_check
+          end if inverse_3_check
 
-        ELSE
+        else
 
-          inverse_2 = ZERO
-          inverse_3 = ZERO
+          inverse_2 = zero
+          inverse_3 = zero
 
-          inverse_1_TL = ZERO
-          inverse_2_TL = ZERO
-          inverse_3_TL = ZERO
+          inverse_1_tl = zero
+          inverse_2_tl = zero
+          inverse_3_tl = zero
 
-        END IF inverse_2_check
+        end if inverse_2_check
 
-      ELSE
+      else
 
-        inverse_1 = ZERO
-        inverse_2 = ZERO
-        inverse_3 = ZERO
+        inverse_1 = zero
+        inverse_2 = zero
+        inverse_3 = zero
 
-        inverse_1_TL = ZERO
-        inverse_2_TL = ZERO
-        inverse_3_TL = ZERO
+        inverse_1_tl = zero
+        inverse_2_tl = zero
+        inverse_3_tl = zero
 
-      END IF inverse_1_check
+      end if inverse_1_check
 
 
       ! ------------------------------------------------------------
-      ! Scale and normalise the tangent-linear integrated predictors
+      ! scale and normalise the tangent-linear integrated predictors
       ! ------------------------------------------------------------
 
-      ! -- T*
-      x_TL( 1, k ) = POINT_5  * ( ( s_TL( 1 ) * inverse_1    ) + &
-                                  ( s( 1 )    * inverse_1_TL ) )
+      ! -- t*
+      x_tl( 1, k ) = point_5  * ( ( s_tl( 1 ) * inverse_1    ) + &
+                                  ( s( 1 )    * inverse_1_tl ) )
 
-      ! -- P*
-      x_TL( 2, k ) = POINT_5  * ( ( s_TL( 2 ) * inverse_1    ) + &
-                                  ( s( 2 )    * inverse_1_TL ) )
+      ! -- p*
+      x_tl( 2, k ) = point_5  * ( ( s_tl( 2 ) * inverse_1    ) + &
+                                  ( s( 2 )    * inverse_1_tl ) )
 
-      ! -- T**
-      x_TL( 3, k ) = POINT_5  * ( ( s_TL( 3 ) * inverse_2    ) + &
-                                  ( s( 3 )    * inverse_2_TL ) )
+      ! -- t**
+      x_tl( 3, k ) = point_5  * ( ( s_tl( 3 ) * inverse_2    ) + &
+                                  ( s( 3 )    * inverse_2_tl ) )
 
-      ! -- P**
-      x_TL( 4, k ) = POINT_5  * ( ( s_TL( 4 ) * inverse_2    ) + &
-                                  ( s( 4 )    * inverse_2_TL ) )
+      ! -- p**
+      x_tl( 4, k ) = point_5  * ( ( s_tl( 4 ) * inverse_2    ) + &
+                                  ( s( 4 )    * inverse_2_tl ) )
 
-      ! -- T***
-      x_TL( 5, k ) = POINT_75 * ( ( s_TL( 5 ) * inverse_3    ) + &
-                                  ( s( 5 )    * inverse_3_TL ) )
+      ! -- t***
+      x_tl( 5, k ) = point_75 * ( ( s_tl( 5 ) * inverse_3    ) + &
+                                  ( s( 5 )    * inverse_3_tl ) )
 
-      ! -- P***
-      x_TL( 6, k ) = POINT_75 * ( ( s_TL( 6 ) * inverse_3    ) + &
-                                  ( s( 6 )    * inverse_3_TL ) )
+      ! -- p***
+      x_tl( 6, k ) = point_75 * ( ( s_tl( 6 ) * inverse_3    ) + &
+                                  ( s( 6 )    * inverse_3_tl ) )
 
 
       ! ----------------------------
-      ! Sum predictors across layers
+      ! sum predictors across layers
       ! ----------------------------
 
-      DO i = 1, n_predictors
+      do i = 1, n_predictors
 
-        predictor_TL( i, k ) = x_TL( i, k ) + x_TL( i, k - 1 )
+        predictor_tl( i, k ) = x_tl( i, k ) + x_tl( i, k - 1 )
 
-      END DO
+      end do
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_int_predictors_TL
+  end subroutine compute_int_predictors_tl
 
 
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_predictors_AD
+!s+
+! name:
+!       compute_predictors_ad
 !
-! PURPOSE:
-!       PUBLIC routine to calculate the adjoint transmittance model
+! purpose:
+!       public routine to calculate the adjoint transmittance model
 !       predictors.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_predictors_AD ( &
-!                                    ! -- Forward input
-!                                    pressure,       &  ! Input,  K
-!                                    temperature,    &  ! Input,  K
-!                                    water_vapor,    &  ! Input,  K
-!                                    absorber,       &  ! Input,  0:K x J
+! calling sequence:
+!       call compute_predictors_ad ( &
+!                                    ! -- forward input
+!                                    pressure,       &  ! input,  k
+!                                    temperature,    &  ! input,  k
+!                                    water_vapor,    &  ! input,  k
+!                                    absorber,       &  ! input,  0:k x j
 !
-!                                    ! -- Adjoint input
-!                                    predictor_AD,   &  ! In/Output, I x K
+!                                    ! -- adjoint input
+!                                    predictor_ad,   &  ! in/output, i x k
 !
-!                                    ! -- Adjoint output
-!                                    pressure_AD,    &  ! In/Output,  K
-!                                    temperature_AD, &  ! In/Output,  K
-!                                    water_vapor_AD, &  ! In/Output,  K
-!                                    absorber_AD,    &  ! In/Output,  0:K x J
+!                                    ! -- adjoint output
+!                                    pressure_ad,    &  ! in/output,  k
+!                                    temperature_ad, &  ! in/output,  k
+!                                    water_vapor_ad, &  ! in/output,  k
+!                                    absorber_ad,    &  ! in/output,  0:k x j
 !
-!                                    ! -- Optional input
-!                                    no_standard     )  ! Optional input
+!                                    ! -- optional input
+!                                    no_standard     )  ! optional input
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER average pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer average pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER average temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer average temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       water_vapor:      Profile LAYER average water vapor mixing ratio array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       water_vapor:      profile layer average water vapor mixing ratio array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       absorber:         Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       absorber:         profile level integrated absorber amount array.
+!                         units:      varies with absorber
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       predictor_AD:     Profile LAYER predictor adjoint array.
-!                         ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  I x K
-!                         ATTRIBUTES: INTENT( IN OUT ), TARGET
+!       predictor_ad:     profile layer predictor adjoint array.
+!                         ** this argument is set to zero on output **.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  i x k
+!                         attributes: intent( in out ), target
 !
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       no_standard:      If present, the standard predictors are not calculated.
-!                         This prevents recalculation of the standard predictors
+! optional input arguments:
+!       no_standard:      if present, the standard predictors are not calculated.
+!                         this prevents recalculation of the standard predictors
 !                         is only the view angle has changed - which only affects
 !                         the integrated predictors.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       pressure_AD:      Profile LAYER adjoint pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+! output arguments:
+!       pressure_ad:      profile layer adjoint pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       temperature_AD:   Profile LAYER adjoint temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       temperature_ad:   profile layer adjoint temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       water_vapor_AD:   Profile LAYER adjoint water vapor array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       water_vapor_ad:   profile layer adjoint water vapor array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       absorber_AD:      Profile LEVEL adjoint integrated absorber
+!       absorber_ad:      profile level adjoint integrated absorber
 !                         amount array.
-!                         UNITS:      Varies with absorber
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!                         units:      varies with absorber
+!                         type:       real( fp_kind )
+!                         dimension:  0:k
+!                         attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       compute_std_predictors_TL:   PRIVATE function to compute the tangent-
+! calls:
+!       compute_std_predictors_tl:   private function to compute the tangent-
 !                                    linear form of the standard (absorber
 !                                    independent) predictor set.
 !
-!       compute_int_predictors_TL:   PRIVATE function to compute the tangent-
+!       compute_int_predictors_tl:   private function to compute the tangent-
 !                                    linear form of the absorber integrated
 !                                    predictor set.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The predictors used in the NCEP transmittance model are organised in
+!       the predictors used in the ncep transmittance model are organised in
 !       the following manner:
 !
 !       --------------------------------------------
@@ -2037,1001 +2037,1001 @@ CONTAINS
 !                  |                      |
 !                  v                      v
 !
-!              Standard               Integrated
-!             Predictors            Predictors for
+!              standard               integrated
+!             predictors            predictors for
 !                                   each absorber
 !
-!       Pointers are used to reference the module scope predictor data array
+!       pointers are used to reference the module scope predictor data array
 !       before the calls are made to the standard and integrated predictor
-!       calculation functions. This eliminates array copying.
-!S-
+!       calculation functions. this eliminates array copying.
+!s-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_predictors_AD ( &
-                                     ! -- Forward input
-                                     pressure,       &  ! Input,  K
-                                     temperature,    &  ! Input,  K
-                                     water_vapor,    &  ! Input,  K
-                                     absorber,       &  ! Input,  0:K x J
+  subroutine compute_predictors_ad ( &
+                                     ! -- forward input
+                                     pressure,       &  ! input,  k
+                                     temperature,    &  ! input,  k
+                                     water_vapor,    &  ! input,  k
+                                     absorber,       &  ! input,  0:k x j
 
-                                     ! -- Adjoint input
-                                     predictor_AD,   &  ! In/Output, I x K
+                                     ! -- adjoint input
+                                     predictor_ad,   &  ! in/output, i x k
 
-                                     ! -- Adjoint output
-                                     pressure_AD,    &  ! In/Output,  K
-                                     temperature_AD, &  ! In/Output,  K
-                                     water_vapor_AD, &  ! In/Output,  K
-                                     absorber_AD,    &  ! In/Output,  0:K x J
+                                     ! -- adjoint output
+                                     pressure_ad,    &  ! in/output,  k
+                                     temperature_ad, &  ! in/output,  k
+                                     water_vapor_ad, &  ! in/output,  k
+                                     absorber_ad,    &  ! in/output,  0:k x j
 
-                                     ! -- Optional input
-                                     no_standard     )  ! Optional input
+                                     ! -- optional input
+                                     no_standard     )  ! optional input
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )             :: pressure        ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )             :: temperature     ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )             :: water_vapor     ! K
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )             :: absorber        ! 0:K x J
+    ! -- forward input
+    real( fp_kind ), dimension( : ),     intent( in )             :: pressure        ! k
+    real( fp_kind ), dimension( : ),     intent( in )             :: temperature     ! k
+    real( fp_kind ), dimension( : ),     intent( in )             :: water_vapor     ! k
+    real( fp_kind ), dimension( 0:, : ), intent( in )             :: absorber        ! 0:k x j
 
-    ! -- Adjoint input
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ), TARGET :: predictor_AD    ! I x K
+    ! -- adjoint input
+    real( fp_kind ), dimension( :, : ),  intent( in out ), target :: predictor_ad    ! i x k
 
-    ! -- Adjoint output
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT )         :: pressure_AD     ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT )         :: temperature_AD  ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT )         :: water_vapor_AD  ! K
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN OUT )         :: absorber_AD     ! 0:K x J
+    ! -- adjoint output
+    real( fp_kind ), dimension( : ),     intent( in out )         :: pressure_ad     ! k
+    real( fp_kind ), dimension( : ),     intent( in out )         :: temperature_ad  ! k
+    real( fp_kind ), dimension( : ),     intent( in out )         :: water_vapor_ad  ! k
+    real( fp_kind ), dimension( 0:, : ), intent( in out )         :: absorber_ad     ! 0:k x j
 
-    ! -- Optional input
-    INTEGER,                             INTENT( IN ), OPTIONAL   :: no_standard
+    ! -- optional input
+    integer,                             intent( in ), optional   :: no_standard
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_PREDICTORS_AD'
+    character( * ), parameter :: routine_name = 'compute_predictors_ad'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    CHARACTER( 80 ) :: message
+    character( 80 ) :: message
 
-    INTEGER :: i1, i2, j
+    integer :: i1, i2, j
 
-    REAL( fp_kind ), POINTER, DIMENSION( :, : ) :: std_predictors_AD   ! Istd x K
-    REAL( fp_kind ), POINTER, DIMENSION( :, : ) :: int_predictors_AD   ! Iint x K
+    real( fp_kind ), pointer, dimension( :, : ) :: std_predictors_ad   ! istd x k
+    real( fp_kind ), pointer, dimension( :, : ) :: int_predictors_ad   ! iint x k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#         -- Calculate the adjoint of the integrated predictors --         #
+    !#         -- calculate the adjoint of the integrated predictors --         #
     !#--------------------------------------------------------------------------#
 
-    j_absorber_loop: DO j = 1, SIZE( absorber, DIM = 2 )
+    j_absorber_loop: do j = 1, size( absorber, dim = 2 )
 
-      ! -- Determine indices of current absorber predictors
-      i1 = MAX_N_STANDARD_PREDICTORS + ( ( j - 1 ) * MAX_N_INTEGRATED_PREDICTORS ) + 1
-      i2 = i1 + MAX_N_INTEGRATED_PREDICTORS - 1
+      ! -- determine indices of current absorber predictors
+      i1 = max_n_standard_predictors + ( ( j - 1 ) * max_n_integrated_predictors ) + 1
+      i2 = i1 + max_n_integrated_predictors - 1
 
-      ! -- Alias the input predictor array
-      int_predictors_AD => predictor_AD( i1:i2, : )
+      ! -- alias the input predictor array
+      int_predictors_ad => predictor_ad( i1:i2, : )
 
-      ! -- Compute the predictor adjoints for the current absorber
-      CALL compute_int_predictors_AD( &
-                                      ! -- Forward input
-                                      pressure,            &  ! Input,  K
-                                      temperature,         &  ! Input,  K
-                                      absorber( 0:, j ),   &  ! Input,  0:K
+      ! -- compute the predictor adjoints for the current absorber
+      call compute_int_predictors_ad( &
+                                      ! -- forward input
+                                      pressure,            &  ! input,  k
+                                      temperature,         &  ! input,  k
+                                      absorber( 0:, j ),   &  ! input,  0:k
 
-                                      ! -- Adjoint input
-                                      int_predictors_AD,   &  ! In/Output, Iint x K
+                                      ! -- adjoint input
+                                      int_predictors_ad,   &  ! in/output, iint x k
                                                               
-                                      ! -- Adjoint output
-                                      pressure_AD,         &  ! In/Output,  K
-                                      temperature_AD,      &  ! In/Output,  K
-                                      absorber_AD( 0:, j ) )  ! In/Output,  0:K
+                                      ! -- adjoint output
+                                      pressure_ad,         &  ! in/output,  k
+                                      temperature_ad,      &  ! in/output,  k
+                                      absorber_ad( 0:, j ) )  ! in/output,  0:k
                                                               
-    END DO j_absorber_loop                                    
+    end do j_absorber_loop                                    
 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#     -- Calculate the adjoint of the standard predictors if needed --     #
+    !#     -- calculate the adjoint of the standard predictors if needed --     #
     !#--------------------------------------------------------------------------#
 
-    IF ( .NOT. PRESENT( no_standard ) ) THEN
+    if ( .not. present( no_standard ) ) then
 
-      ! -- Alias the input predictor array
-      std_predictors_AD => predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : )
+      ! -- alias the input predictor array
+      std_predictors_ad => predictor_ad( 1:max_n_standard_predictors, : )
 
-      ! -- Compute the predictor adjoints
-      CALL compute_std_predictors_AD( &
-                                      ! -- Forward input
-                                      pressure,          &  ! Input,  K
-                                      temperature,       &  ! Input,  K
-                                      water_vapor,       &  ! Input,  K
+      ! -- compute the predictor adjoints
+      call compute_std_predictors_ad( &
+                                      ! -- forward input
+                                      pressure,          &  ! input,  k
+                                      temperature,       &  ! input,  k
+                                      water_vapor,       &  ! input,  k
 
-                                      ! -- Adjoint input
-                                      std_predictors_AD, &  ! In/Output, Istd x K
+                                      ! -- adjoint input
+                                      std_predictors_ad, &  ! in/output, istd x k
 
-                                      ! -- Adjoint output
-                                      pressure_AD,       &  ! In/Output,  K
-                                      temperature_AD,    &  ! In/Output,  K
-                                      water_vapor_AD     )  ! In/Output,  K
-    ELSE
+                                      ! -- adjoint output
+                                      pressure_ad,       &  ! in/output,  k
+                                      temperature_ad,    &  ! in/output,  k
+                                      water_vapor_ad     )  ! in/output,  k
+    else
 
-      predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) = ZERO
+      predictor_ad( 1:max_n_standard_predictors, : ) = zero
 
-    END IF
+    end if
 
-  END SUBROUTINE compute_predictors_AD
+  end subroutine compute_predictors_ad
 
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       compute_std_predictors_AD
+!p+
+! name:
+!       compute_std_predictors_ad
 !
-! PURPOSE:
-!       PRIVATE function to compute the standard, absorber independent
+! purpose:
+!       private function to compute the standard, absorber independent
 !       predictor set for the adjoint transmittance model.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_std_predictors_AD( &
-!                                       ! -- Forward input
-!                                       pressure,       &  ! Input,  K
-!                                       temperature,    &  ! Input,  K
-!                                       water_vapor,    &  ! Input,  K
+! calling sequence:
+!       call compute_std_predictors_ad( &
+!                                       ! -- forward input
+!                                       pressure,       &  ! input,  k
+!                                       temperature,    &  ! input,  k
+!                                       water_vapor,    &  ! input,  k
 !
-!                                       ! -- Adjoint input
-!                                       predictor_AD,   &  ! In/Output, Istd x K
+!                                       ! -- adjoint input
+!                                       predictor_ad,   &  ! in/output, istd x k
 !
-!                                       ! -- Adjoint output
-!                                       pressure_AD,    &  ! In/Output,  K
-!                                       temperature_AD, &  ! In/Output,  K
-!                                       water_vapor_AD  )  ! In/Output,  K
+!                                       ! -- adjoint output
+!                                       pressure_ad,    &  ! in/output,  k
+!                                       temperature_ad, &  ! in/output,  k
+!                                       water_vapor_ad  )  ! in/output,  k
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER average pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer average pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER average temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer average temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       water_vapor:      Profile LAYER average water vapor mixing ratio array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       water_vapor:      profile layer average water vapor mixing ratio array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       predictor_AD:     Adjoint of the LAYER predictor arrays.
-!                         ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  Iint x K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       predictor_ad:     adjoint of the layer predictor arrays.
+!                         ** this argument is set to zero on output **.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  iint x k
+!                         attributes: intent( in out )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None
+! optional input arguments:
+!       none
 !
-! OUTPUT ARGUMENTS:
-!       pressure_AD:      Profile LAYER adjoint pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+! output arguments:
+!       pressure_ad:      profile layer adjoint pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       temperature_AD:   Profile LAYER adjoint temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       temperature_ad:   profile layer adjoint temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       water_vapor_AD:   Profile LAYER adjoint water vapor array.
-!                         UNITS:      g/kg
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       water_vapor_ad:   profile layer adjoint water vapor array.
+!                         units:      g/kg
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None
+! optional output arguments:
+!       none
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The standard predictors are the following:
+!       the standard predictors are the following:
 !
-!         pred(1) = T, Temperature
-!         pred(2) = P, Pressure
-!         pred(3) = T^2
-!         pred(4) = P^2
-!         pred(5) = T.P
-!         pred(6) = T^2.P
-!         pred(7) = T.P^2
-!         pred(8) = T^2.P^2
-!         pred(9) = W, Water vapor mixing ratio
+!         pred(1) = t, temperature
+!         pred(2) = p, pressure
+!         pred(3) = t^2
+!         pred(4) = p^2
+!         pred(5) = t.p
+!         pred(6) = t^2.p
+!         pred(7) = t.p^2
+!         pred(8) = t^2.p^2
+!         pred(9) = w, water vapor mixing ratio
 !
-!       The tangent-linear form of these are
+!       the tangent-linear form of these are
 !
-!         dpred(1) = dT
-!         dpred(2) = dP
-!         dpred(3) = 2T.dT
-!         dpred(4) = 2P.dP
-!         dpred(5) = P.dT + T.dP
-!         dpred(6) = 2TP.dT + T^2.dP
-!         dpred(7) = 2TP.dP + P^2.dT
-!         dpred(8) = 2T(P^2).dT + 2(T^2)P.dP
-!         dpred(9) = dW
+!         dpred(1) = dt
+!         dpred(2) = dp
+!         dpred(3) = 2t.dt
+!         dpred(4) = 2p.dp
+!         dpred(5) = p.dt + t.dp
+!         dpred(6) = 2tp.dt + t^2.dp
+!         dpred(7) = 2tp.dp + p^2.dt
+!         dpred(8) = 2t(p^2).dt + 2(t^2)p.dp
+!         dpred(9) = dw
 !
-!       Thus, the adjoint of the predictors are
+!       thus, the adjoint of the predictors are
 !
-!         d#T = 2T( P^2.d#pred(8) + P.d#pred(6) + d#pred(3) ) + 
-!                   P^2.d#pred(7) + P.d#pred(5) + d#pred(1)
+!         d#t = 2t( p^2.d#pred(8) + p.d#pred(6) + d#pred(3) ) + 
+!                   p^2.d#pred(7) + p.d#pred(5) + d#pred(1)
 !
-!         d#P = 2P( T^2.d#pred(8) + T.d#pred(7) + d#pred(4) ) + 
-!                   T^2.d#pred(6) + T.d#pred(5) + d#pred(2)
+!         d#p = 2p( t^2.d#pred(8) + t.d#pred(7) + d#pred(4) ) + 
+!                   t^2.d#pred(6) + t.d#pred(5) + d#pred(2)
 !
-!         d#W = d#pred(9)
+!         d#w = d#pred(9)
 !
 !       where the "#"ed terms represent the adjoints.
 !
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_std_predictors_AD( &
-                                        ! -- Forward input
-                                        p,            &  ! Input,  K
-                                        t,            &  ! Input,  K
-                                        w,            &  ! Input,  K
+  subroutine compute_std_predictors_ad( &
+                                        ! -- forward input
+                                        p,            &  ! input,  k
+                                        t,            &  ! input,  k
+                                        w,            &  ! input,  k
 
-                                        ! -- Adjoint input
-                                        predictor_AD, &  ! In/Output, Istd x K
+                                        ! -- adjoint input
+                                        predictor_ad, &  ! in/output, istd x k
 
-                                        ! -- Adjoint output
-                                        p_AD,         &  ! In/Output,  K
-                                        t_AD,         &  ! In/Output,  K
-                                        w_AD          )  ! In/Output,  K
+                                        ! -- adjoint output
+                                        p_ad,         &  ! in/output,  k
+                                        t_ad,         &  ! in/output,  k
+                                        w_ad          )  ! in/output,  k
 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: p             ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: t             ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: w             ! Input,  K
+    ! -- forward input
+    real( fp_kind ), dimension( : ),     intent( in )     :: p             ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )     :: t             ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )     :: w             ! input,  k
 
-    ! -- Adjoint input
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: predictor_AD  ! In/Output, Istd x K
+    ! -- adjoint input
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: predictor_ad  ! in/output, istd x k
 
-    ! -- Adjoint output
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: p_AD          ! In/Output,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: t_AD          ! In/Output,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: w_AD          ! In/Output,  K
+    ! -- adjoint output
+    real( fp_kind ), dimension( : ),     intent( in out ) :: p_ad          ! in/output,  k
+    real( fp_kind ), dimension( : ),     intent( in out ) :: t_ad          ! in/output,  k
+    real( fp_kind ), dimension( : ),     intent( in out ) :: w_ad          ! in/output,  k
 
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_STD_PREDICTORS_AD'
+    character( * ), parameter :: routine_name = 'compute_std_predictors_ad'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: i, n_predictors
-    INTEGER :: k
+    integer :: i, n_predictors
+    integer :: k
 
-    REAL( fp_kind ) :: p2, p2_AD
-    REAL( fp_kind ) :: t2, t2_AD
-
-
-
-    !#--------------------------------------------------------------------------#
-    !#              -- Determine the number of predictors --                    #
-    !#--------------------------------------------------------------------------#
-
-    n_predictors = SIZE( predictor_AD, DIM = 1 )
+    real( fp_kind ) :: p2, p2_ad
+    real( fp_kind ) :: t2, t2_ad
 
 
 
     !#--------------------------------------------------------------------------#
-    !#        -- Calculate the adjoints of the standard predictor set --        #
+    !#              -- determine the number of predictors --                    #
+    !#--------------------------------------------------------------------------#
+
+    n_predictors = size( predictor_ad, dim = 1 )
+
+
+
+    !#--------------------------------------------------------------------------#
+    !#        -- calculate the adjoints of the standard predictor set --        #
     !#                                                                          #
-    !# Don't have to loop backwards here as this is a parallel loop.            #
+    !# don't have to loop backwards here as this is a parallel loop.            #
     !#                                                                          #
-    !# Pressure and temperature squared adjoint terms are not zeroed out every  #
+    !# pressure and temperature squared adjoint terms are not zeroed out every  #
     !# loop iteration as they are local to each iteration and can be simply     #
     !# re-assigned.                                                             #
     !#--------------------------------------------------------------------------#
 
-    k_layer_loop: DO k = 1, SIZE( p )
+    k_layer_loop: do k = 1, size( p )
 
 
-      ! -- Precalculate the squared terms
+      ! -- precalculate the squared terms
       p2 = p( k ) * p( k )
       t2 = t( k ) * t( k )
 
-      ! -- Pressure squared adjoint
-      p2_AD = ( t2   * predictor_AD( 8, k ) ) + &   ! Predictor #8, T^2.P^2
-              ( t(k) * predictor_AD( 7, k ) ) + &   ! Predictor #7, T.P^2
-                       predictor_AD( 4, k )         ! Predictor #4, P^2
+      ! -- pressure squared adjoint
+      p2_ad = ( t2   * predictor_ad( 8, k ) ) + &   ! predictor #8, t^2.p^2
+              ( t(k) * predictor_ad( 7, k ) ) + &   ! predictor #7, t.p^2
+                       predictor_ad( 4, k )         ! predictor #4, p^2
 
-      ! -- Temperature squared adjoint
-      t2_AD = ( p2   * predictor_AD( 8, k ) ) + &   ! Predictor #8, T^2.P^2
-              ( p(k) * predictor_AD( 6, k ) ) + &   ! Predictor #6, T^2.P
-                       predictor_AD( 3, k )         ! Predictor #3, T^2
+      ! -- temperature squared adjoint
+      t2_ad = ( p2   * predictor_ad( 8, k ) ) + &   ! predictor #8, t^2.p^2
+              ( p(k) * predictor_ad( 6, k ) ) + &   ! predictor #6, t^2.p
+                       predictor_ad( 3, k )         ! predictor #3, t^2
 
-      ! -- Water vapor adjoint
-      w_AD( k ) = w_AD( k ) + predictor_AD( 9, k )  ! Predictor #9, W
+      ! -- water vapor adjoint
+      w_ad( k ) = w_ad( k ) + predictor_ad( 9, k )  ! predictor #9, w
 
-      ! -- Temperature adjoint
-      t_AD( k ) = t_AD( k ) + &
-                  ( p2   * predictor_AD( 7, k ) ) + &   ! Predictor #7, T.P^2
-                  ( p(k) * predictor_AD( 5, k ) ) + &   ! Predictor #5, T.P
-                           predictor_AD( 1, k )   + &   ! Predictor #1, T
-                  ( TWO * t(k) * t2_AD )                ! T^2 term
+      ! -- temperature adjoint
+      t_ad( k ) = t_ad( k ) + &
+                  ( p2   * predictor_ad( 7, k ) ) + &   ! predictor #7, t.p^2
+                  ( p(k) * predictor_ad( 5, k ) ) + &   ! predictor #5, t.p
+                           predictor_ad( 1, k )   + &   ! predictor #1, t
+                  ( two * t(k) * t2_ad )                ! t^2 term
 
-      ! -- Pressure adjoint
-      p_AD( k ) = p_AD( k ) + &
-                  ( t2   * predictor_AD( 6, k ) ) + &   ! Predictor #6, T^2.P
-                  ( t(k) * predictor_AD( 5, k ) ) + &   ! Predictor #5, T.P
-                           predictor_AD( 2, k )   + &   ! Predictor #2, P
-                  ( TWO * p(k) * p2_AD )                ! P^2 term
+      ! -- pressure adjoint
+      p_ad( k ) = p_ad( k ) + &
+                  ( t2   * predictor_ad( 6, k ) ) + &   ! predictor #6, t^2.p
+                  ( t(k) * predictor_ad( 5, k ) ) + &   ! predictor #5, t.p
+                           predictor_ad( 2, k )   + &   ! predictor #2, p
+                  ( two * p(k) * p2_ad )                ! p^2 term
 
-      ! -- Zero output adjoint
-      predictor_AD( :, k ) = ZERO
+      ! -- zero output adjoint
+      predictor_ad( :, k ) = zero
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_std_predictors_AD
+  end subroutine compute_std_predictors_ad
 
 
 
 
 
 !--------------------------------------------------------------------------------
-!P+
-! NAME:
-!       compute_int_predictors_AD
+!p+
+! name:
+!       compute_int_predictors_ad
 !
-! PURPOSE:
-!       PRIVATE function to compute the integrated, absorber dependent predictor
+! purpose:
+!       private function to compute the integrated, absorber dependent predictor
 !       set for the adjoint transmittance model.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_int_predictors_AD( &
-!                                       ! -- Forward input
-!                                       pressure,       &  ! Input,  K
-!                                       temperature,    &  ! Input,  K
-!                                       absorber,       &  ! Input,  0:K
+! calling sequence:
+!       call compute_int_predictors_ad( &
+!                                       ! -- forward input
+!                                       pressure,       &  ! input,  k
+!                                       temperature,    &  ! input,  k
+!                                       absorber,       &  ! input,  0:k
 !
-!                                       ! -- Adjoint input
-!                                       predictor_AD,   &  ! In/Output, Iint x K
+!                                       ! -- adjoint input
+!                                       predictor_ad,   &  ! in/output, iint x k
 !
-!                                       ! -- Adjoint output
-!                                       pressure_AD,    &  ! In/Output,  K
-!                                       temperature_AD, &  ! In/Output,  K
-!                                       absorber_AD     )  ! In/Output,  0:K
+!                                       ! -- adjoint output
+!                                       pressure_ad,    &  ! in/output,  k
+!                                       temperature_ad, &  ! in/output,  k
+!                                       absorber_ad     )  ! in/output,  0:k
 !
-! INPUT ARGUMENTS:
-!       pressure:         Profile LAYER pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:         profile layer pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       temperature:      Profile LAYER temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN )
+!       temperature:      profile layer temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in )
 !
-!       absorber :        Profile LEVEL integrated absorber amount array.
-!                         UNITS:      Varies with absorber.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K
-!                         ATTRIBUTES: INTENT( IN )
+!       absorber :        profile level integrated absorber amount array.
+!                         units:      varies with absorber.
+!                         type:       real( fp_kind )
+!                         dimension:  0:k
+!                         attributes: intent( in )
 !
-!       predictor_AD:     Adjoint of the LAYER predictor arrays.
-!                         ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                         UNITS:      Varies with predictor type.
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  Iint x K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       predictor_ad:     adjoint of the layer predictor arrays.
+!                         ** this argument is set to zero on output **.
+!                         units:      varies with predictor type.
+!                         type:       real( fp_kind )
+!                         dimension:  iint x k
+!                         attributes: intent( in out )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None
+! optional input arguments:
+!       none
 !
-! OUTPUT ARGUMENTS:
-!       pressure_AD:      Profile LAYER adjoint pressure array.
-!                         UNITS:      hPa
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+! output arguments:
+!       pressure_ad:      profile layer adjoint pressure array.
+!                         units:      hpa
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       temperature_AD:   Profile LAYER adjoint temperature array.
-!                         UNITS:      Kelvin
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!       temperature_ad:   profile layer adjoint temperature array.
+!                         units:      kelvin
+!                         type:       real( fp_kind )
+!                         dimension:  k
+!                         attributes: intent( in out )
 !
-!       absorber_AD:      Profile LEVEL adjoint integrated absorber
+!       absorber_ad:      profile level adjoint integrated absorber
 !                         amount array.
-!                         UNITS:      Varies with absorber
-!                         TYPE:       REAL( fp_kind )
-!                         DIMENSION:  0:K
-!                         ATTRIBUTES: INTENT( IN OUT )
+!                         units:      varies with absorber
+!                         type:       real( fp_kind )
+!                         dimension:  0:k
+!                         attributes: intent( in out )
 !
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None
+! optional output arguments:
+!       none
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       The input argument PREDICTOR_AD is set to zero on output.
+! side effects:
+!       the input argument predictor_ad is set to zero on output.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       McMillin, L.M., L.J. Crone, M.D. Goldberg, and T.J. Kleespies,
-!         "Atmospheric transmittance of an absorbing gas. 4. OPTRAN: a
+! procedure:
+!       mcmillin, l.m., l.j. crone, m.d. goldberg, and t.j. kleespies,
+!         "atmospheric transmittance of an absorbing gas. 4. optran: a
 !          computationally fast and accurate transmittance model for absorbing
 !          with fixed and with variable mixing ratios at variable viewing
-!          angles.", Applied Optics, 1995, v34, pp6269-6274.
+!          angles.", applied optics, 1995, v34, pp6269-6274.
 !
-!       The integrated predictors consist of six that are repeated for every
+!       the integrated predictors consist of six that are repeated for every
 !       absorber:
 !
-!         1) T*
-!         2) P*
-!         3) T**
-!         4) P**
-!         5) T***
-!         6) P***
+!         1) t*
+!         2) p*
+!         3) t**
+!         4) p**
+!         5) t***
+!         6) p***
 !
-!P-
+!p-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_int_predictors_AD( &
-                                        ! -- Forward input
-                                        pressure,       &  ! Input,  K
-                                        temperature,    &  ! Input,  K
-                                        absorber,       &  ! Input,  0:K
+  subroutine compute_int_predictors_ad( &
+                                        ! -- forward input
+                                        pressure,       &  ! input,  k
+                                        temperature,    &  ! input,  k
+                                        absorber,       &  ! input,  0:k
 
-                                        ! -- Adjoint input
-                                        predictor_AD,   &  ! In/Output, Iint x K
+                                        ! -- adjoint input
+                                        predictor_ad,   &  ! in/output, iint x k
 
-                                        ! -- Adjoint output
-                                        pressure_AD,    &  ! In/Output,  K
-                                        temperature_AD, &  ! In/Output,  K
-                                        absorber_AD     )  ! In/Output,  0:K
+                                        ! -- adjoint output
+                                        pressure_ad,    &  ! in/output,  k
+                                        temperature_ad, &  ! in/output,  k
+                                        absorber_ad     )  ! in/output,  0:k
 
  
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: pressure        ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: temperature     ! K
-    REAL( fp_kind ), DIMENSION( 0: ),   INTENT( IN )     :: absorber        ! 0:K
+    ! -- forward input
+    real( fp_kind ), dimension( : ),    intent( in )     :: pressure        ! k
+    real( fp_kind ), dimension( : ),    intent( in )     :: temperature     ! k
+    real( fp_kind ), dimension( 0: ),   intent( in )     :: absorber        ! 0:k
 
-    ! -- Adjoint input
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( IN OUT ) :: predictor_AD    ! Iint x K
+    ! -- adjoint input
+    real( fp_kind ), dimension( :, : ), intent( in out ) :: predictor_ad    ! iint x k
 
-    ! -- Adjoint output
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: pressure_AD     ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: temperature_AD  ! K
-    REAL( fp_kind ), DIMENSION( 0: ),   INTENT( IN OUT ) :: absorber_AD     ! 0:K
+    ! -- adjoint output
+    real( fp_kind ), dimension( : ),    intent( in out ) :: pressure_ad     ! k
+    real( fp_kind ), dimension( : ),    intent( in out ) :: temperature_ad  ! k
+    real( fp_kind ), dimension( 0: ),   intent( in out ) :: absorber_ad     ! 0:k
 
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_INT_PREDICTORS_AD'
+    character( * ), parameter :: routine_name = 'compute_int_predictors_ad'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- Square of the absorber amount. 0:K
-    REAL( fp_kind ), DIMENSION( 0:SIZE( pressure ) ) :: absorber_2
+    ! -- square of the absorber amount. 0:k
+    real( fp_kind ), dimension( 0:size( pressure ) ) :: absorber_2
 
-    ! -- Multiplicative factors, K
-    REAL( fp_kind ), DIMENSION( SIZE( pressure ) ) :: d_absorber
-    REAL( fp_kind ), DIMENSION( SIZE( pressure ) ) :: factor_1
-    REAL( fp_kind ), DIMENSION( SIZE( pressure ) ) :: factor_2
+    ! -- multiplicative factors, k
+    real( fp_kind ), dimension( size( pressure ) ) :: d_absorber
+    real( fp_kind ), dimension( size( pressure ) ) :: factor_1
+    real( fp_kind ), dimension( size( pressure ) ) :: factor_2
 
-    ! -- Intermediate summation arrays, Iint x 0:K and Iint
-    REAL( fp_kind ), DIMENSION( SIZE( predictor_AD, DIM=1 ), 0:SIZE( pressure ) ) :: s
-    REAL( fp_kind ), DIMENSION( SIZE( predictor_AD, DIM=1 ) ) :: s_AD
+    ! -- intermediate summation arrays, iint x 0:k and iint
+    real( fp_kind ), dimension( size( predictor_ad, dim=1 ), 0:size( pressure ) ) :: s
+    real( fp_kind ), dimension( size( predictor_ad, dim=1 ) ) :: s_ad
 
-    ! -- LEVEL predictor, Iint x 0:K
-    REAL( fp_kind ), DIMENSION( SIZE( predictor_AD, DIM=1 ), 0:SIZE( pressure ) ) :: x_AD
+    ! -- level predictor, iint x 0:k
+    real( fp_kind ), dimension( size( predictor_ad, dim=1 ), 0:size( pressure ) ) :: x_ad
 
-    ! -- Scalars
-    INTEGER :: i, n_predictors
-    INTEGER :: k, n_layers
+    ! -- scalars
+    integer :: i, n_predictors
+    integer :: k, n_layers
 
-    REAL( fp_kind ) :: d_absorber_AD
-    REAL( fp_kind ) :: factor_1_AD
-    REAL( fp_kind ) :: factor_2_AD
+    real( fp_kind ) :: d_absorber_ad
+    real( fp_kind ) :: factor_1_ad
+    real( fp_kind ) :: factor_2_ad
 
-    REAL( fp_kind ) :: inverse_1
-    REAL( fp_kind ) :: inverse_2
-    REAL( fp_kind ) :: inverse_3
-    REAL( fp_kind ) :: inverse_4
-    REAL( fp_kind ) :: absorber_3
-    REAL( fp_kind ) :: absorber_4
-    REAL( fp_kind ) :: inverse_1_AD
-    REAL( fp_kind ) :: inverse_2_AD
-    REAL( fp_kind ) :: inverse_3_AD
-
-
-
-    !#--------------------------------------------------------------------------#
-    !#                       -- ASSIGN THE DIMENSIONS --                        #
-    !#--------------------------------------------------------------------------#
-
-    n_predictors = SIZE( predictor_AD, DIM=1 )
-    n_layers     = SIZE( pressure )
-
-!    IF ( n_predictors /= MAX_N_INTEGRATED_PREDICTORS ) THEN....
+    real( fp_kind ) :: inverse_1
+    real( fp_kind ) :: inverse_2
+    real( fp_kind ) :: inverse_3
+    real( fp_kind ) :: inverse_4
+    real( fp_kind ) :: absorber_3
+    real( fp_kind ) :: absorber_4
+    real( fp_kind ) :: inverse_1_ad
+    real( fp_kind ) :: inverse_2_ad
+    real( fp_kind ) :: inverse_3_ad
 
 
 
     !#--------------------------------------------------------------------------#
-    !#          -- RECALCULATE THE INTERMEDIATE FORWARD MODEL SUMS --           #
+    !#                       -- assign the dimensions --                        #
+    !#--------------------------------------------------------------------------#
+
+    n_predictors = size( predictor_ad, dim=1 )
+    n_layers     = size( pressure )
+
+!    if ( n_predictors /= max_n_integrated_predictors ) then....
+
+
+
+    !#--------------------------------------------------------------------------#
+    !#          -- recalculate the intermediate forward model sums --           #
     !#--------------------------------------------------------------------------#
 
     ! -----------------
-    ! Initialise arrays
+    ! initialise arrays
     ! -----------------
 
-    absorber_2( 0 ) = ZERO
-    s( :, 0: )      = ZERO
+    absorber_2( 0 ) = zero
+    s( :, 0: )      = zero
 
 
     ! ----------------
-    ! Loop over layers
+    ! loop over layers
     ! ----------------
 
-    k_layer_loop_forward: DO k = 1, n_layers
+    k_layer_loop_forward: do k = 1, n_layers
 
 
       ! -----------------------------------------
-      ! Calculate absorber multiplicative factors
+      ! calculate absorber multiplicative factors
       ! and save for adjoint calculation.
       ! -----------------------------------------
 
       absorber_2( k ) = absorber( k ) * absorber( k )
 
-      d_absorber( k ) = absorber( k ) - absorber( k-1 )                           ! For * terms
-      factor_1( k )   = ( absorber( k )   + absorber( k-1 )   ) * d_absorber( k ) ! For ** terms
-      factor_2( k )   = ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber( k ) ! For *** terms
+      d_absorber( k ) = absorber( k ) - absorber( k-1 )                           ! for * terms
+      factor_1( k )   = ( absorber( k )   + absorber( k-1 )   ) * d_absorber( k ) ! for ** terms
+      factor_2( k )   = ( absorber_2( k ) + absorber_2( k-1 ) ) * d_absorber( k ) ! for *** terms
 
 
       ! ----------------------------------------
-      ! Calculate and save the intermediate sums
+      ! calculate and save the intermediate sums
       ! ----------------------------------------
 
-      s( 1, k ) = s( 1, k-1 ) + ( temperature( k ) * d_absorber( k ) )  ! T*
-      s( 2, k ) = s( 2, k-1 ) + ( pressure( k )    * d_absorber( k ) )  ! P*
+      s( 1, k ) = s( 1, k-1 ) + ( temperature( k ) * d_absorber( k ) )  ! t*
+      s( 2, k ) = s( 2, k-1 ) + ( pressure( k )    * d_absorber( k ) )  ! p*
 
-      s( 3, k ) = s( 3, k-1 ) + ( temperature( k ) * factor_1( k ) )    ! T**
-      s( 4, k ) = s( 4, k-1 ) + ( pressure( k )    * factor_1( k ) )    ! P**
+      s( 3, k ) = s( 3, k-1 ) + ( temperature( k ) * factor_1( k ) )    ! t**
+      s( 4, k ) = s( 4, k-1 ) + ( pressure( k )    * factor_1( k ) )    ! p**
 
-      s( 5, k ) = s( 5, k-1 ) + ( temperature( k ) * factor_2( k ) )    ! T***
-      s( 6, k ) = s( 6, k-1 ) + ( pressure( k )    * factor_2( k ) )    ! P***
+      s( 5, k ) = s( 5, k-1 ) + ( temperature( k ) * factor_2( k ) )    ! t***
+      s( 6, k ) = s( 6, k-1 ) + ( pressure( k )    * factor_2( k ) )    ! p***
 
-    END DO k_layer_loop_forward
-
-
-
-    !#--------------------------------------------------------------------------#
-    !#                -- INITIALISE LOCAL ADJOINT VARIABLES --                  #
-    !#--------------------------------------------------------------------------#
-
-    x_AD( :, 0: ) = ZERO
-    s_AD( : )     = ZERO
-
-    absorber_AD( 0 ) = ZERO
+    end do k_layer_loop_forward
 
 
 
     !#--------------------------------------------------------------------------#
-    !#            -- CALCULATE THE INTEGRATED PREDICTOR ADJOINTS --             #
+    !#                -- initialise local adjoint variables --                  #
+    !#--------------------------------------------------------------------------#
+
+    x_ad( :, 0: ) = zero
+    s_ad( : )     = zero
+
+    absorber_ad( 0 ) = zero
+
+
+
+    !#--------------------------------------------------------------------------#
+    !#            -- calculate the integrated predictor adjoints --             #
     !#--------------------------------------------------------------------------#
 
 
     ! -----------------------------------
-    ! Here loop order does matter as this
+    ! here loop order does matter as this
     ! is a sequential loop
     ! -----------------------------------
 
-    k_layer_loop_adjoint: DO k = n_layers, 1, -1
+    k_layer_loop_adjoint: do k = n_layers, 1, -1
 
 
       ! -------------------------------------------------------
-      ! Calculate the normalising factors for the integrated
-      ! predictors. Note that the checks below, the IF tests to
+      ! calculate the normalising factors for the integrated
+      ! predictors. note that the checks below, the if tests to
       ! determine if the absorber products are represenatble
-      ! are to minimise the number of calcs. I.e if inverse_1
+      ! are to minimise the number of calcs. i.e if inverse_1
       ! is toast because absorber(k) is too small there's no
       ! need to check any further.
       ! -------------------------------------------------------
 
-      ! -- Is inverse_1 representable?
-      inverse_1_check: IF ( absorber( k ) > TOLERANCE ) THEN
+      ! -- is inverse_1 representable?
+      inverse_1_check: if ( absorber( k ) > tolerance ) then
 
-        inverse_1 = ONE / absorber( k )
+        inverse_1 = one / absorber( k )
 
-        ! -- Is inverse_2 representable
-        inverse_2_check: IF ( absorber_2( k ) > TOLERANCE ) THEN
+        ! -- is inverse_2 representable
+        inverse_2_check: if ( absorber_2( k ) > tolerance ) then
 
           inverse_2  =  inverse_1 * inverse_1
           absorber_3 =  absorber( k ) * absorber_2( k )
          
-          ! -- Is inverse_3 representable
-          inverse_3_check: IF ( absorber_3 > TOLERANCE ) THEN
+          ! -- is inverse_3 representable
+          inverse_3_check: if ( absorber_3 > tolerance ) then
 
             inverse_3  =  inverse_2 * inverse_1
             absorber_4 =  absorber( k ) * absorber_3
 
-            ! -- Is inverse_4 represenatble?
-            inverse_4_check: IF ( absorber_4 > TOLERANCE ) THEN
+            ! -- is inverse_4 represenatble?
+            inverse_4_check: if ( absorber_4 > tolerance ) then
 
               inverse_4 =  inverse_3 * inverse_1
 
-            ELSE
+            else
 
-              inverse_4 = ZERO
+              inverse_4 = zero
 
-            END IF inverse_4_check
+            end if inverse_4_check
 
-          ELSE
+          else
 
-            inverse_3 = ZERO
-            inverse_4 = ZERO
+            inverse_3 = zero
+            inverse_4 = zero
 
-          END IF inverse_3_check
+          end if inverse_3_check
 
-        ELSE
+        else
 
-          inverse_2 = ZERO
-          inverse_3 = ZERO
-          inverse_4 = ZERO
+          inverse_2 = zero
+          inverse_3 = zero
+          inverse_4 = zero
 
-        END IF inverse_2_check
+        end if inverse_2_check
 
-      ELSE
+      else
 
-        inverse_1 = ZERO
-        inverse_2 = ZERO
-        inverse_3 = ZERO
-        inverse_4 = ZERO
+        inverse_1 = zero
+        inverse_2 = zero
+        inverse_3 = zero
+        inverse_4 = zero
 
-      END IF inverse_1_check
+      end if inverse_1_check
 
 
       ! --------------------------------------------
-      ! Adjoint of predictor summation across layers
+      ! adjoint of predictor summation across layers
       ! --------------------------------------------
 
-      DO i = 1, n_predictors
+      do i = 1, n_predictors
 
-        x_AD( i, k )   = x_AD( i, k )   + predictor_AD( i, k )
-        x_AD( i, k-1 ) = x_AD( i, k-1 ) + predictor_AD( i, k )
-        predictor_AD( i, k ) = ZERO
+        x_ad( i, k )   = x_ad( i, k )   + predictor_ad( i, k )
+        x_ad( i, k-1 ) = x_ad( i, k-1 ) + predictor_ad( i, k )
+        predictor_ad( i, k ) = zero
 
-      END DO
+      end do
 
 
       ! ----------------------------------------------------------------
-      ! Adjoint of the scaled and normalised LEVEL integrated predictors
+      ! adjoint of the scaled and normalised level integrated predictors
       !
-      ! Note that the adjoint variables inverse_X_AD are local to this
+      ! note that the adjoint variables inverse_x_ad are local to this
       ! loop iteration so they are simply assigned when they are first
       ! used.
       ! ----------------------------------------------------------------
 
-      ! -- P*** and T***, predictor indices #6 and 5
-      s_AD( 6 )    = s_AD( 6 ) + ( POINT_75 * inverse_3 * x_AD( 6, k ) )
-      s_AD( 5 )    = s_AD( 5 ) + ( POINT_75 * inverse_3 * x_AD( 5, k ) )
-      inverse_3_AD = POINT_75 * ( ( s( 6, k ) * x_AD( 6, k ) ) + &
-                                  ( s( 5, k ) * x_AD( 5, k ) ) )
+      ! -- p*** and t***, predictor indices #6 and 5
+      s_ad( 6 )    = s_ad( 6 ) + ( point_75 * inverse_3 * x_ad( 6, k ) )
+      s_ad( 5 )    = s_ad( 5 ) + ( point_75 * inverse_3 * x_ad( 5, k ) )
+      inverse_3_ad = point_75 * ( ( s( 6, k ) * x_ad( 6, k ) ) + &
+                                  ( s( 5, k ) * x_ad( 5, k ) ) )
 
-      ! -- P** and T**, predictor indices #4 and 3
-      s_AD( 4 )    = s_AD( 4 ) + ( POINT_5 * inverse_2 * x_AD( 4, k ) )
-      s_AD( 3 )    = s_AD( 3 ) + ( POINT_5 * inverse_2 * x_AD( 3, k ) )
-      inverse_2_AD = POINT_5 * ( ( s( 4, k ) * x_AD( 4, k ) ) + &
-                                 ( s( 3, k ) * x_AD( 3, k ) ) )
+      ! -- p** and t**, predictor indices #4 and 3
+      s_ad( 4 )    = s_ad( 4 ) + ( point_5 * inverse_2 * x_ad( 4, k ) )
+      s_ad( 3 )    = s_ad( 3 ) + ( point_5 * inverse_2 * x_ad( 3, k ) )
+      inverse_2_ad = point_5 * ( ( s( 4, k ) * x_ad( 4, k ) ) + &
+                                 ( s( 3, k ) * x_ad( 3, k ) ) )
 
-      ! -- P* and T*, predictor indices #2 and 1
-      ! -- Simply assign a value for inverse_1_AD
-      s_AD( 2 )    = s_AD( 2 ) + ( POINT_5 * inverse_1 * x_AD( 2, k ) )
-      s_AD( 1 )    = s_AD( 1 ) + ( POINT_5 * inverse_1 * x_AD( 1, k ) )
-      inverse_1_AD = POINT_5 * ( ( s( 2, k ) * x_AD( 2, k ) ) + &
-                                 ( s( 1, k ) * x_AD( 1, k ) ) )
+      ! -- p* and t*, predictor indices #2 and 1
+      ! -- simply assign a value for inverse_1_ad
+      s_ad( 2 )    = s_ad( 2 ) + ( point_5 * inverse_1 * x_ad( 2, k ) )
+      s_ad( 1 )    = s_ad( 1 ) + ( point_5 * inverse_1 * x_ad( 1, k ) )
+      inverse_1_ad = point_5 * ( ( s( 2, k ) * x_ad( 2, k ) ) + &
+                                 ( s( 1, k ) * x_ad( 1, k ) ) )
 
-      ! -- Zero out the LEVEL predictor adjoint array for current k.
-      x_AD( :, k ) = ZERO
+      ! -- zero out the level predictor adjoint array for current k.
+      x_ad( :, k ) = zero
 
-      ! -- Adjoint of inverse terms. Note that the inverse_X_AD
+      ! -- adjoint of inverse terms. note that the inverse_x_ad
       ! -- terms are *not* zeroed out as they are re-assigned values
       ! -- each loop iteration above.
-      absorber_AD( k ) = absorber_AD( k ) - (         inverse_2 * inverse_1_AD ) - &
-                                            ( TWO *   inverse_3 * inverse_2_AD ) - &
-                                            ( THREE * inverse_4 * inverse_3_AD )
+      absorber_ad( k ) = absorber_ad( k ) - (         inverse_2 * inverse_1_ad ) - &
+                                            ( two *   inverse_3 * inverse_2_ad ) - &
+                                            ( three * inverse_4 * inverse_3_ad )
 
 
       ! ----------------------------------------------------------
-      ! Pressure and temperature adjoints of the intermediate sums
+      ! pressure and temperature adjoints of the intermediate sums
       ! ----------------------------------------------------------
 
-      ! -- Pressure
-      pressure_AD( k ) = pressure_AD( k ) + ( factor_2( k )   * s_AD( 6 ) ) + &  ! P***
-                                            ( factor_1( k )   * s_AD( 4 ) ) + &  ! P**
-                                            ( d_absorber( k ) * s_AD( 2 ) )      ! P*
+      ! -- pressure
+      pressure_ad( k ) = pressure_ad( k ) + ( factor_2( k )   * s_ad( 6 ) ) + &  ! p***
+                                            ( factor_1( k )   * s_ad( 4 ) ) + &  ! p**
+                                            ( d_absorber( k ) * s_ad( 2 ) )      ! p*
 
 
-      ! -- Temperature
-      temperature_AD( k ) = temperature_AD( k ) + ( factor_2( k )   * s_AD( 5 ) ) + &  ! T***
-                                                  ( factor_1( k )   * s_AD( 3 ) ) + &  ! T**
-                                                  ( d_absorber( k ) * s_AD( 1 ) )      ! T*
+      ! -- temperature
+      temperature_ad( k ) = temperature_ad( k ) + ( factor_2( k )   * s_ad( 5 ) ) + &  ! t***
+                                                  ( factor_1( k )   * s_ad( 3 ) ) + &  ! t**
+                                                  ( d_absorber( k ) * s_ad( 1 ) )      ! t*
 
 
       ! -------------------------------------
-      ! Adjoint of the multiplicative factors
+      ! adjoint of the multiplicative factors
       ! -------------------------------------
 
       ! --------------------------------------------------
-      ! Note that the adjoint variables factor_X_AD and
-      ! d_absorber_AD are local to this loop iteration
+      ! note that the adjoint variables factor_x_ad and
+      ! d_absorber_ad are local to this loop iteration
       ! so they are simply assigned when they are first
       ! used.
       !
-      ! Note there are no
-      !   s_AD() = 0
+      ! note there are no
+      !   s_ad() = 0
       ! because all the tangent-linear forms are
-      !   s_TL() = s_TL() + (...)
+      !   s_tl() = s_tl() + (...)
       ! summing from the previous layer.
       !
-      ! Note that the factor_X_AD and d_absorber_AD
+      ! note that the factor_x_ad and d_absorber_ad
       ! terms are *not* zeroed out as they are re-assigned
       ! values each loop iteration.
       ! --------------------------------------------------
 
-      ! -- Multiplicative factors
-      factor_2_AD = ( pressure( k )    * s_AD( 6 ) ) + &
-                    ( temperature( k ) * s_AD( 5 ) )
+      ! -- multiplicative factors
+      factor_2_ad = ( pressure( k )    * s_ad( 6 ) ) + &
+                    ( temperature( k ) * s_ad( 5 ) )
 
-      factor_1_AD = ( pressure( k )    * s_AD( 4 ) ) + &
-                    ( temperature( k ) * s_AD( 3 ) )
+      factor_1_ad = ( pressure( k )    * s_ad( 4 ) ) + &
+                    ( temperature( k ) * s_ad( 3 ) )
 
-      d_absorber_AD = ( pressure( k )    * s_AD( 2 ) ) + &
-                      ( temperature( k ) * s_AD( 1 ) )
+      d_absorber_ad = ( pressure( k )    * s_ad( 2 ) ) + &
+                      ( temperature( k ) * s_ad( 1 ) )
 
-      ! -- Adjoint of factor_2
-      absorber_AD( k-1 ) = absorber_AD( k-1 ) + ( TWO * absorber( k-1 ) * d_absorber( k ) * factor_2_AD )
-      absorber_AD(  k  ) = absorber_AD(  k  ) + ( TWO * absorber(  k  ) * d_absorber( k ) * factor_2_AD )
-      d_absorber_AD      = d_absorber_AD      + ( ( absorber_2( k ) + absorber_2( k-1 ) ) * factor_2_AD )
+      ! -- adjoint of factor_2
+      absorber_ad( k-1 ) = absorber_ad( k-1 ) + ( two * absorber( k-1 ) * d_absorber( k ) * factor_2_ad )
+      absorber_ad(  k  ) = absorber_ad(  k  ) + ( two * absorber(  k  ) * d_absorber( k ) * factor_2_ad )
+      d_absorber_ad      = d_absorber_ad      + ( ( absorber_2( k ) + absorber_2( k-1 ) ) * factor_2_ad )
 
-      ! -- Adjoint of factor_1
-      absorber_AD( k-1 ) = absorber_AD( k-1 ) + ( d_absorber( k ) * factor_1_AD )
-      absorber_AD(  k  ) = absorber_AD(  k  ) + ( d_absorber( k ) * factor_1_AD )
-      d_absorber_AD      = d_absorber_AD      + ( ( absorber( k ) + absorber( k-1 ) ) * factor_1_AD )
+      ! -- adjoint of factor_1
+      absorber_ad( k-1 ) = absorber_ad( k-1 ) + ( d_absorber( k ) * factor_1_ad )
+      absorber_ad(  k  ) = absorber_ad(  k  ) + ( d_absorber( k ) * factor_1_ad )
+      d_absorber_ad      = d_absorber_ad      + ( ( absorber( k ) + absorber( k-1 ) ) * factor_1_ad )
 
-      ! -- Adjoint of d_absorber
-      absorber_AD( k-1 ) = absorber_AD( k-1 ) - d_absorber_AD
-      absorber_AD(  k  ) = absorber_AD(  k  ) + d_absorber_AD
+      ! -- adjoint of d_absorber
+      absorber_ad( k-1 ) = absorber_ad( k-1 ) - d_absorber_ad
+      absorber_ad(  k  ) = absorber_ad(  k  ) + d_absorber_ad
 
-    END DO k_layer_loop_adjoint
+    end do k_layer_loop_adjoint
 
-  END SUBROUTINE compute_int_predictors_AD
+  end subroutine compute_int_predictors_ad
 
-END MODULE predictors
+end module predictors
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 2.10  2001/08/16 16:45:05  paulv
-! - Updated documentation
+! $log$
+! revision 2.10  2001/08/16 16:45:05  paulv
+! - updated documentation
 !
-! Revision 2.9  2001/07/12 18:22:33  paulv
-! - Added more robust code for calculating the powers of the inverse absorber
-!   amount. The squares, cubes and fourth powers of absorber amounts were
+! revision 2.9  2001/07/12 18:22:33  paulv
+! - added more robust code for calculating the powers of the inverse absorber
+!   amount. the squares, cubes and fourth powers of absorber amounts were
 !   causing floating point underflows which, when used in a denominator were
-!   greatly inflating any precision errors. So, the solution I adopted was,
+!   greatly inflating any precision errors. so, the solution i adopted was,
 !   prior to each inverse calculation, to check the value of the absorber
-!   quantity (e.g. absorber**2, absorber**3, or absorber**4). If they are less
-!   than a tolerance value (defined using the EPSILON intrinsic) then their
-!   inverse is set to zero - as are any higher power inverses. This prevents
+!   quantity (e.g. absorber**2, absorber**3, or absorber**4). if they are less
+!   than a tolerance value (defined using the epsilon intrinsic) then their
+!   inverse is set to zero - as are any higher power inverses. this prevents
 !   too small values from being used.
-!   This is mostly a problem for water vapor near at the top of the defined
+!   this is mostly a problem for water vapor near at the top of the defined
 !   atmosphere, although some low ozone values can be found (rarely).
-! - Changed all loop initialisation to vector expressions, e.g. from
-!     DO i = 1, n_predictors
-!       s( i )       = ZERO
-!       s_TL( i )    = ZERO
-!       x_TL( i, 0 ) = ZERO
-!     END DO
+! - changed all loop initialisation to vector expressions, e.g. from
+!     do i = 1, n_predictors
+!       s( i )       = zero
+!       s_tl( i )    = zero
+!       x_tl( i, 0 ) = zero
+!     end do
 !   to
-!     s( : )       = ZERO
-!     s_TL( : )    = ZERO
-!     x_TL( :, 0 ) = ZERO
-! - Corrected bug in definition of the intermediate summation array in
-!   COMPUTE_INT_PREDICTORS_AD from
-!     REAL( fp_kind ), DIMENSION( SIZE( predictor_AD, DIM=1 ), SIZE( pressure ) ) :: s
+!     s( : )       = zero
+!     s_tl( : )    = zero
+!     x_tl( :, 0 ) = zero
+! - corrected bug in definition of the intermediate summation array in
+!   compute_int_predictors_ad from
+!     real( fp_kind ), dimension( size( predictor_ad, dim=1 ), size( pressure ) ) :: s
 !   to
-!     REAL( fp_kind ), DIMENSION( SIZE( predictor_AD, DIM=1 ), 0:SIZE( pressure ) ) :: s
-! - Added initialisation of absorber_2( 0 )
-!     absorber_2( 0 ) = ZERO
-!   in COMPUTE_INT_PREDICTORS_AD.
-! - Corrected bug in intermediate summation loop. The sums were being calculated
+!     real( fp_kind ), dimension( size( predictor_ad, dim=1 ), 0:size( pressure ) ) :: s
+! - added initialisation of absorber_2( 0 )
+!     absorber_2( 0 ) = zero
+!   in compute_int_predictors_ad.
+! - corrected bug in intermediate summation loop. the sums were being calculated
 !   like:
-!     DO k = 1, n_layers
+!     do k = 1, n_layers
 !       s( i, k ) = s( i, k ) + .......
 !   rather than:
-!     DO k = 1, n_layers
+!     do k = 1, n_layers
 !       s( i, k ) = s( i, k-1 ) + .......
-!   hence the need for the redefintion of s(K) to s(0:K).
+!   hence the need for the redefintion of s(k) to s(0:k).
 !
-! Revision 2.8  2001/05/29 17:51:34  paulv
-! - Corrected some documentation errors.
+! revision 2.8  2001/05/29 17:51:34  paulv
+! - corrected some documentation errors.
 !
-! Revision 2.7  2001/05/04 14:39:43  paulv
-! - Removed shared predictor arrays from module.
-! - Now use TYPE_KINDS module parameter FP_KIND to set the floating point
+! revision 2.7  2001/05/04 14:39:43  paulv
+! - removed shared predictor arrays from module.
+! - now use type_kinds module parameter fp_kind to set the floating point
 !   data type.
-! - Added adjoint form of routines to module. Use of NO_STANDARD optional
-!   keyword in COMPUTE_PREDICTORS_AD has not yet been looked into.
-! - Changed names of PRIVATE integrated predictor routines from
-!   COMPUTE_STARD_PREDICTORS to COMPUTE_INT_PREDICTORS. The difference between
+! - added adjoint form of routines to module. use of no_standard optional
+!   keyword in compute_predictors_ad has not yet been looked into.
+! - changed names of private integrated predictor routines from
+!   compute_stard_predictors to compute_int_predictors. the difference between
 !   "stard" and "std" is small enough to cause mild confusion when scanning
 !   the code.
-! - Changed references to parameter maximums to input array sizes, e.g.
-!     j_absorber_loop: DO j = 1, MAX_N_ABSORBERS
+! - changed references to parameter maximums to input array sizes, e.g.
+!     j_absorber_loop: do j = 1, max_n_absorbers
 !   becomes
-!     j_absorber_loop: DO j = 1, SIZE( absorber, DIM = 2 )
-! - Shortened variable names in standard predictor routines, e.g. p instead
-!   of pressure. These calcs are simple enough that short names are clear.
-! - ABSORBER arrays are now dimensioned as 0:K. This eliminates the
-!   need for using an ABSORBER_KM1 variable in computing the absorber layer
-!   difference, D_ABSORBER, and average, AVE_ABSORBER where the layer loop
+!     j_absorber_loop: do j = 1, size( absorber, dim = 2 )
+! - shortened variable names in standard predictor routines, e.g. p instead
+!   of pressure. these calcs are simple enough that short names are clear.
+! - absorber arrays are now dimensioned as 0:k. this eliminates the
+!   need for using an absorber_km1 variable in computing the absorber layer
+!   difference, d_absorber, and average, ave_absorber where the layer loop
 !   always goes from 1 -> n_layers.
-! - Simplified COMPUTE_INT_PREDICTORS_TL. This is a combination of the
+! - simplified compute_int_predictors_tl. this is a combination of the
 !   change in the absorber array dimensioning and just thinking about it
 !   for a while.
-! - Updated header documentation. Adjoint routines not yet fully documented.
+! - updated header documentation. adjoint routines not yet fully documented.
 !
-! Revision 2.6  2001/04/03 20:02:56  paulv
-! - Commented out shared predictor data arrays. Predictor arrays are now
+! revision 2.6  2001/04/03 20:02:56  paulv
+! - commented out shared predictor data arrays. predictor arrays are now
 !   passed arguments.
-! - Removed reference to profile number. Calls to routines are now a simgle
+! - removed reference to profile number. calls to routines are now a simgle
 !   profile passed per call.
-! - Removed planned allocation of predictor arrays.
-! - Correted bug in 1st and 2nd order predictor calculation.
+! - removed planned allocation of predictor arrays.
+! - correted bug in 1st and 2nd order predictor calculation.
 !
-! Revision 2.5  2001/01/24 20:14:21  paulv
-! - Latest test versions.
+! revision 2.5  2001/01/24 20:14:21  paulv
+! - latest test versions.
 !
-! Revision 2.4  2000/11/09 20:36:07  paulv
-! - Added tangent linear form of routines in this module.
-! - Changed names of PRIVATE routines used to compute predictors. The
+! revision 2.4  2000/11/09 20:36:07  paulv
+! - added tangent linear form of routines in this module.
+! - changed names of private routines used to compute predictors. the
 !   appearance of "standard" and "integrated" in routine names have been
 !   replaced with "std" and "stard" respectively.
-! - Initial setup in place for dynamic allocation of predictor arrays. These
+! - initial setup in place for dynamic allocation of predictor arrays. these
 !   arrays are still statically allocated with parameterised dimensions.
 !
-! Revision 2.3  2000/08/31 19:36:33  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 2.3  2000/08/31 19:36:33  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 2.2  2000/08/24 16:43:29  paulv
-! - Added optional NO_STANDARD argument to COMPUTE_PREDICTORS subprogram.
-!   Using this argument prevents the standard predictors (which are angle
+! revision 2.2  2000/08/24 16:43:29  paulv
+! - added optional no_standard argument to compute_predictors subprogram.
+!   using this argument prevents the standard predictors (which are angle
 !   independent) from being recalculated when only the path angle has changed
 !   in the calling procedure.
-! - Updated module and subprogram documentation.
+! - updated module and subprogram documentation.
 !
-! Revision 2.1  2000/08/21 21:03:16  paulv
-! - Standard and integrated predictor sets calculated in separate
+! revision 2.1  2000/08/21 21:03:16  paulv
+! - standard and integrated predictor sets calculated in separate
 !   functions.
-! - Predictor values saved in linear store. Simplifies application of
+! - predictor values saved in linear store. simplifies application of
 !   predictors when calculating absorption coefficients.
-! - Wrapper function "compute_predictors" added to simplify predictor
+! - wrapper function "compute_predictors" added to simplify predictor
 !   calculation.
 !
-! Revision 1.1  2000/08/08 16:34:17  paulv
-! Initial checkin
+! revision 1.1  2000/08/08 16:34:17  paulv
+! initial checkin
 !
 !
 !

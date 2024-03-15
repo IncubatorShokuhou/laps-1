@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis cdis
 cdis
@@ -54,7 +54,7 @@ c     input parameters
       integer i4time
       integer ii,jj,kk,istatus
       real p_3d (ii,jj,kk)
-      real pb (ii,jj)           ! surface station pressure (hPa)
+      real pb (ii,jj)           ! surface station pressure (hpa)
       real sfc_t(ii,jj)         ! surface station temperature (k)
       real lt1dat(ii,jj,kk)
       real htby (ii,jj)
@@ -92,9 +92,9 @@ c     matrix algebra assignment
 
       htby = pb 
 
-c     alternate method of boundary layer analysis (~ from RUC), 
+c     alternate method of boundary layer analysis (~ from ruc), 
 c     look for the level at which the upper level theta exceeds the surface
-c     theta.  This does not use virtual temperature at this time to reduce
+c     theta.  this does not use virtual temperature at this time to reduce
 c     changes to code.
 
 c     compute theta for all levels, reference pressure (p_naught) is pb or 
@@ -118,7 +118,7 @@ c     theta from the bottom up
          do j = 1,jj
             do k = 1,kk
 
-c     note that 3K are added here in this test to the sfc temperature 
+c     note that 3k are added here in this test to the sfc temperature 
 c     to give some flexibility to the logic due to roundoff error and
 c     surface temperature measurement uncertainty
                if( theta (i,j,k) .ge. sfc_t(i,j)+3.0 ) then
@@ -146,7 +146,7 @@ c     this is the case, then things will be left alone
 
 
 
-c     SKIP THIS SECTION OF OLD CODE
+c     skip this section of old code
 c     section is for original boundary layer analysis (currently skipped over)
 c      
 c      do j = 1,jj
@@ -203,7 +203,7 @@ cc     top of the boundary is very close to x1 so we assign this
 cc     here,  if the difference is large enough, then we use the interp
 cc     routine.
 c
-cc               write (6,*) 'TEMPP ', abs(y2-y1)
+cc               write (6,*) 'tempp ', abs(y2-y1)
 c
 c               if (abs(y2-y1) .le. 1.e-6) then
 c                  htby(i,j) = x1
@@ -233,7 +233,7 @@ c
 c      enddo
 c      
 c     write out the pbl pressure top
-C     END OF SKIPPED SECTION
+c     end of skipped section
 
 
       pdepth = pb-htby
@@ -245,13 +245,13 @@ c     put in check for below ground pressures (assign as sfc pressure)
 
       call check_nan2 (htby,ii,jj,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'NaN values in var:htby routine:ghbry.f'
+         write(6,*) 'nan values in var:htby routine:ghbry.f'
          return
       endif
       
       call gen_bl_file (i4time,htby,ii,jj,istatus)
       
-      if (istatus.eq.0) print*, 'Error in gen_bl_file routine'
+      if (istatus.eq.0) print*, 'error in gen_bl_file routine'
       
       return
       end

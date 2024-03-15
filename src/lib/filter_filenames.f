@@ -1,28 +1,28 @@
 
-        subroutine    Filter_non_numeric_fnames(c_fnames,
+        subroutine    filter_non_numeric_fnames(c_fnames,
      1                           i_nbr_files_in,
      1                           i_nbr_files_out,
      1                           max_files,
      1                           istatus)
 c
-c JSmart  9-9-96
-cdoc    Routine takes the result of 'get_file_names' and filters
-cdoc    it for certain filename types. It tests the first two characters
-c       to determine if they are allowed in i4time_fname_lp. A
-c       filename of allowable types qualifies. If not then
+c jsmart  9-9-96
+cdoc    routine takes the result of 'get_file_names' and filters
+cdoc    it for certain filename types. it tests the first two characters
+c       to determine if they are allowed in i4time_fname_lp. a
+c       filename of allowable types qualifies. if not then
 c       i_nbr_files_in is reduced and this filename type is discarded from
-c       the list. The number of
+c       the list. the number of
 c       files returned (i_nbr_files_out) are files allowed in i4time_fname_lp.
 c
-c       This routine is used in the source get_file_time.f. LAPS can
-c       only deal with specific filename types. See i4time_fname_lp for
+c       this routine is used in the source get_file_time.f. laps can
+c       only deal with specific filename types. see i4time_fname_lp for
 c       more details of the types allowed.
 c   
-c      File type starting with the two characters 'nf' is now allowed since
-c      this represents the FA (Taiwan) filename type for the the FA model.
+c      file type starting with the two characters 'nf' is now allowed since
+c      this represents the fa (taiwan) filename type for the the fa model.
 c
-c      File type starting with 'gb' and 'gs' now allowed since this is Taiwan
-c      CWB global and tropical cyclone model backgrounds for lga (JS: 07/04)
+c      file type starting with 'gb' and 'gs' now allowed since this is taiwan
+c      cwb global and tropical cyclone model backgrounds for lga (js: 07/04)
 c
        implicit none
 
@@ -33,7 +33,7 @@ c
        integer   max_2letter_strings
        parameter(max_2letter_strings = 5)
        integer   max_files_filtered
-       parameter(max_files_filtered=MAX_RADAR_FILES)
+       parameter(max_files_filtered=max_radar_files)
 
        integer   max_files
        integer   i_nbr_files_in

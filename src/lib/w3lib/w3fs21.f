@@ -1,77 +1,77 @@
-      SUBROUTINE W3FS21(IDATE, NMIN)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:   W3FS21       NUMBER OF MINUTES SINCE JAN 1, 1978
-C   PRGMMR: REJONES          ORG: NMC421     DATE: 89-07-17
-C
-C ABSTRACT: CALCULATES THE NUMBER OF MINUTES SINCE 0000,
-C   1 JANUARY 1978.
-C
-C PROGRAM HISTORY LOG:
-C   84-06-21  A. DESMARAIS
-C   89-07-14  R.E.JONES    CONVERT TO CYBER 205 FORTRAN 200,
-C                          CHANGE LOGIC SO IT WILL WORK IN
-C                          21 CENTURY.
-C   89-11-02  R.E.JONES    CONVERT TO CRAY CFT77 FORTRAN
-C
-C USAGE:    CALL W3FS21 (IDATE, NMIN)
-C   INPUT ARGUMENT LIST:
-C     IDATE    - INTEGER  SIZE 5 ARRAY CONTAINING YEAR OF CENTURY,
-C                MONTH, DAY, HOUR AND MINUTE.  IDATE(1) MAY BE
-C                A TWO DIGIT YEAR OR 4. IF 2 DIGITS AND GE THAN 78
-C                1900 IS ADDED TO IT. IF LT 78 THEN 2000 IS ADDED
-C                TO IT. IF 4 DIGITS THE SUBROUTINE WILL WORK
-C                CORRECTLY TO THE YEAR 3300 A.D.
-C
-C   OUTPUT ARGUMENT LIST:
-C     NMIN     - INTEGER NUMBER OF MINUTES SINCE 1 JANUARY 1978
-C
-C   SUBPROGRAMS CALLED:
-C     LIBRARY:
-C       W3LIB    - IW3JDN
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY Y-MP8/832
-C
-C$$$
-C
-      INTEGER  IDATE(5)
-      INTEGER  NMIN
-      INTEGER  JDN78
-C
-      DATA  JDN78 / 2443510 /
-C
-C***   IDATE(1)       YEAR OF CENTURY
-C***   IDATE(2)       MONTH OF YEAR
-C***   IDATE(3)       DAY OF MONTH
-C***   IDATE(4)       HOUR OF DAY
-C***   IDATE(5)       MINUTE OF HOUR
-C
-      NMIN  = 0
-C
-      IYEAR = IDATE(1)
-C
-      IF (IYEAR.LE.99) THEN
-        IF (IYEAR.LT.78) THEN
-          IYEAR = IYEAR + 2000
-        ELSE
-          IYEAR = IYEAR + 1900
-        ENDIF
-      ENDIF
-C
-C     COMPUTE JULIAN DAY NUMBER FROM YEAR, MONTH, DAY
-C
-      IJDN  = IW3JDN(IYEAR,IDATE(2),IDATE(3))
-C
-C     SUBTRACT JULIAN DAY NUMBER OF JAN 1,1978 TO GET THE
-C     NUMBER OF DAYS BETWEEN DATES
-C
-      NDAYS = IJDN - JDN78
-C
-C***  NUMBER OF MINUTES
-C
-      NMIN = NDAYS * 1440 + IDATE(4) * 60 + IDATE(5)
-C
-      RETURN
-      END
+      subroutine w3fs21(idate, nmin)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:   w3fs21       number of minutes since jan 1, 1978
+c   prgmmr: rejones          org: nmc421     date: 89-07-17
+c
+c abstract: calculates the number of minutes since 0000,
+c   1 january 1978.
+c
+c program history log:
+c   84-06-21  a. desmarais
+c   89-07-14  r.e.jones    convert to cyber 205 fortran 200,
+c                          change logic so it will work in
+c                          21 century.
+c   89-11-02  r.e.jones    convert to cray cft77 fortran
+c
+c usage:    call w3fs21 (idate, nmin)
+c   input argument list:
+c     idate    - integer  size 5 array containing year of century,
+c                month, day, hour and minute.  idate(1) may be
+c                a two digit year or 4. if 2 digits and ge than 78
+c                1900 is added to it. if lt 78 then 2000 is added
+c                to it. if 4 digits the subroutine will work
+c                correctly to the year 3300 a.d.
+c
+c   output argument list:
+c     nmin     - integer number of minutes since 1 january 1978
+c
+c   subprograms called:
+c     library:
+c       w3lib    - iw3jdn
+c
+c attributes:
+c   language: cray cft77 fortran
+c   machine:  cray y-mp8/832
+c
+c$$$
+c
+      integer  idate(5)
+      integer  nmin
+      integer  jdn78
+c
+      data  jdn78 / 2443510 /
+c
+c***   idate(1)       year of century
+c***   idate(2)       month of year
+c***   idate(3)       day of month
+c***   idate(4)       hour of day
+c***   idate(5)       minute of hour
+c
+      nmin  = 0
+c
+      iyear = idate(1)
+c
+      if (iyear.le.99) then
+        if (iyear.lt.78) then
+          iyear = iyear + 2000
+        else
+          iyear = iyear + 1900
+        endif
+      endif
+c
+c     compute julian day number from year, month, day
+c
+      ijdn  = iw3jdn(iyear,idate(2),idate(3))
+c
+c     subtract julian day number of jan 1,1978 to get the
+c     number of days between dates
+c
+      ndays = ijdn - jdn78
+c
+c***  number of minutes
+c
+      nmin = ndays * 1440 + idate(4) * 60 + idate(5)
+c
+      return
+      end

@@ -1,43 +1,43 @@
-      SUBROUTINE convert_to_double(INTEGRIN1,INTEGRIN2,REALOUT)
+      subroutine convert_to_double(integrin1,integrin2,realout)
 
-C***********************************************************************
-C  Purpose: Properly interpret the bit string that represents a VAX 
-C  double precision number to obtain the correct number on the target 
-C  system.   
-C
-C  Method: The bit string that represents the VAX double precision 
-C  number is passed into the routine as two integers.  Note the bytes 
-C  have not been swapped.  The data is assumed to be in Big Endian 
-C  IEEE format.  The 4 bytes of the input integers are swaped, using 
-C  MVBITS, so the result is a Little Endian representation stored in an
-C  integer array of dimension two.  This bit string is then transfered 
-C  to a  variable of type double precision (REAL*8) using the routine 
-C  transfer.  Once the bit string is transfered it is properly 
-C  interpreted as a double precision number. 
-C
-C    
-C  References:
-C  1.  Final Interface Specification for the Satellite Data Handling 
-C  System Communications Network (SDHS-COMNET), 01 February 1988
-C  2.  AFGWC/DONS PV-Wave program auto_convert.pro 
-C  3.  VAX Fortran Reference Manual from the SDHS programmer library  
-C***********************************************************************
+c***********************************************************************
+c  purpose: properly interpret the bit string that represents a vax 
+c  double precision number to obtain the correct number on the target 
+c  system.   
+c
+c  method: the bit string that represents the vax double precision 
+c  number is passed into the routine as two integers.  note the bytes 
+c  have not been swapped.  the data is assumed to be in big endian 
+c  ieee format.  the 4 bytes of the input integers are swaped, using 
+c  mvbits, so the result is a little endian representation stored in an
+c  integer array of dimension two.  this bit string is then transfered 
+c  to a  variable of type double precision (real*8) using the routine 
+c  transfer.  once the bit string is transfered it is properly 
+c  interpreted as a double precision number. 
+c
+c    
+c  references:
+c  1.  final interface specification for the satellite data handling 
+c  system communications network (sdhs-comnet), 01 february 1988
+c  2.  afgwc/dons pv-wave program auto_convert.pro 
+c  3.  vax fortran reference manual from the sdhs programmer library  
+c***********************************************************************
 
-      INTEGER   INTEGRIN1,INTEGRIN2 !input integers that contain the 
+      integer   integrin1,integrin2 !input integers that contain the 
                                     !the bit strings
-      REAL*8 REALOUT     !The output double precision number
-      INTEGER,dimension(2) ::  integrtemp !A working integer array 
+      real*8 realout     !the output double precision number
+      integer,dimension(2) ::  integrtemp !a working integer array 
                                           !that holds the double
                                           !precision bit string after
                                           !swaping of the words and 
                                           
-C***********************************************************************
-C  On Big Endian Systems the first word contains the least significant
-C  bits.  On a Little Endian System the second (high address 32 bit word)
-C  contains the least significant bits.  So in addtion to swaping bytes
-C  within a word the word themselves must be swapped.  Both actions are
-C  accomplished with the use of MVBITS
-C***********************************************************************                                          !bytes
+c***********************************************************************
+c  on big endian systems the first word contains the least significant
+c  bits.  on a little endian system the second (high address 32 bit word)
+c  contains the least significant bits.  so in addtion to swaping bytes
+c  within a word the word themselves must be swapped.  both actions are
+c  accomplished with the use of mvbits
+c***********************************************************************                                          !bytes
 
 c     call mvbits(integrin1,24,8,integrtemp(2),0)
 c     call mvbits(integrin1,16,8,integrtemp(2),8)
@@ -52,6 +52,6 @@ c     call mvbits(integrin2,0,8,integrtemp(1),24)
       integrtemp(1)=integrin2
       realout=transfer(integrtemp,realout)
  
-      RETURN
-      END
+      return
+      end
 

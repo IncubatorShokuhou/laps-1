@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -42,28 +42,28 @@ cdis
 cdis
 cdis
 cdis
-c FORTRAN90 constructs
+c fortran90 constructs
       real function func(x)
 
-c     This module now includes more than just satllite data.  It is the 
-c     minimization area for sounder radiance, GVAP, GPS, and cloud.
+c     this module now includes more than just satllite data.  it is the 
+c     minimization area for sounder radiance, gvap, gps, and cloud.
 
-c   This routine interfaces GOES 8/10 satellite broadcast network data (and
-c   local GVAR data) to the LAPS moisture analysis.  In 1999, this routine
-c   was modified from an earlier version that used the University of
-c   Wisconsin -- Madison's forward model to a new model developed at
-c   NESDIS.  OPTRAN (optical transmittance) forward model was developed by
-c   Thomas Kleespies (NESDIS) and questions about this model should be
-c   directed to him.  Forecast Systems Laboratory does not in any way
-c   guarantee the validity of OPTRAN and distributes this software on an
-c   as-is basis.  MOREOVER, FSL HAS PERMISSION TO DISTRIBUTE OPTRAN AS PART
-c   OF LAPS TO FEDERAL AGENCIES.  NON-FEDERAL ENTITIES NEED TO INQUIRE WITH
-c   NESDIS TO ESTABLISH THEIR RIGHTS AND OBLIGATIONS WITH REGARD TO OPTRAN.
+c   this routine interfaces goes 8/10 satellite broadcast network data (and
+c   local gvar data) to the laps moisture analysis.  in 1999, this routine
+c   was modified from an earlier version that used the university of
+c   wisconsin -- madison's forward model to a new model developed at
+c   nesdis.  optran (optical transmittance) forward model was developed by
+c   thomas kleespies (nesdis) and questions about this model should be
+c   directed to him.  forecast systems laboratory does not in any way
+c   guarantee the validity of optran and distributes this software on an
+c   as-is basis.  moreover, fsl has permission to distribute optran as part
+c   of laps to federal agencies.  non-federal entities need to inquire with
+c   nesdis to establish their rights and obligations with regard to optran.
 c   
-c   The version of OPTRAN with which this software is used, has been
-c   modified by FSL to include both sounder and imager channels for a
-c   particular satellite in one call to the routine.  Thus a user only need
-c   to setup OPTRAN for a particular satellite.  After doing such, either
+c   the version of optran with which this software is used, has been
+c   modified by fsl to include both sounder and imager channels for a
+c   particular satellite in one call to the routine.  thus a user only need
+c   to setup optran for a particular satellite.  after doing such, either
 c   the imager or sounding instrument can be used with the software without
 c   further recompilation.
 
@@ -76,11 +76,11 @@ c     parameter variables
       
 c     optran specific arrays for powell function calling
       
-      real btemp_ob (Nchan)
+      real btemp_ob (nchan)
       integer cost_kk
-      real cost_p(Nlevel)
-      real cost_t_l(Nlevel)
-      real cost_mr_l(Nlevel)
+      real cost_p(nlevel)
+      real cost_t_l(nlevel)
+      real cost_mr_l(nlevel)
       real cost_tskin
       real cost_psfc
       integer cost_julian_day
@@ -88,10 +88,10 @@ c     optran specific arrays for powell function calling
       real cost_theta
       integer cost_isnd
       integer cost_rad_istatus
-      real cost_sec_za          ! secant zenith angle for O90
-      real cost_sfc_emis        ! surface emissivity for O90
-      real cost_sfc_refl        ! surface reflectance for O90
-      real cost_sec_solar       ! solar secant angle for O90
+      real cost_sec_za          ! secant zenith angle for o90
+      real cost_sfc_emis        ! surface emissivity for o90
+      real cost_sfc_refl        ! surface reflectance for o90
+      real cost_sec_solar       ! solar secant angle for o90
 
 
 c     background covariance common block
@@ -155,26 +155,26 @@ c     gps common
       real cost_gps_data
       real cost_gps_weight
 
-c     SND common block
+c     snd common block
       common /cost_snd/cost_snd_data, cost_snd_wt,cost_snd_istatus
       real cost_snd_data(500)   !mixing ratio
       real cost_snd_wt(500)
       integer cost_snd_istatus
 
-c     Science common block
+c     science common block
       common/cost_science/cost_comment_switch
       integer cost_comment_switch
 
-c     Radiance display common block
+c     radiance display common block
       common /cost_display/ display_btemps
       real, dimension (1000) :: display_btemps
 
 c     local analogs to common block variables for input to parameters
 
       integer kk
-      real p(Nlevel)
-      real t_l(Nlevel)
-      real mr_l(Nlevel)
+      real p(nlevel)
+      real t_l(nlevel)
+      real mr_l(nlevel)
       real tskin
       real psfc
       integer julian_day
@@ -202,7 +202,7 @@ c     lcal variables
 
       integer i,j,k
       integer kan(18)
-      real w(Nlevel)
+      real w(nlevel)
       real tbest(nchan)
       real radest(nchan)
       logical first_time,first_gvap
@@ -213,8 +213,8 @@ c     lcal variables
       save lvl500, lvl700, lvl100
       real p1,p2,p3             !pressure tops for gvap layers
       real cloud_thresh         ! percent cloud for action (0.6)
-      real GT  ! cloud functions
-      real ipw                  !integrated water for GPS minimization
+      real gt  ! cloud functions
+      real ipw                  !integrated water for gps minimization
       real cloud_integral
       
 c     externals
@@ -236,13 +236,13 @@ c         func = 0.0
 c         return                 ! ignore function 
 c      endif
 
-      func = 0.0                ! Default is start at minima
+      func = 0.0                ! default is start at minima
       max_func_rad = 0.0
       max_func_snd = 0.0
 
-c     define G parameter
+c     define g parameter
 
-      GT = 1.0
+      gt = 1.0
 
 c     constrain x to positive
       do i =1,3
@@ -314,13 +314,13 @@ c     1              cost_mr_l(i)
          
       enddo
 
-C----------------END PRELIMINARY COMPUTATIONS AND PREP -----------
+c----------------end preliminary computations and prep -----------
 
 
 
 
       
-C     SATELLITE RADIANCE SECTION
+c     satellite radiance section
 c     note that radiance and tbest are brightness temperatures (not
 c     radiance as the code might lend you to believe
 
@@ -356,9 +356,9 @@ c     time-consuming part of the code.
          
 c     compute cost function
 
-         if (cost_isnd == 1) then ! SOUNDER radiances used
+         if (cost_isnd == 1) then ! sounder radiances used
             if(cost_isnd == 1 .and. cost_cld >= cloud_thresh) then ! report conflict
-               GT = 0.25 ! reduce influence of this term by 3/4 due to 
+               gt = 0.25 ! reduce influence of this term by 3/4 due to 
 c     conflict with cloud analysis
             endif
             
@@ -366,19 +366,19 @@ c     conflict with cloud analysis
                func = func + ( btemp_ob(j) -
      1              tbest(kan(j)) )**2/2.
             enddo
-            func = func /0.02 !brightnessT variance (=1.5^2)
+            func = func /0.02 !brightnesst variance (=1.5^2)
 
-         else                   ! IMAGER situation (only 3 channels)
+         else                   ! imager situation (only 3 channels)
             
             do j = 1,3          ! radiance _ob(1-3) is imager btemp
                func = func + ( btemp_ob(j) -
      1              tbest(j+7) )**2/2.
             enddo
-            func = func /0.02 !brightnessT variance (=1.5^2)
+            func = func /0.02 !brightnesst variance (=1.5^2)
             
          endif
 
-         func = func * GT ! importance reduced by cloud influence
+         func = func * gt ! importance reduced by cloud influence
 
          max_func_rad = func
          if (max_func_rad .ne. 0.0) then
@@ -396,7 +396,7 @@ c     fill display_btemps section for later display
 
 
 c
-c     END SATELLITE RADIANCE SECTION
+c     end satellite radiance section
 
 
 
@@ -413,7 +413,7 @@ c     END SATELLITE RADIANCE SECTION
 
 
 
-C     BACKGROUND SECTION
+c     background section
 
 c     background weighting, in effect even if radiance data are not present.
 
@@ -433,7 +433,7 @@ c     background weighting, in effect even if radiance data are not present.
          endif
       endif
 
-c     OKYEON SECTION FOR 3 TESTS
+c     okyeon section for 3 tests
 
       if (covar_s.ne.0) then ! divide term by proper covar
 
@@ -454,7 +454,7 @@ c     OKYEON SECTION FOR 3 TESTS
       endif
 
 c      write(6,*) 'func 1, ',func
-c     END BACKGROUND SECTION
+c     end background section
 
 
 
@@ -470,7 +470,7 @@ c     END BACKGROUND SECTION
 
 
       
-c     GVAP SECTION -- UNITS mm
+c     gvap section -- units mm
 
       if (cost_gvap_istatus ==  1) then
 
@@ -480,7 +480,7 @@ c     test for weight of measurement
          else                   ! process gvap
             if (first_gvap) then
                first_gvap = .false.
-               write(6,*) 'TEMP GVAP accepted'
+               write(6,*) 'temp gvap accepted'
             endif
             
 c     integrate q for gvap layers
@@ -502,7 +502,7 @@ c     first the x grad
      1           cost_kk,cost_mdf)
             
             if (p1 <= 300.0) then
-               write(6,*)'TEMM ', x, p1,p2,p3,lpw1,lpw2,lpw3,
+               write(6,*)'temm ', x, p1,p2,p3,lpw1,lpw2,lpw3,
      1              cost_w1_x,cost_w2_x,cost_w3_x
             endif
             
@@ -537,7 +537,7 @@ c     now repeat for the y gradient
      1           cost_kk,cost_mdf)
             
             if (p1 <= 300.0) then
-               write(6,*)'TEMM ', x, p1,p2,p3,lpw1,lpw2,lpw3,
+               write(6,*)'temm ', x, p1,p2,p3,lpw1,lpw2,lpw3,
      1              cost_w1_y,cost_w2_y,cost_w3_y
             endif
             
@@ -564,7 +564,7 @@ c     now repeat for the y gradient
 
 c     max_func_gvap is in mm (above) now divide by mm error to make
 c     dimensionless
-            max_func_gvap = max_func_gvap / ((3.27)**2) ! from SFOV worst case 
+            max_func_gvap = max_func_gvap / ((3.27)**2) ! from sfov worst case 
             func = func + max_func_gvap
             if (max_func_gvap .ne. 0.0) then
                min_func_gvap = min(min_func_gvap,max_func_gvap)
@@ -574,7 +574,7 @@ c     dimensionless
             
          endif                  !weight function test
       endif                     !data present test
-C     END GVAP SECTION
+c     end gvap section
 
 
 
@@ -597,7 +597,7 @@ C     END GVAP SECTION
 
 
       
-c    CLOUD SECTION -- UNITS (none, just a fraction 0->1)
+c    cloud section -- units (none, just a fraction 0->1)
       
       if (cost_cloud_istatus == 1) then ! cloud data present
          max_func_cloud = 0.0
@@ -624,11 +624,11 @@ c    CLOUD SECTION -- UNITS (none, just a fraction 0->1)
 
 c here the weight of the cloud function is hard coded as 0.5  this will 
 c now be modified to become a namelist parameter to help in the improve
-c ment of the cloud analysis for Steve Albers needs. 3/8/12   DB
+c ment of the cloud analysis for steve albers needs. 3/8/12   db
          max_func_cloud = max_func_cloud * cloud_weight
          func = func + max_func_cloud
 
-c the following IF is suspect as a coding bug, it is deemed to have
+c the following if is suspect as a coding bug, it is deemed to have
 c little or no significance on the processing
          if (max_func_cloud .ne. 0.0) then
             min_func_cloud = min(min_func_cloud,max_func_cloud)
@@ -637,7 +637,7 @@ c little or no significance on the processing
 
       endif                     ! cloud data present
       
-C     END CLOUD SECTION
+c     end cloud section
 
 
 
@@ -653,7 +653,7 @@ C     END CLOUD SECTION
 
 
       
-c     GPS SECTION  !  UNITS cm
+c     gps section  !  units cm
       
       if (cost_gps_istatus == 1) then
 
@@ -674,7 +674,7 @@ c     GPS SECTION  !  UNITS cm
       else
          continue
       endif
-C     END GPS SECTION
+c     end gps section
 
 
 
@@ -688,11 +688,11 @@ C     END GPS SECTION
 
 
 
-c     RAOB SECTION (SND)
+c     raob section (snd)
 
-c     Error term computation revised 4/30/04 db 
-c     now uses a 5% approximation in RH converted to approximate 
-c     SH units
+c     error term computation revised 4/30/04 db 
+c     now uses a 5% approximation in rh converted to approximate 
+c     sh units
 
       if (cost_snd_istatus == 1) then
          
@@ -715,9 +715,9 @@ c     SH units
          min_func_snd = min(min_func_snd,max_func_snd)
       endif
 
-C     END RAOB SECTION
+c     end raob section
 
-      if (func .ne. func ) then ! Nan
+      if (func .ne. func ) then ! nan
          write (6,*) 'func is a nan in func_o.f'
          stop
       endif
@@ -740,7 +740,7 @@ C     END RAOB SECTION
 
 
 
-C     BOOKEEPING/MONITOR SECTION
+c     bookeeping/monitor section
 
 c     print test output
 
@@ -752,7 +752,7 @@ c     1     max_func_gvap2/func,
 c     1     max_func_gvap3/func,
 c     1     max_func_cloud/func,
 c     1     max_func_gps/func,func
-C     END BOOKEEPING/MONITOR SECTION
+c     end bookeeping/monitor section
 
 
       

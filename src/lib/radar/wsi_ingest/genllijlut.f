@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -35,9 +35,9 @@ c
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-c Routine reads netCDF nowrad (WSI) data using subroutine read_wsi_cdf.
-c Nowrad data is then remapped to LAPS domain given lat/lon of domain.
-c Routine automatically moves the boundary for any domain with the nowrad
+c routine reads netcdf nowrad (wsi) data using subroutine read_wsi_cdf.
+c nowrad data is then remapped to laps domain given lat/lon of domain.
+c routine automatically moves the boundary for any domain with the nowrad
 c confines.
 c
        implicit none
@@ -78,7 +78,7 @@ c
 c
 c need to get latest filetime from appropriate data subdirectory
 c
-      write(6,*)'NAV Parameters'
+      write(6,*)'nav parameters'
       write(6,*)'dx     ',dx
       write(6,*)'dy     ',dy
       write(6,*)'nelems ',nelems
@@ -101,18 +101,18 @@ c
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-c  Build ri/rj look up for laps domain
+c  build ri/rj look up for laps domain
 c
       call latlon_2_ceij(imax*jmax,lat,lon,ri,rj)
 
       write(6,*)'ri/rj corners for domain: '
       write(6,*)'--------------------------'
-      write(6,*)'(SW) ',ri(1,1),rj(1,1)
-      write(6,*)'(SE) ',ri(imax,1),rj(imax,1)
-      write(6,*)'(NW) ',ri(1,jmax),rj(1,jmax)
-      write(6,*)'(NE) ',ri(imax,jmax),rj(imax,jmax)
+      write(6,*)'(sw) ',ri(1,1),rj(1,1)
+      write(6,*)'(se) ',ri(imax,1),rj(imax,1)
+      write(6,*)'(nw) ',ri(1,jmax),rj(1,jmax)
+      write(6,*)'(ne) ',ri(imax,jmax),rj(imax,jmax)
       write(6,*)
-      write(6,*)'Check for domain coverage'
+      write(6,*)'check for domain coverage'
 c
 c check for laps domain outside data domain
 c
@@ -123,10 +123,10 @@ c output
 c
       write(6,*)'ri/rj corners for domain after check: '
       write(*,*)'--------------------------------------'
-      write(6,*)'(SW) ',ri(1,1),rj(1,1)
-      write(6,*)'(SE) ',ri(imax,1),rj(imax,1)
-      write(6,*)'(NW) ',ri(1,jmax),rj(1,jmax)
-      write(6,*)'(NE) ',ri(imax,jmax),rj(imax,jmax)
+      write(6,*)'(sw) ',ri(1,1),rj(1,1)
+      write(6,*)'(se) ',ri(imax,1),rj(imax,1)
+      write(6,*)'(nw) ',ri(1,jmax),rj(1,jmax)
+      write(6,*)'(ne) ',ri(imax,jmax),rj(imax,jmax)
       write(6,*)
 
       if(.false.)then
@@ -139,9 +139,9 @@ c
 
       goto 16
 
-901   write(6,*)'Error reading parm file ',file(1:n)
+901   write(6,*)'error reading parm file ',file(1:n)
 
-16    write(6,*)'Finished in get_llij_lut_wsi'
+16    write(6,*)'finished in get_llij_lut_wsi'
       return
       end
 c
@@ -196,17 +196,17 @@ c
 c =================================
       pi = acos(-1.0)
 c
-      write(6,*)'NAV Parameters'
+      write(6,*)'nav parameters'
       write(6,*)'dx     ',dx
       write(6,*)'dy     ',dy
       write(6,*)'nelems ',nelems
       write(6,*)'nlines ',nlines
-      write(6,*)'La1   ',rla1
-      write(6,*)'Lo1   ',rlo1
-c     write(6,*)'La2   ',rla2
-c     write(6,*)'Lo2   ',rlo2
-      write(6,*)'Lov   ',rlov
-      write(6,*)'Latin ',rlatin
+      write(6,*)'la1   ',rla1
+      write(6,*)'lo1   ',rlo1
+c     write(6,*)'la2   ',rla2
+c     write(6,*)'lo2   ',rlo2
+      write(6,*)'lov   ',rlov
+      write(6,*)'latin ',rlatin
 
 c compute lat lons  fsl conus grid (or read fm disk)
 c determine ri/rj pair for the four laps domain corners.
@@ -242,17 +242,17 @@ c
       endif
 
 c
-      write(6,*)'Lambert-CONUS (WFO) corners for domain: '
+      write(6,*)'lambert-conus (wfo) corners for domain: '
       write(6,*)'----------------------------------------'
-      write(6,*)'(SW) ',ri(1,1),rj(1,1)
-      write(6,*)'(SE) ',ri(imax,1),rj(imax,1)
-      write(6,*)'(NW) ',ri(1,jmax),rj(1,jmax)
-      write(6,*)'(NE) ',ri(imax,jmax),rj(imax,jmax)
+      write(6,*)'(sw) ',ri(1,1),rj(1,1)
+      write(6,*)'(se) ',ri(imax,1),rj(imax,1)
+      write(6,*)'(nw) ',ri(1,jmax),rj(1,jmax)
+      write(6,*)'(ne) ',ri(imax,jmax),rj(imax,jmax)
       write(6,*)
 
       goto 900
 
-901   write(6,*)'Error openning file ',file(1:n)
+901   write(6,*)'error openning file ',file(1:n)
 
 900   return
       end
@@ -297,15 +297,15 @@ c
        enddo
 
        if(i_out.gt.0)then
-          print*,'Warning! LAPS domain outside of data domain'
+          print*,'warning! laps domain outside of data domain'
           print*,'i out =',i_out
        endif
        if(j_out.gt.0)then
-          print*,'Warning! LAPS domain outside of data domain'
+          print*,'warning! laps domain outside of data domain'
           print*,'j out =',j_out
        endif
        if(i_out.gt.0.or.j_out.gt.0)then
-          print*,'Check yor laps domain (nest7grid.parms) settings'
+          print*,'check yor laps domain (nest7grid.parms) settings'
           print*,'if you do not want partial coverage of domain'
        endif
 

@@ -17,14 +17,14 @@ c
       
       
 c
-c *** Common block variables for Lambert-conformal grid.
-c *** removed JS (4-01)
+c *** common block variables for lambert-conformal grid.
+c *** removed js (4-01)
 
-c *** Convert Pascals to mb.
-c *** Compute tv from thetav.
-c *** Compute height from msf.
-c *** Compute tp (returned in th) from tv.
-c *** Compute sh from mr.
+c *** convert pascals to mb.
+c *** compute tv from thetav.
+c *** compute height from msf.
+c *** compute tp (returned in th) from tv.
+c *** compute sh from mr.
 c
       do k=1,nz
          do j=1,ny
@@ -40,7 +40,7 @@ c
          enddo
       enddo
 c
-c Copy first level into surface fields (this is 5m AGL)
+c copy first level into surface fields (this is 5m agl)
 c
       do j=1,ny
          do i=1,nx
@@ -54,11 +54,11 @@ c
       enddo
 
 c
-c *** Fill Lambert-conformal common block variables.
-c *** removed JS (4-01)
+c *** fill lambert-conformal common block variables.
+c *** removed js (4-01)
 
-c **** No Longer Needed *****
-c *** Convert ruc winds from grid north to true north.
+c **** no longer needed *****
+c *** convert ruc winds from grid north to true north.
 c
 c      do j=1,ny
 c         do i=1,nx

@@ -1,40 +1,40 @@
-      subroutine get_CONUS3D_netcdf(FILENAME
+      subroutine get_conus3d_netcdf(filename
      &          ,nx_dim,ny_dim,nz_dim
-     &          ,xxMin,xxMax,yyMin,yyMax, mrefl, ISTAT) 
+     &          ,xxmin,xxmax,yymin,yymax, mrefl, istat) 
 c *
-c * A subroutine to read 1 km resolution NSSL 3D in netcdf format
-c * 4/19/2004 Dongsoo Kim, Original ingest routine
+c * a subroutine to read 1 km resolution nssl 3d in netcdf format
+c * 4/19/2004 dongsoo kim, original ingest routine
 c *
 c * input
-      CHARACTER FILENAME*132
+      character filename*132
       integer*4 nx_dim, ny_dim, nz_dim
 c * output
       real*4   mrefl(nx_dim, ny_dim, nz_dim)
-      real*4   xxMin, xxMax, yyMin, yyMax
-      integer  NCID
+      real*4   xxmin, xxmax, yymin, yymax
+      integer  ncid
 c
       include '/usr/local/apps/netcdf-3.4/include/netcdf.inc'
 c
-      STATUS=NF_OPEN(FILENAME,NF_NOWRITE,NCID)
-      if (STATUS .ne. NF_NOERR) then
-           ISTAT = -1
-           print *, FILENAME,' is not avail'
+      status=nf_open(filename,nf_nowrite,ncid)
+      if (status .ne. nf_noerr) then
+           istat = -1
+           print *, filename,' is not avail'
            return
       endif
 c
 c  statements to fill image                          
 c
-      nf_status = NF_INQ_VARID(NCID,'mrefl_mosaic',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,mrefl)
+      nf_status = nf_inq_varid(ncid,'mrefl_mosaic',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,mrefl)
 c
 c  read global attributes
 c
-      nf_status = NF_GET_ATT_REAL(NCID,NF_GLOBAL,'xMin', xxMin)
-      nf_status = NF_GET_ATT_REAL(NCID,NF_GLOBAL,'xMax', xxMax)
-      nf_status = NF_GET_ATT_REAL(NCID,NF_GLOBAL,'yMin', yyMin)
-      nf_status = NF_GET_ATT_REAL(NCID,NF_GLOBAL,'yMax', yyMax)
+      nf_status = nf_get_att_real(ncid,nf_global,'xmin', xxmin)
+      nf_status = nf_get_att_real(ncid,nf_global,'xmax', xxmax)
+      nf_status = nf_get_att_real(ncid,nf_global,'ymin', yymin)
+      nf_status = nf_get_att_real(ncid,nf_global,'ymax', yymax)
 c
-      nf_status = NF_CLOSE(NCID)
+      nf_status = nf_close(ncid)
 c
-      RETURN
-      END
+      return
+      end

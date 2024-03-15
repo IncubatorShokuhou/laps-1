@@ -1,478 +1,475 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
 
+module wfoprep_wrf
 
-
-MODULE wfoprep_wrf
-
-! PURPOSE
+! purpose
 ! =======
-! Module to contain the various output routines needed for lapsprep
-! to support initializition of the WRF model via the Standard Initialization.
+! module to contain the various output routines needed for lapsprep
+! to support initializition of the wrf model via the standard initialization.
 !
-! SUBROUTINES CONTAINED
+! subroutines contained
 ! =====================
-! output_wrf_basic     - Outputs state variables on pressure surfaces
-!                          plus MSLP and topography
-! output_wrf_sfc       - Outputs the surface fields
-! write_gribprep_header   - Writes gribprep headers
+! output_wrf_basic     - outputs state variables on pressure surfaces
+!                          plus mslp and topography
+! output_wrf_sfc       - outputs the surface fields
+! write_gribprep_header   - writes gribprep headers
 !
-! REMARKS
+! remarks
 ! =======
-! 
 !
-! HISTORY
+!
+! history
 ! =======
-! 1 Oct 2001 -- Original -- Brent Shaw
+! 1 oct 2001 -- original -- brent shaw
 
-  USE map_utils
-  IMPLICIT NONE
+   use map_utils
+   implicit none
 
-  INTEGER, PARAMETER :: gp_version = 4
-  INTEGER, PARAMETER :: output_unit = 78
-  REAL, PARAMETER,PRIVATE    :: slp_level = 201300.0
-  REAL, PARAMETER,PRIVATE    :: sfc_level = 200100.0
-  PUBLIC output_wrf_basic, output_wrf_sfc
-  INTEGER, PARAMETER, PUBLIC   :: WRFMODE_NEW = 1
-  INTEGER, PARAMETER, PUBLIC   :: WRFMODE_APPEND = 2
-  CHARACTER(LEN=32)   :: source
-  CHARACTER(LEN=8),PARAMETER    :: knownloc = 'SWCORNER'
-  LOGICAL, PARAMETER            :: verbose = .false.
-CONTAINS
+   integer, parameter :: gp_version = 4
+   integer, parameter :: output_unit = 78
+   real, parameter, private    :: slp_level = 201300.0
+   real, parameter, private    :: sfc_level = 200100.0
+   public output_wrf_basic, output_wrf_sfc
+   integer, parameter, public   :: wrfmode_new = 1
+   integer, parameter, public   :: wrfmode_append = 2
+   character(len=32)   :: source
+   character(len=8), parameter    :: knownloc = 'swcorner'
+   logical, parameter            :: verbose = .false.
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE output_wrf_basic(i4time_cycle, i4time_valid, proj, &
-          np_ht, np_t, np_u, np_v, np_rh, &
-          ht_plevels, t_plevels, u_plevels, v_plevels, rh_plevels, &
-          z, t, u, v, rh, mslp, topo, &
-          ext_data_path, output_name, mode, istatus)
+   subroutine output_wrf_basic(i4time_cycle, i4time_valid, proj, &
+                               np_ht, np_t, np_u, np_v, np_rh, &
+                               ht_plevels, t_plevels, u_plevels, v_plevels, rh_plevels, &
+                               z, t, u, v, rh, mslp, topo, &
+                               ext_data_path, output_name, mode, istatus)
 
+      implicit none
+      integer, intent(in)         :: i4time_cycle
+      integer, intent(in)         :: i4time_valid
+      type(proj_info), intent(in)  :: proj
+      integer, intent(in)         :: np_ht
+      integer, intent(in)         :: np_t
+      integer, intent(in)         :: np_u
+      integer, intent(in)         :: np_v
+      integer, intent(in)         :: np_rh
+      real, intent(in)            :: ht_plevels(np_ht)
+      real, intent(in)            :: t_plevels(np_t)
+      real, intent(in)            :: u_plevels(np_u)
+      real, intent(in)            :: v_plevels(np_v)
+      real, intent(in)            :: rh_plevels(np_rh)
+      real, intent(in)            :: z(:, :, :)
+      real, intent(in)            :: t(:, :, :)
+      real, intent(in)            :: u(:, :, :)
+      real, intent(in)            :: v(:, :, :)
+      real, intent(in)            :: rh(:, :, :)
+      real, intent(in)            :: mslp(:, :)
+      real, intent(in)            :: topo(:, :)
+      character(len=256), intent(in):: ext_data_path
+      character(len=32), intent(in):: output_name
+      integer, intent(in)         :: mode
+      integer, intent(out)        :: istatus
 
-     IMPLICIT NONE
-     INTEGER, INTENT(IN)         :: i4time_cycle
-     INTEGER, INTENT(IN)         :: i4time_valid
-     TYPE(proj_info),INTENT(IN)  :: proj
-     INTEGER, INTENT(IN)         :: np_ht
-     INTEGER, INTENT(IN)         :: np_t
-     INTEGER, INTENT(IN)         :: np_u
-     INTEGER, INTENT(IN)         :: np_v
-     INTEGER, INTENT(IN)         :: np_rh
-     REAL, INTENT(IN)            :: ht_plevels(np_ht)
-     REAL, INTENT(IN)            :: t_plevels(np_t)
-     REAL, INTENT(IN)            :: u_plevels(np_u)
-     REAL, INTENT(IN)            :: v_plevels(np_v)
-     REAL, INTENT(IN)            :: rh_plevels(np_rh)
-     REAL, INTENT(IN)            :: z ( : , : , : )
-     REAL, INTENT(IN)            :: t ( : , : , : )
-     REAL, INTENT(IN)            :: u ( : , : , : )
-     REAL, INTENT(IN)            :: v ( : , : , : )
-     REAL, INTENT(IN)            :: rh ( : , : , : )
-     REAL, INTENT(IN)            :: mslp ( : , : )
-     REAL, INTENT(IN)            :: topo ( : , : )
-     CHARACTER(LEN=256),INTENT(IN):: ext_data_path
-     CHARACTER(LEN=32 ),INTENT(IN):: output_name
-     INTEGER, INTENT(IN)         :: mode
-     INTEGER, INTENT(OUT)        :: istatus
-   
-     INTEGER                     :: k
-     CHARACTER(LEN=256)          :: outfile
-     CHARACTER(LEN=24)           :: atime
-     CHARACTER(LEN=3)            :: amonth
-     CHARACTER(LEN=2)            :: amonth_num
-     INTEGER                     :: m
-     REAL               :: xfcst
-     CHARACTER (LEN=24) :: hdate
-     CHARACTER (LEN=9)  :: field
-     CHARACTER (LEN=25) :: units
-     CHARACTER (LEN=46) :: desc        
+      integer                     :: k
+      character(len=256)          :: outfile
+      character(len=24)           :: atime
+      character(len=3)            :: amonth
+      character(len=2)            :: amonth_num
+      integer                     :: m
+      real               :: xfcst
+      character(len=24) :: hdate
+      character(len=9)  :: field
+      character(len=25) :: units
+      character(len=46) :: desc
 
-     istatus = 1
-  
-     CALL make_gribprep_filename(ext_data_path,output_name, &
-        i4time_valid,outfile) 
+      istatus = 1
 
-     ! Compute xfcst
-     xfcst = FLOAT(i4time_valid - i4time_cycle)/3600.
+      call make_gribprep_filename(ext_data_path, output_name, &
+                                  i4time_valid, outfile)
 
-     ! Make hdate
-     CALL make_hdate_from_i4time(i4time_valid,hdate)
+      ! compute xfcst
+      xfcst = float(i4time_valid - i4time_cycle)/3600.
 
-     ! Open the file, using the mode dependency
-     PRINT *, 'Opening file: ', TRIM(outfile)
-     IF (mode .EQ. WRFMODE_NEW) THEN
-       OPEN ( FILE   = TRIM(outfile)    , &
-         UNIT   = output_unit        , &
-         FORM   = 'UNFORMATTED' , &
-         STATUS = 'REPLACE'     , &
-         ACCESS = 'SEQUENTIAL'    )
-     ELSE IF (mode .EQ. WRFMODE_APPEND) THEN
-       OPEN ( FILE   = TRIM(outfile)    , &
-         UNIT   = output_unit        , &
-         FORM   = 'UNFORMATTED' , &
-         STATUS = 'UNKNOWN'     , &
-         ACCESS = 'SEQUENTIAL', &
-         POSITION = 'APPEND'    ) 
-     ELSE 
-       PRINT *, 'Uknown open mode for WRFSI Output: ',mode
-       istatus = 0
-       RETURN
-     ENDIF
+      ! make hdate
+      call make_hdate_from_i4time(i4time_valid, hdate)
 
-     source = TRIM(output_name) // ' from AWIPS netCDF bigfile'
-     If (verbose) THEN
-       PRINT *, 'GRIBPREP VERSION =', gp_version
-       PRINT *, 'HDATE = ',hdate
-       PRINT *, 'XFCST = ', xfcst 
-       PRINT *, 'NX = ', proj%nx
-       PRINT *, 'NY = ', proj%ny
-       PRINT *, 'KNOWNLOC = ', knownloc
-       PRINT *, 'IPROJ = ', proj%code
-       PRINT *, 'STARTLAT = ',proj%lat1
-       PRINT *, 'STARTLON = ',proj%lon1
-       PRINT *, 'DX = ', proj%dx*0.001
-       PRINT *, 'DY = ', proj%dx*0.001
-       PRINT *, 'XLONC = ', proj%stdlon
-       PRINT *, 'TRUELAT1 = ', proj%truelat1
-       PRINT *, 'TRUELAT2 = ', proj%truelat2
-     ENDIF
+      ! open the file, using the mode dependency
+      print *, 'opening file: ', trim(outfile)
+      if (mode .eq. wrfmode_new) then
+         open (file=trim(outfile), &
+               unit=output_unit, &
+               form='unformatted', &
+               status='replace', &
+               access='sequential')
+      else if (mode .eq. wrfmode_append) then
+         open (file=trim(outfile), &
+               unit=output_unit, &
+               form='unformatted', &
+               status='unknown', &
+               access='sequential', &
+               position='append')
+      else
+         print *, 'uknown open mode for wrfsi output: ', mode
+         istatus = 0
+         return
+      end if
 
-     ! Output temperature
-     field = 'T        '
-     units = 'K                        '
-     desc  = 'Temperature                                   '                
-     PRINT *, 'FIELD = ', field
-     PRINT *, 'UNITS = ', units
-     PRINT *, 'DESC =  ',desc
-     var_t : DO k = 1 , np_t
-       CALL write_gribprep_header(proj,field,units,desc,t_plevels(k),hdate,xfcst)
-       WRITE ( output_unit ) t(:,:,k)
-       IF (verbose) THEN
-         PRINT '(A,F9.1,A,F5.1,A,F5.1)','Level (Pa):',t_plevels(k),' Min: ', &
-           MINVAL(t(:,:,k)),' Max: ', MAXVAL(t(:,:,k))
-       ENDIF
-     ENDDO var_t
+      source = trim(output_name)//' from awips netcdf bigfile'
+      if (verbose) then
+         print *, 'gribprep version =', gp_version
+         print *, 'hdate = ', hdate
+         print *, 'xfcst = ', xfcst
+         print *, 'nx = ', proj%nx
+         print *, 'ny = ', proj%ny
+         print *, 'knownloc = ', knownloc
+         print *, 'iproj = ', proj%code
+         print *, 'startlat = ', proj%lat1
+         print *, 'startlon = ', proj%lon1
+         print *, 'dx = ', proj%dx*0.001
+         print *, 'dy = ', proj%dx*0.001
+         print *, 'xlonc = ', proj%stdlon
+         print *, 'truelat1 = ', proj%truelat1
+         print *, 'truelat2 = ', proj%truelat2
+      end if
 
-     ! Do u-component of wind
-     field = 'U        '
-     units = 'm s{-1}                  '
-     desc = 'u-component of velocity, rotated to grid      '
-     var_u : DO k = 1 , np_u
-       CALL write_gribprep_header(proj,field,units,desc,u_plevels(k),hdate,xfcst)
-       WRITE ( output_unit ) u(:,:,k)
-       IF (verbose) THEN 
-         PRINT '(A,X,A,A,F9.1,A,F5.1,A,F5.1)', field,units, &
-            'Level (Pa):', u_plevels(k),  &
-            ' Min: ', MINVAL(u(:,:,k)),&
-            ' Max: ', MAXVAL(u(:,:,k))
-       ENDIF
-     ENDDO var_u
+      ! output temperature
+      field = 't        '
+      units = 'k                        '
+      desc = 'temperature                                   '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_t: do k = 1, np_t
+         call write_gribprep_header(proj, field, units, desc, t_plevels(k), hdate, xfcst)
+         write (output_unit) t(:, :, k)
+         if (verbose) then
+            print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', t_plevels(k), ' min: ', &
+               minval(t(:, :, k)), ' max: ', maxval(t(:, :, k))
+         end if
+      end do var_t
 
-     ! Do v-component of wind
-     field = 'V        '
-     units = 'm s{-1}                  '
-     desc = 'v-component of velocity, rotated to grid      '
-     var_v : DO k = 1 , np_v
-       CALL write_gribprep_header(proj,field,units,desc,v_plevels(k),hdate,xfcst)
-       WRITE ( output_unit ) v(:,:,k)
-       IF (verbose) THEN 
-         PRINT '(A,x,A,A,F9.1,A,F5.1,A,F5.1)',field,units, &
-            'Level (Pa):', v_plevels(k), &
-            ' Min: ', MINVAL(v(:,:,k)),&
-            ' Max: ', MAXVAL(v(:,:,k))
-       ENDIF
-     ENDDO var_v
+      ! do u-component of wind
+      field = 'u        '
+      units = 'm s{-1}                  '
+      desc = 'u-component of velocity, rotated to grid      '
+      var_u: do k = 1, np_u
+         call write_gribprep_header(proj, field, units, desc, u_plevels(k), hdate, xfcst)
+         write (output_unit) u(:, :, k)
+         if (verbose) then
+            print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+               'level (pa):', u_plevels(k), &
+               ' min: ', minval(u(:, :, k)), &
+               ' max: ', maxval(u(:, :, k))
+         end if
+      end do var_u
 
-     ! Relative Humidity
-     field = 'RH       '
-     units = '%                        '
-     desc  = 'Relative humidity                             '
-     var_rh : DO k = 1 , np_rh
-       CALL write_gribprep_header(proj,field,units,desc,rh_plevels(k),hdate,xfcst)
-       WRITE ( output_unit ) rh(:,:,k)
-       IF (verbose) THEN 
-         PRINT '(A,x,A,A,F9.1,A,F5.1,A,F5.1)',field,units, &
-            'Level (Pa):', rh_plevels(k),&
-            ' Min: ', MINVAL(rh(:,:,k)),&
-            ' Max: ', MAXVAL(rh(:,:,k))
-       ENDIF
-     ENDDO var_rh
+      ! do v-component of wind
+      field = 'v        '
+      units = 'm s{-1}                  '
+      desc = 'v-component of velocity, rotated to grid      '
+      var_v: do k = 1, np_v
+         call write_gribprep_header(proj, field, units, desc, v_plevels(k), hdate, xfcst)
+         write (output_unit) v(:, :, k)
+         if (verbose) then
+            print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+               'level (pa):', v_plevels(k), &
+               ' min: ', minval(v(:, :, k)), &
+               ' max: ', maxval(v(:, :, k))
+         end if
+      end do var_v
 
-     ! Do the heights
-     field = 'HGT      '
-     units = 'm                        '
-     desc  = 'Geopotential height                           '
-     var_ht : DO k = 1 , np_ht
-       CALL write_gribprep_header(proj,field,units,desc,ht_plevels(k),hdate,xfcst)
-       WRITE ( output_unit ) z(:,:,k)
-       IF (verbose) THEN
-         PRINT '(A,X,A,A,F9.1,A,F8.1,A,F8.1)', field, units, &
-            'Level (Pa):', ht_plevels(k), &
-            ' Min: ', MINVAL(z(:,:,k)),&
-            ' Max: ', MAXVAL(z(:,:,k))
-       ENDIF
-     ENDDO var_ht
+      ! relative humidity
+      field = 'rh       '
+      units = '%                        '
+      desc = 'relative humidity                             '
+      var_rh: do k = 1, np_rh
+         call write_gribprep_header(proj, field, units, desc, rh_plevels(k), hdate, xfcst)
+         write (output_unit) rh(:, :, k)
+         if (verbose) then
+            print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+               'level (pa):', rh_plevels(k), &
+               ' min: ', minval(rh(:, :, k)), &
+               ' max: ', maxval(rh(:, :, k))
+         end if
+      end do var_rh
 
-     ! Terrain height
-     field = 'SOILHGT  '
-     units = 'm                        '
-     desc  = 'Height of topography                          '
-     CALL write_gribprep_header(proj,field,units,desc,sfc_level,hdate,xfcst)
-     WRITE ( output_unit ) topo
-     IF (verbose) THEN 
-       PRINT '(A,X,A,A,F9.1,A,F9.1,A,F9.1)', field,units, &
-            'Level (Pa):',sfc_level, &
-            ' Min: ', MINVAL(topo),&
-            ' Max: ', MAXVAL(topo)
-     ENDIF
+      ! do the heights
+      field = 'hgt      '
+      units = 'm                        '
+      desc = 'geopotential height                           '
+      var_ht: do k = 1, np_ht
+         call write_gribprep_header(proj, field, units, desc, ht_plevels(k), hdate, xfcst)
+         write (output_unit) z(:, :, k)
+         if (verbose) then
+            print '(a,x,a,a,f9.1,a,f8.1,a,f8.1)', field, units, &
+               'level (pa):', ht_plevels(k), &
+               ' min: ', minval(z(:, :, k)), &
+               ' max: ', maxval(z(:, :, k))
+         end if
+      end do var_ht
 
-     ! Sea-level Pressure field
-     field = 'PMSL     '
-     units = 'Pa                       '
-     desc  = 'Sea-level pressure                            '
-     CALL write_gribprep_header(proj,field,units,desc,slp_level,hdate,xfcst)
-     WRITE ( output_unit ) mslp
-     IF (verbose) THEN 
-       PRINT '(A,X,A,A,F9.1,A,F9.1,A,F9.1)', field,units, &
-            'Level (Pa):', slp_level, &
-            ' Min: ', MINVAL(mslp),&
-            ' Max: ', MAXVAL(mslp)
-     ENDIF
-     CLOSE(output_unit)
-    RETURN
-  END SUBROUTINE output_wrf_basic
+      ! terrain height
+      field = 'soilhgt  '
+      units = 'm                        '
+      desc = 'height of topography                          '
+      call write_gribprep_header(proj, field, units, desc, sfc_level, hdate, xfcst)
+      write (output_unit) topo
+      if (verbose) then
+         print '(a,x,a,a,f9.1,a,f9.1,a,f9.1)', field, units, &
+            'level (pa):', sfc_level, &
+            ' min: ', minval(topo), &
+            ' max: ', maxval(topo)
+      end if
+
+      ! sea-level pressure field
+      field = 'pmsl     '
+      units = 'pa                       '
+      desc = 'sea-level pressure                            '
+      call write_gribprep_header(proj, field, units, desc, slp_level, hdate, xfcst)
+      write (output_unit) mslp
+      if (verbose) then
+         print '(a,x,a,a,f9.1,a,f9.1,a,f9.1)', field, units, &
+            'level (pa):', slp_level, &
+            ' min: ', minval(mslp), &
+            ' max: ', maxval(mslp)
+      end if
+      close (output_unit)
+      return
+   end subroutine output_wrf_basic
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE output_wrf_sfc(i4time_cycle,i4time_valid,proj, &
-                              tsf,usf,vsf,rhsf, &
-                              ext_data_path,output_name, mode, istatus)
+   subroutine output_wrf_sfc(i4time_cycle, i4time_valid, proj, &
+                             tsf, usf, vsf, rhsf, &
+                             ext_data_path, output_name, mode, istatus)
 
-    IMPLICIT NONE
+      implicit none
 
-    INTEGER,INTENT(IN)                     :: i4time_cycle
-    INTEGER,INTENT(IN)                     :: i4time_valid
-    TYPE(proj_info),INTENT(IN)             :: proj
-    REAL,INTENT(IN)                        :: tsf(:,:)
-    REAL,INTENT(IN)                        :: usf(:,:)
-    REAL,INTENT(IN)                        :: vsf(:,:)
-    REAL,INTENT(IN)                        :: rhsf(:,:)
-    CHARACTER(LEN=256),INTENT(IN)          :: ext_data_path
-    CHARACTER(LEN=32),INTENT(IN)           :: output_name
-    INTEGER,INTENT(IN)                     :: mode
-    INTEGER,INTENT(OUT)                    :: istatus
+      integer, intent(in)                     :: i4time_cycle
+      integer, intent(in)                     :: i4time_valid
+      type(proj_info), intent(in)             :: proj
+      real, intent(in)                        :: tsf(:, :)
+      real, intent(in)                        :: usf(:, :)
+      real, intent(in)                        :: vsf(:, :)
+      real, intent(in)                        :: rhsf(:, :)
+      character(len=256), intent(in)          :: ext_data_path
+      character(len=32), intent(in)           :: output_name
+      integer, intent(in)                     :: mode
+      integer, intent(out)                    :: istatus
 
-    CHARACTER(LEN=256)                     :: outfile
-    REAL               :: xfcst
-    CHARACTER (LEN=24) :: hdate
-    CHARACTER (LEN=9)  :: field
-    CHARACTER (LEN=25) :: units
-    CHARACTER (LEN=46) :: desc    
-   
-    istatus = 1
+      character(len=256)                     :: outfile
+      real               :: xfcst
+      character(len=24) :: hdate
+      character(len=9)  :: field
+      character(len=25) :: units
+      character(len=46) :: desc
 
-    CALL make_gribprep_filename(ext_data_path,output_name, &
-                               i4time_valid,outfile)       
-    ! Compute xfcst
-    xfcst = FLOAT(i4time_valid - i4time_cycle)/3600.
+      istatus = 1
 
-    ! Make hdate
-    CALL make_hdate_from_i4time(i4time_valid,hdate)     
-  
-    ! Open the file, using the mode dependency
-    PRINT *, 'Opening file: ', TRIM(outfile)
-    IF (mode .EQ. WRFMODE_NEW) THEN
-      OPEN ( FILE   = TRIM(outfile)    , &
-             UNIT   = output_unit        , &
-             FORM   = 'UNFORMATTED' , &
-             STATUS = 'REPLACE'     , &
-             ACCESS = 'SEQUENTIAL'    )
-    ELSE IF (mode .EQ. WRFMODE_APPEND) THEN
-      OPEN ( FILE   = TRIM(outfile)    , &
-             UNIT   = output_unit        , &
-             FORM   = 'UNFORMATTED' , &
-             STATUS = 'UNKNOWN'     , &
-             ACCESS = 'SEQUENTIAL', &
-             POSITION = 'APPEND'    )
-    ELSE
-      PRINT *, 'Uknown open mode for WRFSI Output: ',mode
-      istatus = 0
-      RETURN
-    ENDIF                  
+      call make_gribprep_filename(ext_data_path, output_name, &
+                                  i4time_valid, outfile)
+      ! compute xfcst
+      xfcst = float(i4time_valid - i4time_cycle)/3600.
 
-    ! Output temperature
-    field = 'T        '
-    units = 'K                        '
-    desc  = 'Temperature                                   '
-    CALL write_gribprep_header(proj,field,units,desc,sfc_level,hdate,xfcst)
-    WRITE ( output_unit ) tsf
-    IF (verbose) THEN
-      PRINT '(A,X,A,A,F9.1,A,F5.1,A,F5.1)',field,units, &
-          'Level (Pa):',sfc_level,' Min: ', &
-           MINVAL(tsf),' Max: ', MAXVAL(tsf)
-    ENDIF
+      ! make hdate
+      call make_hdate_from_i4time(i4time_valid, hdate)
 
-    ! Output u-wind component
-    field = 'U        '
-    units = 'm s{-1}                  '
-    desc  = 'u-component of wind, rotated to grid          '
-    CALL write_gribprep_header(proj,field,units,desc,sfc_level,hdate,xfcst)
-    WRITE ( output_unit ) usf
-    IF (verbose) THEN 
-      PRINT '(A,X,A,A,F9.1,A,F5.1,A,F5.1)',field,units, &
-           'Level (Pa):',sfc_level,' Min: ', &
-           MINVAL(usf),' Max: ', MAXVAL(usf) 
-    ENDIF  
+      ! open the file, using the mode dependency
+      print *, 'opening file: ', trim(outfile)
+      if (mode .eq. wrfmode_new) then
+         open (file=trim(outfile), &
+               unit=output_unit, &
+               form='unformatted', &
+               status='replace', &
+               access='sequential')
+      else if (mode .eq. wrfmode_append) then
+         open (file=trim(outfile), &
+               unit=output_unit, &
+               form='unformatted', &
+               status='unknown', &
+               access='sequential', &
+               position='append')
+      else
+         print *, 'uknown open mode for wrfsi output: ', mode
+         istatus = 0
+         return
+      end if
 
-    ! Output v-wind component
-    field = 'V        '
-    units = 'm s{-1}                  '
-    desc  = 'v-component of wind, rotated to grid          '
-    CALL write_gribprep_header(proj,field,units,desc,sfc_level,hdate,xfcst)
-    WRITE ( output_unit ) vsf
-    IF (verbose) THEN 
-      PRINT '(A,X,A,A,F9.1,A,F5.1,A,F5.1)',field,units, &
-          'Level (Pa):',sfc_level,' Min: ', &
-           MINVAL(vsf),' Max: ', MAXVAL(vsf) 
-    ENDIF
+      ! output temperature
+      field = 't        '
+      units = 'k                        '
+      desc = 'temperature                                   '
+      call write_gribprep_header(proj, field, units, desc, sfc_level, hdate, xfcst)
+      write (output_unit) tsf
+      if (verbose) then
+         print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+            'level (pa):', sfc_level, ' min: ', &
+            minval(tsf), ' max: ', maxval(tsf)
+      end if
 
-    ! Output Relative Humidity
-    field = 'RH       '
-    units = '%                        '
-    desc  = 'Relative Humidity                             '
-    CALL write_gribprep_header(proj,field,units,desc,sfc_level,hdate,xfcst)
-    WRITE ( output_unit ) rhsf
-    IF (verbose) THEN 
-      PRINT '(A,X,A,A,F9.1,A,F5.1,A,F5.1)',field,units, &
-           'Level (Pa):',sfc_level,' Min: ', &
-           MINVAL(rhsf),' Max: ', MAXVAL(rhsf)            
-    ENDIF                 
-    CLOSE (output_unit) 
-    RETURN
-  END SUBROUTINE output_wrf_sfc
+      ! output u-wind component
+      field = 'u        '
+      units = 'm s{-1}                  '
+      desc = 'u-component of wind, rotated to grid          '
+      call write_gribprep_header(proj, field, units, desc, sfc_level, hdate, xfcst)
+      write (output_unit) usf
+      if (verbose) then
+         print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+            'level (pa):', sfc_level, ' min: ', &
+            minval(usf), ' max: ', maxval(usf)
+      end if
+
+      ! output v-wind component
+      field = 'v        '
+      units = 'm s{-1}                  '
+      desc = 'v-component of wind, rotated to grid          '
+      call write_gribprep_header(proj, field, units, desc, sfc_level, hdate, xfcst)
+      write (output_unit) vsf
+      if (verbose) then
+         print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+            'level (pa):', sfc_level, ' min: ', &
+            minval(vsf), ' max: ', maxval(vsf)
+      end if
+
+      ! output relative humidity
+      field = 'rh       '
+      units = '%                        '
+      desc = 'relative humidity                             '
+      call write_gribprep_header(proj, field, units, desc, sfc_level, hdate, xfcst)
+      write (output_unit) rhsf
+      if (verbose) then
+         print '(a,x,a,a,f9.1,a,f5.1,a,f5.1)', field, units, &
+            'level (pa):', sfc_level, ' min: ', &
+            minval(rhsf), ' max: ', maxval(rhsf)
+      end if
+      close (output_unit)
+      return
+   end subroutine output_wrf_sfc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE make_gribprep_filename(ext_data_path,output_name,i4time,filename)
+   subroutine make_gribprep_filename(ext_data_path, output_name, i4time, filename)
 
-    IMPLICIT NONE
-    CHARACTER(LEN=256),INTENT(IN)           :: ext_data_path
-    CHARACTER(LEN=32), INTENT(IN)           :: output_name
-    INTEGER, INTENT(IN)                     :: i4time
-    CHARACTER(LEN=256),INTENT(OUT)          :: filename
-    CHARACTER(LEN=24)                       :: hdate
-    
-    CALL make_hdate_from_i4time(i4time,hdate)
- 
-    ! Build the output file name
+      implicit none
+      character(len=256), intent(in)           :: ext_data_path
+      character(len=32), intent(in)           :: output_name
+      integer, intent(in)                     :: i4time
+      character(len=256), intent(out)          :: filename
+      character(len=24)                       :: hdate
 
-    filename = TRIM(ext_data_path) // TRIM(output_name) // &
-               ':' // hdate(1:13)
+      call make_hdate_from_i4time(i4time, hdate)
 
-    RETURN
+      ! build the output file name
 
-  END SUBROUTINE make_gribprep_filename
+      filename = trim(ext_data_path)//trim(output_name)// &
+                 ':'//hdate(1:13)
+
+      return
+
+   end subroutine make_gribprep_filename
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE make_hdate_from_i4time(i4time,hdate)
+   subroutine make_hdate_from_i4time(i4time, hdate)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)                    :: i4time
-    CHARACTER(LEN=24),INTENT(OUT)          :: hdate
+      implicit none
+      integer, intent(in)                    :: i4time
+      character(len=24), intent(out)          :: hdate
 
-    CHARACTER(LEN=3)                       :: amonth(12)
-    CHARACTER(LEN=24)                      :: atime
-    INTEGER                                :: istatus
-    INTEGER                                :: m
-    INTEGER                                :: dom
-    CHARACTER(LEN=2)                       :: amonth_num
+      character(len=3)                       :: amonth(12)
+      character(len=24)                      :: atime
+      integer                                :: istatus
+      integer                                :: m
+      integer                                :: dom
+      character(len=2)                       :: amonth_num
 
-    DATA amonth/'JAN','FEB','MAR','APR','MAY','JUN',  &
-                 'JUL','AUG','SEP','OCT','NOV','DEC'/   
+      data amonth/'jan', 'feb', 'mar', 'apr', 'may', 'jun', &
+         'jul', 'aug', 'sep', 'oct', 'nov', 'dec'/
 
-    ! Build the file name by converting the i4time_valid
-    ! to YYYY-MM-DD_HH format
-   
-    CALL cv_i4tim_asc_lp(i4time,atime,istatus)
-    IF (istatus .NE. 1) THEN
-      PRINT *, 'Problem converting i4time!'
-      RETURN
-    ENDIF
-    findmonth: DO m = 1, 12
-      IF (atime(4:6).EQ.amonth(m)) EXIT findmonth
-    ENDDO findmonth
+      ! build the file name by converting the i4time_valid
+      ! to yyyy-mm-dd_hh format
 
-    ! Ensure we make day into a 2-digit value
-    READ(atime(1:2),'(I2)') dom
-    WRITE(atime(1:2),'(I2.2)') dom
-    WRITE(amonth_num, '(I2.2)') m
-    hdate  = atime(8:11) // '-' // &
-             amonth_num // '-' // &
-             atime(1:2) // '_' // &
-             atime(13:23) // '00'  
-    RETURN 
-  END SUBROUTINE make_hdate_from_i4time                 
+      call cv_i4tim_asc_lp(i4time, atime, istatus)
+      if (istatus .ne. 1) then
+         print *, 'problem converting i4time!'
+         return
+      end if
+      findmonth: do m = 1, 12
+         if (atime(4:6) .eq. amonth(m)) exit findmonth
+      end do findmonth
+
+      ! ensure we make day into a 2-digit value
+      read (atime(1:2), '(i2)') dom
+      write (atime(1:2), '(i2.2)') dom
+      write (amonth_num, '(i2.2)') m
+      hdate = atime(8:11)//'-'// &
+              amonth_num//'-'// &
+              atime(1:2)//'_'// &
+              atime(13:23)//'00'
+      return
+   end subroutine make_hdate_from_i4time
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE write_gribprep_header(proj,field,units,desc,level,hdate,xfcst)
- 
-  ! Writes the gribprep header given the filed, units, description, and level
+   subroutine write_gribprep_header(proj, field, units, desc, level, hdate, xfcst)
 
-  IMPLICIT NONE
-  TYPE(proj_info),INTENT(IN)    :: proj
-  CHARACTER(LEN=9), INTENT(IN)  :: field
-  CHARACTER(LEN=25),INTENT(IN)  :: units
-  CHARACTER(LEN=46),INTENT(IN)  :: desc
-  REAL, INTENT(IN)              :: level
-  CHARACTER (LEN=24),INTENT(IN) :: hdate
-  REAL, INTENT (IN)             :: xfcst
-  
-  WRITE ( output_unit ) gp_version
-  WRITE ( output_unit ) hdate,xfcst,source,field,units,desc,level,proj%nx, &
-                        proj%ny,proj%code
-  SELECT CASE (proj%code)
-    CASE(0)
-      WRITE ( output_unit) knownloc,proj%lat1, proj%lon1,proj%dlat,proj%dlon 
-    CASE(1)
-      WRITE ( output_unit ) knownloc,proj%lat1,proj%lon1,proj%dx*0.001, &
-                            proj%dx*0.001, &
-                            proj%truelat1
-    CASE(3)
-      WRITE ( output_unit ) knownloc,proj%lat1,proj%lon1,proj%dx*0.001, &
-                            proj%dx*0.001, &
-                            proj%stdlon,proj%truelat1,proj%truelat2
-    CASE(5)
-      WRITE ( output_unit ) knownloc,proj%lat1,proj%lon1,proj%dx*0.001, &
-                            proj%dx*0.001, &
-                            proj%stdlon,proj%truelat1
-  END SELECT
+      ! writes the gribprep header given the filed, units, description, and level
 
-  END SUBROUTINE write_gribprep_header
+      implicit none
+      type(proj_info), intent(in)    :: proj
+      character(len=9), intent(in)  :: field
+      character(len=25), intent(in)  :: units
+      character(len=46), intent(in)  :: desc
+      real, intent(in)              :: level
+      character(len=24), intent(in) :: hdate
+      real, intent(in)             :: xfcst
+
+      write (output_unit) gp_version
+      write (output_unit) hdate, xfcst, source, field, units, desc, level, proj%nx, &
+         proj%ny, proj%code
+      select case (proj%code)
+      case (0)
+         write (output_unit) knownloc, proj%lat1, proj%lon1, proj%dlat, proj%dlon
+      case (1)
+         write (output_unit) knownloc, proj%lat1, proj%lon1, proj%dx*0.001, &
+            proj%dx*0.001, &
+            proj%truelat1
+      case (3)
+         write (output_unit) knownloc, proj%lat1, proj%lon1, proj%dx*0.001, &
+            proj%dx*0.001, &
+            proj%stdlon, proj%truelat1, proj%truelat2
+      case (5)
+         write (output_unit) knownloc, proj%lat1, proj%lon1, proj%dx*0.001, &
+            proj%dx*0.001, &
+            proj%stdlon, proj%truelat1
+      end select
+
+   end subroutine write_gribprep_header
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-END MODULE wfoprep_wrf
-  
+end module wfoprep_wrf
+

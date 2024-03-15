@@ -1,115 +1,115 @@
-SUBROUTINE Minimize(id,ds)
+subroutine minimize(id,ds)
 
 !*********************************************************
-!  This routine minimizes the cost function derived from
+!  this routine minimizes the cost function derived from
 !  a surface analysis using recursive filter.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
-!           Sep. 2004 by YUANFU XIE penalizing div.
+!  history: jan. 2004 by yuanfu xie.
+!           sep. 2004 by yuanfu xie penalizing div.
 !*********************************************************
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: id
-  REAL,    INTENT(IN) :: ds(3)
+  integer, intent(in) :: id
+  real,    intent(in) :: ds(3)
 
-  ! LBFGS_B variables:
-  INCLUDE 'LBFGSB.f90'
+  ! lbfgs_b variables:
+  include 'lbfgsb.f90'
 
-  ! Local variables:
-  INTEGER          :: itr,nvar,idp,istatus
-  ! Adjoint variables:
-  DOUBLE PRECISION :: f,adf,dv(mvar),g(mvar)
-  REAL             :: ada(mx,my,mt,2),rv(mvar)
+  ! local variables:
+  integer          :: itr,nvar,idp,istatus
+  ! adjoint variables:
+  double precision :: f,adf,dv(mvar),g(mvar)
+  real             :: ada(mx,my,mt,2),rv(mvar)
   
-  ! Unified u/v analysis:
+  ! unified u/v analysis:
   idp = id
-  IF (id .EQ. 201) idp = id+1
+  if (id .eq. 201) idp = id+1
 
-  ! Start LBFGS_B
-  ctask = 'START'
+  ! start lbfgs_b
+  ctask = 'start'
   factr = 1.0d+2
   iprnt = 1
   isbmn = 1
 
-  ! Allocate memory:
-  ALLOCATE(bdlow(mvar),bdupp(mvar),nbund(mvar),iwrka(3*mvar), &
+  ! allocate memory:
+  allocate(bdlow(mvar),bdupp(mvar),nbund(mvar),iwrka(3*mvar), &
 	wk(mvar*(2*msave+4)+12*msave*msave+12*msave), &
-	STAT=istatus)
-  IF (istatus .NE. 0) THEN
-     PRINT*,'Minimize: no space for LBFGSB workspace'
-     STOP
-  ENDIF
+	stat=istatus)
+  if (istatus .ne. 0) then
+     print*,'minimize: no space for lbfgsb workspace'
+     stop
+  endif
 
   nbund = 0
 
-  ! Initial:
+  ! initial:
   itr = 0
   nvar = n(1)*n(2)*n(3)*(idp-id+1)
-  rv(1:nvar) = RESHAPE(a(1:n(1),1:n(2),1:n(3),id:idp),(/nvar/))
+  rv(1:nvar) = reshape(a(1:n(1),1:n(2),1:n(3),id:idp),(/nvar/))
   dv(1:nvar) = rv(1:nvar)
 
-  ! Looping:
-1 CONTINUE
-  CALL LBFGSB(nvar,msave,dv,bdlow,bdupp,nbund,f,g,factr,wk, &
+  ! looping:
+1 continue
+  call lbfgsb(nvar,msave,dv,bdlow,bdupp,nbund,f,g,factr,wk, &
               iwrka,ctask,iprnt,isbmn,csave,lsave,isave,dsave)
 
-  ! Transfer a vector to a grid:
+  ! transfer a vector to a grid:
   rv(1:nvar) = dv(1:nvar)
-  a(1:n(1),1:n(2),1:n(3),id:idp) = RESHAPE(rv(1:nvar), &
+  a(1:n(1),1:n(2),1:n(3),id:idp) = reshape(rv(1:nvar), &
                                (/n(1),n(2),n(3),idp-id+1/))
-  ! Exit if succeed:
-  IF (ctask(1:11) .EQ. 'CONVERGENCE') GOTO 2
+  ! exit if succeed:
+  if (ctask(1:11) .eq. 'convergence') goto 2
 
-  ! Function and gradient are needed:
-  IF (ctask(1:2) .EQ. 'FG') THEN
+  ! function and gradient are needed:
+  if (ctask(1:2) .eq. 'fg') then
 
-     ! Function value:
-     IF ((id .NE. 201) .AND. (id .NE. 301)) THEN
-        CALL functn(f,a(1,1,1,id),l,n,id,np,al)
-     ELSE
-        ! CALL functndiv(f,a(1,1,1,id),l,n,ds,id,np,al)
-     ENDIF
+     ! function value:
+     if ((id .ne. 201) .and. (id .ne. 301)) then
+        call functn(f,a(1,1,1,id),l,n,id,np,al)
+     else
+        ! call functndiv(f,a(1,1,1,id),l,n,ds,id,np,al)
+     endif
 
-     ! Gradient value:
+     ! gradient value:
      adf = 1.0d0
      ada = 0.0
-     IF (id .NE. 201) THEN
-        CALL adfunctn( a(1,1,1,id), l, n, id, np, al, adf, ada )
-     ELSE
-	! CALL adfunctndiv( a(1,1,1,id), l, n, ds, id, np, al, adf, ada )
-     ENDIF
+     if (id .ne. 201) then
+        call adfunctn( a(1,1,1,id), l, n, id, np, al, adf, ada )
+     else
+	! call adfunctndiv( a(1,1,1,id), l, n, ds, id, np, al, adf, ada )
+     endif
 
-     rv(1:nvar) = RESHAPE(ada(1:n(1),1:n(2),1:n(3),1:idp-id+1), &
+     rv(1:nvar) = reshape(ada(1:n(1),1:n(2),1:n(3),1:idp-id+1), &
 	(/ nvar /))
      g(1:nvar) = rv(1:nvar)
 
-  ENDIF
+  endif
 
-  ! Exit if irregularity is encountered:
-  IF ((ctask(1:2) .NE. 'FG') .AND. (ctask(1:5) .NE. 'NEW_X')) THEN
-     PRINT*,'Error in LBFGS_B'
-     GOTO 2
-  ENDIF
+  ! exit if irregularity is encountered:
+  if ((ctask(1:2) .ne. 'fg') .and. (ctask(1:5) .ne. 'new_x')) then
+     print*,'error in lbfgs_b'
+     goto 2
+  endif
 
-  ! Count number of iteration and compute relative error:
-  IF (ctask(1:5) .EQ. 'NEW_X') THEN
+  ! count number of iteration and compute relative error:
+  if (ctask(1:5) .eq. 'new_x') then
      itr = itr+1
      ! print*,''
-  ENDIF
+  endif
 
-  ! If number of iterations of LBFGS_B exceeds the limit:
-  IF (itr .LT. maxitr) GOTO 1
+  ! if number of iterations of lbfgs_b exceeds the limit:
+  if (itr .lt. maxitr) goto 1
 
-  ! When an error in LBFGS_B occurs: exit
-2 CONTINUE
+  ! when an error in lbfgs_b occurs: exit
+2 continue
 
-  ! Convert to analysis:
-  CALL RF3D(a(1,1,1,id),l,n,al(1,id),np(1,id))
-  IF (id .EQ. 201) &
-     CALL RF3D(a(1,1,1,idp),l,n,al(1,idp),np(1,idp))
+  ! convert to analysis:
+  call rf3d(a(1,1,1,id),l,n,al(1,id),np(1,id))
+  if (id .eq. 201) &
+     call rf3d(a(1,1,1,idp),l,n,al(1,idp),np(1,idp))
 
-  ! Deallocate memory:
-  DEALLOCATE(bdlow,bdupp,nbund,iwrka,wk,STAT=istatus)
+  ! deallocate memory:
+  deallocate(bdlow,bdupp,nbund,iwrka,wk,stat=istatus)
   
-END SUBROUTINE Minimize
+end subroutine minimize

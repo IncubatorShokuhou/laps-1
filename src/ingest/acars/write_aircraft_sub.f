@@ -1,18 +1,18 @@
           subroutine write_aircraft_sub(lun,ext
-     1                          ,a9_timeObs,a9_recptTime
+     1                          ,a9_timeobs,a9_recpttime
      1                          ,i4time_sys
      1                          ,i4time_earliest          
      1                          ,i4time_latest            
      1                          ,latitude,longitude,altitude
-     1                          ,windDir,windSpeed
-     1                          ,temperature,relHumidity
+     1                          ,winddir,windspeed
+     1                          ,temperature,relhumidity
      1                          ,l_geoalt
-     1                          ,l_debug                           ! I
-     1                          ,istat_ob)                         ! O
+     1                          ,l_debug                           ! i
+     1                          ,istat_ob)                         ! o
 
           character*(*) ext 
 
-          character*9 a9_timeObs,a9_recptTime
+          character*9 a9_timeobs,a9_recpttime
 
           logical l_debug,l_geoalt
 
@@ -22,98 +22,98 @@
 
           call open_ext(lun,i4time_sys,ext(1:3),istatus)       
 
-!         Test the altitude
+!         test the altitude
           if(nanf(altitude) .eq. 1)then
-              if(l_debug)write(6,*)' Altitude failed Nan test - reject'       
+              if(l_debug)write(6,*)' altitude failed nan test - reject'       
      1                            ,altitude
               goto 900
           endif
 
           if(altitude .gt. 20000. .or. altitude .lt. -1000.
      1                            .or. altitude .eq.     0.)then
-              if(l_debug)write(6,*)' Altitude is suspect - reject'
+              if(l_debug)write(6,*)' altitude is suspect - reject'
      1                            ,altitude
               goto 900
           endif
 
-!         Test the time
-          call cv_asc_i4time(a9_timeObs,i4time_ob)
-          if(i4time_ob .lt. i4time_earliest .OR.
+!         test the time
+          call cv_asc_i4time(a9_timeobs,i4time_ob)
+          if(i4time_ob .lt. i4time_earliest .or.
      1       i4time_ob .gt. i4time_latest        )then ! outside time window
               if(l_debug)write(6,*)' time - reject '
-     1           ,a9_timeObs,i4time_ob,i4time_earliest,i4time_latest
+     1           ,a9_timeobs,i4time_ob,i4time_earliest,i4time_latest
               goto 900        
           endif
 
-          if(l_debug)write(6,1)a9_timeObs,a9_recptTime 
-                     write(lun,1)a9_timeObs,a9_recptTime 
- 1        format(' Time - prp/rcvd:'/1x,a9,2x,a9) 
+          if(l_debug)write(6,1)a9_timeobs,a9_recpttime 
+                     write(lun,1)a9_timeobs,a9_recpttime 
+ 1        format(' time - prp/rcvd:'/1x,a9,2x,a9) 
           istat_ob = 1
 
           if(l_geoalt)then
               if(l_debug)write(6,2)latitude,longitude,altitude
               write(lun,2)          latitude,longitude,altitude
- 2            format(' Lat, lon, geoalt  '/f8.3,f10.3,f8.0)  
+ 2            format(' lat, lon, geoalt  '/f8.3,f10.3,f8.0)  
           else
               if(l_debug)write(6,3)latitude,longitude,altitude
               write(lun,3)          latitude,longitude,altitude
- 3            format(' Lat, lon, altitude'/f8.3,f10.3,f8.0)  
+ 3            format(' lat, lon, altitude'/f8.3,f10.3,f8.0)  
           endif
 
-!         Test for bad winds
-!         if(char(dataDescriptor) .eq. 'X')then
-!           if(char(errorType) .eq. 'W' .or. 
-!    1         char(errorType) .eq. 'B'                         )then
-!             if(l_debug)write(6,*)' QC flag is bad - reject wind'
-!    1                 ,char(dataDescriptor),char(errorType)
+!         test for bad winds
+!         if(char(datadescriptor) .eq. 'x')then
+!           if(char(errortype) .eq. 'w' .or. 
+!    1         char(errortype) .eq. 'b'                         )then
+!             if(l_debug)write(6,*)' qc flag is bad - reject wind'
+!    1                 ,char(datadescriptor),char(errortype)
 !             goto 850
 !           endif
 !         endif
 
-          if(abs(windSpeed) .gt. 250.)then
+          if(abs(windspeed) .gt. 250.)then
               if(l_debug)write(6,*)' wind speed is suspect - reject'
-     1                              ,windSpeed
+     1                              ,windspeed
 
-          elseif(int(windDir).lt.0 .or. int(windDir).gt.360)then     
+          elseif(int(winddir).lt.0 .or. int(winddir).gt.360)then     
               if(l_debug)write(6,*)' wind direction is suspect - reject'       
-     1                              ,windDir
+     1                              ,winddir
 
           else ! write out valid wind
               if(l_debug)then
-                  write(6,4)int(windDir),windSpeed
+                  write(6,4)int(winddir),windspeed
               endif
 
-              write(lun,4)int(windDir),windSpeed
- 4            format(' Wind:'/' ', i3, ' deg @ ', f6.1, ' m/s')     
+              write(lun,4)int(winddir),windspeed
+ 4            format(' wind:'/' ', i3, ' deg @ ', f6.1, ' m/s')     
 
           endif
 
-!         Test/Write Temperature
+!         test/write temperature
           if(abs(temperature) .lt. 400.)then
               if(l_debug)write(6,13)temperature
                          write(lun,13)temperature
- 13           format(' Temp:'/1x,f10.1)
+ 13           format(' temp:'/1x,f10.1)
        
           else
-              if(l_debug)write(6,*)' Temperature is suspect - reject'
+              if(l_debug)write(6,*)' temperature is suspect - reject'
      1                             , temperature
 
           endif
 
-!         Test/Write Relative Humidity
-          if(relHumidity     .ge. 0.   .and. 
-     1       relHumidity     .le. 1.00 
-!    1       waterVaporQC(i) .le. 2    .and.
-!    1       waterVaporQC(i) .ge. 0             
+!         test/write relative humidity
+          if(relhumidity     .ge. 0.   .and. 
+     1       relhumidity     .le. 1.00 
+!    1       watervaporqc(i) .le. 2    .and.
+!    1       watervaporqc(i) .ge. 0             
      1                                       )then
-              if(l_debug)write(6,23)relHumidity
-!             if(l_debug)write(6,*)' RH QC value = ',waterVaporQC(i)
-              write(lun,23)relHumidity
- 23           format(' RH:'/1x,f10.3)
+              if(l_debug)write(6,23)relhumidity
+!             if(l_debug)write(6,*)' rh qc value = ',watervaporqc(i)
+              write(lun,23)relhumidity
+ 23           format(' rh:'/1x,f10.3)
 
           else
-              if(l_debug)write(6,*)' RH rejected: '
-     1                             ,relHumidity ! ,waterVaporQC(i)
+              if(l_debug)write(6,*)' rh rejected: '
+     1                             ,relhumidity ! ,watervaporqc(i)
 
           endif
 

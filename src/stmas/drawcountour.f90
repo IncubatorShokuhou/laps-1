@@ -1,98 +1,97 @@
-MODULE DRAWCOUNTOUR
+module drawcountour
 !*************************************************
-! DRAW COUNTOUR PICTURE FOR SUFER SOFTWARE
-! HISTORY: FEBRUARY 2008, SEPARATED FROM THE INPUT_BG_OBS MODULE by ZHONGJIE HE.
+! draw countour picture for sufer software
+! history: february 2008, separated from the input_bg_obs module by zhongjie he.
 !*************************************************
 
-  USE PRMTRS_STMAS
+   use prmtrs_stmas
 
-  PUBLIC   DRCONTOUR, DRCONTOUR_2D
+   public drcontour, drcontour_2d
 
-CONTAINS
+contains
 
-SUBROUTINE DRCONTOUR(OX,EX,OY,EY,ND,NG,UV,FN)
+   subroutine drcontour(ox, ex, oy, ey, nd, ng, uv, fn)
 !*************************************************
-! DRAW RADIAL WIND (AFFILIATE)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! draw radial wind (affiliate)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: ND,NG(NUMDIMS),IU,I,J,K
-  REAL  :: MN,MX,OX,EX,OY,EY
-  REAL  :: UV(NG(1),NG(2),NG(3))
-  CHARACTER(LEN=6) :: FN
+      integer  :: nd, ng(numdims), iu, i, j, k
+      real  :: mn, mx, ox, ex, oy, ey
+      real  :: uv(ng(1), ng(2), ng(3))
+      character(len=6) :: fn
 ! --------------------
-  K=2 !(NG(3)+1)/2
-  IU=2
-  OPEN(IU,FILE=FN,STATUS='UNKNOWN')
-  MX=-100000000.0
-  MN=100000000.0
-  DO I=1,NG(1)
-  DO J=1,NG(2)
-    IF(UV(I,J,K).LT.9000.0)THEN
-      IF(UV(I,J,K).GT.MX)MX=UV(I,J,K)
-      IF(UV(I,J,K).LT.MN)MN=UV(I,J,K)
-    ENDIF
-  ENDDO
-  ENDDO
-  WRITE(IU,'(A4)')'DSAA'
-  WRITE(IU,'(2I4)')NG(1),NG(2)
-  WRITE(IU,*)OX,EX
-  WRITE(IU,*)OY,EY
-  WRITE(IU,*)MN,MX
-  DO I=1,NG(1)
-  DO J=1,NG(2)
-    IF(UV(I,J,K).GT.9000.0)UV(I,J,K)=2.E38
-  ENDDO
-  ENDDO
-  DO J=1,NG(2)
-    WRITE(IU,*)(UV(I,J,K),I=1,NG(1))
-  ENDDO
-  CLOSE(IU)
-  RETURN
-END SUBROUTINE DRCONTOUR
+      k = 2 !(ng(3)+1)/2
+      iu = 2
+      open (iu, file=fn, status='unknown')
+      mx = -100000000.0
+      mn = 100000000.0
+      do i = 1, ng(1)
+      do j = 1, ng(2)
+         if (uv(i, j, k) .lt. 9000.0) then
+            if (uv(i, j, k) .gt. mx) mx = uv(i, j, k)
+            if (uv(i, j, k) .lt. mn) mn = uv(i, j, k)
+         end if
+      end do
+      end do
+      write (iu, '(a4)') 'dsaa'
+      write (iu, '(2i4)') ng(1), ng(2)
+      write (iu, *) ox, ex
+      write (iu, *) oy, ey
+      write (iu, *) mn, mx
+      do i = 1, ng(1)
+      do j = 1, ng(2)
+         if (uv(i, j, k) .gt. 9000.0) uv(i, j, k) = 2.e38
+      end do
+      end do
+      do j = 1, ng(2)
+         write (iu, *) (uv(i, j, k), i=1, ng(1))
+      end do
+      close (iu)
+      return
+   end subroutine drcontour
 
-
-SUBROUTINE DRCONTOUR_2D(OX,EX,OY,EY,IM,JM,UV,FN)
+   subroutine drcontour_2d(ox, ex, oy, ey, im, jm, uv, fn)
 !*************************************************
-! DRAW RADIAL WIND (AFFILIATE)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! draw radial wind (affiliate)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: IU,I,J,K,IM,JM
-  REAL  :: MN,MX,OX,EX,OY,EY
-  REAL  :: UV(IM,JM)
-  CHARACTER(LEN=6) :: FN
+      integer  :: iu, i, j, k, im, jm
+      real  :: mn, mx, ox, ex, oy, ey
+      real  :: uv(im, jm)
+      character(len=6) :: fn
 ! --------------------
-  IU=2
-  OPEN(IU,FILE=FN,STATUS='UNKNOWN')
-  MX=-100000000.0
-  MN=100000000.0
-  DO I=1,IM
-  DO J=1,JM
-    IF(UV(I,J).LT.9000.0)THEN
-      IF(UV(I,J).GT.MX)MX=UV(I,J)
-      IF(UV(I,J).LT.MN)MN=UV(I,J)
-    ENDIF
-  ENDDO
-  ENDDO
-  WRITE(IU,'(A4)')'DSAA'
-  WRITE(IU,'(2I4)')IM,JM
-  WRITE(IU,*)OX,EX
-  WRITE(IU,*)OY,EY
-  WRITE(IU,*)MN,MX
-  DO I=1,IM
-  DO J=1,JM
-    IF(UV(I,J).GT.9000.0)UV(I,J)=2.E38
-  ENDDO
-  ENDDO
-  DO J=1,JM
-    WRITE(IU,*)(UV(I,J),I=1,IM)
-  ENDDO
-  CLOSE(IU)
-  RETURN
-END SUBROUTINE DRCONTOUR_2D
+      iu = 2
+      open (iu, file=fn, status='unknown')
+      mx = -100000000.0
+      mn = 100000000.0
+      do i = 1, im
+      do j = 1, jm
+         if (uv(i, j) .lt. 9000.0) then
+            if (uv(i, j) .gt. mx) mx = uv(i, j)
+            if (uv(i, j) .lt. mn) mn = uv(i, j)
+         end if
+      end do
+      end do
+      write (iu, '(a4)') 'dsaa'
+      write (iu, '(2i4)') im, jm
+      write (iu, *) ox, ex
+      write (iu, *) oy, ey
+      write (iu, *) mn, mx
+      do i = 1, im
+      do j = 1, jm
+         if (uv(i, j) .gt. 9000.0) uv(i, j) = 2.e38
+      end do
+      end do
+      do j = 1, jm
+         write (iu, *) (uv(i, j), i=1, im)
+      end do
+      close (iu)
+      return
+   end subroutine drcontour_2d
 
-END MODULE DRAWCOUNTOUR
+end module drawcountour
 

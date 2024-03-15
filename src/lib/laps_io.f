@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -30,20 +30,20 @@ cdis
 cdis
 cdis
 
-        subroutine get_laps_2d(i4time,EXT,var_2d,units_2d,
+        subroutine get_laps_2d(i4time,ext,var_2d,units_2d,
      1                  comment_2d,imax,jmax,field_2d,istatus)
 
-cdoc    Used to read in a surface grid with inputs of time and ext
+cdoc    used to read in a surface grid with inputs of time and ext
 
         character*9 asc9_tim
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_2d
         character*10 units_2d
         character*3 var_2d
-        integer LVL_2d
-        character*4 LVL_COORD_2d
+        integer lvl_2d
+        character*4 lvl_coord_2d
 
         real field_2d(imax,jmax)
 
@@ -58,21 +58,21 @@ cdoc    Used to read in a surface grid with inputs of time and ext
         call make_fnam_lp(i4time,asc9_tim,istatus)
 
         write(6,11)trim(directory),asc9_tim,ext,var_2d
-11      format(' Reading 2d ',a,1x,a,1x,a,1x,a)
+11      format(' reading 2d ',a,1x,a,1x,a,1x,a)
 
         lvl_2d = 0
-        lvl_coord_2d = 'MSL'
+        lvl_coord_2d = 'msl'
 
-        CALL READ_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1  1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D,
-     1                     COMMENT_2D,field_2d,ISTATUS)
+        call read_laps_data(i4time,directory,ext,imax,jmax,
+     1  1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d,
+     1                     comment_2d,field_2d,istatus)
 
-!       Check for missing data
+!       check for missing data
         do j = 1,jmax
         do i = 1,imax
             if(istatus .eq. 1)then
                 if(field_2d(i,j) .eq. r_missing_data)then
-                    write(6,*)' Missing Data Value Detected in 2D Field'
+                    write(6,*)' missing data value detected in 2d field'
                     istatus = -1
                 endif
             endif
@@ -82,39 +82,39 @@ cdoc    Used to read in a surface grid with inputs of time and ext
         return
         end
 
-        subroutine get_lapsdata_2d(i4time,i4_valid,EXT
+        subroutine get_lapsdata_2d(i4time,i4_valid,ext
      1,var_2d,units_2d,comment_2d,imax,jmax,field_2d,istatus)
 
-!       Returns a 2D laps grid
-!       i4time              Input      Desired i4time initial
-!       i4_valid            Input      i4time for valid data time
-!       ext                 Input      3 character file extension
-!       var_2d              Input      Which Variable do you want?
-!       units_2d            Output     Units of data
-!       Comment_2d          Output     Comment block
-!       imax,jmax           Input      LAPS grid dimensions
-!       field_2d            Output     2D grid
-!       istatus             Output     status
+!       returns a 2d laps grid
+!       i4time              input      desired i4time initial
+!       i4_valid            input      i4time for valid data time
+!       ext                 input      3 character file extension
+!       var_2d              input      which variable do you want?
+!       units_2d            output     units of data
+!       comment_2d          output     comment block
+!       imax,jmax           input      laps grid dimensions
+!       field_2d            output     2d grid
+!       istatus             output     status
 
-!       Steve Albers            1996
+!       steve albers            1996
 
-cdoc    This routine can be used to read in a surface grid of known time
-cdoc    by calling the new READ_LAPS routine
+cdoc    this routine can be used to read in a surface grid of known time
+cdoc    by calling the new read_laps routine
 
         include      'bgdata.inc'
 
         character*9 asc9_tim
-        character*150 DIRECTORY
-        character*(*) EXT
-        character*31  EXT_INT
+        character*150 directory
+        character*(*) ext
+        character*31  ext_int
 
         character*125 comment_2d
         character*10 units_2d
         character*15 fdda_model_source(maxbgmodels)
         character*3 var_2d
-        integer   LVL_2d
+        integer   lvl_2d
         integer   nfdda
-        character*4 LVL_COORD_2d
+        character*4 lvl_coord_2d
 
         real field_2d(imax,jmax)
 
@@ -164,7 +164,7 @@ c             enddo
            endif ! directory is lgb
 
 c          if(ext_int.eq.' ')then
-c             print*,'Unknown lapsprd extension'
+c             print*,'unknown lapsprd extension'
 c    &,directory(1:len_dir)
 c             istatus = 0
 c             return
@@ -181,21 +181,21 @@ c          endif
         call make_fnam_lp(i4time,asc9_tim,istatus)
 
         write(6,11)trim(directory),ext_int(1:len),var_2d
-11      format(' Reading 2d ',a,1x,a5,1x,a3)
+11      format(' reading 2d ',a,1x,a5,1x,a3)
 
         lvl_2d = 0
-        lvl_coord_2d = 'MSL'
+        lvl_coord_2d = 'msl'
 
-        CALL READ_LAPS(I4TIME,i4_valid,DIRECTORY,EXT_INT
-     1,imax,jmax,1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D
-     1, COMMENT_2D,field_2d,ISTATUS)
+        call read_laps(i4time,i4_valid,directory,ext_int
+     1,imax,jmax,1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d
+     1, comment_2d,field_2d,istatus)
 
-!       Check for missing data
+!       check for missing data
         do j = 1,jmax
         do i = 1,imax
             if(istatus .eq. 1)then
                 if(field_2d(i,j) .eq. r_missing_data)then
-                    write(6,*)' Missing Data Value Detected in 2D Field'
+                    write(6,*)' missing data value detected in 2d field'
                     istatus = -1
                 endif
             endif
@@ -209,19 +209,19 @@ c          endif
      1         ,ext_in,var_2d,units_2d
      1         ,comment_2d,imax,jmax,field_2d,ilevel,istatus)
 
-cdoc    Returns a 2-D grid. Inputs include the extension and time window.
+cdoc    returns a 2-d grid. inputs include the extension and time window.
 
         character*9 asc9_tim
 
-        character*150 DIRECTORY
-        character*(*) EXT_IN
+        character*150 directory
+        character*(*) ext_in
         character*31 ext
 
         character*125 comment_2d
         character*10 units_2d
         character*3 var_2d
-        integer LVL_2d
-        character*4 LVL_COORD_2d
+        integer lvl_2d
+        character*4 lvl_coord_2d
 
         real field_2d(imax,jmax)
 
@@ -252,44 +252,44 @@ cdoc    Returns a 2-D grid. Inputs include the extension and time window.
 
         if(abs(i4time_needed - i4time_nearest) .le. i4tol)then
             if(ilevel .ne. 0)then
-                if(ltest_vertical_grid('HEIGHT'))then
+                if(ltest_vertical_grid('height'))then
                     lvl_2d = zcoord_of_level(k)/10
-                    lvl_coord_2d = 'MSL'
-                elseif(ltest_vertical_grid('PRESSURE'))then
+                    lvl_coord_2d = 'msl'
+                elseif(ltest_vertical_grid('pressure'))then
                     lvl_2d = ilevel
-                    lvl_coord_2d = 'MB'
-                elseif(var_2d .eq. 'LSM' .and. ilevel .ge. -3 
+                    lvl_coord_2d = 'mb'
+                elseif(var_2d .eq. 'lsm' .and. ilevel .ge. -3 
      1                                   .and. ilevel .le. -1)then
                     lvl_2d = ilevel
-                    lvl_coord_2d = 'HPA'
+                    lvl_coord_2d = 'hpa'
                 else
-                    write(6,*)' Error, vertical grid not supported,'
-     1                      ,' this routine supports PRESSURE or HEIGHT'       
+                    write(6,*)' error, vertical grid not supported,'
+     1                      ,' this routine supports pressure or height'       
                     istatus = 0
                     return
                 endif
 
             else
                 lvl_2d = 0
-                lvl_coord_2d = 'MSL'
+                lvl_coord_2d = 'msl'
 
             endif
 
             call make_fnam_lp(i4time_nearest,asc9_tim,istatus)
 
             write(6,11)trim(directory),asc9_tim,ext(1:5),var_2d
-11          format(' Reading 2d ',a,1x,a9,1x,a5,1x,a3)
+11          format(' reading 2d ',a,1x,a9,1x,a5,1x,a3)
 
-            CALL READ_LAPS_DATA(I4TIME_nearest,DIRECTORY,EXT,imax,jmax,
-     1                     1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D,
-     1                     COMMENT_2D,field_2d,ISTATUS)
+            call read_laps_data(i4time_nearest,directory,ext,imax,jmax,
+     1                     1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d,
+     1                     comment_2d,field_2d,istatus)
 
-!           Check for missing data
+!           check for missing data
             do j = 1,jmax
             do i = 1,imax
             if(istatus .eq. 1)then
                 if(field_2d(i,j) .eq. r_missing_data)then
-                    write(6,*)' Missing Data Value Detected in 2D Field'
+                    write(6,*)' missing data value detected in 2d field'
                     istatus = -1
                 endif
             endif
@@ -297,7 +297,7 @@ cdoc    Returns a 2-D grid. Inputs include the extension and time window.
             enddo ! j
 
         else
-            write(6,*)' No field found within window ',ext(1:10)
+            write(6,*)' no field found within window ',ext(1:10)
             istatus = 0
 
         endif
@@ -307,24 +307,24 @@ cdoc    Returns a 2-D grid. Inputs include the extension and time window.
 c
         subroutine get_2dgrid_dname(directory
      1         ,i4time_needed,i4tol,i4time_nearest
-     1         ,EXT,var_2d,units_2d
+     1         ,ext,var_2d,units_2d
      1         ,comment_2d,imax,jmax,field_2d,ilevel,istatus)
 
-cdoc    Returns a 2-D grid. Inputs include the directory, ext, and time window.
+cdoc    returns a 2-d grid. inputs include the directory, ext, and time window.
 
-!       Steve Albers            1990
-!           J Smart             1998
+!       steve albers            1990
+!           j smart             1998
 
         character*9 asc9_tim
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_2d
         character*10 units_2d
         character*3 var_2d
-        integer LVL_2d
-        character*4 LVL_COORD_2d
+        integer lvl_2d
+        character*4 lvl_coord_2d
 
         real field_2d(imax,jmax)
 
@@ -349,40 +349,40 @@ cdoc    Returns a 2-D grid. Inputs include the directory, ext, and time window.
 
         if(abs(i4time_needed - i4time_nearest) .le. i4tol)then
             if(ilevel .ne. 0)then
-                if(ltest_vertical_grid('HEIGHT'))then
+                if(ltest_vertical_grid('height'))then
                     lvl_2d = zcoord_of_level(k)/10
-                    lvl_coord_2d = 'MSL'
-                elseif(ltest_vertical_grid('PRESSURE'))then
+                    lvl_coord_2d = 'msl'
+                elseif(ltest_vertical_grid('pressure'))then
                     lvl_2d = ilevel
-                    lvl_coord_2d = 'MB'
+                    lvl_coord_2d = 'mb'
                 else
-                    write(6,*)' Error, vertical grid not supported,'
-     1                      ,' this routine supports PRESSURE or HEIGHT'       
+                    write(6,*)' error, vertical grid not supported,'
+     1                      ,' this routine supports pressure or height'       
                     istatus = 0
                     return
                 endif
 
             else
                 lvl_2d = 0
-                lvl_coord_2d = 'MSL'
+                lvl_coord_2d = 'msl'
 
             endif
 
             call make_fnam_lp(i4time_nearest,asc9_tim,istatus)
 
             write(6,11)trim(directory),asc9_tim,ext(1:5),var_2d
-11          format(' Reading 2d ',a,1x,a9,1x,a5,1x,a3)
+11          format(' reading 2d ',a,1x,a9,1x,a5,1x,a3)
 
-            CALL READ_LAPS_DATA(I4TIME_nearest,DIRECTORY,EXT,imax,jmax,
-     1                     1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D,
-     1                     COMMENT_2D,field_2d,ISTATUS)
+            call read_laps_data(i4time_nearest,directory,ext,imax,jmax,
+     1                     1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d,
+     1                     comment_2d,field_2d,istatus)
 
-!           Check for missing data
+!           check for missing data
             do j = 1,jmax
             do i = 1,imax
             if(istatus .eq. 1)then
                 if(field_2d(i,j) .eq. r_missing_data)then
-                    write(6,*)' Missing Data Value Detected in 2D Field'
+                    write(6,*)' missing data value detected in 2d field'
                     istatus = -1
                 endif
             endif
@@ -390,7 +390,7 @@ cdoc    Returns a 2-D grid. Inputs include the directory, ext, and time window.
             enddo ! j
 
         else
-            write(6,*)' No field found within window ',ext(1:10)
+            write(6,*)' no field found within window ',ext(1:10)
             istatus = 0
 
         endif
@@ -403,31 +403,31 @@ cdoc    Returns a 2-D grid. Inputs include the directory, ext, and time window.
 
         subroutine get_laps_2dvar(i4time_needed,i4tol,i4time_nearest
      1         ,lat,lon
-     1         ,subpoint_lat_clo,subpoint_lon_clo      ! O 
-     1         ,EXT,var_2d,units_2d
+     1         ,subpoint_lat_clo,subpoint_lon_clo      ! o 
+     1         ,ext,var_2d,units_2d
      1         ,comment_2d,imax,jmax,field_2d,ilevel,istatus)
 
-!       Steve Albers            1996
-cdoc    This routine tries to read in the desired variable from all files
+!       steve albers            1996
+cdoc    this routine tries to read in the desired variable from all files
 cdoc    having the proper extension, picking the closest one within the
 cdoc    specified time window.
 !
-!       J Smart                 1998
-cdoc    added lvd subdirectory flexibility. Only one 2d satellite field returned.
+!       j smart                 1998
+cdoc    added lvd subdirectory flexibility. only one 2d satellite field returned.
 
-!       Steve Albers            2011
-!       Pass in lat/lon so that it can potentally be used for satellite mosaicing
+!       steve albers            2011
+!       pass in lat/lon so that it can potentally be used for satellite mosaicing
 
         character*9 asc9_tim
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_2d
         character*10 units_2d
         character*3 var_2d
-        integer LVL_2d
-        character*4 LVL_COORD_2d
+        integer lvl_2d
+        character*4 lvl_coord_2d
 
         real field_2d(imax,jmax)
         real lat(imax,jmax)
@@ -465,21 +465,21 @@ c
         if(ext(1:lenext).eq.'lvd')then
            call config_satellite_lvd(istatus)
            if(istatus.ne.1)then
-              write(6,*)'WARNING config_satellite_lvd status = ',istatus
+              write(6,*)'warning config_satellite_lvd status = ',istatus
 !             return
            endif
 
            call get_laps_sat(maxsat,c_sat_id,isats
      1     ,i4time_needed,i4tol,i4time_nearest
      1     ,var_2d,units_2d,comment_2d,imax,jmax
-     1     ,subpoint_lat_clo,subpoint_lon_clo      ! O 
+     1     ,subpoint_lat_clo,subpoint_lon_clo      ! o 
      1     ,lat,lon,field_2d,istatus)
 
            if(istatus.ne.1)then
-              write(6,*)'No data returned from get_laps_sat'
+              write(6,*)'no data returned from get_laps_sat'
               return
            else
-              write(6,*)'Data is returned from get_laps_sat'
+              write(6,*)'data is returned from get_laps_sat'
               return
            endif
         endif
@@ -495,7 +495,7 @@ c
         call get_file_times(c_filespec,max_files,c_fnames
      1                      ,i4times,i_nbr_files_ret,istatus)
         if(istatus .ne. 1)then
-            write(6,*)'get_laps_2dvar: Bad status returned '
+            write(6,*)'get_laps_2dvar: bad status returned '
      1               ,'from get_file_times'
             return
         endif
@@ -509,7 +509,7 @@ c
         enddo ! i
 
         if(i4_diff_min .gt. i4tol)then
-            write(6,*)' No remaining files found within ',i4tol
+            write(6,*)' no remaining files found within ',i4tol
      1               ,' sec time window ',ext(1:5),var_2d
             istatus = 0
             return
@@ -521,36 +521,36 @@ c
                 i_selected(i) = 1
 
                 if(ilevel .ne. 0)then
-                    if(ltest_vertical_grid('HEIGHT'))then
+                    if(ltest_vertical_grid('height'))then
                         lvl_2d = zcoord_of_level(k)/10
-                        lvl_coord_2d = 'MSL'
-                    elseif(ltest_vertical_grid('PRESSURE'))then
+                        lvl_coord_2d = 'msl'
+                    elseif(ltest_vertical_grid('pressure'))then
                         lvl_2d = ilevel
-                        lvl_coord_2d = 'MB'
+                        lvl_coord_2d = 'mb'
                     else
-                        write(6,*)' Error, vertical grid not supported,'
-     1                      ,' this routine supports PRESSURE or HEIGHT'
+                        write(6,*)' error, vertical grid not supported,'
+     1                      ,' this routine supports pressure or height'
                         istatus = 0
                         return
                     endif
 
                 else
                     lvl_2d = 0
-                    lvl_coord_2d = 'MSL'
+                    lvl_coord_2d = 'msl'
 
                 endif
 
                 call make_fnam_lp(i4times(i),asc9_tim,istatus)
 
                 write(6,11)trim(directory),asc9_tim,ext(1:5),var_2d
-11              format(' Reading 2d ',a,1x,a9,1x,a5,1x,a3)
+11              format(' reading 2d ',a,1x,a9,1x,a5,1x,a3)
 
-                CALL READ_LAPS_DATA(i4times(i),DIRECTORY,EXT,imax
-     1            ,jmax,1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D
-     1            ,COMMENT_2D,field_2d,ISTATUS)
+                call read_laps_data(i4times(i),directory,ext,imax
+     1            ,jmax,1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d
+     1            ,comment_2d,field_2d,istatus)
 
                 if(istatus .ne. 1)then
-                    write(6,*)' No field found at ',ext(1:10)
+                    write(6,*)' no field found at ',ext(1:10)
      1                       ,var_2d,' ',asc9_tim
                     go to 50
 
@@ -559,7 +559,7 @@ c
                     do jl = 1,jmax
                         if(field_2d(il,jl) .eq. r_missing_data)then
                             write(6,*)il,jl,
-     1                        ' Missing Data Value Detected in 2D Field'
+     1                        ' missing data value detected in 2d field'
                             istatus = -1
                             return
                         endif
@@ -570,43 +570,43 @@ c
 
                 return ! istatus = 1 and no missing data
 
-            endif ! File is closest unread file to desired time
+            endif ! file is closest unread file to desired time
         enddo ! ith file
 
         end
 
         subroutine get_laps_3d(i4time,imax,jmax,kmax
-     1  ,EXT,var_2d,units_2d,comment_2d,field_3d,istatus)
+     1  ,ext,var_2d,units_2d,comment_2d,field_3d,istatus)
 
-cdoc    Returns a 3-D grid. Inputs include the extension and time.
+cdoc    returns a 3-d grid. inputs include the extension and time.
 
-!       i4time              Input      Desired i4time
-!       imax,jmax,kmax      Input      LAPS grid dimensions
-!       ext                 Input      3 character file extension
-!       var_2d              Input      Which Variable do you want?
-!       units_2d            Output     Units of data
-!       Comment_2d          Output     Comment block
-!       field_3d            Output     3D grid
+!       i4time              input      desired i4time
+!       imax,jmax,kmax      input      laps grid dimensions
+!       ext                 input      3 character file extension
+!       var_2d              input      which variable do you want?
+!       units_2d            output     units of data
+!       comment_2d          output     comment block
+!       field_3d            output     3d grid
 
-!       Steve Albers            1990
+!       steve albers            1990
 
-        character*150 DIRECTORY
-        character*(*) EXT, var_2d
+        character*150 directory
+        character*(*) ext, var_2d
 
         character*125 comment_3d(kmax),comment_2d
         character*10 units_3d(kmax),units_2d
         character*3 var_3d(kmax)
-        integer LVL_3d(kmax)
-        character*4 LVL_COORD_3d(kmax)
+        integer lvl_3d(kmax)
+        character*4 lvl_coord_3d(kmax)
 
         real field_3d(imax,jmax,kmax)
 
-        write(6,*)' Subroutine get_laps_3d...'
+        write(6,*)' subroutine get_laps_3d...'
 
         call get_directory(ext,directory,len_dir)
 
         call get_3d_dir_time(directory,i4time
-     1                      ,EXT,var_2d,units_2d
+     1                      ,ext,var_2d,units_2d
      1                      ,comment_2d
      1                      ,imax,jmax,kmax,field_3d,istatus)
 
@@ -614,38 +614,38 @@ cdoc    Returns a 3-D grid. Inputs include the extension and time.
         end
 
         subroutine get_lapsdata_3d(i4time,i4_valid
-     1,imax,jmax,kmax,EXT,var_2d,units_2d,comment_2d
+     1,imax,jmax,kmax,ext,var_2d,units_2d,comment_2d
      1,field_3d,istatus)
 
-cdoc    Returns a 3-D fcst grid. Inputs include directory, initial and valid time.
+cdoc    returns a 3-d fcst grid. inputs include directory, initial and valid time.
 
-!       i4time              Input      Desired i4time initial
-!       i4_valid            Input      i4time for valid data time
-!       imax,jmax,kmax      Input      LAPS grid dimensions
-!       ext                 Input      3 character file extension or model member
-!       var_2d              Input      Which Variable do you want?
-!       units_2d            Output     Units of data
-!       Comment_2d          Output     Comment block
-!       field_3d            Output     3D grid
+!       i4time              input      desired i4time initial
+!       i4_valid            input      i4time for valid data time
+!       imax,jmax,kmax      input      laps grid dimensions
+!       ext                 input      3 character file extension or model member
+!       var_2d              input      which variable do you want?
+!       units_2d            output     units of data
+!       comment_2d          output     comment block
+!       field_3d            output     3d grid
 
-!       Steve Albers            1990
+!       steve albers            1990
 
-        use mem_namelist, ONLY: lvl_coord_cdf
+        use mem_namelist, only: lvl_coord_cdf
 
         include      'bgdata.inc'
 
-        character*150 DIRECTORY
-        character*(*) EXT
-        character*31  EXT_INT
+        character*150 directory
+        character*(*) ext
+        character*31  ext_int
 
         character*125 comment_3d(kmax),comment_2d
         character*10 units_3d(kmax),units_2d
         character*15 fdda_model_source(maxbgmodels)
         character*3  var_3d(kmax),var_2d
 
-        integer     LVL_3d(kmax)
+        integer     lvl_3d(kmax)
         integer     nfdda,l
-        character*4 LVL_COORD_3d(kmax)
+        character*4 lvl_coord_3d(kmax)
 
         real field_3d(imax,jmax,kmax)
         real sigma_1d(kmax)
@@ -683,7 +683,7 @@ c             enddo
 
            endif
 c          if(ext_int.eq.' ')then
-c             print*,'Unknown lapsprd extension'
+c             print*,'unknown lapsprd extension'
 c    &,directory(1:len_dir)
 c             istatus = 0
 c             return
@@ -699,31 +699,31 @@ c          endif
 
         write(6,11)directory(1:len_dir),ext_int(1:len)
      1,var_2d
-11      format(' Reading 3d ',a,1x,a5,1x,a3)
+11      format(' reading 3d ',a,1x,a5,1x,a3)
 
         if(kmax.gt.1)then
           do k = 1,kmax
             units_3d(k)   = units_2d
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(k) = zcoord_of_level(k)/10
-                lvl_coord_3d(k) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
-                if(lvl_coord_cdf(1:3) .eq. 'HPA')then
+                lvl_coord_3d(k) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
+                if(lvl_coord_cdf(1:3) .eq. 'hpa')then
                     lvl_3d(k) = nint(zcoord_of_level(k))/100
-                    lvl_coord_3d(k) = 'MB' ! informational
-                elseif(lvl_coord_cdf(1:3) .eq. 'PA')then
+                    lvl_coord_3d(k) = 'mb' ! informational
+                elseif(lvl_coord_cdf(1:3) .eq. 'pa')then
                     lvl_3d(k) = nint(zcoord_of_level(k))
-                    lvl_coord_3d(k) = 'PA' ! informational
+                    lvl_coord_3d(k) = 'pa' ! informational
                 else
                     write(6,*)
-     1               ' Error, pressure units not supported '
+     1               ' error, pressure units not supported '
      1               ,lvl_coord_cdf
                     istatus = 0
                     return
                 endif
-            elseif(ltest_vertical_grid('SIGMA_P'))then
+            elseif(ltest_vertical_grid('sigma_p'))then
                 if(k .eq. 1)then
-                    write(6,*)' Reading Sigma P Levels'
+                    write(6,*)' reading sigma p levels'
                     call get_sigma_1d(kmax,sigma_1d,istatus)
                     if(istatus .ne. 1)then
                         return
@@ -732,9 +732,9 @@ c          endif
 
                 lvl_3d(k) = nint(sigma_1d(k) * 1000.)
                 lvl_coord_3d(k) = '  ' ! informational
-            elseif(ltest_vertical_grid('SIGMA_HT'))then
+            elseif(ltest_vertical_grid('sigma_ht'))then
                 if(k .eq. 1)then
-                    write(6,*)' Reading Sigma Ht Levels'
+                    write(6,*)' reading sigma ht levels'
                     call get_ht_1d(kmax,ht_1d,istatus)
                     if(istatus .ne. 1)then
                         return
@@ -744,7 +744,7 @@ c          endif
                 lvl_3d(k) = nint(ht_1d(k))
                 lvl_coord_3d(k) = '  ' ! informational
             else
-                write(6,*)' Error, vertical grid not supported,'
+                write(6,*)' error, vertical grid not supported,'
      1                   ,' in subroutine get_lapsdata_3d'                
                 istatus = 0
                 return
@@ -756,9 +756,9 @@ c          endif
           enddo ! k
 
 
-          CALL READ_LAPS(I4TIME,I4_VALID,DIRECTORY,EXT_INT,imax,jmax,
-     1  kmax,kmax,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1                     COMMENT_3D,field_3d,ISTATUS)
+          call read_laps(i4time,i4_valid,directory,ext_int,imax,jmax,
+     1  kmax,kmax,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1                     comment_3d,field_3d,istatus)
 
           comment_2d=comment_3d(1)
           units_2d=units_3d(1)
@@ -766,9 +766,9 @@ c          endif
         else
 
 
-          CALL READ_LAPS(I4TIME,i4_valid,DIRECTORY,EXT_INT
-     1,imax,jmax,1,1,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_2D
-     1, COMMENT_2D,field_3d,ISTATUS)
+          call read_laps(i4time,i4_valid,directory,ext_int
+     1,imax,jmax,1,1,var_3d,lvl_3d,lvl_coord_3d,units_2d
+     1, comment_2d,field_3d,istatus)
 
 
         endif
@@ -776,25 +776,25 @@ c          endif
         end
 
         subroutine get_laps_3dgrid(i4time_needed,i4tol,i4time_nearest,
-     1          imax,jmax,kmax,EXT,var_2d,units_2d,
+     1          imax,jmax,kmax,ext,var_2d,units_2d,
      1                          comment_2d,field_3d,istatus)
 
-cdoc    Returns a 3-D analysis grid. Inputs include the extension and time window.
+cdoc    returns a 3-d analysis grid. inputs include the extension and time window.
 
-!       i4time_needed       Input      Desired i4time
-!       i4tol               Input      Tolerance of accepted file times
-!       i4time_nearest      Output     Actual File time of returned data
-!       imax,jmax,kmax      Input      LAPS grid dimensions
-!       var_2d              Input      Which Variable Do you Want?
-!       ext                 Input      3 character file extension
-!       units_2d            Output     Units of data
-!       Comment_2d          Output     Comment block
-!       field_3d            Output     3D grid
+!       i4time_needed       input      desired i4time
+!       i4tol               input      tolerance of accepted file times
+!       i4time_nearest      output     actual file time of returned data
+!       imax,jmax,kmax      input      laps grid dimensions
+!       var_2d              input      which variable do you want?
+!       ext                 input      3 character file extension
+!       units_2d            output     units of data
+!       comment_2d          output     comment block
+!       field_3d            output     3d grid
 
-!       Steve Albers            1990
+!       steve albers            1990
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_2d
         character*10 units_2d
@@ -813,31 +813,31 @@ cdoc    Returns a 3-D analysis grid. Inputs include the extension and time windo
 
         if(abs(i4time_needed - i4time_nearest) .le. i4tol)then
             call get_laps_3d(i4time_nearest,imax,jmax,kmax
-     1                  ,EXT,var_2d,units_2d,
+     1                  ,ext,var_2d,units_2d,
      1                          comment_2d,field_3d,istatus)
         else
-            write(6,*)' No field found within window ',ext(1:10)
+            write(6,*)' no field found within window ',ext(1:10)
             istatus = 0
         endif
 
         return
         end
 
-        subroutine put_laps_2d(i4time,EXT,var_2d,units_2d,
+        subroutine put_laps_2d(i4time,ext,var_2d,units_2d,
      1                  comment_2d,imax,jmax,field_2d,istatus)
 
-cdoc    Writes a 2-D grid. Inputs include the extension and time.
+cdoc    writes a 2-d grid. inputs include the extension and time.
 
-        character*150 DIRECTORY
-cc        character*31 EXT
-        character*(*) EXT
+        character*150 directory
+cc        character*31 ext
+        character*(*) ext
 
         character*125 comment_2d
         character*10 units_2d
 cc        character*3 var_2d
         character*(*) var_2d
-        integer LVL_2d
-        character*4 LVL_COORD_2d
+        integer lvl_2d
+        character*4 lvl_coord_2d
 
         real field_2d(imax,jmax)
 
@@ -846,39 +846,39 @@ cc        character*3 var_2d
         call s_len(ext,len_ext)
 
         write(6,11)directory(1:len_dir),ext(1:len_ext),var_2d
-11      format(' Writing 2d ',a,1x,a,1x,a)
+11      format(' writing 2d ',a,1x,a,1x,a)
 
         call check_nan2(field_2d,imax,jmax,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' ERROR: Nan Detected in this 2D field'
+            write(6,*)' error: nan detected in this 2d field'
             return
         endif
 
         lvl_2d = 0
-        lvl_coord_2d = 'MSL'
+        lvl_coord_2d = 'msl'
 
-        CALL WRITE_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1  1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D,
-     1                     COMMENT_2D,field_2d,ISTATUS)
+        call write_laps_data(i4time,directory,ext,imax,jmax,
+     1  1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d,
+     1                     comment_2d,field_2d,istatus)
 
         return
         end
 
-        subroutine put_laps_3d(i4time,EXT,var_2d,units_2d,
+        subroutine put_laps_3d(i4time,ext,var_2d,units_2d,
      1                          comment_2d,field_3d,ni,nj,nk)
 
-cdoc    Writes a 3-D grid. Inputs include the extension and time.
+cdoc    writes a 3-d grid. inputs include the extension and time.
 
         logical ltest_vertical_grid
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_3d(nk),comment_2d
         character*10 units_3d(nk),units_2d
         character*3 var_3d(nk),var_2d
-        integer LVL_3d(nk)
-        character*4 LVL_COORD_3d(nk)
+        integer lvl_3d(nk)
+        character*4 lvl_coord_3d(nk)
         real ht_1d(nk)
 
         real field_3d(ni,nj,nk)
@@ -886,20 +886,20 @@ cdoc    Writes a 3-D grid. Inputs include the extension and time.
         call get_directory(ext,directory,len_dir)
 
         write(6,11)directory(1:min(len_dir,50)),ext,var_2d
-11      format(' Writing 3d ',a50,1x,a5,1x,a3)
+11      format(' writing 3d ',a50,1x,a5,1x,a3)
 
         do k = 1,nk
             units_3d(k)   = units_2d
             comment_3d(k) = comment_2d
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(k) = zcoord_of_level(k)/10
-                lvl_coord_3d(k) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+                lvl_coord_3d(k) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
                 lvl_3d(k) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(k) = 'HPA'
-            elseif(ltest_vertical_grid('SIGMA_HT'))then
+                lvl_coord_3d(k) = 'hpa'
+            elseif(ltest_vertical_grid('sigma_ht'))then
                 if(k .eq. 1)then
-                    write(6,*)' Reading Sigma Ht Levels'
+                    write(6,*)' reading sigma ht levels'
                     call get_ht_1d(nk,ht_1d,istatus)
                     if(istatus .ne. 1)then
                         return
@@ -908,8 +908,8 @@ cdoc    Writes a 3-D grid. Inputs include the extension and time.
                 lvl_3d(k) = nint(ht_1d(k))
                 lvl_coord_3d(k) = '  ' ! informational
             else
-                write(6,*)' Error, vertical grid not supported,'
-     1                   ,' this routine supports PRESSURE or HEIGHT'
+                write(6,*)' error, vertical grid not supported,'
+     1                   ,' this routine supports pressure or height'
                 istatus = 0
                 return
             endif
@@ -918,28 +918,28 @@ cdoc    Writes a 3-D grid. Inputs include the extension and time.
 
         enddo ! k
 
-        CALL WRITE_LAPS_DATA(I4TIME,DIRECTORY,EXT,ni,nj,
-     1  nk,nk,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1                     COMMENT_3D,field_3d,ISTATUS)
+        call write_laps_data(i4time,directory,ext,ni,nj,
+     1  nk,nk,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1                     comment_3d,field_3d,istatus)
 
         return
         end
 
-        subroutine put_laps_multi_3d(i4time,EXT,var_2d,units_2d,
+        subroutine put_laps_multi_3d(i4time,ext,var_2d,units_2d,
      1                          comment_2d,field_3d,ni,nj,nk,nf,istatus)
 
-cdoc    Writes multiple 3-D grids. Inputs include the extension and time.
+cdoc    writes multiple 3-d grids. inputs include the extension and time.
 
         logical ltest_vertical_grid
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_3d(nk*nf),comment_2d(nf)
         character*10 units_3d(nk*nf),units_2d(nf)
         character*3 var_3d(nk*nf),var_2d(nf)
-        integer LVL_3d(nk*nf)
-        character*4 LVL_COORD_3d(nk*nf)
+        integer lvl_3d(nk*nf)
+        character*4 lvl_coord_3d(nk*nf)
         real ht_1d(nk)
 
         real field_3d(ni,nj,nk,nf)
@@ -950,7 +950,7 @@ cdoc    Writes multiple 3-D grids. Inputs include the extension and time.
 
         do l = 1,nf
             write(6,11)directory(1:min(len_dir,50)),ext,var_2d(l)       
-11          format(' Writing 3d ',a50,1x,a5,1x,a3)
+11          format(' writing 3d ',a50,1x,a5,1x,a3)
         enddo ! l
 
         do l = 1,nf
@@ -960,26 +960,26 @@ cdoc    Writes multiple 3-D grids. Inputs include the extension and time.
 
             units_3d(iscript_3d)   = units_2d(l)
             comment_3d(iscript_3d) = comment_2d(l)
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(iscript_3d) = zcoord_of_level(k)/10
-                lvl_coord_3d(iscript_3d) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+                lvl_coord_3d(iscript_3d) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
                 lvl_3d(iscript_3d) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(iscript_3d) = 'HPA'
-            elseif(ltest_vertical_grid('SIGMA_HT'))then
+                lvl_coord_3d(iscript_3d) = 'hpa'
+            elseif(ltest_vertical_grid('sigma_ht'))then
                 if(k .eq. 1)then
-                    write(6,*)' Reading Sigma Ht Levels'
+                    write(6,*)' reading sigma ht levels'
                     call get_ht_1d(nk,ht_1d,istatus)
                     if(istatus .ne. 1)then
                         return
                     endif
                 endif
-! for other vertical_grid, lvl_3d(iscript_3d). Hongli Jiang 11/2/2011
+! for other vertical_grid, lvl_3d(iscript_3d). hongli jiang 11/2/2011
                 lvl_3d(iscript_3d) = nint(ht_1d(k))
-                lvl_coord_3d(iscript_3d) = 'M' ! informational
+                lvl_coord_3d(iscript_3d) = 'm' ! informational
             else
-                write(6,*)' Error, vertical grid not supported,'
-     1                   ,' this routine supports PRESSURE or HEIGHT'
+                write(6,*)' error, vertical grid not supported,'
+     1                   ,' this routine supports pressure or height'
                 istatus = 0
                 return
             endif
@@ -989,9 +989,9 @@ cdoc    Writes multiple 3-D grids. Inputs include the extension and time.
           enddo ! k
         enddo ! l
 
-        CALL WRITE_LAPS_DATA(I4TIME,DIRECTORY,EXT,ni,nj,
-     1  nk*nf,nk*nf,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1                     COMMENT_3D,field_3d,ISTATUS)
+        call write_laps_data(i4time,directory,ext,ni,nj,
+     1  nk*nf,nk*nf,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1                     comment_3d,field_3d,istatus)
 
         if(istatus .ne. 1)return
 
@@ -1000,22 +1000,22 @@ cdoc    Writes multiple 3-D grids. Inputs include the extension and time.
         return
         end
 
-        subroutine put_compressed_multi_3d(i4time,EXT,var_2d,units_2d,
+        subroutine put_compressed_multi_3d(i4time,ext,var_2d,units_2d,
      1                          comment_2d,field_3d,ni,nj,nk,nf,istatus)       
 
-cdoc    Writes multiple 3-D compressed grids. Inputs include the extension and
+cdoc    writes multiple 3-d compressed grids. inputs include the extension and
 cdoc    time.
 
         logical ltest_vertical_grid
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_3d(nk*nf),comment_2d(nf)
         character*10 units_3d(nk*nf),units_2d(nf)
         character*3 var_3d(nk*nf),var_2d(nf)
-        integer LVL_3d(nk*nf)
-        character*4 LVL_COORD_3d(nk*nf)
+        integer lvl_3d(nk*nf)
+        character*4 lvl_coord_3d(nk*nf)
         real ht_1d(nk)
 
         real field_3d(ni,nj,nk,nf)
@@ -1026,7 +1026,7 @@ cdoc    time.
 
         do l = 1,nf
             write(6,11)directory(1:min(len_dir,50)),ext,var_2d(l)       
-11          format(' Writing 3d ',a50,1x,a5,1x,a3)
+11          format(' writing 3d ',a50,1x,a5,1x,a3)
         enddo ! l
 
         do l = 1,nf
@@ -1036,15 +1036,15 @@ cdoc    time.
 
             units_3d(iscript_3d)   = units_2d(l)
             comment_3d(iscript_3d) = comment_2d(l)
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(iscript_3d) = zcoord_of_level(k)/10
-                lvl_coord_3d(iscript_3d) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+                lvl_coord_3d(iscript_3d) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
                 lvl_3d(iscript_3d) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(iscript_3d) = 'HPA'
-            elseif(ltest_vertical_grid('SIGMA_HT'))then
+                lvl_coord_3d(iscript_3d) = 'hpa'
+            elseif(ltest_vertical_grid('sigma_ht'))then
                 if(k .eq. 1)then
-                    write(6,*)' Reading Sigma Ht Levels'
+                    write(6,*)' reading sigma ht levels'
                     call get_ht_1d(nk,ht_1d,istatus)
                     if(istatus .ne. 1)then
                         return
@@ -1053,8 +1053,8 @@ cdoc    time.
                 lvl_3d(k) = nint(ht_1d(k))
                 lvl_coord_3d(k) = '  ' ! informational
             else
-                write(6,*)' Error, vertical grid not supported,'
-     1                   ,' this routine supports PRESSURE or HEIGHT'
+                write(6,*)' error, vertical grid not supported,'
+     1                   ,' this routine supports pressure or height'
                 istatus = 0
                 return
             endif
@@ -1064,9 +1064,9 @@ cdoc    time.
           enddo ! k
         enddo ! l
 
-        CALL WRITE_LAPS_COMPRESSED(I4TIME,DIRECTORY,EXT,ni,nj,
-     1  nk*nf,nk*nf,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1                     COMMENT_3D,field_3d,ISTATUS)
+        call write_laps_compressed(i4time,directory,ext,ni,nj,
+     1  nk*nf,nk*nf,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1                     comment_3d,field_3d,istatus)
 
         if(istatus .ne. 1)return
 
@@ -1075,29 +1075,29 @@ cdoc    time.
         return
         end
 
-        subroutine put_laps_multi_2d(i4time,EXT,var_a,units_a,
+        subroutine put_laps_multi_2d(i4time,ext,var_a,units_a,
      1                          comment_a,field_2d,ni,nj,nf,istatus)       
 
-cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
+cdoc    writes multiple 2-d grids. inputs include the extension and time.
 
-        integer MAX_FIELDS
-        parameter (MAX_FIELDS = 10)
+        integer max_fields
+        parameter (max_fields = 10)
 
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_a(nf) ! ,comment
         character*10 units_a(nf)
         character*3 var_a(nf)
-        integer LVL_2d(MAX_FIELDS)
-        character*4 LVL_COORD_2d(MAX_FIELDS)
+        integer lvl_2d(max_fields)
+        character*4 lvl_coord_2d(max_fields)
 
         real field_2d(ni,nj,nf)
 
         istatus = 0
 
-        if(nf .gt. MAX_FIELDS)then
-            write(6,*)' Too many fields in put_laps_multi_2d'
+        if(nf .gt. max_fields)then
+            write(6,*)' too many fields in put_laps_multi_2d'
         endif
 
         call get_directory(ext,directory,len_dir)
@@ -1105,24 +1105,24 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         do l = 1,nf
             write(6,11)directory(1:len_dir),ext(1:len_ext),var_a(l)
-11          format(' Writing 2d ',a,1x,a,1x,a)
+11          format(' writing 2d ',a,1x,a,1x,a)
 
             call check_nan2(field_2d(1,1,l),ni,nj,istatus)
             if(istatus .ne. 1)then
-                write(6,*)' ERROR: Nan Detected in above 2D field'
+                write(6,*)' error: nan detected in above 2d field'
                 return
             endif
         enddo ! l
 
         do l = 1,nf
             lvl_2d (l)= 0
-            lvl_coord_2d(l) = 'MSL'
+            lvl_coord_2d(l) = 'msl'
 !           comment_a(l) = comment
         enddo ! l
 
-        CALL WRITE_LAPS_DATA(I4TIME,DIRECTORY,EXT,ni,nj,
-     1  nf,nf,VAR_A,LVL_2D,LVL_COORD_2D,UNITS_A,
-     1                     COMMENT_A,field_2d,ISTATUS)
+        call write_laps_data(i4time,directory,ext,ni,nj,
+     1  nf,nf,var_a,lvl_2d,lvl_coord_2d,units_a,
+     1                     comment_a,field_2d,istatus)
 
         if(istatus .ne. 1)return
 
@@ -1138,7 +1138,7 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
  10     i_switch = 0
         do i = 2,i_dim
-            if(i_array(i) .lt. i_array(i-1))then ! Bubble sort exchange
+            if(i_array(i) .lt. i_array(i-1))then ! bubble sort exchange
                 izzz = i_array(i-1)
                 i_array(i-1) = i_array(i)
                 i_array(i) = izzz
@@ -1159,10 +1159,10 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         logical l_exist
 
-!       Test for proper length of extension
+!       test for proper length of extension
         call s_len(ext,len_ext)
         if(len_ext .ne. 3)then
-           write(6,*)' Error in open_lapsprd_file: ext has length'
+           write(6,*)' error in open_lapsprd_file: ext has length'
      1               ,len_ext
            istatus = 0
            return
@@ -1179,17 +1179,17 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         subroutine open_lapsprd_file(lun,i4time,ext,istatus)
 
-!       1997   Steve Albers (assumed this is for writing files)
+!       1997   steve albers (assumed this is for writing files)
 
         character*(*)    ext
         character*150    directory
         character*13 filename13
         character*14 filename14
 
-!       Test for proper length of extension
+!       test for proper length of extension
         call s_len(ext,len_ext)
         if(len_ext .ne. 3 .and. len_ext .ne. 4)then
-           write(6,*)' Error in open_lapsprd_file: ext has length'
+           write(6,*)' error in open_lapsprd_file: ext has length'
      1               ,len_ext
            istatus = 0
            return
@@ -1206,7 +1206,7 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
         endif
         go to 999
 
- 998    write(6,*)' Error in open_lapsprd_file, cannot open product: '   
+ 998    write(6,*)' error in open_lapsprd_file, cannot open product: '   
      1            ,ext       
         istatus = 0
         return
@@ -1217,16 +1217,16 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         subroutine open_lapsprd_file_read(lun,i4time,ext,istatus)
 
-!       1997   Steve Albers
+!       1997   steve albers
 
         character*(*)    ext
         character*150    directory
         character*13 filename13
 
-!       Test for proper length of extension
+!       test for proper length of extension
         call s_len(ext,len_ext)
         if(len_ext .ne. 3 .and. len_ext .ne. 4)then
-           write(6,*)' Error in open_lapsprd_file_read: ext has length'       
+           write(6,*)' error in open_lapsprd_file_read: ext has length'       
      1               ,len_ext
            istatus = 0
            return
@@ -1238,7 +1238,7 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
      1          ,status='old',err=998)
         go to 999
 
- 998    write(6,*)' Warning in open_lapsprd_file_read: '
+ 998    write(6,*)' warning in open_lapsprd_file_read: '
      1           ,'cannot open the product ',ext     
         istatus = 0
         return
@@ -1250,16 +1250,16 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         subroutine open_lapsprd_file_append(lun,i4time,ext,istatus)
 
-!       1997   Steve Albers
+!       1997   steve albers
 
         character*(*)    ext
         character*150    directory
         character*13 filename13
         integer istatus
-!       Test for proper length of extension
+!       test for proper length of extension
         call s_len(ext,len_ext)
         if(len_ext .ne. 3 .and. len_ext .ne. 4)then
-           write(6,*)' Error in open_lapsprd_file: ext has length'
+           write(6,*)' error in open_lapsprd_file: ext has length'
      1               ,len_ext
            istatus = 0
            return
@@ -1272,7 +1272,7 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         if(istatus.eq.0) then
            write(6,*)
-     1          ' Error in open_lapsprd_file_append: ',
+     1          ' error in open_lapsprd_file_append: ',
      2          'cannot open the file ',
      3          directory(1:len_dir)//filename13(i4time,ext(1:3))       
         else
@@ -1291,14 +1291,14 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
       character*3 ext
 
-!     Open output lapsprd file
+!     open output lapsprd file
       if(iopen .eq. 0)then
           call open_lapsprd_file(lun,i4time_sys,ext,istatus)
           if(istatus .ne. 1)then
-              write(6,*)' ERROR: could not open lapsprd file ',ext
+              write(6,*)' error: could not open lapsprd file ',ext
               stop
           else
-              write(6,*)' Successfully Opened lapsprd file for ',ext
+              write(6,*)' successfully opened lapsprd file for ',ext
           endif
 
           iopen = 1
@@ -1309,7 +1309,7 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
 
         subroutine get_filespec(ext,mode,c_filespec,istatus)
 
-!       1997   Steve Albers
+!       1997   steve albers
 
         character*(*)    ext         ! input
         integer          mode        ! input
@@ -1325,14 +1325,14 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
         if(mode .eq. 1)then ! short form
             if(len(c_filespec) .lt. len_dir)then
                 istatus = 0
-                write(6,*)' Error in get_filespec, c_filespec too short'       
+                write(6,*)' error in get_filespec, c_filespec too short'       
             else
                 c_filespec = directory(1:len_dir)
             endif
         else                ! long form
             if(len(c_filespec) .lt. len_dir+len_ext+2)then
                 istatus = 0
-                write(6,*)' Error in get_filespec, c_filespec too short'
+                write(6,*)' error in get_filespec, c_filespec too short'
             else
                 c_filespec = directory(1:len_dir)//'*.'//ext(1:len_ext)       
             endif
@@ -1341,20 +1341,20 @@ cdoc    Writes multiple 2-D grids. Inputs include the extension and time.
         return
         end
 c
-c J Smart 3/98.
+c j smart 3/98.
 c
         subroutine get_laps_sat(maxsat,c_sat_id,isats
      1     ,i4time_needed,i4tol,i4time_nearest
      1     ,var_2d,units_2d,comment_2d,imax,jmax
-     1     ,subpoint_lat_clo,subpoint_lon_clo         ! O
+     1     ,subpoint_lat_clo,subpoint_lon_clo         ! o
      1     ,lat,lon,field_2d,istatus)
 c
-c    J. Smart 2-98.
-cdoc This routine acquires satellite data from the lvd subdirectories
+c    j. smart 2-98.
+cdoc this routine acquires satellite data from the lvd subdirectories
 cdoc and makes decisions about what the best data is to return as the
 cdoc 2d field (for var_2d).
 
-        use mem_namelist, ONLY: l_mosaic_sat, r_missing_data
+        use mem_namelist, only: l_mosaic_sat, r_missing_data
 c
         implicit none
 
@@ -1418,17 +1418,17 @@ c       save      i4time_first
      &                 imax,jmax,field_2d,jstatus)
 
               if(jstatus.ne.1)then
-                 write(6,*)'No data returned from get_laps_lvd',
+                 write(6,*)'no data returned from get_laps_lvd',
      &                     ' for ',c_sat_id(i)
               else
                  nsats=nsats+1
                  csatid(nsats)=c_sat_id(i)
                  i4timedata(nsats)=i4time_nearest
                  call move(field_2d,field_2d_lvd(1,1,nsats),imax,jmax)
-                 write(6,*)' Comment is:',trim(comment_2d)
+                 write(6,*)' comment is:',trim(comment_2d)
                  read(comment_2d,1)subpoint_lon_sat(nsats)
  1               format(83x,e17.8)
-                 write(6,*)' Sublon for satellite: ',nsats
+                 write(6,*)' sublon for satellite: ',nsats
      1                      ,subpoint_lon_sat(nsats)      
 
               endif
@@ -1442,7 +1442,7 @@ c
 
         if(nsats.gt.1 .and. l_mosaic_sat)then
            write(6,*)
-           write(6,*)'Mosaicing ',nsats,' satellites'
+           write(6,*)'mosaicing ',nsats,' satellites'
            subpoint_lon_clo = r_missing_data  ! fill grid 
 
            cost = 9999. ! initialize array
@@ -1453,7 +1453,7 @@ c
 
               write(6,*)' isat/time_diff = ',isat,time_diff_sec
 
-!             Determine cost of satellite based on valid data, time, and subpoint
+!             determine cost of satellite based on valid data, time, and subpoint
               where(field_2d_lvd(:,:,isat) .ne. r_missing_data)
                  cost(:,:,isat) 
      1           = abs(lon(:,:) - subpoint_lon_sat(isat)) * satm_subp_wt
@@ -1468,7 +1468,7 @@ c
            enddo ! j
            enddo ! i
 
-           write(6,*)' Summary of cost function'
+           write(6,*)' summary of cost function'
            j = jmax/2
            iskip = max(((imax/100)/5)*5,5)
            do i = 1,imax,iskip
@@ -1478,11 +1478,11 @@ c
            do isat=1,nsats
               call make_fnam_lp(i4timedata(isat),asc9_tim,istatus)
 
-!             Add satellite to mosaic if it has the lowest cost
+!             add satellite to mosaic if it has the lowest cost
               do i = 1,imax
               do j = 1,jmax
                   if(field_2d_lvd(i,j,isat) .ne. r_missing_data 
-     1                            .AND.
+     1                            .and.
      1              cost(i,j,isat) .eq. costmin(i,j)
      1                                                           )then       
                     npts(isat) = npts(isat) + 1
@@ -1496,7 +1496,7 @@ c
 
               write(6,11)var_2d,csatid(isat),asc9_tim 
      &                 ,subpoint_lon_sat(isat),npts(isat),fracp  
-11            format('Mosaicing ',a,' for ',a,1x,a,f8.2
+11            format('mosaicing ',a,' for ',a,1x,a,f8.2
      1                           ,' npts/frac=',i8,f10.6)
 
            enddo ! isat
@@ -1504,12 +1504,12 @@ c
 
         elseif(nsats .gt.1 .and. (.not. l_mosaic_sat))then
            write(6,*)
-           write(6,*)'Found data for ',nsats,' satellites '
+           write(6,*)'found data for ',nsats,' satellites '
      1               ,csatid(1:nsats)
 
            imn = 0 ! initialize
 
-!          This option may never be exercised since 'i4time_first' is earlier
+!          this option may never be exercised since 'i4time_first' is earlier
 !          set to 0.
            do i=1,nsats
               if(i4timedata(i).eq.i4time_first)then
@@ -1517,15 +1517,15 @@ c
                  call move(field_2d_lvd(1,1,i),field_2d,imax,jmax)
                  i4time_nearest=i4timedata(i)
                  subpoint_lon_clo = subpoint_lon_sat(i)
-                 write(6,*)'Returning ',var_2d,' for ',csatid(i),
+                 write(6,*)'returning ',var_2d,' for ',csatid(i),
      &                     ' ',asc9_tim,' sec1'
                  return
               endif
            enddo
 
-!          If two satellites are equally close the nominal time, the one
-!          showing up earlier in the list of satellite IDs 
-!          (in satdata_lvd_table.for) will be chosen. At present the subpoint
+!          if two satellites are equally close the nominal time, the one
+!          showing up earlier in the list of satellite ids 
+!          (in satdata_lvd_table.for) will be chosen. at present the subpoint
 !          is not considered.
            rmin_diff=1000000. ! a large number
            do i=1,nsats
@@ -1547,7 +1547,7 @@ c
               call move(field_2d_lvd(1,1,imn),field_2d,imax,jmax)
               i4time_nearest=i4timedata(imn)
               subpoint_lon_clo = subpoint_lon_sat(imn)
-              write(6,*)'Returning ',var_2d,' for ',csatid(imn),imn,
+              write(6,*)'returning ',var_2d,' for ',csatid(imn),imn,
      &                  ' ',asc9_tim,' sec2'
               return
 
@@ -1558,7 +1558,7 @@ c default
               call move(field_2d_lvd(1,1,1),field_2d,imax,jmax)
               i4time_nearest=i4timedata(1)
               subpoint_lon_clo = subpoint_lon_sat(1)
-              write(6,*)'Returning ',var_2d,' for ',csatid(1),
+              write(6,*)'returning ',var_2d,' for ',csatid(1),
      &                  ' ',asc9_tim,' sec3'
               return
            endif
@@ -1570,12 +1570,12 @@ c default
            i4time_nearest=i4timedata(1)
            subpoint_lon_clo = subpoint_lon_sat(1)
            write(6,*)
-           write(6,*)'Returning ',var_2d,' for ',csatid(1), 
+           write(6,*)'returning ',var_2d,' for ',csatid(1), 
      &                ' ',asc9_tim,' sec4'
            return
 
         elseif(nsats.le.0)then
-           write(6,*)'No lvd fields found. Returning  no data'
+           write(6,*)'no lvd fields found. returning  no data'
 
         endif
 
@@ -1592,37 +1592,37 @@ c
      1     ,var_2d,units_2d,comment_2d
      1     ,imax,jmax,field_2d,istatus)
 
-!       Steve Albers            1996
-!       This routine tries to read in the desired variable from all files
+!       steve albers            1996
+!       this routine tries to read in the desired variable from all files
 !       having the proper extension, picking the closest one within the
 !       specified time window.
 !
-!       John Smart              1998
-!       Modified original get_laps_2dvar for satellite lvd files in
-!       lvd subdirectories. Subdirectories are those satellites
+!       john smart              1998
+!       modified original get_laps_2dvar for satellite lvd files in
+!       lvd subdirectories. subdirectories are those satellites
 !       known to the laps system (see src/include/satdata_lvd.for,
-!       and data/static/satellite_lvd.nl). As many as 'maxsat' 2d fields
+!       and data/static/satellite_lvd.nl). as many as 'maxsat' 2d fields
 !       can be returned depending on configuration specified in satellite_lvd.nl.
 !       max_sat is defined in src/include/satellite_dims_lvd.inc.
 !
-!       John Smart              1999
-!       Added multiple lvd file search for best domain cover for files that
-!       are within i4tol. If all files have the same domain cover (like 100%)
+!       john smart              1999
+!       added multiple lvd file search for best domain cover for files that
+!       are within i4tol. if all files have the same domain cover (like 100%)
 !       then the first (and closest in time) file is returned.
 !
-!       John Smart              1999
+!       john smart              1999
 !       return the time closest to requested time in the event that more
 !       than 1 file with complete domain cover satisfies i4tol
 
         character*150 dir
         character*150 satdir
-        character*31  EXT
+        character*31  ext
 
         character*125 comment_2d
         character*10 units_2d
         character*3 var_2d
-        integer LVL_2d
-        character*4 LVL_COORD_2d
+        integer lvl_2d
+        character*4 lvl_coord_2d
 
         integer max_lvd_files
         parameter (max_lvd_files=20)
@@ -1653,7 +1653,7 @@ c
         call make_fnam_lp(i4time_needed,asc9_tim,istatus)
 
         write(6,*)
-        write(6,*)' Subroutine get_laps_lvd for ',c_sat_id,
+        write(6,*)' subroutine get_laps_lvd for ',c_sat_id,
      1            ' needed at ',asc9_tim,'...'
 
         ext = 'lvd'
@@ -1676,7 +1676,7 @@ c
         call get_file_times(c_filespec,max_files,c_fnames
      1                     ,i4times,i_nbr_files_ret,istatus)
         if(istatus .ne. 1)then
-           write(6,*)'get_laps_lvd: Bad status returned '
+           write(6,*)'get_laps_lvd: bad status returned '
      1              ,'from get_file_times'
            return
         endif
@@ -1684,9 +1684,9 @@ c
         lcont=.true.
         jf=0
 
-        print*,'Number of files returned get_file_times',i_nbr_files_ret
+        print*,'number of files returned get_file_times',i_nbr_files_ret
 
-!       Calculate minimum time difference of unselected files from desired time
+!       calculate minimum time difference of unselected files from desired time
 !       with respect to both needed time and system time
 50      i4_diff_min = 999999999
         i4_diff_min_sys = 999999999
@@ -1699,11 +1699,11 @@ c
            endif
         enddo ! j
 
-!       Check whether any unselected files lie within the time window
+!       check whether any unselected files lie within the time window
         if(i4_diff_min_sys .gt. i4tol)then
-           write(6,*)' No remaining files found within ',i4tol
+           write(6,*)' no remaining files found within ',i4tol
      1              ,' sec systime window ',ext(1:5),var_2d
-           write(6,*)' Closest file (in seconds) is ',i4_diff_min_sys
+           write(6,*)' closest file (in seconds) is ',i4_diff_min_sys
 
            lcont=.false.
 
@@ -1716,25 +1716,25 @@ c          return
            i4_diff=    abs(i4times(j)-i4time_needed)
            i4_diff_sys=abs(i4times(j)-i4time_sys)      
 
-!          Select file that has minimum time diff (of unselected)
+!          select file that has minimum time diff (of unselected)
            if(i4_diff.eq.i4_diff_min.and.
      1            i_selected(j).eq.0.and.
      1            i4_diff_sys.le.i4tol)               then
 
               i_selected(j) = 1
               lvl_2d = 0
-              lvl_coord_2d = 'MSL'
+              lvl_coord_2d = 'msl'
               call make_fnam_lp(i4times(j),asc9_tim,istatus)
 
               write(6,11)trim(satdir),asc9_tim,ext(1:5),var_2d
-11            format(' Reading 2d ',a,1x,a9,1x,a5,1x,a3)
+11            format(' reading 2d ',a,1x,a9,1x,a5,1x,a3)
 
-              CALL READ_LAPS_DATA(i4times(j),satdir,EXT,imax
-     1            ,jmax,1,1,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D
-     1            ,COMMENT_2D,field_2d,ISTATUS)
+              call read_laps_data(i4times(j),satdir,ext,imax
+     1            ,jmax,1,1,var_2d,lvl_2d,lvl_coord_2d,units_2d
+     1            ,comment_2d,field_2d,istatus)
 
               if(istatus .ne. 1)then
-                 write(6,*)' No field found at ',ext(1:10)
+                 write(6,*)' no field found at ',ext(1:10)
      1                       ,var_2d,' ',asc9_tim
                  go to 50
 c
@@ -1746,7 +1746,7 @@ c
 
                  jf=jf+1
                  if(jf .gt. max_lvd_files)then
-                     write(6,*)' ERROR in get_laps_lvd: jf > '
+                     write(6,*)' error in get_laps_lvd: jf > '
      1                        ,max_lvd_files
                      stop
                  endif
@@ -1755,7 +1755,7 @@ c
                  do il = 1,imax
                  do jl = 1,jmax
 
-!                   QC check
+!                   qc check
                     if(field_2d(il,jl) .gt. 1e10)then
                        field_2d(il,jl) = r_missing_data
                     endif
@@ -1764,7 +1764,7 @@ c
                        imiss=imiss+1
 
 c                           write(6,*)il,jl,
-c    1                        ' Missing Data Value Detected in 2D Field'
+c    1                        ' missing data value detected in 2d field'
 c                           istatus = -1
 c                           return
 
@@ -1785,7 +1785,7 @@ c             return
 
               if(lcont)goto 50
 
-           endif ! File is closest unread file to desired time
+           endif ! file is closest unread file to desired time
 
         enddo ! ith file
 c
@@ -1818,7 +1818,7 @@ c
         endif
 
         call move(field_2d_save(1,1,jf),field_2d,imax,jmax)
-        print*,'Returning requested field from ',
+        print*,'returning requested field from ',
      1' get_laps_lvd  ',c_sat_id,'   ',asc9_time(jf),'   ',var_2d
         i4time_nearest=i4times_data(jf)
         comment_2d=comment_2d_save(jf)
@@ -1830,31 +1830,31 @@ c
 
         subroutine get_3dgrid_dname(directory_in
      1         ,i4time_needed,i4tol,i4time_nearest
-     1         ,EXT,var_2d,units_2d
+     1         ,ext,var_2d,units_2d
      1         ,comment_2d,imax,jmax,kmax,field_3d,istatus)
 
-cdoc    Returns a 3-D analysis grid. Inputs include a directory, ext, and time window.
+cdoc    returns a 3-d analysis grid. inputs include a directory, ext, and time window.
 
-!       directory_in        Input      Slash at end is optional
-!       i4time_needed       Input      Desired i4time
-!       imax,jmax,kmax      Input      LAPS grid dimensions
-!       ext                 Input      3 character file extension
-!       var_2d              Input      Which Variable do you want?
-!       units_2d            Output     Units of data
-!       Comment_2d          Output     Comment block
-!       field_3d            Output     3D grid
+!       directory_in        input      slash at end is optional
+!       i4time_needed       input      desired i4time
+!       imax,jmax,kmax      input      laps grid dimensions
+!       ext                 input      3 character file extension
+!       var_2d              input      which variable do you want?
+!       units_2d            output     units of data
+!       comment_2d          output     comment block
+!       field_3d            output     3d grid
 
         character*9 asc9_tim
 
-        character*(*) DIRECTORY_IN
-        character*255 DIRECTORY
-        character*(*) EXT
+        character*(*) directory_in
+        character*255 directory
+        character*(*) ext
 
         character*125 comment_3d(kmax),comment_2d
         character*10 units_3d(kmax),units_2d
         character*3 var_3d(kmax),var_2d
-        integer LVL_3d(kmax)
-        character*4 LVL_COORD_3d(kmax)
+        integer lvl_3d(kmax)
+        character*4 lvl_coord_3d(kmax)
 
         real field_3d(imax,jmax,kmax)
 
@@ -1862,7 +1862,7 @@ cdoc    Returns a 3-D analysis grid. Inputs include a directory, ext, and time w
 
         logical ltest_vertical_grid
 
-        write(6,*)' Subroutine get_3dgrid_dname...'
+        write(6,*)' subroutine get_3dgrid_dname...'
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)then
@@ -1884,12 +1884,12 @@ cdoc    Returns a 3-D analysis grid. Inputs include a directory, ext, and time w
         call get_file_time(c_filespec,i4time_needed,i4time_nearest)
 
         if(abs(i4time_needed - i4time_nearest) .le. i4tol)then
-            call get_3d_dir_time(directory_in,i4time_nearest,EXT
+            call get_3d_dir_time(directory_in,i4time_nearest,ext
      1                          ,var_2d,units_2d,comment_2d
      1                          ,imax,jmax,kmax,field_3d,istatus)
 
         else
-            write(6,*)' No field found within window ',ext(1:10)
+            write(6,*)' no field found within window ',ext(1:10)
             istatus = 0
         endif
 
@@ -1898,32 +1898,32 @@ cdoc    Returns a 3-D analysis grid. Inputs include a directory, ext, and time w
 
 
         subroutine get_3d_dir_time(directory_in,i4time
-     1                            ,EXT,var_2d,units_2d
+     1                            ,ext,var_2d,units_2d
      1                            ,comment_2d
      1                            ,imax,jmax,kmax,field_3d,istatus)
 
-cdoc    Returns a 3-D grid. Inputs include a directory, ext, and time.
+cdoc    returns a 3-d grid. inputs include a directory, ext, and time.
 
-!       directory_in        Input      Slash at end is optional
-!       i4time              Input      Desired i4time
-!       imax,jmax,kmax      Input      LAPS grid dimensions
-!       ext                 Input      file extension
-!       var_2d              Input      Which Variable do you want?
-!       units_2d            Output     Units of data
-!       Comment_2d          Output     Comment block
-!       field_3d            Output     3D grid
+!       directory_in        input      slash at end is optional
+!       i4time              input      desired i4time
+!       imax,jmax,kmax      input      laps grid dimensions
+!       ext                 input      file extension
+!       var_2d              input      which variable do you want?
+!       units_2d            output     units of data
+!       comment_2d          output     comment block
+!       field_3d            output     3d grid
 
         character*9 asc9_tim
 
-        character*(*) DIRECTORY_IN
-        character*255 DIRECTORY
-        character*(*) EXT, var_2d
+        character*(*) directory_in
+        character*255 directory
+        character*(*) ext, var_2d
 
         character*125 comment_3d(kmax),comment_2d
         character*10 units_3d(kmax),units_2d
         character*3 var_3d(kmax)
-        integer LVL_3d(kmax)
-        character*4 LVL_COORD_3d(kmax)
+        integer lvl_3d(kmax)
+        character*4 lvl_coord_3d(kmax)
 
         real field_3d(imax,jmax,kmax)
 
@@ -1958,18 +1958,18 @@ cdoc    Returns a 3-D grid. Inputs include a directory, ext, and time.
 
         do k = 1,kmax
             units_3d(k)   = units_2d
-            if(ltest_vertical_grid('HEIGHT'))then
+            if(ltest_vertical_grid('height'))then
                 lvl_3d(k) = zcoord_of_level(k)/10
-                lvl_coord_3d(k) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+                lvl_coord_3d(k) = 'msl'
+            elseif(ltest_vertical_grid('pressure'))then
                 lvl_3d(k) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(k) = 'MB'
-            elseif(ltest_vertical_grid('SIGMA_HT'))then
+                lvl_coord_3d(k) = 'mb'
+            elseif(ltest_vertical_grid('sigma_ht'))then
                 lvl_3d(k) = nint(zcoord_of_level(k))
-                lvl_coord_3d(k) = 'M'
+                lvl_coord_3d(k) = 'm'
             else
-                write(6,*)' Error, vertical grid not supported,'
-     1                   ,' this routine supports PRESSURE or HEIGHT'
+                write(6,*)' error, vertical grid not supported,'
+     1                   ,' this routine supports pressure or height'
                 istatus = 0
                 return
             endif
@@ -1981,35 +1981,35 @@ cdoc    Returns a 3-D grid. Inputs include a directory, ext, and time.
         call get_l_compress_radar(l_compress_radar,istatus)
         if(istatus .ne. 1)return
 
-        if(.not. l_is_vxx(EXT))then
-          CALL READ_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1          kmax,kmax,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1          COMMENT_3D,field_3d,ISTATUS)
+        if(.not. l_is_vxx(ext))then
+          call read_laps_data(i4time,directory,ext,imax,jmax,
+     1          kmax,kmax,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1          comment_3d,field_3d,istatus)
 
         elseif(.not. l_compress_radar)then
-          CALL READ_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1          kmax,kmax,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1          COMMENT_3D,field_3d,ISTATUS)
+          call read_laps_data(i4time,directory,ext,imax,jmax,
+     1          kmax,kmax,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1          comment_3d,field_3d,istatus)
        
-          if(ISTATUS .ne. 1)then
-            write(6,*)' Attempting compressed radar data read instead'      
+          if(istatus .ne. 1)then
+            write(6,*)' attempting compressed radar data read instead'      
             call read_laps_compressed(i4time,directory,ext,imax,jmax
      1                               ,kmax,var_3d,lvl_3d,lvl_coord_3d       
      1                               ,units_3d,comment_3d,field_3d
      1                               ,istatus)
           endif
 
-        else ! l_compress_radar is TRUE for vxx file
+        else ! l_compress_radar is true for vxx file
           call read_laps_compressed(i4time,directory,ext,imax,jmax
      1                               ,kmax,var_3d,lvl_3d,lvl_coord_3d       
      1                               ,units_3d,comment_3d,field_3d
      1                               ,istatus)
 
-          if(ISTATUS .ne. 1)then
-            write(6,*)' Attempting netCDF radar data read instead'      
-            CALL READ_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1          kmax,kmax,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,
-     1          COMMENT_3D,field_3d,ISTATUS)
+          if(istatus .ne. 1)then
+            write(6,*)' attempting netcdf radar data read instead'      
+            call read_laps_data(i4time,directory,ext,imax,jmax,
+     1          kmax,kmax,var_3d,lvl_3d,lvl_coord_3d,units_3d,
+     1          comment_3d,field_3d,istatus)
           endif
 
         endif
@@ -2043,8 +2043,8 @@ cdoc    Returns a 3-D grid. Inputs include a directory, ext, and time.
         end
 c
 c ------------------------------------------------------------------------
-c This routine is used in get_maps_lapsgrid.f (subroutine get_modelfg_3d and
-c other related routines). Returns bgmodel name corresponding to the
+c this routine is used in get_maps_lapsgrid.f (subroutine get_modelfg_3d and
+c other related routines). returns bgmodel name corresponding to the
 c setting of variable "cmodel" in lga namelist (background.nl).
 c
       subroutine bgmodel_name(maxbgmodels,nbgm,bgmodelnames,istatus)
@@ -2083,28 +2083,28 @@ c     include 'bgdata.inc'
       nbgm=0
       do i=1,maxbgmodels
          if(cmodel(i).ne.' ')then
-            if(cmodel(i).eq.'RUC40_NATIVE'.or.
-     +         cmodel(i).eq.'RUC20_NATIVE'.or.
-     +         cmodel(i).eq.'RUC'              )then
+            if(cmodel(i).eq.'ruc40_native'.or.
+     +         cmodel(i).eq.'ruc20_native'.or.
+     +         cmodel(i).eq.'ruc'              )then
                nbgm=nbgm+1
                bgmodelnames(nbgm)='ruc'
             endif
-            if(cmodel(i).eq.'ETA48_CONUS'.or.
-     +         cmodel(i).eq.'MesoEta_SBN')then
+            if(cmodel(i).eq.'eta48_conus'.or.
+     +         cmodel(i).eq.'mesoeta_sbn')then
                nbgm=nbgm+1
                bgmodelnames(nbgm)='eta'
             endif
-            if(cmodel(i).eq.'AVN_FSL_NETCDF'.or.
-     +         cmodel(i).eq.'AVN_SBN_CYLEQ')then
+            if(cmodel(i).eq.'avn_fsl_netcdf'.or.
+     +         cmodel(i).eq.'avn_sbn_cyleq')then
                nbgm=nbgm+1
                bgmodelnames(nbgm)='avn'
             endif
-            if(cmodel(i).eq.'MODEL_FUA'.or.
-     +         cmodel(i).eq.'LAPS_FUA')then
+            if(cmodel(i).eq.'model_fua'.or.
+     +         cmodel(i).eq.'laps_fua')then
                nbgm=nbgm+1
                bgmodelnames(nbgm)='fua'
             endif
-            if(cmodel(i).eq.'CWB_20FA_LAMBERT_NF')then
+            if(cmodel(i).eq.'cwb_20fa_lambert_nf')then
                nbgm=nbgm+1
                bgmodelnames(nbgm)='nfs'
             endif
@@ -2116,20 +2116,20 @@ c     include 'bgdata.inc'
 
 cdis
 
-        subroutine get_laps_multi_2d(i4time,EXT,var_2d,units_2d,
+        subroutine get_laps_multi_2d(i4time,ext,var_2d,units_2d,
      1                  comment_2d,imax,jmax,nf,field_2d,istatus)
 
-cdoc    Used to read in one or more surface grids with inputs of time and ext
+cdoc    used to read in one or more surface grids with inputs of time and ext
 
         character*9 asc9_tim
-        character*150 DIRECTORY
-        character*(*) EXT
+        character*150 directory
+        character*(*) ext
 
         character*125 comment_2d(nf)
         character*10 units_2d(nf)
         character*3 var_2d(nf)
-        integer LVL_2d(nf)
-        character*4 LVL_COORD_2d(nf)
+        integer lvl_2d(nf)
+        character*4 lvl_coord_2d(nf)
 
         real field_2d(imax,jmax,nf)
 
@@ -2144,22 +2144,22 @@ cdoc    Used to read in one or more surface grids with inputs of time and ext
         call make_fnam_lp(i4time,asc9_tim,istatus)
 
         write(6,11)trim(directory),asc9_tim,ext,var_2d
-11      format(' Reading 2d ',a,1x,a,1x,a,1x,a)
+11      format(' reading 2d ',a,1x,a,1x,a,1x,a)
 
         lvl_2d = 0
-        lvl_coord_2d = 'MSL'
+        lvl_coord_2d = 'msl'
 
-        CALL READ_LAPS_DATA(I4TIME,DIRECTORY,EXT,imax,jmax,
-     1  nf,nf,VAR_2D,LVL_2D,LVL_COORD_2D,UNITS_2D,
-     1                     COMMENT_2D,field_2d,ISTATUS)
+        call read_laps_data(i4time,directory,ext,imax,jmax,
+     1  nf,nf,var_2d,lvl_2d,lvl_coord_2d,units_2d,
+     1                     comment_2d,field_2d,istatus)
 
-!       Check for missing data
+!       check for missing data
         do if = 1,nf
         do j = 1,jmax
         do i = 1,imax
             if(istatus .eq. 1)then
                 if(field_2d(i,j,if) .eq. r_missing_data)then
-                    write(6,*)' Missing Data Value Detected in 2D Field'
+                    write(6,*)' missing data value detected in 2d field'
                     istatus = -1
                 endif
             endif

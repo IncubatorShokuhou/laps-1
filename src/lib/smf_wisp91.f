@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -34,54 +34,54 @@ cdis
      1  ,height_laps_1d,pres_laps_1d,temp_laps_1d,
      1                          rlwc_laps,prob_laps,mode)
 
-!     1991 Steve Albers (Smith-Feddes Code adapted to LAPS)
+!     1991 steve albers (smith-feddes code adapted to laps)
 
-!     The array pres_laps_1d begins at 900mb and decreases at 50mb steps.
+!     the array pres_laps_1d begins at 900mb and decreases at 50mb steps.
 
 !     real rlwc_laps(nk),prob_laps(nk)
 !     real height_laps_1d(nk),pres_laps_1d(nk),temp_laps_1d(nk)
 
-!     INPUTS
-      integer nk              ! Number of LAPS vertical levels
-      real cbase_m            ! Cloud base (Meters MSL)
-      real ctop_m             ! Cloud top (Meters MSL)
-      integer itype_in        ! Cloud type (Now Hardwired to 1) (Stratus)
-      real height_laps_1d(nk) ! Vert array, Heights (Meters MSL)
-      real pres_laps_1d(nk)   ! Vert array, LAPS Pressure Levels (MB)
-      real temp_laps_1d(nk)   ! Vert array, Ambient Temperature (Deg K)
-      integer mode            ! Not used (Can be removed)
+!     inputs
+      integer nk              ! number of laps vertical levels
+      real cbase_m            ! cloud base (meters msl)
+      real ctop_m             ! cloud top (meters msl)
+      integer itype_in        ! cloud type (now hardwired to 1) (stratus)
+      real height_laps_1d(nk) ! vert array, heights (meters msl)
+      real pres_laps_1d(nk)   ! vert array, laps pressure levels (mb)
+      real temp_laps_1d(nk)   ! vert array, ambient temperature (deg k)
+      integer mode            ! not used (can be removed)
 
 
-!     OUTPUTS
-      real rlwc_laps(nk)      ! Vert array, LWC (G/M**3)
-                                ! Should be assigned for all LAPS levels within
-                                ! The cloud layer.
-      real prob_laps(nk)      ! Vert array, Not used right now.
+!     outputs
+      real rlwc_laps(nk)      ! vert array, lwc (g/m**3)
+                                ! should be assigned for all laps levels within
+                                ! the cloud layer.
+      real prob_laps(nk)      ! vert array, not used right now.
 
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-C     DIMENSION WATR(4,2,260),XMVD(4),ICLD(8),ICTP(4),ICP(4)
-      DIMENSION WATR(4,2,260),XMVD(4),ICTP(4),ICP(4)
-      CHARACTER*70 TITLE
-      CHARACTER*2 CLDTYP(4)
-C     CHARACTER*1 ANS
-      CHARACTER*11 AINDEX(4,260),HINDEX(4,260)
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+      common /iodev/k5,k6,k7,k8
+c
+c     dimension watr(4,2,260),xmvd(4),icld(8),ictp(4),icp(4)
+      dimension watr(4,2,260),xmvd(4),ictp(4),icp(4)
+      character*70 title
+      character*2 cldtyp(4)
+c     character*1 ans
+      character*11 aindex(4,260),hindex(4,260)
 
-      COMMON /PROF/ NOBHGT,HEIGHT(200),PRESSP(200),TEMPRO(200)
-C
-C-------Define the Input/Output Logical Devices
-C
-      K5 = 5
-      K6 = 6
-      K7 = 7
-      K8 = 8
+      common /prof/ nobhgt,height(200),pressp(200),tempro(200)
+c
+c-------define the input/output logical devices
+c
+      k5 = 5
+      k6 = 6
+      k7 = 7
+      k8 = 8
 
-      bot(1) = cbase_m    ! Bottom Height m
-      top(1) = ctop_m    ! Top Height m
+      bot(1) = cbase_m    ! bottom height m
+      top(1) = ctop_m    ! top height m
 
-      if(mode .eq. 1)then ! LAPS data is passed in through the call
+      if(mode .eq. 1)then ! laps data is passed in through the call
           nobhgt = nk
           do i = 1,nobhgt
               height(i) = height_laps_1d(i)
@@ -89,42 +89,42 @@ C
               tempro(i) = temp_laps_1d(i)
           enddo ! i
 
-      elseif(mode .eq. 2)then ! Test Mode
-!         Read in the test sounding
-          call RAOB(NXFLAG,NVFLAG,MAXOBSR) ! This routine was modified for PROFS
+      elseif(mode .eq. 2)then ! test mode
+!         read in the test sounding
+          call raob(nxflag,nvflag,maxobsr) ! this routine was modified for profs
 
       endif
 
       ndecks = 1
 
-!     0        CLDTYP(I) = '  '
-!     1        CLDTYP(I) = 'St'
-!     2        CLDTYP(I) = 'Sc'
-!     3        CLDTYP(I) = 'Cu'
-!     4        CLDTYP(I) = 'Ns'
-!     5        CLDTYP(I) = 'Ac'
-!     6        CLDTYP(I) = 'As'
-!     7        CLDTYP(I) = 'Cs'
-!     8        CLDTYP(I) = 'Ci'
-!     9        CLDTYP(I) = 'Cc'
-!    10        CLDTYP(I) = 'Cb'
+!     0        cldtyp(i) = '  '
+!     1        cldtyp(i) = 'st'
+!     2        cldtyp(i) = 'sc'
+!     3        cldtyp(i) = 'cu'
+!     4        cldtyp(i) = 'ns'
+!     5        cldtyp(i) = 'ac'
+!     6        cldtyp(i) = 'as'
+!     7        cldtyp(i) = 'cs'
+!     8        cldtyp(i) = 'ci'
+!     9        cldtyp(i) = 'cc'
+!    10        cldtyp(i) = 'cb'
 
-      ictp(1) = itype_in     ! Type of layer 1
-      icp(1)  = 100   ! Percent Cloud Cover of layer 1
+      ictp(1) = itype_in     ! type of layer 1
+      icp(1)  = 100   ! percent cloud cover of layer 1
 
       if(top(1) .le. bot(1))return
 
-      call INTERP_smf(NDECKS)
-      call LWC(NDECKS,ICP,ICTP,WATR,XMVD) ! Add this to link into .NEW routines
+      call interp_smf(ndecks)
+      call lwc(ndecks,icp,ictp,watr,xmvd) ! add this to link into .new routines
 
 !     call a modified version of the output routine
-c     call OUTPUT(CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE)
+c     call output(cldtyp,watr,xmvd,aindex,hindex,icp,ndecks,title)
 
-      call OUT_LAPS
-     1  (nk,CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE,
+      call out_laps
+     1  (nk,cldtyp,watr,xmvd,aindex,hindex,icp,ndecks,title,
      1         rlwc_laps,prob_laps)
 
-!     write(6,*)' height  LWC  %Liquid'
+!     write(6,*)' height  lwc  %liquid'
       i = 1
       n1 = watr(i,1,1)
         iscript = 0
@@ -138,1494 +138,1494 @@ c     call OUTPUT(CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE)
       return
 
       end
-      SUBROUTINE RAOB(NXFLAG,NVFLAG,MAXOBSR)
-C***********************************************************************
-C                          SUBROUTINE RAOB
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  RAOB
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  USRINT
-C=======================================================================
-C<Description>
-C    This subroutine reads in the vertical profile or upperair data
-C    needed to run the Smith-Feddes model.
-C=======================================================================
-C<Called routines>
-C    HSORT - (subroutine) eliminates redundant height levels and sorts
-C            the RAOB data in ascending order of height
-C    INKEY - (subroutine) gets a character from the keyboard without
-C            echo.  The routine is not available in source code form.
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL RAOB(NXFLAG,NVFLAG,MAXOBSR)
-C    Input:
-C       MAXOBSR  - (integer) the maximum number of upperair levels
-C                  allowed
-C    Output:
-C       NXFLAG   - (integer) a flag
-C                  0 - the option to compute the icing index was not
-C                      selected
-C                  1 - the option to compute the icing index was
-C                      selected
-C       NVFLAG   - (integer) a flag
-C                  0 - the vertical profile data is not yet available
-C                      for use
-C                  1 - the vertical profile data is available for use
-C    Output (in Common):
-C       NOBHGT   - (integer) the number of levels in the temperature-
-C                  pressure-height vertical profile
-C       HEIGHT   - (real) the height of each level in the profile
-C       PRESSP   - (real) the pressure profile
-C       TEMPRO   - (real) the temperature profile
-C    Common:
-C       K5       - (integer) the keyboard input unit
-C       K6       - (integer) the screen output unit
-C       K7       - (integer) the disk file unit
-C=======================================================================
-C<History>
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Original code.
-C    09/14/89  ASL    (505) 678-1570    Elton P. Avara
-C              Created subroutine HSORT from part of this code
-C    12/21/89  Cut out screen i/o for PROFS version, all this does now
-C              is essentially reads the sounding from a file.
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-C-------Set the minimums and the maximums of the different input
-C       parameters so there are no magic numbers floating around.
-C
-      real TEMPMIN,TEMPMAX,PRESMIN,PRESMAX,HEITMIN,HEITMAX
-      PARAMETER (TEMPMIN  =   150.000)
-      PARAMETER (TEMPMAX  =   349.999)
-      PARAMETER (PRESMIN  =    50.000)
-      PARAMETER (PRESMAX  =  1099.999)
-      PARAMETER (HEITMIN  =    50.000)
-      PARAMETER (HEITMAX  = 24999.999)
-C
-      COMMON /PROF/ NOBHGT,HEIGHT(200),PRESSP(200),TEMPRO(200)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-      CHARACTER*39 DATAFILE
-C     CHARACTER*10 SCRCLR,ANSWER
-C     CHARACTER*8 CURPOS
-C     CHARACTER*4 SCRBLK,HUNITS(2),TUNITS(3),PUNITS(2)
-      CHARACTER*4 HUNITS(2),TUNITS(3),PUNITS(2)
-C     CHARACTER*3 LERASE
-C     CHARACTER*1 NUM(10),ANS,ANS2
-      CHARACTER*1 NUM(10)
-C
-      DATA NUM/'0','1','2','3','4','5','6','7','8','9'/
-      DATA HUNITS/'(m) ','(ft)'/
-      DATA TUNITS/'(K) ','(C) ','(F) '/
-      DATA PUNITS/'(mb)','(in)'/
-      DATA NHEIT,NTEMP,NPRES/3*1/
-C
-        DATAFILE='sounding.dat'
-        OPEN(K7,FILE=DATAFILE,ERR=19,STATUS='OLD')
-        READ(K7,*) NOBHGT
-        DO 21 J=1,NOBHGT
-   21     READ(K7,*) HEIGHT(J),TEMPRO(J),PRESSP(J)
-        CLOSE(K7)
-C
-C-------Get the desired units for height, temperature, and pressure.
-C
-      NHEIT=1
-      NTEMP=1
-      NPRES=1
-C
-C-------If vertical profile data are available from a file, convert the
-C       data to the desired units.
-C
-   50 HEITMN=HEITMIN
-      HEITMX=HEITMAX
-C
-      TEMPMN=TEMPMIN
-      TEMPMX=TEMPMAX
-C
-      PRESMN=PRESMIN
-      PRESMX=PRESMAX
-C
-C-------Initialize the cursor position and the Icing Index computation
-C       flag
-C
-      ITEM=0
-      NXFLAG=0
-C
-C-------Set the vertical profile flag and return.
-C
-      NVFLAG=1
-C
-19    RETURN
-      END
-      SUBROUTINE INTERP_smf(NDECKS)
-C***********************************************************************
-C                          SUBROUTINE INTERP
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  INTERP
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  INPUT
-C=======================================================================
-C<Description>
-C    This subroutine takes the temperature (TEMPRO) and pressure
-C    (PRESSP) profiles and interpolates between them to yield the
-C    temperatures at the geometric layer bottoms (BTEM), 100 m height
-C    levels (TEMP), and geometric layer tops (TTEM); and the pressures
-C    at the geometric layer bottoms (PRB), 100 m height levels (PRES),
-C    and geometric layer tops (PRT).
-C=======================================================================
-C<Called routines>
-C    None
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL INTERP_smf(NDECKS)
-C    Input:
-C       NDECKS   - (integer) the number of cloud decks (1-4)
-C    Input (in Common):
-C       NOBHGT   - (integer) the number of levels in the temperature-
-C                  pressure-height vertical profile
-C       HEIGHT   - (real) the height of each level in the profile
-C       PRESSP   - (real) the pressure profile
-C       TEMPRO   - (real) the temperature profile
-C       BOT      - (real) the height of the (up to 4) cloud layer
-C                  bottoms
-C       TOP      - (real) the height of the (up to 4) cloud layer tops
-C    Output (in Common):
-C       PRB      - (real) the pressures at the cloud layer bottoms
-C       PRT      - (real) the pressures at the cloud layer tops
-C       BTEM     - (real) the temperatures at the cloud layer bottoms
-C       TTEM     - (real) the temperatures at the cloud layer tops
-C       NLVL     - (integer) number of 100 m height levels
-C       HEITL    - (real) array of 100 m heights
-C       PRES     - (real) the pressure every 100 m
-C       TEMP     - (real) the temperature every 100 m
-C    Common:
-C       K6       - (integer) the screen output unit
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C    05/03/89  ASL    (505) 678-1570    Elton P. Avara
-C              Minor modifications to the code and added the variable
-C              PRES computations.
-C    09/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Modified the definitions of PRES and TEMP to give values
-C              every 100 m.  Also added NLVL, PRT, TTEM, and HEITL.
-C              Major modifications.
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-      COMMON /PROF/ NOBHGT,HEIGHT(200),PRESSP(200),TEMPRO(200)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-C-------Initialize the height indices
-C
-      NLVL=0
-      L=2
-C
-C-------Find the greatest height level required
-C
-      XMAXHT=0
-      DO 5 J=1,NDECKS
-    5 IF(XMAXHT.LT.TOP(J)) XMAXHT=TOP(J)
-C
-C-------The first height level is ground level
-C
-      NLVL=NLVL+1
-      HEITL(NLVL)=HEIGHT(1)
-      PRES(NLVL)=PRESSP(1)
-      TEMP(NLVL)=TEMPRO(1)
-C
-C-------Find the next height above ground level which is a multiple of
-C       100 m
-C
-      HEITZ=100*INT(0.01*HEIGHT(1))
-      IF(HEITZ.LT.HEIGHT(1)) HEITZ=HEITZ+100.0
-C
-C-------Increment the height by 100 meters and get the temperature
-C       and pressure
-C
-   10 NLVL=NLVL+1
-      HEITZ=HEITZ+100.0
-      HEITL(NLVL)=HEITZ
-C
-C-------Check the height level against the maximum height required
-C
-      IF(HEITL(NLVL)-XMAXHT.GE.100.0) THEN
-        NLVL=NLVL-1
-        GOTO 30
-      ENDIF
-C
-C-------Loop over the temperature and pressure heights from the
-C       radiosonde
-C
-      DO 20 J=L,NOBHGT
-C
-C-------Now as soon as the observation height reaches the desired
-C       height level, interpolate the temperature to that height.
-C
-      IF (HEIGHT(J).GE.HEITL(NLVL)) THEN
-        SLOPE = (TEMPRO(J)-TEMPRO(J-1))/(HEIGHT(J)-HEIGHT(J-1))
-        TRCPT = -SLOPE * HEIGHT(J) + TEMPRO(J)
-        TEMP(NLVL) = SLOPE * HEITL(NLVL) + TRCPT
-C
-C-------Now interpolate to find the pressure
-C
-C       IF(ABS(SLOPE).GT.1.0E-4) THEN
-C
-C--------------Linear trend to temperature in vertical.  The number
-C              0.034109527 is the acceleration due to gravity divided
-C              by the gas constant
-C
-C         RATIO = ((TEMPRO(J-1) + SLOPE * (HEITL(NLVL)-HEIGHT(J-1))) /
-C    1    TEMPRO(J-1))**(-0.034109527/SLOPE)
-C       ELSE
-C
-C--------------Use average layer temperature-AVTEMP-to calculate pressure
-C
-C
-          AVTEMP = (TEMPRO(J-1) + TEMPRO(J))/2.
-          RATIO =EXP(-0.034109527*(HEITL(NLVL)-HEIGHT(J-1))/AVTEMP)
-C       ENDIF
-        PRES(NLVL) = PRESSP(J-1) * RATIO
-C
-C-------Go get another height level
-C
-        L=J
-        GOTO 10
-C
-C-------Have we run out of upperair data?
-C
-      ELSEIF (J.EQ.NOBHGT) THEN
-        WRITE(K6,*)'Temperature and pressure profiles do not extend 100
+      subroutine raob(nxflag,nvflag,maxobsr)
+c***********************************************************************
+c                          subroutine raob
+c***********************************************************************
+c<begin>
+c<identification>          name:  raob
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  usrint
+c=======================================================================
+c<description>
+c    this subroutine reads in the vertical profile or upperair data
+c    needed to run the smith-feddes model.
+c=======================================================================
+c<called routines>
+c    hsort - (subroutine) eliminates redundant height levels and sorts
+c            the raob data in ascending order of height
+c    inkey - (subroutine) gets a character from the keyboard without
+c            echo.  the routine is not available in source code form.
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call raob(nxflag,nvflag,maxobsr)
+c    input:
+c       maxobsr  - (integer) the maximum number of upperair levels
+c                  allowed
+c    output:
+c       nxflag   - (integer) a flag
+c                  0 - the option to compute the icing index was not
+c                      selected
+c                  1 - the option to compute the icing index was
+c                      selected
+c       nvflag   - (integer) a flag
+c                  0 - the vertical profile data is not yet available
+c                      for use
+c                  1 - the vertical profile data is available for use
+c    output (in common):
+c       nobhgt   - (integer) the number of levels in the temperature-
+c                  pressure-height vertical profile
+c       height   - (real) the height of each level in the profile
+c       pressp   - (real) the pressure profile
+c       tempro   - (real) the temperature profile
+c    common:
+c       k5       - (integer) the keyboard input unit
+c       k6       - (integer) the screen output unit
+c       k7       - (integer) the disk file unit
+c=======================================================================
+c<history>
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              original code.
+c    09/14/89  asl    (505) 678-1570    elton p. avara
+c              created subroutine hsort from part of this code
+c    12/21/89  cut out screen i/o for profs version, all this does now
+c              is essentially reads the sounding from a file.
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+c-------set the minimums and the maximums of the different input
+c       parameters so there are no magic numbers floating around.
+c
+      real tempmin,tempmax,presmin,presmax,heitmin,heitmax
+      parameter (tempmin  =   150.000)
+      parameter (tempmax  =   349.999)
+      parameter (presmin  =    50.000)
+      parameter (presmax  =  1099.999)
+      parameter (heitmin  =    50.000)
+      parameter (heitmax  = 24999.999)
+c
+      common /prof/ nobhgt,height(200),pressp(200),tempro(200)
+      common /iodev/k5,k6,k7,k8
+c
+      character*39 datafile
+c     character*10 scrclr,answer
+c     character*8 curpos
+c     character*4 scrblk,hunits(2),tunits(3),punits(2)
+      character*4 hunits(2),tunits(3),punits(2)
+c     character*3 lerase
+c     character*1 num(10),ans,ans2
+      character*1 num(10)
+c
+      data num/'0','1','2','3','4','5','6','7','8','9'/
+      data hunits/'(m) ','(ft)'/
+      data tunits/'(k) ','(c) ','(f) '/
+      data punits/'(mb)','(in)'/
+      data nheit,ntemp,npres/3*1/
+c
+        datafile='sounding.dat'
+        open(k7,file=datafile,err=19,status='old')
+        read(k7,*) nobhgt
+        do 21 j=1,nobhgt
+   21     read(k7,*) height(j),tempro(j),pressp(j)
+        close(k7)
+c
+c-------get the desired units for height, temperature, and pressure.
+c
+      nheit=1
+      ntemp=1
+      npres=1
+c
+c-------if vertical profile data are available from a file, convert the
+c       data to the desired units.
+c
+   50 heitmn=heitmin
+      heitmx=heitmax
+c
+      tempmn=tempmin
+      tempmx=tempmax
+c
+      presmn=presmin
+      presmx=presmax
+c
+c-------initialize the cursor position and the icing index computation
+c       flag
+c
+      item=0
+      nxflag=0
+c
+c-------set the vertical profile flag and return.
+c
+      nvflag=1
+c
+19    return
+      end
+      subroutine interp_smf(ndecks)
+c***********************************************************************
+c                          subroutine interp
+c***********************************************************************
+c<begin>
+c<identification>          name:  interp
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  input
+c=======================================================================
+c<description>
+c    this subroutine takes the temperature (tempro) and pressure
+c    (pressp) profiles and interpolates between them to yield the
+c    temperatures at the geometric layer bottoms (btem), 100 m height
+c    levels (temp), and geometric layer tops (ttem); and the pressures
+c    at the geometric layer bottoms (prb), 100 m height levels (pres),
+c    and geometric layer tops (prt).
+c=======================================================================
+c<called routines>
+c    none
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call interp_smf(ndecks)
+c    input:
+c       ndecks   - (integer) the number of cloud decks (1-4)
+c    input (in common):
+c       nobhgt   - (integer) the number of levels in the temperature-
+c                  pressure-height vertical profile
+c       height   - (real) the height of each level in the profile
+c       pressp   - (real) the pressure profile
+c       tempro   - (real) the temperature profile
+c       bot      - (real) the height of the (up to 4) cloud layer
+c                  bottoms
+c       top      - (real) the height of the (up to 4) cloud layer tops
+c    output (in common):
+c       prb      - (real) the pressures at the cloud layer bottoms
+c       prt      - (real) the pressures at the cloud layer tops
+c       btem     - (real) the temperatures at the cloud layer bottoms
+c       ttem     - (real) the temperatures at the cloud layer tops
+c       nlvl     - (integer) number of 100 m height levels
+c       heitl    - (real) array of 100 m heights
+c       pres     - (real) the pressure every 100 m
+c       temp     - (real) the temperature every 100 m
+c    common:
+c       k6       - (integer) the screen output unit
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c    05/03/89  asl    (505) 678-1570    elton p. avara
+c              minor modifications to the code and added the variable
+c              pres computations.
+c    09/13/89  asl    (505) 678-1570    elton p. avara
+c              modified the definitions of pres and temp to give values
+c              every 100 m.  also added nlvl, prt, ttem, and heitl.
+c              major modifications.
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+      common /prof/ nobhgt,height(200),pressp(200),tempro(200)
+      common /iodev/k5,k6,k7,k8
+c
+c-------initialize the height indices
+c
+      nlvl=0
+      l=2
+c
+c-------find the greatest height level required
+c
+      xmaxht=0
+      do 5 j=1,ndecks
+    5 if(xmaxht.lt.top(j)) xmaxht=top(j)
+c
+c-------the first height level is ground level
+c
+      nlvl=nlvl+1
+      heitl(nlvl)=height(1)
+      pres(nlvl)=pressp(1)
+      temp(nlvl)=tempro(1)
+c
+c-------find the next height above ground level which is a multiple of
+c       100 m
+c
+      heitz=100*int(0.01*height(1))
+      if(heitz.lt.height(1)) heitz=heitz+100.0
+c
+c-------increment the height by 100 meters and get the temperature
+c       and pressure
+c
+   10 nlvl=nlvl+1
+      heitz=heitz+100.0
+      heitl(nlvl)=heitz
+c
+c-------check the height level against the maximum height required
+c
+      if(heitl(nlvl)-xmaxht.ge.100.0) then
+        nlvl=nlvl-1
+        goto 30
+      endif
+c
+c-------loop over the temperature and pressure heights from the
+c       radiosonde
+c
+      do 20 j=l,nobhgt
+c
+c-------now as soon as the observation height reaches the desired
+c       height level, interpolate the temperature to that height.
+c
+      if (height(j).ge.heitl(nlvl)) then
+        slope = (tempro(j)-tempro(j-1))/(height(j)-height(j-1))
+        trcpt = -slope * height(j) + tempro(j)
+        temp(nlvl) = slope * heitl(nlvl) + trcpt
+c
+c-------now interpolate to find the pressure
+c
+c       if(abs(slope).gt.1.0e-4) then
+c
+c--------------linear trend to temperature in vertical.  the number
+c              0.034109527 is the acceleration due to gravity divided
+c              by the gas constant
+c
+c         ratio = ((tempro(j-1) + slope * (heitl(nlvl)-height(j-1))) /
+c    1    tempro(j-1))**(-0.034109527/slope)
+c       else
+c
+c--------------use average layer temperature-avtemp-to calculate pressure
+c
+c
+          avtemp = (tempro(j-1) + tempro(j))/2.
+          ratio =exp(-0.034109527*(heitl(nlvl)-height(j-1))/avtemp)
+c       endif
+        pres(nlvl) = pressp(j-1) * ratio
+c
+c-------go get another height level
+c
+        l=j
+        goto 10
+c
+c-------have we run out of upperair data?
+c
+      elseif (j.eq.nobhgt) then
+        write(k6,*)'temperature and pressure profiles do not extend 100
      1m above highest cloud top.'
-        WRITE(K6,*)'The model needs this information to perform the calc
+        write(k6,*)'the model needs this information to perform the calc
      1ulations.'
-C
-        STOP
-      ENDIF
-   20 CONTINUE
-C
-C-------Loop over the geometric layers and get the layer bottom values
-C       of temperature and pressure.
-C
-   30 L=2
-      DO 40 I=1,NDECKS
-C
-C-------Loop over the temperature and pressure heights from the
-C       radiosonde
-C
-      DO 50 J=L,NOBHGT
-C
-C-------Now as soon as the observation height reaches the desired
-C       height level, interpolate the temperature to that height.
-C
-      IF (HEIGHT(J).GE.BOT(I)) THEN
-        SLOPE = (TEMPRO(J)-TEMPRO(J-1))/(HEIGHT(J)-HEIGHT(J-1))
-        TRCPT = -SLOPE * HEIGHT(J) + TEMPRO(J)
-        BTEM(I) = SLOPE * BOT(I) + TRCPT
-C
-C-------Now interpolate to find the pressure
-C
-C       IF(ABS(SLOPE).GT.1.0E-4) THEN
-C
-C--------------Linear trend to temperature in vertical.  The number
-C              0.034109527 is the acceleration due to gravity divided
-C              by the gas constant
-C
-C         RATIO = ((TEMPRO(J-1) + SLOPE * (BOT(I)-HEIGHT(J-1))) /
-C    1    TEMPRO(J-1))**(-0.034109527/SLOPE)
-C       ELSE
-C
-C--------------Use average layer temperature-AVTEMP-to calculate pressure
-C
-          AVTEMP = (TEMPRO(J-1) + TEMPRO(J))/2.
-          RATIO =EXP(-0.034109527*(BOT(I)-HEIGHT(J-1))/AVTEMP)
-C       ENDIF
-        PRB(I) = PRESSP(J-1) * RATIO
-C
-C-------Go get another geometric layer
-C
-        L=J
-        GOTO 40
-C
-C-------Have we run out of upperair data?
-C
-      ELSEIF (J.EQ.NOBHGT) THEN
-        WRITE(K6,*)'Temperature and pressure profiles do not extend 100
+c
+        stop
+      endif
+   20 continue
+c
+c-------loop over the geometric layers and get the layer bottom values
+c       of temperature and pressure.
+c
+   30 l=2
+      do 40 i=1,ndecks
+c
+c-------loop over the temperature and pressure heights from the
+c       radiosonde
+c
+      do 50 j=l,nobhgt
+c
+c-------now as soon as the observation height reaches the desired
+c       height level, interpolate the temperature to that height.
+c
+      if (height(j).ge.bot(i)) then
+        slope = (tempro(j)-tempro(j-1))/(height(j)-height(j-1))
+        trcpt = -slope * height(j) + tempro(j)
+        btem(i) = slope * bot(i) + trcpt
+c
+c-------now interpolate to find the pressure
+c
+c       if(abs(slope).gt.1.0e-4) then
+c
+c--------------linear trend to temperature in vertical.  the number
+c              0.034109527 is the acceleration due to gravity divided
+c              by the gas constant
+c
+c         ratio = ((tempro(j-1) + slope * (bot(i)-height(j-1))) /
+c    1    tempro(j-1))**(-0.034109527/slope)
+c       else
+c
+c--------------use average layer temperature-avtemp-to calculate pressure
+c
+          avtemp = (tempro(j-1) + tempro(j))/2.
+          ratio =exp(-0.034109527*(bot(i)-height(j-1))/avtemp)
+c       endif
+        prb(i) = pressp(j-1) * ratio
+c
+c-------go get another geometric layer
+c
+        l=j
+        goto 40
+c
+c-------have we run out of upperair data?
+c
+      elseif (j.eq.nobhgt) then
+        write(k6,*)'temperature and pressure profiles do not extend 100
      1m above highest cloud top.'
-        WRITE(K6,*)'The model needs this information to perform the calc
+        write(k6,*)'the model needs this information to perform the calc
      1ulations.'
-C
-        STOP
-      ENDIF
-   50 CONTINUE
-C
-   40 CONTINUE
-C
-C-------Loop over the geometric layers and get the layer top values
-C       of temperature and pressure.
-C
-      L=2
-      DO 60 I=1,NDECKS
-C
-C-------Loop over the temperature and pressure heights from the
-C       radiosonde
-C
-      DO 70 J=L,NOBHGT
-C
-C-------Now as soon as the observation height reaches the desired
-C       height level, interpolate the temperature to that height.
-C
-      IF (HEIGHT(J).GE.TOP(I)) THEN
-        SLOPE = (TEMPRO(J)-TEMPRO(J-1))/(HEIGHT(J)-HEIGHT(J-1))
-        TRCPT = -SLOPE * HEIGHT(J) + TEMPRO(J)
-        TTEM(I) = SLOPE * TOP(I) + TRCPT
-C
-C-------Now interpolate to find the pressure
-C
-C       IF(ABS(SLOPE).GT.1.0E-4) THEN
-C
-C--------------Linear trend to temperature in vertical.  The number
-C              0.034109527 is the acceleration due to gravity divided
-C              by the gas constant
-C
-C         RATIO = ((TEMPRO(J-1) + SLOPE * (TOP(I)-HEIGHT(J-1))) /
-C    1    TEMPRO(J-1))**(-0.034109527/SLOPE)
-C       ELSE
-C
-C--------------Use average temperature in layer-AVTEMP-to calculate pressure
-C
-          AVTEMP = (TEMPRO(J-1) + TEMPRO(J))/2.
-          RATIO =EXP(-0.034109527*(TOP(I)-HEIGHT(J-1))/AVTEMP)
-C       ENDIF
-        PRT(I) = PRESSP(J-1) * RATIO
-C
-C-------Go get another geometric layer
-C
-        L=J
-        GOTO 60
-C
-C-------Have we run out of upperair data?
-C
-      ELSEIF (J.EQ.NOBHGT) THEN
-        WRITE(K6,*)'Temperature and pressure profiles do not extend 100
+c
+        stop
+      endif
+   50 continue
+c
+   40 continue
+c
+c-------loop over the geometric layers and get the layer top values
+c       of temperature and pressure.
+c
+      l=2
+      do 60 i=1,ndecks
+c
+c-------loop over the temperature and pressure heights from the
+c       radiosonde
+c
+      do 70 j=l,nobhgt
+c
+c-------now as soon as the observation height reaches the desired
+c       height level, interpolate the temperature to that height.
+c
+      if (height(j).ge.top(i)) then
+        slope = (tempro(j)-tempro(j-1))/(height(j)-height(j-1))
+        trcpt = -slope * height(j) + tempro(j)
+        ttem(i) = slope * top(i) + trcpt
+c
+c-------now interpolate to find the pressure
+c
+c       if(abs(slope).gt.1.0e-4) then
+c
+c--------------linear trend to temperature in vertical.  the number
+c              0.034109527 is the acceleration due to gravity divided
+c              by the gas constant
+c
+c         ratio = ((tempro(j-1) + slope * (top(i)-height(j-1))) /
+c    1    tempro(j-1))**(-0.034109527/slope)
+c       else
+c
+c--------------use average temperature in layer-avtemp-to calculate pressure
+c
+          avtemp = (tempro(j-1) + tempro(j))/2.
+          ratio =exp(-0.034109527*(top(i)-height(j-1))/avtemp)
+c       endif
+        prt(i) = pressp(j-1) * ratio
+c
+c-------go get another geometric layer
+c
+        l=j
+        goto 60
+c
+c-------have we run out of upperair data?
+c
+      elseif (j.eq.nobhgt) then
+        write(k6,*)'temperature and pressure profiles do not extend 100
      1m above highest cloud top.'
-        WRITE(K6,*)'The model needs this information to perform the calc
+        write(k6,*)'the model needs this information to perform the calc
      1ulations.'
-C
-        STOP
-      ENDIF
-   70 CONTINUE
-C
-   60 CONTINUE
-C
-      RETURN
-      END
+c
+        stop
+      endif
+   70 continue
+c
+   60 continue
+c
+      return
+      end
 
 
-      SUBROUTINE AL(LVLCT,LAYR,TI,N1,N2,CALW)
-C***********************************************************************
-C                          SUBROUTINE AL
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  AL
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  LW
-C=======================================================================
-C<Description>
-C    This subroutine computes moist adiabatic Liquid Water Content of
-C    non-cirriform cloud types
-C=======================================================================
-C<Called routines>
-C    TZ     - (subroutine) calculates moist adiabatic lapse rate of
-C             temperature and saturation vapor pressure
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL AL(LVLCT,LAYR,TI,N1,N2,CALW)
-C    Input:
-C       LVLCT    - (integer) cloud type of the cloud deck
-C       LAYR     - (integer) cloud layer
-C       TI       - (real) temperature at bottom of cloud layer (C)
-C       N1       - (integer) the lowest 100 m height level within the
-C                  cloud layer
-C       N2       - (integer) the highest 100 m height level within the
-C                  cloud layer
-C    Output:
-C       CALW     - (real) array of adiabatic Liquid Water Content at
-C                  each 100 m within the cloud layer
-C    Common:
-C       BOT      - (real) the height of the (up to 4) cloud layer
-C                  bottoms
-C       TOP      - (real) the height of the (up to 4) cloud layer tops
-C       PRB      - (real) the pressures at the cloud layer bottoms
-C       PRT      - (real) the pressures at the cloud layer tops
-C       BTEM     - (real) the temperatures at the cloud layer bottoms
-C       TTEM     - (real) the temperatures at the cloud layer tops
-C       NLVL     - (integer) number of 100 m height levels
-C       HEITL    - (real) array of 100 m heights
-C       PRES     - (real) the pressure every 100 m
-C       TEMP     - (real) the temperature every 100 m
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code.
-C    05/03/89  ASL    (505) 678-1570    Elton P. Avara
-C              Minor modifications to the code and added the variable
-C              PRES for calculating DPZ.
-C    09/12/89  ASL    (505) 678-1570    Elton P. Avara
-C              Modified the definition of PRES to give values every
-C              100 m.  Also added NLVL, TOP, BTEM, TTEM, PRT, TEMP,
-C              and HEITL.  Major modifications.
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-C  Author - C. William Rogers
-C
-C  PROCEDURE:
-C       Compute moist adiabatic temperature lapse rate in S/R TZ.  Then
-C  compute water condensed out in air parcel which rises 10M and cools
-C  at lapse rate from S/R TZ.  LWC is difference between saturated
-C  conditions at bottom and top of 10M thick layer.  This procedure
-C  is repeated in 10M steps or fraction thereof until LWC at each 100 m
-C  in cloud is obtained.  All sublayer variables are for 10M increments
-C  except at top of layer or bottom of next higher layer.  For
-C  cumuliform cloud reduce LWC to account for entrainment.
-C
-C  REFERENCE:
-C       Rogers, C.W., J.T. Hanley and E.J. Mack, 1985: "Updating the
-C       Smith-Feddes Model", Final Report Contract No. N00228-84-C-3157
-C       Calspan Report No. 7330-1.  Calspan Corp., P.O. Box 400 Buffalo,
-C       New York 14225. (See Section 3.5)
-C
-C  NOTE:  All computations are carried out for 10M thick layers except
-C         for shallower layers ending at bottom of next higher layer.
-C
-C  LOCAL GLOSSARY:
-C       T      = bottom temperature of 10M layer (C) as input to S/R TZ
-C                and in computing TN for ES2 computation.  It will be
-C                (K) when returned by S/R TZ and in computation of RHO.
-C       ALW    = adiabatic Liquid Water Content in cloud layer
-C                bottom to bottom of next layer and at 10M intervals in
-C                between
-C       DP     = pressure change of 10M or less interval
-C       DTZ    = moist adiabatic lapse rate of temperature
-C       DZ     = 10M interval or less, the latter at BOT(LAYR) and
-C                TOP(LAYR)
-C       ES     = saturation vapor pressure at bottom of 10M layer
-C       ES2    = saturation vapor pressure at top of 10M or less layer
-C       HT     = height of height level in cloud layer relative to cloud
-C                deck base
-C       IGO    = control variable
-C                if IGO = 1 - have reached top of layer
-C                       = 0 - have not reached top of layer
-C       P      = pressure at bottom of 10M layer
-C       RHO    = absolute humidity at bottom of 10M layer
-C       TN     = top temperature of 10M layer (C) in ES2 computation
-C                and (K) in RHO2 computations
-C       RHO2   = absolute humidity at top of 10M or less layer
-C       RS     = universal gas constant
-C       WR     = gas constant for water vapor
-C       Y      = fraction of adiabatic LWC produced by entrainment
-C       Z      = height parameter within cloud layer used in S/R AL
-C
-C-----------------------------------------------------------------------
-C
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-C
-      DIMENSION CALW(260)
-      LOGICAL NSKIP
-C
-      DATA A1,B1,C1,A2,B2,C2/8.4897, -13.2191, 4.7295, 10.357,
+      subroutine al(lvlct,layr,ti,n1,n2,calw)
+c***********************************************************************
+c                          subroutine al
+c***********************************************************************
+c<begin>
+c<identification>          name:  al
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  lw
+c=======================================================================
+c<description>
+c    this subroutine computes moist adiabatic liquid water content of
+c    non-cirriform cloud types
+c=======================================================================
+c<called routines>
+c    tz     - (subroutine) calculates moist adiabatic lapse rate of
+c             temperature and saturation vapor pressure
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call al(lvlct,layr,ti,n1,n2,calw)
+c    input:
+c       lvlct    - (integer) cloud type of the cloud deck
+c       layr     - (integer) cloud layer
+c       ti       - (real) temperature at bottom of cloud layer (c)
+c       n1       - (integer) the lowest 100 m height level within the
+c                  cloud layer
+c       n2       - (integer) the highest 100 m height level within the
+c                  cloud layer
+c    output:
+c       calw     - (real) array of adiabatic liquid water content at
+c                  each 100 m within the cloud layer
+c    common:
+c       bot      - (real) the height of the (up to 4) cloud layer
+c                  bottoms
+c       top      - (real) the height of the (up to 4) cloud layer tops
+c       prb      - (real) the pressures at the cloud layer bottoms
+c       prt      - (real) the pressures at the cloud layer tops
+c       btem     - (real) the temperatures at the cloud layer bottoms
+c       ttem     - (real) the temperatures at the cloud layer tops
+c       nlvl     - (integer) number of 100 m height levels
+c       heitl    - (real) array of 100 m heights
+c       pres     - (real) the pressure every 100 m
+c       temp     - (real) the temperature every 100 m
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code.
+c    05/03/89  asl    (505) 678-1570    elton p. avara
+c              minor modifications to the code and added the variable
+c              pres for calculating dpz.
+c    09/12/89  asl    (505) 678-1570    elton p. avara
+c              modified the definition of pres to give values every
+c              100 m.  also added nlvl, top, btem, ttem, prt, temp,
+c              and heitl.  major modifications.
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+c  author - c. william rogers
+c
+c  procedure:
+c       compute moist adiabatic temperature lapse rate in s/r tz.  then
+c  compute water condensed out in air parcel which rises 10m and cools
+c  at lapse rate from s/r tz.  lwc is difference between saturated
+c  conditions at bottom and top of 10m thick layer.  this procedure
+c  is repeated in 10m steps or fraction thereof until lwc at each 100 m
+c  in cloud is obtained.  all sublayer variables are for 10m increments
+c  except at top of layer or bottom of next higher layer.  for
+c  cumuliform cloud reduce lwc to account for entrainment.
+c
+c  reference:
+c       rogers, c.w., j.t. hanley and e.j. mack, 1985: "updating the
+c       smith-feddes model", final report contract no. n00228-84-c-3157
+c       calspan report no. 7330-1.  calspan corp., p.o. box 400 buffalo,
+c       new york 14225. (see section 3.5)
+c
+c  note:  all computations are carried out for 10m thick layers except
+c         for shallower layers ending at bottom of next higher layer.
+c
+c  local glossary:
+c       t      = bottom temperature of 10m layer (c) as input to s/r tz
+c                and in computing tn for es2 computation.  it will be
+c                (k) when returned by s/r tz and in computation of rho.
+c       alw    = adiabatic liquid water content in cloud layer
+c                bottom to bottom of next layer and at 10m intervals in
+c                between
+c       dp     = pressure change of 10m or less interval
+c       dtz    = moist adiabatic lapse rate of temperature
+c       dz     = 10m interval or less, the latter at bot(layr) and
+c                top(layr)
+c       es     = saturation vapor pressure at bottom of 10m layer
+c       es2    = saturation vapor pressure at top of 10m or less layer
+c       ht     = height of height level in cloud layer relative to cloud
+c                deck base
+c       igo    = control variable
+c                if igo = 1 - have reached top of layer
+c                       = 0 - have not reached top of layer
+c       p      = pressure at bottom of 10m layer
+c       rho    = absolute humidity at bottom of 10m layer
+c       tn     = top temperature of 10m layer (c) in es2 computation
+c                and (k) in rho2 computations
+c       rho2   = absolute humidity at top of 10m or less layer
+c       rs     = universal gas constant
+c       wr     = gas constant for water vapor
+c       y      = fraction of adiabatic lwc produced by entrainment
+c       z      = height parameter within cloud layer used in s/r al
+c
+c-----------------------------------------------------------------------
+c
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+c
+      dimension calw(260)
+      logical nskip
+c
+      data a1,b1,c1,a2,b2,c2/8.4897, -13.2191, 4.7295, 10.357,
      1-28.2416, 8.8846 /
-      DATA RS/8.313E07/
-      DATA WR/2.16528E-7/
-C
-C-------Initialize some variables
-C
-      ALW = 0.0
-      IGO=0
-      INC=0
-      T=TI
-C
-      CALW(1)=ALW
-      NSKIP=.FALSE.
-      IF(N1.EQ.0.OR.N2.EQ.0) NSKIP=.TRUE.
-C
-C-------Begin computing the LWC each 100 m within the cloud.
-C
+      data rs/8.313e07/
+      data wr/2.16528e-7/
+c
+c-------initialize some variables
+c
+      alw = 0.0
+      igo=0
+      inc=0
+      t=ti
+c
+      calw(1)=alw
+      nskip=.false.
+      if(n1.eq.0.or.n2.eq.0) nskip=.true.
+c
+c-------begin computing the lwc each 100 m within the cloud.
+c
       deltaz = 100.
-      NZ=N1-1
-      DO 100 I=1,2600
-C
-C-------Compute the LWC in 10 m (or less) height layers
-C
-      DZ=deltaz
-C
-C-------Compute the RAOB pressure and temperature gradients and height
-C       increment for each 100 m height level.
-C
-      IF(INC.EQ.0) THEN
-        NZ=NZ+1
-        LVL=NZ-N1+2
-        IF(NSKIP) THEN
-          P=PRB(LAYR)
-          Z=BOT(LAYR)
-CC        T=BTEM(LAYR)-273.16
-          DELZ=TOP(LAYR)-BOT(LAYR)
-          DZ=DELZ-deltaz*AINT(DELZ/deltaz)
-          DPZ=(PRT(LAYR)-PRB(LAYR))/DELZ
-          DTZ=(TTEM(LAYR)-BTEM(LAYR))/DELZ
-          INC=1
-        ELSEIF(NZ.EQ.N1) THEN
-          P=PRB(LAYR)
-          Z=BOT(LAYR)
-CC        T=BTEM(LAYR)-273.16
-          DELZ=HEITL(N1)-BOT(LAYR)
-          DZ=DELZ-deltaz*AINT(DELZ/deltaz)
-          DPZ=(PRES(N1)-PRB(LAYR))/DELZ
-          DTZ=(TEMP(N1)-BTEM(LAYR))/DELZ
-          INC=1
-        ELSEIF(NZ.GT.N1.AND.NZ.LE.N2) THEN
-          P=PRES(NZ-1)
-          Z=HEITL(NZ-1)
-CC        T=TEMP(NZ-1)-273.16
-          DPZ=(PRES(NZ)-PRES(NZ-1))/(HEITL(NZ)-HEITL(NZ-1))
-          DTZ=(TEMP(NZ)-TEMP(NZ-1))/(HEITL(NZ)-HEITL(NZ-1))
-          INC=1
-        ELSEIF(NZ.GT.N2) THEN
-          P=PRES(N2-1)
-          Z=HEITL(N2-1)
-CC        T=TEMP(N2-1)-273.16
+      nz=n1-1
+      do 100 i=1,2600
+c
+c-------compute the lwc in 10 m (or less) height layers
+c
+      dz=deltaz
+c
+c-------compute the raob pressure and temperature gradients and height
+c       increment for each 100 m height level.
+c
+      if(inc.eq.0) then
+        nz=nz+1
+        lvl=nz-n1+2
+        if(nskip) then
+          p=prb(layr)
+          z=bot(layr)
+cc        t=btem(layr)-273.16
+          delz=top(layr)-bot(layr)
+          dz=delz-deltaz*aint(delz/deltaz)
+          dpz=(prt(layr)-prb(layr))/delz
+          dtz=(ttem(layr)-btem(layr))/delz
+          inc=1
+        elseif(nz.eq.n1) then
+          p=prb(layr)
+          z=bot(layr)
+cc        t=btem(layr)-273.16
+          delz=heitl(n1)-bot(layr)
+          dz=delz-deltaz*aint(delz/deltaz)
+          dpz=(pres(n1)-prb(layr))/delz
+          dtz=(temp(n1)-btem(layr))/delz
+          inc=1
+        elseif(nz.gt.n1.and.nz.le.n2) then
+          p=pres(nz-1)
+          z=heitl(nz-1)
+cc        t=temp(nz-1)-273.16
+          dpz=(pres(nz)-pres(nz-1))/(heitl(nz)-heitl(nz-1))
+          dtz=(temp(nz)-temp(nz-1))/(heitl(nz)-heitl(nz-1))
+          inc=1
+        elseif(nz.gt.n2) then
+          p=pres(n2-1)
+          z=heitl(n2-1)
+cc        t=temp(n2-1)-273.16
 
-          DPZ=(PRT(LAYR)-PRES(N2))/(TOP(LAYR)-HEITL(N2))
-          DTZ=(TTEM(LAYR)-TEMP(N2))/(TOP(LAYR)-HEITL(N2))
-          INC=1
-        ENDIF
-      ENDIF
-C
-C-------If at the top of the cloud layer, change the index to show it.
-C
-      IF(TOP(LAYR)-Z.LT.deltaz) THEN
-        DZ=TOP(LAYR)-Z
-        IGO=1
-      ENDIF
-C
-C-------Compute the moist adiabatic temperature lapse rate and
-C       saturation vapor pressure
-C
-!     Code for TZ has been pulled in. Note that DTZ was changed to DMTZ.
-!     The value of T is also modified in that subroutine.
-!     CALL TZ(P,T,DMTZ,ES)
-!     SUBROUTINE TZ(P,T,DTZ,ES)
+          dpz=(prt(layr)-pres(n2))/(top(layr)-heitl(n2))
+          dtz=(ttem(layr)-temp(n2))/(top(layr)-heitl(n2))
+          inc=1
+        endif
+      endif
+c
+c-------if at the top of the cloud layer, change the index to show it.
+c
+      if(top(layr)-z.lt.deltaz) then
+        dz=top(layr)-z
+        igo=1
+      endif
+c
+c-------compute the moist adiabatic temperature lapse rate and
+c       saturation vapor pressure
+c
+!     code for tz has been pulled in. note that dtz was changed to dmtz.
+!     the value of t is also modified in that subroutine.
+!     call tz(p,t,dmtz,es)
+!     subroutine tz(p,t,dtz,es)
 
-      G=980.
-      CP=.239
-      R=.06855
-C
-C  COMPUTE SATURATION VAPOR PRESSURE AT BOTTOM OF 10M SUBLAYER
-C
-      ES=6.112*EXP(17.67*T/(T+243.5))
-      XL=595.-0.5*T
-C
-C  COMPUTE DIFFERENTIAL OF ES WITH CELSIUS TEMPERATURE
-C
-      DES=ES*((17.67/(T+243.5))-(17.67*T/(T+243.5)**2))
-      TOLD = T
-      T=T+273.16
-C
-C  COMPUTE MOIST ADIABATIC LAPSE RATE OF TEMPERATURE
-C
-      DMTZ=-G*((1.0+.621*ES*XL/(P*R*T))/(CP+.621*XL*DES/P))
-      DMTZ=DMTZ*2.39E-6
+      g=980.
+      cp=.239
+      r=.06855
+c
+c  compute saturation vapor pressure at bottom of 10m sublayer
+c
+      es=6.112*exp(17.67*t/(t+243.5))
+      xl=595.-0.5*t
+c
+c  compute differential of es with celsius temperature
+c
+      des=es*((17.67/(t+243.5))-(17.67*t/(t+243.5)**2))
+      told = t
+      t=t+273.16
+c
+c  compute moist adiabatic lapse rate of temperature
+c
+      dmtz=-g*((1.0+.621*es*xl/(p*r*t))/(cp+.621*xl*des/p))
+      dmtz=dmtz*2.39e-6
 
 
-C
-C-------Compute the mixing ratio and absolute humidity at the bottom of
-C       the layer
-C
-      AMR1=0.622*ES/(P-ES)
-      RHO=1000.*P/(2.8704*T)
-C
-C-------Get the height, pressure, and moist adiabatic temperature (C) of
-C       the top of the 10 m (or less) layer
-C
-      Z=Z+DZ
-      P=P+DPZ*DZ
-      TN=(T-273.16)+DMTZ*DZ
-CC    TN=(T-273.16)+DTZ*DZ
-C
-C-------Compute the and saturation vapor pressure, mixing ratio, and
-C       absolute humidity at the top of the layer
-C
-C-------Try an approximate form for the saturation vapor pressure
-C       at the higher level
-      DTEMP = TN - TOLD
-      ES2 = ES + DES*DTEMP
-C     ES2=6.112*EXP(17.67*TN/(TN+243.5))
-      TN=TN+273.16
-      AMR2=0.622*ES2/(P-ES2)
-      RHO2=1000.*P/(2.8704*TN)
-C
-C-------Compute the increase in the adiabatic liquid water over the 10 m
-C       ascent and add to the total liquid water content thus far.
-C
-      ALW=ALW+(AMR1-AMR2)*((RHO+RHO2)*0.5)
-      T=TN-273.16
-      CALW(LVL)=ALW
-C
-C-------If at the top of a 100 m height level, set the index to show it.
-C
-      IF(IGO.NE.1) THEN
-        IF(NSKIP) THEN
-          GOTO 100
-        ELSE
-          IF(ABS(Z-HEITL(NZ)).GT.1.0) GOTO 100
-        ENDIF
-      ENDIF
-      INC=0
-C                                           !MODIFICATIONS NOV/87
-C-------Time to reduce the CALW due to entrainment.
-C       There are two methods for reducing the CALW.  The first is via
-C       Skatskii's curve which is used on the cumuliform clouds
-C       (Cb, Sc, Cu, and Ac) and on the unknown cloud type.
-C       The second is via Warner's curve which is used on the stratiform
-C       clouds (St, As, and Ns).
-C
-C
-C-------Calculate the thickness of the cloud so far in kilometers.
-C
-      HT=(Z-BOT(LAYR))*.001
-C
-      IF((LVLCT.EQ.10).OR.(LVLCT.EQ.2).OR.(LVLCT.EQ.3).OR.(LVLCT.EQ.5)
-     1.OR.(LVLCT.EQ.25)) THEN
-C
-C-------Reduce CALW due to entrainment via Skatskii's curve
-C                                        !MODIFICATIONS OCT/86
-        IF(HT.LT.0.3) THEN
-          Y = -1.667 * (HT - 0.6)
-        ELSEIF (HT.LT.1.0) THEN
-          ARG1 = B1 * B1 - 4.0 * A1 * (C1 - HT)
-          Y = (-B1 - SQRT(ARG1)) / (2.0 * A1)
-        ELSEIF (HT.LT.2.9) THEN
-          ARG2 = B2 * B2 - 4.0 * A2 * (C2 - HT)
-          Y = (-B2 - SQRT(ARG2)) / (2.0 * A2)
-        ELSE
-          Y = 0.26
-        ENDIF
+c
+c-------compute the mixing ratio and absolute humidity at the bottom of
+c       the layer
+c
+      amr1=0.622*es/(p-es)
+      rho=1000.*p/(2.8704*t)
+c
+c-------get the height, pressure, and moist adiabatic temperature (c) of
+c       the top of the 10 m (or less) layer
+c
+      z=z+dz
+      p=p+dpz*dz
+      tn=(t-273.16)+dmtz*dz
+cc    tn=(t-273.16)+dtz*dz
+c
+c-------compute the and saturation vapor pressure, mixing ratio, and
+c       absolute humidity at the top of the layer
+c
+c-------try an approximate form for the saturation vapor pressure
+c       at the higher level
+      dtemp = tn - told
+      es2 = es + des*dtemp
+c     es2=6.112*exp(17.67*tn/(tn+243.5))
+      tn=tn+273.16
+      amr2=0.622*es2/(p-es2)
+      rho2=1000.*p/(2.8704*tn)
+c
+c-------compute the increase in the adiabatic liquid water over the 10 m
+c       ascent and add to the total liquid water content thus far.
+c
+      alw=alw+(amr1-amr2)*((rho+rho2)*0.5)
+      t=tn-273.16
+      calw(lvl)=alw
+c
+c-------if at the top of a 100 m height level, set the index to show it.
+c
+      if(igo.ne.1) then
+        if(nskip) then
+          goto 100
+        else
+          if(abs(z-heitl(nz)).gt.1.0) goto 100
+        endif
+      endif
+      inc=0
+c                                           !modifications nov/87
+c-------time to reduce the calw due to entrainment.
+c       there are two methods for reducing the calw.  the first is via
+c       skatskii's curve which is used on the cumuliform clouds
+c       (cb, sc, cu, and ac) and on the unknown cloud type.
+c       the second is via warner's curve which is used on the stratiform
+c       clouds (st, as, and ns).
+c
+c
+c-------calculate the thickness of the cloud so far in kilometers.
+c
+      ht=(z-bot(layr))*.001
+c
+      if((lvlct.eq.10).or.(lvlct.eq.2).or.(lvlct.eq.3).or.(lvlct.eq.5)
+     1.or.(lvlct.eq.25)) then
+c
+c-------reduce calw due to entrainment via skatskii's curve
+c                                        !modifications oct/86
+        if(ht.lt.0.3) then
+          y = -1.667 * (ht - 0.6)
+        elseif (ht.lt.1.0) then
+          arg1 = b1 * b1 - 4.0 * a1 * (c1 - ht)
+          y = (-b1 - sqrt(arg1)) / (2.0 * a1)
+        elseif (ht.lt.2.9) then
+          arg2 = b2 * b2 - 4.0 * a2 * (c2 - ht)
+          y = (-b2 - sqrt(arg2)) / (2.0 * a2)
+        else
+          y = 0.26
+        endif
 
-C                                        !END OF MODIFICATIONS OCT/86
-      ELSEIF ((LVLCT.EQ.1).OR.(LVLCT.EQ.4).OR.(LVLCT.EQ.6)) THEN
-C
-C-------Reduce CALW due to entrainment via Warner's curve.
-C
-        IF(HT.LE.0.032) THEN
-          Y = -11.0 * HT + 1.0
-        ELSEIF (HT.LE.0.177) THEN
-          Y =  -1.4 * HT + 0.6915
-        ELSEIF (HT.LE.0.726) THEN
-          Y =  -0.356 * HT + 0.505
-        ELSEIF (HT.LE.1.5) THEN
-          Y =  -0.0608 * HT + 0.2912
-        ELSE
-          Y =   0.20
-        ENDIF
-C
-      ELSE
-C
-C-------Do nothing because cirriform clouds or clear and then we
-C       shouldn't even be in this subroutine.
-C
-        Y = 1.0
-C
-      ENDIF
-C                                        !END OF MODIFICATIONS NOV/87
-C
-C-------Now calculate the reduced CALW.
-C
-      CALW(LVL) = CALW(LVL) * Y
-C
-C-------If at the top of the cloud layer, exit the loop.
-C
-      IF(IGO .EQ. 1) GOTO 150
-C
-  100 CONTINUE
-C
-  150 RETURN
-      END
-      SUBROUTINE TZ(P,T,DTZ,ES)
-C***********************************************************************
-C                          SUBROUTINE TZ
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  TZ
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  AL
-C=======================================================================
-C<Description>
-C    Compute moist adiabatic lapse rate of temperature and saturation
-C    vapor pressure at bottom of 10M layer.
-C=======================================================================
-C<Called routines>
-C    None
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL TZ(P,T,DTZ,ES)
-C    Input:
-C       P        - (real) pressure at bottom of 10M layer
-C       T        - (real) bottom temperature of 10M layer (C)
-C    Output:
-C       DTZ      - (real) moist adiabatic lapse rate based on variables
-C                  at bottom of 10M layer
-C       ES       - (real) vapor pressure at bottom of 10M layer
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-C  Author - C. William Rogers
-C
-C  LOCAL GLOSSARY:
-C       CP      = specific heat of air
-C       G       = acceleration of gravity
-C       XL      = latent heat of vaporization
-C       R       = gas constant
-C       DES     = differential of ES with temperature (C)
-C
-C  REFERENCE:
-C       Rogers, C.W., J.T. Hanley and E.J. Mack, 1985: "Updating the
-C       Smith Feddes Model", Final Report Contract No. N00228-84-C-3157
-C       Calspan Report No. 7330-1.  Calspan Corp., P.O. Box 400 Buffalo,
-C       New York 14225. (See Section 3.5)
-C
-C-----------------------------------------------------------------------
-C
-      G=980.
-      CP=.239
-      R=.06855
-C
-C  COMPUTE SATURATION VAPOR PRESSURE AT BOTTOM OF 10M SUBLAYER
-C
-      ES=6.112*EXP(17.67*T/(T+243.5))
-      XL=595.-0.5*T
-C
-C  COMPUTE DIFFERENTIAL OF ES WITH CELSIUS TEMPERATURE
-C
-      DES=ES*((17.67/(T+243.5))-(17.67*T/(T+243.5)**2))
-      T=T+273.16
-C
-C  COMPUTE MOIST ADIABATIC LAPSE RATE OF TEMPERATURE
-C
-      DTZ=-G*((1.0+.621*ES*XL/(P*R*T))/(CP+.621*XL*DES/P))
-      DTZ=DTZ*2.39E-6
-C
-      RETURN
-      END
-      SUBROUTINE MVD(NDECKS,ICTP,XMVD)
-C***********************************************************************
-C                          SUBROUTINE MVD
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  MVD
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  SMFD
-C=======================================================================
-C<Description>
-C    Determines the Mean Volume Diameter of the droplets within the
-C    cloud decks
-C=======================================================================
-C<Called routines>
-C    None
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL MVD(NDECKS,ICTP,XMVD)
-C    Input:
-C       NDECKS   - (integer) the number of cloud decks
-C       ICTP     - (integer) code for the cloud type (up to 4 cloud
-C                  decks)
-C    Output:
-C       XMVD     - (real) Mean Volume Diameter for each cloud
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code as part of main SMFD routine
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C    09/14/89  ASL    (505) 678-1570    Elton P. Avara
-C              Created a separate subroutine for XMVD determination
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-      DIMENSION ICTP(4),XMVD(4)
-C
-C-------The MVDs will be defined to a default representative value for
-C       each of the different cloud types
-C
-      DO 10 I = 1,NDECKS
-C                                                 ! no cloud
-      IF(ICTP(I).EQ.0) THEN
-        XMVD(I) = 0.0
-C                                                 ! St
-      ELSEIF (ICTP(I).EQ. 1) THEN
-        XMVD(I) = 12.0
-C                                                 ! Sc
-      ELSEIF (ICTP(I).EQ. 2) THEN
-        XMVD(I) = 10.0
-C                                                 ! Cu
-      ELSEIF (ICTP(I).EQ. 3) THEN
-        XMVD(I) = 18.0
-C                                                 ! Ns
-      ELSEIF (ICTP(I).EQ. 4) THEN
-        XMVD(I) = 12.0
-C                                                 ! Ac
-      ELSEIF (ICTP(I).EQ. 5) THEN
-        XMVD(I) = 18.0
-C                                                 ! As
-      ELSEIF (ICTP(I).EQ. 6) THEN
-        XMVD(I) = 10.0
-C                                                 ! Cb
-      ELSEIF (ICTP(I).EQ.10) THEN
-        XMVD(I) = 25.0
-C                                                 ! cirriform
-      ELSE
-        XMVD(I) = 10.0
-C
-      ENDIF
-   10 CONTINUE
-C
-      RETURN
-      END
-      SUBROUTINE IINDEX(XMVD,WATR,NDECKS,AINDEX,HINDEX)
-C***********************************************************************
-C                          SUBROUTINE IINDEX
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  IINDEX
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  SMFD
-C=======================================================================
-C<Description>
-C    This subroutine will determine the icing severity index for both
-C    fixed-wing aircraft (AINDEX) and rotary-wing helicopters (HINDEX),
-C    given the XMVD, WATR, and height level temperatures TEMP, BTEM, and
-C    TTEM.
-C=======================================================================
-C<Called routines>
-C    None
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL IINDEX(XMVD,WATR,NDECKS,AINDEX,HINDEX)
-C    Input:
-C       XMVD     - (real) Mean Volume Diameter for each cloud
-C       WATR     - (real) output array containing LWC every 100 m
-C       NDECKS   - (integer) the number of cloud decks
-C    Output:
-C       AINDEX   - (character) Icing Severity Index for fixed wing
-C                  aircraft every 100 m within the cloud
-C       HINDEX   - (character) Icing Severity Index for helicopters
-C                  every 100 m within the cloud
-C    Common:
-C       BOT      - (real) the height of the (up to 4) cloud layer
-C                  bottoms
-C       TOP      - (real) the height of the (up to 4) cloud layer tops
-C       PRB      - (real) the pressures at the cloud layer bottoms
-C       PRT      - (real) the pressures at the cloud layer tops
-C       BTEM     - (real) the temperatures at the cloud layer bottoms
-C       TTEM     - (real) the temperatures at the cloud layer tops
-C       NLVL     - (integer) number of 100 m height levels
-C       HEITL    - (real) array of 100 m heights
-C       PRES     - (real) the pressure every 100 m
-C       TEMP     - (real) the temperature every 100 m
-C       K6       - (integer) the screen output unit
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C    05/03/89  ASL    (505) 678-1570    Elton P. Avara
-C              Corrected a bug in determining severe LWC and minor
-C              modifications to other code.
-C    09/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Modified the definition of TEMP, WATR, AINDEX and HINDEX
-C              to give values every 100 m.  Also added NLVL.
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-      INTEGER NDIAMS
-      PARAMETER   (NDIAMS = 6)
+c                                        !end of modifications oct/86
+      elseif ((lvlct.eq.1).or.(lvlct.eq.4).or.(lvlct.eq.6)) then
+c
+c-------reduce calw due to entrainment via warner's curve.
+c
+        if(ht.le.0.032) then
+          y = -11.0 * ht + 1.0
+        elseif (ht.le.0.177) then
+          y =  -1.4 * ht + 0.6915
+        elseif (ht.le.0.726) then
+          y =  -0.356 * ht + 0.505
+        elseif (ht.le.1.5) then
+          y =  -0.0608 * ht + 0.2912
+        else
+          y =   0.20
+        endif
+c
+      else
+c
+c-------do nothing because cirriform clouds or clear and then we
+c       shouldn't even be in this subroutine.
+c
+        y = 1.0
+c
+      endif
+c                                        !end of modifications nov/87
+c
+c-------now calculate the reduced calw.
+c
+      calw(lvl) = calw(lvl) * y
+c
+c-------if at the top of the cloud layer, exit the loop.
+c
+      if(igo .eq. 1) goto 150
+c
+  100 continue
+c
+  150 return
+      end
+      subroutine tz(p,t,dtz,es)
+c***********************************************************************
+c                          subroutine tz
+c***********************************************************************
+c<begin>
+c<identification>          name:  tz
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  al
+c=======================================================================
+c<description>
+c    compute moist adiabatic lapse rate of temperature and saturation
+c    vapor pressure at bottom of 10m layer.
+c=======================================================================
+c<called routines>
+c    none
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call tz(p,t,dtz,es)
+c    input:
+c       p        - (real) pressure at bottom of 10m layer
+c       t        - (real) bottom temperature of 10m layer (c)
+c    output:
+c       dtz      - (real) moist adiabatic lapse rate based on variables
+c                  at bottom of 10m layer
+c       es       - (real) vapor pressure at bottom of 10m layer
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+c  author - c. william rogers
+c
+c  local glossary:
+c       cp      = specific heat of air
+c       g       = acceleration of gravity
+c       xl      = latent heat of vaporization
+c       r       = gas constant
+c       des     = differential of es with temperature (c)
+c
+c  reference:
+c       rogers, c.w., j.t. hanley and e.j. mack, 1985: "updating the
+c       smith feddes model", final report contract no. n00228-84-c-3157
+c       calspan report no. 7330-1.  calspan corp., p.o. box 400 buffalo,
+c       new york 14225. (see section 3.5)
+c
+c-----------------------------------------------------------------------
+c
+      g=980.
+      cp=.239
+      r=.06855
+c
+c  compute saturation vapor pressure at bottom of 10m sublayer
+c
+      es=6.112*exp(17.67*t/(t+243.5))
+      xl=595.-0.5*t
+c
+c  compute differential of es with celsius temperature
+c
+      des=es*((17.67/(t+243.5))-(17.67*t/(t+243.5)**2))
+      t=t+273.16
+c
+c  compute moist adiabatic lapse rate of temperature
+c
+      dtz=-g*((1.0+.621*es*xl/(p*r*t))/(cp+.621*xl*des/p))
+      dtz=dtz*2.39e-6
+c
+      return
+      end
+      subroutine mvd(ndecks,ictp,xmvd)
+c***********************************************************************
+c                          subroutine mvd
+c***********************************************************************
+c<begin>
+c<identification>          name:  mvd
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  smfd
+c=======================================================================
+c<description>
+c    determines the mean volume diameter of the droplets within the
+c    cloud decks
+c=======================================================================
+c<called routines>
+c    none
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call mvd(ndecks,ictp,xmvd)
+c    input:
+c       ndecks   - (integer) the number of cloud decks
+c       ictp     - (integer) code for the cloud type (up to 4 cloud
+c                  decks)
+c    output:
+c       xmvd     - (real) mean volume diameter for each cloud
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code as part of main smfd routine
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c    09/14/89  asl    (505) 678-1570    elton p. avara
+c              created a separate subroutine for xmvd determination
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+      dimension ictp(4),xmvd(4)
+c
+c-------the mvds will be defined to a default representative value for
+c       each of the different cloud types
+c
+      do 10 i = 1,ndecks
+c                                                 ! no cloud
+      if(ictp(i).eq.0) then
+        xmvd(i) = 0.0
+c                                                 ! st
+      elseif (ictp(i).eq. 1) then
+        xmvd(i) = 12.0
+c                                                 ! sc
+      elseif (ictp(i).eq. 2) then
+        xmvd(i) = 10.0
+c                                                 ! cu
+      elseif (ictp(i).eq. 3) then
+        xmvd(i) = 18.0
+c                                                 ! ns
+      elseif (ictp(i).eq. 4) then
+        xmvd(i) = 12.0
+c                                                 ! ac
+      elseif (ictp(i).eq. 5) then
+        xmvd(i) = 18.0
+c                                                 ! as
+      elseif (ictp(i).eq. 6) then
+        xmvd(i) = 10.0
+c                                                 ! cb
+      elseif (ictp(i).eq.10) then
+        xmvd(i) = 25.0
+c                                                 ! cirriform
+      else
+        xmvd(i) = 10.0
+c
+      endif
+   10 continue
+c
+      return
+      end
+      subroutine iindex(xmvd,watr,ndecks,aindex,hindex)
+c***********************************************************************
+c                          subroutine iindex
+c***********************************************************************
+c<begin>
+c<identification>          name:  iindex
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  smfd
+c=======================================================================
+c<description>
+c    this subroutine will determine the icing severity index for both
+c    fixed-wing aircraft (aindex) and rotary-wing helicopters (hindex),
+c    given the xmvd, watr, and height level temperatures temp, btem, and
+c    ttem.
+c=======================================================================
+c<called routines>
+c    none
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call iindex(xmvd,watr,ndecks,aindex,hindex)
+c    input:
+c       xmvd     - (real) mean volume diameter for each cloud
+c       watr     - (real) output array containing lwc every 100 m
+c       ndecks   - (integer) the number of cloud decks
+c    output:
+c       aindex   - (character) icing severity index for fixed wing
+c                  aircraft every 100 m within the cloud
+c       hindex   - (character) icing severity index for helicopters
+c                  every 100 m within the cloud
+c    common:
+c       bot      - (real) the height of the (up to 4) cloud layer
+c                  bottoms
+c       top      - (real) the height of the (up to 4) cloud layer tops
+c       prb      - (real) the pressures at the cloud layer bottoms
+c       prt      - (real) the pressures at the cloud layer tops
+c       btem     - (real) the temperatures at the cloud layer bottoms
+c       ttem     - (real) the temperatures at the cloud layer tops
+c       nlvl     - (integer) number of 100 m height levels
+c       heitl    - (real) array of 100 m heights
+c       pres     - (real) the pressure every 100 m
+c       temp     - (real) the temperature every 100 m
+c       k6       - (integer) the screen output unit
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c    05/03/89  asl    (505) 678-1570    elton p. avara
+c              corrected a bug in determining severe lwc and minor
+c              modifications to other code.
+c    09/13/89  asl    (505) 678-1570    elton p. avara
+c              modified the definition of temp, watr, aindex and hindex
+c              to give values every 100 m.  also added nlvl.
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+      integer ndiams
+      parameter   (ndiams = 6)
 
-      REAL FREEZE,TOOCLD
-      PARAMETER   (FREEZE = 273.15)
-      PARAMETER   (TOOCLD = 243.15)
-C
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-      CHARACTER*11 AINDEX(4,260),HINDEX(4,260)
-      DIMENSION XMVD(4),WATR(4,2,260),DIAM(NDIAMS),XLWCD(NDIAMS)
-C
-      DATA DIAM/10.0,15.0,20.0,30.0,40.0,50.0/
-      DATA XLWCD/2.50,1.30,0.85,0.65,0.55,0.50/
-C
-C-------Loop over the number of geometric layers which have
-C       clouds
-C
-      DO 300 I = 1,NDECKS
-C
-C-------First thing we need to do is to determine the threshold of the
-C       severe liquid water content (XLWCS)
-C
-      IF(DIAM(1).LE.XMVD(I).AND.XMVD(I).LE.DIAM(NDIAMS)) THEN
-C
-        DO 10 K=2,NDIAMS
-C
-        IF(XMVD(I).GE.DIAM(K-1).AND.XMVD(I).LE.DIAM(K)) THEN
-          SLOPE = (XLWCD(K) - XLWCD(K-1))/(DIAM(K) - DIAM(K-1))
-          TRCPT = -SLOPE * DIAM(K) + XLWCD(K)
-          XLWCS = SLOPE * XMVD(I) + TRCPT
-        ENDIF
-C
-   10   CONTINUE
-C
-      ELSE
-C
-        WRITE(K6,1111)'The calculated MVD = ',XMVD(I),' microns.'
-! Hongli Jiang: change f3.1 to F4.1. 11/27/2013
- 1111   FORMAT(1X,A,F4.1,A)
-        WRITE(K6,*)'This is not within the  possible values of 10-50 mic
-     1rons.  Thus, the'
-        WRITE(K6,*)'icing severity index is not available for this case.
+      real freeze,toocld
+      parameter   (freeze = 273.15)
+      parameter   (toocld = 243.15)
+c
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+      common /iodev/k5,k6,k7,k8
+c
+      character*11 aindex(4,260),hindex(4,260)
+      dimension xmvd(4),watr(4,2,260),diam(ndiams),xlwcd(ndiams)
+c
+      data diam/10.0,15.0,20.0,30.0,40.0,50.0/
+      data xlwcd/2.50,1.30,0.85,0.65,0.55,0.50/
+c
+c-------loop over the number of geometric layers which have
+c       clouds
+c
+      do 300 i = 1,ndecks
+c
+c-------first thing we need to do is to determine the threshold of the
+c       severe liquid water content (xlwcs)
+c
+      if(diam(1).le.xmvd(i).and.xmvd(i).le.diam(ndiams)) then
+c
+        do 10 k=2,ndiams
+c
+        if(xmvd(i).ge.diam(k-1).and.xmvd(i).le.diam(k)) then
+          slope = (xlwcd(k) - xlwcd(k-1))/(diam(k) - diam(k-1))
+          trcpt = -slope * diam(k) + xlwcd(k)
+          xlwcs = slope * xmvd(i) + trcpt
+        endif
+c
+   10   continue
+c
+      else
+c
+        write(k6,1111)'the calculated mvd = ',xmvd(i),' microns.'
+! hongli jiang: change f3.1 to f4.1. 11/27/2013
+ 1111   format(1x,a,f4.1,a)
+        write(k6,*)'this is not within the  possible values of 10-50 mic
+     1rons.  thus, the'
+        write(k6,*)'icing severity index is not available for this case.
      1'
-C
-        RETURN
-C
-      ENDIF
-C
-C-------Now we can determine the thresholds for the moderate and light
-C       liquid water contents, XLWCM and XLWCL.
-C
-      XLWCM = 0.5 * XLWCS
-      XLWCL = 0.1 * XLWCS
-C
-C-------Compute the Icing Severity Index for each height level within
-C       the cloud deck
-C
-      N1=WATR(I,1,1)+0.001
-      N2=WATR(I,1,2)+0.001
-C
-      IF(N1.LT.0.OR.N2.LT.0) THEN
-        AINDEX(I,1) = '    missing'
-        HINDEX(I,1) = '    missing'
-        GOTO 300
-      ELSEIF(N1.EQ.0.OR.N2.EQ.0) THEN
-        MAXCNT=2
-      ELSE
-        MAXCNT=N2-N1+3
-      ENDIF
-C
-      DO 200 L=1,MAXCNT
-C
-C-------Get the temperature for the height level
-C
-      IF(L.EQ.1) THEN
-        T=BTEM(I)
-      ELSEIF(L.EQ.MAXCNT) THEN
-        T=TTEM(I)
-      ELSE
-        T=TEMP(N1+L-2)
-      ENDIF
-C
-C-------Now to determine the actual icing severity index for both the
-C       fixed wing aircraft (AINDEX) and the rotary wing helicopters
-C       (HINDEX), if the temperature is below freezing.
-C
-      IF((TOOCLD.LT.T).AND.(T.LE.FREEZE)) THEN
-C
-C-------First, the fixed wing (AINDEX)
-C
-        IF(WATR(I,1,L+2).LT.XLWCL) THEN
-          AINDEX(I,L) = '  A1: TRACE'
-        ELSEIF (WATR(I,1,L+2).LT.XLWCM) THEN
-          AINDEX(I,L) = '  A2: LIGHT'
-        ELSEIF (WATR(I,1,L+2).LT.XLWCS) THEN
-C
-          IF(T.LE.FREEZE - 5.0) THEN
-            AINDEX(I,L) = 'A3:MODERATE'
-          ELSE
-            AINDEX(I,L) = '  A2: LIGHT'
-          ENDIF
-C
-        ELSE
-C
-          IF(T.LE.FREEZE - 5.0) THEN
-            AINDEX(I,L) = ' A4: SEVERE'
-          ELSEIF (T.LE.FREEZE - 3.0) THEN
-            AINDEX(I,L) = 'A3:MODERATE'
-          ELSE
-            AINDEX(I,L) = '  A2: LIGHT'
-          ENDIF
-C
-        ENDIF
-C
-C-------Now for the rotary wing (HINDEX)
-C
-        IF(WATR(I,1,L+2).LT.XLWCL) THEN
-          HINDEX(I,L) = '  H1: TRACE'
-        ELSEIF (WATR(I,1,L+2).LT.XLWCM) THEN
-C
-          IF(T.LE.FREEZE - 5.0) THEN
-            HINDEX(I,L) = '  H2: LIGHT'
-          ELSE
-            HINDEX(I,L) = '  H1: TRACE'
-          ENDIF
-C
-        ELSEIF (WATR(I,1,L+2).LT.XLWCS) THEN
-C
-          IF(T.LE.FREEZE - 10.0) THEN
-            HINDEX(I,L) = 'H3:MODERATE'
-          ELSEIF (T.LE.FREEZE - 5.0) THEN
-            HINDEX(I,L) = '  H2: LIGHT'
-          ELSE
-            HINDEX(I,L) = '  H1: TRACE'
-          ENDIF
-C
-        ELSE
-C
-          IF(T.LE.FREEZE - 10.0) THEN
-            HINDEX(I,L) = ' H4: SEVERE'
-          ELSEIF (T.LE.FREEZE - 5.0) THEN
-            HINDEX(I,L) = 'H3:MODERATE'
-          ELSE
-            HINDEX(I,L) = '  H2: LIGHT'
-          ENDIF
-C
-        ENDIF
-C
-      ELSE
-C
-C-------The temperature is too warm or too cold to produce freezing
-C
-        AINDEX(I,L) = 'A0:NO ICING'
-        HINDEX(I,L) = 'H0:NO ICING'
-C
-      ENDIF
-C
-  200 CONTINUE
-C
-  300 CONTINUE
-C
-      RETURN
-      END
-      SUBROUTINE CLTYPE(ICTP,NDECKS,CLDTYP)
-C***********************************************************************
-C                          SUBROUTINE CLTYPE
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  CLTYPE
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  SMFD
-C=======================================================================
-C<Description>
-C    This subroutine will determine the two character abbreviation for
-C    the cloud type from the 3DNEPH integer code for the cloud type.
-C=======================================================================
-C<Called routines>
-C    None
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL CLTYPE(ICTP,NDECKS,CLDTYP)
-C    Input:
-C       ICTP     - (integer) code for the cloud type (up to 4 cloud
-C                  decks)
-C       NDECKS   - (integer) the number of cloud decks
-C    Output:
-C       CLDTYP   - (character) cloud type in two ASCII characters
-C    Common:
-C       K6       - (integer) the screen output unit
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-      DIMENSION ICTP(4)
-      CHARACTER*2 CLDTYP(4)
-C
-C-------Loop over the number of cloud decks
-C
-      DO 100 I = 1,NDECKS
-C
-      IF(ICTP(I).EQ.0) THEN
-        CLDTYP(I) = '  '
-      ELSEIF (ICTP(I).EQ. 1) THEN
-        CLDTYP(I) = 'St'
-      ELSEIF (ICTP(I).EQ. 2) THEN
-        CLDTYP(I) = 'Sc'
-      ELSEIF (ICTP(I).EQ. 3) THEN
-        CLDTYP(I) = 'Cu'
-      ELSEIF (ICTP(I).EQ. 4) THEN
-        CLDTYP(I) = 'Ns'
-      ELSEIF (ICTP(I).EQ. 5) THEN
-        CLDTYP(I) = 'Ac'
-      ELSEIF (ICTP(I).EQ. 6) THEN
-        CLDTYP(I) = 'As'
-      ELSEIF (ICTP(I).EQ. 7) THEN
-        CLDTYP(I) = 'Cs'
-      ELSEIF (ICTP(I).EQ. 8) THEN
-        CLDTYP(I) = 'Ci'
-      ELSEIF (ICTP(I).EQ. 9) THEN
-        CLDTYP(I) = 'Cc'
-      ELSEIF (ICTP(I).EQ.10) THEN
-        CLDTYP(I) = 'Cb'
-      ELSEIF (ICTP(I).EQ.25) THEN
-        CLDTYP(I) = '??'
-      ELSE
-        WRITE(6,*)'SOMETHING IS WRONG WITH THE CLOUD TYPE ARRAY,'
-        WRITE(6,1001) I,ICTP(I)
- 1001   FORMAT(1X,'ICTP ARRAY.  ICTP(',I1,') = ',I2)
-C
-        STOP
-      ENDIF
-C
-  100 CONTINUE
-C
-      RETURN
-      END
-      SUBROUTINE OUTPUT(CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE)
-C***********************************************************************
-C                          SUBROUTINE OUTPUT
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  OUTPUT
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  SMFD
-C=======================================================================
-C<Description>
-C    This subroutine takes the output parameters and writes them out to
-C    the screen or printer.
-C=======================================================================
-C<Called routines>
-C    INKEY - (subroutine) gets a character from the keyboard without
-C            echo.  The routine is not available in source code form.
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL OUTPUT(CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE)
-C    Input:
-C       CLDTYP   - (character) cloud type in two ASCII characters
-C       WATR     - (real) output array containing LWC and percent liquid
-C                  water every 100 m in the cloud
-C       XMVD     - (real) Mean Volume Diameter for each cloud
-C       AINDEX   - (character) Icing Severity Index for fixed wing
-C                  aircraft every 100 m
-C       HINDEX   - (character) Icing Severity Index for helicopters
-C                  every 100 m
-C       ICP      - (integer) percent (1-100%) cloud coverage for up to 4
-C                  cloud decks
-C       NDECKS   - (integer) the number of cloud decks
-C       TITLE    - (character) the title to be displayed in the output
-C    Output:
-C       None
-C    Common:
-C       BOT      - (real) the height of the (up to 4) cloud layer
-C                  bottoms
-C       TOP      - (real) the height of the (up to 4) cloud layer tops
-C       PRB      - (real) the pressures at the cloud layer bottoms
-C       PRT      - (real) the pressures at the cloud layer tops
-C       BTEM     - (real) the temperatures at the cloud layer bottoms
-C       TTEM     - (real) the temperatures at the cloud layer tops
-C       NLVL     - (integer) number of 100 m height levels
-C       HEITL    - (real) array of 100 m heights
-C       PRES     - (real) the pressure every 100 m
-C       TEMP     - (real) the temperature every 100 m
-C       K5       - (integer) the keyboard input unit
-C       K6       - (integer) the screen output unit
-C       K7       - (integer) the disk file unit
-C       K8       - (integer) the printer output unit
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Major modifications to the code.  Completely rewritten.
-C    05/03/89  ASL    (505) 678-1570    Elton P. Avara
-C              Minor modifications to the code.
-C    09/14/89  ASL    (505) 678-1570    Elton P. Avara
-C              Modified the definition of TEMP, WATR, AINDEX and HINDEX
-C              to give values every 100 m.  Also added NLVL, HEITL,
-C              PRES, PRT, and TTEM.  Major modifications.
-C    12/21/89  Steve Albers - Modified for PROFS
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-      REAL       FREEZE
-      PARAMETER   (FREEZE = 273.15)
-C
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-      DIMENSION ICP(4),WATR(4,2,260),XMVD(4)
-C
-      CHARACTER*70 TITLE
-C     CHARACTER*14 FILENM
-      CHARACTER*11 AINDEX(4,260),HINDEX(4,260)
-C     CHARACTER*10 SCRCLR
-C     CHARACTER*8 CURPOS
-C     CHARACTER*4 SCRBLK
-C     CHARACTER*3 LERASE
-      CHARACTER*2 CLDTYP(4)
-C     CHARACTER*1 NUM(10),ANS
-      CHARACTER*1 NUM(10)
-C
-C     LOGICAL NPRT,NFIL
-C
-      DATA NUM/'0','1','2','3','4','5','6','7','8','9'/
+c
+        return
+c
+      endif
+c
+c-------now we can determine the thresholds for the moderate and light
+c       liquid water contents, xlwcm and xlwcl.
+c
+      xlwcm = 0.5 * xlwcs
+      xlwcl = 0.1 * xlwcs
+c
+c-------compute the icing severity index for each height level within
+c       the cloud deck
+c
+      n1=watr(i,1,1)+0.001
+      n2=watr(i,1,2)+0.001
+c
+      if(n1.lt.0.or.n2.lt.0) then
+        aindex(i,1) = '    missing'
+        hindex(i,1) = '    missing'
+        goto 300
+      elseif(n1.eq.0.or.n2.eq.0) then
+        maxcnt=2
+      else
+        maxcnt=n2-n1+3
+      endif
+c
+      do 200 l=1,maxcnt
+c
+c-------get the temperature for the height level
+c
+      if(l.eq.1) then
+        t=btem(i)
+      elseif(l.eq.maxcnt) then
+        t=ttem(i)
+      else
+        t=temp(n1+l-2)
+      endif
+c
+c-------now to determine the actual icing severity index for both the
+c       fixed wing aircraft (aindex) and the rotary wing helicopters
+c       (hindex), if the temperature is below freezing.
+c
+      if((toocld.lt.t).and.(t.le.freeze)) then
+c
+c-------first, the fixed wing (aindex)
+c
+        if(watr(i,1,l+2).lt.xlwcl) then
+          aindex(i,l) = '  a1: trace'
+        elseif (watr(i,1,l+2).lt.xlwcm) then
+          aindex(i,l) = '  a2: light'
+        elseif (watr(i,1,l+2).lt.xlwcs) then
+c
+          if(t.le.freeze - 5.0) then
+            aindex(i,l) = 'a3:moderate'
+          else
+            aindex(i,l) = '  a2: light'
+          endif
+c
+        else
+c
+          if(t.le.freeze - 5.0) then
+            aindex(i,l) = ' a4: severe'
+          elseif (t.le.freeze - 3.0) then
+            aindex(i,l) = 'a3:moderate'
+          else
+            aindex(i,l) = '  a2: light'
+          endif
+c
+        endif
+c
+c-------now for the rotary wing (hindex)
+c
+        if(watr(i,1,l+2).lt.xlwcl) then
+          hindex(i,l) = '  h1: trace'
+        elseif (watr(i,1,l+2).lt.xlwcm) then
+c
+          if(t.le.freeze - 5.0) then
+            hindex(i,l) = '  h2: light'
+          else
+            hindex(i,l) = '  h1: trace'
+          endif
+c
+        elseif (watr(i,1,l+2).lt.xlwcs) then
+c
+          if(t.le.freeze - 10.0) then
+            hindex(i,l) = 'h3:moderate'
+          elseif (t.le.freeze - 5.0) then
+            hindex(i,l) = '  h2: light'
+          else
+            hindex(i,l) = '  h1: trace'
+          endif
+c
+        else
+c
+          if(t.le.freeze - 10.0) then
+            hindex(i,l) = ' h4: severe'
+          elseif (t.le.freeze - 5.0) then
+            hindex(i,l) = 'h3:moderate'
+          else
+            hindex(i,l) = '  h2: light'
+          endif
+c
+        endif
+c
+      else
+c
+c-------the temperature is too warm or too cold to produce freezing
+c
+        aindex(i,l) = 'a0:no icing'
+        hindex(i,l) = 'h0:no icing'
+c
+      endif
+c
+  200 continue
+c
+  300 continue
+c
+      return
+      end
+      subroutine cltype(ictp,ndecks,cldtyp)
+c***********************************************************************
+c                          subroutine cltype
+c***********************************************************************
+c<begin>
+c<identification>          name:  cltype
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  smfd
+c=======================================================================
+c<description>
+c    this subroutine will determine the two character abbreviation for
+c    the cloud type from the 3dneph integer code for the cloud type.
+c=======================================================================
+c<called routines>
+c    none
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call cltype(ictp,ndecks,cldtyp)
+c    input:
+c       ictp     - (integer) code for the cloud type (up to 4 cloud
+c                  decks)
+c       ndecks   - (integer) the number of cloud decks
+c    output:
+c       cldtyp   - (character) cloud type in two ascii characters
+c    common:
+c       k6       - (integer) the screen output unit
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+      dimension ictp(4)
+      character*2 cldtyp(4)
+c
+c-------loop over the number of cloud decks
+c
+      do 100 i = 1,ndecks
+c
+      if(ictp(i).eq.0) then
+        cldtyp(i) = '  '
+      elseif (ictp(i).eq. 1) then
+        cldtyp(i) = 'st'
+      elseif (ictp(i).eq. 2) then
+        cldtyp(i) = 'sc'
+      elseif (ictp(i).eq. 3) then
+        cldtyp(i) = 'cu'
+      elseif (ictp(i).eq. 4) then
+        cldtyp(i) = 'ns'
+      elseif (ictp(i).eq. 5) then
+        cldtyp(i) = 'ac'
+      elseif (ictp(i).eq. 6) then
+        cldtyp(i) = 'as'
+      elseif (ictp(i).eq. 7) then
+        cldtyp(i) = 'cs'
+      elseif (ictp(i).eq. 8) then
+        cldtyp(i) = 'ci'
+      elseif (ictp(i).eq. 9) then
+        cldtyp(i) = 'cc'
+      elseif (ictp(i).eq.10) then
+        cldtyp(i) = 'cb'
+      elseif (ictp(i).eq.25) then
+        cldtyp(i) = '??'
+      else
+        write(6,*)'something is wrong with the cloud type array,'
+        write(6,1001) i,ictp(i)
+ 1001   format(1x,'ictp array.  ictp(',i1,') = ',i2)
+c
+        stop
+      endif
+c
+  100 continue
+c
+      return
+      end
+      subroutine output(cldtyp,watr,xmvd,aindex,hindex,icp,ndecks,title)
+c***********************************************************************
+c                          subroutine output
+c***********************************************************************
+c<begin>
+c<identification>          name:  output
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  smfd
+c=======================================================================
+c<description>
+c    this subroutine takes the output parameters and writes them out to
+c    the screen or printer.
+c=======================================================================
+c<called routines>
+c    inkey - (subroutine) gets a character from the keyboard without
+c            echo.  the routine is not available in source code form.
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call output(cldtyp,watr,xmvd,aindex,hindex,icp,ndecks,title)
+c    input:
+c       cldtyp   - (character) cloud type in two ascii characters
+c       watr     - (real) output array containing lwc and percent liquid
+c                  water every 100 m in the cloud
+c       xmvd     - (real) mean volume diameter for each cloud
+c       aindex   - (character) icing severity index for fixed wing
+c                  aircraft every 100 m
+c       hindex   - (character) icing severity index for helicopters
+c                  every 100 m
+c       icp      - (integer) percent (1-100%) cloud coverage for up to 4
+c                  cloud decks
+c       ndecks   - (integer) the number of cloud decks
+c       title    - (character) the title to be displayed in the output
+c    output:
+c       none
+c    common:
+c       bot      - (real) the height of the (up to 4) cloud layer
+c                  bottoms
+c       top      - (real) the height of the (up to 4) cloud layer tops
+c       prb      - (real) the pressures at the cloud layer bottoms
+c       prt      - (real) the pressures at the cloud layer tops
+c       btem     - (real) the temperatures at the cloud layer bottoms
+c       ttem     - (real) the temperatures at the cloud layer tops
+c       nlvl     - (integer) number of 100 m height levels
+c       heitl    - (real) array of 100 m heights
+c       pres     - (real) the pressure every 100 m
+c       temp     - (real) the temperature every 100 m
+c       k5       - (integer) the keyboard input unit
+c       k6       - (integer) the screen output unit
+c       k7       - (integer) the disk file unit
+c       k8       - (integer) the printer output unit
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              major modifications to the code.  completely rewritten.
+c    05/03/89  asl    (505) 678-1570    elton p. avara
+c              minor modifications to the code.
+c    09/14/89  asl    (505) 678-1570    elton p. avara
+c              modified the definition of temp, watr, aindex and hindex
+c              to give values every 100 m.  also added nlvl, heitl,
+c              pres, prt, and ttem.  major modifications.
+c    12/21/89  steve albers - modified for profs
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+      real       freeze
+      parameter   (freeze = 273.15)
+c
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+      common /iodev/k5,k6,k7,k8
+c
+      dimension icp(4),watr(4,2,260),xmvd(4)
+c
+      character*70 title
+c     character*14 filenm
+      character*11 aindex(4,260),hindex(4,260)
+c     character*10 scrclr
+c     character*8 curpos
+c     character*4 scrblk
+c     character*3 lerase
+      character*2 cldtyp(4)
+c     character*1 num(10),ans
+      character*1 num(10)
+c
+c     logical nprt,nfil
+c
+      data num/'0','1','2','3','4','5','6','7','8','9'/
 
-    1 FORMAT(A,$)
-C
-C-------Now to write the cloud data starting with the lowest cloud
-C       to the highest cloud.
-C
-C-------First write the cloud deck data that is not height conditional
-C       to the screen (and printer/disk file).
-C
-      WRITE(K6,26) (INT(TOP(J)),J=1,NDECKS)
-   26 FORMAT(' Cloud Top (m):',16X,4I12)
-C
-      WRITE(K6,24) (INT(BOT(J)),J=1,NDECKS)
-   24 FORMAT(' Cloud Base (m):',15X,4I12)
-C
-      WRITE(K6,30) (CLDTYP(J),J=1,NDECKS)
-   30 FORMAT(' Cloud Type:',19X,4(10X,A2))
-C
-      WRITE(K6,32) (XMVD(J),J=1,NDECKS)
-   32 FORMAT(' Drop MVD (microns):',11X,4F12.1)
-C
-      WRITE(K6,34) (ICP(J),J=1,NDECKS)
-   34 FORMAT(' Prob. of Encountering Cloud:',2X,4I12)
-C
-C-------Now write the height conditional cloud data to the screen (and
-C       printer/disk file).
-C
-      DO 100 I = 1,NDECKS
-C
-      N1=WATR(I,1,1)+0.001
-      N2=WATR(I,1,2)+0.001
-C
-      IF(N1.LT.0.OR.N2.LT.0) THEN
-        GOTO 100
-      ELSEIF(N1.EQ.0.OR.N2.EQ.0) THEN
-        MAXCNT=2
-      ELSE
-        MAXCNT=N2-N1+3
-      ENDIF
-C
-C-------Write the cloud layer heading
-C
-      WRITE(K6,41) I
-   41 FORMAT(/35X,'Layer - ',I1//' Height Pressure  Temp    LWC    Prob
-     1Cloud    Fix-Wng Icing    Rot-Wng Icing'/'   (m)    (mb)     (C) (
-     2gm/cu m) All Liquid   Severity Index   Severity Index'/)
-C
-      DO 200 L=1,MAXCNT
-C
-C-------Get the temperature for the height level and convert to Celsius.
-C
-      IF(L.EQ.1) THEN
-        Z=BOT(I)
-        P=PRB(I)
-        T=BTEM(I)-FREEZE
-      ELSEIF(L.EQ.MAXCNT) THEN
-        Z=TOP(I)
-        P=PRT(I)
-        T=TTEM(I)-FREEZE
-      ELSE
-        NZ=N1+L-2
-        Z=HEITL(NZ)
-        P=PRES(NZ)
-        T=TEMP(NZ)-FREEZE
-      ENDIF
-C
-      ALW=WATR(I,1,L+2)
-C
-C-------Convert WATR(2,I) from decimal to percent format
-C
-      PROB=100.0*WATR(I,2,L+2)
-C
-C-------Write the data to the screen (and printer/disk file).
-C
-      WRITE(K6,42) INT(Z),P,T,ALW,PROB,AINDEX(I,L),HINDEX(I,L)
- 42   FORMAT(I7,F9.1,F7.1,F8.3,F10.1,8X,A11,6X,A11)
+    1 format(a,$)
+c
+c-------now to write the cloud data starting with the lowest cloud
+c       to the highest cloud.
+c
+c-------first write the cloud deck data that is not height conditional
+c       to the screen (and printer/disk file).
+c
+      write(k6,26) (int(top(j)),j=1,ndecks)
+   26 format(' cloud top (m):',16x,4i12)
+c
+      write(k6,24) (int(bot(j)),j=1,ndecks)
+   24 format(' cloud base (m):',15x,4i12)
+c
+      write(k6,30) (cldtyp(j),j=1,ndecks)
+   30 format(' cloud type:',19x,4(10x,a2))
+c
+      write(k6,32) (xmvd(j),j=1,ndecks)
+   32 format(' drop mvd (microns):',11x,4f12.1)
+c
+      write(k6,34) (icp(j),j=1,ndecks)
+   34 format(' prob. of encountering cloud:',2x,4i12)
+c
+c-------now write the height conditional cloud data to the screen (and
+c       printer/disk file).
+c
+      do 100 i = 1,ndecks
+c
+      n1=watr(i,1,1)+0.001
+      n2=watr(i,1,2)+0.001
+c
+      if(n1.lt.0.or.n2.lt.0) then
+        goto 100
+      elseif(n1.eq.0.or.n2.eq.0) then
+        maxcnt=2
+      else
+        maxcnt=n2-n1+3
+      endif
+c
+c-------write the cloud layer heading
+c
+      write(k6,41) i
+   41 format(/35x,'layer - ',i1//' height pressure  temp    lwc    prob
+     1cloud    fix-wng icing    rot-wng icing'/'   (m)    (mb)     (c) (
+     2gm/cu m) all liquid   severity index   severity index'/)
+c
+      do 200 l=1,maxcnt
+c
+c-------get the temperature for the height level and convert to celsius.
+c
+      if(l.eq.1) then
+        z=bot(i)
+        p=prb(i)
+        t=btem(i)-freeze
+      elseif(l.eq.maxcnt) then
+        z=top(i)
+        p=prt(i)
+        t=ttem(i)-freeze
+      else
+        nz=n1+l-2
+        z=heitl(nz)
+        p=pres(nz)
+        t=temp(nz)-freeze
+      endif
+c
+      alw=watr(i,1,l+2)
+c
+c-------convert watr(2,i) from decimal to percent format
+c
+      prob=100.0*watr(i,2,l+2)
+c
+c-------write the data to the screen (and printer/disk file).
+c
+      write(k6,42) int(z),p,t,alw,prob,aindex(i,l),hindex(i,l)
+ 42   format(i7,f9.1,f7.1,f8.3,f10.1,8x,a11,6x,a11)
 
-C
-  200 CONTINUE
-C
-  100 CONTINUE
-C
-   99 RETURN
-      END
-      SUBROUTINE OUT_LAPS
-     1  (nk,CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE,
+c
+  200 continue
+c
+  100 continue
+c
+   99 return
+      end
+      subroutine out_laps
+     1  (nk,cldtyp,watr,xmvd,aindex,hindex,icp,ndecks,title,
      1         rlwc_laps,prob_laps)
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL OUTPUT(CLDTYP,WATR,XMVD,AINDEX,HINDEX,ICP,NDECKS,TITLE)
-C    Input:
-C       CLDTYP   - (character) cloud type in two ASCII characters
-C       WATR     - (real) output array containing LWC and percent liquid
-C                  water every 100 m in the cloud
-C       XMVD     - (real) Mean Volume Diameter for each cloud
-C       AINDEX   - (character) Icing Severity Index for fixed wing
-C                  aircraft every 100 m
-C       HINDEX   - (character) Icing Severity Index for helicopters
-C                  every 100 m
-C       ICP      - (integer) percent (1-100%) cloud coverage for up to 4
-C                  cloud decks
-C       NDECKS   - (integer) the number of cloud decks
-C       TITLE    - (character) the title to be displayed in the output
-C    Output:
-C       None
-C    Common:
-C       BOT      - (real) the height of the (up to 4) cloud layer
-C                  bottoms
-C       TOP      - (real) the height of the (up to 4) cloud layer tops
-C       PRB      - (real) the pressures at the cloud layer bottoms
-C       PRT      - (real) the pressures at the cloud layer tops
-C       BTEM     - (real) the temperatures at the cloud layer bottoms
-C       TTEM     - (real) the temperatures at the cloud layer tops
-C       NLVL     - (integer) number of 100 m height levels
-C       HEITL    - (real) array of 100 m heights
-C       PRES     - (real) the pressure every 100 m
-C       TEMP     - (real) the temperature every 100 m
-C       K5       - (integer) the keyboard input unit
-C       K6       - (integer) the screen output unit
-C       K7       - (integer) the disk file unit
-C       K8       - (integer) the printer output unit
-C=======================================================================
-C    12/21/89  Steve Albers - Modified for PROFS Map LWC output to
-C                             LAPS grid
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-      REAL       FREEZE
-      PARAMETER   (FREEZE = 273.15)
-C
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-      DIMENSION ICP(4),WATR(4,2,260),XMVD(4)
-C
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call output(cldtyp,watr,xmvd,aindex,hindex,icp,ndecks,title)
+c    input:
+c       cldtyp   - (character) cloud type in two ascii characters
+c       watr     - (real) output array containing lwc and percent liquid
+c                  water every 100 m in the cloud
+c       xmvd     - (real) mean volume diameter for each cloud
+c       aindex   - (character) icing severity index for fixed wing
+c                  aircraft every 100 m
+c       hindex   - (character) icing severity index for helicopters
+c                  every 100 m
+c       icp      - (integer) percent (1-100%) cloud coverage for up to 4
+c                  cloud decks
+c       ndecks   - (integer) the number of cloud decks
+c       title    - (character) the title to be displayed in the output
+c    output:
+c       none
+c    common:
+c       bot      - (real) the height of the (up to 4) cloud layer
+c                  bottoms
+c       top      - (real) the height of the (up to 4) cloud layer tops
+c       prb      - (real) the pressures at the cloud layer bottoms
+c       prt      - (real) the pressures at the cloud layer tops
+c       btem     - (real) the temperatures at the cloud layer bottoms
+c       ttem     - (real) the temperatures at the cloud layer tops
+c       nlvl     - (integer) number of 100 m height levels
+c       heitl    - (real) array of 100 m heights
+c       pres     - (real) the pressure every 100 m
+c       temp     - (real) the temperature every 100 m
+c       k5       - (integer) the keyboard input unit
+c       k6       - (integer) the screen output unit
+c       k7       - (integer) the disk file unit
+c       k8       - (integer) the printer output unit
+c=======================================================================
+c    12/21/89  steve albers - modified for profs map lwc output to
+c                             laps grid
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+      real       freeze
+      parameter   (freeze = 273.15)
+c
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+      common /iodev/k5,k6,k7,k8
+c
+      dimension icp(4),watr(4,2,260),xmvd(4)
+c
       real rlwc_laps(nk),prob_laps(nk)
 
-      CHARACTER*70 TITLE
-C     CHARACTER*14 FILENM
-      CHARACTER*11 AINDEX(4,260),HINDEX(4,260)
-      CHARACTER*2 CLDTYP(4)
-C     CHARACTER*1 NUM(10),ANS
-      CHARACTER*1 NUM(10)
-C
-C     LOGICAL NPRT,NFIL
-C
-      DATA NUM/'0','1','2','3','4','5','6','7','8','9'/
+      character*70 title
+c     character*14 filenm
+      character*11 aindex(4,260),hindex(4,260)
+      character*2 cldtyp(4)
+c     character*1 num(10),ans
+      character*1 num(10)
+c
+c     logical nprt,nfil
+c
+      data num/'0','1','2','3','4','5','6','7','8','9'/
 
-    1 FORMAT(A,$)
+    1 format(a,$)
 
-!     Initialize laps arrays
+!     initialize laps arrays
 !     do k = 1,nk
 !         rlwc_laps(k) = 0.
 !         prob_laps(k) = 0.
 !     enddo
 
-C
-C-------Now write the height conditional cloud data to the screen (and
-C       printer/disk file).
-C
-      DO 100 I = 1,NDECKS
-C
-      N1=WATR(I,1,1)+0.001
-      N2=WATR(I,1,2)+0.001
-C
-      IF(N1.LT.0.OR.N2.LT.0) THEN
-        GOTO 100
-      ELSEIF(N1.EQ.0.OR.N2.EQ.0) THEN
-        MAXCNT=2
-      ELSE
-        MAXCNT=N2-N1+3
-      ENDIF
+c
+c-------now write the height conditional cloud data to the screen (and
+c       printer/disk file).
+c
+      do 100 i = 1,ndecks
+c
+      n1=watr(i,1,1)+0.001
+      n2=watr(i,1,2)+0.001
+c
+      if(n1.lt.0.or.n2.lt.0) then
+        goto 100
+      elseif(n1.eq.0.or.n2.eq.0) then
+        maxcnt=2
+      else
+        maxcnt=n2-n1+3
+      endif
 
       z_new = -999.
-      DO 200 L=1,MAXCNT
-C
-C-------Get the temperature for the height level and convert to Celsius.
-C
-      IF(L.EQ.1) THEN
-        Z=BOT(I)
-        P=PRB(I)
-        T=BTEM(I)-FREEZE
-      ELSEIF(L.EQ.MAXCNT) THEN
-        Z=TOP(I)
-        P=PRT(I)
-        T=TTEM(I)-FREEZE
-      ELSE
-        NZ=N1+L-2
-        Z=HEITL(NZ)
-        P=PRES(NZ)
-        T=TEMP(NZ)-FREEZE
-      ENDIF
-C
-      ALW=WATR(I,1,L+2)
-C
-C-------Convert WATR(2,I) from decimal to percent format
-C
-      PROB=100.0*WATR(I,2,L+2)
-C
-C-------Write the data to the screen (and printer/disk file).
-C
+      do 200 l=1,maxcnt
+c
+c-------get the temperature for the height level and convert to celsius.
+c
+      if(l.eq.1) then
+        z=bot(i)
+        p=prb(i)
+        t=btem(i)-freeze
+      elseif(l.eq.maxcnt) then
+        z=top(i)
+        p=prt(i)
+        t=ttem(i)-freeze
+      else
+        nz=n1+l-2
+        z=heitl(nz)
+        p=pres(nz)
+        t=temp(nz)-freeze
+      endif
+c
+      alw=watr(i,1,l+2)
+c
+c-------convert watr(2,i) from decimal to percent format
+c
+      prob=100.0*watr(i,2,l+2)
+c
+c-------write the data to the screen (and printer/disk file).
+c
 
       alw_old = alw
       prob_old = prob
@@ -1634,7 +1634,7 @@ C
       z_new = zcoord_of_pressure(p*100.)
 
       if(int(z_old) .ne. int(z_new) .and. z_old .ne. -999.)then
-!         Interpolate to LAPS grid point
+!         interpolate to laps grid point
           iz = int(z_new)
           frac = (z_new - float(iz)) / (z_new - z_old)
           rlwc_laps(iz) = alw_old * frac + alw * (1.0 - frac)
@@ -1642,782 +1642,782 @@ C
       endif
 
 
-!      WRITE(K6,42) INT(Z),P,T,ALW,PROB,AINDEX(I,L),HINDEX(I,L)
-! 42   FORMAT(I7,F9.1,F7.1,F8.3,F10.1,8X,A11,6X,A11)
+!      write(k6,42) int(z),p,t,alw,prob,aindex(i,l),hindex(i,l)
+! 42   format(i7,f9.1,f7.1,f8.3,f10.1,8x,a11,6x,a11)
 
-C
-  200 CONTINUE
-C
-  100 CONTINUE
-C
-   99 RETURN
-      END
+c
+  200 continue
+c
+  100 continue
+c
+   99 return
+      end
 
-      SUBROUTINE LWC(NDECKS,ICP,ICTP,WATR,XMVD)
-C***********************************************************************
-C                          SUBROUTINE LWC
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  LWC
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  SMFD
-C=======================================================================
-C<Description>
-C    This routine controls the computation of liquid water content (LWC)
-C    and the probability the cloud is all liquid.  It calls the
-C    microphysics portion of the code by RTNEPH cloud deck.
-C=======================================================================
-C<Called routines>
-C    LW     - (subroutine) calculates LWC and the probability the cloud
-C             is all liquid for super-cooled clouds
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL LWC(NDECKS,ICP,ICTP,WATR)
-C    Input:
-C       NDECKS   - (integer) number of cloud decks present
-C       ICP      - (integer) percent cloud amount in layers
-C       ICTP     - (integer) code for the cloud type (up to 4 cloud
-C                  decks)
-C    Output:
-C       WATR     - (real) output array containing LWC and percent liquid
-C                  water for every 100 m in the cloud layers
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C    09/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Modified the definition of WATR to give values every
-C              100 m.  Minor modifications.
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-C  DESCRIPTION:
-C       Loop 10 controls the stepping through the observed RTNEPH cloud
-C  decks.  Subroutine LW is called to calculate the Liquid Water Content
-C  (LWC) and Thermodynamic Phase (TDP).
-C
-C  LOCAL GLOSSARY:
-C       IRAIN     - NO RAIN (1) Flag
-C       LAY       - RTNEPH cloud deck index
-C       ICTP(4)   - cloud type by 3DNEPH cloud deck
-C
-C-----------------------------------------------------------------------
-C
-      DIMENSION WATR(4,2,260),ICTP(4),ICP(4),XMVD(4)
-C
-C ------------------- START OF EXECUTABLE CODE -------------------------
-C
-C-------Set the rain flag to NO RAIN permenantly
-C
-      IRAIN = 1
-C
-      DO 10 LAY=1,NDECKS
-C
-C-------Set the first two values of WATR to indicate no clouds
-C
-      WATR(LAY,1,1)=-2.0
-      WATR(LAY,1,2)=-2.0
-C
-C-------If the cloud type is 'clear', skip it.
-C
-      IF(ICTP(LAY).NE.0) CALL LW(LAY,IRAIN,ICTP(LAY),WATR,ICP(LAY)
-     1                                          ,XMVD(LAY))
-C
-  10  CONTINUE
-C
-      RETURN
-      END
-      SUBROUTINE LW(LAY,IRAIN,LVLCT,WATR,NEPH,RMVD)
-C***********************************************************************
-C                          SUBROUTINE LW
-C***********************************************************************
-C<Begin>
-C<Identification>          Name:  LW
-C                          Type:  FORTRAN-77 Subroutine
-C                      Filename:  ICE.FOR
-C                        Parent:  LWC
-C=======================================================================
-C<Description>
-C    This subroutine calculates the LWC and probability the cloud water
-C    is all liquid for super-cooled clouds, and calls S/R AL for each
-C    height level within a cloud deck.
-C=======================================================================
-C<Called routines>
-C    AL     - (subroutine) calculates moist adiabatic LWC of non-
-C             cirriform cloud types
-C=======================================================================
-C<Parameters>
-C    Formal declaration:
-C       CALL LW(LAY,IRAIN,LVLCT,WATR,NEPH)
-C    Input:
-C       LAY      - (integer) cloud layer index (1-4)
-C       IRAIN    - (integer) RAIN (2) or NO RAIN (1)
-C       LVLCT    - (integer) cloud type of the cloud deck
-C       NEPH     - (integer) percent cloud amount in cloud deck
-C    Output:
-C       WATR     - (real) output array containing LWC and percent liquid
-C                  water for every 100 m in the cloud layers
-C    Common:
-C       BOT      - (real) the height of the (up to 4) cloud layer
-C                  bottoms
-C       TOP      - (real) the height of the (up to 4) cloud layer tops
-C       PRB      - (real) the pressures at the cloud layer bottoms
-C       PRT      - (real) the pressures at the cloud layer tops
-C       BTEM     - (real) the temperatures at the cloud layer bottoms
-C       TTEM     - (real) the temperatures at the cloud layer tops
-C       NLVL     - (integer) number of 100 m height levels
-C       HEITL    - (real) array of 100 m heights
-C       PRES     - (real) the pressure every 100 m
-C       TEMP     - (real) the temperature every 100 m
-C       K6       - (integer) the screen output unit
-C=======================================================================
-C<History>
-C    11/15/87  UDRI   (513) 229-3921    James K. Luers
-C              Delivered basic source code
-C    02/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Cleaned up the code
-C    05/03/89  ASL    (505) 678-1570    Elton P. Avara
-C              Minor modifications to the code and added the variables
-C              PRES and TOP.
-C    09/13/89  ASL    (505) 678-1570    Elton P. Avara
-C              Modified the definitions of PRES and WATR to give
-C              values every 100 m.  Also added NLVL, TTEM, TEMP, LAY,
-C              and HEITL.  Major modifications.
-C=======================================================================
-C<End>
-C***********************************************************************
-C
-C  DESCRIPTION:
-C       Authors - M. D. Dykton and C. W. Rogers.  Loop 200 finds ILOC
-C                 and ITMP and puts the calculated LWC in WATR.
-C
-C  LOCAL GLOSSARY:
-C       ILOC       = (integer) location of point within cloud deck
-C       ITMP       = (integer) temperature converted to Table Index
-C       LAY        = (integer) cloud layer
-C       PERMAX(5,10,2)
-C                  = (real) table of the percent of maximum LWC for a
-C                    given cloud type (10) at intervals above the cloud
-C                    base (5) for raining or non-raining clouds (2).
-C                    See TN 74-4, Figures 4, 5, & 6 on PP 6-8 and
-C                    paragraph 4A, P 4.  ILOC, LVLCT, and IRAIN are the
-C                    indices for PERMAX.
-C       T          = (real) temperature in degrees Kelvin
-C       THEMAX(10,10)
-C                  = (real) table of maximum LWC in G/M**3 that can
-C                    occur for a given cloud type (10) and for a given 5
-C                    degree temperature interval (10).  See Calspan
-C                    Final Report, Table 5, P 26.
-C
-C  REFERENCES:
-C       1) USAFETAC Technical Note 74-4, "A Synoptic-Scale Model for
-C          Simulating Condensed Atmospheric Moisture", April 1974, by
-C          CAPT Robert G. Feddes.
-C
-C       2) Rogers, C.W., Hanley J.T. and E.J. Mack, 1985: "Updating the
-C          Smith-Feddes Model", Final Report Contract No. N00228-84-C-
-C          3157 Calspan Report No. 7330-1. Calspan Corp., P.O. Box 400
-C          Buffalo, New York 14225.
-C
-C-----------------------------------------------------------------------
-C
-      COMMON /PANT/ BOT(4),TOP(4),PRB(4),PRT(4),BTEM(4),TTEM(4)
-      COMMON /QANT/ NLVL,HEITL(260),PRES(260),TEMP(260)
-      COMMON /IODEV/K5,K6,K7,K8
-C
-      DIMENSION CALW(260),WATR(4,2,260),THEMAX(10,10),PERMAX(5,10,2)
-C
-      DATA THEMAX/.2,.25,.30,.35,.4,.45,.50,.55,.6,.6,
+      subroutine lwc(ndecks,icp,ictp,watr,xmvd)
+c***********************************************************************
+c                          subroutine lwc
+c***********************************************************************
+c<begin>
+c<identification>          name:  lwc
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  smfd
+c=======================================================================
+c<description>
+c    this routine controls the computation of liquid water content (lwc)
+c    and the probability the cloud is all liquid.  it calls the
+c    microphysics portion of the code by rtneph cloud deck.
+c=======================================================================
+c<called routines>
+c    lw     - (subroutine) calculates lwc and the probability the cloud
+c             is all liquid for super-cooled clouds
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call lwc(ndecks,icp,ictp,watr)
+c    input:
+c       ndecks   - (integer) number of cloud decks present
+c       icp      - (integer) percent cloud amount in layers
+c       ictp     - (integer) code for the cloud type (up to 4 cloud
+c                  decks)
+c    output:
+c       watr     - (real) output array containing lwc and percent liquid
+c                  water for every 100 m in the cloud layers
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c    09/13/89  asl    (505) 678-1570    elton p. avara
+c              modified the definition of watr to give values every
+c              100 m.  minor modifications.
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+c  description:
+c       loop 10 controls the stepping through the observed rtneph cloud
+c  decks.  subroutine lw is called to calculate the liquid water content
+c  (lwc) and thermodynamic phase (tdp).
+c
+c  local glossary:
+c       irain     - no rain (1) flag
+c       lay       - rtneph cloud deck index
+c       ictp(4)   - cloud type by 3dneph cloud deck
+c
+c-----------------------------------------------------------------------
+c
+      dimension watr(4,2,260),ictp(4),icp(4),xmvd(4)
+c
+c ------------------- start of executable code -------------------------
+c
+c-------set the rain flag to no rain permenantly
+c
+      irain = 1
+c
+      do 10 lay=1,ndecks
+c
+c-------set the first two values of watr to indicate no clouds
+c
+      watr(lay,1,1)=-2.0
+      watr(lay,1,2)=-2.0
+c
+c-------if the cloud type is 'clear', skip it.
+c
+      if(ictp(lay).ne.0) call lw(lay,irain,ictp(lay),watr,icp(lay)
+     1                                          ,xmvd(lay))
+c
+  10  continue
+c
+      return
+      end
+      subroutine lw(lay,irain,lvlct,watr,neph,rmvd)
+c***********************************************************************
+c                          subroutine lw
+c***********************************************************************
+c<begin>
+c<identification>          name:  lw
+c                          type:  fortran-77 subroutine
+c                      filename:  ice.for
+c                        parent:  lwc
+c=======================================================================
+c<description>
+c    this subroutine calculates the lwc and probability the cloud water
+c    is all liquid for super-cooled clouds, and calls s/r al for each
+c    height level within a cloud deck.
+c=======================================================================
+c<called routines>
+c    al     - (subroutine) calculates moist adiabatic lwc of non-
+c             cirriform cloud types
+c=======================================================================
+c<parameters>
+c    formal declaration:
+c       call lw(lay,irain,lvlct,watr,neph)
+c    input:
+c       lay      - (integer) cloud layer index (1-4)
+c       irain    - (integer) rain (2) or no rain (1)
+c       lvlct    - (integer) cloud type of the cloud deck
+c       neph     - (integer) percent cloud amount in cloud deck
+c    output:
+c       watr     - (real) output array containing lwc and percent liquid
+c                  water for every 100 m in the cloud layers
+c    common:
+c       bot      - (real) the height of the (up to 4) cloud layer
+c                  bottoms
+c       top      - (real) the height of the (up to 4) cloud layer tops
+c       prb      - (real) the pressures at the cloud layer bottoms
+c       prt      - (real) the pressures at the cloud layer tops
+c       btem     - (real) the temperatures at the cloud layer bottoms
+c       ttem     - (real) the temperatures at the cloud layer tops
+c       nlvl     - (integer) number of 100 m height levels
+c       heitl    - (real) array of 100 m heights
+c       pres     - (real) the pressure every 100 m
+c       temp     - (real) the temperature every 100 m
+c       k6       - (integer) the screen output unit
+c=======================================================================
+c<history>
+c    11/15/87  udri   (513) 229-3921    james k. luers
+c              delivered basic source code
+c    02/13/89  asl    (505) 678-1570    elton p. avara
+c              cleaned up the code
+c    05/03/89  asl    (505) 678-1570    elton p. avara
+c              minor modifications to the code and added the variables
+c              pres and top.
+c    09/13/89  asl    (505) 678-1570    elton p. avara
+c              modified the definitions of pres and watr to give
+c              values every 100 m.  also added nlvl, ttem, temp, lay,
+c              and heitl.  major modifications.
+c=======================================================================
+c<end>
+c***********************************************************************
+c
+c  description:
+c       authors - m. d. dykton and c. w. rogers.  loop 200 finds iloc
+c                 and itmp and puts the calculated lwc in watr.
+c
+c  local glossary:
+c       iloc       = (integer) location of point within cloud deck
+c       itmp       = (integer) temperature converted to table index
+c       lay        = (integer) cloud layer
+c       permax(5,10,2)
+c                  = (real) table of the percent of maximum lwc for a
+c                    given cloud type (10) at intervals above the cloud
+c                    base (5) for raining or non-raining clouds (2).
+c                    see tn 74-4, figures 4, 5, & 6 on pp 6-8 and
+c                    paragraph 4a, p 4.  iloc, lvlct, and irain are the
+c                    indices for permax.
+c       t          = (real) temperature in degrees kelvin
+c       themax(10,10)
+c                  = (real) table of maximum lwc in g/m**3 that can
+c                    occur for a given cloud type (10) and for a given 5
+c                    degree temperature interval (10).  see calspan
+c                    final report, table 5, p 26.
+c
+c  references:
+c       1) usafetac technical note 74-4, "a synoptic-scale model for
+c          simulating condensed atmospheric moisture", april 1974, by
+c          capt robert g. feddes.
+c
+c       2) rogers, c.w., hanley j.t. and e.j. mack, 1985: "updating the
+c          smith-feddes model", final report contract no. n00228-84-c-
+c          3157 calspan report no. 7330-1. calspan corp., p.o. box 400
+c          buffalo, new york 14225.
+c
+c-----------------------------------------------------------------------
+c
+      common /pant/ bot(4),top(4),prb(4),prt(4),btem(4),ttem(4)
+      common /qant/ nlvl,heitl(260),pres(260),temp(260)
+      common /iodev/k5,k6,k7,k8
+c
+      dimension calw(260),watr(4,2,260),themax(10,10),permax(5,10,2)
+c
+      data themax/.2,.25,.30,.35,.4,.45,.50,.55,.6,.6,
      1            .35,.4,.45,.50,.55,.60,.65,3*.7,10*3.,.35,.4,
      2            .45,.5,.6,.6,.75,3*.90,.25,.30,.35,.40,.40,
      3            .45,.6,3*.7,.20,.25,.25,.3,.35,.40,.45,3*.5,
      4            3*.15,3*.2,4*.25,4*.1,3*.15,3*.2,
      5            4*.05,3*.1,3*.15,10*6.5/
-C
-      DATA PERMAX/5*.4,.38,.62,.74,.58,.37,.40,.60,.80,
+c
+      data permax/5*.4,.38,.62,.74,.58,.37,.40,.60,.80,
      1           .95,.74,.38,.62,.74,.58,.37,.38,.62,.74,.58,.37,
      2            20*.4,.37,.57,.76,.90,.82,.93,.77,.62,.47,.32,
      3           .96,.88,.74,.58,.37,1.9,1.6,1.,.5,.4,.96,.88,
      4           .74,.58,.37,.96,.88,.74,.58,.37,.93,.77,.62,
      5           .47,.32,.93,.77,.62,.47,.32,.93,.77,.62,.47,
      6           .32,.93,.77,.62,.47,.32,2.75,1.95,1.,.63,.47/
-C
-C ******************* START OF EXECUTABLE CODE *************************
-C
-C  IF CLOUD PERCENTAGE IS ZERO, SKIP MICROPHYSICS.
-C
-      IF(NEPH.EQ.0) GOTO 100
-C
-C  SET S/R AL PARAMETER
-C
-      TI=BTEM(LAY)-273.16
-C
-C-------Determine which 100 m height levels are within this cloud layer.
-C
-      N1=1
-      N2=NLVL
-      DO 400 J=1,NLVL
-      IF(BOT(LAY).GE.HEITL(J)) N1=J+1
-      IF(TOP(LAY).GT.HEITL(J)) N2=J
-  400 CONTINUE
-      NMAX=N2-N1+3
-C
-      IF(N1.GT.N2) THEN
-        N1=0
-        N2=0
-        NMAX=2
-      ENDIF
-C
-      DIF=TOP(LAY)-BOT(LAY)
-C
-C-------Store the indices which indicate which 100 m height levels are
-C       within the cloud in the first two elements of WATR.
-C
-      WATR(LAY,1,1)=N1
-      WATR(LAY,1,2)=N2
-C
-C-------If the cloud type is not cirriform, calculate the adiabatic
-C       liquid water content within the cloud layer
-C
-      IF(LVLCT.LT.7.OR.LVLCT.GT.9) CALL AL(LVLCT,LAY,TI,N1,N2,CALW)
-C
-C-------Get the liquid water content at all height levels within the
-C       cloud layer
-C
-      DO 200 L=1,NMAX
-C
-C-------Get the height and temperature for each height level within the
-C       cloud layer
-C
-      IF(L.EQ.1) THEN
-        Z=BOT(LAY)
-        T=BTEM(LAY)
-      ELSEIF(L.LT.NMAX) THEN
-        Z=HEITL(N1+L-2)
-        T=TEMP(N1+L-2)
-      ELSE
-        Z=TOP(LAY)
-        T=TTEM(LAY)
-      ENDIF
-C
-C  SCALE TEMPERATURE INTO AN INDEX (ITMP) FOR THE ARRAY THEMAX
-C
-      ITMP = (T - 238.0) / 5.0
-      IF(ITMP.GT.10) ITMP = 10
-      IF(ITMP.LT. 1) ITMP = 1
-C
-C  CALCULATE PERCENT HEIGHT OF POINT ABOVE BASE WITHIN CLOUD
-C  DECK AND SCALE IT INTO AN INDEX FOR THE TABLE PERMAX.
-C
-      HGTPCT = (Z - BOT(LAY)) / DIF
-      ILOC = HGTPCT * 5. + 1.
-      IF(ILOC.LT.1) ILOC = 1
-      IF(ILOC.GT.5) ILOC = 5
-C
-C  IF NOT CIRRIFORM CLOUD, MODIFY ADIABATIC CMC.
-C
-      IF(LVLCT .LT. 7 .OR. LVLCT .GT. 9) THEN
-C
-C  NO REDUCTION IN CMC NEAR CLOUD TOP IF STRATUS TYPE CLOUDS
-C  (ST, AS, AND NS).  FOR CUMULIFORM CLOUDS REDUCE CMC NEAR CLOUD TOP
-C  IF HEIGHT GREATER THAN 80% OF CLOUD DEPTH
-C
-        IF(LVLCT.NE.1.AND.LVLCT.NE.4.AND.LVLCT.NE.6) THEN
-          IF(HGTPCT.GE.0.8) THEN
-            LL=LVLCT
-            IF(LL.EQ.25) LL=3
-            DELTOP=5.0*(HGTPCT-0.8)
-            CALW(L)=CALW(L)*(1.0-DELTOP*(1.0-PERMAX(ILOC,LL,1)))
-          ENDIF
-        ENDIF
-C
-C  IF PRECIPITATION IS PRESENT, MODIFY THE LIQUID WATER CONTENT
-C
-        IF(IRAIN.EQ.2) THEN
-          PERDIF=PERMAX(ILOC,LVLCT,2)-PERMAX(ILOC,LVLCT,1)
-          IF(PERDIF .LE. 0.0) THEN
-C
-C  DECREASE CMC IN PRECIPITATION
-C
-            CALW(L)=CALW(L)*PERMAX(ILOC,LVLCT,2)/PERMAX(ILOC,LVLCT,1)
-          ELSE
-C
-C  INCREASE CMC IN PRECIPITATION
-C
-            PDIF=PERDIF/PERMAX(ILOC,LVLCT,2)
-            CALW(L)=CALW(L)/(1.0-PDIF)
-          ENDIF
-        ENDIF
-C
-        WATR(LAY,1,L+2)=CALW(L)
-C
-C  CALCULATE FRACTIONAL PROBABILITY CLOUD WATER IS ALL LIQUID
-C
-        IF( T .GT. 273. ) THEN
-C
-C  ALL CLOUD WATER IS LIQUID IF TEMPERATURE > 273.
-C
-          WATR(LAY,2,L+2) = 1.
-        ELSEIF( T .LT. 233. ) THEN
-C
-C  ALL CLOUD WATER IS ICE IF TEMPERATURE < 233.
-C
-          WATR(LAY,2,L+2) = 0.
-        ELSE ! T is between 233 and 273
-C
-C  CHECK CLOUD TYPE IF (233. <= TEMPERATURE <= 273.)
-C  THERE IS SUPER-COOLED WATER
-C
-          IF(LVLCT.EQ.3.OR.LVLCT.EQ.10) THEN ! Cu type cloud, 233 < T < 273
-C
-C  SUPER-COOLED UNSTABLE - CUMULUS OR CUMULONIMBUS CLOUDS
-C  -.03927 = (PI/2.) / -40.
-C
-            WATR(LAY,2,L+2)=COS(-.03927*(T-273.))
-          ELSE ! not CU type cloud (Stratiform cloud), 233 < T < 273
-C
-C  SUPER-COOLED STABLE - STRATIFORM CLOUDS (0C to -30C)
-C  CLOUD WATER IS DEPLETED BY A TEMPERATURE DEPENDENT HYPERBOLIC
-C  TANGENT FUNCTION-NO CLOUD WATER AT -40C AND ALL WATER AT 0C
-C  THE "WIDTH" OF THE DROP-OFF BETWEEN ALL WATER AND NO WATER
-C  IN THE CLOUD IS CONTROLLED BY THE DENOMINATOR OF ARGUMENT.
-C  THE MIDDLE OF THE DROPOFF IS CURRENTLY AT -20C(253K) SINCE
-C  THIS VALUE ENSURES MATHEMATICAL CONSISTENTCY
-C
-C
-C           ARG=(T-253.)/7.5
-C           FAC=(TANH(ARG)+1.0)/2.
-C
-C    11/6/90 CHANGE-USE A LINEAR FACTOR FOR LWC DEPLETION BY GLACIATION
-C    INSTEAD OF THE HYPERBOLIC PROFILE ABOVE (Ramps from -10C to -30C)
-C
-            IF(T.GE.263.) THEN
-              FAC=1.0
-            ELSEIF(T.LE.243.) THEN
-              FAC=0.0
-            ELSE
-              FAC=(T-243.)/20.
-            ENDIF
+c
+c ******************* start of executable code *************************
+c
+c  if cloud percentage is zero, skip microphysics.
+c
+      if(neph.eq.0) goto 100
+c
+c  set s/r al parameter
+c
+      ti=btem(lay)-273.16
+c
+c-------determine which 100 m height levels are within this cloud layer.
+c
+      n1=1
+      n2=nlvl
+      do 400 j=1,nlvl
+      if(bot(lay).ge.heitl(j)) n1=j+1
+      if(top(lay).gt.heitl(j)) n2=j
+  400 continue
+      nmax=n2-n1+3
+c
+      if(n1.gt.n2) then
+        n1=0
+        n2=0
+        nmax=2
+      endif
+c
+      dif=top(lay)-bot(lay)
+c
+c-------store the indices which indicate which 100 m height levels are
+c       within the cloud in the first two elements of watr.
+c
+      watr(lay,1,1)=n1
+      watr(lay,1,2)=n2
+c
+c-------if the cloud type is not cirriform, calculate the adiabatic
+c       liquid water content within the cloud layer
+c
+      if(lvlct.lt.7.or.lvlct.gt.9) call al(lvlct,lay,ti,n1,n2,calw)
+c
+c-------get the liquid water content at all height levels within the
+c       cloud layer
+c
+      do 200 l=1,nmax
+c
+c-------get the height and temperature for each height level within the
+c       cloud layer
+c
+      if(l.eq.1) then
+        z=bot(lay)
+        t=btem(lay)
+      elseif(l.lt.nmax) then
+        z=heitl(n1+l-2)
+        t=temp(n1+l-2)
+      else
+        z=top(lay)
+        t=ttem(lay)
+      endif
+c
+c  scale temperature into an index (itmp) for the array themax
+c
+      itmp = (t - 238.0) / 5.0
+      if(itmp.gt.10) itmp = 10
+      if(itmp.lt. 1) itmp = 1
+c
+c  calculate percent height of point above base within cloud
+c  deck and scale it into an index for the table permax.
+c
+      hgtpct = (z - bot(lay)) / dif
+      iloc = hgtpct * 5. + 1.
+      if(iloc.lt.1) iloc = 1
+      if(iloc.gt.5) iloc = 5
+c
+c  if not cirriform cloud, modify adiabatic cmc.
+c
+      if(lvlct .lt. 7 .or. lvlct .gt. 9) then
+c
+c  no reduction in cmc near cloud top if stratus type clouds
+c  (st, as, and ns).  for cumuliform clouds reduce cmc near cloud top
+c  if height greater than 80% of cloud depth
+c
+        if(lvlct.ne.1.and.lvlct.ne.4.and.lvlct.ne.6) then
+          if(hgtpct.ge.0.8) then
+            ll=lvlct
+            if(ll.eq.25) ll=3
+            deltop=5.0*(hgtpct-0.8)
+            calw(l)=calw(l)*(1.0-deltop*(1.0-permax(iloc,ll,1)))
+          endif
+        endif
+c
+c  if precipitation is present, modify the liquid water content
+c
+        if(irain.eq.2) then
+          perdif=permax(iloc,lvlct,2)-permax(iloc,lvlct,1)
+          if(perdif .le. 0.0) then
+c
+c  decrease cmc in precipitation
+c
+            calw(l)=calw(l)*permax(iloc,lvlct,2)/permax(iloc,lvlct,1)
+          else
+c
+c  increase cmc in precipitation
+c
+            pdif=perdif/permax(iloc,lvlct,2)
+            calw(l)=calw(l)/(1.0-pdif)
+          endif
+        endif
+c
+        watr(lay,1,l+2)=calw(l)
+c
+c  calculate fractional probability cloud water is all liquid
+c
+        if( t .gt. 273. ) then
+c
+c  all cloud water is liquid if temperature > 273.
+c
+          watr(lay,2,l+2) = 1.
+        elseif( t .lt. 233. ) then
+c
+c  all cloud water is ice if temperature < 233.
+c
+          watr(lay,2,l+2) = 0.
+        else ! t is between 233 and 273
+c
+c  check cloud type if (233. <= temperature <= 273.)
+c  there is super-cooled water
+c
+          if(lvlct.eq.3.or.lvlct.eq.10) then ! cu type cloud, 233 < t < 273
+c
+c  super-cooled unstable - cumulus or cumulonimbus clouds
+c  -.03927 = (pi/2.) / -40.
+c
+            watr(lay,2,l+2)=cos(-.03927*(t-273.))
+          else ! not cu type cloud (stratiform cloud), 233 < t < 273
+c
+c  super-cooled stable - stratiform clouds (0c to -30c)
+c  cloud water is depleted by a temperature dependent hyperbolic
+c  tangent function-no cloud water at -40c and all water at 0c
+c  the "width" of the drop-off between all water and no water
+c  in the cloud is controlled by the denominator of argument.
+c  the middle of the dropoff is currently at -20c(253k) since
+c  this value ensures mathematical consistentcy
+c
+c
+c           arg=(t-253.)/7.5
+c           fac=(tanh(arg)+1.0)/2.
+c
+c    11/6/90 change-use a linear factor for lwc depletion by glaciation
+c    instead of the hyperbolic profile above (ramps from -10c to -30c)
+c
+            if(t.ge.263.) then
+              fac=1.0
+            elseif(t.le.243.) then
+              fac=0.0
+            else
+              fac=(t-243.)/20.
+            endif
 
-            WATR(LAY,1,L+2)=WATR(LAY,1,L+2)*FAC
-            WATR(LAY,2,L+2) = EXP(.0909091*(T-273.)) - .0263
-          ENDIF ! Cu type Cloud
-        ENDIF ! T
+            watr(lay,1,l+2)=watr(lay,1,l+2)*fac
+            watr(lay,2,l+2) = exp(.0909091*(t-273.)) - .0263
+          endif ! cu type cloud
+        endif ! t
 
-        IF(T .LE. 233.)WATR(LAY,1,L+2)=0. ! Case for Cu or Stratiform cloud < 40C
+        if(t .le. 233.)watr(lay,1,l+2)=0. ! case for cu or stratiform cloud < 40c
 
-      ELSE ! Cirroform cloud
-C
-C  IF CIRRIFROM CLOUD DO NOT USE ADIABATIC LWC, USE TABLE.
-C
-        WATR(LAY,1,L+2) = THEMAX(ITMP,LVLCT) * PERMAX(ILOC,LVLCT,IRAIN)
-C
-C  CLOUD IS ALL ICE
-C
-        WATR(LAY,2,L+2) = 0.0
-      ENDIF
-C
-C-------Check to make sure that the LWC calculated by this program
-C       is non-negative.  If it is negative then tell the user to
-C       check their input values for errors.
-C
-      IF(WATR(LAY,1,L+2).LT.0.0) THEN
-        WRITE(K6 ,*)'The model has calculated a negative LWC.'
-        WRITE(K6 ,*)'Please check your input data for errors.'
-        STOP
-      ENDIF
-C
-  200 CONTINUE
-      NDIF=N2-N1
-      NMID=(NDIF)/2+2
-      NMID1=NMID+1
-      IF((NDIF/2)*2.EQ.NDIF) THEN
-       TMID=TEMP(NMID)
-      ELSE
-       TMID=(TEMP(NMID)+TEMP(NMID1))/2.
-      ENDIF
-!     CALL DSD(LAY,LVLCT,IRAIN,ILOC,PERMAX,WATR,TMID,N1,N2,RMVD)
-C
-  100 RETURN
-      END
+      else ! cirroform cloud
+c
+c  if cirrifrom cloud do not use adiabatic lwc, use table.
+c
+        watr(lay,1,l+2) = themax(itmp,lvlct) * permax(iloc,lvlct,irain)
+c
+c  cloud is all ice
+c
+        watr(lay,2,l+2) = 0.0
+      endif
+c
+c-------check to make sure that the lwc calculated by this program
+c       is non-negative.  if it is negative then tell the user to
+c       check their input values for errors.
+c
+      if(watr(lay,1,l+2).lt.0.0) then
+        write(k6 ,*)'the model has calculated a negative lwc.'
+        write(k6 ,*)'please check your input data for errors.'
+        stop
+      endif
+c
+  200 continue
+      ndif=n2-n1
+      nmid=(ndif)/2+2
+      nmid1=nmid+1
+      if((ndif/2)*2.eq.ndif) then
+       tmid=temp(nmid)
+      else
+       tmid=(temp(nmid)+temp(nmid1))/2.
+      endif
+!     call dsd(lay,lvlct,irain,iloc,permax,watr,tmid,n1,n2,rmvd)
+c
+  100 return
+      end
 
-      SUBROUTINE DSD
-     G              ( LAY, LVLCT, IRAIN, ILOC, PERMAX,
-     B                WATR,TEMPK,N1,N2,MVD )
-C
-C    PURPOSE
-C         THIS SUBROUTINE CALCULATES DROP SIZE DISTRIBUTION
-C    PARAMETER LIST
-C         GIVEN
-C              LVLCT (I) = CLOUD TYPE (1-10)
-C              IRAIN  (I) = NO RAIN (1) OR RAIN (2)
-C              ILOC   (I) = LOCATION OF A CALCULATION POINT
-C                           WITHIN A CLOUD DECK
-C              LVL    (I) = CLOUD LEVEL
-C              PERMAX(5,10,2) (R) = PERCENT OF MAXIMUM LWC THAT CAN
-C                                   A FUNCTION OF CLOUD TYPE AND
-C                                   RELATIVE CLOUD POSITION
-C         YIELDED
-C              RNDRPS(4,40) (R)    = DROP SIZE DITRIBUTION AT
-C                                    THE MID-POINT OF EACH CLOUD
-C                                    DECK
-C                        MVD = MEAN VOLUME DIAMETER PER LAYER
-C
-C    LOCAL GLOSSARY
-C              DRPCLD (R) = RADII AT WHICH CLOUD DSD IS EVALUATED
-C              CLDRPS (R) = NUMBER OF DROPS/CM**3/MICRON RADIUS INTERVAL
-C                           CENTERED AT A PARTICULAR RADIUS
-C              ILAYR  (R) = LAYER NUMBER (SAME AS LAY)
-C              LWCC   (R) = CLOUD CONDENSED MOISTURE
-C              LWCCL  (R) = CLOUD LIQUID CONTENT
-C              LWCCI  (R) = CLOUD ICE CONTENT
-C              LWCR   (R) = RAIN CONDENSED MOISTURE
-C              LWCRL  (R) = RAIN LIQUID CONTENT
-C              LWCRI  (R) = RAIN ICE CONTENT
-C LWC=TOTAL CONDENSED MOISTURE, PRECIPITATION OR NO PRECIPITATION, LIQUI
-C  CLOUD.  USED IN BOTH NO PRECIPITATION AND PRECIPITATION CASES.
-C  TDP=TOTAL LIQUID CONDENSED MOISTURE, PRECIPITATION OR NO PRECIPITATIO
-C  TDP=LWC FOR LIQUID CLOUD
-C  TDP=0.0 FOR ICE CLOUD
-C  USED ONLY IF ALL MOISTURE IS ONLY IN CLOUD
-C              TEMPK  (R) = LAYER MIDPOINT TEMPERATURE (DEGREES KELVIN)
-C
-C.......................................................................
-C
-C
-      DIMENSION  VOLI(40),CLDRPS(4,40),RNDRPS(10,4,2),
-     1           PERMAX(5,10,2), DRPCLD(40),WATR(4,2,260)
-      REAL       LWC, LWCC, LWCR, LWCCL, LWCCI, LWCRL, LWCRI
-      REAL MVD,MVDI(40)
+      subroutine dsd
+     g              ( lay, lvlct, irain, iloc, permax,
+     b                watr,tempk,n1,n2,mvd )
+c
+c    purpose
+c         this subroutine calculates drop size distribution
+c    parameter list
+c         given
+c              lvlct (i) = cloud type (1-10)
+c              irain  (i) = no rain (1) or rain (2)
+c              iloc   (i) = location of a calculation point
+c                           within a cloud deck
+c              lvl    (i) = cloud level
+c              permax(5,10,2) (r) = percent of maximum lwc that can
+c                                   a function of cloud type and
+c                                   relative cloud position
+c         yielded
+c              rndrps(4,40) (r)    = drop size ditribution at
+c                                    the mid-point of each cloud
+c                                    deck
+c                        mvd = mean volume diameter per layer
+c
+c    local glossary
+c              drpcld (r) = radii at which cloud dsd is evaluated
+c              cldrps (r) = number of drops/cm**3/micron radius interval
+c                           centered at a particular radius
+c              ilayr  (r) = layer number (same as lay)
+c              lwcc   (r) = cloud condensed moisture
+c              lwccl  (r) = cloud liquid content
+c              lwcci  (r) = cloud ice content
+c              lwcr   (r) = rain condensed moisture
+c              lwcrl  (r) = rain liquid content
+c              lwcri  (r) = rain ice content
+c lwc=total condensed moisture, precipitation or no precipitation, liqui
+c  cloud.  used in both no precipitation and precipitation cases.
+c  tdp=total liquid condensed moisture, precipitation or no precipitatio
+c  tdp=lwc for liquid cloud
+c  tdp=0.0 for ice cloud
+c  used only if all moisture is only in cloud
+c              tempk  (r) = layer midpoint temperature (degrees kelvin)
+c
+c.......................................................................
+c
+c
+      dimension  voli(40),cldrps(4,40),rndrps(10,4,2),
+     1           permax(5,10,2), drpcld(40),watr(4,2,260)
+      real       lwc, lwcc, lwcr, lwccl, lwcci, lwcrl, lwcri
+      real mvd,mvdi(40)
 
-      DATA DRPCLD/1.0,3.0,5.0,7.0,9.0,11.0,13.0,15.0,17.0,19.0,
+      data drpcld/1.0,3.0,5.0,7.0,9.0,11.0,13.0,15.0,17.0,19.0,
      1 21.0,23.0,25.0,27.0,29.0,31.0,33.0,35.0,37.0,39.0,41.0,
      2 43.0,45.0,47.0,49.0,51.0,53.0,55.0,57.0,59.0,61.0,63.0,
      3 65.0,67.0,69.0,71.0,73.0,75.0,77.0,79.0/
-C
-C ******************** START OF EXECUTABLE CODE ************************
-C
-C     PRESETTING LWC VARIABLES
-C
-      LWC   = -99.0
-      LWCC  = -99.0
-      LWCR  = -99.0
-      LWCCL = -99.0
-      LWCCI = -99.0
-      LWCRL = -99.0
-      LWCRI = -99.0
-C
-C   FOR THE TIME BEING WE WILL CALCULATE A DROP SIZE DISTRIBUTION ONLY
-      ILAYR=LAY
+c
+c ******************** start of executable code ************************
+c
+c     presetting lwc variables
+c
+      lwc   = -99.0
+      lwcc  = -99.0
+      lwcr  = -99.0
+      lwccl = -99.0
+      lwcci = -99.0
+      lwcrl = -99.0
+      lwcri = -99.0
+c
+c   for the time being we will calculate a drop size distribution only
+      ilayr=lay
 
-C   AT THE MID-POINT OF A CLOUD DECK
-      NDIF=N2-N1
-      NMID=NDIF/2+1
-      NMID1=NMID+1
-      IF((NDIF/2)*2.EQ.NDIF) THEN
-       LWC=WATR(LAY,1,NMID)
-      ELSE
-       LWC=(WATR(LAY,1,NMID)+WATR(LAY,1,NMID1))/2.
-      ENDIF
-      TDP=LWC
-C  IF NO PRECIPITATION AT THIS LEVEL ALL MOISITURE IS CLOUD WATER
-      IF ( .NOT. ( IRAIN .EQ. 2 ) ) GO TO 20
-C
-C         IT'S PRECIPITATING; CALCULATE THE LWC PERCENT DIFFERENCE
-C         BETWEEN PRECIPITATING & NON-PRECIPITATING CLOUD TYPES
- 10   DIF  = PERMAX(ILOC,LVLCT,2) - PERMAX(ILOC,LVLCT,1)
-      PDIF = DIF / PERMAX(ILOC,LVLCT,2)
-      IF (.NOT.( DIF .LE. 0. )) GO TO 60
-C
-C     ALL LIQUID IS IN CLOUD FORM - NO PRECIPITATION
-C
-   20 LWCCL = TDP
-      LWCCI = LWC - LWCCL
-C          CLOUD LIQUID CONTENT
-C          CLOUD ICE CONTENT
-C
-C     FOLLOWING COMPUTES AND STORES DROP SIZE DISTRIBUTIONS
-C     CORRESPONDING TO LWCCL AND LWCCI
-C
-C
-      IF(LWCCL .GT. 0.)then
-          CALL NDROPS
-     G           ( LVLCT, LWCCL, DRPCLD, 40,LAY,
-     Y             CLDRPS    )
-C
-C-----CALCULATE THE VOLUMES OF EACH OF THE RADII CATEGORIES
-C
-      TOTVOL=0.0
-      PI=ACOS(-1.0)
-      DO 25 K=1,40
-         VOLI(K)=(4.0/3.0)*PI*(DRPCLD(K)*1E-4)**3
-         IWATR=INT(CLDRPS(LAY,K))
-         TOTVOL=TOTVOL+IWATR*VOLI(K)
-  25  CONTINUE
-C
-C-----CALCULATE THE MEAN VOLUME DIAMETER FOR THIS LAYER
-C
-      DO 35 K=1,40
-         L=41-K
-!        WRITE(3,*) CLDRPS(LAY,K)
-         IWATR=INT(CLDRPS(LAY,L))
-C         WRITE(3,*)IWATR,VOLI(L),TOTVOL
-         MVDI(L)=IWATR*VOLI(L)/TOTVOL
-C         WRITE(3,*)MVDI(L)
-   35 CONTINUE
-      TOTMVD=0.0
+c   at the mid-point of a cloud deck
+      ndif=n2-n1
+      nmid=ndif/2+1
+      nmid1=nmid+1
+      if((ndif/2)*2.eq.ndif) then
+       lwc=watr(lay,1,nmid)
+      else
+       lwc=(watr(lay,1,nmid)+watr(lay,1,nmid1))/2.
+      endif
+      tdp=lwc
+c  if no precipitation at this level all moisiture is cloud water
+      if ( .not. ( irain .eq. 2 ) ) go to 20
+c
+c         it's precipitating; calculate the lwc percent difference
+c         between precipitating & non-precipitating cloud types
+ 10   dif  = permax(iloc,lvlct,2) - permax(iloc,lvlct,1)
+      pdif = dif / permax(iloc,lvlct,2)
+      if (.not.( dif .le. 0. )) go to 60
+c
+c     all liquid is in cloud form - no precipitation
+c
+   20 lwccl = tdp
+      lwcci = lwc - lwccl
+c          cloud liquid content
+c          cloud ice content
+c
+c     following computes and stores drop size distributions
+c     corresponding to lwccl and lwcci
+c
+c
+      if(lwccl .gt. 0.)then
+          call ndrops
+     g           ( lvlct, lwccl, drpcld, 40,lay,
+     y             cldrps    )
+c
+c-----calculate the volumes of each of the radii categories
+c
+      totvol=0.0
+      pi=acos(-1.0)
+      do 25 k=1,40
+         voli(k)=(4.0/3.0)*pi*(drpcld(k)*1e-4)**3
+         iwatr=int(cldrps(lay,k))
+         totvol=totvol+iwatr*voli(k)
+  25  continue
+c
+c-----calculate the mean volume diameter for this layer
+c
+      do 35 k=1,40
+         l=41-k
+!        write(3,*) cldrps(lay,k)
+         iwatr=int(cldrps(lay,l))
+c         write(3,*)iwatr,voli(l),totvol
+         mvdi(l)=iwatr*voli(l)/totvol
+c         write(3,*)mvdi(l)
+   35 continue
+      totmvd=0.0
 
-      MVD=0.0
-      DO 40 K=1,40
-         L=41-K
-         TOTMVD=TOTMVD+MVDI(L)
-         IF (TOTMVD.GE.0.5) THEN
-             MVD=DRPCLD(L)
-C            WRITE(3,*)MVD
-             GO TO 45
-         ENDIF
-   40 CONTINUE
-      ENDIF ! IF NO LWC
-C
-   45 IF(LWCCI.EQ.0.)GO TO 50
-C
-C     CALL NDROPS
-C    G           (8, LWCCI, DRPCLD, 8,
-C    Y             WATR(13,ILAYR)     )
-C
-C
-   50 CONTINUE
-      RETURN
-C
-C     FOLLOWING TREATS CASES WHERE SOME LIQUID IS IN RAIN FORM
-C
- 60   CONTINUE
-C SPLIT LWC INTO RAIN AND CLOUD WATER
-      LWCR = PDIF * LWC
-      LWCC = LWC - LWCR
-C
-C     TEMPK IS TEMPERATURE AT THE LAYER MIDPOINT
-      IF((LVLCT .GE. 7) .AND. (LVLCT .LE. 9)) GO TO 400
-C          IF TEMPERATURE > 273. THEN ALL MOISTURE IS LIQUID
-      IF ( TEMPK .GT. 273. ) LWCCL = 1.
-C          IF TEMPERATURE < 233. THEN ALL MOISTURE IS ICE
-      IF ( TEMPK .LT. 233. ) LWCCL = 0.
-C          SKIP IF NO SUPER-COOLED LIQUID IS PRESENT
-      IF ( TEMPK .GT. 273. .OR. TEMPK .LT. 233. ) GO TO 210
-      IF ( LVLCT .EQ. 3 .OR. LVLCT .EQ. 10 ) GO TO 200
-C
-C     SUPER-COOLED STABLE -- STRATIFORM CLOUDS
-      LWCCL = EXP(.0909091*(TEMPK-273.))-.0263
-      GO TO 210
-C
- 200  CONTINUE
-C     SUPER-COOLED UNSTABLE -- CUMULUS OR CUMULONIMBUS CLOUDS
-C     -.03927 = ( PI / 2. ) / -40.
-      LWCCL = COS (-.03927 * (TEMPK - 273.))
-C
- 210  CONTINUE
-C  FRACTIONAL PROBABILITY CLOUD IS ALL WATER
-      WATER=LWCCL
-C SET LWCCL FOR LIQUID CLOUD PROCESSING
-C  LWCCL=1.0. INSURES LWCCL CONVERTS TO LWCC IN 2ND STATEMENT HENCE.
-      LWCCL=1.0
-      IF(WATER .EQ. 0.0) LWCCL=0.0
-C  LIQUID CLOUD VARIABLES SET FOR S/R NDROPS AND S/R WRTOUT.
-      LWCCL = LWCCL * LWCC
-      LWCCI = LWCC - LWCCL
-      WATL = LWCCL
-      WATI = LWCCI
-      GO TO 500
-C  ICE CLOUD VARIABLE SET FOR S/R NDROPS AND S/R WRTOUT
-C  IF CIRRIFORM CLOUD THEN NO CLOUD LIQUID CONTENT AND PROBABILITY OF CL
-C  CONDENSED MOISTURE BEING ALL LIQUID IS ZERO
-  400 WATL=0.0
-      WATI=LWCC
-      LWCCI=LWCC
-      LWCCL=0.0
-C
-C     FOLLOWING COMPUTES AND STORES DROP SIZE DISTRIBUTIONS
-C     CORRESPONDING TO LWCCL AND LWCCI
-  500 CONTINUE
-C
-C
-      IF(LWCCL .GT. 0.)then
-          CALL NDROPS
-     G           ( LVLCT, LWCCL, DRPCLD, 40,LAY,
-     :             CLDRPS  )
-C
-C-----CALCULATE THE VOLUMES OF EACH OF THE RADII CATEGORIES
-C
-      TOTVOL=0.0
-      PI=ACOS(-1.0)
-      DO 525 K=1,40
-         VOLI(K)=(4.0/3.0)*PI*(DRPCLD(K)*1E-4)**3
-         IWATR=INT(CLDRPS(LAY,K))
-         TOTVOL=TOTVOL+IWATR*VOLI(K)
-C         TWATR=WATR(J,ILAYR)
-C         TOTVOL=TOTVOL+TWATR*VOLI(K)
- 525  CONTINUE
-C
-C-----CALCULATE THE MEAN VOLUME DIAMETER FOR THIS LAYER
-C
-      DO 535 K=1,40
-         L=41-K
-C         TWATR=WATR(J,ILAYR)
-         IWATR=INT(CLDRPS(LAY,L))
-C        WRITE(3,*)IWATR,VOLI(L),TOTVOL
-C         MVDI(L)=TWATR*VOLI(L)/TOTVOL
-         MVDI(L)=IWATR*VOLI(L)/TOTVOL
-C         WRITE(3,*)MVDI(L)
-  535 CONTINUE
-      TOTMVD=0.0
-      MVD=0.0
-      DO 540 K=1,40
-         L=41-K
-         TOTMVD=TOTMVD+MVDI(L)
-         IF (TOTMVD.GE.0.5) THEN
-             MVD=DRPCLD(L)
-C            WRITE(3,*)MVD
-             GO TO 45
-         ENDIF
-  540 CONTINUE
-      ENDIF ! IF NO LWC
-C
-C
-      IF(LWCCI.EQ.0.)GO TO 90
-C
-C      CALL NDROPS
-C    G           ( 8, LWCCI, DRPCLD,40,
-C    Y             WATR(13,ILAYR)  )
-C
-C
-   90 CONTINUE
-C     THE FACTOR QZ IS INCORPORATED INTO THE MODEL TO ACCOUNT FOR
-C     THE FACT THAT "THE DIFFERENTIAL FALL VELOCITIES FOR LIQUID
-C     AND SOLID WATER WILL DECREASE THE TOTAL CONDENSED MOISTURE
-C     BELOW THE FREEZING LEVEL."  (TN 74-4, P 11, PARA. A)
-C     IN THOSE LAYERS WHOSE HEIGHTS ARE BELOW THE FREEZING LEVEL,
-C     THE CONDENSED MOISTURE IS HALVED, FOR CONVECTIVE CLOUD TYPES.
-      QZ = 1.
-C
-C     FOLLOW SAME COMPUTATIONAL PROCEDURE FOR RAIN AS FOR CLOUDS (ABOVE)
-      IF ( TEMPK .GT. 273. ) LWCRL = 1.
-      IF ( TEMPK .LT. 233. ) LWCRL = 0.
-      IF ( TEMPK .GT. 273. .AND. LVLCT .EQ. 10 ) GO TO 230
-      IF ( TEMPK .GT. 273. .AND. LVLCT .EQ. 3 ) GO TO 230
-      IF ( TEMPK .GT. 273. .OR.  TEMPK .LT. 233. ) GO TO 240
-      IF(LVLCT .EQ. 3 .OR. LVLCT .EQ. 10 ) GO TO 220
-C
-C     SUPER-COOLED STABLE -- NON-CONVECTIVE SO FACTOR DOESN'T APPLY
-      LWCRL = EXP(.0909091 * (TEMPK-273.))-.0263
-C  PRECIPITATION AT TEMPERATURES BELOW ZERO IS FROZEN. STRATIFORM CLOUDS
-      LWCRL=0.0
-      GO TO 240
-C
- 220  CONTINUE
-C     SUPER-COOLED UNSTABLE
-      LWCRL =  COS(-.03927  *  (TEMPK - 273.))
-C  PRECIPTATION AT TEMPERATURES BELOW ZERO IS FROZEN.  CUMULIFORM CLOUDS
-      LWCRL=0.0
-C
- 230  CONTINUE
-C     BRANCH HERE IF CONVECTIVE CLOUDS; TEST TO SEE IF TEMPERATURE
-C     ABOVE FREEZING (SO THAT LAYER IS BELOW FREEZING POINT).
-      IF ( TEMPK .GT. 273.) QZ = .5
-C
- 240  CONTINUE
-C
-      LWCRL = (LWCRL * QZ) * LWCR
-      LWCRI = (LWCR * QZ) - LWCRL
-C
-C     LWC = LWCCL + LWCCI + LWCRL + LWCRI
-C
-C
-C     COMPUTE DROP SIZE DISTRIBUTION (NUMBER/M**3/MICRON) AT 300
-C     MICRON INTERVALS FROM 150 TO 2850 MICRONS, CORRESPONDING TO ...
-C
-C     LWCRL (RAIN LIQUID):
-      IF ( .NOT. ( LWCRL .NE. 0 ) ) GO TO 105
-      R = -150.
-      DO 100 IA = 1,10
-           R = R+300.
-  100      RNDRPS(IA,LAY,1)= 20.*EXP((-.004555*R)/LWCRL**.25)
-C          SEE EQUATION, P 8, TN 74-4 (WHICH IS FROM P 17, TN 74-1)
-C     ENDDO
-C
-  105 CONTINUE
-C
-C     LWCRI (RAIN ICE):
-      IF (.NOT.( LWCRI .NE. 0 )) GO TO 115
-      R = -150.
-      DO 110 IA = 1,10
-           R = R+300.
-  110      RNDRPS(IA,LAY,2)= 20. * EXP((-.004555*R)/LWCRI**.25)
-C          SEE EQUATION, P 8, TN 74-4
-C     ENDDO
-C
-C
-  115 RETURN
-      END
-C
-C
+      mvd=0.0
+      do 40 k=1,40
+         l=41-k
+         totmvd=totmvd+mvdi(l)
+         if (totmvd.ge.0.5) then
+             mvd=drpcld(l)
+c            write(3,*)mvd
+             go to 45
+         endif
+   40 continue
+      endif ! if no lwc
+c
+   45 if(lwcci.eq.0.)go to 50
+c
+c     call ndrops
+c    g           (8, lwcci, drpcld, 8,
+c    y             watr(13,ilayr)     )
+c
+c
+   50 continue
+      return
+c
+c     following treats cases where some liquid is in rain form
+c
+ 60   continue
+c split lwc into rain and cloud water
+      lwcr = pdif * lwc
+      lwcc = lwc - lwcr
+c
+c     tempk is temperature at the layer midpoint
+      if((lvlct .ge. 7) .and. (lvlct .le. 9)) go to 400
+c          if temperature > 273. then all moisture is liquid
+      if ( tempk .gt. 273. ) lwccl = 1.
+c          if temperature < 233. then all moisture is ice
+      if ( tempk .lt. 233. ) lwccl = 0.
+c          skip if no super-cooled liquid is present
+      if ( tempk .gt. 273. .or. tempk .lt. 233. ) go to 210
+      if ( lvlct .eq. 3 .or. lvlct .eq. 10 ) go to 200
+c
+c     super-cooled stable -- stratiform clouds
+      lwccl = exp(.0909091*(tempk-273.))-.0263
+      go to 210
+c
+ 200  continue
+c     super-cooled unstable -- cumulus or cumulonimbus clouds
+c     -.03927 = ( pi / 2. ) / -40.
+      lwccl = cos (-.03927 * (tempk - 273.))
+c
+ 210  continue
+c  fractional probability cloud is all water
+      water=lwccl
+c set lwccl for liquid cloud processing
+c  lwccl=1.0. insures lwccl converts to lwcc in 2nd statement hence.
+      lwccl=1.0
+      if(water .eq. 0.0) lwccl=0.0
+c  liquid cloud variables set for s/r ndrops and s/r wrtout.
+      lwccl = lwccl * lwcc
+      lwcci = lwcc - lwccl
+      watl = lwccl
+      wati = lwcci
+      go to 500
+c  ice cloud variable set for s/r ndrops and s/r wrtout
+c  if cirriform cloud then no cloud liquid content and probability of cl
+c  condensed moisture being all liquid is zero
+  400 watl=0.0
+      wati=lwcc
+      lwcci=lwcc
+      lwccl=0.0
+c
+c     following computes and stores drop size distributions
+c     corresponding to lwccl and lwcci
+  500 continue
+c
+c
+      if(lwccl .gt. 0.)then
+          call ndrops
+     g           ( lvlct, lwccl, drpcld, 40,lay,
+     :             cldrps  )
+c
+c-----calculate the volumes of each of the radii categories
+c
+      totvol=0.0
+      pi=acos(-1.0)
+      do 525 k=1,40
+         voli(k)=(4.0/3.0)*pi*(drpcld(k)*1e-4)**3
+         iwatr=int(cldrps(lay,k))
+         totvol=totvol+iwatr*voli(k)
+c         twatr=watr(j,ilayr)
+c         totvol=totvol+twatr*voli(k)
+ 525  continue
+c
+c-----calculate the mean volume diameter for this layer
+c
+      do 535 k=1,40
+         l=41-k
+c         twatr=watr(j,ilayr)
+         iwatr=int(cldrps(lay,l))
+c        write(3,*)iwatr,voli(l),totvol
+c         mvdi(l)=twatr*voli(l)/totvol
+         mvdi(l)=iwatr*voli(l)/totvol
+c         write(3,*)mvdi(l)
+  535 continue
+      totmvd=0.0
+      mvd=0.0
+      do 540 k=1,40
+         l=41-k
+         totmvd=totmvd+mvdi(l)
+         if (totmvd.ge.0.5) then
+             mvd=drpcld(l)
+c            write(3,*)mvd
+             go to 45
+         endif
+  540 continue
+      endif ! if no lwc
+c
+c
+      if(lwcci.eq.0.)go to 90
+c
+c      call ndrops
+c    g           ( 8, lwcci, drpcld,40,
+c    y             watr(13,ilayr)  )
+c
+c
+   90 continue
+c     the factor qz is incorporated into the model to account for
+c     the fact that "the differential fall velocities for liquid
+c     and solid water will decrease the total condensed moisture
+c     below the freezing level."  (tn 74-4, p 11, para. a)
+c     in those layers whose heights are below the freezing level,
+c     the condensed moisture is halved, for convective cloud types.
+      qz = 1.
+c
+c     follow same computational procedure for rain as for clouds (above)
+      if ( tempk .gt. 273. ) lwcrl = 1.
+      if ( tempk .lt. 233. ) lwcrl = 0.
+      if ( tempk .gt. 273. .and. lvlct .eq. 10 ) go to 230
+      if ( tempk .gt. 273. .and. lvlct .eq. 3 ) go to 230
+      if ( tempk .gt. 273. .or.  tempk .lt. 233. ) go to 240
+      if(lvlct .eq. 3 .or. lvlct .eq. 10 ) go to 220
+c
+c     super-cooled stable -- non-convective so factor doesn't apply
+      lwcrl = exp(.0909091 * (tempk-273.))-.0263
+c  precipitation at temperatures below zero is frozen. stratiform clouds
+      lwcrl=0.0
+      go to 240
+c
+ 220  continue
+c     super-cooled unstable
+      lwcrl =  cos(-.03927  *  (tempk - 273.))
+c  preciptation at temperatures below zero is frozen.  cumuliform clouds
+      lwcrl=0.0
+c
+ 230  continue
+c     branch here if convective clouds; test to see if temperature
+c     above freezing (so that layer is below freezing point).
+      if ( tempk .gt. 273.) qz = .5
+c
+ 240  continue
+c
+      lwcrl = (lwcrl * qz) * lwcr
+      lwcri = (lwcr * qz) - lwcrl
+c
+c     lwc = lwccl + lwcci + lwcrl + lwcri
+c
+c
+c     compute drop size distribution (number/m**3/micron) at 300
+c     micron intervals from 150 to 2850 microns, corresponding to ...
+c
+c     lwcrl (rain liquid):
+      if ( .not. ( lwcrl .ne. 0 ) ) go to 105
+      r = -150.
+      do 100 ia = 1,10
+           r = r+300.
+  100      rndrps(ia,lay,1)= 20.*exp((-.004555*r)/lwcrl**.25)
+c          see equation, p 8, tn 74-4 (which is from p 17, tn 74-1)
+c     enddo
+c
+  105 continue
+c
+c     lwcri (rain ice):
+      if (.not.( lwcri .ne. 0 )) go to 115
+      r = -150.
+      do 110 ia = 1,10
+           r = r+300.
+  110      rndrps(ia,lay,2)= 20. * exp((-.004555*r)/lwcri**.25)
+c          see equation, p 8, tn 74-4
+c     enddo
+c
+c
+  115 return
+      end
+c
+c
 
-      SUBROUTINE NDROPS(LVLCT,LWC,DROPSZ,N,LAY,
-     1 CLDRPS)
-CC
-CC   THE CLOUD DROP SIZE DISTRIBUTION CALCULATED HEREIN IS BASED
-CC   ON BERRY AND REINHARDT(JOURNAL OF ATMOSPHERIC SCIENCE, 1974)
-CC   THE TOTAL DROP CONCENTRATION MUST BE SPECIFIED.  FOR NOW,
-CC   THIS IS SPECIFIED FOR ALL CLOUD TYPES.
-CC   LATER I INTEND TO MAKE THIS A FUNCTION OF CLOUD BASE VERTICAL
-CC   VELOCITY AND TEMPERATURE.
-CC
-CC   PARAMETER LIST
-CC
-CC    GIVEN
-CC     LVLCT(I) = CLOUD TYPE
-CC     LWC(R)    = LIQUID WATER CONTENT(GM/CM**3)
-CC     DROPSZ(R) = NUMBER OF DROPS PER 2 MICRON DIAMETER INTERVAL
-CC     N(I)      = DIMENSION OF DROPSZ
-CC     LAY(I)    = CLOUD DECK INDEX
-CC    YIELDED
-CC     CLDRPS(R) = NUMBER OF DROPS/CM**3/2 MICRON INTERVAL
-CC
-CC   -------------------------------------------------------------
-      REAL PI,DENSITY
-      PARAMETER(PI=3.14159,DENSITY=1.0)
-      REAL LWC,CLDRPS(4,40),DROPSZ(40),TND(10)
-      INTEGER GMAFCT
-      DATA GAMMA/2./
-      DATA TND/2.5E2,3.0E2,5.0E2,2.5E2,2.5E2,3.0E2,2.5E2,
-     1 3.0E2,2.5E2,5.0E2/
-CC
-CC
-      LWC=LWC*1E-6
-      GMAFCT=1
-      DO 100 I=1,GAMMA
-       GMAFCT=GMAFCT*I
- 100  CONTINUE
-CC
-      G=(1+GAMMA)**(1+GAMMA)/FLOAT(GMAFCT)
-CC
-      DDIAM=2.0E-4
-      DO 200 I=1,40
-       DIA=DROPSZ(I)/1E4
-       DVOL=PI*DIA*DIA*DDIAM/2.
-       VOL=PI*DIA**3/6.
-       S=TND(LVLCT)*VOL*DENSITY/LWC
-       ARG=(1+GAMMA)*S
-       IF(ARG.GT.75) ARG=75
-       F=TND(LVLCT)**2*G*S**GAMMA*EXP(-ARG)/LWC
-       CLDRPS(LAY,I)=F*DVOL*DENSITY
- 200  CONTINUE
-      RETURN
-      END
+      subroutine ndrops(lvlct,lwc,dropsz,n,lay,
+     1 cldrps)
+cc
+cc   the cloud drop size distribution calculated herein is based
+cc   on berry and reinhardt(journal of atmospheric science, 1974)
+cc   the total drop concentration must be specified.  for now,
+cc   this is specified for all cloud types.
+cc   later i intend to make this a function of cloud base vertical
+cc   velocity and temperature.
+cc
+cc   parameter list
+cc
+cc    given
+cc     lvlct(i) = cloud type
+cc     lwc(r)    = liquid water content(gm/cm**3)
+cc     dropsz(r) = number of drops per 2 micron diameter interval
+cc     n(i)      = dimension of dropsz
+cc     lay(i)    = cloud deck index
+cc    yielded
+cc     cldrps(r) = number of drops/cm**3/2 micron interval
+cc
+cc   -------------------------------------------------------------
+      real pi,density
+      parameter(pi=3.14159,density=1.0)
+      real lwc,cldrps(4,40),dropsz(40),tnd(10)
+      integer gmafct
+      data gamma/2./
+      data tnd/2.5e2,3.0e2,5.0e2,2.5e2,2.5e2,3.0e2,2.5e2,
+     1 3.0e2,2.5e2,5.0e2/
+cc
+cc
+      lwc=lwc*1e-6
+      gmafct=1
+      do 100 i=1,gamma
+       gmafct=gmafct*i
+ 100  continue
+cc
+      g=(1+gamma)**(1+gamma)/float(gmafct)
+cc
+      ddiam=2.0e-4
+      do 200 i=1,40
+       dia=dropsz(i)/1e4
+       dvol=pi*dia*dia*ddiam/2.
+       vol=pi*dia**3/6.
+       s=tnd(lvlct)*vol*density/lwc
+       arg=(1+gamma)*s
+       if(arg.gt.75) arg=75
+       f=tnd(lvlct)**2*g*s**gamma*exp(-arg)/lwc
+       cldrps(lay,i)=f*dvol*density
+ 200  continue
+      return
+      end
 
 
 

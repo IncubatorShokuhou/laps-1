@@ -29,14 +29,14 @@ c
 
       integer nz_laps
 c
-c *** Input background 3D variable.
+c *** input background 3d variable.
 c
 
-      real   prbght(nx,ny,nzbg_ht),   !pressure (mb) of levels for hgt and T
+      real   prbght(nx,ny,nzbg_ht),   !pressure (mb) of levels for hgt and t
      .       prbgsh(nx,ny,nzbg_sh),   !pressure (mb) of levels for rh
      .       prbguv(nx,ny,nzbg_uv),   !pressure (mb) of levels for u/v comps
      .       prbgww(nx,ny,nzbg_ww),   !pressure (mb) of levels for vertical wind comp
-     .       tpbg(nx,ny,nzbg_tp),     !temperature (K)
+     .       tpbg(nx,ny,nzbg_tp),     !temperature (k)
      .       htbg(nx,ny,nzbg_ht),     !height (m)
      .       shbg(nx,ny,nzbg_sh),     !specific humidity (kg/kg)
      .       uwbg(nx,ny,nzbg_uv),     !u-wind (m/s)
@@ -44,16 +44,16 @@ c
      .       cwbg(nx,ny,nzbg_ww)      !w-wind (omega [pa/s])
 
 c
-c *** Output vertically interpolated variables.
+c *** output vertically interpolated variables.
 c
-      real   tpvi(nx,ny,nz_laps), !temperature (K)
+      real   tpvi(nx,ny,nz_laps), !temperature (k)
      .       htvi(nx,ny,nz_laps), !height (m)
      .       shvi(nx,ny,nz_laps), !specific humidity (kg/kg)
      .       uwvi(nx,ny,nz_laps), !u-wind (m/s)
      .       vwvi(nx,ny,nz_laps), !v-wind (m/s)
      .       wwvi(nx,ny,nz_laps)  !w-wind (omega [pa/s])
 c
-!     3D pressures on the model grid (or input as a 1D constant pressure array)
+!     3d pressures on the model grid (or input as a 1d constant pressure array)
       real   prlaps(nx_pr,ny_pr,nz_laps) ! pressure (mb)
       real   prilaps,fact1,fact2
       real   datmsg,datmsg1,datmsg2
@@ -77,10 +77,10 @@ c
 c_______________________________________________________________________________
 c
 c first loop is required for getting the heights and temps.
-c currently only SBN grids have variable pressure levels for
+c currently only sbn grids have variable pressure levels for
 c individual fields (like sh, u/v and ww).
 
-      write(6,*)' Start vinterp, # lvls (bg/laps) = ',nzbg_ht,nz_laps       
+      write(6,*)' start vinterp, # lvls (bg/laps) = ',nzbg_ht,nz_laps       
 
       if(nzbg_ht.ne.nzbg_tp)then
          print*,'vinterp requires nzbg_ht=nzbg_tp'
@@ -109,7 +109,7 @@ c individual fields (like sh, u/v and ww).
          kkguess = 1 ! default value
          do j=iymin,iymax ! 1,ny
             do i=ixmin,ixmax ! 1,nx
-               ip = min(i,nx_pr) ! Collapse indices to 1,1 for 1D 'prlaps' input
+               ip = min(i,nx_pr) ! collapse indices to 1,1 for 1d 'prlaps' input
                jp = min(j,ny_pr) 
                prilaps=1./prlaps(ip,jp,k)
 
@@ -165,7 +165,7 @@ c analysis pressure level is below lowest bg pressure level
                if (prlaps(ip,jp,k) .gt. prbght(i,j,1)) then
                   datmsg = max(htbg(i,j,1),tpbg(i,j,1))
 
-                  if (datmsg .lt. missingflag) then ! extrapolate for T, Ht
+                  if (datmsg .lt. missingflag) then ! extrapolate for t, ht
                      fact2=14.642857*alog(prbght(i,j,1)*prilaps)
 
                      tpvi(i,j,k)=tpbg(i,j,1)
@@ -246,14 +246,14 @@ c analysis pressure of level is inbetween bg pressures of levels kk and kk+1
 
                if(htvi(i,j,k) .eq. missingflag)then
                   if(nmiss_write .le. 50)then
-                     write(6,*)' WARNING: missing htvi ',i,j,k,mode
+                     write(6,*)' warning: missing htvi ',i,j,k,mode
                      nmiss_write = nmiss_write + 1
                   endif
                endif
 
                if(tpvi(i,j,k) .lt. 150.)then
                   if(nmiss_write .le. 50)then
-                     write(6,*)' WARNING: tpvi < 150. ',i,j,k,mode
+                     write(6,*)' warning: tpvi < 150. ',i,j,k,mode
                      nmiss_write = nmiss_write + 1
                   endif
                endif
@@ -263,9 +263,9 @@ c analysis pressure of level is inbetween bg pressures of levels kk and kk+1
 
          ixtest = (ixmin+ixmax)/2
          iytest = (iymin+iymax)/2
-         if(ixtest .lt.  1 .OR. iytest .lt.  1 .OR. 
-     1      ixtest .gt. nx .OR. iytest .gt. ny      )then
-             write(6,*)' WARNING: ixtest/iytest out of bounds',ixtest
+         if(ixtest .lt.  1 .or. iytest .lt.  1 .or. 
+     1      ixtest .gt. nx .or. iytest .gt. ny      )then
+             write(6,*)' warning: ixtest/iytest out of bounds',ixtest
      1                                                        ,iytest
          else
              write(6,*)k,htvi(ixtest,iytest,k),tpvi(ixtest,iytest,k)
@@ -327,7 +327,7 @@ c
          kkguess = 1 ! default value
          do j=iymin,iymax ! 1,ny
             do i=ixmin,ixmax ! 1,nx
-               ip = min(i,nx_pr) ! Collapse indices to 1,1 for 1D 'prlaps' input
+               ip = min(i,nx_pr) ! collapse indices to 1,1 for 1d 'prlaps' input
                jp = min(j,ny_pr)
 
 c guessed pressure level

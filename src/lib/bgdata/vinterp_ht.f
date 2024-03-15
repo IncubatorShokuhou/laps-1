@@ -24,14 +24,14 @@ c
 
       integer nz_laps
 c
-c *** Input background 3D variable.
+c *** input background 3d variable.
 c
 
-      real   prbght(nx,ny,nzbg_ht),   !pressure (mb) of levels for hgt and T
+      real   prbght(nx,ny,nzbg_ht),   !pressure (mb) of levels for hgt and t
      .       prbgsh(nx,ny,nzbg_sh),   !pressure (mb) of levels for rh
      .       prbguv(nx,ny,nzbg_uv),   !pressure (mb) of levels for u/v comps
      .       prbgww(nx,ny,nzbg_ww),   !pressure (mb) of levels for vertical wind comp
-     .       tpbg(nx,ny,nzbg_tp),     !temperature (K)
+     .       tpbg(nx,ny,nzbg_tp),     !temperature (k)
      .       htbg(nx,ny,nzbg_ht),     !height (m)
      .       shbg(nx,ny,nzbg_sh),     !specific humidity (kg/kg)
      .       uwbg(nx,ny,nzbg_uv),     !u-wind (m/s)
@@ -39,9 +39,9 @@ c
      .       wwbg(nx,ny,nzbg_ww)      !w-wind (omega [pa/s])
 
 c
-c *** Output vertically interpolated variables.
+c *** output vertically interpolated variables.
 c
-      real   tpvi(nx,ny,nz_laps), !temperature (K)
+      real   tpvi(nx,ny,nz_laps), !temperature (k)
      .       prvi(nx,ny,nz_laps), !pressure (mb)
      .       shvi(nx,ny,nz_laps), !specific humidity (kg/kg)
      .       uwvi(nx,ny,nz_laps), !u-wind (m/s)
@@ -68,10 +68,10 @@ c
 c_______________________________________________________________________________
 c
 c first loop is required for getting the heights and temps.
-c currently only SBN grids have variable pressure levels for
+c currently only sbn grids have variable pressure levels for
 c individual fields (like sh, u/v and ww).
 
-      write(6,*)' Start vinterp_ht'
+      write(6,*)' start vinterp_ht'
 
       if(nzbg_ht.ne.nzbg_tp)then
          print*,'vinterp_ht requires nzbg_ht=nzbg_tp'
@@ -105,17 +105,17 @@ c individual fields (like sh, u/v and ww).
 
       datmsg = 0.
 
-c     In 'vinterp' we derived the heights/temps by interpolating from the 
-c     pressures done in log P space. Extrapolation is also done.
+c     in 'vinterp' we derived the heights/temps by interpolating from the 
+c     pressures done in log p space. extrapolation is also done.
 
-c     In 'vinterp_ht' we first get temperatures calling the 'vinterp_ht_sub' 
-c     We then want to derive the (log) pressures by interpolating from the 
-c     heights? Assume dlogp/dz is a approximately constant, though we can
-c     refine this knowing the lapse rate. This is given by the hypsometric
-c     equation in the from dlogp/dz = g/RTbar. We assume the model is 
-c     hydrostatic when we interpolate between levels. We can change this to
-c     non-hydrostatic by explicitly calculating dlogp/dz from the model P,Ht
-c     fields instead of using Tbar.
+c     in 'vinterp_ht' we first get temperatures calling the 'vinterp_ht_sub' 
+c     we then want to derive the (log) pressures by interpolating from the 
+c     heights? assume dlogp/dz is a approximately constant, though we can
+c     refine this knowing the lapse rate. this is given by the hypsometric
+c     equation in the from dlogp/dz = g/rtbar. we assume the model is 
+c     hydrostatic when we interpolate between levels. we can change this to
+c     non-hydrostatic by explicitly calculating dlogp/dz from the model p,ht
+c     fields instead of using tbar.
 
       call vinterp_ht_sub(missingflag,nx,ny,nz_laps,nzbgtp
      .                   ,htlaps,htbg,tpbg,tpvi)

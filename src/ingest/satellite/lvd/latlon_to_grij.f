@@ -4,9 +4,9 @@
 
         include 'trigd.inc'
 
-        ANGDIF(XX,Y)=MOD(XX-Y+540.,360.)-180.
+        angdif(xx,y)=mod(xx-y+540.,360.)-180.
 
-!       Determine i/j satellite coordinates for each LAPS grid point
+!       determine i/j satellite coordinates for each laps grid point
 
         real lat_l(nx_l,ny_l)
         real lon_l(nx_l,ny_l)
@@ -40,7 +40,7 @@
 
         itstatus=ishow_timer()
 
-        write(6,*)' Subroutine latlon_to_grij...'
+        write(6,*)' subroutine latlon_to_grij...'
 
         istatus = 1
 
@@ -64,15 +64,15 @@
 
         epsilon = .00040 ! degrees
 
-!       Initialize other variables
+!       initialize other variables
         iclo = -1
         jclo = -1
         dist_min_last = -999.
 
-!       Start with i/j LAPS coordinate for each satellite grid point
+!       start with i/j laps coordinate for each satellite grid point
         do is = 1,nx_s
         do js = 1,ny_s
-            if(lat_s(is,js) .ne. r_missing_data .AND.
+            if(lat_s(is,js) .ne. r_missing_data .and.
      1         lon_s(is,js) .ne. r_missing_data       )then
                 call latlon_to_rlapsgrid(lat_s(is,js),lon_s(is,js)
      1                                  ,lat_l,lon_l
@@ -93,13 +93,13 @@
         enddo ! js
         enddo ! is
 
-        write(6,*)' Sat lon center                  : ',sloncen
-        write(6,*)' Sat lat range                   : ',slatmin,slatmax
-        write(6,*)' Sat lon range (diff from center): ',slonmin,slonmax
-        write(6,*)' Sat lon range                   : ',slonmin+sloncen
+        write(6,*)' sat lon center                  : ',sloncen
+        write(6,*)' sat lat range                   : ',slatmin,slatmax
+        write(6,*)' sat lon range (diff from center): ',slonmin,slonmax
+        write(6,*)' sat lon range                   : ',slonmin+sloncen
      1                                                 ,slonmax+sloncen
 
-!       Create buffer within sat lat/lon range
+!       create buffer within sat lat/lon range
         sat_ll_buf = 0.2
         slatmin = slatmin + sat_ll_buf
         slatmax = slatmax - sat_ll_buf
@@ -118,25 +118,25 @@
 
         itstatus=ishow_timer()
 
-!       Obtain approximate satellite geometry info
-        write(6,*)' Calling satgeom...'
+!       obtain approximate satellite geometry info
+        write(6,*)' calling satgeom...'
         range_m = 42155680.00
 
-!       This 'i4time' will be correct when LVD is run from 'sched.pl' though
-!       it might be different when LVD is run from 'laps_driver.pl'. As long
-!       as 'i4time' is non-negative we should be OK, since it appears that 
+!       this 'i4time' will be correct when lvd is run from 'sched.pl' though
+!       it might be different when lvd is run from 'laps_driver.pl'. as long
+!       as 'i4time' is non-negative we should be ok, since it appears that 
 !       only 'emission_angle_d' is used that is independent of 'i4time'.
         call get_systime(i4time,a9time,istatus)
 
         call satgeom(i4time,lat_l,lon_l,nx_l,ny_l
-     1  ,sublat_l,sublon_l,range_m,r_missing_data,Phase_angle_d
-     1  ,Specular_ref_angle_d,emission_angle_d,azimuth_d,istatus)
+     1  ,sublat_l,sublon_l,range_m,r_missing_data,phase_angle_d
+     1  ,specular_ref_angle_d,emission_angle_d,azimuth_d,istatus)
 
         itstatus=ishow_timer()
 
         nxl2 = nx_l / 2  
 
-!       Loop through LAPS grid points
+!       loop through laps grid points
         do il = 1,nx_l
 
           if(il .eq. (il/100) * 100)then
@@ -161,30 +161,30 @@
 
             if(emission_angle_d(il,jl) .gt. 360.)then
                 write(6,*)
-     1              ' ERROR in latlon_to_grij.f: large emission angle'
+     1              ' error in latlon_to_grij.f: large emission angle'
      1             ,emission_angle_d(il,jl)
                 istatus = 0
                 return
             endif
 
             if(idebug .eq. 1)then
-                write(6,*)'Debugging - reached ',il,jl
+                write(6,*)'debugging - reached ',il,jl
                 write(6,51)lat_l(il,jl),lon_l(il,jl)
      1                    ,angdist,emission_angle_d(il,jl)
 51              format(' lat/lon/angdist/emission = ',2f9.3,2x,2f9.3)  
             endif
 
-!           Reset when starting a new column
+!           reset when starting a new column
             if(jl .eq. 1)then
                 bnorm = 999.
             endif
 
-!           Test whether in satellite sector / geometry area
-            if(lat_l(il,jl) .ge. slatmin .AND. 
-     1         lat_l(il,jl) .le. slatmax .AND.
-     1         il .gt. 1 .and. il .lt. nx_l .AND.
-     1         angdif(lon_l(il,jl),sloncen) .ge. slonmin .AND.       
-     1         angdif(lon_l(il,jl),sloncen) .le. slonmax .AND.
+!           test whether in satellite sector / geometry area
+            if(lat_l(il,jl) .ge. slatmin .and. 
+     1         lat_l(il,jl) .le. slatmax .and.
+     1         il .gt. 1 .and. il .lt. nx_l .and.
+     1         angdif(lon_l(il,jl),sloncen) .ge. slonmin .and.       
+     1         angdif(lon_l(il,jl),sloncen) .le. slonmax .and.
      1                 emission_angle_d(il,jl) .ge. 13.
 !    1                 angdist                 .le. 70.
      1                                                           )then
@@ -193,11 +193,11 @@
 
                 if(bnorm .gt. 1.1)then
                     
-!                   Determine satellite grid point having the closest lat/lon
-!                   to the LAPS grid point
+!                   determine satellite grid point having the closest lat/lon
+!                   to the laps grid point
 
-!                   Apply initial check prior to routine to reduce calling
-!                   Check if we've moved far enough since the last full calculation
+!                   apply initial check prior to routine to reduce calling
+!                   check if we've moved far enough since the last full calculation
                     delt_pt = sqrt((rlat_last-lat_l(il,jl))**2 
      1                           + (rlon_last-lon_l(il,jl))**2)
                     if((dist_min_last - delt_pt) .gt. 1.0)then
@@ -209,12 +209,12 @@
      1                             lat_l(il,jl),lon_l(il,jl)
      1                            ,r_missing_data           
      1                            ,lat_s,lon_s,nx_s,ny_s 
-     1                            ,iclo_loop,i_loop                  ! I/O
-     1                            ,rlat_last,rlon_last,dist_min_last ! I/O
-     1                            ,iclo,jclo,dist_min)               ! O
+     1                            ,iclo_loop,i_loop                  ! i/o
+     1                            ,rlat_last,rlon_last,dist_min_last ! i/o
+     1                            ,iclo,jclo,dist_min)               ! o
 
                        else ! inlined version for speed
-!                         Check if we've moved far enough since the last
+!                         check if we've moved far enough since the last
 !                         full calculation
                           rlat = lat_l(il,jl)
                           rlon = lon_l(il,jl)
@@ -234,7 +234,7 @@
 
                           do i = 1,nx_s
                           do j = 1,ny_s
-                            if(lat_s(i,j) .ne. r_missing_data .AND.
+                            if(lat_s(i,j) .ne. r_missing_data .and.
      1                         lon_s(i,j) .ne. r_missing_data      )then
                               delta_lat = abs(lat_s(i,j) - rlat)
                           delta_lon = abs(lon_s(i,j) - rlon) * scale_lon
@@ -294,13 +294,13 @@
                         goto 900
                     endif
 
-!                   Use closest point as first guess
+!                   use closest point as first guess
                     ri_s = iclo
                     rj_s = jclo
 
                 endif ! bnorm > 1.1
 
-!               Interpolate to get laps i,j at current guessed sat i,j
+!               interpolate to get laps i,j at current guessed sat i,j
                 i1 = max(min(int(ri_s),nx_s-1),1); fi = ri_s - i1; i2=i1+1
                 j1 = max(min(int(rj_s),ny_s-1),1); fj = rj_s - j1; j2=j1+1
 
@@ -320,13 +320,13 @@
 !               call bilinear_interp_extrap(ri_s,rj_s,nx_s,ny_s
 !    1                                     ,rjlaps_s,result2,istat_bil)
 
-                if(result1 .eq. r_missing_data .OR. 
+                if(result1 .eq. r_missing_data .or. 
      1             result2 .eq. r_missing_data      )then
                     bnorm = 20000. ! flag value
                 else
                     b(0) = il - result1
 
-!                   Check for wrapping
+!                   check for wrapping
                     if(b(0) .gt. (nxl2))then
                         b(0) = b(0) - nx_l
                     elseif(b(0) .lt. -(nxl2))then
@@ -349,7 +349,7 @@
                     if(iwrite .le. 60 .or. idebug .eq. 1)then
                         write(6,111)il,jl,iter,ri_s,rj_s
      1                             ,lat_l(il,jl),lon_l(il,jl)
-111                     format(' Convergence acheived at ',3i6,2f10.4
+111                     format(' convergence acheived at ',3i6,2f10.4
      1                                                    ,4x,2f10.3)
                         if(idebug .eq. 1)write(6,*)
                         iwrite = iwrite + 1               
@@ -359,24 +359,24 @@
                     goto 800
                 endif
 
-!               Solve Ax = b for offsets of i/j satellite grid point
-!               A matrix is partials of LAPS i,j with respect to satellite i,j
+!               solve ax = b for offsets of i/j satellite grid point
+!               a matrix is partials of laps i,j with respect to satellite i,j
 !               x matrix is the solution offset of satellite i,j
-!               b matrix is desired LAPS i,j offset
+!               b matrix is desired laps i,j offset
 
-!               Prevent partials from going beyond the array edge
+!               prevent partials from going beyond the array edge
                 iis = max(min(is,nx_s-1),1)
                 jjs = max(min(js,ny_s-1),1)
 
 !               if(iis .le. 0)then
-!                   write(6,*)'ERROR: iis,is,js,ri_s,rj_s'
+!                   write(6,*)'error: iis,is,js,ri_s,rj_s'
 !    1                               ,iis,is,js,ri_s,rj_s
 !               endif
 
                 dlapsi_dx = rilaps_s(iis+1,jjs) - rilaps_s(iis,jjs)
                 dlapsi_dy = rilaps_s(iis,jjs+1) - rilaps_s(iis,jjs)
 
-!               Test for wrapping
+!               test for wrapping
                 if(dlapsi_dx .gt. nxl2)then
                     dlapsi_dx = dlapsi_dx - nx_l
                 elseif(dlapsi_dx .lt. -nxl2)then
@@ -418,7 +418,7 @@
                     ccinv = -cc * arg2
                     ddinv =  aa * arg2
 
-!                   Note that X = ainv times b
+!                   note that x = ainv times b
                     bsol(0) = aainv * b(0) + bbinv * b(1)
                     bsol(1) = ccinv * b(0) + ddinv * b(1)
                 endif
@@ -444,7 +444,7 @@
 
 800           continue
 
-!             Convergence was not achieved
+!             convergence was not achieved
               gri(il,jl) = r_missing_data
               grj(il,jl) = r_missing_data
 
@@ -452,15 +452,15 @@
               if(.true.)then                                 
                 if(bnorm .eq. 20000.)then
                     write(6,801)il,jl,bnorm,lat_l(il,jl),lon_l(il,jl)
-801                 format('No bilinear_laps result at  ',2i5,f14.5
+801                 format('no bilinear_laps result at  ',2i5,f14.5
      1                    ,2f8.2)
                 else
                     write(6,802)il,jl,bnorm,lat_l(il,jl),lon_l(il,jl) 
      1                         ,emission_angle_d(il,jl)
-802                 format('Convergence not acheived at ',2i5,f14.5
+802                 format('convergence not acheived at ',2i5,f14.5
      1                    ,2f8.2,' emission = ',f8.2)
                     if(abs(lon_l(il,jl)) .lt. 179.50)then
-                        write(6,*)' ERROR not due to dateline'
+                        write(6,*)' error not due to dateline'
                         istatus = 0
                         return
                     endif
@@ -472,7 +472,7 @@
             else ! outside satellite sector
               dist_min = 999.
               if(idebug .eq. 1)then
-                  write(6,*)'   Outside lat/lon/geom range'
+                  write(6,*)'   outside lat/lon/geom range'
      1                     ,lat_l(il,jl),lon_l(il,jl)
               endif
  
@@ -513,7 +513,7 @@
         subroutine get_closest_point(rlat,rlon,r_missing_data	
      1                              ,lat_s,lon_s,nx_s,ny_s 
      1                              ,iclo_loop,i_loop
-     1                              ,rlat_last,rlon_last,dist_min_last ! I/O
+     1                              ,rlat_last,rlon_last,dist_min_last ! i/o
      1                              ,iclo,jclo,dist_min)                
 
         include 'trigd.inc'
@@ -521,10 +521,10 @@
         real lat_s(nx_s,ny_s)
         real lon_s(nx_s,ny_s)
 
-!       Determine satellite grid point having the closest lat/lon
-!       to the LAPS grid point
+!       determine satellite grid point having the closest lat/lon
+!       to the laps grid point
 
-!       Check if we've moved far enough since the last full calculation
+!       check if we've moved far enough since the last full calculation
         delt_pt = sqrt((rlat_last-rlat)**2 + (rlon_last-rlon)**2)
         if((dist_min_last - delt_pt) .gt. 1.0)then
             i_loop = 0
@@ -540,7 +540,7 @@
 
         do i = 1,nx_s
         do j = 1,ny_s
-          if(lat_s(i,j) .ne. r_missing_data .AND.
+          if(lat_s(i,j) .ne. r_missing_data .and.
      1       lon_s(i,j) .ne. r_missing_data       )then
             delta_lat = abs(lat_s(i,j) - rlat)
             delta_lon = abs(lon_s(i,j) - rlon) * scale_lon
@@ -568,9 +568,9 @@
         subroutine latlon_to_grij_new(lat_l,lon_l,nx_l,ny_l,
      1                            lat_s,lon_s,gri,grj,nx_s,ny_s,istatus)
 
-        ANGDIF(XX,Y)=MOD(XX-Y+540.,360.)-180.
+        angdif(xx,y)=mod(xx-y+540.,360.)-180.
 
-!       Determine i/j satellite coordinates for each LAPS grid point
+!       determine i/j satellite coordinates for each laps grid point
 
         real lat_l(nx_l,ny_l)
         real lon_l(nx_l,ny_l)
@@ -600,13 +600,13 @@
 
         itstatus=ishow_timer()
 
-        write(6,*)' Subroutine latlon_to_grij...'
+        write(6,*)' subroutine latlon_to_grij...'
 
         istatus = 1
 
         call get_r_missing_data(r_missing_data,istatus)
 
-!       Initialize
+!       initialize
         gri = r_missing_data
         grj = r_missing_data
 
@@ -628,15 +628,15 @@
 
         epsilon = .00040 ! degrees
 
-!       Initialize other variables
+!       initialize other variables
         iclo = -1
         jclo = -1
         dist_min_last = -999.
 
-!       Start with i/j LAPS coordinate for each satellite grid point
+!       start with i/j laps coordinate for each satellite grid point
         do is = 1,nx_s
         do js = 1,ny_s
-            if(lat_s(is,js) .ne. r_missing_data .AND.
+            if(lat_s(is,js) .ne. r_missing_data .and.
      1         lon_s(is,js) .ne. r_missing_data       )then
                 call latlon_to_rlapsgrid(lat_s(is,js),lon_s(is,js)
      1                                  ,lat_l,lon_l
@@ -657,32 +657,32 @@
         enddo ! js
         enddo ! is
 
-        write(6,*)' Sat lon center                  : ',sloncen
-        write(6,*)' Sat lat range                   : ',slatmin,slatmax
-        write(6,*)' Sat lon range (diff from center): ',slonmin,slonmax
-        write(6,*)' Sat lon range                   : ',slonmin+sloncen
+        write(6,*)' sat lon center                  : ',sloncen
+        write(6,*)' sat lat range                   : ',slatmin,slatmax
+        write(6,*)' sat lon range (diff from center): ',slonmin,slonmax
+        write(6,*)' sat lon range                   : ',slonmin+sloncen
      1                                                 ,slonmax+sloncen
 
         itstatus=ishow_timer()
 
-!       Create buffer within sat lat/lon range
+!       create buffer within sat lat/lon range
         sat_ll_buf = 0.2
         slatmin = slatmin + sat_ll_buf
         slatmax = slatmax - sat_ll_buf
         slonmin = slonmin + sat_ll_buf
         slonmax = slonmax - sat_ll_buf
 
-!       New solution method
+!       new solution method
         do is = 1,nx_s-1
         do js = 1,ny_s-1
 
-!           Obtain derivatives
+!           obtain derivatives
             dlidsi = rilaps_s(is+1,js) - rilaps_s(is,js)
             dlidsj = rilaps_s(is,js+1) - rilaps_s(is,js)
             dljdsi = rjlaps_s(is+1,js) - rjlaps_s(is,js)
             dljdsj = rjlaps_s(is,js+1) - rjlaps_s(is,js)
 
-!           Locate model grid points inside the satellite parallelogram
+!           locate model grid points inside the satellite parallelogram
             rilmn = min(rilaps_s(is,js),rilaps_s(is+1,js)
      1                 ,rilaps_s(is,js+1),rilaps_s(is+1,js+1))
 
@@ -695,12 +695,12 @@
             rjlmx = max(rjlaps_s(is,js),rjlaps_s(is+1,js)
      1                 ,rjlaps_s(is,js+1),rjlaps_s(is+1,js+1))
 
-!           Loop through model grid points inside the satellite parallelogram
+!           loop through model grid points inside the satellite parallelogram
             do il = int(rilmn),int(rilmx)
             do jl = int(rjlmn),int(rjlmx)
 
-!               Set up system of linear equations
-!               If x,y = 0 we are at the lower left of the satellite parallelogram
+!               set up system of linear equations
+!               if x,y = 0 we are at the lower left of the satellite parallelogram
 !               ax + by = p
 !               cx + dy = q
 

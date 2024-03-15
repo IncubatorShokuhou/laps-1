@@ -1,108 +1,108 @@
-      SUBROUTINE W3FI83 (DATA,NPTS,FVAL1,FDIFF1,ISCAL2,
-     *                                ISC10,KPDS,KGDS)
-C$$$  SUBPROGRAM DOCUMENTATION  BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:  W3FI83        RESTORE DELTA PACKED DATA TO ORIGINAL
-C   PRGMMR: CAVANAUGH        ORG: NMC421      DATE:93-08-18
-C
-C ABSTRACT: RESTORE DELTA PACKED DATA TO ORIGINAL VALUES
-C           RESTORE FROM BOUSTREPHEDONIC ALIGNMENT
-C
-C PROGRAM HISTORY LOG:
-C   93-07-14  CAVANAUGH
-C   93-07-22  STACKPOLE      ADDITIONS TO FIX SCALING
-C   94-01-27  CAVANAUGH   ADDED REVERSAL OF EVEN NUMBERED ROWS
-C                         (BOUSTROPHEDONIC PROCESSING) TO RESTORE
-C                         DATA TO ORIGINAL SEQUENCE.
-C   94-03-02  CAVANAUGH   CORRECTED REVERSAL OF EVEN NUMBERED ROWS
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL W3FI83(DATA,NPTS,FVAL1,FDIFF1,ISCAL2,
-C    *                                ISC10,KPDS,KGDS)
-C   INPUT ARGUMENT LIST:
-C     DATA     - SECOND ORDER DIFFERENCES
-C     NPTS     - NUMBER OF POINTS IN ARRAY
-C     FVAL1    - ORIGINAL FIRST ENTRY IN ARRAY
-C     FDIFF1   - ORIGINAL FIRST FIRST-DIFFERENCE
-C     ISCAL2   - POWER-OF-TWO EXPONENT FOR UNSCALING
-C     ISC10    - POWER-OF-TEN EXPONENT FOR UNSCALING
-C     KPDS     - ARRAY OF INFORMATION FOR PDS
-C     KGDS     - ARRAY OF INFORMATION FOR GDS
-C
-C   OUTPUT ARGUMENT LIST:
-C     DATA     - EXPANDED ORIGINAL DATA VALUES
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256
-C
-C$$$
-C
-      REAL          FVAL1,FDIFF1
-      REAL          DATA(*),BOUST(200)
-      INTEGER       NPTS,NROW,NCOL,KPDS(*),KGDS(*),ISC10
-C  ---------------------------------------
-C
-C     REMOVE DECIMAL UN-SCALING INTRODUCED DURING UNPACKING
-C
-      DSCAL = 10.0 ** ISC10
-      IF (DSCAL.EQ.0.0) THEN
-          DO 50 I=1,NPTS
-              DATA(I) = 1.0
-   50     CONTINUE
-      ELSE IF (DSCAL.EQ.1.0) THEN
-      ELSE
-          DO 51 I=1,NPTS
-              DATA(I) = DATA(I) * DSCAL
-   51     CONTINUE
-      END IF
-C
-      DATA(1)  = FVAL1
-      DATA(2)  = FDIFF1
-      DO 200 J = 3,2,-1
-          DO 100 K = J, NPTS
-              DATA(K)  = DATA(K) + DATA(K-1)
-  100     CONTINUE
-  200 CONTINUE
-C
-C     NOW REMOVE THE BINARY SCALING FROM THE RECONSTRUCTED FIELD
-C     AND THE DECIMAL SCALING TOO
-C
-      IF (DSCAL.EQ.0) THEN
-          SCALE  = 0.0
-      ELSE
-          SCALE =(2.0**ISCAL2)/DSCAL
-      END IF
-      DO 300 I=1,NPTS
-        DATA(I) = DATA(I) * SCALE
-  300 CONTINUE
-C  ==========================================================
-      IF (IAND(KPDS(4),128).NE.0) THEN
-          NROW  = KGDS(3)
-          NCOL  = KGDS(2)
-C
-C      DATA LAID OUT BOUSTROPHEDONIC STYLE
-C
-C
-C         PRINT*, '  REVERSE BOUSTROPHEDON'
-          DO 210 I = 2, NROW, 2
-C
-C          REVERSE THE EVEN NUMBERED ROWS
-C
-              DO 201 J = 1, NCOL
-                  NPOS  = I * NCOL - J + 1
-                  BOUST(J) = DATA(NPOS)
-  201         CONTINUE
-              DO 202 J = 1, NCOL
-                  NPOS  = NCOL * (I-1) + J
-                  DATA(NPOS)  = BOUST(J)
-  202         CONTINUE
-  210     CONTINUE
-C
-C
-      END IF
-C  =================================================================
-      RETURN
-      END
+      subroutine w3fi83 (data,npts,fval1,fdiff1,iscal2,
+     *                                isc10,kpds,kgds)
+c$$$  subprogram documentation  block
+c                .      .    .                                       .
+c subprogram:  w3fi83        restore delta packed data to original
+c   prgmmr: cavanaugh        org: nmc421      date:93-08-18
+c
+c abstract: restore delta packed data to original values
+c           restore from boustrephedonic alignment
+c
+c program history log:
+c   93-07-14  cavanaugh
+c   93-07-22  stackpole      additions to fix scaling
+c   94-01-27  cavanaugh   added reversal of even numbered rows
+c                         (boustrophedonic processing) to restore
+c                         data to original sequence.
+c   94-03-02  cavanaugh   corrected reversal of even numbered rows
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call w3fi83(data,npts,fval1,fdiff1,iscal2,
+c    *                                isc10,kpds,kgds)
+c   input argument list:
+c     data     - second order differences
+c     npts     - number of points in array
+c     fval1    - original first entry in array
+c     fdiff1   - original first first-difference
+c     iscal2   - power-of-two exponent for unscaling
+c     isc10    - power-of-ten exponent for unscaling
+c     kpds     - array of information for pds
+c     kgds     - array of information for gds
+c
+c   output argument list:
+c     data     - expanded original data values
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916-128, cray y-mp8/864, cray y-mp el2/256
+c
+c$$$
+c
+      real          fval1,fdiff1
+      real          data(*),boust(200)
+      integer       npts,nrow,ncol,kpds(*),kgds(*),isc10
+c  ---------------------------------------
+c
+c     remove decimal un-scaling introduced during unpacking
+c
+      dscal = 10.0 ** isc10
+      if (dscal.eq.0.0) then
+          do 50 i=1,npts
+              data(i) = 1.0
+   50     continue
+      else if (dscal.eq.1.0) then
+      else
+          do 51 i=1,npts
+              data(i) = data(i) * dscal
+   51     continue
+      end if
+c
+      data(1)  = fval1
+      data(2)  = fdiff1
+      do 200 j = 3,2,-1
+          do 100 k = j, npts
+              data(k)  = data(k) + data(k-1)
+  100     continue
+  200 continue
+c
+c     now remove the binary scaling from the reconstructed field
+c     and the decimal scaling too
+c
+      if (dscal.eq.0) then
+          scale  = 0.0
+      else
+          scale =(2.0**iscal2)/dscal
+      end if
+      do 300 i=1,npts
+        data(i) = data(i) * scale
+  300 continue
+c  ==========================================================
+      if (iand(kpds(4),128).ne.0) then
+          nrow  = kgds(3)
+          ncol  = kgds(2)
+c
+c      data laid out boustrophedonic style
+c
+c
+c         print*, '  reverse boustrophedon'
+          do 210 i = 2, nrow, 2
+c
+c          reverse the even numbered rows
+c
+              do 201 j = 1, ncol
+                  npos  = i * ncol - j + 1
+                  boust(j) = data(npos)
+  201         continue
+              do 202 j = 1, ncol
+                  npos  = ncol * (i-1) + j
+                  data(npos)  = boust(j)
+  202         continue
+  210     continue
+c
+c
+      end if
+c  =================================================================
+      return
+      end

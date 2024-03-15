@@ -1,6 +1,6 @@
 
         subroutine midpoint(a1,a2,a3,b1,b2,b3,m1,m2,m3)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         call normalize(a1,a2,a3,maga)
         call normalize(b1,b2,b3,magb)
@@ -14,7 +14,7 @@
 
 
         subroutine anglevectors(a1,a2,a3,b1,b2,b3,angle)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         maga = mag(a1,a2,a3)
         magb = mag(b1,b2,b3)
@@ -33,7 +33,7 @@
 
 
         function dotproduct(a1,a2,a3,b1,b2,b3)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         dotproduct  = a1 * b1 + a2 * b2 + a3 * b3
 
@@ -42,7 +42,7 @@
 
 
         function angle_vectors(a1,a2,a3,b1,b2,b3)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         maga = mag(a1,a2,a3)
         magb = mag(b1,b2,b3)
@@ -62,7 +62,7 @@
 
 
         subroutine normalize(a1,a2,a3,maga)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         maga    = sqrt(a1*a1+a2*a2+a3*a3)
 
@@ -81,7 +81,7 @@
 
 
         function mag(a1,a2,a3)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         mag    = sqrt(a1*a1+a2*a2+a3*a3)
 
@@ -90,7 +90,7 @@
 
 
         subroutine xyztolatlon(x,y,z,lat,lon)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         lat = atan(z/sqrt(x**2 + y**2))
         lon = atan3(y,x)
@@ -100,7 +100,7 @@
 
 
         subroutine latlontoxyz(lat,lon,x,y,z)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         x = cos(lon)*cos(lat)
         y = sin(lon)*cos(lat)
@@ -111,7 +111,7 @@
 
 
         subroutine crossproduct(a1,a2,a3,b1,b2,b3,c1,c2,c3)
-        implicit real*8 (A-Z)
+        implicit real*8 (a-z)
 
         c1   = a2 * b3 - a3 * b2
         c2   = a3 * b1 - a1 * b3

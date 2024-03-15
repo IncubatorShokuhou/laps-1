@@ -1,10 +1,10 @@
 
 
 
-       subroutine put_sfc_bal(i4time,t_bal,ht_bal,u_bal,v_bal         ! Input
-     1                       ,topo,ni,nj,nk                           ! Input
-!    1                       ,rlat,rlon                               ! Input
-     1                       ,istatus                              )  ! Output
+       subroutine put_sfc_bal(i4time,t_bal,ht_bal,u_bal,v_bal         ! input
+     1                       ,topo,ni,nj,nk                           ! input
+!    1                       ,rlat,rlon                               ! input
+     1                       ,istatus                              )  ! output
 
        real ht_bal(ni,nj,nk)
        real u_bal(ni,nj,nk)
@@ -52,54 +52,54 @@
 
        write(6,*)' subroutine put_sfc_bal...'
 
-       ext = 'LSX'
+       ext = 'lsx'
        
-       var(1) = 'U'		! u-wind (m/s)
-       var(2) = 'V'		! v-wind (m/s)
-       var(3) = 'P'		! reduced press (Pa)
-       var(4) = 'T'		! temp (K)
-       var(5) = 'TD'		! dew point (K)
-       var(6) = 'VV'		! vert. vel (m/s)
-       var(7) = 'RH'		! relative humidity (%)
-       var(8) = 'HI'		! Heat Index (K)
-       var(9) = 'MSL'		! MSL pressure (Pa)
-       var(10) = 'TAD'		! temperature advection (K/sec)
-       var(11) = 'TH'		! potential temp (K)
-       var(12) = 'THE'		! equiv pot temp (K)
-       var(13) = 'PS'		! surface press (Pa)
-       var(14) = 'VOR'		! sfc vorticity (/s)
-       var(15) = 'MR'		! mixing ratio (g/kg)
-       var(16) = 'MRC'		! moisture convergence (g/kg/s)
-       var(17) = 'DIV'		! sfc divergence (/s)
-       var(18) = 'THA'		! pot temp adv (K/s)
-       var(19) = 'MRA'		! moisture adv (g/kg/s)
-       var(20) = 'SPD'		! wind speed (m/s)
-       var(21) = 'CSS'		! CSSI 
-       var(22) = 'VIS'		! Visibility (m)
-       var(23) = 'FWX'		! Fire threat index (integer)
-       var(24) = 'TGD'		! Ground Temperature
+       var(1) = 'u'		! u-wind (m/s)
+       var(2) = 'v'		! v-wind (m/s)
+       var(3) = 'p'		! reduced press (pa)
+       var(4) = 't'		! temp (k)
+       var(5) = 'td'		! dew point (k)
+       var(6) = 'vv'		! vert. vel (m/s)
+       var(7) = 'rh'		! relative humidity (%)
+       var(8) = 'hi'		! heat index (k)
+       var(9) = 'msl'		! msl pressure (pa)
+       var(10) = 'tad'		! temperature advection (k/sec)
+       var(11) = 'th'		! potential temp (k)
+       var(12) = 'the'		! equiv pot temp (k)
+       var(13) = 'ps'		! surface press (pa)
+       var(14) = 'vor'		! sfc vorticity (/s)
+       var(15) = 'mr'		! mixing ratio (g/kg)
+       var(16) = 'mrc'		! moisture convergence (g/kg/s)
+       var(17) = 'div'		! sfc divergence (/s)
+       var(18) = 'tha'		! pot temp adv (k/s)
+       var(19) = 'mra'		! moisture adv (g/kg/s)
+       var(20) = 'spd'		! wind speed (m/s)
+       var(21) = 'css'		! cssi 
+       var(22) = 'vis'		! visibility (m)
+       var(23) = 'fwx'		! fire threat index (integer)
+       var(24) = 'tgd'		! ground temperature
 
        lvl_req = 0 ! set entire array to 0
  
-!      Read Pre-balanced LSX surface analysis
+!      read pre-balanced lsx surface analysis
        call get_directory(ext,dir_in,len_dir_in)
-       call read_laps_data(i4time,dir_in,ext,ni,nj,n_sfc,n_sfc,     ! I
-     1                     var,lvl_req,                             ! I
-     1                     lvl_coord_req,                           ! O
-     1                     units_req,comment_req,data,istatus)      ! O
+       call read_laps_data(i4time,dir_in,ext,ni,nj,n_sfc,n_sfc,     ! i
+     1                     var,lvl_req,                             ! i
+     1                     lvl_coord_req,                           ! o
+     1                     units_req,comment_req,data,istatus)      ! o
 
-!      Determine terrain location in 3-D grid
+!      determine terrain location in 3-d grid
        do j = 1,nj
        do i = 1,ni
 
-!          Interpolate from three dimensional grid to terrain surface
+!          interpolate from three dimensional grid to terrain surface
            zlow = height_to_zcoord2(topo(i,j),ht_bal,ni,nj,nk
      1                                                  ,i,j,istatus)
            if(istatus .ne. 1)then
                write(6,*)' lapswind_anal: error in height_to_zcoord2'
      1                  ,' in sfc wind interpolation',istatus
                write(6,*)i,j,zlow,topo(i,j)
-               write(6,*)' Heights of column'
+               write(6,*)' heights of column'
                do k = 1,nk
                  write(6,*)k,ht_bal(i,j,k)
                enddo ! k
@@ -112,7 +112,7 @@
        enddo ! i
        enddo ! j
 
-!      Perform interpolation for U and V wind components
+!      perform interpolation for u and v wind components
        do j = 1,nj
        do i = 1,ni
            klow = max(rk_terrain(i,j),1.)
@@ -130,7 +130,7 @@
      1    .or. v_bal(i,j,khigh) .eq. r_missing_data        )then
 
                write(6,3333)i,j
-3333           format(' Warning: cannot interpolate to sfc at ',2i3)
+3333           format(' warning: cannot interpolate to sfc at ',2i3)
                u_bal_sfc(i,j) = r_missing_data
                v_bal_sfc(i,j) = r_missing_data
 
@@ -146,12 +146,12 @@
        enddo ! j
        enddo ! i
 
-!      Recalculate Vorticity and Divergence
+!      recalculate vorticity and divergence
 !      call get_grid_spacing_array(rlat,rlon,,ni,nj,dx,dy)
 !      call vortdiv(u_bal_sfc,v_bal_sfc,vort_bal_sfc,div_bal_sfc
 !    1             ,ni,nj,dx,dy)
 
-!      Perform interpolation for Temperature
+!      perform interpolation for temperature
        do j = 1,nj
        do i = 1,ni
            klow = max(rk_terrain(i,j),1.)
@@ -174,7 +174,7 @@
        enddo ! j
        enddo ! i
 
-!      Perform interpolation for height / surface pressure / MSLP/ reduced P
+!      perform interpolation for height / surface pressure / mslp/ reduced p
 !      possibly use height to pressure routine in conversions.f
 
        call get_laps_redp(redp_lvl,istatus)
@@ -204,18 +204,18 @@
        enddo ! i
        enddo ! j
 
-!      Recalculate moisture variables (td,rh,mr)
+!      recalculate moisture variables (td,rh,mr)
        td_bal_sfc = data(:,:,5) 
 
-!      Constrain dewpoint
+!      constrain dewpoint
        do i = 1,ni
        do j = 1,nj
 
-!          Calculate RH from Td and T
+!          calculate rh from td and t
            if(td_bal_sfc(i,j) .ne. r_missing_data .and.
      1        t_bal_sfc(i,j)  .ne. r_missing_data        )then
 
-!             Avoid supersaturation
+!             avoid supersaturation
               td_bal_sfc(i,j) = min(td_bal_sfc(i,j),t_bal_sfc(i,j)) 
 
            endif
@@ -223,13 +223,13 @@
        enddo ! j
        enddo ! i
 
-!      Calculate humidity
+!      calculate humidity
        call hum(t_bal_sfc,td_bal_sfc,rh_bal_sfc,ni,nj,sat_t,sat_td)
 
-!      Note W = 622. * x / (p-x), where x is ambient vapor pressure in mb
+!      note w = 622. * x / (p-x), where x is ambient vapor pressure in mb
        mr_bal_sfc = (622. * sat_td) / (stnp_bal_sfc/100. - sat_td)
 
-!      Substitute balanced fields in data array
+!      substitute balanced fields in data array
        data(:,:,1) = u_bal_sfc
        data(:,:,2) = v_bal_sfc
        data(:,:,4) = t_bal_sfc
@@ -242,15 +242,15 @@
        data(:,:,15) = mr_bal_sfc
 !      data(:,:,17) = div_bal_sfc
 
-!      Write balanced LSX file
+!      write balanced lsx file
        call get_directory('balance/lsx',dir_out,len_dir_out)
-       print*,'Writing out balanced lsx...'
-       call write_laps_data(i4time,dir_out,ext,ni,nj,n_sfc,n_sfc,    ! I
-     1                      var,lvl_req,                             ! I
-     1                      lvl_coord_req,                           ! O
-     1                      units_req,comment_req,data,istatus)      ! I/O
-       if (istatus .NE. 1) then
-         print*,'Problem writing out lsx!'
+       print*,'writing out balanced lsx...'
+       call write_laps_data(i4time,dir_out,ext,ni,nj,n_sfc,n_sfc,    ! i
+     1                      var,lvl_req,                             ! i
+     1                      lvl_coord_req,                           ! o
+     1                      units_req,comment_req,data,istatus)      ! i/o
+       if (istatus .ne. 1) then
+         print*,'problem writing out lsx!'
        endif
 
        istatus = 1

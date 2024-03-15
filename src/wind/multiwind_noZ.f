@@ -1,40 +1,40 @@
-       subroutine multiwind_noZ(u,v,rms,u0,v0,x,y,height
+       subroutine multiwind_noz(u,v,rms,u0,v0,x,y,height
      1                         ,n,xx,yy,ht,vr,rmsmax,ier)
 c***********************************************************************
-c description      : To derive horizontal wind from multi-radar radial
+c description      : to derive horizontal wind from multi-radar radial
 c                    velocity at constant height without reflectivity data.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    O     u,v              real       the horizontal wind component of x,y coordinate
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    o     u,v              real       the horizontal wind component of x,y coordinate
 c                                      in unit of m/s. 
-c    O     rms              real       root mean square error relative to initial guess wind 
+c    o     rms              real       root mean square error relative to initial guess wind 
 c                                      in unit of m/s.
 c                                      rms=sqrt( (u-u0)**2 + (v-v0)**2 )
-c    I     u0,v0            real     initial guess (or model wind) horizontal wind
+c    i     u0,v0            real     initial guess (or model wind) horizontal wind
 c                                      in unit of m/s.
-c    I     x,y              real     the (x,y) coordinate at the wind position.
+c    i     x,y              real     the (x,y) coordinate at the wind position.
 c                                      in unit of meter.
-c    I     height           real     the height at the wind position 
+c    i     height           real     the height at the wind position 
 c                                      in unit of meter.
-c    I     n                integer    number of input radar data. (maximum number, n=4 )
-c    I     xx(n)          real array the x-coordinate of radar center in unit of meter.
-c    I     yy(n)          real array the y-coordinate of radar center in unit of meter.
-c    I     ht(n)          real array the height of radar antena in unit of meter.
-c    I     vr(n)          real array the radial velocity observed by radar in unit of m/s.
-c    I     rmsmax           real       the maximum value of root mean square error relative
+c    i     n                integer    number of input radar data. (maximum number, n=4 )
+c    i     xx(n)          real array the x-coordinate of radar center in unit of meter.
+c    i     yy(n)          real array the y-coordinate of radar center in unit of meter.
+c    i     ht(n)          real array the height of radar antena in unit of meter.
+c    i     vr(n)          real array the radial velocity observed by radar in unit of m/s.
+c    i     rmsmax           real       the maximum value of root mean square error relative
 c                                      to initial guess wind in unit of m/s.
-c                                      If the rms of multi-radar (n>2) wind is greater than 
+c                                      if the rms of multi-radar (n>2) wind is greater than 
 c                                      rmsmax, the final computed horizontal wind is obtained 
 c                                      by the single radar method.
-c    O     ier              integer    =0, success message.
+c    o     ier              integer    =0, success message.
 c                                      =1, n < 1, or n > 4.
 c                                      =2, ht() > height or ht() > 30000 meters.
 c                                      =3, sqrt( (x-xx())**2+(y-yy())**2 ) < 1. meter.
-c                                      =4, single Doppler method used due to ambiguities
+c                                      =4, single doppler method used due to ambiguities
 c
-c Date :
-c   May. 14, 2004 (S.-M. Deng)
+c date :
+c   may. 14, 2004 (s.-m. deng)
 c***********************************************************************
 
       real x,y,height
@@ -48,7 +48,7 @@ c***********************************************************************
       real vt
 
 c-----------------------------------------------------------------------
-c*  To check input data.
+c*  to check input data.
 
       ier=0
       if( (n.lt.1).or.(n.gt.4) )then
@@ -74,7 +74,7 @@ c*  To check input data.
       enddo 
 
 c-----------------------------------------------------------------------
-c*  To compute the horizontal radial velocity.
+c*  to compute the horizontal radial velocity.
 
       do i=1,n
          rcos=d(i)/sqrt( d(i)**2+(ht(i)-height)**2 )
@@ -82,7 +82,7 @@ c*  To compute the horizontal radial velocity.
       enddo 
 
 c-----------------------------------------------------------------------
-c*  For single radar (n=1), to reserve tangent component of initial wind,
+c*  for single radar (n=1), to reserve tangent component of initial wind,
 c                and combine observed horizontal radial velocity. 
 
       if( n.eq.1 )then
@@ -94,7 +94,7 @@ c                and combine observed horizontal radial velocity.
       endif
 
 c-----------------------------------------------------------------------
-c*  For dual-radar (n=2), to compute horizontal wind by Dual-Doppler method.
+c*  for dual-radar (n=2), to compute horizontal wind by dual-doppler method.
 
       if( n.eq.2 )then
           call duwind(u,v,rms,vcos(1),u0,v0,xa(1),xa(2)
@@ -104,7 +104,7 @@ c*  For dual-radar (n=2), to compute horizontal wind by Dual-Doppler method.
       endif 
 
 c-----------------------------------------------------------------------
-c*  For multi-radar (n=3), to compute horizontal wind.
+c*  for multi-radar (n=3), to compute horizontal wind.
 
       if( n.eq.3 )then
           call duwind(wu(1),wv(1),srms(1),vcos(1),u0,v0,xa(1),xa(2)
@@ -135,7 +135,7 @@ c*  For multi-radar (n=3), to compute horizontal wind.
       endif
 
 c-----------------------------------------------------------------------
-c*  For multi-radar (n=4), to compute horizontal wind.
+c*  for multi-radar (n=4), to compute horizontal wind.
 
       call duwind(wu(1),wv(1),srms(1),vcos(1),u0,v0,xa(1),xa(2)
      1           ,yb(1),yb(2),d(1),d(2),vh(1),vh(2))
@@ -169,7 +169,7 @@ c*  For multi-radar (n=4), to compute horizontal wind.
       rms=sqrt( (u-u0)**2 + (v-v0)**2 )
       return
 
- 100  continue ! single Doppler method with best fit radar
+ 100  continue ! single doppler method with best fit radar
       rms=rmsmax
       do i=1,n
          vt=( u0*yb(i)-v0*xa(i) )/d(i)

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -36,35 +36,35 @@ c
 c
 c*******************************************************************************
 c
-c	Routine to calculate a mean lapse rate from observed surface data.
-c	Values returned are the coefficients for the regression equations
-c	for the temperatures and dew points.  Also calculates the mean 
+c	routine to calculate a mean lapse rate from observed surface data.
+c	values returned are the coefficients for the regression equations
+c	for the temperatures and dew points.  also calculates the mean 
 c	elevation for the surface stations.
 c
-c	Changes:
-c		P.A. Stamus	12-01-88  Original (from J. McGinley)
-c				12-22-88  Added consistency check on td.
-c				05-24-90  Rig to return std lapse rate.
-c                               08-25-97  Changes for dynamic LAPS.
+c	changes:
+c		p.a. stamus	12-01-88  original (from j. mcginley)
+c				12-22-88  added consistency check on td.
+c				05-24-90  rig to return std lapse rate.
+c                               08-25-97  changes for dynamic laps.
 c
-c	Inputs/Outputs:
+c	inputs/outputs:
 c
-c	   Variable     Var Type    I/O   Description
+c	   variable     var type    i/o   description
 c	  ----------   ----------  ----- -------------
-c	   num_sfc         I         I    Number of surface stations.
-c	   elev            RA        I    Station elevation.
-c	   t               RA        I    Temperature.
-c	   td              RA        I    Dew point temperature.
-c	   a_t             R         O    'a' regression value for temp.(intrcp)
-c          b_t             R         O    'b'      "       "    "    "  (lapse)
-c	   a_td            R         O    'a'      "       "    "  dewpt.
-c	   b_td            R         O    'b'      "       "    "    "
-c	   hbar            R         O    Mean elevation of the stations.
-c          badflag         R         I    Bad flag value.
+c	   num_sfc         i         i    number of surface stations.
+c	   elev            ra        i    station elevation.
+c	   t               ra        i    temperature.
+c	   td              ra        i    dew point temperature.
+c	   a_t             r         o    'a' regression value for temp.(intrcp)
+c          b_t             r         o    'b'      "       "    "    "  (lapse)
+c	   a_td            r         o    'a'      "       "    "  dewpt.
+c	   b_td            r         o    'b'      "       "    "    "
+c	   hbar            r         o    mean elevation of the stations.
+c          badflag         r         i    bad flag value.
 c
-c	User Notes:
+c	user notes:
 c
-c	1. Units are not changed in this routine.
+c	1. units are not changed in this routine.
 c
 c*******************************************************************************
 c
@@ -75,7 +75,7 @@ c
 	real cnt, cntd, sumht, sumh, sumt, sumh2, sumt2, sumtd, sumhtd
 	integer i
 c
-c.....	Set up storage variables.
+c.....	set up storage variables.
 c
 	cnt = 0.
 	cntd = 0.
@@ -87,10 +87,10 @@ c
 	sumtd = 0.
 	sumhtd = 0.
 c
-c.....	Gather sums and then calculate the 'a' and 'b' for the regression
-c.....	equation y = bz + a, for both the temperature and dew point.  The
+c.....	gather sums and then calculate the 'a' and 'b' for the regression
+c.....	equation y = bz + a, for both the temperature and dew point.  the
 c.....	'a' is the intercept with sea level, and the 'b' is the lapse rate.
-c.....	Also calculate the mean elevation of the stations.
+c.....	also calculate the mean elevation of the stations.
 c
 	do 10 i=1,num_sfc
 	  if(elev(i).le.badflag .or. t(i).le.badflag) go to 10
@@ -120,16 +120,16 @@ c
         endif
 
         if(hbar .eq. 0.)then
-            write(6,*)' WARNING in mean_lapse: station elevations'
+            write(6,*)' warning in mean_lapse: station elevations'
      1               ,' and/or hbar = 0.'
-            write(6,*)' Skipping lapse rate regression'
+            write(6,*)' skipping lapse rate regression'
             goto990
         endif
 c
         if(cntd .eq. 0.)then
-            write(6,*)' WARNING in mean_lapse: cntd = 0.!'
+            write(6,*)' warning in mean_lapse: cntd = 0.!'
      1               ,' dewpoints all badflag/missing'
-            write(6,*)' Skipping lapse rate regression'
+            write(6,*)' skipping lapse rate regression'
             goto990
         endif
 c
@@ -139,31 +139,31 @@ c
 	b_td = (cntd*sumhtd - sumh*sumtd) / (cntd*sumh2 - sumh*sumh)
 	a_td = (sumtd - b_td * sumh) / cntd
 c
-c.....	Do a consistency check on the dewpoint regression.  If msl intercept 
+c.....	do a consistency check on the dewpoint regression.  if msl intercept 
 c.....	is below zero or if the dewpoint lapse rate is positive, set td slope 
 c.....	to t slope and slide intercept over.
 c
 	if(a_td.lt.0. .or. b_td.gt.0. .or. a_td.gt.a_t) then
 	  write(6,900)
-900	  format(1x,'++ Suspect dewpoint regression in MEAN_LAPSE. ++')
+900	  format(1x,'++ suspect dewpoint regression in mean_lapse. ++')
 	  write(6,901) a_td, b_td
-901	  format(1x,'  MSL intercept = ',e12.4,'  Slope = ',e12.4)
+901	  format(1x,'  msl intercept = ',e12.4,'  slope = ',e12.4)
 	  b_td = b_t * .6
 	  a_td = (sumtd / cntd) - b_td * hbar  !mean td - new td lapse @ mean h
 	  write(6,902)
-902	  format(3x,'  Setting values to:')
+902	  format(3x,'  setting values to:')
 	  write(6,901) a_td, b_td
 	endif
 c
-c.....	Now change that stuff to std lapse rate...in deg F...temp. fix
+c.....	now change that stuff to std lapse rate...in deg f...temp. fix
 c
-990     write(6,*)' mean_lapse: Using std lapse rate...'
+990     write(6,*)' mean_lapse: using std lapse rate...'
 	b_t = -.01167
 	a_t = 59.
 	b_td = -.007
 	a_td = 40.
 c
-c.....	End of routine
+c.....	end of routine
 c
 	return
 	end
@@ -173,32 +173,32 @@ c
 c
 c*******************************************************************************
 c
-c       Routine to calculate the mean surface or reduced pressure.
-c       Based on 'mean_press' routine.
+c       routine to calculate the mean surface or reduced pressure.
+c       based on 'mean_press' routine.
 c
-c       Changes:
-c               P.A.Stamus    11-23-99       Original
+c       changes:
+c               p.a.stamus    11-23-99       original
 c
-c       Inputs/Outputs:
+c       inputs/outputs:
 c
-c          Variable     Var Type     I/O     Description
+c          variable     var type     i/o     description
 c         ----------   ----------   -----   -------------
-c          p_s             RA         I      Pressure observations.
-c          n_sfc           I          I      Number of surface observations.
-c          p_bk            RA         I      Pressure background array.
-c          ni, nj          I          I      Domain dimensions
-c          badflag         R          I      Bad flag value.
-c          pbar            R          O      Mean pressure of all obs or bkg.
+c          p_s             ra         i      pressure observations.
+c          n_sfc           i          i      number of surface observations.
+c          p_bk            ra         i      pressure background array.
+c          ni, nj          i          i      domain dimensions
+c          badflag         r          i      bad flag value.
+c          pbar            r          o      mean pressure of all obs or bkg.
 c
-c       User Notes:
+c       user notes:
 c
-c       1.  Units are not changed in this routine.
+c       1.  units are not changed in this routine.
 c
 c*******************************************************************************
 c
         real p_s(n_sfc), p_bk(ni,nj)
 c
-c.....  Find the mean pressure of the observations.
+c.....  find the mean pressure of the observations.
 c
         sump = 0.
         cntp = 0.
@@ -212,13 +212,13 @@ c
 c
 	if(cntp .eq. 0.) then
 	   print *,
-     &     '  WARNING. No pressure observations. Trying background.'
+     &     '  warning. no pressure observations. trying background.'
 	else
 	   pbar = sump / cntp
 	   return
 	endif
 c
-c.....  If no pressure obs, try the background.  If bkg no good,
+c.....  if no pressure obs, try the background.  if bkg no good,
 c.....  set the pbar to badflag.
 c
 	sump = 0.
@@ -235,7 +235,7 @@ c
 c
 	if(cntp .eq. 0.) then
 	   print *,
-     &     '  WARNING. No pressure background either.'
+     &     '  warning. no pressure background either.'
 	   pbar = badflag
 	else
 	   pbar = sump / cntp
@@ -249,14 +249,14 @@ c
 c
 c*****************************************************************************
 c
-c	Routine to reduce an SAO altimeter to surface pressure.  Have to 
-c	use MSL pressure and Standard temperature since that's how they
+c	routine to reduce an sao altimeter to surface pressure.  have to 
+c	use msl pressure and standard temperature since that's how they
 c	got altimeter in the first place.
 c
-c	Original:	07-12-88 (from CNVRT_SFC_DATA_2CMM by M. McCoy)
-c							Peter A. Stamus
+c	original:	07-12-88 (from cnvrt_sfc_data_2cmm by m. mccoy)
+c							peter a. stamus
 c
-c	Changes:	07-20-88	Changed from subroutine to function.
+c	changes:	07-20-88	changed from subroutine to function.
 c
 c*****************************************************************************
 c
@@ -289,14 +289,14 @@ c
 c
 c======================================================================
 c
-c       Routine to find the i,j locations for each station.  Do not "round"
+c       routine to find the i,j locations for each station.  do not "round"
 c       the ii,jj's "up"...straight truncation puts the ob at the proper
 c       grid point on the major grid.
 c
-c       Orginal:  P. Stamus NOAA/FSL c.1990
-c       Changes:
+c       orginal:  p. stamus noaa/fsl c.1990
+c       changes:
 c
-c       Changed by Steve Albers in 2003 as it seems to me that the major
+c       changed by steve albers in 2003 as it seems to me that the major
 c       (non-staggered) grid can best be emplaced by each thermo ob by 
 c       allowing a rounding up to occur.
 c
@@ -321,10 +321,10 @@ c
 c
 	subroutine extract(a,imax,jmax,i,j,ix,jy)
 c
-c.....	Routine designed to zero out a grouping of points about a 
-c.....  named point i,j.  All points from i-ix to i+ix, and 
-c.....	j-jy to j+jy will be zeroed.  This is aimed at processing 
-c.....	Band 8 temperatures to remove cloud edges.
+c.....	routine designed to zero out a grouping of points about a 
+c.....  named point i,j.  all points from i-ix to i+ix, and 
+c.....	j-jy to j+jy will be zeroed.  this is aimed at processing 
+c.....	band 8 temperatures to remove cloud edges.
 c
 	implicit none
 	integer imax, jmax, i,j,ix,jy
@@ -351,18 +351,18 @@ c
 c
 c
 	subroutine decompwind_gm(dd,ff,ucomp,vcomp,status)
-C***Decompose vector wind into U and V
+c***decompose vector wind into u and v
 
-C	J. Wakefield	16 Sep 83	Original version
-c	P. Stamus       29 Apr 93	Unix version
+c	j. wakefield	16 sep 83	original version
+c	p. stamus       29 apr 93	unix version
 
-C Argument	I/O	Type			Description
-C --------	---	----	-----------------------------------------------
-C DD		 I	R*4	Wind direction (meteorological degrees)
-C FF		 I	R*4	Wind speed
-C UComp		 O	R*4	U-component of wind
-C VComp		 O	R*4	V-component of wind
-C Status	 O	I*4	Standard system status
+c argument	i/o	type			description
+c --------	---	----	-----------------------------------------------
+c dd		 i	r*4	wind direction (meteorological degrees)
+c ff		 i	r*4	wind speed
+c ucomp		 o	r*4	u-component of wind
+c vcomp		 o	r*4	v-component of wind
+c status	 o	i*4	standard system status
 
 	implicit none
 	real flag, angle
@@ -371,13 +371,13 @@ C Status	 O	I*4	Standard system status
 	real		dd,ff,ucomp,vcomp
 	integer	status
 
-	Status = 1
+	status = 1
 
 	if(ff .eq. .0) then
 	 ucomp = .0
 	 vcomp = .0
 	elseif(dd .ge. .0 .and. dd .le. 360) then
-	 angle = .01745239 * dd			!Radians
+	 angle = .01745239 * dd			!radians
 	 ucomp = -ff * sin(angle)
 	 vcomp = -ff * cos(angle)
 	else
@@ -394,15 +394,15 @@ c
 c
 c========================================================================
 c
-c     Routine to calculate some statistical scores for a 2-d grid.
-c     The following scores are calculated and printed:
+c     routine to calculate some statistical scores for a 2-d grid.
+c     the following scores are calculated and printed:
 c
-c     Max, Min     Absolute Average     Std. Deviation     Mean
-c     Z-score for Max, Min              Range              Skewness
-c     Variance     Kurtosis
+c     max, min     absolute average     std. deviation     mean
+c     z-score for max, min              range              skewness
+c     variance     kurtosis
 c
-c     Original: 04-86 (from an old program)
-c     LAPS version:  07-26-94  P. Stamus
+c     original: 04-86 (from an old program)
+c     laps version:  07-26-94  p. stamus
 c
 c========================================================================
 c
@@ -416,7 +416,7 @@ c
       integer i,j, imax, imin, jmax, jmin
       
 c
-c..... Start by zeroing some counters.
+c..... start by zeroing some counters.
 c
       amean = 0.
       ave = 0.
@@ -432,7 +432,7 @@ c
       amin =  1.e25
       pts = float(ni * nj)
 c
-c..... Calculate the means and range.
+c..... calculate the means and range.
 c
       do j=1,nj
       do i=1,ni
@@ -455,7 +455,7 @@ c
       ave = sum_a / pts
       range = amax - amin
 c
-c..... Now calculate the variance, stdev, etc.
+c..... now calculate the variance, stdev, etc.
 c
       do j=1,nj
       do i=1,ni
@@ -477,20 +477,20 @@ c
         coef_kr = (sum_kr / pts) / ( (sum_v / pts) ** 2   )
       endif
 c
-c..... Write out the stats.
+c..... write out the stats.
 c
 	write(6,900) amean, ave, st_dev, coef_sk
- 900  format(1x,'Mean:',g12.4,2x,'AbsAve:',g12.4,2x,'StDev:',g12.4,
-     &       2x,'Skew:',g12.4)
+ 900  format(1x,'mean:',g12.4,2x,'absave:',g12.4,2x,'stdev:',g12.4,
+     &       2x,'skew:',g12.4)
 c
 	write(6,910) amax,imax,jmax,amin,imin,jmin
- 910  format(1x,'Max:',g12.4,' @ ',i4,',',i4,2x,'Min:',g12.4,' @ ',
+ 910  format(1x,'max:',g12.4,' @ ',i4,',',i4,2x,'min:',g12.4,' @ ',
      &       i4,',',i4)
 c
 !       write(6,920) z_max, z_min, range
- 920	format(1x,'Z-Max:',g12.4,2x,'Z-Min:',g12.4,2x,'Range:',g12.4)
+ 920	format(1x,'z-max:',g12.4,2x,'z-min:',g12.4,2x,'range:',g12.4)
 c
-c.... That's it.  Let's go home.
+c.... that's it.  let's go home.
 c
       return
       end
@@ -502,13 +502,13 @@ c
 c
 c*************************************************************************
 c
-c	Routine to process band 8 brightness temps for clouds.
+c	routine to process band 8 brightness temps for clouds.
 c	
-c	Changes: 11-01-91  Changes for new LAPS grids.
-c                07-20-94  New version.    S. Albers
-c                08-25-97  Changes for dynamic LAPS.   P. Stamus
-c                09-30-98  Housekeeping.
-c                04-12-99  More housekeeping.
+c	changes: 11-01-91  changes for new laps grids.
+c                07-20-94  new version.    s. albers
+c                08-25-97  changes for dynamic laps.   p. stamus
+c                09-30-98  housekeeping.
+c                04-12-99  more housekeeping.
 c
 c*************************************************************************
 c
@@ -535,7 +535,7 @@ c
      &                             ,cvr_snow,t_est,t_gnd_k)
 
 
-!       Call the ground temperature routine
+!       call the ground temperature routine
 
 	do j=1,jmax
 	do i=1,imax
@@ -549,23 +549,23 @@ c             t_compare = t_est(i,j)
 	enddo !i
 	enddo !j
 c
-c.....  Now use the std dev data to check the Band 8 data for clouds.
+c.....  now use the std dev data to check the band 8 data for clouds.
 c
 	icnt = 0
 
-!       Check number of points thrown out as a function of offset to check
-!       for IR navigation errors
+!       check number of points thrown out as a function of offset to check
+!       for ir navigation errors
 
         thresh1 = 10.
 
 	do j=1,jmax
 	do i=1,imax
 
-!         Estimate whether tb8 - t < -1.5 * stdt
+!         estimate whether tb8 - t < -1.5 * stdt
 	   if(dtb8(i,j) .lt. -thresh1) then ! probably clds
 	      
 c.....	set the point and surrounding points to zero...clouds.
-	      tb8(i,j) = 0.	! Set to zero as a cloud flag
+	      tb8(i,j) = 0.	! set to zero as a cloud flag
 	      call extract(tb8,imax,jmax,i,j,7,7)
 	      icnt = icnt + 1
           endif
@@ -585,22 +585,22 @@ c
 c
 c++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 c
-c	Routine to caluclate fire danger from LAPS surface data.
+c	routine to caluclate fire danger from laps surface data.
 c
-c	Original version:  Matt Kelsch  05-18-93
-c	Changes:           Pete Stamus  10-14-93  Set up for LAPS use.
-c                                       07-27-94  Unix version.
-c                                       07-29-94  Change units on tests.
-c                                       02-24-95  Add snow, topo caps.
-c                                       08-25-97  Changes for dynamic LAPS.
+c	original version:  matt kelsch  05-18-93
+c	changes:           pete stamus  10-14-93  set up for laps use.
+c                                       07-27-94  unix version.
+c                                       07-29-94  change units on tests.
+c                                       02-24-95  add snow, topo caps.
+c                                       08-25-97  changes for dynamic laps.
 c
-c	Notes:
+c	notes:
 c
-c       The if-then structure of this routine will produce a 0 to 20 unit
+c       the if-then structure of this routine will produce a 0 to 20 unit
 c	scale of the fire danger based on the current conditions observed 
-c	within LAPS.  Each unit represents an increase in fire danger ...
+c	within laps.  each unit represents an increase in fire danger ...
 c
-c	The four components to the fire danger index and the number of
+c	the four components to the fire danger index and the number of
 c	points out of 20 each component may contribute are given below
 c	(note the relative humidity and wind speed are most influential):
 c		i.   relative humidity (7),
@@ -620,15 +620,15 @@ c
 	integer i_lp,	j_lp, i_rh, i_temp, i_wspeed, i_soil,
      &            i_status
 c
-c	...BEGIN...
+c	...begin...
 
-c	... loop over all of the LAPS gridpoints
+c	... loop over all of the laps gridpoints
 c
 	do j_lp = 1,nj
 	  do i_lp = 1,ni
 c
-c	... first, the relative humidity component, I_RH, of fire danger...
-c       ... the RH enters this routine in a range of 0 to 100 Percent ...
+c	... first, the relative humidity component, i_rh, of fire danger...
+c       ... the rh enters this routine in a range of 0 to 100 percent ...
 c
 	    i_rh = 0
 c	
@@ -656,7 +656,7 @@ c
 	      endif
 	    endif
 
-c	... second, the wind speed component, I_WIND, of fire danger ...
+c	... second, the wind speed component, i_wind, of fire danger ...
 c       ... the wind speed enters this routine in m/s...
 	    i_wspeed = 0
 c
@@ -682,7 +682,7 @@ c
 	      endif
 	    endif
 
-c	... third, the soil moisture component, I_SOIL, of fire danger ...
+c	... third, the soil moisture component, i_soil, of fire danger ...
 
 	    i_soil = 0
 c
@@ -698,26 +698,26 @@ c
 	      endif
 	    endif
 
-c	... fourth, the temperature component, I_TEMP, of fire danger ...
-c       ... temp enters this routine in deg K
+c	... fourth, the temperature component, i_temp, of fire danger ...
+c       ... temp enters this routine in deg k
  600	    i_temp = 0
 c
-	    if (lp_10kt(i_lp,j_lp) .ge. 298.15) then  ! 77 F
+	    if (lp_10kt(i_lp,j_lp) .ge. 298.15) then  ! 77 f
 	      i_temp = i_temp + 1
-	      if (lp_10kt(i_lp,j_lp) .ge. 303.15) then  ! 86 F
+	      if (lp_10kt(i_lp,j_lp) .ge. 303.15) then  ! 86 f
 	        i_temp = i_temp + 1
-	        if (lp_10kt(i_lp,j_lp) .ge. 308.15) then  ! 95 F
+	        if (lp_10kt(i_lp,j_lp) .ge. 308.15) then  ! 95 f
 	          i_temp = i_temp + 1
 	        endif
 	      endif
 	    endif
 
-c	... the LAPS fire danger product is the sum of the four components ...
+c	... the laps fire danger product is the sum of the four components ...
 
 	    lp_fire_index(i_lp,j_lp) = 
      &                         i_rh + i_wspeed + i_soil + i_temp
 
-c.....  If there's no soil moisture analysis, increase index by 7.5% to
+c.....  if there's no soil moisture analysis, increase index by 7.5% to
 c.....  allow for at least some influence.
 
 	    if(ismoist .ne. 1) then
@@ -725,15 +725,15 @@ c.....  allow for at least some influence.
      &                   0.075 * lp_fire_index(i_lp,j_lp)
 	    endif
 
-c.....  Cap the index under the following conditions:
-c.....  1. The elevation is greater than treeline (about 11000 feet)
+c.....  cap the index under the following conditions:
+c.....  1. the elevation is greater than treeline (about 11000 feet)
 
 	    if(topo(i_lp,j_lp) .gt. 3350.) then
 	       if(lp_fire_index(i_lp,j_lp) .gt. 10.)
      &                             lp_fire_index(i_lp,j_lp) = 10.
 	    endif
 
-c.....  2. The snow cover is greater than 25%.
+c.....  2. the snow cover is greater than 25%.
 
 	    if(isnow .ne. 1) go to 700        ! no snow data
 	    if(snow_cover(i_lp,j_lp) .gt. .25) then
@@ -741,27 +741,27 @@ c.....  2. The snow cover is greater than 25%.
      &                             lp_fire_index(i_lp,j_lp) = 5.
 	    endif
 
-c.....  Check for index below zero.
+c.....  check for index below zero.
 
  700	    continue
 	    if (lp_fire_index(i_lp,j_lp) .lt. 0.0) then
 	        lp_fire_index(i_lp,j_lp) = 0.0
 	    endif
 
-c.....  Apply land fraction as a mask
+c.....  apply land fraction as a mask
             lp_fire_index(i_lp,j_lp) 
      1    = lp_fire_index(i_lp,j_lp) * ldf(i_lp,j_lp)
 
 	  enddo !i_lp
 	enddo!j_lp
 
-c	...END...
+c	...end...
 
 	i_status = 1
 	return
 c
 97	i_status = -1
-	print *,' *** Bad status in LP_FIRE_DANGER ***'
+	print *,' *** bad status in lp_fire_danger ***'
 c
 	return
 	end
@@ -771,27 +771,27 @@ c
 c
 c====================================================================
 c
-c     Routine to calculate a heat index.  Based on a formula 
-c     by Lans Rothfusz, NWS.  Seems to provide valid HI numbers
-c     for temperatures above 75 deg F.
+c     routine to calculate a heat index.  based on a formula 
+c     by lans rothfusz, nws.  seems to provide valid hi numbers
+c     for temperatures above 75 deg f.
 c
-c     Original:  07-18-95  P. Stamus, NOAA/FSL
-c     Changes:  P. Stamus  08-25-97  Return r_missing_data if Temp < 75F
-c                                    Change units returned to K.
-c                          01-20-98  T in as deg K.
+c     original:  07-18-95  p. stamus, noaa/fsl
+c     changes:  p. stamus  08-25-97  return r_missing_data if temp < 75f
+c                                    change units returned to k.
+c                          01-20-98  t in as deg k.
 c
-c     Notes:
+c     notes:
 c
-c       1.  Inputs:
-c                    rh = Relative Humidity (0 to 100 %)
-c                    t  = Temperature (deg K)
-c	             ni, nj  = Grid dimensions
-c                    r_missing_data = Bad flag value
+c       1.  inputs:
+c                    rh = relative humidity (0 to 100 %)
+c                    t  = temperature (deg k)
+c	             ni, nj  = grid dimensions
+c                    r_missing_data = bad flag value
 c
-c           Output:
-c                    hi = Heat Index (deg K)
+c           output:
+c                    hi = heat index (deg k)
 c
-c       2.  If the temperature is below 75 deg F, no heat index is
+c       2.  if the temperature is below 75 deg f, no heat index is
 c           calculated and the point is set to "r_missing_data".
 c
 c====================================================================
@@ -802,7 +802,7 @@ c
       do j=1,nj
       do i=1,ni
 c
-	 temp = ( 1.8 * (t(i,j) - 273.15) ) + 32.         ! K to F
+	 temp = ( 1.8 * (t(i,j) - 273.15) ) + 32.         ! k to f
 c
 	 if(temp .lt. 75.) then
 	    hi(i,j) = r_missing_data
@@ -822,58 +822,58 @@ c
      &                     + (8.52e-4     * rh2 * t1)
      &                     - (1.99e-6     * t2  * rh2)
 c
-	    hi(i,j) = ((heat - 32.) * 0.55555555) + 273.15 ! F to K
+	    hi(i,j) = ((heat - 32.) * 0.55555555) + 273.15 ! f to k
 c
 	 endif
 
       enddo !i
       enddo !j
 c
-c.... That's it.  Let's go home.
+c.... that's it.  let's go home.
 c
       return
       end
 c
 c
-	subroutine bkgwts(lat,lon,topo,numsfc,lat_s,lon_s,elev_s,     ! I
-     &                    rii,rjj,                                    ! I
-     &                    wt,                                         ! O
-     &                    ni,nj,mxstn,                                ! I
-     &                    istatus)                                    ! O
+	subroutine bkgwts(lat,lon,topo,numsfc,lat_s,lon_s,elev_s,     ! i
+     &                    rii,rjj,                                    ! i
+     &                    wt,                                         ! o
+     &                    ni,nj,mxstn,                                ! i
+     &                    istatus)                                    ! o
 c
 c***************************************************************************
 c
-c	This routine finds the distance from each gridpoint to each station
+c	this routine finds the distance from each gridpoint to each station
 c	to find the station density and set up the assmilation weight array.
 c
-c	Changes:
-c 	P.A. Stamus	12-13-96  Original (from build_sfc_static)
-c                       08-25-97  Changes for dynamic LAPS
+c	changes:
+c 	p.a. stamus	12-13-96  original (from build_sfc_static)
+c                       08-25-97  changes for dynamic laps
 c
-c       Note:  'topo' (the LAPS grid elevations) is passed in since we may
+c       note:  'topo' (the laps grid elevations) is passed in since we may
 c              want to have an elevation-based weight in the future.
 c***************************************************************************
 c
 c
-c..... Arrays for the OBS file input data
+c..... arrays for the obs file input data
 c
         integer mxstn, ni, nj
 	real lat_s(mxstn), lon_s(mxstn), elev_s(mxstn)
 c
-c.....	Grids for the outputs, weights, and stuff 
+c.....	grids for the outputs, weights, and stuff 
 c
 	real wt(ni,nj), gpmean(ni,nj)
 c
-c..... LAPS Lat/lon grids.
+c..... laps lat/lon grids.
 c
 	real lat(ni,nj), lon(ni,nj), topo(ni,nj)
 	real rii(mxstn), rjj(mxstn)
 c
 c
-c.....  Set up constants.  Open file for background info.
+c.....  set up constants.  open file for background info.
 c
 	print *,' '
-	print *,' Calculating Background weights:'
+	print *,' calculating background weights:'
 c
 	imax = ni
 	jmax = nj
@@ -885,11 +885,11 @@ cc	alarge = .5
 	small = 100.
 	alarge = 500.
 c
-c.....	Find the distance from each grid point to each station
+c.....	find the distance from each grid point to each station
 c
 !	write(9,899)
-!899	format(/,10x,'Within 2',3x,'Within 5',3x,'Within 10',3x,'Within 20',
-!     &         3x,' Mean Distance')
+!899	format(/,10x,'within 2',3x,'within 5',3x,'within 10',3x,'within 20',
+!     &         3x,' mean distance')
 	dist_max = -1.e15
 	dist_min = +1.e15
 	do j=1,jmax
@@ -928,7 +928,7 @@ c
           endif
 c
           if(numsta .eq. 0)then
-            write(6,*)' Aborting subroutine bkgwts, no obs in domain...'
+            write(6,*)' aborting subroutine bkgwts, no obs in domain...'
             istatus = 0
             return
           else
@@ -954,12 +954,12 @@ c
         enddo !j
 c
 	write(6,905)
-905	format(/,' Distance:')
-	write(6,902) 'MAX',dist_max,max_i,max_j
-	write(6,902) 'MIN',dist_min,min_i,min_j
-902	format(3x,'The ',a3,' of ',f9.1,' occured at gridpoint ',2i4)
+905	format(/,' distance:')
+	write(6,902) 'max',dist_max,max_i,max_j
+	write(6,902) 'min',dist_min,min_i,min_j
+902	format(3x,'the ',a3,' of ',f9.1,' occured at gridpoint ',2i4)
 c
-c.....	Now calculate the weight array by scaling the mean distances
+c.....	now calculate the weight array by scaling the mean distances
 c.....	so that the larger the mean, the larger the weight.
 c
 	r = dist_min / dist_max
@@ -989,12 +989,12 @@ c
         enddo !j
 c
 	write(6,906)
-906	format(/,' Weights:')
-	write(6,902) 'MAX',wt_max,max_i,max_j
-	write(6,902) 'MIN',wt_min,min_i,min_j
+906	format(/,' weights:')
+	write(6,902) 'max',wt_max,max_i,max_j
+	write(6,902) 'min',wt_min,min_i,min_j
 c
 	print *,' '
-	print *,' Normal completion of BKGWTS.'
+	print *,' normal completion of bkgwts.'
 c
         istatus = 1
 	return
@@ -1005,15 +1005,15 @@ c
 c
 c======================================================================
 c
-c     Routine to do a quick, scaled ASCII plot of a 2-d field.
-c     Based on a version by D. Birkenheuer, NOAA/FSL
+c     routine to do a quick, scaled ascii plot of a 2-d field.
+c     based on a version by d. birkenheuer, noaa/fsl
 c
-c     The variables are:
+c     the variables are:
 c          field      the field to plot
 c          ni, nj     the dimensions of the field
 c          amx, amn   the max/min of the values of the field
 c
-c     Original: 03-06-98  P. Stamus, NOAA/FSL
+c     original: 03-06-98  p. stamus, noaa/fsl
 c
 c======================================================================
 c
@@ -1023,13 +1023,13 @@ c
       character line(ni)*1
 c
 c
-c.....  Start by clearing out the line.
+c.....  start by clearing out the line.
 c
       do i=1,ni
          line(i) = ' '
       enddo !i
 c
-c.....  Figure out the max and min in the field.
+c.....  figure out the max and min in the field.
 c
       amax = -9.e20
       amin =  9.e20
@@ -1050,12 +1050,12 @@ c
 c
       print *,' '
       write(6,901) amax, i_max, j_max, amin, i_min, j_min
- 901  format(1x,' Field Max: ',f15.6,' at ',i4,',',i4,
-     &       '   Field Min: ',f15.6,' at ',i4,',',i4)
+ 901  format(1x,' field max: ',f15.6,' at ',i4,',',i4,
+     &       '   field min: ',f15.6,' at ',i4,',',i4)
       print *,' '
 c        
-c.....  Now at each point along the row, scale the value and put
-c.....  the proper character in the line at that point.  Then write
+c.....  now at each point along the row, scale the value and put
+c.....  the proper character in the line at that point.  then write
 c.....  the line and move to the next one down (remember to go from
 c.....  the top of the domain to the bottom).
 c
@@ -1076,7 +1076,7 @@ c
 	 elseif(ich.ge.5 .and. ich.le.9) then
 	    line(i) = ':'
 	 else
-	    print *,' Bad value in plot routine'
+	    print *,' bad value in plot routine'
 	 endif
 c
       enddo !i
@@ -1085,7 +1085,7 @@ c
 c
       enddo !j
 c
-c.....  That's it...lets go home.
+c.....  that's it...lets go home.
 c
       print *,' '
       print *,' '
@@ -1097,23 +1097,23 @@ c
 c
 c========================================================================
 c
-c     Routine to check a 2-d field for NaN's, out of range values, and
-c     other bad stuff.  The istatus flag returns what we found to the
+c     routine to check a 2-d field for nan's, out of range values, and
+c     other bad stuff.  the istatus flag returns what we found to the
 c     calling routine:
 c
-c               istatus =  1  Field ok.
-c                          0  Missing field (all 'fill_val')
-c                         -1  Found NaN's.
+c               istatus =  1  field ok.
+c                          0  missing field (all 'fill_val')
+c                         -1  found nan's.
 c
-c     Some stats are calculated and printed in the log file:
+c     some stats are calculated and printed in the log file:
 c
-c            Max, Min  Absolute Average  Std. Deviation  Mean  Range  
+c            max, min  absolute average  std. deviation  mean  range  
 c
-c     Original: 06-10-98  (from "stats.f").  P.A. Stamus, NOAA/FSL
-c     Changes:  09-24-98  P.A. Stamus, NOAA/FSL
-c                  Added zero to missing field check.
-c               10-02-98  P.A. Stamus, NOAA/FSL
-c                  Added check for fill_val to max/min/ave calcs.
+c     original: 06-10-98  (from "stats.f").  p.a. stamus, noaa/fsl
+c     changes:  09-24-98  p.a. stamus, noaa/fsl
+c                  added zero to missing field check.
+c               10-02-98  p.a. stamus, noaa/fsl
+c                  added check for fill_val to max/min/ave calcs.
 c
 c
 c========================================================================
@@ -1123,7 +1123,7 @@ c
 c
       istatus = 1
 c
-c..... Start by zeroing some counters.
+c..... start by zeroing some counters.
 c
       amean = 0.
       ave = 0.
@@ -1137,29 +1137,29 @@ c
       amin =  1.e25
       pts = 0
 c
-c..... Check the field for NaN's
+c..... check the field for nan's
 c
       call check_nan2(x,ni,nj,nan_flag)
       if(nan_flag .ne. 1) then
-         print *,'   *** ERROR. NaNs found in field. ***'
+         print *,'   *** error. nans found in field. ***'
          istatus = -1
          return
       endif
 c
-c..... Check for an empty field.
+c..... check for an empty field.
 c
       do j=1,nj
       do i=1,ni
          if(x(i,j).ne.fill_val .and. x(i,j).ne.0.) go to 100
       enddo !i
       enddo !j
-      print *,'   ** WARNING. Empty field. **'
+      print *,'   ** warning. empty field. **'
       istatus = 0
       return
 c
  100  continue
 c
-c..... Calculate the means and range.
+c..... calculate the means and range.
 c
       do j=1,nj
       do i=1,ni
@@ -1185,7 +1185,7 @@ c
       ave = sum_a / pts
       range = amax - amin
 c
-c..... Now calculate the variance, stdev, etc.
+c..... now calculate the variance, stdev, etc.
 c
       pts = 0
       do j=1,nj
@@ -1204,17 +1204,17 @@ c
       if(pts .gt. 1) var = sum_v / (pts - 1)
       if (var .gt. 0.0) st_dev = sqrt( var )
 c
-c..... Write out some stat info.
+c..... write out some stat info.
 c
       write(6,900) amax,imax,jmax,amin,imin,jmin,range
- 900  format(5x,'Max: ',g12.4,' at ',2i4,'  Min: ',
-     &         g12.4,' at ',2i4,'  Range: ',g12.4)
+ 900  format(5x,'max: ',g12.4,' at ',2i4,'  min: ',
+     &         g12.4,' at ',2i4,'  range: ',g12.4)
 c
       write(6,910) amean, ave, st_dev
- 910  format(5x,'Mean:',g12.4,2x,'AbsAve:',g12.4,2x,'StDev:',g12.4)
+ 910  format(5x,'mean:',g12.4,2x,'absave:',g12.4,2x,'stdev:',g12.4)
 c
 c
-c.... That's it.  Let's go home.
+c.... that's it.  let's go home.
 c
       return
       end
@@ -1227,43 +1227,43 @@ c
 c
 c*****************************************************************************
 c
-c       Routine to get a surface background field for a given variable.  
-c       This routine checks several different files for an appropiate field
-c       to use, and checks the field for NaN's and other problems before
-c       returning.  In addition to returning the appropiate background
+c       routine to get a surface background field for a given variable.  
+c       this routine checks several different files for an appropiate field
+c       to use, and checks the field for nan's and other problems before
+c       returning.  in addition to returning the appropiate background
 c       field, the routine also returns the extension and time of the
 c       background file.
 c
-c	History:
-c		P. Stamus, NOAA/FSL 
-c                   06-16-98  Original version.
-c                   09-10-98  Change SFM filename read to be like LGB.
-c                   09-30-98  Housekeeping.
-c                   12-02-98  Change 'istatus' to 'bkg_status' in call list.
-c                   01-28-99  Skip LGB until can figure out how to deal 
+c	history:
+c		p. stamus, noaa/fsl 
+c                   06-16-98  original version.
+c                   09-10-98  change sfm filename read to be like lgb.
+c                   09-30-98  housekeeping.
+c                   12-02-98  change 'istatus' to 'bkg_status' in call list.
+c                   01-28-99  skip lgb until can figure out how to deal 
 c                               with bias in its fields.
-c                   06-11-99  Turn LGB back on.
-c                   07-25-99  Set LGB MSL variable to MSL so won't use for now.
-c                   09-16-99  Try LGB MSL again.
+c                   06-11-99  turn lgb back on.
+c                   07-25-99  set lgb msl variable to msl so won't use for now.
+c                   09-16-99  try lgb msl again.
 c
 c
-c       Notes:
-c               Inputs:    i4time_in  - time of analysis    (int)
+c       notes:
+c               inputs:    i4time_in  - time of analysis    (int)
 c                             var_in  - requested variable  (ch*4)
 c                    laps_cycle_time  - analysis interval   (int)
 c                             ni, nj  - grid dimensions     (int)
 c
-c               Outputs:    bkg_field - 2d background field    (r*4)
+c               outputs:    bkg_field - 2d background field    (r*4)
 c                             bkg_ext - ext of bkg file used  (ch*31)
 c                            bkg_time - time of bkg file used  (int)
-c                          bkg_status - Status:
+c                          bkg_status - status:
 c                                          1 - normal return
-c                                          0 - No background files found
+c                                          0 - no background files found
 c
 c
 c*****************************************************************************
 c
-        include 'lapsparms.for' ! MAX_BACKGROUND_FILES
+        include 'lapsparms.for' ! max_background_files
 
 	integer ni,nj
 	real bkg_field(ni,nj)
@@ -1276,12 +1276,12 @@ c
 	character units*10, lvlc*4, comment*125
 c
 	integer max_files
-	parameter(max_files = MAX_BACKGROUND_FILES)
+	parameter(max_files = max_background_files)
 	character fnames(max_files)*256
 	character filespec*255
 c
 c
-c.....	Start here.  
+c.....	start here.  
 c
 	call tagit('get_background_sfc', 19990725)
 	bkg_status = 0
@@ -1290,37 +1290,37 @@ c
 	i4time_prev = i4time_in - laps_cycle_time
 	call constant(bkg_field, fill_val, ni,nj)
 c
-c.....  Set up var array for the different names used in the different
+c.....  set up var array for the different names used in the different
 c.....  files, based on the 'var_in' variable.
 c
-	if(var_in .eq. 'TEMP') then
-	   var(1) = 'T  '  ! SFM variable
-	   var(2) = 'TSF'  ! LGB variable
-	   var(3) = 'T  '  ! LSX variable
-	elseif(var_in .eq. 'SFCP') then
-	   var(1) = 'PS '  ! SFM variable
-	   var(2) = 'PSF'  ! LGB variable
-	   var(3) = 'PS '  ! LSX variable
-	elseif(var_in .eq. 'MSLP') then
-	   var(1) = 'MSL'  ! SFM variable
-	   var(2) = 'SLP'  ! LGB variable
-cc	   var(2) = 'MSL'  ! LGB variable
-	   var(3) = 'MSL'  ! LSX variable
-	elseif(var_in .eq. 'DEWP') then
-	   var(1) = 'TD '  ! SFM variable
-	   var(2) = 'DSF'  ! LGB variable
-	   var(3) = 'TD '  ! LSX variable
-	elseif(var_in .eq. 'REDP') then
-	   var(1) = 'P  '  ! SFM variable
-	   var(2) = 'P  '  ! LGB variable
-	   var(3) = 'P  '  ! LSX variable
-	elseif(var_in .eq. 'VISB') then
-	   var(1) = 'VIS'  ! SFM variable
-	   var(2) = 'VIS'  ! LGB variable
-	   var(3) = 'VIS'  ! LSX variable
+	if(var_in .eq. 'temp') then
+	   var(1) = 't  '  ! sfm variable
+	   var(2) = 'tsf'  ! lgb variable
+	   var(3) = 't  '  ! lsx variable
+	elseif(var_in .eq. 'sfcp') then
+	   var(1) = 'ps '  ! sfm variable
+	   var(2) = 'psf'  ! lgb variable
+	   var(3) = 'ps '  ! lsx variable
+	elseif(var_in .eq. 'mslp') then
+	   var(1) = 'msl'  ! sfm variable
+	   var(2) = 'slp'  ! lgb variable
+cc	   var(2) = 'msl'  ! lgb variable
+	   var(3) = 'msl'  ! lsx variable
+	elseif(var_in .eq. 'dewp') then
+	   var(1) = 'td '  ! sfm variable
+	   var(2) = 'dsf'  ! lgb variable
+	   var(3) = 'td '  ! lsx variable
+	elseif(var_in .eq. 'redp') then
+	   var(1) = 'p  '  ! sfm variable
+	   var(2) = 'p  '  ! lgb variable
+	   var(3) = 'p  '  ! lsx variable
+	elseif(var_in .eq. 'visb') then
+	   var(1) = 'vis'  ! sfm variable
+	   var(2) = 'vis'  ! lgb variable
+	   var(3) = 'vis'  ! lsx variable
 	else
 	   print *,
-     &       ' Invalid variable request sent to get_background_sfc'
+     &       ' invalid variable request sent to get_background_sfc'
 	   return
 	endif
 
@@ -1328,7 +1328,7 @@ cc	   var(2) = 'MSL'  ! LGB variable
         if(.true.)then ! new way
            call get_modelfg_2d(i4time_in,var(2),ni,nj,bkg_field,istatus)
            if(istatus .ne. 1)then
-	       print *,' No LGB/FSF file with proper valid time.'
+	       print *,' no lgb/fsf file with proper valid time.'
                bkg_status = 0
 	       go to 300
            endif
@@ -1338,7 +1338,7 @@ cc	   var(2) = 'MSL'  ! LGB variable
         endif
 
 c
-c.....  Check the field for NaN's and other bad stuff.
+c.....  check the field for nan's and other bad stuff.
 c
 	print *,'...checking field.'
 	call check_field_2d(bkg_field,ni,nj,fill_val,istatus)
@@ -1349,22 +1349,22 @@ c
 	   return
 	else
 	   print *,
-     &    '  Problem with LGB/RSF background, check status = ', istatus       
+     &    '  problem with lgb/rsf background, check status = ', istatus       
 	endif
 c
-c.....	Try the previous LSX.
+c.....	try the previous lsx.
 c
- 300	if(.true.)return ! Using the previous LSX analysis as a background can
+ 300	if(.true.)return ! using the previous lsx analysis as a background can
                          ! promote gradient overshoots so we'll turn this off
-                         ! for now. One future option would be a climo field or
+                         ! for now. one future option would be a climo field or
                          ! to analyze only on larger scales with this type of
-                         ! cycling. The latter could be accomplished by setting
+                         ! cycling. the latter could be accomplished by setting
                          ! an artifically high value to the rms iteration 
                          ! thresholds.
 
         ilaps_bk = 1
 	ilaps_loop = 1
-	print *,' Trying for previous LSX background '
+	print *,' trying for previous lsx background '
 c	bkg_dir = '../lapsprd/lsx/'
 	call get_directory('lsx',bkg_dir,len)
 	bkg_ext = 'lsx'
@@ -1374,7 +1374,7 @@ c
      &   var(3),lvl_in,lvlc,units,comment,bkg_field,istatus)
 	if(istatus .ne. 1) then
 	   if(ilaps_loop .gt. 3) then     ! give up
-	      print *,'  No LSX background available. '
+	      print *,'  no lsx background available. '
 	      ilaps_bk = 0
 	      go to 500
 	   else
@@ -1384,10 +1384,10 @@ c
 	   endif
 	endif
 c
-c.....  Check the field for NaN's and other bad stuff.
+c.....  check the field for nan's and other bad stuff.
 c
         call make_fnam_lp(i4time_bk,filename,istat)  ! make filename	
-	print *,'  Found LSX background at ',filename,
+	print *,'  found lsx background at ',filename,
      &          '...checking field.'
 	call check_field_2d(bkg_field,ni,nj,fill_val,istatus)
 	if(istatus .eq. 1) then
@@ -1395,12 +1395,12 @@ c
 	   bkg_time = i4time_bk
 	   return
 	else
-	   print *,'  Problem with LSX background, check status = ', istatus
+	   print *,'  problem with lsx background, check status = ', istatus
 	endif
 c
  500	continue
 c
-c.....	That's about it...let's go home.
+c.....	that's about it...let's go home.
 c
 	return
 	end
@@ -1412,40 +1412,40 @@ c
 c
 c*****************************************************************************
 c
-c       Routine to get a surface background wind field.  This routine checks 
+c       routine to get a surface background wind field.  this routine checks 
 c       several different files for an appropiate fields to use, and checks 
-c       the fields for NaN's and other problems before returning.  The u and
+c       the fields for nan's and other problems before returning.  the u and
 c       v components must be from the same file at the same time to be vaild.
-c       In addition to returning the appropiate background u and v, this 
+c       in addition to returning the appropiate background u and v, this 
 c       routine also returns the extension and time of the background file.
 c
-c	History:
-c		P. Stamus, NOAA/FSL 
-c                   07-10-98  Original version.
-c                   09-10-98  Change SFM filename read to be like LGB.
-c                   09-30-98  Housekeeping.
-c                   12-02-98  Change 'istatus' to 'bkg_status' in call list.
-c                   01-28-99  Skip LGB until can figure out how to deal 
+c	history:
+c		p. stamus, noaa/fsl 
+c                   07-10-98  original version.
+c                   09-10-98  change sfm filename read to be like lgb.
+c                   09-30-98  housekeeping.
+c                   12-02-98  change 'istatus' to 'bkg_status' in call list.
+c                   01-28-99  skip lgb until can figure out how to deal 
 c                               with bias in its fields.
-c                   06-11-99  Turn LGB back on.
+c                   06-11-99  turn lgb back on.
 c
 c
-c       Notes:
-c               Inputs:    i4time_in  - time of analysis    (int)
+c       notes:
+c               inputs:    i4time_in  - time of analysis    (int)
 c                    laps_cycle_time  - analysis interval   (int)
 c                             ni, nj  - grid dimensions     (int)
 c
-c               Outputs: bkg_u, bkg_v - 2d background component fields (r*4)
+c               outputs: bkg_u, bkg_v - 2d background component fields (r*4)
 c                             bkg_ext - ext of bkg file used  (ch*31)
 c                            bkg_time - time of bkg file used  (int)
-c                          bkg_status - Status:
+c                          bkg_status - status:
 c                                          1 - normal return
-c                                          0 - No background files found
+c                                          0 - no background files found
 c
 c
 c*****************************************************************************
 c
-        include 'lapsparms.for' ! MAX_BACKGROUND_FILES
+        include 'lapsparms.for' ! max_background_files
 
 	integer ni,nj
 	real bkg_u(ni,nj), bkg_v(ni,nj)
@@ -1457,11 +1457,11 @@ c
 	character units*10, lvlc*4, comment*125
 c
 	integer max_files
-	parameter(max_files = MAX_BACKGROUND_FILES)
+	parameter(max_files = max_background_files)
 	character fnames(max_files)*256
 	character filespec*255, filename14*14
 c
-c.....	Start here.  
+c.....	start here.  
 c
 	bkg_status = 0
 	lvl_in = 0      ! surface level
@@ -1469,28 +1469,28 @@ c
 	i4time_prev = i4time_in - laps_cycle_time
 	call constant(bkg_u, fill_val, ni,nj)
 	call constant(bkg_v, fill_val, ni,nj)
-	var_u = 'U  '
-	var_v = 'V  '
+	var_u = 'u  '
+	var_v = 'v  '
 	print *,' '
-	print *,' Getting background wind data....'
+	print *,' getting background wind data....'
 	call tagit('get_bkgwind_sfc', 19990611)
 c
 c
-c.....  Get the background data.  Try for LWM file first. Next, try for an 
-c.....  SFM forecast.  If not available, try the LGB file.  If that's not there
-c.....  either, use a previous LAPS analysis.  If nothings available, print a 
+c.....  get the background data.  try for lwm file first. next, try for an 
+c.....  sfm forecast.  if not available, try the lgb file.  if that's not there
+c.....  either, use a previous laps analysis.  if nothings available, print a 
 c.....  warning.
 c
-c.....	Try LWM (sfc interpolated from 3d)
+c.....	try lwm (sfc interpolated from 3d)
 c
 	ilwm_loop = 1
-	print *,' Trying for LWM wind background '
+	print *,' trying for lwm wind background '
 c	bkg_dir = '../lapsprd/lwm/'
 	call get_directory('lwm',bkg_dir,len)
 	bkg_ext = 'lwm'
 	i4time_bk = i4time_in
-	var_u = 'SU '
-	var_v = 'SV '
+	var_u = 'su '
+	var_v = 'sv '
 c
  310	call read_laps_data(i4time_bk,bkg_dir,bkg_ext,ni,nj,1,1,
      &   var_u,lvl_in,lvlc,units,comment,bkg_u,istatus_u)
@@ -1499,7 +1499,7 @@ c
 c
 	if(istatus_u.ne.1 .or. istatus_v.ne.1) then
 	   if(ilwm_loop .gt. 0) then     ! give up
-	      print *,'  No LWM background available. '
+	      print *,'  no lwm background available. '
 	      go to 400
 	   else
 	      ilwm_loop = ilwm_loop + 1
@@ -1508,9 +1508,9 @@ c
 	   endif
 	endif
 c
-c.....  Check the field for NaN's and other bad stuff.
+c.....  check the field for nan's and other bad stuff.
 c
-	print *,'  Found LWM backgrounds...checking fields.'
+	print *,'  found lwm backgrounds...checking fields.'
 	call check_field_2d(bkg_u,ni,nj,fill_val,istatus_u)
 	call check_field_2d(bkg_v,ni,nj,fill_val,istatus_v)
 	if(istatus_u.eq.1 .and. istatus_v.eq.1) then
@@ -1518,15 +1518,15 @@ c
 	   bkg_time = i4time_bk
 	   return
 	else
-	   print *,'  Problem with LWM background, check status = ', 
+	   print *,'  problem with lwm background, check status = ', 
      &            istatus_u, istatus_v
 	endif
  400	continue
 c
-c.....  Try SFM
+c.....  try sfm
 c
 	isfm_bk = 1
-	print *,' Trying for SFM background '
+	print *,' trying for sfm background '
 c	bkg_dir = '../lapsprd/rsf/'
 	bkg_ext = 'rsf'
 	i4time_bk = i4time_in
@@ -1564,22 +1564,22 @@ c
      &   var_v,lvl_in,lvlc,units,comment,bkg_v,istatus_v)
 
   	   if(istatus_u.ne.1 .or. istatus_v.ne.1) then
-	      print *,' ERROR reading SFM file at ', filename14
+	      print *,' error reading sfm file at ', filename14
 	      isfm_bk = 0
 	      go to 200
 	   endif
 c
 	else
 c
-	   print *,' No SFM file with proper valid time.'
+	   print *,' no sfm file with proper valid time.'
 	   isfm_bk = 0
 	   go to 200
 
 	endif
 c
-c.....  Check the field for NaN's and other bad stuff.
+c.....  check the field for nan's and other bad stuff.
 c
-	print *,'  Found SFM background at ',filename14,
+	print *,'  found sfm background at ',filename14,
      &          '...checking field.'
 	call check_field_2d(bkg_u,ni,nj,fill_val,istatus_u)
 	call check_field_2d(bkg_v,ni,nj,fill_val,istatus_v)
@@ -1589,17 +1589,17 @@ c
 	   return
 	else
 	   print *,
-     &   '   Problem with SFM backgrounds, check status = ',
+     &   '   problem with sfm backgrounds, check status = ',
      &   istatus_u, istatus_v
 	endif
  200	continue
 c
-c.....  Try LGB.
+c.....  try lgb.
 c
-	var_u = 'USF'
-	var_v = 'VSF'
+	var_u = 'usf'
+	var_v = 'vsf'
 	imodel_bk = 1
-	print *,' Trying for LGB background '
+	print *,' trying for lgb background '
 c	bkg_dir = '../lapsprd/lgb/'
 	bkg_ext = 'lgb'
 	i4time_bk = i4time_in
@@ -1637,22 +1637,22 @@ c
      &   var_v,lvl_in,lvlc,units,comment,bkg_v,istatus_v)
 
   	   if(istatus_u.ne.1 .or. istatus_v.ne.1) then
-	      print *,' ERROR reading LGB file at ', filename14
+	      print *,' error reading lgb file at ', filename14
 	      imodel_bk = 0
 	      go to 300
 	   endif
 c
 	else
 c
-	   print *,' No LGB file with proper valid time.'
+	   print *,' no lgb file with proper valid time.'
 	   imodel_bk = 0
 	   go to 300
 
 	endif
 c
-c.....  Check the field for NaN's and other bad stuff.
+c.....  check the field for nan's and other bad stuff.
 c
-	print *,'  Found LGB backgrounds at ',filename14,
+	print *,'  found lgb backgrounds at ',filename14,
      &          '...checking fields.'
 	call check_field_2d(bkg_u,ni,nj,fill_val,istatus_u)
 	call check_field_2d(bkg_v,ni,nj,fill_val,istatus_v)
@@ -1662,29 +1662,29 @@ c
 	   return
 	else
 	   print *,
-     &    '  Problem with LGB backgrounds, check status = ', 
+     &    '  problem with lgb backgrounds, check status = ', 
      &    istatus_u, istatus_v
 	endif
 
- 300	if(.true.)return ! Using the previous LSX analysis as a background can
+ 300	if(.true.)return ! using the previous lsx analysis as a background can
                          ! promote gradient overshoots so we'll turn this off
-                         ! for now. One future option would be a climo field or
+                         ! for now. one future option would be a climo field or
                          ! to analyze only on larger scales with this type of
-                         ! cycling. The latter could be accomplished by setting
+                         ! cycling. the latter could be accomplished by setting
                          ! an artifically high value to the rms iteration 
                          ! thresholds.
 c
-c.....	Try the previous LSX.
+c.....	try the previous lsx.
 c
         ilaps_bk = 1
 	ilaps_loop = 1
-	print *,' Trying for previous LSX background '
+	print *,' trying for previous lsx background '
 c	bkg_dir = '../lapsprd/lsx/'
 	call get_directory('lsx',bkg_dir,len)
 	bkg_ext = 'lsx'
 	i4time_bk = i4time_prev
-	var_u = 'U  '
-	var_v = 'V  '
+	var_u = 'u  '
+	var_v = 'v  '
 c
  410	call read_laps_data(i4time_bk,bkg_dir,bkg_ext,ni,nj,1,1,
      &   var_u,lvl_in,lvlc,units,comment,bkg_u,istatus_u)
@@ -1693,7 +1693,7 @@ c
 c
 	if(istatus_u.ne.1 .or. istatus_v.ne.1) then
 	   if(ilaps_loop .gt. 3) then     ! give up
-	      print *,'  No LSX background available. '
+	      print *,'  no lsx background available. '
 	      ilaps_bk = 0
 	      go to 500
 	   else
@@ -1703,9 +1703,9 @@ c
 	   endif
 	endif
 c
-c.....  Check the field for NaN's and other bad stuff.
+c.....  check the field for nan's and other bad stuff.
 c
- 	print *,'  Found LSX backgrounds...checking fields.'
+ 	print *,'  found lsx backgrounds...checking fields.'
 	call check_field_2d(bkg_u,ni,nj,fill_val,istatus_u)
 	call check_field_2d(bkg_v,ni,nj,fill_val,istatus_v)
 	if(istatus_u.eq.1 .and. istatus_v.eq.1) then
@@ -1713,13 +1713,13 @@ c
 	   bkg_time = i4time_bk
 	   return
 	else
-	   print *,'  Problem with LSX background, check status = ', 
+	   print *,'  problem with lsx background, check status = ', 
      &             istatus_u, istatus_v
 	endif
 c
  500	continue
 c
-c.....	That's about it...let's go home.
+c.....	that's about it...let's go home.
 c
 	return
 	end
@@ -1729,11 +1729,11 @@ c
 c
 c*****************************************************************************
 c
-c       Routine to print a tracking code for the 'name' routine into the log.
+c       routine to print a tracking code for the 'name' routine into the log.
 c
-c       Original:   P. Stamus, NOAA/FSL   04 Aug 1999
+c       original:   p. stamus, noaa/fsl   04 aug 1999
 c
-c       Notes:
+c       notes:
 c
 c*****************************************************************************
 c
@@ -1743,7 +1743,7 @@ c
 c
 	call s_len(name, len)
 c
-	write(6,*) ' Welcome to ',name(1:len),';  tag: ',code
+	write(6,*) ' welcome to ',name(1:len),';  tag: ',code
 c
 	return
 	end
@@ -1751,32 +1751,32 @@ c
         subroutine pstn_anal(back_mp,back_sp,prin_bk,prin,ni,nj
      1                      ,stnp_bk,stnp)
 
-!       This routine solves for the 'stnp' analysis by assuming that ratio
-!       stnp/stnp_bk is equal to prin/prin_bk. This provides an indirect
-!       way to get the observations to modify the STNP background to
-!       come up with a STNP analysis. We are thus feeding off of any PRIN obs
-!       that contributed to the PRIN analysis.
+!       this routine solves for the 'stnp' analysis by assuming that ratio
+!       stnp/stnp_bk is equal to prin/prin_bk. this provides an indirect
+!       way to get the observations to modify the stnp background to
+!       come up with a stnp analysis. we are thus feeding off of any prin obs
+!       that contributed to the prin analysis.
 
         integer back_mp,back_sp
 
-!       PRIN is input pressure array, either REDP field (mb)
-        real prin_bk(ni,nj)                                    ! I
-        real prin(ni,nj)                                       ! I
-        real prin_diff(ni,nj)                                  ! L
+!       prin is input pressure array, either redp field (mb)
+        real prin_bk(ni,nj)                                    ! i
+        real prin(ni,nj)                                       ! i
+        real prin_diff(ni,nj)                                  ! l
         
-        real stnp_bk(ni,nj)                                    ! I
-        real stnp(ni,nj)                                       ! I/O
+        real stnp_bk(ni,nj)                                    ! i
+        real stnp(ni,nj)                                       ! i/o
 
 
-        write(6,*)' Subroutine pstn_anal (using pressure in mb)'
+        write(6,*)' subroutine pstn_anal (using pressure in mb)'
 
         call get_r_missing_data(r_missing_data,istatus)
 
-!       Check bounds of prin/stnp fields
+!       check bounds of prin/stnp fields
         if(back_sp .eq. 1)then
             call array_minmax(stnp_bk,ni,nj,rmin,rmax,r_missing_data)
             if(rmin .lt. 300. .or. rmax .gt. 1100)then
-                write(6,*)' ERROR: STNP bkgnd range out of bounds'      
+                write(6,*)' error: stnp bkgnd range out of bounds'      
      1                   ,rmin,rmax
                 stop
             endif
@@ -1784,36 +1784,36 @@ c
 
         call array_minmax(prin,ni,nj,rmin,rmax,r_missing_data)
         if(rmin .lt. 850. .or. rmax .gt. 1100)then
-            write(6,*)' Warning: input P analysis range out of bounds'      
+            write(6,*)' warning: input p analysis range out of bounds'      
      1               ,rmin,rmax
-            write(6,*)' Check if expected for reduced pressure height'      
+            write(6,*)' check if expected for reduced pressure height'      
         endif
 
         if(back_mp .eq. 1)then
             call array_minmax(prin_bk,ni,nj,rmin,rmax,r_missing_data)
             if(rmin .lt. 850. .or. rmax .gt. 1100)then
-                write(6,*)' Warning: input P bkgnd range out of bounds'       
+                write(6,*)' warning: input p bkgnd range out of bounds'       
      1                   ,rmin,rmax
                 write(6,*)
-     1                 ' Check if expected for reduced pressure height'
+     1                 ' check if expected for reduced pressure height'
             endif
 
             call diff(prin,prin_bk,prin_diff,ni,nj)
             call array_minmax(prin_diff,ni,nj,rmin,rmax,r_missing_data)       
             if(rmin .lt. -50. .or. rmax .gt. +50.)then
                 write(6,*)
-     1                  ' Warning: input P bkg diff range out of bounds'       
+     1                  ' warning: input p bkg diff range out of bounds'       
      1                   ,rmin,rmax
             endif
         endif
 
         if(back_mp .ne. 1 .or. back_sp .ne. 1)then
-            write(6,*)' Skipping stnp adjustment'
+            write(6,*)' skipping stnp adjustment'
             return
         endif
 
-!       Adjust stnp field
-        write(6,*)' Performing stnp adjustment using prin/prin_bk'
+!       adjust stnp field
+        write(6,*)' performing stnp adjustment using prin/prin_bk'
 
         do i = 1,ni
         do j = 1,nj
@@ -1842,24 +1842,24 @@ c
 c
 c*******************************************************************************
 c
-c	Routine to calculate derived quantities from the LAPS surface 
-c	analysis.  From the Meso program written by Mark Jackson...derived 
-c	from AFOS MESO sometime during fall of 1988.....?????
+c	routine to calculate derived quantities from the laps surface 
+c	analysis.  from the meso program written by mark jackson...derived 
+c	from afos meso sometime during fall of 1988.....?????
 c
-c	Input units:  u, v  -- m/s          Output:  q           -- g/kg
+c	input units:  u, v  -- m/s          output:  q           -- g/kg
 c	              p     -- mb                    qcon, qadv  -- g/kg/s
-c	              theta -- K                     tadv, thadv -- K/s
-c	              t, td -- K
+c	              theta -- k                     tadv, thadv -- k/s
+c	              t, td -- k
 c
-c	Changes:
-c		P. A. Stamus	04-21-89  Changed for use in lapsvanl.
-c				05-02-89  VORT calc in main program.
-c				05-08-89  Working version...really.
-c				05-11-89  Add Moisture advect. calc.
-c				04-16-90  Added temp adv.
-c				10-30-90  Added boundary routine.
-c				04-10-91  Bugs, bugs, bugs....sign/unit errs.
-c                               11-15-99  Clean up mix ratio calc (QC check).
+c	changes:
+c		p. a. stamus	04-21-89  changed for use in lapsvanl.
+c				05-02-89  vort calc in main program.
+c				05-08-89  working version...really.
+c				05-11-89  add moisture advect. calc.
+c				04-16-90  added temp adv.
+c				10-30-90  added boundary routine.
+c				04-10-91  bugs, bugs, bugs....sign/unit errs.
+c                               11-15-99  clean up mix ratio calc (qc check).
 c
 c*****************************************************************************
 c
@@ -1872,13 +1872,13 @@ c
 	integer qbad
 c
 c
-c.....	Calculate mixing ratio.
-c.....	Units:  g / kg
+c.....	calculate mixing ratio.
+c.....	units:  g / kg
 c
 	qbad = 0  !q ok
 	do j=1,nj
 	do i=1,ni
-	   tdp = td(i,j) - 273.15          ! convert K to C
+	   tdp = td(i,j) - 273.15          ! convert k to c
 	   tl = (7.5 * tdp) / (237.3 + tdp)
 	   e = 6.11 * 10. ** tl
 	   if(p(i,j).le.0.0 .or. p(i,j).eq.e) then
@@ -1891,11 +1891,11 @@ c
 	   endif	
 	enddo !i
 	enddo !j
-990	format(1x,' ERROR. Bad pressure in mixing ratio calc at point ',
+990	format(1x,' error. bad pressure in mixing ratio calc at point ',
      &         2i5,'-- pressure: ',f12.4,' calculated e: ',f12.4)
 c
-c.....	Compute moisture flux convergence on the laps grid.
-c.....	Units:  g / kg / sec
+c.....	compute moisture flux convergence on the laps grid.
+c.....	units:  g / kg / sec
 c
 	if(qbad .eq. 1) then
 	   call constant(qcon, badflag, ni,nj)
@@ -1915,8 +1915,8 @@ c
 	call bounds(qcon,ni,nj)
  30	continue
 c
-c.....	Compute Theta advection on the laps grid.
-c.....	Units:  deg K / sec
+c.....	compute theta advection on the laps grid.
+c.....	units:  deg k / sec
 c
 	do 40 j=2,nj-1
 	do 40 i=2,ni-1
@@ -1926,12 +1926,12 @@ c
 	  dth3 = (theta(i,j) - theta(i,j-1)) / dy(i,j)
 	  dth4 = (theta(i-1,j) - theta(i-1,j-1)) / dy(i,j)
 	  dtdy = (v(i-1,j) + v(i-1,j-1)) * (dth3 + dth4) * .25
-	  thadv(i,j) = - dtdx - dtdy   ! deg K/sec
+	  thadv(i,j) = - dtdx - dtdy   ! deg k/sec
 40	continue
 	call bounds(thadv,ni,nj)
 c
-c.....	Compute temperature advection.
-c.....	Units:  deg K / sec
+c.....	compute temperature advection.
+c.....	units:  deg k / sec
 c
 	do 45 j=2,nj-1
 	do 45 i=2,ni-1
@@ -1941,12 +1941,12 @@ c
 	  dth3 = (t(i,j) - t(i,j-1)) / dy(i,j)
 	  dth4 = (t(i-1,j) - t(i-1,j-1)) / dy(i,j)
 	  dtdy = (v(i-1,j) + v(i-1,j-1)) * (dth3 + dth4) * .25
-	  tadv(i,j) = - dtdx - dtdy     ! deg K/sec
+	  tadv(i,j) = - dtdx - dtdy     ! deg k/sec
 45	continue
 	call bounds(tadv,ni,nj)
 c
-c.....	Compute Moisture advection on the laps grid.
-c.....	Units:  g / kg / sec
+c.....	compute moisture advection on the laps grid.
+c.....	units:  g / kg / sec
 c
 	if(qbad .eq. 1) then
 	   call constant(qadv, badflag, ni,nj)
@@ -1966,7 +1966,7 @@ c
 	call bounds(qadv,ni,nj)
  50	continue
 c
-c.....	Send the fields back to the main program.
+c.....	send the fields back to the main program.
 c
 	return
 	end
@@ -1978,19 +1978,19 @@ c
 c
 c======================================================================
 c
-c     Routine to interpolate a field back to station locations, to 
+c     routine to interpolate a field back to station locations, to 
 c     compare the analysis to the original obs.
 c
-c     Original: P.Stamus, NOAA/FSL  08-07-95
-c     Changes:  
-c               P.Stamus  08-14-95  Added mean.
-c                         08-25-97  Changes for dynamic LAPS
-c                         05-13-98  Added expected accuracy counts.
-c                         07-13-99  Change stn character arrays.
-c                                     Rm *4 from declarations.
-c                         11-15-99  Add writes to log file.
+c     original: p.stamus, noaa/fsl  08-07-95
+c     changes:  
+c               p.stamus  08-14-95  added mean.
+c                         08-25-97  changes for dynamic laps
+c                         05-13-98  added expected accuracy counts.
+c                         07-13-99  change stn character arrays.
+c                                     rm *4 from declarations.
+c                         11-15-99  add writes to log file.
 c
-c     Notes:
+c     notes:
 c
 c======================================================================
 c
@@ -2001,9 +2001,9 @@ c
 	character title*(*), stn(mxstn)*20, stn_mx*5, stn_mn*5
         logical l_bilinear_interp 
 c
-c.... Start.
+c.... start.
 c
-!       This will interpolate the grid to the stations using a significantly
+!       this will interpolate the grid to the stations using a significantly
 !       faster bilinear interpolation instead of the splines.
         l_bilinear_interp = .true.
 
@@ -2030,12 +2030,12 @@ c
 
         if(.not. l_bilinear_interp)then
 c
-c....       Find the 2nd derivative table for use by the splines.
+c....       find the 2nd derivative table for use by the splines.
 	    call splie2(x1a,x2a,field,ni,nj,y2a)
 
         endif
 c
-c....   Now call the spline for each station in the grid.
+c....   now call the spline for each station in the grid.
 c
 	do i=1,n_obs_b
 	   if(ii(i).lt.1 .or. ii(i).gt.ni) go to 500
@@ -2068,7 +2068,7 @@ c
 		 stn_mn = stn(i)(1:5)
 	      endif
 c
-c.....  Count how many stns are within the exp accuracy (and multiples)
+c.....  count how many stns are within the exp accuracy (and multiples)
 c
 	      if(adiff .le. ea1) num_ea1 = num_ea1 + 1
 	      if(adiff .le. ea2) num_ea2 = num_ea2 + 1
@@ -2082,7 +2082,7 @@ c
 c
  500	enddo !i
 c
-c.... Get the average diff over the obs.
+c.... get the average diff over the obs.
 c     
 	ave_diff = badflag
 	amean = badflag
@@ -2092,27 +2092,27 @@ c
 
 	write(6,909) amean, num
 	write(iunit,909) amean, num
- 909	format(/,' Mean difference:    ',f10.2,' over ',i6,' stations.')       
+ 909	format(/,' mean difference:    ',f10.2,' over ',i6,' stations.')       
 
 	write(6,910) ave_diff, num
 	write(iunit,910) ave_diff, num
- 910	format(' Average difference: ',f10.2,' over ',i6,' stations.')
+ 910	format(' average difference: ',f10.2,' over ',i6,' stations.')
 
 	write(6,915) rms, num
 	write(iunit,915) rms, num
- 915	format(' RMS difference:     ',f10.2,' over ',i6,' stations.')
+ 915	format(' rms difference:     ',f10.2,' over ',i6,' stations.')
 
 	write(iunit,920) diff_mx, stn_mx
- 920	format(' Maximum difference of ',f10.2,' at ',a5)
+ 920	format(' maximum difference of ',f10.2,' at ',a5)
 
 	write(iunit,925) diff_mn, stn_mn
- 925	format(' Minimum difference of ',f10.2,' at ',a5)
+ 925	format(' minimum difference of ',f10.2,' at ',a5)
 
 	write(iunit, 930)
  930	format(' ')
 c
 	write(iunit, 950) field_ea
- 950	format(' Number of obs within multiples of exp acc of ',f8.2)
+ 950	format(' number of obs within multiples of exp acc of ',f8.2)
 	percent = -1.
 	anum = float(num)
 	if(num .ne. 0) percent = (float(num_ea1) / anum) * 100.
@@ -2138,7 +2138,7 @@ c
 c
       subroutine splie2(x1a,x2a,ya,m,n,y2a)
 
-c	15 May 1991  birkenheuer
+c	15 may 1991  birkenheuer
 
       dimension x1a(m),x2a(n),ya(m,n),y2a(m,n),ytmp(n*50),y2tmp(n*50)
       do 13 j=1,m
@@ -2156,7 +2156,7 @@ c
 c
       subroutine splin2(x1a,x2a,ya,y2a,m,n,x1,x2,y)
 
-c	15 May 1991 birkenheuer
+c	15 may 1991 birkenheuer
 
        dimension x1a(m),x2a(n),ya(m,n),y2a(m,n),ytmp(n*50),
      &          y2tmp(n*50),yytmp(n*50)
@@ -2210,7 +2210,7 @@ c
       subroutine splint(xa,ya,y2a,n,x,y)
 
 
-c	15 May 1991 Birkenheuer
+c	15 may 1991 birkenheuer
 
       dimension xa(n),ya(n*50),y2a(n*50)
       klo=1
@@ -2239,36 +2239,36 @@ c
 c
 c
 c================================================================================
-c   This routine is designed to reduce the mesonet plains stations' pressure
-C   reports to the elevation of the Boulder mesonet station, namely 1612 m.  The
-C   hydrostatic equation is used to perform the reduction, with the assumption
-C   that the mean virtual temperature in the layer between the station in ques-
-C   tion and Boulder can approximated by the station virtual temperature.  This
-C   is a sufficient approximation for the mesonet plains stations below about
-C   7000 ft.  For the mountain and higher foothill stations (Estes Park,
-C   Rollinsville, Ward, Squaw Mountain, and Elbert), a different technique needs
-C   to be utilized in order to decently approximate the mean virtual temperature
-C   in the layer between the station and Boulder. Ideas to do this are 1) use
-C   the free air temperature from a Denver sounding, or 2) use the data from
-C   each higher station to construct a vertical profile of the data and iterate
-C   downward to Boulder.
+c   this routine is designed to reduce the mesonet plains stations' pressure
+c   reports to the elevation of the boulder mesonet station, namely 1612 m.  the
+c   hydrostatic equation is used to perform the reduction, with the assumption
+c   that the mean virtual temperature in the layer between the station in ques-
+c   tion and boulder can approximated by the station virtual temperature.  this
+c   is a sufficient approximation for the mesonet plains stations below about
+c   7000 ft.  for the mountain and higher foothill stations (estes park,
+c   rollinsville, ward, squaw mountain, and elbert), a different technique needs
+c   to be utilized in order to decently approximate the mean virtual temperature
+c   in the layer between the station and boulder. ideas to do this are 1) use
+c   the free air temperature from a denver sounding, or 2) use the data from
+c   each higher station to construct a vertical profile of the data and iterate
+c   downward to boulder.
 
-C	D. Baker	 2 Sep 83  Original version.
-C	J. Wakefield	 8 Jun 87  Changed ZBOU from 1609 to 1612 m.
-c	P. Stamus 	27 Jul 88  Change ranges for good data tests.
-c	P. Stamus	05 Dec 88  Added lapse rate for better computation
+c	d. baker	 2 sep 83  original version.
+c	j. wakefield	 8 jun 87  changed zbou from 1609 to 1612 m.
+c	p. stamus 	27 jul 88  change ranges for good data tests.
+c	p. stamus	05 dec 88  added lapse rate for better computation
 c	 				of mean virtual temps.
-c			19 Jan 89  Fixed error with lapse rates (sheeze!)
-c			19 Dec 89  Change reduction to 1500 m.
-c			20 Jan 93  Version with variable reference level.
-c                       25 Aug 97  Changes for dynamic LAPS.
-c       P. Stamus       15 Nov 99  Change checks of incoming values so the
-c                                    AF can run over Mt. Everest and Antarctica.
+c			19 jan 89  fixed error with lapse rates (sheeze!)
+c			19 dec 89  change reduction to 1500 m.
+c			20 jan 93  version with variable reference level.
+c                       25 aug 97  changes for dynamic laps.
+c       p. stamus       15 nov 99  change checks of incoming values so the
+c                                    af can run over mt. everest and antarctica.
 c
-c       Notes:  This routine may or may not be giving reasonable results over
-c               extreme areas (Tibet, Antarctica).  As noted above, there are
+c       notes:  this routine may or may not be giving reasonable results over
+c               extreme areas (tibet, antarctica).  as noted above, there are
 c               questions about use of the std lapse rate to do these reductions.
-c               15 Nov 99
+c               15 nov 99
 c
 c================================================================================
 c
@@ -2278,36 +2278,36 @@ c
 	real gor, ctv
 	parameter(gor=0.03414158,ctv=0.37803)
 	real dz, dz2, t_mean, td_mean, td, e, tkel, tv, esw
-!	DATA GOR,ZBOU,CTV/.03414158,1612.,.37803/
+!	data gor,zbou,ctv/.03414158,1612.,.37803/
 !	data gor,ctv/.03414158,.37803/
-		!GOR= acceleration due to gravity divided by the dry air gas
+		!gor= acceleration due to gravity divided by the dry air gas
 		!     constant (9.8/287.04)
-		!F2M= conversion from feet to meters
+		!f2m= conversion from feet to meters
 		! *** zbou is now the standard (reduction) level 12-19-89 ***
-		!CTV= 1-EPS where EPS is the ratio of the molecular weight of
+		!ctv= 1-eps where eps is the ratio of the molecular weight of
 		!     water to that of dry air.
 
 
-C** Check input values......good T, Td, & P needed to perform the reduction.
+c** check input values......good t, td, & p needed to perform the reduction.
 cc	if(dewp.gt.temp .or. pres.le.620. .or. pres.gt.1080. .or.
 cc     &      temp.lt.-30. .or. temp.gt.120. .or. dewp.lt.-35. .or.
 cc     &      dewp.gt.90.) then
 	if(dewp.gt.temp .or. pres.le.275. .or. pres.gt.1150. .or.
      &      temp.lt.-130. .or. temp.gt.150. .or. dewp.lt.-135. .or.
      &      dewp.gt.100.) then
-	   print *,' Warning. Bad input to reduce_p routine.',dewp,temp
+	   print *,' warning. bad input to reduce_p routine.',dewp,temp
      &                                                       ,pres   
-	   redpres = badflag	!FLAG VALUE RETURNED FOR BAD INPUT
+	   redpres = badflag	!flag value returned for bad input
 	   return
 	endif
 
 	dz= elev - ref_lvl	!thickness (m) between station & reference lvl
 	dz2 = 0.5 * dz		! midway point in thickness (m)
-	t_mean = temp - (lapse_t * dz2)	! temp at midpoint (F)
-	td_mean = dewp - (lapse_td * dz2)	! dewpt at midpoint (F)
-	TD= 0.55556 * (td_mean - 32.)		! convert F to C
+	t_mean = temp - (lapse_t * dz2)	! temp at midpoint (f)
+	td_mean = dewp - (lapse_td * dz2)	! dewpt at midpoint (f)
+	td= 0.55556 * (td_mean - 32.)		! convert f to c
 	e= esw(td)		!saturation vapor pressure
-	tkel= 0.55556 * (t_mean - 32.) + 273.15	! convert F to K
+	tkel= 0.55556 * (t_mean - 32.) + 273.15	! convert f to k
 	tv= tkel/(1.-ctv*e/pres)	!virtual temperature
 
 	redpres= pres*exp(gor*(dz/tv))	!corrected pressure
@@ -2316,9 +2316,9 @@ c
 	end
 c
 
-	subroutine read_sfc_verif_history(lun,r_missing_data             ! I
-     1                                   ,mo,mf,mt                       ! I
-     1                                   ,stn_a,bkg_a,obs_a,diff_a,nsta  ! O
+	subroutine read_sfc_verif_history(lun,r_missing_data             ! i
+     1                                   ,mo,mf,mt                       ! i
+     1                                   ,stn_a,bkg_a,obs_a,diff_a,nsta  ! o
      1                                   ,istatus)
 
         character*150 dirname,filename
@@ -2335,7 +2335,7 @@ c
 
         integer mapcount(mo)
 
-        write(6,*)' Subroutine read_sfc_verif_history'
+        write(6,*)' subroutine read_sfc_verif_history'
 
         ierr = 0
 
@@ -2361,7 +2361,7 @@ c
 
           filename = dirname(1:lend)//'/'//basename
 
-          write(6,*)' Open ',filename
+          write(6,*)' open ',filename
 
           open(lun,file=filename,status='old',err=950)
 
@@ -2389,7 +2389,7 @@ c
 
  906	    ierr = ierr + 1
             if(ierr .le. 100)then
-                write(6,*)' Error reading line with length 56:'
+                write(6,*)' error reading line with length 56:'
                 write(6,*)line
             endif
 
@@ -2401,16 +2401,16 @@ c
           endif
 
  910	  if(ifound_last .eq. 0 .and. ifound .eq. 1)then
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
             iblock = iblock + 1
-            write(6,*)' Start text block',iblock
+            write(6,*)' start text block',iblock
             nmap = 0
             nsearch = 0
             nnew = 0
 
           elseif(ifound_last .eq. 1 .and. ifound .eq. 0)then
             write(6,104)iblock,nmap,nsearch,nsta,nnew
- 104        format(' End text block',i4,3x     
+ 104        format(' end text block',i4,3x     
      1            ,' nmap/nsearch/nsta/nnew=',4i7)                     
 
           endif
@@ -2469,7 +2469,7 @@ c
                   diff_a(ista,ifield,itime) = diff
                 endif
             else ! skip rest of fields
-                write(6,*)' Skipping rest of fields for this time'
+                write(6,*)' skipping rest of fields for this time'
                 goto 900
                 
             endif
@@ -2486,7 +2486,7 @@ c
 
           goto 960
 
- 950	  write(6,*)' Error opening itime ',itime
+ 950	  write(6,*)' error opening itime ',itime
 
  960	  write(6,*)' end time: itime/nsta = ',itime,nsta
           write(6,*)
@@ -2498,14 +2498,14 @@ c
         return
         end
 
-	subroutine sfc_verif_qc(r_missing_data                  ! I
-     1                         ,mo,mf,mt                        ! I
-     1                         ,stn_a,bkg_a,obs_a,diff_a,nsta   ! I
-     1                         ,bias_a,obs_mean,obs_std)        ! O
+	subroutine sfc_verif_qc(r_missing_data                  ! i
+     1                         ,mo,mf,mt                        ! i
+     1                         ,stn_a,bkg_a,obs_a,diff_a,nsta   ! i
+     1                         ,bias_a,obs_mean,obs_std)        ! o
 
-!       Calculate obs minus background statistics, and obs statistics
+!       calculate obs minus background statistics, and obs statistics
 
-!       Note that wind directions are inserted into the 'obs_a' array for output
+!       note that wind directions are inserted into the 'obs_a' array for output
 
         character*5 stn_a(mo)
         real bkg_a(mo,mf,mt)
@@ -2516,13 +2516,13 @@ c
         real obs_mean(mo,mf)
         real obs_std(mo,mf)
 
-        write(6,*)' Subroutine sfc_verif_qc'
+        write(6,*)' subroutine sfc_verif_qc'
 
         bias_a = r_missing_data
         obs_mean = r_missing_data
         obs_std = r_missing_data
 
-!       Field array indices
+!       field array indices
         iv_t = 1
         iv_td = 2
         iv_u = 3
@@ -2578,8 +2578,8 @@ c
           enddo ! ista
         enddo ! ifield
 
-!       Obtain wind direction
-        write(6,*)' Obtaining wind directions'
+!       obtain wind direction
+        write(6,*)' obtaining wind directions'
         do ista = 1,nsta
           do itime = 1,mt
             u = obs_a(ista,iv_u,itime)
@@ -2591,7 +2591,7 @@ c
           enddo 
         enddo
 
-!       Compute standard deviation of wind direction/speed
+!       compute standard deviation of wind direction/speed
         do ifield = 5,9,4
           do ista = 1,nsta
             icount = 0
@@ -2607,13 +2607,13 @@ c
 
             frac = float(icount) / float(mt)
 
-!           (stddev ala the IDL code)
-!           MEAN[*,*] = SUM[*,*] / nmembers
+!           (stddev ala the idl code)
+!           mean[*,*] = sum[*,*] / nmembers
             if(icount .ge. 2 .and. frac .ge. 0.5)then
               rmean = sum / float(icount)
               obs_mean(ista,ifield) = rmean
 
-!             SPREAD[*,*] = SQRT( (SUMSQ[*,*] / nmembers ) - MEAN[*,*]^2.0 )
+!             spread[*,*] = sqrt( (sumsq[*,*] / nmembers ) - mean[*,*]^2.0 )
               obs_std(ista,ifield) = 
      1          sqrt( (sumsq / float(icount)) - rmean**2)
 

@@ -1,966 +1,964 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
 
-MODULE lapsprep_wrf
+module lapsprep_wrf
 
-! PURPOSE
+! purpose
 ! =======
-! Module to contain the various output routines needed for lapsprep
-! to support initializition of the WRF model.
+! module to contain the various output routines needed for lapsprep
+! to support initializition of the wrf model.
 !
-! SUBROUTINES CONTAINED
+! subroutines contained
 ! =====================
-! output_gribprep_format  - Used to support WRF initializations
-! output_gribprep_header  - Writes the grib prep headers
-! output_metgrid_format  - Used to support WRF initializations using WPS
-! output_metgrid_header  - Writes the metgrid headers
-! REMARKS
+! output_gribprep_format  - used to support wrf initializations
+! output_gribprep_header  - writes the grib prep headers
+! output_metgrid_format  - used to support wrf initializations using wps
+! output_metgrid_header  - writes the metgrid headers
+! remarks
 ! =======
-! 
 !
-! HISTORY
+!
+! history
 ! =======
-! 4 Dec 2000 -- Original -- Brent Shaw
+! 4 dec 2000 -- original -- brent shaw
 
-  USE setup
-  USE laps_static
-  USE date_pack
-! USE lapsprep_constants
-  IMPLICIT NONE
+   use setup
+   use laps_static
+   use date_pack
+! use lapsprep_constants
+   implicit none
 
-  PRIVATE
-  INTEGER, PARAMETER :: gp_version = 4
-  INTEGER, PARAMETER :: gp_version_wps = 5
-  REAL, PARAMETER    :: xfcst = 0.
-  CHARACTER(LEN=32),PARAMETER :: source = &
-     'LAPS ANALYSIS                   '
-  CHARACTER (LEN=8), PARAMETER:: knownloc='SWCORNER'
-  CHARACTER (LEN=24) :: hdate
-  INTEGER            :: llflag
-  CHARACTER (LEN=9)  :: field
-  CHARACTER (LEN=25) :: units
-  CHARACTER (LEN=46) :: desc 
-  INTEGER, PARAMETER :: output_unit = 78
-  REAL, PARAMETER    :: slp_level = 201300.0
+   private
+   integer, parameter :: gp_version = 4
+   integer, parameter :: gp_version_wps = 5
+   real, parameter    :: xfcst = 0.
+   character(len=32), parameter :: source = &
+                                   'laps analysis                   '
+   character(len=8), parameter:: knownloc = 'swcorner'
+   character(len=24) :: hdate
+   integer            :: llflag
+   character(len=9)  :: field
+   character(len=25) :: units
+   character(len=46) :: desc
+   integer, parameter :: output_unit = 78
+   real, parameter    :: slp_level = 201300.0
 
-  PUBLIC output_gribprep_format
-  PUBLIC output_metgrid_format
-CONTAINS
+   public output_gribprep_format
+   public output_metgrid_format
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE output_gribprep_format(p, t, ht, u, v, rh, slp, psfc, &
-                               lwc, rai, sno, ice, pic, snocov,tskin)
+   subroutine output_gribprep_format(p, t, ht, u, v, rh, slp, psfc, &
+                                     lwc, rai, sno, ice, pic, snocov, tskin)
 
-  !  Subroutine of lapsprep that will build a file the
-  !  WRFSI "gribprep" format that can be read by hinterp
+      !  subroutine of lapsprep that will build a file the
+      !  wrfsi "gribprep" format that can be read by hinterp
 
-  IMPLICIT NONE
+      implicit none
 
-  ! Arguments
- 
-  REAL, INTENT(IN)                   :: p(:)        ! Pressure (hPa)
-  REAL, INTENT(IN)                   :: t(:,:,:)    ! Temperature (K)
-  REAL, INTENT(IN)                   :: ht(:,:,:)   ! Height (m)
-  REAL, INTENT(IN)                   :: u(:,:,:)    ! U-wind (m s{-1})
-  REAL, INTENT(IN)                   :: v(:,:,:)    ! V-wind (m s{-1})
-  REAL, INTENT(IN)                   :: rh(:,:,:)   ! Relative Humidity (%)
-  REAL, INTENT(IN)                   :: slp(:,:)    ! Sea-level Pressure (Pa)
-  REAL, INTENT(IN)                   :: psfc(:,:)   ! Surface Pressure (Pa)
-  REAL, INTENT(IN)                   :: lwc(:,:,:)  ! Cloud liquid (kg/kg)
-  REAL, INTENT(IN)                   :: rai(:,:,:)  ! Rain (kg/kg)
-  REAL, INTENT(IN)                   :: sno(:,:,:)  ! Snow (kg/kg)
-  REAL, INTENT(IN)                   :: ice(:,:,:)  ! Ice (kg/kg)
-  REAL, INTENT(IN)                   :: pic(:,:,:)  ! Graupel (kg/kg)
-  REAL, INTENT(IN)                   :: snocov(:,:) ! Snow cover (fract)
-  REAL, INTENT(IN)                   :: tskin(:,:)  ! Skin temperature
-  
-  ! Local Variables
-  
-  INTEGER            :: valid_mm, valid_dd
-  CHARACTER (LEN=256):: output_file_name
-  REAL, ALLOCATABLE  :: d2d(:,:)
-  REAL, ALLOCATABLE  :: p_pa(:)
-  INTEGER            :: k,yyyyddd
-  INTEGER            :: istatus
-  REAL               :: r_missing_data
- 
-  ! Allocate a scratch 2d array
-  ALLOCATE (d2d (x,y) )
-  ALLOCATE (p_pa (z3+1))
-  ! Build the output file name
- 
-  output_prefix = TRIM(laps_data_root)// '/lapsprd/lapsprep/wrf/LAPS'
-  yyyyddd = valid_yyyy*1000 + valid_jjj
-  CALL wrf_date_to_ymd(yyyyddd, valid_yyyy, valid_mm, valid_dd) 
-  WRITE(hdate, '(I4.4,"-",I2.2,"-",I2.2,"_",I2.2,":",I2.2,":00.0000")') &
-          valid_yyyy, valid_mm, valid_dd, valid_hh, valid_min
-  IF (valid_min .EQ. 0) THEN
-    output_file_name = TRIM(output_prefix) // ':' // hdate(1:13)
-  ELSE
-    output_file_name = TRIM(output_prefix) // ':' // hdate(1:16)
-  ENDIF
-  !  Open the file for sequential, unformatted output
-  OPEN ( FILE   = TRIM(output_file_name)    , &
-         UNIT   = output_unit        , &
-         FORM   = 'UNFORMATTED' , &
-         STATUS = 'UNKNOWN'     , &
-         ACCESS = 'SEQUENTIAL'    )
+      ! arguments
 
-  ! Convert p levels from mb to Pascals
+      real, intent(in)                   :: p(:)        ! pressure (hpa)
+      real, intent(in)                   :: t(:, :, :)    ! temperature (k)
+      real, intent(in)                   :: ht(:, :, :)   ! height (m)
+      real, intent(in)                   :: u(:, :, :)    ! u-wind (m s{-1})
+      real, intent(in)                   :: v(:, :, :)    ! v-wind (m s{-1})
+      real, intent(in)                   :: rh(:, :, :)   ! relative humidity (%)
+      real, intent(in)                   :: slp(:, :)    ! sea-level pressure (pa)
+      real, intent(in)                   :: psfc(:, :)   ! surface pressure (pa)
+      real, intent(in)                   :: lwc(:, :, :)  ! cloud liquid (kg/kg)
+      real, intent(in)                   :: rai(:, :, :)  ! rain (kg/kg)
+      real, intent(in)                   :: sno(:, :, :)  ! snow (kg/kg)
+      real, intent(in)                   :: ice(:, :, :)  ! ice (kg/kg)
+      real, intent(in)                   :: pic(:, :, :)  ! graupel (kg/kg)
+      real, intent(in)                   :: snocov(:, :) ! snow cover (fract)
+      real, intent(in)                   :: tskin(:, :)  ! skin temperature
 
-  p_pa = p * 100.
+      ! local variables
 
-  ! Set llflag based on grid type
+      integer            :: valid_mm, valid_dd
+      character(len=256):: output_file_name
+      real, allocatable  :: d2d(:, :)
+      real, allocatable  :: p_pa(:)
+      integer            :: k, yyyyddd
+      integer            :: istatus
+      real               :: r_missing_data
 
-  IF      ( grid_type(1:8)  .EQ. 'mercator'                 ) THEN
-    llflag = 1
-  ELSE IF ( ( grid_type(1:24) .EQ. 'secant lambert conformal' ) .or. &
-           ( grid_type(1:28) .EQ.  'tangential lambert conformal' ) )THEN
-    llflag = 3
-  ELSE IF ( grid_type(1:19) .EQ. 'polar stereographic'      ) THEN
-    llflag = 5
-  ELSE
-    PRINT '(A,A,A)','Unknown map projection: ',TRIM(grid_type),'.  I quit.'
-    STOP 'unknown_projection'
-  END IF
+      ! allocate a scratch 2d array
+      allocate (d2d(x, y))
+      allocate (p_pa(z3 + 1))
+      ! build the output file name
 
-  PRINT *, 'GRIBPREP VERSION =', gp_version
-  PRINT *, 'SOURCE = ', source
-  PRINT *, 'HDATE = ',hdate
-  PRINT *, 'XFCST = ', xfcst 
-  PRINT *, 'NX = ', X
-  PRINT *, 'NY = ', Y
-  PRINT *, 'IPROJ = ', LLFLAG
-  PRINT *, 'KNOWNLOC = ', knownloc
-  PRINT *, 'STARTLAT = ',LA1
-  PRINT *, 'STARTLON = ',LO1
-  PRINT *, 'DX = ', DX
-  PRINT *, 'DY = ', DY
-  PRINT *, 'XLONC = ', LOV
-  PRINT *, 'TRUELAT1 = ', LATIN1
-  PRINT *, 'TRUELAT2 = ', LATIN2  
+      output_prefix = trim(laps_data_root)//'/lapsprd/lapsprep/wrf/laps'
+      yyyyddd = valid_yyyy*1000 + valid_jjj
+      call wrf_date_to_ymd(yyyyddd, valid_yyyy, valid_mm, valid_dd)
+      write (hdate, '(i4.4,"-",i2.2,"-",i2.2,"_",i2.2,":",i2.2,":00.0000")') &
+         valid_yyyy, valid_mm, valid_dd, valid_hh, valid_min
+      if (valid_min .eq. 0) then
+         output_file_name = trim(output_prefix)//':'//hdate(1:13)
+      else
+         output_file_name = trim(output_prefix)//':'//hdate(1:16)
+      end if
+      !  open the file for sequential, unformatted output
+      open (file=trim(output_file_name), &
+            unit=output_unit, &
+            form='unformatted', &
+            status='unknown', &
+            access='sequential')
 
- ! Output temperature
-  field = 'T        '
-  units = 'K                        '
-  desc  = 'Temperature                                   '                
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_t : DO k = 1 , z3 + 1
-    IF (( p_pa(k) .GT. 100100).AND.(p_pa(k).LT.200000) ) THEN
-      CYCLE var_t
-    ENDIF
-    CALL write_gribprep_header(field,units,desc,p_pa(k))
-    d2d = t(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)','Level (Pa):',p_pa(k),' Min: ', &
-           MINVAL(d2d),' Max: ', MAXVAL(d2d)
-  ENDDO var_t
+      ! convert p levels from mb to pascals
 
-  ! Do u-component of wind
-  field = 'U        '
-  units = 'm s{-1}                  '
-  desc = 'u-component of velocity, rotated to grid      '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_u : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_u
-    END IF
-    CALL write_gribprep_header(field,units,desc,p_pa(k))
-    d2d = u(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_u
+      p_pa = p*100.
 
-  ! Do v-component of wind
-  field = 'V        '
-  units = 'm s{-1}                  '
-  desc = 'v-component of velocity, rotated to grid      '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_v : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_v
-    END IF
-    CALL write_gribprep_header(field,units,desc,p_pa(k))
-    d2d = v(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_v
+      ! set llflag based on grid type
 
-  ! Relative Humidity
-  field = 'RH       '
-  units = '%                        '
-  desc  = 'Relative humidity                             '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_rh : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_rh
-    END IF
-    CALL write_gribprep_header(field,units,desc,p_pa(k))
-    d2d = rh(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_rh
+      if (grid_type(1:8) .eq. 'mercator') then
+         llflag = 1
+      else if ((grid_type(1:24) .eq. 'secant lambert conformal') .or. &
+               (grid_type(1:28) .eq. 'tangential lambert conformal')) then
+         llflag = 3
+      else if (grid_type(1:19) .eq. 'polar stereographic') then
+         llflag = 5
+      else
+         print '(a,a,a)', 'unknown map projection: ', trim(grid_type), '.  i quit.'
+         stop 'unknown_projection'
+      end if
 
-  ! Do the heights
-  field = 'HGT      '
-  units = 'm                        '
-  desc  = 'Geopotential height                           '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_ht : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_ht
-    END IF
-    CALL write_gribprep_header(field,units,desc,p_pa(k))
-    d2d = ht(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F8.1,A,F8.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_ht
+      print *, 'gribprep version =', gp_version
+      print *, 'source = ', source
+      print *, 'hdate = ', hdate
+      print *, 'xfcst = ', xfcst
+      print *, 'nx = ', x
+      print *, 'ny = ', y
+      print *, 'iproj = ', llflag
+      print *, 'knownloc = ', knownloc
+      print *, 'startlat = ', la1
+      print *, 'startlon = ', lo1
+      print *, 'dx = ', dx
+      print *, 'dy = ', dy
+      print *, 'xlonc = ', lov
+      print *, 'truelat1 = ', latin1
+      print *, 'truelat2 = ', latin2
 
-  ! Terrain height
-  field = 'SOILHGT '
-  units = 'm                        '
-  desc  = 'Height of topography                          '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_gribprep_header(field,units,desc,p_pa(z3+1))
-  d2d = ht(:,:,z3+1)
-  WRITE ( output_unit ) d2d
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
+      ! output temperature
+      field = 't        '
+      units = 'k                        '
+      desc = 'temperature                                   '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_t: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_t
+         end if
+         call write_gribprep_header(field, units, desc, p_pa(k))
+         d2d = t(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', &
+            minval(d2d), ' max: ', maxval(d2d)
+      end do var_t
 
-  ! Skin temperature
-  field = 'SKINTEMP '
-  units = 'K                        '
-  desc  = 'Skin temperature                              '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_gribprep_header(field,units,desc,p_pa(z3+1))
-  WRITE ( output_unit ) tskin
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), &
-       ' Min: ', MINVAL(tskin), ' Max: ', MAXVAL(tskin)
+      ! do u-component of wind
+      field = 'u        '
+      units = 'm s{-1}                  '
+      desc = 'u-component of velocity, rotated to grid      '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_u: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_u
+         end if
+         call write_gribprep_header(field, units, desc, p_pa(k))
+         d2d = u(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_u
 
-  ! Sea-level Pressure field
-  field = 'PMSL     '
-  units = 'Pa                       '
-  desc  = 'Sea-level pressure                            '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_gribprep_header(field,units,desc,slp_level)
-  WRITE ( output_unit ) slp
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', slp_level, ' Min: ', MINVAL(slp),&
-            ' Max: ', MAXVAL(slp)
+      ! do v-component of wind
+      field = 'v        '
+      units = 'm s{-1}                  '
+      desc = 'v-component of velocity, rotated to grid      '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_v: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_v
+         end if
+         call write_gribprep_header(field, units, desc, p_pa(k))
+         d2d = v(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_v
 
-  ! Surface Pressure field
-  field = 'PSFC     '
-  units = 'Pa                       '
-  desc  = 'Surface pressure                              '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_gribprep_header(field,units,desc,p_pa(z3+1))
-  WRITE ( output_unit ) psfc
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), ' Min: ', MINVAL(psfc),&
-            ' Max: ', MAXVAL(psfc)
+      ! relative humidity
+      field = 'rh       '
+      units = '%                        '
+      desc = 'relative humidity                             '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_rh: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_rh
+         end if
+         call write_gribprep_header(field, units, desc, p_pa(k))
+         d2d = rh(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_rh
 
-  call get_r_missing_data(r_missing_data,istatus)
-	print*,'output_gribprep_format r_missing_data ',r_missing_data
-  if(istatus .ne. 1)then
-      write(6,*)' Bad status for r_missing_data'
-      stop
-  endif
+      ! do the heights
+      field = 'hgt      '
+      units = 'm                        '
+      desc = 'geopotential height                           '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_ht: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_ht
+         end if
+         call write_gribprep_header(field, units, desc, p_pa(k))
+         d2d = ht(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f8.1,a,f8.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_ht
 
-  IF (MINVAL(snocov).GE.0) THEN
-    ! Water equivalent snow depth
-    field = 'SNOWCOVR '
-    units = '(DIMENSIONLESS)          '
-    desc  = 'Snow cover flag                               '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    CALL write_gribprep_header(field,units,desc,p_pa(z3+1))
+      ! terrain height
+      field = 'soilhgt '
+      units = 'm                        '
+      desc = 'height of topography                          '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_gribprep_header(field, units, desc, p_pa(z3 + 1))
+      d2d = ht(:, :, z3 + 1)
+      write (output_unit) d2d
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), ' min: ', minval(d2d), &
+         ' max: ', maxval(d2d)
 
+      ! skin temperature
+      field = 'skintemp '
+      units = 'k                        '
+      desc = 'skin temperature                              '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_gribprep_header(field, units, desc, p_pa(z3 + 1))
+      write (output_unit) tskin
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), &
+         ' min: ', minval(tskin), ' max: ', maxval(tskin)
 
-!   Initialize output snow cover field to missing value
-    d2d=-999.
+      ! sea-level pressure field
+      field = 'pmsl     '
+      units = 'pa                       '
+      desc = 'sea-level pressure                            '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_gribprep_header(field, units, desc, slp_level)
+      write (output_unit) slp
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', slp_level, ' min: ', minval(slp), &
+         ' max: ', maxval(slp)
 
-!   Convert from fraction to mask using namelist entry snow_thresh
-    if(snow_thresh .le. 1.0)then
-        WHERE(snocov .ge. snow_thresh .AND. snocov .ne. r_missing_data) d2d = 1.0
-        WHERE(snocov .lt. snow_thresh .AND. snocov .ne. r_missing_data) d2d = 0.0
-    endif
+      ! surface pressure field
+      field = 'psfc     '
+      units = 'pa                       '
+      desc = 'surface pressure                              '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_gribprep_header(field, units, desc, p_pa(z3 + 1))
+      write (output_unit) psfc
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), ' min: ', minval(psfc), &
+         ' max: ', maxval(psfc)
 
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F9.2,A,F9.2)', 'Level (Pa):', p_pa(z3+1), &
-        ' Min: ', MINVAL(d2d),&
-        ' Max: ', MAXVAL(d2d) 
+      call get_r_missing_data(r_missing_data, istatus)
+      print *, 'output_gribprep_format r_missing_data ', r_missing_data
+      if (istatus .ne. 1) then
+         write (6, *) ' bad status for r_missing_data'
+         stop
+      end if
 
-  ENDIF
+      if (minval(snocov) .ge. 0) then
+         ! water equivalent snow depth
+         field = 'snowcovr '
+         units = '(dimensionless)          '
+         desc = 'snow cover flag                               '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         call write_gribprep_header(field, units, desc, p_pa(z3 + 1))
 
-  ! Get cloud species if this is a hot start
-  IF (hotstart) THEN
-    field = 'QLIQUID  '
-    units = 'kg kg{-1}               '
-    desc  = 'Cloud liquid water mixing ratio             '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc    
-    var_lwc : DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_lwc
-      END IF
-      CALL write_gribprep_header(field,units,desc,p_pa(k))
-      d2d = lwc(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. from F8.6 to F9.6 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_lwc 
+!   initialize output snow cover field to missing value
+         d2d = -999.
 
-    ! Cloud ice   
-    field = 'QICE     '
-    units = 'kg kg{-1}               '
-    desc  = 'Cloud ice mixing ratio                      '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc    
-    var_ice: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_ice
-      END IF
-      CALL write_gribprep_header(field,units,desc,p_pa(k))
-      d2d = ice(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. from F8.6 to F9.6 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_ice
+!   convert from fraction to mask using namelist entry snow_thresh
+         if (snow_thresh .le. 1.0) then
+            where (snocov .ge. snow_thresh .and. snocov .ne. r_missing_data) d2d = 1.0
+            where (snocov .lt. snow_thresh .and. snocov .ne. r_missing_data) d2d = 0.0
+         end if
 
-    ! Cloud rain
-    field = 'QRAIN    '
-    units = 'kg kg{-1}               '
-    desc  = 'Rain water mixing ratio                     '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc    
-    var_rai: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_rai
-      END IF
-      CALL write_gribprep_header(field,units,desc,p_pa(k))
-      d2d = rai(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. from F8.6 to F9.6 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_rai
+         write (output_unit) d2d
+         print '(a,f9.1,a,f9.2,a,f9.2)', 'level (pa):', p_pa(z3 + 1), &
+            ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
 
-   ! Snow
-    field = 'QSNOW    '
-    units = 'kg kg{-1}               '
-    desc  = 'Snow mixing ratio                           '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc    
-    var_sno: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_sno
-      END IF
-      CALL write_gribprep_header(field,units,desc,p_pa(k))
-      d2d = sno(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. from F8.6 to F9.6 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_sno
+      end if
 
-    ! Graupel
-    field = 'QGRAUPEL '
-    units = 'kg kg{-1}               '
-    desc  = 'Graupel mixing ratio                        '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc    
-    var_pic: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_pic
-      END IF
-      CALL write_gribprep_header(field,units,desc,p_pa(k))
-      d2d = pic(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. from F8.6 to F9.6 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_pic
+      ! get cloud species if this is a hot start
+      if (hotstart) then
+         field = 'qliquid  '
+         units = 'kg kg{-1}               '
+         desc = 'cloud liquid water mixing ratio             '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_lwc: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_lwc
+            end if
+            call write_gribprep_header(field, units, desc, p_pa(k))
+            d2d = lwc(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. from f8.6 to f9.6 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_lwc
 
-  ENDIF
+         ! cloud ice
+         field = 'qice     '
+         units = 'kg kg{-1}               '
+         desc = 'cloud ice mixing ratio                      '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_ice: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_ice
+            end if
+            call write_gribprep_header(field, units, desc, p_pa(k))
+            d2d = ice(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. from f8.6 to f9.6 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_ice
 
-  CLOSE (output_unit)
-  DEALLOCATE (d2d)
-  DEALLOCATE (p_pa)
-  RETURN
-  END SUBROUTINE output_gribprep_format
+         ! cloud rain
+         field = 'qrain    '
+         units = 'kg kg{-1}               '
+         desc = 'rain water mixing ratio                     '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_rai: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_rai
+            end if
+            call write_gribprep_header(field, units, desc, p_pa(k))
+            d2d = rai(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. from f8.6 to f9.6 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_rai
+
+         ! snow
+         field = 'qsnow    '
+         units = 'kg kg{-1}               '
+         desc = 'snow mixing ratio                           '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_sno: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_sno
+            end if
+            call write_gribprep_header(field, units, desc, p_pa(k))
+            d2d = sno(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. from f8.6 to f9.6 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_sno
+
+         ! graupel
+         field = 'qgraupel '
+         units = 'kg kg{-1}               '
+         desc = 'graupel mixing ratio                        '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_pic: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_pic
+            end if
+            call write_gribprep_header(field, units, desc, p_pa(k))
+            d2d = pic(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. from f8.6 to f9.6 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_pic
+
+      end if
+
+      close (output_unit)
+      deallocate (d2d)
+      deallocate (p_pa)
+      return
+   end subroutine output_gribprep_format
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  SUBROUTINE write_gribprep_header(field,units,desc,level)
- 
-  ! Writes the gribprep header given the filed, units, description, and level
+   subroutine write_gribprep_header(field, units, desc, level)
 
-  IMPLICIT NONE
-  CHARACTER(LEN=9), INTENT(IN)  :: field
-  CHARACTER(LEN=25),INTENT(IN)  :: units
-  CHARACTER(LEN=46),INTENT(IN)  :: desc
-  REAL, INTENT(IN)              :: level
-  
-  WRITE ( output_unit ) gp_version
-  WRITE ( output_unit ) hdate,xfcst,source,field,units,desc,level,x,y,llflag
-  SELECT CASE (llflag)
-    CASE(1)
-      WRITE ( output_unit ) knownloc,la1,lo1,dx,dy,latin1
-    CASE(3)
-      WRITE ( output_unit ) knownloc,la1,lo1,dx,dy,lov,latin1,latin2
-    CASE(5)
-      WRITE ( output_unit ) knownloc,la1,lo1,dx,dy,lov,latin1
-  END SELECT
+      ! writes the gribprep header given the filed, units, description, and level
 
-  END SUBROUTINE write_gribprep_header
+      implicit none
+      character(len=9), intent(in)  :: field
+      character(len=25), intent(in)  :: units
+      character(len=46), intent(in)  :: desc
+      real, intent(in)              :: level
+
+      write (output_unit) gp_version
+      write (output_unit) hdate, xfcst, source, field, units, desc, level, x, y, llflag
+      select case (llflag)
+      case (1)
+         write (output_unit) knownloc, la1, lo1, dx, dy, latin1
+      case (3)
+         write (output_unit) knownloc, la1, lo1, dx, dy, lov, latin1, latin2
+      case (5)
+         write (output_unit) knownloc, la1, lo1, dx, dy, lov, latin1
+      end select
+
+   end subroutine write_gribprep_header
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE output_metgrid_format(p, t, ht, u, v, w, rh, slp, psfc, &
-                               lwc, rai, sno, ice, pic, snocov, tskin, soilt, soilm)
+   subroutine output_metgrid_format(p, t, ht, u, v, w, rh, slp, psfc, &
+                                    lwc, rai, sno, ice, pic, snocov, tskin, soilt, soilm)
 
-  !  Subroutine of lapsprep that will build a file the
-  !  WPS format that can be read by metgrid
+      !  subroutine of lapsprep that will build a file the
+      !  wps format that can be read by metgrid
 
-  IMPLICIT NONE
+      implicit none
 
-  ! Arguments
+      ! arguments
 
-  REAL, INTENT(IN)                   :: p(:)        ! Pressure (hPa)
-  REAL, INTENT(IN)                   :: t(:,:,:)    ! Temperature (K)
-  REAL, INTENT(IN)                   :: ht(:,:,:)   ! Height (m)
-  REAL, INTENT(IN)                   :: u(:,:,:)    ! U-wind (m s{-1})
-  REAL, INTENT(IN)                   :: v(:,:,:)    ! V-wind (m s{-1})
-  REAL, INTENT(IN)                   :: w(:,:,:)    ! W-wind (m s{-1})
-  REAL, INTENT(IN)                   :: rh(:,:,:)   ! Relative Humidity (%)
-  REAL, INTENT(IN)                   :: slp(:,:)    ! Sea-level Pressure (Pa)
-  REAL, INTENT(IN)                   :: psfc(:,:)   ! Surface Pressure (Pa)
-  REAL, INTENT(IN)                   :: lwc(:,:,:)  ! Cloud liquid (kg/kg)
-  REAL, INTENT(IN)                   :: rai(:,:,:)  ! Rain (kg/kg)
-  REAL, INTENT(IN)                   :: sno(:,:,:)  ! Snow (kg/kg)
-  REAL, INTENT(IN)                   :: ice(:,:,:)  ! Ice (kg/kg)
-  REAL, INTENT(IN)                   :: pic(:,:,:)  ! Graupel (kg/kg)
-  REAL, INTENT(IN)                   :: soilt(:,:,:)! Soil Temp (K)
-  REAL, INTENT(IN)                   :: soilm(:,:,:)! Soil moist (kg/kg)
-  REAL, INTENT(IN)                   :: snocov(:,:) ! Snow cover (fract)
-  REAL, INTENT(IN)                   :: tskin(:,:)  ! Skin temperature
+      real, intent(in)                   :: p(:)        ! pressure (hpa)
+      real, intent(in)                   :: t(:, :, :)    ! temperature (k)
+      real, intent(in)                   :: ht(:, :, :)   ! height (m)
+      real, intent(in)                   :: u(:, :, :)    ! u-wind (m s{-1})
+      real, intent(in)                   :: v(:, :, :)    ! v-wind (m s{-1})
+      real, intent(in)                   :: w(:, :, :)    ! w-wind (m s{-1})
+      real, intent(in)                   :: rh(:, :, :)   ! relative humidity (%)
+      real, intent(in)                   :: slp(:, :)    ! sea-level pressure (pa)
+      real, intent(in)                   :: psfc(:, :)   ! surface pressure (pa)
+      real, intent(in)                   :: lwc(:, :, :)  ! cloud liquid (kg/kg)
+      real, intent(in)                   :: rai(:, :, :)  ! rain (kg/kg)
+      real, intent(in)                   :: sno(:, :, :)  ! snow (kg/kg)
+      real, intent(in)                   :: ice(:, :, :)  ! ice (kg/kg)
+      real, intent(in)                   :: pic(:, :, :)  ! graupel (kg/kg)
+      real, intent(in)                   :: soilt(:, :, :)! soil temp (k)
+      real, intent(in)                   :: soilm(:, :, :)! soil moist (kg/kg)
+      real, intent(in)                   :: snocov(:, :) ! snow cover (fract)
+      real, intent(in)                   :: tskin(:, :)  ! skin temperature
 
-  ! Local Variables
+      ! local variables
 
-  INTEGER            :: valid_mm, valid_dd
-  CHARACTER (LEN=256):: output_file_name
-  REAL, ALLOCATABLE  :: d2d(:,:)
-  REAL, ALLOCATABLE  :: p_pa(:)
-  INTEGER            :: k,yyyyddd
-  INTEGER            :: istatus
-  REAL               :: r_missing_data
-  
-  ! Yuanfu added LAPS soil moisture level depth information in centi-meters:
-  INTEGER :: lk
-  REAL, PARAMETER :: lsm3(3) = (/ 15.2, 30.5, 91.4 /)
-  REAL    :: alpha
+      integer            :: valid_mm, valid_dd
+      character(len=256):: output_file_name
+      real, allocatable  :: d2d(:, :)
+      real, allocatable  :: p_pa(:)
+      integer            :: k, yyyyddd
+      integer            :: istatus
+      real               :: r_missing_data
 
-  call get_r_missing_data(r_missing_data,istatus)
-	print*,'output_metgrid_format r_missing_data ',r_missing_data
-  if(istatus .ne. 1)then
-      write(6,*)' Bad status for r_missing_data'
-      stop
-  endif
+      ! yuanfu added laps soil moisture level depth information in centi-meters:
+      integer :: lk
+      real, parameter :: lsm3(3) = (/15.2, 30.5, 91.4/)
+      real    :: alpha
 
-  ! Allocate a scratch 2d array
-  ALLOCATE (d2d (x,y) )
-  ALLOCATE (p_pa (z3+1))
-  ! Build the output file name
+      call get_r_missing_data(r_missing_data, istatus)
+      print *, 'output_metgrid_format r_missing_data ', r_missing_data
+      if (istatus .ne. 1) then
+         write (6, *) ' bad status for r_missing_data'
+         stop
+      end if
 
-  output_prefix = TRIM(laps_data_root)// '/lapsprd/lapsprep/wps/LAPS'
-  yyyyddd = valid_yyyy*1000 + valid_jjj
-  CALL wrf_date_to_ymd(yyyyddd, valid_yyyy, valid_mm, valid_dd)
-  WRITE(hdate, '(I4.4,"-",I2.2,"-",I2.2,"_",I2.2,":",I2.2,":00.0000")') &
-          valid_yyyy, valid_mm, valid_dd, valid_hh, valid_min
-  IF (valid_min .EQ. 0) THEN
-    output_file_name = TRIM(output_prefix) // ':' // hdate(1:13)
-  ELSE
-    output_file_name = TRIM(output_prefix) // ':' // hdate(1:16)
-  ENDIF
-  !  Open the file for sequential, unformatted output
-  OPEN ( FILE   = TRIM(output_file_name)    , &
-         UNIT   = output_unit        , &
-         FORM   = 'UNFORMATTED' , &
-         STATUS = 'UNKNOWN'     , &
-         ACCESS = 'SEQUENTIAL'    )
+      ! allocate a scratch 2d array
+      allocate (d2d(x, y))
+      allocate (p_pa(z3 + 1))
+      ! build the output file name
 
-  ! Convert p levels from mb to Pascals
+      output_prefix = trim(laps_data_root)//'/lapsprd/lapsprep/wps/laps'
+      yyyyddd = valid_yyyy*1000 + valid_jjj
+      call wrf_date_to_ymd(yyyyddd, valid_yyyy, valid_mm, valid_dd)
+      write (hdate, '(i4.4,"-",i2.2,"-",i2.2,"_",i2.2,":",i2.2,":00.0000")') &
+         valid_yyyy, valid_mm, valid_dd, valid_hh, valid_min
+      if (valid_min .eq. 0) then
+         output_file_name = trim(output_prefix)//':'//hdate(1:13)
+      else
+         output_file_name = trim(output_prefix)//':'//hdate(1:16)
+      end if
+      !  open the file for sequential, unformatted output
+      open (file=trim(output_file_name), &
+            unit=output_unit, &
+            form='unformatted', &
+            status='unknown', &
+            access='sequential')
 
-  p_pa = p * 100.
+      ! convert p levels from mb to pascals
 
-  ! Set llflag based on grid type
+      p_pa = p*100.
 
-  IF      ( grid_type(1:8)  .EQ. 'mercator'                 ) THEN
-    llflag = 1
-  ELSE IF ( ( grid_type(1:24) .EQ. 'secant lambert conformal' ) .or. &
-           ( grid_type(1:28) .EQ.  'tangential lambert conformal' ) )THEN
-    llflag = 3
-  ELSE IF ( grid_type(1:19) .EQ. 'polar stereographic'      ) THEN
-    llflag = 5
-  ELSE
-    PRINT '(A,A,A)','Unknown map projection: ',TRIM(grid_type),'.  I quit.'
-    STOP 'unknown_projection'
-  END IF
+      ! set llflag based on grid type
 
-  PRINT *, 'METGRID VERSION =', gp_version_wps
-  PRINT *, 'SOURCE = ', source
-  PRINT *, 'HDATE = ',hdate
-  PRINT *, 'XFCST = ', xfcst
-  PRINT *, 'NX = ', X
-  PRINT *, 'NY = ', Y
-  PRINT *, 'IPROJ = ', LLFLAG
-  PRINT *, 'KNOWNLOC = ', knownloc
-  PRINT *, 'STARTLAT = ',LA1
-  PRINT *, 'STARTLON = ',LO1
-  PRINT *, 'DX = ', DX
-  PRINT *, 'DY = ', DY
-  PRINT *, 'XLONC = ', LOV
-  PRINT *, 'TRUELAT1 = ', LATIN1
-  PRINT *, 'TRUELAT2 = ', LATIN2
+      if (grid_type(1:8) .eq. 'mercator') then
+         llflag = 1
+      else if ((grid_type(1:24) .eq. 'secant lambert conformal') .or. &
+               (grid_type(1:28) .eq. 'tangential lambert conformal')) then
+         llflag = 3
+      else if (grid_type(1:19) .eq. 'polar stereographic') then
+         llflag = 5
+      else
+         print '(a,a,a)', 'unknown map projection: ', trim(grid_type), '.  i quit.'
+         stop 'unknown_projection'
+      end if
 
- ! Output temperature
-  field = 'TT       '
-  units = 'K                        '
-  desc  = 'Temperature                                   '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_t : DO k = 1 , z3 + 1
-    IF (( p_pa(k) .GT. 100100).AND.(p_pa(k).LT.200000) ) THEN
-      CYCLE var_t
-    ENDIF
-    CALL write_metgrid_header(field,units,desc,p_pa(k))
-    d2d = t(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)','Level (Pa):',p_pa(k),' Min: ', &
-           MINVAL(d2d),' Max: ', MAXVAL(d2d)
-  ENDDO var_t
+      print *, 'metgrid version =', gp_version_wps
+      print *, 'source = ', source
+      print *, 'hdate = ', hdate
+      print *, 'xfcst = ', xfcst
+      print *, 'nx = ', x
+      print *, 'ny = ', y
+      print *, 'iproj = ', llflag
+      print *, 'knownloc = ', knownloc
+      print *, 'startlat = ', la1
+      print *, 'startlon = ', lo1
+      print *, 'dx = ', dx
+      print *, 'dy = ', dy
+      print *, 'xlonc = ', lov
+      print *, 'truelat1 = ', latin1
+      print *, 'truelat2 = ', latin2
 
-  ! Do u-component of wind
-  field = 'UU       '
-  units = 'm s-1                    '
-  desc = 'U                                             '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_u : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_u
-    END IF
-    CALL write_metgrid_header(field,units,desc,p_pa(k))
-    d2d = u(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_u
+      ! output temperature
+      field = 'tt       '
+      units = 'k                        '
+      desc = 'temperature                                   '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_t: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_t
+         end if
+         call write_metgrid_header(field, units, desc, p_pa(k))
+         d2d = t(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', &
+            minval(d2d), ' max: ', maxval(d2d)
+      end do var_t
 
-  ! Do v-component of wind
-  field = 'VV       '
-  units = 'm s-1                    '
-  desc = 'V                                             '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_v : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_v
-    END IF
-    CALL write_metgrid_header(field,units,desc,p_pa(k))
-    d2d = v(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_v
+      ! do u-component of wind
+      field = 'uu       '
+      units = 'm s-1                    '
+      desc = 'u                                             '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_u: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_u
+         end if
+         call write_metgrid_header(field, units, desc, p_pa(k))
+         d2d = u(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_u
 
-  ! Do w-component of wind
-  IF (use_laps_vv) THEN
-    field = 'VVEL     '
-    units = 'm s-1                   '
-    desc = 'W                                             '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_vv : DO k = 1 , z3 + 1
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_vv
-      END IF
-      CALL write_metgrid_header(field,units,desc,p_pa(k))
-      d2d = w(:,:,k)
-      WRITE ( output_unit ) d2d
-      PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-              ' Max: ', MAXVAL(d2d)
-  ENDDO var_vv
-  ENDIF
+      ! do v-component of wind
+      field = 'vv       '
+      units = 'm s-1                    '
+      desc = 'v                                             '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_v: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_v
+         end if
+         call write_metgrid_header(field, units, desc, p_pa(k))
+         d2d = v(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_v
 
-  ! Relative Humidity
-  field = 'RH       '
-  units = '%                        '
-  desc  = 'Relative Humidity                             '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_rh : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_rh
-    END IF
-    CALL write_metgrid_header(field,units,desc,p_pa(k))
-    d2d = rh(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_rh
+      ! do w-component of wind
+      if (use_laps_vv) then
+         field = 'vvel     '
+         units = 'm s-1                   '
+         desc = 'w                                             '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_vv: do k = 1, z3 + 1
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_vv
+            end if
+            call write_metgrid_header(field, units, desc, p_pa(k))
+            d2d = w(:, :, k)
+            write (output_unit) d2d
+            print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_vv
+      end if
 
-  ! Do the heights
-  field = 'HGT      '
-  units = 'm                        '
-  desc  = 'Geopotential height                           '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  var_ht : DO k = 1 , z3 + 1
-    IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-      CYCLE var_ht
-    END IF
-    CALL write_metgrid_header(field,units,desc,p_pa(k))
-    d2d = ht(:,:,k)
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F8.1,A,F8.1)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDDO var_ht
+      ! relative humidity
+      field = 'rh       '
+      units = '%                        '
+      desc = 'relative humidity                             '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_rh: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_rh
+         end if
+         call write_metgrid_header(field, units, desc, p_pa(k))
+         d2d = rh(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f5.1,a,f5.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_rh
 
-  ! Terrain height
-  field = 'SOILHGT '
-  units = 'm                        '
-  desc  = 'Terrain field of source analysis              '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_metgrid_header(field,units,desc,p_pa(z3+1))
-  d2d = ht(:,:,z3+1)
-  WRITE ( output_unit ) d2d
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
+      ! do the heights
+      field = 'hgt      '
+      units = 'm                        '
+      desc = 'geopotential height                           '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      var_ht: do k = 1, z3 + 1
+         if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+            cycle var_ht
+         end if
+         call write_metgrid_header(field, units, desc, p_pa(k))
+         d2d = ht(:, :, k)
+         write (output_unit) d2d
+         print '(a,f9.1,a,f8.1,a,f8.1)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end do var_ht
 
-  ! Surface fractional snow cover
-  ! Dividing by 6 translates a 0.3 threshold into .05 for WRF
-  IF(snow_thresh .le. 1.0)then
-      field = 'SNOWH    '
-      units = '                         '
-      desc  = 'Snow cover (fraction)                         '
-      PRINT *, 'FIELD = ', field
-      PRINT *, 'UNITS = ', units
-      PRINT *, 'DESC =  ',desc
-      CALL write_metgrid_header(field,units,desc,p_pa(z3+1))
+      ! terrain height
+      field = 'soilhgt '
+      units = 'm                        '
+      desc = 'terrain field of source analysis              '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_metgrid_header(field, units, desc, p_pa(z3 + 1))
+      d2d = ht(:, :, z3 + 1)
+      write (output_unit) d2d
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), ' min: ', minval(d2d), &
+         ' max: ', maxval(d2d)
 
-!     Initialize output snow cover field to missing value
-      d2d=0.
+      ! surface fractional snow cover
+      ! dividing by 6 translates a 0.3 threshold into .05 for wrf
+      if (snow_thresh .le. 1.0) then
+         field = 'snowh    '
+         units = '                         '
+         desc = 'snow cover (fraction)                         '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         call write_metgrid_header(field, units, desc, p_pa(z3 + 1))
 
-!     Convert from fraction to mask using namelist entry snow_thresh
-      WHERE(snocov .ge. snow_thresh .AND. snocov .ne. r_missing_data) d2d = 1.0
-      WHERE(snocov .lt. snow_thresh .AND. snocov .ne. r_missing_data) d2d = 0.0
+!     initialize output snow cover field to missing value
+         d2d = 0.
 
-      WRITE ( output_unit ) d2d
-      PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-  ENDIF
+!     convert from fraction to mask using namelist entry snow_thresh
+         where (snocov .ge. snow_thresh .and. snocov .ne. r_missing_data) d2d = 1.0
+         where (snocov .lt. snow_thresh .and. snocov .ne. r_missing_data) d2d = 0.0
 
-  ! Skin temperature
-  IF (use_laps_skintemp) THEN
-      field = 'SKINTEMP '
-      units = 'K                        '
-      desc  = 'Skin temperature                              '
-      PRINT *, 'FIELD = ', field
-      PRINT *, 'UNITS = ', units
-      PRINT *, 'DESC =  ',desc
-      CALL write_metgrid_header(field,units,desc,p_pa(z3+1))
-      WRITE ( output_unit ) tskin
-      PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), &
-         ' Min: ', MINVAL(tskin), ' Max: ', MAXVAL(tskin)
-  ENDIF
-  
-  ! Soil temperature and moisture: by Yuanfu Xie 2015/05
-  IF (num_soil_layers .GT. 0) THEN
-    field = 'SOILT       '
-    units = 'K                        '
-    desc  = 'Soil temperature                                '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_soilt : DO k = 1 , num_soil_layers
-    CALL write_metgrid_header(field,units,desc,soil_layer_depths(k))
-    d2d = tskin  ! Test of skin temperature for now
-    WRITE ( output_unit ) d2d
-    PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (cm):', soil_layer_depths(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-print*,'Yuanfu Debugger: ',d2d(1,1),tskin(1,1),x,y
-    ENDDO var_soilt
-    
-    field = 'SOILM       '
-    units = 'KG/KG                    '
-    desc  = 'Soil Moisture                                    '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_soilm : DO k = 1 , num_soil_layers
-      CALL write_metgrid_header(field,units,desc,soil_layer_depths(k))
-      
-      ! Test soil moisture from laps lm1: by Yuanfu Xie
-      d2d = 12.3  ! Test
-      print*,'Soil_Layer_depths: ',soil_layer_depths(1:4),lsm3(1:3), maxval(soilm)
-      IF (soil_layer_depths(k) .LE. lsm3(3)) THEN
-        ! Interpolated from lm1:
-        IF      (soil_layer_depths(k) .LE. lsm3(1)) THEN
-          alpha = 1.0
-          lk = 1
-        ELSE IF (soil_layer_depths(k) .LE. lsm3(2)) THEN
-          alpha = (lsm3(2)-soil_layer_depths(k))/(lsm3(2)-lsm3(1))
-          lk = 1
-        ELSE
-          alpha = (lsm3(3)-soil_layer_depths(k))/(lsm3(3)-lsm3(2))
-          lk = 2
-        ENDIF
-        d2d = alpha*soilm(:,:,lk)+(1.0-alpha)*soilm(:,:,lk+1)
-      ELSE
-        ! set to the deepest level of LAPS lm1
-        d2d = soilm(:,:,3)
-      ENDIF
-      
-      WRITE ( output_unit ) d2d/100.0  ! Temporarily change the scale to 0-1
-      PRINT '(A,F9.1,A,F5.1,A,F5.1)', 'Level (cm):', soil_layer_depths(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-print*,'Xie debugger: ',d2d(1,1)
-    ENDDO var_soilm
-  ENDIF
+         write (output_unit) d2d
+         print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), ' min: ', minval(d2d), &
+            ' max: ', maxval(d2d)
+      end if
 
-  ! Sea-level Pressure field
-  field = 'PMSL     '
-  units = 'Pa                       '
-  desc  = 'Sea-level Pressure                            '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_metgrid_header(field,units,desc,slp_level)
-print*,'XXXX : ',slp(1,198)
-  WRITE ( output_unit ) slp
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', slp_level, ' Min: ', MINVAL(slp),&
-            ' Max: ', MAXVAL(slp)
+      ! skin temperature
+      if (use_laps_skintemp) then
+         field = 'skintemp '
+         units = 'k                        '
+         desc = 'skin temperature                              '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         call write_metgrid_header(field, units, desc, p_pa(z3 + 1))
+         write (output_unit) tskin
+         print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), &
+            ' min: ', minval(tskin), ' max: ', maxval(tskin)
+      end if
 
-  ! Surface Pressure field
-  field = 'PSFC     '
-  units = 'Pa                       '
-  desc  = 'Surface Pressure                              '
-  PRINT *, 'FIELD = ', field
-  PRINT *, 'UNITS = ', units
-  PRINT *, 'DESC =  ',desc
-  CALL write_metgrid_header(field,units,desc,p_pa(z3+1))
-print*,'YYYY : ',psfc(1,198)
-  WRITE ( output_unit ) psfc
-  PRINT '(A,F9.1,A,F9.1,A,F9.1)', 'Level (Pa):', p_pa(z3+1), ' Min: ', MINVAL(psfc),&
-            ' Max: ', MAXVAL(psfc)
+      ! soil temperature and moisture: by yuanfu xie 2015/05
+      if (num_soil_layers .gt. 0) then
+         field = 'soilt       '
+         units = 'k                        '
+         desc = 'soil temperature                                '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_soilt: do k = 1, num_soil_layers
+            call write_metgrid_header(field, units, desc, soil_layer_depths(k))
+            d2d = tskin  ! test of skin temperature for now
+            write (output_unit) d2d
+            print '(a,f9.1,a,f5.1,a,f5.1)', 'level (cm):', soil_layer_depths(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+            print *, 'yuanfu debugger: ', d2d(1, 1), tskin(1, 1), x, y
+         end do var_soilt
 
-  ! Get cloud species if this is a hot start
-  IF (hotstart) THEN
-    field = 'QC       '
-    units = 'kg kg-1                 '
-    desc  = 'Cloud liquid water mixing ratio             '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_lwc : DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_lwc
-      END IF
-      CALL write_metgrid_header(field,units,desc,p_pa(k))
-      d2d = lwc(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_lwc
+         field = 'soilm       '
+         units = 'kg/kg                    '
+         desc = 'soil moisture                                    '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_soilm: do k = 1, num_soil_layers
+            call write_metgrid_header(field, units, desc, soil_layer_depths(k))
 
-    ! Cloud ice
-    field = 'QI       '
-    units = 'kg kg-1                 '
-    desc  = 'Cloud ice mixing ratio                      '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_ice: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_ice
-      END IF
-      CALL write_metgrid_header(field,units,desc,p_pa(k))
-      d2d = ice(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_ice
+            ! test soil moisture from laps lm1: by yuanfu xie
+            d2d = 12.3  ! test
+            print *, 'soil_layer_depths: ', soil_layer_depths(1:4), lsm3(1:3), maxval(soilm)
+            if (soil_layer_depths(k) .le. lsm3(3)) then
+               ! interpolated from lm1:
+               if (soil_layer_depths(k) .le. lsm3(1)) then
+                  alpha = 1.0
+                  lk = 1
+               else if (soil_layer_depths(k) .le. lsm3(2)) then
+                  alpha = (lsm3(2) - soil_layer_depths(k))/(lsm3(2) - lsm3(1))
+                  lk = 1
+               else
+                  alpha = (lsm3(3) - soil_layer_depths(k))/(lsm3(3) - lsm3(2))
+                  lk = 2
+               end if
+               d2d = alpha*soilm(:, :, lk) + (1.0 - alpha)*soilm(:, :, lk + 1)
+            else
+               ! set to the deepest level of laps lm1
+               d2d = soilm(:, :, 3)
+            end if
 
+            write (output_unit) d2d/100.0  ! temporarily change the scale to 0-1
+            print '(a,f9.1,a,f5.1,a,f5.1)', 'level (cm):', soil_layer_depths(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+            print *, 'xie debugger: ', d2d(1, 1)
+         end do var_soilm
+      end if
 
-    ! Cloud rain
-    field = 'QR       '
-    units = 'kg kg-1                 '
-    desc  = 'Rain water mixing ratio                     '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_rai: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_rai
-      END IF
-      CALL write_metgrid_header(field,units,desc,p_pa(k))
-      d2d = rai(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_rai
+      ! sea-level pressure field
+      field = 'pmsl     '
+      units = 'pa                       '
+      desc = 'sea-level pressure                            '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_metgrid_header(field, units, desc, slp_level)
+      print *, 'xxxx : ', slp(1, 198)
+      write (output_unit) slp
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', slp_level, ' min: ', minval(slp), &
+         ' max: ', maxval(slp)
 
-   ! Snow
-    field = 'QS       '
-    units = 'kg kg-1                 '
-    desc  = 'Snow mixing ratio                           '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_sno: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_sno
-      END IF
-      CALL write_metgrid_header(field,units,desc,p_pa(k))
-      d2d = sno(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_sno
+      ! surface pressure field
+      field = 'psfc     '
+      units = 'pa                       '
+      desc = 'surface pressure                              '
+      print *, 'field = ', field
+      print *, 'units = ', units
+      print *, 'desc =  ', desc
+      call write_metgrid_header(field, units, desc, p_pa(z3 + 1))
+      print *, 'yyyy : ', psfc(1, 198)
+      write (output_unit) psfc
+      print '(a,f9.1,a,f9.1,a,f9.1)', 'level (pa):', p_pa(z3 + 1), ' min: ', minval(psfc), &
+         ' max: ', maxval(psfc)
 
-    ! Graupel
-    field = 'QG       '
-    units = 'kg kg-1                 '
-    desc  = 'Graupel mixing ratio                        '
-    PRINT *, 'FIELD = ', field
-    PRINT *, 'UNITS = ', units
-    PRINT *, 'DESC =  ',desc
-    var_pic: DO k = 1 , z3
-      IF ( ( p_pa(k) .GT. 100100 ) .AND. ( p_pa(k) .LT. 200000 ) ) THEN
-        CYCLE var_pic
-      END IF
-      CALL write_metgrid_header(field,units,desc,p_pa(k))
-      d2d = pic(:,:,k)
-      WRITE ( output_unit ) d2d
-!HJ: W>=D+3. 10/14/2013
-      PRINT '(A,F9.1,A,F9.6,A,F9.6)', 'Level (Pa):', p_pa(k), ' Min: ', MINVAL(d2d),&
-            ' Max: ', MAXVAL(d2d)
-    END DO var_pic
+      ! get cloud species if this is a hot start
+      if (hotstart) then
+         field = 'qc       '
+         units = 'kg kg-1                 '
+         desc = 'cloud liquid water mixing ratio             '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_lwc: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_lwc
+            end if
+            call write_metgrid_header(field, units, desc, p_pa(k))
+            d2d = lwc(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_lwc
 
-  ENDIF
+         ! cloud ice
+         field = 'qi       '
+         units = 'kg kg-1                 '
+         desc = 'cloud ice mixing ratio                      '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_ice: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_ice
+            end if
+            call write_metgrid_header(field, units, desc, p_pa(k))
+            d2d = ice(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_ice
 
-  CLOSE (output_unit)
-  DEALLOCATE (d2d)
-  DEALLOCATE (p_pa)
-  RETURN
-  END SUBROUTINE output_metgrid_format
+         ! cloud rain
+         field = 'qr       '
+         units = 'kg kg-1                 '
+         desc = 'rain water mixing ratio                     '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_rai: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_rai
+            end if
+            call write_metgrid_header(field, units, desc, p_pa(k))
+            d2d = rai(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_rai
+
+         ! snow
+         field = 'qs       '
+         units = 'kg kg-1                 '
+         desc = 'snow mixing ratio                           '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_sno: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_sno
+            end if
+            call write_metgrid_header(field, units, desc, p_pa(k))
+            d2d = sno(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_sno
+
+         ! graupel
+         field = 'qg       '
+         units = 'kg kg-1                 '
+         desc = 'graupel mixing ratio                        '
+         print *, 'field = ', field
+         print *, 'units = ', units
+         print *, 'desc =  ', desc
+         var_pic: do k = 1, z3
+            if ((p_pa(k) .gt. 100100) .and. (p_pa(k) .lt. 200000)) then
+               cycle var_pic
+            end if
+            call write_metgrid_header(field, units, desc, p_pa(k))
+            d2d = pic(:, :, k)
+            write (output_unit) d2d
+!hj: w>=d+3. 10/14/2013
+            print '(a,f9.1,a,f9.6,a,f9.6)', 'level (pa):', p_pa(k), ' min: ', minval(d2d), &
+               ' max: ', maxval(d2d)
+         end do var_pic
+
+      end if
+
+      close (output_unit)
+      deallocate (d2d)
+      deallocate (p_pa)
+      return
+   end subroutine output_metgrid_format
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  SUBROUTINE write_metgrid_header(field,units,desc,level)
+   subroutine write_metgrid_header(field, units, desc, level)
 
-  ! Writes the gribprep header given the filed, units, description, and level
+      ! writes the gribprep header given the filed, units, description, and level
 
-  IMPLICIT NONE
-  CHARACTER(LEN=9), INTENT(IN)  :: field
-  CHARACTER(LEN=25),INTENT(IN)  :: units
-  CHARACTER(LEN=46),INTENT(IN)  :: desc
-  REAL, INTENT(IN)              :: level
-  LOGICAL, PARAMETER            :: is_wind_grid_rel = .true.
-  REAL                          :: radius_of_earth_m,radius_of_earth_km
-  INTEGER                       :: istatus
- 
-  call get_earth_radius(radius_of_earth_m,istatus)
-  radius_of_earth_km = radius_of_earth_m / 1000.
-  print*,'write_metgrid_header radius_of_earth_km ',radius_of_earth_km
-  if(istatus .ne. 1)then
-      write(6,*)' Bad status for radius_of_earth_km'
-      stop
-  endif
+      implicit none
+      character(len=9), intent(in)  :: field
+      character(len=25), intent(in)  :: units
+      character(len=46), intent(in)  :: desc
+      real, intent(in)              :: level
+      logical, parameter            :: is_wind_grid_rel = .true.
+      real                          :: radius_of_earth_m, radius_of_earth_km
+      integer                       :: istatus
 
-  WRITE ( output_unit ) gp_version_wps
-  WRITE ( output_unit ) hdate,xfcst,source,field,units,desc,level,x,y,llflag
-  SELECT CASE (llflag)
-    CASE(1)
-      WRITE ( output_unit ) knownloc,la1,lo1,dx,dy,latin1,radius_of_earth_km
-    CASE(3)
-      WRITE ( output_unit ) knownloc,la1,lo1,dx,dy,lov,latin1,latin2,radius_of_earth_km
-    CASE(5)
-      WRITE ( output_unit ) knownloc,la1,lo1,dx,dy,lov,latin1,radius_of_earth_km
-  END SELECT
-  WRITE ( output_unit) is_wind_grid_rel
+      call get_earth_radius(radius_of_earth_m, istatus)
+      radius_of_earth_km = radius_of_earth_m/1000.
+      print *, 'write_metgrid_header radius_of_earth_km ', radius_of_earth_km
+      if (istatus .ne. 1) then
+         write (6, *) ' bad status for radius_of_earth_km'
+         stop
+      end if
 
-  END SUBROUTINE write_metgrid_header
+      write (output_unit) gp_version_wps
+      write (output_unit) hdate, xfcst, source, field, units, desc, level, x, y, llflag
+      select case (llflag)
+      case (1)
+         write (output_unit) knownloc, la1, lo1, dx, dy, latin1, radius_of_earth_km
+      case (3)
+         write (output_unit) knownloc, la1, lo1, dx, dy, lov, latin1, latin2, radius_of_earth_km
+      case (5)
+         write (output_unit) knownloc, la1, lo1, dx, dy, lov, latin1, radius_of_earth_km
+      end select
+      write (output_unit) is_wind_grid_rel
+
+   end subroutine write_metgrid_header
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-END MODULE lapsprep_wrf
-  
+end module lapsprep_wrf
+

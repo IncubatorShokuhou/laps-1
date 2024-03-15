@@ -7,14 +7,14 @@
       integer nx_l,ny_l,nz_l
       integer record, x, y, z
       integer nf_fid, nf_vid, nf_status
-      integer Nx, Ny, nc
+      integer nx, ny, nc
       integer imax, jmax, kdim, kmax
       integer ref_fcinv( z, record)
       integer i,j, i_ra_count, n_valid_radars
       integer n_ref_grids(i_ra_count)
       integer istatus
 
-      real Dx, Dy, La1, Latin1, Latin2, Lo1, LoV, level, r_missing_data       
+      real dx, dy, la1, latin1, latin2, lo1, lov, level, r_missing_data       
       real ref(nx_l,ny_l,z,record)
       real grid_ra_ref(nx_l, ny_l, nz_l, i_ra_count) 
       real rlat_radar(i_ra_count)
@@ -38,7 +38,7 @@ c
 c ------------------ start ----------------------
 c
 
-      write(6,*)' Subroutine get_laps_rdr:'
+      write(6,*)' subroutine get_laps_rdr:'
 
       istatus = 0
  
@@ -48,25 +48,25 @@ c
 
       do i=1,i_ra_count
 
-         write(6,*)' Reading radar # ',i
+         write(6,*)' reading radar # ',i
 
          call s_len(cfname(i),nc)
 
-         call read_rdr_vrc(cfname(i),nx_l,ny_l,z,record, Nx, Ny,
-     + imax, jmax, kdim, kmax, ref_fcinv, Dx, Dy, La1,
-     + Latin1, Latin2, Lo1, LoV, level, ref, reftime, valtime,
+         call read_rdr_vrc(cfname(i),nx_l,ny_l,z,record, nx, ny,
+     + imax, jmax, kdim, kmax, ref_fcinv, dx, dy, la1,
+     + latin1, latin2, lo1, lov, level, ref, reftime, valtime,
      + asctime, earth_shape, grid_name, grid_type, origin_name,
      + process_name, ref_comment, x_dim, y_dim, istatus)
 
          if(istatus .ne. 1)then
-            print*,'Error reading ',cfname(i)(1:nc)
+            print*,'error reading ',cfname(i)(1:nc)
             return
          else
-            print*,'Success reading ',cfname(i)(1:nc)
+            print*,'success reading ',cfname(i)(1:nc)
             n_valid_radars = n_valid_radars + 1
          endif
 
-         grid_ra_ref(:,:,:,i) = r_missing_data  ! Initialize this 3D radar ref
+         grid_ra_ref(:,:,:,i) = r_missing_data  ! initialize this 3d radar ref
 
          call move(ref(1,1,1,1),grid_ra_ref(1,1,1,i),nx_l,ny_l)
 

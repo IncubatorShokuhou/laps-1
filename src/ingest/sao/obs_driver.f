@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -42,39 +42,39 @@ c
 c
 c******************************************************************************
 c
-c	Driver program for the LAPS surface data collection.  This 
+c	driver program for the laps surface data collection.  this 
 c	program gets the correct time and other stuff, then calls
 c	the routines that read the different data files.
 c
-c	History:
-c	   P. Stamus  11-09-94  Original version (Interactive from obs_driver)
-c                     01-17-95  Turned on mesonet data.
-c                     10-30-96  Changes for METARs and CDOTs.
-c                     11-13-96  Porting improvments.
-c                     12-11-96  Change to FD CDOT files.
-c                     01-15-97  Check CDOT filename (pub vs wfo).
-c                     03-27-97  Add ability to do interactive runs (removes
-c                                 the need for 'obs_driveri').  Remove equivs.
+c	history:
+c	   p. stamus  11-09-94  original version (interactive from obs_driver)
+c                     01-17-95  turned on mesonet data.
+c                     10-30-96  changes for metars and cdots.
+c                     11-13-96  porting improvments.
+c                     12-11-96  change to fd cdot files.
+c                     01-15-97  check cdot filename (pub vs wfo).
+c                     03-27-97  add ability to do interactive runs (removes
+c                                 the need for 'obs_driveri').  remove equivs.
 c
-c          J. Edwards 07-14-97  Made dynamic and moved data paths 
+c          j. edwards 07-14-97  made dynamic and moved data paths 
 c                               to parameter file
 c
-c          P. Stamus  03-23-98  Changes for stand-alone QC; LS2 format.
-c                     05-01-98  Added soil moisture variables.
-c                     08-28-98  Added buoy and LDAD mesonet reads.
-c                     09-04-98  Install as LSO, using new 'ls2' format.
-c                     09-30-98  Housekeeping changes.
-c	              12-03-98  Increase dir_s to 256 characters.
-c                     06-21-99  Pass lat/lon, grid size and grid spacing
+c          p. stamus  03-23-98  changes for stand-alone qc; ls2 format.
+c                     05-01-98  added soil moisture variables.
+c                     08-28-98  added buoy and ldad mesonet reads.
+c                     09-04-98  install as lso, using new 'ls2' format.
+c                     09-30-98  housekeeping changes.
+c	              12-03-98  increase dir_s to 256 characters.
+c                     06-21-99  pass lat/lon, grid size and grid spacing
 c                                 to get_ routines to calculate box size.
-c                     09-20-99  Add blacklist test (on KFCS w/known bad P).
-c                     11-10-99  Upgrade blacklist code.
-c	              01-05-00  Hardwire 903 format statement..LINUX compile
+c                     09-20-99  add blacklist test (on kfcs w/known bad p).
+c                     11-10-99  upgrade blacklist code.
+c	              01-05-00  hardwire 903 format statement..linux compile
 c                                 didn't like variable field length.
 c
-c       Notes:
-c         1. When run "operationally", 'obs_driver.x' uses the time from
-c            the 'systime.dat' file.  Running 'obs_driver.x -i' allows the
+c       notes:
+c         1. when run "operationally", 'obs_driver.x' uses the time from
+c            the 'systime.dat' file.  running 'obs_driver.x -i' allows the
 c            user to enter the run time.
 c
 c******************************************************************************
@@ -95,17 +95,17 @@ c
 
         logical l_allow_empty_lso,l_multiple_reports,l_dupe_names
 
-        ISTAT = INIT_TIMER()
+        istat = init_timer()
 
         call get_config(istatus)
 	if (istatus .ne. 1) then
-           write (6,*) 'Error returned from get_config'
+           write (6,*) 'error returned from get_config'
 	   stop
 	endif
 
         call get_grid_dim_xy(nx,ny,istatus)
 	if (istatus .ne. 1) then
-           write (6,*) 'Error getting horizontal domain dimensions'
+           write (6,*) 'error getting horizontal domain dimensions'
 	   stop
 	endif
 
@@ -115,14 +115,14 @@ c
         call get_laps_cycle_time(laps_cycle_time,istatus)
         if(istatus .ne. 1)stop
 
-!       Get default value for metar_format
+!       get default value for metar_format
         call get_c8_project(c8_project,istatus)
         if(istatus .ne. 1)stop
 
         metar_format = 'default'
         madis_dirs = ' '
 
-!       Note that metar_format is updated only when fully specified in namelist
+!       note that metar_format is updated only when fully specified in namelist
         call get_obs_driver_parms(
      1                            path_to_metar
      1                           ,path_to_local_data
@@ -144,10 +144,10 @@ c
      1                           ,istatus)
         if(istatus .ne. 1)stop
 
-        call GETENV('MODE_VERIF',c_mode)
+        call getenv('mode_verif',c_mode)
         if(trim(c_mode) .eq. '1')then
             write(6,*)
-     1          ' MODE_VERIF = 1: setting l_multiple_reports to false'
+     1          ' mode_verif = 1: setting l_multiple_reports to false'
             l_multiple_reports = .false.
         endif
 
@@ -159,17 +159,17 @@ c
         call get_systime(i4time_sys,filename9,istatus)
 
         do i_cycle = n_cycles,1,-1
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
             if(nominal_latency .ge. 0 .and. i_cycle .eq. 1)then
                 i4time_now = i4time_now_gg()
                 i4_wait = (i4time_sys + nominal_latency) - i4time_now
                 if(i4_wait .gt. 0)then
-                    write(6,*)' Waiting for the nominal latency time '
+                    write(6,*)' waiting for the nominal latency time '
      1                       ,i4_wait     
-                    CALL sleep(i4_wait)
+                    call sleep(i4_wait)
                 endif
-                I4_elapsed = ishow_timer()
+                i4_elapsed = ishow_timer()
             endif
 
             i4time_proc = i4time_sys - ((i_cycle-1) * laps_cycle_time)       
@@ -266,7 +266,7 @@ c
         logical l_allow_empty_lso,l_string_contains
         logical l_identical_a(maxsta),l_multiple_reports,l_dupe_names
 c
-c.....	Start here.  
+c.....	start here.  
 c
         local_obs_thresh_switch = 0
         local_obs_thresh_switch(1) = 1
@@ -283,27 +283,27 @@ c
 	outfile = outfile(1:len)//filename9(1:9)//'.lso'
 cc	outfile = filename9(1:9)//'.lso'
 c
-c.....	Get the LAPS lat/lon and topo data here so we can pass them to the 
+c.....	get the laps lat/lon and topo data here so we can pass them to the 
 c.....	routines that need them.
 c
         call get_directory('static',dir_s,len)
 	ext_s = 'nest7grid'
-	var_s = 'LAT'
+	var_s = 'lat'
         call rd_laps_static(dir_s,ext_s,ni,nj,1,var_s,units,comment,
      &                      lat,  grid_spacing,istatus)
         if(istatus .ne. 1)return
 c
-	var_s = 'LON'
+	var_s = 'lon'
         call rd_laps_static(dir_s,ext_s,ni,nj,1,var_s,units,comment,
      &                      lon,  grid_spacing,istatus)
         if(istatus .ne. 1)return
 c
-	var_s = 'AVG'
+	var_s = 'avg'
         call rd_laps_static(dir_s,ext_s,ni,nj,1,var_s,units,comment,
      &                      topo, grid_spacing,istatus)
         if(istatus .ne. 1)return
 c
-c.....	Find east/west and north/south sides of grid (max extension of grid)
+c.....	find east/west and north/south sides of grid (max extension of grid)
 c
 	grid_east = -999.
 	grid_west = 0.
@@ -318,7 +318,7 @@ c
 	  if(lon(1,j) .lt. grid_west) grid_west = lon(1,j)
 	enddo !j
 c
-c.....	Set up the counters, and zero/blank arrays.
+c.....	set up the counters, and zero/blank arrays.
 c
 	nn = 0
 	n_obs_g = 0 ! # of obs in grid (domain)
@@ -333,7 +333,7 @@ c
 	n_gps_b = 0
 c
 	do i=1,maxsta
-!          Initialize station i
+!          initialize station i
            call init_station(i
      1                      ,stations,provider,weather,reptype,atype      
      1                      ,store_1,store_2,store_3,store_4,store_5
@@ -344,19 +344,19 @@ c
 	enddo !i
 
 c
-c.....  Figure out if the data files are there, paths, etc.
+c.....  figure out if the data files are there, paths, etc.
 c
         data_file_m = ' '
         data_file_l = ' '
 
         call s_len(metar_format,len_metar_format)
 
-        if(    metar_format(1:len_metar_format) .eq. 'NIMBUS'
-     1    .or. metar_format(1:len_metar_format) .eq. 'WFO'   
-     1    .or. metar_format(1:len_metar_format) .eq. 'MADIS'    )then       
+        if(    metar_format(1:len_metar_format) .eq. 'nimbus'
+     1    .or. metar_format(1:len_metar_format) .eq. 'wfo'   
+     1    .or. metar_format(1:len_metar_format) .eq. 'madis'    )then       
 
-!           Select the hourly METAR file best suited to our obs time window
-!           Note that an hourly raw file contains obs from 15 before to 45 after
+!           select the hourly metar file best suited to our obs time window
+!           note that an hourly raw file contains obs from 15 before to 45 after
             i4time_midwindow = i4time_sys + 
      1                         (itime_after - itime_before) / 2      
             i4time_metar_file = ((i4time_midwindow+900) / 3600) * 3600
@@ -365,44 +365,44 @@ c
      1                       ,istatus)
             if(istatus .ne. 1)return
 
-            if(metar_format(1:len_metar_format) .eq. 'NIMBUS')then
-                len_path = index(path_to_METAR,' ') - 1
-	        data_file_m = path_to_METAR(1:len_path)
+            if(metar_format(1:len_metar_format) .eq. 'nimbus')then
+                len_path = index(path_to_metar,' ') - 1
+	        data_file_m = path_to_metar(1:len_path)
      1                        //a9time_metar_file// '0100o'       
 c        
-            elseif(metar_format(1:len_metar_format) .eq. 'WFO'
-     1    .or.     metar_format(1:len_metar_format) .eq. 'MADIS')then
+            elseif(metar_format(1:len_metar_format) .eq. 'wfo'
+     1    .or.     metar_format(1:len_metar_format) .eq. 'madis')then
                 filename13=fname9_to_wfo_fname13(a9time_metar_file)       
 
-                len_path = index(path_to_METAR,' ') - 1
-                data_file_m = path_to_METAR(1:len_path)//filename13       
+                len_path = index(path_to_metar,' ') - 1
+                data_file_m = path_to_metar(1:len_path)//filename13       
 
             else
-                write(6,*)' ERROR: unknown metar format ',metar_format  
+                write(6,*)' error: unknown metar format ',metar_format  
                 istatus = 0
                 return
 
             endif
 
-        elseif(metar_format(1:len_metar_format) .eq. 'CWB')then
+        elseif(metar_format(1:len_metar_format) .eq. 'cwb')then
             continue
 
-        elseif(metar_format(1:len_metar_format) .eq. 'AFWA')then
+        elseif(metar_format(1:len_metar_format) .eq. 'afwa')then
             continue
 
         else
-            write(6,*)' ERROR: unknown metar format ',metar_format
+            write(6,*)' error: unknown metar format ',metar_format
             istatus=0
             return
        
-        endif ! FSL format
+        endif ! fsl format
 c
-c.....  Call the routine that reads the METAR data files, then get
+c.....  call the routine that reads the metar data files, then get
 c.....  the data.
 c
-	print*,'Getting METAR data ', data_file_m
+	print*,'getting metar data ', data_file_m
 c
-        if(metar_format(1:len_metar_format) .ne. 'AFWA')then
+        if(metar_format(1:len_metar_format) .ne. 'afwa')then
            call get_metar_obs(maxobs,maxsta,i4time_sys,
      &                        path_to_metar,metar_format,   
      &                        minutes_to_wait_for_metars,
@@ -417,7 +417,7 @@ c
      &                        store_7,store_cldht,store_cldamt,
      &                        provider, jstatus)
 	   if(jstatus .ne. 1) then
-	      print *, ' WARNING: Bad status return from GET_METAR_OBS'       
+	      print *, ' warning: bad status return from get_metar_obs'       
 	      print *,' '
 	   endif
 
@@ -434,23 +434,23 @@ c
      &                        provider,jstatus)
 
 	   if(jstatus .ne. 1) then
-	      print *, ' WARNING. Bad status return from GET_SAO_OBS_AF'       
+	      print *, ' warning. bad status return from get_sao_obs_af'       
 	      print *,' '
 	   endif
 
         endif
 
         if(nn .gt. maxsta)then
-           write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+           write(6,*)' error: nn > maxsta ',nn,maxsta
            return
         endif
 c
-c.....  Call the routine that reads the mesonet data files, then get the data.
+c.....  call the routine that reads the mesonet data files, then get the data.
 c
         write(6,*)
-	write(6,*)'Getting Mesonet Data...'
+	write(6,*)'getting mesonet data...'
 c
-        if(metar_format(1:len_metar_format) .ne. 'CWB')then ! LDAD Netcdf
+        if(metar_format(1:len_metar_format) .ne. 'cwb')then ! ldad netcdf
 
             if(l_string_contains(path_to_local_data,'madis',istatus)
      1                                                             )then      
@@ -465,13 +465,13 @@ c
                
 	            path_to_madis_data = path_to_local_data(1:len_path)      
      1                           //'/'//madis_dirs(imadis)(1:len_madis)
-     1                           //'/'//'netCDF/'
+     1                           //'/'//'netcdf/'
 
-!                   Wait for 'mesonet' with no waiting for 'urbanet'
+!                   wait for 'mesonet' with no waiting for 'urbanet'
                     local_obs_thresh_madis = local_obs_thresh * 
      1              local_obs_thresh_switch(imadis)
 
-                    write(6,*)' MADIS case: ',path_to_madis_data
+                    write(6,*)' madis case: ',path_to_madis_data
 
                     if(madis_dirs(imadis)(1:len_madis) .ne. 'hydro')then       
                       call get_local_obs(maxobs,maxsta,i4time_sys,
@@ -509,17 +509,17 @@ c
 
 	            if(jstatus .ne. 1) then
 	               print *, 
-     1                  ' WARNING. Bad status return from GET_LOCAL_...'       
+     1                  ' warning. bad status return from get_local_...'       
 	               print *,' '
 	            endif
 
                     n_local_g = n_local_g + n_local_gx
 
                     if(nn .gt. maxsta)then
-                       write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+                       write(6,*)' error: nn > maxsta ',nn,maxsta
                        return
                     else
-                       write(6,*)' Total obs so far is ',nn
+                       write(6,*)' total obs so far is ',nn
                     endif
 
                   endif ! directory length > 0
@@ -527,7 +527,7 @@ c
                 enddo ! imadis
 
             else 
-                write(6,*)' non-MADIS case'
+                write(6,*)' non-madis case'
                 call get_local_obs(maxobs,maxsta,i4time_sys,
      &                      path_to_local_data,metar_format,
      &                      itime_before,itime_after,
@@ -545,18 +545,18 @@ c
 
 	        if(jstatus .ne. 1) then
 	           print *, 
-     1                  ' WARNING. Bad status return from GET_LOCAL_...'       
+     1                  ' warning. bad status return from get_local_...'       
 	           print *,' '
 	        endif
 
                 if(nn .gt. maxsta)then
-                   write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+                   write(6,*)' error: nn > maxsta ',nn,maxsta
                    return
                 endif
 
             endif
 
-        else ! CWB data
+        else ! cwb data
             call get_local_cwb(maxobs,maxsta,i4time_sys,
      &                      path_to_local_data,metar_format,
      &                      itime_before,itime_after,
@@ -571,19 +571,19 @@ c
      &                      provider, laps_cycle_time, jstatus)
 
 	    if(jstatus .ne. 1) then
-	       print *, ' WARNING. Bad status return from GET_LOCAL_...'
+	       print *, ' warning. bad status return from get_local_...'
 	       print *,' '
 	    endif
 
             if(nn .gt. maxsta)then
-               write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+               write(6,*)' error: nn > maxsta ',nn,maxsta
                return
             endif
 
         endif
 c
 c
-c.....  Call the routine that reads the Maritime data files, then get
+c.....  call the routine that reads the maritime data files, then get
 c.....  the data.
 c
 c
@@ -601,17 +601,17 @@ c
      &                      provider, jstatus)
 c
 	if(jstatus .ne. 1) then
-	   print *, ' WARNING. Bad status return from GET_MARITIME_OBS'       
+	   print *, ' warning. bad status return from get_maritime_obs'       
 	   print *,' '
 	endif
 
         if(nn .gt. maxsta)then
-           write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+           write(6,*)' error: nn > maxsta ',nn,maxsta
            return
         endif
 c
 c
-c.....  Call the routine that reads the SYNOP data files, then get
+c.....  call the routine that reads the synop data files, then get
 c.....  the data.
 c
 c
@@ -629,21 +629,21 @@ c
      &                      provider, jstatus)
 c
 	if(jstatus .ne. 1) then
-	   print *, ' WARNING. Bad status return from GET_MARITIME_OBS'       
+	   print *, ' warning. bad status return from get_maritime_obs'       
 	   print *,' '
 	endif
 
         if(nn .gt. maxsta)then
-           write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+           write(6,*)' error: nn > maxsta ',nn,maxsta
            return
         endif
 c
-c.....  Call the routine that reads the GPS data files, then get
+c.....  call the routine that reads the gps data files, then get
 c.....  the data.
 c
         if(.true.)then
 
-	    print*,'Getting GPS data...'
+	    print*,'getting gps data...'
 c
             call get_gps_obs(maxobs,maxsta,i4time_sys,
      &                      path_to_gps_data,metar_format,
@@ -659,46 +659,46 @@ c
      &                      provider, jstatus)
 c
 	    if(jstatus .ne. 1) then
-	       print *, ' WARNING. Bad status return from GET_GPS_OBS'
+	       print *, ' warning. bad status return from get_gps_obs'
 	       print *,' '
 	    endif
 
             if(nn .gt. maxsta)then
-               write(6,*)' ERROR: nn > maxsta ',nn,maxsta
+               write(6,*)' error: nn > maxsta ',nn,maxsta
                return
             endif
 
         endif
 
-        if(c8_project(1:3) .eq. 'RSA')then ! Tower soil moisture
-	    print*,'Getting Tower soil moisture data...'
-            call tower_sfc_driver(  maxsta,i4time_sys                     ! I
-     1                             ,path_to_tower_data                    ! I
-     1                             ,lat,lon,ni,nj,grid_spacing            ! I
-     1                             ,laps_cycle_time                       ! I
-     1                             ,itime_before,itime_after              ! I
-     1                             ,nn,n_local_g,n_local_b,stations       ! I/O
-     1                             ,store_1,store_2,store_2ea             ! O
-     1                             ,store_3,store_3ea,store_4,store_4ea   ! O    
-     1                             ,store_5,store_5ea,store_6,store_6ea   ! O
-     1                             ,store_7,store_cldht,store_cldamt      ! O
-     1                             ,provider,istatus)                     ! O
+        if(c8_project(1:3) .eq. 'rsa')then ! tower soil moisture
+	    print*,'getting tower soil moisture data...'
+            call tower_sfc_driver(  maxsta,i4time_sys                     ! i
+     1                             ,path_to_tower_data                    ! i
+     1                             ,lat,lon,ni,nj,grid_spacing            ! i
+     1                             ,laps_cycle_time                       ! i
+     1                             ,itime_before,itime_after              ! i
+     1                             ,nn,n_local_g,n_local_b,stations       ! i/o
+     1                             ,store_1,store_2,store_2ea             ! o
+     1                             ,store_3,store_3ea,store_4,store_4ea   ! o    
+     1                             ,store_5,store_5ea,store_6,store_6ea   ! o
+     1                             ,store_7,store_cldht,store_cldamt      ! o
+     1                             ,provider,istatus)                     ! o
         endif
 c
-c.....  Count up the obs.
+c.....  count up the obs.
 c
 	n_obs_g = n_sao_g + n_local_g + n_buoy_g + n_gps_g
 	n_obs_b = nn
 
-c       Call subroutine to blacklist the stations in the "store" arrays
+c       call subroutine to blacklist the stations in the "store" arrays
         call apply_blacklist(      maxsta,n_obs_b,stations,provider
      1                            ,store_1,store_2,store_3
      1                            ,store_4,store_5,store_6
      1                            ,store_7,badflag)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-c       Call subroutine to check for duplicate obs
+c       call subroutine to check for duplicate obs
         if(l_multiple_reports .eqv. .true.)then
             l_dupe_names = .false.
         endif
@@ -709,12 +709,12 @@ c       Call subroutine to check for duplicate obs
      1                            ,store_7,badflag,l_identical_a
      1                            ,l_dupe_names)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Remove identical stations by calling 'init_station'
+!       remove identical stations by calling 'init_station'
         do i = 1,n_obs_b
             if(l_identical_a(i) .and. .true.)then
-                write(6,*)' Removing identical station',i
+                write(6,*)' removing identical station',i
                 call init_station(i
      1                      ,stations,provider,weather,reptype,atype      
      1                      ,store_1,store_2,store_3,store_4,store_5
@@ -725,31 +725,31 @@ c       Call subroutine to check for duplicate obs
             endif
         enddo
 c
-!       Final QC check 
+!       final qc check 
         call get_ibadflag(ibadflag,istatus)
         if(istatus .ne. 1)return
 
-!       Replace blank/UNK station names with wmoid if possible, else set blank
+!       replace blank/unk station names with wmoid if possible, else set blank
         iblank = 0
         do i = 1,n_obs_b
             call s_len(stations(i),lensta)
-            if(lensta .eq. 0 .or. stations(i)(1:3) .eq. 'UNK')then
+            if(lensta .eq. 0 .or. stations(i)(1:3) .eq. 'unk')then
                 if(wmoid(i) .ne. ibadflag .and. wmoid(i) .ne. 0)then
                     write(stations(i),511,err=512)wmoid(i)
  511		    format(i8)
  512		    continue
                 else
-                    stations(i) = 'UNK                 '
+                    stations(i) = 'unk                 '
                     iblank = iblank + 1
                 endif
             endif
         enddo
 
         if(iblank .gt. 0)then
-            write(6,*)' Warning: number of UNK stanames = ',iblank       
+            write(6,*)' warning: number of unk stanames = ',iblank       
         endif
 
-!       Count pressure obs
+!       count pressure obs
         nalt = 0
         nstp = 0
         nmsl = 0
@@ -795,33 +795,33 @@ c
         endif
 
         write(6,*)
-        write(6,*)' Checking pressure reports in box...'
+        write(6,*)' checking pressure reports in box...'
         write(6,*)' # of stations reporting altimeter         ',nalt
         write(6,*)' # of stations reporting station pressure  ',nstp
-        write(6,*)' # of stations reporting MSL pressure      ',nmsl
-        write(6,*)' # of stations reporting MSL pressure only '
+        write(6,*)' # of stations reporting msl pressure      ',nmsl
+        write(6,*)' # of stations reporting msl pressure only '
      1                                                 ,nmsl_only     
-        write(6,*)' # of stations reporting altimeter and MSLP'
+        write(6,*)' # of stations reporting altimeter and mslp'
      1                                                 ,nalt_and_msl    
-        write(6,*)' # of stations reporting altimeter or MSLP '
+        write(6,*)' # of stations reporting altimeter or mslp '
      1                                                 ,nalt_or_msl    
-        write(6,*)' # of stations reporting altimeter or STNP '
+        write(6,*)' # of stations reporting altimeter or stnp '
      1                                                 ,nalt_or_stp    
-        write(6,*)' Mean elevation of alt/stnp reports = ' 
+        write(6,*)' mean elevation of alt/stnp reports = ' 
      1                                                 ,ave_elev_pres       
 
-!       Check for no obs
+!       check for no obs
         if(nn .eq. 0 .and. .not. l_allow_empty_lso)then
-            write(6,*)' WARNING: no LSO written due to no obs'
+            write(6,*)' warning: no lso written due to no obs'
             return
         endif
 
 c
-c.....  Call the routine to write the LSO file.
+c.....  call the routine to write the lso file.
 c
 
         print *
-	print *,'  Writing LSO file, # of obs (in box) = ',n_obs_b
+	print *,'  writing lso file, # of obs (in box) = ',n_obs_b
 c
         call write_surface_obs(atime,outfile,n_obs_g,
      &    n_obs_b,wmoid,stations,provider,weather,reptype,atype,
@@ -829,9 +829,9 @@ c
      &    store_2ea,store_3ea,store_4ea,store_5ea,store_6ea,
      &    store_cldamt,store_cldht,maxsta,jstatus)
 c
-c.....	That's about it...let's go home.
+c.....	that's about it...let's go home.
 c
-	write(6,*)' Normal completion of OBS_DRIVER'
+	write(6,*)' normal completion of obs_driver'
 
 	end
 
@@ -941,26 +941,26 @@ c
 	logical exists, l_provider, l_match
         data exists/.false./
 c
-c.....  Check for a blacklist file.  If one exists, read it
+c.....  check for a blacklist file.  if one exists, read it
 c.....  and flag the variables listed for each blacklist station
-c.....  as bad.  Otherwise, skip over this section and write what
+c.....  as bad.  otherwise, skip over this section and write what
 c.....  we have.
 c
 	call get_directory('static',dir_b,len)
-	black_path = dir_b(1:len) // 'Blacklist.dat'
-cc	black_path = './Blacklist.dat'
+	black_path = dir_b(1:len) // 'blacklist.dat'
+cc	black_path = './blacklist.dat'
 	call s_len(black_path, len)
 c
 	print *,' '
-	print *,'  Looking for blacklist file...'
-        INQUIRE(FILE=black_path(1:len), EXIST=exists)
+	print *,'  looking for blacklist file...'
+        inquire(file=black_path(1:len), exist=exists)
         if( .not. exists ) then
-	   print *,'    No blacklist file found.'
+	   print *,'    no blacklist file found.'
 	   go to 505		!no blacklist file...skip this stuff
 	endif
-	print *,'  Found one.  Checking blacklist file.'
+	print *,'  found one.  checking blacklist file.'
 c
-c.....  Have blacklist file...read it.
+c.....  have blacklist file...read it.
 c
 	open(11, file=black_path, status='unknown')
 	read(11,901) num_black
@@ -973,7 +973,7 @@ c
  903	format(1x,a20,2x,i3,20(2x,a3))
         close(11)
 c
-c.....  Have blacklist info.  Now flag the var_b's at each station_b as bad.
+c.....  have blacklist info.  now flag the var_b's at each station_b as bad.
 c
 	do ibl=1,num_black ! loop over the blacklist stations
 
@@ -1009,7 +1009,7 @@ c
 
 		 do j=1,num_varb(ibl)
 
-		    if( var_b(ibl,j) .eq. 'ALL' ) then
+		    if( var_b(ibl,j) .eq. 'all' ) then
 		       store_2(i,1) = badflag ! temperature
 		       store_2(i,2) = badflag ! dew point
 		       store_2(i,3) = badflag ! relative humidity
@@ -1019,7 +1019,7 @@ c
 		       store_3(i,4) = badflag ! wind gust speed
 		       store_4(i,1) = badflag ! altimeter
 		       store_4(i,2) = badflag ! station pressure
-		       store_4(i,3) = badflag ! MSL pressure
+		       store_4(i,3) = badflag ! msl pressure
 		       store_5(i,1) = badflag ! visibility
 		       store_5(i,2) = badflag ! solar
 		       store_5(i,3) = badflag ! soil/water temp
@@ -1031,49 +1031,49 @@ c
 		       store_6(i,5) = badflag ! snow depth
 		       store_7(i,1) = 0       ! clouds (set num cld layers to 0)
 c
-		    elseif( var_b(ibl,j) .eq. 'TMP' ) then
+		    elseif( var_b(ibl,j) .eq. 'tmp' ) then
 		       store_2(i,1) = badflag ! temperature
-		    elseif( var_b(ibl,j) .eq. 'DEW' ) then
+		    elseif( var_b(ibl,j) .eq. 'dew' ) then
 		       store_2(i,2) = badflag ! dew point
-		    elseif( var_b(ibl,j) .eq. 'HUM' ) then
+		    elseif( var_b(ibl,j) .eq. 'hum' ) then
 		       store_2(i,3) = badflag ! relative humidity
 c
-		    elseif( var_b(ibl,j) .eq. 'WND' ) then
+		    elseif( var_b(ibl,j) .eq. 'wnd' ) then
 		       store_3(i,1) = badflag ! wind dir
 		       store_3(i,2) = badflag ! wind speed
 		       store_3(i,3) = badflag ! wind gust dir
 		       store_3(i,4) = badflag ! wind gust speed
 c
-		    elseif( var_b(ibl,j) .eq. 'ALT' ) then
+		    elseif( var_b(ibl,j) .eq. 'alt' ) then
 		       store_4(i,1) = badflag ! altimeter
-		    elseif( var_b(ibl,j) .eq. 'STP' ) then
+		    elseif( var_b(ibl,j) .eq. 'stp' ) then
 		       store_4(i,2) = badflag ! station pressure
-		    elseif( var_b(ibl,j) .eq. 'MSL' ) then
-		       store_4(i,3) = badflag ! MSL pressure
+		    elseif( var_b(ibl,j) .eq. 'msl' ) then
+		       store_4(i,3) = badflag ! msl pressure
 c
-		    elseif( var_b(ibl,j) .eq. 'VIS' ) then
+		    elseif( var_b(ibl,j) .eq. 'vis' ) then
 		       store_5(i,1) = badflag ! visibility
-		    elseif( var_b(ibl,j) .eq. 'SOL' ) then
+		    elseif( var_b(ibl,j) .eq. 'sol' ) then
 		       store_5(i,2) = badflag ! solar
-		    elseif( var_b(ibl,j) .eq. 'SWT' ) then
+		    elseif( var_b(ibl,j) .eq. 'swt' ) then
 		       store_5(i,3) = badflag ! soil/water temp
-		    elseif( var_b(ibl,j) .eq. 'SWM' ) then
+		    elseif( var_b(ibl,j) .eq. 'swm' ) then
 		       store_5(i,4) = badflag ! soil moisture
 c
-		    elseif( var_b(ibl,j) .eq. 'PCP' ) then
+		    elseif( var_b(ibl,j) .eq. 'pcp' ) then
 		       store_6(i,1) = badflag !  1-h precip
 		       store_6(i,2) = badflag !  3-h precip
 		       store_6(i,3) = badflag !  6-h precip
 		       store_6(i,4) = badflag ! 12-h precip
-		    elseif( var_b(ibl,j) .eq. 'SNW' ) then
+		    elseif( var_b(ibl,j) .eq. 'snw' ) then
 		       store_6(i,5) = badflag ! snow depth
 c
-		    elseif( var_b(ibl,j) .eq. 'CLD' ) then
+		    elseif( var_b(ibl,j) .eq. 'cld' ) then
 		       store_7(i,1) = 0       ! clouds (set num cld layers to 0)
 c
 		    else
 		       print *,' '
-		       print *,' WARNING. Invalid blacklist variable: ',
+		       print *,' warning. invalid blacklist variable: ',
      &                   var_b(ibl,j),' for station ',stations_b(ibl)
 
 		    endif
@@ -1084,7 +1084,7 @@ c
 	enddo ! ibl (blacklist loop)
 
 	print *,' '
-	print *,'  Done with blacklisting.'
+	print *,'  done with blacklisting.'
  505	continue
 
         return
@@ -1109,7 +1109,7 @@ c
      &          store_7(maxsta,3)
 
         write(6,*)
-        write(6,*)' Checking for identical stations...'
+        write(6,*)' checking for identical stations...'
 
         l_identical_a = .false.
 
@@ -1125,14 +1125,14 @@ c
 	            enddo ! k
 
                     if(l_identical)then
-                        write(6,*)' Location/Time are identical: '
+                        write(6,*)' location/time are identical: '
      1                       ,i,stations(i),j,stations(j)
 
                         if(store_2(i,1) .eq. store_2(j,1))then
-                            write(6,*)' Temp is also identical'
+                            write(6,*)' temp is also identical'
      1                               ,store_2(i,1),store_2(j,1)
                         else
-                            write(6,*)' Temp is not identical'
+                            write(6,*)' temp is not identical'
      1                               ,store_2(i,1),store_2(j,1)
                             l_identical = .false.
                         endif
@@ -1143,8 +1143,8 @@ c
                     if(l_dupe_names .and.
      1                 stations(i) .eq. stations(j) .and. 
      1                 leni .gt. 0                  .and. 
-     1                 stations(i)(1:3) .ne. 'UNK'       )then
-                        write(6,*)' Names are identical: '
+     1                 stations(i)(1:3) .ne. 'unk'       )then
+                        write(6,*)' names are identical: '
      1                           ,i,j,stations(i)     
                         l_identical = .true.
                     endif
@@ -1163,12 +1163,12 @@ c
         do i=1,n_obs_b ! loop over all stations
             if(l_identical_a(i))then
                 n_identical = n_identical + 1
-                write(6,*)' Identical station ',i
+                write(6,*)' identical station ',i
             endif
         enddo ! i
 
 	print *,' '
-	print *,'  Duplicate check: # of identical stations = '
+	print *,'  duplicate check: # of identical stations = '
      1         ,n_identical     
 
         return
@@ -1201,7 +1201,7 @@ c
         character  store_cldamt(maxsta,5)*4
 
         if(i .le. 0 .or. i .gt. maxsta)then
-            write(6,*)' ERROR: init_station index out of bounds ',i       
+            write(6,*)' error: init_station index out of bounds ',i       
             stop
         endif            
 

@@ -6,7 +6,7 @@ c
         implicit none
 c
 c all these include files are needed to marry namelist besides nest7grid.parms
-c to the lapsparms.cmn.  At the moment we only deal with one additional namelist wrfsi.nl 
+c to the lapsparms.cmn.  at the moment we only deal with one additional namelist wrfsi.nl 
 c
 c       include 'wrf_dims.inc'
 
@@ -14,18 +14,18 @@ c       include 'wrf_dims.inc'
 
         integer      nx_l,ny_l,nz_l
         character*8  c_vcoordinate
-        real       PRESSURE_BOTTOM
-        real       PRESSURE_INTERVAL
+        real       pressure_bottom
+        real       pressure_interval
         integer      laps_cycle_time
         integer      i_perimeter
 c       integer      i2_missing_data
 c       real       r_missing_data
-        integer      MAX_RADARS
+        integer      max_radars
         real       ref_base
         real       ref_base_useable
         real       silavwt_parm,toptwvl_parm
         integer      maxstns
-        integer      N_PIREP
+        integer      n_pirep
         integer      vert_rad_meso
         integer      vert_rad_sao
         integer      vert_rad_pirep
@@ -146,7 +146,7 @@ c           return
 c        endif
 c
         if(nest.eq.0)then
-           nest=1    !this would be the MOAD
+           nest=1    !this would be the moad
         endif
 
         standard_latitude  =moad_stand_lats(1)
@@ -221,9 +221,9 @@ c---------------------------------------------------------
  
         do while (i.ne.1)
          if(i.eq.0)then
-            print*,'Error:  parent_id = 0. Nest = ',nest
-            print*,'Error:  Check wrfsi.nl variable parent_id.'
-            print*,'***** Terminating *****'
+            print*,'error:  parent_id = 0. nest = ',nest
+            print*,'error:  check wrfsi.nl variable parent_id.'
+            print*,'***** terminating *****'
             stop
          endif
          grid_spacing_wrf_m = grid_spacing_wrf_m / ratio_to_parent(i)
@@ -233,7 +233,7 @@ c---------------------------------------------------------
         return
         end  
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 	subroutine get_nmm_grid_spacing(dlmd,dphd,res)
 
@@ -243,7 +243,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 	write(6,*) 'unexpectedly large deltax/deltay values'
 	write(6,*) moad_delta_x, moad_delta_y
 	write(6,*) 'these seem inappropriate for nmm grid'
-	STOP
+	stop
 	endif
 
 	dlmd=moad_delta_x
@@ -254,4 +254,4 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 	return
 	end subroutine get_nmm_grid_spacing
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+cccccccccccccccccccccccccccccc

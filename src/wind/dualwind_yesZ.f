@@ -1,30 +1,30 @@
       subroutine dualwind_yesz
      1           (u,v,x,y,ht,vr1,vr2,x1,y1,x2,y2,ht1,ht2,dz,ier)
 c***********************************************************************
-c description      : To derive Dual-Doppler wind from radar radial
+c description      : to derive dual-doppler wind from radar radial
 c                    velocity and reflectivity factor at constant height.
 c                                                                       
-c I/O parameters   :                                                    
-c  I/O/W   name,            type,      description
-c    O     u,v              real       the horizontal wind component of x,y coordinate
+c i/o parameters   :                                                    
+c  i/o/w   name,            type,      description
+c    o     u,v              real       the horizontal wind component of x,y coordinate
 c                                      in unit of m/s. 
-c    I     x,y              real       the (x,y) coordinate at the wind position.
+c    i     x,y              real       the (x,y) coordinate at the wind position.
 c                                      in unit of km.
-c    I     ht               real       the height at the wind position 
+c    i     ht               real       the height at the wind position 
 c                                      in unit of km.
-c    I     vr1,vr2          real       the radial velocity observed by radar1 and
+c    i     vr1,vr2          real       the radial velocity observed by radar1 and
 c                                      radar2 in unit of m/s.
-c    I     x1,y1            real       the x,y coordinate at radar 1 in unit of km.
-c    I     x2,y2            real       the x,y coordinate at radar 2 in unit of km.
-c    I     ht1,ht2          real       the height of radar1 and radar2 in unit of km.
-c    I     dz               real       the reflectivity factor at the wind position
-c                                      in unit of dBZ. 
-c    O     ier              integer    =0, success message.
+c    i     x1,y1            real       the x,y coordinate at radar 1 in unit of km.
+c    i     x2,y2            real       the x,y coordinate at radar 2 in unit of km.
+c    i     ht1,ht2          real       the height of radar1 and radar2 in unit of km.
+c    i     dz               real       the reflectivity factor at the wind position
+c                                      in unit of dbz. 
+c    o     ier              integer    =0, success message.
 c                                      =1, cannot derive horizontal wind.
 c                                      =2, (ht1 or ht2) > ht.
 c
-c Date :
-c   Mar. 9, 2004 (S.-M. Deng)
+c date :
+c   mar. 9, 2004 (s.-m. deng)
 c***********************************************************************
 
       det=(x-x1)*(y-y2)-(x-x2)*(y-y1)

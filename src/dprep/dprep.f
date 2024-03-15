@@ -8,11 +8,11 @@ c eventually put these parameters into bgdata.inc
       integer mxvars,mxlvls
       parameter(mxvars=10,mxlvls=100)
 
-      integer NX,NY,NZ                !Background grid dimensions
+      integer nx,ny,nz                !background grid dimensions
 
       integer nzbg_ht,nzbg_uv,nzbg_sh,nzbg_ww
 c
-c cmodel is really only 12 chars but the SBN netcdf carrys 132
+c cmodel is really only 12 chars but the sbn netcdf carrys 132
 c
       integer i,l, filesfound, len
       character*256 nl_file
@@ -42,7 +42,7 @@ c
 
 c these are dummy variables used in get_bkgd_mdl_info (returns nx,ny,nz)
       character*2 gproj
-      real        dlat,dlon,Lat1,Lat2,Lon0,sw(2),ne(2)
+      real        dlat,dlon,lat1,lat2,lon0,sw(2),ne(2)
       real        centrallat,centrallon
       real        dx,dy
                  
@@ -69,21 +69,21 @@ c
 
 c_______________________________________________________________________________
 c
-c *** Initialize tables.
+c *** initialize tables.
 c
       include 'grid_fname.cmn' 
       call es_ini
 c
-c *** Read namelist for data sources
+c *** read namelist for data sources
 c
       call get_config(istatus)
       call get_directory('static',cdirstatic,lendr)
       nl_file = cdirstatic(1:lendr)//'/dprep.nl'
-      open(21,FILE=nl_file,status='old',err=900)
+      open(21,file=nl_file,status='old',err=900)
       read(21,dprep_nl,err=901)
       close(21)
       call s_len(outdir,len)
-      if(len.gt.0) inquire(FILE=outdir,EXIST=outdir_defined)
+      if(len.gt.0) inquire(file=outdir,exist=outdir_defined)
       if(.not.outdir_defined) then
          call s_len(generic_data_root,lendr)
          outdir=generic_data_root(1:lendr)//'/lapsprd/dprep'
@@ -104,7 +104,7 @@ c
 c this section gets model initialization data
 
       if(inittimes(itime).eq.ntime) then 
-         print*, 'Dprep at time ',inittimes(itime),'for forecast of',
+         print*, 'dprep at time ',inittimes(itime),'for forecast of',
      +        fcstlengths(itime), ' hours'
 
          do while(accepted_files.le.0 .and. i.le.maxbgmodels)
@@ -114,11 +114,11 @@ c this section gets model initialization data
             bgpath = initbgpaths(i)
             cmodel = initcmodels(i)
             call s_len(bgpath,len)
-            if(len.gt.0) inquire(FILE=bgpath,EXIST=bgpath_defined)
+            if(len.gt.0) inquire(file=bgpath,exist=bgpath_defined)
             if(bgmodel.eq.0.and..not.bgpath_defined) then
                bgpath=generic_data_root(1:lendr)
             elseif(.not.bgpath_defined) then
-               print*,'Could not find directory ',bgpath
+               print*,'could not find directory ',bgpath
                stop
             endif
 
@@ -146,10 +146,10 @@ c              call get_sbn_dims(bgpath,cfname,idum,idum,idum,ntbg)
                call get_bkgd_mdl_info(bgmodel,cmodel,cfname
      &,mxvars,mxlvls,nx,ny,nzbg_ht,nzbg_sh,nzbg_uv,nzbg_ww
      &,gproj,dlat,dlon,centrallat,centrallon,dx,dy
-     &,Lat1,Lat2,Lon0,sw,ne,istatus)
+     &,lat1,lat2,lon0,sw,ne,istatus)
 
                if(istatus.ne.1)then
-                  print*,'Error getting background model information'
+                  print*,'error getting background model information'
                  stop
                endif
 
@@ -161,7 +161,7 @@ c     +         bgfnames,bgfcnt,outdir,filesfound,bgfcnt
      +,accepted_files,cmodel,gproj,dx,dy,istatus)
 
                if(istatus.ne.0)then
-                  print*,'No dprep output due to error'
+                  print*,'no dprep output due to error'
                   i=maxbgmodels+1
                endif
 
@@ -173,7 +173,7 @@ c     +         bgfnames,bgfcnt,outdir,filesfound,bgfcnt
 
 
          if(accepted_files.le.0) then
-            print*,'ERROR: Could not find suitable file to initialize'
+            print*,'error: could not find suitable file to initialize'
 c            stop
          endif
 
@@ -211,7 +211,7 @@ c    +,n_valtimes,istatus)
 
 c                 call get_sbn_dims(bgpath,cfname,idum,idum,idum,ntbg)
                else
-                  i=maxbgmodels  !6-30-00: Smart: no files (i4time_latest = 0) terminates the loop.
+                  i=maxbgmodels  !6-30-00: smart: no files (i4time_latest = 0) terminates the loop.
                endif
             endif
 
@@ -226,7 +226,7 @@ c                 call get_sbn_dims(bgpath,cfname,idum,idum,idum,ntbg)
                call get_bkgd_mdl_info(bgmodel,cmodel,cfname
      &,mxvars,mxlvls,nx,ny,nzbg_ht,nzbg_sh,nzbg_uv,nzbg_ww
      &,gproj,dlat,dlon,centrallat,centrallon,dx,dy
-     &,Lat1,Lat2,Lon0,sw,ne,istatus)
+     &,lat1,lat2,lon0,sw,ne,istatus)
 
                print *, nx,ny,nzbg_ht,nzbg_uv,nzbg_sh,nzbg_ww
 
@@ -235,7 +235,7 @@ c                 call get_sbn_dims(bgpath,cfname,idum,idum,idum,ntbg)
      +,outdir,filesfound,cmodel,gproj,dx,dy,istatus)
 
                if(istatus.ne.0)then
-                  print*,'No dprep output due to error'
+                  print*,'no dprep output due to error'
                   i=maxbgmodels+1
                endif
 
@@ -246,16 +246,16 @@ c                 call get_sbn_dims(bgpath,cfname,idum,idum,idum,ntbg)
          enddo
       endif
 
-      print*, 'Normal completion of dprep'
+      print*, 'normal completion of dprep'
       if(bgfcnt.le.0 .or. accepted_files.le.0)then
-        print*, 'No dprep request for this time'
+        print*, 'no dprep request for this time'
       endif
 
       stop
 
- 900  print *, 'ERROR: Could not open file ',nl_file,' to read'
+ 900  print *, 'error: could not open file ',nl_file,' to read'
       stop
- 901  print *,'ERROR: Could not read namelist'
+ 901  print *,'error: could not read namelist'
       write(*,dprep_nl)
       stop
 c
@@ -285,10 +285,10 @@ c     integer bgmodel, istatus, bgfcnt, k, len, filesfound
       character*9 fname
       character*13 fname13,fname9_to_wfo_fname13
 
-c     real La1, La2, Lo1, Lo2, ht( NX,  NY,  NZ), 
+c     real la1, la2, lo1, lo2, ht( nx,  ny,  nz), 
 
 c
-c *** Background model grid data.
+c *** background model grid data.
 c
 c
 c *** sfc background arrays.
@@ -301,7 +301,7 @@ c
       real, allocatable  :: htbg_sfc(:,:)
       real, allocatable  :: mslpbg(:,:)
 c
-c *** 3D background arrays.
+c *** 3d background arrays.
 c
       real, allocatable  :: prbght(:,:,:)
       real, allocatable  :: prbgsh(:,:,:)
@@ -315,14 +315,14 @@ c
       real, allocatable  :: vwbg(:,:,:)
       real, allocatable  :: wwbg(:,:,:)
 
-c     real ht( NX,  NY,  NZ), 
-c    +   ht_sfc( NX,  NY), p_sfc( NX,  NY), 
-c    +   rh( NX,  NY,  NZ), rh_sfc( NX,  NY), 
-c    +   th( NX,  NY,  NZ), th_sfc( NX,  NY), 
-c    +   uw( NX,  NY,  NZ), uw_sfc( NX,  NY), 
-c    +   vw( NX,  NY,  NZ), vw_sfc( NX,  NY),
-c    +    p( NX,  NY,  NZ), ww(NX, NY, NZ),
-c    +   mslp(NX, NY)
+c     real ht( nx,  ny,  nz), 
+c    +   ht_sfc( nx,  ny), p_sfc( nx,  ny), 
+c    +   rh( nx,  ny,  nz), rh_sfc( nx,  ny), 
+c    +   th( nx,  ny,  nz), th_sfc( nx,  ny), 
+c    +   uw( nx,  ny,  nz), uw_sfc( nx,  ny), 
+c    +   vw( nx,  ny,  nz), vw_sfc( nx,  ny),
+c    +    p( nx,  ny,  nz), ww(nx, ny, nz),
+c    +   mslp(nx, ny)
 
       real sw(2), ne(2)
       real lat1, lat2, lon0
@@ -482,17 +482,17 @@ c    + ,gproj,lon0,lat1,lat2,istatus_dprep)
             elseif (bgmodel .eq. 4) then
                fname13=fname9_to_wfo_fname13(fname)
             endif
-            print *,'Error reading background model data for: ',
+            print *,'error reading background model data for: ',
      .         bgpath(1:i)//'/'//fname13
-            print *,'Process aborted for this file.'
+            print *,'process aborted for this file.'
             return
 
          endif
 
 
          if(bgmodel.eq.0)then
-            ext = '.LPS'
-            gproj='PS'
+            ext = '.lps'
+            gproj='ps'
             af='0000'
 
             call get_laps_data(bgpath
@@ -511,20 +511,20 @@ c    + ,gproj,lon0,lat1,lat2,istatus_dprep)
             endif
 
          elseif(bgmodel.eq.2)then
-            ext = '.E48'
+            ext = '.e48'
             call dprep_eta_conusc(nx_bg,ny_bg,nzbg_ht ,htbg
      +,prbght,tpbg,uwbg,vwbg,shbg,htbg_sfc,prbg_sfc, shbg_sfc
      +,tpbg_sfc, uwbg_sfc, vwbg_sfc, mslpbg ,istatus)
 
          elseif(bgmodel.eq.4)then
-            ext='.SBN'
+            ext='.sbn'
             
          elseif(bgmodel.eq.5)then
-            ext='.RUC'
+            ext='.ruc'
             call dprep_ruc2_pub(nx_bg,ny_bg,nzbg_ht,nzbg_uv
      +,nzbg_sh,nzbg_ww,htbg,prbght,shbg,uwbg,vwbg,tpbg,gproj)
          else
-            print*, 'ERROR bgmodel may not be supported ',bgmodel
+            print*, 'error bgmodel may not be supported ',bgmodel
             stop
          endif
 
@@ -588,15 +588,15 @@ c    + ,gproj,lon0,lat1,lat2,istatus_dprep)
       real, intent(in) ::  vw_sfc( :, :)
       real, intent(in) ::    mslp( :, :)
 
-      real  adum2d( NX,  NY)
+      real  adum2d( nx,  ny)
 
 
 
-c          rh_sfc( NX,  NY), 
-c    +     th( NX,  NY,  NZ), th_sfc( NX,  NY), 
-c    +     uw( NX,  NY,  NZ), uw_sfc( NX,  NY), 
-c    +     vw( NX,  NY,  NZ), vw_sfc( NX,  NY),
-c    +     mslp(NX, NY),      adum3d( NX,  NY, NZ)
+c          rh_sfc( nx,  ny), 
+c    +     th( nx,  ny,  nz), th_sfc( nx,  ny), 
+c    +     uw( nx,  ny,  nz), uw_sfc( nx,  ny), 
+c    +     vw( nx,  ny,  nz), vw_sfc( nx,  ny),
+c    +     mslp(nx, ny),      adum3d( nx,  ny, nz)
 
 
 c     call s_len(model_src,lenm)
@@ -610,28 +610,28 @@ c     endif
       n=index(outdir,' ')-1
       outfile=outdir(1:n)//'/'//fname
       n=index(outfile,' ')-1
-      print *,'DPREP data ---> ',outfile(1:n)
+      print *,'dprep data ---> ',outfile(1:n)
 
       open(1,file=outfile(1:n),status='unknown',form='unformatted')
 c
-c *** Prepare (Write) header stuff.
+c *** prepare (write) header stuff.
 c
       nsfcfld=7
       write(1) nx,ny,nzht,nzuv,nzrh,nzww,nx,ny,nsfcfld,gproj
 
-      if(gproj.eq.'PS')then
+      if(gproj.eq.'ps')then
          rota=0.
          write(1) nx,ny,nzht,lat2,lon0,rota,sw,ne
-      elseif(gproj.eq.'LC')then
+      elseif(gproj.eq.'lc')then
          write(1) nx,ny,nzht,lat1,lat2,lon0,sw,ne
-c      else if(gproj.eq.'CE') then
+c      else if(gproj.eq.'ce') then
 c         write(1) nx,ny,nzht,lat1,lat2,lon0,sw,ne
       else
-         print*,'Unsupported grid projection in dprep.f'
+         print*,'unsupported grid projection in dprep.f'
          stop
       endif
 c
-c *** Write surface data.
+c *** write surface data.
 c
       write(1) uw_sfc
       write(1) vw_sfc
@@ -641,7 +641,7 @@ c
       write(1) p_sfc
       write(1) mslp
 c
-c *** Write upper air data 
+c *** write upper air data 
 c
       write(1) uw
       write(1) vw

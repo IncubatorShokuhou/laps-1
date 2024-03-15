@@ -1,7 +1,7 @@
 
         subroutine csplit(line,carray,nelems,maxelems,char,istatus)
 
-!       Routine to split a character array into segments
+!       routine to split a character array into segments
 
         character*(*) line
         character*1 char
@@ -16,18 +16,18 @@
 
         lenelem = len(carray(1))
 
-!       Beginning of line might start an element
+!       beginning of line might start an element
         if(line(1:1) .ne. char)then
             istart(1) = 1
         endif
 
         do i = 1,lenline-1
 
-!           Check for start of string
+!           check for start of string
             if(line(i:i) .eq. char .and. line(i+1:i+1) .ne. char)then
                 if(nelems+1 .gt. maxelems)then
                     write(6,*)
-     1              ' Error: nelems+1 > maxelems',nelems+1,maxelems,i
+     1              ' error: nelems+1 > maxelems',nelems+1,maxelems,i
      1                     ,line(i:i+1)
                     write(6,*)line
                     istatus = 0
@@ -36,13 +36,13 @@
                 istart(nelems+1)= i+1
             endif
 
-!           Check for end of string
+!           check for end of string
             if(line(i:i) .ne. char .and. line(i+1:i+1) .eq. char)then
                 nelems = nelems + 1
                 iend(nelems)= i+1
  
                 if(iend(nelems) - istart(nelems) .ge. lenelem)then
-                    write(6,*)' Error: element is too long',
+                    write(6,*)' error: element is too long',
      1                        istart(nelems),iend(nelems)
                     write(6,*)line
                     stop
@@ -53,7 +53,7 @@
 
         enddo ! i
 
-        write(6,*)' Elements in csplit are:'
+        write(6,*)' elements in csplit are:'
         do i = 1,nelems
             write(6,*)i,' ',carray(i)
         enddo ! i

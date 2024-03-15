@@ -1,6 +1,6 @@
 
-      subroutine get_pirep_data_WFO(i4time_sys,ilaps_cycle_time,
-     1                              filename,ext,NX_L,NY_L,istatus)
+      subroutine get_pirep_data_wfo(i4time_sys,ilaps_cycle_time,
+     1                              filename,ext,nx_l,ny_l,istatus)
 
       character*(*) filename
       character*(*) ext
@@ -8,287 +8,287 @@
 !.............................................................................
 
       include 'netcdf.inc'
-      integer maxNumCloudLayers, recNum,nf_fid, nf_vid, nf_status
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ',filename
+      integer maxnumcloudlayers, recnum,nf_fid, nf_vid, nf_status
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ',filename
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of maxNumCloudLayers
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxNumCloudLayers',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxNumCloudLayers'
+c
+c  fill all dimension values
+c
+c
+c get size of maxnumcloudlayers
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxnumcloudlayers',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxnumcloudlayers'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxNumCloudLayers)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxNumCloudLayers'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxnumcloudlayers)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxnumcloudlayers'
       endif
-C
-C Get size of recNum
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+c
+c get size of recnum
+c
+      nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
 
-      call pireps_WFO_sub(nf_fid, maxNumCloudLayers, recNum,
+      call pireps_wfo_sub(nf_fid, maxnumcloudlayers, recnum,
 !.............................................................................
-     1     ext,i4time_sys,ilaps_cycle_time,NX_L,NY_L,istatus)
+     1     ext,i4time_sys,ilaps_cycle_time,nx_l,ny_l,istatus)
       return
 !.............................................................................
       end
-C
-C
-      subroutine pireps_WFO_sub(nf_fid, maxNumCloudLayers, recNum,
+c
+c
+      subroutine pireps_wfo_sub(nf_fid, maxnumcloudlayers, recnum,
 !.............................................................................
-     1     ext,i4time_sys,ilaps_cycle_time,NX_L,NY_L,istatus)
+     1     ext,i4time_sys,ilaps_cycle_time,nx_l,ny_l,istatus)
 !.............................................................................
 
       include 'netcdf.inc'
-      integer maxNumCloudLayers, recNum,nf_fid, nf_vid, 
-     +        nf_status, cloudAmt(maxNumCloudLayers,recNum),
+      integer maxnumcloudlayers, recnum,nf_fid, nf_vid, 
+     +        nf_status, cloudamt(maxnumcloudlayers,recnum),
      +        written
-      real lat(recNum), lon(recNum), 
-     +     cloudBaseHt(maxNumCloudLayers,recNum),
-     +     cloudTopHt(maxNumCloudLayers,recNum)
-      double precision timeObs(recNum)
+      real lat(recnum), lon(recnum), 
+     +     cloudbaseht(maxnumcloudlayers,recnum),
+     +     cloudtopht(maxnumcloudlayers,recnum)
+      double precision timeobs(recnum)
 
 !.............................................................................
 
-      integer i4time_sys, ilaps_cycle_time, NX_L, NY_L, istatus
+      integer i4time_sys, ilaps_cycle_time, nx_l, ny_l, istatus
       character*(*) ext
-      character*9 a9_timeObs 
-      real lat_a(NX_L,NY_L)
-      real lon_a(NX_L,NY_L)
-      real topo_a(NX_L,NY_L)
+      character*9 a9_timeobs 
+      real lat_a(nx_l,ny_l)
+      real lon_a(nx_l,ny_l)
+      real topo_a(nx_l,ny_l)
 
 !.............................................................................
-C
-C      read latitude          "Latitude of report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'latitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c      read latitude          "latitude of report"
+c
+        nf_status = nf_inq_varid(nf_fid,'latitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var latitude'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,lat)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lat)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var latitude'
       endif
-C
-C      read longitude          "Longitude of report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'longitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c      read longitude          "longitude of report"
+c
+        nf_status = nf_inq_varid(nf_fid,'longitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var longitude'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,lon)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lon)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var longitude'
       endif
-C
-C      read timeObs      "Time of report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'timeObs',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
+c
+c      read timeobs      "time of report"
+c
+        nf_status = nf_inq_varid(nf_fid,'timeobs',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
       endif
-        nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,timeObs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
+        nf_status = nf_get_var_double(nf_fid,nf_vid,timeobs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
       endif
-C
-C      read cloudBaseHeight
-C
-        nf_status = NF_INQ_VARID(nf_fid,'cloudBaseHeight',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var cloudBaseHeight'
+c
+c      read cloudbaseheight
+c
+        nf_status = nf_inq_varid(nf_fid,'cloudbaseheight',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var cloudbaseheight'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,cloudBaseHt)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var cloudBaseHeight'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,cloudbaseht)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var cloudbaseheight'
       endif
-C
-C      read cloudTopHeight
-C
-        nf_status = NF_INQ_VARID(nf_fid,'cloudTopHeight',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var cloudTopHeight'
+c
+c      read cloudtopheight
+c
+        nf_status = nf_inq_varid(nf_fid,'cloudtopheight',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var cloudtopheight'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,cloudTopHt)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var cloudTopHeight'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,cloudtopht)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var cloudtopheight'
       endif
-C
-C      read cloudAmount
-C
-        nf_status = NF_INQ_VARID(nf_fid,'cloudAmount',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var cloudAmount'
+c
+c      read cloudamount
+c
+        nf_status = nf_inq_varid(nf_fid,'cloudamount',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var cloudamount'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,cloudAmt)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var cloudAmount'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,cloudamt)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var cloudamount'
       endif
-C
-C The netcdf variables are filled 
-C
+c
+c the netcdf variables are filled 
+c
 !.............................................................................
 
-      call get_domain_perimeter(NX_L,NY_L,'nest7grid',lat_a,lon_a,
+      call get_domain_perimeter(nx_l,ny_l,'nest7grid',lat_a,lon_a,
      1            topo_a,1.0,rnorth,south,east,west,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_domain_perimeter'
+          write(6,*)' error in get_domain_perimeter'
           return
       endif
 
-!     Write All Pireps to LAPS PIN file
+!     write all pireps to laps pin file
       altitude = 0.
 
       r_nc_missing_data = 1e20
 
-      write(6,*)' recNum = ',recNum
+      write(6,*)' recnum = ',recnum
 
-      num_pireps = recNum
+      num_pireps = recnum
 
       do i = 1,num_pireps
 
           write(6,*)
-          write(6,*)' Pirep #',i
+          write(6,*)' pirep #',i
 
           if(lat(i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing first latitude',i
+              write(6,*)' missing first latitude',i
               goto 999
           endif
           if(lon(i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing first longitude',i
+              write(6,*)' missing first longitude',i
               goto 999
           endif
-          if(timeObs(i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing ob time',i
+          if(timeobs(i) .ge. r_nc_missing_data)then
+              write(6,*)' missing ob time',i
               goto 999
           endif
 
-!         Test to see how many lat/lons are present
+!         test to see how many lat/lons are present
           n_latitude_present = 0
           if(lat(i) .lt. r_nc_missing_data)then
             write(6,*)' lat/lon = ',lat(i),lon(i)
             n_latitude_present = n_latitude_present + 1
           endif
 
-          write(6,*)' Num locations = ',n_latitude_present       
+          write(6,*)' num locations = ',n_latitude_present       
 
           if(n_latitude_present .gt. 1)then
-              write(6,*)' Multiple locations, reject ob',i
+              write(6,*)' multiple locations, reject ob',i
               goto 999
           endif
 
           if(lat(i) .le. rnorth .and. lat(i) .ge. south .and.
      1       lon(i) .ge. west   .and. lon(i) .le. east      )then        
-              write(6,*)' Pirep is inside domain lat/lon perimeter'
+              write(6,*)' pirep is inside domain lat/lon perimeter'
           else
               write(6,*)
-     1            ' Outside domain lat/lon perimeter - reject'
+     1            ' outside domain lat/lon perimeter - reject'
               goto 999
           endif
 
-!         Write Individual Pirep to LAPS PIN file
-          call c_time2fname(nint(timeObs(i)),a9_timeObs)
+!         write individual pirep to laps pin file
+          call c_time2fname(nint(timeobs(i)),a9_timeobs)
 
-          call cv_asc_i4time(a9_timeObs,i4time_ob)
+          call cv_asc_i4time(a9_timeobs,i4time_ob)
           i4_resid = abs(i4time_ob - i4time_sys)
           if(i4_resid .gt. (ilaps_cycle_time / 2) )then
-              write(6,*)' Outside time window - reject '
-     1                              ,a9_timeObs,i4_resid
+              write(6,*)' outside time window - reject '
+     1                              ,a9_timeobs,i4_resid
               goto 999        
           endif
 
 
-!         Write out cloud base/top in feet and cloud amount in eighths
-!         written = 0 if timeObs/lat/lon not written out, set to 1 once written to file
+!         write out cloud base/top in feet and cloud amount in eighths
+!         written = 0 if timeobs/lat/lon not written out, set to 1 once written to file
           written = 0
-          do ilyr = 1,maxNumCloudLayers
+          do ilyr = 1,maxnumcloudlayers
 
-!             Use -1000. for missing value of cloud base/top
-              if ((cloudBaseHt(ilyr,i) .ge. 1e10) .or.
-     +         (cloudBaseHt(ilyr,i) .eq. -9999.)) then
+!             use -1000. for missing value of cloud base/top
+              if ((cloudbaseht(ilyr,i) .ge. 1e10) .or.
+     +         (cloudbaseht(ilyr,i) .eq. -9999.)) then
                   rbase = -1000.
               else
-                  rbase = cloudBaseHt(ilyr,i)
+                  rbase = cloudbaseht(ilyr,i)
               endif
 
-              if((cloudTopHt(ilyr,i) .ge. 1e10) .or.
-     +         (cloudTopHt(ilyr,i) .eq. -9999.)) then
+              if((cloudtopht(ilyr,i) .ge. 1e10) .or.
+     +         (cloudtopht(ilyr,i) .eq. -9999.)) then
                   rtop = -1000.
               else
-                  rtop = cloudTopHt(ilyr,i)
+                  rtop = cloudtopht(ilyr,i)
               endif
 
-!             Test for missing or unusable cloud cover
-!             WFO bases cloudAmount on WFM BUFR Table 020011
-              if((cloudAmt(ilyr,i) .gt. 8) .or.
-     +           (cloudAmt(ilyr,i) .lt. 0)) then 
+!             test for missing or unusable cloud cover
+!             wfo bases cloudamount on wfm bufr table 020011
+              if((cloudamt(ilyr,i) .gt. 8) .or.
+     +           (cloudamt(ilyr,i) .lt. 0)) then 
                   ieighths = -999
               else 
-                  ieighths = cloudAmt(ilyr,i)
+                  ieighths = cloudamt(ilyr,i)
               endif                  
 
               write(6,3)rbase,rtop,ieighths
- 3            format(' Cloud layer',2f8.0,i5)
+ 3            format(' cloud layer',2f8.0,i5)
 
               if ((rbase .ne. -1000.) .and. (rtop .ne. -1000.) .and.
      +            (ieighths .ne. -999)) then
-                if (written .eq. 0) then   ! write timeObs, lat, lon, etc
+                if (written .eq. 0) then   ! write timeobs, lat, lon, etc
                   call open_ext(31,i4time_sys,ext(1:3),istatus)
 
-                  write(6,1)a9_timeObs 
-                  write(31,1)a9_timeObs, a9_timeObs 
- 1                format(' Time - prp/rcvd:'/1x,a9,2x,a9) 
+                  write(6,1)a9_timeobs 
+                  write(31,1)a9_timeobs, a9_timeobs 
+ 1                format(' time - prp/rcvd:'/1x,a9,2x,a9) 
 
                   write(6,2)lat(i),lon(i),altitude
                   write(31,2)lat(i),lon(i),altitude
- 2                format(' Lat, lon, altitude'/f8.3,f10.3,f8.0)  
+ 2                format(' lat, lon, altitude'/f8.3,f10.3,f8.0)  
 
                   write(6,33)
                   write(31,33)
- 33               format(' Cloud layer')
+ 33               format(' cloud layer')
                   written = 1
                 endif
-!               write(6,*)' Above layer written to PIN file'
+!               write(6,*)' above layer written to pin file'
                 write(31,3)rbase,rtop,ieighths
               endif
 
           enddo ! ilyr
 
           if (written .eq. 0) then ! none of layers in pirep contained info
-            write(6,*)' Above pirep NOT written to PIN file - ',
+            write(6,*)' above pirep not written to pin file - ',
      +'no usable data.'
           endif
 

@@ -1,135 +1,135 @@
-      SUBROUTINE DGETF2( M, N, A, LDA, IPIV, INFO )
+      subroutine dgetf2( m, n, a, lda, ipiv, info )
 *
-*  -- LAPACK routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     June 30, 1992
+*  -- lapack routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     june 30, 1992
 *
-*     .. Scalar Arguments ..
-      INTEGER            INFO, LDA, M, N
+*     .. scalar arguments ..
+      integer            info, lda, m, n
 *     ..
-*     .. Array Arguments ..
-      INTEGER            IPIV( * )
-      DOUBLE PRECISION   A( LDA, * )
+*     .. array arguments ..
+      integer            ipiv( * )
+      double precision   a( lda, * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DGETF2 computes an LU factorization of a general m-by-n matrix A
+*  dgetf2 computes an lu factorization of a general m-by-n matrix a
 *  using partial pivoting with row interchanges.
 *
-*  The factorization has the form
-*     A = P * L * U
-*  where P is a permutation matrix, L is lower triangular with unit
-*  diagonal elements (lower trapezoidal if m > n), and U is upper
+*  the factorization has the form
+*     a = p * l * u
+*  where p is a permutation matrix, l is lower triangular with unit
+*  diagonal elements (lower trapezoidal if m > n), and u is upper
 *  triangular (upper trapezoidal if m < n).
 *
-*  This is the right-looking Level 2 BLAS version of the algorithm.
+*  this is the right-looking level 2 blas version of the algorithm.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  M       (input) INTEGER
-*          The number of rows of the matrix A.  M >= 0.
+*  m       (input) integer
+*          the number of rows of the matrix a.  m >= 0.
 *
-*  N       (input) INTEGER
-*          The number of columns of the matrix A.  N >= 0.
+*  n       (input) integer
+*          the number of columns of the matrix a.  n >= 0.
 *
-*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-*          On entry, the m by n matrix to be factored.
-*          On exit, the factors L and U from the factorization
-*          A = P*L*U; the unit diagonal elements of L are not stored.
+*  a       (input/output) double precision array, dimension (lda,n)
+*          on entry, the m by n matrix to be factored.
+*          on exit, the factors l and u from the factorization
+*          a = p*l*u; the unit diagonal elements of l are not stored.
 *
-*  LDA     (input) INTEGER
-*          The leading dimension of the array A.  LDA >= max(1,M).
+*  lda     (input) integer
+*          the leading dimension of the array a.  lda >= max(1,m).
 *
-*  IPIV    (output) INTEGER array, dimension (min(M,N))
-*          The pivot indices; for 1 <= i <= min(M,N), row i of the
-*          matrix was interchanged with row IPIV(i).
+*  ipiv    (output) integer array, dimension (min(m,n))
+*          the pivot indices; for 1 <= i <= min(m,n), row i of the
+*          matrix was interchanged with row ipiv(i).
 *
-*  INFO    (output) INTEGER
+*  info    (output) integer
 *          = 0: successful exit
-*          < 0: if INFO = -k, the k-th argument had an illegal value
-*          > 0: if INFO = k, U(k,k) is exactly zero. The factorization
-*               has been completed, but the factor U is exactly
+*          < 0: if info = -k, the k-th argument had an illegal value
+*          > 0: if info = k, u(k,k) is exactly zero. the factorization
+*               has been completed, but the factor u is exactly
 *               singular, and division by zero will occur if it is used
 *               to solve a system of equations.
 *
 *  =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE, ZERO
-      PARAMETER          ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. parameters ..
+      double precision   one, zero
+      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      INTEGER            J, JP
+*     .. local scalars ..
+      integer            j, jp
 *     ..
-*     .. External Functions ..
-      INTEGER            IDAMAX
-      EXTERNAL           IDAMAX
+*     .. external functions ..
+      integer            idamax
+      external           idamax
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DGER, DSCAL, DSWAP, XERBLA
+*     .. external subroutines ..
+      external           dger, dscal, dswap, xerbla
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX, MIN
+*     .. intrinsic functions ..
+      intrinsic          max, min
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      IF( M.LT.0 ) THEN
-         INFO = -1
-      ELSE IF( N.LT.0 ) THEN
-         INFO = -2
-      ELSE IF( LDA.LT.MAX( 1, M ) ) THEN
-         INFO = -4
-      END IF
-      IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DGETF2', -INFO )
-         RETURN
-      END IF
+      info = 0
+      if( m.lt.0 ) then
+         info = -1
+      else if( n.lt.0 ) then
+         info = -2
+      else if( lda.lt.max( 1, m ) ) then
+         info = -4
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'dgetf2', -info )
+         return
+      end if
 *
-*     Quick return if possible
+*     quick return if possible
 *
-      IF( M.EQ.0 .OR. N.EQ.0 )
-     $   RETURN
+      if( m.eq.0 .or. n.eq.0 )
+     $   return
 *
-      DO 10 J = 1, MIN( M, N )
+      do 10 j = 1, min( m, n )
 *
-*        Find pivot and test for singularity.
+*        find pivot and test for singularity.
 *
-         JP = J - 1 + IDAMAX( M-J+1, A( J, J ), 1 )
-         IPIV( J ) = JP
-         IF( A( JP, J ).NE.ZERO ) THEN
+         jp = j - 1 + idamax( m-j+1, a( j, j ), 1 )
+         ipiv( j ) = jp
+         if( a( jp, j ).ne.zero ) then
 *
-*           Apply the interchange to columns 1:N.
+*           apply the interchange to columns 1:n.
 *
-            IF( JP.NE.J )
-     $         CALL DSWAP( N, A( J, 1 ), LDA, A( JP, 1 ), LDA )
+            if( jp.ne.j )
+     $         call dswap( n, a( j, 1 ), lda, a( jp, 1 ), lda )
 *
-*           Compute elements J+1:M of J-th column.
+*           compute elements j+1:m of j-th column.
 *
-            IF( J.LT.M )
-     $         CALL DSCAL( M-J, ONE / A( J, J ), A( J+1, J ), 1 )
+            if( j.lt.m )
+     $         call dscal( m-j, one / a( j, j ), a( j+1, j ), 1 )
 *
-         ELSE IF( INFO.EQ.0 ) THEN
+         else if( info.eq.0 ) then
 *
-            INFO = J
-         END IF
+            info = j
+         end if
 *
-         IF( J.LT.MIN( M, N ) ) THEN
+         if( j.lt.min( m, n ) ) then
 *
-*           Update trailing submatrix.
+*           update trailing submatrix.
 *
-            CALL DGER( M-J, N-J, -ONE, A( J+1, J ), 1, A( J, J+1 ), LDA,
-     $                 A( J+1, J+1 ), LDA )
-         END IF
-   10 CONTINUE
-      RETURN
+            call dger( m-j, n-j, -one, a( j+1, j ), 1, a( j, j+1 ), lda,
+     $                 a( j+1, j+1 ), lda )
+         end if
+   10 continue
+      return
 *
-*     End of DGETF2
+*     end of dgetf2
 *
-      END
+      end

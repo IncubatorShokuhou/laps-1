@@ -3,7 +3,7 @@
      +     usfc, vsfc, tsfc, dsfc, psfc, mslp, zsfc, r01, rto,
      +     lmr, llr, s8a, swi, tpw,
      +     istatus)
-C
+c
       implicit none
       include 'netcdf.inc'
       character*(*) fullname
@@ -48,59 +48,59 @@ C
       call s_len(fullname,lname_in)
 
       if(x*y .eq. 0)then
-          write(6,*)' ERROR in read_fuafsf_cdf input x/y ',x,y
+          write(6,*)' error in read_fuafsf_cdf input x/y ',x,y
           istatus = 0
           return
       endif
 
       if(z .le. 1)then
-          write(6,*)' Skip FUA read, lname_in,x,y = ',lname_in,x,y
+          write(6,*)' skip fua read, lname_in,x,y = ',lname_in,x,y
           cfname_int=fullname(1:lname_in)//'.fsf'
           goto100
       endif
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       cfname_int=fullname(1:lname_in)//'.fua'
       call s_len(cfname_int,lname)
-      print*,'Open/read ',cfname_int(1:lname)
-      nf_status = NF_OPEN(cfname_int,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ',cfname_int(1:lname)
+      print*,'open/read ',cfname_int(1:lname)
+      nf_status = nf_open(cfname_int,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ',cfname_int(1:lname)
         istatus = 0; return
       endif
-C
-C     Variable        NETCDF Long Name
-C      ht           "LAPS Fcst height"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'ht',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      ht           "laps fcst height"
+c
+      nf_status = nf_inq_varid(nf_fid,'ht',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var ht'
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,ht)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,ht)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var ht'
         istatus = -1            
       endif
 
 c     if(c8_proj(1:lenc8).eq.'airdrop')
       call swap_array_k(ht,x,y,z)
-C
-C     Variable        NETCDF Long Name
-C      level        "level of data"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'level',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      level        "level of data"
+c
+      nf_status = nf_inq_varid(nf_fid,'level',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var level'
         istatus = -1             
       else ! found id
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,level)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,level)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var level'
           istatus = -1           
         else ! found data
@@ -108,95 +108,95 @@ c         if(c8_proj(1:lenc8).eq.'airdrop')
           call swap_array_k(level,1,1,z)
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      om           "LAPS Fcst omega wind component"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'om',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      om           "laps fcst omega wind component"
+c
+      nf_status = nf_inq_varid(nf_fid,'om',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var om'
         istatus = -1            
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,om)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,om)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var om'
         istatus = -1          
       endif
 
 c     if(c8_proj(1:lenc8).eq.'airdrop')
       call swap_array_k(om,x,y,z)
-C
-C     Variable        NETCDF Long Name
-C      sh           "LAPS Fcst specific humidity"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'sh',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      sh           "laps fcst specific humidity"
+c
+      nf_status = nf_inq_varid(nf_fid,'sh',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var sh'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,sh)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,sh)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var sh'
         istatus = -1                
       endif
 
 c     if(c8_proj(1:lenc8).eq.'airdrop')
       call swap_array_k(sh,x,y,z)
-C
-C     Variable        NETCDF Long Name
-C      t3           "LAPS Fcst temperature"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'t3',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      t3           "laps fcst temperature"
+c
+      nf_status = nf_inq_varid(nf_fid,'t3',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var t3'
         istatus = -1            
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,t3)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,t3)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var t3'
         istatus = -1           
       endif
 
 c     if(c8_proj(1:lenc8).eq.'airdrop')
       call swap_array_k(t3,x,y,z)
-C
-C     Variable        NETCDF Long Name
-C      u3           "LAPS Fcst u wind component"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'u3',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      u3           "laps fcst u wind component"
+c
+      nf_status = nf_inq_varid(nf_fid,'u3',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var u3'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,u3)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,u3)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var u3'
         istatus = -1           
       endif
 
 c     if(c8_proj(1:lenc8).eq.'airdrop')
       call swap_array_k(u3,x,y,z)
-C
-C     Variable        NETCDF Long Name
-C      v3           "LAPS Fcst v wind component"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'v3',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      v3           "laps fcst v wind component"
+c
+      nf_status = nf_inq_varid(nf_fid,'v3',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var v3'
         istatus = -1              
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,v3)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,v3)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var v3'
         istatus = -1           
       endif
@@ -205,8 +205,8 @@ c     if(c8_proj(1:lenc8).eq.'airdrop')
       call swap_array_k(v3,x,y,z)
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
         istatus = -1           
       endif
@@ -224,7 +224,7 @@ c
 
       if(l.le.1)then
          print*,'didnt determine location of fua in'
-         print*,'string for fsf. Return with no data'
+         print*,'string for fsf. return with no data'
          print*,'read_fuafsf.f: abort'
          istatus = 0; return
       endif
@@ -236,249 +236,249 @@ c
       cfname_int=cfname_int(1:lname_in)//'.fsf'
 
       call s_len(cfname_int,lname)
-      print*,'Open/read ',cfname_int(1:lname)
-      nf_status = NF_OPEN(cfname_int,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ',cfname_int(1:lname)
+      print*,'open/read ',cfname_int(1:lname)
+      nf_status = nf_open(cfname_int,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ',cfname_int(1:lname)
         istatus = 0; return
       endif
 
-      write(6,*)' Reading USF'
-C
-C     Variable        NETCDF Long Name
-C      usf          "LAPS Fcst sfc u wind component"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'usf',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading usf'
+c
+c     variable        netcdf long name
+c      usf          "laps fcst sfc u wind component"
+c
+      nf_status = nf_inq_varid(nf_fid,'usf',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var usf'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,usfc)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,usfc)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var usf'
         istatus = -1           
       endif
-C
-C     Variable        NETCDF Long Name
-C      vsf          "LAPS Fcst sfc v wind component"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'vsf',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      vsf          "laps fcst sfc v wind component"
+c
+      nf_status = nf_inq_varid(nf_fid,'vsf',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var vsf'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,vsfc)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,vsfc)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var vsf'
         istatus = -1          
       endif
-C
-C     Variable        NETCDF Long Name
-C      vsf          "LAPS Fcst sfc temperature"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'tsf',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      vsf          "laps fcst sfc temperature"
+c
+      nf_status = nf_inq_varid(nf_fid,'tsf',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var tsf'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,tsfc)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,tsfc)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var tsf'
         istatus = -1           
       endif
-C
-C     Variable        NETCDF Long Name
-C      vsf          "LAPS Fcst sfc dew point temperature"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'dsf',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      vsf          "laps fcst sfc dew point temperature"
+c
+      nf_status = nf_inq_varid(nf_fid,'dsf',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var dsf'
         istatus = -1           
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,dsfc)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,dsfc)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var dsfc'
         istatus = -1            
       endif
-C
-C     Variable        NETCDF Long Name
-C      vsf          "LAPS Fcst mean sea level pressure"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'slp',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      vsf          "laps fcst mean sea level pressure"
+c
+      nf_status = nf_inq_varid(nf_fid,'slp',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var slp'
         istatus = -1            
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,mslp)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,mslp)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var mslp'
         istatus = -1           
       endif
-C
-C     Variable        NETCDF Long Name
-C      vsf          "LAPS Fcst sfc pressure"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'psf',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      vsf          "laps fcst sfc pressure"
+c
+      nf_status = nf_inq_varid(nf_fid,'psf',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var psf'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,psfc)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,psfc)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var psfc'
         istatus = -1           
       endif
 
-      write(6,*)' Reading ZSFC'
-CC
-C     Variable        NETCDF Long Name
-C      ter          "LAPS sfc terrain"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'ter',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading zsfc'
+cc
+c     variable        netcdf long name
+c      ter          "laps sfc terrain"
+c
+      nf_status = nf_inq_varid(nf_fid,'ter',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var ter'
         istatus = -1           
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,zsfc)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,zsfc)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var zsfc'
         istatus = -1            
       endif
 
-      write(6,*)' Reading R01'
-C
-C     Variable        NETCDF Long Name
-C      r01          "LAPS Incremental Precip"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'r01',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading r01'
+c
+c     variable        netcdf long name
+c      r01          "laps incremental precip"
+c
+      nf_status = nf_inq_varid(nf_fid,'r01',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var r01'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,r01)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,r01)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var r01'
         istatus = -1          
       endif
 
-      write(6,*)' Reading RTO'
-C
-C     Variable        NETCDF Long Name
-C      rto          "LAPS Storm-Total Precip"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'rto',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading rto'
+c
+c     variable        netcdf long name
+c      rto          "laps storm-total precip"
+c
+      nf_status = nf_inq_varid(nf_fid,'rto',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var rto'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,rto)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,rto)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var rto'
         istatus = -1          
       endif
 
-      write(6,*)' Reading LMR'
-C
-C     Variable        NETCDF Long Name
-C      lmr          "LAPS Column Max reflectivity"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'lmr',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading lmr'
+c
+c     variable        netcdf long name
+c      lmr          "laps column max reflectivity"
+c
+      nf_status = nf_inq_varid(nf_fid,'lmr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lmr'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,lmr)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,lmr)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lmr'
         istatus = -1          
       endif
 
-      write(6,*)' Reading SWI'
-C
-C     Variable        NETCDF Long Name
-C      swi          "LAPS GHI"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'swi',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading swi'
+c
+c     variable        netcdf long name
+c      swi          "laps ghi"
+c
+      nf_status = nf_inq_varid(nf_fid,'swi',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var swi'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,swi)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,swi)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var swi'
         istatus = -1          
       endif
 
-      write(6,*)' Reading S8A'
-C
-C     Variable        NETCDF Long Name
-C      s8a          "LAPS GHI"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'s8a',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading s8a'
+c
+c     variable        netcdf long name
+c      s8a          "laps ghi"
+c
+      nf_status = nf_inq_varid(nf_fid,'s8a',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var s8a'
         istatus = -1          
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,s8a)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_real(nf_fid,nf_vid,s8a)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var s8a'
         istatus = -1          
       endif
 
-      write(6,*)' Reading TPW'
-C
-C     Variable        NETCDF Long Name
-C      tpw          "LAPS TPW"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'tpw',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      write(6,*)' reading tpw'
+c
+c     variable        netcdf long name
+c      tpw          "laps tpw"
+c
+      nf_status = nf_inq_varid(nf_fid,'tpw',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var tpw'
         istatus = -1          
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,tpw)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,tpw)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var tpw'
           istatus = -1          
         endif
       endif
 
-      write(6,*)' Closing file ',nf_fid,z
+      write(6,*)' closing file ',nf_fid,z
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
         return
       endif
 
-      write(6,*)' Returning from read_fuafsf_cdf...'
+      write(6,*)' returning from read_fuafsf_cdf...'
 
       return
       end

@@ -4,10 +4,10 @@
       
       real :: lat ! deg
       real :: lon ! deg
-      real :: sfc_temp ! K
+      real :: sfc_temp ! k
       real :: sfc_pres ! mb
       real :: secsola ! no units
-      real :: secza(3)  !no units, 1=goesE, 2=goesW, 3=GOES 9
+      real :: secza(3)  !no units, 1=goese, 2=goesw, 3=goes 9
       real :: sfc_emiss (25) ! unknown units
       real :: sfc_refl (25) ! unknown units
 

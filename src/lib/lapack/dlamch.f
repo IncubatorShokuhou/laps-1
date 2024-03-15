@@ -1,34 +1,34 @@
-      DOUBLE PRECISION FUNCTION DLAMCH( CMACH )
+      double precision function dlamch( cmach )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      CHARACTER          CMACH
+*     .. scalar arguments ..
+      character          cmach
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLAMCH determines double precision machine parameters.
+*  dlamch determines double precision machine parameters.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  CMACH   (input) CHARACTER*1
-*          Specifies the value to be returned by DLAMCH:
-*          = 'E' or 'e',   DLAMCH := eps
-*          = 'S' or 's ,   DLAMCH := sfmin
-*          = 'B' or 'b',   DLAMCH := base
-*          = 'P' or 'p',   DLAMCH := eps*base
-*          = 'N' or 'n',   DLAMCH := t
-*          = 'R' or 'r',   DLAMCH := rnd
-*          = 'M' or 'm',   DLAMCH := emin
-*          = 'U' or 'u',   DLAMCH := rmin
-*          = 'L' or 'l',   DLAMCH := emax
-*          = 'O' or 'o',   DLAMCH := rmax
+*  cmach   (input) character*1
+*          specifies the value to be returned by dlamch:
+*          = 'e' or 'e',   dlamch := eps
+*          = 's' or 's ,   dlamch := sfmin
+*          = 'b' or 'b',   dlamch := base
+*          = 'p' or 'p',   dlamch := eps*base
+*          = 'n' or 'n',   dlamch := t
+*          = 'r' or 'r',   dlamch := rnd
+*          = 'm' or 'm',   dlamch := emin
+*          = 'u' or 'u',   dlamch := rmin
+*          = 'l' or 'l',   dlamch := emax
+*          = 'o' or 'o',   dlamch := rmax
 *
 *          where
 *
@@ -45,813 +45,813 @@
 *
 * =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE, ZERO
-      PARAMETER          ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. parameters ..
+      double precision   one, zero
+      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      LOGICAL            FIRST, LRND
-      INTEGER            BETA, IMAX, IMIN, IT
-      DOUBLE PRECISION   BASE, EMAX, EMIN, EPS, PREC, RMACH, RMAX, RMIN,
-     $                   RND, SFMIN, SMALL, T
+*     .. local scalars ..
+      logical            first, lrnd
+      integer            beta, imax, imin, it
+      double precision   base, emax, emin, eps, prec, rmach, rmax, rmin,
+     $                   rnd, sfmin, small, t
 *     ..
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
+*     .. external functions ..
+      logical            lsame
+      external           lsame
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DLAMC2
+*     .. external subroutines ..
+      external           dlamc2
 *     ..
-*     .. Save statement ..
-      SAVE               FIRST, EPS, SFMIN, BASE, T, RND, EMIN, RMIN,
-     $                   EMAX, RMAX, PREC
+*     .. save statement ..
+      save               first, eps, sfmin, base, t, rnd, emin, rmin,
+     $                   emax, rmax, prec
 *     ..
-*     .. Data statements ..
-      DATA               FIRST / .TRUE. /
+*     .. data statements ..
+      data               first / .true. /
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      IF( FIRST ) THEN
-         FIRST = .FALSE.
-         CALL DLAMC2( BETA, IT, LRND, EPS, IMIN, RMIN, IMAX, RMAX )
-         BASE = BETA
-         T = IT
-         IF( LRND ) THEN
-            RND = ONE
-            EPS = ( BASE**( 1-IT ) ) / 2
-         ELSE
-            RND = ZERO
-            EPS = BASE**( 1-IT )
-         END IF
-         PREC = EPS*BASE
-         EMIN = IMIN
-         EMAX = IMAX
-         SFMIN = RMIN
-         SMALL = ONE / RMAX
-         IF( SMALL.GE.SFMIN ) THEN
+      if( first ) then
+         first = .false.
+         call dlamc2( beta, it, lrnd, eps, imin, rmin, imax, rmax )
+         base = beta
+         t = it
+         if( lrnd ) then
+            rnd = one
+            eps = ( base**( 1-it ) ) / 2
+         else
+            rnd = zero
+            eps = base**( 1-it )
+         end if
+         prec = eps*base
+         emin = imin
+         emax = imax
+         sfmin = rmin
+         small = one / rmax
+         if( small.ge.sfmin ) then
 *
-*           Use SMALL plus a bit, to avoid the possibility of rounding
+*           use small plus a bit, to avoid the possibility of rounding
 *           causing overflow when computing  1/sfmin.
 *
-            SFMIN = SMALL*( ONE+EPS )
-         END IF
-      END IF
+            sfmin = small*( one+eps )
+         end if
+      end if
 *
-      IF( LSAME( CMACH, 'E' ) ) THEN
-         RMACH = EPS
-      ELSE IF( LSAME( CMACH, 'S' ) ) THEN
-         RMACH = SFMIN
-      ELSE IF( LSAME( CMACH, 'B' ) ) THEN
-         RMACH = BASE
-      ELSE IF( LSAME( CMACH, 'P' ) ) THEN
-         RMACH = PREC
-      ELSE IF( LSAME( CMACH, 'N' ) ) THEN
-         RMACH = T
-      ELSE IF( LSAME( CMACH, 'R' ) ) THEN
-         RMACH = RND
-      ELSE IF( LSAME( CMACH, 'M' ) ) THEN
-         RMACH = EMIN
-      ELSE IF( LSAME( CMACH, 'U' ) ) THEN
-         RMACH = RMIN
-      ELSE IF( LSAME( CMACH, 'L' ) ) THEN
-         RMACH = EMAX
-      ELSE IF( LSAME( CMACH, 'O' ) ) THEN
-         RMACH = RMAX
-      END IF
+      if( lsame( cmach, 'e' ) ) then
+         rmach = eps
+      else if( lsame( cmach, 's' ) ) then
+         rmach = sfmin
+      else if( lsame( cmach, 'b' ) ) then
+         rmach = base
+      else if( lsame( cmach, 'p' ) ) then
+         rmach = prec
+      else if( lsame( cmach, 'n' ) ) then
+         rmach = t
+      else if( lsame( cmach, 'r' ) ) then
+         rmach = rnd
+      else if( lsame( cmach, 'm' ) ) then
+         rmach = emin
+      else if( lsame( cmach, 'u' ) ) then
+         rmach = rmin
+      else if( lsame( cmach, 'l' ) ) then
+         rmach = emax
+      else if( lsame( cmach, 'o' ) ) then
+         rmach = rmax
+      end if
 *
-      DLAMCH = RMACH
-      RETURN
+      dlamch = rmach
+      return
 *
-*     End of DLAMCH
+*     end of dlamch
 *
-      END
+      end
 *
 ************************************************************************
 *
-      SUBROUTINE DLAMC1( BETA, T, RND, IEEE1 )
+      subroutine dlamc1( beta, t, rnd, ieee1 )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      LOGICAL            IEEE1, RND
-      INTEGER            BETA, T
+*     .. scalar arguments ..
+      logical            ieee1, rnd
+      integer            beta, t
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLAMC1 determines the machine parameters given by BETA, T, RND, and
-*  IEEE1.
+*  dlamc1 determines the machine parameters given by beta, t, rnd, and
+*  ieee1.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  BETA    (output) INTEGER
-*          The base of the machine.
+*  beta    (output) integer
+*          the base of the machine.
 *
-*  T       (output) INTEGER
-*          The number of ( BETA ) digits in the mantissa.
+*  t       (output) integer
+*          the number of ( beta ) digits in the mantissa.
 *
-*  RND     (output) LOGICAL
-*          Specifies whether proper rounding  ( RND = .TRUE. )  or
-*          chopping  ( RND = .FALSE. )  occurs in addition. This may not
+*  rnd     (output) logical
+*          specifies whether proper rounding  ( rnd = .true. )  or
+*          chopping  ( rnd = .false. )  occurs in addition. this may not
 *          be a reliable guide to the way in which the machine performs
 *          its arithmetic.
 *
-*  IEEE1   (output) LOGICAL
-*          Specifies whether rounding appears to be done in the IEEE
+*  ieee1   (output) logical
+*          specifies whether rounding appears to be done in the ieee
 *          'round to nearest' style.
 *
-*  Further Details
+*  further details
 *  ===============
 *
-*  The routine is based on the routine  ENVRON  by Malcolm and
-*  incorporates suggestions by Gentleman and Marovich. See
+*  the routine is based on the routine  envron  by malcolm and
+*  incorporates suggestions by gentleman and marovich. see
 *
-*     Malcolm M. A. (1972) Algorithms to reveal properties of
-*        floating-point arithmetic. Comms. of the ACM, 15, 949-951.
+*     malcolm m. a. (1972) algorithms to reveal properties of
+*        floating-point arithmetic. comms. of the acm, 15, 949-951.
 *
-*     Gentleman W. M. and Marovich S. B. (1974) More on algorithms
+*     gentleman w. m. and marovich s. b. (1974) more on algorithms
 *        that reveal properties of floating point arithmetic units.
-*        Comms. of the ACM, 17, 276-277.
+*        comms. of the acm, 17, 276-277.
 *
 * =====================================================================
 *
-*     .. Local Scalars ..
-      LOGICAL            FIRST, LIEEE1, LRND
-      INTEGER            LBETA, LT
-      DOUBLE PRECISION   A, B, C, F, ONE, QTR, SAVEC, T1, T2
+*     .. local scalars ..
+      logical            first, lieee1, lrnd
+      integer            lbeta, lt
+      double precision   a, b, c, f, one, qtr, savec, t1, t2
 *     ..
-*     .. External Functions ..
-      DOUBLE PRECISION   DLAMC3
-      EXTERNAL           DLAMC3
+*     .. external functions ..
+      double precision   dlamc3
+      external           dlamc3
 *     ..
-*     .. Save statement ..
-      SAVE               FIRST, LIEEE1, LBETA, LRND, LT
+*     .. save statement ..
+      save               first, lieee1, lbeta, lrnd, lt
 *     ..
-*     .. Data statements ..
-      DATA               FIRST / .TRUE. /
+*     .. data statements ..
+      data               first / .true. /
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      IF( FIRST ) THEN
-         FIRST = .FALSE.
-         ONE = 1
+      if( first ) then
+         first = .false.
+         one = 1
 *
-*        LBETA,  LIEEE1,  LT and  LRND  are the  local values  of  BETA,
-*        IEEE1, T and RND.
+*        lbeta,  lieee1,  lt and  lrnd  are the  local values  of  beta,
+*        ieee1, t and rnd.
 *
-*        Throughout this routine  we use the function  DLAMC3  to ensure
+*        throughout this routine  we use the function  dlamc3  to ensure
 *        that relevant values are  stored and not held in registers,  or
 *        are not affected by optimizers.
 *
-*        Compute  a = 2.0**m  with the  smallest positive integer m such
+*        compute  a = 2.0**m  with the  smallest positive integer m such
 *        that
 *
 *           fl( a + 1.0 ) = a.
 *
-         A = 1
-         C = 1
+         a = 1
+         c = 1
 *
-*+       WHILE( C.EQ.ONE )LOOP
-   10    CONTINUE
-         IF( C.EQ.ONE ) THEN
-            A = 2*A
-            C = DLAMC3( A, ONE )
-            C = DLAMC3( C, -A )
-            GO TO 10
-         END IF
-*+       END WHILE
+*+       while( c.eq.one )loop
+   10    continue
+         if( c.eq.one ) then
+            a = 2*a
+            c = dlamc3( a, one )
+            c = dlamc3( c, -a )
+            go to 10
+         end if
+*+       end while
 *
-*        Now compute  b = 2.0**m  with the smallest positive integer m
+*        now compute  b = 2.0**m  with the smallest positive integer m
 *        such that
 *
 *           fl( a + b ) .gt. a.
 *
-         B = 1
-         C = DLAMC3( A, B )
+         b = 1
+         c = dlamc3( a, b )
 *
-*+       WHILE( C.EQ.A )LOOP
-   20    CONTINUE
-         IF( C.EQ.A ) THEN
-            B = 2*B
-            C = DLAMC3( A, B )
-            GO TO 20
-         END IF
-*+       END WHILE
+*+       while( c.eq.a )loop
+   20    continue
+         if( c.eq.a ) then
+            b = 2*b
+            c = dlamc3( a, b )
+            go to 20
+         end if
+*+       end while
 *
-*        Now compute the base.  a and c  are neighbouring floating point
+*        now compute the base.  a and c  are neighbouring floating point
 *        numbers  in the  interval  ( beta**t, beta**( t + 1 ) )  and so
-*        their difference is beta. Adding 0.25 to c is to ensure that it
+*        their difference is beta. adding 0.25 to c is to ensure that it
 *        is truncated to beta and not ( beta - 1 ).
 *
-         QTR = ONE / 4
-         SAVEC = C
-         C = DLAMC3( C, -A )
-         LBETA = C + QTR
+         qtr = one / 4
+         savec = c
+         c = dlamc3( c, -a )
+         lbeta = c + qtr
 *
-*        Now determine whether rounding or chopping occurs,  by adding a
+*        now determine whether rounding or chopping occurs,  by adding a
 *        bit  less  than  beta/2  and a  bit  more  than  beta/2  to  a.
 *
-         B = LBETA
-         F = DLAMC3( B / 2, -B / 100 )
-         C = DLAMC3( F, A )
-         IF( C.EQ.A ) THEN
-            LRND = .TRUE.
-         ELSE
-            LRND = .FALSE.
-         END IF
-         F = DLAMC3( B / 2, B / 100 )
-         C = DLAMC3( F, A )
-         IF( ( LRND ) .AND. ( C.EQ.A ) )
-     $      LRND = .FALSE.
+         b = lbeta
+         f = dlamc3( b / 2, -b / 100 )
+         c = dlamc3( f, a )
+         if( c.eq.a ) then
+            lrnd = .true.
+         else
+            lrnd = .false.
+         end if
+         f = dlamc3( b / 2, b / 100 )
+         c = dlamc3( f, a )
+         if( ( lrnd ) .and. ( c.eq.a ) )
+     $      lrnd = .false.
 *
-*        Try and decide whether rounding is done in the  IEEE  'round to
-*        nearest' style. B/2 is half a unit in the last place of the two
-*        numbers A and SAVEC. Furthermore, A is even, i.e. has last  bit
-*        zero, and SAVEC is odd. Thus adding B/2 to A should not  change
-*        A, but adding B/2 to SAVEC should change SAVEC.
+*        try and decide whether rounding is done in the  ieee  'round to
+*        nearest' style. b/2 is half a unit in the last place of the two
+*        numbers a and savec. furthermore, a is even, i.e. has last  bit
+*        zero, and savec is odd. thus adding b/2 to a should not  change
+*        a, but adding b/2 to savec should change savec.
 *
-         T1 = DLAMC3( B / 2, A )
-         T2 = DLAMC3( B / 2, SAVEC )
-         LIEEE1 = ( T1.EQ.A ) .AND. ( T2.GT.SAVEC ) .AND. LRND
+         t1 = dlamc3( b / 2, a )
+         t2 = dlamc3( b / 2, savec )
+         lieee1 = ( t1.eq.a ) .and. ( t2.gt.savec ) .and. lrnd
 *
-*        Now find  the  mantissa, t.  It should  be the  integer part of
+*        now find  the  mantissa, t.  it should  be the  integer part of
 *        log to the base beta of a,  however it is safer to determine  t
-*        by powering.  So we find t as the smallest positive integer for
+*        by powering.  so we find t as the smallest positive integer for
 *        which
 *
 *           fl( beta**t + 1.0 ) = 1.0.
 *
-         LT = 0
-         A = 1
-         C = 1
+         lt = 0
+         a = 1
+         c = 1
 *
-*+       WHILE( C.EQ.ONE )LOOP
-   30    CONTINUE
-         IF( C.EQ.ONE ) THEN
-            LT = LT + 1
-            A = A*LBETA
-            C = DLAMC3( A, ONE )
-            C = DLAMC3( C, -A )
-            GO TO 30
-         END IF
-*+       END WHILE
+*+       while( c.eq.one )loop
+   30    continue
+         if( c.eq.one ) then
+            lt = lt + 1
+            a = a*lbeta
+            c = dlamc3( a, one )
+            c = dlamc3( c, -a )
+            go to 30
+         end if
+*+       end while
 *
-      END IF
+      end if
 *
-      BETA = LBETA
-      T = LT
-      RND = LRND
-      IEEE1 = LIEEE1
-      RETURN
+      beta = lbeta
+      t = lt
+      rnd = lrnd
+      ieee1 = lieee1
+      return
 *
-*     End of DLAMC1
+*     end of dlamc1
 *
-      END
+      end
 *
 ************************************************************************
 *
-      SUBROUTINE DLAMC2( BETA, T, RND, EPS, EMIN, RMIN, EMAX, RMAX )
+      subroutine dlamc2( beta, t, rnd, eps, emin, rmin, emax, rmax )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      LOGICAL            RND
-      INTEGER            BETA, EMAX, EMIN, T
-      DOUBLE PRECISION   EPS, RMAX, RMIN
+*     .. scalar arguments ..
+      logical            rnd
+      integer            beta, emax, emin, t
+      double precision   eps, rmax, rmin
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLAMC2 determines the machine parameters specified in its argument
+*  dlamc2 determines the machine parameters specified in its argument
 *  list.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  BETA    (output) INTEGER
-*          The base of the machine.
+*  beta    (output) integer
+*          the base of the machine.
 *
-*  T       (output) INTEGER
-*          The number of ( BETA ) digits in the mantissa.
+*  t       (output) integer
+*          the number of ( beta ) digits in the mantissa.
 *
-*  RND     (output) LOGICAL
-*          Specifies whether proper rounding  ( RND = .TRUE. )  or
-*          chopping  ( RND = .FALSE. )  occurs in addition. This may not
+*  rnd     (output) logical
+*          specifies whether proper rounding  ( rnd = .true. )  or
+*          chopping  ( rnd = .false. )  occurs in addition. this may not
 *          be a reliable guide to the way in which the machine performs
 *          its arithmetic.
 *
-*  EPS     (output) DOUBLE PRECISION
-*          The smallest positive number such that
+*  eps     (output) double precision
+*          the smallest positive number such that
 *
-*             fl( 1.0 - EPS ) .LT. 1.0,
+*             fl( 1.0 - eps ) .lt. 1.0,
 *
 *          where fl denotes the computed value.
 *
-*  EMIN    (output) INTEGER
-*          The minimum exponent before (gradual) underflow occurs.
+*  emin    (output) integer
+*          the minimum exponent before (gradual) underflow occurs.
 *
-*  RMIN    (output) DOUBLE PRECISION
-*          The smallest normalized number for the machine, given by
-*          BASE**( EMIN - 1 ), where  BASE  is the floating point value
-*          of BETA.
+*  rmin    (output) double precision
+*          the smallest normalized number for the machine, given by
+*          base**( emin - 1 ), where  base  is the floating point value
+*          of beta.
 *
-*  EMAX    (output) INTEGER
-*          The maximum exponent before overflow occurs.
+*  emax    (output) integer
+*          the maximum exponent before overflow occurs.
 *
-*  RMAX    (output) DOUBLE PRECISION
-*          The largest positive number for the machine, given by
-*          BASE**EMAX * ( 1 - EPS ), where  BASE  is the floating point
-*          value of BETA.
+*  rmax    (output) double precision
+*          the largest positive number for the machine, given by
+*          base**emax * ( 1 - eps ), where  base  is the floating point
+*          value of beta.
 *
-*  Further Details
+*  further details
 *  ===============
 *
-*  The computation of  EPS  is based on a routine PARANOIA by
-*  W. Kahan of the University of California at Berkeley.
+*  the computation of  eps  is based on a routine paranoia by
+*  w. kahan of the university of california at berkeley.
 *
 * =====================================================================
 *
-*     .. Local Scalars ..
-      LOGICAL            FIRST, IEEE, IWARN, LIEEE1, LRND
-      INTEGER            GNMIN, GPMIN, I, LBETA, LEMAX, LEMIN, LT,
-     $                   NGNMIN, NGPMIN
-      DOUBLE PRECISION   A, B, C, HALF, LEPS, LRMAX, LRMIN, ONE, RBASE,
-     $                   SIXTH, SMALL, THIRD, TWO, ZERO
+*     .. local scalars ..
+      logical            first, ieee, iwarn, lieee1, lrnd
+      integer            gnmin, gpmin, i, lbeta, lemax, lemin, lt,
+     $                   ngnmin, ngpmin
+      double precision   a, b, c, half, leps, lrmax, lrmin, one, rbase,
+     $                   sixth, small, third, two, zero
 *     ..
-*     .. External Functions ..
-      DOUBLE PRECISION   DLAMC3
-      EXTERNAL           DLAMC3
+*     .. external functions ..
+      double precision   dlamc3
+      external           dlamc3
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DLAMC1, DLAMC4, DLAMC5
+*     .. external subroutines ..
+      external           dlamc1, dlamc4, dlamc5
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          ABS, MAX, MIN
+*     .. intrinsic functions ..
+      intrinsic          abs, max, min
 *     ..
-*     .. Save statement ..
-      SAVE               FIRST, IWARN, LBETA, LEMAX, LEMIN, LEPS, LRMAX,
-     $                   LRMIN, LT
+*     .. save statement ..
+      save               first, iwarn, lbeta, lemax, lemin, leps, lrmax,
+     $                   lrmin, lt
 *     ..
-*     .. Data statements ..
-      DATA               FIRST / .TRUE. / , IWARN / .FALSE. /
+*     .. data statements ..
+      data               first / .true. / , iwarn / .false. /
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      IF( FIRST ) THEN
-         FIRST = .FALSE.
-         ZERO = 0
-         ONE = 1
-         TWO = 2
+      if( first ) then
+         first = .false.
+         zero = 0
+         one = 1
+         two = 2
 *
-*        LBETA, LT, LRND, LEPS, LEMIN and LRMIN  are the local values of
-*        BETA, T, RND, EPS, EMIN and RMIN.
+*        lbeta, lt, lrnd, leps, lemin and lrmin  are the local values of
+*        beta, t, rnd, eps, emin and rmin.
 *
-*        Throughout this routine  we use the function  DLAMC3  to ensure
+*        throughout this routine  we use the function  dlamc3  to ensure
 *        that relevant values are stored  and not held in registers,  or
 *        are not affected by optimizers.
 *
-*        DLAMC1 returns the parameters  LBETA, LT, LRND and LIEEE1.
+*        dlamc1 returns the parameters  lbeta, lt, lrnd and lieee1.
 *
-         CALL DLAMC1( LBETA, LT, LRND, LIEEE1 )
+         call dlamc1( lbeta, lt, lrnd, lieee1 )
 *
-*        Start to find EPS.
+*        start to find eps.
 *
-         B = LBETA
-         A = B**( -LT )
-         LEPS = A
+         b = lbeta
+         a = b**( -lt )
+         leps = a
 *
-*        Try some tricks to see whether or not this is the correct  EPS.
+*        try some tricks to see whether or not this is the correct  eps.
 *
-         B = TWO / 3
-         HALF = ONE / 2
-         SIXTH = DLAMC3( B, -HALF )
-         THIRD = DLAMC3( SIXTH, SIXTH )
-         B = DLAMC3( THIRD, -HALF )
-         B = DLAMC3( B, SIXTH )
-         B = ABS( B )
-         IF( B.LT.LEPS )
-     $      B = LEPS
+         b = two / 3
+         half = one / 2
+         sixth = dlamc3( b, -half )
+         third = dlamc3( sixth, sixth )
+         b = dlamc3( third, -half )
+         b = dlamc3( b, sixth )
+         b = abs( b )
+         if( b.lt.leps )
+     $      b = leps
 *
-         LEPS = 1
+         leps = 1
 *
-*+       WHILE( ( LEPS.GT.B ).AND.( B.GT.ZERO ) )LOOP
-   10    CONTINUE
-         IF( ( LEPS.GT.B ) .AND. ( B.GT.ZERO ) ) THEN
-            LEPS = B
-            C = DLAMC3( HALF*LEPS, ( TWO**5 )*( LEPS**2 ) )
-            C = DLAMC3( HALF, -C )
-            B = DLAMC3( HALF, C )
-            C = DLAMC3( HALF, -B )
-            B = DLAMC3( HALF, C )
-            GO TO 10
-         END IF
-*+       END WHILE
+*+       while( ( leps.gt.b ).and.( b.gt.zero ) )loop
+   10    continue
+         if( ( leps.gt.b ) .and. ( b.gt.zero ) ) then
+            leps = b
+            c = dlamc3( half*leps, ( two**5 )*( leps**2 ) )
+            c = dlamc3( half, -c )
+            b = dlamc3( half, c )
+            c = dlamc3( half, -b )
+            b = dlamc3( half, c )
+            go to 10
+         end if
+*+       end while
 *
-         IF( A.LT.LEPS )
-     $      LEPS = A
+         if( a.lt.leps )
+     $      leps = a
 *
-*        Computation of EPS complete.
+*        computation of eps complete.
 *
-*        Now find  EMIN.  Let A = + or - 1, and + or - (1 + BASE**(-3)).
-*        Keep dividing  A by BETA until (gradual) underflow occurs. This
-*        is detected when we cannot recover the previous A.
+*        now find  emin.  let a = + or - 1, and + or - (1 + base**(-3)).
+*        keep dividing  a by beta until (gradual) underflow occurs. this
+*        is detected when we cannot recover the previous a.
 *
-         RBASE = ONE / LBETA
-         SMALL = ONE
-         DO 20 I = 1, 3
-            SMALL = DLAMC3( SMALL*RBASE, ZERO )
-   20    CONTINUE
-         A = DLAMC3( ONE, SMALL )
-         CALL DLAMC4( NGPMIN, ONE, LBETA )
-         CALL DLAMC4( NGNMIN, -ONE, LBETA )
-         CALL DLAMC4( GPMIN, A, LBETA )
-         CALL DLAMC4( GNMIN, -A, LBETA )
-         IEEE = .FALSE.
+         rbase = one / lbeta
+         small = one
+         do 20 i = 1, 3
+            small = dlamc3( small*rbase, zero )
+   20    continue
+         a = dlamc3( one, small )
+         call dlamc4( ngpmin, one, lbeta )
+         call dlamc4( ngnmin, -one, lbeta )
+         call dlamc4( gpmin, a, lbeta )
+         call dlamc4( gnmin, -a, lbeta )
+         ieee = .false.
 *
-         IF( ( NGPMIN.EQ.NGNMIN ) .AND. ( GPMIN.EQ.GNMIN ) ) THEN
-            IF( NGPMIN.EQ.GPMIN ) THEN
-               LEMIN = NGPMIN
-*            ( Non twos-complement machines, no gradual underflow;
-*              e.g.,  VAX )
-            ELSE IF( ( GPMIN-NGPMIN ).EQ.3 ) THEN
-               LEMIN = NGPMIN - 1 + LT
-               IEEE = .TRUE.
-*            ( Non twos-complement machines, with gradual underflow;
-*              e.g., IEEE standard followers )
-            ELSE
-               LEMIN = MIN( NGPMIN, GPMIN )
-*            ( A guess; no known machine )
-               IWARN = .TRUE.
-            END IF
+         if( ( ngpmin.eq.ngnmin ) .and. ( gpmin.eq.gnmin ) ) then
+            if( ngpmin.eq.gpmin ) then
+               lemin = ngpmin
+*            ( non twos-complement machines, no gradual underflow;
+*              e.g.,  vax )
+            else if( ( gpmin-ngpmin ).eq.3 ) then
+               lemin = ngpmin - 1 + lt
+               ieee = .true.
+*            ( non twos-complement machines, with gradual underflow;
+*              e.g., ieee standard followers )
+            else
+               lemin = min( ngpmin, gpmin )
+*            ( a guess; no known machine )
+               iwarn = .true.
+            end if
 *
-         ELSE IF( ( NGPMIN.EQ.GPMIN ) .AND. ( NGNMIN.EQ.GNMIN ) ) THEN
-            IF( ABS( NGPMIN-NGNMIN ).EQ.1 ) THEN
-               LEMIN = MAX( NGPMIN, NGNMIN )
-*            ( Twos-complement machines, no gradual underflow;
-*              e.g., CYBER 205 )
-            ELSE
-               LEMIN = MIN( NGPMIN, NGNMIN )
-*            ( A guess; no known machine )
-               IWARN = .TRUE.
-            END IF
+         else if( ( ngpmin.eq.gpmin ) .and. ( ngnmin.eq.gnmin ) ) then
+            if( abs( ngpmin-ngnmin ).eq.1 ) then
+               lemin = max( ngpmin, ngnmin )
+*            ( twos-complement machines, no gradual underflow;
+*              e.g., cyber 205 )
+            else
+               lemin = min( ngpmin, ngnmin )
+*            ( a guess; no known machine )
+               iwarn = .true.
+            end if
 *
-         ELSE IF( ( ABS( NGPMIN-NGNMIN ).EQ.1 ) .AND.
-     $            ( GPMIN.EQ.GNMIN ) ) THEN
-            IF( ( GPMIN-MIN( NGPMIN, NGNMIN ) ).EQ.3 ) THEN
-               LEMIN = MAX( NGPMIN, NGNMIN ) - 1 + LT
-*            ( Twos-complement machines with gradual underflow;
+         else if( ( abs( ngpmin-ngnmin ).eq.1 ) .and.
+     $            ( gpmin.eq.gnmin ) ) then
+            if( ( gpmin-min( ngpmin, ngnmin ) ).eq.3 ) then
+               lemin = max( ngpmin, ngnmin ) - 1 + lt
+*            ( twos-complement machines with gradual underflow;
 *              no known machine )
-            ELSE
-               LEMIN = MIN( NGPMIN, NGNMIN )
-*            ( A guess; no known machine )
-               IWARN = .TRUE.
-            END IF
+            else
+               lemin = min( ngpmin, ngnmin )
+*            ( a guess; no known machine )
+               iwarn = .true.
+            end if
 *
-         ELSE
-            LEMIN = MIN( NGPMIN, NGNMIN, GPMIN, GNMIN )
-*         ( A guess; no known machine )
-            IWARN = .TRUE.
-         END IF
+         else
+            lemin = min( ngpmin, ngnmin, gpmin, gnmin )
+*         ( a guess; no known machine )
+            iwarn = .true.
+         end if
 ***
-* Comment out this if block if EMIN is ok
-         IF( IWARN ) THEN
-            FIRST = .TRUE.
-            WRITE( 6, FMT = 9999 )LEMIN
-         END IF
+* comment out this if block if emin is ok
+         if( iwarn ) then
+            first = .true.
+            write( 6, fmt = 9999 )lemin
+         end if
 ***
 *
-*        Assume IEEE arithmetic if we found denormalised  numbers above,
-*        or if arithmetic seems to round in the  IEEE style,  determined
-*        in routine DLAMC1. A true IEEE machine should have both  things
+*        assume ieee arithmetic if we found denormalised  numbers above,
+*        or if arithmetic seems to round in the  ieee style,  determined
+*        in routine dlamc1. a true ieee machine should have both  things
 *        true; however, faulty machines may have one or the other.
 *
-         IEEE = IEEE .OR. LIEEE1
+         ieee = ieee .or. lieee1
 *
-*        Compute  RMIN by successive division by  BETA. We could compute
-*        RMIN as BASE**( EMIN - 1 ),  but some machines underflow during
+*        compute  rmin by successive division by  beta. we could compute
+*        rmin as base**( emin - 1 ),  but some machines underflow during
 *        this computation.
 *
-         LRMIN = 1
-         DO 30 I = 1, 1 - LEMIN
-            LRMIN = DLAMC3( LRMIN*RBASE, ZERO )
-   30    CONTINUE
+         lrmin = 1
+         do 30 i = 1, 1 - lemin
+            lrmin = dlamc3( lrmin*rbase, zero )
+   30    continue
 *
-*        Finally, call DLAMC5 to compute EMAX and RMAX.
+*        finally, call dlamc5 to compute emax and rmax.
 *
-         CALL DLAMC5( LBETA, LT, LEMIN, IEEE, LEMAX, LRMAX )
-      END IF
+         call dlamc5( lbeta, lt, lemin, ieee, lemax, lrmax )
+      end if
 *
-      BETA = LBETA
-      T = LT
-      RND = LRND
-      EPS = LEPS
-      EMIN = LEMIN
-      RMIN = LRMIN
-      EMAX = LEMAX
-      RMAX = LRMAX
+      beta = lbeta
+      t = lt
+      rnd = lrnd
+      eps = leps
+      emin = lemin
+      rmin = lrmin
+      emax = lemax
+      rmax = lrmax
 *
-      RETURN
+      return
 *
- 9999 FORMAT( / / ' WARNING. The value EMIN may be incorrect:-',
-     $      '  EMIN = ', I8, /
-     $      ' If, after inspection, the value EMIN looks',
+ 9999 format( / / ' warning. the value emin may be incorrect:-',
+     $      '  emin = ', i8, /
+     $      ' if, after inspection, the value emin looks',
      $      ' acceptable please comment out ',
-     $      / ' the IF block as marked within the code of routine',
-     $      ' DLAMC2,', / ' otherwise supply EMIN explicitly.', / )
+     $      / ' the if block as marked within the code of routine',
+     $      ' dlamc2,', / ' otherwise supply emin explicitly.', / )
 *
-*     End of DLAMC2
+*     end of dlamc2
 *
-      END
+      end
 *
 ************************************************************************
 *
-      DOUBLE PRECISION FUNCTION DLAMC3( A, B )
+      double precision function dlamc3( a, b )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      DOUBLE PRECISION   A, B
+*     .. scalar arguments ..
+      double precision   a, b
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLAMC3  is intended to force  A  and  B  to be stored prior to doing
-*  the addition of  A  and  B ,  for use in situations where optimizers
+*  dlamc3  is intended to force  a  and  b  to be stored prior to doing
+*  the addition of  a  and  b ,  for use in situations where optimizers
 *  might hold one of these in a register.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  A, B    (input) DOUBLE PRECISION
-*          The values A and B.
+*  a, b    (input) double precision
+*          the values a and b.
 *
 * =====================================================================
 *
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      DLAMC3 = A + B
+      dlamc3 = a + b
 *
-      RETURN
+      return
 *
-*     End of DLAMC3
+*     end of dlamc3
 *
-      END
+      end
 *
 ************************************************************************
 *
-      SUBROUTINE DLAMC4( EMIN, START, BASE )
+      subroutine dlamc4( emin, start, base )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      INTEGER            BASE, EMIN
-      DOUBLE PRECISION   START
+*     .. scalar arguments ..
+      integer            base, emin
+      double precision   start
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLAMC4 is a service routine for DLAMC2.
+*  dlamc4 is a service routine for dlamc2.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  EMIN    (output) EMIN
-*          The minimum exponent before (gradual) underflow, computed by
-*          setting A = START and dividing by BASE until the previous A
+*  emin    (output) emin
+*          the minimum exponent before (gradual) underflow, computed by
+*          setting a = start and dividing by base until the previous a
 *          can not be recovered.
 *
-*  START   (input) DOUBLE PRECISION
-*          The starting point for determining EMIN.
+*  start   (input) double precision
+*          the starting point for determining emin.
 *
-*  BASE    (input) INTEGER
-*          The base of the machine.
+*  base    (input) integer
+*          the base of the machine.
 *
 * =====================================================================
 *
-*     .. Local Scalars ..
-      INTEGER            I
-      DOUBLE PRECISION   A, B1, B2, C1, C2, D1, D2, ONE, RBASE, ZERO
+*     .. local scalars ..
+      integer            i
+      double precision   a, b1, b2, c1, c2, d1, d2, one, rbase, zero
 *     ..
-*     .. External Functions ..
-      DOUBLE PRECISION   DLAMC3
-      EXTERNAL           DLAMC3
+*     .. external functions ..
+      double precision   dlamc3
+      external           dlamc3
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      A = START
-      ONE = 1
-      RBASE = ONE / BASE
-      ZERO = 0
-      EMIN = 1
-      B1 = DLAMC3( A*RBASE, ZERO )
-      C1 = A
-      C2 = A
-      D1 = A
-      D2 = A
-*+    WHILE( ( C1.EQ.A ).AND.( C2.EQ.A ).AND.
-*    $       ( D1.EQ.A ).AND.( D2.EQ.A )      )LOOP
-   10 CONTINUE
-      IF( ( C1.EQ.A ) .AND. ( C2.EQ.A ) .AND. ( D1.EQ.A ) .AND.
-     $    ( D2.EQ.A ) ) THEN
-         EMIN = EMIN - 1
-         A = B1
-         B1 = DLAMC3( A / BASE, ZERO )
-         C1 = DLAMC3( B1*BASE, ZERO )
-         D1 = ZERO
-         DO 20 I = 1, BASE
-            D1 = D1 + B1
-   20    CONTINUE
-         B2 = DLAMC3( A*RBASE, ZERO )
-         C2 = DLAMC3( B2 / RBASE, ZERO )
-         D2 = ZERO
-         DO 30 I = 1, BASE
-            D2 = D2 + B2
-   30    CONTINUE
-         GO TO 10
-      END IF
-*+    END WHILE
+      a = start
+      one = 1
+      rbase = one / base
+      zero = 0
+      emin = 1
+      b1 = dlamc3( a*rbase, zero )
+      c1 = a
+      c2 = a
+      d1 = a
+      d2 = a
+*+    while( ( c1.eq.a ).and.( c2.eq.a ).and.
+*    $       ( d1.eq.a ).and.( d2.eq.a )      )loop
+   10 continue
+      if( ( c1.eq.a ) .and. ( c2.eq.a ) .and. ( d1.eq.a ) .and.
+     $    ( d2.eq.a ) ) then
+         emin = emin - 1
+         a = b1
+         b1 = dlamc3( a / base, zero )
+         c1 = dlamc3( b1*base, zero )
+         d1 = zero
+         do 20 i = 1, base
+            d1 = d1 + b1
+   20    continue
+         b2 = dlamc3( a*rbase, zero )
+         c2 = dlamc3( b2 / rbase, zero )
+         d2 = zero
+         do 30 i = 1, base
+            d2 = d2 + b2
+   30    continue
+         go to 10
+      end if
+*+    end while
 *
-      RETURN
+      return
 *
-*     End of DLAMC4
+*     end of dlamc4
 *
-      END
+      end
 *
 ************************************************************************
 *
-      SUBROUTINE DLAMC5( BETA, P, EMIN, IEEE, EMAX, RMAX )
+      subroutine dlamc5( beta, p, emin, ieee, emax, rmax )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      LOGICAL            IEEE
-      INTEGER            BETA, EMAX, EMIN, P
-      DOUBLE PRECISION   RMAX
+*     .. scalar arguments ..
+      logical            ieee
+      integer            beta, emax, emin, p
+      double precision   rmax
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLAMC5 attempts to compute RMAX, the largest machine floating-point
-*  number, without overflow.  It assumes that EMAX + abs(EMIN) sum
-*  approximately to a power of 2.  It will fail on machines where this
-*  assumption does not hold, for example, the Cyber 205 (EMIN = -28625,
-*  EMAX = 28718).  It will also fail if the value supplied for EMIN is
+*  dlamc5 attempts to compute rmax, the largest machine floating-point
+*  number, without overflow.  it assumes that emax + abs(emin) sum
+*  approximately to a power of 2.  it will fail on machines where this
+*  assumption does not hold, for example, the cyber 205 (emin = -28625,
+*  emax = 28718).  it will also fail if the value supplied for emin is
 *  too large (i.e. too close to zero), probably with overflow.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  BETA    (input) INTEGER
-*          The base of floating-point arithmetic.
+*  beta    (input) integer
+*          the base of floating-point arithmetic.
 *
-*  P       (input) INTEGER
-*          The number of base BETA digits in the mantissa of a
+*  p       (input) integer
+*          the number of base beta digits in the mantissa of a
 *          floating-point value.
 *
-*  EMIN    (input) INTEGER
-*          The minimum exponent before (gradual) underflow.
+*  emin    (input) integer
+*          the minimum exponent before (gradual) underflow.
 *
-*  IEEE    (input) LOGICAL
-*          A logical flag specifying whether or not the arithmetic
-*          system is thought to comply with the IEEE standard.
+*  ieee    (input) logical
+*          a logical flag specifying whether or not the arithmetic
+*          system is thought to comply with the ieee standard.
 *
-*  EMAX    (output) INTEGER
-*          The largest exponent before overflow
+*  emax    (output) integer
+*          the largest exponent before overflow
 *
-*  RMAX    (output) DOUBLE PRECISION
-*          The largest machine floating-point number.
+*  rmax    (output) double precision
+*          the largest machine floating-point number.
 *
 * =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ZERO, ONE
-      PARAMETER          ( ZERO = 0.0D0, ONE = 1.0D0 )
+*     .. parameters ..
+      double precision   zero, one
+      parameter          ( zero = 0.0d0, one = 1.0d0 )
 *     ..
-*     .. Local Scalars ..
-      INTEGER            EXBITS, EXPSUM, I, LEXP, NBITS, TRY, UEXP
-      DOUBLE PRECISION   OLDY, RECBAS, Y, Z
+*     .. local scalars ..
+      integer            exbits, expsum, i, lexp, nbits, try, uexp
+      double precision   oldy, recbas, y, z
 *     ..
-*     .. External Functions ..
-      DOUBLE PRECISION   DLAMC3
-      EXTERNAL           DLAMC3
+*     .. external functions ..
+      double precision   dlamc3
+      external           dlamc3
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          MOD
+*     .. intrinsic functions ..
+      intrinsic          mod
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     First compute LEXP and UEXP, two powers of 2 that bound
-*     abs(EMIN). We then assume that EMAX + abs(EMIN) will sum
-*     approximately to the bound that is closest to abs(EMIN).
-*     (EMAX is the exponent of the required number RMAX).
+*     first compute lexp and uexp, two powers of 2 that bound
+*     abs(emin). we then assume that emax + abs(emin) will sum
+*     approximately to the bound that is closest to abs(emin).
+*     (emax is the exponent of the required number rmax).
 *
-      LEXP = 1
-      EXBITS = 1
-   10 CONTINUE
-      TRY = LEXP*2
-      IF( TRY.LE.( -EMIN ) ) THEN
-         LEXP = TRY
-         EXBITS = EXBITS + 1
-         GO TO 10
-      END IF
-      IF( LEXP.EQ.-EMIN ) THEN
-         UEXP = LEXP
-      ELSE
-         UEXP = TRY
-         EXBITS = EXBITS + 1
-      END IF
+      lexp = 1
+      exbits = 1
+   10 continue
+      try = lexp*2
+      if( try.le.( -emin ) ) then
+         lexp = try
+         exbits = exbits + 1
+         go to 10
+      end if
+      if( lexp.eq.-emin ) then
+         uexp = lexp
+      else
+         uexp = try
+         exbits = exbits + 1
+      end if
 *
-*     Now -LEXP is less than or equal to EMIN, and -UEXP is greater
-*     than or equal to EMIN. EXBITS is the number of bits needed to
+*     now -lexp is less than or equal to emin, and -uexp is greater
+*     than or equal to emin. exbits is the number of bits needed to
 *     store the exponent.
 *
-      IF( ( UEXP+EMIN ).GT.( -LEXP-EMIN ) ) THEN
-         EXPSUM = 2*LEXP
-      ELSE
-         EXPSUM = 2*UEXP
-      END IF
+      if( ( uexp+emin ).gt.( -lexp-emin ) ) then
+         expsum = 2*lexp
+      else
+         expsum = 2*uexp
+      end if
 *
-*     EXPSUM is the exponent range, approximately equal to
-*     EMAX - EMIN + 1 .
+*     expsum is the exponent range, approximately equal to
+*     emax - emin + 1 .
 *
-      EMAX = EXPSUM + EMIN - 1
-      NBITS = 1 + EXBITS + P
+      emax = expsum + emin - 1
+      nbits = 1 + exbits + p
 *
-*     NBITS is the total number of bits needed to store a
+*     nbits is the total number of bits needed to store a
 *     floating-point number.
 *
-      IF( ( MOD( NBITS, 2 ).EQ.1 ) .AND. ( BETA.EQ.2 ) ) THEN
+      if( ( mod( nbits, 2 ).eq.1 ) .and. ( beta.eq.2 ) ) then
 *
-*        Either there are an odd number of bits used to store a
+*        either there are an odd number of bits used to store a
 *        floating-point number, which is unlikely, or some bits are
 *        not used in the representation of numbers, which is possible,
-*        (e.g. Cray machines) or the mantissa has an implicit bit,
-*        (e.g. IEEE machines, Dec Vax machines), which is perhaps the
-*        most likely. We have to assume the last alternative.
-*        If this is true, then we need to reduce EMAX by one because
+*        (e.g. cray machines) or the mantissa has an implicit bit,
+*        (e.g. ieee machines, dec vax machines), which is perhaps the
+*        most likely. we have to assume the last alternative.
+*        if this is true, then we need to reduce emax by one because
 *        there must be some way of representing zero in an implicit-bit
-*        system. On machines like Cray, we are reducing EMAX by one
+*        system. on machines like cray, we are reducing emax by one
 *        unnecessarily.
 *
-         EMAX = EMAX - 1
-      END IF
+         emax = emax - 1
+      end if
 *
-      IF( IEEE ) THEN
+      if( ieee ) then
 *
-*        Assume we are on an IEEE machine which reserves one exponent
-*        for infinity and NaN.
+*        assume we are on an ieee machine which reserves one exponent
+*        for infinity and nan.
 *
-         EMAX = EMAX - 1
-      END IF
+         emax = emax - 1
+      end if
 *
-*     Now create RMAX, the largest machine number, which should
-*     be equal to (1.0 - BETA**(-P)) * BETA**EMAX .
+*     now create rmax, the largest machine number, which should
+*     be equal to (1.0 - beta**(-p)) * beta**emax .
 *
-*     First compute 1.0 - BETA**(-P), being careful that the
+*     first compute 1.0 - beta**(-p), being careful that the
 *     result is less than 1.0 .
 *
-      RECBAS = ONE / BETA
-      Z = BETA - ONE
-      Y = ZERO
-      DO 20 I = 1, P
-         Z = Z*RECBAS
-         IF( Y.LT.ONE )
-     $      OLDY = Y
-         Y = DLAMC3( Y, Z )
-   20 CONTINUE
-      IF( Y.GE.ONE )
-     $   Y = OLDY
+      recbas = one / beta
+      z = beta - one
+      y = zero
+      do 20 i = 1, p
+         z = z*recbas
+         if( y.lt.one )
+     $      oldy = y
+         y = dlamc3( y, z )
+   20 continue
+      if( y.ge.one )
+     $   y = oldy
 *
-*     Now multiply by BETA**EMAX to get RMAX.
+*     now multiply by beta**emax to get rmax.
 *
-      DO 30 I = 1, EMAX
-         Y = DLAMC3( Y*BETA, ZERO )
-   30 CONTINUE
+      do 30 i = 1, emax
+         y = dlamc3( y*beta, zero )
+   30 continue
 *
-      RMAX = Y
-      RETURN
+      rmax = y
+      return
 *
-*     End of DLAMC5
+*     end of dlamc5
 *
-      END
+      end

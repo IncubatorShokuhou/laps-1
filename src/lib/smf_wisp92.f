@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -36,20 +36,20 @@ cdis
      1          ql(nll),prob(nll),calw(200),cali(200),qi(nll)
 cc   --------------------------------------------------------------
 cc
-cc         this is the streamlined version of the Smith-Feddes
-cc         and Temperature Adjusted LWC calculation methodologies
-cc         produced at Purdue University under sponsorship
-cc         by the FAA Technical Center
+cc         this is the streamlined version of the smith-feddes
+cc         and temperature adjusted lwc calculation methodologies
+cc         produced at purdue university under sponsorship
+cc         by the faa technical center
 cc
-cc         currently, this subroutine will only use the Smith-
-cc         Feddes and will only do so as if there are solely
+cc         currently, this subroutine will only use the smith-
+cc         feddes and will only do so as if there are solely
 cc         stratiform clouds present, however, it is very easy
-cc         to switch so that only the Temperature Adjusted
+cc         to switch so that only the temperature adjusted
 cc         method is used
 cc
 cc         dilution by glaciation is also included, it is a
 cc         linear function of in cloud temperature going from
-cc         all liquid water at -10 C to all ice at -30 C
+cc         all liquid water at -10 c to all ice at -30 c
 cc         as such the amount of ice is also calculated
 cc
 cc   --------------------------------------------------------------
@@ -72,8 +72,8 @@ cc   --------------------------------------------------------------
      +,  b2=-28.2416
      +,  c2=8.8846)
 
-!     Set ramp going from liquid to ice
-      if(ityp .eq. 3 .OR. ityp .eq. 10)then ! convective
+!     set ramp going from liquid to ice
+      if(ityp .eq. 3 .or. ityp .eq. 10)then ! convective
         temp1_c = -10.
         temp2_c = -30.
       else
@@ -269,9 +269,9 @@ ccc          if(alw.lt.0.0) alw=0.0
 cc   ----------------------------------------------------------------
 cc
 cc   application of a simple linear glaciation
-cc         all liquid T > -15 C
-cc         partially liquid -15 C > T > -25 C
-cc         all ice    T < -25 C
+cc         all liquid t > -15 c
+cc         partially liquid -15 c > t > -25 c
+cc         all ice    t < -25 c
 cc
 cc   ---------------------------------------------------------------
 ccc          ffrac=1.0
@@ -289,7 +289,7 @@ ccc 450   continue
 ccc 455   continue
 cc   -----------------------------------------------------------------
 cc
-cc                 obtain LAPS profile of LWCs
+cc                 obtain laps profile of lwcs
 cc
 cc   -----------------------------------------------------------------
       do 500 ip=1,nll
@@ -321,7 +321,7 @@ cc   -----------------------------------------------------------------
  9001 format(i7)
  9002 format(1x,3i2,1x,14f8.2,i2,i3)
  9004 format(1x,2e15.8,'ihr, imin, isec=',3(i8,1x))
- 9005 format(2x,'Predicted LWC',8x,'Observed LWC',/)
+ 9005 format(2x,'predicted lwc',8x,'observed lwc',/)
  9014 format(1x,8e15.8)
  9015 format(1x,'j=',i3,'adiabatic lwc =',f12.6,'altitude =',f8.1)
       istatus = 1

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis 
@@ -34,31 +34,31 @@ cdis
      &               chtype,i4time_cur,i_delta_t,
      &               sri,srj,lvd_status)
 c
-c Program drives generation of LAPS lvd.  Processes satellite data.
+c program drives generation of laps lvd.  processes satellite data.
 c
-c The satillite data are acquired from several sources which are defined
+c the satillite data are acquired from several sources which are defined
 c in /static/satellite_lvd.nl.
 c
-c More information on the lvd process is found in the README in this directory.
+c more information on the lvd process is found in the readme in this directory.
 c
-c Note: the channel types for this process (chtype) and the number of channels
+c note: the channel types for this process (chtype) and the number of channels
 c       nchannels will be less than or equal to (but never greater than) the
 c       maxchannel variable within the include.
 c
-c Variables computed in subroutine that processes IR satellite data
+c variables computed in subroutine that processes ir satellite data
 c
-c       ta4                               Channel 1 (3.9)  B-temps
-c       tb4                                      "         B-temps averaged
-c       ta6                               Channel 2 (6.7)  B-temps
-c       tb6                                      "         B-temps averaged       
-c       ta8              RA       O       Channel 4 (11.2) Brightness temps (averaged)
-c       tb8              RA       O       Channel 4 (11.2) Brightness temps (warm pixel)
-c       tc8              RA       O           "            Brightness temps (filtered)
-c       ta12                              Channel 5 (12.0) B-temps
+c       ta4                               channel 1 (3.9)  b-temps
+c       tb4                                      "         b-temps averaged
+c       ta6                               channel 2 (6.7)  b-temps
+c       tb6                                      "         b-temps averaged       
+c       ta8              ra       o       channel 4 (11.2) brightness temps (averaged)
+c       tb8              ra       o       channel 4 (11.2) brightness temps (warm pixel)
+c       tc8              ra       o           "            brightness temps (filtered)
+c       ta12                              channel 5 (12.0) b-temps
 c       tb12                                     "          "       averaged
-c       laps_vis         RA       O       Visible (raw)
-c       vis_norm         RA       O       Visible (normalized)
-c       albedo           RA       O       Albedo (0.0 -- 1.0)
+c       laps_vis         ra       o       visible (raw)
+c       vis_norm         ra       o       visible (normalized)
+c       albedo           ra       o       albedo (0.0 -- 1.0)
 c
 c
       implicit none
@@ -111,7 +111,7 @@ c
       real,     allocatable  :: ri4time_ob(:,:)
       real,     allocatable  :: ctp_data(:,:,:)
 c
-c netCDF for cloud top pressure
+c netcdf for cloud top pressure
 c
       character*125 c_ctp(4)
       character*10 units_ctp(4)
@@ -171,8 +171,8 @@ c
       real      r12_cnt_to_btemp_lut(0:4095)
       real      r39_cnt_to_btemp_lut(0:4095)
       real      r67_cnt_to_btemp_lut(0:4095)
-      real      sri(nx_l,ny_l,maxchannel)   !Input: i satellite coord at each LAPS grid point    
-      real      srj(nx_l,ny_l,maxchannel)   !Input: j satellite coord at each LAPS grid point    
+      real      sri(nx_l,ny_l,maxchannel)   !input: i satellite coord at each laps grid point    
+      real      srj(nx_l,ny_l,maxchannel)   !input: j satellite coord at each laps grid point    
       real      good_vis_data_thresh,good_vis_data_frac
       real      good_ir_data_frac      
 c
@@ -221,18 +221,18 @@ c used for "bad" meteosat data.
       data favgth11u /239.0/
       data favgth12u /237.0/
 
-      data rcal/0.106178/  !as specified by EUMETSAT User Services 5-May-99.
+      data rcal/0.106178/  !as specified by eumetsat user services 5-may-99.
 
-      integer lineRes, elemRes
-      common /cdfdata/ lineRes, elemRes
+      integer lineres, elemres
+      common /cdfdata/ lineres, elemres
 
       include 'grid_fname.cmn'
 
 c =========================================================================
-c ----------------------------- START -------------------------------------
+c ----------------------------- start -------------------------------------
 c
       write(6,*)                                   
-      write(6,*)'Start lvd_driver_sub...'          
+      write(6,*)'start lvd_driver_sub...'          
 
       lvd_status = 0
       nchannels = 0
@@ -259,7 +259,7 @@ c     enddo
 c ----------------------------------------------------------------------
 c if current time is at beginning of new day, then adjust time back just
 c a few seconds to allow any data just before top of hour to have a chance
-c at being processed now.  Only do this for real time runs
+c at being processed now.  only do this for real time runs
 c ---------------------------------------------------------------------
       i4time_now = i4time_now_gg()
       call make_fnam_lp(i4time_cur,c_fname_cur,istatus)
@@ -268,7 +268,7 @@ c ---------------------------------------------------------------------
          l_archive_case = .false.
          if(c_fname_cur(6:9).eq.'0000')then
             print*
-            print*,'Adjusting time for beginning of new day'
+            print*,'adjusting time for beginning of new day'
             print*
             i4time_cur=i4time_cur-15
             call make_fnam_lp(i4time_cur,c_fname_cur,istatus)
@@ -277,27 +277,27 @@ c ---------------------------------------------------------------------
          l_archive_case = .true.
       endif
 
-      write(6,*)'Current LVD process time: ',
+      write(6,*)'current lvd process time: ',
      &'filename: ',c_fname_cur,' i4time: ',i4time_cur
 c ---------------------------------------------
-c acquiring LAPS latitude and longitude arrays.
+c acquiring laps latitude and longitude arrays.
 c ---------------------------------------------
       call get_domain_laps(nx_l,ny_l,c_gridfname,lat,lon,topo,
      &grid_spacing_laps_m,istatus)
       if(istatus.eq.1)then
-         write(6,*)'LAPS lat/lon/grid_spacing obtained'
+         write(6,*)'laps lat/lon/grid_spacing obtained'
          write(6,*)
       else
-         write(6,*)'Error getting LAPS lat/lon data'
+         write(6,*)'error getting laps lat/lon data'
          stop
       end if
 
 c --------------------------------------------------------------------
-c Read lat/lon to i/j look-up tables as needed.
+c read lat/lon to i/j look-up tables as needed.
 c --------------------------------------------------------------------
-      if(csattype .eq. 'rll' .or. csattype .eq. 'cms')then ! Java NetCDF files now use this type
-!          print *,' Read lat/lon arrays to regenerate sri/srj'
-!          print *,' Set i/j start/end for: ',jtype,ksat,
+      if(csattype .eq. 'rll' .or. csattype .eq. 'cms')then ! java netcdf files now use this type
+!          print *,' read lat/lon arrays to regenerate sri/srj'
+!          print *,' set i/j start/end for: ',jtype,ksat,
 !    1               i_end_ir(jtype,ksat),j_end_ir(jtype,ksat)
 !          sri = 100.
 !          srj = 50.                               
@@ -317,7 +317,7 @@ c --------------------------------------------------------------------
                i_end_vis(jtype,ksat)   =  n_pixels_vis(jtype,ksat)
                j_start_vis(jtype,ksat) =  1                             
                j_end_vis(jtype,ksat)   =  n_lines_vis(jtype,ksat)                             
-!YL
+!yl
                i_start_wv(jtype,ksat) =  1
                i_end_wv(jtype,ksat)   =  n_pixels_wv(jtype,ksat)
                j_start_wv(jtype,ksat) =  1
@@ -325,7 +325,7 @@ c --------------------------------------------------------------------
 
 !          endif
 
-           print *,' Set i/j start/end from pixels/lines: ',jtype,ksat
+           print *,' set i/j start/end from pixels/lines: ',jtype,ksat
      1            ,i_end_ir(jtype,ksat),j_end_ir(jtype,ksat)
      1            ,i_end_vis(jtype,ksat),j_end_vis(jtype,ksat)
 
@@ -336,12 +336,12 @@ c --------------------------------------------------------------------
      &chtype,nx_l,ny_l,sri,srj,istatus)
 
 c        if(istatus.eq.1)then
-c           write(6,*)'Grid mapping arrays not obtained: '
+c           write(6,*)'grid mapping arrays not obtained: '
 c           write(6,*)'    ',csatid,'/',csattype
 c           istatus = -1
 c           return
 c        else
-c           write(6,*)'Successfully obtained mapping arrays '
+c           write(6,*)'successfully obtained mapping arrays '
 c        endif
 
          if(csattype.eq.'twn')then  !.or.csattype.eq.'hko')then
@@ -352,14 +352,14 @@ c        endif
 c sanity "nan" checker for grid mapping arrays.
            call check_nan3(sri,nx_l,ny_l,maxchannel,nan_flag)
            if(nan_flag .ne. 1) then
-            print *,' ERROR: NaN in grid mapping array sri'
+            print *,' error: nan in grid mapping array sri'
             stop
            endif
 
 c
            call check_nan3 (srj,nx_l,ny_l,maxchannel,nan_flag)
            if(nan_flag .ne. 1) then
-            print *,' ERROR: NaN in grid mapping array srj'
+            print *,' error: nan in grid mapping array srj'
             stop
            endif
 
@@ -367,11 +367,11 @@ c
 
 c
 c -------------------------------------------------------------------------
-c Determine solar-altitude and set flag for visible sat data availability.
-c This flag will force  this process to not wait for vis data at the end of
+c determine solar-altitude and set flag for visible sat data availability.
+c this flag will force  this process to not wait for vis data at the end of
 c the day when the sun is setting.
 c
-      write(6,*)' Calling set_vis_flag:'
+      write(6,*)' calling set_vis_flag:'
       lvis_flag = .false.   !assume that it is available
       call set_vis_flag(i4time_cur,lat,lon,nx_l,ny_l,lvis_flag)
       if(lvis_flag)then
@@ -379,7 +379,7 @@ c
       endif
 c
 c --------------------------------------------------------------------------
-c Compute Dimensions and Allocate Raw satellite data arrays
+c compute dimensions and allocate raw satellite data arrays
 c --------------------------------------------------------------------------
 c
       n_vis_elem=1
@@ -393,11 +393,11 @@ c
          if(ichannels(i,jtype,ksat).eq.1)then
            nchannels=nchannels+1
            chtype(nchannels)=c_channel_types(i,jtype,ksat)
-c Find and read current satellite files... as many as 4 ir channels and vis.
+c find and read current satellite files... as many as 4 ir channels and vis.
            call lvd_file_specifier(c_channel_types(i,jtype,ksat)
      &,ispec,istatus)
            if(istatus.ne.0)then
-               write(6,*)'Error status returned from lvd_file_specifier'
+               write(6,*)'error status returned from lvd_file_specifier'
                return
            endif
            if(ispec.eq.1)then
@@ -419,52 +419,52 @@ c Find and read current satellite files... as many as 4 ir channels and vis.
          endif ! valid channel
       enddo
 
-      print*,'Nchannels = ',nchannels      
+      print*,'nchannels = ',nchannels      
 
       print*      
-      print*,'Raw data line/elem dimensions: '
+      print*,'raw data line/elem dimensions: '
       print*,'-------------------------------'
-      print*,'VIS: ',n_vis_lines,n_vis_elem
-      print*,'IR:  ',n_ir_lines, n_ir_elem
-      print*,'WV:  ',n_wv_lines, n_wv_elem
+      print*,'vis: ',n_vis_lines,n_vis_elem
+      print*,'ir:  ',n_ir_lines, n_ir_elem
+      print*,'wv:  ',n_wv_lines, n_wv_elem
 
       if(.not.allocated(image_vis))then
        allocate(image_vis(n_vis_lines,n_vis_elem,nimages),stat=istat)
        if(istat.ne.0)then
-         print*,'Error allocating visible data array ',istat
-         print*,'Error: Aborting process: Not enough memory'
+         print*,'error allocating visible data array ',istat
+         print*,'error: aborting process: not enough memory'
          stop
        endif
       endif
       if(.not.allocated(image_ir))then
        allocate(image_ir(n_ir_lines,n_ir_elem,nimages),stat=istat)
        if(istat.ne.0)then
-         print*,'Error allocating 11.0u data array ',istat
-         print*,'Error: Aborting process: Not enough memory'
+         print*,'error allocating 11.0u data array ',istat
+         print*,'error: aborting process: not enough memory'
          stop
        endif
       endif
       if(.not.allocated(image_39))then
        allocate(image_39(n_ir_lines,n_ir_elem,nimages),stat=istat)
        if(istat.ne.0)then
-         print*,'Error allocating 3.9u data array ',istat
-         print*,'Error: Aborting process: Not enough memory'
+         print*,'error allocating 3.9u data array ',istat
+         print*,'error: aborting process: not enough memory'
          stop
        endif
       endif
       if(.not.allocated(image_67))then
        allocate(image_67(n_wv_lines,n_wv_elem,nimages),stat=istat)
        if(istat.ne.0)then
-         print*,'Error allocating WV data array ',istat
-         print*,'Error: Aborting process: Not enough memory'
+         print*,'error allocating wv data array ',istat
+         print*,'error: aborting process: not enough memory'
          stop
        endif
       endif
       if(.not.allocated(image_12))then
        allocate(image_12(n_ir_lines,n_ir_elem,nimages),stat=istat)
        if(istat.ne.0)then
-         print*,'Error allocating 12.0u data array ',istat
-         print*,'Error: Aborting process: Not enough memory'
+         print*,'error allocating 12.0u data array ',istat
+         print*,'error: aborting process: not enough memory'
          stop
        endif
       endif
@@ -472,30 +472,30 @@ c Find and read current satellite files... as many as 4 ir channels and vis.
        if(.not.allocated(image_lat_ir))then
         allocate(image_lat_ir(n_ir_lines,n_ir_elem),stat=istat)
         if(istat.ne.0)then
-          print*,'Error allocating image_lat_ir data array ',istat
-          print*,'Error: Aborting process: Not enough memory'
+          print*,'error allocating image_lat_ir data array ',istat
+          print*,'error: aborting process: not enough memory'
           stop
         endif
        endif
        if(.not.allocated(image_lon_ir))then
         allocate(image_lon_ir(n_ir_lines,n_ir_elem),stat=istat)
         if(istat.ne.0)then
-          print*,'Error allocating image_lon_ir data array ',istat
-          print*,'Error: Aborting process: Not enough memory'
+          print*,'error allocating image_lon_ir data array ',istat
+          print*,'error: aborting process: not enough memory'
           stop
         endif
        endif
       endif
 c
 c --------------------------------------------------------------------------
-c Find and read current satellite files... as many as 5 ir channels and vis.
+c find and read current satellite files... as many as 5 ir channels and vis.
 c --------------------------------------------------------------------------
       if(csattype.eq.'cdf'.or.csattype.eq.'gvr'.or.
      &   csattype.eq.'wfo'.or.csattype.eq.'ncp'.or.
      &     csattype.eq.'nll'.or.csattype.eq.'rll'.or.
      &     csattype.eq.'jma'                           )then 
 
-       write(6,*)'Using getcdf_satdat routine for ',csattype
+       write(6,*)'using getcdf_satdat routine for ',csattype
 
          call getcdf_satdat(csatid,
      &                      csattype,
@@ -517,17 +517,17 @@ c --------------------------------------------------------------------------
      &                      istatus)
 
          if(istatus .ne. 1)then
-            write(6,*)'Did not get data for ',c_fname_cur
+            write(6,*)'did not get data for ',c_fname_cur
             goto 998
          endif
 
-!        Note that lineRes and elemRes are filled into common for the 'rll' case
+!        note that lineres and elemres are filled into common for the 'rll' case
 
       elseif(csattype.eq.'asc')then   !then we are using ascii files for raw ingest sat data
 
          call s_len(path_to_raw_sat(1,jtype,ksat),in)
          write(6,*)'datapath: ',path_to_raw_sat(1,jtype,ksat)(1:in)
-         write(6,*)'Using getascii_satdat routine'
+         write(6,*)'using getascii_satdat routine'
 
 c  only possible to have one time for ascii files (nft=1); however, the number of
 c  matches for this time (ntm) >= 0 depending on the result in getascii_satdat.
@@ -552,18 +552,18 @@ c    &                        r_image_res_m(1,1),
 c    &                        istatus)
 
 c        if(istatus .eq. 1)then
-c           write(6,*)'Did not get data for ',c_fname_cur
+c           write(6,*)'did not get data for ',c_fname_cur
 c           goto 998
 c        end if
 c
-c 5-15-97: JSmart added gwc satdat switch
+c 5-15-97: jsmart added gwc satdat switch
 c
       elseif(csattype.eq.'gwc')then
 
-         write(6,*)'Search for data: ',csattype
-         write(6,*)'Using getafgwc_satdat routine'
+         write(6,*)'search for data: ',csattype
+         write(6,*)'using getafgwc_satdat routine'
 
-         nft=1    !default to start. can change within this routine depending on AFWA file times.
+         nft=1    !default to start. can change within this routine depending on afwa file times.
          nft_prior=nft
          call getafgwc_satdat(ksat,jtype,
      &                        maxchannel,nchannels,chtype,
@@ -579,19 +579,19 @@ c
 
          if(nft.gt.nft_prior.and.nft.lt.3)then
             print*,'nft incremented in getafgwc_satdat.'
-     &,' Move image_ir(1,1,1) to image_ir(1,1,2)'
+     &,' move image_ir(1,1,1) to image_ir(1,1,2)'
          call move(image_ir(1,1,1),image_ir(1,1,2),n_ir_elem,n_ir_lines)
          elseif(nft.ge.3)then
-            print*,'nft > 2. lvd for AFWA cannot handle this. terminate'
+            print*,'nft > 2. lvd for afwa cannot handle this. terminate'
             stop
          endif
 
          if(istatus.ne.0)then
-            write(6,*)'Did not get data for ',c_fname_cur
+            write(6,*)'did not get data for ',c_fname_cur
             goto 998
          endif 
 
-c June 2001 added Taiwan (gms) sat ingest
+c june 2001 added taiwan (gms) sat ingest
 
       elseif(csattype.eq.'twn')then
 
@@ -604,11 +604,11 @@ c June 2001 added Taiwan (gms) sat ingest
      &,istatus)
 
          if(istatus.ne.1)then
-            print*,'Error returned: read_gms_taiwan'
+            print*,'error returned: read_gms_taiwan'
             return
          endif
 
-c March 2003 added HKO (gms) sat ingest
+c march 2003 added hko (gms) sat ingest
 
       elseif(csattype.eq.'hko')then
 
@@ -621,13 +621,13 @@ c March 2003 added HKO (gms) sat ingest
      &,istatus)
 
          if (istatus.eq.0) then
-            print*,'Error returned: read_gms_hko'
+            print*,'error returned: read_gms_hko'
             return
          endif
 
       elseif(csattype.eq.'cms')then
 
-         call COMScount2tbNrad_sub(
+         call comscount2tbnrad_sub(
      & path_to_raw_sat(1,jtype,ksat),max_files
 !    &,n_lines_ir(jtype,ksat),n_pixels_ir(jtype,ksat)        !<-- full array size raw data
      &,n_ir_lines,n_ir_elem
@@ -651,7 +651,7 @@ c March 2003 added HKO (gms) sat ingest
 !         c_type(3,1) = '4u'
 !         c_type(4,1) = 'wv'
 !         c_type(5,1) = '12u'
-!YL
+!yl
          c_type(1,1) = 'vis'
          c_type(2,1) = '4u'
          c_type(3,1) = 'wv'
@@ -665,16 +665,16 @@ c March 2003 added HKO (gms) sat ingest
      &         image_lon_ir(:,:) = r_missing_data      
 
          if (istatus.eq.0) then
-            print*,'Error returned: COMScount2tbNrad_sub'
+            print*,'error returned: comscount2tbnrad_sub'
          else
-            print*,'Success in COMScount2tbNrad_sub for i4time '
+            print*,'success in comscount2tbnrad_sub for i4time '
      &            ,i4time_data(1)
          endif
 
       elseif(csattype.eq.'gnp')then
          do i4time_offset = -120,+120,60
            call get_goes_np_data
-     +                   (i4time_cur,laps_cycle_time,NX_L,NY_L
+     +                   (i4time_cur,laps_cycle_time,nx_l,ny_l
      +                   ,i4time_offset
      +                   ,maxchannel,max_files,nchannels
      +                   ,csatid,csattype,chtype
@@ -682,9 +682,9 @@ c March 2003 added HKO (gms) sat ingest
      +                   ,image_ir,n_ir_elem,n_ir_lines
      +                   ,image_39
      +                   ,image_vis,n_vis_elem,n_vis_lines
-     +                   ,i4time_goes,istatus)                      ! O
+     +                   ,i4time_goes,istatus)                      ! o
            if(istatus .eq. 1)then
-              write(6,*)' Successful return from get_goes_np_data'
+              write(6,*)' successful return from get_goes_np_data'
               goto 110
            endif
          enddo
@@ -709,7 +709,7 @@ c March 2003 added HKO (gms) sat ingest
       elseif(csattype.eq.'gr2')then
          do i4time_offset = -120,+120,60
            call get_goes_l2_data
-     +                   (i4time_cur,laps_cycle_time,NX_L,NY_L
+     +                   (i4time_cur,laps_cycle_time,nx_l,ny_l
      +                   ,i4time_offset
      +                   ,maxchannel,max_files,nchannels
      +                   ,csatid,csattype,chtype
@@ -717,12 +717,12 @@ c March 2003 added HKO (gms) sat ingest
      +                   ,image_ir,n_ir_elem,n_ir_lines
      +                   ,image_39
      +                   ,image_vis,n_vis_elem,n_vis_lines
-     +                   ,i4time_goes,istatus)                      ! O
+     +                   ,i4time_goes,istatus)                      ! o
            if(istatus .eq. 1)then
-              write(6,*)' Successful return from get_goes_l2_data'
+              write(6,*)' successful return from get_goes_l2_data'
               goto 120
            else
-              write(6,*)' No data from get_goes_l2_data for this time'
+              write(6,*)' no data from get_goes_l2_data for this time'
               write(6,*)
            endif
          enddo
@@ -745,16 +745,16 @@ c March 2003 added HKO (gms) sat ingest
          c_type(3,1) = 'vis'
 
       else
-         write(6,*)' ERROR: unknown sat type ',csattype
+         write(6,*)' error: unknown sat type ',csattype
          lvd_status = 0
          return
 
       endif ! csattype
 
 c --------------------------------------------------------------------
-c Get image resolution information
+c get image resolution information
 c --------------------------------
-      write(6,*)' Getting image resolution information (m)'
+      write(6,*)' getting image resolution information (m)'
 
       do j = 1,nft
       do i = 1,ntm(j)
@@ -762,15 +762,15 @@ c --------------------------------
          call lvd_file_specifier(c_type(i,j),ispec,istatus)
          if(ispec.eq.1)then
             r_image_res_m(i,j)=r_resolution_x_vis(jtype,ksat)
-            write(6,*)'YLYL'
+            write(6,*)'ylyl'
      1               ,jtype,ksat,i,j,r_resolution_x_vis(jtype,ksat)
          elseif(ispec.eq.2.or.ispec.eq.4.or.ispec.eq.5)then
             r_image_res_m(i,j)=r_resolution_x_ir(jtype,ksat)
-            write(6,*)'YLYL'
+            write(6,*)'ylyl'
      1               ,jtype,ksat,i,j,r_resolution_x_ir(jtype,ksat)
          elseif(ispec.eq.3)then
             r_image_res_m(i,j)=r_resolution_x_wv(jtype,ksat)
-            write(6,*)'YLYL'
+            write(6,*)'ylyl'
      1               ,jtype,ksat,i,j,r_resolution_x_wv(jtype,ksat)
          endif
 
@@ -778,13 +778,13 @@ c --------------------------------
       enddo
 c
 c -----------------------------------------------------------------------
-c Compute or read ir/vis count to brightness temp (Tb)/vis count-to-count.
+c compute or read ir/vis count to brightness temp (tb)/vis count-to-count.
 c -----------------------------------------------------------------------
 c
       if(csattype.eq.'cdf'.or.csattype.eq.'wfo'.or.
      &   csatid.eq.'meteos'                         )then
 
-         write(6,*)'Compute ',csatid,' cnt-to-btemp lookup tables'
+         write(6,*)'compute ',csatid,' cnt-to-btemp lookup tables'
 
          do j = 1,nft
          do i = 1,ntm(j)
@@ -795,25 +795,25 @@ c
                call genbtemplut(csatid,csattype,ispec,rcal,
      &                          r39_cnt_to_btemp_lut,istatus)
                if(istatus.ne.1)then
-                  write(6,*)'Error computing 39 lut'
+                  write(6,*)'error computing 39 lut'
                endif
             elseif(ispec.eq.3)then
                call genbtemplut(csatid,csattype,ispec,rcal,
      &                          r67_cnt_to_btemp_lut,istatus)
                if(istatus.ne.1)then
-                  write(6,*)'Error computing 67 lut'
+                  write(6,*)'error computing 67 lut'
                endif
             elseif(ispec.eq.4)then
                call genbtemplut(csatid,csattype,ispec,rcal,
      &                          ir_cnt_to_btemp_lut,istatus)
                if(istatus.ne.1)then
-                  write(6,*)'Error computing ir lut'
+                  write(6,*)'error computing ir lut'
                endif
             elseif(ispec.eq.5)then
                call genbtemplut(csatid,csattype,ispec,rcal,
      &                          r12_cnt_to_btemp_lut,istatus)
                if(istatus.ne.1)then
-                  write(6,*)'Error computing 12 lut'
+                  write(6,*)'error computing 12 lut'
                endif
             endif
 
@@ -853,8 +853,8 @@ c
 6        enddo
          enddo
 c
-c           call count2radiance_lut(n_vis_lines,scalingBias,
-c    &scalingGain,cnt2rad(1,i))
+c           call count2radiance_lut(n_vis_lines,scalingbias,
+c    &scalinggain,cnt2rad(1,i))
 
       endif
 c
@@ -871,7 +871,7 @@ c     lsatqc=.true.
       if(lsatqc)then
 
          smsng(:)=float(i_msng_sat_flag(:,jtype,ksat))
-         write(6,*)'Entering satdatfill routine'
+         write(6,*)'entering satdatfill routine'
 
          call satdatfill(csatid,csattype,nft,ntm,
      &   n_ir_elem,n_ir_lines,n_vis_elem,n_vis_lines,
@@ -883,11 +883,11 @@ c     lsatqc=.true.
 
       else         !  if(csatid.ne.'gmssat')then
 
-         write(6,*)'TEST = skipping satfill section'
+         write(6,*)'test = skipping satfill section'
          write(6,*)'==============================='
 
-         write(6,*)'Not using fill routine '
-         write(6,*)'Only use set_missing_flag '
+         write(6,*)'not using fill routine '
+         write(6,*)'only use set_missing_flag '
 
          smsng(:)=float(i_msng_sat_flag(:,jtype,ksat))
 
@@ -904,10 +904,10 @@ c ---------------------------------------------------
 c satellite range and sub-longitude (namelist items).
 c ---------------------------------------------------
       radtodeg=180.0/acos(-1.)
-      range_m = sat_range_m(ksat)+eradius   !adding eradius 07-2007: JRS
+      range_m = sat_range_m(ksat)+eradius   !adding eradius 07-2007: jrs
 
       if(csattype .eq. 'rll')then 
-!        Select center of hopefully full disk image
+!        select center of hopefully full disk image
          sublat_d = image_lat_ir(n_ir_lines/2,n_ir_elem/2)
          sublon_d = image_lon_ir(n_ir_lines/2,n_ir_elem/2)
 
@@ -920,7 +920,7 @@ c ---------------------------------------------------
       write(6,*)'range_m = ',range_m
       write(6,*)'sublat_d = ',sublat_d
       write(6,*)'sublon_d = ',sublon_d
-      write(6,*)'LAPS grid spacing (m): ',grid_spacing_laps_m
+      write(6,*)'laps grid spacing (m): ',grid_spacing_laps_m
       write(6,*)
 c
 c -------------------------------------------------
@@ -929,27 +929,27 @@ c -------------------------------------------------
       do i = 1,nft
       do j = 1,ntm(i)
 
-         write(6,*)'Satellite Channel: ',c_type(j,i)
+         write(6,*)'satellite channel: ',c_type(j,i)
 
          if(r_image_status(j,i) .gt. 0.0)then
-            write(6,*)'Some Bad data found = ', c_type(j,i)
+            write(6,*)'some bad data found = ', c_type(j,i)
      &,r_image_status(j,i)
          else
-            write(6,*)'Good data type/status: ',c_type(j,i)
+            write(6,*)'good data type/status: ',c_type(j,i)
      &,r_image_status(j,i)
          endif
 c
 c compute grid ratio input/output resolutions
 c
          if(csattype .eq. 'rll')then
-            write(6,*)'Using common block variable for lineRes'
-            r_image_res_m(j,i) = lineRes * 1000.
+            write(6,*)'using common block variable for lineres'
+            r_image_res_m(j,i) = lineres * 1000.
          endif
 
          r_grid_ratio(j,i)=r_image_res_m(j,i)/grid_spacing_laps_m
 
-         write(6,*)'Image resolution (m): ',r_image_res_m(j,i)
-         write(6,*)'I/O Grid ratio: ',r_grid_ratio(j,i)
+         write(6,*)'image resolution (m): ',r_image_res_m(j,i)
+         write(6,*)'i/o grid ratio: ',r_grid_ratio(j,i)
          write(6,*)
 
       enddo
@@ -957,8 +957,8 @@ c
 c
 c
 c ------------------------------------------------------------
-c convert from counts to brightness temps for CDF data use the
-c pre-generated lut's. For ascii data divide all by 10.
+c convert from counts to brightness temps for cdf data use the
+c pre-generated lut's. for ascii data divide all by 10.
 c ------------------------------------------------------------
 
        if(csattype.ne.'asc'.and. ! exceptions to btemp_convert call
@@ -971,28 +971,28 @@ c ------------------------------------------------------------
      &    csattype.ne.'gr2'.and.
      &    csattype.ne.'ncp')then
           write(6,*)
-          write(6,*)'Convert counts to brightness temps ',csattype
+          write(6,*)'convert counts to brightness temps ',csattype
           do i = 1,nft
           do j = 1,ntm(i)
              if(r_image_status(j,i).le.0.333)then
                 call lvd_file_specifier(c_type(j,i),ispec,istat)
                 if(ispec.eq.4)then
 
-                   write(6,*)'For ',c_type(j,i)
+                   write(6,*)'for ',c_type(j,i)
                    call btemp_convert(n_ir_elem,n_ir_lines,
      &                        ir_cnt_to_btemp_lut,
      &                        r_missing_data,
      &                        image_ir(1,1,i))
                 elseif(ispec.eq.2)then 
  
-                   write(6,*)'For ',c_type(j,i)
+                   write(6,*)'for ',c_type(j,i)
                    call btemp_convert(n_ir_elem,n_ir_lines,
      &                        r39_cnt_to_btemp_lut,
      &                        r_missing_data,
      &                        image_39(1,1,i))
                 elseif(ispec.eq.3)then
 
-                   write(6,*)'For ',c_type(j,i)
+                   write(6,*)'for ',c_type(j,i)
                    call btemp_convert(n_wv_elem,n_wv_lines,
      &                        r67_cnt_to_btemp_lut,
      &                        r_missing_data,
@@ -1000,7 +1000,7 @@ c ------------------------------------------------------------
 
                 elseif(ispec.eq.5)then
 
-                   write(6,*)'For ',c_type(j,i)
+                   write(6,*)'for ',c_type(j,i)
                    call btemp_convert(n_ir_elem,n_ir_lines,
      &                        r12_cnt_to_btemp_lut,
      &                        r_missing_data,
@@ -1021,7 +1021,7 @@ c ------------------------------------------------------------
      &                          vis_cnt_to_cnt_lut,
      &                          r_missing_data,
      &                          image_vis(1,1,i))
-                       write(*,*)'VIS data converted - cnt-to-cnt lut'
+                       write(*,*)'vis data converted - cnt-to-cnt lut'
 
                        call array_range(image_vis(1,1,i)
      1                                 ,n_vis_elem,n_vis_lines,rmin,rmax
@@ -1030,13 +1030,13 @@ c ------------------------------------------------------------
      1                          ,rmin,rmax
 
                    else
-                       write(*,*)'Not converting ',csattype,' vis data'
+                       write(*,*)'not converting ',csattype,' vis data'
                    endif
                 endif
              endif
           enddo
           enddo
-          write(6,*)'Done with conversions for ',csattype
+          write(6,*)'done with conversions for ',csattype
           write(6,*)
 
        elseif(csattype.eq.'asc'.or.csattype.eq.'rll')then
@@ -1045,7 +1045,7 @@ c note that brightness temps in the ascii file have 1 significant
 c decimal digit and have been acquired as integers so convert here.
 c 
           write(6,*)
-     1       'Convert btemps from Integer to Floating pt., scaled by '
+     1       'convert btemps from integer to floating pt., scaled by '
      1        ,scale_img      
 
           do i = 1,nft
@@ -1068,27 +1068,27 @@ c
 
           enddo
           enddo
-          write(6,*)'Done with conversion'
+          write(6,*)'done with conversion'
           write(6,*)
        else
-          write(6,*)'No btemps conversion for this csattype '
+          write(6,*)'no btemps conversion for this csattype '
      &             ,csattype
        endif
 c
 c ------------------------------------------------------------------------------------------------
-c Start processing satellite image data found for the current run time.
+c start processing satellite image data found for the current run time.
 c nft = number of file times. ntm(i) is the number of time matches for each file time
 c nft can be > 1 if, 1) the code has been idle; 2) if there is more
 c than one time due to rapid scan; 3) there are file times within threshold i_sat_delta_t_sec
 c (found in static/nest7grid.parms). nft must never exceed parameter max_images (satellite_lvd.nl).
-c This is insured within the getcdf, getafgwc, etc code.
+c this is insured within the getcdf, getafgwc, etc code.
 c ------------------------------------------------------------------------------------------------
 
       write(6,*)
-      write(6,*)'Ready to remap satellite data - nft is ',nft
+      write(6,*)'ready to remap satellite data - nft is ',nft
       write(6,*)'---------------------------------------'
 c
-c This for output.  LAPS LVD files as indicated.
+c this for output.  laps lvd files as indicated.
 c
       call get_directory('lvd',dir_lvd,len_lvd)
       dir_lvd=dir_lvd(1:len_lvd)//trim(csatid)//'/'
@@ -1099,8 +1099,8 @@ c initialize output array
 c
       do i=1,n_lvd_fields_max
          lvl_lvd(i) = 0
-         lvl_coord_lvd(i) = 'AGL'
-         units_lvd(i)='K'
+         lvl_coord_lvd(i) = 'agl'
+         units_lvd(i)='k'
          do k=1,ny_l
          do j=1,nx_l
             laps_data(j,k,i)=r_missing_data
@@ -1117,11 +1117,11 @@ c
 
          call make_fnam_lp(i4time_data(i),c_fname,istatus)
 c
-c ----------  GMS SATELLITE SWITCH -------
+c ----------  gms satellite switch -------
          if(csatid.eq.'gmssat'.and. csattype.ne.'twn'
      &      .and. csattype.ne.'hko')goto 310
 
-         write(6,*) 'YL',ntm(i),i,nft
+         write(6,*) 'yl',ntm(i),i,nft
          do j = 1,ntm(i)
 
             n=index(c_type(j,i),' ')-1
@@ -1134,10 +1134,10 @@ c ----------  GMS SATELLITE SWITCH -------
             if(ispec.eq.4)then
               if(r_image_status(j,i).le.(1.-good_ir_data_frac))then
 
-!              Is this needed for coarse LAPS grids using pixel averaging?
+!              is this needed for coarse laps grids using pixel averaging?
                if(csattype.eq.'rll' .or. csattype.eq.'cms')then
                  if(maxval(istat_grij) .eq. 0)then
-                   write(6,*)' Calling latlon_to_grij for VIS ',ispec
+                   write(6,*)' calling latlon_to_grij for vis ',ispec
                    call latlon_to_grij(lat,lon,nx_l,ny_l,
      1                                 image_lat_ir,image_lon_ir,
      1                                 sri(1,1,ispec),srj(1,1,ispec),
@@ -1151,7 +1151,7 @@ c ----------  GMS SATELLITE SWITCH -------
                      do while(istat_grij(ispec) .eq. 0)
                        if(istat_grij(ispec) .eq. 1)then
                          write(6,*)
-     1                           ' Copying latlon_to_grij data for IR '
+     1                           ' copying latlon_to_grij data for ir '
      1                           ,iispec,ispec
                          sri(:,:,ispec) = sri(:,:,iispec)
                          srj(:,:,ispec) = srj(:,:,iispec)
@@ -1174,7 +1174,7 @@ c ----------  GMS SATELLITE SWITCH -------
      &                      istatus)
 
                if(istatus .ne. 1)then
-                  write(*,*)'Error processing IR (Bnd-8) Satellite Data'
+                  write(*,*)'error processing ir (bnd-8) satellite data'
                else
                   if(csatid.eq.'meteos')then
                      call check_field_ave(nx_l,ny_l,ta8,favgth11u
@@ -1196,32 +1196,32 @@ c                    endif
 
                      nlf=nlf+1
                      call move(ta8,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf)  = 'S8A'    ! satellite, channel-4, averaged
-                     c_lvd(nlf)=csatid//' (11.2u) IR B-TEMPS - AVERAGED'
+                     var_lvd(nlf)  = 's8a'    ! satellite, channel-4, averaged
+                     c_lvd(nlf)=csatid//' (11.2u) ir b-temps - averaged'
                      nlf=nlf+1
                      call move(tb8,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf)='S8W'       ! satellite, channel-4, warm pixel
-                     c_lvd(nlf)=csatid//' (11.2u) IR B-TEMPS; WARM PIX'
+                     var_lvd(nlf)='s8w'       ! satellite, channel-4, warm pixel
+                     c_lvd(nlf)=csatid//' (11.2u) ir b-temps; warm pix'
                      nlf=nlf+1
                      call move(tc8,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf)='S8C'       ! satellite, channel-4, warm pixel
-                     c_lvd(nlf)=csatid//' (11.2u) IR B-TEMPS - FILTERED'
+                     var_lvd(nlf)='s8c'       ! satellite, channel-4, warm pixel
+                     c_lvd(nlf)=csatid//' (11.2u) ir b-temps - filtered'
                    else
-                     print*,'No output for this channel: ',c_type(j,k)
+                     print*,'no output for this channel: ',c_type(j,k)
                    endif
                endif
 
               else
-               write(6,*)'IR image not processed: missing ir data'
+               write(6,*)'ir image not processed: missing ir data'
      1                  ,r_image_status(j,i)
               endif
 
             elseif(ispec.eq.2)then
               if(r_image_status(j,i).lt.(1.-good_ir_data_frac))then
-!YL
+!yl
                if(csattype.eq.'rll' .or. csattype.eq.'cms')then
                  if(maxval(istat_grij) .eq. 0)then
-                   write(6,*)' Calling latlon_to_grij for IR ',ispec
+                   write(6,*)' calling latlon_to_grij for ir ',ispec
                    call latlon_to_grij(lat,lon,nx_l,ny_l,
      1                                 image_lat_ir,image_lon_ir,
      1                                 sri(1,1,ispec),srj(1,1,ispec),
@@ -1235,7 +1235,7 @@ c                    endif
                      do while(istat_grij(ispec) .eq. 0)
                        if(istat_grij(ispec) .eq. 1)then
                          write(6,*)
-     1                           ' Copying latlon_to_grij data for IR '    
+     1                           ' copying latlon_to_grij data for ir '    
      1                           ,iispec,ispec
                          sri(:,:,ispec) = sri(:,:,iispec)
                          srj(:,:,ispec) = srj(:,:,iispec)
@@ -1258,7 +1258,7 @@ c                    endif
      &                      istatus)
 
                if(istatus .ne. 1)then
-                  write(*,*)'Error processing IR (Bnd-4) Satellite Data'       
+                  write(*,*)'error processing ir (bnd-4) satellite data'       
                else
                   if(csatid.eq.'meteos')then
                      call check_field_ave(nx_l,ny_l,ta4,favgth39u
@@ -1267,14 +1267,14 @@ c                    endif
                   if(istatus.eq.1)then
                      nlf=nlf+1
                      call move(ta4,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf) = 'S3A'       ! satellite, , averaged
-                     c_lvd(nlf)=csatid//' (3.9u) IR B-TEMPS - AVERAGED'
+                     var_lvd(nlf) = 's3a'       ! satellite, , averaged
+                     c_lvd(nlf)=csatid//' (3.9u) ir b-temps - averaged'
                      nlf=nlf+1
                      call move(tb4,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf)  = 'S3C'       ! satellite, , filtered
-                     c_lvd(nlf)=csatid//' (3.9u) IR B-TEMPS - FILTERED'
+                     var_lvd(nlf)  = 's3c'       ! satellite, , filtered
+                     c_lvd(nlf)=csatid//' (3.9u) ir b-temps - filtered'
                   else
-                     print*,'No output for this channel: ',c_type(j,k)
+                     print*,'no output for this channel: ',c_type(j,k)
                   end if
                endif
             else
@@ -1283,10 +1283,10 @@ c                    endif
 
             elseif(ispec.eq.5)then
             if(r_image_status(j,i).lt.(1.-good_ir_data_frac))then
-!YL
+!yl
                if(csattype.eq.'rll' .or. csattype.eq.'cms')then
                  if(maxval(istat_grij) .eq. 0)then
-                   write(6,*)' Calling latlon_to_grij for IR ',ispec
+                   write(6,*)' calling latlon_to_grij for ir ',ispec
                    call latlon_to_grij(lat,lon,nx_l,ny_l,
      1                                 image_lat_ir,image_lon_ir,
      1                                 sri(1,1,ispec),srj(1,1,ispec),
@@ -1297,7 +1297,7 @@ c                    endif
                      do while(istat_grij(ispec) .eq. 0)
                        if(istat_grij(ispec) .eq. 1)then
                          write(6,*)
-     1                           ' Copying latlon_to_grij data for IR '    
+     1                           ' copying latlon_to_grij data for ir '    
      1                           ,iispec,ispec
                          sri(:,:,ispec) = sri(:,:,iispec)
                          srj(:,:,ispec) = srj(:,:,iispec)
@@ -1320,7 +1320,7 @@ c                    endif
      &                      istatus)
 
                if(istatus .ne. 1)then
-                  write(*,*)'Error processing IR (Bd-12) Satellite Data'       
+                  write(*,*)'error processing ir (bd-12) satellite data'       
                else
                   if(csatid.eq.'meteos')then
                      call check_field_ave(nx_l,ny_l,ta12,favgth12u
@@ -1329,14 +1329,14 @@ c                    endif
                   if(istatus.eq.1)then
                      nlf=nlf+1
                      call move(ta12,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf) = 'SCA'       ! satellite, averaged
-                     c_lvd(nlf)=csatid//' (12.0u) IR B-TEMPS - AVERAGED'
+                     var_lvd(nlf) = 'sca'       ! satellite, averaged
+                     c_lvd(nlf)=csatid//' (12.0u) ir b-temps - averaged'
                      nlf=nlf+1
                      call move(tb12,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf) = 'SCC'       ! satellite, averaged
-                     c_lvd(nlf)=csatid//' (12.0u) IR B-TEMPS - FILTERED'
+                     var_lvd(nlf) = 'scc'       ! satellite, averaged
+                     c_lvd(nlf)=csatid//' (12.0u) ir b-temps - filtered'
                   else
-                     print*,'No output for this channel: ',c_type(j,k)
+                     print*,'no output for this channel: ',c_type(j,k)
                   end if
                endif
             else
@@ -1345,10 +1345,10 @@ c                    endif
 
             elseif(ispec.eq.3)then
               if(r_image_status(j,i).lt.(1.-good_ir_data_frac))then
-!YL
+!yl
                if(csattype.eq.'rll' .or. csattype.eq.'cms')then
                  if(maxval(istat_grij) .eq. 0)then
-                   write(6,*)' Calling latlon_to_grij for IR ',ispec
+                   write(6,*)' calling latlon_to_grij for ir ',ispec
                    call latlon_to_grij(lat,lon,nx_l,ny_l,
      1                                 image_lat_ir,image_lon_ir,
      1                                 sri(1,1,ispec),srj(1,1,ispec),
@@ -1359,7 +1359,7 @@ c                    endif
                      do while(istat_grij(ispec) .eq. 0)
                        if(istat_grij(ispec) .eq. 1)then
                          write(6,*)
-     1                           ' Copying latlon_to_grij data for IR '    
+     1                           ' copying latlon_to_grij data for ir '    
      1                           ,iispec,ispec
                          sri(:,:,ispec) = sri(:,:,iispec)
                          srj(:,:,ispec) = srj(:,:,iispec)
@@ -1382,7 +1382,7 @@ c                    endif
      &                      istatus)
 
                if(istatus .ne. 1)then
-                  write(*,*)'Error processing wv Satellite Data'
+                  write(*,*)'error processing wv satellite data'
                else
                   if(csatid.eq.'meteos')then
                      call check_field_ave(nx_l,ny_l,ta6,favgth67u
@@ -1391,14 +1391,14 @@ c                    endif
                   if(istatus.eq.1)then
                      nlf=nlf+1
                      call move(ta6,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf) = 'S4A'       ! satellite, averaged
-                     c_lvd(nlf)=csatid//' (6.7u) IR B-TEMPS - AVERAGED'
+                     var_lvd(nlf) = 's4a'       ! satellite, averaged
+                     c_lvd(nlf)=csatid//' (6.7u) ir b-temps - averaged'
                      nlf=nlf+1
                      call move(tb6,laps_data(1,1,nlf),nx_l,ny_l)
-                     var_lvd(nlf) = 'S4C'       ! satellite, filtered
-                     c_lvd(nlf)=csatid//' (6.7u) IR B-TEMPS - FILTERED'
+                     var_lvd(nlf) = 's4c'       ! satellite, filtered
+                     c_lvd(nlf)=csatid//' (6.7u) ir b-temps - filtered'
                   else
-                     print*,'No output for this channel: ',c_type(j,k)
+                     print*,'no output for this channel: ',c_type(j,k)
                   end if
                endif
               else
@@ -1411,7 +1411,7 @@ c                    endif
 
                if(csattype.eq.'rll' .or. csattype.eq.'cms')then
                  if(maxval(istat_grij) .eq. 0)then
-                   write(6,*)' Calling latlon_to_grij for VIS ',ispec
+                   write(6,*)' calling latlon_to_grij for vis ',ispec
                    call latlon_to_grij(lat,lon,nx_l,ny_l,
      1                                 image_lat_ir,image_lon_ir,
      1                                 sri(1,1,ispec),srj(1,1,ispec),
@@ -1425,7 +1425,7 @@ c                    endif
                      do while(istat_grij(ispec) .eq. 0)
                        if(istat_grij(ispec) .eq. 1)then
                          write(6,*)
-     1                           ' Copying latlon_to_grij data for VIS '
+     1                           ' copying latlon_to_grij data for vis '
      1                           ,iispec,ispec
                          sri(:,:,ispec) = sri(:,:,iispec)
                          srj(:,:,ispec) = srj(:,:,iispec)
@@ -1449,7 +1449,7 @@ c                    endif
      &                      visraw,visrefl,visnorm,albedo,
      &                      istatus_vis)
 c
-c *** istatus_v() is < 0. Determine if we have enough vis data.
+c *** istatus_v() is < 0. determine if we have enough vis data.
 c
                good_vis_data_thresh=(nx_l*ny_l)*good_vis_data_frac
                if( (nx_l*ny_l+istatus_vis(1)).gt.
@@ -1458,10 +1458,10 @@ c
                   nlf=nlf+1
 !                 call move(visraw,laps_data(1,1,nlf),nx_l,ny_l)
                   call move(visrefl,laps_data(1,1,nlf),nx_l,ny_l)
-                  write(6,*)' Using vis reflectance for SVS field'
-                  var_lvd(nlf) = 'SVS'       ! satellite, visible
-                  c_lvd(nlf)=csatid//' Visible Satellite Reflectance'
-                  units_lvd(nlf) = 'REFLECTANCE'
+                  write(6,*)' using vis reflectance for svs field'
+                  var_lvd(nlf) = 'svs'       ! satellite, visible
+                  c_lvd(nlf)=csatid//' visible satellite reflectance'
+                  units_lvd(nlf) = 'reflectance'
                else
                   write(6,*)' less than 1% good vis data in status 1'
                endif
@@ -1471,9 +1471,9 @@ c
 
                   nlf=nlf+1
                   call move(visnorm,laps_data(1,1,nlf),nx_l,ny_l)
-                  var_lvd(nlf) = 'SVN'       ! satellite, visible, normalized
-                  c_lvd(nlf)=csatid//' (VISIBLE) SATELLITE - NORM'
-                  units_lvd(nlf) = 'COUNTS'
+                  var_lvd(nlf) = 'svn'       ! satellite, visible, normalized
+                  c_lvd(nlf)=csatid//' (visible) satellite - norm'
+                  units_lvd(nlf) = 'counts'
                else
                   write(6,*)' less than 1% good vis data in status 2'
                endif
@@ -1483,11 +1483,11 @@ c
 
                   nlf=nlf+1
                   call move(albedo,laps_data(1,1,nlf),nx_l,ny_l)
-                  var_lvd(nlf) = 'ALB'       ! albedo
-                  c_lvd(nlf)= csatid//' (VISIBLE) ALBEDO'
+                  var_lvd(nlf) = 'alb'       ! albedo
+                  c_lvd(nlf)= csatid//' (visible) albedo'
                else
                   write(6,*)' less than 1% good vis data in status 3'
-                  write(6,*)'ALB not moved',nx_l*ny_l+istatus_vis(3)
+                  write(6,*)'alb not moved',nx_l*ny_l+istatus_vis(3)
      &                                     ,good_vis_data_thresh
                endif
 
@@ -1498,8 +1498,8 @@ c
 
             endif
 
-            write(6,*)'Number of lvd fields so far: ',nlf
-            write(6,*)'     New Fields Written:'
+            write(6,*)'number of lvd fields so far: ',nlf
+            write(6,*)'     new fields written:'
             do k=nlf_prev,nlf
                write(6,132)var_lvd(k)
 132            format(8x,a3)
@@ -1511,7 +1511,7 @@ c
          goto 311
 c
 c following routine handles the case for which the data have already
-c been mapped to the laps domain. AFWA's GMS so far.
+c been mapped to the laps domain. afwa's gms so far.
 
 310      call loadlapsdata(nx_l,ny_l,maxchannel,n_lvd_fields_max,
      &                     ntm(i),c_type(1,i),r_image_status(1,i),
@@ -1523,8 +1523,8 @@ c been mapped to the laps domain. AFWA's GMS so far.
 
 311      if(nlf .gt. 0)then
 
-!           Add subpoint to comments
-            write(6,*)' Add subpoint to comments: ',sublat_d,sublon_d
+!           add subpoint to comments
+            write(6,*)' add subpoint to comments: ',sublat_d,sublon_d
             do ic = 1,nlf
                 write(c_lvd(ic)(51:100),312)sublat_d,sublon_d
 312             format(' sublat:',e17.8,' sublon:',e17.8)
@@ -1539,10 +1539,10 @@ c been mapped to the laps domain. AFWA's GMS so far.
      1                ,i3,1x,a,1x,2f10.4)
             enddo
 
-            write(6,*)' Writing lvd. Total # of fields: ',nlf
+            write(6,*)' writing lvd. total # of fields: ',nlf
             write(6,*)'    to ',dir_lvd(1:len_lvd)
             write(6,314)csatid,c_fname,(var_lvd(ilf),ilf=1,nlf)
-314         format(' LVD fields for ',a6,1x,a9,':',30(1x,a))
+314         format(' lvd fields for ',a6,1x,a9,':',30(1x,a))
             call write_laps_data(i4time_data(i),
      &                      dir_lvd,
      &                      ext_lvd,
@@ -1564,14 +1564,14 @@ c been mapped to the laps domain. AFWA's GMS so far.
                write(6,*)'*****************************'
                lvd_status=1
             else
-               write(*,*)' Error writing lvd file for this time'
-               write(*,*)' i4Time: ',i4time_data(i)
-               write(*,*)' File Time: ',c_fname
+               write(*,*)' error writing lvd file for this time'
+               write(*,*)' i4time: ',i4time_data(i)
+               write(*,*)' file time: ',c_fname
             endif
 
          else
 
-            print*,'No fields processed. No lvd written ',c_fname
+            print*,'no fields processed. no lvd written ',c_fname
 
          endif
 
@@ -1581,13 +1581,13 @@ c been mapped to the laps domain. AFWA's GMS so far.
 
       goto 17
 
-998   write(*,*)'No ',c_sat_id(ksat),"/",c_sat_types(jtype,ksat),
+998   write(*,*)'no ',c_sat_id(ksat),"/",c_sat_types(jtype,ksat),
      &' satellite image data.'
 
       deallocate(image_vis,image_ir,image_39,image_67,image_12)
 
 17    call get_c8_project(c8_project,istatus)
-      if(c8_project.eq.'NIMBUS')then
+      if(c8_project.eq.'nimbus')then
 
          if(csatid.eq.'goes08')then
             csat=csatid(1:4)//csatid(6:6)
@@ -1634,8 +1634,8 @@ c           path_to_ctp='/data/ihop/lapb/casedate/data/sat/nesdis/'
          endif
 
          call s_len(path_to_ctp,lctp)
-         print*,'Path to CO2 data: ',path_to_ctp(1:lctp)
-         print*,'check for new cloud top pressure (C02) files'
+         print*,'path to co2 data: ',path_to_ctp(1:lctp)
+         print*,'check for new cloud top pressure (c02) files'
          print*,'ctp time window (sec) = ',iwindow_ctp
 
          call check_for_new_ctp(iwindow_ctp,istatus_ctp)
@@ -1664,34 +1664,34 @@ c
              call get_directory('ctp',dir_ctp,ldctp)
 c            call move(rlctp,ctp_data(1,1,1),nx_l,ny_l)
              ctp_data(:,:,1)=rlctp
-             var_ctp(1) = 'PCT'
-             c_ctp(1)=csatid//' NESDIS derived cloud top pressure'
-             units_ctp(1)='PA'
+             var_ctp(1) = 'pct'
+             c_ctp(1)=csatid//' nesdis derived cloud top pressure'
+             units_ctp(1)='pa'
              lvl_ctp(1) = 0
-             lvl_coord_ctp(1)='AGL'
+             lvl_coord_ctp(1)='agl'
 
              ctp_data(:,:,2)=rlca
-             var_ctp(2) = 'LCA'
-             c_ctp(2)=csatid//' NESDIS derived cloud amount'
+             var_ctp(2) = 'lca'
+             c_ctp(2)=csatid//' nesdis derived cloud amount'
              units_ctp(2)='%'
              lvl_ctp(2) = 0
-             lvl_coord_ctp(2)='AGL'
+             lvl_coord_ctp(2)='agl'
 
 c            call move(rlct,ctp_data(1,1,3),nx_l,ny_l)
              ctp_data(:,:,3)=rlct
-             var_ctp(3)='CTT'
-             c_ctp(3)=csatid//' NESDIS derived cloud top temperature'
-             units_ctp(3)='K'
+             var_ctp(3)='ctt'
+             c_ctp(3)=csatid//' nesdis derived cloud top temperature'
+             units_ctp(3)='k'
              lvl_ctp(3) = 0
-             lvl_coord_ctp(3)='AGL'
+             lvl_coord_ctp(3)='agl'
 
 c            call move(ri4time_ob,ctp_data(1,1,4),nx_l,ny_l)
              ctp_data(:,:,4)=ri4time_ob
-             var_ctp(4)='I4T'
+             var_ctp(4)='i4t'
              c_ctp(4)=csatid//' i4time of obs'
              units_ctp(4)='sec'
              lvl_ctp(4) = 0
-             lvl_coord_ctp(4)='AGL'
+             lvl_coord_ctp(4)='agl'
 
              print*,'writing cld top pressure file ',ext_ctp
              print*,'dir = ',dir_ctp(1:ldctp)
@@ -1708,9 +1708,9 @@ c            print*,'path/filename out: ',dir_ctp
                 write(*,*)'i4 time: ',i4time_ctp_data
                 write(6,*)'*****************************'
              else
-                write(*,*)' Error writing ctp file for this time'
-                write(*,*)' i4Time: ',i4time_ctp_data
-                write(*,*)' File Time: ',fname_ctp
+                write(*,*)' error writing ctp file for this time'
+                write(*,*)' i4time: ',i4time_ctp_data
+                write(*,*)' file time: ',fname_ctp
              endif
 
             endif
@@ -1718,7 +1718,7 @@ c            print*,'path/filename out: ',dir_ctp
             deallocate(rlctp,rlca,rlct,ctp_data,ri4time_ob)
 
          else
-            print*,'No new cld top pressure files to process'
+            print*,'no new cld top pressure files to process'
             print*
          endif
 
@@ -1726,19 +1726,19 @@ c            print*,'path/filename out: ',dir_ctp
 
       goto 16
 
- 99   write(6,*)'Error opening count LUT: terminating. NO LVD'
+ 99   write(6,*)'error opening count lut: terminating. no lvd'
       lvd_status = 1
       goto 16
 
-909   write(6,*)'Error opening ll/ij look up table'
+909   write(6,*)'error opening ll/ij look up table'
       lvd_status = 1
       goto 16
 
-910   write(6,*)'Error getting mapping lut'
+910   write(6,*)'error getting mapping lut'
       lvd_status = 1
 
- 16   print*,'*** Finished in lvd driver sub ***'
+ 16   print*,'*** finished in lvd driver sub ***'
       itstatus=ishow_timer()
-      write(6,*)'Elapsed time (sec): ',itstatus
+      write(6,*)'elapsed time (sec): ',itstatus
       return
       end

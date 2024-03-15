@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -39,17 +39,17 @@ c
 c
 c*****************************************************************************
 c
-c	Routine to write the LAPS surface data file.   The data is passed
+c	routine to write the laps surface data file.   the data is passed
 c       to this routine via the 'store' array.
 c
-c	Changes:
-c		P. Stamus  03-27-98  Original version (from old format
+c	changes:
+c		p. stamus  03-27-98  original version (from old format
 c                                      version of write_surface_obs).
-c                          05-01-98  Added soil moisture to 'store_5' & '_5ea'
-c                          09-04-98  Final adjustments for operational use.
+c                          05-01-98  added soil moisture to 'store_5' & '_5ea'
+c                          09-04-98  final adjustments for operational use.
 c
 c
-c               J. Edwards 09-16-98  moved all format definitions to 
+c               j. edwards 09-16-98  moved all format definitions to 
 c                                    src/include/lso_formats.inc
 c                                    changed 909 definition to allow for 
 c                                    missing data
@@ -73,17 +73,17 @@ c
      &         autostntype(maxsta)*6,store_cldamt(maxsta,5)*4
 c
 c
-c.....	Write the file.
+c.....	write the file.
 c
 	open(11,file=outfile,status='replace')
 c
-c.....	Write the header.
+c.....	write the header.
 c
 	write(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Write the station data.
+c.....	write the station data.
 c
 	do k=1,n_obs_b
 c
@@ -91,7 +91,7 @@ c
            call filter_string(provider(k))
 
 	   write(11,901) stations(k),           !station id
-     &                   wmoid(k),              !WMO id number
+     &                   wmoid(k),              !wmo id number
      &                   provider(k),           !data provider
      &                   (store_1(k,i),i=1,3),  !lat, lon, elev
      &                   nint(store_1(k,4))     !obs time
@@ -106,7 +106,7 @@ c
 c
 	  write(11,905) store_2(k,1), store_2ea(k,1),   !temp, temp expected accuracy
      &                  store_2(k,2), store_2ea(k,2),   !dew point, dew point exp. accuracy
-     &                  store_2(k,3), store_2ea(k,3)    !Rel hum, rh expected accuracy
+     &                  store_2(k,3), store_2ea(k,3)    !rel hum, rh expected accuracy
 c
 	  write(11,907) store_3(k,1), store_3(k,2),     !wind dir, wind speed
      &                  store_3(k,3), store_3(k,4),     !wind gust dir, wind gust speed
@@ -114,7 +114,7 @@ c
 c
 	  write(11,909) store_4(k,1),                   !altimeter
      &                  store_4(k,2),                   !station pressure
-     &                  store_4(k,3),                   !MSL pressure
+     &                  store_4(k,3),                   !msl pressure
      &                  nint(store_4(k,4)),             !3-h press change character
      &                  store_4(k,5),                   !3-h pressure change
      &                  store_4ea(k,1), store_4ea(k,2)  !pressure exp accuracy, alt exp accuracy
@@ -138,7 +138,7 @@ c
      &                  store_7(k,2),              !24-h max temperature
      &                  store_7(k,3)               !24-h min temperature
 c
-c.....	Write the cloud data if we have any.
+c.....	write the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -153,7 +153,7 @@ c
 	close(11)	
 
 c
-c..... End of data writing.  Let's go home...
+c..... end of data writing.  let's go home...
 c
 	return
 	include 'lso_formats.inc'
@@ -161,7 +161,7 @@ c
 
         subroutine get_sfc_badflag(badflag_out,istatus)
 
-cdoc    Returns "badflag" used in surface code
+cdoc    returns "badflag" used in surface code
 
         include 'laps_sfc.inc'
 
@@ -173,7 +173,7 @@ cdoc    Returns "badflag" used in surface code
 
         subroutine get_ibadflag(ibadflag,istatus)
 
-cdoc    Returns "ibadflag" used in surface code
+cdoc    returns "ibadflag" used in surface code
 
         ibadflag = -99
         istatus = 1
@@ -182,27 +182,27 @@ cdoc    Returns "ibadflag" used in surface code
         end
 
          subroutine get_filetime_range(
-     1                i4time_ob_b,i4time_ob_a                   ! I
-     1               ,i4_contains_early,i4_contains_late        ! I
-     1               ,intvl                                     ! I
-     1               ,i4time_file_b,i4time_file_a)              ! O
+     1                i4time_ob_b,i4time_ob_a                   ! i
+     1               ,i4_contains_early,i4_contains_late        ! i
+     1               ,intvl                                     ! i
+     1               ,i4time_file_b,i4time_file_a)              ! o
 
-cdoc     Determine the range of needed filetimes, given observation time range
+cdoc     determine the range of needed filetimes, given observation time range
 cdoc     and other info about the files.
 
-         integer i4time_ob_b        ! Earliest ob we want
-         integer i4time_ob_a        ! Latest ob we want
-         integer i4_contains_early  ! Earliest contained ob relative to filetime
-         integer i4_contains_late   ! Latest contained ob relative to filetime
-         integer intvl              ! Regular time interval of files
+         integer i4time_ob_b        ! earliest ob we want
+         integer i4time_ob_a        ! latest ob we want
+         integer i4_contains_early  ! earliest contained ob relative to filetime
+         integer i4_contains_late   ! latest contained ob relative to filetime
+         integer intvl              ! regular time interval of files
         
          character*9 a9_ob_b,a9_ob_a,a9_ft_b,a9_ft_a
 
-!        Range of file times we want to read
+!        range of file times we want to read
          i4time_file_b = i4time_ob_b - i4_contains_late
          i4time_file_a = i4time_ob_a + i4_contains_early
 
-!        Range of filenames at fixed intervals
+!        range of filenames at fixed intervals
          i4time_file_b = ( (i4time_file_b + intvl - 1) / intvl)*intvl     
          i4time_file_a = ( (i4time_file_a            ) / intvl)*intvl
 
@@ -219,12 +219,12 @@ cdoc     and other info about the files.
 
 c
 c
-      subroutine ck_array_real(var, recNum, filval, badflag)
+      subroutine ck_array_real(var, recnum, filval, badflag)
 c
-      integer recNum
-      real var(recNum), filval, badflag
+      integer recnum
+      real var(recnum), filval, badflag
 c
-      do i=1,recNum
+      do i=1,recnum
          if(var(i) .eq. filval) var(i) = badflag
          if(abs(var(i)) .gt. 1e20) var(i) = badflag
       enddo !i
@@ -234,13 +234,13 @@ c
       end
 c
 c
-      subroutine ck_array_dble(var, recNum, filval, badflag)
+      subroutine ck_array_dble(var, recnum, filval, badflag)
 c
-      integer recNum
-      double precision var(recNum), filval
+      integer recnum
+      double precision var(recnum), filval
       real badflag
 c
-      do i=1,recNum
+      do i=1,recnum
          if(var(i) .eq. filval) var(i) = badflag
          if(abs(var(i)) .gt. 1e20) var(i) = badflag
       enddo !i
@@ -248,10 +248,10 @@ c
       return
       end
 
-        subroutine get_sfc_obtime(int_obtime,i4time_lso ! I
-     1                           ,i4time_ob,istatus)    ! O
+        subroutine get_sfc_obtime(int_obtime,i4time_lso ! i
+     1                           ,i4time_ob,istatus)    ! o
 
-        character*9 a9time                              ! L
+        character*9 a9time                              ! l
 
         data icount /0/
 
@@ -288,27 +288,27 @@ c
         return
 
  900    if(icount .le. 1000)then
-            write(6,*)' Error in get_sfc_obtime, unresolved ob time'
+            write(6,*)' error in get_sfc_obtime, unresolved ob time'
         endif
-        i4time_ob = i4time_lso ! Assume obtime equals the file time
+        i4time_ob = i4time_lso ! assume obtime equals the file time
         istatus = 0
         return
 
         end
 
-        subroutine sfci4_to_sfchhmm(i4time_ob,            ! I
-     1                              hhmm,istatus)         ! O
+        subroutine sfci4_to_sfchhmm(i4time_ob,            ! i
+     1                              hhmm,istatus)         ! o
 
         ! this routine essentially the reverse operation of 
         ! get_sfc_obtime. that is, from i4time to hhmm.
 
         integer hhmm
 
-        call CV_I4TIM_INT_LP (i4time_ob,NYEAR,NMONTH,NDAY,NHOUR,
-     1                     NMIN,NSEC,ISTATUS)
+        call cv_i4tim_int_lp (i4time_ob,nyear,nmonth,nday,nhour,
+     1                     nmin,nsec,istatus)
 
         if(istatus .eq. 1)then
-            hhmm = NHOUR*100 + NMIN
+            hhmm = nhour*100 + nmin
         else
             hhmm = -100 ! flag value
         endif

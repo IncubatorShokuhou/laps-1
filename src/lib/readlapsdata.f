@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -28,52 +28,52 @@ cdis
        subroutine read_laps_data(i4time,dir,ext,iimax,jjmax,kkmax,kdim,
      1                    var_req,lvl_req,lvl_coord_req,
      1                    units_req,comment_req,data,istatus)
-C**********************************************************************
-C
-C      This file contains the following FORTRAN subroutines:
-C            read_laps_data
-C            cvt_fname_v3
-C            make_fcst_time
-C
-C      The read_laps_data subroutine calls the following C function
-C      from the rwl_v3.c file:
-C            read_cdf_v3
-C
-C**********************************************************************
-C
-C      Subroutine READ_LAPS_DATA
-C
-C      Author:    Linda Wharton
-C      Modified:  To accept netCDF ver. 2 data files  1/93 Linda Wharton
-C                 To accept netCDF ver. 3 data files...capablility to 
-C                   read binary laps files separated out into 
-C                   read_old_laps.f  9/97 Linda Wharton
-C
-C      Reads data requested by arrays VAR_REQ and LVL_REQ for the
-C      I4TIME, DIR and EXT specified.  Returns LVL_COORD-REQ,
-C      UNITS_REQ, COMMENT_REQ, DATA AND ISTATUS
-C
-C**********************************************************************
-C
+c**********************************************************************
+c
+c      this file contains the following fortran subroutines:
+c            read_laps_data
+c            cvt_fname_v3
+c            make_fcst_time
+c
+c      the read_laps_data subroutine calls the following c function
+c      from the rwl_v3.c file:
+c            read_cdf_v3
+c
+c**********************************************************************
+c
+c      subroutine read_laps_data
+c
+c      author:    linda wharton
+c      modified:  to accept netcdf ver. 2 data files  1/93 linda wharton
+c                 to accept netcdf ver. 3 data files...capablility to 
+c                   read binary laps files separated out into 
+c                   read_old_laps.f  9/97 linda wharton
+c
+c      reads data requested by arrays var_req and lvl_req for the
+c      i4time, dir and ext specified.  returns lvl_coord-req,
+c      units_req, comment_req, data and istatus
+c
+c**********************************************************************
+c
       implicit  none
-C
-      integer       i4time,              !INPUT I4time of data
-     1                iimax,jjmax,kkmax,   !INPUT # cols, # rows, # fields
-     1                kdim,                !INPUT K dimension of DATA array
-     1                lvl_req(kdim),       !INPUT Requested levels
-     1                istatus              !OUTPUT
-      character*(*)   dir                  !INPUT Directory to read data from
-      character*(*)   ext                  !INPUT File name ext 
-      character*(*)   var_req(kdim)        !INPUT 3 letter ID of requested fields
-      character*(*)   lvl_coord_req(kdim)  !OUTPUT Vertical coordinate of fields
-      character*(*)   units_req(kdim)      !OUTPUT Units of requested fields
-      character*(*)   comment_req(kdim)    !OUTPUT Comments for requested fields
-      real        data(iimax,jjmax,kdim) !OUTPUT data
-C
+c
+      integer       i4time,              !input i4time of data
+     1                iimax,jjmax,kkmax,   !input # cols, # rows, # fields
+     1                kdim,                !input k dimension of data array
+     1                lvl_req(kdim),       !input requested levels
+     1                istatus              !output
+      character*(*)   dir                  !input directory to read data from
+      character*(*)   ext                  !input file name ext 
+      character*(*)   var_req(kdim)        !input 3 letter id of requested fields
+      character*(*)   lvl_coord_req(kdim)  !output vertical coordinate of fields
+      character*(*)   units_req(kdim)      !output units of requested fields
+      character*(*)   comment_req(kdim)    !output comments for requested fields
+      real        data(iimax,jjmax,kdim) !output data
+c
       integer fn_length,
-     1          i_reftime,              !UNIX time of data
-     1          i_valtime,              !UNIX time of data
-     1          flag,                   !Print flag (1 = off)
+     1          i_reftime,              !unix time of data
+     1          i_valtime,              !unix time of data
+     1          flag,                   !print flag (1 = off)
      1          error(3),
      1          called_from,
      1          var_len,
@@ -82,46 +82,46 @@ C
      1          lvl_coord_len,
      1          units_len
   
-C
+c
       character*5       fcst_hh_mm
       character*9       gtime
       character*150     file_name
-C
+c
       common            /prt/flag
-C
-C-------------------------------------------------------------------------------
-C
+c
+c-------------------------------------------------------------------------------
+c
       error(1)=1
       error(2)=0
       error(3)=-2
-C
-C ****  Create file name.
-C
+c
+c ****  create file name.
+c
       call make_fnam_lp(i4time,gtime,istatus)
       if (istatus .ne. 1) then
         write (6,*) 
-     1'Error converting i4time to file name...read aborted.'
+     1'error converting i4time to file name...read aborted.'
         istatus=error(2)
         return
       endif
 
       call s_len(ext, ext_len)
 
-C Hard wired as a place holder - will be used in filename only if read_laps_data
-C   is called on lga, lgb, fua, fsf, ram, rsf
-C To fix this, call read_laps instead
+c hard wired as a place holder - will be used in filename only if read_laps_data
+c   is called on lga, lgb, fua, fsf, ram, rsf
+c to fix this, call read_laps instead
       fcst_hh_mm = '0000'
 
       call cvt_fname_v3(dir,gtime,fcst_hh_mm,ext,ext_len,
      1                  file_name,fn_length,istatus)
       if (istatus .eq. error(2)) goto 930
-C
-C **** get actual reftime from gtime...
-C
+c
+c **** get actual reftime from gtime...
+c
       i_reftime = i4time - 315619200
       i_valtime = i_reftime
 
-      called_from = 0   !called from FORTRAN
+      called_from = 0   !called from fortran
 
       var_len = len(var_req(1))
       comm_len = len(comment_req(1))
@@ -150,73 +150,73 @@ C
       if (istatus .eq. -4)  goto 990  !error in version 
       if (istatus .eq. -3)  goto 980  !error in dimensioning arrays
       if (istatus .eq. -2)  goto 970  !error retrieving data
-      if (istatus .eq. -1)  goto 950  !error opening file as netCDF
-C
-C ****  Return normally.
-C
+      if (istatus .eq. -1)  goto 950  !error opening file as netcdf
+c
+c ****  return normally.
+c
         istatus=error(1)
 999     return
-C
-C ****  Error trapping.
-C
+c
+c ****  error trapping.
+c
 930     if (flag .ne. 1)
      1    write (6,*) 'file_name variable too short...read aborted.'
         istatus=error(2)
         goto 999
-C
+c
 950     if (flag .ne. 1)
-     1    write (6,*) 'Error opening netCDF file...read aborted.'
+     1    write (6,*) 'error opening netcdf file...read aborted.'
         istatus=error(2)
         goto 999
-C
+c
 970     if (flag .ne. 1)
-     1    write (6,*) 'Error retrieving data...read aborted.'
+     1    write (6,*) 'error retrieving data...read aborted.'
         istatus=error(2)
         goto 999
-C
+c
 980     if (flag .ne. 1) then
-          write (6,*) 'Error in array dimensioning...read aborted.'
+          write (6,*) 'error in array dimensioning...read aborted.'
           write (6,*) 'iimax/jjmax/kkmax/kdim = ',iimax,jjmax,kkmax,kdim
         endif
         istatus=error(2)
         goto 999
-C
+c
 990     if (flag .ne. 1)
-     1    write (6,*) 'Error in version, not a valid LAPS file... '
+     1    write (6,*) 'error in version, not a valid laps file... '
      1                ,'read aborted.'
         istatus=error(2)
         goto 999
-C
+c
 992     continue
         istatus=error(2)
         goto 999
-C
-        END
+c
+        end
 
-C########################################################################
+c########################################################################
       subroutine cvt_fname_v3(dir,gtime,fhh,ext,ext_len,file_name,
      1                        fn_length,istatus)
-C**********************************************************************
-C
-C      Subroutine CVT_FNAME_V3
-C
-C      Author:    Linda Wharton 1/93
-C
-C      Inputed DIR, GTIME and EXT are converted to ASCII values in a byte
-C      array.  B_FNAME is created in C function make_c_fname.  FILE_NAME
-C      is also created.  B_EXT is returned for use in other functions.
-C
-C      Modified:  Linda Wharton 4/94
-C      Changed to remove references to BYTE data type, FILE_NAME is
-C      created from DIR, GTIME and EXT.  No ASCII conversions done.
-C
-C**********************************************************************
+c**********************************************************************
+c
+c      subroutine cvt_fname_v3
+c
+c      author:    linda wharton 1/93
+c
+c      inputed dir, gtime and ext are converted to ascii values in a byte
+c      array.  b_fname is created in c function make_c_fname.  file_name
+c      is also created.  b_ext is returned for use in other functions.
+c
+c      modified:  linda wharton 4/94
+c      changed to remove references to byte data type, file_name is
+c      created from dir, gtime and ext.  no ascii conversions done.
+c
+c**********************************************************************
 
       implicit  none
 
-      character*(*)     dir          !Directory to read data from
+      character*(*)     dir          !directory to read data from
       character*(*)     gtime
-      character*(*)     ext          !File name ext 
+      character*(*)     ext          !file name ext 
       character*(*)     file_name
       character*5       fhh
 
@@ -226,39 +226,39 @@ C**********************************************************************
 
       integer         end_dir, end_ext, error(2)
 
-C#ifdefined NODYNAMIC
-C      character*31  ext_dn
-C#else
+c#ifdefined nodynamic
+c      character*31  ext_dn
+c#else
       character*(10) ext_dn
-C#endif
+c#endif
 
       call downcase(ext,ext_dn)
 
       error(1)=1
       error(2)=0
 
-C **** Convert string data so it can be used by C programs
-C ******  find end of dir 
-C
+c **** convert string data so it can be used by c programs
+c ******  find end of dir 
+c
       call s_len(dir,end_dir)
-C
-C ******  find end of ext_dn
-C
+c
+c ******  find end of ext_dn
+c
       call s_len(ext_dn,end_ext)
-C
-C ******  find end of file_name
-C
+c
+c ******  find end of file_name
+c
       fn_length = len(file_name)
-C
-C ******  find end of fhh
-C
+c
+c ******  find end of fhh
+c
       call s_len(fhh,fhh_len)
-C
-C ****  make fortran file_name
-C
+c
+c ****  make fortran file_name
+c
 
       if (end_dir+end_ext+fhh_len+10 .gt. fn_length) then
-        write (6,*) 'Length of dir+file-name exceeds file_name length.'
+        write (6,*) 'length of dir+file-name exceeds file_name length.'
         istatus = error(2)
         goto 999
       else
@@ -277,13 +277,13 @@ C
         call s_len(file_name,fn_length)
       endif
 
-C
-C ****  Return normally.
-C
+c
+c ****  return normally.
+c
         istatus=error(1)
 999     return
         end
-C########################################################################
+c########################################################################
       subroutine make_fcst_time(valtime,reftime,fcst_hh_mm,istatus)
 
       implicit none
@@ -299,7 +299,7 @@ C########################################################################
 
       fcst_sec = valtime - reftime
 
-C see if fcst_sec > 356400 seconds (99 hours)
+c see if fcst_sec > 356400 seconds (99 hours)
       if (fcst_sec .gt. 356400) then
         extended = 1  ! fcst_hh_mm format is hhhmm if hh > 99
       else
@@ -311,21 +311,21 @@ C see if fcst_sec > 356400 seconds (99 hours)
         goto 998
       endif
 
-C ****  fcst_sec > 0 .... create fcst_hh_mm
+c ****  fcst_sec > 0 .... create fcst_hh_mm
 
       fcst_min_sec = mod(fcst_sec,3600)
       fcst_hr = (fcst_sec - fcst_min_sec) / 3600
       fcst_min = fcst_min_sec / 60
 
-C     fcst_hr can be between 0 and 999
-C     fcst_min can be between 0 and 59
+c     fcst_hr can be between 0 and 999
+c     fcst_min can be between 0 and 59
 
       if ((fcst_hr .lt. 0) .or. (fcst_hr .gt. 999)) then
-       write(6,*) ' Forecast hour cannot exceed 999: ',fcst_hr
+       write(6,*) ' forecast hour cannot exceed 999: ',fcst_hr
         goto 997
       else
         if ((fcst_min .lt. 0) .or. (fcst_min .gt. 59)) then
-          write(6,*) ' Forecast minute cannot exceed 59: ',fcst_min
+          write(6,*) ' forecast minute cannot exceed 59: ',fcst_min
           goto 997
         endif
       endif
@@ -360,19 +360,19 @@ C     fcst_min can be between 0 and 59
         fcst_hh_mm = h1//h2//m1//m2
       endif
       goto 998
-C
-C ****  Error Return.
-C
+c
+c ****  error return.
+c
 
 997   istatus=error(2)
       goto 999
 
-C
-C ****  Return normally.
-C
+c
+c ****  return normally.
+c
 
 998   istatus=error(1)
 
 999   return
       end
-C########################################################################
+c########################################################################

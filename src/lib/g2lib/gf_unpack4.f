@@ -1,52 +1,52 @@
       subroutine gf_unpack4(cgrib,lcgrib,iofst,ipdsnum,ipdstmpl,
      &                      mappdslen,coordlist,numcoord,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_unpack4 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-26
+! subprogram:    gf_unpack4 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-26
 !
-! ABSTRACT: This subroutine unpacks Section 4 (Product Definition Section)
-!   starting at octet 6 of that Section.  
+! abstract: this subroutine unpacks section 4 (product definition section)
+!   starting at octet 6 of that section.  
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-26  Gilbert
-! 2002-01-24  Gilbert  - Changed to dynamically allocate arrays
+! program history log:
+! 2000-05-26  gilbert
+! 2002-01-24  gilbert  - changed to dynamically allocate arrays
 !                        and to pass pointers to those arrays through
 !                        the argument list.
 !
-! USAGE:    CALL gf_unpack4(cgrib,lcgrib,iofst,ipdsnum,ipdstmpl,mappdslen,
+! usage:    call gf_unpack4(cgrib,lcgrib,iofst,ipdsnum,ipdstmpl,mappdslen,
 !    &                   coordlist,numcoord,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array that contains the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     iofst    - Bit offset of the beginning of Section 4.
+!   input argument list:
+!     cgrib    - character array that contains the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     iofst    - bit offset of the beginning of section 4.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     iofst    - Bit offset of the end of Section 4, returned.
-!     ipdsnum  - Product Definition Template Number ( see Code Table 4.0)
-!     ipdstmpl - Pointer to integer array containing the data values for 
-!                the specified Product Definition
-!                Template ( N=ipdsnum ).  Each element of this integer
-!                array contains an entry (in the order specified) of Product
-!                Defintion Template 4.N
-!     mappdslen- Number of elements in ipdstmpl().  i.e. number of entries
-!                in Product Defintion Template 4.N  ( N=ipdsnum ).
-!     coordlist- Pointer to real array containing floating point values 
+!   output argument list:      
+!     iofst    - bit offset of the end of section 4, returned.
+!     ipdsnum  - product definition template number ( see code table 4.0)
+!     ipdstmpl - pointer to integer array containing the data values for 
+!                the specified product definition
+!                template ( n=ipdsnum ).  each element of this integer
+!                array contains an entry (in the order specified) of product
+!                defintion template 4.n
+!     mappdslen- number of elements in ipdstmpl().  i.e. number of entries
+!                in product defintion template 4.n  ( n=ipdsnum ).
+!     coordlist- pointer to real array containing floating point values 
 !                intended to document
 !                the vertical discretisation associated to model data
-!                on hybrid coordinate vertical levels.  (part of Section 4)
+!                on hybrid coordinate vertical levels.  (part of section 4)
 !     numcoord - number of values in array coordlist.
-!     ierr     - Error return code.
+!     ierr     - error return code.
 !                0 = no error
-!                5 = "GRIB" message contains an undefined Product Definition
-!                    Template.
+!                5 = "grib" message contains an undefined product definition
+!                    template.
 !                6 = memory allocation error
 !
-! REMARKS: Uses Fortran 90 module pdstemplates and module re_alloc.
+! remarks: uses fortran 90 module pdstemplates and module re_alloc.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -69,16 +69,16 @@
       ierr=0
       nullify(ipdstmpl,coordlist)
 
-      call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+      call gbyte(cgrib,lensec,iofst,32)        ! get length of section
       iofst=iofst+32
       iofst=iofst+8     ! skip section number
       allocate(mappds(lensec))
 
-      call gbyte(cgrib,numcoord,iofst,16)    ! Get num of coordinate values
+      call gbyte(cgrib,numcoord,iofst,16)    ! get num of coordinate values
       iofst=iofst+16
-      call gbyte(cgrib,ipdsnum,iofst,16)    ! Get Prod. Def Template num.
+      call gbyte(cgrib,ipdsnum,iofst,16)    ! get prod. def template num.
       iofst=iofst+16
-      !   Get Product Definition Template
+      !   get product definition template
       call getpdstemplate(ipdsnum,mappdslen,mappds,needext,iret)
       if (iret.ne.0) then
         ierr=5
@@ -86,7 +86,7 @@
         return
       endif
       !
-      !   Unpack each value into array ipdstmpl from the
+      !   unpack each value into array ipdstmpl from the
       !   the appropriate number of octets, which are specified in
       !   corresponding entries in array mappds.
       !
@@ -110,16 +110,16 @@
         iofst=iofst+nbits
       enddo
       !
-      !   Check to see if the Product Definition Template needs to be
+      !   check to see if the product definition template needs to be
       !   extended.
-      !   The number of values in a specific template may vary
+      !   the number of values in a specific template may vary
       !   depending on data specified in the "static" part of the
       !   template.
       !
       if ( needext ) then
         call extpdstemplate(ipdsnum,ipdstmpl,newmappdslen,mappds)
         call realloc(ipdstmpl,mappdslen,newmappdslen,istat)
-        !   Unpack the rest of the Product Definition Template
+        !   unpack the rest of the product definition template
         do i=mappdslen+1,newmappdslen
           nbits=iabs(mappds(i))*8
           if ( mappds(i).ge.0 ) then
@@ -135,8 +135,8 @@
       endif
       if( allocated(mappds) ) deallocate(mappds)
       !
-      !   Get Optional list of vertical coordinate values
-      !   after the Product Definition Template, if necessary.
+      !   get optional list of vertical coordinate values
+      !   after the product definition template, if necessary.
       !
       nullify(coordlist)
       if ( numcoord .ne. 0 ) then
@@ -154,6 +154,6 @@
         iofst=iofst+(32*numcoord)
       endif
       
-      return    ! End of Section 4 processing
+      return    ! end of section 4 processing
       end
 

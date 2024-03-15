@@ -1,657 +1,657 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       spectral_coefficients
 !
-! PURPOSE:
-!       Module to hold the RT model spectral coefficients and their access
+! purpose:
+!       module to hold the rt model spectral coefficients and their access
 !       routines. 
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE spectral_coefficients
+! calling sequence:
+!       use spectral_coefficients
 !
-! OUTPUTS:
-!       frequency:                     Channel frequency
-!                                      UNITS:      GHz
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+! outputs:
+!       frequency:                     channel frequency
+!                                      units:      ghz
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       wavenumber:                    Channel frequency
-!                                      UNITS:      cm^-1
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!       wavenumber:                    channel frequency
+!                                      units:      cm^-1
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       planck_c1:                     First Planck function coefficient
-!                                      UNITS:      mW/(m^2.sr.cm^-2)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!       planck_c1:                     first planck function coefficient
+!                                      units:      mw/(m^2.sr.cm^-2)
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       planck_c2:                     Second Planck function coefficient
-!                                      UNITS:      K/cm^1
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!       planck_c2:                     second planck function coefficient
+!                                      units:      k/cm^1
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       band_c1:                       Polychromatic band correction offset.
-!                                      UNITS:      K
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!       band_c1:                       polychromatic band correction offset.
+!                                      units:      k
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       band_c2:                       Polychromatic band correction slope.
-!                                      UNITS:      K/K
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!       band_c2:                       polychromatic band correction slope.
+!                                      units:      k/k
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       is_microwave_channel:          Flag indicating if the particular satellite
+!       is_microwave_channel:          flag indicating if the particular satellite
 !                                      channel is a microwave channel.
-!                                      If = 0, IR channel
-!                                         = 1, uW channel
-!                                      UNITS:      None
-!                                      TYPE:       Long
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!                                      if = 0, ir channel
+!                                         = 1, uw channel
+!                                      units:      none
+!                                      type:       long
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       cosmic_background_temperature: Cosmic background temperature in Kelvin to
-!                                      use in the radiative transfer. These values
+!       cosmic_background_temperature: cosmic background temperature in kelvin to
+!                                      use in the radiative transfer. these values
 !                                      are frequency dependent for microwave channels
 !                                      to account for instrument calibration using the
-!                                      Rayleigh-Jeans approximation, but the radiative
-!                                      transfer using the full Planck function
-!                                      expression. IR channels use a fixed value of
-!                                      2.736K.
-!                                      UNITS:      K
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!                                      rayleigh-jeans approximation, but the radiative
+!                                      transfer using the full planck function
+!                                      expression. ir channels use a fixed value of
+!                                      2.736k.
+!                                      units:      k
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       cosmic_background_radiance:    Cosmic background radiance used to initialise
-!                                      the radiative transfer. These values
+!       cosmic_background_radiance:    cosmic background radiance used to initialise
+!                                      the radiative transfer. these values
 !                                      are frequency dependent for microwave channels
 !                                      to account for instrument calibration using the
-!                                      Rayleigh-Jeans approximation, but the radiative
-!                                      transfer using the full Planck function
-!                                      expression. IR channel values are all set to 0.0.
-!                                      UNITS:      mW/(m^2.sr.cm^-1)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!                                      rayleigh-jeans approximation, but the radiative
+!                                      transfer using the full planck function
+!                                      expression. ir channel values are all set to 0.0.
+!                                      units:      mw/(m^2.sr.cm^-1)
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       solar_irradiance:              Exterrestrial solar irradiance source values
-!                                      (based on Kurucz).
-!                                      UNITS:      mW/(m^2.cm^-1)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!       solar_irradiance:              exterrestrial solar irradiance source values
+!                                      (based on kurucz).
+!                                      units:      mw/(m^2.cm^-1)
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       blackbody_irradiance:          Exterrestrial solar irradiance source values
+!       blackbody_irradiance:          exterrestrial solar irradiance source values
 !                                      for a blackbody source at the equivalent solar
-!                                      temperature of 5783K.
-!                                      UNITS:      mW/(m^2.cm^-1)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!                                      temperature of 5783k.
+!                                      units:      mw/(m^2.cm^-1)
+!                                      type:       double
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-!       is_solar_channel:              Array of integer flag values indicating if the
+!       is_solar_channel:              array of integer flag values indicating if the
 !                                      particular satellite channel possesses valid
 !                                      solar irradiance values.
-!                                      If = 0, No
-!                                         = 1, Yes
-!                                      UNITS:      None
-!                                      TYPE:       Long
-!                                      DIMENSION:  L
-!                                      ATTRIBUTES: PUBLIC, SAVE
+!                                      if = 0, no
+!                                         = 1, yes
+!                                      units:      none
+!                                      type:       long
+!                                      dimension:  l
+!                                      attributes: public, save
 !
-! MODULES:
-!       type_kinds:           Module containing data type kind definitions.
+! modules:
+!       type_kinds:           module containing data type kind definitions.
 !
-!       error_handler:        Module to define error codes and handle error
+!       error_handler:        module to define error codes and handle error
 !                             conditions
 !
-!       parameters:           Module containing parameter definitions for the
-!                             RT model.
+!       parameters:           module containing parameter definitions for the
+!                             rt model.
 !
-!       coefficient_utility:  Module containing coefficient file utility subprograms.
+!       coefficient_utility:  module containing coefficient file utility subprograms.
 !
-! CONTAINS:
-!       read_spectral_coefficients:     PUBLIC function to read the spectral coefficients
-!                                       for the satellite/channels used by the RT model
-!                                       and fill the PUBLIC data arrays.
+! contains:
+!       read_spectral_coefficients:     public function to read the spectral coefficients
+!                                       for the satellite/channels used by the rt model
+!                                       and fill the public data arrays.
 !
-!       destroy_spectral_coefficients:  PUBLIC function to release the memory that
+!       destroy_spectral_coefficients:  public function to release the memory that
 !                                       was allocated for the spectral coefficient data.
 !
-!       write_spectral_coefficients:    PUBLIC function to write the new format spectral
+!       write_spectral_coefficients:    public function to write the new format spectral
 !                                       coefficient data file.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 12-Jun-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 12-jun-2000
 !                       pvandelst@ncep.noaa.gov
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE spectral_coefficients
+module spectral_coefficients
 
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
 
-  USE type_kinds
-  USE file_utility
-  USE error_handler
-  USE parameters
-  USE coefficient_utility
+  use type_kinds
+  use file_utility
+  use error_handler
+  use parameters
+  use coefficient_utility
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------------
-  ! Default visibilities
+  ! default visibilities
   ! ------------------
 
-  PRIVATE
-  PUBLIC :: read_spectral_coefficients
-  PUBLIC :: destroy_spectral_coefficients
-  PUBLIC :: write_spectral_coefficients
+  private
+  public :: read_spectral_coefficients
+  public :: destroy_spectral_coefficients
+  public :: write_spectral_coefficients
 
 
 
   ! -----------------
-  ! Module parameters
+  ! module parameters
   ! -----------------
 
-  ! -- Spectral coefficient file version numbers
-  INTEGER( Long ), PARAMETER, PRIVATE :: MIN_VALID_RELEASE = 1_Long
-  INTEGER( Long ), PARAMETER, PRIVATE :: MAX_VALID_RELEASE = 1_Long
+  ! -- spectral coefficient file version numbers
+  integer( long ), parameter, private :: min_valid_release = 1_long
+  integer( long ), parameter, private :: max_valid_release = 1_long
 
-  INTEGER( Long ), PARAMETER, PRIVATE :: MIN_VALID_VERSION = 1_Long
-  INTEGER( Long ), PARAMETER, PRIVATE :: MAX_VALID_VERSION = 1_Long
+  integer( long ), parameter, private :: min_valid_version = 1_long
+  integer( long ), parameter, private :: max_valid_version = 1_long
 
-  ! -- Spectral coefficient file descriptors:
-  ! -- Number of items in the spectral coefficient file
-  INTEGER( Long ), PARAMETER, PRIVATE :: N_SPECTRAL_ITEMS = 12_Long
+  ! -- spectral coefficient file descriptors:
+  ! -- number of items in the spectral coefficient file
+  integer( long ), parameter, private :: n_spectral_items = 12_long
 
-  ! -- Data types of the spectral coefficient data
-  !    5 = Double (i.e. 8-byte float)
-  !    4 = Single (i.e. 4-byte float)
-  !    3 = Long   (i.e. 4-byte integer)
-  INTEGER( Long ), PARAMETER, PRIVATE, &
-                   DIMENSION( N_SPECTRAL_ITEMS ) :: SPECTRAL_DATA_TYPE = &
-                                                    (/ 5_Long, 5_Long, 5_Long, 5_Long, &
-                                                       5_Long, 5_Long, 3_Long, 5_Long, &
-                                                       5_Long, 5_Long, 5_Long, 3_Long /)
+  ! -- data types of the spectral coefficient data
+  !    5 = double (i.e. 8-byte float)
+  !    4 = single (i.e. 4-byte float)
+  !    3 = long   (i.e. 4-byte integer)
+  integer( long ), parameter, private, &
+                   dimension( n_spectral_items ) :: spectral_data_type = &
+                                                    (/ 5_long, 5_long, 5_long, 5_long, &
+                                                       5_long, 5_long, 3_long, 5_long, &
+                                                       5_long, 5_long, 5_long, 3_long /)
 
-  ! -- Names of the data items (for error processing)
-  CHARACTER( * ), PARAMETER, PRIVATE, &
-                  DIMENSION( N_SPECTRAL_ITEMS ) :: SPECTRAL_DATA_NAME = &
-                                                     (/ 'FREQUENCY                    ', &
-                                                        'WAVENUMBER                   ', &
-                                                        'PLANCK_C1                    ', &
-                                                        'PLANCK_C2                    ', &
-                                                        'BAND_C1                      ', &
-                                                        'BAND_C2                      ', &
-                                                        'IS_MICROWAVE_CHANNEL         ', &
-                                                        'COSMIC_BACKGROUND_TEMPERATURE', &
-                                                        'COSMIC_BACKGROUND_RADIANCE   ', &
-                                                        'SOLAR_IRRADIANCE             ', &
-                                                        'BLACKBODY_IRRADIANCE         ', &
-                                                        'IS_SOLAR_CHANNEL             ' /)
+  ! -- names of the data items (for error processing)
+  character( * ), parameter, private, &
+                  dimension( n_spectral_items ) :: spectral_data_name = &
+                                                     (/ 'frequency                    ', &
+                                                        'wavenumber                   ', &
+                                                        'planck_c1                    ', &
+                                                        'planck_c2                    ', &
+                                                        'band_c1                      ', &
+                                                        'band_c2                      ', &
+                                                        'is_microwave_channel         ', &
+                                                        'cosmic_background_temperature', &
+                                                        'cosmic_background_radiance   ', &
+                                                        'solar_irradiance             ', &
+                                                        'blackbody_irradiance         ', &
+                                                        'is_solar_channel             ' /)
 
   ! ----------------
-  ! Module variables
+  ! module variables
   ! ----------------
 
-  CHARACTER( 128 ) :: message
+  character( 128 ) :: message
 
 
   ! ---------------------------------------------------
-  ! Definitions of shared data.
+  ! definitions of shared data.
   !
-  ! Note that the SAVE attribute is specified to ensure
+  ! note that the save attribute is specified to ensure
   ! that the data is retained even when this module is
   ! not being directly accessed.
   ! ---------------------------------------------------
 
-  ! -- Channel frequency in GHz (MW only, 0.0 for IR)
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: frequency
+  ! -- channel frequency in ghz (mw only, 0.0 for ir)
+  real( double ),  save, public, allocatable, dimension( : ) :: frequency
 
-  ! -- Channel frequency in cm^-1
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: wavenumber
+  ! -- channel frequency in cm^-1
+  real( double ),  save, public, allocatable, dimension( : ) :: wavenumber
 
-  ! -- First channel Planck function coefficient in mW/(m^2.sr.cm^-2)
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: planck_c1
+  ! -- first channel planck function coefficient in mw/(m^2.sr.cm^-2)
+  real( double ),  save, public, allocatable, dimension( : ) :: planck_c1
 
-  ! -- Second channel Planck function coefficient in K/cm^1
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: planck_c2
+  ! -- second channel planck function coefficient in k/cm^1
+  real( double ),  save, public, allocatable, dimension( : ) :: planck_c2
 
-  ! -- Band correction (for polychromaticity) offset in K
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: band_c1
+  ! -- band correction (for polychromaticity) offset in k
+  real( double ),  save, public, allocatable, dimension( : ) :: band_c1
 
-  ! -- Band correction (for polychromaticity) slope in K/K
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: band_c2
+  ! -- band correction (for polychromaticity) slope in k/k
+  real( double ),  save, public, allocatable, dimension( : ) :: band_c2
 
-  ! -- Flag indicating whether channel is microwave or infrared.
-  INTEGER( Long ), SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: is_microwave_channel
+  ! -- flag indicating whether channel is microwave or infrared.
+  integer( long ), save, public, allocatable, dimension( : ) :: is_microwave_channel
 
-  ! -- Effective cosmic background temperature in Kelvin.
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: cosmic_background_temperature
+  ! -- effective cosmic background temperature in kelvin.
+  real( double ),  save, public, allocatable, dimension( : ) :: cosmic_background_temperature
 
-  ! -- Cosmic background radiance in mW/(m^2.sr.cm^-1).
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: cosmic_background_radiance
+  ! -- cosmic background radiance in mw/(m^2.sr.cm^-1).
+  real( double ),  save, public, allocatable, dimension( : ) :: cosmic_background_radiance
 
-  ! -- Kurucz solar irradiance source function in mW/(m^2.cm^-1)
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: solar_irradiance
+  ! -- kurucz solar irradiance source function in mw/(m^2.cm^-1)
+  real( double ),  save, public, allocatable, dimension( : ) :: solar_irradiance
 
-  ! -- Equivalent blackbody solar irradiance source function in mW/(m^2.cm^-1)
-  REAL( Double ),  SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: blackbody_irradiance
+  ! -- equivalent blackbody solar irradiance source function in mw/(m^2.cm^-1)
+  real( double ),  save, public, allocatable, dimension( : ) :: blackbody_irradiance
 
-  ! -- Flag indicating whether channel is sensitive to solar contribution.
-  INTEGER( Long ), SAVE, PUBLIC, ALLOCATABLE, DIMENSION( : ) :: is_solar_channel
+  ! -- flag indicating whether channel is sensitive to solar contribution.
+  integer( long ), save, public, allocatable, dimension( : ) :: is_solar_channel
 
 
 
-CONTAINS
+contains
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       read_spectral_coefficients
 !
-! PURPOSE:
-!       PUBLIC function to read the spectral coefficients for the satellite/
-!       channels used by the RT model and fill the PUBLIC data arrays..
+! purpose:
+!       public function to read the spectral coefficients for the satellite/
+!       channels used by the rt model and fill the public data arrays..
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = read_spectral_coefficients( coefficient_file, &
 !                                            message_log  = message_log )
 !
-! INPUT ARGUMENTS:
-!       coefficient_file: Name of the file containing the spectral coefficient data.
-!                         UNITS:      None
-!                         TYPE:       Character
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       coefficient_file: name of the file containing the spectral coefficient data.
+!                         units:      none
+!                         type:       character
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       message_log:      Character string specifying a filename in which any
-!                         messages will be logged. If not specified, or if an
+! optional input arguments:
+!       message_log:      character string specifying a filename in which any
+!                         messages will be logged. if not specified, or if an
 !                         error occurs opening the log file, the default action
 !                         is to output messages to the screen.
-!                         UNITS:      None
-!                         TYPE:       Character
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                         units:      none
+!                         type:       character
+!                         dimension:  scalar
+!                         attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       None.
+! output arguments:
+!       none.
 !
-! OPTIONAL OUTUPT ARGUMENTS:
-!       None.
+! optional outupt arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => coefficient read was successful
-!              = FAILURE => error occurred opening or accessing coefficient
+! function result:
+!       result = success => coefficient read was successful
+!              = failure => error occurred opening or accessing coefficient
 !                           data file
 !
-! CALLS:
-!      display_message:         Subroutine to output messages
-!                               SOURCE: error_handler module
+! calls:
+!      display_message:         subroutine to output messages
+!                               source: error_handler module
 !
-!      open_coefficient_file:   Function to open the transmittance coefficient
+!      open_coefficient_file:   function to open the transmittance coefficient
 !                               data file.
-!                               SOURCE: coefficient_utility module
+!                               source: coefficient_utility module
 !
-!      get_max_n_channels:      Routine to retrieve the value of the
-!                               MAX_N_CHANNELS "pseudo-parameter".
-!                               SOURCE: parameters module
+!      get_max_n_channels:      routine to retrieve the value of the
+!                               max_n_channels "pseudo-parameter".
+!                               source: parameters module
 !
-!      set_max_n_channels:      Routine to set the value of the
-!                               MAX_N_CHANNELS "pseudo-parameter".
-!                               SOURCE: parameters module
+!      set_max_n_channels:      routine to set the value of the
+!                               max_n_channels "pseudo-parameter".
+!                               source: parameters module
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       All spectral coefficients are read in and stored by CHANNEL.
-!S-
+! procedure:
+!       all spectral coefficients are read in and stored by channel.
+!s-
 !------------------------------------------------------------------------------
 
-  FUNCTION read_spectral_coefficients( coefficient_file, &
+  function read_spectral_coefficients( coefficient_file, &
                                        message_log ) &
-                                     RESULT ( error_status )
+                                     result ( error_status )
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    CHARACTER( * ), INTENT( IN )           :: coefficient_file
-    CHARACTER( * ), INTENT( IN ), OPTIONAL :: message_log
+    character( * ), intent( in )           :: coefficient_file
+    character( * ), intent( in ), optional :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'READ_SPECTRAL_COEFFICIENTS'
+    character( * ), parameter :: routine_name = 'read_spectral_coefficients'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- These are dimensioned ( Long ) as they are read in
-    INTEGER( Long ) :: file_release
-    INTEGER( Long ) :: file_version
+    ! -- these are dimensioned ( long ) as they are read in
+    integer( long ) :: file_release
+    integer( long ) :: file_version
 
-    INTEGER( Long ) :: n_channels
-    INTEGER( Long ) :: n_items
-    INTEGER( Long ), DIMENSION( N_SPECTRAL_ITEMS ) :: data_type
+    integer( long ) :: n_channels
+    integer( long ) :: n_items
+    integer( long ), dimension( n_spectral_items ) :: data_type
 
-    INTEGER :: l
-    INTEGER :: io_status
-    INTEGER :: file_id
-    INTEGER :: allocate_status
+    integer :: l
+    integer :: io_status
+    integer :: file_id
+    integer :: allocate_status
 
-    ! -- Maximum channels pseudo parameter
-    INTEGER :: MAX_N_CHANNELS
-    LOGICAL :: is_set
+    ! -- maximum channels pseudo parameter
+    integer :: max_n_channels
+    logical :: is_set
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC TRIM                          
+    intrinsic trim                          
 
 
     !#--------------------------------------------------------------------------#
-    !#              -- Open the spectral coefficient data file --               #
+    !#              -- open the spectral coefficient data file --               #
     !#--------------------------------------------------------------------------#
 
     error_status = open_coefficient_file( coefficient_file, &
                                           file_id, &
                                           message_log = message_log )
 
-    IF ( error_status /= SUCCESS ) THEN
-      CALL display_message( ROUTINE_NAME, &
-                            'Error opening '//TRIM( coefficient_file ), &
+    if ( error_status /= success ) then
+      call display_message( routine_name, &
+                            'error opening '//trim( coefficient_file ), &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Read the "file header" --                        #
+    !#                      -- read the "file header" --                        #
     !#--------------------------------------------------------------------------#
 
     ! ------------------------------------
-    ! Read the release/version information
+    ! read the release/version information
     ! ------------------------------------
 
-    READ( file_id, IOSTAT = io_status ) file_release, file_version
+    read( file_id, iostat = io_status ) file_release, file_version
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error reading file release/version information. IOSTAT = ", i5 )' ) &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error reading file release/version information. iostat = ", i5 )' ) &
                       io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
-    ! -- Check that this file is not an OLD release/version
-    IF ( ( file_release + file_version ) < ( MIN_VALID_RELEASE + MIN_VALID_VERSION ) ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Need to update the coefficient file. ", &
-                        &"File version is ", i1, ".", i2.2, &
-                        &". Oldest valid release is ",i1,".",i2.2,"." )' ) &
+    ! -- check that this file is not an old release/version
+    if ( ( file_release + file_version ) < ( min_valid_release + min_valid_version ) ) then
+      error_status = failure
+      write( message, '( "need to update the coefficient file. ", &
+                        &"file version is ", i1, ".", i2.2, &
+                        &". oldest valid release is ",i1,".",i2.2,"." )' ) &
                       file_release,  file_version, &
-                      MIN_VALID_RELEASE, MIN_VALID_VERSION
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+                      min_valid_release, min_valid_version
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
-    ! -- Check that this file is not a TOO NEW release/version
+    ! -- check that this file is not a too new release/version
     ! -- i.e. update the software!
-    IF ( ( file_release + file_version ) > ( MAX_VALID_RELEASE + MAX_VALID_VERSION ) ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Need to update the coefficient read software. ", &
-                        &"File version is ", i1, ".", i2.2, &
-                        &". Newest valid release is ",i1,".",i2.2,"." )' ) &
+    if ( ( file_release + file_version ) > ( max_valid_release + max_valid_version ) ) then
+      error_status = failure
+      write( message, '( "need to update the coefficient read software. ", &
+                        &"file version is ", i1, ".", i2.2, &
+                        &". newest valid release is ",i1,".",i2.2,"." )' ) &
                       file_release,  file_version, &
-                      MAX_VALID_RELEASE, MAX_VALID_VERSION
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+                      max_valid_release, max_valid_version
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
     ! ---------------------------
-    ! Read the number of channels
+    ! read the number of channels
     ! ---------------------------
 
-    READ( file_id, IOSTAT = io_status ) n_channels
+    read( file_id, iostat = io_status ) n_channels
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error reading total number of channels. IOSTAT = ", i5 )' ) &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error reading total number of channels. iostat = ", i5 )' ) &
                       io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
     ! -----------------------------        
-    ! Read the number of data items
+    ! read the number of data items
     ! -----------------------------
 
-    READ( file_id, IOSTAT = io_status ) n_items
+    read( file_id, iostat = io_status ) n_items
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error reading total number of data items. IOSTAT = ", i5 )' ) &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error reading total number of data items. iostat = ", i5 )' ) &
                       io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
-    IF ( n_items /= N_SPECTRAL_ITEMS ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Number of data items in '//&
-                            TRIM( coefficient_file )//&
+    if ( n_items /= n_spectral_items ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'number of data items in '//&
+                            trim( coefficient_file )//&
                             ' inconsistent with definition.', &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
     ! -------------------
-    ! Read the data types
+    ! read the data types
     ! -------------------
 
-    READ( file_id, IOSTAT = io_status ) data_type
+    read( file_id, iostat = io_status ) data_type
     
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error reading data types. IOSTAT = ", i5 )' ) &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error reading data types. iostat = ", i5 )' ) &
                       io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
-    DO l = 1, n_items
+    do l = 1, n_items
 
-      IF ( data_type( l ) /= SPECTRAL_DATA_TYPE( l ) ) THEN
-        error_status = FAILURE
-        WRITE( message, '( "Invalid type for ", a, " data item." )' ) &
-                        TRIM( SPECTRAL_DATA_NAME( l ) )
-        CALL display_message( ROUTINE_NAME, &
-                              TRIM( message ), &
+      if ( data_type( l ) /= spectral_data_type( l ) ) then
+        error_status = failure
+        write( message, '( "invalid type for ", a, " data item." )' ) &
+                        trim( spectral_data_name( l ) )
+        call display_message( routine_name, &
+                              trim( message ), &
                               error_status, &
                               message_log = message_log )
-        CLOSE( file_id )
-        RETURN
-      END IF
+        close( file_id )
+        return
+      end if
 
-    END DO
+    end do
 
 
     ! --------------------------------------------
-    ! Set the global definition for MAX_N_CHANNELS
+    ! set the global definition for max_n_channels
     ! --------------------------------------------
 
-    CALL get_max_n_channels( MAX_N_CHANNELS, is_set )
+    call get_max_n_channels( max_n_channels, is_set )
 
-    IF ( is_set  ) THEN
-      IF ( MAX_N_CHANNELS /= n_channels ) THEN
-        error_status = WARNING
-        WRITE( message, '( "MAX_N_CHANNELS set to different value, ", i4, ", ", &
-                          &"than defined in coefficient file, ", i4, ". Overwriting." )' ) &
-                        MAX_N_CHANNELS, n_channels
-        CALL display_message( ROUTINE_NAME, &
-                              TRIM( message ), &
+    if ( is_set  ) then
+      if ( max_n_channels /= n_channels ) then
+        error_status = warning
+        write( message, '( "max_n_channels set to different value, ", i4, ", ", &
+                          &"than defined in coefficient file, ", i4, ". overwriting." )' ) &
+                        max_n_channels, n_channels
+        call display_message( routine_name, &
+                              trim( message ), &
                               error_status, &
                               message_log = message_log )
-        CALL set_max_n_channels( n_channels )
-      END IF
-    ELSE
-      CALL set_max_n_channels( n_channels )
-    END IF
+        call set_max_n_channels( n_channels )
+      end if
+    else
+      call set_max_n_channels( n_channels )
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#          -- Allocate arrays for spectral coefficient data --             #
+    !#          -- allocate arrays for spectral coefficient data --             #
     !#--------------------------------------------------------------------------#
 
-    ! -- Check if arrays are already allocated
-    IF ( ALLOCATED( frequency                     ) .OR. &
-         ALLOCATED( wavenumber                    ) .OR. &
-         ALLOCATED( planck_c1                     ) .OR. &
-         ALLOCATED( planck_c2                     ) .OR. &
-         ALLOCATED( band_c1                       ) .OR. &
-         ALLOCATED( band_c2                       ) .OR. &
-         ALLOCATED( is_microwave_channel          ) .OR. &
-         ALLOCATED( cosmic_background_temperature ) .OR. &
-         ALLOCATED( cosmic_background_radiance    ) .OR. &
-         ALLOCATED( solar_irradiance              ) .OR. &
-         ALLOCATED( blackbody_irradiance          ) .OR. &
-         ALLOCATED( is_solar_channel              )      ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Spectral coefficient data arrays already allocated.', &
+    ! -- check if arrays are already allocated
+    if ( allocated( frequency                     ) .or. &
+         allocated( wavenumber                    ) .or. &
+         allocated( planck_c1                     ) .or. &
+         allocated( planck_c2                     ) .or. &
+         allocated( band_c1                       ) .or. &
+         allocated( band_c2                       ) .or. &
+         allocated( is_microwave_channel          ) .or. &
+         allocated( cosmic_background_temperature ) .or. &
+         allocated( cosmic_background_radiance    ) .or. &
+         allocated( solar_irradiance              ) .or. &
+         allocated( blackbody_irradiance          ) .or. &
+         allocated( is_solar_channel              )      ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'spectral coefficient data arrays already allocated.', &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    ENDIF
+      close( file_id )
+      return
+    endif
 
-    ! -- If not, allocate them
-    ALLOCATE( frequency( n_channels ),                     &
+    ! -- if not, allocate them
+    allocate( frequency( n_channels ),                     &
               wavenumber( n_channels ),                    &
               planck_c1( n_channels ),                     &
               planck_c2( n_channels ),                     &
@@ -663,198 +663,198 @@ CONTAINS
               solar_irradiance( n_channels ),              &
               blackbody_irradiance( n_channels ),          &
               is_solar_channel( n_channels ),              &
-              STAT = allocate_status                       )
+              stat = allocate_status                       )
 
-    IF ( allocate_status /= 0 ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Unable to allocate arrays for spectral coefficient data.', &
+    if ( allocate_status /= 0 ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'unable to allocate arrays for spectral coefficient data.', &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
    
 
 
     !#--------------------------------------------------------------------------#
-    !#                        -- Loop over channels --                          #
+    !#                        -- loop over channels --                          #
     !#--------------------------------------------------------------------------#
 
-    l_channel_loop: DO l = 1, n_channels
+    l_channel_loop: do l = 1, n_channels
 
 
       ! -------------------
-      ! Read channel record
+      ! read channel record
       ! -------------------
 
-      READ( file_id, IOSTAT = io_status )   &
-        frequency( l ),                     &  ! Frequency
-        wavenumber( l ),                    &  ! Wavenumber
-        planck_c1( l ),                     &  ! First Planck constant
-        planck_c2( l ),                     &  ! Second Planck constant
-        band_c1( l ),                       &  ! Band correction offset
-        band_c2( l ),                       &  ! Band correction slope
-        is_microwave_channel( l ),          &  ! Microwave channel flag
-        cosmic_background_temperature( l ), &  ! Effective cosmic background temperature
-        cosmic_background_radiance( l ),    &  ! Cosmic background radiance
-        solar_irradiance( l ),              &  ! Solar irradiance source
-        blackbody_irradiance( l ),          &  ! Blackbody solar irradiance source
-        is_solar_channel( l )                  ! Solar use flag
+      read( file_id, iostat = io_status )   &
+        frequency( l ),                     &  ! frequency
+        wavenumber( l ),                    &  ! wavenumber
+        planck_c1( l ),                     &  ! first planck constant
+        planck_c2( l ),                     &  ! second planck constant
+        band_c1( l ),                       &  ! band correction offset
+        band_c2( l ),                       &  ! band correction slope
+        is_microwave_channel( l ),          &  ! microwave channel flag
+        cosmic_background_temperature( l ), &  ! effective cosmic background temperature
+        cosmic_background_radiance( l ),    &  ! cosmic background radiance
+        solar_irradiance( l ),              &  ! solar irradiance source
+        blackbody_irradiance( l ),          &  ! blackbody solar irradiance source
+        is_solar_channel( l )                  ! solar use flag
 
 
-      IF ( io_status /= 0 ) THEN
-        error_status = FAILURE
-        WRITE( message, '( "Error reading channel ", i4, " coefficients. IOSTAT = ", i5 )' ) &
+      if ( io_status /= 0 ) then
+        error_status = failure
+        write( message, '( "error reading channel ", i4, " coefficients. iostat = ", i5 )' ) &
                         l, io_status
-        CALL display_message( ROUTINE_NAME, &
-                              TRIM( message ), &
+        call display_message( routine_name, &
+                              trim( message ), &
                               error_status, &
                               message_log = message_log )
-        RETURN
-      END IF
+        return
+      end if
 
-    END DO l_channel_loop
+    end do l_channel_loop
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                          -- Close the file --                            #
+    !#                          -- close the file --                            #
     !#--------------------------------------------------------------------------#
 
-    CLOSE( file_id, IOSTAT = io_status )
+    close( file_id, iostat = io_status )
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error closing ", a, ". IOSTAT = ", i5 )' ) &
-                      TRIM( coefficient_file ), io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error closing ", a, ". iostat = ", i5 )' ) &
+                      trim( coefficient_file ), io_status
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Successful completion --                         #
+    !#                      -- successful completion --                         #
     !#--------------------------------------------------------------------------#
 
-    ! -- Output an info message
-!    WRITE( message, '( "FILE VERSION: ", i1, ".", i2.2, 2x, &
-!                      &"N_CHANNELS=",i4 )' ) &
+    ! -- output an info message
+!    write( message, '( "file version: ", i1, ".", i2.2, 2x, &
+!                      &"n_channels=",i4 )' ) &
 !                    file_release, file_version, &
 !                    n_channels
-!    CALL display_message( ROUTINE_NAME, &
-!                          TRIM( message ), &
-!                          INFORMATION, &
+!    call display_message( routine_name, &
+!                          trim( message ), &
+!                          information, &
 !                          message_log = message_log )
  
-    error_status = SUCCESS
+    error_status = success
 
-  END FUNCTION read_spectral_coefficients 
+  end function read_spectral_coefficients 
 
 
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       destroy_spectral_coefficients
 !
-! PURPOSE:
-!       PUBLIC function to deallocate the spectral coefficients PUBLIC
+! purpose:
+!       public function to deallocate the spectral coefficients public
 !       data arrays..
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = destroy_spectral_coefficients( message_log = message_log )
 !
-! INPUT ARGUMENTS:
-!       None.
+! input arguments:
+!       none.
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       message_log:      Character string specifying a filename in which any
-!                         messages will be logged. If not specified, or if an
+! optional input arguments:
+!       message_log:      character string specifying a filename in which any
+!                         messages will be logged. if not specified, or if an
 !                         error occurs opening the log file, the default action
 !                         is to output messages to the screen.
-!                         UNITS:      None
-!                         TYPE:       Character
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                         units:      none
+!                         type:       character
+!                         dimension:  scalar
+!                         attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       None.
+! output arguments:
+!       none.
 !
-! OPTIONAL OUTUPT ARGUMENTS:
-!       None.
+! optional outupt arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => deallocation was successful
-!              = FAILURE => error occurred deallocating coefficient data arrays
+! function result:
+!       result = success => deallocation was successful
+!              = failure => error occurred deallocating coefficient data arrays
 !
-! CALLS:
-!      display_message:         Subroutine to output messages
-!                               SOURCE: error_handler module
+! calls:
+!      display_message:         subroutine to output messages
+!                               source: error_handler module
 !
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-!S-
+!s-
 !------------------------------------------------------------------------------
 
-  FUNCTION destroy_spectral_coefficients( message_log ) &
-                                        RESULT ( error_status )
+  function destroy_spectral_coefficients( message_log ) &
+                                        result ( error_status )
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    CHARACTER( * ), INTENT( IN ), OPTIONAL :: message_log
+    character( * ), intent( in ), optional :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'DESTROY_SPECTRAL_COEFFICIENTS'
+    character( * ), parameter :: routine_name = 'destroy_spectral_coefficients'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: allocate_status
+    integer :: allocate_status
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- Deallocate arrays for spectral coefficient data --          #
+    !#           -- deallocate arrays for spectral coefficient data --          #
     !#--------------------------------------------------------------------------#
 
-    DEALLOCATE( frequency,                     &
+    deallocate( frequency,                     &
                 wavenumber,                    &
                 planck_c1,                     &
                 planck_c2,                     &
@@ -866,33 +866,33 @@ CONTAINS
                 solar_irradiance,              &
                 blackbody_irradiance,          &
                 is_solar_channel,              &
-                STAT = allocate_status         )
+                stat = allocate_status         )
 
-    IF ( allocate_status /= 0 ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Error occurred deallocating spectral coefficient data arrays.', &
+    if ( allocate_status /= 0 ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'error occurred deallocating spectral coefficient data arrays.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- Reset the MAX_N_CHANNELS "pseudo-parameter" --              #
+    !#           -- reset the max_n_channels "pseudo-parameter" --              #
     !#--------------------------------------------------------------------------#
 
-    CALL reset_max_n_channels()
+    call reset_max_n_channels()
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Successful completion --                         #
+    !#                      -- successful completion --                         #
     !#--------------------------------------------------------------------------#
  
-    error_status = SUCCESS
+    error_status = success
 
-  END FUNCTION destroy_spectral_coefficients 
+  end function destroy_spectral_coefficients 
 
 
 
@@ -900,322 +900,322 @@ CONTAINS
 
 !------------------------------------------------------------------------------
 !
-! NAME:
+! name:
 !       write_spectral_coefficients
 !
-! PURPOSE:
-!       Function to write the spectral coefficient data to file.
+! purpose:
+!       function to write the spectral coefficient data to file.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! LANGUAGE:
-!       Fortran-90
+! language:
+!       fortran-90
 !
-! CALLING SEQUENCE:
-!       result = write_spectral_coefficients( coefficient_file,              &  ! Input
-!                                             frequency,                     &  ! Input, L
-!                                             wavenumber,                    &  ! Input, L
-!                                             planck_c1,                     &  ! Input, L
-!                                             planck_c2,                     &  ! Input, L
-!                                             band_c1,                       &  ! Input, L
-!                                             band_c2,                       &  ! Input, L
-!                                             is_microwave_channel,          &  ! Input, L
-!                                             cosmic_background_temperature, &  ! Input, L
-!                                             cosmic_background_radiance     &  ! Input, L
-!                                             solar_irradiance,              &  ! Input, L
-!                                             blackbody_irradiance,          &  ! Input, L
-!                                             is_solar_channel,              &  ! Input, L
-!                                             message_log                    )  ! Optional input
+! calling sequence:
+!       result = write_spectral_coefficients( coefficient_file,              &  ! input
+!                                             frequency,                     &  ! input, l
+!                                             wavenumber,                    &  ! input, l
+!                                             planck_c1,                     &  ! input, l
+!                                             planck_c2,                     &  ! input, l
+!                                             band_c1,                       &  ! input, l
+!                                             band_c2,                       &  ! input, l
+!                                             is_microwave_channel,          &  ! input, l
+!                                             cosmic_background_temperature, &  ! input, l
+!                                             cosmic_background_radiance     &  ! input, l
+!                                             solar_irradiance,              &  ! input, l
+!                                             blackbody_irradiance,          &  ! input, l
+!                                             is_solar_channel,              &  ! input, l
+!                                             message_log                    )  ! optional input
 !
-! INPUT ARGUMENTS:
-!       coefficient_file:              Name of the file to which the spectral
+! input arguments:
+!       coefficient_file:              name of the file to which the spectral
 !                                      data is to be written.
-!                                      UNITS:      None
-!                                      TYPE:       Character
-!                                      DIMENSION:  Scalar
-!                                      ATTRIBUTES: INTENT( IN )
+!                                      units:      none
+!                                      type:       character
+!                                      dimension:  scalar
+!                                      attributes: intent( in )
 !
-!       frequency:                     Channel frequency
-!                                      UNITS:      GHz
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       frequency:                     channel frequency
+!                                      units:      ghz
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       wavenumber:                    Channel frequency
-!                                      UNITS:      cm^-1
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       wavenumber:                    channel frequency
+!                                      units:      cm^-1
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       planck_c1:                     First Planck function coefficient
-!                                      UNITS:      mW/(m^2.sr.cm^-2)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       planck_c1:                     first planck function coefficient
+!                                      units:      mw/(m^2.sr.cm^-2)
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       planck_c2:                     Second Planck function coefficient
-!                                      UNITS:      K/cm^1
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       planck_c2:                     second planck function coefficient
+!                                      units:      k/cm^1
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       band_c1:                       Polychromatic band correction offset.
-!                                      UNITS:      K
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       band_c1:                       polychromatic band correction offset.
+!                                      units:      k
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       band_c2:                       Polychromatic band correction slope.
-!                                      UNITS:      K/K
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       band_c2:                       polychromatic band correction slope.
+!                                      units:      k/k
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       is_microwave_channel:          Flag indicating if the particular satellite
+!       is_microwave_channel:          flag indicating if the particular satellite
 !                                      channel is a microwave channel.
-!                                      If = 0, IR channel
-!                                         = 1, uW channel
-!                                      UNITS:      None
-!                                      TYPE:       Long integer
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!                                      if = 0, ir channel
+!                                         = 1, uw channel
+!                                      units:      none
+!                                      type:       long integer
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       cosmic_background_temperature: Cosmic background temperature in Kelvin to
-!                                      use in the radiative transfer. These values
+!       cosmic_background_temperature: cosmic background temperature in kelvin to
+!                                      use in the radiative transfer. these values
 !                                      may be frequency dependent for microwave channels
 !                                      to account for instrument calibration using the
-!                                      Rayleigh-Jeans approximation, but the radiative
-!                                      transfer using the full Planck function
-!                                      expression. IR channels use a fixed value of
-!                                      2.736K.
-!                                      UNITS:      K
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!                                      rayleigh-jeans approximation, but the radiative
+!                                      transfer using the full planck function
+!                                      expression. ir channels use a fixed value of
+!                                      2.736k.
+!                                      units:      k
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       cosmic_background_radiance:    Cosmic background radiance used to initialise
-!                                      the radiative transfer. These values
+!       cosmic_background_radiance:    cosmic background radiance used to initialise
+!                                      the radiative transfer. these values
 !                                      may be frequency dependent for microwave channels
 !                                      to account for instrument calibration using the
-!                                      Rayleigh-Jeans approximation, but the radiative
-!                                      transfer using the full Planck function
-!                                      expression. IR channel values are all set to 0.0.
-!                                      UNITS:      mW/(m^2.sr.cm^-1)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!                                      rayleigh-jeans approximation, but the radiative
+!                                      transfer using the full planck function
+!                                      expression. ir channel values are all set to 0.0.
+!                                      units:      mw/(m^2.sr.cm^-1)
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       solar_irradiance:              Exterrestrial solar irradiance source values
-!                                      (based on Kurucz).
-!                                      UNITS:      mW/(m^2.cm^-1)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!       solar_irradiance:              exterrestrial solar irradiance source values
+!                                      (based on kurucz).
+!                                      units:      mw/(m^2.cm^-1)
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       blackbody_irradiance:          Exterrestrial solar irradiance source values
+!       blackbody_irradiance:          exterrestrial solar irradiance source values
 !                                      for a blackbody source at the equivalent solar
-!                                      temperature of 5783K.
-!                                      UNITS:      mW/(m^2.cm^-1)
-!                                      TYPE:       Double
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!                                      temperature of 5783k.
+!                                      units:      mw/(m^2.cm^-1)
+!                                      type:       double
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-!       is_solar_channel:              Array of integer flag values indicating if the
+!       is_solar_channel:              array of integer flag values indicating if the
 !                                      particular satellite channel possesses valid
 !                                      solar irradiance values.
-!                                      If = 0, No
-!                                         = 1, Yes
-!                                      UNITS:      None
-!                                      TYPE:       Long
-!                                      DIMENSION:  L, n_channels
-!                                      ATTRIBUTES: INTENT( IN )
+!                                      if = 0, no
+!                                         = 1, yes
+!                                      units:      none
+!                                      type:       long
+!                                      dimension:  l, n_channels
+!                                      attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       message_log:                   Character string specifying a filename in which
-!                                      any messages will be logged. If not specified,
+! optional input arguments:
+!       message_log:                   character string specifying a filename in which
+!                                      any messages will be logged. if not specified,
 !                                      or if an error occurs opening the log file,
 !                                      the default action is to output messages to
 !                                      the screen.
-!                                      UNITS:      None
-!                                      TYPE:       Character
-!                                      DIMENSION:  Scalar
-!                                      ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                                      units:      none
+!                                      type:       character
+!                                      dimension:  scalar
+!                                      attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       None.
+! output arguments:
+!       none.
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => data file write was successful
-!              = FAILURE => error occurred opening or writing to the
+! function result:
+!       result = success => data file write was successful
+!              = failure => error occurred opening or writing to the
 !                           data file
 !
-! CALLS:
-!       display_message:        Subroutine to output messages
-!                               SOURCE: error_handler module
+! calls:
+!       display_message:        subroutine to output messages
+!                               source: error_handler module
 !
-! CONTAINS:
-!       None.
+! contains:
+!       none.
 !
-! INCLUDE FILES:
-!       None.
+! include files:
+!       none.
 !
-! EXTERNALS:
-!       None.
+! externals:
+!       none.
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! FILES ACCESSED:
-!       None.
+! files accessed:
+!       none.
 !
-! SIDE EFFECTS:
-!       If a coefficient file with the specified name exists, it is
+! side effects:
+!       if a coefficient file with the specified name exists, it is
 !       overwritten.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
 !------------------------------------------------------------------------------
 
-  FUNCTION write_spectral_coefficients( coefficient_file,              &  ! Input
-                                        frequency,                     &  ! Input
-                                        wavenumber,                    &  ! Input
-                                        planck_c1,                     &  ! Input
-                                        planck_c2,                     &  ! Input
-                                        band_c1,                       &  ! Input
-                                        band_c2,                       &  ! Input
-                                        is_microwave_channel,          &  ! Input
-                                        cosmic_background_temperature, &  ! Input
-                                        cosmic_background_radiance,    &  ! Input
-                                        solar_irradiance,              &  ! Input
-                                        blackbody_irradiance,          &  ! Input
-                                        is_solar_channel,              &  ! Input
+  function write_spectral_coefficients( coefficient_file,              &  ! input
+                                        frequency,                     &  ! input
+                                        wavenumber,                    &  ! input
+                                        planck_c1,                     &  ! input
+                                        planck_c2,                     &  ! input
+                                        band_c1,                       &  ! input
+                                        band_c2,                       &  ! input
+                                        is_microwave_channel,          &  ! input
+                                        cosmic_background_temperature, &  ! input
+                                        cosmic_background_radiance,    &  ! input
+                                        solar_irradiance,              &  ! input
+                                        blackbody_irradiance,          &  ! input
+                                        is_solar_channel,              &  ! input
 
-                                        release,                       &  ! Optional input
-                                        version,                       &  ! Optional input
-                                        message_log )                  &  ! Optional input
-                                      RESULT ( error_status )
+                                        release,                       &  ! optional input
+                                        version,                       &  ! optional input
+                                        message_log )                  &  ! optional input
+                                      result ( error_status )
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Input
-    CHARACTER( * ),                  INTENT( IN ) :: coefficient_file              ! Input
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: frequency                     ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: wavenumber                    ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: planck_c1                     ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: planck_c2                     ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: band_c1                       ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: band_c2                       ! Input, L
-    INTEGER( Long ), DIMENSION( : ), INTENT( IN ) :: is_microwave_channel          ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: cosmic_background_temperature ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: cosmic_background_radiance    ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: solar_irradiance              ! Input, L
-    REAL( Double ),  DIMENSION( : ), INTENT( IN ) :: blackbody_irradiance          ! Input, L
-    INTEGER( Long ), DIMENSION( : ), INTENT( IN ) :: is_solar_channel              ! Input, L
+    ! -- input
+    character( * ),                  intent( in ) :: coefficient_file              ! input
+    real( double ),  dimension( : ), intent( in ) :: frequency                     ! input, l
+    real( double ),  dimension( : ), intent( in ) :: wavenumber                    ! input, l
+    real( double ),  dimension( : ), intent( in ) :: planck_c1                     ! input, l
+    real( double ),  dimension( : ), intent( in ) :: planck_c2                     ! input, l
+    real( double ),  dimension( : ), intent( in ) :: band_c1                       ! input, l
+    real( double ),  dimension( : ), intent( in ) :: band_c2                       ! input, l
+    integer( long ), dimension( : ), intent( in ) :: is_microwave_channel          ! input, l
+    real( double ),  dimension( : ), intent( in ) :: cosmic_background_temperature ! input, l
+    real( double ),  dimension( : ), intent( in ) :: cosmic_background_radiance    ! input, l
+    real( double ),  dimension( : ), intent( in ) :: solar_irradiance              ! input, l
+    real( double ),  dimension( : ), intent( in ) :: blackbody_irradiance          ! input, l
+    integer( long ), dimension( : ), intent( in ) :: is_solar_channel              ! input, l
 
 
-    INTEGER,        OPTIONAL,        INTENT( IN ) :: release
-    INTEGER,        OPTIONAL,        INTENT( IN ) :: version
+    integer,        optional,        intent( in ) :: release
+    integer,        optional,        intent( in ) :: version
 
-    CHARACTER( * ), OPTIONAL,        INTENT( IN ) :: message_log
+    character( * ), optional,        intent( in ) :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ),  PARAMETER :: ROUTINE_NAME = 'WRITE_SPECTRAL_COEFFICIENTS'
+    character( * ),  parameter :: routine_name = 'write_spectral_coefficients'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- Typed ( Long ) for output
-    INTEGER( Long ) :: n_channels
+    ! -- typed ( long ) for output
+    integer( long ) :: n_channels
 
-    INTEGER( Long ) :: file_release
-    INTEGER( Long ) :: file_version
+    integer( long ) :: file_release
+    integer( long ) :: file_version
 
-    INTEGER :: file_id
-    INTEGER :: io_status
+    integer :: file_id
+    integer :: io_status
 
-    INTEGER :: i, j, k, l
+    integer :: i, j, k, l
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC SIZE, &
-              TRIM
+    intrinsic size, &
+              trim
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                           -- Check input --                              #
+    !#                           -- check input --                              #
     !#--------------------------------------------------------------------------#
 
-    n_channels = SIZE( frequency )
+    n_channels = size( frequency )
 
-    IF ( SIZE( wavenumber                    ) /= n_channels .OR. &
-         SIZE( planck_c1                     ) /= n_channels .OR. &
-         SIZE( planck_c2                     ) /= n_channels .OR. &
-         SIZE( band_c1                       ) /= n_channels .OR. &
-         SIZE( band_c1                       ) /= n_channels .OR. &
-         SIZE( is_microwave_channel          ) /= n_channels .OR. &
-         SIZE( cosmic_background_temperature ) /= n_channels .OR. &
-         SIZE( cosmic_background_radiance    ) /= n_channels .OR. &
-         SIZE( solar_irradiance              ) /= n_channels .OR. &
-         SIZE( blackbody_irradiance          ) /= n_channels .OR. &
-         SIZE( is_solar_channel              ) /= n_channels      ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Inconsistent vector channel dimensions.', &
+    if ( size( wavenumber                    ) /= n_channels .or. &
+         size( planck_c1                     ) /= n_channels .or. &
+         size( planck_c2                     ) /= n_channels .or. &
+         size( band_c1                       ) /= n_channels .or. &
+         size( band_c1                       ) /= n_channels .or. &
+         size( is_microwave_channel          ) /= n_channels .or. &
+         size( cosmic_background_temperature ) /= n_channels .or. &
+         size( cosmic_background_radiance    ) /= n_channels .or. &
+         size( solar_irradiance              ) /= n_channels .or. &
+         size( blackbody_irradiance          ) /= n_channels .or. &
+         size( is_solar_channel              ) /= n_channels      ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'inconsistent vector channel dimensions.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
     ! ----------------------------------
-    ! Assign release and version numbers
+    ! assign release and version numbers
     ! ----------------------------------
 
-    IF ( PRESENT( release ) ) THEN
-      file_release = INT( release, Long )
-    ELSE
-      file_release = MAX_VALID_RELEASE
-    END IF
+    if ( present( release ) ) then
+      file_release = int( release, long )
+    else
+      file_release = max_valid_release
+    end if
 
-    IF ( PRESENT( version ) ) THEN
-      file_version = INT( version, Long )
-    ELSE
-      file_version = MAX_VALID_VERSION
-    END IF
+    if ( present( version ) ) then
+      file_version = int( version, long )
+    else
+      file_version = max_valid_version
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#        -- Open the spectral coefficient data file for output --          #
+    !#        -- open the spectral coefficient data file for output --          #
     !#--------------------------------------------------------------------------#
 
     error_status = open_coefficient_file( coefficient_file,         &
@@ -1223,101 +1223,101 @@ CONTAINS
                                           for_output  = 1,          &
                                           message_log = message_log )
 
-    IF ( error_status /= SUCCESS ) THEN
-      CALL display_message( ROUTINE_NAME, &
-                            'Error opening '//TRIM( coefficient_file )//' for output.', &
+    if ( error_status /= success ) then
+      call display_message( routine_name, &
+                            'error opening '//trim( coefficient_file )//' for output.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                     -- Write the "file header" --                        #
+    !#                     -- write the "file header" --                        #
     !#--------------------------------------------------------------------------#
 
     ! -------------------------------------
-    ! Write the release/version information
+    ! write the release/version information
     ! -------------------------------------
 
-    WRITE( file_id, IOSTAT = io_status ) file_release, file_version 
+    write( file_id, iostat = io_status ) file_release, file_version 
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error writing file release/version information to ", a, &
-                        &". IOSTAT = ", i5 )' ) &
-                      TRIM( coefficient_file ), io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error writing file release/version information to ", a, &
+                        &". iostat = ", i5 )' ) &
+                      trim( coefficient_file ), io_status
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
     ! --------------------
-    ! Write the dimensions
+    ! write the dimensions
     ! --------------------
 
-    WRITE( file_id, IOSTAT = io_status ) n_channels
+    write( file_id, iostat = io_status ) n_channels
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error writing dimension values to ", a, ". IOSTAT = ", i5 )' ) &
-                      TRIM( coefficient_file ), io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error writing dimension values to ", a, ". iostat = ", i5 )' ) &
+                      trim( coefficient_file ), io_status
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
     ! ----------------------------------------------
-    ! Write the number of data items per channel and
+    ! write the number of data items per channel and
     ! the type of the data items.
     ! ----------------------------------------------
 
-    WRITE( file_id, IOSTAT = io_status ) N_SPECTRAL_ITEMS
+    write( file_id, iostat = io_status ) n_spectral_items
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error writing data item count to ", a, ". IOSTAT = ", i5 )' ) &
-                      TRIM( coefficient_file ), io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error writing data item count to ", a, ". iostat = ", i5 )' ) &
+                      trim( coefficient_file ), io_status
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
-    WRITE( file_id, IOSTAT = io_status ) SPECTRAL_DATA_TYPE
+    write( file_id, iostat = io_status ) spectral_data_type
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error writing data item types to ", a, ". IOSTAT = ", i5 )' ) &
-                      TRIM( coefficient_file ), io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error writing data item types to ", a, ". iostat = ", i5 )' ) &
+                      trim( coefficient_file ), io_status
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      CLOSE( file_id )
-      RETURN
-    END IF
+      close( file_id )
+      return
+    end if
 
 
     !#--------------------------------------------------------------------------#
-    !#                     -- Write the data by channel --                      #
+    !#                     -- write the data by channel --                      #
     !#--------------------------------------------------------------------------#
 
-    DO l = 1, n_channels
+    do l = 1, n_channels
 
-      WRITE( file_id, IOSTAT = io_status ) frequency( l ),                     &                    
+      write( file_id, iostat = io_status ) frequency( l ),                     &                    
                                            wavenumber( l ),                    &
                                            planck_c1( l ),                     &
                                            planck_c2( l ),                     &
@@ -1330,158 +1330,158 @@ CONTAINS
                                            blackbody_irradiance( l ),          &
                                            is_solar_channel( l )
 
-      IF ( io_status /= 0 ) THEN
-        error_status = FAILURE
-        WRITE( message, '( "Error writing channel ", i4, 1x, &
-                          &"spectral data. IOSTAT = ", i5 )' ) &
+      if ( io_status /= 0 ) then
+        error_status = failure
+        write( message, '( "error writing channel ", i4, 1x, &
+                          &"spectral data. iostat = ", i5 )' ) &
                         l, io_status
-        CALL display_message( ROUTINE_NAME, &
-                              TRIM( message ), &
+        call display_message( routine_name, &
+                              trim( message ), &
                               error_status, &
                               message_log = message_log )
-        CLOSE( file_id )
-        RETURN
-      END IF
+        close( file_id )
+        return
+      end if
 
-    END DO
+    end do
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                          -- Close the file --                            #
+    !#                          -- close the file --                            #
     !#--------------------------------------------------------------------------#
 
-    CLOSE( file_id, IOSTAT = io_status )
+    close( file_id, iostat = io_status )
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error closing ", a, ". IOSTAT = ", i5 )' ) &
-                      TRIM( coefficient_file ), io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error closing ", a, ". iostat = ", i5 )' ) &
+                      trim( coefficient_file ), io_status
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Successful completion --                         #
+    !#                      -- successful completion --                         #
     !#--------------------------------------------------------------------------#
 
-    ! -- Output an info message
-    ! -- Output an info message
-    WRITE( message, '( "FILE VERSION: ", i1, ".", i2.2, 2x, &
-                      &"N_CHANNELS=",i4 )' ) &
+    ! -- output an info message
+    ! -- output an info message
+    write( message, '( "file version: ", i1, ".", i2.2, 2x, &
+                      &"n_channels=",i4 )' ) &
                     file_release, file_version, &
                     n_channels
-    CALL display_message( ROUTINE_NAME, &
-                          TRIM( message ), &
-                          INFORMATION, &
+    call display_message( routine_name, &
+                          trim( message ), &
+                          information, &
                           message_log = message_log )
 
-    error_status = SUCCESS
+    error_status = success
 
-  END FUNCTION write_spectral_coefficients
+  end function write_spectral_coefficients
 
-END MODULE spectral_coefficients
+end module spectral_coefficients
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.1  2002/11/15 15:21:33  birk
-! Added to cvs mainly to see how this compiles on other platforms, it currently
-! seems to compile on the IBM
+! $log$
+! revision 1.1  2002/11/15 15:21:33  birk
+! added to cvs mainly to see how this compiles on other platforms, it currently
+! seems to compile on the ibm
 !
-! Revision 1.11  2001/08/31 21:11:41  paulv
-! - Added MIN and MAX release/version parameters to allow for valid use of
+! revision 1.11  2001/08/31 21:11:41  paulv
+! - added min and max release/version parameters to allow for valid use of
 !   data files within a specified range.
 !
-! Revision 1.10  2001/08/16 17:16:30  paulv
-! - Updated documentation
-! - The comparison of n_channels and MAX_N_CHANNELS is now done via the
-!   MAX_N_CHANNELS methods in the PARAMETERS module.
+! revision 1.10  2001/08/16 17:16:30  paulv
+! - updated documentation
+! - the comparison of n_channels and max_n_channels is now done via the
+!   max_n_channels methods in the parameters module.
 !
-! Revision 1.9  2001/08/09 20:45:33  paulv
-! - Added the WRITE_SPECTRAL_COEFFICIENTS function.
-! - Moved all the spectral data type and name definitions from the
-!   COEFFICIENT_UTILITY module to this one. Altered USE statement of the
-!   COEFFICIENT_UTILITY module to reflect this change.
-! - Added VALID_RELEASE and VALID_VERSION parameters for data file version
+! revision 1.9  2001/08/09 20:45:33  paulv
+! - added the write_spectral_coefficients function.
+! - moved all the spectral data type and name definitions from the
+!   coefficient_utility module to this one. altered use statement of the
+!   coefficient_utility module to reflect this change.
+! - added valid_release and valid_version parameters for data file version
 !   checking.
-! - Added data file release and version number read/write to the requisite
+! - added data file release and version number read/write to the requisite
 !   read/write function.
 !
-! Revision 1.8  2001/07/12 17:46:31  paulv
-! - Removed definitions of the number, type, and name of the spectral items
-!   and moved them into the COEFFICIENT_UTILITY module. They are now available
+! revision 1.8  2001/07/12 17:46:31  paulv
+! - removed definitions of the number, type, and name of the spectral items
+!   and moved them into the coefficient_utility module. they are now available
 !   via:
-!     USE coefficient_utility, ONLY: open_coefficient_file, &
-!                                    N_SPECTRAL_ITEMS,      &
-!                                    SPECTRAL_DATA_TYPE,    &
-!                                    SPECTRAL_DATA_NAME
-!   This was done to allow the COEFFICIENT_UTILITY module to be used for
-!   reformatting. However, this may change - now definitions for the contents
+!     use coefficient_utility, only: open_coefficient_file, &
+!                                    n_spectral_items,      &
+!                                    spectral_data_type,    &
+!                                    spectral_data_name
+!   this was done to allow the coefficient_utility module to be used for
+!   reformatting. however, this may change - now definitions for the contents
 !   of the spectral coefficient data file are distributed in two different
-!   modules. I don't like that.
-! - Compressed the coefficient READ statement.
+!   modules. i don't like that.
+! - compressed the coefficient read statement.
 !
-! Revision 1.7  2001/05/29 17:49:32  paulv
-! - Made ALL real valued spectral coefficients double precision. Previously
+! revision 1.7  2001/05/29 17:49:32  paulv
+! - made all real valued spectral coefficients double precision. previously
 !   the cosmic background and solar terms were single precision.
-! - Added precalculated cosmic background radiance term.
-! - Some cosmetic changes.
-! - Changed USE_SOLAR array name to IS_SOLAR_CHANNEL.
-! - Added DESTROY_SPECTRAL_COEFFICIENTS function. This deallocates the
+! - added precalculated cosmic background radiance term.
+! - some cosmetic changes.
+! - changed use_solar array name to is_solar_channel.
+! - added destroy_spectral_coefficients function. this deallocates the
 !   data arrays used to store the spectral coefficient data.
 !
-! Revision 1.6  2001/01/09 21:23:27  paulv
-! - Added IS_MICROWAVE_CHANNEL and COSMIC_BACKGROUND_TEMPERATURE arrays to
+! revision 1.6  2001/01/09 21:23:27  paulv
+! - added is_microwave_channel and cosmic_background_temperature arrays to
 !   read.
-! - Updated module documentation.
+! - updated module documentation.
 !
-! Revision 1.5  2000/11/09 20:39:49  paulv
-! - Coefficient arrays are now ALLOCATABLE.
-! - Input file format has changed to contain data dimension and type
+! revision 1.5  2000/11/09 20:39:49  paulv
+! - coefficient arrays are now allocatable.
+! - input file format has changed to contain data dimension and type
 !   information for file data checks and array allocation.
 !
-! Revision 1.4  2000/08/31 19:36:33  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.4  2000/08/31 19:36:33  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.3  2000/08/24 16:06:28  paulv
-! - Removed references to the record length parameter. No longer needed as
-!   file access is SEQUENTIAL rather than DIRECT.
-! - Replaced error check after OPEN_COEFFICIENT_FILE call with a simple
-!   test for error_status /= SUCCESS. The open function no longer returns
-!   any error status other than SUCCESS or FAILURE (used to return WARNING
+! revision 1.3  2000/08/24 16:06:28  paulv
+! - removed references to the record length parameter. no longer needed as
+!   file access is sequential rather than direct.
+! - replaced error check after open_coefficient_file call with a simple
+!   test for error_status /= success. the open function no longer returns
+!   any error status other than success or failure (used to return warning
 !   in some circumstances.)
-! - "REC =" keyword removed from file READ statement.
-! - Channel loop construct name changed from "channel_loop" to "l_channel_loop"
-!   to indicate the loop counter variable is "l". This is not a big deal for
+! - "rec =" keyword removed from file read statement.
+! - channel loop construct name changed from "channel_loop" to "l_channel_loop"
+!   to indicate the loop counter variable is "l". this is not a big deal for
 !   this situation but has proven useful in other modules with a high degree
 !   of nested loops.
-! - Updated module and subprogram documentation.
+! - updated module and subprogram documentation.
 !
-! Revision 1.2  2000/08/08 17:04:02  paulv
-! Module modified to:
-! - Read the spectral coefficients correctly! and
-! - To use the PARAMETERS module rather than the CONSTANTS module.
+! revision 1.2  2000/08/08 17:04:02  paulv
+! module modified to:
+! - read the spectral coefficients correctly! and
+! - to use the parameters module rather than the constants module.
 !
-! Revision 1.1  2000/07/12 16:08:10  paulv
-! Initial checked in version
+! revision 1.1  2000/07/12 16:08:10  paulv
+! initial checked in version
 !
 !
 !

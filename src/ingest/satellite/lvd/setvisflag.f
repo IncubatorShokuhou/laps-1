@@ -1,13 +1,13 @@
        subroutine set_vis_flag(i4time,lat,lon,nx_l,ny_l,lvis_flag)
 c
-c routine sets flag for visible data availability. When the solar
+c routine sets flag for visible data availability. when the solar
 c elevation is less than 14 degrees then the visible data is useless
-c even if the file is available. This routine returns lvis_flag = true
+c even if the file is available. this routine returns lvis_flag = true
 c when the solar elevation angle is less than the threshold.
 c
-       use mem_namelist, ONLY: solalt_thr_vis
+       use mem_namelist, only: solalt_thr_vis
 
-       implicit None
+       implicit none
 c
        integer nx_l,ny_l
        integer i4time

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -30,25 +30,25 @@ cdis
 cdis
 cdis
 
-        subroutine wait_for_data(c_filespec,i4time_desired   !  Inputs
-     1               ,i4_check_interval,i4_total_wait        !  Inputs
-     1               ,i4_thresh_age       ! Only loop through the waiting
+        subroutine wait_for_data(c_filespec,i4time_desired   !  inputs
+     1               ,i4_check_interval,i4_total_wait        !  inputs
+     1               ,i4_thresh_age       ! only loop through the waiting
                                           ! if most recent data is younger
-                                          ! than this threshold age (Input)
-     1               ,istatus)            ! Output
+                                          ! than this threshold age (input)
+     1               ,istatus)            ! output
 
-!       Steve Albers FSL 1995, 2001
+!       steve albers fsl 1995, 2001
 
-!       Note all times are in seconds
+!       note all times are in seconds
 
-        character*255 c_filespec      ! Wild card specifying the full path
-!       and filenames. NOTE: If there are very many files in the directory,
+        character*255 c_filespec      ! wild card specifying the full path
+!       and filenames. note: if there are very many files in the directory,
 !       you will need to use a directory name only, the ls command can't
-!       handle it otherwise. The wildcard is especially useful if there
+!       handle it otherwise. the wildcard is especially useful if there
 !       is more than one type of file in the directory.
 
-!       The c_filespec string should not have a particular file time within it.
-!       Valid examples of c_filespec are 'directory/*ext' and 'directory'.
+!       the c_filespec string should not have a particular file time within it.
+!       valid examples of c_filespec are 'directory/*ext' and 'directory'.
 
         logical l_waited
 
@@ -61,7 +61,7 @@ cdis
 
         i4time_start_wait = i4time_now_gg()
 
-        write(6,*)' Wait for data:'
+        write(6,*)' wait for data:'
      1           ,' i4_check_interval,i4_total_wait,i4_thresh_age'
         write(6,*)  i4_check_interval,i4_total_wait,i4_thresh_age
 
@@ -69,7 +69,7 @@ cdis
 
         i4_data_age = i4time_desired-i4time_nearest
 
-        write(6,*)' Wait for data:'
+        write(6,*)' wait for data:'
      1           ,' i4time_desired,i4time_nearest,i4_data_age'
         write(6,*)  i4time_desired,i4time_nearest,i4_data_age
 
@@ -83,12 +83,12 @@ cdis
             i4_wait_sofar = i4time_current - i4time_start_wait
 
             if(i4_wait_sofar .lt. i4_total_wait)then
-                write(6,*)' Searching for more data, sleep '
+                write(6,*)' searching for more data, sleep '
      1                   ,i4_check_interval
                 r4_check_interval = float(i4_check_interval)
                 call snooze_gg(r4_check_interval,istatus)
                 if(istatus .ne. 1)then
-                    write(6,*)' ERROR in wait_for_data from snooze'
+                    write(6,*)' error in wait_for_data from snooze'
                     return
                 endif
    
@@ -100,35 +100,35 @@ cdis
 
         endif
 
-!       Assess the latest data age
+!       assess the latest data age
         if(i4_data_age .eq. 0)then
-            write(6,*)' Wait for data: Found the data'
+            write(6,*)' wait for data: found the data'
             istatus = 1
         elseif(i4_data_age .gt. i4_thresh_age)then
-            write(6,*)' Latest data too old, not waiting for new data'
+            write(6,*)' latest data too old, not waiting for new data'
             istatus = 0
         elseif(i4_data_age .lt. 0)then
-            write(6,*)' Wait for data: '
-     1               ,'Found the data (later than requested time)'
+            write(6,*)' wait for data: '
+     1               ,'found the data (later than requested time)'
             istatus = 1
         else
-            write(6,*)' Wait for data: Never did find the data'
+            write(6,*)' wait for data: never did find the data'
             istatus = 0
         endif
 
 
-        if(istatus .eq. 1 .and. c8_project(1:3) .eq. 'WFO')then       
+        if(istatus .eq. 1 .and. c8_project(1:3) .eq. 'wfo')then       
             if(l_waited)then
                 r_additional_wait = 60.
             else
                 r_additional_wait = 50.
             endif
 
-            write(6,*)' Doing wait to allow full file update: '
+            write(6,*)' doing wait to allow full file update: '
      1               ,r_additional_wait
             call snooze_gg(r_additional_wait,istatus)
             if(istatus .ne. 1)then
-                write(6,*)' ERROR in wait_for_data returned from snooze'
+                write(6,*)' error in wait_for_data returned from snooze'
                 return
             endif
         endif

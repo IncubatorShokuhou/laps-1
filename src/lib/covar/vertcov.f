@@ -1,14 +1,14 @@
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       subroutine vert_cov(i4time,v_inno
      +                          ,num_of_ens
-     +                          ,ix,iy,iz,isoLevel
+     +                          ,ix,iy,iz,isolevel
      +                          ,covert)
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-c c History:
-c Date         Name          Action
+c c history:
+c date         name          action
 c --------     -----------   -------------------------------------------
-c 03/27/2007   Ok-Yeon Kim   Created. 
+c 03/27/2007   ok-yeon kim   created. 
 c ----------------------------------------------------------------------
 
       implicit none
@@ -18,17 +18,17 @@ c ----------------------------------------------------------------------
       integer       i,j,k,l,m,n,ii,jj
       integer       ilength,jlength
       integer     i4time
-      integer     isoLevel(iz)
+      integer     isolevel(iz)
       real        v_inno(ix,iy,iz,20)
       real        amean(ix,iy,iz)
       real        dev(ix,iy,iz,20)
       real        var(ix,iy,iz)
       real        covert(iz,iz,ix,iy)
 
-c--------------- End of Diclaration -----------------------------------
+c--------------- end of diclaration -----------------------------------
 
 
-c Average of innovation at each point  !!
+c average of innovation at each point  !!
       amean=0.
       do n=1,num_of_ens
         do k=1,iz
@@ -49,7 +49,7 @@ c Average of innovation at each point  !!
       enddo
 
 
-c Deviation, variance at each point  !!
+c deviation, variance at each point  !!
       var=0.
       do k=1,iz
         do j=1,iy  
@@ -63,7 +63,7 @@ c Deviation, variance at each point  !!
       enddo
 
 
-c Covariance in the vertical direction  !!
+c covariance in the vertical direction  !!
 
       iens=num_of_ens-1            
       do k=1,iz

@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -47,27 +47,27 @@ cdis
 
         write(6,*)' systime = ',a9_time
 
-        call get_grid_dim_xy(NX_L,NY_L,istatus)
+        call get_grid_dim_xy(nx_l,ny_l,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting horizontal domain dimensions'
+           write (6,*) 'error getting horizontal domain dimensions'
            go to 999
         endif
 
-        call get_laps_dimensions(NZ_L,istatus)
+        call get_laps_dimensions(nz_l,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting vertical domain dimension'
+           write (6,*) 'error getting vertical domain dimension'
            go to 999
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting r_missing_data'
+           write (6,*) 'error getting r_missing_data'
            go to 999
         endif
           
         call laps_deriv(i4time,
-     1                  NX_L,NY_L,
-     1                  NZ_L,
+     1                  nx_l,ny_l,
+     1                  nz_l,
      1                  r_missing_data,
      1                  j_status)
 
@@ -76,37 +76,37 @@ cdis
         end
           
         subroutine laps_deriv(i4time,
-     1                  NX_L,NY_L,
-     1                  NZ_L,
+     1                  nx_l,ny_l,
+     1                  nz_l,
      1                  r_missing_data,
      1                  j_status)
 
-        use mem_namelist, ONLY: max_snd_grid, max_snd_levels
+        use mem_namelist, only: max_snd_grid, max_snd_levels
 
         integer j_status(20),iprod_number(20)
 
-        real temp_3d(NX_L,NY_L,NZ_L)
-        real rh_3d_pct(NX_L,NY_L,NZ_L)
-        real td_3d_k(NX_L,NY_L,NZ_L)
-        real heights_3d(NX_L,NY_L,NZ_L)
-        real u_3d(NX_L,NY_L,NZ_L)
-        real v_3d(NX_L,NY_L,NZ_L)
+        real temp_3d(nx_l,ny_l,nz_l)
+        real rh_3d_pct(nx_l,ny_l,nz_l)
+        real td_3d_k(nx_l,ny_l,nz_l)
+        real heights_3d(nx_l,ny_l,nz_l)
+        real u_3d(nx_l,ny_l,nz_l)
+        real v_3d(nx_l,ny_l,nz_l)
 
-        real temp_sfc_k(NX_L,NY_L)
-        real pres_sfc_pa(NX_L,NY_L)
-        real rh_sfc_pct(NX_L,NY_L)
-        real tpw_2d(NX_L,NY_L)         ! units are M
-        real u_sfc_ms(NX_L,NY_L)
-        real v_sfc_ms(NX_L,NY_L)
+        real temp_sfc_k(nx_l,ny_l)
+        real pres_sfc_pa(nx_l,ny_l)
+        real rh_sfc_pct(nx_l,ny_l)
+        real tpw_2d(nx_l,ny_l)         ! units are m
+        real u_sfc_ms(nx_l,ny_l)
+        real v_sfc_ms(nx_l,ny_l)
 
-        real dbz_max_2d(NX_L,NY_L)
+        real dbz_max_2d(nx_l,ny_l)
 
-        real lat(NX_L,NY_L)
-        real lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
-        real ldf(NX_L,NY_L)
+        real lat(nx_l,ny_l)
+        real lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
+        real ldf(nx_l,ny_l)
 
-        character*31 EXT
+        character*31 ext
 
         character*10  units_2d
         character*125 comment_2d
@@ -114,257 +114,257 @@ cdis
 
         logical l_cloud_only
 
-!       Get parameters for laps_deriv_sub call
-        call get_meso_sao_pirep(N_MESO,N_SAO,N_PIREP,istatus)
+!       get parameters for laps_deriv_sub call
+        call get_meso_sao_pirep(n_meso,n_sao,n_pirep,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting N_PIREP'
+           write (6,*) 'error getting n_pirep'
            go to 999
         endif
 
         call get_maxstns(maxstns,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting maxstns'
+           write (6,*) 'error getting maxstns'
            go to 999
         endif
 
-        max_cld_snd = maxstns + N_PIREP
+        max_cld_snd = maxstns + n_pirep
 
-!       Read data for laps_deriv_sub and put_stability calls
+!       read data for laps_deriv_sub and put_stability calls
 
-!       Read LT1 - temp_3d
-        var_2d = 'T3'
+!       read lt1 - temp_3d
+        var_2d = 't3'
         ext = 'lt1'
-        call get_laps_3d(i4time,NX_L,NY_L,NZ_L
+        call get_laps_3d(i4time,nx_l,ny_l,nz_l
      1      ,ext,var_2d,units_2d,comment_2d,temp_3d,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading 3D Temp'
+            write(6,*)' error reading 3d temp'
             return
         endif
-        call qc_field_3d('T3',temp_3d,NX_L,NY_L,NZ_L,istatus)
+        call qc_field_3d('t3',temp_3d,nx_l,ny_l,nz_l,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading 3D Temp'
+            write(6,*)' error reading 3d temp'
             return
         endif
 
-!       Read LT1 - heights_3d
-        var_2d = 'HT'
+!       read lt1 - heights_3d
+        var_2d = 'ht'
         ext = 'lt1'
-        call get_laps_3d(i4time,NX_L,NY_L,NZ_L
+        call get_laps_3d(i4time,nx_l,ny_l,nz_l
      1      ,ext,var_2d,units_2d,comment_2d,heights_3d,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading 3D Heights'
+            write(6,*)' error reading 3d heights'
             return
         endif
-        call qc_field_3d('HT',heights_3d,NX_L,NY_L,NZ_L,istatus)
+        call qc_field_3d('ht',heights_3d,nx_l,ny_l,nz_l,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading 3D Heights'
+            write(6,*)' error reading 3d heights'
             return
         endif
 
-!       Read RH
-        var_2d = 'RHL'
+!       read rh
+        var_2d = 'rhl'
         ext = 'lh3'
-        call get_laps_3d(i4time,NX_L,NY_L,NZ_L
+        call get_laps_3d(i4time,nx_l,ny_l,nz_l
      1      ,ext,var_2d,units_2d,comment_2d,rh_3d_pct,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading 3D RH (lh3/RHL)'
+            write(6,*)' error reading 3d rh (lh3/rhl)'
             return
         endif
-        call qc_field_3d('RHL',rh_3d_pct,NX_L,NY_L,NZ_L,istatus)
+        call qc_field_3d('rhl',rh_3d_pct,nx_l,ny_l,nz_l,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading 3D RH (lh3/RHL)'
+            write(6,*)' error reading 3d rh (lh3/rhl)'
             return
         endif
 
-!       Read in surface temp data
-        var_2d = 'T'
+!       read in surface temp data
+        var_2d = 't'
         ext = 'lsx'
         call get_laps_2d(i4time,ext,var_2d,units_2d,comment_2d
-     1                  ,NX_L,NY_L,temp_sfc_k,istatus)
+     1                  ,nx_l,ny_l,temp_sfc_k,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' LAPS Sfc Temp not available'
+            write(6,*)' laps sfc temp not available'
             go to 999
         endif
 
-!       Read in surface pressure data
-        var_2d = 'PS'
+!       read in surface pressure data
+        var_2d = 'ps'
         ext = 'lsx'
         call get_laps_2d(i4time,ext,var_2d,units_2d,comment_2d
-     1                  ,NX_L,NY_L,pres_sfc_pa,istatus)
+     1                  ,nx_l,ny_l,pres_sfc_pa,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' LAPS Sfc Pres not available'
+            write(6,*)' laps sfc pres not available'
             go to 999
         endif
 
-!       Read in surface rh data
-        var_2d = 'RH'
+!       read in surface rh data
+        var_2d = 'rh'
         ext = 'lsx'
         call get_laps_2d(i4time,ext,var_2d,units_2d,comment_2d
-     1                  ,NX_L,NY_L,rh_sfc_pct,istatus)
+     1                  ,nx_l,ny_l,rh_sfc_pct,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' LAPS Sfc RH not available'
+            write(6,*)' laps sfc rh not available'
             go to 999
         endif
 
-!       Read in surface u component
-        var_2d = 'U'
+!       read in surface u component
+        var_2d = 'u'
         ext = 'lsx'
         call get_laps_2d(i4time,ext,var_2d,units_2d,comment_2d
-     1                  ,NX_L,NY_L,u_sfc_ms,istatus)
+     1                  ,nx_l,ny_l,u_sfc_ms,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' LAPS Sfc U not available'
+            write(6,*)' laps sfc u not available'
             go to 999
         endif
 
-!       Read in surface v component
-        var_2d = 'V'
+!       read in surface v component
+        var_2d = 'v'
         ext = 'lsx'
         call get_laps_2d(i4time,ext,var_2d,units_2d,comment_2d
-     1                  ,NX_L,NY_L,v_sfc_ms,istatus)
+     1                  ,nx_l,ny_l,v_sfc_ms,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' LAPS Sfc V not available'
+            write(6,*)' laps sfc v not available'
             go to 999
         endif
 
-!       Read in tpw data
-        var_2d = 'TPW'
+!       read in tpw data
+        var_2d = 'tpw'
         ext = 'lh4'
         call get_laps_2d(i4time,ext,var_2d,units_2d,comment_2d
-     1                  ,NX_L,NY_L,tpw_2d,istatus)
+     1                  ,nx_l,ny_l,tpw_2d,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' LAPS TPW not available'
+            write(6,*)' laps tpw not available'
             go to 999
         endif
 
         write(6,*)
-        write(6,*)' Calling laps_deriv_sub'
-        call laps_deriv_sub(i4time,                  ! I
-     1                  NX_L,NY_L,                   ! I
-     1                  NZ_L,                        ! I
-     1                  N_PIREP,                     ! I
-     1                  maxstns,                     ! I
-     1                  max_snd_grid,max_snd_levels, ! I
+        write(6,*)' calling laps_deriv_sub'
+        call laps_deriv_sub(i4time,                  ! i
+     1                  nx_l,ny_l,                   ! i
+     1                  nz_l,                        ! i
+     1                  n_pirep,                     ! i
+     1                  maxstns,                     ! i
+     1                  max_snd_grid,max_snd_levels, ! i
      1                  n_prods,
      1                  iprod_number,
-     1                  temp_3d,                     ! I
-     1                  heights_3d,                  ! I
-     1                  rh_3d_pct,                   ! I
-     1                  pres_sfc_pa,                 ! I
-     1                  temp_sfc_k,                  ! I
-     1                  dbz_max_2d,istat_lps,        ! O
-     1                  twet_snow,l_cloud_only,      ! O
-     1                  j_status,                    ! O
-     1                  istatus1)                    ! O
+     1                  temp_3d,                     ! i
+     1                  heights_3d,                  ! i
+     1                  rh_3d_pct,                   ! i
+     1                  pres_sfc_pa,                 ! i
+     1                  temp_sfc_k,                  ! i
+     1                  dbz_max_2d,istat_lps,        ! o
+     1                  twet_snow,l_cloud_only,      ! o
+     1                  j_status,                    ! o
+     1                  istatus1)                    ! o
 
         if(l_cloud_only)then
-            write(6,*)' Skipping stability and fire sections'
+            write(6,*)' skipping stability and fire sections'
             go to 999
         endif
 
-!       istat_lps = 0 ! Temporary until this is wired in'
+!       istat_lps = 0 ! temporary until this is wired in'
         istat_twet_snow = 1 ! if we get this far the read was successful
 
-        call get_laps_domain_95(NX_L,NY_L,lat,lon,topo
+        call get_laps_domain_95(nx_l,ny_l,lat,lon,topo
      1                         ,ldf,grid_spacing_m,istatus)       
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS domain'
+            write(6,*)' error getting laps domain'
             go to 999
         endif
 
         if(istat_twet_snow .eq. 1)then
             call get_laps_cycle_time(laps_cycle_time,istatus)
             if (istatus .ne. 1) then
-                write (6,*) 'Error getting LAPS cycle time'
+                write (6,*) 'error getting laps cycle time'
                 go to 999
             endif
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
             write(6,*)
-            write(6,*)' Calling put_stability'
+            write(6,*)' calling put_stability'
             call put_stability(
-     1           i4time                          ! I
-     1          ,NX_L,NY_L,NZ_L                  ! I
-     1          ,heights_3d                      ! I
-     1          ,lat,lon,topo                    ! I
-     1          ,laps_cycle_time                 ! I
-     1          ,temp_3d                         ! I
-     1          ,rh_3d_pct                       ! I
-     1          ,temp_sfc_k                      ! I
-     1          ,pres_sfc_pa                     ! I
-     1          ,twet_snow                       ! I
-     1          ,td_3d_k                         ! O
-     1          ,istat_lst)                      ! O
+     1           i4time                          ! i
+     1          ,nx_l,ny_l,nz_l                  ! i
+     1          ,heights_3d                      ! i
+     1          ,lat,lon,topo                    ! i
+     1          ,laps_cycle_time                 ! i
+     1          ,temp_3d                         ! i
+     1          ,rh_3d_pct                       ! i
+     1          ,temp_sfc_k                      ! i
+     1          ,pres_sfc_pa                     ! i
+     1          ,twet_snow                       ! i
+     1          ,td_3d_k                         ! o
+     1          ,istat_lst)                      ! o
         else
-            write(6,*)' put_stability not called for LST file'
+            write(6,*)' put_stability not called for lst file'
 
         endif
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       If we need space we can deallocate rh_3d_pct here
-!       If we need space we can allocate u_3d, v_3d here
+!       if we need space we can deallocate rh_3d_pct here
+!       if we need space we can allocate u_3d, v_3d here
 
         write(6,*)
-        write(6,*)' Calling put_derived_wind_prods'
-        call put_derived_wind_prods(NX_L,NY_L,NZ_L           ! Input
-     1          ,NX_L,NY_L,NZ_L                              ! Input (sic)
-     1          ,max_radars_dum,r_missing_data               ! Input
-     1          ,i4time                                      ! Input
-     1          ,dbz_max_2d,istat_lps                        ! Input
-     1          ,lat,lon,topo,ldf                            ! Input
-     1          ,tpw_2d                                      ! Input
-     1          ,heights_3d                                  ! Input
-     1          ,u_3d,v_3d)                                  ! Output
+        write(6,*)' calling put_derived_wind_prods'
+        call put_derived_wind_prods(nx_l,ny_l,nz_l           ! input
+     1          ,nx_l,ny_l,nz_l                              ! input (sic)
+     1          ,max_radars_dum,r_missing_data               ! input
+     1          ,i4time                                      ! input
+     1          ,dbz_max_2d,istat_lps                        ! input
+     1          ,lat,lon,topo,ldf                            ! input
+     1          ,tpw_2d                                      ! input
+     1          ,heights_3d                                  ! input
+     1          ,u_3d,v_3d)                                  ! output
 
         write(6,*)
         if(istat_lst .eq. 1)then
 
-            write(6,*)' Calling fire_fields'
-            call fire_fields(NX_L,NY_L,NZ_L,temp_3d,td_3d_k          ! I
-     1                      ,u_3d,v_3d                               ! I
-     1                      ,temp_sfc_k,pres_sfc_pa                  ! I
-     1                      ,rh_sfc_pct,u_sfc_ms,v_sfc_ms            ! I
-     1                      ,r_missing_data,i4time                   ! I
-     1                      ,istatus)                                ! O
+            write(6,*)' calling fire_fields'
+            call fire_fields(nx_l,ny_l,nz_l,temp_3d,td_3d_k          ! i
+     1                      ,u_3d,v_3d                               ! i
+     1                      ,temp_sfc_k,pres_sfc_pa                  ! i
+     1                      ,rh_sfc_pct,u_sfc_ms,v_sfc_ms            ! i
+     1                      ,r_missing_data,i4time                   ! i
+     1                      ,istatus)                                ! o
 
         else
-            write(6,*)' Skipping call to fire_fields'
+            write(6,*)' skipping call to fire_fields'
 
         endif
 
- 999    write(6,*)' End of subroutine laps_deriv'
+ 999    write(6,*)' end of subroutine laps_deriv'
 
         return
 
         end
 
  
-       subroutine get_deriv_parms(mode_evap,l_bogus_radar_w,              ! O
-     1                            l_deep_vv,l_cloud_only,                 ! O
-     1                            vv_to_height_ratio_Cu,                  ! O
-     1                            vv_to_height_ratio_Sc,                  ! O
-     1                            vv_for_St,                              ! O
-     1                            c_z2m,                                  ! O
-     1                            thresh_cvr_cty_vv,thresh_cvr_lwc,       ! O
-     1                            twet_snow,                              ! O
-     1                            hydrometeor_scale_cldliq,               ! O
-     1                            hydrometeor_scale_cldice,               ! O
-     1                            hydrometeor_scale_pcp,                  ! O
-     1                            istatus)                                ! O
+       subroutine get_deriv_parms(mode_evap,l_bogus_radar_w,              ! o
+     1                            l_deep_vv,l_cloud_only,                 ! o
+     1                            vv_to_height_ratio_cu,                  ! o
+     1                            vv_to_height_ratio_sc,                  ! o
+     1                            vv_for_st,                              ! o
+     1                            c_z2m,                                  ! o
+     1                            thresh_cvr_cty_vv,thresh_cvr_lwc,       ! o
+     1                            twet_snow,                              ! o
+     1                            hydrometeor_scale_cldliq,               ! o
+     1                            hydrometeor_scale_cldice,               ! o
+     1                            hydrometeor_scale_pcp,                  ! o
+     1                            istatus)                                ! o
 
-       Real vv_to_height_ratio_Cu
-       Real vv_to_height_ratio_Sc
-       Real vv_for_St
-       Real thresh_cvr_cty_vv,thresh_cvr_lwc,twet_snow
-       Real hydrometeor_scale_cldliq,hydrometeor_scale_cldice
-       Real hydrometeor_scale_pcp
+       real vv_to_height_ratio_cu
+       real vv_to_height_ratio_sc
+       real vv_for_st
+       real thresh_cvr_cty_vv,thresh_cvr_lwc,twet_snow
+       real hydrometeor_scale_cldliq,hydrometeor_scale_cldice
+       real hydrometeor_scale_pcp
 
        character*20 c_z2m
 
@@ -372,9 +372,9 @@ cdis
 
        namelist /deriv_nl/ mode_evap, l_bogus_radar_w, l_deep_vv,
      1                     l_cloud_only,
-     1                     vv_to_height_ratio_Cu,
-     1                     vv_to_height_ratio_Sc,
-     1                     vv_for_St,
+     1                     vv_to_height_ratio_cu,
+     1                     vv_to_height_ratio_sc,
+     1                     vv_for_st,
      1                     c_z2m,
      1                     thresh_cvr_cty_vv,thresh_cvr_lwc,
      1                     twet_snow,
@@ -384,7 +384,7 @@ cdis
  
        character*150 static_dir,filename
 
-!      Set default value(s)
+!      set default value(s)
        c_z2m = 'albers'
        hydrometeor_scale_cldliq = 0.2
        hydrometeor_scale_cldice = 0.2

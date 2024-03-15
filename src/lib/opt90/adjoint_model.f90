@@ -1,1125 +1,1125 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       adjoint_model
 !
-! PURPOSE:
-!       Module containing the NCEP RT adjoint model function
+! purpose:
+!       module containing the ncep rt adjoint model function
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE adjoint_model
+! calling sequence:
+!       use adjoint_model
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       type_kinds:            Module to define kind types for variable declaration.
+! modules:
+!       type_kinds:            module to define kind types for variable declaration.
 !
-!       error_handler:         Module to define error codes and handle error conditions
+!       error_handler:         module to define error codes and handle error conditions
 !
-!       parameters:            Module containing parameter definitions for the
-!                              RT model.
+!       parameters:            module containing parameter definitions for the
+!                              rt model.
 !
-!       spectral_coefficients: Module containing the RT model spectral coefficients.
+!       spectral_coefficients: module containing the rt model spectral coefficients.
 !
-!       absorber_profile:      Module containing routines for generating the absorber
+!       absorber_profile:      module containing routines for generating the absorber
 !                              profiles.
 !
-!       predictors:            Module containing routines for generating the predictor
+!       predictors:            module containing routines for generating the predictor
 !                              profiles.
 !
-!       transmittance:         Module containing transmittance calculation routines.
+!       transmittance:         module containing transmittance calculation routines.
 !
-!       radiance:              Module containing radiance calculation routines.
+!       radiance:              module containing radiance calculation routines.
 !
-! CONTAINS:
-!       adjoint_rtm:           PUBLIC function that calculates the adjoint of the
-!                              top-of-atmosphere (TOA) radiances and brightness
+! contains:
+!       adjoint_rtm:           public function that calculates the adjoint of the
+!                              top-of-atmosphere (toa) radiances and brightness
 !                              temperatures for user specified profiles and
 !                              satellites/channels.
 !
-!       compute_rtm_AD:        PUBLIC function that calculates the adjoint of the
-!                              top-of-atmosphere (TOA) radiances and brightness
+!       compute_rtm_ad:        public function that calculates the adjoint of the
+!                              top-of-atmosphere (toa) radiances and brightness
 !                              temperatures for an input atmospheric profile
 !                              set and user specified satellites/channels.
 !
-!                              This function is simply a wrapper around both the
-!                              FORWARD model (FORTWARD_RTM) and the ADJOINT model
-!                              (ADJOINT_RTM) so that the user doesn't have to declare
+!                              this function is simply a wrapper around both the
+!                              forward model (fortward_rtm) and the adjoint model
+!                              (adjoint_rtm) so that the user doesn't have to declare
 !                              the absorber/predictor/etc arrays in the calling routine.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 05-Feb-2001
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 05-feb-2001
 !                       pvandelst@ncep.noaa.gov
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE adjoint_model
+module adjoint_model
 
 
   ! ------------
-  ! Module usage
+  ! module usage
   ! ------------
 
-  USE type_kinds, ONLY : fp_kind
-  USE error_handler
-  USE parameters
-  USE spectral_coefficients
-  USE absorber_profile
-  USE predictors
-  USE transmittance
-  USE radiance
-  USE forward_model, ONLY: forward_rtm
+  use type_kinds, only : fp_kind
+  use error_handler
+  use parameters
+  use spectral_coefficients
+  use absorber_profile
+  use predictors
+  use transmittance
+  use radiance
+  use forward_model, only: forward_rtm
 
 
   ! -----------------------
-  ! Disable implicit typing
+  ! disable implicit typing
   ! -----------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! --------------------
-  ! Default visibilities
+  ! default visibilities
   ! --------------------
 
-  PRIVATE
-  PUBLIC :: compute_rtm_AD
-  PUBLIC :: adjoint_rtm
+  private
+  public :: compute_rtm_ad
+  public :: adjoint_rtm
 
 
   ! --------------------
-  ! Function overloading
+  ! function overloading
   ! --------------------
 
-  INTERFACE compute_rtm_AD
-    MODULE PROCEDURE compute_rtm_AD_rank1
-    MODULE PROCEDURE compute_rtm_AD_rank2
-  END INTERFACE ! compute_rtm_AD
+  interface compute_rtm_ad
+    module procedure compute_rtm_ad_rank1
+    module procedure compute_rtm_ad_rank2
+  end interface ! compute_rtm_ad
 
-  INTERFACE adjoint_rtm
-    MODULE PROCEDURE adjoint_rtm_rank1
-    MODULE PROCEDURE adjoint_rtm_rank2
-  END INTERFACE ! adjoint_rtm
+  interface adjoint_rtm
+    module procedure adjoint_rtm_rank1
+    module procedure adjoint_rtm_rank2
+  end interface ! adjoint_rtm
 
 
-CONTAINS
+contains
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_rtm_AD
+!s+
+! name:
+!       compute_rtm_ad
 !
-! PURPOSE:
-!       PUBLIC function that calculates the Adjoint of the top-of-atmosphere (TOA)
+! purpose:
+!       public function that calculates the adjoint of the top-of-atmosphere (toa)
 !       radiances and brightness temperatures for an input atmospheric profile
 !       set and user specified satellites/channels.
 !
-!       This function is simply a wrapper around both the FORWARD model and the
-!       ADJOINT model so that the user doesn't have to declare the absorber/
+!       this function is simply a wrapper around both the forward model and the
+!       adjoint model so that the user doesn't have to declare the absorber/
 !       predictor/etc arrays in the calling routine.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       result = compute_rtm_AD( &
-!                               ! -- Forward inputs
-!                               level_p, layer_p, layer_t, layer_w, layer_o, &  ! Input, K x M
+! calling sequence:
+!       result = compute_rtm_ad( &
+!                               ! -- forward inputs
+!                               level_p, layer_p, layer_t, layer_w, layer_o, &  ! input, k x m
 !
-!                               surface_temperature,                         &  ! Input, M
-!                               surface_emissivity,                          &  ! Input, L*M
-!                               surface_reflectivity,                        &  ! Input, L*M
+!                               surface_temperature,                         &  ! input, m
+!                               surface_emissivity,                          &  ! input, l*m
+!                               surface_reflectivity,                        &  ! input, l*m
 !
-!                               ! -- Adjoint inputs
-!                               tau_AD,                                      &  ! In/Output, K x L*M
-!                               flux_tau_AD,                                 &  ! In/Output, K x L*M
-!                               solar_tau_AD,                                &  ! In/Output, K x L*M
+!                               ! -- adjoint inputs
+!                               tau_ad,                                      &  ! in/output, k x l*m
+!                               flux_tau_ad,                                 &  ! in/output, k x l*m
+!                               solar_tau_ad,                                &  ! in/output, k x l*m
 !
-!                               upwelling_radiance_AD,                       &  ! In/Output, L*M
-!                               brightness_temperature_AD,                   &  ! In/Output, L*M
+!                               upwelling_radiance_ad,                       &  ! in/output, l*m
+!                               brightness_temperature_ad,                   &  ! in/output, l*m
 !
-!                               ! -- Other inputs
-!                               secant_view_angle,                           &  ! Input, M
-!                               secant_solar_angle,                          &  ! Input, M
-!                               n_channels_per_profile,                      &  ! Input, M
-!                               channel_index,                               &  ! Input, L*M
+!                               ! -- other inputs
+!                               secant_view_angle,                           &  ! input, m
+!                               secant_solar_angle,                          &  ! input, m
+!                               n_channels_per_profile,                      &  ! input, m
+!                               channel_index,                               &  ! input, l*m
 !
-!                               ! -- Forward output
-!                               tau,                                         &  ! Input, K x L*M
-!                               flux_tau,                                    &  ! Input, K x L*M
-!                               solar_tau,                                   &  ! Input, K x L*M
+!                               ! -- forward output
+!                               tau,                                         &  ! input, k x l*m
+!                               flux_tau,                                    &  ! input, k x l*m
+!                               solar_tau,                                   &  ! input, k x l*m
 !
-!                               upwelling_radiance,                          &  ! Input, L*M
-!                               brightness_temperature,                      &  ! Input, L*M
+!                               upwelling_radiance,                          &  ! input, l*m
+!                               brightness_temperature,                      &  ! input, l*m
 !
-!                               ! -- Adjoint outputs
-!                               level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output, K x M
+!                               ! -- adjoint outputs
+!                               level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output, k x m
 !
-!                               surface_temperature_AD,                      &  ! In/Output, M
-!                               surface_emissivity_AD,                       &  ! In/Output, L*M
-!                               surface_reflectivity_AD,                     &  ! In/Output, L*M
+!                               surface_temperature_ad,                      &  ! in/output, m
+!                               surface_emissivity_ad,                       &  ! in/output, l*m
+!                               surface_reflectivity_ad,                     &  ! in/output, l*m
 !
-!                               ! Optional inputs
+!                               ! optional inputs
 !                               message_log = message_log )
 !
-! INPUT ARGUMENTS:
+! input arguments:
 !
-!       level_p:                   Profile set layer interface pressure array. The TOA
-!                                  pressure is not included. TOA pressure is parameterised
-!                                  in the PARAMETERS module.
-!                                  UNITS:      hPa
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       level_p:                   profile set layer interface pressure array. the toa
+!                                  pressure is not included. toa pressure is parameterised
+!                                  in the parameters module.
+!                                  units:      hpa
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_p:                   Profile set layer average pressure array.
-!                                  UNITS:      hPa
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_p:                   profile set layer average pressure array.
+!                                  units:      hpa
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_t:                   Profile set layer average temperature array.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_t:                   profile set layer average temperature array.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_w:      .            Profile set layer average water vapor mixing ratio array
-!                                  UNITS:      g/kg
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_w:      .            profile set layer average water vapor mixing ratio array
+!                                  units:      g/kg
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_o:                   Profile set layer average ozone mixing ratio array.
-!                                  UNITS:      ppmv
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_o:                   profile set layer average ozone mixing ratio array.
+!                                  units:      ppmv
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       surface_temperature:       Profile set surface temperature array.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_temperature:       profile set surface temperature array.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       surface_emissivity:        Profile set surface emissivity array
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_emissivity:        profile set surface emissivity array
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-!       surface_reflectivity:      Profile set surface reflectivity array
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity:      profile set surface reflectivity array
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-!       tau_AD:                    Layer->TOA adjoint transmittance for the satellite
+!       tau_ad:                    layer->toa adjoint transmittance for the satellite
 !                                  view angle.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       flux_tau_AD:               Layer->SFC adjoint transmittance for the default
+!       flux_tau_ad:               layer->sfc adjoint transmittance for the default
 !                                  diffusivity angle.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       solar_tau_AD:              Layer->SFC adjoint transmittance for the solar
+!       solar_tau_ad:              layer->sfc adjoint transmittance for the solar
 !                                  zenith angle.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       upwelling_radiance_AD:     TOA adjoint radiances for each channel/profile.
-!                                  UNITS:      (m^2.sr.cm^-1)/mW
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       upwelling_radiance_ad:     toa adjoint radiances for each channel/profile.
+!                                  units:      (m^2.sr.cm^-1)/mw
+!                                  ** this argument is set to zero on output **.
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       brightness_temperature_AD: Adjoint temperatures corresponding to the
-!                                  TOA adjoint radiances.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      K^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       brightness_temperature_ad: adjoint temperatures corresponding to the
+!                                  toa adjoint radiances.
+!                                  ** this argument is set to zero on output **.
+!                                  units:      k^-1
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       secant_view_angle:         Secant of the satellite view angle measured
+!       secant_view_angle:         secant of the satellite view angle measured
 !                                  from nadir for each profile in the set.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       secant_solar_angle:        Secant of the solar zenith angle for each
+!       secant_solar_angle:        secant of the solar zenith angle for each
 !                                  profile in the set.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       n_channels_per_profile:    The number of channels for each profile in the
+!       n_channels_per_profile:    the number of channels for each profile in the
 !                                  set for which radiances are required.
-!                                  UNITS:      None
-!                                  TYPE:       Integer
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       integer
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       channel_index:             Channel index id array. Each element is a unique
+!       channel_index:             channel index id array. each element is a unique
 !                                  index to a (supported) sensor channel.
-!                                  UNITS:      None
-!                                  TYPE:       Integer
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       integer
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
 !
-! OPTIONAL INPUT ARGUMENTS:
+! optional input arguments:
 !
-!       message_log:               Character string specifying a filename in which any
-!                                  messages will be logged. If not specified, or if an
+!       message_log:               character string specifying a filename in which any
+!                                  messages will be logged. if not specified, or if an
 !                                  error occurs opening the log file, the default action
 !                                  is to output messages to the screen.
-!                                  UNITS:      None
-!                                  TYPE:       Character
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                                  units:      none
+!                                  type:       character
+!                                  dimension:  scalar
+!                                  attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
+! output arguments:
 !
-!       tau:                       Layer->TOA transmittance for the satellite
+!       tau:                       layer->toa transmittance for the satellite
 !                                  view angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( OUT )
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( out )
 !
-!       flux_tau:                  Layer->SFC transmittance for the default
+!       flux_tau:                  layer->sfc transmittance for the default
 !                                  diffusivity angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( OUT )
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( out )
 !
-!       solar_tau:                 Layer->SFC transmittance for the solar
+!       solar_tau:                 layer->sfc transmittance for the solar
 !                                  zenith angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( OUT )
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( out )
 !
-!       upwelling_radiance:        TOA radiances for each channel/profile.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( OUT )
+!       upwelling_radiance:        toa radiances for each channel/profile.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( out )
 !
-!       brightness_temperature:    TOA brightness temperatures corresponding
-!                                  to the TOA radiances.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( OUT )
+!       brightness_temperature:    toa brightness temperatures corresponding
+!                                  to the toa radiances.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( out )
 !
-!       level_p_AD:                Profile set layer interface pressure adjoint array.
-!                                  UNITS:      hPa^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       level_p_ad:                profile set layer interface pressure adjoint array.
+!                                  units:      hpa^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_p_AD:                Profile set layer average pressure adjoint array.
-!                                  UNITS:      hPa^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       layer_p_ad:                profile set layer average pressure adjoint array.
+!                                  units:      hpa^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_t_AD:                Profile set layer average temperature adjoint array.
-!                                  UNITS:      K^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       layer_t_ad:                profile set layer average temperature adjoint array.
+!                                  units:      k^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_w_AD:      .         Profile set layer average water vapor mixing ratio
+!       layer_w_ad:      .         profile set layer average water vapor mixing ratio
 !                                  adjoint array.
-!                                  UNITS:      kg/g
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      kg/g
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_o_AD:                Profile set layer average ozone mixing ratio
+!       layer_o_ad:                profile set layer average ozone mixing ratio
 !                                  adjoint array.
-!                                  UNITS:      ppmv^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      ppmv^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       surface_temperature_AD:    Profile set surface temperature adjoint
+!       surface_temperature_ad:    profile set surface temperature adjoint
 !                                  array.
-!                                  UNITS:      K^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      k^-1
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in out )
 !
-!       surface_emissivity_AD:     Profile set surface emissivity k-matrix adjoint
+!       surface_emissivity_ad:     profile set surface emissivity k-matrix adjoint
 !                                  array.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       surface_reflectivity_AD:    Profile set surface reflectivity k-matrix adjoint
+!       surface_reflectivity_ad:    profile set surface reflectivity k-matrix adjoint
 !                                  array.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => Calculation was successful
-!              = FAILURE => Error occurred
+! function result:
+!       result = success => calculation was successful
+!              = failure => error occurred
 !
-! CALLS:
-!      display_message:            Subroutine to output messages
-!                                  SOURCE: error_handler module
+! calls:
+!      display_message:            subroutine to output messages
+!                                  source: error_handler module
 !
-!      get_max_n_channels:         Routine to retrieve the value of the
-!                                  MAX_N_CHANNELS "pseudo-parameter".
-!                                  SOURCE: parameters module
+!      get_max_n_channels:         routine to retrieve the value of the
+!                                  max_n_channels "pseudo-parameter".
+!                                  source: parameters module
 !
-!      forward_rtm:                Function to construct the forward model and calculate
-!                                  the transmittance profiles and TOA radiance/temperatures.
-!                                  SOURCE: forward_model module
+!      forward_rtm:                function to construct the forward model and calculate
+!                                  the transmittance profiles and toa radiance/temperatures.
+!                                  source: forward_model module
 !
-!      adjoint_rtm:                Function that calculates the adjoint of the (TOA)
+!      adjoint_rtm:                function that calculates the adjoint of the (toa)
 !                                  radiances/temperatures.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       All input adjoint arguments are set to ZERO on output.
+! side effects:
+!       all input adjoint arguments are set to zero on output.
 !
-! RESTRICTIONS:
-!       Note the restrictions on the input array dimensions:
-!         K == n_layers > 1
-!         L == n_channels > 1
-!         M == n_profiles > or = 1
+! restrictions:
+!       note the restrictions on the input array dimensions:
+!         k == n_layers > 1
+!         l == n_channels > 1
+!         m == n_profiles > or = 1
 !
-! PROCEDURE:
-!       See individual module function documentation.
-!S-
+! procedure:
+!       see individual module function documentation.
+!s-
 !--------------------------------------------------------------------------------
 
-  FUNCTION compute_rtm_AD_rank2( &
-             ! -- Forward inputs
-             level_p, layer_p, layer_t, layer_w, layer_o, &  ! Input, K x M
+  function compute_rtm_ad_rank2( &
+             ! -- forward inputs
+             level_p, layer_p, layer_t, layer_w, layer_o, &  ! input, k x m
 
-             surface_temperature,                         &  ! Input, M
-             surface_emissivity,                          &  ! Input, L*M
-             surface_reflectivity,                        &  ! Input, L*M
+             surface_temperature,                         &  ! input, m
+             surface_emissivity,                          &  ! input, l*m
+             surface_reflectivity,                        &  ! input, l*m
 
-             ! -- K-matrix inputs
-             tau_AD,                                      &  ! In/Output, K x L*M
-             flux_tau_AD,                                 &  ! In/Output, K x L*M
-             solar_tau_AD,                                &  ! In/Output, K x L*M
+             ! -- k-matrix inputs
+             tau_ad,                                      &  ! in/output, k x l*m
+             flux_tau_ad,                                 &  ! in/output, k x l*m
+             solar_tau_ad,                                &  ! in/output, k x l*m
 
-             upwelling_radiance_AD,                       &  ! In/Output, L*M
-             brightness_temperature_AD,                   &  ! In/Output, L*M
+             upwelling_radiance_ad,                       &  ! in/output, l*m
+             brightness_temperature_ad,                   &  ! in/output, l*m
 
-             ! -- Other inputs
-             secant_view_angle,                           &  ! Input, M
-             secant_solar_angle,                          &  ! Input, M
-             n_channels_per_profile,                      &  ! Input, M
-             channel_index,                               &  ! Input, L*M
+             ! -- other inputs
+             secant_view_angle,                           &  ! input, m
+             secant_solar_angle,                          &  ! input, m
+             n_channels_per_profile,                      &  ! input, m
+             channel_index,                               &  ! input, l*m
 
-             ! -- Forward output
-             tau,                                         &  ! Input, K x L*M
-             flux_tau,                                    &  ! Input, K x L*M
-             solar_tau,                                   &  ! Input, K x L*M
+             ! -- forward output
+             tau,                                         &  ! input, k x l*m
+             flux_tau,                                    &  ! input, k x l*m
+             solar_tau,                                   &  ! input, k x l*m
 
-             upwelling_radiance,                          &  ! Input, L*M
-             brightness_temperature,                      &  ! Input, L*M
+             upwelling_radiance,                          &  ! input, l*m
+             brightness_temperature,                      &  ! input, l*m
 
-             ! -- K-matrix outputs
-             level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output, K x M
+             ! -- k-matrix outputs
+             level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output, k x m
 
-             surface_temperature_AD,                      &  ! In/Output, M
-             surface_emissivity_AD,                       &  ! In/Output, L*M
-             surface_reflectivity_AD,                     &  ! In/Output, L*M
+             surface_temperature_ad,                      &  ! in/output, m
+             surface_emissivity_ad,                       &  ! in/output, l*m
+             surface_reflectivity_ad,                     &  ! in/output, l*m
 
-             ! -- Optional inputs
+             ! -- optional inputs
              n_input_profiles,                            &
              message_log )                                &
 
-           RESULT ( error_status )
+           result ( error_status )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- TYPE DECLARATIONS  --                         #
+    !#                         -- type declarations  --                         #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward inputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: level_p                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_p                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_t                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_w                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_o                    ! K x M
+    ! -- forward inputs
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: level_p                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_p                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_t                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_w                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_o                    ! k x m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: surface_temperature        ! M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: surface_emissivity         ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: surface_reflectivity       ! L*M
+    real( fp_kind ), dimension( : ),        intent( in )     :: surface_temperature        ! m
+    real( fp_kind ), dimension( : ),        intent( in )     :: surface_emissivity         ! l*m
+    real( fp_kind ), dimension( : ),        intent( in )     :: surface_reflectivity       ! l*m
 
-    ! -- Adjoint inputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: tau_AD                     ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: flux_tau_AD                ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: solar_tau_AD               ! K x L*M
+    ! -- adjoint inputs
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: tau_ad                     ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: flux_tau_ad                ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: solar_tau_ad               ! k x l*m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: upwelling_radiance_AD      ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: brightness_temperature_AD  ! L*M
+    real( fp_kind ), dimension( : ),        intent( in out ) :: upwelling_radiance_ad      ! l*m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: brightness_temperature_ad  ! l*m
 
-    ! -- Other inputs
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: secant_view_angle          ! M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: secant_solar_angle         ! M
-    INTEGER,         DIMENSION( : ),        INTENT( IN )     :: n_channels_per_profile     ! M
-    INTEGER,         DIMENSION( : ),        INTENT( IN )     :: channel_index              ! L*M
+    ! -- other inputs
+    real( fp_kind ), dimension( : ),        intent( in )     :: secant_view_angle          ! m
+    real( fp_kind ), dimension( : ),        intent( in )     :: secant_solar_angle         ! m
+    integer,         dimension( : ),        intent( in )     :: n_channels_per_profile     ! m
+    integer,         dimension( : ),        intent( in )     :: channel_index              ! l*m
 
-    ! -- Forward outputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( OUT )    :: tau                        ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( OUT )    :: flux_tau                   ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( OUT )    :: solar_tau                  ! K x L*M
+    ! -- forward outputs
+    real( fp_kind ), dimension( :, : ),     intent( out )    :: tau                        ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( out )    :: flux_tau                   ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( out )    :: solar_tau                  ! k x l*m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( OUT )    :: upwelling_radiance         ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( OUT )    :: brightness_temperature     ! L*M
+    real( fp_kind ), dimension( : ),        intent( out )    :: upwelling_radiance         ! l*m
+    real( fp_kind ), dimension( : ),        intent( out )    :: brightness_temperature     ! l*m
 
-    ! -- Adjoint outputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: level_p_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_p_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_t_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_w_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_o_AD                 ! K x M
+    ! -- adjoint outputs
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: level_p_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_p_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_t_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_w_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_o_ad                 ! k x m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: surface_temperature_AD     ! M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: surface_emissivity_AD      ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: surface_reflectivity_AD    ! L*M
+    real( fp_kind ), dimension( : ),        intent( in out ) :: surface_temperature_ad     ! m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: surface_emissivity_ad      ! l*m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: surface_reflectivity_ad    ! l*m
 
-    ! -- Optional input
-    INTEGER,        OPTIONAL,               INTENT( IN )     :: n_input_profiles           ! Scalar
-    CHARACTER( * ), OPTIONAL,               INTENT( IN )     :: message_log
+    ! -- optional input
+    integer,        optional,               intent( in )     :: n_input_profiles           ! scalar
+    character( * ), optional,               intent( in )     :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_RTM_AD_RANK2'
+    character( * ), parameter :: routine_name = 'compute_rtm_ad_rank2'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- Scalars
-    INTEGER :: error_status_FWD
-    INTEGER :: error_status_AD
+    ! -- scalars
+    integer :: error_status_fwd
+    integer :: error_status_ad
 
-    ! -- Array for integrated absorber amounts, 0:K x J x M
-    REAL( fp_kind ), DIMENSION( 0:SIZE( layer_p, DIM = 1 ), &
-                                  MAX_N_ABSORBERS,          &
-                                  SIZE( layer_p, DIM = 2 )  ) :: absorber
+    ! -- array for integrated absorber amounts, 0:k x j x m
+    real( fp_kind ), dimension( 0:size( layer_p, dim = 1 ), &
+                                  max_n_absorbers,          &
+                                  size( layer_p, dim = 2 )  ) :: absorber
 
-    ! -- Arrays for absorber space indexing, K x J x M
-    INTEGER,         DIMENSION( SIZE( layer_p, DIM = 1 ), &
-                                MAX_N_ABSORBERS,          &
-                                SIZE( layer_p, DIM = 2 )  ) :: tau_layer_index,      &
+    ! -- arrays for absorber space indexing, k x j x m
+    integer,         dimension( size( layer_p, dim = 1 ), &
+                                max_n_absorbers,          &
+                                size( layer_p, dim = 2 )  ) :: tau_layer_index,      &
                                                                flux_tau_layer_index, &
                                                                solar_tau_layer_index
 
-    ! -- Arrays for predictors, Imax x K x M
-    REAL( fp_kind ), DIMENSION( MAX_N_PREDICTORS,         &
-                                SIZE( layer_p, DIM = 1 ), &
-                                SIZE( layer_p, DIM = 2 )  ) :: tau_predictor,      &
+    ! -- arrays for predictors, imax x k x m
+    real( fp_kind ), dimension( max_n_predictors,         &
+                                size( layer_p, dim = 1 ), &
+                                size( layer_p, dim = 2 )  ) :: tau_predictor,      &
                                                                flux_tau_predictor, &
                                                                solar_tau_predictor
 
-    ! -- Array for forward and adjoint layer Planck radiance term, K x L*M
-    REAL( fp_kind ), DIMENSION( SIZE( layer_p, DIM = 1 ),  &
-                                SIZE( upwelling_radiance ) ) :: layer_radiance,  &
-                                                                layer_radiance_AD
+    ! -- array for forward and adjoint layer planck radiance term, k x l*m
+    real( fp_kind ), dimension( size( layer_p, dim = 1 ),  &
+                                size( upwelling_radiance ) ) :: layer_radiance,  &
+                                                                layer_radiance_ad
       
 
-    ! -- Array for forward and adjoint downwelling radiance (flux + solar), L*M
-    REAL( fp_kind ), DIMENSION( SIZE( upwelling_radiance ) ) :: downwelling_radiance,  &
-                                                                downwelling_radiance_AD 
+    ! -- array for forward and adjoint downwelling radiance (flux + solar), l*m
+    real( fp_kind ), dimension( size( upwelling_radiance ) ) :: downwelling_radiance,  &
+                                                                downwelling_radiance_ad 
 
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC ADJUSTL, &
-              MAXVAL,  &
-              SIZE,    &
-              TRIM
+    intrinsic adjustl, &
+              maxval,  &
+              size,    &
+              trim
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- COMPUTE THE FORWARD RADIANCES --                    #
+    !#                   -- compute the forward radiances --                    #
     !#--------------------------------------------------------------------------#
 
-    error_status_FWD = forward_rtm( &
-                         ! -- Forward inputs
-                         level_p, layer_p, layer_t, layer_w, layer_o,  &  ! Input,  K x M
+    error_status_fwd = forward_rtm( &
+                         ! -- forward inputs
+                         level_p, layer_p, layer_t, layer_w, layer_o,  &  ! input,  k x m
 
-                         surface_temperature,                          &  ! Input,  M
-                         surface_emissivity,                           &  ! Input,  L*M
-                         surface_reflectivity,                         &  ! Input,  L*M
+                         surface_temperature,                          &  ! input,  m
+                         surface_emissivity,                           &  ! input,  l*m
+                         surface_reflectivity,                         &  ! input,  l*m
 
-                         ! -- Other inputs
-                         secant_view_angle,                            &  ! Input,  M
-                         secant_solar_angle,                           &  ! Input,  M
-                         n_channels_per_profile,                       &  ! Input,  M
-                         channel_index,                                &  ! Input,  L*M
+                         ! -- other inputs
+                         secant_view_angle,                            &  ! input,  m
+                         secant_solar_angle,                           &  ! input,  m
+                         n_channels_per_profile,                       &  ! input,  m
+                         channel_index,                                &  ! input,  l*m
 
-                         ! -- Outputs
-                         absorber,                                     &  ! Output, 0:K x J x M
+                         ! -- outputs
+                         absorber,                                     &  ! output, 0:k x j x m
 
-                         tau_layer_index,                              &  ! Output, K x J x M
-                         flux_tau_layer_index,                         &  ! Output, K x J x M
-                         solar_tau_layer_index,                        &  ! Output, K x J x M
+                         tau_layer_index,                              &  ! output, k x j x m
+                         flux_tau_layer_index,                         &  ! output, k x j x m
+                         solar_tau_layer_index,                        &  ! output, k x j x m
 
-                         tau_predictor,                                &  ! Output, Imax x K x M
-                         flux_tau_predictor,                           &  ! Output, Imax x K x M
-                         solar_tau_predictor,                          &  ! Output, Imax x K x M
+                         tau_predictor,                                &  ! output, imax x k x m
+                         flux_tau_predictor,                           &  ! output, imax x k x m
+                         solar_tau_predictor,                          &  ! output, imax x k x m
 
-                         tau,                                          &  ! Output, K x L*M
-                         flux_tau,                                     &  ! Output, K x L*M
-                         solar_tau,                                    &  ! Output, K x L*M
+                         tau,                                          &  ! output, k x l*m
+                         flux_tau,                                     &  ! output, k x l*m
+                         solar_tau,                                    &  ! output, k x l*m
 
-                         layer_radiance,                               &  ! Output, K x L*M
-                         downwelling_radiance,                         &  ! Output, L*M
-                         upwelling_radiance,                           &  ! Output, L*M
+                         layer_radiance,                               &  ! output, k x l*m
+                         downwelling_radiance,                         &  ! output, l*m
+                         upwelling_radiance,                           &  ! output, l*m
 
-                         brightness_temperature,                       &  ! Output, L*M
+                         brightness_temperature,                       &  ! output, l*m
 
-                         ! -- Optional inputs
+                         ! -- optional inputs
                          n_input_profiles = n_input_profiles,          &
                          message_log      = message_log                )
 
 
     ! -------------------------------
-    ! Check for successful completion
+    ! check for successful completion
     ! -------------------------------
 
-    IF ( error_status_FWD /= SUCCESS ) THEN
+    if ( error_status_fwd /= success ) then
 
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Error occured in FORWARD_RTM', &
+      error_status = failure
+      call display_message( routine_name, &
+                            'error occured in forward_rtm', &
                             error_status, &
                             message_log = message_log )
-      RETURN
+      return
 
-    END IF
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                     -- COMPUTE THE ADJOINT RTM --                        #
+    !#                     -- compute the adjoint rtm --                        #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------------
-    ! Initialise all local adjoint variables
+    ! initialise all local adjoint variables
     ! --------------------------------------
 
-    layer_radiance_AD( :, : )    = ZERO
-    downwelling_radiance_AD( : ) = ZERO
+    layer_radiance_ad( :, : )    = zero
+    downwelling_radiance_ad( : ) = zero
 
 
     ! ----------------------
-    ! Call the adjoint model
+    ! call the adjoint model
     ! ----------------------
 
-    error_status_AD = adjoint_rtm_rank2( &
-                        ! -- Forward inputs
-                        level_p, layer_p, layer_t, layer_w, layer_o, &  ! Input,  K x M
+    error_status_ad = adjoint_rtm_rank2( &
+                        ! -- forward inputs
+                        level_p, layer_p, layer_t, layer_w, layer_o, &  ! input,  k x m
 
-                        surface_temperature,                         &  ! Input, M
-                        surface_emissivity,                          &  ! Input, L*M
-                        surface_reflectivity,                        &  ! Input, L*M
+                        surface_temperature,                         &  ! input, m
+                        surface_emissivity,                          &  ! input, l*m
+                        surface_reflectivity,                        &  ! input, l*m
 
-                        absorber,                                    &  ! Input, 0:K x J x M
+                        absorber,                                    &  ! input, 0:k x j x m
 
-                        tau_layer_index,                             &  ! Input, K x J x M
-                        flux_tau_layer_index,                        &  ! Input, K x J x M
-                        solar_tau_layer_index,                       &  ! Input, K x J x M
+                        tau_layer_index,                             &  ! input, k x j x m
+                        flux_tau_layer_index,                        &  ! input, k x j x m
+                        solar_tau_layer_index,                       &  ! input, k x j x m
 
-                        tau_predictor,                               &  ! Input, Imax x K x M
-                        flux_tau_predictor,                          &  ! Input, Imax x K x M
-                        solar_tau_predictor,                         &  ! Input, Imax x K x M
+                        tau_predictor,                               &  ! input, imax x k x m
+                        flux_tau_predictor,                          &  ! input, imax x k x m
+                        solar_tau_predictor,                         &  ! input, imax x k x m
 
-                        tau,                                         &  ! Input, K x L*M
-                        flux_tau,                                    &  ! Input, K x L*M
-                        solar_tau,                                   &  ! Input, K x L*M
+                        tau,                                         &  ! input, k x l*m
+                        flux_tau,                                    &  ! input, k x l*m
+                        solar_tau,                                   &  ! input, k x l*m
 
-                        layer_radiance,                              &  ! Input, K x L*M
-                        downwelling_radiance,                        &  ! Input, L*M
-                        upwelling_radiance,                          &  ! Input, L*M
+                        layer_radiance,                              &  ! input, k x l*m
+                        downwelling_radiance,                        &  ! input, l*m
+                        upwelling_radiance,                          &  ! input, l*m
 
-                        ! -- Adjoint inputs
-                        tau_AD,                                      &  ! In/Output, K x L*M
-                        flux_tau_AD,                                 &  ! In/Output, K x L*M
-                        solar_tau_AD,                                &  ! In/Output, K x L*M
+                        ! -- adjoint inputs
+                        tau_ad,                                      &  ! in/output, k x l*m
+                        flux_tau_ad,                                 &  ! in/output, k x l*m
+                        solar_tau_ad,                                &  ! in/output, k x l*m
 
-                        layer_radiance_AD,                           &  ! In/Output, K x L*M
-                        downwelling_radiance_AD,                     &  ! In/Output, L*M
-                        upwelling_radiance_AD,                       &  ! In/Output, L*M
+                        layer_radiance_ad,                           &  ! in/output, k x l*m
+                        downwelling_radiance_ad,                     &  ! in/output, l*m
+                        upwelling_radiance_ad,                       &  ! in/output, l*m
 
-                        brightness_temperature_AD,                   &  ! In/Output, L*M
+                        brightness_temperature_ad,                   &  ! in/output, l*m
 
-                        ! -- Other inputs
-                        secant_view_angle,                           &  ! Input, M
-                        secant_solar_angle,                          &  ! Input, M
-                        n_channels_per_profile,                      &  ! Input, M
-                        channel_index,                               &  ! Input, L*M
+                        ! -- other inputs
+                        secant_view_angle,                           &  ! input, m
+                        secant_solar_angle,                          &  ! input, m
+                        n_channels_per_profile,                      &  ! input, m
+                        channel_index,                               &  ! input, l*m
 
-                        ! -- Adjoint outputs
-                        level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output,  K x M
+                        ! -- adjoint outputs
+                        level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output,  k x m
 
-                        surface_temperature_AD,                      &  ! In/Output, M
-                        surface_emissivity_AD,                       &  ! In/Output, L*M
-                        surface_reflectivity_AD,                     &  ! In/Output, L*M
+                        surface_temperature_ad,                      &  ! in/output, m
+                        surface_emissivity_ad,                       &  ! in/output, l*m
+                        surface_reflectivity_ad,                     &  ! in/output, l*m
 
-                       ! -- Optional inputs
+                       ! -- optional inputs
                        n_input_profiles = n_input_profiles,          &
                        message_log      = message_log                )
 
 
     ! -------------------------------
-    ! Check for successful completion
+    ! check for successful completion
     ! -------------------------------
 
-    IF ( error_status_AD /= SUCCESS ) THEN
+    if ( error_status_ad /= success ) then
 
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Error occured in ADJOINT_RTM', &
+      error_status = failure
+      call display_message( routine_name, &
+                            'error occured in adjoint_rtm', &
                             error_status, &
                             message_log = message_log )
-      RETURN
+      return
 
-    END IF
+    end if
 
 
     !#--------------------------------------------------------------------------#
-    !#                              -- DONE --                                  #
+    !#                              -- done --                                  #
     !#--------------------------------------------------------------------------#
 
-    error_status = SUCCESS
+    error_status = success
 
 
-  END FUNCTION compute_rtm_AD_rank2
+  end function compute_rtm_ad_rank2
 
 
 
 
 
-  FUNCTION compute_rtm_AD_rank1( &
-             ! -- Forward inputs
-             level_p, layer_p, layer_t, layer_w, layer_o, &  ! Input, K
+  function compute_rtm_ad_rank1( &
+             ! -- forward inputs
+             level_p, layer_p, layer_t, layer_w, layer_o, &  ! input, k
 
-             surface_temperature,                         &  ! Input, Scalar
-             surface_emissivity,                          &  ! Input, L
-             surface_reflectivity,                        &  ! Input, L
+             surface_temperature,                         &  ! input, scalar
+             surface_emissivity,                          &  ! input, l
+             surface_reflectivity,                        &  ! input, l
 
-             ! -- K-matrix inputs
-             tau_AD,                                      &  ! In/Output, K x L
-             flux_tau_AD,                                 &  ! In/Output, K x L
-             solar_tau_AD,                                &  ! In/Output, K x L
+             ! -- k-matrix inputs
+             tau_ad,                                      &  ! in/output, k x l
+             flux_tau_ad,                                 &  ! in/output, k x l
+             solar_tau_ad,                                &  ! in/output, k x l
 
-             upwelling_radiance_AD,                       &  ! In/Output, L
-             brightness_temperature_AD,                   &  ! In/Output, L
+             upwelling_radiance_ad,                       &  ! in/output, l
+             brightness_temperature_ad,                   &  ! in/output, l
 
-             ! -- Other inputs
-             secant_view_angle,                           &  ! Input, Scalar
-             secant_solar_angle,                          &  ! Input, Scalar
-             n_channels_per_profile,                      &  ! Input, Scalar
-             channel_index,                               &  ! Input, L
+             ! -- other inputs
+             secant_view_angle,                           &  ! input, scalar
+             secant_solar_angle,                          &  ! input, scalar
+             n_channels_per_profile,                      &  ! input, scalar
+             channel_index,                               &  ! input, l
 
-             ! -- Forward output
-             tau,                                         &  ! Input, K x L
-             flux_tau,                                    &  ! Input, K x L
-             solar_tau,                                   &  ! Input, K x L
+             ! -- forward output
+             tau,                                         &  ! input, k x l
+             flux_tau,                                    &  ! input, k x l
+             solar_tau,                                   &  ! input, k x l
 
-             upwelling_radiance,                          &  ! Input, L
-             brightness_temperature,                      &  ! Input, L
+             upwelling_radiance,                          &  ! input, l
+             brightness_temperature,                      &  ! input, l
 
-             ! -- K-matrix outputs
-             level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output, K
+             ! -- k-matrix outputs
+             level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output, k
 
-             surface_temperature_AD,                      &  ! In/Output, Scalar
-             surface_emissivity_AD,                       &  ! In/Output, L
-             surface_reflectivity_AD,                     &  ! In/Output, L
+             surface_temperature_ad,                      &  ! in/output, scalar
+             surface_emissivity_ad,                       &  ! in/output, l
+             surface_reflectivity_ad,                     &  ! in/output, l
 
-             ! -- Optional inputs
+             ! -- optional inputs
              n_input_profiles,                            &
              message_log )                                &
 
-           RESULT ( error_status )
+           result ( error_status )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- TYPE DECLARATIONS  --                         #
+    !#                         -- type declarations  --                         #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward inputs
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: level_p                    ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: layer_p                    ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: layer_t                    ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: layer_w                    ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: layer_o                    ! K
+    ! -- forward inputs
+    real( fp_kind ), dimension( : ),    intent( in )     :: level_p                    ! k
+    real( fp_kind ), dimension( : ),    intent( in )     :: layer_p                    ! k
+    real( fp_kind ), dimension( : ),    intent( in )     :: layer_t                    ! k
+    real( fp_kind ), dimension( : ),    intent( in )     :: layer_w                    ! k
+    real( fp_kind ), dimension( : ),    intent( in )     :: layer_o                    ! k
 
-    REAL( fp_kind ),                    INTENT( IN )     :: surface_temperature        ! Scalar
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: surface_emissivity         ! L
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN )     :: surface_reflectivity       ! L
+    real( fp_kind ),                    intent( in )     :: surface_temperature        ! scalar
+    real( fp_kind ), dimension( : ),    intent( in )     :: surface_emissivity         ! l
+    real( fp_kind ), dimension( : ),    intent( in )     :: surface_reflectivity       ! l
 
-    ! -- Adjoint inputs
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( IN OUT ) :: tau_AD                     ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( IN OUT ) :: flux_tau_AD                ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( IN OUT ) :: solar_tau_AD               ! K x L
+    ! -- adjoint inputs
+    real( fp_kind ), dimension( :, : ), intent( in out ) :: tau_ad                     ! k x l
+    real( fp_kind ), dimension( :, : ), intent( in out ) :: flux_tau_ad                ! k x l
+    real( fp_kind ), dimension( :, : ), intent( in out ) :: solar_tau_ad               ! k x l
 
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: upwelling_radiance_AD      ! L
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: brightness_temperature_AD  ! L
+    real( fp_kind ), dimension( : ),    intent( in out ) :: upwelling_radiance_ad      ! l
+    real( fp_kind ), dimension( : ),    intent( in out ) :: brightness_temperature_ad  ! l
 
-    ! -- Other inputs
-    REAL( fp_kind ),                    INTENT( IN )     :: secant_view_angle          ! Scalar
-    REAL( fp_kind ),                    INTENT( IN )     :: secant_solar_angle         ! Scalar
-    INTEGER,                            INTENT( IN )     :: n_channels_per_profile     ! Scalar
-    INTEGER,         DIMENSION( : ),    INTENT( IN )     :: channel_index              ! L
+    ! -- other inputs
+    real( fp_kind ),                    intent( in )     :: secant_view_angle          ! scalar
+    real( fp_kind ),                    intent( in )     :: secant_solar_angle         ! scalar
+    integer,                            intent( in )     :: n_channels_per_profile     ! scalar
+    integer,         dimension( : ),    intent( in )     :: channel_index              ! l
 
-    ! -- Forward outputs
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( OUT )    :: tau                        ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( OUT )    :: flux_tau                   ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ), INTENT( OUT )    :: solar_tau                  ! K x L
+    ! -- forward outputs
+    real( fp_kind ), dimension( :, : ), intent( out )    :: tau                        ! k x l
+    real( fp_kind ), dimension( :, : ), intent( out )    :: flux_tau                   ! k x l
+    real( fp_kind ), dimension( :, : ), intent( out )    :: solar_tau                  ! k x l
 
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( OUT )    :: upwelling_radiance         ! L
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( OUT )    :: brightness_temperature     ! L
+    real( fp_kind ), dimension( : ),    intent( out )    :: upwelling_radiance         ! l
+    real( fp_kind ), dimension( : ),    intent( out )    :: brightness_temperature     ! l
 
-    ! -- Adjoint outputs
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: level_p_AD                 ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: layer_p_AD                 ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: layer_t_AD                 ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: layer_w_AD                 ! K
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: layer_o_AD                 ! K
+    ! -- adjoint outputs
+    real( fp_kind ), dimension( : ),    intent( in out ) :: level_p_ad                 ! k
+    real( fp_kind ), dimension( : ),    intent( in out ) :: layer_p_ad                 ! k
+    real( fp_kind ), dimension( : ),    intent( in out ) :: layer_t_ad                 ! k
+    real( fp_kind ), dimension( : ),    intent( in out ) :: layer_w_ad                 ! k
+    real( fp_kind ), dimension( : ),    intent( in out ) :: layer_o_ad                 ! k
 
-    REAL( fp_kind ),                    INTENT( IN OUT ) :: surface_temperature_AD     ! Scalar
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: surface_emissivity_AD      ! L
-    REAL( fp_kind ), DIMENSION( : ),    INTENT( IN OUT ) :: surface_reflectivity_AD    ! L
+    real( fp_kind ),                    intent( in out ) :: surface_temperature_ad     ! scalar
+    real( fp_kind ), dimension( : ),    intent( in out ) :: surface_emissivity_ad      ! l
+    real( fp_kind ), dimension( : ),    intent( in out ) :: surface_reflectivity_ad    ! l
 
-    ! -- Optional input. Note that N_INPUT_PROFILES is not used in this
-    ! -- function. It is included here so if a user specifies it by mistake
+    ! -- optional input. note that n_input_profiles is not used in this
+    ! -- function. it is included here so if a user specifies it by mistake
     ! -- for rank-1 profile input the code won't (hopefully) fall in a heap.
-    INTEGER,        OPTIONAL,           INTENT( IN )     :: n_input_profiles           ! Scalar
-    CHARACTER( * ), OPTIONAL,           INTENT( IN )     :: message_log
+    integer,        optional,           intent( in )     :: n_input_profiles           ! scalar
+    character( * ), optional,           intent( in )     :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'COMPUTE_RTM_AD_RANK1'
+    character( * ), parameter :: routine_name = 'compute_rtm_ad_rank1'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- Scalars
-    INTEGER :: error_status_FWD
-    INTEGER :: error_status_AD
+    ! -- scalars
+    integer :: error_status_fwd
+    integer :: error_status_ad
 
-    ! -- Array for integrated absorber amounts, 0:K x J
-    REAL( fp_kind ), DIMENSION( 0:SIZE( layer_p, DIM = 1 ), &
-                                  MAX_N_ABSORBERS           ) :: absorber
+    ! -- array for integrated absorber amounts, 0:k x j
+    real( fp_kind ), dimension( 0:size( layer_p, dim = 1 ), &
+                                  max_n_absorbers           ) :: absorber
 
-    ! -- Arrays for absorber space indexing, K x J
-    INTEGER,         DIMENSION( SIZE( layer_p, DIM = 1 ), &
-                                MAX_N_ABSORBERS           ) :: tau_layer_index,      &
+    ! -- arrays for absorber space indexing, k x j
+    integer,         dimension( size( layer_p, dim = 1 ), &
+                                max_n_absorbers           ) :: tau_layer_index,      &
                                                                flux_tau_layer_index, &
                                                                solar_tau_layer_index
 
-    ! -- Arrays for predictors, Imax x K
-    REAL( fp_kind ), DIMENSION( MAX_N_PREDICTORS,         &
-                                SIZE( layer_p, DIM = 1 )  ) :: tau_predictor,      &
+    ! -- arrays for predictors, imax x k
+    real( fp_kind ), dimension( max_n_predictors,         &
+                                size( layer_p, dim = 1 )  ) :: tau_predictor,      &
                                                                flux_tau_predictor, &
                                                                solar_tau_predictor
 
-    ! -- Array for forward and adjoint layer Planck radiance term, K x L
-    REAL( fp_kind ), DIMENSION( SIZE( layer_p, DIM = 1 ),  &
-                                SIZE( upwelling_radiance ) ) :: layer_radiance,  &
-                                                                layer_radiance_AD
+    ! -- array for forward and adjoint layer planck radiance term, k x l
+    real( fp_kind ), dimension( size( layer_p, dim = 1 ),  &
+                                size( upwelling_radiance ) ) :: layer_radiance,  &
+                                                                layer_radiance_ad
       
 
-    ! -- Array for forward and adjoint downwelling radiance (flux + solar), L
-    REAL( fp_kind ), DIMENSION( SIZE( upwelling_radiance ) ) :: downwelling_radiance,  &
-                                                                downwelling_radiance_AD 
+    ! -- array for forward and adjoint downwelling radiance (flux + solar), l
+    real( fp_kind ), dimension( size( upwelling_radiance ) ) :: downwelling_radiance,  &
+                                                                downwelling_radiance_ad 
 
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC ADJUSTL, &
-              MAXVAL,  &
-              SIZE,    &
-              TRIM
+    intrinsic adjustl, &
+              maxval,  &
+              size,    &
+              trim
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- COMPUTE THE FORWARD RADIANCES --                    #
+    !#                   -- compute the forward radiances --                    #
     !#--------------------------------------------------------------------------#
 
-    error_status_FWD = forward_rtm( &
-                                    ! -- Forward inputs
-                                    level_p, layer_p, layer_t, layer_w, layer_o,  &  ! Input,  K
+    error_status_fwd = forward_rtm( &
+                                    ! -- forward inputs
+                                    level_p, layer_p, layer_t, layer_w, layer_o,  &  ! input,  k
 
-                                    surface_temperature,                          &  ! Input,  Scalar
-                                    surface_emissivity,                           &  ! Input,  L
-                                    surface_reflectivity,                         &  ! Input,  L
+                                    surface_temperature,                          &  ! input,  scalar
+                                    surface_emissivity,                           &  ! input,  l
+                                    surface_reflectivity,                         &  ! input,  l
 
-                                    ! -- Other inputs
-                                    secant_view_angle,                            &  ! Input,  Scalar
-                                    secant_solar_angle,                           &  ! Input,  Scalar
-                                    n_channels_per_profile,                       &  ! Input,  Scalar
-                                    channel_index,                                &  ! Input,  L
+                                    ! -- other inputs
+                                    secant_view_angle,                            &  ! input,  scalar
+                                    secant_solar_angle,                           &  ! input,  scalar
+                                    n_channels_per_profile,                       &  ! input,  scalar
+                                    channel_index,                                &  ! input,  l
 
-                                    ! -- Outputs
-                                    absorber,                                     &  ! Output, 0:K x J
+                                    ! -- outputs
+                                    absorber,                                     &  ! output, 0:k x j
 
-                                    tau_layer_index,                              &  ! Output, K x J
-                                    flux_tau_layer_index,                         &  ! Output, K x J
-                                    solar_tau_layer_index,                        &  ! Output, K x J
+                                    tau_layer_index,                              &  ! output, k x j
+                                    flux_tau_layer_index,                         &  ! output, k x j
+                                    solar_tau_layer_index,                        &  ! output, k x j
 
-                                    tau_predictor,                                &  ! Output, Imax x K
-                                    flux_tau_predictor,                           &  ! Output, Imax x K
-                                    solar_tau_predictor,                          &  ! Output, Imax x K
+                                    tau_predictor,                                &  ! output, imax x k
+                                    flux_tau_predictor,                           &  ! output, imax x k
+                                    solar_tau_predictor,                          &  ! output, imax x k
 
-                                    tau,                                          &  ! Output, K x L
-                                    flux_tau,                                     &  ! Output, K x L
-                                    solar_tau,                                    &  ! Output, K x L
+                                    tau,                                          &  ! output, k x l
+                                    flux_tau,                                     &  ! output, k x l
+                                    solar_tau,                                    &  ! output, k x l
 
-                                    layer_radiance,                               &  ! Output, K x L
-                                    downwelling_radiance,                         &  ! Output, L
-                                    upwelling_radiance,                           &  ! Output, L
+                                    layer_radiance,                               &  ! output, k x l
+                                    downwelling_radiance,                         &  ! output, l
+                                    upwelling_radiance,                           &  ! output, l
 
-                                    brightness_temperature,                       &  ! Output, L
+                                    brightness_temperature,                       &  ! output, l
 
                                     message_log = message_log )
 
 
     ! -------------------------------
-    ! Check for successful completion
+    ! check for successful completion
     ! -------------------------------
 
-    IF ( error_status_FWD /= SUCCESS ) THEN
+    if ( error_status_fwd /= success ) then
 
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Error occured in FORWARD_RTM', &
+      error_status = failure
+      call display_message( routine_name, &
+                            'error occured in forward_rtm', &
                             error_status, &
                             message_log = message_log )
-      RETURN
+      return
 
-    END IF
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                     -- COMPUTE THE ADJOINT RTM --                        #
+    !#                     -- compute the adjoint rtm --                        #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------------
-    ! Initialise all local adjoint variables
+    ! initialise all local adjoint variables
     ! --------------------------------------
 
-    layer_radiance_AD( :, : )    = ZERO
-    downwelling_radiance_AD( : ) = ZERO
+    layer_radiance_ad( :, : )    = zero
+    downwelling_radiance_ad( : ) = zero
 
 
     ! ----------------------
-    ! Call the adjoint model
+    ! call the adjoint model
     ! ----------------------
 
-    error_status_AD = adjoint_rtm_rank1( &
-                        ! -- Forward inputs
-                        level_p, layer_p, layer_t, layer_w, layer_o, &  ! Input,  K
+    error_status_ad = adjoint_rtm_rank1( &
+                        ! -- forward inputs
+                        level_p, layer_p, layer_t, layer_w, layer_o, &  ! input,  k
 
-                        surface_temperature,                         &  ! Input, Scalar
-                        surface_emissivity,                          &  ! Input, L
-                        surface_reflectivity,                        &  ! Input, L
+                        surface_temperature,                         &  ! input, scalar
+                        surface_emissivity,                          &  ! input, l
+                        surface_reflectivity,                        &  ! input, l
 
-                        absorber,                                    &  ! Input, 0:K x J
+                        absorber,                                    &  ! input, 0:k x j
 
-                        tau_layer_index,                             &  ! Input, K x J
-                        flux_tau_layer_index,                        &  ! Input, K x J
-                        solar_tau_layer_index,                       &  ! Input, K x J
+                        tau_layer_index,                             &  ! input, k x j
+                        flux_tau_layer_index,                        &  ! input, k x j
+                        solar_tau_layer_index,                       &  ! input, k x j
 
-                        tau_predictor,                               &  ! Input, Imax x K
-                        flux_tau_predictor,                          &  ! Input, Imax x K
-                        solar_tau_predictor,                         &  ! Input, Imax x K
+                        tau_predictor,                               &  ! input, imax x k
+                        flux_tau_predictor,                          &  ! input, imax x k
+                        solar_tau_predictor,                         &  ! input, imax x k
 
-                        tau,                                         &  ! Input, K x L
-                        flux_tau,                                    &  ! Input, K x L
-                        solar_tau,                                   &  ! Input, K x L
+                        tau,                                         &  ! input, k x l
+                        flux_tau,                                    &  ! input, k x l
+                        solar_tau,                                   &  ! input, k x l
 
-                        layer_radiance,                              &  ! Input, K x L
-                        downwelling_radiance,                        &  ! Input, L
-                        upwelling_radiance,                          &  ! Input, L
+                        layer_radiance,                              &  ! input, k x l
+                        downwelling_radiance,                        &  ! input, l
+                        upwelling_radiance,                          &  ! input, l
 
-                        ! -- Adjoint inputs
-                        tau_AD,                                      &  ! In/Output, K x L
-                        flux_tau_AD,                                 &  ! In/Output, K x L
-                        solar_tau_AD,                                &  ! In/Output, K x L
+                        ! -- adjoint inputs
+                        tau_ad,                                      &  ! in/output, k x l
+                        flux_tau_ad,                                 &  ! in/output, k x l
+                        solar_tau_ad,                                &  ! in/output, k x l
 
-                        layer_radiance_AD,                           &  ! In/Output, K x L
-                        downwelling_radiance_AD,                     &  ! In/Output, L
-                        upwelling_radiance_AD,                       &  ! In/Output, L
+                        layer_radiance_ad,                           &  ! in/output, k x l
+                        downwelling_radiance_ad,                     &  ! in/output, l
+                        upwelling_radiance_ad,                       &  ! in/output, l
 
-                        brightness_temperature_AD,                   &  ! In/Output, L
+                        brightness_temperature_ad,                   &  ! in/output, l
 
-                        ! -- Other inputs
-                        secant_view_angle,                           &  ! Input, Scalar
-                        secant_solar_angle,                          &  ! Input, Scalar
-                        n_channels_per_profile,                      &  ! Input, Scalar
-                        channel_index,                               &  ! Input, L
+                        ! -- other inputs
+                        secant_view_angle,                           &  ! input, scalar
+                        secant_solar_angle,                          &  ! input, scalar
+                        n_channels_per_profile,                      &  ! input, scalar
+                        channel_index,                               &  ! input, l
 
-                        ! -- Adjoint outputs
-                        level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output,  K
+                        ! -- adjoint outputs
+                        level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output,  k
 
-                        surface_temperature_AD,                      &  ! In/Output, Scalar
-                        surface_emissivity_AD,                       &  ! In/Output, L
-                        surface_reflectivity_AD,                     &  ! In/Output, L
+                        surface_temperature_ad,                      &  ! in/output, scalar
+                        surface_emissivity_ad,                       &  ! in/output, l
+                        surface_reflectivity_ad,                     &  ! in/output, l
 
                         message_log = message_log )
 
 
     ! -------------------------------
-    ! Check for successful completion
+    ! check for successful completion
     ! -------------------------------
 
-    IF ( error_status_AD /= SUCCESS ) THEN
+    if ( error_status_ad /= success ) then
 
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Error occured in ADJOINT_RTM_RANK1', &
+      error_status = failure
+      call display_message( routine_name, &
+                            'error occured in adjoint_rtm_rank1', &
                             error_status, &
                             message_log = message_log )
-      RETURN
+      return
 
-    END IF
+    end if
 
 
     !#--------------------------------------------------------------------------#
-    !#                              -- Done --                                  #
+    !#                              -- done --                                  #
     !#--------------------------------------------------------------------------#
 
-    error_status = SUCCESS
+    error_status = success
 
 
-  END FUNCTION compute_rtm_AD_rank1
+  end function compute_rtm_ad_rank1
 
 
 
@@ -1127,1645 +1127,1645 @@ CONTAINS
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       adjoint_rtm
 !
-! PURPOSE:
-!       PUBLIC function that calculates the adjoint of the top-of-atmosphere (TOA)
+! purpose:
+!       public function that calculates the adjoint of the top-of-atmosphere (toa)
 !       radiances and brightness temperatures for an input atmospheric profile
 !       set and user specified satellites/channels.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = adjoint_rtm( &
-!                             ! -- Forward inputs
-!                             level_p, layer_p, layer_t, layer_w, layer_o,                &  ! Input, K x M
+!                             ! -- forward inputs
+!                             level_p, layer_p, layer_t, layer_w, layer_o,                &  ! input, k x m
 !
-!                             surface_temperature,                                        &  ! Input, M
-!                             surface_emissivity,                                         &  ! Input, L*M
-!                             surface_reflectivity,                                       &  ! Input, L*M
+!                             surface_temperature,                                        &  ! input, m
+!                             surface_emissivity,                                         &  ! input, l*m
+!                             surface_reflectivity,                                       &  ! input, l*m
 !
-!                             absorber,                                                   &  ! Input, 0:K x J x M
+!                             absorber,                                                   &  ! input, 0:k x j x m
 !
-!                             tau_layer_index,                                            &  ! Input, K x J x M
-!                             flux_tau_layer_index,                                       &  ! Input, K x J x M
-!                             solar_tau_layer_index,                                      &  ! Input, K x J x M
+!                             tau_layer_index,                                            &  ! input, k x j x m
+!                             flux_tau_layer_index,                                       &  ! input, k x j x m
+!                             solar_tau_layer_index,                                      &  ! input, k x j x m
 !
-!                             tau_predictor,                                              &  ! Input, Imax x K x M
-!                             flux_tau_predictor,                                         &  ! Input, Imax x K x M
-!                             solar_tau_predictor,                                        &  ! Input, Imax x K x M
+!                             tau_predictor,                                              &  ! input, imax x k x m
+!                             flux_tau_predictor,                                         &  ! input, imax x k x m
+!                             solar_tau_predictor,                                        &  ! input, imax x k x m
 !
-!                             tau,                                                        &  ! Input, K x L*M
-!                             flux_tau,                                                   &  ! Input, K x L*M
-!                             solar_tau,                                                  &  ! Input, K x L*M
+!                             tau,                                                        &  ! input, k x l*m
+!                             flux_tau,                                                   &  ! input, k x l*m
+!                             solar_tau,                                                  &  ! input, k x l*m
 !
-!                             layer_radiance,                                             &  ! Input, K x L*M
-!                             downwelling_radiance,                                       &  ! Input, L*M
-!                             upwelling_radiance,                                         &  ! Input, L*M
+!                             layer_radiance,                                             &  ! input, k x l*m
+!                             downwelling_radiance,                                       &  ! input, l*m
+!                             upwelling_radiance,                                         &  ! input, l*m
 !
-!                             ! -- Adjoint inputs
-!                             tau_AD,                                                     &  ! In/Output, K x L*M
-!                             flux_tau_AD,                                                &  ! In/Output, K x L*M
-!                             solar_tau_AD,                                               &  ! In/Output, K x L*M
+!                             ! -- adjoint inputs
+!                             tau_ad,                                                     &  ! in/output, k x l*m
+!                             flux_tau_ad,                                                &  ! in/output, k x l*m
+!                             solar_tau_ad,                                               &  ! in/output, k x l*m
 !
-!                             layer_radiance_AD,                                          &  ! In/Output, K x L*M
-!                             downwelling_radiance_AD,                                    &  ! In/Output, L*M
-!                             upwelling_radiance_AD,                                      &  ! In/Output, L*M
+!                             layer_radiance_ad,                                          &  ! in/output, k x l*m
+!                             downwelling_radiance_ad,                                    &  ! in/output, l*m
+!                             upwelling_radiance_ad,                                      &  ! in/output, l*m
 !
-!                             brightness_temperature_AD,                                  &  ! In/Output, L*M
+!                             brightness_temperature_ad,                                  &  ! in/output, l*m
 !
-!                             ! -- Other inputs
-!                             secant_view_angle,                                          &  ! Input, M
-!                             secant_solar_angle,                                         &  ! Input, M
-!                             n_channels_per_profile,                                     &  ! Input, M
-!                             channel_index,                                              &  ! Input, L*M
+!                             ! -- other inputs
+!                             secant_view_angle,                                          &  ! input, m
+!                             secant_solar_angle,                                         &  ! input, m
+!                             n_channels_per_profile,                                     &  ! input, m
+!                             channel_index,                                              &  ! input, l*m
 !
-!                             ! -- Adjoint outputs
-!                             level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output, K x M
+!                             ! -- adjoint outputs
+!                             level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output, k x m
 !
-!                             surface_temperature_AD,                                     &  ! In/Output, M
-!                             surface_emissivity_AD,                                      &  ! In/Output, L*M
-!                             surface_reflectivity_AD,                                    &  ! In/Output, L*M
+!                             surface_temperature_ad,                                     &  ! in/output, m
+!                             surface_emissivity_ad,                                      &  ! in/output, l*m
+!                             surface_reflectivity_ad,                                    &  ! in/output, l*m
 !
-!                             ! Optional inputs
+!                             ! optional inputs
 !                             message_log = message_log )
 !
-! INPUT ARGUMENTS:
+! input arguments:
 !
-!       level_p:                   Profile set layer interface pressure array. The TOA
-!                                  pressure is not included. TOA pressure is parameterised
-!                                  in the PARAMETERS module.
-!                                  UNITS:      hPa
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       level_p:                   profile set layer interface pressure array. the toa
+!                                  pressure is not included. toa pressure is parameterised
+!                                  in the parameters module.
+!                                  units:      hpa
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_p:                   Profile set layer average pressure array.
-!                                  UNITS:      hPa
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_p:                   profile set layer average pressure array.
+!                                  units:      hpa
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_t:                   Profile set layer average temperature array.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_t:                   profile set layer average temperature array.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_w:      .            Profile set layer average water vapor mixing ratio array
-!                                  UNITS:      g/kg
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_w:      .            profile set layer average water vapor mixing ratio array
+!                                  units:      g/kg
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_o:                   Profile set layer average ozone mixing ratio array.
-!                                  UNITS:      ppmv
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       layer_o:                   profile set layer average ozone mixing ratio array.
+!                                  units:      ppmv
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       surface_temperature:       Profile set surface temperature array.
-!                                  UNITS:      Kelvin
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_temperature:       profile set surface temperature array.
+!                                  units:      kelvin
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       surface_emissivity:        Profile set surface emissivity array
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_emissivity:        profile set surface emissivity array
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-!       surface_reflectivity:      Profile set surface reflectivity array
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!       surface_reflectivity:      profile set surface reflectivity array
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-!       absorber:                  Array of absorber amount for nadir view.
-!                                  UNITS:      Absorber dependent.
-!                                  TYPE:       Real
-!                                  DIMENSION:  0:K x J x M
-!                                  ATTRIBUTES: INTENT( IN )
+!       absorber:                  array of absorber amount for nadir view.
+!                                  units:      absorber dependent.
+!                                  type:       real
+!                                  dimension:  0:k x j x m
+!                                  attributes: intent( in )
 !
-!       tau_layer_index:           Array of absorber space layer indices of the input
+!       tau_layer_index:           array of absorber space layer indices of the input
 !                                  absorber amounts at the satellite view angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Integer
-!                                  DIMENSION:  K x J x M
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       integer
+!                                  dimension:  k x j x m
+!                                  attributes: intent( in )
 !
-!       flux_tau_layer_index:      Array of absorber space layer indices of the input
+!       flux_tau_layer_index:      array of absorber space layer indices of the input
 !                                  absorber amounts at the default diffusivity angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Integer
-!                                  DIMENSION:  K x J x M
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       integer
+!                                  dimension:  k x j x m
+!                                  attributes: intent( in )
 !
-!       solar_tau_layer_index:     Array of absorber space layer indices of the input
+!       solar_tau_layer_index:     array of absorber space layer indices of the input
 !                                  absorber amounts at the solar zenith angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Integer
-!                                  DIMENSION:  K x J x M
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       integer
+!                                  dimension:  k x j x m
+!                                  attributes: intent( in )
 !
-!       tau_predictor:             Predictor profiles for the layer->TOA transmittance.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  I x K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       tau_predictor:             predictor profiles for the layer->toa transmittance.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  i x k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       flux_tau_predictor:        Predictor profiles for the thermal flux transmittance.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  I x K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       flux_tau_predictor:        predictor profiles for the thermal flux transmittance.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  i x k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       solar_tau_predictor:       Predictor profiles for the solar transmittance.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  I x K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!       solar_tau_predictor:       predictor profiles for the solar transmittance.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  i x k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       tau:                       Layer->TOA transmittance for the satellite
+!       tau:                       layer->toa transmittance for the satellite
 !                                  view angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       flux_tau:                  Layer->SFC transmittance for the default
+!       flux_tau:                  layer->sfc transmittance for the default
 !                                  diffusivity angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       solar_tau:                 Layer->SFC transmittance for the solar
+!       solar_tau:                 layer->sfc transmittance for the solar
 !                                  zenith angle.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       layer_radiance:            Layer Planck radiances at every layer for
+!       layer_radiance:            layer planck radiances at every layer for
 !                                  each channel/profile.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in )
 !
-!       downwelling_radiance:      TOA->SFC radiances for each channel/profile due
+!       downwelling_radiance:      toa->sfc radiances for each channel/profile due
 !                                  to thermal flux and solar components.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-!       upwelling_radiance:        TOA radiances for each channel/profile.
-!                                  UNITS:      mW/(m^2.sr.cm^-1)
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!       upwelling_radiance:        toa radiances for each channel/profile.
+!                                  units:      mw/(m^2.sr.cm^-1)
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-!       tau_AD:                    Layer->TOA adjoint transmittance for the satellite
+!       tau_ad:                    layer->toa adjoint transmittance for the satellite
 !                                  view angle.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       flux_tau_AD:               Layer->SFC adjoint transmittance for the default
+!       flux_tau_ad:               layer->sfc adjoint transmittance for the default
 !                                  diffusivity angle.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       solar_tau_AD:              Layer->SFC adjoint transmittance for the solar
+!       solar_tau_ad:              layer->sfc adjoint transmittance for the solar
 !                                  zenith angle.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      None.
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      none.
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_radiance_AD:         Layer Planck adjoint radiances at every layer for
+!       layer_radiance_ad:         layer planck adjoint radiances at every layer for
 !                                  each channel/profile.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      (m^2.sr.cm^-1)/mW
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x L*M; K > 1, L > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      (m^2.sr.cm^-1)/mw
+!                                  type:       real
+!                                  dimension:  k x l*m; k > 1, l > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       downwelling_radiance_AD:   TOA->SFC adjoint radiances for each channel/profile due
+!       downwelling_radiance_ad:   toa->sfc adjoint radiances for each channel/profile due
 !                                  to thermal flux and solar components.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      (m^2.sr.cm^-1)/mW
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  ** this argument is set to zero on output **.
+!                                  units:      (m^2.sr.cm^-1)/mw
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       upwelling_radiance_AD:     TOA adjoint radiances for each channel/profile.
-!                                  UNITS:      (m^2.sr.cm^-1)/mW
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       upwelling_radiance_ad:     toa adjoint radiances for each channel/profile.
+!                                  units:      (m^2.sr.cm^-1)/mw
+!                                  ** this argument is set to zero on output **.
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       brightness_temperature_AD: adjoint temperatures corresponding to the
-!                                  TOA adjoint radiances.
-!                                  ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                                  UNITS:      K^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       brightness_temperature_ad: adjoint temperatures corresponding to the
+!                                  toa adjoint radiances.
+!                                  ** this argument is set to zero on output **.
+!                                  units:      k^-1
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       secant_view_angle:         Secant of the satellite view angle measured
+!       secant_view_angle:         secant of the satellite view angle measured
 !                                  from nadir for each profile in the set.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       secant_solar_angle:        Secant of the solar zenith angle for each
+!       secant_solar_angle:        secant of the solar zenith angle for each
 !                                  profile in the set.
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       n_channels_per_profile:    The number of channels for each profile in the
+!       n_channels_per_profile:    the number of channels for each profile in the
 !                                  set for which radiances are required.
-!                                  UNITS:      None
-!                                  TYPE:       Integer
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       integer
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in )
 !
-!       channel_index:             Channel index id array. Each element is a unique
+!       channel_index:             channel index id array. each element is a unique
 !                                  index to a (supported) sensor channel.
-!                                  UNITS:      None
-!                                  TYPE:       Integer
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN )
+!                                  units:      none
+!                                  type:       integer
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
+! optional input arguments:
 !
-!       message_log:               Character string specifying a filename in which any
-!                                  messages will be logged. If not specified, or if an
+!       message_log:               character string specifying a filename in which any
+!                                  messages will be logged. if not specified, or if an
 !                                  error occurs opening the log file, the default action
 !                                  is to output messages to the screen.
-!                                  UNITS:      None
-!                                  TYPE:       Character
-!                                  DIMENSION:  Scalar
-!                                  ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                                  units:      none
+!                                  type:       character
+!                                  dimension:  scalar
+!                                  attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
+! output arguments:
 !
-!       level_p_AD:                Profile set layer interface pressure adjoint
+!       level_p_ad:                profile set layer interface pressure adjoint
 !                                  array.
-!                                  UNITS:      hPa^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      hpa^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_p_AD:                Profile set layer average pressure adjoint
+!       layer_p_ad:                profile set layer average pressure adjoint
 !                                  array.
-!                                  UNITS:      hPa^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      hpa^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_t_AD:                Profile set layer average temperature adjoint
+!       layer_t_ad:                profile set layer average temperature adjoint
 !                                  array.
-!                                  UNITS:      K^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      k^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_w_AD:      .         Profile set layer average water vapor mixing ratio
+!       layer_w_ad:      .         profile set layer average water vapor mixing ratio
 !                                  adjoint array.
-!                                  UNITS:      kg/g
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      kg/g
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       layer_o_AD:                Profile set layer average ozone mixing ratio
+!       layer_o_ad:                profile set layer average ozone mixing ratio
 !                                  adjoint array.
-!                                  UNITS:      ppmv^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  K x M; K > 1, and M > or = 1
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!                                  units:      ppmv^-1
+!                                  type:       real
+!                                  dimension:  k x m; k > 1, and m > or = 1
+!                                  attributes: intent( in out )
 !
-!       surface_temperature_AD:    Profile set surface temperature adjoint array.
-!                                  UNITS:      K^-1
-!                                  TYPE:       Real
-!                                  DIMENSION:  M; M > or = 1 (i.e. scalar)
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       surface_temperature_ad:    profile set surface temperature adjoint array.
+!                                  units:      k^-1
+!                                  type:       real
+!                                  dimension:  m; m > or = 1 (i.e. scalar)
+!                                  attributes: intent( in out )
 !
-!       surface_emissivity_AD:     Profile set surface emissivity adjoint array
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       surface_emissivity_ad:     profile set surface emissivity adjoint array
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-!       surface_reflectivity_AD:   Profile set surface reflectivity adjoint array
-!                                  UNITS:      None
-!                                  TYPE:       Real
-!                                  DIMENSION:  L*M; L > 1, and M > or = 1
-!                                              NB: This is a 1-D array.
-!                                  ATTRIBUTES: INTENT( IN OUT )
+!       surface_reflectivity_ad:   profile set surface reflectivity adjoint array
+!                                  units:      none
+!                                  type:       real
+!                                  dimension:  l*m; l > 1, and m > or = 1
+!                                              nb: this is a 1-d array.
+!                                  attributes: intent( in out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => Calculation was successful
-!              = FAILURE => Error occurred checking input arguments
+! function result:
+!       result = success => calculation was successful
+!              = failure => error occurred checking input arguments
 !
-! CALLS:
-!      display_message:            Subroutine to output messages
-!                                  SOURCE: error_handler module
+! calls:
+!      display_message:            subroutine to output messages
+!                                  source: error_handler module
 !
-!      get_max_n_channels:         Routine to retrieve the value of the
-!                                  MAX_N_CHANNELS "pseudo-parameter".
-!                                  SOURCE: parameters module
+!      get_max_n_channels:         routine to retrieve the value of the
+!                                  max_n_channels "pseudo-parameter".
+!                                  source: parameters module
 !
-!      compute_absorber_amount_AD: Subroutine to calculate the adjoint
+!      compute_absorber_amount_ad: subroutine to calculate the adjoint
 !                                  absorber profiles
-!                                  SOURCE: absorber_profile module
+!                                  source: absorber_profile module
 !
-!      compute_predictors_AD:      Subroutine to compute the adjoint 
+!      compute_predictors_ad:      subroutine to compute the adjoint 
 !                                  transmittance predictor profiles.
-!                                  SOURCE: predictor module
+!                                  source: predictor module
 !
-!      compute_transmittance_AD:   Subroutine to compute the adjoint
+!      compute_transmittance_ad:   subroutine to compute the adjoint
 !                                  transmittance profiles.
-!                                  SOURCE: transmittance module
+!                                  source: transmittance module
 !
-!      compute_radiance_AD:        Subroutine to compute the TOA adjoint 
+!      compute_radiance_ad:        subroutine to compute the toa adjoint 
 !                                  radiances and brightness temperatures.
-!                                  SOURCE: radiance module
+!                                  source: radiance module
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       All input adjoint arguments are set to ZERO on output.
+! side effects:
+!       all input adjoint arguments are set to zero on output.
 !
-! RESTRICTIONS:
-!       Note the restrictions on the input array dimensions:
-!         K == n_layers > 1
-!         L == n_channels > 1
-!         M == n_profiles > or = 1
+! restrictions:
+!       note the restrictions on the input array dimensions:
+!         k == n_layers > 1
+!         l == n_channels > 1
+!         m == n_profiles > or = 1
 !
-! PROCEDURE:
-!       See individual module function documentation.
-!S-
+! procedure:
+!       see individual module function documentation.
+!s-
 !--------------------------------------------------------------------------------
 
-  FUNCTION adjoint_rtm_rank2( &
+  function adjoint_rtm_rank2( &
 
-             ! -- Forward inputs
-             level_p, layer_p, layer_t, layer_w, layer_o,                &  ! Input, K x M
+             ! -- forward inputs
+             level_p, layer_p, layer_t, layer_w, layer_o,                &  ! input, k x m
 
-             surface_temperature,                                        &  ! Input, M
-             surface_emissivity,                                         &  ! Input, L*M
-             surface_reflectivity,                                       &  ! Input, L*M
+             surface_temperature,                                        &  ! input, m
+             surface_emissivity,                                         &  ! input, l*m
+             surface_reflectivity,                                       &  ! input, l*m
 
-             absorber,                                                   &  ! Input, 0:K x J x M
+             absorber,                                                   &  ! input, 0:k x j x m
 
-             tau_layer_index,                                            &  ! Input, K x J x M
-             flux_tau_layer_index,                                       &  ! Input, K x J x M
-             solar_tau_layer_index,                                      &  ! Input, K x J x M
+             tau_layer_index,                                            &  ! input, k x j x m
+             flux_tau_layer_index,                                       &  ! input, k x j x m
+             solar_tau_layer_index,                                      &  ! input, k x j x m
 
-             tau_predictor,                                              &  ! Input, Imax x K x M
-             flux_tau_predictor,                                         &  ! Input, Imax x K x M
-             solar_tau_predictor,                                        &  ! Input, Imax x K x M
+             tau_predictor,                                              &  ! input, imax x k x m
+             flux_tau_predictor,                                         &  ! input, imax x k x m
+             solar_tau_predictor,                                        &  ! input, imax x k x m
 
-             tau,                                                        &  ! Input, K x L*M
-             flux_tau,                                                   &  ! Input, K x L*M
-             solar_tau,                                                  &  ! Input, K x L*M
+             tau,                                                        &  ! input, k x l*m
+             flux_tau,                                                   &  ! input, k x l*m
+             solar_tau,                                                  &  ! input, k x l*m
 
-             layer_radiance,                                             &  ! Input, K x L*M
-             downwelling_radiance,                                       &  ! Input, L*M
-             upwelling_radiance,                                         &  ! Input, L*M
+             layer_radiance,                                             &  ! input, k x l*m
+             downwelling_radiance,                                       &  ! input, l*m
+             upwelling_radiance,                                         &  ! input, l*m
 
-             ! -- Adjoint inputs
-             tau_AD,                                                     &  ! In/Output, K x L*M
-             flux_tau_AD,                                                &  ! In/Output, K x L*M
-             solar_tau_AD,                                               &  ! In/Output, K x L*M
+             ! -- adjoint inputs
+             tau_ad,                                                     &  ! in/output, k x l*m
+             flux_tau_ad,                                                &  ! in/output, k x l*m
+             solar_tau_ad,                                               &  ! in/output, k x l*m
 
-             layer_radiance_AD,                                          &  ! In/Output, K x L*M
-             downwelling_radiance_AD,                                    &  ! In/Output, L*M
-             upwelling_radiance_AD,                                      &  ! In/Output, L*M
+             layer_radiance_ad,                                          &  ! in/output, k x l*m
+             downwelling_radiance_ad,                                    &  ! in/output, l*m
+             upwelling_radiance_ad,                                      &  ! in/output, l*m
 
-             brightness_temperature_AD,                                  &  ! In/Output, L*M
+             brightness_temperature_ad,                                  &  ! in/output, l*m
 
-             ! -- Other inputs
-             secant_view_angle,                                          &  ! Input, M
-             secant_solar_angle,                                         &  ! Input, M
-             n_channels_per_profile,                                     &  ! Input, M
-             channel_index,                                              &  ! Input, L*M
+             ! -- other inputs
+             secant_view_angle,                                          &  ! input, m
+             secant_solar_angle,                                         &  ! input, m
+             n_channels_per_profile,                                     &  ! input, m
+             channel_index,                                              &  ! input, l*m
 
-             ! -- Adjoint outputs
-             level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output, K x M
+             ! -- adjoint outputs
+             level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output, k x m
 
-             surface_temperature_AD,                                     &  ! In/Output, M
-             surface_emissivity_AD,                                      &  ! In/Output, L*M
-             surface_reflectivity_AD,                                    &  ! In/Output, L*M
+             surface_temperature_ad,                                     &  ! in/output, m
+             surface_emissivity_ad,                                      &  ! in/output, l*m
+             surface_reflectivity_ad,                                    &  ! in/output, l*m
 
-             ! -- Optional inputs
+             ! -- optional inputs
              n_input_profiles,                                           &
              message_log )                                               &
 
-           RESULT ( error_status )
+           result ( error_status )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- TYPE DECLARATIONS  --                          #
+    !#                         -- type declarations  --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward inputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: level_p                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_p                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_t                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_w                    ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_o                    ! K x M
+    ! -- forward inputs
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: level_p                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_p                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_t                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_w                    ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_o                    ! k x m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: surface_temperature        ! M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: surface_emissivity         ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: surface_reflectivity       ! L*M
+    real( fp_kind ), dimension( : ),        intent( in )     :: surface_temperature        ! m
+    real( fp_kind ), dimension( : ),        intent( in )     :: surface_emissivity         ! l*m
+    real( fp_kind ), dimension( : ),        intent( in )     :: surface_reflectivity       ! l*m
 
-    REAL( fp_kind ), DIMENSION( 0:, :, : ), INTENT( IN )     :: absorber                   ! 0:K x J x M
+    real( fp_kind ), dimension( 0:, :, : ), intent( in )     :: absorber                   ! 0:k x j x m
 
-    INTEGER,         DIMENSION(  :, :, : ), INTENT( IN )     :: tau_layer_index            ! K x J x M
-    INTEGER,         DIMENSION(  :, :, : ), INTENT( IN )     :: flux_tau_layer_index       ! K x J x M
-    INTEGER,         DIMENSION(  :, :, : ), INTENT( IN )     :: solar_tau_layer_index      ! K x J x M
+    integer,         dimension(  :, :, : ), intent( in )     :: tau_layer_index            ! k x j x m
+    integer,         dimension(  :, :, : ), intent( in )     :: flux_tau_layer_index       ! k x j x m
+    integer,         dimension(  :, :, : ), intent( in )     :: solar_tau_layer_index      ! k x j x m
 
-    REAL( fp_kind ), DIMENSION( :, :, : ),  INTENT( IN )     :: tau_predictor              ! Imax x K x M
-    REAL( fp_kind ), DIMENSION( :, :, : ),  INTENT( IN )     :: flux_tau_predictor         ! Imax x K x M
-    REAL( fp_kind ), DIMENSION( :, :, : ),  INTENT( IN )     :: solar_tau_predictor        ! Imax x K x M
+    real( fp_kind ), dimension( :, :, : ),  intent( in )     :: tau_predictor              ! imax x k x m
+    real( fp_kind ), dimension( :, :, : ),  intent( in )     :: flux_tau_predictor         ! imax x k x m
+    real( fp_kind ), dimension( :, :, : ),  intent( in )     :: solar_tau_predictor        ! imax x k x m
 
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: tau                        ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: flux_tau                   ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: solar_tau                  ! K x L*M
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: tau                        ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: flux_tau                   ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: solar_tau                  ! k x l*m
 
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN )     :: layer_radiance             ! K x L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: downwelling_radiance       ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: upwelling_radiance         ! L*M
+    real( fp_kind ), dimension( :, : ),     intent( in )     :: layer_radiance             ! k x l*m
+    real( fp_kind ), dimension( : ),        intent( in )     :: downwelling_radiance       ! l*m
+    real( fp_kind ), dimension( : ),        intent( in )     :: upwelling_radiance         ! l*m
 
-    ! -- Adjoint inputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: tau_AD                     ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: flux_tau_AD                ! K x L*M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: solar_tau_AD               ! K x L*M
+    ! -- adjoint inputs
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: tau_ad                     ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: flux_tau_ad                ! k x l*m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: solar_tau_ad               ! k x l*m
 
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_radiance_AD          ! K x L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: downwelling_radiance_AD    ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: upwelling_radiance_AD      ! L*M
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_radiance_ad          ! k x l*m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: downwelling_radiance_ad    ! l*m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: upwelling_radiance_ad      ! l*m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: brightness_temperature_AD  ! L*M
+    real( fp_kind ), dimension( : ),        intent( in out ) :: brightness_temperature_ad  ! l*m
 
-    ! -- Other inputs
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: secant_view_angle          ! M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN )     :: secant_solar_angle         ! M
-    INTEGER,         DIMENSION( : ),        INTENT( IN )     :: n_channels_per_profile     ! M
-    INTEGER,         DIMENSION( : ),        INTENT( IN )     :: channel_index              ! L*M
+    ! -- other inputs
+    real( fp_kind ), dimension( : ),        intent( in )     :: secant_view_angle          ! m
+    real( fp_kind ), dimension( : ),        intent( in )     :: secant_solar_angle         ! m
+    integer,         dimension( : ),        intent( in )     :: n_channels_per_profile     ! m
+    integer,         dimension( : ),        intent( in )     :: channel_index              ! l*m
 
-    ! -- Adjoint outputs
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: level_p_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_p_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_t_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_w_AD                 ! K x M
-    REAL( fp_kind ), DIMENSION( :, : ),     INTENT( IN OUT ) :: layer_o_AD                 ! K x M
+    ! -- adjoint outputs
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: level_p_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_p_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_t_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_w_ad                 ! k x m
+    real( fp_kind ), dimension( :, : ),     intent( in out ) :: layer_o_ad                 ! k x m
 
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: surface_temperature_AD     ! M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: surface_emissivity_AD      ! L*M
-    REAL( fp_kind ), DIMENSION( : ),        INTENT( IN OUT ) :: surface_reflectivity_AD    ! L*M
+    real( fp_kind ), dimension( : ),        intent( in out ) :: surface_temperature_ad     ! m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: surface_emissivity_ad      ! l*m
+    real( fp_kind ), dimension( : ),        intent( in out ) :: surface_reflectivity_ad    ! l*m
 
-    ! -- Optional input
-    INTEGER,        OPTIONAL,               INTENT( IN )     :: n_input_profiles           ! Scalar
-    CHARACTER( * ), OPTIONAL,               INTENT( IN )     :: message_log
+    ! -- optional input
+    integer,        optional,               intent( in )     :: n_input_profiles           ! scalar
+    character( * ), optional,               intent( in )     :: message_log
     
     
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'ADJOINT_RTM_RANK2'
+    character( * ), parameter :: routine_name = 'adjoint_rtm_rank2'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- Scalars
-    CHARACTER( 100 ) :: message
-    CHARACTER( 5 )   :: value_in, value_allowed
+    ! -- scalars
+    character( 100 ) :: message
+    character( 5 )   :: value_in, value_allowed
 
-    INTEGER :: m, n_profiles          ! Profile loop variables
-    INTEGER :: l, l1, l2, n_channels  ! Channel loop/index variables
+    integer :: m, n_profiles          ! profile loop variables
+    integer :: l, l1, l2, n_channels  ! channel loop/index variables
 
-    INTEGER :: valid_solar
+    integer :: valid_solar
 
-    ! -- Maximum channels pseudo parameter
-    INTEGER :: MAX_N_CHANNELS
-    LOGICAL :: is_set
+    ! -- maximum channels pseudo parameter
+    integer :: max_n_channels
+    logical :: is_set
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC ADJUSTL, &
-              ANY,     &
-              COS,     &
-              MAXVAL,  &
-              SIZE,    &
-              TRIM
+    intrinsic adjustl, &
+              any,     &
+              cos,     &
+              maxval,  &
+              size,    &
+              trim
 
 
 
     !#--------------------------------------------------------------------------#
-    !#          -- DETERMINE ARRAY DIMENSIONS AND CHECK THE VALUES --           #
+    !#          -- determine array dimensions and check the values --           #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------------
-    ! Check the number of profiles
+    ! check the number of profiles
     ! ----------------------------
 
-    ! -- Number of atmospheric profiles. Default size is the SECOND
-    ! -- dimension of the LAYER_P argument.
-    n_profiles = SIZE( layer_p, DIM = 2 )
-    IF ( PRESENT( n_input_profiles ) ) THEN
-      IF ( n_input_profiles > 0 .AND. n_input_profiles <= n_profiles ) THEN
+    ! -- number of atmospheric profiles. default size is the second
+    ! -- dimension of the layer_p argument.
+    n_profiles = size( layer_p, dim = 2 )
+    if ( present( n_input_profiles ) ) then
+      if ( n_input_profiles > 0 .and. n_input_profiles <= n_profiles ) then
         n_profiles = n_input_profiles
-      ELSE
-        WRITE( message, '( "Invalid N_INPUT_PROFILES value: ", i5, &
-                          &". Using pressure array dimension value of ", i5, "." )' ) &
+      else
+        write( message, '( "invalid n_input_profiles value: ", i5, &
+                          &". using pressure array dimension value of ", i5, "." )' ) &
                         n_input_profiles, n_profiles
-        CALL display_message( ROUTINE_NAME,    &
-                              TRIM( message ), &
-                              WARNING,         &
+        call display_message( routine_name,    &
+                              trim( message ), &
+                              warning,         &
                               message_log = message_log )
-      END IF
-    END IF
+      end if
+    end if
 
-    ! -- Check that the number of profiles is not greater than
-    ! -- MAX_N_PROFILES. This is simply a limit to restrict the
-    ! -- size of the input arrays so they're not TOO big.
-    IF ( n_profiles > MAX_N_PROFILES ) THEN
+    ! -- check that the number of profiles is not greater than
+    ! -- max_n_profiles. this is simply a limit to restrict the
+    ! -- size of the input arrays so they're not too big.
+    if ( n_profiles > max_n_profiles ) then
 
-      error_status = FAILURE
-      WRITE( value_in,      '( i5 )' ) n_profiles
-      WRITE( value_allowed, '( i5 )' ) MAX_N_PROFILES
-      CALL display_message( ROUTINE_NAME, &
-                            'Number of passed profiles ('// &
-                            TRIM( ADJUSTL( value_in ) )// &
+      error_status = failure
+      write( value_in,      '( i5 )' ) n_profiles
+      write( value_allowed, '( i5 )' ) max_n_profiles
+      call display_message( routine_name, &
+                            'number of passed profiles ('// &
+                            trim( adjustl( value_in ) )// &
                             ') > maximum number of profiles allowed ('// &
-                            TRIM( ADJUSTL( value_allowed ) )//').', &
+                            trim( adjustl( value_allowed ) )//').', &
                             error_status, &
                             message_log = message_log )
-      RETURN
+      return
 
-    END IF
+    end if
 
 
     ! ----------------------------
-    ! Check the number of channels
+    ! check the number of channels
     ! ----------------------------
 
-    ! -- Check for a negative number of channels
-    IF ( ANY( n_channels_per_profile < 0 ) ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Elements of N_CHANNELS_PER_PROFILE are negative.', &
+    ! -- check for a negative number of channels
+    if ( any( n_channels_per_profile < 0 ) ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'elements of n_channels_per_profile are negative.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
-    ! -- Check that the maximum number of channels for any profile
+    ! -- check that the maximum number of channels for any profile
     ! -- is not greater than than the number of channels with which
     ! -- the model was initialised
-    n_channels = MAXVAL( n_channels_per_profile )
+    n_channels = maxval( n_channels_per_profile )
 
-    CALL get_max_n_channels( MAX_N_CHANNELS, is_set )
+    call get_max_n_channels( max_n_channels, is_set )
 
-    IF ( .NOT. is_set ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'MAX_N_CHANNELS value not set. Check that RTM is initialised.', &
+    if ( .not. is_set ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'max_n_channels value not set. check that rtm is initialised.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
-    IF ( n_channels > MAX_N_CHANNELS ) THEN
-      error_status = FAILURE
-      WRITE( value_in,      '( i5 )' ) n_channels
-      WRITE( value_allowed, '( i5 )' ) MAX_N_CHANNELS
-      CALL display_message( ROUTINE_NAME, &
-                            'Number of requested channels ('// &
-                            TRIM( ADJUSTL( value_in ) )// &
+    if ( n_channels > max_n_channels ) then
+      error_status = failure
+      write( value_in,      '( i5 )' ) n_channels
+      write( value_allowed, '( i5 )' ) max_n_channels
+      call display_message( routine_name, &
+                            'number of requested channels ('// &
+                            trim( adjustl( value_in ) )// &
                             ') > number of initialisation channels ('// &
-                            TRIM( ADJUSTL( value_allowed ) )//').', &
+                            trim( adjustl( value_allowed ) )//').', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                           -- PROFILE LOOP --                             #
+    !#                           -- profile loop --                             #
     !#--------------------------------------------------------------------------#
 
     ! -------------------------------
-    ! Initialise channel index finder
+    ! initialise channel index finder
     ! -------------------------------
 
     l1 = 1
 
 
     ! ------------------
-    ! Begin profile loop
+    ! begin profile loop
     ! ------------------
 
-    m_profile_loop: DO m = 1, n_profiles
+    m_profile_loop: do m = 1, n_profiles
 
 
       ! -----------------------------------------------
-      ! Check for the "no channel" case. If no channels
+      ! check for the "no channel" case. if no channels
       ! required for this profile, go to the next one.
       ! -----------------------------------------------
 
-      IF ( n_channels_per_profile( m ) == 0 ) CYCLE m_profile_loop
+      if ( n_channels_per_profile( m ) == 0 ) cycle m_profile_loop
 
 
       ! -------------------------------------------
-      ! Determine the end channel index index range
+      ! determine the end channel index index range
       ! -------------------------------------------
 
       l2 = l1 + n_channels_per_profile( m ) - 1
 
 
       ! ------------------------
-      ! Call the rank-1 function
+      ! call the rank-1 function
       ! ------------------------
 
       error_status = adjoint_rtm_rank1( &
-                       ! -- Forward inputs
-                       level_p( :, m ), layer_p( :, m ), layer_t( :, m ), layer_w( :, m ), layer_o( :, m ), &  ! Input, K
+                       ! -- forward inputs
+                       level_p( :, m ), layer_p( :, m ), layer_t( :, m ), layer_w( :, m ), layer_o( :, m ), &  ! input, k
 
-                       surface_temperature) m ),          &  ! Input, Scalar
-                       surface_emissivity( l1:l2),        &  ! Input, L
-                       surface_reflectivity( l1:l2),      &  ! Input, L
+                       surface_temperature) m ),          &  ! input, scalar
+                       surface_emissivity( l1:l2),        &  ! input, l
+                       surface_reflectivity( l1:l2),      &  ! input, l
 
-                       absorber( 0:, :, m ),              &  ! Input, 0:K x J
+                       absorber( 0:, :, m ),              &  ! input, 0:k x j
 
-                       tau_layer_index( :, :, m ),        &  ! Input, K x J
-                       flux_tau_layer_index( :, :, m ),   &  ! Input, K x J
-                       solar_tau_layer_index( :, :, m ),  &  ! Input, K x J
+                       tau_layer_index( :, :, m ),        &  ! input, k x j
+                       flux_tau_layer_index( :, :, m ),   &  ! input, k x j
+                       solar_tau_layer_index( :, :, m ),  &  ! input, k x j
 
-                       tau_predictor( :, :, m ),          &  ! Input, Imax x K
-                       flux_tau_predictor( :, :, m ),     &  ! Input, Imax x K
-                       solar_tau_predictor( :, :, m ),    &  ! Input, Imax x K
+                       tau_predictor( :, :, m ),          &  ! input, imax x k
+                       flux_tau_predictor( :, :, m ),     &  ! input, imax x k
+                       solar_tau_predictor( :, :, m ),    &  ! input, imax x k
 
-                       tau( :, l1:l2 ),                   &  ! Input, K x L
-                       flux_tau( :, l1:l2 ),              &  ! Input, K x L
-                       solar_tau( :, l1:l2 ),             &  ! Input, K x L
+                       tau( :, l1:l2 ),                   &  ! input, k x l
+                       flux_tau( :, l1:l2 ),              &  ! input, k x l
+                       solar_tau( :, l1:l2 ),             &  ! input, k x l
 
-                       layer_radiance( :, l1:l2 ),        &  ! Input, K x L
-                       downwelling_radiance( l1:l2),      &  ! Input, L
-                       upwelling_radiance( l1:l2),        &  ! Input, L
+                       layer_radiance( :, l1:l2 ),        &  ! input, k x l
+                       downwelling_radiance( l1:l2),      &  ! input, l
+                       upwelling_radiance( l1:l2),        &  ! input, l
 
-                       ! -- Adjoint inputs
-                       tau_AD( :, l1:l2 ),                &  ! In/Output, K x L
-                       flux_tau_AD( :, l1:l2 ),           &  ! In/Output, K x L
-                       solar_tau_AD( :, l1:l2 ),          &  ! In/Output, K x L
+                       ! -- adjoint inputs
+                       tau_ad( :, l1:l2 ),                &  ! in/output, k x l
+                       flux_tau_ad( :, l1:l2 ),           &  ! in/output, k x l
+                       solar_tau_ad( :, l1:l2 ),          &  ! in/output, k x l
 
-                       layer_radiance_AD( :, l1:l2 ),     &  ! In/Output, K x L
-                       downwelling_radiance_AD( l1:l2),   &  ! In/Output, L
-                       upwelling_radiance_AD( l1:l2),     &  ! In/Output, L
+                       layer_radiance_ad( :, l1:l2 ),     &  ! in/output, k x l
+                       downwelling_radiance_ad( l1:l2),   &  ! in/output, l
+                       upwelling_radiance_ad( l1:l2),     &  ! in/output, l
 
-                       brightness_temperature_AD( l1:l2), &  ! In/Output, L
+                       brightness_temperature_ad( l1:l2), &  ! in/output, l
 
-                       ! -- Other inputs
-                       secant_view_angle( m ),            &  ! Input, Scalar
-                       secant_solar_angle( m ),           &  ! Input, Scalar
-                       n_channels_per_profile( m ),       &  ! Input, Scalar
-                       channel_index( l1:l2),             &  ! Input, L
+                       ! -- other inputs
+                       secant_view_angle( m ),            &  ! input, scalar
+                       secant_solar_angle( m ),           &  ! input, scalar
+                       n_channels_per_profile( m ),       &  ! input, scalar
+                       channel_index( l1:l2),             &  ! input, l
 
-                       ! -- Adjoint outputs
-                       level_p_AD( :, m ), layer_p_AD( :, m ), layer_t_AD( :, m ), layer_w_AD( :, m ), layer_o_AD( :, m ), &  ! In/Output, K
+                       ! -- adjoint outputs
+                       level_p_ad( :, m ), layer_p_ad( :, m ), layer_t_ad( :, m ), layer_w_ad( :, m ), layer_o_ad( :, m ), &  ! in/output, k
 
-                       surface_temperature_AD( m ),       &  ! In/Output, Scalar
-                       surface_emissivity_AD( l1:l2),     &  ! In/Output, L
-                       surface_reflectivity_AD( l1:l2),   &  ! In/Output, L
+                       surface_temperature_ad( m ),       &  ! in/output, scalar
+                       surface_emissivity_ad( l1:l2),     &  ! in/output, l
+                       surface_reflectivity_ad( l1:l2),   &  ! in/output, l
 
-                       ! -- Optional inputs
+                       ! -- optional inputs
                        message_log = message_log )
 
 
       ! -------------------------------
-      ! Check for successful completion
+      ! check for successful completion
       ! -------------------------------
 
-      IF ( error_status /= SUCCESS ) THEN
+      if ( error_status /= success ) then
 
-        CALL display_message( ROUTINE_NAME, &
-                              'Error occured in ADJOINT_RTM_RANK1', &
+        call display_message( routine_name, &
+                              'error occured in adjoint_rtm_rank1', &
                               error_status, &
                               message_log = message_log )
-        RETURN
+        return
 
-      END IF
+      end if
 
 
       ! ------------------------------
-      ! Update the channel begin index
+      ! update the channel begin index
       ! ------------------------------
 
       l1 = l2 + 1
 
 
-    END DO m_profile_loop
+    end do m_profile_loop
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                              -- DONE --                                  #
+    !#                              -- done --                                  #
     !#--------------------------------------------------------------------------#
 
-    error_status = SUCCESS
+    error_status = success
 
-  END FUNCTION adjoint_rtm_rank2
+  end function adjoint_rtm_rank2
 
 
 
-  FUNCTION adjoint_rtm_rank1( &
+  function adjoint_rtm_rank1( &
 
-             ! -- Forward inputs
-             level_p, layer_p, layer_t, layer_w, layer_o,                &  ! Input, K
+             ! -- forward inputs
+             level_p, layer_p, layer_t, layer_w, layer_o,                &  ! input, k
 
-             surface_temperature,                                        &  ! Input, Scalar
-             surface_emissivity,                                         &  ! Input, L
-             surface_reflectivity,                                       &  ! Input, L
+             surface_temperature,                                        &  ! input, scalar
+             surface_emissivity,                                         &  ! input, l
+             surface_reflectivity,                                       &  ! input, l
 
-             absorber,                                                   &  ! Input, 0:K x J
+             absorber,                                                   &  ! input, 0:k x j
 
-             tau_layer_index,                                            &  ! Input, K x J
-             flux_tau_layer_index,                                       &  ! Input, K x J
-             solar_tau_layer_index,                                      &  ! Input, K x J
+             tau_layer_index,                                            &  ! input, k x j
+             flux_tau_layer_index,                                       &  ! input, k x j
+             solar_tau_layer_index,                                      &  ! input, k x j
 
-             tau_predictor,                                              &  ! Input, Imax x K
-             flux_tau_predictor,                                         &  ! Input, Imax x K
-             solar_tau_predictor,                                        &  ! Input, Imax x K
+             tau_predictor,                                              &  ! input, imax x k
+             flux_tau_predictor,                                         &  ! input, imax x k
+             solar_tau_predictor,                                        &  ! input, imax x k
 
-             tau,                                                        &  ! Input, K x L
-             flux_tau,                                                   &  ! Input, K x L
-             solar_tau,                                                  &  ! Input, K x L
+             tau,                                                        &  ! input, k x l
+             flux_tau,                                                   &  ! input, k x l
+             solar_tau,                                                  &  ! input, k x l
 
-             layer_radiance,                                             &  ! Input, K x L
-             downwelling_radiance,                                       &  ! Input, L
-             upwelling_radiance,                                         &  ! Input, L
+             layer_radiance,                                             &  ! input, k x l
+             downwelling_radiance,                                       &  ! input, l
+             upwelling_radiance,                                         &  ! input, l
 
-             ! -- Adjoint inputs
-             tau_AD,                                                     &  ! In/Output, K x L
-             flux_tau_AD,                                                &  ! In/Output, K x L
-             solar_tau_AD,                                               &  ! In/Output, K x L
+             ! -- adjoint inputs
+             tau_ad,                                                     &  ! in/output, k x l
+             flux_tau_ad,                                                &  ! in/output, k x l
+             solar_tau_ad,                                               &  ! in/output, k x l
 
-             layer_radiance_AD,                                          &  ! In/Output, K x L
-             downwelling_radiance_AD,                                    &  ! In/Output, L
-             upwelling_radiance_AD,                                      &  ! In/Output, L
+             layer_radiance_ad,                                          &  ! in/output, k x l
+             downwelling_radiance_ad,                                    &  ! in/output, l
+             upwelling_radiance_ad,                                      &  ! in/output, l
 
-             brightness_temperature_AD,                                  &  ! In/Output, L
+             brightness_temperature_ad,                                  &  ! in/output, l
 
-             ! -- Other inputs
-             secant_view_angle,                                          &  ! Input, Scalar
-             secant_solar_angle,                                         &  ! Input, Scalar
-             n_channels,                                                 &  ! Input, Scalar
-             channel_index,                                              &  ! Input, L
+             ! -- other inputs
+             secant_view_angle,                                          &  ! input, scalar
+             secant_solar_angle,                                         &  ! input, scalar
+             n_channels,                                                 &  ! input, scalar
+             channel_index,                                              &  ! input, l
 
-             ! -- Adjoint outputs
-             level_p_AD, layer_p_AD, layer_t_AD, layer_w_AD, layer_o_AD, &  ! In/Output, K
+             ! -- adjoint outputs
+             level_p_ad, layer_p_ad, layer_t_ad, layer_w_ad, layer_o_ad, &  ! in/output, k
 
-             surface_temperature_AD,                                     &  ! In/Output, Scalar
-             surface_emissivity_AD,                                      &  ! In/Output, L
-             surface_reflectivity_AD,                                    &  ! In/Output, L
+             surface_temperature_ad,                                     &  ! in/output, scalar
+             surface_emissivity_ad,                                      &  ! in/output, l
+             surface_reflectivity_ad,                                    &  ! in/output, l
 
-             ! Optional inputs
+             ! optional inputs
              n_input_profiles,                                           &
              message_log )                                               &
 
-           RESULT ( error_status )
+           result ( error_status )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- TYPE DECLARATIONS --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward inputs
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: level_p                    ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: layer_p                    ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: layer_t                    ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: layer_w                    ! K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: layer_o                    ! K
+    ! -- forward inputs
+    real( fp_kind ), dimension( : ),     intent( in )     :: level_p                    ! k
+    real( fp_kind ), dimension( : ),     intent( in )     :: layer_p                    ! k
+    real( fp_kind ), dimension( : ),     intent( in )     :: layer_t                    ! k
+    real( fp_kind ), dimension( : ),     intent( in )     :: layer_w                    ! k
+    real( fp_kind ), dimension( : ),     intent( in )     :: layer_o                    ! k
 
-    REAL( fp_kind ),                     INTENT( IN )     :: surface_temperature        ! Scalar
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: surface_emissivity         ! L
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: surface_reflectivity       ! L
+    real( fp_kind ),                     intent( in )     :: surface_temperature        ! scalar
+    real( fp_kind ), dimension( : ),     intent( in )     :: surface_emissivity         ! l
+    real( fp_kind ), dimension( : ),     intent( in )     :: surface_reflectivity       ! l
 
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )     :: absorber                   ! 0:K x J
+    real( fp_kind ), dimension( 0:, : ), intent( in )     :: absorber                   ! 0:k x j
 
-    INTEGER,         DIMENSION(  :, : ), INTENT( IN )     :: tau_layer_index            ! K x J
-    INTEGER,         DIMENSION(  :, : ), INTENT( IN )     :: flux_tau_layer_index       ! K x J
-    INTEGER,         DIMENSION(  :, : ), INTENT( IN )     :: solar_tau_layer_index      ! K x J
+    integer,         dimension(  :, : ), intent( in )     :: tau_layer_index            ! k x j
+    integer,         dimension(  :, : ), intent( in )     :: flux_tau_layer_index       ! k x j
+    integer,         dimension(  :, : ), intent( in )     :: solar_tau_layer_index      ! k x j
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: tau_predictor              ! Imax x K 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: flux_tau_predictor         ! Imax x K 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: solar_tau_predictor        ! Imax x K 
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: tau_predictor              ! imax x k 
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: flux_tau_predictor         ! imax x k 
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: solar_tau_predictor        ! imax x k 
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: tau                        ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: flux_tau                   ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: solar_tau                  ! K x L
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: tau                        ! k x l
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: flux_tau                   ! k x l
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: solar_tau                  ! k x l
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN )     :: layer_radiance             ! K x L
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: downwelling_radiance       ! L
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: upwelling_radiance         ! L
+    real( fp_kind ), dimension( :, : ),  intent( in )     :: layer_radiance             ! k x l
+    real( fp_kind ), dimension( : ),     intent( in )     :: downwelling_radiance       ! l
+    real( fp_kind ), dimension( : ),     intent( in )     :: upwelling_radiance         ! l
 
-    ! -- Adjoint inputs
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: tau_AD                     ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: flux_tau_AD                ! K x L
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: solar_tau_AD               ! K x L
+    ! -- adjoint inputs
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: tau_ad                     ! k x l
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: flux_tau_ad                ! k x l
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: solar_tau_ad               ! k x l
 
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: layer_radiance_AD          ! K x L
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: downwelling_radiance_AD    ! L
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: upwelling_radiance_AD      ! L
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: layer_radiance_ad          ! k x l
+    real( fp_kind ), dimension( : ),     intent( in out ) :: downwelling_radiance_ad    ! l
+    real( fp_kind ), dimension( : ),     intent( in out ) :: upwelling_radiance_ad      ! l
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: brightness_temperature_AD  ! L
+    real( fp_kind ), dimension( : ),     intent( in out ) :: brightness_temperature_ad  ! l
 
-    ! -- Other inputs
-    REAL( fp_kind ),                     INTENT( IN )     :: secant_view_angle          ! Scalar
-    REAL( fp_kind ),                     INTENT( IN )     :: secant_solar_angle         ! Scalar
-    INTEGER,                             INTENT( IN )     :: n_channels                 ! Scalar
-    INTEGER,         DIMENSION( : ),     INTENT( IN )     :: channel_index              ! L
+    ! -- other inputs
+    real( fp_kind ),                     intent( in )     :: secant_view_angle          ! scalar
+    real( fp_kind ),                     intent( in )     :: secant_solar_angle         ! scalar
+    integer,                             intent( in )     :: n_channels                 ! scalar
+    integer,         dimension( : ),     intent( in )     :: channel_index              ! l
 
-    ! -- Adjoint outputs
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: level_p_AD                 ! K
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: layer_p_AD                 ! K
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: layer_t_AD                 ! K
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: layer_w_AD                 ! K
-    REAL( fp_kind ), DIMENSION( :, : ),  INTENT( IN OUT ) :: layer_o_AD                 ! K
+    ! -- adjoint outputs
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: level_p_ad                 ! k
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: layer_p_ad                 ! k
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: layer_t_ad                 ! k
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: layer_w_ad                 ! k
+    real( fp_kind ), dimension( :, : ),  intent( in out ) :: layer_o_ad                 ! k
 
-    REAL( fp_kind ),                     INTENT( IN OUT ) :: surface_temperature_AD     ! Scalar
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: surface_emissivity_AD      ! L
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: surface_reflectivity_AD    ! L
+    real( fp_kind ),                     intent( in out ) :: surface_temperature_ad     ! scalar
+    real( fp_kind ), dimension( : ),     intent( in out ) :: surface_emissivity_ad      ! l
+    real( fp_kind ), dimension( : ),     intent( in out ) :: surface_reflectivity_ad    ! l
 
-    ! -- Optional input. Note that N_INPUT_PROFILES is not used in this
-    ! -- function. It is specified so if a user specifies it by mistake
+    ! -- optional input. note that n_input_profiles is not used in this
+    ! -- function. it is specified so if a user specifies it by mistake
     ! -- for rank-1 profile input the code won't (hopefully) fall in a heap.
-    INTEGER,        OPTIONAL,            INTENT( IN )  :: n_input_profiles              ! Scalar
-    CHARACTER( * ), OPTIONAL,            INTENT( IN )  :: message_log
+    integer,        optional,            intent( in )  :: n_input_profiles              ! scalar
+    character( * ), optional,            intent( in )  :: message_log
     
     
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'ADJOINT_RTM_RANK1'
+    character( * ), parameter :: routine_name = 'adjoint_rtm_rank1'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    ! -- Scalars
-    CHARACTER( 100 ) :: message
-    CHARACTER( 5 )   :: value_in, value_allowed
+    ! -- scalars
+    character( 100 ) :: message
+    character( 5 )   :: value_in, value_allowed
 
-    INTEGER :: k, n_layers  ! Layer loop/index variables
-    INTEGER :: l            ! Channel loop/index variable
+    integer :: k, n_layers  ! layer loop/index variables
+    integer :: l            ! channel loop/index variable
 
-    INTEGER :: valid_solar
+    integer :: valid_solar
 
-    ! -- Maximum channels pseudo parameter
-    INTEGER :: MAX_N_CHANNELS
-    LOGICAL :: is_set
+    ! -- maximum channels pseudo parameter
+    integer :: max_n_channels
+    logical :: is_set
 
-     ! -- Arrays for integrated absorber amounts, 0:K x J
-    REAL( fp_kind ), DIMENSION( 0:SIZE( absorber, DIM = 1 )-1, &
-                                  SIZE( absorber, DIM = 2 )    ) :: tau_absorber,      &
+     ! -- arrays for integrated absorber amounts, 0:k x j
+    real( fp_kind ), dimension( 0:size( absorber, dim = 1 )-1, &
+                                  size( absorber, dim = 2 )    ) :: tau_absorber,      &
                                                                     flux_tau_absorber, &
                                                                     solar_tau_absorber
 
-    ! -- Arrays for adjoints of integrated absorber amounts, 0:K x J
-    REAL( fp_kind ), DIMENSION( 0:SIZE( absorber, DIM = 1 )-1, &
-                                  SIZE( absorber, DIM = 2 )    ) :: absorber_AD, &
-                                                                    tau_absorber_AD,      &
-                                                                    flux_tau_absorber_AD, &
-                                                                    solar_tau_absorber_AD
+    ! -- arrays for adjoints of integrated absorber amounts, 0:k x j
+    real( fp_kind ), dimension( 0:size( absorber, dim = 1 )-1, &
+                                  size( absorber, dim = 2 )    ) :: absorber_ad, &
+                                                                    tau_absorber_ad,      &
+                                                                    flux_tau_absorber_ad, &
+                                                                    solar_tau_absorber_ad
 
-    ! -- Arrays for adjoint predictors, Imax x K
-    REAL( fp_kind ), DIMENSION( SIZE( tau_predictor, DIM = 1 ), &
-                                SIZE( tau_predictor, DIM = 2 )  ) :: tau_predictor_AD,      &
-                                                                     flux_tau_predictor_AD, &
-                                                                     solar_tau_predictor_AD
+    ! -- arrays for adjoint predictors, imax x k
+    real( fp_kind ), dimension( size( tau_predictor, dim = 1 ), &
+                                size( tau_predictor, dim = 2 )  ) :: tau_predictor_ad,      &
+                                                                     flux_tau_predictor_ad, &
+                                                                     solar_tau_predictor_ad
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC ADJUSTL, &
-              ANY,     &
-              COS,     &
-              MAXVAL,  &
-              SIZE,    &
-              TRIM
+    intrinsic adjustl, &
+              any,     &
+              cos,     &
+              maxval,  &
+              size,    &
+              trim
 
 
 
     !#--------------------------------------------------------------------------#
-    !#             -- DETERMINE ARRAY DIMENSIONS AND CHECK INPUT --             #
+    !#             -- determine array dimensions and check input --             #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------------
-    ! Check the number of channels - if zero
-    ! then simply RETURN.
+    ! check the number of channels - if zero
+    ! then simply return.
     ! --------------------------------------
 
-    IF ( n_channels == 0 ) RETURN
+    if ( n_channels == 0 ) return
 
 
     ! ------------------
-    ! Get the dimensions
+    ! get the dimensions
     ! ------------------
 
-    n_layers   = SIZE( layer_p )
+    n_layers   = size( layer_p )
 
 
     ! ------------------------------------------------------------
-    ! Check that the number of layers is not greater than
-    ! MAX_N_ABSORBER_LAYERS. If there are more input layers
+    ! check that the number of layers is not greater than
+    ! max_n_absorber_layers. if there are more input layers
     ! there may be non-unique assignation of absorber->atmospheric
     ! layers
     ! ------------------------------------------------------------
 
-    IF ( n_layers > MAX_N_ABSORBER_LAYERS ) THEN
+    if ( n_layers > max_n_absorber_layers ) then
 
-      error_status = FAILURE
-      WRITE( value_in,      '( i5 )' ) n_layers
-      WRITE( value_allowed, '( i5 )' ) MAX_N_ABSORBER_LAYERS
-      CALL display_message( ROUTINE_NAME, &
-                            'Number of passed layers ('// &
-                            TRIM( ADJUSTL( value_in ) )// &
+      error_status = failure
+      write( value_in,      '( i5 )' ) n_layers
+      write( value_allowed, '( i5 )' ) max_n_absorber_layers
+      call display_message( routine_name, &
+                            'number of passed layers ('// &
+                            trim( adjustl( value_in ) )// &
                             ') > maximum number of absorber layers ('// &
-                            TRIM( ADJUSTL( value_allowed ) )//').', &
+                            trim( adjustl( value_allowed ) )//').', &
                             error_status, &
                             message_log = message_log )
-      RETURN
+      return
 
-    END IF
+    end if
 
 
     ! -----------------------------------
-    ! Perform a simple check on the input
+    ! perform a simple check on the input
     ! profile data for negative values
     ! -----------------------------------
 
-    ! -- Profile data
-    IF ( ANY( level_p < ZERO ) .OR. &
-         ANY( layer_p < ZERO ) .OR. &
-         ANY( layer_t < ZERO ) .OR. &
-         ANY( layer_w < ZERO ) .OR. &
-         ANY( layer_o < ZERO )      ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Negative values found in input profile data.', &
+    ! -- profile data
+    if ( any( level_p < zero ) .or. &
+         any( layer_p < zero ) .or. &
+         any( layer_t < zero ) .or. &
+         any( layer_w < zero ) .or. &
+         any( layer_o < zero )      ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'negative values found in input profile data.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
       
-    ! -- Surface properties
-    IF (      surface_temperature  < ZERO   .OR. &
-         ANY( surface_emissivity   < ZERO ) .OR. &
-         ANY( surface_reflectivity < ZERO )      ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Negative values found in surface properties (Tsfc,esfc,rsfc).', &
+    ! -- surface properties
+    if (      surface_temperature  < zero   .or. &
+         any( surface_emissivity   < zero ) .or. &
+         any( surface_reflectivity < zero )      ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'negative values found in surface properties (tsfc,esfc,rsfc).', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
-    ! -- Number of channels
-    IF ( n_channels < 0 ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
-                            'Negative number of channels passed..', &
+    ! -- number of channels
+    if ( n_channels < 0 ) then
+      error_status = failure
+      call display_message( routine_name, &
+                            'negative number of channels passed..', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- SCALE ABSORBER AMOUNTS AND INITIALISE ADJOINTS --           #
+    !#           -- scale absorber amounts and initialise adjoints --           #
     !#--------------------------------------------------------------------------#
 
     ! ----------------------------------------------------
-    ! Modify absorber quantities by the angle secant
-    ! Could put a loop here but here's hoping the compiler
+    ! modify absorber quantities by the angle secant
+    ! could put a loop here but here's hoping the compiler
     ! recognises this as a group of loops over layer.
     ! ----------------------------------------------------
 
-    ! -- Upwelling transmittance
+    ! -- upwelling transmittance
     tau_absorber( 0:, : ) = secant_view_angle * absorber( 0:, : )
-    tau_absorber( 1:, 2 ) = tau_absorber( 1:, 2 ) - TOA_PRESSURE
+    tau_absorber( 1:, 2 ) = tau_absorber( 1:, 2 ) - toa_pressure
 
-    ! -- Flux transmittance
-    IF ( ANY( is_microwave_channel( channel_index( 1:n_channels ) ) == 0 ) ) THEN
-      flux_tau_absorber( 0:, : ) = SECANT_DIFFUSIVITY_ANGLE * absorber( 0:, : )
-      flux_tau_absorber( 1:, 2 ) = flux_tau_absorber( 1:, 2 ) - TOA_PRESSURE
-    END IF
+    ! -- flux transmittance
+    if ( any( is_microwave_channel( channel_index( 1:n_channels ) ) == 0 ) ) then
+      flux_tau_absorber( 0:, : ) = secant_diffusivity_angle * absorber( 0:, : )
+      flux_tau_absorber( 1:, 2 ) = flux_tau_absorber( 1:, 2 ) - toa_pressure
+    end if
 
-    ! -- Solar transmittance
-    IF ( ( ANY( is_solar_channel( channel_index( 1:n_channels ) ) == 1 ) ) .AND. &
-         secant_solar_angle < MAX_SECANT_SOLAR_ANGLE ) THEN
+    ! -- solar transmittance
+    if ( ( any( is_solar_channel( channel_index( 1:n_channels ) ) == 1 ) ) .and. &
+         secant_solar_angle < max_secant_solar_angle ) then
       solar_tau_absorber( 0:, : ) = secant_solar_angle( m ) * absorber( 0:, : )
-      solar_tau_absorber( 1:, 2 ) = solar_tau_absorber( 1:, 2 ) - TOA_PRESSURE
-    END IF
+      solar_tau_absorber( 1:, 2 ) = solar_tau_absorber( 1:, 2 ) - toa_pressure
+    end if
 
 
     ! ----------------------------------
-    ! Initialise local adjoint variables
+    ! initialise local adjoint variables
     ! ----------------------------------
 
-    ! -- Absorber arrays, 0:K x J
-    absorber_AD( 0:, : )           = ZERO
-    tau_absorber_AD( 0:, : )       = ZERO
-    flux_tau_absorber_AD( 0:, : )  = ZERO
-    solar_tau_absorber_AD( 0:, : ) = ZERO
+    ! -- absorber arrays, 0:k x j
+    absorber_ad( 0:, : )           = zero
+    tau_absorber_ad( 0:, : )       = zero
+    flux_tau_absorber_ad( 0:, : )  = zero
+    solar_tau_absorber_ad( 0:, : ) = zero
 
 
-    ! -- Predictor arrays, Imax x K
-    tau_predictor_AD( :, : )       = ZERO
-    flux_tau_predictor_AD( :, : )  = ZERO
-    solar_tau_predictor_AD( :, : ) = ZERO 
+    ! -- predictor arrays, imax x k
+    tau_predictor_ad( :, : )       = zero
+    flux_tau_predictor_ad( :, : )  = zero
+    solar_tau_predictor_ad( :, : ) = zero 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                            -- CHANNEL LOOP --                            #
+    !#                            -- channel loop --                            #
     !#--------------------------------------------------------------------------#
 
-    l_channel_loop: DO l = 1, n_channels
+    l_channel_loop: do l = 1, n_channels
 
 
       ! ----------------------------------------------------
-      ! Set the "this is a channel influenced by solar" flag
+      ! set the "this is a channel influenced by solar" flag
       ! ----------------------------------------------------
 
       valid_solar = 0
 
-      IF ( is_solar_channel( channel_index( l ) ) == 1 .AND. &
-           secant_solar_angle < MAX_SECANT_SOLAR_ANGLE       ) valid_solar = 1
+      if ( is_solar_channel( channel_index( l ) ) == 1 .and. &
+           secant_solar_angle < max_secant_solar_angle       ) valid_solar = 1
 
 
 
       ! ------------------------------------------------
-      ! Calculate the adjoint of the current channel TOA
+      ! calculate the adjoint of the current channel toa
       ! radiance or brightness temperature
       ! ------------------------------------------------
 
-      CALL compute_radiance_AD( &
-                                ! -- Forward input
-                                layer_t( : ),                   &  ! Input, K
+      call compute_radiance_ad( &
+                                ! -- forward input
+                                layer_t( : ),                   &  ! input, k
 
-                                surface_temperature,            &  ! Input, scalar
-                                surface_emissivity( l ),        &  ! Input, scalar
-                                surface_reflectivity( l ),      &  ! Input, scalar
+                                surface_temperature,            &  ! input, scalar
+                                surface_emissivity( l ),        &  ! input, scalar
+                                surface_reflectivity( l ),      &  ! input, scalar
 
-                                tau(      :, l ),               &  ! Input, K
-                                flux_tau( :, l ),               &  ! Input, K
-                                solar_tau( n_layers, l ),       &  ! Input, scalar
+                                tau(      :, l ),               &  ! input, k
+                                flux_tau( :, l ),               &  ! input, k
+                                solar_tau( n_layers, l ),       &  ! input, scalar
 
-                                layer_radiance( :, l ),         &  ! Input, K
-                                downwelling_radiance( l ),      &  ! Input, scalar
-                                upwelling_radiance( l ),        &  ! Input, scalar
+                                layer_radiance( :, l ),         &  ! input, k
+                                downwelling_radiance( l ),      &  ! input, scalar
+                                upwelling_radiance( l ),        &  ! input, scalar
 
-                                ! -- Adjoint input
-                                layer_radiance_AD( :, l ),      &  ! In/Output, K
-                                downwelling_radiance_AD( l ),   &  ! In/Output, scalar
-                                upwelling_radiance_AD( l ),     &  ! In/Output, scalar
+                                ! -- adjoint input
+                                layer_radiance_ad( :, l ),      &  ! in/output, k
+                                downwelling_radiance_ad( l ),   &  ! in/output, scalar
+                                upwelling_radiance_ad( l ),     &  ! in/output, scalar
 
-                                brightness_temperature_AD( l ), &  ! In/Output, scalar
+                                brightness_temperature_ad( l ), &  ! in/output, scalar
 
-                                ! -- Other input
-                                secant_solar_angle,             &  ! Input, scalar
-                                valid_solar,                    &  ! Input, scalar
-                                channel_index( l ),             &  ! Input, scalar
+                                ! -- other input
+                                secant_solar_angle,             &  ! input, scalar
+                                valid_solar,                    &  ! input, scalar
+                                channel_index( l ),             &  ! input, scalar
 
-                                ! -- Adjoint output
-                                layer_t_AD( : ),                &  ! In/Output, K
+                                ! -- adjoint output
+                                layer_t_ad( : ),                &  ! in/output, k
 
-                                surface_temperature_AD,         &  ! In/Output, scalar
-                                surface_emissivity_AD( l ),     &  ! In/Output, scalar
-                                surface_reflectivity_AD( l ),   &  ! In/Output, scalar
+                                surface_temperature_ad,         &  ! in/output, scalar
+                                surface_emissivity_ad( l ),     &  ! in/output, scalar
+                                surface_reflectivity_ad( l ),   &  ! in/output, scalar
 
-                                tau_AD( :, l ),                 &  ! In/Output, K
-                                flux_tau_AD( :, l ),            &  ! In/Output, K
-                                solar_tau_AD( n_layers, l )     )  ! In/Output, scalar
+                                tau_ad( :, l ),                 &  ! in/output, k
+                                flux_tau_ad( :, l ),            &  ! in/output, k
+                                solar_tau_ad( n_layers, l )     )  ! in/output, scalar
 
 
       ! ----------------------------------------------------
-      ! If the current channel is a SOLAR SENSITIVE channel,
-      !   AND
+      ! if the current channel is a solar sensitive channel,
+      !   and
       ! the solar angle is valid, then calculate the adjoint
       ! of the transmittance for direct solar.
       ! ----------------------------------------------------
 
-      IF ( valid_solar == 1 ) THEN
+      if ( valid_solar == 1 ) then
 
-        CALL compute_transmittance_AD( &
-                                       ! -- Forward input
-                                       solar_tau_absorber( 0:, : ),    &   ! Input, 0:K x J
-                                       solar_tau_predictor( :, : ),    &   ! Input, I x K
-                                       solar_tau( :, l ),              &   ! Input, K
+        call compute_transmittance_ad( &
+                                       ! -- forward input
+                                       solar_tau_absorber( 0:, : ),    &   ! input, 0:k x j
+                                       solar_tau_predictor( :, : ),    &   ! input, i x k
+                                       solar_tau( :, l ),              &   ! input, k
 
-                                       ! -- Adjoint input
-                                       solar_tau_AD( :, l ),           &   ! In/Output, K
+                                       ! -- adjoint input
+                                       solar_tau_ad( :, l ),           &   ! in/output, k
 
-                                       ! -- Other input
-                                       solar_tau_layer_index( :, : ),  &   ! Input, K x J
-                                       channel_index( l ),             &   ! Input, scalar
-                                       DOWN,                           &   ! Input, scalar
+                                       ! -- other input
+                                       solar_tau_layer_index( :, : ),  &   ! input, k x j
+                                       channel_index( l ),             &   ! input, scalar
+                                       down,                           &   ! input, scalar
 
-                                       ! -- Adjoint output
-                                       solar_tau_absorber_AD( 0:, : ), &   ! In/Output, 0:K x J
-                                       solar_tau_predictor_AD( :, : )  )   ! In/Output, I x K
+                                       ! -- adjoint output
+                                       solar_tau_absorber_ad( 0:, : ), &   ! in/output, 0:k x j
+                                       solar_tau_predictor_ad( :, : )  )   ! in/output, i x k
 
-      END IF
+      end if
 
 
 
 
       ! --------------------------------------------------
-      ! If the current channel is an INFRARED channel,
+      ! if the current channel is an infrared channel,
       ! then calculate the adjoint of the downwelling flux
       ! transmittance using the flux absorber amounts.
       !
-      ! If the current channel is a MICROWAVE channel,
+      ! if the current channel is a microwave channel,
       ! then calculate the adjoint of the flux transmittance
       ! using the upwelling absorber amounts.
       ! --------------------------------------------------
 
-      IF ( is_microwave_channel( channel_index( l ) ) == 0 ) THEN
+      if ( is_microwave_channel( channel_index( l ) ) == 0 ) then
 
-        ! -- IR channel
-        CALL compute_transmittance_AD( &
-                                       ! -- Forward input
-                                       flux_tau_absorber( 0:, : ),    &   ! Input, 0:K x J
-                                       flux_tau_predictor( :, : ),    &   ! Input, I x K
-                                       flux_tau( :, l ),              &   ! Input, K
+        ! -- ir channel
+        call compute_transmittance_ad( &
+                                       ! -- forward input
+                                       flux_tau_absorber( 0:, : ),    &   ! input, 0:k x j
+                                       flux_tau_predictor( :, : ),    &   ! input, i x k
+                                       flux_tau( :, l ),              &   ! input, k
 
-                                       ! -- Adjoint input
-                                       flux_tau_AD( :, l ),           &   ! In/Output, K
+                                       ! -- adjoint input
+                                       flux_tau_ad( :, l ),           &   ! in/output, k
 
-                                       ! -- Other input
-                                       flux_tau_layer_index( :, : ),  &   ! Input, K x J
-                                       channel_index( l ),            &   ! Input, scalar
-                                       DOWN,                          &   ! Input, scalar
+                                       ! -- other input
+                                       flux_tau_layer_index( :, : ),  &   ! input, k x j
+                                       channel_index( l ),            &   ! input, scalar
+                                       down,                          &   ! input, scalar
 
-                                       ! -- Adjoint output
-                                       flux_tau_absorber_AD( 0:, : ), &   ! In/Output, 0:K x J
-                                       flux_tau_predictor_AD( :, : )  )   ! In/Output, I x K
+                                       ! -- adjoint output
+                                       flux_tau_absorber_ad( 0:, : ), &   ! in/output, 0:k x j
+                                       flux_tau_predictor_ad( :, : )  )   ! in/output, i x k
 
-      ELSE
+      else
 
-        ! -- uW channel. Use upwelling transmittance predictors
-!        CALL compute_transmittance_AD( &
-!                                       ! -- Forward input
-!                                       tau_absorber( 0:, : ),    &   ! Input, 0:K x J
-!                                       tau_predictor( :, : ),    &   ! Input, I x K
-!                                       flux_tau( :, l ),         &   ! Input, K
+        ! -- uw channel. use upwelling transmittance predictors
+!        call compute_transmittance_ad( &
+!                                       ! -- forward input
+!                                       tau_absorber( 0:, : ),    &   ! input, 0:k x j
+!                                       tau_predictor( :, : ),    &   ! input, i x k
+!                                       flux_tau( :, l ),         &   ! input, k
 !
-!                                       ! -- Adjoint input
-!                                       flux_tau_AD( :, l ),      &   ! In/Output, K
+!                                       ! -- adjoint input
+!                                       flux_tau_ad( :, l ),      &   ! in/output, k
 !
-!                                       ! -- Other input
-!                                       tau_layer_index( :, : ),  &   ! Input, K x J
-!                                       channel_index( l ),       &   ! Input, scalar
-!                                       DOWN,                     &   ! Input, scalar
+!                                       ! -- other input
+!                                       tau_layer_index( :, : ),  &   ! input, k x j
+!                                       channel_index( l ),       &   ! input, scalar
+!                                       down,                     &   ! input, scalar
 !
-!                                       ! -- Adjoint output
-!                                       tau_absorber_AD( 0:, : ), &   ! In/Output, 0:K x J
-!                                       tau_predictor_AD( :, : )  )   ! In/Output, I x K
+!                                       ! -- adjoint output
+!                                       tau_absorber_ad( 0:, : ), &   ! in/output, 0:k x j
+!                                       tau_predictor_ad( :, : )  )   ! in/output, i x k
 
-        ! -- If total transmittance /= 0, calculate 
+        ! -- if total transmittance /= 0, calculate 
         ! -- adjoint flux transmittance
-        IF ( tau( n_layers, l ) > TOLERANCE ) THEN
-          DO k = n_layers, 2, -1
-            flux_tau_AD( 1, l ) = flux_tau_AD( 1, l ) + ( flux_tau_AD( k, l ) / &
+        if ( tau( n_layers, l ) > tolerance ) then
+          do k = n_layers, 2, -1
+            flux_tau_ad( 1, l ) = flux_tau_ad( 1, l ) + ( flux_tau_ad( k, l ) / &
             !                                             -------------------
                                                               tau( k-1, l )   )
 
-            tau_AD( k-1, l ) = tau_AD( k-1, l ) - ( flux_tau_AD( k, l ) * flux_tau( 1, l ) / &
+            tau_ad( k-1, l ) = tau_ad( k-1, l ) - ( flux_tau_ad( k, l ) * flux_tau( 1, l ) / &
             !                                       --------------------------------------
                                                                  tau( k-1, l )**2          )
-            flux_tau_AD( k, l ) = ZERO
-          END DO
-          tau_AD( n_layers, l ) = tau_AD( n_layers, l ) + flux_tau_AD( 1, l )
-          flux_tau_AD( 1, l ) = ZERO
-        ELSE
-          flux_tau_AD( :, l ) = ZERO
-        END IF
+            flux_tau_ad( k, l ) = zero
+          end do
+          tau_ad( n_layers, l ) = tau_ad( n_layers, l ) + flux_tau_ad( 1, l )
+          flux_tau_ad( 1, l ) = zero
+        else
+          flux_tau_ad( :, l ) = zero
+        end if
 
-      END IF
+      end if
 
 
       ! -----------------------------------------------------
-      ! Calculate the adjoint of the upwelling transmittances
+      ! calculate the adjoint of the upwelling transmittances
       ! for the satellite view angle
       ! -----------------------------------------------------
 
-      CALL compute_transmittance_AD( &
-                                     ! -- Forward input
-                                     tau_absorber( 0:, : ),    &   ! Input, 0:K x J
-                                     tau_predictor( :, : ),    &   ! Input, I x K
-                                     tau( :, l ),              &   ! Input, K
+      call compute_transmittance_ad( &
+                                     ! -- forward input
+                                     tau_absorber( 0:, : ),    &   ! input, 0:k x j
+                                     tau_predictor( :, : ),    &   ! input, i x k
+                                     tau( :, l ),              &   ! input, k
 
-                                     ! -- Adjoint input
-                                     tau_AD( :, l ),           &   ! In/Output, K
+                                     ! -- adjoint input
+                                     tau_ad( :, l ),           &   ! in/output, k
 
-                                     ! -- Other input
-                                     tau_layer_index( :, : ),  &   ! Input, K x J
-                                     channel_index( l ),       &   ! Input, scalar
-                                     UP,                       &   ! Input, scalar
+                                     ! -- other input
+                                     tau_layer_index( :, : ),  &   ! input, k x j
+                                     channel_index( l ),       &   ! input, scalar
+                                     up,                       &   ! input, scalar
 
-                                     ! -- Adjoint output
-                                     tau_absorber_AD( 0:, : ), &   ! In/Output, 0:K x J
-                                     tau_predictor_AD( :, : )  )   ! In/Output, I x K
+                                     ! -- adjoint output
+                                     tau_absorber_ad( 0:, : ), &   ! in/output, 0:k x j
+                                     tau_predictor_ad( :, : )  )   ! in/output, i x k
 
-    END DO l_channel_loop
+    end do l_channel_loop
 
 
 
     !#--------------------------------------------------------------------------#
-    !#    -- CALCULATE THE PREDICTOR ADJOINTS FOR THE SOLAR TRANSMITTANCE --    #
+    !#    -- calculate the predictor adjoints for the solar transmittance --    #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------------------------
-    ! Have *any* SOLAR sensitive channels been specified
-    ! for the current profile (Flagged as == 1)?
+    ! have *any* solar sensitive channels been specified
+    ! for the current profile (flagged as == 1)?
     !
-    ! AND
+    ! and
     !
-    ! Is the specified solar zenith angle valid (<85)?
+    ! is the specified solar zenith angle valid (<85)?
     ! --------------------------------------------------
 
-    IF ( ( ANY( is_solar_channel( channel_index( 1:n_channels ) ) == 1 ) ) .AND. &
-         secant_solar_angle < MAX_SECANT_SOLAR_ANGLE ) THEN
+    if ( ( any( is_solar_channel( channel_index( 1:n_channels ) ) == 1 ) ) .and. &
+         secant_solar_angle < max_secant_solar_angle ) then
 
 
       ! --------------------------------------
-      ! Adjoint of the standard predictor copy
+      ! adjoint of the standard predictor copy
       ! --------------------------------------
 
-      tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) = &
-              tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) + &
-        solar_tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : )
+      tau_predictor_ad( 1:max_n_standard_predictors, : ) = &
+              tau_predictor_ad( 1:max_n_standard_predictors, : ) + &
+        solar_tau_predictor_ad( 1:max_n_standard_predictors, : )
 
-      solar_tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) = ZERO
+      solar_tau_predictor_ad( 1:max_n_standard_predictors, : ) = zero
 
 
       ! -------------------------------------
-      ! Adjoint of the integrateed predictors
+      ! adjoint of the integrateed predictors
       ! -------------------------------------
 
-      CALL compute_predictors_AD( &
-                                  ! -- Forward input
-                                  layer_p( : ),                   &  ! Input,  K
-                                  layer_t( : ),                   &  ! Input,  K
-                                  layer_w( : ),                   &  ! Input,  K
-                                  solar_tau_absorber( 0:, : ),    &  ! Input,  0:K x J
+      call compute_predictors_ad( &
+                                  ! -- forward input
+                                  layer_p( : ),                   &  ! input,  k
+                                  layer_t( : ),                   &  ! input,  k
+                                  layer_w( : ),                   &  ! input,  k
+                                  solar_tau_absorber( 0:, : ),    &  ! input,  0:k x j
 
-                                  ! -- Adjoint input
-                                  solar_tau_predictor_AD( :, : ), &  ! In/Output, I x K
+                                  ! -- adjoint input
+                                  solar_tau_predictor_ad( :, : ), &  ! in/output, i x k
 
-                                  ! -- Adjoint output
-                                  layer_p_AD( : ),                &  ! In/Output,  K
-                                  layer_t_AD( : ),                &  ! In/Output,  K
-                                  layer_w_AD( : ),                &  ! In/Output,  K
-                                  solar_tau_absorber_AD( 0:, : ), &  ! In/Output,  0:K x J
+                                  ! -- adjoint output
+                                  layer_p_ad( : ),                &  ! in/output,  k
+                                  layer_t_ad( : ),                &  ! in/output,  k
+                                  layer_w_ad( : ),                &  ! in/output,  k
+                                  solar_tau_absorber_ad( 0:, : ), &  ! in/output,  0:k x j
 
-                                  no_standard = 1                 )  ! Optional input
+                                  no_standard = 1                 )  ! optional input
 
 
       ! -------------------------------------------------
-      ! Adjoint of the nadir absorber amount modification
+      ! adjoint of the nadir absorber amount modification
       ! -------------------------------------------------
 
-      absorber_AD( 0:, : ) = absorber_AD( 0:, : ) + &
-                             ( secant_solar_angle * solar_tau_absorber_AD( 0:, : ) )
+      absorber_ad( 0:, : ) = absorber_ad( 0:, : ) + &
+                             ( secant_solar_angle * solar_tau_absorber_ad( 0:, : ) )
 
-    END IF
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#     -- CALCULATE THE PREDICTOR ADJOINTS FOR THE FLUX TRANSMITTANCE --    #
+    !#     -- calculate the predictor adjoints for the flux transmittance --    #
     !#--------------------------------------------------------------------------#
 
     ! ---------------------------------------------
-    ! Have any INFRARED channels been specified for
-    ! the current profile? (Microwave channels are
-    ! flagged as == 1, so IR == 0).
+    ! have any infrared channels been specified for
+    ! the current profile? (microwave channels are
+    ! flagged as == 1, so ir == 0).
     !
-    ! For microwave channels the downwelling flux
+    ! for microwave channels the downwelling flux
     ! transmission is assumed == upwelling view
     ! angle transmission.
     ! ---------------------------------------------
 
-    IF ( ANY( is_microwave_channel( channel_index( 1:n_channels ) ) == 0 ) ) THEN
+    if ( any( is_microwave_channel( channel_index( 1:n_channels ) ) == 0 ) ) then
 
 
       ! --------------------------------------
-      ! Adjoint of the standard predictor copy
+      ! adjoint of the standard predictor copy
       ! --------------------------------------
 
-      tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) = &
-             tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) + &
-        flux_tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : )
+      tau_predictor_ad( 1:max_n_standard_predictors, : ) = &
+             tau_predictor_ad( 1:max_n_standard_predictors, : ) + &
+        flux_tau_predictor_ad( 1:max_n_standard_predictors, : )
 
-      flux_tau_predictor_AD( 1:MAX_N_STANDARD_PREDICTORS, : ) = ZERO
+      flux_tau_predictor_ad( 1:max_n_standard_predictors, : ) = zero
 
 
       ! -------------------------------------
-      ! Adjoint of the integrateed predictors
+      ! adjoint of the integrateed predictors
       ! -------------------------------------
 
-      CALL compute_predictors_AD( &
-                                  ! -- Forward input
-                                  layer_p( : ),                  &  ! Input,  K
-                                  layer_t( : ),                  &  ! Input,  K
-                                  layer_w( : ),                  &  ! Input,  K
-                                  flux_tau_absorber( 0:, : ),    &  ! Input,  0:K x J
+      call compute_predictors_ad( &
+                                  ! -- forward input
+                                  layer_p( : ),                  &  ! input,  k
+                                  layer_t( : ),                  &  ! input,  k
+                                  layer_w( : ),                  &  ! input,  k
+                                  flux_tau_absorber( 0:, : ),    &  ! input,  0:k x j
 
-                                  ! -- Adjoint input
-                                  flux_tau_predictor_AD( :, : ), &  ! In/Output, I x K
+                                  ! -- adjoint input
+                                  flux_tau_predictor_ad( :, : ), &  ! in/output, i x k
 
-                                  ! -- Adjoint output
-                                  layer_p_AD( : ),               &  ! In/Output,  K
-                                  layer_t_AD( : ),               &  ! In/Output,  K
-                                  layer_w_AD( : ),               &  ! In/Output,  K
-                                  flux_tau_absorber_AD( 0:, : ), &  ! In/Output,  0:K x J
+                                  ! -- adjoint output
+                                  layer_p_ad( : ),               &  ! in/output,  k
+                                  layer_t_ad( : ),               &  ! in/output,  k
+                                  layer_w_ad( : ),               &  ! in/output,  k
+                                  flux_tau_absorber_ad( 0:, : ), &  ! in/output,  0:k x j
 
-                                  no_standard = 1                )  ! Optional input
+                                  no_standard = 1                )  ! optional input
 
 
       ! -------------------------------------------------
-      ! Adjoint of the nadir absorber amount modification
+      ! adjoint of the nadir absorber amount modification
       ! -------------------------------------------------
 
-      absorber_AD( 0:, : ) = absorber_AD( 0:, : ) + &
-                             ( SECANT_DIFFUSIVITY_ANGLE * flux_tau_absorber_AD( 0:, : ) )
+      absorber_ad( 0:, : ) = absorber_ad( 0:, : ) + &
+                             ( secant_diffusivity_angle * flux_tau_absorber_ad( 0:, : ) )
 
 
-    END IF
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#  -- CALCULATE THE PREDICTOR ADJOINTS FOR THE UPWELLING TRANSMITTANCE --  #
+    !#  -- calculate the predictor adjoints for the upwelling transmittance --  #
     !#--------------------------------------------------------------------------#
 
     ! -----------------------------
-    ! Adjoint of all the predictors
+    ! adjoint of all the predictors
     ! -----------------------------
 
-    CALL compute_predictors_AD( &
-                                ! -- Forward input
-                                layer_p( : ),             &  ! Input,  K
-                                layer_t( : ),             &  ! Input,  K
-                                layer_w( : ),             &  ! Input,  K
-                                tau_absorber( 0:, : ),    &  ! Input,  0:K x J
+    call compute_predictors_ad( &
+                                ! -- forward input
+                                layer_p( : ),             &  ! input,  k
+                                layer_t( : ),             &  ! input,  k
+                                layer_w( : ),             &  ! input,  k
+                                tau_absorber( 0:, : ),    &  ! input,  0:k x j
 
-                                ! -- Adjoint input
-                                tau_predictor_AD( :, : ), &  ! In/Output, I x K
+                                ! -- adjoint input
+                                tau_predictor_ad( :, : ), &  ! in/output, i x k
 
-                                ! -- Adjoint output
-                                layer_p_AD( : ),          &  ! In/Output,  K
-                                layer_t_AD( : ),          &  ! In/Output,  K
-                                layer_w_AD( : ),          &  ! In/Output,  K
-                                tau_absorber_AD( 0:, : )  )  ! In/Output,  0:K x J
+                                ! -- adjoint output
+                                layer_p_ad( : ),          &  ! in/output,  k
+                                layer_t_ad( : ),          &  ! in/output,  k
+                                layer_w_ad( : ),          &  ! in/output,  k
+                                tau_absorber_ad( 0:, : )  )  ! in/output,  0:k x j
 
 
     ! -------------------------------------------------
-    ! Adjoint of the nadir absorber amount modification
+    ! adjoint of the nadir absorber amount modification
     ! -------------------------------------------------
 
-    absorber_AD( 0:, : ) = absorber_AD( 0:, : ) + &
-                           ( secant_view_angle * tau_absorber_AD( 0:, : ) )
+    absorber_ad( 0:, : ) = absorber_ad( 0:, : ) + &
+                           ( secant_view_angle * tau_absorber_ad( 0:, : ) )
 
 
 
     !#--------------------------------------------------------------------------#
-    !#   -- CALCULATE THE ABSORBER ADJOINTS FOR THE UPWELLING TRANSMITTANCE --  #
+    !#   -- calculate the absorber adjoints for the upwelling transmittance --  #
     !#--------------------------------------------------------------------------#
 
-    CALL compute_absorber_amount_AD( &
-                                     ! -- Forward input
-                                     level_p( : ),         &  ! Input,  K
-                                     layer_w( : ),         &  ! Input,  K
-                                     layer_o( : ),         &  ! Input,  K
+    call compute_absorber_amount_ad( &
+                                     ! -- forward input
+                                     level_p( : ),         &  ! input,  k
+                                     layer_w( : ),         &  ! input,  k
+                                     layer_o( : ),         &  ! input,  k
 
-                                     ! -- Adjoint input
-                                     absorber_AD( 0:, : ), &  ! In/Output, 0:K x J
+                                     ! -- adjoint input
+                                     absorber_ad( 0:, : ), &  ! in/output, 0:k x j
 
-                                     ! -- Adjoint output
-                                     level_p_AD( : ),      &  ! In/Ouput,  K
-                                     layer_w_AD( : ),      &  ! In/Ouput,  K
-                                     layer_o_AD( : )       )  ! In/Ouput,  K
+                                     ! -- adjoint output
+                                     level_p_ad( : ),      &  ! in/ouput,  k
+                                     layer_w_ad( : ),      &  ! in/ouput,  k
+                                     layer_o_ad( : )       )  ! in/ouput,  k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                              -- DONE --                                  #
+    !#                              -- done --                                  #
     !#--------------------------------------------------------------------------#
 
-    error_status = SUCCESS
+    error_status = success
 
-  END FUNCTION adjoint_rtm_rank1
+  end function adjoint_rtm_rank1
 
-END MODULE adjoint_model
+end module adjoint_model
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $Name$
+! $name$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.9  2001/11/07 15:08:08  paulv
-! - Changed the logical IF test for the number of input profiles in the
-!   [<TANGENT_LINEAR><ADJOINT><K_MATRIX>]_RTM_RANK2() functions from
-!     IF ( n_input_profiles >= 1 .AND. n_input_profiles <= n_profiles ) THEN
+! $log$
+! revision 1.9  2001/11/07 15:08:08  paulv
+! - changed the logical if test for the number of input profiles in the
+!   [<tangent_linear><adjoint><k_matrix>]_rtm_rank2() functions from
+!     if ( n_input_profiles >= 1 .and. n_input_profiles <= n_profiles ) then
 !   to
-!     IF ( n_input_profiles > 0 .AND. n_input_profiles <= n_profiles ) THEN
-!   The use of both the ">=" and "<=" relational operators with the .AND. I
+!     if ( n_input_profiles > 0 .and. n_input_profiles <= n_profiles ) then
+!   the use of both the ">=" and "<=" relational operators with the .and. i
 !   found confusing.
 !
-! Revision 1.8  2001/11/06 20:59:40  paulv
-! - Corrected adjoint variable units documentation.
-! - Added check for negative number of channels to ADJOINT_RTM_RANK2() function.
-! - Added profile loop CYCLE statement to ADJOINT_RTM_RANK2() function.
-! - Added check for negative number of channels to ADJOINT_RTM_RANK1() function.
+! revision 1.8  2001/11/06 20:59:40  paulv
+! - corrected adjoint variable units documentation.
+! - added check for negative number of channels to adjoint_rtm_rank2() function.
+! - added profile loop cycle statement to adjoint_rtm_rank2() function.
+! - added check for negative number of channels to adjoint_rtm_rank1() function.
 !
-! Revision 1.7  2001/10/01 20:13:28  paulv
-! - Overloaded the COMPUTE_RTM_K and ADJOINT_RTM functions to accept both a
-!   single or group of profiles. Contained PRIVATE functions are now
-!     o COMPUTE_RTM_AD_RANK1 and ADJOINT_RTM_RANK1 for single profile input
-!     o COMPUTE_RTM_AD_RANK2 and ADJOINT_RTM_RANK2 for multiple profile input
-! - Put N_INPUT_PROFILES optional argument back in the COMPUTE_RTM and FORWARD_RTM
-!   argument lists. This allows more control over how many profiles are to be
+! revision 1.7  2001/10/01 20:13:28  paulv
+! - overloaded the compute_rtm_k and adjoint_rtm functions to accept both a
+!   single or group of profiles. contained private functions are now
+!     o compute_rtm_ad_rank1 and adjoint_rtm_rank1 for single profile input
+!     o compute_rtm_ad_rank2 and adjoint_rtm_rank2 for multiple profile input
+! - put n_input_profiles optional argument back in the compute_rtm and forward_rtm
+!   argument lists. this allows more control over how many profiles are to be
 !   processed rather than simply relying on the dimension of the input arrays.
-!   Now, as before,
-!     n_profiles = SIZE( layer_p, DIM = 2 )
+!   now, as before,
+!     n_profiles = size( layer_p, dim = 2 )
 !   but also,
-!     IF ( PRESENT( n_input_profiles ) ) THEN
-!       IF ( n_input_profiles >= 1 .AND. n_input_profiles <= n_profiles ) THEN
+!     if ( present( n_input_profiles ) ) then
+!       if ( n_input_profiles >= 1 .and. n_input_profiles <= n_profiles ) then
 !         n_profiles = n_input_profiles
 !     ....
-!   The check for N_INPUT_PROFILES is only performed in the ADJOINT_RTM_RANK2
+!   the check for n_input_profiles is only performed in the adjoint_rtm_rank2
 !   function.
-! - Changed SURFACE_TEMPERATURE argument check from
-!     IF ( ANY( surface_temperature < ZERO ) )
+! - changed surface_temperature argument check from
+!     if ( any( surface_temperature < zero ) )
 !   to
-!     IF (      surface_temperature < ZERO )
-!   as the check is now done in the rank-1 ADJOINT_RTM function. This eliminates
+!     if (      surface_temperature < zero )
+!   as the check is now done in the rank-1 adjoint_rtm function. this eliminates
 !   the need to fully populate the input arrays with data when only certain
-!   "chunks" may be processed. Previously, the use of ANY() could generate
+!   "chunks" may be processed. previously, the use of any() could generate
 !   and error if the full surface_temperature array was not initialised.
-! - Added "Name" to RCS keyword list.
+! - added "name" to rcs keyword list.
 !
-! Revision 1.6  2001/09/28 22:56:40  paulv
-! - Overloaded the ADJOINT_RTM function to accept both a
-!   single or group of profiles. Contained PRIVATE functions are now
-!     o ADJOINT_RTM_RANK1 for single profile input
-!     o ADJOINT_RTM_RANK2 for multiple profile input
-! - Put N_INPUT_PROFILES optional argument back in the ADJOINT_RTM
-!   argument list. This allows more control over how many profiles are to be
+! revision 1.6  2001/09/28 22:56:40  paulv
+! - overloaded the adjoint_rtm function to accept both a
+!   single or group of profiles. contained private functions are now
+!     o adjoint_rtm_rank1 for single profile input
+!     o adjoint_rtm_rank2 for multiple profile input
+! - put n_input_profiles optional argument back in the adjoint_rtm
+!   argument list. this allows more control over how many profiles are to be
 !   processed rather than simply relying on the dimension of the input arrays.
-!   Now, as before,
-!     n_profiles = SIZE( layer_p, DIM = 2 )
+!   now, as before,
+!     n_profiles = size( layer_p, dim = 2 )
 !   but also,
-!     IF ( PRESENT( n_input_profiles ) ) THEN
-!       IF ( n_input_profiles >= 1 .AND. n_input_profiles <= n_profiles ) THEN
+!     if ( present( n_input_profiles ) ) then
+!       if ( n_input_profiles >= 1 .and. n_input_profiles <= n_profiles ) then
 !         n_profiles = n_input_profiles
 !     ....
-! - Changed SURFACE_TEMPERATURE argument check from
-!     IF ( ANY( surface_temperature < ZERO ) )
+! - changed surface_temperature argument check from
+!     if ( any( surface_temperature < zero ) )
 !   to
-!     IF (      surface_temperature < ZERO )
-!   as the check is now done in the rank-1 ADJOINT_RTM function. This eliminates
+!     if (      surface_temperature < zero )
+!   as the check is now done in the rank-1 adjoint_rtm function. this eliminates
 !   the need to fully populate the input arrays with data when only certain
-!   "chunks" may be processed. Previously, the use of ANY() could generate
+!   "chunks" may be processed. previously, the use of any() could generate
 !   and error if the full surface_temperature array was not initialised.
-! - Added "Name" to RCS keyword list.
+! - added "name" to rcs keyword list.
 !
-! Revision 1.5  2001/08/31 21:31:33  paulv
-! - Added check for negative profile and surface data in ADJOINT_RTM.
-! - Maximum solar angle secant is no longer calculated in ADJOINT_RTM but
-!   is declared as a parameter in the PARAMETERS module.
-! - Added COMPUTE_RTM_AD function. This is a wrapper for the ADJOINT_RTM function.
+! revision 1.5  2001/08/31 21:31:33  paulv
+! - added check for negative profile and surface data in adjoint_rtm.
+! - maximum solar angle secant is no longer calculated in adjoint_rtm but
+!   is declared as a parameter in the parameters module.
+! - added compute_rtm_ad function. this is a wrapper for the adjoint_rtm function.
 !
-! Revision 1.4  2001/08/16 16:35:16  paulv
-! - Updated documentation.
-! - The channel dimension is now obtained by:
-!     n_channels = MAXVAL( n_channels_per_profile )
+! revision 1.4  2001/08/16 16:35:16  paulv
+! - updated documentation.
+! - the channel dimension is now obtained by:
+!     n_channels = maxval( n_channels_per_profile )
 !   rather than
-!     n_channels = SIZE( channel_index ) / n_profiles
+!     n_channels = size( channel_index ) / n_profiles
 !   since the latter assumes the same number of channels will be processed
-!   for each profile - which may not be the case. The new method determines
+!   for each profile - which may not be the case. the new method determines
 !   the largest number of channels to be processed for any particular
 !   profile.
-! - The comparison of n_channels and MAX_N_CHANNELS is now done via the
-!   MAX_N_CHANNELS methods in the PARAMETERS module. And extra check to
-!   see if MAX_N_CHANNELS has been set was added.
+! - the comparison of n_channels and max_n_channels is now done via the
+!   max_n_channels methods in the parameters module. and extra check to
+!   see if max_n_channels has been set was added.
 !
-! Revision 1.3  2001/08/01 16:40:12  paulv
-! - Added documentation.
-! - Altered function declaration to avoid more than the standard 39
-!   continuation lines allowed in Fortran 90.
-! - Updated input argument checking. Now consistent with other model
+! revision 1.3  2001/08/01 16:40:12  paulv
+! - added documentation.
+! - altered function declaration to avoid more than the standard 39
+!   continuation lines allowed in fortran 90.
+! - updated input argument checking. now consistent with other model
 !   components.
 !
-! Revision 1.2  2001/07/12 19:01:03  paulv
-! - Added absorber quantity modification for the various zenith angles (view,
+! revision 1.2  2001/07/12 19:01:03  paulv
+! - added absorber quantity modification for the various zenith angles (view,
 !   diffusivity, and solar.)
-! - Added local adjoint variable initialisation.
-! - Corrected bug in main transmittance adjoint calculation. The
-!   direction argument was set to DOWN when it should be UP.
-! - Corrected bug in calculation of the predictor adjoint for the IR flux
-!   transmittance. The forward input absorber amount argument was specified
-!   as SOLAR_TAU_ABSORBER rather than FLUX_TAU_ABSORBER.
+! - added local adjoint variable initialisation.
+! - corrected bug in main transmittance adjoint calculation. the
+!   direction argument was set to down when it should be up.
+! - corrected bug in calculation of the predictor adjoint for the ir flux
+!   transmittance. the forward input absorber amount argument was specified
+!   as solar_tau_absorber rather than flux_tau_absorber.
 !
-! Revision 1.1  2001/05/29 16:33:55  paulv
-! Initial checkin
+! revision 1.1  2001/05/29 16:33:55  paulv
+! initial checkin
 !
 !
 !

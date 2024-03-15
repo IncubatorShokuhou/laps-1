@@ -12,7 +12,7 @@
       save init,i4time_sys_save,a9_time_save
 
       if(init .eq. 0)then
-          call GETENV('LAPS_A9TIME',a9_time)
+          call getenv('laps_a9time',a9_time)
           call s_len(a9_time,ilen)
 
           if(ilen .eq. 9)then ! override file using environment variable
@@ -44,13 +44,13 @@
       istatus = 1
       return
 
- 999  print*,'Error reading systime file'
+ 999  print*,'error reading systime file'
       istatus = 0
       return
 
       end
 
-C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+c&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
       subroutine get_systime_i4(i4time_sys,istatus)
 
@@ -64,7 +64,7 @@ C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
       return
       end
 
-C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+c&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
       subroutine get_systime_all(i4time_sys,a9_time,analysis_hr,
      1             analysis_min,asctim_str,yr_jday,istatus)
@@ -110,7 +110,7 @@ C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
       enddo
       if (loc_len .eq. 0) loc_len = loc_asc_len
       if (loc_len .gt. length) then 
-        print*,'Error reading systime file - asctime string truncated'
+        print*,'error reading systime file - asctime string truncated'
         asctim_str = asc_str(1:length)
       else
         asctim_str = asc_str(1:loc_len)
@@ -130,7 +130,7 @@ C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
       enddo
       if (loc_len .eq. 0) loc_len = loc_asc_len
       if (loc_len .gt. length) then
-        print*,'Error reading systime file - YYJJJ string truncated'
+        print*,'error reading systime file - yyjjj string truncated'
         yr_jday = yjd_str(1:length)
       else
         yr_jday = yjd_str(1:loc_len)
@@ -139,12 +139,12 @@ C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
       istatus = 1
       return
 
- 999  print*,'Error reading systime file'
+ 999  print*,'error reading systime file'
       istatus = 0
       return
       end
 
-C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+c&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
       subroutine get_modeltime(i4time_mdl,a9_time,istatus)
 
       implicit none 
@@ -167,11 +167,11 @@ C&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
          !print *, ' modeltime (from modeltime.dat) = ',a9_time
          call i4time_fname_lp(a9_time,i4time_mdl,istatus)
          if (istatus .ne. 1) then
-           print *, "-- Error getting LAPS modeltime.dat!"
-           stop "STOP in get_laps_modeltime"
+           print *, "-- error getting laps modeltime.dat!"
+           stop "stop in get_laps_modeltime"
          endif
       else
-        print *, "-- No modeltime.dat file found: ",trim(filenamet)
-        stop "STOP in get_laps_modeltime"
+        print *, "-- no modeltime.dat file found: ",trim(filenamet)
+        stop "stop in get_laps_modeltime"
       endif
       end subroutine get_modeltime

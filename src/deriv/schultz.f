@@ -1,274 +1,274 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
 !--------------------------------------------------------------------------
-!Cloud water stays supercooled well below freezing, but there's almost zero
-!supercooled water at -20 (253K).  Pristine crystals melt pretty fast above
+!cloud water stays supercooled well below freezing, but there's almost zero
+!supercooled water at -20 (253k).  pristine crystals melt pretty fast above
 !freezing.
 
-        Subroutine ConvC2P (maxrate, t, rate)
-        Implicit none
-        Real maxrate, t, rate
-        Real pwr
+        subroutine convc2p (maxrate, t, rate)
+        implicit none
+        real maxrate, t, rate
+        real pwr
         data pwr/2./
 
         rate = 0.
 
-        If (t .lt. 253.) then
+        if (t .lt. 253.) then
          rate = maxrate
-         Return
-        Else if (t .lt. 267.) then
+         return
+        else if (t .lt. 267.) then
          rate = maxrate * ((267.-t)/(267.-253.))**pwr
-         Return
-        Else if (t .lt. 273.15) then
+         return
+        else if (t .lt. 273.15) then
          rate = 0.
-         Return
-        Else if (t .lt. 278.) then
+         return
+        else if (t .lt. 278.) then
          rate = -maxrate * (t-273.15)/(278.-273.15)
-         Return
-        Else
+         return
+        else
          rate = -maxrate
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!This includes both autoconversion and collision/coalescence (collection).
-!Obviously, the former is just a function of cloud water content, but the
-!latter is also dependent on the presence of rain.  Note that collection
+!this includes both autoconversion and collision/coalescence (collection).
+!obviously, the former is just a function of cloud water content, but the
+!latter is also dependent on the presence of rain.  note that collection
 !can cause the rate to exceed the "maxrate" if there are very high
 !concentrations of rain.
 
-        Subroutine ConvC2R (maxrate, qc, qcmin, qr, rate)
-        Implicit none
-        Real maxrate, qc, qcmin, qr, rate
+        subroutine convc2r (maxrate, qc, qcmin, qr, rate)
+        implicit none
+        real maxrate, qc, qcmin, qr, rate
 
         rate = 0.
 
-        If (qc .lt. qcmin) then
-         Return
-        Else if (qc .lt. .0015) then
+        if (qc .lt. qcmin) then
+         return
+        else if (qc .lt. .0015) then
          rate = maxrate * (qc-qcmin)/(.0015-qcmin) * (1.+qr/.002)
-         Return
-        Else
+         return
+        else
          rate = maxrate * (1. + qr/.002)
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !-----------------------------------------------------------------------
-!This includes both autoconversion and aggregration.  The former is just
+!this includes both autoconversion and aggregration.  the former is just
 !a function of cloud ice content, but the latter is also dependent on the
-!presence of snow.  Note that collection can cause the rate to exceed the
+!presence of snow.  note that collection can cause the rate to exceed the
 !"maxrate" if there are very high concentrations of snow.
 
-        Subroutine ConvP2S (maxrate, qp, qpmin, qs, rate)
-        Implicit none
-        Real maxrate, qp, qpmin, qs, rate
+        subroutine convp2s (maxrate, qp, qpmin, qs, rate)
+        implicit none
+        real maxrate, qp, qpmin, qs, rate
 
         rate = 0.
 
-        If (qp .lt. qpmin) then
-         Return
-        Else if (qp .lt. .0015) then
+        if (qp .lt. qpmin) then
+         return
+        else if (qp .lt. .0015) then
          rate = maxrate * (qp-qpmin)/(.0015-qpmin) * (1.+qs/.002)
-         Return
-        Else
+         return
+        else
          rate = maxrate * (1. + qs/.002)
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Riming.  Note that the rate can exceed the "maxrate" if there are very high
+!riming.  note that the rate can exceed the "maxrate" if there are very high
 !concentrations of snow.
 
-        Subroutine ConvC2S (maxrate, qc, qcmin, qs, rate)
-        Implicit none
-        Real maxrate, qc, qcmin, qs, rate
+        subroutine convc2s (maxrate, qc, qcmin, qs, rate)
+        implicit none
+        real maxrate, qc, qcmin, qs, rate
 
         rate = 0.
-        If (qs .lt. .0000001) Return    ! no autoconversion
+        if (qs .lt. .0000001) return    ! no autoconversion
 
-        If (qc .lt. qcmin) then
-         Return
-        Else if (qc .lt. .0015) then
+        if (qc .lt. qcmin) then
+         return
+        else if (qc .lt. .0015) then
          rate = maxrate * (qc-qcmin)/(.0015-qcmin) * (1.+qs/.002)
-         Return
-        Else
+         return
+        else
          rate = maxrate * (1. + qs/.002)
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Riming of ice particles.  Note that the rate can exceed the "maxrate" if
+!riming of ice particles.  note that the rate can exceed the "maxrate" if
 !there are very high concentrations of ice.
 
-        Subroutine ConvC2I (maxrate, qc, qcmin, qi, rate)
-        Implicit none
-        Real maxrate, qc, qcmin, qi, rate
+        subroutine convc2i (maxrate, qc, qcmin, qi, rate)
+        implicit none
+        real maxrate, qc, qcmin, qi, rate
 
         rate = 0.
-        If (qi .lt. .0000001) Return    ! no autoconversion
+        if (qi .lt. .0000001) return    ! no autoconversion
 
-        If (qc .lt. qcmin) then
-         Return
-        Else if (qc .lt. .0015) then
+        if (qc .lt. qcmin) then
+         return
+        else if (qc .lt. .0015) then
          rate = maxrate * (qc-qcmin)/(.0015-qcmin) * (1.+qi/.002)
-         Return
-        Else
+         return
+        else
          rate = maxrate * (1. + qi/.002)
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Melting only, since rain does not freeze into snow.
+!melting only, since rain does not freeze into snow.
 
-        Subroutine ConvS2R (maxrate, t, rate)
-        Implicit none
-        Real maxrate, t, rate
+        subroutine convs2r (maxrate, t, rate)
+        implicit none
+        real maxrate, t, rate
 
         rate = 0.
 
-        If (t .lt. 273.15) then
-         Return
-        Else if (t .lt. 283.) then
+        if (t .lt. 273.15) then
+         return
+        else if (t .lt. 283.) then
          rate = maxrate * (t-273.15)/(283.-273.15)
-         Return
-        Else
+         return
+        else
          rate = maxrate
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Freezing and melting.  For now, this is the same algorithm as C2P.
+!freezing and melting.  for now, this is the same algorithm as c2p.
 
-        Subroutine ConvR2I (maxrate, t, rate)
-        Implicit none
-        Real maxrate, t, rate
-        Real pwr
+        subroutine convr2i (maxrate, t, rate)
+        implicit none
+        real maxrate, t, rate
+        real pwr
         data pwr/2./
 
         rate = 0.
 
-        If (t .lt. 253.) then
+        if (t .lt. 253.) then
          rate = maxrate
-         Return
-        Else if (t .lt. 267.) then
+         return
+        else if (t .lt. 267.) then
          rate = maxrate * ((267.-t)/(267.-253.))**pwr
-         Return
-        Else if (t .lt. 273.15) then
+         return
+        else if (t .lt. 273.15) then
          rate = 0.
-         Return
-        Else if (t .lt. 278.) then
+         return
+        else if (t .lt. 278.) then
          rate = -maxrate * (t-273.15)/(278.-273.15)
-         Return
-        Else
+         return
+        else
          rate = -maxrate
-         Return
-        End if
+         return
+        end if
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Evaporation of rain; function of vapor deficit only.
+!evaporation of rain; function of vapor deficit only.
 
-        Subroutine ConvR2V (maxrate, rv, rvsatliq, rate)
-        Implicit none
-        Real maxrate, rv, rvsatliq, rate
+        subroutine convr2v (maxrate, rv, rvsatliq, rate)
+        implicit none
+        real maxrate, rv, rvsatliq, rate
 
         rate = 0.
-        If (rv .ge. rvsatliq) Return
+        if (rv .ge. rvsatliq) return
 
-        If (rvsatliq .lt. .000001) Return
+        if (rvsatliq .lt. .000001) return
 
         rate = maxrate * (rvsatliq-rv)/rvsatliq
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Evaporation of snow; function of vapor deficit only.
+!evaporation of snow; function of vapor deficit only.
 
-        Subroutine ConvS2V (maxrate, rv, rvsatice, rate)
-        Implicit none
-        Real maxrate, rv, rvsatice, rate
+        subroutine convs2v (maxrate, rv, rvsatice, rate)
+        implicit none
+        real maxrate, rv, rvsatice, rate
 
         rate = 0.
-        If (rv .ge. rvsatice) Return
+        if (rv .ge. rvsatice) return
 
-        If (rvsatice .lt. .000001) Return
+        if (rvsatice .lt. .000001) return
 
         rate = maxrate * (rvsatice-rv)/rvsatice
 
-        Return
-        End
+        return
+        end
 
 !--------------------------------------------------------------------------
-!Evaporation of precipitating ice (graupel, sleet, hail); function of vapor
-!deficit only.  Maybe the vapor deficit should be with respect to water...
+!evaporation of precipitating ice (graupel, sleet, hail); function of vapor
+!deficit only.  maybe the vapor deficit should be with respect to water...
 
-        Subroutine ConvI2V (maxrate, rv, rvsatice, rate)
-        Implicit none
-        Real maxrate, rv, rvsatice, rate
+        subroutine convi2v (maxrate, rv, rvsatice, rate)
+        implicit none
+        real maxrate, rv, rvsatice, rate
 
         rate = 0.
-        If (rv .ge. rvsatice) Return
+        if (rv .ge. rvsatice) return
 
-        If (rvsatice .lt. .000001) Return
+        if (rvsatice .lt. .000001) return
 
         rate = maxrate * (rvsatice-rv)/rvsatice
 
-        Return
-        End
+        return
+        end

@@ -4,10 +4,10 @@ c
 c
 c*********************************************************************
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -45,7 +45,7 @@ c
     1 write(6,999) cs
  999  format(//1x,a12)
       write(6,1000) atime,iii, smax,smin
- 1000 format(13x,a24,' x 10**',i3,' Max: ',e10.4,'  Min: ',e10.4)
+ 1000 format(13x,a24,' x 10**',i3,' max: ',e10.4,'  min: ',e10.4)
       do j=1,jmax
       do i=1,imax
          if(a(i,j).ne.badflag) then
@@ -56,7 +56,7 @@ c
       enddo !j
       rms=sqrt(rms/cnt)                
       write(6,1004) rms,sum,offset
- 1004 format(1x,'RMS  = ',e12.4,' MEAN = ',e12.4,' OFFSET = ',e12.4)
+ 1004 format(1x,'rms  = ',e12.4,' mean = ',e12.4,' offset = ',e12.4)
  1001 format(1x,'transposed vector')
       if (jmax.eq.1) then
          write(6,1001)
@@ -81,10 +81,10 @@ c
 c
 c*********************************************************************
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -105,10 +105,10 @@ c
 c
 c*********************************************************************
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -124,14 +124,14 @@ c
       end 
 c
 c
-       Subroutine writewvv(wvr,maxsta,m,ncycles,wvv,it) 
+       subroutine writewvv(wvr,maxsta,m,ncycles,wvv,it) 
 
 c
 c*********************************************************************
-c     Subroutine puts the latest sets of errors into wvv     for
+c     subroutine puts the latest sets of errors into wvv     for
 c      error averaging over ncycles
 c
-c     Original: John McGinley, NOAA/FSL  Summer 2004
+c     original: john mcginley, noaa/fsl  summer 2004
 c
 c*********************************************************************
 c
@@ -150,19 +150,19 @@ c
        return
        end
 c
-       Subroutine writemon(ta,tda,ua,va,pmsla,alta,
+       subroutine writemon(ta,tda,ua,va,pmsla,alta,
      &   nvar,maxsta,m,ncycles,monster,it) 
 c
 c*********************************************************************
-c     Subroutine puts the latest sets of obs into monster for
+c     subroutine puts the latest sets of obs into monster for
 c     fourier processing.
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          New version.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          new version.
 c
 c*********************************************************************
 c
@@ -188,19 +188,19 @@ c
        return
        end
 c
-       Subroutine writeqc(qta,qtda,qua,qva,qpmsla,qalta,
+       subroutine writeqc(qta,qtda,qua,qva,qpmsla,qalta,
      &   nvar,maxsta,m,ncycles,qmonster,it) 
 c
 c*********************************************************************
-c     Subroutine puts the latest sets of obs into monster for
+c     subroutine puts the latest sets of obs into monster for
 c     fourier processing.
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       24 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          New version.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       24 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          new version.
 c
 c*********************************************************************
 c
@@ -239,8 +239,8 @@ c
      1   status)
 
 c*********************************************************************
-c     Original: Linda Wharton, NOAA/FSL  05 Oct 1998
-c       Subroutine write_qc_cdf to write output to a netCDF
+c     original: linda wharton, noaa/fsl  05 oct 1998
+c       subroutine write_qc_cdf to write output to a netcdf
 c         file rather than the "temploc" file.
 c
 c*********************************************************************
@@ -263,7 +263,7 @@ c*********************************************************************
         real    tf(m),tdf(m),uf(m),vf(m), pmslf(m), altf(m)
 	integer   status
 
-c Local variables
+c local variables
 
         character filename*200, cdl_path*190, gtime*9, fcst_hh_mm*4
 	integer   fn_len, ext_len, sta_len, pro_len, type_len
@@ -281,7 +281,7 @@ c make output file name from i4time_file
         call make_fnam_lp(i4time_file,gtime,istatus)
         if (istatus .ne. 1) then
           write (6,*)
-     1'Error converting i4time to file name... writing QC file aborted.'
+     1'error converting i4time to file name... writing qc file aborted.'
           status=error(2)
           return
         endif
@@ -296,7 +296,7 @@ c make output file name from i4time_file
 c get cdl_path
 	call get_directory('cdl',cdl_path, cdl_len)
 
-c setup lengths of character variables for passing into C code
+c setup lengths of character variables for passing into c code
         sta_len = len(stations(1))
         pro_len = len(provider(1))
         type_len = len(reptype(1))
@@ -305,7 +305,7 @@ c setup valtime and reftime for writing into output file
 	i_reftime = i4time_file - 315619200
 	i_valtime = i_reftime
 
-c pass data into C code for generating netCDF output file
+c pass data into c code for generating netcdf output file
 	call write_qc( filename, cdl_path, num_sta, m, i_reftime, 
      1        i_valtime, stations, provider, reptype, sta_len, 
      1        pro_len, type_len, fn_len, cdl_len, lat, lon, elev, 
@@ -323,19 +323,19 @@ c pass data into C code for generating netCDF output file
 	else
           if (istatus .eq. 2)  goto 96  !error writing file
           if (istatus .eq. -1)  goto 95  !error reading dimension data
-          if (istatus .eq. -2)  goto 94  !error creating netCDF file
+          if (istatus .eq. -2)  goto 94  !error creating netcdf file
 	endif
 
-94	write (6,*) 'Error creating netCDF file...write aborted.'
+94	write (6,*) 'error creating netcdf file...write aborted.'
 	status=error(2)
 	goto 99
 
 95	write (6,*) 
-     1'Error reading dimensions from netCDF file...write aborted.'
+     1'error reading dimensions from netcdf file...write aborted.'
 	status=error(2)
 	goto 99
 
-96	write (6,*) 'Error writing text to  netCDF file...write aborted.'
+96	write (6,*) 'error writing text to  netcdf file...write aborted.'
 	status=error(2)
 	goto 99
 

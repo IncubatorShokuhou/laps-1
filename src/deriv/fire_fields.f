@@ -1,101 +1,101 @@
 c
-c**************new routine as adapted at FSL**************************
+c**************new routine as adapted at fsl**************************
 
-      subroutine fire_fields(ni,nj,nk,temp_3d,td_3d                 ! I
-!    1                      ,heights_3d                             ! I
-     1                      ,u_3d,v_3d                              ! I
-     1                      ,t_sfc_k,p_sfc_pa                       ! I
-     1                      ,rh_sfc,u_sfc,v_sfc                     ! I
-     1                      ,r_missing_data,i4time                  ! I
-     1                      ,istatus)                               ! O
+      subroutine fire_fields(ni,nj,nk,temp_3d,td_3d                 ! i
+!    1                      ,heights_3d                             ! i
+     1                      ,u_3d,v_3d                              ! i
+     1                      ,t_sfc_k,p_sfc_pa                       ! i
+     1                      ,rh_sfc,u_sfc,v_sfc                     ! i
+     1                      ,r_missing_data,i4time                  ! i
+     1                      ,istatus)                               ! o
 
       character*10  units_2d
       character*125 comment_2d
       character*3 var_2d
 
-      integer MAX_FIELDS
-      parameter (MAX_FIELDS = 7)
-      real field_array(ni,nj,MAX_FIELDS)
-      character*3 var_a(MAX_FIELDS)
-      character*125 comment_a(MAX_FIELDS)
-      character*10  units_a(MAX_FIELDS)
+      integer max_fields
+      parameter (max_fields = 7)
+      real field_array(ni,nj,max_fields)
+      character*3 var_a(max_fields)
+      character*125 comment_a(max_fields)
+      character*10  units_a(max_fields)
       character*31 ext
 
-!     real heights_3d(ni,nj,nk)                                   ! I
-      real temp_3d(ni,nj,nk)                                      ! I
-      real td_3d(ni,nj,nk)                                        ! I
+!     real heights_3d(ni,nj,nk)                                   ! i
+      real temp_3d(ni,nj,nk)                                      ! i
+      real td_3d(ni,nj,nk)                                        ! i
       real u_3d(ni,nj,nk)
       real v_3d(ni,nj,nk)
 
-      real t_sfc_k(ni,nj)                                         ! I 
-      real rh_sfc(ni,nj)                                          ! I 
-      real p_sfc_pa(ni,nj)                                        ! I 
-      real u_sfc(ni,nj)                                           ! I
-      real v_sfc(ni,nj)                                           ! I
+      real t_sfc_k(ni,nj)                                         ! i 
+      real rh_sfc(ni,nj)                                          ! i 
+      real p_sfc_pa(ni,nj)                                        ! i 
+      real u_sfc(ni,nj)                                           ! i
+      real v_sfc(ni,nj)                                           ! i
 
-      real pbl_top_pa(ni,nj),pbl_depth_m(ni,nj)                   ! L
-      real pres_3d_pa(ni,nj,nk)                                   ! L
-      real haines_mid_2d(ni,nj)                                   ! L
-      real haines_hi_2d(ni,nj)                                    ! L
-      real vent_2d(ni,nj)                                         ! L
-      real fosberg_2d(ni,nj)                                      ! L
-      real umean_2d(ni,nj),vmean_2d(ni,nj)                        ! L
-      real cfwi(ni,nj)                                            ! L
+      real pbl_top_pa(ni,nj),pbl_depth_m(ni,nj)                   ! l
+      real pres_3d_pa(ni,nj,nk)                                   ! l
+      real haines_mid_2d(ni,nj)                                   ! l
+      real haines_hi_2d(ni,nj)                                    ! l
+      real vent_2d(ni,nj)                                         ! l
+      real fosberg_2d(ni,nj)                                      ! l
+      real umean_2d(ni,nj),vmean_2d(ni,nj)                        ! l
+      real cfwi(ni,nj)                                            ! l
 
-      write(6,*)' Subroutine fire_fields (under construction)'
+      write(6,*)' subroutine fire_fields (under construction)'
 
       ext = 'pbl'
       istat_pbl = 1
 
-      write(6,*)' Read in pressure of PBL top'
-      var_2d = 'PTP'
+      write(6,*)' read in pressure of pbl top'
+      var_2d = 'ptp'
       call get_laps_2dgrid(i4time,0,i4time_nearest
      1                    ,ext,var_2d,units_2d,comment_2d,ni,nj
      1                    ,pbl_top_pa,0,istatus)
 
       if(istatus .ne. 1)then
-          write(6,*)' LAPS PBL top not available'
+          write(6,*)' laps pbl top not available'
           istat_pbl = 0
       endif
 
-      write(6,*)' Read in PBL depth'
-      var_2d = 'PDM'
+      write(6,*)' read in pbl depth'
+      var_2d = 'pdm'
       call get_laps_2dgrid(i4time,0,i4time_nearest
      1                    ,ext,var_2d,units_2d,comment_2d,ni,nj
      1                    ,pbl_depth_m,0,istatus)
 
       if(istatus .ne. 1)then
-          write(6,*)' LAPS PBL depth not available'
+          write(6,*)' laps pbl depth not available'
           istat_pbl = 0
       endif
 
       call get_pres_3d(i4time,ni,nj,nk,pres_3d_pa,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Could not obtain pres_3d'
+          write(6,*)' could not obtain pres_3d'
           return
       endif
 
-      call cpt_fire_fields(ni,nj,nk,pres_3d_pa,temp_3d,td_3d        ! I
-!    1                          ,heights_3d                         ! I
-     1                          ,u_3d,v_3d                          ! I
-     1                          ,pbl_top_pa,pbl_depth_m,istat_pbl   ! I
-     1                          ,t_sfc_k                            ! I
-     1                          ,rh_sfc                             ! I
-     1                          ,u_sfc                              ! I
-     1                          ,v_sfc                              ! I
-     1                          ,p_sfc_pa                           ! I
-     1                          ,r_missing_data                     ! I
-     1                          ,i4time                             ! I
-     1                          ,fosberg_2d                         ! O
-     1                          ,haines_mid_2d                      ! O
-     1                          ,haines_hi_2d                       ! O
-     1                          ,vent_2d                            ! O
-     1                          ,umean_2d,vmean_2d                  ! O
-     1                          ,cfwi                               ! O
-     1                          ,istatus)                           ! O
+      call cpt_fire_fields(ni,nj,nk,pres_3d_pa,temp_3d,td_3d        ! i
+!    1                          ,heights_3d                         ! i
+     1                          ,u_3d,v_3d                          ! i
+     1                          ,pbl_top_pa,pbl_depth_m,istat_pbl   ! i
+     1                          ,t_sfc_k                            ! i
+     1                          ,rh_sfc                             ! i
+     1                          ,u_sfc                              ! i
+     1                          ,v_sfc                              ! i
+     1                          ,p_sfc_pa                           ! i
+     1                          ,r_missing_data                     ! i
+     1                          ,i4time                             ! i
+     1                          ,fosberg_2d                         ! o
+     1                          ,haines_mid_2d                      ! o
+     1                          ,haines_hi_2d                       ! o
+     1                          ,vent_2d                            ! o
+     1                          ,umean_2d,vmean_2d                  ! o
+     1                          ,cfwi                               ! o
+     1                          ,istatus)                           ! o
 
-      if(istatus .eq. 1)then ! write out LFR fire fields file
-          write(6,*)' Write out LFR file'
+      if(istatus .eq. 1)then ! write out lfr fire fields file
+          write(6,*)' write out lfr file'
 
           call move(vent_2d      ,field_array(1,1,1),ni,nj)
           call move(haines_mid_2d,field_array(1,1,2),ni,nj)
@@ -106,90 +106,90 @@ c**************new routine as adapted at FSL**************************
           call move(cfwi         ,field_array(1,1,7),ni,nj)
 
           ext = 'lfr'
-          var_a(1) = 'VNT'
-          var_a(2) = 'HAM'
-          var_a(3) = 'HAH'
-          var_a(4) = 'FWI'
-          var_a(5) = 'UPB'
-          var_a(6) = 'VPB'
-          var_a(7) = 'CWI'
-          units_a(1) = 'M**2/S'
+          var_a(1) = 'vnt'
+          var_a(2) = 'ham'
+          var_a(3) = 'hah'
+          var_a(4) = 'fwi'
+          var_a(5) = 'upb'
+          var_a(6) = 'vpb'
+          var_a(7) = 'cwi'
+          units_a(1) = 'm**2/s'
           units_a(2) = '      '
           units_a(3) = '      '
           units_a(4) = '      '
-          units_a(5) = 'M/S'
-          units_a(6) = 'M/S'
+          units_a(5) = 'm/s'
+          units_a(6) = 'm/s'
           units_a(7) = '      '
-          comment_a(1) = 'Ventilation Index'
-          comment_a(2) = 'Haines Index (850-700hPa)'
-          comment_a(3) = 'Haines Index (700-500hPa)'
-          comment_a(4) = 'Fosberg Fire Wx Index'
-          comment_a(5) = 'Boundary Layer Mean U Component'
-          comment_a(6) = 'Boundary Layer Mean V Component'
-          comment_a(7) = 'Critical Fire Weather Index'
+          comment_a(1) = 'ventilation index'
+          comment_a(2) = 'haines index (850-700hpa)'
+          comment_a(3) = 'haines index (700-500hpa)'
+          comment_a(4) = 'fosberg fire wx index'
+          comment_a(5) = 'boundary layer mean u component'
+          comment_a(6) = 'boundary layer mean v component'
+          comment_a(7) = 'critical fire weather index'
           call put_laps_multi_2d(i4time,ext,var_a,units_a
      1                          ,comment_a,field_array,ni,nj
      1                          ,7,istatus)
 
       else
-          write(6,*)' Skipping write of LFR file'
+          write(6,*)' skipping write of lfr file'
 
       endif
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
       return
       end
 
-       subroutine cpt_fire_fields(ni,nj,nk,pres_3d_pa,temp_3d,td_3d  ! I
-!    1                           ,heights_3d                         ! I
-     1                           ,u_3d,v_3d                          ! I
-     1                           ,pbl_top_pa,pbl_depth_m,istat_pbl   ! I
-     1                           ,t_sfc_k                            ! I
-     1                           ,rh_sfc                             ! I
-     1                           ,u_sfc                              ! I
-     1                           ,v_sfc                              ! I
-     1                           ,p_sfc_pa                           ! I
-     1                           ,r_missing_data                     ! I
-     1                           ,i4time                             ! I
-     1                           ,fosberg_2d                         ! O
-     1                           ,haines_mid_2d                      ! O
-     1                           ,haines_hi_2d                       ! O
-     1                           ,vent_2d                            ! O
-     1                           ,umean_2d,vmean_2d                  ! O
-     1                           ,cfwi                               ! O
-     1                           ,istatus)                           ! O
+       subroutine cpt_fire_fields(ni,nj,nk,pres_3d_pa,temp_3d,td_3d  ! i
+!    1                           ,heights_3d                         ! i
+     1                           ,u_3d,v_3d                          ! i
+     1                           ,pbl_top_pa,pbl_depth_m,istat_pbl   ! i
+     1                           ,t_sfc_k                            ! i
+     1                           ,rh_sfc                             ! i
+     1                           ,u_sfc                              ! i
+     1                           ,v_sfc                              ! i
+     1                           ,p_sfc_pa                           ! i
+     1                           ,r_missing_data                     ! i
+     1                           ,i4time                             ! i
+     1                           ,fosberg_2d                         ! o
+     1                           ,haines_mid_2d                      ! o
+     1                           ,haines_hi_2d                       ! o
+     1                           ,vent_2d                            ! o
+     1                           ,umean_2d,vmean_2d                  ! o
+     1                           ,cfwi                               ! o
+     1                           ,istatus)                           ! o
 
-       real pres_3d_pa(ni,nj,nk)                                   ! I
-!      real heights_3d(ni,nj,nk)                                   ! I
-       real temp_3d(ni,nj,nk)                                      ! I
-       real td_3d(ni,nj,nk)                                        ! I
+       real pres_3d_pa(ni,nj,nk)                                   ! i
+!      real heights_3d(ni,nj,nk)                                   ! i
+       real temp_3d(ni,nj,nk)                                      ! i
+       real td_3d(ni,nj,nk)                                        ! i
        real u_3d(ni,nj,nk)
        real v_3d(ni,nj,nk)
 
-       real pbl_top_pa(ni,nj),pbl_depth_m(ni,nj)                   ! I
-       real pbl_top_m(ni,nj)                                       ! L
+       real pbl_top_pa(ni,nj),pbl_depth_m(ni,nj)                   ! i
+       real pbl_top_m(ni,nj)                                       ! l
 
        real t_sfc_k(ni,nj)
        real rh_sfc(ni,nj)
        real u_sfc(ni,nj)
        real v_sfc(ni,nj)
-       real p_sfc_pa(ni,nj)                                        ! I
+       real p_sfc_pa(ni,nj)                                        ! i
        real p_sfc_mb(ni,nj)
 
-       real haines_mid_2d(ni,nj)                                   ! O
-       real haines_hi_2d(ni,nj)                                    ! O
-       real vent_2d(ni,nj)                                         ! O
-       real umean_2d(ni,nj),vmean_2d(ni,nj)                        ! O
-       real fosberg_2d(ni,nj)                                      ! O
-       real cfwi(ni,nj)                                            ! O
+       real haines_mid_2d(ni,nj)                                   ! o
+       real haines_hi_2d(ni,nj)                                    ! o
+       real vent_2d(ni,nj)                                         ! o
+       real umean_2d(ni,nj),vmean_2d(ni,nj)                        ! o
+       real fosberg_2d(ni,nj)                                      ! o
+       real cfwi(ni,nj)                                            ! o
 
-       real pres_3d_mb(ni,nj,nk)                                   ! L
+       real pres_3d_mb(ni,nj,nk)                                   ! l
 
-       write(6,*)' Subroutine cpt_fire_fields...'
+       write(6,*)' subroutine cpt_fire_fields...'
 
-!      Calculate Haines Index
-       write(6,*)' Calculate Mid-Level Haines Index'
+!      calculate haines index
+       write(6,*)' calculate mid-level haines index'
        pres_3d_mb = pres_3d_pa / 100.
        call hainesindex(pres_3d_mb,temp_3d,td_3d,haines_mid_2d,ni,nj,nk       
      1                 ,850.,700.) 
@@ -211,87 +211,87 @@ c**************new routine as adapted at FSL**************************
        enddo ! j
        enddo ! i
 
-!      Calculate Fosberg Fireweather Index
-       write(6,*)' Calculate Fosberg Fireweather Index'
+!      calculate fosberg fireweather index
+       write(6,*)' calculate fosberg fireweather index'
        p_sfc_mb = p_sfc_pa / 100.
-!      Argument list has been changed to use sfc inputs instead of 3D
-       call fireweatherindex(t_sfc_k,rh_sfc,p_sfc_mb,u_sfc,v_sfc          ! I
-     1                      ,ni,nj                                        ! I
-     1                      ,fosberg_2d)                                  ! O
+!      argument list has been changed to use sfc inputs instead of 3d
+       call fireweatherindex(t_sfc_k,rh_sfc,p_sfc_mb,u_sfc,v_sfc          ! i
+     1                      ,ni,nj                                        ! i
+     1                      ,fosberg_2d)                                  ! o
 
-!      Calculate Ventilation Index
+!      calculate ventilation index
        if(istat_pbl .eq. 1)then
-           write(6,*)' Calculate Ventilation Index'
-           call ventilation_index(u_3d,v_3d,pbl_top_pa,pbl_depth_m        ! I
-     1                           ,pres_3d_pa,p_sfc_pa                     ! I
-     1                           ,ni,nj,nk                                ! I
-     1                           ,r_missing_data                          ! I
-!    1                           ,heights_3d                              ! I
-     1                           ,umean_2d,vmean_2d                       ! O
-     1                           ,vent_2d,istatus)                        ! O
+           write(6,*)' calculate ventilation index'
+           call ventilation_index(u_3d,v_3d,pbl_top_pa,pbl_depth_m        ! i
+     1                           ,pres_3d_pa,p_sfc_pa                     ! i
+     1                           ,ni,nj,nk                                ! i
+     1                           ,r_missing_data                          ! i
+!    1                           ,heights_3d                              ! i
+     1                           ,umean_2d,vmean_2d                       ! o
+     1                           ,vent_2d,istatus)                        ! o
        else
-           write(6,*)' Skip ventilation index due to no PBL'
+           write(6,*)' skip ventilation index due to no pbl'
 
        endif
 
-!      Calculate Critical Fire Weather Index.
-!         (RH<15% and speed>20mph for any 3 consecutive hours during the
+!      calculate critical fire weather index.
+!         (rh<15% and speed>20mph for any 3 consecutive hours during the
 !          past 24 hours)
-       write(6,*)' Calculate Critical Fireweather Index',i4time
-       call critical_fwi(rh_sfc,u_sfc,v_sfc                               ! I
-     1                  ,ni,nj,i4time                                     ! I
-     1                  ,cfwi)                                            ! O
+       write(6,*)' calculate critical fireweather index',i4time
+       call critical_fwi(rh_sfc,u_sfc,v_sfc                               ! i
+     1                  ,ni,nj,i4time                                     ! i
+     1                  ,cfwi)                                            ! o
 
        return
        end
 
-       subroutine ventilation_index(u_3d,v_3d,pbl_top_pa,pbl_depth_m      ! I
-     1                             ,pres_3d_pa,p_sfc_pa                   ! I
-     1                             ,ni,nj,nk                              ! I
-     1                             ,r_missing_data                        ! I
-!    1                             ,heights_3d                            ! I
-     1                             ,umean_2d,vmean_2d                     ! O
-     1                             ,vent_2d,istatus)                      ! O
+       subroutine ventilation_index(u_3d,v_3d,pbl_top_pa,pbl_depth_m      ! i
+     1                             ,pres_3d_pa,p_sfc_pa                   ! i
+     1                             ,ni,nj,nk                              ! i
+     1                             ,r_missing_data                        ! i
+!    1                             ,heights_3d                            ! i
+     1                             ,umean_2d,vmean_2d                     ! o
+     1                             ,vent_2d,istatus)                      ! o
 
-!      real heights_3d(ni,nj,nk)                                        ! I
-       real pres_3d_pa(ni,nj,nk)                                        ! I
-       real u_3d(ni,nj,nk)                                              ! I
-       real v_3d(ni,nj,nk)                                              ! I
+!      real heights_3d(ni,nj,nk)                                        ! i
+       real pres_3d_pa(ni,nj,nk)                                        ! i
+       real u_3d(ni,nj,nk)                                              ! i
+       real v_3d(ni,nj,nk)                                              ! i
 
-       real pbl_top_pa(ni,nj),pbl_depth_m(ni,nj)                        ! I
-       real umean_2d(ni,nj),vmean_2d(ni,nj)                             ! O
-       real vent_2d(ni,nj)                                              ! O
+       real pbl_top_pa(ni,nj),pbl_depth_m(ni,nj)                        ! i
+       real umean_2d(ni,nj),vmean_2d(ni,nj)                             ! o
+       real vent_2d(ni,nj)                                              ! o
 
-       real topo(ni,nj)           ! Switch to sfc_pres_pa?
-       real p_sfc_pa(ni,nj)                                             ! I
+       real topo(ni,nj)           ! switch to sfc_pres_pa?
+       real p_sfc_pa(ni,nj)                                             ! i
 
-       write(6,*)' Subroutine ventilation_index'
+       write(6,*)' subroutine ventilation_index'
 
        vent_2d = r_missing_data
 
-!      Calculate mean wind within the PBL
-       call pbl_mean_wind(u_3d,v_3d,topo,pbl_top_pa,ni,nj,nk              ! I
-     1                   ,pres_3d_pa,p_sfc_pa                             ! I
-     1                   ,umean_2d,vmean_2d,istatus)                      ! O
+!      calculate mean wind within the pbl
+       call pbl_mean_wind(u_3d,v_3d,topo,pbl_top_pa,ni,nj,nk              ! i
+     1                   ,pres_3d_pa,p_sfc_pa                             ! i
+     1                   ,umean_2d,vmean_2d,istatus)                      ! o
        if(istatus .ne. 1)then
-           write(6,*)' WARNING: Bad status returned from pbl_mean_wind'       
-           write(6,*)' Returning vent_2d field as missing data'
+           write(6,*)' warning: bad status returned from pbl_mean_wind'       
+           write(6,*)' returning vent_2d field as missing data'
            return
        endif
 
-       write(6,*)' Compute VI from mean wind speed and PBL Depth'
+       write(6,*)' compute vi from mean wind speed and pbl depth'
 
-!      Multiply PBL depth by mean wind to obtain ventilation index
+!      multiply pbl depth by mean wind to obtain ventilation index
        do i = 1,ni
        do j = 1,nj
            if(abs(umean_2d(i,j)) .gt. 1000.)then
-               write(6,*)' ERROR, umean out of bounds',i,j,umean_2d(i,j)
+               write(6,*)' error, umean out of bounds',i,j,umean_2d(i,j)
                istatus = 0
                return
            endif
 
            if(abs(vmean_2d(i,j)) .gt. 1000.)then
-               write(6,*)' ERROR, vmean out of bounds',i,j,vmean_2d(i,j)       
+               write(6,*)' error, vmean out of bounds',i,j,vmean_2d(i,j)       
                istatus = 0
                return
            endif
@@ -307,31 +307,31 @@ c**************new routine as adapted at FSL**************************
 
 
 
-        subroutine pbl_mean_wind(uanl,vanl,topo,pbl_top_pa        ! I
-     1                          ,imax,jmax,kmax                   ! I
-     1                          ,pres_3d_pa,p_sfc_pa              ! I
-     1                          ,umean_2d,vmean_2d,istatus)       ! O
+        subroutine pbl_mean_wind(uanl,vanl,topo,pbl_top_pa        ! i
+     1                          ,imax,jmax,kmax                   ! i
+     1                          ,pres_3d_pa,p_sfc_pa              ! i
+     1                          ,umean_2d,vmean_2d,istatus)       ! o
 
         logical ltest_vertical_grid
 
-        real umean_2d(imax,jmax),vmean_2d(imax,jmax)            ! Output
-        real uanl(imax,jmax,kmax),vanl(imax,jmax,kmax)          ! Input
-        real pres_3d_pa(imax,jmax,kmax)                         ! Input
+        real umean_2d(imax,jmax),vmean_2d(imax,jmax)            ! output
+        real uanl(imax,jmax,kmax),vanl(imax,jmax,kmax)          ! input
+        real pres_3d_pa(imax,jmax,kmax)                         ! input
 
-        real topo(imax,jmax)                                    ! Input
-        real p_sfc_pa(imax,jmax)                                ! Input
-        real pbl_top_pa(imax,jmax)                              ! Input
+        real topo(imax,jmax)                                    ! input
+        real p_sfc_pa(imax,jmax)                                ! input
+        real pbl_top_pa(imax,jmax)                              ! input
 
-        real sum(imax,jmax)                                     ! Local
-        real usum(imax,jmax)                                    ! Local
-        real vsum(imax,jmax)                                    ! Local
-        integer klow(imax,jmax)                                 ! Local
-        integer khigh(imax,jmax)                                ! Local
+        real sum(imax,jmax)                                     ! local
+        real usum(imax,jmax)                                    ! local
+        real vsum(imax,jmax)                                    ! local
+        integer klow(imax,jmax)                                 ! local
+        integer khigh(imax,jmax)                                ! local
 
-!       topo = 0.             ! Just for testing (also switch to pres_sfc_pa)?
+!       topo = 0.             ! just for testing (also switch to pres_sfc_pa)?
 
-!       Calculate the mass weighted mean wind for the PBL. Inputs are the
-!       lower and upper bounds in terms of pressure. Fractional levels are 
+!       calculate the mass weighted mean wind for the pbl. inputs are the
+!       lower and upper bounds in terms of pressure. fractional levels are 
 !       not accounted for - only whole levels between the pressure bounds
 !       are integrated.
 
@@ -344,7 +344,7 @@ c**************new routine as adapted at FSL**************************
         do j = 1,jmax
           do i = 1,imax
              if(pbl_top_pa(i,j) .gt. p_sfc_pa(i,j))then
-                 write(6,*)' ERROR in pbl_mean_wind: Pbl Top > Sfc P'
+                 write(6,*)' error in pbl_mean_wind: pbl top > sfc p'
      1                    ,i,j,pbl_top_pa(i,j),p_sfc_pa(i,j)
                  istatus = 0
                  return
@@ -353,14 +353,14 @@ c**************new routine as adapted at FSL**************************
              khigh(i,j) = rlevel_of_field(pbl_top_pa(i,j),pres_3d_pa
      1                              ,imax,jmax,kmax,i,j,istatus)
              if(istatus .ne. 1)then
-                 write(6,*)' mean_wind: ERROR in rlevel_of_field'
+                 write(6,*)' mean_wind: error in rlevel_of_field'
                  return
              endif
 
              klow(i,j) = rlevel_of_field(p_sfc_pa(i,j),pres_3d_pa
      1                                  ,imax,jmax,kmax,i,j,istatus)
              if(istatus .ne. 1)then
-                 write(6,*)' mean_wind: ERROR in rlevel_of_field'
+                 write(6,*)' mean_wind: error in rlevel_of_field'
                  return
              endif
 
@@ -386,12 +386,12 @@ c**************new routine as adapted at FSL**************************
 
         do j = 1,jmax
           do i = 1,imax
-             if(sum(i,j) .gt. 0.)then ! Mean wind through the layer
+             if(sum(i,j) .gt. 0.)then ! mean wind through the layer
                  umean_2d(i,j) = usum(i,j) / sum(i,j)
                  vmean_2d(i,j) = vsum(i,j) / sum(i,j)
 
              else 
-                 write(6,*)' WARNING: sum <= 0',i,j,klow(i,j),khigh(i,j)       
+                 write(6,*)' warning: sum <= 0',i,j,klow(i,j),khigh(i,j)       
 
              endif
           enddo ! i
@@ -401,9 +401,9 @@ c**************new routine as adapted at FSL**************************
         end
 
 
-       subroutine critical_fwi(rh_sfc,u_sfc,v_sfc                         ! I
-     1                        ,ni,nj,i4time                               ! I
-     1                        ,cfwi)                                      ! O
+       subroutine critical_fwi(rh_sfc,u_sfc,v_sfc                         ! i
+     1                        ,ni,nj,i4time                               ! i
+     1                        ,cfwi)                                      ! o
 
        implicit none
 
@@ -440,13 +440,13 @@ c**************new routine as adapted at FSL**************************
 
              ext = 'lsx'
 
-             var_2d = 'U'
+             var_2d = 'u'
              call get_laps_2d(pi4time,ext,var_2d,units_2d,comment_2d
      1                       ,ni,nj,u,istatus)
-             var_2d = 'V'
+             var_2d = 'v'
              call get_laps_2d(pi4time,ext,var_2d,units_2d,comment_2d
      1                       ,ni,nj,v,istatus)
-             var_2d = 'RH'
+             var_2d = 'rh'
              call get_laps_2d(pi4time,ext,var_2d,units_2d,comment_2d
      1                       ,ni,nj,rh,istatus)
 

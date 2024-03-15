@@ -21,7 +21,7 @@
       real    vw3d(nx,ny,nz)
       real    uw2d(nx,ny)
       real    vw2d(nx,ny)
-      real    angle(nx,ny,2)  !both grid to true N and true to grid N.
+      real    angle(nx,ny,2)  !both grid to true n and true to grid n.
       real    latitude(nx,ny),projrot_latlon(nx,ny)
 
 c
@@ -30,12 +30,12 @@ c
       call reset_lapsparms_common(ldir,bgmodel,cmodel,fullname
      1,gproj,istatus)
 c
-c build look-up-tables for rotation angles in 2D grid and
+c build look-up-tables for rotation angles in 2d grid and
 c apply this to grid winds
 c
 !     istatus_rot=ishow_timer()
 
-      latitude = -999. ! Since lat is not yet passed in
+      latitude = -999. ! since lat is not yet passed in
       call projrot_latlon_2d(latitude,lon,nx,ny,projrot_latlon,istatus)
 
       do j = 1, ny
@@ -48,7 +48,7 @@ c
       write(6,*)'rotate_lga_winds - built lookup table'
 !     istatus_rot=ishow_timer()
 
-      if(ldir)then   !from grid to true North
+      if(ldir)then   !from grid to true north
 c 3d
         if(.not. lgb_only)then
           do k = 1, nz
@@ -77,7 +77,7 @@ c 2d
         uw2d = u_true_2d
         vw2d = v_true_2d
 
-      else !rotate from true to grid N.
+      else !rotate from true to grid n.
 c 3d
         if(.not. lgb_only)then
           do k = 1, nz
@@ -151,10 +151,10 @@ c     call get_standard_latitudes(std_lat1,std_lat2,istatus)
 
       logical lgb_only
 
-      print*,'Rotate u/v components'
+      print*,'rotate u/v components'
       print*
 
-c For the case when rotating the bkgd grid winds, we use subroutine
+c for the case when rotating the bkgd grid winds, we use subroutine
 c reset_lapsparms_common to reset the appropriate projection parameters
 c within lapsparms.cmn.
 
@@ -166,7 +166,7 @@ c ----------------------------------------------------------------
       if(c6_maproj.eq.'merctr')then
 c ----------------------------------------------------------------
 
-         if(gproj.eq.'MC'.or.gproj.eq.'LL')then
+         if(gproj.eq.'mc'.or.gproj.eq.'ll')then
 
             call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
@@ -174,13 +174,13 @@ c ----------------------------------------------------------------
 
          else
 
-c rotate from grid north to LAPS true north (this subroutine uses
+c rotate from grid north to laps true north (this subroutine uses
 c std_lon by virtue of library routines.
 
             call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
 
-            print*,'Rotate grid-north (bkgd) to true-north (LAPS)'
+            print*,'rotate grid-north (bkgd) to true-north (laps)'
 
             call rotate_lga_winds(.true.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
@@ -190,17 +190,17 @@ c ----------------------------------------------------------------
       elseif(c6_maproj.eq.'plrstr')then
 c ----------------------------------------------------------------
 
-         if(gproj.eq.'MC'.or.gproj.eq.'LL'.or.gproj.eq.'LE')then
+         if(gproj.eq.'mc'.or.gproj.eq.'ll'.or.gproj.eq.'le')then
 
             call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
 
-            print*,'Rotate true-north (bkgd) to grid-north (LAPS)'
+            print*,'rotate true-north (bkgd) to grid-north (laps)'
 
             call rotate_lga_winds(.false.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
 
-         elseif(gproj.eq.'PS')then
+         elseif(gproj.eq.'ps')then
 
              if(slon0.eq.std_lon)then
 
@@ -216,11 +216,11 @@ c currently we are only considering polar stereo, not local stereo.
                 call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
 
-                print*,'Rotate grid-north (bkgd) to true-north'
+                print*,'rotate grid-north (bkgd) to true-north'
                 call rotate_lga_winds(.true.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
 
-                print*,'Rotate true-north to grid-north (LAPS)'
+                print*,'rotate true-north to grid-north (laps)'
                 call rotate_lga_winds(.false.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
 
@@ -233,12 +233,12 @@ c background is lambert
              call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
 
-             print*,'Rotate grid-north (bkgd) to true-north'
+             print*,'rotate grid-north (bkgd) to true-north'
 
              call rotate_lga_winds(.true.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
 
-             print*,'Rotate true-north to grid-north (LAPS)'
+             print*,'rotate true-north to grid-north (laps)'
 
              call rotate_lga_winds(.false.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
@@ -246,32 +246,32 @@ c background is lambert
          endif
 
 c ----------------------------------------------------------------
-      else     !LAPS is Lambert --- if(c6_maproj.eq.'lambrt')then
+      else     !laps is lambert --- if(c6_maproj.eq.'lambrt')then
 c ----------------------------------------------------------------
 
-         if(gproj.eq.'MC' .or.
-     +      gproj.eq.'LL' .or.
-     +      gproj.eq.'LE')then
+         if(gproj.eq.'mc' .or.
+     +      gproj.eq.'ll' .or.
+     +      gproj.eq.'le')then
 
             call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
 
-            print*,'Rotate true-north (bkgd) to grid-north (LAPS)'   ! because MC/LL/LE grids are true north
+            print*,'rotate true-north (bkgd) to grid-north (laps)'   ! because mc/ll/le grids are true north
 
             call rotate_lga_winds(.false.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
 
-         elseif(gproj.eq.'PS'.or.gproj.eq.'LC')then
+         elseif(gproj.eq.'ps'.or.gproj.eq.'lc')then
 
             call print_rotproj(gproj,c6_maproj,slon0,slat1,slat2
      +,std_lon,std_lat1,std_lat2)
 
-            print*,'Rotate grid-north (bkgd) to true-north'
+            print*,'rotate grid-north (bkgd) to true-north'
 
             call rotate_lga_winds(.true.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
 
-             print*,'Rotate true-north to grid-north (LAPS)'
+             print*,'rotate true-north to grid-north (laps)'
 
              call rotate_lga_winds(.false.,bgmodel,cmodel,fullname
      +,gproj,nx,ny,nz,lon,uw,vw,uw_sfc,vw_sfc,lgb_only)
@@ -293,10 +293,10 @@ c
       real lon0,lat1,lat2
       real std_lon,std_lat1,std_lat2
 
-      print*,'BACKGROUND: /gproj/lon0/lat1/lat2: '
+      print*,'background: /gproj/lon0/lat1/lat2: '
       print*,'            ',gproj,' ',lon0,lat1,lat2
 
-      print*,'ANALYSIS: /c6_maproj/std_lon/std_lat1/std_lat2: '
+      print*,'analysis: /c6_maproj/std_lon/std_lat1/std_lat2: '
       print*,'          ',c6_maproj,' ',std_lon,std_lat1,std_lat2
 
       return
@@ -306,27 +306,27 @@ c===============================================================================
 c
       subroutine thvpc2tq(thv,pc,p,t,q)
 c
-c *** Subprogram:  thvpc2tq - Calculates temperature (K) and specific 
+c *** subprogram:  thvpc2tq - calculates temperature (k) and specific 
 c                             humidity (kg/kg) given virtual potential 
-c                             temperature (K), pressure (mb), and
+c                             temperature (k), pressure (mb), and
 c                             condensation pressure (mb).
 c
-c *** Program history log:
-c        93-12-20  S. Benjamin - Original version 
-c        96-09-17  J. Snook    - es calculated in a table
+c *** program history log:
+c        93-12-20  s. benjamin - original version 
+c        96-09-17  j. snook    - es calculated in a table
 c
-c *** Usage:  call thvpc2tq(thv,pc,p,t,q)
+c *** usage:  call thvpc2tq(thv,pc,p,t,q)
 c
-c *** Input argument list:
-c        thv    - real  virtual potential temperature (K)
+c *** input argument list:
+c        thv    - real  virtual potential temperature (k)
 c        pc     - real  condensation pressure (mb)
 c        p      - real  pressure (mb)
 c
-c *** Output argument list:
-c        t      - real  temperature (K)
+c *** output argument list:
+c        t      - real  temperature (k)
 c        q      - real  specific humidity (kg/kg)
 c
-c *** Subprograms called:
+c *** subprograms called:
 c        tv2tq  - calculate temp and spec. hum. from virtual
 c                    temp and relative humidity
 c        es   - calculate saturation vapor pressure (from a table)
@@ -358,26 +358,26 @@ c===============================================================================
 c
       subroutine tv2tq(tv,rh,p,t,q)
 c
-c *** Subprogram:  tv2tq - Calculates temperature (K) and specific 
-c                          humidity (kg/kg) given virtual temperature (K),
+c *** subprogram:  tv2tq - calculates temperature (k) and specific 
+c                          humidity (kg/kg) given virtual temperature (k),
 c                          pressure (mb), and relative humidity.
 c
-c *** Program history log:
-c        93-01-12  S. Benjamin - Original version
+c *** program history log:
+c        93-01-12  s. benjamin - original version
 c
-c *** Usage:  call tv2tq(tv,rh,p,t,q)
+c *** usage:  call tv2tq(tv,rh,p,t,q)
 c
-c *** Input argument list:
-c        tv     - real  virtual temperature (K)
+c *** input argument list:
+c        tv     - real  virtual temperature (k)
 c        rh     - real  relative humidity (range 0.0-1.0)
 c        p      - real  pressure (mb)
 c
-c *** Output argument list:
-c        t      - real  temperature (K) 
+c *** output argument list:
+c        t      - real  temperature (k) 
 c        q      - real  specific humidity (kg/kg)
 c
-c *** Reamrks:
-c        It uses an iterative newton-raphson technique.  Four iterations are
+c *** reamrks:
+c        it uses an iterative newton-raphson technique.  four iterations are
 c        generally adequate to provide convergence to 5 decimal places.
 c        the wobus function for saturation vapor pressure over liquid water
 c        is used.
@@ -428,13 +428,13 @@ c
          q=0.62197*etv/(p-etv)
          t=t2*(1.+0.608*q)
 c
-c ****** Recalc. tv.
+c ****** recalc. tv.
 c
          dt=tv-t
          dum=(estv2-estv1)/(t2-t1)
          etv=estv2+dum*dt*rh
 c
-c ****** Reset t1 and estv1 before next iteration.
+c ****** reset t1 and estv1 before next iteration.
 c
          t1=t2
          estv1=estv2
@@ -452,7 +452,7 @@ c
      1,fullname,gproj,istatus)
 c
 c acquires background projection parameters and uses them to
-c temporarily replace lapsparms parameters. It is then possible
+c temporarily replace lapsparms parameters. it is then possible
 c to use the library projection routines to calculate wind rotation
 c angles for the background.
 c
@@ -475,9 +475,9 @@ c
       real          dlat,dlon
       real          sw(2),ne(2)
       real          dxbg,dybg
-      real          La1,Lo1,La2,Lo2
-      real          Xcen,Ycen
-      real          Xsw,Ysw,Xne,Yne
+      real          la1,lo1,la2,lo2
+      real          xcen,ycen
+      real          xsw,ysw,xne,yne
       real          erad
       real          rlatcen,rloncen
 
@@ -487,12 +487,12 @@ c
       save          centrallat_save
       real          centrallon_save
       save          centrallon_save
-      real          Lat0_save
-      save          Lat0_save
-      real          Lat1_save
-      save          Lat1_save
-      real          Lon0_save
-      save          Lon0_save
+      real          lat0_save
+      save          lat0_save
+      real          lat1_save
+      save          lat1_save
+      real          lon0_save
+      save          lon0_save
 
       integer       isave
       data          isave/0/
@@ -505,22 +505,22 @@ c
             c6_maproj_save=c6_maproj
             centrallat_save=grid_cen_lat
             centrallon_save=grid_cen_lon
-            Lat0_save=standard_latitude
-            Lat1_save=standard_latitude2
-            Lon0_save=standard_longitude
+            lat0_save=standard_latitude
+            lat1_save=standard_latitude2
+            lon0_save=standard_longitude
             isave=1
          else
-            print*,'Return to rotate_background_uv: isave=0; ldir=false'
+            print*,'return to rotate_background_uv: isave=0; ldir=false'
             return 
          endif
       elseif(isave.eq.1)then        
-c Restore original nest7grid.parms settings
+c restore original nest7grid.parms settings
          c6_maproj=c6_maproj_save
          grid_cen_lat=centrallat_save
          grid_cen_lon=centrallon_save
-         standard_latitude=Lat0_save
-         standard_latitude2=Lat1_save
-         standard_longitude=Lon0_save
+         standard_latitude=lat0_save
+         standard_latitude2=lat1_save
+         standard_longitude=lon0_save
          isave=0
          return
       endif
@@ -529,8 +529,8 @@ c Restore original nest7grid.parms settings
       print*,'reset_lapsparms_common: isave = ',isave
       print*
       print*,'bgmodel: ',bgmodel
-      print*,'cmodel: ', TRIM(cmodel)
-      print*,'fullname:',TRIM(fullname)
+      print*,'cmodel: ', trim(cmodel)
+      print*,'fullname:',trim(fullname)
       print*
 
       call get_bkgd_mdl_info(bgmodel,cmodel,fullname
@@ -539,31 +539,31 @@ c Restore original nest7grid.parms settings
      &,dxbg,dybg,standard_latitude,standard_latitude2
      &,standard_longitude,sw,ne,cgrddef,istatus)
 
-c Temporarily set c6_maproj.
-      if(gproj.eq.'LC')c6_maproj='lambrt'
-      if(gproj.eq.'PS')c6_maproj='plrstr'
-      if(gproj.eq.'MC')c6_maproj='merctr' 
+c temporarily set c6_maproj.
+      if(gproj.eq.'lc')c6_maproj='lambrt'
+      if(gproj.eq.'ps')c6_maproj='plrstr'
+      if(gproj.eq.'mc')c6_maproj='merctr' 
 cc
-c if RUC_NATIVE
+c if ruc_native
       if(bgmodel.eq.5 .or. bgmodel.eq.3 .or. bgmodel.eq.13)then
-         if(TRIM(cmodel).eq.'CWB_20FA_LAMBERT_NF'.or.
-     +      TRIM(cmodel).eq.'CWB_20FA_LAMBERT_RE'.or.
-     +      TRIM(cmodel).eq.'RUC40_NATIVE'.or.
-     +      TRIM(cmodel).eq.'RUC')then  
-            La1=sw(1)
-            Lo1=sw(2)
-            La2=ne(1)
-            Lo2=ne(2)
-            print*,'*** SW lat/lon = ',La1,Lo1,'***'
-            print*,'*** NE lat/lon = ',La2,Lo2,'***'
+         if(trim(cmodel).eq.'cwb_20fa_lambert_nf'.or.
+     +      trim(cmodel).eq.'cwb_20fa_lambert_re'.or.
+     +      trim(cmodel).eq.'ruc40_native'.or.
+     +      trim(cmodel).eq.'ruc')then  
+            la1=sw(1)
+            lo1=sw(2)
+            la2=ne(1)
+            lo2=ne(2)
+            print*,'*** sw lat/lon = ',la1,lo1,'***'
+            print*,'*** ne lat/lon = ',la2,lo2,'***'
             call get_earth_radius(erad,istatus)
-c Get X/Y for grid center
-            call latlon_to_xy(La1,Lo1,ERAD,Xsw,Ysw) 
-            call latlon_to_xy(La2,Lo2,ERAD,Xne,Yne) 
-            Xcen=(Xne+Xsw)/2.
-            Ycen=(Yne+Ysw)/2.
-            call xy_to_latlon(Xcen,Ycen,erad,rlatcen,rloncen)
-            print*,'*** Center lat/lon= ',rlatcen,rloncen,' ***'
+c get x/y for grid center
+            call latlon_to_xy(la1,lo1,erad,xsw,ysw) 
+            call latlon_to_xy(la2,lo2,erad,xne,yne) 
+            xcen=(xne+xsw)/2.
+            ycen=(yne+ysw)/2.
+            call xy_to_latlon(xcen,ycen,erad,rlatcen,rloncen)
+            print*,'*** center lat/lon= ',rlatcen,rloncen,' ***'
          endif
       endif
 

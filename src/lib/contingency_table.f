@@ -1,18 +1,18 @@
 
-        subroutine contingency_table(o,f,ni,nj,nk             ! I
-     1                              ,thresh_o,thresh_f        ! I
-     1                              ,lun_out                  ! I
-     1                              ,ilow,ihigh,jlow,jhigh    ! I
-     1                              ,lmask_rqc_3d             ! I
-     1                              ,contable)                ! O
+        subroutine contingency_table(o,f,ni,nj,nk             ! i
+     1                              ,thresh_o,thresh_f        ! i
+     1                              ,lun_out                  ! i
+     1                              ,ilow,ihigh,jlow,jhigh    ! i
+     1                              ,lmask_rqc_3d             ! i
+     1                              ,contable)                ! o
 
         real o(ni,nj,nk)
         real f(ni,nj,nk)
 
         logical lmask_rqc_3d(ni,nj,nk)
 
-!       First index is observed, second index is forecast
-!       0 is Yes, 1 is No
+!       first index is observed, second index is forecast
+!       0 is yes, 1 is no
         integer,parameter :: k12 = selected_int_kind(12)
         integer (kind=k12) :: contable(0:1,0:1)
 
@@ -44,17 +44,17 @@
         enddo ! i
         enddo ! k
 
-!       Write contingency table
+!       write contingency table
         write(lun_out,*)
         write(lun_out,1)
         write(lun_out,2)
         write(lun_out,3)contable(0,0),contable(1,0) 
         write(lun_out,4)contable(0,1),contable(1,1) 
 
- 1      format('                    Obs')
- 2      format('                  Y         N     ')
- 3      format('  Fcst  Y',  i11,         i11)
- 4      format('        N',  i11,         i11)
+ 1      format('                    obs')
+ 2      format('                  y         n     ')
+ 3      format('  fcst  y',  i11,         i11)
+ 4      format('        n',  i11,         i11)
 
         return
         end

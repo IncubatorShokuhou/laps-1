@@ -1,35 +1,35 @@
-  SUBROUTINE smooth2 (nx,ny,dist,data)
+  subroutine smooth2 (nx,ny,dist,data)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)  :: nx,ny,dist
-    REAL,    INTENT(INOUT) :: data(nx,ny)
-    REAL                   :: tempdata(nx,ny)
+    implicit none
+    integer, intent(in)  :: nx,ny,dist
+    real,    intent(inout) :: data(nx,ny)
+    real                   :: tempdata(nx,ny)
 
-    INTEGER i,j,ii,jj,ipt,jpt
-    REAL  :: np, datasum
+    integer i,j,ii,jj,ipt,jpt
+    real  :: np, datasum
 
     tempdata(:,:) = 0.
-    DO j = 1, ny
-      DO i = 1, nx
+    do j = 1, ny
+      do i = 1, nx
         
         np = 0.
         datasum = 0.
-        DO jj = -dist,dist,1
-          DO ii = -dist,dist,1
+        do jj = -dist,dist,1
+          do ii = -dist,dist,1
             ipt = i + ii
             jpt = j + jj
-            IF ((ipt .GE. 1) .AND. (ipt .LE. nx) .AND. &
-                (jpt .GE. 1) .AND. (jpt .LE. ny) ) THEN
+            if ((ipt .ge. 1) .and. (ipt .le. nx) .and. &
+                (jpt .ge. 1) .and. (jpt .le. ny) ) then
                datasum = datasum + data(ipt,jpt)
                np = np + 1.
-            ENDIF
-          ENDDO
-        ENDDO
+            endif
+          enddo
+        enddo
 
         tempdata(i,j) = datasum / np
-      ENDDO
-    ENDDO
+      enddo
+    enddo
     data = tempdata
-    END SUBROUTINE smooth2
+    end subroutine smooth2
       
 

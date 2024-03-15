@@ -1,20 +1,20 @@
            
-      subroutine write_pro(lun_out                         ! I
-     1                    ,maxpro,maxlvl,npro              ! I
-     1                    ,iwmostanum                      ! I
-     1                    ,stalat,stalon,staelev           ! I
-     1                    ,c6_staid,a9time_ob,c8_obstype   ! I
-     1                    ,nlvl                            ! I
-     1                    ,height_m                        ! I
-     1                    ,dir_deg                         ! I
-     1                    ,spd_mps                         ! I
-     1                    ,istatus)                        ! O
+      subroutine write_pro(lun_out                         ! i
+     1                    ,maxpro,maxlvl,npro              ! i
+     1                    ,iwmostanum                      ! i
+     1                    ,stalat,stalon,staelev           ! i
+     1                    ,c6_staid,a9time_ob,c8_obstype   ! i
+     1                    ,nlvl                            ! i
+     1                    ,height_m                        ! i
+     1                    ,dir_deg                         ! i
+     1                    ,spd_mps                         ! i
+     1                    ,istatus)                        ! o
 
-!     Steve Albers FSL    2001
+!     steve albers fsl    2001
 
-!     Write routine for 'pro' file
+!     write routine for 'pro' file
 
-!     For missing data values, 'r_missing_data' should be passed in 
+!     for missing data values, 'r_missing_data' should be passed in 
 
 !.............................................................................
 
@@ -36,7 +36,7 @@
 
       do ipro = 1,npro
 
-!       Count and index the good levels
+!       count and index the good levels
         n_good_levels = 0
         do ilvl = 1,nlvl(ipro)
             if(dir_deg(ipro,ilvl) .ne. r_missing_data .and.
@@ -48,7 +48,7 @@
             endif
         enddo ! ilvl
 
-!       Write Sounding Header
+!       write sounding header
 
         call filter_string(c6_staid(ipro))
 
@@ -64,7 +64,7 @@
 
           if(l_good_level(ilvl))then
 
-!             Write Profile Level
+!             write profile level
               write(lun_out,301,err=303)height_m(ipro,ilvl)
      1                                 ,dir_deg(ipro,ilvl)
      1                                 ,spd_mps(ipro,ilvl)
@@ -88,7 +88,7 @@
 
       go to 999
 
- 990  write(6,*)' ERROR in write_pro'
+ 990  write(6,*)' error in write_pro'
       istatus=0
       return
 

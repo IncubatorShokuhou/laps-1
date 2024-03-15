@@ -27,7 +27,7 @@
         init_optmiz = init_optmiz_in       
 
 	if(init_optmiz .eq. 0)then
-           write(6,*)' Subroutine optimize_wrapper initialize...'
+           write(6,*)' subroutine optimize_wrapper initialize...'
            num_stepsize_inc = 0
            increment_ratio = 5.
            depth_this_run = 0.
@@ -52,8 +52,8 @@
 	iter_prior = max(iterop-10,1)
 	if(f_merit_min_a(iterop) -
      1     f_merit_min_a(iter_prior) .gt. -.001d0
-     1	                                    .AND. iswp .ge. 3
-     1                                      .AND. iterswp .eq. 1)then
+     1	                                    .and. iswp .ge. 3
+     1                                      .and. iterswp .eq. 1)then
             write(6,*)' optimize slow convergence',iswp,iterswp,iterop
             iexit_pending = 1
 
@@ -114,7 +114,7 @@
 12         format(' dstep is ',10f10.5)
 	endif
 
-!	Output Logic
+!	output logic
 	if(iswp .le. 1)then
             l_extra_output = l_extra1 
         else
@@ -122,7 +122,7 @@
         endif
         
 
-        if(modeop .ge. 10 .OR. 
+        if(modeop .ge. 10 .or. 
      1	     l_extra_output .eqv. .true. 
      1	        .and.  ( iterop .lt. 1000
      1          .and.     kswp .le. 1 )
@@ -137,7 +137,7 @@
         endif
 
 	if(init_optmiz .eq. 0)then
-            write(6,*)' Subroutine optmiz initialize...'
+            write(6,*)' subroutine optmiz initialize...'
             modeop=1
             iswp=1
             g2=1
@@ -168,7 +168,7 @@
 	goto(21000,21600,22300,22600,23800,25200,25600,26508,27745
      1                                                ,27800),modeop
 
-!****** Modeop = 1 *******************************************************
+!****** modeop = 1 *******************************************************
 21000	step_factor = 10**depth_this_run*increment_ratio**num_stepsize_inc
 	cfive = 1d-14*step_factor**2
 	c7 = 1d+5/step_factor**2
@@ -189,7 +189,7 @@
 	kswp = 1
 	lswp = 1
 	iv = 1
-	f_ref = f_merit ! New Statement
+	f_ref = f_merit ! new statement
 	g_ref = f_merit
 	gone = f_merit
 	k5 = swps_per_extrpl
@@ -204,7 +204,7 @@
 	    k3 = 0
 	endif
 
-!****** Modeop = 2 ***********************************************************
+!****** modeop = 2 ***********************************************************
 21600	if(g6 .ne. 0)then
             g_ref = f_merit
             g6 = 0
@@ -217,7 +217,7 @@
 
         if(.not.(itervar .gt. 2 .or. kswp .lt. 3 
      1                          .or. c1(iv) .eq. 0))then
-!           Multidimensional Convergence
+!           multidimensional convergence
             if(itervar .eq. 1 .and. kswp .ge. 3)then
      
                 if(kswp .eq. 3)then
@@ -229,11 +229,11 @@
                 if(l_extra_output .eqv. .true. 
      1			        .and. iterop .lt. 1000)then
                     write(6,111)iv,a(iv)
-111                 format(12x,'Accelerating a(',i2,') to',d15.6)
+111                 format(12x,'accelerating a(',i2,') to',d15.6)
                 endif
 
 	        if( .not. ( abs( d1(iv)/dstep(iv) ) .gt. .4 
-     1	                             .OR. 
+     1	                             .or. 
      1               abs(za(iv)-a_ref(iv)) .gt. .4 * dstep(iv) ) )then       
 
                     if(l_extra1 .eqv. .true. .and. iterop .lt. 1000)
@@ -253,7 +253,7 @@
             if(f_merit .gt. f_ref)then
                 if(l_extra1 .eqv. .true. .and. iterop .lt. 2500)then
                     write(6,112)iswp,iv,itervar,f_merit-f_ref
-112                 format(' Multidimensional Convergence halted',
+112                 format(' multidimensional convergence halted',
      1                 ' swp ',i4,' ivar',i3,' iq ',i4,' f-fref',d10.3)       
                 endif
                 c1(iv) = 0
@@ -274,13 +274,13 @@
         modeop = 3
         return
 
-!****** Modeop = 3 ************************************************************
+!****** modeop = 3 ************************************************************
 22300	ahigh = f_merit
         a(iv) = aref-dstep(iv)
         modeop = 4
         return
 
-!****** Modeop = 4 ************************************************************
+!****** modeop = 4 ************************************************************
 22600	alow = f_merit
 	a(iv) = aref
 	f_merit = amid
@@ -288,19 +288,19 @@
 	dlow = alow - amid
 	if(l_extra_output .eqv. .true.)write(6,102)alow,amid,ahigh
 102     format(1x,' alow,amid,ahigh',3d15.5)
-!       If step size is too small to affect F, increase it
+!       if step size is too small to affect f, increase it
 	if(dhigh .eq. 0. .or. dlow .eq. 0.)then
 	    dstep(iv) = dstep(iv)*5.
 	    write(6,*)' dn(',iv,') is too small - increased to',dstep(iv)
 	    goto21900
         endif
 
-!       Converge parabolically if possible or else linearly
+!       converge parabolically if possible or else linearly
         if(abs(dhigh + dlow) .gt. 1d-6*abs(dhigh-dlow))then
             anew = a(iv)+dstep(iv)*(.5-dhigh/(dhigh+dlow))
         else
             anew = a(iv) - f_merit/((dhigh-dlow)/(2.*dstep(iv)))
-	    write(6,*)' Linear Convergence cv(iv) = ',cv(iv),' modeop=10'       
+	    write(6,*)' linear convergence cv(iv) = ',cv(iv),' modeop=10'       
         endif
 
         if(l_extra_output .eqv. .true.)
@@ -309,7 +309,7 @@
 
         if((anew - a(iv))*(dhigh-dlow) .gt. 0.)then
 	    write(6,*)
-     1	         ' Parabolic convergence not well behaved (concave down)'
+     1	         ' parabolic convergence not well behaved (concave down)'
             write(6,*)' a(iv),anew,alow,amid,ahigh,dh,dl',
      1	                a(iv),anew,alow,amid,ahigh,dhigh,dlow
 
@@ -336,10 +336,10 @@
                       f_ref = ahigh
                     endif
  
-!                   This mimics part of the 26511 block
+!                   this mimics part of the 26511 block
                     cv(iv) = cv(iv) - 1
-                    write(6,*)' Switching to convergence mode',cv(iv)
-                    write(6,*)' Modeop = ',modeop
+                    write(6,*)' switching to convergence mode',cv(iv)
+                    write(6,*)' modeop = ',modeop
 
                     write(6,*)' going to mode 8 (26520) new option'
                     goto26520
@@ -378,7 +378,7 @@
         endif
 
         if(cv(iv) .ge. 2)then
-!           Set variables for convergence speedup
+!           set variables for convergence speedup
 !                      cv(iv) = 2
             a(iv) = anew
             g5 = 1
@@ -403,7 +403,7 @@
         modeop = 5
         return            
 
-!****** Modeop = 5 ***********************************************************
+!****** modeop = 5 ***********************************************************
 23800	if(f_merit .ge. f9)then
             goto24100
         else
@@ -431,7 +431,7 @@
         aalow = aamid - dstep_swp
         amid = f9
 	write(6,24111)aalow,aamid,aahigh,dstep_swp   
-24111   format(' Start bisection search',3f10.5,5x,f10.5)	
+24111   format(' start bisection search',3f10.5,5x,f10.5)	
 !       goto25200
         a(iv) = aahigh
         modeop = 6
@@ -452,15 +452,15 @@
         modeop = 6
         return
 
- !****** Modeop = 6 ***********************************************************
+ !****** modeop = 6 ***********************************************************
 25200	ahigh = f_merit
         a(iv) = aalow
         modeop = 7
         return
 
- !****** Modeop = 7 **********************************************************
+ !****** modeop = 7 **********************************************************
 25600	alow = f_merit
-!       Convergence Speedup
+!       convergence speedup
         if(cv(iv) .ne. 0)then
             if(a9 .eq. 0.)a8 = anew
             if(ahigh - 2.*amid + alow .ne. 0.)then
@@ -476,7 +476,7 @@
      1                    itervar,a9,dstep_swp,alow,amid,ahigh,a8
             endif
 
-!           Test for convergence cv(iv) = 1
+!           test for convergence cv(iv) = 1
             if(abs(anew-a8) .lt. dstep(iv))then 
                 a9 = a9+1
             else
@@ -532,13 +532,13 @@
         endif
 
 !
-!       Test for convergence cv(iv) = 0
+!       test for convergence cv(iv) = 0
         if(abs(dstep_swp) .gt. dstep(iv))goto24600
         crv(iv)=(ahigh - 2.*amid + alow)*(dstep(iv)/dstep_swp)**2
         a(iv) = aamid
         f_merit = amid
 
-!****** Modeop = 8 ***********************************************************
+!****** modeop = 8 ***********************************************************
 26508	continue
 
 	write(6,*)' modeop 8: compare f_ref/f_merit',f_ref,f_merit
@@ -549,9 +549,9 @@
         endif
 
 26509   if(cv(iv) .le. 1)then
-            write(6,*)' Too many iterations on one variable'
+            write(6,*)' too many iterations on one variable'
             dstep(iv) = dstep(iv) * 5.
-            write(6,*)' Increasing step size of variable ',iv,
+            write(6,*)' increasing step size of variable ',iv,
      1                ' to',dstep(iv)
             goto 26520
         endif
@@ -559,16 +559,16 @@
 26511   if(abs(a(iv)-a_ref(iv))/dstep(iv) .ge. .01 .or. nv .eq. 1
      1                                                            )then       
             cv(iv) = cv(iv) - 1
-            write(6,*)' Switching to convergence mode',cv(iv)
-            write(6,*)' Modeop = ',modeop
+            write(6,*)' switching to convergence mode',cv(iv)
+            write(6,*)' modeop = ',modeop
         else
 	    g8 = 1
 	    write(6,*)' a is close to a_ref',a(iv),a_ref(iv)
-            write(6,*)' Sweep',iswp,'  on variable',iv,
+            write(6,*)' sweep',iswp,'  on variable',iv,
      1                '  aborted cv=',cv(iv)
         endif
 
-26520	write(6,*)' Sweep,f,ft',iswp,f_merit,f_ref
+26520	write(6,*)' sweep,f,ft',iswp,f_merit,f_ref
         write(6,*)' f-ft,iv,iq',f_merit-f_ref,iv,itervar
         write(6,*)' a(iv),at(iv),a-at',a(iv),a_ref(iv),a(iv)-a_ref(iv)
 
@@ -583,10 +583,10 @@
             goto21600
         endif
 
-!       Adjust An if out of bounds
+!       adjust an if out of bounds
 26538   if(mhigh(iv) .lt. mlow(iv))then
             modeop = 12
-            write(6,*)' Warning, Unreal System, Vanished Constraints'
+            write(6,*)' warning, unreal system, vanished constraints'
             return
         endif
 
@@ -610,13 +610,13 @@
 
 26710   if(l_extra1 .eqv. .true. .and. iterop .le. 2500)then
             write(6,105)iterop,iv,f_merit
-105         format(15x,'Iterop = ',i5,'      iv',i4,'     f',d18.9)
+105         format(15x,'iterop = ',i5,'      iv',i4,'     f',d18.9)
 !           if(iswp .le. 2)then
 !               write(6,101)a(j)
 !           endif            
         endif
 
-!       Advance to next variable
+!       advance to next variable
         iv = iv + 1
         itervar = 1
         iterswp = 1
@@ -627,7 +627,7 @@
             k8 = 5
             l_aitken_thistime = .false.
             write(6,*)
-     1             ' Aitken failure override is cancelled mp,f,g_ref='
+     1             ' aitken failure override is cancelled mp,f,g_ref='
      1              ,modeop,f_merit,g_ref
             do j = 1,nv
                 a(j) = g1(j)
@@ -649,7 +649,7 @@
             return
         endif
 
-!       End of Sweep, Reset convergence variables every fourth sweep
+!       end of sweep, reset convergence variables every fourth sweep
         if(kswp * .25 .eq. int(kswp * .25) .or. kswp .eq. 2)then
             do j = 1,nv
                 cv(j) = cv_ref(j)
@@ -659,7 +659,7 @@
 
         modeop = 10
         l_aitken_thistime = .true.
-        c9_outstring = ' A(n)s'
+        c9_outstring = ' a(n)s'
         if(l_extra1 .eqv. .true.)write(6,101)c9_outstring,(a(j),j=1,nv)       
 101     format(1x,a9,8d14.5/8d14.5)
 27508   k_ref = 1
@@ -671,7 +671,7 @@
                 if(d1(j) .eq. 0.)c1(j) = 0.
 !               write(6,*)' j,e1(j)',j,e1(j)
 
-!               Decide whether to apply Aitken Acceleration
+!               decide whether to apply aitken acceleration
                 if(d1(j) .ne. 0. .and. abs(e1(j)) .gt. 1d-14)then
  
  	            if(abs(1.-d1(j)*g1(j)/(e1(j)**2)) .gt. .06
@@ -686,7 +686,7 @@
 
             enddo
     
-!	    Adjust Step Sizes
+!	    adjust step sizes
             if(f_merit .gt. cfive*c7)then
                 m9 = f_merit/c7
             else
@@ -710,7 +710,7 @@
 	    u7 = 0
             if(l_extra1 .eqv. .true. .and. 
      1         iterop .le. 1000 .and. l_depth .eqv. .true.)then
-                c9_outstring = ' Step(n)s'
+                c9_outstring = ' step(n)s'
                 write(6,101)c9_outstring,(d1(j)/dstep(j),j=1,nv)
                 c9_outstring = ' d1(n)s'
                 write(6,101)c9_outstring,(d1(j),j=1,nv)
@@ -718,15 +718,15 @@
                 write(6,101)c9_outstring,(dstep(j),j=1,nv)
             endif
 
-!           Test for Convergence
-!           Examine maximum change of all variables optimized in this sweep
+!           test for convergence
+!           examine maximum change of all variables optimized in this sweep
             zsum = 0.
             do j = 1,nv
                 zsum = zsum + ((a(j)-a_ref(j))/dstep(j))**2
             enddo
             if(zsum .gt. 1. .or. qq .eq. 1 .and. v5 .eq. 0)modeop = 2
             write(6,104)iswp-1,iterop,f_merit
-104         format(' End of sweep ',i5,'      ip= ',i5,'      f ',d17.7)
+104         format(' end of sweep ',i5,'      ip= ',i5,'      f ',d17.7)
             write(6,*)
 
         else
@@ -734,19 +734,19 @@
 
         endif
 
-!       Apply Aitken acceleration or Sweep extrapolation
+!       apply aitken acceleration or sweep extrapolation
 27720   if(modeop .gt. 9)return
 
         if(l_aitken .and. l_aitken_thistime)then
-            write(6,*)' Aitken Acceleration'
+            write(6,*)' aitken acceleration'
             goto 27730
         endif
 
-!       write(6,*)' Testing - kswp,swps_per_extrpl'
+!       write(6,*)' testing - kswp,swps_per_extrpl'
 !	1			,kswp,swps_per_extrpl
 27724   if(kswp .lt. swps_per_extrpl)goto21600
 
-!       Initialize Sweep Extrapolation
+!       initialize sweep extrapolation
         l_swp_extrpl = .true.
         l6 = 1
         l7 = 0
@@ -755,7 +755,7 @@
                 h1(j) = a(j)
         enddo ! j
 
-!       Loop through Sweep Extrapolation
+!       loop through sweep extrapolation
 27725   bottom_last = bottom
 	if(l7 .gt. 2.)then
 		slope1 = (f_merit - f_m1) / (l7 - l_m1)
@@ -769,10 +769,10 @@
 
 
 	if(l_extra1 .eqv. .true. .and. iterop .le. 1000)then
-!   	        c9_outstring = ' A(n)s'
+!   	        c9_outstring = ' a(n)s'
 !               write(6,101)c9_outstring,(a(j),j=1,nv)
                 write(6,107)iterop,f_merit,l7,crv_swp,bottom
-107             format(' Sweep extpl ip,f,l7,crv,btm='
+107             format(' sweep extpl ip,f,l7,crv,btm='
      1                      ,i5,d15.6,f10.2,d11.3,f10.2)
         endif
 
@@ -799,23 +799,23 @@
         modeop = 9
         return
 
-!****** Modeop = 9 ***********************************************************
+!****** modeop = 9 ***********************************************************
 27745	itervar = 1
         iterswp = 1
 
         if(l_swp_extpl_end .eqv. .true.)then
-  	    c9_outstring = ' A(n)s'
+  	    c9_outstring = ' a(n)s'
             write(6,101)c9_outstring,(a(j),j=1,nv)
             write(6,204)f_merit
-204         format('  The bottom value of f is ',d15.6,
-     1             ' Setting Modeop to 2'/)
+204         format('  the bottom value of f is ',d15.6,
+     1             ' setting modeop to 2'/)
             f_ref = f_merit
             l_swp_extpl_end = .false.
             modeop = 2
             goto21600
         endif
 
-!       Check bounds
+!       check bounds
         do j = 1,nv
             if(a(j) .gt. mhigh(j) .or. a(j) .lt. mlow(j))then
                 if(l_swp_extrpl .eqv. .true. .or. mlow(j) .gt. mhigh(j))     
@@ -841,20 +841,20 @@
             else
                 modeop = 2
                 write(6,106)f_merit
-106             format(' After Aitken Acceleration, f_merit = ',d17.7)
+106             format(' after aitken acceleration, f_merit = ',d17.7)
                 u7 = 1
                 goto21600
             endif
         endif
 
 27750   if(l_swp_extrpl)then
-            write(6,*)' Sweep extrapolation'
+            write(6,*)' sweep extrapolation'
         else
-            write(6,*)' Aitken Acceleration'
+            write(6,*)' aitken acceleration'
         endif
 
         write(6,203)f_merit,f_ref,f_merit-f_ref
-203     format('  Aborted - ff,ft,ff-ft',3d15.5)
+203     format('  aborted - ff,ft,ff-ft',3d15.5)
 
         if(.not.(l_swp_extrpl))then
             k8 = k8-1
@@ -869,14 +869,14 @@
             modeop = 2
             goto27724
         else
-!  	    c9_outstring = ' A(n)s'
+!  	    c9_outstring = ' a(n)s'
 !           write(6,101)c9_outstring,(a(j),j=1,nv)
 !           write(6,*)
 
 
         endif
 
-!       Modify number of sweeps per extrapolation
+!       modify number of sweeps per extrapolation
         if(k3 .ne. 0)then
             conv_rate_m2 = conv_rate_m1
             conv_rate_m1 = conv_rate
@@ -911,17 +911,17 @@
         if(k3 .eq. 0)swps_per_extrpl = k5
         swps_per_extrpl = max(swps_per_extrpl,1)
         write(6,201)conv_rate,swps_per_extrpl,iterop,l7-l6/swp_ratio
-201     format('  Conv rate ',d10.3,i4,' sweeps per extrpolation'
+201     format('  conv rate ',d10.3,i4,' sweeps per extrpolation'
      1        ,i7,f9.2)
 
         if(bottom .eq. 0.)bottom = l_m1
         write(6,205)bottom
-205     format('  Resetting a(n)s, Bottom = ',f10.2)
+205     format('  resetting a(n)s, bottom = ',f10.2)
         do j = 1,nv
             a(j) = h1(j)+d1(j)*bottom
         enddo
 
-!       c9_outstring = ' A(n)s'
+!       c9_outstring = ' a(n)s'
 !       write(6,101)c9_outstring,(a(j),j=1,nv)
 !       write(6,*)
 !       f_merit = f_ref
@@ -930,7 +930,7 @@
         l_swp_extpl_end = .true.
         return
 
-27790   write(6,*)' Abort Mode overridden - going for it'
+27790   write(6,*)' abort mode overridden - going for it'
         do j = 1,nv
             a_ref(j) = a(j)
         enddo
@@ -938,14 +938,14 @@
         modeop = 2
         goto21600             
 
-!****** Modeop = 10 **********************************************************
+!****** modeop = 10 **********************************************************
 27800	if(v5 .le. 0)then
             modeop = 11
             return
         endif
         c7 = c7 * increment_ratio**2
         cfive = cfive / increment_ratio**2
-        write(6,*)' Incrementing step sizes,c7,crv',c7,cfive
+        write(6,*)' incrementing step sizes,c7,crv',c7,cfive
         do j = 1,nv
             dstep(j) = dstep(j)/increment_ratio
         enddo
@@ -959,8 +959,8 @@
 
         subroutine golden_search(a1,a2,a3,f1,f2,f3)
 
-!       Assume a2 has the lowest f2
-!       A minimum must exist between a1 and a3
+!       assume a2 has the lowest f2
+!       a minimum must exist between a1 and a3
 
 	implicit real*8 (a-h,o-z)
 	

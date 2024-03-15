@@ -1,10 +1,10 @@
 
        subroutine antialias_ellipse(radius,ricen,rjcen,aspect_ratio,array,ni,nj,iverbose)
 
-!      radius        radius in pixels of ellipse vertical axis        I
-!      ricen         location in pixels of ellipse center             I
-!      ni,nj         half size of pixel box to evaluate               I
-!      array         fractional area of pixels inside ellipse         O
+!      radius        radius in pixels of ellipse vertical axis        i
+!      ricen         location in pixels of ellipse center             i
+!      ni,nj         half size of pixel box to evaluate               i
+!      array         fractional area of pixels inside ellipse         o
 
        real array(-ni:ni,-nj:nj)
        real m,k
@@ -18,7 +18,7 @@
        do i = -ni,+ni
        do j = -nj,+nj
 
-!        Subdivide grid box into horizontal lines
+!        subdivide grid box into horizontal lines
          sum = 0.
          xlo = float(i) - 0.5
          xhi = float(i) + 0.5
@@ -102,10 +102,10 @@
 
        subroutine line_ellipse(m,c,h,k,a,b,r_missing_data,x1,x2,y1,y2)
 
-!      http://www.ambrsoft.com/TrigoCalc/Circles2/Ellipse/EllipseLine.htm
+!      http://www.ambrsoft.com/trigocalc/circles2/ellipse/ellipseline.htm
 
-!      Find intersection of line and circle
-!      Line is defined as y = mx + c
+!      find intersection of line and circle
+!      line is defined as y = mx + c
 
        real m,k
 
@@ -132,13 +132,13 @@
 
        subroutine antialias_phase(radius,ricen,rjcen,aspect_ratio,alt_scale,azi_scale,va,rill,array,ni,nj,iverbose)
 
-!      radius        radius in pixels of ellipse vertical axis        I
-!      ricen         location in pixels of ellipse center             I
-!      ni,nj         half size of pixel box to evaluate               I
-!      aspect_ratio  circle projected onto alt/az grid                I
-!      va            vertex angle of center of illuminated limb       I
+!      radius        radius in pixels of ellipse vertical axis        i
+!      ricen         location in pixels of ellipse center             i
+!      ni,nj         half size of pixel box to evaluate               i
+!      aspect_ratio  circle projected onto alt/az grid                i
+!      va            vertex angle of center of illuminated limb       i
 !                    (0 is up, 90 is right) 
-!      array         fractional area of pixels inside ellipse         O
+!      array         fractional area of pixels inside ellipse         o
 
        parameter (rpd = 3.14159/180.)
          
@@ -161,7 +161,7 @@
        bb = radius
        area_sum = 0.
 
-!      Ratio of terminator minor axis / major axis
+!      ratio of terminator minor axis / major axis
        aspect2 = abs((2.*rill)-1.)
 
        r_missing_data = 1e37
@@ -169,7 +169,7 @@
        do i = -ni,+ni ! azimuth direction
        do j = -nj,+nj ! altitude direction
 
-!        Subdivide grid box into horizontal lines
+!        subdivide grid box into horizontal lines
          sum = 0.
          if(iverbose .ge. 2)write(6,*)'  i   j    xpix     ypix     rdeg    th_up   th_minor th_major   rell1    rell2  aspect_rat rinc'
          do isub = 0,9 
@@ -185,7 +185,7 @@
            theta_minor = theta_up - va*rpd ! theta relative to minor axis (illuminated side)
            theta_major=theta_minor+90.*rpd ! theta relative to major axis
 
-!          Determine r_el1, r_el2 and compare
+!          determine r_el1, r_el2 and compare
            rell1 = 0.25
            rell2 = rell(rell1,rell1*aspect2,theta_major)
            if(rdeg .lt. rell1)then

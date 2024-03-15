@@ -1,45 +1,45 @@
-      Subroutine rdblock_line_elem(csat_id,csat_type,chtype,
+      subroutine rdblock_line_elem(csat_id,csat_type,chtype,
      &ncid,varid,n_elems,n_lines,data,istatus)
 c
-c routine designed to read 3-d satellite sounding and image netCDF data with variable
+c routine designed to read 3-d satellite sounding and image netcdf data with variable
 c line and element dimensions.
 c
-      Implicit None
+      implicit none
 
       include 'netcdf.inc'
       include 'satellite_dims_lvd.inc'
       include 'satellite_common_lvd.inc'
 
-      integer      RCODE
+      integer      rcode
 c
-      Integer n_elems,n_lines,nch
+      integer n_elems,n_lines,nch
       real    data(n_elems, n_lines)
-      Integer*2 data_int2(n_elems, n_lines)
+      integer*2 data_int2(n_elems, n_lines)
 
-      Integer n,nn
-      Integer varid,ncid
-      Integer istatus
-      Integer NDSIZE_CH
-      Integer NDSIZE_X
-      Integer NDSIZE_Y
-      Integer dim_id_x
-      Integer dim_id_y
-      Integer dim_id_k
+      integer n,nn
+      integer varid,ncid
+      integer istatus
+      integer ndsize_ch
+      integer ndsize_x
+      integer ndsize_y
+      integer dim_id_x
+      integer dim_id_y
+      integer dim_id_k
       integer istart
       integer iend
       integer jstart
       integer jend
 
-      Integer START(10)
-      Integer COUNT(10)
-      Character*31 DUMMY
-      Character*40 c_data_type
-      Character*6  csat_id
-      Character*3  csat_type
-      Character*3  chtype
+      integer start(10)
+      integer count(10)
+      character*31 dummy
+      character*40 c_data_type
+      character*6  csat_id
+      character*3  csat_type
+      character*3  chtype
       integer i,j,ii,jj 
 c
-C **************************************************************************
+c **************************************************************************
 c
       istatus = -1
 c
@@ -55,22 +55,22 @@ c
 c
 c qc step
 c -------
-      if(jend.gt.NDSIZE_Y)then
-         write(6,*)'jend > NDSIZE_Y - rdcdfblock.f ',jend,NDSIZE_Y
-         write(6,*)'Returing: istatus = ',istatus
+      if(jend.gt.ndsize_y)then
+         write(6,*)'jend > ndsize_y - rdcdfblock.f ',jend,ndsize_y
+         write(6,*)'returing: istatus = ',istatus
          return
       endif
 
-      if(iend.gt.NDSIZE_X)then
-         write(6,*)'iend > NDSIZE_X ',iend,NDSIZE_X
-         write(6,*)'Returning to main, istatus = ',istatus
+      if(iend.gt.ndsize_x)then
+         write(6,*)'iend > ndsize_x ',iend,ndsize_x
+         write(6,*)'returning to main, istatus = ',istatus
          return
       endif
 
-      START(1)=istart
-      COUNT(1)=iend-istart+1
-      START(2)=jstart
-      COUNT(2)=jend-jstart+1
+      start(1)=istart
+      count(1)=iend-istart+1
+      start(2)=jstart
+      count(2)=jend-jstart+1
       if(csat_type.eq.'cdf'.or.
      +   csat_type.eq.'wfo')then
          start(3)=1
@@ -82,23 +82,23 @@ c -------
          count(4)=1
       endif
 c
-c read line. Switch here discriminates 1-byte versus 2-byte data.
+c read line. switch here discriminates 1-byte versus 2-byte data.
 c
       if(csat_type.eq.'rll' .or. csat_type.eq.'gnp')then
           write(6,*)'ncid/varid = ',ncid,varid
           write(6,*)'start=',start(1:2),' count=',count(1:2)
-          rcode=NF_GET_VARA_INT2(NCID,varid,START,COUNT,data_int2)
-          if (rcode .ne. NF_NOERR) then
-              print *, NF_STRERROR(rcode)
+          rcode=nf_get_vara_int2(ncid,varid,start,count,data_int2)
+          if (rcode .ne. nf_noerr) then
+              print *, nf_strerror(rcode)
           endif
           write(6,*)'center pixel i2: ',data_int2(n_elems/2,n_lines/2)
           write(6,*)'rdblock_line_elem i2 data range: '
      1              ,minval(data_int2),maxval(data_int2)
           data(:,:) = data_int2(:,:)
       else
-          rcode=NF_GET_VARA_REAL(NCID,varid,START,COUNT,data)
-          if (rcode .ne. NF_NOERR) then
-              print *, NF_STRERROR(rcode)
+          rcode=nf_get_vara_real(ncid,varid,start,count,data)
+          if (rcode .ne. nf_noerr) then
+              print *, nf_strerror(rcode)
           endif
       endif
 
@@ -114,7 +114,7 @@ c
       endif
 
       write(6,*)'center pixel r4: ',data(n_elems/2,n_lines/2)
-C
+c
       istatus = 1
-1000  Return
-      End
+1000  return
+      end

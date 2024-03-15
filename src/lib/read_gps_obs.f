@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis cdis
 cdis
@@ -47,15 +47,15 @@ cdis
      1     imax, jmax, latgrid, longrid, bad_sfc,
      1     gps_tpw, gps_wet, gps_error, gps_xy, gps_elv, 
      1     gps_tim, gps_indomain, gps_n, istatus)
-c     This code is originated from Dan Birkenheuer.
+c     this code is originated from dan birkenheuer.
 
-c     On July 16, 2009, Yuanfu Xie modified it to read an additional 
+c     on july 16, 2009, yuanfu xie modified it to read an additional 
 c     variable, wet delays, station elevation and gps obs time.
 
-c     On August 2, 2009, Yuanfu Xie modified it to read all GPS data
+c     on august 2, 2009, yuanfu xie modified it to read all gps data
 c     files between i4begin and i4end.
 
-c     Reworked a bit by Steve Albers in 2011
+c     reworked a bit by steve albers in 2011
 
       implicit none
 
@@ -85,90 +85,90 @@ c     internal
       integer istatus, ptg_index
       integer file_name_length
 
-      integer recNum, nf_fid, nf_vid, nf_status
+      integer recnum, nf_fid, nf_vid, nf_status
       real x, y, bad_sfc
 
       verbose = 0
 
-c     Set file specs for get_file_times:
+c     set file specs for get_file_times:
       call s_len(path, ptg_index)
       filespec(1:ptg_index) = path(1:ptg_index)
-      filespec(ptg_index+1:ptg_index+9) = '*0030o.nc'  ! Hardcode for now by Yuanfu
+      filespec(ptg_index+1:ptg_index+9) = '*0030o.nc'  ! hardcode for now by yuanfu
 
-c     Get all filenames under the path:
+c     get all filenames under the path:
       call get_file_times(filespec(1:ptg_index+9),max_files,c_filenames,
      1                    i4times,nfiles,istatus)
 
-      gps_i = 0    ! Total GPS data read
-c     Loop through all available files: Yuanfu
+      gps_i = 0    ! total gps data read
+c     loop through all available files: yuanfu
       do ifile=1,nfiles
       
-C
-C       Open netcdf File for reading
-C
-        ! Read data file between i4beg and i4end:
+c
+c       open netcdf file for reading
+c
+        ! read data file between i4beg and i4end:
         if (i4times(ifile) .ge. i4beg .and. 
      1      i4times(ifile) .le. i4end) then
-        nf_status = NF_OPEN(c_filenames(ifile),NF_NOWRITE,nf_fid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_open(c_filenames(ifile),nf_nowrite,nf_fid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           istatus = 0
-          write(6,*) 'failure getting GPS data'
-          nf_status = NF_CLOSE(nf_fid)
+          write(6,*) 'failure getting gps data'
+          nf_status = nf_close(nf_fid)
           return
         else
           istatus = 1
-          write(6,*)' Opened gps file: ',trim(c_filenames(ifile))
+          write(6,*)' opened gps file: ',trim(c_filenames(ifile))
         endif
-C
-C       Fill all dimension values
-C
-C
-C       Get size of recNum
-C
-        nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'dim recNum'
+c
+c       fill all dimension values
+c
+c
+c       get size of recnum
+c
+        nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'dim recnum'
           istatus = 0
           goto 900  
         endif
-        nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'dim recNum'
+        nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'dim recnum'
           istatus = 0
           goto 900  
         endif
 
-        ! Check if recNum is larger than space allocated:
-        if (gps_i+recNum .gt. gps_n) then
-          print *,' Too many GPS obs, increase your gps_n and rerun!'
-     1	,gps_i+recNum,' > ',gps_n
+        ! check if recnum is larger than space allocated:
+        if (gps_i+recnum .gt. gps_n) then
+          print *,' too many gps obs, increase your gps_n and rerun!'
+     1	,gps_i+recnum,' > ',gps_n
           stop
         endif
 
-        call read_gps_data (nf_fid , recNum, gps_tpw(gps_i+1), 
+        call read_gps_data (nf_fid , recnum, gps_tpw(gps_i+1), 
      1       gps_wet(gps_i+1), gps_error(gps_i+1), gps_lat(gps_i+1), 
      1       gps_lon(gps_i+1), gps_elv(gps_i+1), gps_tim(gps_i+1), 
      1       gps_n,gps_num)
 
-c       Accumulate all:
+c       accumulate all:
         gps_i = gps_i+gps_num
         write(6,*)' gps_num / gps_i = ',gps_num,gps_i
 
-        ! Finish read this qualified file:
+        ! finish read this qualified file:
         endif
 
  900  enddo
-      ! Check if there is any gps obs:
+      ! check if there is any gps obs:
       if (gps_i .ge. 1) istatus = 1
       if (gps_i .le. 0) istatus = 0
 
-      ! Write the GPS wetdelay information into LAPS HMG file:
+      ! write the gps wetdelay information into laps hmg file:
       gps_indomain = 0
       do i=1,gps_i ! loop through all obs from the files
-        CALL LATLON_TO_RLAPSGRID(gps_lat(i),gps_lon(i),latgrid,
+        call latlon_to_rlapsgrid(gps_lat(i),gps_lon(i),latgrid,
      1             longrid, imax, jmax, x, y, istat_latlon)
 
         if(verbose .ge. 1 .or. i .le. 10)then
@@ -188,14 +188,14 @@ c       Accumulate all:
           gps_xy(1,gps_indomain) = x
           gps_xy(2,gps_indomain) = y
 
-          if(lun .gt. 0)then! Write wet delays and tpw into hmg file:
-            write(lun, *) x, y,0, gps_wet(i), 'GPSWET'
-            write(lun, *) x, y,0, gps_tpw(i), 'GPSTPW'
+          if(lun .gt. 0)then! write wet delays and tpw into hmg file:
+            write(lun, *) x, y,0, gps_wet(i), 'gpswet'
+            write(lun, *) x, y,0, gps_tpw(i), 'gpstpw'
           endif
 
           if(verbose .ge. 1)then
-            write(6, *) x, y,0, gps_wet(i), 'GPSWET'
-            write(6, *) x, y,0, gps_tpw(i), 'GPSTPW'
+            write(6, *) x, y,0, gps_wet(i), 'gpswet'
+            write(6, *) x, y,0, gps_tpw(i), 'gpstpw'
           endif
 
         endif
@@ -205,15 +205,15 @@ c       Accumulate all:
 
       end
 
-C
-C
-      subroutine read_gps_data (nf_fid, recNum, gps_tpw, 
+c
+c
+      subroutine read_gps_data (nf_fid, recnum, gps_tpw, 
      1     gps_wet, gps_error, gps_lat, gps_lon, gps_elv,
      1     gps_tim, gps_n,gps_num)
       include 'netcdf.inc'
 
-c     This code is originated from Dan Birkenheuer.
-c     On July 16, 2009, Yuanfu Xie modified it to read an additional
+c     this code is originated from dan birkenheuer.
+c     on july 16, 2009, yuanfu xie modified it to read an additional
 c     variable, wet delays, station elevation and gps obs time.
 
 c     parameter list variables
@@ -226,183 +226,183 @@ c     parameter list variables
       real gps_elv(gps_n)
       real gps_tim(gps_n)
 c
-      integer recNum, nf_fid, nf_vid, nf_status,i
-      character*80 staLongNam(recNum)
-      character*5 staNam(recNum)
-      real formalError(recNum), staLat(recNum), staLon(recNum), 
-     +     staElv(recNum), timObs(recNum), waterVapor(recNum), 
-     +     wetDelay(recNum)
-      call read_gps_basics (nf_fid , recNum, formalError, staLat,
-     +    staLon, staElv, timObs, staLongNam, staNam, waterVapor, 
-     +    wetDelay) 
-      ! Yuanfu: wetDelay, staElv -- station elevation, and gps obs time
-C
-C The netcdf variables are filled - your code goes here
-C
+      integer recnum, nf_fid, nf_vid, nf_status,i
+      character*80 stalongnam(recnum)
+      character*5 stanam(recnum)
+      real formalerror(recnum), stalat(recnum), stalon(recnum), 
+     +     staelv(recnum), timobs(recnum), watervapor(recnum), 
+     +     wetdelay(recnum)
+      call read_gps_basics (nf_fid , recnum, formalerror, stalat,
+     +    stalon, staelv, timobs, stalongnam, stanam, watervapor, 
+     +    wetdelay) 
+      ! yuanfu: wetdelay, staelv -- station elevation, and gps obs time
+c
+c the netcdf variables are filled - your code goes here
+c
 
-      gps_num = recNum
-      do i = 1, recNum
-         gps_tpw(i) = waterVapor(i)
-         gps_wet(i) = wetDelay(i)
-         gps_error(i) = formalError(i)
-         gps_lat(i) = staLat(i)
-         gps_lon(i) = staLon(i)
-         gps_elv(i) = staElv(i)
-         gps_tim(i) = timObs(i)
+      gps_num = recnum
+      do i = 1, recnum
+         gps_tpw(i) = watervapor(i)
+         gps_wet(i) = wetdelay(i)
+         gps_error(i) = formalerror(i)
+         gps_lat(i) = stalat(i)
+         gps_lon(i) = stalon(i)
+         gps_elv(i) = staelv(i)
+         gps_tim(i) = timobs(i)
       enddo
 
       return
       end
-      subroutine read_gps_basics (nf_fid , recNum, formalError, 
-     +           staLat,staLon, staElv, timObs, staLongNam, 
-     +           staNam, waterVapor,wetDelay)	
-      ! Yuanfu: add wetDelay and staElv -- station elevation
+      subroutine read_gps_basics (nf_fid , recnum, formalerror, 
+     +           stalat,stalon, staelv, timobs, stalongnam, 
+     +           stanam, watervapor,wetdelay)	
+      ! yuanfu: add wetdelay and staelv -- station elevation
 
-c     This code is originated from Dan Birkenheuer.
-c     On July 16, 2009, Yuanfu Xie modified it to read an additional
+c     this code is originated from dan birkenheuer.
+c     on july 16, 2009, yuanfu xie modified it to read an additional
 c     variable, wet delays and station elevation.
 
       include 'netcdf.inc'
-      integer recNum, nf_fid, nf_vid, nf_status
+      integer recnum, nf_fid, nf_vid, nf_status
 
-      character*80 staLongNam(recNum)
-      character*5 staNam(recNum)
-      real formalError(recNum), staLat(recNum), staLon(recNum), 
-     +     staElv(recNum), timObs(recNum), waterVapor(recNum), 
-     +     wetDelay(recNum)	
-      ! Yuanfu: add wetDelay and staElv
-C
-C     Variable        NETCDF Long Name
-C      staLongNam   "Station Location" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLongNam',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLongNam'
+      character*80 stalongnam(recnum)
+      character*5 stanam(recnum)
+      real formalerror(recnum), stalat(recnum), stalon(recnum), 
+     +     staelv(recnum), timobs(recnum), watervapor(recnum), 
+     +     wetdelay(recnum)	
+      ! yuanfu: add wetdelay and staelv
+c
+c     variable        netcdf long name
+c      stalongnam   "station location" 
+c
+        nf_status = nf_inq_varid(nf_fid,'stalongnam',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalongnam'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,staLongNam)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ staLongNam '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,stalongnam)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ stalongnam '
       endif
-C
-C     Variable        NETCDF Long Name
-C      staNam       "Alphanumeric station name" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staNam',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staNam'
+c
+c     variable        netcdf long name
+c      stanam       "alphanumeric station name" 
+c
+        nf_status = nf_inq_varid(nf_fid,'stanam',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stanam'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,staNam)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ staNam '
+        nf_status = nf_get_var_text(nf_fid,nf_vid,stanam)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ stanam '
       endif
-C
-C     Variable        NETCDF Long Name
-C      formalError  "Formal Error" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'formalError',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var formalError'
+c
+c     variable        netcdf long name
+c      formalerror  "formal error" 
+c
+        nf_status = nf_inq_varid(nf_fid,'formalerror',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var formalerror'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,formalError)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ formalError '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,formalerror)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ formalerror '
       endif
-C
-C     Variable        NETCDF Long Name
-C      staLat       "Station Latitude" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLat',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLat'
+c
+c     variable        netcdf long name
+c      stalat       "station latitude" 
+c
+        nf_status = nf_inq_varid(nf_fid,'stalat',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalat'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,staLat)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ staLat '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stalat)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ stalat '
       endif
-C
-C     Variable        NETCDF Long Name
-C      staLon       "Station Longitude" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staLon',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staLon'
+c
+c     variable        netcdf long name
+c      stalon       "station longitude" 
+c
+        nf_status = nf_inq_varid(nf_fid,'stalon',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stalon'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,staLon)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ staLon '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stalon)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ stalon '
       endif
-C
-C     Variable        NETCDF Long Name
-C      staElv       "Station Elevation" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'staElev',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staElev'
+c
+c     variable        netcdf long name
+c      staelv       "station elevation" 
+c
+        nf_status = nf_inq_varid(nf_fid,'staelev',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var staelev'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,staElv)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ staElev '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,staelv)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ staelev '
       endif
-C
-C     Variable        NETCDF Long Name
-C      timObs       "Time of observation" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'timeObs',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
+c
+c     variable        netcdf long name
+c      timobs       "time of observation" 
+c
+        nf_status = nf_inq_varid(nf_fid,'timeobs',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,timObs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ timeObs '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,timobs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ timeobs '
       endif
-C
-C     Variable        NETCDF Long Name
-C      waterVapor   "Water Vapor" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'waterVapor',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var waterVapor'
+c
+c     variable        netcdf long name
+c      watervapor   "water vapor" 
+c
+        nf_status = nf_inq_varid(nf_fid,'watervapor',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var watervapor'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,waterVapor)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ waterVapor '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,watervapor)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ watervapor '
       endif
-C
-C     Variable        NETCDF Long Name
-C      wetDelay   "Wet component GPS signal delay" 
-C
-        nf_status = NF_INQ_VARID(nf_fid,'wetDelay',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var wetDelay'
+c
+c     variable        netcdf long name
+c      wetdelay   "wet component gps signal delay" 
+c
+        nf_status = nf_inq_varid(nf_fid,'wetdelay',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var wetdelay'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,wetDelay)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ wetDelay '
+        nf_status = nf_get_var_real(nf_fid,nf_vid,wetdelay)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ wetdelay '
       endif
 
 
-C     Close file:
+c     close file:
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 
@@ -412,7 +412,7 @@ C     Close file:
 
       subroutine get_gps_path(path_to_gps_out,istatus)
 
-      use mem_namelist, ONLY: path_to_gps
+      use mem_namelist, only: path_to_gps
 
       character*256 path_to_gps_out
 
@@ -422,10 +422,10 @@ C     Close file:
 
       inquire(file=trim(path_to_gps_out),exist=l_exist)
       if(l_exist .eqv. .true.)then
-          write(6,*)' Path to GPS from namelist exists'         
+          write(6,*)' path to gps from namelist exists'         
       else
           write(6,*)
-     1              ' Path to GPS non-existent, trying /public'
+     1              ' path to gps non-existent, trying /public'
           path_to_gps_out = '/public/data/gpsmet/netcdf/'
       endif
 

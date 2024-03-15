@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory 
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory 
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -33,7 +33,7 @@ cdis
      &       image_in,nx,ny,smsng,r_missing_data,scale_img,istatus)
 c
 c
-c J. Smart    11-13-95   include technique to determine bad (outliers) data in
+c j. smart    11-13-95   include technique to determine bad (outliers) data in
 c                        addition to missing sat pixels
 c
       implicit none
@@ -57,7 +57,7 @@ c
       character chtype*(*)
       character csatid*(*)
 
-      write(6,*)'Enter set_missing_sat: ',csattype,' ',chtype
+      write(6,*)'enter set_missing_sat: ',csattype,' ',chtype
 
 c
 c note that this quality control step is performed with satellite counts
@@ -73,7 +73,7 @@ c
       if(smsng.gt.0.0)then
          rhigh=550.  !smsng
       else
-c per Eric Gregow 22 Aug 2008 -- get the IR channels ingested without any exclusion
+c per eric gregow 22 aug 2008 -- get the ir channels ingested without any exclusion
 c of points (that were previously set to missing values)
 c        rhigh=255.
          rhigh=350.
@@ -89,10 +89,10 @@ c        rhigh=255.
          endif
       endif
 
-      if(csattype.eq.'rll')then ! Bad range thresholds
+      if(csattype.eq.'rll')then ! bad range thresholds
         if(chtype .ne. 'vis')then 
           write(6,*)' scale_img passed in = ',scale_img
-!         if(csatid .ne. 'meteos' .AND. csatid .ne. 'fy')then
+!         if(csatid .ne. 'meteos' .and. csatid .ne. 'fy')then
 !            scale_img = .01
 !         else
 !            scale_img = .1
@@ -107,35 +107,35 @@ c        rhigh=255.
 
         endif
 
-        write(6,*)' Range testing thresholds set to ',rlow,rhigh
+        write(6,*)' range testing thresholds set to ',rlow,rhigh
 
-      elseif(csattype.eq.'cms')then ! Bad range thresholds
+      elseif(csattype.eq.'cms')then ! bad range thresholds
         if(chtype .eq. 'vis')then 
           rhigh=1000.
         endif
 
-        write(6,*)' Range testing thresholds set to ',rlow,rhigh
+        write(6,*)' range testing thresholds set to ',rlow,rhigh
 
-      elseif(csattype.eq.'gnp')then ! Bad range thresholds
+      elseif(csattype.eq.'gnp')then ! bad range thresholds
         if(chtype .eq. 'vis')then 
           rhigh=4096.
         else ! ir
           rhigh=4096.
         endif
 
-        write(6,*)' Range testing thresholds set to ',rlow,rhigh
+        write(6,*)' range testing thresholds set to ',rlow,rhigh
 
-      elseif(csattype.eq.'jma')then ! Bad range thr (previously descaled data)
+      elseif(csattype.eq.'jma')then ! bad range thr (previously descaled data)
         if(chtype .eq. 'vis')then 
           rhigh=10.0
         else ! ir
           rhigh=400.0
         endif
 
-        write(6,*)' Range testing thresholds set to ',rlow,rhigh
+        write(6,*)' range testing thresholds set to ',rlow,rhigh
 
       else
-        write(6,*)' Range testing thresholds set to ',rlow,rhigh
+        write(6,*)' range testing thresholds set to ',rlow,rhigh
 
       endif
 

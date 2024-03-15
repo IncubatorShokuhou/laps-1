@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -53,7 +53,7 @@ c
 
       integer*4 i,j
       integer*4 istatus
-      Integer*4 lend
+      integer*4 lend
 c
 c dimensions for lat/lon
 c
@@ -63,21 +63,21 @@ c
       character*150 dir_static
       character c_radar_name(max_radars)*4
 c
-c ======================== START ==============================
+c ======================== start ==============================
 c
-c Acquire LAPS latitude and longitude arrays.
+c acquire laps latitude and longitude arrays.
 c -------------------------------------------------------------
       call get_directory('static',dir_static,lend)
-      var_ll(1) = 'LAT'
-      var_ll(2) = 'LON'
+      var_ll(1) = 'lat'
+      var_ll(2) = 'lon'
 
-      write(6,*)'Get LAPS lat/lon grid'
+      write(6,*)'get laps lat/lon grid'
       call rd_laps_static(dir_static,'nest7grid',nx_l,ny_l, 2,
      &     var_ll, units_ll, comment_ll, data, grid_spacing,
      &     istatus)
 
       if(istatus.eq.1)then
-         write(6,*)'LAPS lat/lon grid obtained'
+         write(6,*)'laps lat/lon grid obtained'
          write(6,*)
          do j=1,ny_l
             do i=1,nx_l
@@ -86,7 +86,7 @@ c -------------------------------------------------------------
             end do
          end do
       else
-         write(6,*)'Error - Unable to get lat/lon data'
+         write(6,*)'error - unable to get lat/lon data'
          goto 900 
       end if
 c-----------------------------------------------------------------
@@ -98,11 +98,11 @@ c
      &dxv01,dyv01,ri(1,1,i),rj(1,1,i),istatus)
 
          if(istatus.eq.1)then
-            write(6,*)'LUT generated ',c_radar_name(i)
+            write(6,*)'lut generated ',c_radar_name(i)
             write(6,*)'********************************'
             write(6,*)
          else
-            write(6,*)'LUT not generated ',c_radar_name(i)
+            write(6,*)'lut not generated ',c_radar_name(i)
             write(6,*)
          endif
 

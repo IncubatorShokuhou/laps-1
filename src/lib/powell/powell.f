@@ -1,96 +1,96 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis 
 
-      SUBROUTINE POWELL(P,XI,N,NP,FTOL,ITER,FRET,func,print_switch)
-      PARAMETER (NMAX=40,ITMAX=5)
-      EXTERNAL FUNC
+      subroutine powell(p,xi,n,np,ftol,iter,fret,func,print_switch)
+      parameter (nmax=40,itmax=5)
+      external func
       integer print_switch
       real func                 ! funciton type
-      DIMENSION P(NP),XI(NP,NP),PT(NMAX),PTT(NMAX),XIT(NMAX)
-      FRET=FUNC(P)
+      dimension p(np),xi(np,np),pt(nmax),ptt(nmax),xit(nmax)
+      fret=func(p)
       if(fret.eq.0.0) then      !notify
          if (print_switch .eq. 1) then
-            write(6,*)'POWELL:fret = 0.0'
+            write(6,*)'powell:fret = 0.0'
          endif
       endif
-      DO 11 J=1,N
-         PT(J)=P(J)
- 11   CONTINUE
-      ITER=0
- 1    ITER=ITER+1
-      FP=FRET
-      IBIG=0
-      DEL=0.
-      DO 13 I=1,N
-         DO 12 J=1,N
-            XIT(J)=XI(J,I)
- 12      CONTINUE
-         FPTT=FRET
-         CALL LINMIN(P,XIT,N,FRET)
-         IF(ABS(FPTT-FRET).GT.DEL)THEN
-            DEL=ABS(FPTT-FRET)
-            IBIG=I
-         ENDIF
- 13   CONTINUE
-      IF(2.*ABS(FP-FRET).LE.FTOL*(ABS(FP)+ABS(FRET)))then
-c         write(6,*) 'POWELL difference less than FTOL'
+      do 11 j=1,n
+         pt(j)=p(j)
+ 11   continue
+      iter=0
+ 1    iter=iter+1
+      fp=fret
+      ibig=0
+      del=0.
+      do 13 i=1,n
+         do 12 j=1,n
+            xit(j)=xi(j,i)
+ 12      continue
+         fptt=fret
+         call linmin(p,xit,n,fret)
+         if(abs(fptt-fret).gt.del)then
+            del=abs(fptt-fret)
+            ibig=i
+         endif
+ 13   continue
+      if(2.*abs(fp-fret).le.ftol*(abs(fp)+abs(fret)))then
+c         write(6,*) 'powell difference less than ftol'
 c         write(6,*) fp, fret, ftol,'fp, fret,ftol'
-         RETURN
+         return
       endif
-c     IF(ITER.EQ.ITMAX) PAUSE 'Powell exceeding maximum iterations.'
-      IF(ITER.EQ.ITMAX) then
+c     if(iter.eq.itmax) pause 'powell exceeding maximum iterations.'
+      if(iter.eq.itmax) then
          if (print_switch .eq. 1) then
-            write(6,*) 'Powell exceeding maximum iterations.'
+            write(6,*) 'powell exceeding maximum iterations.'
          endif
          return
       endif
-      DO 14 J=1,N
-         PTT(J)=2.*P(J)-PT(J)
-         XIT(J)=P(J)-PT(J)
-         PT(J)=P(J)
- 14   CONTINUE
-      FPTT=FUNC(PTT)
-      IF(FPTT.GE.FP)GO TO 1
-      T=2.*(FP-2.*FRET+FPTT)*(FP-FRET-DEL)**2-DEL*(FP-FPTT)**2
-      IF(T.GE.0.)GO TO 1
-      CALL LINMIN(P,XIT,N,FRET)
-      DO 15 J=1,N
-         XI(J,IBIG)=XIT(J)
- 15   CONTINUE
-      GO TO 1
+      do 14 j=1,n
+         ptt(j)=2.*p(j)-pt(j)
+         xit(j)=p(j)-pt(j)
+         pt(j)=p(j)
+ 14   continue
+      fptt=func(ptt)
+      if(fptt.ge.fp)go to 1
+      t=2.*(fp-2.*fret+fptt)*(fp-fret-del)**2-del*(fp-fptt)**2
+      if(t.ge.0.)go to 1
+      call linmin(p,xit,n,fret)
+      do 15 j=1,n
+         xi(j,ibig)=xit(j)
+ 15   continue
+      go to 1
       return
-      END
+      end
       

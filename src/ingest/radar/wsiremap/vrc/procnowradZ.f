@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,7 +29,7 @@ cdis
 cdis 
 cdis 
 cdis 
-      SUBROUTINE  process_nowrad_z(imax,jmax,
+      subroutine  process_nowrad_z(imax,jmax,
      &     r_grid_ratio,
      &     image_to_dbz,
      &     image_data,
@@ -39,12 +39,12 @@ cdis
      &     laps_dbz,
      &     istatus)
 
-C
-c       J. Smart          Jul 1995          Orginal Subroutine for GOES 8
-c.....          Changes:  02-OCT-1990       Set up for prodgen.
-c.....          Changes:     SEP-1993       Add average (SA)
 c
-c       J. Smart          Sept 1996         Modified this satellite processing code
+c       j. smart          jul 1995          orginal subroutine for goes 8
+c.....          changes:  02-oct-1990       set up for prodgen.
+c.....          changes:     sep-1993       add average (sa)
+c
+c       j. smart          sept 1996         modified this satellite processing code
 c                                           to do similar function with the wsi (nowrad)
 c      				    reflectivity data.
 c
@@ -94,12 +94,12 @@ c
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data'
+         print*,'error getting r_missing_data'
          goto 1000
       endif
       call get_ref_base(ref_base,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting ref_base'
+         print*,'error getting ref_base'
          goto 1000
       endif
 c
@@ -113,19 +113,19 @@ c
 c
       if(r_grid_ratio .le. 0.5)then
 
-         write(6,*)'Grid ratio .le. 0.5' !0.75'
-         write(6,*)'Use pixel avg to get dbz'
+         write(6,*)'grid ratio .le. 0.5' !0.75'
+         write(6,*)'use pixel avg to get dbz'
 
          icnt_out = 0
 
-         DO J=1,JMAX
-         DO I=1,IMAX
+         do j=1,jmax
+         do i=1,imax
 
             if(r_llij_lut_ri(i,j).ne.r_missing_data.and.
      &         r_llij_lut_rj(i,j).ne.r_missing_data)then
 
 c
-c line/elem are floating point i/j positions in ISPAN grid for input lat/lon
+c line/elem are floating point i/j positions in ispan grid for input lat/lon
 c also, use the lat/lon to real i/j look up table (r_llij_lut) to map out points
 c needed for satellite pixels.
 c****************************************************************************
@@ -143,12 +143,12 @@ c****************************************************************************
                   icnt_out=icnt_out+1
 c                 write(*,*)'insufficient data for lat/lon sector'
 c                 write(*,1020)i,j
-c1020             format(1x,'LAPS grid (i,j) = ',i3,1x,i3)
+c1020             format(1x,'laps grid (i,j) = ',i3,1x,i3)
 c                 write(6,1021)elem_mx,elem_mn,line_mx,line_mn
 c1021             format(1x,'elem mx/mn  line mx/mn ',4f7.1)
                else
 c
-c **** FIND PIXELS AROUND GRID POINT
+c **** find pixels around grid point
 c
                   zmax=-1.e15
                   zmin=1.e15
@@ -156,14 +156,14 @@ c
                   pixsum = 0.
                   maxpix = 0
 
-                  DO JJ=jstart,jend
-                  DO II=istart,iend
+                  do jj=jstart,jend
+                  do ii=istart,iend
                         
-                     if(image_data(II,JJ).lt.bad_data_flag_cnt.and.
-     &                  image_data(II,JJ).ge.0)then
+                     if(image_data(ii,jj).lt.bad_data_flag_cnt.and.
+     &                  image_data(ii,jj).ge.0)then
                         npix=npix+1
                         z_array(npix)=
-     +                       image_to_dbz(image_data(II,JJ))
+     +                       image_to_dbz(image_data(ii,jj))
                      endif
                            
                   enddo
@@ -206,7 +206,7 @@ c
 
                   endif      ! npix .gt. 1
 
-               end if        ! Enough data for num_lines .gt. 0
+               end if        ! enough data for num_lines .gt. 0
 
 cccd           if(i .eq. i/10*10 .and. j .eq. j/10*10)then
 cccd              write(6,5555)i,j,wm,wc,npix,nwarm,sc(i,j)
@@ -222,10 +222,10 @@ cccd           endif
          enddo
          enddo
 
-         write(6,*)'Max num WSI pix for avg: ',maxpix
-         write(6,*)'Number of LAPS gridpoints missing',
+         write(6,*)'max num wsi pix for avg: ',maxpix
+         write(6,*)'number of laps gridpoints missing',
      &              fcount
-         write(6,*)'Number of grid points without data for ',
+         write(6,*)'number of grid points without data for ',
      &'this domain: ',icnt_out
 
       else
@@ -234,8 +234,8 @@ c input image resolution is large relative to output grid spacing
 c this section uses bilinear interpolation to map
 c the four surrounding input pixels to the output grid.
 c
-         write(6,*)'Image res .ge. output grid spacing'
-         write(6,*)'Using bilinear interp to get dBZ '
+         write(6,*)'image res .ge. output grid spacing'
+         write(6,*)'using bilinear interp to get dbz '
 
          do j=1,nline
             do i=1,nelem
@@ -248,14 +248,14 @@ c
             enddo
          enddo
 
-         DO J=1,JMAX
-         DO I=1,IMAX
+         do j=1,jmax
+         do i=1,imax
 
             if(r_llij_lut_ri(i,j).ne.r_missing_data.or.
      &         r_llij_lut_rj(i,j).ne.r_missing_data)then
 c
 c bilinear_interp_extrap checks on boundary conditions and
-c uses ref_base if out of bounds. NO; out-of-bounds now = r_missing_data
+c uses ref_base if out of bounds. no; out-of-bounds now = r_missing_data
 c
                call  bilinear_interp_extrap(
      &               r_llij_lut_ri(i,j),

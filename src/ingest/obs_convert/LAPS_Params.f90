@@ -1,108 +1,108 @@
-MODULE LAPS_PARAMS
+module laps_params
 
 !==============================================================================
-!doc  THIS ROUTINE DEFINES ALL PARAMETERS REQUIRED FOR LAPS.
+!doc  this routine defines all parameters required for laps.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	MAY 2007
-!doc    MODIFIED:       YUANFU XIE	MAR 2008 ADDING RADAR VARIABLES
+!doc  history:
+!doc	creation:	yuanfu xie	may 2007
+!doc    modified:       yuanfu xie	mar 2008 adding radar variables
 !==============================================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  ! CONSTANTS:
-  INTEGER,PARAMETER :: OUTPUT_CHANNEL=20,BFRTBL_CHANNEL=21,POINTS_CHANNEL=22
-  ! FOR LAPSPLOT OF OBSERVATIONS:
-  INTEGER,PARAMETER :: TMGOUT_CHANNEL=23,PIGOUT_CHANNEL=24,PRGOUT_CHANNEL=25,&
-                       SAGOUT_CHANNEL=26
-  REAL,PARAMETER :: INCHES_CONV2MM=2.54		! FROM INCH TO MILLI-METER
+  ! constants:
+  integer,parameter :: output_channel=20,bfrtbl_channel=21,points_channel=22
+  ! for lapsplot of observations:
+  integer,parameter :: tmgout_channel=23,pigout_channel=24,prgout_channel=25,&
+                       sagout_channel=26
+  real,parameter :: inches_conv2mm=2.54		! from inch to milli-meter
 
-  ! BUFR encoding:
-  CHARACTER*80, PARAMETER :: HEADER_PREBUFR= &
-    'SID TYP T29 RPT DHR YOB XOB ELV ITP SQN PROCN'
-  INTEGER,      PARAMETER :: HEADER_NUMITEM=11
-  CHARACTER*80, PARAMETER :: OBSDAT_PREBUFR= &
-    'ZOB POB TOB UOB VOB QOB PMO PRSS PWO'
-  INTEGER,      PARAMETER :: OBSDAT_NUMITEM=9
-  CHARACTER*80, PARAMETER :: OBSERR_PREBUFR= &
-    'ZOE POE TOE WOE QOE PWE'
-  INTEGER,      PARAMETER :: OBSERR_NUMITEM=6
-  CHARACTER*80, PARAMETER :: OBSQMS_PREBUFR= &
-    'ZQM PQM TQM WQM QQM PMQ PWQ'
-  INTEGER,      PARAMETER :: OBSQMS_NUMITEM=7
+  ! bufr encoding:
+  character*80, parameter :: header_prebufr= &
+    'sid typ t29 rpt dhr yob xob elv itp sqn procn'
+  integer,      parameter :: header_numitem=11
+  character*80, parameter :: obsdat_prebufr= &
+    'zob pob tob uob vob qob pmo prss pwo'
+  integer,      parameter :: obsdat_numitem=9
+  character*80, parameter :: obserr_prebufr= &
+    'zoe poe toe woe qoe pwe'
+  integer,      parameter :: obserr_numitem=6
+  character*80, parameter :: obsqms_prebufr= &
+    'zqm pqm tqm wqm qqm pmq pwq'
+  integer,      parameter :: obsqms_numitem=7
 
-  CHARACTER*80, PARAMETER :: SFCDAT_PREBUFR= &
-    'PRSS ??? TOB ??? WDIR1 NWSPD1'
-  INTEGER,      PARAMETER :: SFCDAT_NUMITEM=9
-  CHARACTER*80, PARAMETER :: SFCERR_PREBUFR= &
-   'SFCERR PREBUFR UNKNOWN'
-  INTEGER,      PARAMETER :: SFCERR_NUMITEM=6
-  CHARACTER*80, PARAMETER :: SFCQMS_PREBUFR= &
-   'SFCQMS PREBUFR UNKNOWN'
-  INTEGER,      PARAMETER :: SFCQMS_NUMITEM=7
+  character*80, parameter :: sfcdat_prebufr= &
+    'prss ??? tob ??? wdir1 nwspd1'
+  integer,      parameter :: sfcdat_numitem=9
+  character*80, parameter :: sfcerr_prebufr= &
+   'sfcerr prebufr unknown'
+  integer,      parameter :: sfcerr_numitem=6
+  character*80, parameter :: sfcqms_prebufr= &
+   'sfcqms prebufr unknown'
+  integer,      parameter :: sfcqms_numitem=7
 
-  ! MISSING DATA:
-  REAL*8,       PARAMETER :: MISSNG_PREBUFR=10.0E10
+  ! missing data:
+  real*8,       parameter :: missng_prebufr=10.0e10
 
-  ! REFERENCE VALUE FOR ICE/WATER RELATIVE HUMIDITY:
-  REAL,         PARAMETER :: ABSOLU_TMPZERO=273.15
-  REAL,         PARAMETER :: TEMPTR_REFEREN=-5.0 !-132.0
+  ! reference value for ice/water relative humidity:
+  real,         parameter :: absolu_tmpzero=273.15
+  real,         parameter :: temptr_referen=-5.0 !-132.0
 
-  ! GENERAL VARS:
-  CHARACTER*8 :: FORMAT_REQUEST		! DATA FORMAT REQUESTED TO CONVERT TO
-  CHARACTER*9 :: SYSTEM_ASCTIME 	! ASCII SYSTEM TIME
-  CHARACTER   :: ANALYS_HOURCHA*2, &	! ANALYSIS HOUR
-                 ANALYS_MINUTES*2, &	! ANALYSIS MINUTE
-                 YYYEAR_JULIANS*5	! YY YEAR AND JULIAN DAYS
-  CHARACTER   :: STRING_ASCTIME*16, &	! TIME IN A STRING
-                 NUMBER_ASCTIME*14      ! TIME IN YYYYMMDDHHMM FORM
-  INTEGER     :: NUMBER_GRIDPTS(4)	! NUMBER GRID POINTS IN X, Y, Z AND T
-  INTEGER     :: LENGTH_ANATIME		! ANAL TIME WINDOW
-  INTEGER     :: YYYYMM_DDHHMIN(5)	! TIME IN INTEGERS
-  INTEGER     :: SYSTEM_IN4TIME		! I4 SYSTEM TIME
-  INTEGER     :: RADARS_TIMETOL         ! RADAR TIME TOLERANCE
-  INTEGER     :: IVALUE_MISSING		! MISSING VALUE IN INTEGER
-  REAL        :: RVALUE_MISSING		! MISSING VALUE IN REAL
-  REAL        :: SFCOBS_INVALID 	! BAD SURFACE OBSERVATION
-  REAL        :: GRID4D_SPACING(4)	! GRID DISTANCE OF 4 DIMEMSION
-  REAL, ALLOCATABLE, DIMENSION(:) :: &
-		PRESSR_GRID1DM		! PRESSURE LEVELS
-  REAL, ALLOCATABLE, DIMENSION(:,:) :: &
-	        DOMAIN_LATITDE,        & ! GRID LATITUDES
-		DOMAIN_LONGITD,        & ! GRID LONGITUDE
-		DOMAIN_TOPOGRP           ! GRID TOPOGRAPHY
-  REAL, ALLOCATABLE,DIMENSION(:,:,:) :: &
-                HEIGHT_GRID3DM,&	! LAPS 3D HEIGHT BACKGROUND FIELD
-                temptr_GRID3DM,&	! LAPS 3D HEIGHT BACKGROUND FIELD
-                uuwind_GRID3DM,&	! LAPS 3D HEIGHT BACKGROUND FIELD
-                vvwind_GRID3DM	! LAPS 3D HEIGHT BACKGROUND FIELD
+  ! general vars:
+  character*8 :: format_request		! data format requested to convert to
+  character*9 :: system_asctime 	! ascii system time
+  character   :: analys_hourcha*2, &	! analysis hour
+                 analys_minutes*2, &	! analysis minute
+                 yyyear_julians*5	! yy year and julian days
+  character   :: string_asctime*16, &	! time in a string
+                 number_asctime*14      ! time in yyyymmddhhmm form
+  integer     :: number_gridpts(4)	! number grid points in x, y, z and t
+  integer     :: length_anatime		! anal time window
+  integer     :: yyyymm_ddhhmin(5)	! time in integers
+  integer     :: system_in4time		! i4 system time
+  integer     :: radars_timetol         ! radar time tolerance
+  integer     :: ivalue_missing		! missing value in integer
+  real        :: rvalue_missing		! missing value in real
+  real        :: sfcobs_invalid 	! bad surface observation
+  real        :: grid4d_spacing(4)	! grid distance of 4 dimemsion
+  real, allocatable, dimension(:) :: &
+		pressr_grid1dm		! pressure levels
+  real, allocatable, dimension(:,:) :: &
+	        domain_latitde,        & ! grid latitudes
+		domain_longitd,        & ! grid longitude
+		domain_topogrp           ! grid topography
+  real, allocatable,dimension(:,:,:) :: &
+                height_grid3dm,&	! laps 3d height background field
+                temptr_grid3dm,&	! laps 3d height background field
+                uuwind_grid3dm,&	! laps 3d height background field
+                vvwind_grid3dm	! laps 3d height background field
 
-  ! USE A NEW LAPS WIND PARAMETER SCHEME AND SO THE FOLLOWINGS ARE COVERED
-  ! EXCEPT THOSE USED:
+  ! use a new laps wind parameter scheme and so the followings are covered
+  ! except those used:
 
-  ! FOR WIND DATA:
-  ! LOGICAL     :: USEOBS_RAOBDAT	! USE RAOB DATA
-  ! LOGICAL     :: USEOBS_CLDRFWD	! USE CLOUD DRIFT WIND
-  ! LOGICAL     :: USEOBS_RADARWD	! USE RADIAL WIND
-  ! INTEGER     :: THRESH_RADAROB(3)	! THRESHOLD NUMBERS DOPPLER OBS/LEVEL
-					! BY FACTOR 2,4,9
-  INTEGER     :: MAXNUM_PROFLRS	! MAX NUM PROFILERS
-  INTEGER     :: MAXLVL_PROFLRS	! MAX LEVEL OF PROF
+  ! for wind data:
+  ! logical     :: useobs_raobdat	! use raob data
+  ! logical     :: useobs_cldrfwd	! use cloud drift wind
+  ! logical     :: useobs_radarwd	! use radial wind
+  ! integer     :: thresh_radarob(3)	! threshold numbers doppler obs/level
+					! by factor 2,4,9
+  integer     :: maxnum_proflrs	! max num profilers
+  integer     :: maxlvl_proflrs	! max level of prof
 
-  INTEGER     :: MAXNUM_SONDES	! MAX NUM SONDES
-  INTEGER     :: MAXLVL_SONDES 	! MAX LEVEL OF SONDES
+  integer     :: maxnum_sondes	! max num sondes
+  integer     :: maxlvl_sondes 	! max level of sondes
 
-  ! INTEGER     :: WEIGHT_OPTIONS	! LAPS WEIGHT SCHEME
-  ! REAL        :: WEIGHT_BKGWIND	! WEIGHT FOR BACKGROUND WIND
-  ! REAL        :: WEIGHT_RADARWD	! WEIGHT FOR RADAR WIND OBS
-  ! REAL        :: THRESH_RMSWIND	! THRESHOLD FOR RMS FIT OF ANALYSIS TO
-					! THE OBSERVATIONS
+  ! integer     :: weight_options	! laps weight scheme
+  ! real        :: weight_bkgwind	! weight for background wind
+  ! real        :: weight_radarwd	! weight for radar wind obs
+  ! real        :: thresh_rmswind	! threshold for rms fit of analysis to
+					! the observations
 
-  ! NAME LIST FOR WIND:
-  ! NAMELIST /WIND_NL/ USEOBS_RAOBDAT,USEOBS_CLDRFWD, &
-  !		     USEOBS_RADARWD,THRESH_RADAROB, &
-  !		     WEIGHT_BKGWIND,WEIGHT_RADARWD, &
-  !		     THRESH_RMSWIND,MAXNUM_PROFLRS, &
-  !		     MAXLVL_PROFLRS,WEIGHT_OPTIONS
+  ! name list for wind:
+  ! namelist /wind_nl/ useobs_raobdat,useobs_cldrfwd, &
+  !		     useobs_radarwd,thresh_radarob, &
+  !		     weight_bkgwind,weight_radarwd, &
+  !		     thresh_rmswind,maxnum_proflrs, &
+  !		     maxlvl_proflrs,weight_options
 
-END MODULE LAPS_PARAMS
+end module laps_params

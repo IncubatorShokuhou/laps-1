@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -46,12 +46,12 @@ c
 c
 c*****************************************************************************
 c
-c	Routine to read the LAPS "master" data file.   The file contains
+c	routine to read the laps "master" data file.   the file contains
 c       the station id, obs, and trend, for the past several hours (usually
 c       three).
 c
-c	Changes:
-c		P. Stamus  02-24-97  Original version.
+c	changes:
+c		p. stamus  02-24-97  original version.
 c
 c*****************************************************************************
 c
@@ -70,17 +70,17 @@ c
 	character stn_name(maxsta)*5
 c
 c
-c.....	Open the file.
+c.....	open the file.
 c
 	jstatus = 0
 	open(11,file=master_file,status='unknown',err=500)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900,err=500,end=500) n_master      ! # of stations in this file.
  900    format(i7)
 c
-c.....	Read the data.
+c.....	read the data.
 c
 	do k=1,n_master
 	  read(11,910) stn_name(k)(1:5), stn_lat(k), stn_lon(k),
@@ -97,17 +97,17 @@ c
  910      format(1x,a5,1x,2(f8.2,1x),f6.0,1x,i4,1x,i4,1x,i3)
  920      format(4x,f10.1,1x,f10.2)
 c
-c.....  End of data reading.  Let's go home...
+c.....  end of data reading.  let's go home...
 c
 	close(11)	
 	jstatus = 1
 	return
 c
-c.....  Error opening the file.
+c.....  error opening the file.
 c
  500	continue
 	close(11)
-	print *,' ERROR. Unable to open master file.'
+	print *,' error. unable to open master file.'
 	jstatus = -1
 	return
 c
@@ -121,12 +121,12 @@ c
 c
 c*****************************************************************************
 c
-c	Routine to write the LAPS "master" data file.   The file contains
+c	routine to write the laps "master" data file.   the file contains
 c       the station id, obs, and trend, for the past several hours (usually
 c       three).
 c
-c	Changes:
-c		P. Stamus  02-24-97  Original version.
+c	changes:
+c		p. stamus  02-24-97  original version.
 c
 c*****************************************************************************
 c
@@ -144,16 +144,16 @@ c
 	character stn_name(maxsta)*5
 c
 c
-c.....	Open the file.
+c.....	open the file.
 c
 	open(12,file=master_file,status='unknown')
 c
-c.....	Write the header.
+c.....	write the header.
 c
 	write(12,900) n_master           ! # of stations in this file.
  900    format(i7)
 c
-c.....	Write the data.
+c.....	write the data.
 c
 	do k=1,n_master
 	  write(12,910) stn_name(k)(1:5), stn_lat(k), stn_lon(k),
@@ -173,7 +173,7 @@ c
 	endfile(12)
 	close(12)	
 c
-c..... End of data writing.  Let's go home...
+c..... end of data writing.  let's go home...
 c
 	return
 	end
@@ -181,15 +181,15 @@ c
 c
 	subroutine windconv_af(uwind,vwind,direction,speed)
 c
-c-----  Given wind components, calculate the corresponding speed and direction.
+c-----  given wind components, calculate the corresponding speed and direction.
 
 c
-C Argument	I/O	Type			Description
-C --------	---	----	-----------------------------------------------
-C UWind		 I	R*4	U-component of wind
-C VWind		 I	R*4	V-component of wind
-C Direction	 O	R*4	Wind direction (meteorological degrees)
-C Speed		 O	R*4	Wind speed (same units as input arguments)
+c argument	i/o	type			description
+c --------	---	----	-----------------------------------------------
+c uwind		 i	r*4	u-component of wind
+c vwind		 i	r*4	v-component of wind
+c direction	 o	r*4	wind direction (meteorological degrees)
+c speed		 o	r*4	wind speed (same units as input arguments)
 c
 c
 	parameter(flag = -99.9)
@@ -204,7 +204,7 @@ c
 	   direction = flag
 	elseif(uwind.eq.0.0 .and. vwind.eq.0.0) then
 	   speed = 0.0
-	   direction = 0.0	!Undefined
+	   direction = 0.0	!undefined
 	else
 	   speed = sqrt(uwind*uwind + vwind*vwind) !speed
 	   direction = 57.2957795 * (atan2(uwind,vwind)) + 180.	!dir
@@ -215,18 +215,18 @@ c
 c
 c
 	subroutine decomp_wind_af(dd,ff,ucomp,vcomp,status)
-C***Decompose vector wind into U and V
+c***decompose vector wind into u and v
 
-C	J. Wakefield	16 Sep 83	Original version
-c	P. Stamus       29 Apr 93	Unix version
+c	j. wakefield	16 sep 83	original version
+c	p. stamus       29 apr 93	unix version
 
-C Argument	I/O	Type			Description
-C --------	---	----	-----------------------------------------------
-C DD		 I	R*4	Wind direction (meteorological degrees)
-C FF		 I	R*4	Wind speed
-C UComp		 O	R*4	U-component of wind
-C VComp		 O	R*4	V-component of wind
-C Status	 O	I*4	Standard system status
+c argument	i/o	type			description
+c --------	---	----	-----------------------------------------------
+c dd		 i	r*4	wind direction (meteorological degrees)
+c ff		 i	r*4	wind speed
+c ucomp		 o	r*4	u-component of wind
+c vcomp		 o	r*4	v-component of wind
+c status	 o	i*4	standard system status
 
 	parameter	(flag = -99.9)
 
@@ -242,7 +242,7 @@ C Status	 O	I*4	Standard system status
 	   ucomp = 0.0
 	   vcomp = 0.0
 	elseif(dd.ge.0. .and. dd.le.360.) then
-	   angle = .01745239 * dd            !Conv to radians
+	   angle = .01745239 * dd            !conv to radians
 	   ucomp = -ff * sin(angle)
 	   vcomp = -ff * cos(angle)
 	else
@@ -258,7 +258,7 @@ c
 	subroutine find_ij_af(lat_s,lon_s,lat,lon,numsta,mxsta,
      &                     ni,nj,ii,jj,rii,rjj)
 c
-c.....	Routine to find the i,j locations for each station.  Do not "round"
+c.....	routine to find the i,j locations for each station.  do not "round"
 c.....  the ii,jj's "up"...straight truncation puts the ob at the proper
 c.....  grid point on the major grid.
 c

@@ -1,20 +1,20 @@
 
 
       subroutine get_topo_1s(ni,nj,grid_spacing_m,r8lat,r8lon,topo
-     1                      ,rnorth,south,east,west                      ! I
+     1                      ,rnorth,south,east,west                      ! i
      1                      ,path_to_topt1s,istatus)
 
-!     Read in topo tiles
-!     Presently called from 'gridgen_model' software
+!     read in topo tiles
+!     presently called from 'gridgen_model' software
       use ppm
-      use mem_namelist, ONLY: c6_maproj 
+      use mem_namelist, only: c6_maproj 
 
       parameter (maxtiles = 100)
 
       real*8 r8lat(ni,nj), r8lon(ni,nj)
-      real sfc_glow_c(3,ni,nj) ! Sfc Glow (Red, Green, Blue)
-      real result(ni,nj)       ! Interpolated image channel
-      real result_tile(ni,nj)  ! Interpolated image channel
+      real sfc_glow_c(3,ni,nj) ! sfc glow (red, green, blue)
+      real result(ni,nj)       ! interpolated image channel
+      real result_tile(ni,nj)  ! interpolated image channel
       real sfc_glow(ni,nj)     ! surface lighting intensity of clouds (nl)
       real topo(ni,nj)     ! zenithal ground lighting intensity (wm2sr)
       real ri_img(ni,nj)
@@ -53,7 +53,7 @@
 
       rlat_laps = r8lat; rlon_laps = r8lon
 
-      write(6,*)' Subroutine get_topo_1s...',ni,nj
+      write(6,*)' subroutine get_topo_1s...',ni,nj
       if(nj .le. 0)then
           write(6,*)' returning early'
           istatus = 0
@@ -66,18 +66,18 @@
       call get_directory('static',directory,len_dir)
       file_bm=trim(directory)//'topo1s_tile.dat'
       inquire(file=trim(file_bm),exist=l_there)
-      write(6,*)' File being inquired is ',trim(file_bm),' ',l_there
+      write(6,*)' file being inquired is ',trim(file_bm),' ',l_there
 
       if(l_there)then ! this block not presently used
         write(6,*)' topo_1s tile remapped topo file exists'
         open(u,file=trim(file_bm),form='unformatted' 
      1      ,status='old',err=999)
-        write(6,*)' Successful open, now reading'
+        write(6,*)' successful open, now reading'
         read(u,err=999)sfc_glow_c
         close(u)
         write(6,*)' first point is ',sfc_glow_c(1,1,1)
         if(sfc_glow_c(1,1,1) .lt. 0.0)then
-          write(6,*)' ERROR bad first point'
+          write(6,*)' error bad first point'
           goto 999
         endif
         sfc_glow = sfc_glow_c(2,:,:)
@@ -92,7 +92,7 @@
          offset_lon = +.000  !             "
          l_global_nl = .false.
 
-         write(6,*)' perimeter NSEW:',rnorth,south,east,west
+         write(6,*)' perimeter nsew:',rnorth,south,east,west
          ilat_start = int(south) + 1
          ilat_end   = int(rnorth) + 1
 
@@ -116,16 +116,16 @@
 
        endif
 
-!      Process asc tiles derived from ArcGIS 30m topo data
-!      For example, gdal_translate can convert 'adf' files to 'asc'        
+!      process asc tiles derived from arcgis 30m topo data
+!      for example, gdal_translate can convert 'adf' files to 'asc'        
        do itile=1,ntiles
 
         file=file_a(itile)
 
-        write(6,*)' Open for reading ',trim(file)
+        write(6,*)' open for reading ',trim(file)
         write(6,*)' pix_latlon,l_global_nl = ',pix_latlon,l_global_nl
 
-!       Read terrain tile in PPM format
+!       read terrain tile in ppm format
         open(u,file=trim(file),status='old',err=999)
         read(u,*)cdum,iwidth
         read(u,*)cdum,iheight
@@ -152,17 +152,17 @@
         rlat_end = rlat_start + float(iheight) * cellsize
         rlon_end = rlon_start + float(iwidth)  * cellsize
 
-        write(6,*)' TILE ASC lat range: ',rlat_start,rlat_end
-        write(6,*)' TILE ASC lon range: ',rlon_start,rlon_end
+        write(6,*)' tile asc lat range: ',rlat_start,rlat_end
+        write(6,*)' tile asc lon range: ',rlon_start,rlon_end
 
         pix_latlon = cellsize
 
-!       Fill arrays of image ri,rj for each LAPS grid point
+!       fill arrays of image ri,rj for each laps grid point
         istatus_img = 1
-        do i = 1,ni ! Loop through LAPS grid points    
+        do i = 1,ni ! loop through laps grid points    
         do j = 1,nj     
 
-!        The dimensions of this are questionable
+!        the dimensions of this are questionable
          rj_mdl(i,j) = (rlat_laps(i,j) - rlat_start) / pix_latlon
          ri_mdl(i,j) = (rlon_laps(i,j) - rlon_start) / pix_latlon
 
@@ -170,9 +170,9 @@
          rj_img(i,j) = 3600. - rj_img(i,j) + 1.0
          ri_img(i,j) = (rlon_laps(i,j) - rlon_start) / pix_latlon
 
-         if(rlat_laps(i,j) .gt. rlat_start .OR.
-     1      rlat_laps(i,j) .lt. rlat_end   .OR.
-     1      rlon_laps(i,j) .lt. rlon_start .OR. 
+         if(rlat_laps(i,j) .gt. rlat_start .or.
+     1      rlat_laps(i,j) .lt. rlat_end   .or.
+     1      rlon_laps(i,j) .lt. rlon_start .or. 
      1      rlon_laps(i,j) .gt. rlon_end)then
              istatus_img = 0
          endif
@@ -180,9 +180,9 @@
         enddo ! i
 
         if(istatus_img .eq. 0)then
-          write(6,*)' NOTE: LAPS grid extends outside image tile'
+          write(6,*)' note: laps grid extends outside image tile'
         else
-          write(6,*)' LAPS grid is contained within image tile'      
+          write(6,*)' laps grid is contained within image tile'      
         endif
 
         write(6,*)' selected image topo points for tile',itile
@@ -203,21 +203,21 @@
         write(6,*)' array_2d range before interpolation (topo) = '
      1          ,minval(array_2d),maxval(array_2d)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         reslights_m = 30.
 
-!       Interpolate to LAPS grid using bilinear_laps_2d
+!       interpolate to laps grid using bilinear_laps_2d
 !       array_2d(:,:) = img(1,:,:)
 
         if(grid_spacing_m / reslights_m .lt. 1.5)then
 !       if(.false.)then
-          write(6,*)' Bilinearly Interpolate Tile ',itile,grid_spacing_m
+          write(6,*)' bilinearly interpolate tile ',itile,grid_spacing_m
      1                                             ,reslights_m
           result_tile = r_missing_data
 
-!         Find interpolated image values on the model grid points that
-!         overlap the image. The output is on the model grid. 'array_2d'
+!         find interpolated image values on the model grid points that
+!         overlap the image. the output is on the model grid. 'array_2d'
 !         is the image terrain. 'ri_img' and 'rj_img' are dimensioned 
 !         on the model grid and represent ri/rj image values.          
           call bilinear_laps_2d(ri_img,rj_img,iwidth,iheight,ni,nj 
@@ -234,20 +234,20 @@
 
         else ! pixel average interpolation
 
-          write(6,*)' Calls to latlon_to_rlapsgrid'
+          write(6,*)' calls to latlon_to_rlapsgrid'
            
           if(.true.)then
 
-!           Loop through image array
+!           loop through image array
             do i = 1,iwidth
             do j = 1,iheight
 
-!             Fill lat/lon of each image pixel
+!             fill lat/lon of each image pixel
               j1 = iheight+1-j  
               rlon_img(i,j1) = rlon_start + float(i) * pix_latlon
               rlat_img(i,j1) = rlat_start + float(j) * pix_latlon
 
-!             Fill LAPS ri/rj of each image pixel
+!             fill laps ri/rj of each image pixel
               call latlon_to_rlapsgrid(rlat_img(i,j1),rlon_img(i,j1)
      1                                ,rlat_laps,rlon_laps,ni,nj
      1                                ,ri_mdl(i,j1),rj_mdl(i,j1)
@@ -264,9 +264,9 @@
 
           endif 
 
-          write(6,*)' Pixel Ave Interpolate ',ni,nj,grid_spacing_m
+          write(6,*)' pixel ave interpolate ',ni,nj,grid_spacing_m
      1                                       ,reslights_m
-!         Check dimensions and purpose of each array
+!         check dimensions and purpose of each array
           call pixelave_interp_multi(ri_mdl,rj_mdl,iwidth,iheight 
      1         ,ni,nj
      1         ,itile,ntiles,pixsum,npix
@@ -281,19 +281,19 @@
 
        enddo ! itiles
 
-cdoc   Interpolate 2-d array to find the field values at fractional grid
+cdoc   interpolate 2-d array to find the field values at fractional grid
 cdoc   points.
 
       endif ! binary file exists
 
       topo = result
 
-!     Normal end
+!     normal end
       istatus = 1
       write(6,*)' normal return from get_topo_1s'
       goto 9999
 
-!     Error condition
+!     error condition
 999   istatus = 0
       write(6,*)' error in get_topo_1s (check missing file)'
 
@@ -369,7 +369,7 @@ cdoc   points.
      1                        / float(npix(iout,jout))
           else
             result(iout,jout) = r_missing_data
-            write(6,*)' WARNING: npix = 0 at ',iout,jout
+            write(6,*)' warning: npix = 0 at ',iout,jout
           endif
           if(i .eq. 30*(i/30) .and. jout .eq. jtest)then
             write(6,*)'iout/jout/result',iout,jout,pixsum(iout,jout)

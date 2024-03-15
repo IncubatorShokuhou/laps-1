@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -33,17 +33,17 @@ cdis
      1                                 ,grid_spacing_actual_mx
      1                                 ,grid_spacing_actual_my)
 
-cdoc  Calculate actual grid spacing (x,y directions) at any given lat/lon 
-cdoc  location. This works for conformal or 'latlon' grids
+cdoc  calculate actual grid spacing (x,y directions) at any given lat/lon 
+cdoc  location. this works for conformal or 'latlon' grids
 
       include 'trigd.inc'
 
-      real rlat(ni,nj),rlon(ni,nj)                                     ! I
-      real grid_spacing_actual_mx(ni,nj),grid_spacing_actual_my(ni,nj) ! O
+      real rlat(ni,nj),rlon(ni,nj)                                     ! i
+      real grid_spacing_actual_mx(ni,nj),grid_spacing_actual_my(ni,nj) ! o
 
       character*6 c6_maproj
 
-      write(6,*)' Subroutine get_grid_spacing_array'
+      write(6,*)' subroutine get_grid_spacing_array'
 
       call get_standard_latitudes(slat1,slat2,istatus)
       if(istatus .ne. 1)then
@@ -53,7 +53,7 @@ cdoc  location. This works for conformal or 'latlon' grids
       call get_grid_spacing(grid_spacing_m,istatus)
       if(istatus .ne. 1)then
           write(6,*)
-     1 ' Error calling get_grid_spacing from get_grid_spacing_actual_xy'       
+     1 ' error calling get_grid_spacing from get_grid_spacing_actual_xy'       
           stop
       endif
 
@@ -75,7 +75,7 @@ cdoc  location. This works for conformal or 'latlon' grids
               call get_sigma(rlat(i,j),rlon(i,j),sigma,istatus)
               if(istatus .ne. 1)then
                   write(6,*)
-     1        ' Error calling get_sigma from get_grid_spacing_actual'       
+     1        ' error calling get_sigma from get_grid_spacing_actual'       
                   stop
               endif
 
@@ -99,7 +99,7 @@ cdoc  location. This works for conformal or 'latlon' grids
       end
 
 c
-c=====  Here are John's subroutines...(abandon hope, ye who enter)
+c=====  here are john's subroutines...(abandon hope, ye who enter)
 c
 	subroutine vortdiv(u,v,vort,div,imax,jmax,dx,dy)
 c this routine computes vorticity and divergence from u and v winds
@@ -124,7 +124,7 @@ c
 c
 	subroutine bounds(x,imax,jmax)
 c
-c.....	Routine to fill in the boundaries of an array.  Just uses the
+c.....	routine to fill in the boundaries of an array.  just uses the
 c.....	interior points for now.
 c
 	real x(imax,jmax)

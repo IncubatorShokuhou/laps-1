@@ -23,8 +23,8 @@
 !      real rmaglim_s(minalt:maxalt,minazi:maxazi)
        real rmaglim_v(minalt:maxalt,minazi:maxazi)
 
-       real*8 PI, RPD                            
-       PI = 3.1415926535897932d0; RPD = PI/180.d0
+       real*8 pi, rpd                            
+       pi = 3.1415926535897932d0; rpd = pi/180.d0
 
        blog_v = 0.
        elong_a = 0.
@@ -37,7 +37,7 @@
        skyglow_in = 1.0
        patm = 0.85
 
-       write(6,*)' Start skyglow_cyl for ',altsource_in,azisource_in
+       write(6,*)' start skyglow_cyl for ',altsource_in,azisource_in
 
        write(6,*)
        write(6,*)'   alt   skyglow_in   skyglow_out  diff_mag del-logb'   
@@ -60,13 +60,13 @@
 !          altsource = max(altsource_in,0.)
            altsource = altsource_in     
            write(6,*)
-           write(6,*)'                     Solar Altitude = ',altsource
+           write(6,*)'                     solar altitude = ',altsource
            do aziobj = 0.,180.,azi_scale                   
              call get_idx(aziobj,minazi,azi_scale,jazi)
              if(l_process_azi(jazi) .eqv. .true.)then
-               write(6,*)' Aziobj/jazi = ',aziobj,jazi
+               write(6,*)' aziobj/jazi = ',aziobj,jazi
                do altobj = altmax,altmin,-degint_alt
-!                  write(6,*)' Altobj = ',altobj
+!                  write(6,*)' altobj = ',altobj
                    xs = cosd(altsource) * cosd(azisource)
                    ys = cosd(altsource) * sind(azisource)
                    zs = sind(altsource)
@@ -79,15 +79,15 @@
                    elong_r8 = elong_r8 / rpd
                    elong = elong_r8            
 
-                   if(aziobj .eq. 180. .OR. aziobj .eq. 0.)then
+                   if(aziobj .eq. 180. .or. aziobj .eq. 0.)then
                        idebug = 1
                        write(6,*)
-                       write(6,*)'Debug for alt/az/elong ',altobj,aziobj,elong
+                       write(6,*)'debug for alt/az/elong ',altobj,aziobj,elong
                    else
                        idebug = 0
                    endif
 
-!                  Schaeffer routine
+!                  schaeffer routine
 !                  call get_skyglow(rmag,altsource,altobj,elong,patm,skyglow)
 
                    call get_idx(altobj,minalt,alt_scale,ialt)
@@ -97,7 +97,7 @@
                    call calc_extinction(altobj_e,patm,airmass,totexto)
 !                  rmaglim_s(ialt,jazi) = b_to_maglim(skyglow) - (totexto - zenext)
 
-!                  VI routine
+!                  vi routine
                    magn_r8 = -10.
                    altdif_r8 = -1.0
                    al1_r8 = 0.     
@@ -109,7 +109,7 @@
                    alm_best_r8 = 0.
                    elong_r8 = max(elong_r8,1.50d0)
 
-!                  Consider settings for the moon
+!                  consider settings for the moon
 
                    if(altsource .ge. 0.)then
                      call vi(magn_r8,elong_r8,altdif_r8,al1_r8,al2_r8,elgms_r8,elgmc_r8 &
@@ -139,7 +139,7 @@
                    endif
 
                    if(skyglow .le. 0.)then
-                       write(6,*)' Error in skyglow value ',skyglow,rmaglim_v_noextinction,maglim_r8,totexto,zenext
+                       write(6,*)' error in skyglow value ',skyglow,rmaglim_v_noextinction,maglim_r8,totexto,zenext
                        stop
                    endif
                    blog_v(ialt,jazi) = log10(skyglow)
@@ -163,15 +163,15 @@
 !          write(lun,*)blog_v         
 
            write(6,*)
-!          Fill in altitudes with blog_v/elong     
-           write(6,*)' Fill interpolated altitudes in blog_v/elong'
+!          fill in altitudes with blog_v/elong     
+           write(6,*)' fill interpolated altitudes in blog_v/elong'
            ialt_delt = nint(2. / alt_scale)
            do altobj = altmax,altmin,-alt_scale
 !            if(altobj .ne. nint(altobj/2.) * 2.)then ! odd altitudes
 !              ialt = nint((altobj-altmin)/alt_scale)
                call get_idx(altobj,minalt,alt_scale,ialt)
-               call get_interp_parms(minalt,maxalt,ialt_delt,ialt &     ! I
-                                    ,fm,fp,ialtm,ialtp,ir,istatus)      ! O
+               call get_interp_parms(minalt,maxalt,ialt_delt,ialt &     ! i
+                                    ,fm,fp,ialtm,ialtp,ir,istatus)      ! o
                write(6,*)' altobj/fm/fp/ialtm/ialtp',altobj,fm,fp,ialtm,ialtp
                if(ir .ne. 0)then
                  blog_v(ialt,:)  = fm * blog_v(ialtm,:)  + fp * blog_v(ialtp,:)
@@ -183,8 +183,8 @@
            blog_v_out  = blog_v
            elong_out = elong_a
 
-!          Fill in azimuths with blog_v
-           write(6,*)' Fill interpolated azimuths in blog_v_out'  
+!          fill in azimuths with blog_v
+           write(6,*)' fill interpolated azimuths in blog_v_out'  
            do iazi = minazi,maxazi/2,1
                if(blog_v(0,iazi) .gt. 0.)then
 !                  write(6,*)' azi already filled ',iazi
@@ -208,7 +208,7 @@
                    dist = distm + distp
                    frac = distm / dist
                    if(iazi_m .lt. 0 .or. iazi_m .gt. maxazi .or. iazi_p .lt. 0 .or. iazi_p .gt. maxazi)then
-                       write(6,*)' ERROR in iazi values'
+                       write(6,*)' error in iazi values'
                        stop
                    endif
                    blog_v_out(:,iazi) = blog_v(:,iazi_m) * (1. - frac)  &
@@ -227,7 +227,7 @@
 
        iroll = nint((azisource_in - azisource)/azi_scale)
 
-       write(6,*)' Roll image by azimuth ',iroll,azisource_in
+       write(6,*)' roll image by azimuth ',iroll,azisource_in
 
        do iazir = 0,maxazi
            iazio = iazir - iroll
@@ -244,13 +244,13 @@
 23         format('altobj,blog_v_roll ',f8.2,13f6.2)
        enddo ! altobj
 
-       write(6,*)' End of skyglow_cyl'
+       write(6,*)' end of skyglow_cyl'
 
        return
        end
 
-       subroutine get_interp_parms(minidx,maxidx,intidx,idx &         ! I
-                                  ,fm,fp,im,ip,ir,istatus)            ! O
+       subroutine get_interp_parms(minidx,maxidx,intidx,idx &         ! i
+                                  ,fm,fp,im,ip,ir,istatus)            ! o
 
        istatus = 1
 
@@ -267,8 +267,8 @@
            fm = 0.0
        endif
 
-       if(ip .gt. maxidx .OR. im .lt. minidx)then
-           write(6,*)'ERROR in get_interp_parms:',minidx,maxidx,idx,im,ip
+       if(ip .gt. maxidx .or. im .lt. minidx)then
+           write(6,*)'error in get_interp_parms:',minidx,maxidx,idx,im,ip
            istatus = 0
        endif
 

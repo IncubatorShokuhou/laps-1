@@ -1,25 +1,25 @@
-MODULE Minimizatn
+module minimizatn
 
 !*********************************************************
-!  This module defines a minimization procedure analyzing
+!  this module defines a minimization procedure analyzing
 !  surface observations in time sequence.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !*********************************************************
 
-  USE Definition
+  use definition
 
-CONTAINS
+contains
   
-  INCLUDE 'Functn.f90'
-  INCLUDE 'Functn_ad.f90'
-  ! INCLUDE 'FunctnDiv.f90'
-  ! INCLUDE 'FunctnDiv_ad.f90'
-  INCLUDE 'Iterates.f90'
-  INCLUDE 'Minimize.f90'
-  INCLUDE 'RF1D.f90'
-  INCLUDE 'RF1D_ad.f90'
-  INCLUDE 'RF3D.f90'
-  INCLUDE 'RF3D_ad.f90'
+  include 'functn.f90'
+  include 'functn_ad.f90'
+  ! include 'functndiv.f90'
+  ! include 'functndiv_ad.f90'
+  include 'iterates.f90'
+  include 'minimize.f90'
+  include 'rf1d.f90'
+  include 'rf1d_ad.f90'
+  include 'rf3d.f90'
+  include 'rf3d_ad.f90'
 
-END MODULE Minimizatn
+end module minimizatn

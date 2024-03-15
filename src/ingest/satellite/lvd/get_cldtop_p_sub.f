@@ -20,9 +20,9 @@
       call get_systime(i4time_sys,a9_systime,istatus)
       if(i4time_latest.eq.0)i4time_latest=i4time_sys  !if = 0 then no files in directory
       i4timedif=abs(i4time_sys-i4time_latest)         !if negative then maybe a case rerun
-      print*,'Age of ctp data: ',i4timedif/60,' minutes' 
+      print*,'age of ctp data: ',i4timedif/60,' minutes' 
       if(i4timedif.le.itime_ctp_window)then
-         print*,'Found new data'
+         print*,'found new data'
          istatus_ctp=1
       endif
       return
@@ -40,7 +40,7 @@ c
       parameter (max_files=20000)
 c
 c the max_ctp parameter is set based upon the size of the
-c cld-top-p files we read from FSL's /public data base.
+c cld-top-p files we read from fsl's /public data base.
       integer   max_ctp
       parameter (max_ctp=110000)
 
@@ -173,10 +173,10 @@ c    &   i4timefile_min.le.i4time_sys+iwindow_ctp_s)then
            lon(iobs)=-1*lon(iobs)
         enddo
         if(iobs.eq.max_ctp)then
-           print*,'WARNING: Entire file may not have been read'
+           print*,'warning: entire file may not have been read'
         endif
 20      iobs=iobs-1
-        print*,'Done reading:',iobs, ' records' 
+        print*,'done reading:',iobs, ' records' 
 c
 c determine which observations are within the analysis domain
 c
@@ -184,14 +184,14 @@ c
 
         call find_domain_name(c_dataroot,c_domain_name,istatus)
         if(istatus.ne.1)then
-           print*,'Error returned: find_domain_name'
+           print*,'error returned: find_domain_name'
            return
         endif
 
         call get_laps_domain(nxl,nyl,c_domain_name
      +,rlat,rlon,topo,istatus)
         if (istatus.lt.1)then
-            print *,'Error reading lat, lon, topo data.'
+            print *,'error reading lat, lon, topo data.'
             stop
         endif
 
@@ -207,11 +207,11 @@ c determine cld top p data spacing
 
         do ii=1,iobs
       
-         Call latlon_to_rlapsgrid(lat(ii),
+         call latlon_to_rlapsgrid(lat(ii),
      &                            lon(ii),
-     &                            rlat,rlon,         !LAPS lat/lon arrays
-     &                            nxl,nyl,           !LAPS horiz domain
-     &                            ri,rj,             !Output: real i,j
+     &                            rlat,rlon,         !laps lat/lon arrays
+     &                            nxl,nyl,           !laps horiz domain
+     &                            ri,rj,             !output: real i,j
      &                            jstatus)
 
          if(jstatus .eq. 1)then
@@ -283,10 +283,10 @@ c     endif
 
       goto 1000
 
-9     print*,'Error reading cloud top p header'
+9     print*,'error reading cloud top p header'
       istatus = 0
       goto 1000
-99    print*,'Error reading cloud top p file'
+99    print*,'error reading cloud top p file'
       istatus = 0
 
 1000  return

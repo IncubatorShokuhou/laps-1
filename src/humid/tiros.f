@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis cdis
 cdis
@@ -53,22 +53,22 @@ cdis
      1     ii,jj,kk             ! grid dimensions
      1     )
 
-c   The module tiros.f is the current interface to use
-c   TOVS radiances in LAPS through variational methods. 
-c   This algorithm is now using the ECMWF RATAOV forward
+c   the module tiros.f is the current interface to use
+c   tovs radiances in laps through variational methods. 
+c   this algorithm is now using the ecmwf rataov forward
 c   model for its radiance computations and the
-c   computation of the Jacobian matrix used in the
-c   solution of the 1-D variational adjustment of the
+c   computation of the jacobian matrix used in the
+c   solution of the 1-d variational adjustment of the
 c   atmospheric profile.
 c   
-c   Since the RTATOV software is proprietary code, it is
-c   not offered with LAPS.  Instead a signed agreement
-c   is required with ECMWF to establish the rights to
-c   use the code.  Once this is in hand, FSL will
-c   provide and interface to RTATOV.
+c   since the rtatov software is proprietary code, it is
+c   not offered with laps.  instead a signed agreement
+c   is required with ecmwf to establish the rights to
+c   use the code.  once this is in hand, fsl will
+c   provide and interface to rtatov.
 c   
-c   Author:  Dan Birkenheuer
-c   Date:    April 1997
+c   author:  dan birkenheuer
+c   date:    april 1997
 
 
 
@@ -101,7 +101,7 @@ c climate model variables
 c missing data flag
       real rmd
 
-c RTATOV variables
+c rtatov variables
       integer nlev
       integer nchan
       parameter (nlev = 67)    ! background profile dim
@@ -109,10 +109,10 @@ c RTATOV variables
       real ulad (nlev)         ! background profile
       real radiance(nchan)     ! computed radiances
       real b_temps (nchan)     ! computed brightness temps
-      real xktbb (nlev,nchan)  ! adjoint of Jacobian matrix
+      real xktbb (nlev,nchan)  ! adjoint of jacobian matrix
       real inv_k (nlev,nchan)  ! inverse multiplier matrix
       real mx (nlev)           ! modified profile
-      real ym (nchan)          ! radiance data (btemp K)
+      real ym (nchan)          ! radiance data (btemp k)
 
 c dynamic dependent variables
 c      real lt1(nz_l,1)  ! one location temp
@@ -142,9 +142,9 @@ c     1 430.,475.,500.,570.,620.,670.,700.,780.,850.,920.,950.,1000./
 
 c     this is a place holder routine for the real routine
 
-      write(6,*) 'Tiros code activated but not present'
-      write(6,*) 'Use of RTATOV requires license from ECMWF'
-      write(6,*) 'Stopping lq3 run, invalid moisture_switch.txt file'
+      write(6,*) 'tiros code activated but not present'
+      write(6,*) 'use of rtatov requires license from ecmwf'
+      write(6,*) 'stopping lq3 run, invalid moisture_switch.txt file'
 
       stop
 

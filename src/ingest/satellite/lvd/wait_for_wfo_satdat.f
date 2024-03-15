@@ -43,7 +43,7 @@ c
 87     format(i2)
 88     format(i3)
 89     format(i4)
-       write(6,*)'In wait-for-wfo-data '
+       write(6,*)'in wait-for-wfo-data '
 c
 c set "found" flag. set extensions (because the filenames are not in the same order
 c
@@ -60,7 +60,7 @@ c
        enddo
 c
 c for wfo data, there is no filename extension indicative of sat data
-c type. This is contained in the database directory structure.
+c type. this is contained in the database directory structure.
 c
 c this disables waiting for visible data when solar_altitude is low
 c
@@ -81,14 +81,14 @@ c
              nn=index(data_dir(ispec),' ')-1
              path=data_dir(ispec)(1:nn)//'*'
              nn=index(path,' ')
-             write(6,*)'Waiting for ',path(1:nn)
+             write(6,*)'waiting for ',path(1:nn)
              write(6,*)'---------------------'
              call wait_for_data(path,i4time_data
      1               ,i4_check_interval,i4_total_wait
      1               ,i4_thresh_age
      1               ,istatus)
              if(istatus .ne. 1)then
-                write(6,*)'No data found: ',path(1:nn)
+                write(6,*)'no data found: ',path(1:nn)
              else
                 call get_latest_file_time(path,i4time_nearest)
                 if(i4time_nearest.eq.i4time_data)then
@@ -104,7 +104,7 @@ c
 
        goto 999
 
-995    write(6,*)'Error getting wait parms'
+995    write(6,*)'error getting wait parms'
 
 999    return
        end

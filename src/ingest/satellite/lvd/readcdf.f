@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -32,29 +32,29 @@ cdis
       subroutine readcdf(csat_id,csat_type,chtype,
      1record,n_elem,n_lines,r4_image,scale_img,
      1latitude,longitude,
-     1La1,Lo1,Dx,Dy,Latin,
-     1LoV, ivalidTime , ncid, istatus)
+     1la1,lo1,dx,dy,latin,
+     1lov, ivalidtime , ncid, istatus)
 
-c     written by Dan Birkenheuer February 1994
-c     J Smart   5/95    Included code to deal with gvar /public files
-c     J Smart   6/96    Included code to deal with WFO satellite netcdf files
-c     J Smart   3/97    Included subroutine rdblock_line_elem to read only the
-c			appropriate sector of visible satellite data. Argument
-c                       list lets subroutine know whether logical or I*2 data type.
-c     J Smart   3/97    Converted _vis routine to be the only netCDF reader. Works
-c			for vis, ir, wv and sounder. Block reading allows this.
-c     J Smart   4/97    Adapted code further to work with gvar. NetCDF headers for
-c                       raw gvar are different than for fsl-conus (ie., no La1, Lo1,
-c                       Lov, or Latin).
-c     J Smart   5/07    Added capability to read FMI (Finish Met Inst) data
+c     written by dan birkenheuer february 1994
+c     j smart   5/95    included code to deal with gvar /public files
+c     j smart   6/96    included code to deal with wfo satellite netcdf files
+c     j smart   3/97    included subroutine rdblock_line_elem to read only the
+c			appropriate sector of visible satellite data. argument
+c                       list lets subroutine know whether logical or i*2 data type.
+c     j smart   3/97    converted _vis routine to be the only netcdf reader. works
+c			for vis, ir, wv and sounder. block reading allows this.
+c     j smart   4/97    adapted code further to work with gvar. netcdf headers for
+c                       raw gvar are different than for fsl-conus (ie., no la1, lo1,
+c                       lov, or latin).
+c     j smart   5/07    added capability to read fmi (finish met inst) data
 c=====================================================================================
       implicit none
 
-      Include 'netcdf.inc'
+      include 'netcdf.inc'
 
-      Integer n_elem,n_lines,record
-      INTEGER RCODE
-C
+      integer n_elem,n_lines,record
+      integer rcode
+c
       real      r4_image(n_elem,n_lines)
       real      latitude(n_elem,n_lines)
       real      longitude(n_elem,n_lines)
@@ -62,38 +62,38 @@ C
       integer       bi (2)
       equivalence (ib,bi (1) )
       integer istatus
-      Integer   iDx
-      Integer   iD
-      INTEGER   Nx
-      INTEGER   Ny
-      INTEGER   Nz
-      REAL      La1     
-      REAL      Lo1     
-      REAL      Dx      
-      REAL      Dy      
-      REAL      Latin   
-      REAL      LoV     
-      REAL      poLat
-      REAL      La2,Lo2,level
-      REAL      scale_img,offset_img ! O
+      integer   idx
+      integer   id
+      integer   nx
+      integer   ny
+      integer   nz
+      real      la1     
+      real      lo1     
+      real      dx      
+      real      dy      
+      real      latin   
+      real      lov     
+      real      polat
+      real      la2,lo2,level
+      real      scale_img,offset_img ! o
       real arg1,arg2
-      INTEGER START(10)
-      INTEGER COUNT(10)
+      integer start(10)
+      integer count(10)
       integer varid,ncid
       integer center_id, process_id,
      +     wmo_sat_id(record),ivalidtime,nav
-      Integer imax,jmax,kmax,kdim
-      Integer channel_fcinv
+      integer imax,jmax,kmax,kdim
+      integer channel_fcinv
 
-      integer lineRes, elemRes
-      common /cdfdata/ lineRes, elemRes
+      integer lineres, elemres
+      common /cdfdata/ lineres, elemres
 
       double precision reftime(record), valtime(record)
       character*30  c_valtime
-      character*30  c_Lov
+      character*30  c_lov
       character*30  c_xres
       character*30  c_yres
-      Character*3   csat_type
+      character*3   csat_type
       character*3   chtype
       character*6   csat_id
       character*132 origin_name
@@ -110,27 +110,27 @@ C
 c---------------------------------------------------------
 c   code
 
-      print*,'Subroutine readcdf...'
+      print*,'subroutine readcdf...'
       print*,'n_elem/n_lines = ',n_elem,n_lines
 
       istatus = 0 ! bad istatus
 
-      call NCPOPT(0)
+      call ncpopt(0)
 
       if(csat_type.eq.'rll')then ! read lat/lon
-         rcode = NF_INQ_VARID(ncid,'latitude',varid)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         rcode = nf_inq_varid(ncid,'latitude',varid)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             print *,'in var latitude'
          else
             write(6,*)
-            Write(6,*)'Calling rdblock_line_elem - latitude'
+            write(6,*)'calling rdblock_line_elem - latitude'
 
-            Call rdblock_line_elem(csat_id,csat_type,chtype,
+            call rdblock_line_elem(csat_id,csat_type,chtype,
      &          ncid,varid,n_elem,n_lines,latitude,istatus)
 
             if(istatus .ne. 1)then
-               write(6,*)'Error in rdblock_line_elem'
+               write(6,*)'error in rdblock_line_elem'
                return
             endif
          endif
@@ -139,24 +139,24 @@ c   code
          arg2 = maxval(latitude)
          write(6,*)'readcdf latitude range:       ',arg1,arg2
          if(arg1 .eq. 0. .and. arg2 .eq. 0.)then
-            write(6,*)' ERROR in latitude range'
+            write(6,*)' error in latitude range'
             istatus = 0
             return
          endif
 
-         rcode = NF_INQ_VARID(ncid,'longitude',varid)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         rcode = nf_inq_varid(ncid,'longitude',varid)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             print *,'in var longitude'
          else
             write(6,*)
-            Write(6,*)'Calling rdblock_line_elem - longitude'
+            write(6,*)'calling rdblock_line_elem - longitude'
 
-            Call rdblock_line_elem(csat_id,csat_type,chtype,
+            call rdblock_line_elem(csat_id,csat_type,chtype,
      &          ncid,varid,n_elem,n_lines,longitude,istatus)
 
             if(istatus .ne. 1)then
-               write(6,*)'Error in rdblock_line_elem'
+               write(6,*)'error in rdblock_line_elem'
                return
             endif
          endif
@@ -164,8 +164,8 @@ c   code
          write(6,*)'readcdf longitude range:      '
      1          ,minval(longitude),maxval(longitude)
 
-      elseif(csat_type.eq.'nll' .or. csat_type.eq.'jma')then ! read 1D lat/lon
-         write(6,*)' Read 1D lat/lon arrays (UNDER CONSTRUCTION)'
+      elseif(csat_type.eq.'nll' .or. csat_type.eq.'jma')then ! read 1d lat/lon
+         write(6,*)' read 1d lat/lon arrays (under construction)'
 
       endif
 
@@ -183,24 +183,24 @@ c   code
          varname = 'image'
       endif
 
-      rcode = NF_INQ_VARID(ncid,trim(varname),varid)
-      if(rcode.ne.NF_NOERR) then
-         print *, NF_STRERROR(rcode)
+      rcode = nf_inq_varid(ncid,trim(varname),varid)
+      if(rcode.ne.nf_noerr) then
+         print *, nf_strerror(rcode)
          print *,'in var ',trim(varname)
       else
          print *,'varid obtained for ',trim(varname)
       endif
-C
-C    statements to fill image                          
-C
+c
+c    statements to fill image                          
+c
       write(6,*)
-      Write(6,*)'Calling rdblock_line_elem - image read sub'
+      write(6,*)'calling rdblock_line_elem - image read sub'
 
-      Call rdblock_line_elem(csat_id,csat_type,chtype,
+      call rdblock_line_elem(csat_id,csat_type,chtype,
      &ncid,varid,n_elem,n_lines,r4_image,istatus)
 
       if(istatus .ne. 1)then
-         write(6,*)'Error in rdblock_line_elem'
+         write(6,*)'error in rdblock_line_elem'
          return
       endif
 
@@ -208,25 +208,25 @@ C
      1                      .or. csat_type.eq.'jma')then 
 
 !         read scaling attribute
-          rcode=NF_GET_ATT_REAL(ncid,varid,'scale_factor'
+          rcode=nf_get_att_real(ncid,varid,'scale_factor'
      1                              ,scale_img)
-          if(rcode.ne.NF_NOERR) then
-             write(6,*)'Error reading image scaling attribute'
+          if(rcode.ne.nf_noerr) then
+             write(6,*)'error reading image scaling attribute'
              scale_img = .01
-             write(6,*)' Use default value for image scale ',scale_img
+             write(6,*)' use default value for image scale ',scale_img
           else
-             write(6,*)' Successfully read image scale ',scale_img
+             write(6,*)' successfully read image scale ',scale_img
           endif
 
 !         read offset attribute
-          rcode=NF_GET_ATT_REAL(ncid,varid,'add_offset'
+          rcode=nf_get_att_real(ncid,varid,'add_offset'
      1                              ,offset_img)
-          if(rcode.ne.NF_NOERR) then
-             write(6,*)'Error reading image offset attribute'
+          if(rcode.ne.nf_noerr) then
+             write(6,*)'error reading image offset attribute'
              offset_img = 0.
-             write(6,*)' Use default value for image offset ',offset_img
+             write(6,*)' use default value for image offset ',offset_img
           else
-             write(6,*)' Successfully read image offset ',offset_img
+             write(6,*)' successfully read image offset ',offset_img
           endif
 
           r4_image(:,:) = r4_image(:,:) * scale_img + offset_img
@@ -234,50 +234,50 @@ C
       endif
 
       if(csat_type.eq.'rll')then 
-          rcode = NF_INQ_VARID(ncid,'lineRes',varid)
-          if(rcode.ne.NF_NOERR) then
-             print *, NF_STRERROR(rcode)
-             print *,'in var lineRes'
+          rcode = nf_inq_varid(ncid,'lineres',varid)
+          if(rcode.ne.nf_noerr) then
+             print *, nf_strerror(rcode)
+             print *,'in var lineres'
           endif
-          rcode = NF_GET_VAR_INT(ncid,varid,lineRes)
-          if(rcode.ne.NF_NOERR) then
-             print *, NF_STRERROR(rcode)
-             print *,'in var lineRes'
+          rcode = nf_get_var_int(ncid,varid,lineres)
+          if(rcode.ne.nf_noerr) then
+             print *, nf_strerror(rcode)
+             print *,'in var lineres'
           endif
-          if(rcode.ne.NF_NOERR) then
-             write(6,*)'Error reading lineRes'
+          if(rcode.ne.nf_noerr) then
+             write(6,*)'error reading lineres'
           else
-             write(6,*)' Successfully read lineRes ',lineRes
+             write(6,*)' successfully read lineres ',lineres
           endif
 
-          rcode = NF_INQ_VARID(ncid,'elemRes',varid)
-          if(rcode.ne.NF_NOERR) then
-             print *, NF_STRERROR(rcode)
-             print *,'in var elemRes'
+          rcode = nf_inq_varid(ncid,'elemres',varid)
+          if(rcode.ne.nf_noerr) then
+             print *, nf_strerror(rcode)
+             print *,'in var elemres'
           endif
-          rcode = NF_GET_VAR_INT(ncid,varid,elemRes)
-          if(rcode.ne.NF_NOERR) then
-             print *, NF_STRERROR(rcode)
-             print *,'in var elemRes'
+          rcode = nf_get_var_int(ncid,varid,elemres)
+          if(rcode.ne.nf_noerr) then
+             print *, nf_strerror(rcode)
+             print *,'in var elemres'
           endif
-          if(rcode.ne.NF_NOERR) then
-             write(6,*)'Error reading elemRes'
+          if(rcode.ne.nf_noerr) then
+             write(6,*)'error reading elemres'
           else
-             write(6,*)' Successfully read elemRes ',elemRes
+             write(6,*)' successfully read elemres ',elemres
           endif
-C
+c
       endif
 
       istatus = 0
 c
-c JSmart: 6-4-97.  WFO satellite netCDF files changed rather dramatically
-c                  such that NO header info exists and we must now jump over
+c jsmart: 6-4-97.  wfo satellite netcdf files changed rather dramatically
+c                  such that no header info exists and we must now jump over
 c                  the statements to read the header info. 
 c
       if(csat_type.eq.'cdf')then
          call read_netcdf_sat_head(ncid,record,
-     + Nx, Ny, center_id,process_id, wmo_sat_id,Dx,Dy,
-     + La1, Latin, Lo1, Lov, reftime, valtime, earth_shape,
+     + nx, ny, center_id,process_id, wmo_sat_id,dx,dy,
+     + la1, latin, lo1, lov, reftime, valtime, earth_shape,
      + grid_name, grid_type, origin_name, process_name,
      + wavelength, x_dim, y_dim, istatus)
 
@@ -289,5 +289,5 @@ c
 
       istatus = 1  ! ok!
 
-      Return
-      END
+      return
+      end

@@ -3,7 +3,7 @@
                               ,iplo,iphi,jplo,jphi,ni_polar,nj_polar)
 
        include 'trigd.inc'
-       use mem_namelist, ONLY: r_missing_data
+       use mem_namelist, only: r_missing_data
 
        real cyl(minalt:maxalt,minazi:maxazi)
        real polar(iplo:iphi,jplo:jphi)
@@ -52,7 +52,7 @@
        azi_a = r_missing_data
        polar = r_missing_data
 
-!      Determine cylindrical indices 'ri_a' and 'rj_a' for each polar grid point
+!      determine cylindrical indices 'ri_a' and 'rj_a' for each polar grid point
        do ip = iplo,iphi
        do jp = jplo,jphi
            rip = ip; rjp = jp
@@ -64,14 +64,14 @@
            azi_last = azi
            azi = atan3d(-deltj*posign,delti) ! minus sign on deltj flips left/right
 
-!          Determine sign convention of azimuth range
+!          determine sign convention of azimuth range
            if(azimin .lt. 0. .and. azi .gt. 180. .and. azi .gt. azimax)then
                azi2 = azi - 360. ! azi2 is between -180. and 0.
            else
                azi2 = azi
            endif
 
-!          Perform coordinate rotation (around E-W horizon axis)
+!          perform coordinate rotation (around e-w horizon axis)
            if(rotew .ne. 0. .or. rotz .ne. 0.)then
              if(azi2 .ne. azi)then
                  write(6,*)' software error, negative azi',azi,azi2
@@ -81,22 +81,22 @@
              alt_orig = alt
              azi_orig = azi ! between 0 and 360
 
-             sindec = SIND(alt)
-             cosdec = COSD(alt)
-             sinphi = SIND(90.-rotew)
-             cosphi = COSD(90.-rotew)
-             cosha  = COSD(azi)
+             sindec = sind(alt)
+             cosdec = cosd(alt)
+             sinphi = sind(90.-rotew)
+             cosphi = cosd(90.-rotew)
+             cosha  = cosd(azi)
 
-             alt=ASIND (sinphi*sindec+cosphi*cosdec*cosha)
+             alt=asind (sinphi*sindec+cosphi*cosdec*cosha)
              cosarg = (cosphi*sindec-sinphi*cosdec*cosha)/cosd(alt)
              cosarg = min(max(cosarg,-1.),+1.)
-             azi=180. - ACOSD(cosarg)
+             azi=180. - acosd(cosarg)
 
              if(modulo(azi_orig,360.) .gt. 180.)then
                 azi = 360.0 - azi
              endif
 
-!            Apply azimuth rotation at the end
+!            apply azimuth rotation at the end
              azi = modulo(azi + rotz,360.)
              if(abs(alt) .eq. 90.)azi = azi_orig
 
@@ -111,8 +111,8 @@
 !              i_cyl = nint(alt)    
 !              j_cyl = nint(azi) 
 !              polar(ip,jp) = cyl(i_cyl,j_cyl)
-               ri_a(ip,jp) = (alt -altmin) / alt_scale + 1.0 ! real I index in CYL array, offset to start at 1
-               rj_a(ip,jp) = (azi2-azimin) / azi_scale + 1.0 ! real J index in CYL array, offset to start at 1
+               ri_a(ip,jp) = (alt -altmin) / alt_scale + 1.0 ! real i index in cyl array, offset to start at 1
+               rj_a(ip,jp) = (azi2-azimin) / azi_scale + 1.0 ! real j index in cyl array, offset to start at 1
 
                if(ip .eq. ni_polar/2 .and. jp .eq. (jp/10)*10)then
                    iprint = 1
@@ -120,8 +120,8 @@
                    iprint = 0
                endif
 !              if(jp .eq. nint(rj_polar_mid))then
-!              if((azi-50.) * (azi_last-50.) .lt. 0. .OR. ip .eq. 257)then ! cross 50.
-!              if((azi-50.) * (azi_last-50.) .lt. 0. .AND. jp .gt. 265)then ! cross 50.
+!              if((azi-50.) * (azi_last-50.) .lt. 0. .or. ip .eq. 257)then ! cross 50.
+!              if((azi-50.) * (azi_last-50.) .lt. 0. .and. jp .gt. 265)then ! cross 50.
                if(iprint .eq. 1)then
                  icyl = nint(ri_a(ip,jp)) + minalt
                  jcyl = nint(rj_a(ip,jp)) + minazi
@@ -146,7 +146,7 @@
        gamma = 2.2
        where(cyl .ne. r_missing_data)cyl = cyl**gamma
 
-!      Bilinear interpolation is most suited when the output grid spacing
+!      bilinear interpolation is most suited when the output grid spacing
 !      less than 1.5 times the input grid spacing (determine this ratio)
        frame_width_deg = 180. / pomag
        polar_sp = frame_width_deg / float(ni_polar)
@@ -159,15 +159,15 @@
        njp_crop = jphi-jplo+1
 
        if(polar_over_cyl_sp .lt. 1.5)then
-           write(6,*)' Using bilinear interpolation'
+           write(6,*)' using bilinear interpolation'
            call bilinear_laps_2d(ri_a(iplo:iphi,jplo:jphi) &
                                 ,rj_a(iplo:iphi,jplo:jphi) &
                                 ,imax,jmax,nip_crop,njp_crop &
                                 ,cyl,polar(iplo:iphi,jplo:jphi))
 
        else ! allow for antialiasing approach
-!          Loop through polar indices           
-           write(6,*)' Using antialiasing interpolation method'
+!          loop through polar indices           
+           write(6,*)' using antialiasing interpolation method'
            do ip = iplo,iphi
            do jp = jplo,jphi
 
@@ -177,9 +177,9 @@
                    iprint = 0
                endif
 
-!              Cylindrical indices are given by 'ri_a' and 'rj_a'
+!              cylindrical indices are given by 'ri_a' and 'rj_a'
 
-!              Azimuth direction
+!              azimuth direction
                rjcyl = rj_a(ip,jp)
                j1 = int(rjcyl)
                j2 = j1+1
@@ -187,14 +187,14 @@
                fracj1 = 1. - fracj
                fracj2 = fracj
 
-!              Find overlap of each circumferential stripe in circularized pixel          
+!              find overlap of each circumferential stripe in circularized pixel          
                ricyl = ri_a(ip,jp)
                icen = (nint(ricyl)-1) + minalt
 
                sumij = 0.
-               do jcyl = j1,j2 ! Azimuth
+               do jcyl = j1,j2 ! azimuth
                    sumi = 0.
-                   do icylrel = -2,+2 ! Altitude
+                   do icylrel = -2,+2 ! altitude
                        icyl = icen + icylrel
                        relpolarcen = (float(icylrel) + mod(ricyl,1.)) / polar_over_cyl_sp
                        relpolarl = relpolarcen - 0.5 / polar_over_cyl_sp
@@ -234,7 +234,7 @@
        write(6,*)' alt(iplo,jphi) = ',iplo,jphi,alt_a(iplo,jphi)       
        write(6,*)' alt(iphi,jphi) = ',iphi,jphi,alt_a(iphi,jphi)       
 
-!      Fill in corners of polar array (below horizon) with zero values
+!      fill in corners of polar array (below horizon) with zero values
        where(alt_a(:,:) .eq. r_missing_data)polar(:,:) = 0.
       
        return

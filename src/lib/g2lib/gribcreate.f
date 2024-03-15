@@ -1,58 +1,58 @@
       subroutine gribcreate(cgrib,lcgrib,listsec0,listsec1,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gribcreate 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-04-28
+! subprogram:    gribcreate 
+!   prgmmr: gilbert         org: w/np11    date: 2000-04-28
 !
-! ABSTRACT: This subroutine initializes a new GRIB2 message and packs
-!   GRIB2 sections 0 (Indicator Section) and 1 (Identification Section).
-!   This routine is used with routines "addlocal", "addgrid", "addfield",
-!   and "gribend" to create a complete GRIB2 message.  Subroutine
-!   gribcreate must be called first to initialize a new GRIB2 message.
-!   Also, a call to gribend is required to complete GRIB2 message
+! abstract: this subroutine initializes a new grib2 message and packs
+!   grib2 sections 0 (indicator section) and 1 (identification section).
+!   this routine is used with routines "addlocal", "addgrid", "addfield",
+!   and "gribend" to create a complete grib2 message.  subroutine
+!   gribcreate must be called first to initialize a new grib2 message.
+!   also, a call to gribend is required to complete grib2 message
 !   after all fields have been added.
 !
-! PROGRAM HISTORY LOG:
-! 2000-04-28  Gilbert
+! program history log:
+! 2000-04-28  gilbert
 !
-! USAGE:    CALL gribcreate(cgrib,lcgrib,listsec0,listsec1,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array to contain the GRIB2 message
-!     lcgrib   - Maximum length (bytes) of array cgrib.
-!     listsec0 - Contains information needed for GRIB Indicator Section 0.
-!                Must be dimensioned >= 2.
-!                listsec0(1)=Discipline-GRIB Master Table Number
-!                            (see Code Table 0.0)
-!                listsec0(2)=GRIB Edition Number (currently 2)
-!     listsec1 - Contains information needed for GRIB Identification Section 1.
-!                Must be dimensioned >= 13.
-!                listsec1(1)=Id of orginating centre (Common Code Table C-1)
-!                listsec1(2)=Id of orginating sub-centre (local table)
-!                listsec1(3)=GRIB Master Tables Version Number (Code Table 1.0)
-!                listsec1(4)=GRIB Local Tables Version Number (Code Table 1.1)
-!                listsec1(5)=Significance of Reference Time (Code Table 1.2)
-!                listsec1(6)=Reference Time - Year (4 digits)
-!                listsec1(7)=Reference Time - Month
-!                listsec1(8)=Reference Time - Day
-!                listsec1(9)=Reference Time - Hour
-!                listsec1(10)=Reference Time - Minute
-!                listsec1(11)=Reference Time - Second
-!                listsec1(12)=Production status of data (Code Table 1.3)
-!                listsec1(13)=Type of processed data (Code Table 1.4)
+! usage:    call gribcreate(cgrib,lcgrib,listsec0,listsec1,ierr)
+!   input argument list:
+!     cgrib    - character array to contain the grib2 message
+!     lcgrib   - maximum length (bytes) of array cgrib.
+!     listsec0 - contains information needed for grib indicator section 0.
+!                must be dimensioned >= 2.
+!                listsec0(1)=discipline-grib master table number
+!                            (see code table 0.0)
+!                listsec0(2)=grib edition number (currently 2)
+!     listsec1 - contains information needed for grib identification section 1.
+!                must be dimensioned >= 13.
+!                listsec1(1)=id of orginating centre (common code table c-1)
+!                listsec1(2)=id of orginating sub-centre (local table)
+!                listsec1(3)=grib master tables version number (code table 1.0)
+!                listsec1(4)=grib local tables version number (code table 1.1)
+!                listsec1(5)=significance of reference time (code table 1.2)
+!                listsec1(6)=reference time - year (4 digits)
+!                listsec1(7)=reference time - month
+!                listsec1(8)=reference time - day
+!                listsec1(9)=reference time - hour
+!                listsec1(10)=reference time - minute
+!                listsec1(11)=reference time - second
+!                listsec1(12)=production status of data (code table 1.3)
+!                listsec1(13)=type of processed data (code table 1.4)
 !
-!   OUTPUT ARGUMENT LIST:      
-!     cgrib    - Character array to contain the GRIB2 message
-!     ierr     - Error return code.
+!   output argument list:      
+!     cgrib    - character array to contain the grib2 message
+!     ierr     - error return code.
 !                0 = no error
-!                1 = Tried to use for version other than GRIB Edition 2
+!                1 = tried to use for version other than grib edition 2
 !
-! REMARKS: This routine is intended for use with routines "addlocal", 
+! remarks: this routine is intended for use with routines "addlocal", 
 !          "addgrid", "addfield", and "gribend" to create a complete 
-!          GRIB2 message.
+!          grib2 message.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -61,7 +61,7 @@
       integer,intent(in) :: lcgrib
       integer,intent(out) :: ierr
       
-      character(len=4),parameter :: grib='GRIB'
+      character(len=4),parameter :: grib='grib'
       integer,parameter :: zero=0,one=1
       integer,parameter :: mapsec1len=13
       integer,parameter :: 
@@ -70,35 +70,35 @@
 
       ierr=0
 !
-!  Currently handles only GRIB Edition 2.
+!  currently handles only grib edition 2.
 !  
       if (listsec0(2).ne.2) then
-        print *,'gribcreate: can only code GRIB edition 2.'
+        print *,'gribcreate: can only code grib edition 2.'
         ierr=1
         return
       endif
 !
-!  Pack Section 0 - Indicator Section 
-!  ( except for total length of GRIB message )
+!  pack section 0 - indicator section 
+!  ( except for total length of grib message )
 !
 !      cgrib=' '
-      cgrib(1)=grib(1:1)                     ! Beginning of GRIB message
+      cgrib(1)=grib(1:1)                     ! beginning of grib message
       cgrib(2)=grib(2:2)   
       cgrib(3)=grib(3:3)   
       cgrib(4)=grib(4:4)   
       call sbyte(cgrib,zero,32,16)           ! reserved for future use
-      call sbyte(cgrib,listsec0(1),48,8)     ! Discipline
-      call sbyte(cgrib,listsec0(2),56,8)     ! GRIB edition number
+      call sbyte(cgrib,listsec0(1),48,8)     ! discipline
+      call sbyte(cgrib,listsec0(2),56,8)     ! grib edition number
       lensec0=16      ! bytes (octets)
 !
-!  Pack Section 1 - Identification Section
+!  pack section 1 - identification section
 !
-      ibeg=lensec0*8        !   Calculate offset for beginning of section 1
+      ibeg=lensec0*8        !   calculate offset for beginning of section 1
       iofst=ibeg+32         !   leave space for length of section
-      call sbyte(cgrib,one,iofst,8)     ! Store section number ( 1 )
+      call sbyte(cgrib,one,iofst,8)     ! store section number ( 1 )
       iofst=iofst+8
       !
-      !   Pack up each input value in array listsec1 into the
+      !   pack up each input value in array listsec1 into the
       !   the appropriate number of octets, which are specified in
       !   corresponding entries in array mapsec1.
       !
@@ -108,13 +108,13 @@
         iofst=iofst+nbits
       enddo
       !
-      !   Calculate length of section 1 and store it in octets
+      !   calculate length of section 1 and store it in octets
       !   1-4 of section 1.
       !
       lensec1=(iofst-ibeg)/8
       call sbyte(cgrib,lensec1,ibeg,32)
 !
-!  Put current byte total of message into Section 0
+!  put current byte total of message into section 0
 !
       call sbyte(cgrib,zero,64,32)
       call sbyte(cgrib,lensec0+lensec1,96,32)

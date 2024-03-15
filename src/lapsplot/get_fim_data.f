@@ -1,5 +1,5 @@
       subroutine get_fim_data
-     +                   (i4time_sys,ilaps_cycle_time,NX_L,NY_L
+     +                   (i4time_sys,ilaps_cycle_time,nx_l,ny_l
      +                   ,i4time_earliest,i4time_latest
      +                   ,filename
      +                   ,pres_p
@@ -12,78 +12,78 @@
       character*(*) filename
 
       integer latitude, longitude, time,nf_fid, nf_vid, nf_status
-      real pres_p(NX_L,NY_L,21)
-      real clwc_p(NX_L,NY_L,21)
-C
-C  Open netcdf File for reading
-C
-      nf_status=NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),filename
+      real pres_p(nx_l,ny_l,21)
+      real clwc_p(nx_l,ny_l,21)
+c
+c  open netcdf file for reading
+c
+      nf_status=nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),filename
         istatus=0
         return
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of latitude
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'latitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c  fill all dimension values
+c
+c
+c get size of latitude
+c
+      nf_status=nf_inq_dimid(nf_fid,'latitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim latitude'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,latitude)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,latitude)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim latitude'
       endif
-C
-C Get size of longitude
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'longitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of longitude
+c
+      nf_status=nf_inq_dimid(nf_fid,'longitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim longitude'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,longitude)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,longitude)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim longitude'
       endif
-C
-C Get size of time
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'time',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of time
+c
+      nf_status=nf_inq_dimid(nf_fid,'time',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim time'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,time)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,time)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim time'
       endif
       call read_fim_data(nf_fid, latitude, longitude, time,
-     +     i4time_sys, ilaps_cycle_time, NX_L, NY_L, i4time_earliest,
+     +     i4time_sys, ilaps_cycle_time, nx_l, ny_l, i4time_earliest,
      +     i4time_latest, lun_out, pres_p, clwc_p, istatus)
 
-      write(6,*)' Dimensions: ',NX_L,NY_L,longitude,latitude
+      write(6,*)' dimensions: ',nx_l,ny_l,longitude,latitude
 
       write(6,*)' range of clwc_p (kg/m^3)',minval(clwc_p)
      +                                     ,maxval(clwc_p)
 
       return
       end
-C
-C
+c
+c
       subroutine read_fim_data(nf_fid, latitude, longitude, time,
-     +     i4time_sys, ilaps_cycle_time, NX_L, NY_L, i4time_earliest,
+     +     i4time_sys, ilaps_cycle_time, nx_l, ny_l, i4time_earliest,
      +     i4time_latest, lun_out, pres_p, clwc_p, istatus)
 
 
-      use constants_laps, ONLY: R
+      use constants_laps, only: r
 
       include 'netcdf.inc'
       integer latitude, longitude, time,nf_fid, nf_vid, nf_status
@@ -96,392 +96,392 @@ C
       real pres(longitude,latitude,65)
       real clwc(longitude,latitude,65)
 
-      real CLWMR_10hybridlevel( longitude,  latitude, time),
-     +     CLWMR_11hybridlevel( longitude,  latitude, time),
-     +     CLWMR_12hybridlevel( longitude,  latitude, time),
-     +     CLWMR_13hybridlevel( longitude,  latitude, time),
-     +     CLWMR_14hybridlevel( longitude,  latitude, time),
-     +     CLWMR_15hybridlevel( longitude,  latitude, time),
-     +     CLWMR_16hybridlevel( longitude,  latitude, time),
-     +     CLWMR_17hybridlevel( longitude,  latitude, time),
-     +     CLWMR_18hybridlevel( longitude,  latitude, time),
-     +     CLWMR_19hybridlevel( longitude,  latitude, time),
-     +     CLWMR_1hybridlevel( longitude,  latitude, time),
-     +     CLWMR_20hybridlevel( longitude,  latitude, time),
-     +     CLWMR_21hybridlevel( longitude,  latitude, time),
-     +     CLWMR_22hybridlevel( longitude,  latitude, time),
-     +     CLWMR_23hybridlevel( longitude,  latitude, time),
-     +     CLWMR_24hybridlevel( longitude,  latitude, time),
-     +     CLWMR_25hybridlevel( longitude,  latitude, time),
-     +     CLWMR_26hybridlevel( longitude,  latitude, time),
-     +     CLWMR_27hybridlevel( longitude,  latitude, time),
-     +     CLWMR_28hybridlevel( longitude,  latitude, time),
-     +     CLWMR_29hybridlevel( longitude,  latitude, time),
-     +     CLWMR_2hybridlevel( longitude,  latitude, time),
-     +     CLWMR_30hybridlevel( longitude,  latitude, time),
-     +     CLWMR_31hybridlevel( longitude,  latitude, time),
-     +     CLWMR_32hybridlevel( longitude,  latitude, time),
-     +     CLWMR_33hybridlevel( longitude,  latitude, time),
-     +     CLWMR_34hybridlevel( longitude,  latitude, time),
-     +     CLWMR_35hybridlevel( longitude,  latitude, time),
-     +     CLWMR_36hybridlevel( longitude,  latitude, time),
-     +     CLWMR_37hybridlevel( longitude,  latitude, time),
-     +     CLWMR_38hybridlevel( longitude,  latitude, time),
-     +     CLWMR_39hybridlevel( longitude,  latitude, time),
-     +     CLWMR_3hybridlevel( longitude,  latitude, time),
-     +     CLWMR_40hybridlevel( longitude,  latitude, time),
-     +     CLWMR_41hybridlevel( longitude,  latitude, time),
-     +     CLWMR_42hybridlevel( longitude,  latitude, time),
-     +     CLWMR_43hybridlevel( longitude,  latitude, time),
-     +     CLWMR_44hybridlevel( longitude,  latitude, time),
-     +     CLWMR_45hybridlevel( longitude,  latitude, time),
-     +     CLWMR_46hybridlevel( longitude,  latitude, time),
-     +     CLWMR_47hybridlevel( longitude,  latitude, time),
-     +     CLWMR_48hybridlevel( longitude,  latitude, time),
-     +     CLWMR_49hybridlevel( longitude,  latitude, time),
-     +     CLWMR_4hybridlevel( longitude,  latitude, time),
-     +     CLWMR_50hybridlevel( longitude,  latitude, time),
-     +     CLWMR_51hybridlevel( longitude,  latitude, time),
-     +     CLWMR_52hybridlevel( longitude,  latitude, time),
-     +     CLWMR_53hybridlevel( longitude,  latitude, time),
-     +     CLWMR_54hybridlevel( longitude,  latitude, time),
-     +     CLWMR_55hybridlevel( longitude,  latitude, time),
-     +     CLWMR_56hybridlevel( longitude,  latitude, time),
-     +     CLWMR_57hybridlevel( longitude,  latitude, time),
-     +     CLWMR_58hybridlevel( longitude,  latitude, time),
-     +     CLWMR_59hybridlevel( longitude,  latitude, time),
-     +     CLWMR_5hybridlevel( longitude,  latitude, time),
-     +     CLWMR_60hybridlevel( longitude,  latitude, time),
-     +     CLWMR_61hybridlevel( longitude,  latitude, time),
-     +     CLWMR_62hybridlevel( longitude,  latitude, time),
-     +     CLWMR_63hybridlevel( longitude,  latitude, time),
-     +     CLWMR_64hybridlevel( longitude,  latitude, time),
-     +     CLWMR_6hybridlevel( longitude,  latitude, time),
-     +     CLWMR_7hybridlevel( longitude,  latitude, time),
-     +     CLWMR_8hybridlevel( longitude,  latitude, time),
-     +     CLWMR_9hybridlevel( longitude,  latitude, time),
-     +     PRES_10hybridlevel( longitude,  latitude, time),
-     +     PRES_11hybridlevel( longitude,  latitude, time),
-     +     PRES_12hybridlevel( longitude,  latitude, time),
-     +     PRES_13hybridlevel( longitude,  latitude, time),
-     +     PRES_14hybridlevel( longitude,  latitude, time),
-     +     PRES_15hybridlevel( longitude,  latitude, time),
-     +     PRES_16hybridlevel( longitude,  latitude, time),
-     +     PRES_17hybridlevel( longitude,  latitude, time),
-     +     PRES_18hybridlevel( longitude,  latitude, time),
-     +     PRES_19hybridlevel( longitude,  latitude, time),
-     +     PRES_1hybridlevel( longitude,  latitude, time),
-     +     PRES_20hybridlevel( longitude,  latitude, time),
-     +     PRES_21hybridlevel( longitude,  latitude, time),
-     +     PRES_22hybridlevel( longitude,  latitude, time),
-     +     PRES_23hybridlevel( longitude,  latitude, time),
-     +     PRES_24hybridlevel( longitude,  latitude, time),
-     +     PRES_25hybridlevel( longitude,  latitude, time),
-     +     PRES_26hybridlevel( longitude,  latitude, time),
-     +     PRES_27hybridlevel( longitude,  latitude, time),
-     +     PRES_28hybridlevel( longitude,  latitude, time),
-     +     PRES_29hybridlevel( longitude,  latitude, time),
-     +     PRES_2hybridlevel( longitude,  latitude, time),
-     +     PRES_30hybridlevel( longitude,  latitude, time),
-     +     PRES_31hybridlevel( longitude,  latitude, time),
-     +     PRES_32hybridlevel( longitude,  latitude, time),
-     +     PRES_33hybridlevel( longitude,  latitude, time),
-     +     PRES_34hybridlevel( longitude,  latitude, time),
-     +     PRES_35hybridlevel( longitude,  latitude, time),
-     +     PRES_36hybridlevel( longitude,  latitude, time),
-     +     PRES_37hybridlevel( longitude,  latitude, time),
-     +     PRES_38hybridlevel( longitude,  latitude, time),
-     +     PRES_39hybridlevel( longitude,  latitude, time),
-     +     PRES_3hybridlevel( longitude,  latitude, time),
-     +     PRES_40hybridlevel( longitude,  latitude, time),
-     +     PRES_41hybridlevel( longitude,  latitude, time),
-     +     PRES_42hybridlevel( longitude,  latitude, time),
-     +     PRES_43hybridlevel( longitude,  latitude, time),
-     +     PRES_44hybridlevel( longitude,  latitude, time),
-     +     PRES_45hybridlevel( longitude,  latitude, time),
-     +     PRES_46hybridlevel( longitude,  latitude, time),
-     +     PRES_47hybridlevel( longitude,  latitude, time),
-     +     PRES_48hybridlevel( longitude,  latitude, time),
-     +     PRES_49hybridlevel( longitude,  latitude, time),
-     +     PRES_4hybridlevel( longitude,  latitude, time),
-     +     PRES_50hybridlevel( longitude,  latitude, time),
-     +     PRES_51hybridlevel( longitude,  latitude, time),
-     +     PRES_52hybridlevel( longitude,  latitude, time),
-     +     PRES_53hybridlevel( longitude,  latitude, time),
-     +     PRES_54hybridlevel( longitude,  latitude, time),
-     +     PRES_55hybridlevel( longitude,  latitude, time),
-     +     PRES_56hybridlevel( longitude,  latitude, time),
-     +     PRES_57hybridlevel( longitude,  latitude, time),
-     +     PRES_58hybridlevel( longitude,  latitude, time),
-     +     PRES_59hybridlevel( longitude,  latitude, time),
-     +     PRES_5hybridlevel( longitude,  latitude, time),
-     +     PRES_60hybridlevel( longitude,  latitude, time),
-     +     PRES_61hybridlevel( longitude,  latitude, time),
-     +     PRES_62hybridlevel( longitude,  latitude, time),
-     +     PRES_63hybridlevel( longitude,  latitude, time),
-     +     PRES_64hybridlevel( longitude,  latitude, time),
-     +     PRES_65hybridlevel( longitude,  latitude, time),
-     +     PRES_6hybridlevel( longitude,  latitude, time),
-     +     PRES_7hybridlevel( longitude,  latitude, time),
-     +     PRES_8hybridlevel( longitude,  latitude, time),
-     +     PRES_9hybridlevel( longitude,  latitude, time)
+      real clwmr_10hybridlevel( longitude,  latitude, time),
+     +     clwmr_11hybridlevel( longitude,  latitude, time),
+     +     clwmr_12hybridlevel( longitude,  latitude, time),
+     +     clwmr_13hybridlevel( longitude,  latitude, time),
+     +     clwmr_14hybridlevel( longitude,  latitude, time),
+     +     clwmr_15hybridlevel( longitude,  latitude, time),
+     +     clwmr_16hybridlevel( longitude,  latitude, time),
+     +     clwmr_17hybridlevel( longitude,  latitude, time),
+     +     clwmr_18hybridlevel( longitude,  latitude, time),
+     +     clwmr_19hybridlevel( longitude,  latitude, time),
+     +     clwmr_1hybridlevel( longitude,  latitude, time),
+     +     clwmr_20hybridlevel( longitude,  latitude, time),
+     +     clwmr_21hybridlevel( longitude,  latitude, time),
+     +     clwmr_22hybridlevel( longitude,  latitude, time),
+     +     clwmr_23hybridlevel( longitude,  latitude, time),
+     +     clwmr_24hybridlevel( longitude,  latitude, time),
+     +     clwmr_25hybridlevel( longitude,  latitude, time),
+     +     clwmr_26hybridlevel( longitude,  latitude, time),
+     +     clwmr_27hybridlevel( longitude,  latitude, time),
+     +     clwmr_28hybridlevel( longitude,  latitude, time),
+     +     clwmr_29hybridlevel( longitude,  latitude, time),
+     +     clwmr_2hybridlevel( longitude,  latitude, time),
+     +     clwmr_30hybridlevel( longitude,  latitude, time),
+     +     clwmr_31hybridlevel( longitude,  latitude, time),
+     +     clwmr_32hybridlevel( longitude,  latitude, time),
+     +     clwmr_33hybridlevel( longitude,  latitude, time),
+     +     clwmr_34hybridlevel( longitude,  latitude, time),
+     +     clwmr_35hybridlevel( longitude,  latitude, time),
+     +     clwmr_36hybridlevel( longitude,  latitude, time),
+     +     clwmr_37hybridlevel( longitude,  latitude, time),
+     +     clwmr_38hybridlevel( longitude,  latitude, time),
+     +     clwmr_39hybridlevel( longitude,  latitude, time),
+     +     clwmr_3hybridlevel( longitude,  latitude, time),
+     +     clwmr_40hybridlevel( longitude,  latitude, time),
+     +     clwmr_41hybridlevel( longitude,  latitude, time),
+     +     clwmr_42hybridlevel( longitude,  latitude, time),
+     +     clwmr_43hybridlevel( longitude,  latitude, time),
+     +     clwmr_44hybridlevel( longitude,  latitude, time),
+     +     clwmr_45hybridlevel( longitude,  latitude, time),
+     +     clwmr_46hybridlevel( longitude,  latitude, time),
+     +     clwmr_47hybridlevel( longitude,  latitude, time),
+     +     clwmr_48hybridlevel( longitude,  latitude, time),
+     +     clwmr_49hybridlevel( longitude,  latitude, time),
+     +     clwmr_4hybridlevel( longitude,  latitude, time),
+     +     clwmr_50hybridlevel( longitude,  latitude, time),
+     +     clwmr_51hybridlevel( longitude,  latitude, time),
+     +     clwmr_52hybridlevel( longitude,  latitude, time),
+     +     clwmr_53hybridlevel( longitude,  latitude, time),
+     +     clwmr_54hybridlevel( longitude,  latitude, time),
+     +     clwmr_55hybridlevel( longitude,  latitude, time),
+     +     clwmr_56hybridlevel( longitude,  latitude, time),
+     +     clwmr_57hybridlevel( longitude,  latitude, time),
+     +     clwmr_58hybridlevel( longitude,  latitude, time),
+     +     clwmr_59hybridlevel( longitude,  latitude, time),
+     +     clwmr_5hybridlevel( longitude,  latitude, time),
+     +     clwmr_60hybridlevel( longitude,  latitude, time),
+     +     clwmr_61hybridlevel( longitude,  latitude, time),
+     +     clwmr_62hybridlevel( longitude,  latitude, time),
+     +     clwmr_63hybridlevel( longitude,  latitude, time),
+     +     clwmr_64hybridlevel( longitude,  latitude, time),
+     +     clwmr_6hybridlevel( longitude,  latitude, time),
+     +     clwmr_7hybridlevel( longitude,  latitude, time),
+     +     clwmr_8hybridlevel( longitude,  latitude, time),
+     +     clwmr_9hybridlevel( longitude,  latitude, time),
+     +     pres_10hybridlevel( longitude,  latitude, time),
+     +     pres_11hybridlevel( longitude,  latitude, time),
+     +     pres_12hybridlevel( longitude,  latitude, time),
+     +     pres_13hybridlevel( longitude,  latitude, time),
+     +     pres_14hybridlevel( longitude,  latitude, time),
+     +     pres_15hybridlevel( longitude,  latitude, time),
+     +     pres_16hybridlevel( longitude,  latitude, time),
+     +     pres_17hybridlevel( longitude,  latitude, time),
+     +     pres_18hybridlevel( longitude,  latitude, time),
+     +     pres_19hybridlevel( longitude,  latitude, time),
+     +     pres_1hybridlevel( longitude,  latitude, time),
+     +     pres_20hybridlevel( longitude,  latitude, time),
+     +     pres_21hybridlevel( longitude,  latitude, time),
+     +     pres_22hybridlevel( longitude,  latitude, time),
+     +     pres_23hybridlevel( longitude,  latitude, time),
+     +     pres_24hybridlevel( longitude,  latitude, time),
+     +     pres_25hybridlevel( longitude,  latitude, time),
+     +     pres_26hybridlevel( longitude,  latitude, time),
+     +     pres_27hybridlevel( longitude,  latitude, time),
+     +     pres_28hybridlevel( longitude,  latitude, time),
+     +     pres_29hybridlevel( longitude,  latitude, time),
+     +     pres_2hybridlevel( longitude,  latitude, time),
+     +     pres_30hybridlevel( longitude,  latitude, time),
+     +     pres_31hybridlevel( longitude,  latitude, time),
+     +     pres_32hybridlevel( longitude,  latitude, time),
+     +     pres_33hybridlevel( longitude,  latitude, time),
+     +     pres_34hybridlevel( longitude,  latitude, time),
+     +     pres_35hybridlevel( longitude,  latitude, time),
+     +     pres_36hybridlevel( longitude,  latitude, time),
+     +     pres_37hybridlevel( longitude,  latitude, time),
+     +     pres_38hybridlevel( longitude,  latitude, time),
+     +     pres_39hybridlevel( longitude,  latitude, time),
+     +     pres_3hybridlevel( longitude,  latitude, time),
+     +     pres_40hybridlevel( longitude,  latitude, time),
+     +     pres_41hybridlevel( longitude,  latitude, time),
+     +     pres_42hybridlevel( longitude,  latitude, time),
+     +     pres_43hybridlevel( longitude,  latitude, time),
+     +     pres_44hybridlevel( longitude,  latitude, time),
+     +     pres_45hybridlevel( longitude,  latitude, time),
+     +     pres_46hybridlevel( longitude,  latitude, time),
+     +     pres_47hybridlevel( longitude,  latitude, time),
+     +     pres_48hybridlevel( longitude,  latitude, time),
+     +     pres_49hybridlevel( longitude,  latitude, time),
+     +     pres_4hybridlevel( longitude,  latitude, time),
+     +     pres_50hybridlevel( longitude,  latitude, time),
+     +     pres_51hybridlevel( longitude,  latitude, time),
+     +     pres_52hybridlevel( longitude,  latitude, time),
+     +     pres_53hybridlevel( longitude,  latitude, time),
+     +     pres_54hybridlevel( longitude,  latitude, time),
+     +     pres_55hybridlevel( longitude,  latitude, time),
+     +     pres_56hybridlevel( longitude,  latitude, time),
+     +     pres_57hybridlevel( longitude,  latitude, time),
+     +     pres_58hybridlevel( longitude,  latitude, time),
+     +     pres_59hybridlevel( longitude,  latitude, time),
+     +     pres_5hybridlevel( longitude,  latitude, time),
+     +     pres_60hybridlevel( longitude,  latitude, time),
+     +     pres_61hybridlevel( longitude,  latitude, time),
+     +     pres_62hybridlevel( longitude,  latitude, time),
+     +     pres_63hybridlevel( longitude,  latitude, time),
+     +     pres_64hybridlevel( longitude,  latitude, time),
+     +     pres_65hybridlevel( longitude,  latitude, time),
+     +     pres_6hybridlevel( longitude,  latitude, time),
+     +     pres_7hybridlevel( longitude,  latitude, time),
+     +     pres_8hybridlevel( longitude,  latitude, time),
+     +     pres_9hybridlevel( longitude,  latitude, time)
 !     double precision latitude(latitude), longitude(longitude),
 !    +     time(time)
 
-!     Declarations for 'write_zzz' call
-!     integer iwmostanum(recNum)
-!     character a9time_ob_r(recNum)*9
+!     declarations for 'write_zzz' call
+!     integer iwmostanum(recnum)
+!     character a9time_ob_r(recnum)*9
       logical l_closest_time, l_closest_time_i, l_in_domain
-      real*4 lat_a(NX_L,NY_L)
-      real*4 lon_a(NX_L,NY_L)
-      real*4 topo_a(NX_L,NY_L)
+      real*4 lat_a(nx_l,ny_l)
+      real*4 lon_a(nx_l,ny_l)
+      real*4 topo_a(nx_l,ny_l)
 
       call get_r_missing_data(r_missing_data,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting r_missing_data'
+          write (6,*) 'error getting r_missing_data'
           return
       endif
-      call get_domain_perimeter(NX_L,NY_L,'nest7grid',lat_a,lon_a,
+      call get_domain_perimeter(nx_l,ny_l,'nest7grid',lat_a,lon_a,
      1            topo_a,1.0,rnorth,south,east,west,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_domain_perimeter'
+          write(6,*)' error in get_domain_perimeter'
           return
       endif
 
       write(6,*)' call read_fim_netcdf ',latitude,longitude,time
 
       call read_fim_netcdf(nf_fid, ! latitude, longitude, time, 
-     +     CLWMR_10hybridlevel, CLWMR_11hybridlevel, 
-     +     CLWMR_12hybridlevel, CLWMR_13hybridlevel, 
-     +     CLWMR_14hybridlevel, CLWMR_15hybridlevel, 
-     +     CLWMR_16hybridlevel, CLWMR_17hybridlevel, 
-     +     CLWMR_18hybridlevel, CLWMR_19hybridlevel, 
-     +     CLWMR_1hybridlevel, CLWMR_20hybridlevel, 
-     +     CLWMR_21hybridlevel, CLWMR_22hybridlevel, 
-     +     CLWMR_23hybridlevel, CLWMR_24hybridlevel, 
-     +     CLWMR_25hybridlevel, CLWMR_26hybridlevel, 
-     +     CLWMR_27hybridlevel, CLWMR_28hybridlevel, 
-     +     CLWMR_29hybridlevel, CLWMR_2hybridlevel, 
-     +     CLWMR_30hybridlevel, CLWMR_31hybridlevel, 
-     +     CLWMR_32hybridlevel, CLWMR_33hybridlevel, 
-     +     CLWMR_34hybridlevel, CLWMR_35hybridlevel, 
-     +     CLWMR_36hybridlevel, CLWMR_37hybridlevel, 
-     +     CLWMR_38hybridlevel, CLWMR_39hybridlevel, 
-     +     CLWMR_3hybridlevel, CLWMR_40hybridlevel, 
-     +     CLWMR_41hybridlevel, CLWMR_42hybridlevel, 
-     +     CLWMR_43hybridlevel, CLWMR_44hybridlevel, 
-     +     CLWMR_45hybridlevel, CLWMR_46hybridlevel, 
-     +     CLWMR_47hybridlevel, CLWMR_48hybridlevel, 
-     +     CLWMR_49hybridlevel, CLWMR_4hybridlevel, 
-     +     CLWMR_50hybridlevel, CLWMR_51hybridlevel, 
-     +     CLWMR_52hybridlevel, CLWMR_53hybridlevel, 
-     +     CLWMR_54hybridlevel, CLWMR_55hybridlevel, 
-     +     CLWMR_56hybridlevel, CLWMR_57hybridlevel, 
-     +     CLWMR_58hybridlevel, CLWMR_59hybridlevel, 
-     +     CLWMR_5hybridlevel, CLWMR_60hybridlevel, 
-     +     CLWMR_61hybridlevel, CLWMR_62hybridlevel, 
-     +     CLWMR_63hybridlevel, CLWMR_64hybridlevel, 
-     +     CLWMR_6hybridlevel, CLWMR_7hybridlevel, 
-     +     CLWMR_8hybridlevel, CLWMR_9hybridlevel, 
-     +     PRES_10hybridlevel, PRES_11hybridlevel, 
-     +     PRES_12hybridlevel, PRES_13hybridlevel, 
-     +     PRES_14hybridlevel, PRES_15hybridlevel, 
-     +     PRES_16hybridlevel, PRES_17hybridlevel, 
-     +     PRES_18hybridlevel, PRES_19hybridlevel, PRES_1hybridlevel, 
-     +     PRES_20hybridlevel, PRES_21hybridlevel, 
-     +     PRES_22hybridlevel, PRES_23hybridlevel, 
-     +     PRES_24hybridlevel, PRES_25hybridlevel, 
-     +     PRES_26hybridlevel, PRES_27hybridlevel, 
-     +     PRES_28hybridlevel, PRES_29hybridlevel, PRES_2hybridlevel, 
-     +     PRES_30hybridlevel, PRES_31hybridlevel, 
-     +     PRES_32hybridlevel, PRES_33hybridlevel, 
-     +     PRES_34hybridlevel, PRES_35hybridlevel, 
-     +     PRES_36hybridlevel, PRES_37hybridlevel, 
-     +     PRES_38hybridlevel, PRES_39hybridlevel, PRES_3hybridlevel, 
-     +     PRES_40hybridlevel, PRES_41hybridlevel, 
-     +     PRES_42hybridlevel, PRES_43hybridlevel, 
-     +     PRES_44hybridlevel, PRES_45hybridlevel, 
-     +     PRES_46hybridlevel, PRES_47hybridlevel, 
-     +     PRES_48hybridlevel, PRES_49hybridlevel, PRES_4hybridlevel, 
-     +     PRES_50hybridlevel, PRES_51hybridlevel, 
-     +     PRES_52hybridlevel, PRES_53hybridlevel, 
-     +     PRES_54hybridlevel, PRES_55hybridlevel, 
-     +     PRES_56hybridlevel, PRES_57hybridlevel, 
-     +     PRES_58hybridlevel, PRES_59hybridlevel, PRES_5hybridlevel, 
-     +     PRES_60hybridlevel, PRES_61hybridlevel, 
-     +     PRES_62hybridlevel, PRES_63hybridlevel, 
-     +     PRES_64hybridlevel, PRES_65hybridlevel, PRES_6hybridlevel, 
-     +     PRES_7hybridlevel, PRES_8hybridlevel, PRES_9hybridlevel, 
+     +     clwmr_10hybridlevel, clwmr_11hybridlevel, 
+     +     clwmr_12hybridlevel, clwmr_13hybridlevel, 
+     +     clwmr_14hybridlevel, clwmr_15hybridlevel, 
+     +     clwmr_16hybridlevel, clwmr_17hybridlevel, 
+     +     clwmr_18hybridlevel, clwmr_19hybridlevel, 
+     +     clwmr_1hybridlevel, clwmr_20hybridlevel, 
+     +     clwmr_21hybridlevel, clwmr_22hybridlevel, 
+     +     clwmr_23hybridlevel, clwmr_24hybridlevel, 
+     +     clwmr_25hybridlevel, clwmr_26hybridlevel, 
+     +     clwmr_27hybridlevel, clwmr_28hybridlevel, 
+     +     clwmr_29hybridlevel, clwmr_2hybridlevel, 
+     +     clwmr_30hybridlevel, clwmr_31hybridlevel, 
+     +     clwmr_32hybridlevel, clwmr_33hybridlevel, 
+     +     clwmr_34hybridlevel, clwmr_35hybridlevel, 
+     +     clwmr_36hybridlevel, clwmr_37hybridlevel, 
+     +     clwmr_38hybridlevel, clwmr_39hybridlevel, 
+     +     clwmr_3hybridlevel, clwmr_40hybridlevel, 
+     +     clwmr_41hybridlevel, clwmr_42hybridlevel, 
+     +     clwmr_43hybridlevel, clwmr_44hybridlevel, 
+     +     clwmr_45hybridlevel, clwmr_46hybridlevel, 
+     +     clwmr_47hybridlevel, clwmr_48hybridlevel, 
+     +     clwmr_49hybridlevel, clwmr_4hybridlevel, 
+     +     clwmr_50hybridlevel, clwmr_51hybridlevel, 
+     +     clwmr_52hybridlevel, clwmr_53hybridlevel, 
+     +     clwmr_54hybridlevel, clwmr_55hybridlevel, 
+     +     clwmr_56hybridlevel, clwmr_57hybridlevel, 
+     +     clwmr_58hybridlevel, clwmr_59hybridlevel, 
+     +     clwmr_5hybridlevel, clwmr_60hybridlevel, 
+     +     clwmr_61hybridlevel, clwmr_62hybridlevel, 
+     +     clwmr_63hybridlevel, clwmr_64hybridlevel, 
+     +     clwmr_6hybridlevel, clwmr_7hybridlevel, 
+     +     clwmr_8hybridlevel, clwmr_9hybridlevel, 
+     +     pres_10hybridlevel, pres_11hybridlevel, 
+     +     pres_12hybridlevel, pres_13hybridlevel, 
+     +     pres_14hybridlevel, pres_15hybridlevel, 
+     +     pres_16hybridlevel, pres_17hybridlevel, 
+     +     pres_18hybridlevel, pres_19hybridlevel, pres_1hybridlevel, 
+     +     pres_20hybridlevel, pres_21hybridlevel, 
+     +     pres_22hybridlevel, pres_23hybridlevel, 
+     +     pres_24hybridlevel, pres_25hybridlevel, 
+     +     pres_26hybridlevel, pres_27hybridlevel, 
+     +     pres_28hybridlevel, pres_29hybridlevel, pres_2hybridlevel, 
+     +     pres_30hybridlevel, pres_31hybridlevel, 
+     +     pres_32hybridlevel, pres_33hybridlevel, 
+     +     pres_34hybridlevel, pres_35hybridlevel, 
+     +     pres_36hybridlevel, pres_37hybridlevel, 
+     +     pres_38hybridlevel, pres_39hybridlevel, pres_3hybridlevel, 
+     +     pres_40hybridlevel, pres_41hybridlevel, 
+     +     pres_42hybridlevel, pres_43hybridlevel, 
+     +     pres_44hybridlevel, pres_45hybridlevel, 
+     +     pres_46hybridlevel, pres_47hybridlevel, 
+     +     pres_48hybridlevel, pres_49hybridlevel, pres_4hybridlevel, 
+     +     pres_50hybridlevel, pres_51hybridlevel, 
+     +     pres_52hybridlevel, pres_53hybridlevel, 
+     +     pres_54hybridlevel, pres_55hybridlevel, 
+     +     pres_56hybridlevel, pres_57hybridlevel, 
+     +     pres_58hybridlevel, pres_59hybridlevel, pres_5hybridlevel, 
+     +     pres_60hybridlevel, pres_61hybridlevel, 
+     +     pres_62hybridlevel, pres_63hybridlevel, 
+     +     pres_64hybridlevel, pres_65hybridlevel, pres_6hybridlevel, 
+     +     pres_7hybridlevel, pres_8hybridlevel, pres_9hybridlevel, 
      +     latitude, longitude, time)
-C
-C The netcdf variables are filled - your zzz write call may go here
-C
+c
+c the netcdf variables are filled - your zzz write call may go here
+c
 
-      pres(:,:,1) = PRES_1hybridlevel(:,:,1)
-      pres(:,:,2) = PRES_2hybridlevel(:,:,1)
-      pres(:,:,3) = PRES_3hybridlevel(:,:,1)
-      pres(:,:,4) = PRES_4hybridlevel(:,:,1)
-      pres(:,:,5) = PRES_5hybridlevel(:,:,1)
-      pres(:,:,6) = PRES_6hybridlevel(:,:,1)
-      pres(:,:,7) = PRES_7hybridlevel(:,:,1)
-      pres(:,:,8) = PRES_8hybridlevel(:,:,1)
-      pres(:,:,9) = PRES_9hybridlevel(:,:,1)
-      pres(:,:,10) = PRES_10hybridlevel(:,:,1)
-      pres(:,:,11) = PRES_11hybridlevel(:,:,1)
-      pres(:,:,12) = PRES_12hybridlevel(:,:,1)
-      pres(:,:,13) = PRES_13hybridlevel(:,:,1)
-      pres(:,:,14) = PRES_14hybridlevel(:,:,1)
-      pres(:,:,15) = PRES_15hybridlevel(:,:,1)
-      pres(:,:,16) = PRES_16hybridlevel(:,:,1)
-      pres(:,:,17) = PRES_17hybridlevel(:,:,1)
-      pres(:,:,18) = PRES_18hybridlevel(:,:,1)
-      pres(:,:,19) = PRES_19hybridlevel(:,:,1)
-      pres(:,:,20) = PRES_20hybridlevel(:,:,1)
-      pres(:,:,21) = PRES_21hybridlevel(:,:,1)
-      pres(:,:,22) = PRES_22hybridlevel(:,:,1)
-      pres(:,:,23) = PRES_23hybridlevel(:,:,1)
-      pres(:,:,24) = PRES_24hybridlevel(:,:,1)
-      pres(:,:,25) = PRES_25hybridlevel(:,:,1)
-      pres(:,:,26) = PRES_26hybridlevel(:,:,1)
-      pres(:,:,27) = PRES_27hybridlevel(:,:,1)
-      pres(:,:,28) = PRES_28hybridlevel(:,:,1)
-      pres(:,:,29) = PRES_29hybridlevel(:,:,1)
-      pres(:,:,30) = PRES_30hybridlevel(:,:,1)
-      pres(:,:,31) = PRES_31hybridlevel(:,:,1)
-      pres(:,:,32) = PRES_32hybridlevel(:,:,1)
-      pres(:,:,33) = PRES_33hybridlevel(:,:,1)
-      pres(:,:,34) = PRES_34hybridlevel(:,:,1)
-      pres(:,:,35) = PRES_35hybridlevel(:,:,1)
-      pres(:,:,36) = PRES_36hybridlevel(:,:,1)
-      pres(:,:,37) = PRES_37hybridlevel(:,:,1)
-      pres(:,:,38) = PRES_38hybridlevel(:,:,1)
-      pres(:,:,39) = PRES_39hybridlevel(:,:,1)
-      pres(:,:,40) = PRES_40hybridlevel(:,:,1)
-      pres(:,:,41) = PRES_41hybridlevel(:,:,1)
-      pres(:,:,42) = PRES_42hybridlevel(:,:,1)
-      pres(:,:,43) = PRES_43hybridlevel(:,:,1)
-      pres(:,:,44) = PRES_44hybridlevel(:,:,1)
-      pres(:,:,45) = PRES_45hybridlevel(:,:,1)
-      pres(:,:,46) = PRES_46hybridlevel(:,:,1)
-      pres(:,:,47) = PRES_47hybridlevel(:,:,1)
-      pres(:,:,48) = PRES_48hybridlevel(:,:,1)
-      pres(:,:,49) = PRES_49hybridlevel(:,:,1)
-      pres(:,:,50) = PRES_50hybridlevel(:,:,1)
-      pres(:,:,51) = PRES_51hybridlevel(:,:,1)
-      pres(:,:,52) = PRES_52hybridlevel(:,:,1)
-      pres(:,:,53) = PRES_53hybridlevel(:,:,1)
-      pres(:,:,54) = PRES_54hybridlevel(:,:,1)
-      pres(:,:,55) = PRES_55hybridlevel(:,:,1)
-      pres(:,:,56) = PRES_56hybridlevel(:,:,1)
-      pres(:,:,57) = PRES_57hybridlevel(:,:,1)
-      pres(:,:,58) = PRES_58hybridlevel(:,:,1)
-      pres(:,:,59) = PRES_59hybridlevel(:,:,1)
-      pres(:,:,60) = PRES_60hybridlevel(:,:,1)
-      pres(:,:,61) = PRES_61hybridlevel(:,:,1)
-      pres(:,:,62) = PRES_62hybridlevel(:,:,1)
-      pres(:,:,63) = PRES_63hybridlevel(:,:,1)
-      pres(:,:,64) = PRES_64hybridlevel(:,:,1)
-      pres(:,:,65) = PRES_65hybridlevel(:,:,1)
+      pres(:,:,1) = pres_1hybridlevel(:,:,1)
+      pres(:,:,2) = pres_2hybridlevel(:,:,1)
+      pres(:,:,3) = pres_3hybridlevel(:,:,1)
+      pres(:,:,4) = pres_4hybridlevel(:,:,1)
+      pres(:,:,5) = pres_5hybridlevel(:,:,1)
+      pres(:,:,6) = pres_6hybridlevel(:,:,1)
+      pres(:,:,7) = pres_7hybridlevel(:,:,1)
+      pres(:,:,8) = pres_8hybridlevel(:,:,1)
+      pres(:,:,9) = pres_9hybridlevel(:,:,1)
+      pres(:,:,10) = pres_10hybridlevel(:,:,1)
+      pres(:,:,11) = pres_11hybridlevel(:,:,1)
+      pres(:,:,12) = pres_12hybridlevel(:,:,1)
+      pres(:,:,13) = pres_13hybridlevel(:,:,1)
+      pres(:,:,14) = pres_14hybridlevel(:,:,1)
+      pres(:,:,15) = pres_15hybridlevel(:,:,1)
+      pres(:,:,16) = pres_16hybridlevel(:,:,1)
+      pres(:,:,17) = pres_17hybridlevel(:,:,1)
+      pres(:,:,18) = pres_18hybridlevel(:,:,1)
+      pres(:,:,19) = pres_19hybridlevel(:,:,1)
+      pres(:,:,20) = pres_20hybridlevel(:,:,1)
+      pres(:,:,21) = pres_21hybridlevel(:,:,1)
+      pres(:,:,22) = pres_22hybridlevel(:,:,1)
+      pres(:,:,23) = pres_23hybridlevel(:,:,1)
+      pres(:,:,24) = pres_24hybridlevel(:,:,1)
+      pres(:,:,25) = pres_25hybridlevel(:,:,1)
+      pres(:,:,26) = pres_26hybridlevel(:,:,1)
+      pres(:,:,27) = pres_27hybridlevel(:,:,1)
+      pres(:,:,28) = pres_28hybridlevel(:,:,1)
+      pres(:,:,29) = pres_29hybridlevel(:,:,1)
+      pres(:,:,30) = pres_30hybridlevel(:,:,1)
+      pres(:,:,31) = pres_31hybridlevel(:,:,1)
+      pres(:,:,32) = pres_32hybridlevel(:,:,1)
+      pres(:,:,33) = pres_33hybridlevel(:,:,1)
+      pres(:,:,34) = pres_34hybridlevel(:,:,1)
+      pres(:,:,35) = pres_35hybridlevel(:,:,1)
+      pres(:,:,36) = pres_36hybridlevel(:,:,1)
+      pres(:,:,37) = pres_37hybridlevel(:,:,1)
+      pres(:,:,38) = pres_38hybridlevel(:,:,1)
+      pres(:,:,39) = pres_39hybridlevel(:,:,1)
+      pres(:,:,40) = pres_40hybridlevel(:,:,1)
+      pres(:,:,41) = pres_41hybridlevel(:,:,1)
+      pres(:,:,42) = pres_42hybridlevel(:,:,1)
+      pres(:,:,43) = pres_43hybridlevel(:,:,1)
+      pres(:,:,44) = pres_44hybridlevel(:,:,1)
+      pres(:,:,45) = pres_45hybridlevel(:,:,1)
+      pres(:,:,46) = pres_46hybridlevel(:,:,1)
+      pres(:,:,47) = pres_47hybridlevel(:,:,1)
+      pres(:,:,48) = pres_48hybridlevel(:,:,1)
+      pres(:,:,49) = pres_49hybridlevel(:,:,1)
+      pres(:,:,50) = pres_50hybridlevel(:,:,1)
+      pres(:,:,51) = pres_51hybridlevel(:,:,1)
+      pres(:,:,52) = pres_52hybridlevel(:,:,1)
+      pres(:,:,53) = pres_53hybridlevel(:,:,1)
+      pres(:,:,54) = pres_54hybridlevel(:,:,1)
+      pres(:,:,55) = pres_55hybridlevel(:,:,1)
+      pres(:,:,56) = pres_56hybridlevel(:,:,1)
+      pres(:,:,57) = pres_57hybridlevel(:,:,1)
+      pres(:,:,58) = pres_58hybridlevel(:,:,1)
+      pres(:,:,59) = pres_59hybridlevel(:,:,1)
+      pres(:,:,60) = pres_60hybridlevel(:,:,1)
+      pres(:,:,61) = pres_61hybridlevel(:,:,1)
+      pres(:,:,62) = pres_62hybridlevel(:,:,1)
+      pres(:,:,63) = pres_63hybridlevel(:,:,1)
+      pres(:,:,64) = pres_64hybridlevel(:,:,1)
+      pres(:,:,65) = pres_65hybridlevel(:,:,1)
 
-      clwc(:,:,1) = CLWMR_1hybridlevel(:,:,1)
-      clwc(:,:,2) = CLWMR_2hybridlevel(:,:,1)
-      clwc(:,:,3) = CLWMR_3hybridlevel(:,:,1)
-      clwc(:,:,4) = CLWMR_4hybridlevel(:,:,1)
-      clwc(:,:,5) = CLWMR_5hybridlevel(:,:,1)
-      clwc(:,:,6) = CLWMR_6hybridlevel(:,:,1)
-      clwc(:,:,7) = CLWMR_7hybridlevel(:,:,1)
-      clwc(:,:,8) = CLWMR_8hybridlevel(:,:,1)
-      clwc(:,:,9) = CLWMR_9hybridlevel(:,:,1)
-      clwc(:,:,10) = CLWMR_10hybridlevel(:,:,1)
-      clwc(:,:,11) = CLWMR_11hybridlevel(:,:,1)
-      clwc(:,:,12) = CLWMR_12hybridlevel(:,:,1)
-      clwc(:,:,13) = CLWMR_13hybridlevel(:,:,1)
-      clwc(:,:,14) = CLWMR_14hybridlevel(:,:,1)
-      clwc(:,:,15) = CLWMR_15hybridlevel(:,:,1)
-      clwc(:,:,16) = CLWMR_16hybridlevel(:,:,1)
-      clwc(:,:,17) = CLWMR_17hybridlevel(:,:,1)
-      clwc(:,:,18) = CLWMR_18hybridlevel(:,:,1)
-      clwc(:,:,19) = CLWMR_19hybridlevel(:,:,1)
-      clwc(:,:,20) = CLWMR_20hybridlevel(:,:,1)
-      clwc(:,:,21) = CLWMR_21hybridlevel(:,:,1)
-      clwc(:,:,22) = CLWMR_22hybridlevel(:,:,1)
-      clwc(:,:,23) = CLWMR_23hybridlevel(:,:,1)
-      clwc(:,:,24) = CLWMR_24hybridlevel(:,:,1)
-      clwc(:,:,25) = CLWMR_25hybridlevel(:,:,1)
-      clwc(:,:,26) = CLWMR_26hybridlevel(:,:,1)
-      clwc(:,:,27) = CLWMR_27hybridlevel(:,:,1)
-      clwc(:,:,28) = CLWMR_28hybridlevel(:,:,1)
-      clwc(:,:,29) = CLWMR_29hybridlevel(:,:,1)
-      clwc(:,:,30) = CLWMR_30hybridlevel(:,:,1)
-      clwc(:,:,31) = CLWMR_31hybridlevel(:,:,1)
-      clwc(:,:,32) = CLWMR_32hybridlevel(:,:,1)
-      clwc(:,:,33) = CLWMR_33hybridlevel(:,:,1)
-      clwc(:,:,34) = CLWMR_34hybridlevel(:,:,1)
-      clwc(:,:,35) = CLWMR_35hybridlevel(:,:,1)
-      clwc(:,:,36) = CLWMR_36hybridlevel(:,:,1)
-      clwc(:,:,37) = CLWMR_37hybridlevel(:,:,1)
-      clwc(:,:,38) = CLWMR_38hybridlevel(:,:,1)
-      clwc(:,:,39) = CLWMR_39hybridlevel(:,:,1)
-      clwc(:,:,40) = CLWMR_40hybridlevel(:,:,1)
-      clwc(:,:,41) = CLWMR_41hybridlevel(:,:,1)
-      clwc(:,:,42) = CLWMR_42hybridlevel(:,:,1)
-      clwc(:,:,43) = CLWMR_43hybridlevel(:,:,1)
-      clwc(:,:,44) = CLWMR_44hybridlevel(:,:,1)
-      clwc(:,:,45) = CLWMR_45hybridlevel(:,:,1)
-      clwc(:,:,46) = CLWMR_46hybridlevel(:,:,1)
-      clwc(:,:,47) = CLWMR_47hybridlevel(:,:,1)
-      clwc(:,:,48) = CLWMR_48hybridlevel(:,:,1)
-      clwc(:,:,49) = CLWMR_49hybridlevel(:,:,1)
-      clwc(:,:,50) = CLWMR_50hybridlevel(:,:,1)
-      clwc(:,:,51) = CLWMR_51hybridlevel(:,:,1)
-      clwc(:,:,52) = CLWMR_52hybridlevel(:,:,1)
-      clwc(:,:,53) = CLWMR_53hybridlevel(:,:,1)
-      clwc(:,:,54) = CLWMR_54hybridlevel(:,:,1)
-      clwc(:,:,55) = CLWMR_55hybridlevel(:,:,1)
-      clwc(:,:,56) = CLWMR_56hybridlevel(:,:,1)
-      clwc(:,:,57) = CLWMR_57hybridlevel(:,:,1)
-      clwc(:,:,58) = CLWMR_58hybridlevel(:,:,1)
-      clwc(:,:,59) = CLWMR_59hybridlevel(:,:,1)
-      clwc(:,:,60) = CLWMR_60hybridlevel(:,:,1)
-      clwc(:,:,61) = CLWMR_61hybridlevel(:,:,1)
-      clwc(:,:,62) = CLWMR_62hybridlevel(:,:,1)
-      clwc(:,:,63) = CLWMR_63hybridlevel(:,:,1)
-      clwc(:,:,64) = CLWMR_64hybridlevel(:,:,1)
-      clwc(:,:,65) = 0. ! CLWMR_65hybridlevel(:,:,1)
+      clwc(:,:,1) = clwmr_1hybridlevel(:,:,1)
+      clwc(:,:,2) = clwmr_2hybridlevel(:,:,1)
+      clwc(:,:,3) = clwmr_3hybridlevel(:,:,1)
+      clwc(:,:,4) = clwmr_4hybridlevel(:,:,1)
+      clwc(:,:,5) = clwmr_5hybridlevel(:,:,1)
+      clwc(:,:,6) = clwmr_6hybridlevel(:,:,1)
+      clwc(:,:,7) = clwmr_7hybridlevel(:,:,1)
+      clwc(:,:,8) = clwmr_8hybridlevel(:,:,1)
+      clwc(:,:,9) = clwmr_9hybridlevel(:,:,1)
+      clwc(:,:,10) = clwmr_10hybridlevel(:,:,1)
+      clwc(:,:,11) = clwmr_11hybridlevel(:,:,1)
+      clwc(:,:,12) = clwmr_12hybridlevel(:,:,1)
+      clwc(:,:,13) = clwmr_13hybridlevel(:,:,1)
+      clwc(:,:,14) = clwmr_14hybridlevel(:,:,1)
+      clwc(:,:,15) = clwmr_15hybridlevel(:,:,1)
+      clwc(:,:,16) = clwmr_16hybridlevel(:,:,1)
+      clwc(:,:,17) = clwmr_17hybridlevel(:,:,1)
+      clwc(:,:,18) = clwmr_18hybridlevel(:,:,1)
+      clwc(:,:,19) = clwmr_19hybridlevel(:,:,1)
+      clwc(:,:,20) = clwmr_20hybridlevel(:,:,1)
+      clwc(:,:,21) = clwmr_21hybridlevel(:,:,1)
+      clwc(:,:,22) = clwmr_22hybridlevel(:,:,1)
+      clwc(:,:,23) = clwmr_23hybridlevel(:,:,1)
+      clwc(:,:,24) = clwmr_24hybridlevel(:,:,1)
+      clwc(:,:,25) = clwmr_25hybridlevel(:,:,1)
+      clwc(:,:,26) = clwmr_26hybridlevel(:,:,1)
+      clwc(:,:,27) = clwmr_27hybridlevel(:,:,1)
+      clwc(:,:,28) = clwmr_28hybridlevel(:,:,1)
+      clwc(:,:,29) = clwmr_29hybridlevel(:,:,1)
+      clwc(:,:,30) = clwmr_30hybridlevel(:,:,1)
+      clwc(:,:,31) = clwmr_31hybridlevel(:,:,1)
+      clwc(:,:,32) = clwmr_32hybridlevel(:,:,1)
+      clwc(:,:,33) = clwmr_33hybridlevel(:,:,1)
+      clwc(:,:,34) = clwmr_34hybridlevel(:,:,1)
+      clwc(:,:,35) = clwmr_35hybridlevel(:,:,1)
+      clwc(:,:,36) = clwmr_36hybridlevel(:,:,1)
+      clwc(:,:,37) = clwmr_37hybridlevel(:,:,1)
+      clwc(:,:,38) = clwmr_38hybridlevel(:,:,1)
+      clwc(:,:,39) = clwmr_39hybridlevel(:,:,1)
+      clwc(:,:,40) = clwmr_40hybridlevel(:,:,1)
+      clwc(:,:,41) = clwmr_41hybridlevel(:,:,1)
+      clwc(:,:,42) = clwmr_42hybridlevel(:,:,1)
+      clwc(:,:,43) = clwmr_43hybridlevel(:,:,1)
+      clwc(:,:,44) = clwmr_44hybridlevel(:,:,1)
+      clwc(:,:,45) = clwmr_45hybridlevel(:,:,1)
+      clwc(:,:,46) = clwmr_46hybridlevel(:,:,1)
+      clwc(:,:,47) = clwmr_47hybridlevel(:,:,1)
+      clwc(:,:,48) = clwmr_48hybridlevel(:,:,1)
+      clwc(:,:,49) = clwmr_49hybridlevel(:,:,1)
+      clwc(:,:,50) = clwmr_50hybridlevel(:,:,1)
+      clwc(:,:,51) = clwmr_51hybridlevel(:,:,1)
+      clwc(:,:,52) = clwmr_52hybridlevel(:,:,1)
+      clwc(:,:,53) = clwmr_53hybridlevel(:,:,1)
+      clwc(:,:,54) = clwmr_54hybridlevel(:,:,1)
+      clwc(:,:,55) = clwmr_55hybridlevel(:,:,1)
+      clwc(:,:,56) = clwmr_56hybridlevel(:,:,1)
+      clwc(:,:,57) = clwmr_57hybridlevel(:,:,1)
+      clwc(:,:,58) = clwmr_58hybridlevel(:,:,1)
+      clwc(:,:,59) = clwmr_59hybridlevel(:,:,1)
+      clwc(:,:,60) = clwmr_60hybridlevel(:,:,1)
+      clwc(:,:,61) = clwmr_61hybridlevel(:,:,1)
+      clwc(:,:,62) = clwmr_62hybridlevel(:,:,1)
+      clwc(:,:,63) = clwmr_63hybridlevel(:,:,1)
+      clwc(:,:,64) = clwmr_64hybridlevel(:,:,1)
+      clwc(:,:,65) = 0. ! clwmr_65hybridlevel(:,:,1)
 
-!     Vertical Interpolation
-      call vinterp_sub(r_missing_data,NX_L,NY_L,NX_L,NY_L
-     .                ,1,NX_L,1,NY_L,21,65
+!     vertical interpolation
+      call vinterp_sub(r_missing_data,nx_l,ny_l,nx_l,ny_l
+     .                ,1,nx_l,1,ny_l,21,65
      .                ,pres_p,pres,clwc,clwc_p)
 
       write(6,*)' range of input clwc_p',minval(clwc_p)
      +                                  ,maxval(clwc_p)
 
-!     Fix units to kg/kg as advertised
+!     fix units to kg/kg as advertised
       clwc_p = clwc_p * .001
 
       write(6,*)' range of clwc_p (kg/kg)',minval(clwc_p)
      +                                    ,maxval(clwc_p)
 
-!     Convert mixing ratio to density (content)
-      rho_p(:,:,:) = pres_p(:,:,:) / (R * 273.15)
+!     convert mixing ratio to density (content)
+      rho_p(:,:,:) = pres_p(:,:,:) / (r * 273.15)
       clwc_p(:,:,:) = clwc_p(:,:,:) * rho_p(:,:,:)
 
       write(6,*)' applying 180 degree offset to clwc_p and pres_p'
 
-!     Apply 180 degree roll to clwc_p
-      do i = 1,NX_L
-         iroll = i+NX_L/2
+!     apply 180 degree roll to clwc_p
+      do i = 1,nx_l
+         iroll = i+nx_l/2
          write(6,*)' i/iroll',i,iroll
-         if(iroll .gt. NX_L)iroll = iroll - NX_L   
+         if(iroll .gt. nx_l)iroll = iroll - nx_l   
          buff_p(i,:,:) = clwc_p(iroll,:,:)
       enddo ! i
       clwc_p = buff_p
 
-!     Apply 180 degree roll to pres_p
-      do i = 1,NX_L
-         iroll = i+NX_L/2
-         if(iroll .gt. NX_L)iroll = iroll - NX_L   
+!     apply 180 degree roll to pres_p
+      do i = 1,nx_l
+         iroll = i+nx_l/2
+         if(iroll .gt. nx_l)iroll = iroll - nx_l   
          buff_p(i,:,:) = pres_p(iroll,:,:)
       enddo ! i
       pres_p = buff_p
@@ -491,1944 +491,1944 @@ C
 
       return
       end
-C
-C  Subroutine to read the file 
-C
+c
+c  subroutine to read the file 
+c
       subroutine read_fim_netcdf(nf_fid, ! latitude, longitude, time, 
-     +     CLWMR_10hybridlevel, CLWMR_11hybridlevel, 
-     +     CLWMR_12hybridlevel, CLWMR_13hybridlevel, 
-     +     CLWMR_14hybridlevel, CLWMR_15hybridlevel, 
-     +     CLWMR_16hybridlevel, CLWMR_17hybridlevel, 
-     +     CLWMR_18hybridlevel, CLWMR_19hybridlevel, 
-     +     CLWMR_1hybridlevel, CLWMR_20hybridlevel, 
-     +     CLWMR_21hybridlevel, CLWMR_22hybridlevel, 
-     +     CLWMR_23hybridlevel, CLWMR_24hybridlevel, 
-     +     CLWMR_25hybridlevel, CLWMR_26hybridlevel, 
-     +     CLWMR_27hybridlevel, CLWMR_28hybridlevel, 
-     +     CLWMR_29hybridlevel, CLWMR_2hybridlevel, 
-     +     CLWMR_30hybridlevel, CLWMR_31hybridlevel, 
-     +     CLWMR_32hybridlevel, CLWMR_33hybridlevel, 
-     +     CLWMR_34hybridlevel, CLWMR_35hybridlevel, 
-     +     CLWMR_36hybridlevel, CLWMR_37hybridlevel, 
-     +     CLWMR_38hybridlevel, CLWMR_39hybridlevel, 
-     +     CLWMR_3hybridlevel, CLWMR_40hybridlevel, 
-     +     CLWMR_41hybridlevel, CLWMR_42hybridlevel, 
-     +     CLWMR_43hybridlevel, CLWMR_44hybridlevel, 
-     +     CLWMR_45hybridlevel, CLWMR_46hybridlevel, 
-     +     CLWMR_47hybridlevel, CLWMR_48hybridlevel, 
-     +     CLWMR_49hybridlevel, CLWMR_4hybridlevel, 
-     +     CLWMR_50hybridlevel, CLWMR_51hybridlevel, 
-     +     CLWMR_52hybridlevel, CLWMR_53hybridlevel, 
-     +     CLWMR_54hybridlevel, CLWMR_55hybridlevel, 
-     +     CLWMR_56hybridlevel, CLWMR_57hybridlevel, 
-     +     CLWMR_58hybridlevel, CLWMR_59hybridlevel, 
-     +     CLWMR_5hybridlevel, CLWMR_60hybridlevel, 
-     +     CLWMR_61hybridlevel, CLWMR_62hybridlevel, 
-     +     CLWMR_63hybridlevel, CLWMR_64hybridlevel, 
-     +     CLWMR_6hybridlevel, CLWMR_7hybridlevel, 
-     +     CLWMR_8hybridlevel, CLWMR_9hybridlevel, 
-     +     PRES_10hybridlevel, PRES_11hybridlevel, 
-     +     PRES_12hybridlevel, PRES_13hybridlevel, 
-     +     PRES_14hybridlevel, PRES_15hybridlevel, 
-     +     PRES_16hybridlevel, PRES_17hybridlevel, 
-     +     PRES_18hybridlevel, PRES_19hybridlevel, PRES_1hybridlevel, 
-     +     PRES_20hybridlevel, PRES_21hybridlevel, 
-     +     PRES_22hybridlevel, PRES_23hybridlevel, 
-     +     PRES_24hybridlevel, PRES_25hybridlevel, 
-     +     PRES_26hybridlevel, PRES_27hybridlevel, 
-     +     PRES_28hybridlevel, PRES_29hybridlevel, PRES_2hybridlevel, 
-     +     PRES_30hybridlevel, PRES_31hybridlevel, 
-     +     PRES_32hybridlevel, PRES_33hybridlevel, 
-     +     PRES_34hybridlevel, PRES_35hybridlevel, 
-     +     PRES_36hybridlevel, PRES_37hybridlevel, 
-     +     PRES_38hybridlevel, PRES_39hybridlevel, PRES_3hybridlevel, 
-     +     PRES_40hybridlevel, PRES_41hybridlevel, 
-     +     PRES_42hybridlevel, PRES_43hybridlevel, 
-     +     PRES_44hybridlevel, PRES_45hybridlevel, 
-     +     PRES_46hybridlevel, PRES_47hybridlevel, 
-     +     PRES_48hybridlevel, PRES_49hybridlevel, PRES_4hybridlevel, 
-     +     PRES_50hybridlevel, PRES_51hybridlevel, 
-     +     PRES_52hybridlevel, PRES_53hybridlevel, 
-     +     PRES_54hybridlevel, PRES_55hybridlevel, 
-     +     PRES_56hybridlevel, PRES_57hybridlevel, 
-     +     PRES_58hybridlevel, PRES_59hybridlevel, PRES_5hybridlevel, 
-     +     PRES_60hybridlevel, PRES_61hybridlevel, 
-     +     PRES_62hybridlevel, PRES_63hybridlevel, 
-     +     PRES_64hybridlevel, PRES_65hybridlevel, PRES_6hybridlevel, 
-     +     PRES_7hybridlevel, PRES_8hybridlevel, PRES_9hybridlevel, 
+     +     clwmr_10hybridlevel, clwmr_11hybridlevel, 
+     +     clwmr_12hybridlevel, clwmr_13hybridlevel, 
+     +     clwmr_14hybridlevel, clwmr_15hybridlevel, 
+     +     clwmr_16hybridlevel, clwmr_17hybridlevel, 
+     +     clwmr_18hybridlevel, clwmr_19hybridlevel, 
+     +     clwmr_1hybridlevel, clwmr_20hybridlevel, 
+     +     clwmr_21hybridlevel, clwmr_22hybridlevel, 
+     +     clwmr_23hybridlevel, clwmr_24hybridlevel, 
+     +     clwmr_25hybridlevel, clwmr_26hybridlevel, 
+     +     clwmr_27hybridlevel, clwmr_28hybridlevel, 
+     +     clwmr_29hybridlevel, clwmr_2hybridlevel, 
+     +     clwmr_30hybridlevel, clwmr_31hybridlevel, 
+     +     clwmr_32hybridlevel, clwmr_33hybridlevel, 
+     +     clwmr_34hybridlevel, clwmr_35hybridlevel, 
+     +     clwmr_36hybridlevel, clwmr_37hybridlevel, 
+     +     clwmr_38hybridlevel, clwmr_39hybridlevel, 
+     +     clwmr_3hybridlevel, clwmr_40hybridlevel, 
+     +     clwmr_41hybridlevel, clwmr_42hybridlevel, 
+     +     clwmr_43hybridlevel, clwmr_44hybridlevel, 
+     +     clwmr_45hybridlevel, clwmr_46hybridlevel, 
+     +     clwmr_47hybridlevel, clwmr_48hybridlevel, 
+     +     clwmr_49hybridlevel, clwmr_4hybridlevel, 
+     +     clwmr_50hybridlevel, clwmr_51hybridlevel, 
+     +     clwmr_52hybridlevel, clwmr_53hybridlevel, 
+     +     clwmr_54hybridlevel, clwmr_55hybridlevel, 
+     +     clwmr_56hybridlevel, clwmr_57hybridlevel, 
+     +     clwmr_58hybridlevel, clwmr_59hybridlevel, 
+     +     clwmr_5hybridlevel, clwmr_60hybridlevel, 
+     +     clwmr_61hybridlevel, clwmr_62hybridlevel, 
+     +     clwmr_63hybridlevel, clwmr_64hybridlevel, 
+     +     clwmr_6hybridlevel, clwmr_7hybridlevel, 
+     +     clwmr_8hybridlevel, clwmr_9hybridlevel, 
+     +     pres_10hybridlevel, pres_11hybridlevel, 
+     +     pres_12hybridlevel, pres_13hybridlevel, 
+     +     pres_14hybridlevel, pres_15hybridlevel, 
+     +     pres_16hybridlevel, pres_17hybridlevel, 
+     +     pres_18hybridlevel, pres_19hybridlevel, pres_1hybridlevel, 
+     +     pres_20hybridlevel, pres_21hybridlevel, 
+     +     pres_22hybridlevel, pres_23hybridlevel, 
+     +     pres_24hybridlevel, pres_25hybridlevel, 
+     +     pres_26hybridlevel, pres_27hybridlevel, 
+     +     pres_28hybridlevel, pres_29hybridlevel, pres_2hybridlevel, 
+     +     pres_30hybridlevel, pres_31hybridlevel, 
+     +     pres_32hybridlevel, pres_33hybridlevel, 
+     +     pres_34hybridlevel, pres_35hybridlevel, 
+     +     pres_36hybridlevel, pres_37hybridlevel, 
+     +     pres_38hybridlevel, pres_39hybridlevel, pres_3hybridlevel, 
+     +     pres_40hybridlevel, pres_41hybridlevel, 
+     +     pres_42hybridlevel, pres_43hybridlevel, 
+     +     pres_44hybridlevel, pres_45hybridlevel, 
+     +     pres_46hybridlevel, pres_47hybridlevel, 
+     +     pres_48hybridlevel, pres_49hybridlevel, pres_4hybridlevel, 
+     +     pres_50hybridlevel, pres_51hybridlevel, 
+     +     pres_52hybridlevel, pres_53hybridlevel, 
+     +     pres_54hybridlevel, pres_55hybridlevel, 
+     +     pres_56hybridlevel, pres_57hybridlevel, 
+     +     pres_58hybridlevel, pres_59hybridlevel, pres_5hybridlevel, 
+     +     pres_60hybridlevel, pres_61hybridlevel, 
+     +     pres_62hybridlevel, pres_63hybridlevel, 
+     +     pres_64hybridlevel, pres_65hybridlevel, pres_6hybridlevel, 
+     +     pres_7hybridlevel, pres_8hybridlevel, pres_9hybridlevel, 
      +     latitude, longitude, time)
-C
+c
       include 'netcdf.inc'
       integer latitude, longitude, time,nf_fid, nf_vid, nf_status
 
-      real CLWMR_10hybridlevel( longitude,  latitude, time),
-     +     CLWMR_11hybridlevel( longitude,  latitude, time),
-     +     CLWMR_12hybridlevel( longitude,  latitude, time),
-     +     CLWMR_13hybridlevel( longitude,  latitude, time),
-     +     CLWMR_14hybridlevel( longitude,  latitude, time),
-     +     CLWMR_15hybridlevel( longitude,  latitude, time),
-     +     CLWMR_16hybridlevel( longitude,  latitude, time),
-     +     CLWMR_17hybridlevel( longitude,  latitude, time),
-     +     CLWMR_18hybridlevel( longitude,  latitude, time),
-     +     CLWMR_19hybridlevel( longitude,  latitude, time),
-     +     CLWMR_1hybridlevel( longitude,  latitude, time),
-     +     CLWMR_20hybridlevel( longitude,  latitude, time),
-     +     CLWMR_21hybridlevel( longitude,  latitude, time),
-     +     CLWMR_22hybridlevel( longitude,  latitude, time),
-     +     CLWMR_23hybridlevel( longitude,  latitude, time),
-     +     CLWMR_24hybridlevel( longitude,  latitude, time),
-     +     CLWMR_25hybridlevel( longitude,  latitude, time),
-     +     CLWMR_26hybridlevel( longitude,  latitude, time),
-     +     CLWMR_27hybridlevel( longitude,  latitude, time),
-     +     CLWMR_28hybridlevel( longitude,  latitude, time),
-     +     CLWMR_29hybridlevel( longitude,  latitude, time),
-     +     CLWMR_2hybridlevel( longitude,  latitude, time),
-     +     CLWMR_30hybridlevel( longitude,  latitude, time),
-     +     CLWMR_31hybridlevel( longitude,  latitude, time),
-     +     CLWMR_32hybridlevel( longitude,  latitude, time),
-     +     CLWMR_33hybridlevel( longitude,  latitude, time),
-     +     CLWMR_34hybridlevel( longitude,  latitude, time),
-     +     CLWMR_35hybridlevel( longitude,  latitude, time),
-     +     CLWMR_36hybridlevel( longitude,  latitude, time),
-     +     CLWMR_37hybridlevel( longitude,  latitude, time),
-     +     CLWMR_38hybridlevel( longitude,  latitude, time),
-     +     CLWMR_39hybridlevel( longitude,  latitude, time),
-     +     CLWMR_3hybridlevel( longitude,  latitude, time),
-     +     CLWMR_40hybridlevel( longitude,  latitude, time),
-     +     CLWMR_41hybridlevel( longitude,  latitude, time),
-     +     CLWMR_42hybridlevel( longitude,  latitude, time),
-     +     CLWMR_43hybridlevel( longitude,  latitude, time),
-     +     CLWMR_44hybridlevel( longitude,  latitude, time),
-     +     CLWMR_45hybridlevel( longitude,  latitude, time),
-     +     CLWMR_46hybridlevel( longitude,  latitude, time),
-     +     CLWMR_47hybridlevel( longitude,  latitude, time),
-     +     CLWMR_48hybridlevel( longitude,  latitude, time),
-     +     CLWMR_49hybridlevel( longitude,  latitude, time),
-     +     CLWMR_4hybridlevel( longitude,  latitude, time),
-     +     CLWMR_50hybridlevel( longitude,  latitude, time),
-     +     CLWMR_51hybridlevel( longitude,  latitude, time),
-     +     CLWMR_52hybridlevel( longitude,  latitude, time),
-     +     CLWMR_53hybridlevel( longitude,  latitude, time),
-     +     CLWMR_54hybridlevel( longitude,  latitude, time),
-     +     CLWMR_55hybridlevel( longitude,  latitude, time),
-     +     CLWMR_56hybridlevel( longitude,  latitude, time),
-     +     CLWMR_57hybridlevel( longitude,  latitude, time),
-     +     CLWMR_58hybridlevel( longitude,  latitude, time),
-     +     CLWMR_59hybridlevel( longitude,  latitude, time),
-     +     CLWMR_5hybridlevel( longitude,  latitude, time),
-     +     CLWMR_60hybridlevel( longitude,  latitude, time),
-     +     CLWMR_61hybridlevel( longitude,  latitude, time),
-     +     CLWMR_62hybridlevel( longitude,  latitude, time),
-     +     CLWMR_63hybridlevel( longitude,  latitude, time),
-     +     CLWMR_64hybridlevel( longitude,  latitude, time),
-     +     CLWMR_6hybridlevel( longitude,  latitude, time),
-     +     CLWMR_7hybridlevel( longitude,  latitude, time),
-     +     CLWMR_8hybridlevel( longitude,  latitude, time),
-     +     CLWMR_9hybridlevel( longitude,  latitude, time),
-     +     PRES_10hybridlevel( longitude,  latitude, time),
-     +     PRES_11hybridlevel( longitude,  latitude, time),
-     +     PRES_12hybridlevel( longitude,  latitude, time),
-     +     PRES_13hybridlevel( longitude,  latitude, time),
-     +     PRES_14hybridlevel( longitude,  latitude, time),
-     +     PRES_15hybridlevel( longitude,  latitude, time),
-     +     PRES_16hybridlevel( longitude,  latitude, time),
-     +     PRES_17hybridlevel( longitude,  latitude, time),
-     +     PRES_18hybridlevel( longitude,  latitude, time),
-     +     PRES_19hybridlevel( longitude,  latitude, time),
-     +     PRES_1hybridlevel( longitude,  latitude, time),
-     +     PRES_20hybridlevel( longitude,  latitude, time),
-     +     PRES_21hybridlevel( longitude,  latitude, time),
-     +     PRES_22hybridlevel( longitude,  latitude, time),
-     +     PRES_23hybridlevel( longitude,  latitude, time),
-     +     PRES_24hybridlevel( longitude,  latitude, time),
-     +     PRES_25hybridlevel( longitude,  latitude, time),
-     +     PRES_26hybridlevel( longitude,  latitude, time),
-     +     PRES_27hybridlevel( longitude,  latitude, time),
-     +     PRES_28hybridlevel( longitude,  latitude, time),
-     +     PRES_29hybridlevel( longitude,  latitude, time),
-     +     PRES_2hybridlevel( longitude,  latitude, time),
-     +     PRES_30hybridlevel( longitude,  latitude, time),
-     +     PRES_31hybridlevel( longitude,  latitude, time),
-     +     PRES_32hybridlevel( longitude,  latitude, time),
-     +     PRES_33hybridlevel( longitude,  latitude, time),
-     +     PRES_34hybridlevel( longitude,  latitude, time),
-     +     PRES_35hybridlevel( longitude,  latitude, time),
-     +     PRES_36hybridlevel( longitude,  latitude, time),
-     +     PRES_37hybridlevel( longitude,  latitude, time),
-     +     PRES_38hybridlevel( longitude,  latitude, time),
-     +     PRES_39hybridlevel( longitude,  latitude, time),
-     +     PRES_3hybridlevel( longitude,  latitude, time),
-     +     PRES_40hybridlevel( longitude,  latitude, time),
-     +     PRES_41hybridlevel( longitude,  latitude, time),
-     +     PRES_42hybridlevel( longitude,  latitude, time),
-     +     PRES_43hybridlevel( longitude,  latitude, time),
-     +     PRES_44hybridlevel( longitude,  latitude, time),
-     +     PRES_45hybridlevel( longitude,  latitude, time),
-     +     PRES_46hybridlevel( longitude,  latitude, time),
-     +     PRES_47hybridlevel( longitude,  latitude, time),
-     +     PRES_48hybridlevel( longitude,  latitude, time),
-     +     PRES_49hybridlevel( longitude,  latitude, time),
-     +     PRES_4hybridlevel( longitude,  latitude, time),
-     +     PRES_50hybridlevel( longitude,  latitude, time),
-     +     PRES_51hybridlevel( longitude,  latitude, time),
-     +     PRES_52hybridlevel( longitude,  latitude, time),
-     +     PRES_53hybridlevel( longitude,  latitude, time),
-     +     PRES_54hybridlevel( longitude,  latitude, time),
-     +     PRES_55hybridlevel( longitude,  latitude, time),
-     +     PRES_56hybridlevel( longitude,  latitude, time),
-     +     PRES_57hybridlevel( longitude,  latitude, time),
-     +     PRES_58hybridlevel( longitude,  latitude, time),
-     +     PRES_59hybridlevel( longitude,  latitude, time),
-     +     PRES_5hybridlevel( longitude,  latitude, time),
-     +     PRES_60hybridlevel( longitude,  latitude, time),
-     +     PRES_61hybridlevel( longitude,  latitude, time),
-     +     PRES_62hybridlevel( longitude,  latitude, time),
-     +     PRES_63hybridlevel( longitude,  latitude, time),
-     +     PRES_64hybridlevel( longitude,  latitude, time),
-     +     PRES_65hybridlevel( longitude,  latitude, time),
-     +     PRES_6hybridlevel( longitude,  latitude, time),
-     +     PRES_7hybridlevel( longitude,  latitude, time),
-     +     PRES_8hybridlevel( longitude,  latitude, time),
-     +     PRES_9hybridlevel( longitude,  latitude, time)
+      real clwmr_10hybridlevel( longitude,  latitude, time),
+     +     clwmr_11hybridlevel( longitude,  latitude, time),
+     +     clwmr_12hybridlevel( longitude,  latitude, time),
+     +     clwmr_13hybridlevel( longitude,  latitude, time),
+     +     clwmr_14hybridlevel( longitude,  latitude, time),
+     +     clwmr_15hybridlevel( longitude,  latitude, time),
+     +     clwmr_16hybridlevel( longitude,  latitude, time),
+     +     clwmr_17hybridlevel( longitude,  latitude, time),
+     +     clwmr_18hybridlevel( longitude,  latitude, time),
+     +     clwmr_19hybridlevel( longitude,  latitude, time),
+     +     clwmr_1hybridlevel( longitude,  latitude, time),
+     +     clwmr_20hybridlevel( longitude,  latitude, time),
+     +     clwmr_21hybridlevel( longitude,  latitude, time),
+     +     clwmr_22hybridlevel( longitude,  latitude, time),
+     +     clwmr_23hybridlevel( longitude,  latitude, time),
+     +     clwmr_24hybridlevel( longitude,  latitude, time),
+     +     clwmr_25hybridlevel( longitude,  latitude, time),
+     +     clwmr_26hybridlevel( longitude,  latitude, time),
+     +     clwmr_27hybridlevel( longitude,  latitude, time),
+     +     clwmr_28hybridlevel( longitude,  latitude, time),
+     +     clwmr_29hybridlevel( longitude,  latitude, time),
+     +     clwmr_2hybridlevel( longitude,  latitude, time),
+     +     clwmr_30hybridlevel( longitude,  latitude, time),
+     +     clwmr_31hybridlevel( longitude,  latitude, time),
+     +     clwmr_32hybridlevel( longitude,  latitude, time),
+     +     clwmr_33hybridlevel( longitude,  latitude, time),
+     +     clwmr_34hybridlevel( longitude,  latitude, time),
+     +     clwmr_35hybridlevel( longitude,  latitude, time),
+     +     clwmr_36hybridlevel( longitude,  latitude, time),
+     +     clwmr_37hybridlevel( longitude,  latitude, time),
+     +     clwmr_38hybridlevel( longitude,  latitude, time),
+     +     clwmr_39hybridlevel( longitude,  latitude, time),
+     +     clwmr_3hybridlevel( longitude,  latitude, time),
+     +     clwmr_40hybridlevel( longitude,  latitude, time),
+     +     clwmr_41hybridlevel( longitude,  latitude, time),
+     +     clwmr_42hybridlevel( longitude,  latitude, time),
+     +     clwmr_43hybridlevel( longitude,  latitude, time),
+     +     clwmr_44hybridlevel( longitude,  latitude, time),
+     +     clwmr_45hybridlevel( longitude,  latitude, time),
+     +     clwmr_46hybridlevel( longitude,  latitude, time),
+     +     clwmr_47hybridlevel( longitude,  latitude, time),
+     +     clwmr_48hybridlevel( longitude,  latitude, time),
+     +     clwmr_49hybridlevel( longitude,  latitude, time),
+     +     clwmr_4hybridlevel( longitude,  latitude, time),
+     +     clwmr_50hybridlevel( longitude,  latitude, time),
+     +     clwmr_51hybridlevel( longitude,  latitude, time),
+     +     clwmr_52hybridlevel( longitude,  latitude, time),
+     +     clwmr_53hybridlevel( longitude,  latitude, time),
+     +     clwmr_54hybridlevel( longitude,  latitude, time),
+     +     clwmr_55hybridlevel( longitude,  latitude, time),
+     +     clwmr_56hybridlevel( longitude,  latitude, time),
+     +     clwmr_57hybridlevel( longitude,  latitude, time),
+     +     clwmr_58hybridlevel( longitude,  latitude, time),
+     +     clwmr_59hybridlevel( longitude,  latitude, time),
+     +     clwmr_5hybridlevel( longitude,  latitude, time),
+     +     clwmr_60hybridlevel( longitude,  latitude, time),
+     +     clwmr_61hybridlevel( longitude,  latitude, time),
+     +     clwmr_62hybridlevel( longitude,  latitude, time),
+     +     clwmr_63hybridlevel( longitude,  latitude, time),
+     +     clwmr_64hybridlevel( longitude,  latitude, time),
+     +     clwmr_6hybridlevel( longitude,  latitude, time),
+     +     clwmr_7hybridlevel( longitude,  latitude, time),
+     +     clwmr_8hybridlevel( longitude,  latitude, time),
+     +     clwmr_9hybridlevel( longitude,  latitude, time),
+     +     pres_10hybridlevel( longitude,  latitude, time),
+     +     pres_11hybridlevel( longitude,  latitude, time),
+     +     pres_12hybridlevel( longitude,  latitude, time),
+     +     pres_13hybridlevel( longitude,  latitude, time),
+     +     pres_14hybridlevel( longitude,  latitude, time),
+     +     pres_15hybridlevel( longitude,  latitude, time),
+     +     pres_16hybridlevel( longitude,  latitude, time),
+     +     pres_17hybridlevel( longitude,  latitude, time),
+     +     pres_18hybridlevel( longitude,  latitude, time),
+     +     pres_19hybridlevel( longitude,  latitude, time),
+     +     pres_1hybridlevel( longitude,  latitude, time),
+     +     pres_20hybridlevel( longitude,  latitude, time),
+     +     pres_21hybridlevel( longitude,  latitude, time),
+     +     pres_22hybridlevel( longitude,  latitude, time),
+     +     pres_23hybridlevel( longitude,  latitude, time),
+     +     pres_24hybridlevel( longitude,  latitude, time),
+     +     pres_25hybridlevel( longitude,  latitude, time),
+     +     pres_26hybridlevel( longitude,  latitude, time),
+     +     pres_27hybridlevel( longitude,  latitude, time),
+     +     pres_28hybridlevel( longitude,  latitude, time),
+     +     pres_29hybridlevel( longitude,  latitude, time),
+     +     pres_2hybridlevel( longitude,  latitude, time),
+     +     pres_30hybridlevel( longitude,  latitude, time),
+     +     pres_31hybridlevel( longitude,  latitude, time),
+     +     pres_32hybridlevel( longitude,  latitude, time),
+     +     pres_33hybridlevel( longitude,  latitude, time),
+     +     pres_34hybridlevel( longitude,  latitude, time),
+     +     pres_35hybridlevel( longitude,  latitude, time),
+     +     pres_36hybridlevel( longitude,  latitude, time),
+     +     pres_37hybridlevel( longitude,  latitude, time),
+     +     pres_38hybridlevel( longitude,  latitude, time),
+     +     pres_39hybridlevel( longitude,  latitude, time),
+     +     pres_3hybridlevel( longitude,  latitude, time),
+     +     pres_40hybridlevel( longitude,  latitude, time),
+     +     pres_41hybridlevel( longitude,  latitude, time),
+     +     pres_42hybridlevel( longitude,  latitude, time),
+     +     pres_43hybridlevel( longitude,  latitude, time),
+     +     pres_44hybridlevel( longitude,  latitude, time),
+     +     pres_45hybridlevel( longitude,  latitude, time),
+     +     pres_46hybridlevel( longitude,  latitude, time),
+     +     pres_47hybridlevel( longitude,  latitude, time),
+     +     pres_48hybridlevel( longitude,  latitude, time),
+     +     pres_49hybridlevel( longitude,  latitude, time),
+     +     pres_4hybridlevel( longitude,  latitude, time),
+     +     pres_50hybridlevel( longitude,  latitude, time),
+     +     pres_51hybridlevel( longitude,  latitude, time),
+     +     pres_52hybridlevel( longitude,  latitude, time),
+     +     pres_53hybridlevel( longitude,  latitude, time),
+     +     pres_54hybridlevel( longitude,  latitude, time),
+     +     pres_55hybridlevel( longitude,  latitude, time),
+     +     pres_56hybridlevel( longitude,  latitude, time),
+     +     pres_57hybridlevel( longitude,  latitude, time),
+     +     pres_58hybridlevel( longitude,  latitude, time),
+     +     pres_59hybridlevel( longitude,  latitude, time),
+     +     pres_5hybridlevel( longitude,  latitude, time),
+     +     pres_60hybridlevel( longitude,  latitude, time),
+     +     pres_61hybridlevel( longitude,  latitude, time),
+     +     pres_62hybridlevel( longitude,  latitude, time),
+     +     pres_63hybridlevel( longitude,  latitude, time),
+     +     pres_64hybridlevel( longitude,  latitude, time),
+     +     pres_65hybridlevel( longitude,  latitude, time),
+     +     pres_6hybridlevel( longitude,  latitude, time),
+     +     pres_7hybridlevel( longitude,  latitude, time),
+     +     pres_8hybridlevel( longitude,  latitude, time),
+     +     pres_9hybridlevel( longitude,  latitude, time)
 !     double precision latitude(latitude), longitude(longitude),
 !    +     time(time)
 
       write(6,*)' read_fim_netcdf ',latitude,longitude,time
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_10hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_10hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_10hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_10hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_10hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_11hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_11hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_11hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_11hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_11hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_12hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_12hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_12hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_12hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_12hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_13hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_13hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_13hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_13hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_13hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_14hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_14hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_14hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_14hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_14hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_15hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_15hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_15hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_15hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_15hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_16hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_16hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_16hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_16hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_16hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_17hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_17hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_17hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_17hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_17hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_18hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_18hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_18hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_18hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_18hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_19hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_19hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_19hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_19hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_19hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_1hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_1hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_1hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_1hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_1hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_20hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_20hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_20hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_20hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_20hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_21hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_21hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_21hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_21hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_21hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_22hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_22hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_22hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_22hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_22hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_23hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_23hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_23hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_23hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_23hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_24hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_24hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_24hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_24hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_24hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_25hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_25hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_25hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_25hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_25hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_26hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_26hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_26hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_26hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_26hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_27hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_27hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_27hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_27hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_27hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_28hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_28hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_28hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_28hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_28hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_29hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_29hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_29hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_29hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_29hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_2hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_2hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_2hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_2hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_2hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_30hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_30hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_30hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_30hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_30hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_31hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_31hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_31hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_31hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_31hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_32hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_32hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_32hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_32hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_32hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_33hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_33hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_33hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_33hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_33hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_34hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_34hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_34hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_34hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_34hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_35hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_35hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_35hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_35hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_35hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_36hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_36hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_36hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_36hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_36hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_37hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_37hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_37hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_37hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_37hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_38hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_38hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_38hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_38hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_38hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_39hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_39hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_39hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_39hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_39hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_3hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_3hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_3hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_3hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_3hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_40hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_40hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_40hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_40hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_40hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_41hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_41hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_41hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_41hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_41hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_42hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_42hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_42hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_42hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_42hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_43hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_43hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_43hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_43hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_43hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_44hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_44hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_44hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_44hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_44hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_45hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_45hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_45hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_45hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_45hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_46hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_46hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_46hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_46hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_46hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_47hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_47hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_47hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_47hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_47hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_48hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_48hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_48hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_48hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_48hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_49hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_49hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_49hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_49hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_49hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_4hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_4hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_4hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_4hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_4hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_50hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_50hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_50hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_50hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_50hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_51hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_51hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_51hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_51hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_51hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_52hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_52hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_52hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_52hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_52hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_53hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_53hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_53hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_53hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_53hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_54hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_54hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_54hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_54hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_54hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_55hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_55hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_55hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_55hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_55hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_56hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_56hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_56hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_56hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_56hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_57hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_57hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_57hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_57hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_57hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_58hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_58hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_58hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_58hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_58hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_59hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_59hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_59hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_59hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_59hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_5hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_5hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_5hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_5hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_5hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_60hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_60hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_60hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_60hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_60hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_61hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_61hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_61hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_61hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_61hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_62hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_62hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_62hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_62hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_62hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_63hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_63hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_63hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_63hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_63hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_64hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_64hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_64hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_64hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_64hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_6hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_6hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_6hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_6hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_6hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_7hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_7hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_7hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_7hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_7hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_8hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_8hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_8hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_8hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_8hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     CLWMR_9hybridlevel"Cloud Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'CLWMR_9hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for CLWMR_9hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,CLWMR_9hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for CLWMR_9hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_10hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_10hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_10hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_10hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_10hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_11hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_11hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_11hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_11hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_11hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_12hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_12hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_12hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_12hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_12hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_13hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_13hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_13hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_13hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_13hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_14hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_14hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_14hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_14hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_14hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_15hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_15hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_15hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_15hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_15hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_16hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_16hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_16hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_16hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_16hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_17hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_17hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_17hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_17hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_17hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_18hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_18hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_18hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_18hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_18hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_19hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_19hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_19hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_19hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_19hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_1hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_1hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_1hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_1hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_1hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_20hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_20hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_20hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_20hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_20hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_21hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_21hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_21hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_21hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_21hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_22hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_22hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_22hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_22hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_22hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_23hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_23hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_23hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_23hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_23hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_24hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_24hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_24hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_24hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_24hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_25hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_25hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_25hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_25hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_25hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_26hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_26hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_26hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_26hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_26hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_27hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_27hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_27hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_27hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_27hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_28hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_28hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_28hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_28hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_28hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_29hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_29hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_29hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_29hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_29hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_2hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_2hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_2hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_2hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_2hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_30hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_30hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_30hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_30hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_30hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_31hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_31hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_31hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_31hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_31hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_32hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_32hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_32hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_32hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_32hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_33hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_33hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_33hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_33hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_33hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_34hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_34hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_34hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_34hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_34hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_35hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_35hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_35hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_35hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_35hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_36hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_36hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_36hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_36hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_36hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_37hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_37hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_37hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_37hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_37hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_38hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_38hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_38hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_38hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_38hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_39hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_39hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_39hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_39hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_39hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_3hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_3hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_3hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_3hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_3hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_40hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_40hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_40hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_40hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_40hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_41hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_41hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_41hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_41hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_41hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_42hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_42hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_42hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_42hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_42hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_43hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_43hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_43hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_43hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_43hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_44hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_44hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_44hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_44hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_44hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_45hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_45hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_45hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_45hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_45hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_46hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_46hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_46hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_46hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_46hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_47hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_47hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_47hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_47hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_47hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_48hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_48hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_48hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_48hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_48hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_49hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_49hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_49hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_49hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_49hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_4hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_4hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_4hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_4hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_4hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_50hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_50hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_50hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_50hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_50hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_51hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_51hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_51hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_51hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_51hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_52hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_52hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_52hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_52hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_52hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_53hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_53hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_53hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_53hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_53hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_54hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_54hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_54hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_54hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_54hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_55hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_55hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_55hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_55hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_55hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_56hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_56hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_56hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_56hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_56hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_57hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_57hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_57hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_57hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_57hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_58hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_58hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_58hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_58hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_58hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_59hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_59hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_59hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_59hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_59hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_5hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_5hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_5hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_5hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_5hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_60hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_60hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_60hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_60hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_60hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_61hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_61hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_61hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_61hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_61hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_62hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_62hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_62hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_62hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_62hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_63hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_63hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_63hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_63hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_63hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_64hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_64hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_64hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_64hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_64hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_65hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_65hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_65hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_65hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_65hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_6hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_6hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_6hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_6hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_6hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_7hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_7hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_7hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_7hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_7hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_8hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_8hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_8hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_8hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_8hybridlevel'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     PRES_9hybridlevel"Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'PRES_9hybridlevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for PRES_9hybridlevel'
-      else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,PRES_9hybridlevel)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for PRES_9hybridlevel'
+c   variables of type real
+c
+c     variable        netcdf long name
+c     clwmr_10hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_10hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_10hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_10hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_10hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_11hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_11hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_11hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_11hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_11hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_12hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_12hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_12hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_12hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_12hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_13hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_13hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_13hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_13hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_13hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_14hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_14hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_14hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_14hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_14hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_15hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_15hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_15hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_15hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_15hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_16hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_16hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_16hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_16hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_16hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_17hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_17hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_17hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_17hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_17hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_18hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_18hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_18hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_18hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_18hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_19hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_19hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_19hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_19hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_19hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_1hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_1hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_1hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_1hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_1hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_20hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_20hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_20hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_20hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_20hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_21hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_21hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_21hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_21hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_21hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_22hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_22hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_22hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_22hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_22hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_23hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_23hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_23hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_23hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_23hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_24hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_24hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_24hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_24hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_24hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_25hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_25hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_25hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_25hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_25hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_26hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_26hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_26hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_26hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_26hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_27hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_27hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_27hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_27hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_27hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_28hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_28hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_28hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_28hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_28hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_29hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_29hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_29hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_29hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_29hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_2hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_2hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_2hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_2hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_2hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_30hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_30hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_30hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_30hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_30hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_31hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_31hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_31hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_31hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_31hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_32hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_32hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_32hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_32hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_32hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_33hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_33hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_33hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_33hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_33hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_34hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_34hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_34hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_34hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_34hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_35hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_35hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_35hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_35hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_35hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_36hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_36hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_36hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_36hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_36hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_37hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_37hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_37hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_37hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_37hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_38hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_38hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_38hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_38hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_38hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_39hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_39hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_39hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_39hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_39hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_3hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_3hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_3hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_3hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_3hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_40hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_40hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_40hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_40hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_40hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_41hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_41hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_41hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_41hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_41hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_42hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_42hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_42hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_42hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_42hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_43hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_43hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_43hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_43hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_43hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_44hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_44hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_44hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_44hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_44hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_45hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_45hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_45hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_45hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_45hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_46hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_46hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_46hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_46hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_46hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_47hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_47hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_47hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_47hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_47hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_48hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_48hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_48hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_48hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_48hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_49hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_49hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_49hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_49hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_49hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_4hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_4hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_4hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_4hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_4hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_50hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_50hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_50hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_50hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_50hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_51hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_51hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_51hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_51hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_51hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_52hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_52hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_52hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_52hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_52hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_53hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_53hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_53hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_53hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_53hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_54hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_54hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_54hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_54hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_54hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_55hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_55hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_55hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_55hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_55hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_56hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_56hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_56hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_56hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_56hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_57hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_57hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_57hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_57hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_57hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_58hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_58hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_58hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_58hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_58hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_59hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_59hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_59hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_59hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_59hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_5hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_5hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_5hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_5hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_5hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_60hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_60hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_60hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_60hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_60hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_61hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_61hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_61hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_61hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_61hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_62hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_62hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_62hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_62hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_62hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_63hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_63hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_63hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_63hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_63hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_64hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_64hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_64hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_64hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_64hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_6hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_6hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_6hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_6hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_6hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_7hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_7hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_7hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_7hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_7hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_8hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_8hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_8hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_8hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_8hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     clwmr_9hybridlevel"cloud mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'clwmr_9hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for clwmr_9hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,clwmr_9hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for clwmr_9hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_10hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_10hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_10hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_10hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_10hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_11hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_11hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_11hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_11hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_11hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_12hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_12hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_12hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_12hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_12hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_13hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_13hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_13hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_13hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_13hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_14hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_14hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_14hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_14hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_14hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_15hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_15hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_15hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_15hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_15hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_16hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_16hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_16hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_16hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_16hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_17hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_17hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_17hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_17hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_17hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_18hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_18hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_18hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_18hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_18hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_19hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_19hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_19hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_19hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_19hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_1hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_1hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_1hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_1hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_1hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_20hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_20hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_20hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_20hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_20hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_21hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_21hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_21hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_21hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_21hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_22hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_22hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_22hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_22hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_22hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_23hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_23hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_23hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_23hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_23hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_24hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_24hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_24hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_24hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_24hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_25hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_25hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_25hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_25hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_25hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_26hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_26hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_26hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_26hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_26hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_27hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_27hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_27hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_27hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_27hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_28hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_28hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_28hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_28hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_28hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_29hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_29hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_29hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_29hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_29hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_2hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_2hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_2hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_2hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_2hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_30hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_30hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_30hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_30hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_30hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_31hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_31hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_31hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_31hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_31hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_32hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_32hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_32hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_32hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_32hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_33hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_33hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_33hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_33hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_33hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_34hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_34hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_34hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_34hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_34hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_35hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_35hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_35hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_35hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_35hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_36hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_36hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_36hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_36hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_36hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_37hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_37hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_37hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_37hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_37hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_38hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_38hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_38hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_38hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_38hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_39hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_39hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_39hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_39hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_39hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_3hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_3hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_3hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_3hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_3hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_40hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_40hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_40hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_40hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_40hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_41hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_41hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_41hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_41hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_41hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_42hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_42hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_42hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_42hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_42hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_43hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_43hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_43hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_43hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_43hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_44hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_44hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_44hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_44hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_44hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_45hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_45hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_45hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_45hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_45hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_46hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_46hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_46hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_46hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_46hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_47hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_47hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_47hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_47hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_47hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_48hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_48hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_48hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_48hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_48hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_49hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_49hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_49hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_49hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_49hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_4hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_4hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_4hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_4hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_4hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_50hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_50hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_50hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_50hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_50hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_51hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_51hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_51hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_51hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_51hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_52hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_52hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_52hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_52hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_52hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_53hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_53hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_53hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_53hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_53hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_54hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_54hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_54hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_54hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_54hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_55hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_55hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_55hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_55hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_55hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_56hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_56hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_56hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_56hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_56hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_57hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_57hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_57hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_57hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_57hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_58hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_58hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_58hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_58hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_58hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_59hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_59hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_59hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_59hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_59hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_5hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_5hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_5hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_5hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_5hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_60hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_60hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_60hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_60hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_60hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_61hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_61hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_61hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_61hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_61hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_62hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_62hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_62hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_62hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_62hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_63hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_63hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_63hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_63hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_63hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_64hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_64hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_64hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_64hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_64hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_65hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_65hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_65hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_65hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_65hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_6hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_6hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_6hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_6hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_6hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_7hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_7hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_7hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_7hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_7hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_8hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_8hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_8hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_8hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_8hybridlevel'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     pres_9hybridlevel"pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pres_9hybridlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pres_9hybridlevel'
+      else
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pres_9hybridlevel)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pres_9hybridlevel'
        endif
       endif
 
-C   Variables of type INT
-C
+c   variables of type int
+c
 
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C     latitude      "latitude"
-C
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c     latitude      "latitude"
+c
       if(.false.)then
 
-      nf_status=NF_INQ_VARID(nf_fid,'latitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for latitude'
+      nf_status=nf_inq_varid(nf_fid,'latitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for latitude'
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,latitude)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for latitude'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,latitude)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for latitude'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     longitude     "longitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'longitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for longitude'
+c
+c     variable        netcdf long name
+c     longitude     "longitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'longitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for longitude'
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,longitude)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for longitude'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,longitude)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for longitude'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     time          "verification time generated by wgrib2 function verftime()"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'time',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for time'
+c
+c     variable        netcdf long name
+c     time          "verification time generated by wgrib2 function verftime()"
+c
+      nf_status=nf_inq_varid(nf_fid,'time',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for time'
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,time)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for time'
+       nf_status=nf_get_var_double(nf_fid,nf_vid,time)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for time'
        endif
       endif
  
       endif
 
-C   Variables of type CHAR
-C
+c   variables of type char
+c
 
       nf_status=nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

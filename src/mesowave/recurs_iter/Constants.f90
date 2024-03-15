@@ -1,14 +1,14 @@
 !****************************************************
-!  This modul defines all necessary constants needed
+!  this modul defines all necessary constants needed
 !  in the data assimilation.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !****************************************************
 
 !===================
-!  Dimensions:
+!  dimensions:
 !===================
 
-INTEGER, PARAMETER :: mx=765,my=600,mt=8,mv=6
+integer, parameter :: mx=765,my=600,mt=8,mv=6
 
-INCLUDE 'OBSCommon.f90'
+include 'obscommon.f90'

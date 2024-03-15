@@ -1,79 +1,79 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis 	
         implicit none
 	include 'constants_optran.inc'
 
-	Real*8 Bw(Nwet+1,Nw,Nchan)
-	Real*8 Bd(Ndry+1,Nw,Nchan)
-	Real*8 Bo(Nozo+1,Nw,Nchan)
+	real*8 bw(nwet+1,nw,nchan)
+	real*8 bd(ndry+1,nw,nchan)
+	real*8 bo(nozo+1,nw,nchan)
 
-	Integer i,j,k,Ichan
+	integer i,j,k,ichan
 
-	Open(12,file='coef.dat',
+	open(12,file='coef.dat',
      &		form='formatted')
-	Open(42,file='wet_coeff.dat',
+	open(42,file='wet_coeff.dat',
      &          form='unformatted')
-	Open(43,file='dry_coeff.dat',
+	open(43,file='dry_coeff.dat',
      &          form='unformatted')
-	Open(44,file='ozo_coeff.dat',
+	open(44,file='ozo_coeff.dat',
      &          form='unformatted')
 
-	Do Ichan = 1 , Nchan
-1200     Format(i4,6e20.12)
+	do ichan = 1 , nchan
+1200     format(i4,6e20.12)
 
-	 do i = 1 , Nw
-	  Read(12,1200) k,(Bd(j,i,Ichan),j=1,Ndry+1)
-	 EndDo
-	 Do i = 1 , Nw
-	  Read(12,1200) k,(Bw(j,i,Ichan),j=1,Nwet+1)
-  	 EndDo
-	 Do i = 1 , Nw
-	  Read(12,1200) k,(Bo(j,i,Ichan),j=1,Nozo+1)
-  	 EndDo
+	 do i = 1 , nw
+	  read(12,1200) k,(bd(j,i,ichan),j=1,ndry+1)
+	 enddo
+	 do i = 1 , nw
+	  read(12,1200) k,(bw(j,i,ichan),j=1,nwet+1)
+  	 enddo
+	 do i = 1 , nw
+	  read(12,1200) k,(bo(j,i,ichan),j=1,nozo+1)
+  	 enddo
 
-	EndDo
+	enddo
 
-	Write(42) Bw
-	Write(43) Bd
-	Write(44) Bo
+	write(42) bw
+	write(43) bd
+	write(44) bo
 
-	Close(42)
-	Close(43)
-	Close(44)
+	close(42)
+	close(43)
+	close(44)
 
 
-	Stop
+	stop
 	end

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -33,19 +33,19 @@ cdis
         subroutine get_maxtops(grid_ra_ref,heights_3d
      1                        ,imax,jmax,kmax,rmax_tops_m)
 
-        real grid_ra_ref(imax,jmax,kmax)             ! I
-        real heights_3d(imax,jmax,kmax)              ! I
-        real rmax_tops_m(imax,jmax)                  ! O
+        real grid_ra_ref(imax,jmax,kmax)             ! i
+        real heights_3d(imax,jmax,kmax)              ! i
+        real rmax_tops_m(imax,jmax)                  ! o
 
         highest_top = 0.
         rf_thr = 0.
         do j = 1,jmax
         do i = 1,imax
 
-!           Initialize Point
+!           initialize point
             rmax_tops_m(i,j) = 0.
 
-!           Find level of Max Tops
+!           find level of max tops
             k_grid = 0.
             do k = 1,kmax-1
                 if(grid_ra_ref(i,j,k)   .ge. rf_thr .and.
@@ -56,7 +56,7 @@ cdis
                 endif
             enddo
 
-!           Convert from Grid Level to Height
+!           convert from grid level to height
             if(k_grid .gt. 0.)then
                 height_low  = heights_3d(i,j,k_grid)
                 height_high = heights_3d(i,j,k_grid+1)

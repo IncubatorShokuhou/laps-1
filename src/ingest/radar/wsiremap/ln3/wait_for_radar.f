@@ -32,7 +32,7 @@ c
        call get_ln3_parameters(c_data_path,msng,i4_check_interval,
      +i4_total_wait,i4_thresh_age,id,id,id,id,istatus)
        if(istatus.ne.1)then
-          print*,'Error getting wait parms from ln3.nl'
+          print*,'error getting wait parms from ln3.nl'
           goto 999
        endif
        write(6,*)'check-interval, total_wait, thresh age'
@@ -55,14 +55,14 @@ c
        if(.not.foundit(i))then
           path=c_data_path(1:n-1)//'*_'//c_data_types(i)
           write(6,*)
-          write(6,*)'Waiting for ',c_data_types(i),' data '
+          write(6,*)'waiting for ',c_data_types(i),' data '
           write(6,*)'-------------------------------------'
           call wait_for_data(path,i4time_cur
      1               ,i4_check_interval,i4_total_wait
      1               ,i4_thresh_age
      1               ,istatus)
           if(istatus .ne. 1)then
-             write(6,*)'No data found in Wait-for-data',
+             write(6,*)'no data found in wait-for-data',
      &c_data_types(i)
           else
              call get_latest_file_time(path,i4time_nearest)
@@ -80,7 +80,7 @@ c
 
        goto 999
 
-995    write(6,*)'Error getting wait parms'
+995    write(6,*)'error getting wait parms'
 
 999    return
        end

@@ -3,8 +3,8 @@
      +                   lat1,lat2,lon0,sw,ne,dskm,glat,glon,
      +                   pressures_pa,filename,bgmodel,cwb_type)
 !
-!     Bogusing balanced tropical cyclones based on Rankin Vortex
-!     Input file : tcbogus.nl
+!     bogusing balanced tropical cyclones based on rankin vortex
+!     input file : tcbogus.nl
 !======================================================================
 !        field      unit          description
 !         ht         m        geopotential height (upper)
@@ -19,12 +19,12 @@
 !         mslp      pa        mean sea level pressure
 !      pressure_pa  pa        model vertical level
 !       filename              background model full path
-!        bgmodel              model number (support CWB/NFS bgmodel=3 now)
-!         pss       hPa       surface pressure (not necessary!)
+!        bgmodel              model number (support cwb/nfs bgmodel=3 now)
+!         pss       hpa       surface pressure (not necessary!)
 !
-!      Guo-Ji Jian (CWB,Taiwan)       June, 2002
-!      wen-ho Wang modify slightly     Sep, 2004
-!      Steve Albers (more general inputs)   2010
+!      guo-ji jian (cwb,taiwan)       june, 2002
+!      wen-ho wang modify slightly     sep, 2004
+!      steve albers (more general inputs)   2010
 
       include 'trigd.inc'
 
@@ -61,12 +61,12 @@
       logical bogus
       include 'grid_fname.cmn'
       data beta/0.90,1.00,0.90,0.80,0.60,0.45,0.35/
-      NAMELIST /tcbogus_nl/bogus,itc_no,dskm,year,month,day,hour,
+      namelist /tcbogus_nl/bogus,itc_no,dskm,year,month,day,hour,
      +                     cen_lat,cen_lon,alpha_i,vmax,rmax,
      +                     r_7deg,speed,direc
 
 
-! Bogusing namelist and driver
+! bogusing namelist and driver
       call get_systime(i4time_sys,a9,istatus)
       call get_directory('tcbogus',nest7grid,len_dir)
       call get_file_time(nest7grid,i4time_sys,i4time_closest)
@@ -81,7 +81,7 @@
  101  if ( iread == 0 ) then 
        print*,'--- open  tcbogus file successful ---'
       else
-       print*,'--- No   tcbogus file  ---'
+       print*,'--- no   tcbogus file  ---'
       endif  
 
       
@@ -106,9 +106,9 @@
 !
       if (bogus) then
        print *,' '
-       print *,'Do Tropical cyclone bogusing'
+       print *,'do tropical cyclone bogusing'
       else
-       print *,'No Tropical cyclone bogusing'
+       print *,'no tropical cyclone bogusing'
        return
       endif
 
@@ -117,8 +117,8 @@
 
 !      if (bgmodel.eq.3 .and. filename(l-15:l-14).eq.'nf') then
       if (bgmodel.eq.3 .and. cwb_type.eq.'nf') then
-! OLD CWB NFS_15KM model
-       print *,'----- Using OLD CWB ---- '
+! old cwb nfs_15km model
+       print *,'----- using old cwb ---- '
        lat1=10.
        lat2=40.
        lon0=120.
@@ -129,8 +129,8 @@
        dskm=15.
       elseif (bgmodel.eq.3 .and. cwb_type.eq.'nf15' .or. 
      +        cwb_type.eq.'gfs') then
-! NEW CWB NFS_15KM & GFS_180 (interpolated into 15KM) model
-       print *,'----- Using NEW CWB ---- '
+! new cwb nfs_15km & gfs_180 (interpolated into 15km) model
+       print *,'----- using new cwb ---- '
        lat1=10.
        lat2=40.
        lon0=120.
@@ -140,8 +140,8 @@
        ne(2)=+137.7342
        dskm=15.
       elseif (bgmodel.eq.3 .and. cwb_type.eq.'nf45') then
-! NEW CWB NFS_45km  model
-       print *,'----- Using NEW CWB 45 ---- '
+! new cwb nfs_45km  model
+       print *,'----- using new cwb 45 ---- '
        lat1=10.
        lat2=40.
        lon0=120.
@@ -151,8 +151,8 @@
        ne(2)=+180.2034
        dskm=45.
       elseif (bgmodel.eq.3 .and. cwb_type.eq.'tfs') then
-! NEW CWB TFS_45KM  model
-       print *,'----- Using NEW CWB TFS  ---- '
+! new cwb tfs_45km  model
+       print *,'----- using new cwb tfs  ---- '
        lat1=10.
        lat2=40.
        lon0=120.
@@ -162,11 +162,11 @@
        ne(2)=+199.610
        dskm=45.
       else
-       print *,'Other model'
+       print *,'other model'
        return
       endif
 !!
-       print *,'----- Using cwb_type is ---- ',cwb_type
+       print *,'----- using cwb_type is ---- ',cwb_type
 
        call lc_param11(s,cone,xmin,ymin,dx,dy,jx,ix,
      +                 nz,lat1,lat2,lon0,sw,ne)
@@ -205,7 +205,7 @@
        hour_m=10.*(a1+b1)+(a2+b2)
  
 
-! Tropical cyclone information
+! tropical cyclone information
       call hourcalc(year,month,day,hour,tothour)
       call hourcalc(year_m,month_m,day_m,hour_m,tothour_m)
       do n=1,itc_no
@@ -237,14 +237,14 @@
       ds=dskm*1000.
       omg2=2.*7.292/100000.
 
-! Tropical cyclone numbers : itc_no (max_no=3)
+! tropical cyclone numbers : itc_no (max_no=3)
       do icount=1,itc_no
 
        call cen_posi(cal_lat(icount),cal_lon(icount),
      +               glon,glat,cen_i,cen_j,jx,ix)
        if (cen_j.le.3 .or. cen_j.ge.jx-3 .or.
      +     cen_i.le.3 .or. cen_i.ge.ix-3) then
-        print *,'Out or near model boundary. Ignore bogusing '
+        print *,'out or near model boundary. ignore bogusing '
         return
        endif
 
@@ -255,13 +255,13 @@
        dealbox=int(r_7deg(icount)/dskm)-1.0
        xix=cen_i+0.2
        xjx=cen_j+0.2
-       print *, 'Tropical cyclone location (lon,lat) ',
+       print *, 'tropical cyclone location (lon,lat) ',
      +           cal_lon(icount),cal_lat(icount)
        print *, '                          (  i,  j) ',
      +           cen_j,cen_i
        print *,vs,rout/dskm,dealbox
 
-! Background model data
+! background model data
       do kk=1,kx
        do ii=1,ix
         do jj=1,jx
@@ -292,7 +292,7 @@
        enddo
       enddo
 
-! Rankin vortex profile
+! rankin vortex profile
       do k=1,kb
        do i=1,ix
         do j=1,jx
@@ -334,7 +334,7 @@
        enddo
       enddo
 
-! Replace u,v,t,h inside the box
+! replace u,v,t,h inside the box
       ix1=int(xix-0.5)-int(dealbox)
       ix2=int(xix+0.5)+int(dealbox)
       jx1=int(xjx-0.5)-int(dealbox)
@@ -390,7 +390,7 @@
        enddo
       enddo
 
-! Calculate perturbation
+! calculate perturbation
 
       do k=2,k300+1
        do i=1,ix
@@ -441,12 +441,12 @@
        do i=1,ix
         do j=1,jx
          fip(i,j,k)=chi(i,j)
-         hw(i,j,k)=dot(i,j)/G
+         hw(i,j,k)=dot(i,j)/g
         enddo
        enddo
       enddo
 
-! Find lower level minimum
+! find lower level minimum
       hminc=0.
       hmind=0.
       do i=1,ix
@@ -464,7 +464,7 @@
        enddo
       enddo
 
-! Temperature perturbation and background temperature
+! temperature perturbation and background temperature
       do i=1,ix
        do j=1,jx
         do k=2,2
@@ -499,11 +499,11 @@
        enddo
       enddo
 
-! Calculate vorticity with u1 v1
+! calculate vorticity with u1 v1
       call vor(u1,v1,xmapd,xmapc,ix,jx,kx,ds,vort)
       call vor(utcc,vtcc,xmapd,xmapc,ix,jx,kx,ds,vorttc)
 
-! Replace vorticity using Rankin vortex vorticity
+! replace vorticity using rankin vortex vorticity
       do k=2,k300+1
        do i=ix1,ix2
         do j=jx1,jx2
@@ -585,7 +585,7 @@
        enddo
       enddo
 
-! Find lower level minimum
+! find lower level minimum
       hminc=0.
       hmind=0.
       do i=1,ix
@@ -603,7 +603,7 @@
        enddo
       enddo
 
-! Calculate new Temperature 
+! calculate new temperature 
       do i=1,ix
        do j=1,jx
         do k=2,2
@@ -651,18 +651,18 @@
        enddo
       enddo
 
-! RH
+! rh
 
       do k=2,k300+1
        do i=1,ix-1
         do j=1,jx-1
-         rh(i,j,k)=100.*exp(5418.12*(1./to(I,J,K)-
-     +                      1./(to(I,J,K)-dd(I,J,K))))
+         rh(i,j,k)=100.*exp(5418.12*(1./to(i,j,k)-
+     +                      1./(to(i,j,k)-dd(i,j,k))))
         enddo
        enddo
       enddo
  
-! Calculate slp
+! calculate slp
       poo=1000.
       density=1.225
       do i=1,ix
@@ -720,7 +720,7 @@
        enddo
       enddo
 
-! Where is the min slp of bogusing tropical cyclone ?
+! where is the min slp of bogusing tropical cyclone ?
       pc1=psealc(ix1,jx1)
       pc2=pseald(ix1,jx1)
       iminpc=1
@@ -742,7 +742,7 @@
        enddo
       enddo
 
-! Surface wind
+! surface wind
       do i=1,ix
        do j=1,jx
         utcc(i,j,1)=uo(i,j,2)
@@ -858,7 +858,7 @@
        enddo
       enddo
 
-! Find the max. wind
+! find the max. wind
       vmax0=uo(cen_i,cen_j,1)
       vmax1=uo(cen_i,cen_j,2)
       do i=ix1,ix2
@@ -879,32 +879,32 @@
       enddo
 
       print *,' '
-      print *,'Tropical cyclone bogusing result : '
+      print *,'tropical cyclone bogusing result : '
       print 2000,pc1,glat(jminpc,iminpc),glon(jminpc,iminpc)
       print 2001,vmax0,glat(jmax0,imax0),glon(jmax0,imax0)
       print 2002,vmax1,glat(jmax1,imax1),glon(jmax1,imax1)
       print 2003,tmax,glat(jmaxt,imaxt),glon(jmaxt,imaxt)
       print *,' '
-2000  format(' Min sea level pressure    : ',f7.2,' hPa  at',
-     +        f7.2,'N',f7.2,'E')
-2001  format(' Max wind speed at surface : ',f7.2,' m/s  at',
-     +        f7.2,'N',f7.2,'E')
-2002  format(' Max wind speed at 1000hPa : ',f7.2,' m/s  at',
-     +        f7.2,'N',f7.2,'E')
-2003  format(' 850hPa max temperaturea   : ',f7.2,' K    at',
-     +        f7.2,'N',f7.2,'E')
+2000  format(' min sea level pressure    : ',f7.2,' hpa  at',
+     +        f7.2,'n',f7.2,'e')
+2001  format(' max wind speed at surface : ',f7.2,' m/s  at',
+     +        f7.2,'n',f7.2,'e')
+2002  format(' max wind speed at 1000hpa : ',f7.2,' m/s  at',
+     +        f7.2,'n',f7.2,'e')
+2003  format(' 850hpa max temperaturea   : ',f7.2,' k    at',
+     +        f7.2,'n',f7.2,'e')
 
-! Surface RH
+! surface rh
       do i=1,ix-1
        do j=1,jx-1
-        rh(i,j,1)=100.*exp(5418.12*(1./to(I,J,1)-
-     +                     1./(to(I,J,1)-dd(I,J,1))))
+        rh(i,j,1)=100.*exp(5418.12*(1./to(i,j,1)-
+     +                     1./(to(i,j,1)-dd(i,j,1))))
        enddo
       enddo
 
 !**********************penny**************************
       rovcp=287./1004.
-      print *, 'Penny test!'
+      print *, 'penny test!'
       do i=1,ix-1
        do j=1,jx-1
         ps=psealc(i,j)
@@ -921,7 +921,7 @@
       enddo
 ********************************************************
 
-! After bogusing
+! after bogusing
        do kk=1,kx
         do ii=1,ix
          do jj=1,jx
@@ -961,9 +961,9 @@
      .       xmin,xmax,ymin,ymax,
      .       dx,dy
 c
-      real lat1,lat2,lon0,       !Lambert-conformal std lat1, lat2, lon
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
-      integer nx,ny,nz           !No. of LC domain grid points
+      real lat1,lat2,lon0,       !lambert-conformal std lat1, lat2, lon
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
+      integer nx,ny,nz           !no. of lc domain grid points
 c_______________________________________________________________________________
 c
       if (lat1 .ge. 0.) then
@@ -1033,17 +1033,17 @@ c
       return
       end
 
-      subroutine cen_posi(lat,lon,glon,glat,cen_I,cen_J,JX,IX)
-      REAL lat,lon,glon(JX,IX),glat(JX,IX),dis2,min
-      INTEGER cen_I,cen_J
+      subroutine cen_posi(lat,lon,glon,glat,cen_i,cen_j,jx,ix)
+      real lat,lon,glon(jx,ix),glat(jx,ix),dis2,min
+      integer cen_i,cen_j
 
-      min=1.E+20
-      do i=1,JX
-       do j=1,IX
+      min=1.e+20
+      do i=1,jx
+       do j=1,ix
         dis2=(lat-glat(i,j))**2+(lon-glon(i,j))**2
         if (dis2.lt.min) then
-          cen_I=j
-          cen_J=i
+          cen_i=j
+          cen_j=i
           min=dis2
         endif
        enddo
@@ -1087,7 +1087,7 @@ c
      +     chimx,rdmax,eeps,epx,alpha,level
 
       istatus=0
-      eeps=1.E-6
+      eeps=1.e-6
       alpha=0.45
       mm=5000
       fac=ds*ds*1.
@@ -1139,9 +1139,9 @@ c
        endif
       enddo
 
-      print *,'Error ! relaxation not converge.  bogusing abort ! '
-2004  format(' Surface  done, iterations = ',i4)
-2005  format(1x,f5.0,' hPa  done, iterations = ',i4)
+      print *,'error ! relaxation not converge.  bogusing abort ! '
+2004  format(' surface  done, iterations = ',i4)
+2005  format(1x,f5.0,' hpa  done, iterations = ',i4)
       return
       end
 

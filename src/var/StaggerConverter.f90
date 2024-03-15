@@ -1,316 +1,316 @@
 !dis
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
 !dis
-!dis    This software is distributed under the Open Source Definition,
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
 !dis
-!dis    In particular, redistribution and use in source and binary forms,
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
 !dis
-!dis    - Redistributions of source code must retain this notice, this
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
 !dis
-!dis    - Redistributions in binary form must provide access to this
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
 !dis
-!dis    - All modifications to this software must be clearly documented,
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
 !dis
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
 !dis
 !dis
 !dis
 !dis
 !dis
 
-SUBROUTINE StaggerZ(vin,nx,ny,nz,ptop,psfc,znw,iorder,logP,vout)
+subroutine staggerz(vin, nx, ny, nz, ptop, psfc, znw, iorder, logp, vout)
 
 !==========================================================
-!  This routine computes a grid function on a vertically
+!  this routine computes a grid function on a vertically
 !  stagger grid using a given uniform grid function with
-!  options of 2nd/4th order accuracy and LogP transfer.
+!  options of 2nd/4th order accuracy and logp transfer.
 !
-!  Input:
-!	ptop: 	Top pressure;
-!	psfc:	Sfc pressure;
-!	znw:	Grid spacing ratio relative to psfc (nz);
-!	vin:	Input grid function on a uniform grid;
-!		(nx*ny*nz)
-!	nx:	Number of uniform grid point in X;
-!	ny:	Number of uniform grid point in Y;
-!	nz:	Number of uniform vertical points;
-!	logP:	0 -- standard interpolation;
-!		1 -- log(P) interpolation;
+!  input:
+!        ptop:         top pressure;
+!        psfc:        sfc pressure;
+!        znw:        grid spacing ratio relative to psfc (nz);
+!        vin:        input grid function on a uniform grid;
+!                (nx*ny*nz)
+!        nx:        number of uniform grid point in x;
+!        ny:        number of uniform grid point in y;
+!        nz:        number of uniform vertical points;
+!        logp:        0 -- standard interpolation;
+!                1 -- log(p) interpolation;
 !       iorder: 2 or 4 for second or fourth order;
 !
-!  Output:
-!	vout:	Output grid funcion on a stagger grid.
-!		(nx*ny*(nz-1))
+!  output:
+!        vout:        output grid funcion on a stagger grid.
+!                (nx*ny*(nz-1))
 !
-!  HISTORY: JUL. 2006 by YUANFU XIE.
+!  history: jul. 2006 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+   implicit none
 
-  INTEGER, INTENT(IN) :: nx,ny,nz,logP,iorder
-  REAL, INTENT(IN) ::  ptop,psfc(nx,ny),znw(nz)
-  REAL, INTENT(IN) ::    vin(nx,ny,nz)
-  REAL, INTENT(OUT) ::   vout(nx,ny,nz-1)
+   integer, intent(in) :: nx, ny, nz, logp, iorder
+   real, intent(in) ::  ptop, psfc(nx, ny), znw(nz)
+   real, intent(in) ::    vin(nx, ny, nz)
+   real, intent(out) ::   vout(nx, ny, nz - 1)
 
-  ! Local variables:
-  INTEGER :: i,j,k,l,m
-  REAL :: p,x(4)
+   ! local variables:
+   integer :: i, j, k, l, m
+   real :: p, x(4)
 
-  ! Lower boundary:
-  DO j=1,ny
-    DO i=1,nx
+   ! lower boundary:
+   do j = 1, ny
+      do i = 1, nx
 
-      DO l=1,iorder
-        x(l) = znw(l)*(psfc(i,j)-ptop)+ptop
-      ENDDO
+         do l = 1, iorder
+            x(l) = znw(l)*(psfc(i, j) - ptop) + ptop
+         end do
 
-      ! First stagger grid point:
-      p = 0.5*(x(1)+x(2))
+         ! first stagger grid point:
+         p = 0.5*(x(1) + x(2))
 
-      ! Log(P):
-      IF (logP .EQ. 1) THEN
-        x = LOG(x)
-        p = LOG(p)
-      ENDIF
+         ! log(p):
+         if (logp .eq. 1) then
+            x = log(x)
+            p = log(p)
+         end if
 
-      ! Interpolation:
-      IF (iorder .EQ. 2) &
-        CALL Intplt2(p,x,vin(i,j,1:iorder),vout(i,j,1))
-      IF (iorder .EQ. 4) &
-        CALL Intplt4(p,x,vin(i,j,1:iorder),vout(i,j,1))
+         ! interpolation:
+         if (iorder .eq. 2) &
+            call intplt2(p, x, vin(i, j, 1:iorder), vout(i, j, 1))
+         if (iorder .eq. 4) &
+            call intplt4(p, x, vin(i, j, 1:iorder), vout(i, j, 1))
 
-    ENDDO
-  ENDDO
+      end do
+   end do
 
-  ! Interior:
-  DO k=2,nz-2
+   ! interior:
+   do k = 2, nz - 2
 
-    m = k-iorder/2
+      m = k - iorder/2
 
-    DO j=1,ny
-      DO i=1,nx
+      do j = 1, ny
+         do i = 1, nx
 
-        DO l=1,iorder
-          x(l) = znw(m+l)*(psfc(i,j)-ptop)+ptop
-        ENDDO
+            do l = 1, iorder
+               x(l) = znw(m + l)*(psfc(i, j) - ptop) + ptop
+            end do
 
-        ! First stagger grid point:
-        p = 0.5*(x(iorder/2)+x(iorder/2+1))
+            ! first stagger grid point:
+            p = 0.5*(x(iorder/2) + x(iorder/2 + 1))
 
-        ! Log(P):
-        IF (logP .EQ. 1) THEN
-          x = LOG(x)
-          p = LOG(p)
-        ENDIF
+            ! log(p):
+            if (logp .eq. 1) then
+               x = log(x)
+               p = log(p)
+            end if
 
-        ! Interpolation:
-        IF (iorder .EQ. 2) &
-          CALL Intplt2(p,x,vin(i,j,k:k+1),vout(i,j,k))
-        IF (iorder .EQ. 4) &
-          CALL Intplt4(p,x,vin(i,j,k-1:k+2),vout(i,j,k))
+            ! interpolation:
+            if (iorder .eq. 2) &
+               call intplt2(p, x, vin(i, j, k:k + 1), vout(i, j, k))
+            if (iorder .eq. 4) &
+               call intplt4(p, x, vin(i, j, k - 1:k + 2), vout(i, j, k))
 
-      ENDDO
-    ENDDO
+         end do
+      end do
 
-  ENDDO
+   end do
 
-  ! Upper boundary:
-  m = nz-iorder
-  DO j=1,ny
-    DO i=1,nx
+   ! upper boundary:
+   m = nz - iorder
+   do j = 1, ny
+      do i = 1, nx
 
-      DO l=1,iorder
-        x(l) = znw(m+l)*(psfc(i,j)-ptop)+ptop
-      ENDDO
+         do l = 1, iorder
+            x(l) = znw(m + l)*(psfc(i, j) - ptop) + ptop
+         end do
 
-      ! First stagger grid point:
-      p = 0.5*(x(iorder-1)+x(iorder))
+         ! first stagger grid point:
+         p = 0.5*(x(iorder - 1) + x(iorder))
 
-      ! Log(P):
-      IF (logP .EQ. 1) THEN
-        x = LOG(x)
-        p = LOG(p)
-      ENDIF
+         ! log(p):
+         if (logp .eq. 1) then
+            x = log(x)
+            p = log(p)
+         end if
 
-      ! Interpolation:
-      IF (iorder .EQ. 2) &
-        CALL Intplt2(p,x,vin(i,j,nz-1:nz),vout(i,j,nz-1))
-      IF (iorder .EQ. 4) &
-        CALL Intplt4(p,x,vin(i,j,nz-3:nz),vout(i,j,nz-1))
+         ! interpolation:
+         if (iorder .eq. 2) &
+            call intplt2(p, x, vin(i, j, nz - 1:nz), vout(i, j, nz - 1))
+         if (iorder .eq. 4) &
+            call intplt4(p, x, vin(i, j, nz - 3:nz), vout(i, j, nz - 1))
 
-    ENDDO
-  ENDDO
+      end do
+   end do
 
-END SUBROUTINE StaggerZ
+end subroutine staggerz
 
-SUBROUTINE UnStaggerZ(vin,nx,ny,nz,ptop,psfc,znu,iorder,logP,vout)
+subroutine unstaggerz(vin, nx, ny, nz, ptop, psfc, znu, iorder, logp, vout)
 
 !==========================================================
-!  This routine computes a grid function on a uniform grid
+!  this routine computes a grid function on a uniform grid
 !  using a given stagger grid function with options of a
-!  second/fourth order accuracy and Log P transfer.
+!  second/fourth order accuracy and log p transfer.
 !
-!  Input:
-!	ptop: 	Top pressure;
-!	psfc:	Sfc pressure;
-!	znw:	Eta value for a uniform grid;
-!	vin:	Input grid function on a stagger grid;
-!		(nx*ny*(nz-1))
-!	nx:	Number of uniform grid point in X;
-!	ny:	Number of uniform grid point in Y;
-!	nz:	Number of uniform vertical points;
-!	logP:	0 -- standard interpolation;
-!		1 -- log(P) interpolation;
-!	iorder: 2 or 4 order accuracy;
+!  input:
+!        ptop:         top pressure;
+!        psfc:        sfc pressure;
+!        znw:        eta value for a uniform grid;
+!        vin:        input grid function on a stagger grid;
+!                (nx*ny*(nz-1))
+!        nx:        number of uniform grid point in x;
+!        ny:        number of uniform grid point in y;
+!        nz:        number of uniform vertical points;
+!        logp:        0 -- standard interpolation;
+!                1 -- log(p) interpolation;
+!        iorder: 2 or 4 order accuracy;
 !
-!  Output:
-!	vout:	Output grid funcion on a uniform grid.
-!		(nx*ny*nz)
+!  output:
+!        vout:        output grid funcion on a uniform grid.
+!                (nx*ny*nz)
 !
-!  HISTORY: JUL. 2006 by YUANFU XIE.
+!  history: jul. 2006 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+   implicit none
 
-  INTEGER, INTENT(IN) :: nx,ny,nz,logP,iorder
-  REAL, INTENT(IN) ::  ptop,psfc(nx,ny),znu(nz-1)
-  REAL, INTENT(IN) ::    vin(nx,ny,nz-1)
-  REAL, INTENT(OUT) ::   vout(nx,ny,nz)
+   integer, intent(in) :: nx, ny, nz, logp, iorder
+   real, intent(in) ::  ptop, psfc(nx, ny), znu(nz - 1)
+   real, intent(in) ::    vin(nx, ny, nz - 1)
+   real, intent(out) ::   vout(nx, ny, nz)
 
-  ! Local variables:
-  INTEGER :: i,j,k,l,m
-  REAL :: p,x(4)
+   ! local variables:
+   integer :: i, j, k, l, m
+   real :: p, x(4)
 
-  ! Lower boundary:
-  DO j=1,ny
-    DO i=1,nx
+   ! lower boundary:
+   do j = 1, ny
+      do i = 1, nx
 
-      DO l=1,iorder
-        x(l) = znu(l)*(psfc(i,j)-ptop)+ptop
-      ENDDO
+         do l = 1, iorder
+            x(l) = znu(l)*(psfc(i, j) - ptop) + ptop
+         end do
 
-      ! First stagger grid point:
-      p = 1.5*x(1)-0.5*x(2)
+         ! first stagger grid point:
+         p = 1.5*x(1) - 0.5*x(2)
 
-      ! Log(P):
-      IF (logP .EQ. 1) THEN
-        x = LOG(x)
-        p = LOG(p)
-      ENDIF
+         ! log(p):
+         if (logp .eq. 1) then
+            x = log(x)
+            p = log(p)
+         end if
 
-      ! Interpolation:
-      IF (iorder .EQ. 2) &
-        CALL Intplt2(p,x,vin(i,j,1:2),vout(i,j,1))
-      IF (iorder .EQ. 4) &
-        CALL Intplt4(p,x,vin(i,j,1:4),vout(i,j,1))
+         ! interpolation:
+         if (iorder .eq. 2) &
+            call intplt2(p, x, vin(i, j, 1:2), vout(i, j, 1))
+         if (iorder .eq. 4) &
+            call intplt4(p, x, vin(i, j, 1:4), vout(i, j, 1))
 
-      ! Second stagger grid point:
-      p = 0.5*(x(1)+x(2))
+         ! second stagger grid point:
+         p = 0.5*(x(1) + x(2))
 
-      ! Log(P):
-      IF (logP .EQ. 1) THEN
-        p = LOG(p)
-      ENDIF
+         ! log(p):
+         if (logp .eq. 1) then
+            p = log(p)
+         end if
 
-      ! Interpolation:
-      IF (iorder .EQ. 2) &
-        CALL Intplt2(p,x,vin(i,j,1:2),vout(i,j,2))
-      IF (iorder .EQ. 4) &
-        CALL Intplt4(p,x,vin(i,j,1:4),vout(i,j,2))
+         ! interpolation:
+         if (iorder .eq. 2) &
+            call intplt2(p, x, vin(i, j, 1:2), vout(i, j, 2))
+         if (iorder .eq. 4) &
+            call intplt4(p, x, vin(i, j, 1:4), vout(i, j, 2))
 
-    ENDDO
-  ENDDO
+      end do
+   end do
 
-  ! Interior:
-  DO k=3,nz-2
+   ! interior:
+   do k = 3, nz - 2
 
-    m = k-iorder/2-1
+      m = k - iorder/2 - 1
 
-    DO j=1,ny
-      DO i=1,nx
+      do j = 1, ny
+         do i = 1, nx
 
-        DO l=1,iorder
-          x(l) = znu(m+l)*(psfc(i,j)-ptop)+ptop
-        ENDDO
+            do l = 1, iorder
+               x(l) = znu(m + l)*(psfc(i, j) - ptop) + ptop
+            end do
 
-        ! First stagger grid point:
-        p = 0.5*(x(iorder/2)+x(iorder/2+1))
+            ! first stagger grid point:
+            p = 0.5*(x(iorder/2) + x(iorder/2 + 1))
 
-        ! Log(P):
-        IF (logP .EQ. 1) THEN
-          x = LOG(x)
-          p = LOG(p)
-        ENDIF
+            ! log(p):
+            if (logp .eq. 1) then
+               x = log(x)
+               p = log(p)
+            end if
 
-        ! Interpolation:
-        IF (iorder .EQ. 2) &
-          CALL Intplt2(p,x,vin(i,j,k-1:k),vout(i,j,k))
-        IF (iorder .EQ. 4) &
-          CALL Intplt4(p,x,vin(i,j,k-2:k+1),vout(i,j,k))
+            ! interpolation:
+            if (iorder .eq. 2) &
+               call intplt2(p, x, vin(i, j, k - 1:k), vout(i, j, k))
+            if (iorder .eq. 4) &
+               call intplt4(p, x, vin(i, j, k - 2:k + 1), vout(i, j, k))
 
-      ENDDO
-    ENDDO
+         end do
+      end do
 
-  ENDDO
+   end do
 
-  ! Upper boundary:
-  m = nz-iorder-1
-  DO j=1,ny
-    DO i=1,nx
+   ! upper boundary:
+   m = nz - iorder - 1
+   do j = 1, ny
+      do i = 1, nx
 
-      DO l=1,iorder
-        x(l) = znu(m+l)*(psfc(i,j)-ptop)+ptop
-      ENDDO
+         do l = 1, iorder
+            x(l) = znu(m + l)*(psfc(i, j) - ptop) + ptop
+         end do
 
-      ! First stagger grid point from the top:
-      p = 1.5*x(iorder)-0.5*x(iorder-1)
+         ! first stagger grid point from the top:
+         p = 1.5*x(iorder) - 0.5*x(iorder - 1)
 
-      ! Log(P):
-      IF (logP .EQ. 1) THEN
-        x = LOG(x)
-        p = LOG(p)
-      ENDIF
+         ! log(p):
+         if (logp .eq. 1) then
+            x = log(x)
+            p = log(p)
+         end if
 
-      ! Interpolation:
-      IF (iorder .EQ. 2) &
-	CALL Intplt2(p,x,vin(i,j,nz-2:nz-1),vout(i,j,nz))
-      IF (iorder .EQ. 4) &
-        CALL Intplt4(p,x,vin(i,j,nz-4:nz-1),vout(i,j,nz))
+         ! interpolation:
+         if (iorder .eq. 2) &
+            call intplt2(p, x, vin(i, j, nz - 2:nz - 1), vout(i, j, nz))
+         if (iorder .eq. 4) &
+            call intplt4(p, x, vin(i, j, nz - 4:nz - 1), vout(i, j, nz))
 
-      ! Second stagger grid point:
-      p = 0.5*(x(iorder-1)+x(iorder))
+         ! second stagger grid point:
+         p = 0.5*(x(iorder - 1) + x(iorder))
 
-      ! Log(P):
-      IF (logP .EQ. 1) THEN
-        p = LOG(p)
-      ENDIF
+         ! log(p):
+         if (logp .eq. 1) then
+            p = log(p)
+         end if
 
-      ! Interpolation:
-      IF (iorder .EQ. 2) &
-	CALL Intplt2(p,x,vin(i,j,nz-2:nz-1),vout(i,j,nz-1))
-      IF (iorder .EQ. 4) &
-        CALL Intplt4(p,x,vin(i,j,nz-4:nz-1),vout(i,j,nz-1))
+         ! interpolation:
+         if (iorder .eq. 2) &
+            call intplt2(p, x, vin(i, j, nz - 2:nz - 1), vout(i, j, nz - 1))
+         if (iorder .eq. 4) &
+            call intplt4(p, x, vin(i, j, nz - 4:nz - 1), vout(i, j, nz - 1))
 
-    ENDDO
-  ENDDO
+      end do
+   end do
 
-END SUBROUTINE UnStaggerZ
+end subroutine unstaggerz

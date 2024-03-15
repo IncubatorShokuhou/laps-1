@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -44,7 +44,7 @@ cdis
         common /supmp1/ dummy,part
         common /supmp6/ umin,umax,vmin,vmax
         real dummy(8),part
-        common /ERROR/ IFRAME, IERRR
+        common /error/ iframe, ierrr
         common /image/ n_image
 
         integer       idummy(6),ioffm,istatus
@@ -56,9 +56,9 @@ cdis
         real
      1  umin,umax,vmin,vmax
 
-        integer N_CONTOURS
-        parameter (N_CONTOURS = 26)
-        real factor(N_CONTOURS)
+        integer n_contours
+        parameter (n_contours = 26)
+        real factor(n_contours)
         data factor/
      1  .0001,
      1  .0002,
@@ -109,7 +109,7 @@ cdis
 
         call get_r_missing_data(r_missing_data, istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Bad istatus in lapsplot.for'
+            write(6,*)' bad istatus in lapsplot.for'
             stop
         endif
 
@@ -121,7 +121,7 @@ cdis
         if(c_metacode .eq. 'm ')then
 
             if(n_image .gt. 0)then
-                write(6,*)' Skipping map plot - already done with image'       
+                write(6,*)' skipping map plot - already done with image'       
 
             else ! set up supmap for plot
                 call lapsplot_setup(ni,nj,lat,lon,jdot_in
@@ -141,8 +141,8 @@ cdis
             part = 0.90
             ioffm = 1
 
-            IOFFP = 1              ! we may need this
-            SPVAL = r_missing_data ! we may need this
+            ioffp = 1              ! we may need this
+            spval = r_missing_data ! we may need this
 
             write(6,*)' lapsplot: call "conrec", cint = ',cint
 
@@ -150,13 +150,13 @@ cdis
                 call conrec_line(field,ni,ni,nj,clow,chigh,cint
      1                          ,plot_parms,-1,0,-1848,0)
 
-            else ! Special Contouring
+            else ! special contouring
                 call conrec_line(field,ni,ni,nj,0.,1e8,1e8,plot_parms
      1                          ,-1,0,-1848,0)       
-                do i = 1,N_CONTOURS
+                do i = 1,n_contours
                     cvalue = factor(i)
                     if( cvalue .ge. abs(cint) )then
-                        write(6,*)' Contouring at +/-',i,cvalue
+                        write(6,*)' contouring at +/-',i,cvalue
                         call conrec_line(field,ni,ni,nj,cvalue
      1                                  ,cvalue,1e-6,plot_parms
      1                                  ,-1,0,-1848,0)
@@ -164,7 +164,7 @@ cdis
      1                                  ,-cvalue,1e-6,plot_parms
      1                                  ,-1,0,-1848,0)
                     else
-                        write(6,*)' Skip contouring at +/-',i,cvalue
+                        write(6,*)' skip contouring at +/-',i,cvalue
                     endif
                 enddo
             endif
@@ -187,7 +187,7 @@ cdis
         common /supmp1/ dummy,part
         common /supmp6/ umin,umax,vmin,vmax
         real dummy(8),part
-        common /ERROR/ IFRAME, IERRR
+        common /error/ iframe, ierrr
         common /image/ n_image
 
         integer       idummy(6),ioffm,istatus
@@ -199,9 +199,9 @@ cdis
         real
      1  umin,umax,vmin,vmax
 
-        integer N_CONTOURS
-        parameter (N_CONTOURS = 20)
-        real factor(N_CONTOURS)
+        integer n_contours
+        parameter (n_contours = 20)
+        real factor(n_contours)
         data factor/
      1  .01,
      1  .02,
@@ -255,21 +255,21 @@ c       set up supmap for plot
 
         call get_c6_maproj(c6_maproj,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error calling laps routine'
+            write(6,*)' error calling laps routine'
             stop 
         endif
         write(6,*)' c6_maproj = ',c6_maproj
 
         call get_standard_longitude(std_lon,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Bad istatus in lapsplot.for'
+            write(6,*)' bad istatus in lapsplot.for'
             stop
         endif
         write(6,*)' standard_lon = ',std_lon
 
         call get_standard_latitudes(std_lat1,std_lat2,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error calling laps routine'
+            write(6,*)' error calling laps routine'
             stop 
         endif
         write(6,*)' standard_lats = ',std_lat1,std_lat2
@@ -278,9 +278,9 @@ c       set up supmap for plot
         jlts=-3
         jnj=0
 
-!       write(6,*)' UMIN/UMAX/VMIN/VMAX',umin,umax,vmin,vmax
+!       write(6,*)' umin/umax/vmin/vmax',umin,umax,vmin,vmax
 
-!       mpcol1 = 4 ! For Tektronix
+!       mpcol1 = 4 ! for tektronix
 
         sizel = 2.0
 
@@ -296,36 +296,36 @@ c       set up supmap for plot
 
         iusout = 3
 
-        PLM1(1)=lat(1,nj)
-        PLM1(2)=lon(1,nj)
-        PLM2(1)=lat(ni,1)
-        PLM2(2)=lon(ni,1)
-        PLM3(1)=lat(1,1)
-        PLM3(2)=lon(1,1)
-        PLM4(1)=lat(ni,nj)
-        PLM4(2)=lon(ni,nj)
+        plm1(1)=lat(1,nj)
+        plm1(2)=lon(1,nj)
+        plm2(1)=lat(ni,1)
+        plm2(2)=lon(ni,1)
+        plm3(1)=lat(1,1)
+        plm3(2)=lon(1,1)
+        plm4(1)=lat(ni,nj)
+        plm4(2)=lon(ni,nj)
 
-        TX=0.5
-        TY=0.9765
-        IFRAME=IFRAME + 1
+        tx=0.5
+        ty=0.9765
+        iframe=iframe + 1
 
-        write(6,*)' lapsplot_setup: IFRAME = ',IFRAME,' JDOT = '
+        write(6,*)' lapsplot_setup: iframe = ',iframe,' jdot = '
      1                                   ,jdot_in,' ',c6_maproj
 
-        call MAPINT
+        call mapint
 
-!       call GSCR(1,0,0.9,1.0,0.9)
-!       call GSCR(1,1,0.,0.,0.)
+!       call gscr(1,0,0.9,1.0,0.9)
+!       call gscr(1,1,0.,0.,0.)
 
-        call MAPSTC('OU','PS')
-        call MAPSTI('C6',5)
-        call MAPSTI('DO',0)
+        call mapstc('ou','ps')
+        call mapsti('c6',5)
+        call mapsti('do',0)
 
         if(c6_maproj .eq. 'plrstr')then
             polat = std_lat2
             polon = std_lon
             rrot  = 0.
-            call maproj('ST',polat,polon,rrot)
+            call maproj('st',polat,polon,rrot)
             jproj = 1
 
         elseif(c6_maproj .eq. 'lambrt')then
@@ -333,32 +333,32 @@ c       set up supmap for plot
             polat = std_lat1
             polon = std_lon
             rrot  = std_lat2
-            call maproj('LC',polat,polon,rrot)   
+            call maproj('lc',polat,polon,rrot)   
 
         elseif(c6_maproj .eq. 'merctr')then
             jproj = 9
             polat = 0.
             polon = std_lon
             rrot  = 0.
-            call maproj('ME',polat,polon,rrot)
+            call maproj('me',polat,polon,rrot)
 
         elseif(c6_maproj .eq. 'latlon')then
             jproj = 9
             polat = 0.
             polon = std_lon
             rrot  = 0.
-            call maproj('CE',polat,polon,rrot)
+            call maproj('ce',polat,polon,rrot)
 
         else
-            write(6,*)' lapsplot_setup: Error, maproj = ',c6_maproj
+            write(6,*)' lapsplot_setup: error, maproj = ',c6_maproj
 
         endif
 
-        call MAPINT
+        call mapint
 
         map_mode = 2
 
-!       Set up the colors, draw the county map
+!       set up the colors, draw the county map
         if(n_image .gt. 0)then ! image present
             icol_sta = 7       ! yellow
             icol_cou = 17      ! lavender
@@ -369,34 +369,34 @@ c       set up supmap for plot
             jdot = 0
         endif
 
-        call MAPSTI('C6',icol_sta)
+        call mapsti('c6',icol_sta)
 
-        call MAPSET('PO',PLM1,PLM2,PLM3,PLM4)
+        call mapset('po',plm1,plm2,plm3,plm4)
 
-        call MAPINT
+        call mapint
 
-        call draw_county_map(PLM3,PLM4,jproj,polat,polon,rrot,jdot
+        call draw_county_map(plm3,plm4,jproj,polat,polon,rrot,jdot
      1                      ,icol_sta,icol_cou,ni,nj,namelist_parms)
 
-!       Set up colors, draw the state map?
+!       set up colors, draw the state map?
  
 !       if(map_mode .eq. 1)then
-!           call setusv_dum(2HIN,32)
+!           call setusv_dum(2hin,32)
 !       elseif(map_mode .eq. 2)then
-!           call setusv_dum(2HIN,7)
+!           call setusv_dum(2hin,7)
 !       endif
 
-        call MAPINT
-!       if(IFRAME .eq. 1)call MAPLOT
+        call mapint
+!       if(iframe .eq. 1)call maplot
 
-        IF(NERRO(IERR) .ne. 0)THEN
-            call EPRIN
-            call ERROF
-        ENDIF
+        if(nerro(ierr) .ne. 0)then
+            call eprin
+            call errof
+        endif
 
-        call GSELNT(0)
+        call gselnt(0)
 
-        write(6,*)' UMIN/UMAX/VMIN/VMAX',umin,umax,vmin,vmax
+        write(6,*)' umin/umax/vmin/vmax',umin,umax,vmin,vmax
 
         write(6,*)' lapsplot_setup: return'
 

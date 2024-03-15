@@ -1,46 +1,46 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
 
-c There will probably have to be some adjustments made to the
+c there will probably have to be some adjustments made to the
 c read routines (there's one routine for the data and one for 
 c the station metadata), and possibly to the
-c 'get_tmeso_obs' routine too.  I've made some
+c 'get_tmeso_obs' routine too.  i've made some
 c assumptions there, and have tried to document in the 
 c code where they are.  
 c
@@ -60,32 +60,32 @@ c
 c
 c======================================================================
 c
-c     Routine to gather the CWB ASCII Mesonet data, and store it for
-c     LAPS use.
+c     routine to gather the cwb ascii mesonet data, and store it for
+c     laps use.
 c     
-c     Original:  P. Stamus, NOAA/FSL  08 Sep 1999
-c     Changes:
+c     original:  p. stamus, noaa/fsl  08 sep 1999
+c     changes:
 c
-c     Notes:
-c	1. Code assumes that the station metadata file is in the same
-c 	   directory as the raw observations.  If they are different,
+c     notes:
+c	1. code assumes that the station metadata file is in the same
+c 	   directory as the raw observations.  if they are different,
 c 	   change the variable 'infile' in the call to 
 c          'read_tmeso_stntbl'.
 c
-c       2. Code assumes that the reported precip is a 1-h amount.  
+c       2. code assumes that the reported precip is a 1-h amount.  
 c
-c	3. The 'priority' array is not used at this time.
+c	3. the 'priority' array is not used at this time.
 c
 c======================================================================
 c
 	include 'surface_obs.inc'
 c
-c.....  Input 
+c.....  input 
 c
 	real lat(ni,nj), lon(ni,nj)
         character path_to_local_data*(*)
 c
-c.....  Output arrays
+c.....  output arrays
 c
         real  store_1(maxsta,4), 
      &        store_2(maxsta,3), store_2ea(maxsta,3),
@@ -105,7 +105,7 @@ c
         character  store_cldamt(maxsta,5)*4
 
 c
-c.....  Local arrays
+c.....  local arrays
 c
         real t_in(maxsta), td_in(maxsta), rh_in(maxsta)
         real dd_in(maxsta), ff_in(maxsta)
@@ -116,22 +116,22 @@ c
 c
         character stn_in(maxsta)*5
 c
-c.....  Stuff for the mesonet metadata.
+c.....  stuff for the mesonet metadata.
 c
 	real lat_master(maxsta),lon_master(maxsta),elev_master(maxsta)
 	real priority(maxsta)
 c
 	character stn_master(maxsta)*5
 c
-c.....  Start.
+c.....  start.
 c
 	ibadflag = int(badflag)
 c
-c.....	Set jstatus flag for the local data to bad until we find otherwise.
+c.....	set jstatus flag for the local data to bad until we find otherwise.
 c
 	jstatus = -1
 c
-c.....  Figure out the size of the "box" in gridpoints.  User defines
+c.....  figure out the size of the "box" in gridpoints.  user defines
 c.....  the 'box_size' variable in degrees, then we convert that to an
 c.....  average number of gridpoints based on the grid spacing.
 c
@@ -141,7 +141,7 @@ c
 	n_local_g = 0
 	n_local_b = 0
 c
-c.....  Get the mesonet metadata (station information).
+c.....  get the mesonet metadata (station information).
 c
         call read_tmeso_stntbl(path_to_local_data,maxsta,badflag,
      &                         stn_master,
@@ -149,7 +149,7 @@ c
      &                         priority,num_master,istatus)
 	if(istatus .ne. 1) go to 990
 c
-c.....  Get the mesonet data.
+c.....  get the mesonet data.
 c
         call read_tmeso(path_to_local_data,maxsta,badflag,i4time,
      &                  stn_in,rtime_in,
@@ -159,18 +159,18 @@ c
 	if(istatus .ne. 1) go to 990
 	n_local_all = num_in
 c
-c.....  Match data with metadata for each station, then store
+c.....  match data with metadata for each station, then store
 c.....  the metadata in arrays.
 c
         do i=1,n_local_all
 c
-c.....  For each station, search the master list.  
+c.....  for each station, search the master list.  
 c
 	   do j=1,num_master
 c
 	      if(stn_in(i)(1:5) .eq. stn_master(j)(1:5)) then
 c
-c.....  Found one...store the location info.
+c.....  found one...store the location info.
 c
 		 lat_in(i) = lat_master(j)
 		 lon_in(i) = lon_master(j)
@@ -180,9 +180,9 @@ c
 	   enddo !j
 	enddo !i
 c
-c.....  Now that we have a matched set of data and metadata, 
-c.....  process the stations.  Check to see if the station is
-c.....  within the LAPS grid; if so, store it.
+c.....  now that we have a matched set of data and metadata, 
+c.....  process the stations.  check to see if the station is
+c.....  within the laps grid; if so, store it.
 c
 	jfirst = 1
 	box_low = 1. - float(ibox_points)  !buffer on west/south side
@@ -196,12 +196,12 @@ c
 	   if(ri_loc.lt.box_low .or. ri_loc.gt.box_idir) go to 125
 	   if(rj_loc.lt.box_low .or. rj_loc.gt.box_jdir) go to 125
 c
-c.....  Elevation ok?
+c.....  elevation ok?
 c
 	   if(elev_in(i) .eq. badflag) go to 125
 	   if(elev_in(i).gt.5200. .or. elev_in(i).lt.-400.) go to 125
 c
-c.....  If you want to check the valid time, or if there are more than
+c.....  if you want to check the valid time, or if there are more than
 c.....  one report from this station, put that here.
 c
 
@@ -209,33 +209,33 @@ c
 	   nn = nn + 1
 	   n_local_b = n_local_b + 1
 c
-c.....  Within LAPS grid?
+c.....  within laps grid?
 c
 	   if(ri_loc.lt.1 .or. ri_loc.gt.float(ni)) go to 151  !off grid
 	   if(rj_loc.lt.1 .or. rj_loc.gt.float(nj)) go to 151  !off grid
 	   n_local_g = n_local_g + 1                           !on grid...count it
 151        continue
 c
-c.....  Fill expected accuracy arrays...see the 'get_metar_obs' routine for details.
-c.....  Note that these values are only guesses based on US mesonet stations.
+c.....  fill expected accuracy arrays...see the 'get_metar_obs' routine for details.
+c.....  note that these values are only guesses based on us mesonet stations.
 c
-           store_2ea(nn,1) = 3.0             ! temperature (deg F)               
-           store_2ea(nn,2) = 3.0             ! Dew point (deg F)               
-           store_2ea(nn,3) = 30.0            ! Relative Humidity %
+           store_2ea(nn,1) = 3.0             ! temperature (deg f)               
+           store_2ea(nn,2) = 3.0             ! dew point (deg f)               
+           store_2ea(nn,3) = 30.0            ! relative humidity %
 c
-c..... Wind direction (deg) and speed (kts)
+c..... wind direction (deg) and speed (kts)
 c
            store_3ea(nn,1) = 15.0            ! wind direction (dir)
            store_3ea(nn,2) = 6.0             ! wind speed (kt)
 
-c..... Pressure and altimeter (mb)
+c..... pressure and altimeter (mb)
 c
            store_4ea(nn,1) = 2.00            ! pressure (mb)
            store_4ea(nn,2) = 0.00            ! altimeter (mb) (don't have)
 c
-c..... Other stuff (don't report these). 
+c..... other stuff (don't report these). 
 c 
-           store_5ea(nn,1) = 0.0             ! Visibility 
+           store_5ea(nn,1) = 0.0             ! visibility 
            store_5ea(nn,2) = 0.0             ! solar radiation       
            store_5ea(nn,3) = 0.0             ! soil/water temperature
            store_5ea(nn,4) = 0.0             ! soil moisture
@@ -244,11 +244,11 @@ c
            store_6ea(nn,2) = 0.0             ! snow cover (in) 
 c
 c
-c.....  Clouds get set to zero, since don't have cloud info from these mesonets.
+c.....  clouds get set to zero, since don't have cloud info from these mesonets.
 c
 	   kkk = 0
 c
-c.....  Output the data to the storage arrays.
+c.....  output the data to the storage arrays.
 c
 !    	  call s_len(stn_in(i), len)
 !         stations(nn)(1:len) = stn_in(i)(1:len)
@@ -257,18 +257,18 @@ c
           if(len .ne. 0)then
               stations(nn)(1:len) = stn_in(i)(1:len) ! station name
           else
-              write(6,*)' Warning in get_local_cwb: blank station name.'
-     1                 ,' Assigning name ',i
+              write(6,*)' warning in get_local_cwb: blank station name.'
+     1                 ,' assigning name ',i
               write(stations(nn),101)i
  101	      format(i5,15x)
           endif
 c
-	  atype(nn)(1:6) = 'MESONT'
+	  atype(nn)(1:6) = 'mesont'
 c
-	  reptype(nn)(1:6) = 'UNK   '
+	  reptype(nn)(1:6) = 'unk   '
 c
-	  weather(nn)(1:25) = 'UNK                     '
-	  provider(nn)(1:11) = 'CWB        '
+	  weather(nn)(1:25) = 'unk                     '
+	  provider(nn)(1:11) = 'cwb        '
 	  wmoid(nn) = ibadflag
 c 
 	  store_1(nn,1) = lat_in(i)              ! station latitude
@@ -276,9 +276,9 @@ c
 	  store_1(nn,3) = elev_in(i)             ! station elevation (m)
 	  store_1(nn,4) = rtime_in(i)            ! observation time
 c	
-	  store_2(nn,1) = t_in(i)                ! temperature (deg F)
-	  store_2(nn,1) = td_in(i)               ! dew point (deg F)
-	  store_2(nn,1) = rh_in(i)               ! Relative Humidity
+	  store_2(nn,1) = t_in(i)                ! temperature (deg f)
+	  store_2(nn,1) = td_in(i)               ! dew point (deg f)
+	  store_2(nn,1) = rh_in(i)               ! relative humidity
 c
           store_3(nn,1) = dd_in(i)               ! wind dir (deg)
           store_3(nn,2) = ff_in(i)               ! wind speed (kt)
@@ -287,7 +287,7 @@ c
 c
           store_4(nn,1) = badflag                ! altimeter setting (mb)
           store_4(nn,2) = sfcp_in(i)             ! station pressure (mb)
-          store_4(nn,3) = badflag                ! MSL pressure (mb)
+          store_4(nn,3) = badflag                ! msl pressure (mb)
           store_4(nn,4) = badflag                ! 3-h press change character
           store_4(nn,5) = badflag                ! 3-h press change (mb)
 c
@@ -306,23 +306,23 @@ c
           store_7(nn,2) = badflag                ! 24-h max temperature
           store_7(nn,3) = badflag                ! 24-h min temperature
 c
-c.....  That's it for this station.
+c.....  that's it for this station.
 c
  125      continue
         enddo !i
 c
-c.....  All done.
+c.....  all done.
 c
-        print *,' Found ',n_local_b,' mesonet stations in the LAPS box'
-        print *,' Found ',n_local_g,' mesonet stations in the LAPS grid'
+        print *,' found ',n_local_b,' mesonet stations in the laps box'
+        print *,' found ',n_local_g,' mesonet stations in the laps grid'
         print *,' '
         jstatus = 1            ! everything's ok...
-      	write(6,*)' GET_LOCAL_CWB: exit'
+      	write(6,*)' get_local_cwb: exit'
       	return
 c
  990  	continue
 c
-      	write(6,*)' GET_LOCAL_CWB: exit without reading data'
+      	write(6,*)' get_local_cwb: exit without reading data'
      	return
 c
    	end
@@ -334,10 +334,10 @@ c
 c
 c======================================================================
 c
-c     Routine to read the CWB ASCII Mesonet files.
+c     routine to read the cwb ascii mesonet files.
 c     
-c     Original:  P. Stamus, NOAA/FSL  08 Sep 1999
-c     Changes:
+c     original:  p. stamus, noaa/fsl  08 sep 1999
+c     changes:
 c
 c======================================================================
 c
@@ -350,7 +350,7 @@ c
      1            a9_to_a8*8, a9time*9, a8time*8, a6time*6, filename*11       
 c
 c
-c.....  Start here.  Fill the output arrays with something, then open
+c.....  start here.  fill the output arrays with something, then open
 c.....	the file to read.
 c
 	istatus = 0
@@ -373,7 +373,7 @@ c
         a6time = a8time(3:8)
 !       a6time = '050826'
 
-        filename = 'MSO.m'//a6time
+        filename = 'mso.m'//a6time
 
         call s_len(infile,len_infile)
         open(11,file=infile(1:len_infile)//filename,status='old'       
@@ -381,12 +381,12 @@ c
 c
         num = 0
 
-!       Skip header comments at the top of the file
+!       skip header comments at the top of the file
         do iread = 1,16
             read(11,*,end=550,err=990)
         enddo
 c
-c.....  This starts the read loop.  Since we don't know how many 
+c.....  this starts the read loop.  since we don't know how many 
 c.....  stations we have, read until we hit the end of file.
 c     
  500    continue
@@ -395,15 +395,15 @@ c
      &                               ispd,idir,irh,isfcp,it,itd,iprecip
  900    format(i2,1x,a5,5(1x,i2),1x,i3,1x,i2,1x,i3,1x,i4,2(1x,i3),1x,i5)
 c
-c.....  Check for valid date/time...if bad, toss this ob.
+c.....  check for valid date/time...if bad, toss this ob.
 c
         if(iyr.lt.0 .or. imth.le.0 .or. idy.le.0 .or. 
      &     ihr.lt.0 .or. imin.lt.0) then 
-           print *, ' Bad date/time at station: ', stn_id, idum
+           print *, ' bad date/time at station: ', stn_id, idum
            go to 500
         endif
 c
-c.....  Have good date/time...store ob.  Adjust/scale variables while storing.
+c.....  have good date/time...store ob.  adjust/scale variables while storing.
 c
         num = num + 1   !add to count
 c
@@ -427,13 +427,13 @@ c
         if(it .le. -90) then
            t(num) = badflag
         else
-           t(num) = (float(it) * 0.1) * 9/5 + 32 !conv C to F
+           t(num) = (float(it) * 0.1) * 9/5 + 32 !conv c to f
         endif
 c
         if(itd .le. -90) then
            td(num) = badflag
         else
-           td(num) = (float(itd) * 0.1) * 9/5 + 32 !conv C to F
+           td(num) = (float(itd) * 0.1) * 9/5 + 32 !conv c to f
         endif
 c
         if(irh .lt. 0) then
@@ -458,27 +458,27 @@ c
            sfcp(num) = ps
         endif
 c
-c.....  Go back for the next ob.
+c.....  go back for the next ob.
 c
         go to 500
 c
-c.....  Hit end of file...that's it.
+c.....  hit end of file...that's it.
 c
  550    continue
 c
-        print *,' Found ', num, ' mesonet stations.'
+        print *,' found ', num, ' mesonet stations.'
 	istatus = 1
         return
 c     
  980    continue
 c
-        write(6,*)' WARNING: could not open mesonet data file ',filename
+        write(6,*)' warning: could not open mesonet data file ',filename
 	istatus = -1
         return
 c     
  990    continue
 c
-        print *,' ** ERROR reading mesonet data.'
+        print *,' ** error reading mesonet data.'
 	istatus = -1
         return
 c     
@@ -490,11 +490,11 @@ c
 c
 c======================================================================
 c
-c     Routine to read station information for the CWB ASCII Mesonet 
+c     routine to read station information for the cwb ascii mesonet 
 c	data.
 c     
-c     Original:  P. Stamus, NOAA/FSL  08 Sep 1999
-c     Changes:
+c     original:  p. stamus, noaa/fsl  08 sep 1999
+c     changes:
 c
 c======================================================================
 c
@@ -506,7 +506,7 @@ c
         character infile*(*), stn_name*5, stn(maxsta)*5
 c
 c
-c.....  Start here.  Fill the output with something, then open the 
+c.....  start here.  fill the output with something, then open the 
 c.....	file to read.
 c
 	do i=1,maxsta
@@ -523,12 +523,12 @@ c
 c
         num = 0
 
-!       Skip header comments at the top of the file
+!       skip header comments at the top of the file
         do iread = 1,6
             read(11,*,end=550,err=990)
         enddo
 c
-c.....  This starts the station read loop.  Since we don't know how many 
+c.....  this starts the station read loop.  since we don't know how many 
 c.....  stations we have, read until we hit the end of file.
 c     
  500    continue
@@ -537,7 +537,7 @@ c
      &                               aprior 
  900    format(i5,1x,a5,2x,f7.4,2x,f8.4,2x,i4,1x,f9.3)
 c
-c.....  Move station info to arrays for sending to calling routine.
+c.....  move station info to arrays for sending to calling routine.
 c
 	num = num + 1
 	stn(num)(1:5) = stn_name(1:5)
@@ -546,22 +546,22 @@ c
 	elev(num) = float(ielev)
 	prior(num) = aprior
 c
-c.....  Go back for the next ob.
+c.....  go back for the next ob.
 c
         go to 500
 c
-c.....  Hit end of file...that's it.
+c.....  hit end of file...that's it.
 c
  550    continue
 c
-        print *,' Found ', num
+        print *,' found ', num
      1         , ' mesonet stations in the station table.' 
         istatus = 1
         return
 c     
  990    continue
 c
-        print *,' ** ERROR reading mesonet station table'
+        print *,' ** error reading mesonet station table'
         istatus = 0
         return
 c     

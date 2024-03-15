@@ -1,96 +1,96 @@
-      Subroutine Process_SDHS_GVAR_sub(filename,chtype,isat,jtype,
+      subroutine process_sdhs_gvar_sub(filename,chtype,isat,jtype,
      &nelem,nlines,image_out,nlfi,nefi,depth,width,istatus)
 
-C**********************************************************************
-C  Purpose:  Convert the SDHS image data from a cellular format to an 
-C  image format
-C
-C  Method:  read the image header information to determine how many
-C  64 scanline by 256 pixel cells make up the image.  Read in the image
-C  into a singlely dimnesioned array and convert the data into a two
-C  dimensional array where the first index indicates the row (scanline
-C  number) and the second dimension the column(pixel number).  Some 
-C  Fortran 90 constructs are used to allow dynamic array sizing
-C  but the majority of the code is in Fortran 77. 
-C  No attempt is made to remove the blank parts of cells
-C  which may be in the cells send to satisfy an image request.  Also
-C  since AIX fortran will not allow an unsigned byte variable the data
-C  is read into an INTEGER*1 variable and the bit string picked off and
-C  stored into an INTEGER*2 variable.  Without using this method byte 
-C  values such as 255 (all bits on) were being interpreted as -128.
-C  
-C  References:
-C  1.  Final Interface Specification for the Satellite Data Handling
-C  System Communications Network (SDHS-COMNET), 01 February 1988
-C  2.  AFGWC/DONS PV-Wave program auto_convert.pro
-C
-C**********************************************************************
+c**********************************************************************
+c  purpose:  convert the sdhs image data from a cellular format to an 
+c  image format
+c
+c  method:  read the image header information to determine how many
+c  64 scanline by 256 pixel cells make up the image.  read in the image
+c  into a singlely dimnesioned array and convert the data into a two
+c  dimensional array where the first index indicates the row (scanline
+c  number) and the second dimension the column(pixel number).  some 
+c  fortran 90 constructs are used to allow dynamic array sizing
+c  but the majority of the code is in fortran 77. 
+c  no attempt is made to remove the blank parts of cells
+c  which may be in the cells send to satisfy an image request.  also
+c  since aix fortran will not allow an unsigned byte variable the data
+c  is read into an integer*1 variable and the bit string picked off and
+c  stored into an integer*2 variable.  without using this method byte 
+c  values such as 255 (all bits on) were being interpreted as -128.
+c  
+c  references:
+c  1.  final interface specification for the satellite data handling
+c  system communications network (sdhs-comnet), 01 february 1988
+c  2.  afgwc/dons pv-wave program auto_convert.pro
+c
+c**********************************************************************
 
-      IMPLICIT NONE
+      implicit none
 
-      CHARACTER*255 FILENAME
-      Character*3   chtype
+      character*255 filename
+      character*3   chtype
 
-      INTEGER CELL_WIDTH !Number of pixels in width of a cell
-      INTEGER CELL_DEPTH !Number of scanline in depth of cell
-      INTEGER HEADER_SIZE  !size of GVAR header
-      INTEGER PIXELS_PER_CELL !Number of Pixels per cell
-      Integer nelem,nlines
-      Integer nefi,nlfi
-      Integer imagelen
-      Integer nf
-      Integer lend
-      INTEGER WIDTH      !Number of Cells in Width of image
-      INTEGER DEPTH      !Number of Cells in Depth of image
-      Integer itempintgr
+      integer cell_width !number of pixels in width of a cell
+      integer cell_depth !number of scanline in depth of cell
+      integer header_size  !size of gvar header
+      integer pixels_per_cell !number of pixels per cell
+      integer nelem,nlines
+      integer nefi,nlfi
+      integer imagelen
+      integer nf
+      integer lend
+      integer width      !number of cells in width of image
+      integer depth      !number of cells in depth of image
+      integer itempintgr
 
-      PARAMETER (HEADER_SIZE = 256) 
-      PARAMETER (CELL_WIDTH = 256)
-      PARAMETER (CELL_DEPTH = 64)
-      PARAMETER (PIXELS_PER_CELL = CELL_WIDTH*CELL_DEPTH)
+      parameter (header_size = 256) 
+      parameter (cell_width = 256)
+      parameter (cell_depth = 64)
+      parameter (pixels_per_cell = cell_width*cell_depth)
 
-c     PARAMETER (WIDTH=5,DEPTH=13)  !this for the test images so far.
-c     Parameter (imagelen=width*cell_width*depth*cell_depth)
+c     parameter (width=5,depth=13)  !this for the test images so far.
+c     parameter (imagelen=width*cell_width*depth*cell_depth)
 
-c     Parameter (imagelen_ir=nlines_ir_max*nelem_ir_max)
-c     Parameter (imagelen_vis=nlines_vis_max*nelem_vis_max)
-c     Parameter (imagelen_wv=nlines_wv_max*nelem_wv_max)
+c     parameter (imagelen_ir=nlines_ir_max*nelem_ir_max)
+c     parameter (imagelen_vis=nlines_vis_max*nelem_vis_max)
+c     parameter (imagelen_wv=nlines_wv_max*nelem_wv_max)
 
-      INTEGER SIZE       !Size of the SDHS image including the header
-c     INTEGER CELL_NUM   !The number of the cell
-c     INTEGER CELL_ROW   !The row number of a cell
-c     INTEGER CELL_COLUMN !The column number of a cell
-c     INTEGER XS         !Pixels in width of image
-c     INTEGER YS         !Scanlines depth of image
+      integer size       !size of the sdhs image including the header
+c     integer cell_num   !the number of the cell
+c     integer cell_row   !the row number of a cell
+c     integer cell_column !the column number of a cell
+c     integer xs         !pixels in width of image
+c     integer ys         !scanlines depth of image
 
-      integer HEADER(HEADER_SIZE)!array used to read over the header
-      INTEGER IOSTATUS   !I/O status variable
-      Integer istatus    !Return status
-      INTEGER I,J        !DO loop indices
-      INTEGER RNUM       !the row number (scanline) of the converted
+      integer header(header_size)!array used to read over the header
+      integer iostatus   !i/o status variable
+      integer istatus    !return status
+      integer i,j        !do loop indices
+      integer rnum       !the row number (scanline) of the converted
                            !image
-      INTEGER CNUM       !the column number(pixel) of the converted 
+      integer cnum       !the column number(pixel) of the converted 
                            !image
-      Integer ii,jj,m
-      Integer ispec
-      Integer istat
-      Integer istart,jstart
-      Integer iend,jend
-      Integer isat,jtype
+      integer ii,jj,m
+      integer ispec
+      integer istat
+      integer istart,jstart
+      integer iend,jend
+      integer isat,jtype
 
-C**********************************************************************
-C  Fortran 90 used to declare allocatable arrays 
-C**********************************************************************
+c**********************************************************************
+c  fortran 90 used to declare allocatable arrays 
+c**********************************************************************
 
-c     INTEGER*1,DIMENSION(:),ALLOCATABLE:: IMAGEI1 
-c     INTEGER*2,DIMENSION(:,:),ALLOCATABLE:: IMAGE 
-c static case: JSmart 5-12-97
-c     Integer*1 IMAGEI1(WIDTH*CELL_WIDTH*DEPTH*CELL_DEPTH)
+c     integer*1,dimension(:),allocatable:: imagei1 
+c     integer*2,dimension(:,:),allocatable:: image 
+c static case: jsmart 5-12-97
+c     integer*1 imagei1(width*cell_width*depth*cell_depth)
 
-      character      IMAGEC(nlfi*nefi)*1
-      Integer        image_decell_2d(nefi,nlfi)
-      Integer        image_temp(nefi,nlfi)
-      Integer        image_decell_1d(nefi*nlfi+HEADER_SIZE*4)
+      character      imagec(nlfi*nefi)*1
+      integer        image_decell_2d(nefi,nlfi)
+      integer        image_temp(nefi,nlfi)
+      integer        image_decell_1d(nefi*nlfi+header_size*4)
       real           image_out(nelem,nlines)
       real           r8to10
 
@@ -116,49 +116,49 @@ c     Integer*1 IMAGEI1(WIDTH*CELL_WIDTH*DEPTH*CELL_DEPTH)
        iend=i_end_ir(jtype,isat)
        jend=j_end_ir(jtype,isat)
       endif
-C
-C**********************************************************************
-C  Read the header information and pass back the number of 64 scanline
-C  by 256 pixel cells in the width and depth of the image.
-C**********************************************************************
+c
+c**********************************************************************
+c  read the header information and pass back the number of 64 scanline
+c  by 256 pixel cells in the width and depth of the image.
+c**********************************************************************
 
-C     CALL READHDR(FILENAME,WIDTH, DEPTH)
+c     call readhdr(filename,width, depth)
 
-C**********************************************************************
-C  compute the number of pixels in the width of the image and the 
-C  number of scanline in the depth of the image.  Also compute the size
-C  of the image file including the header. 
-C**********************************************************************
-C Original constructs:
-C     XS =WIDTH*CELL_WIDTH
-C     YS = DEPTH*CELL_DEPTH
-C     SIZE = YS*XS+HEADER_SIZE
+c**********************************************************************
+c  compute the number of pixels in the width of the image and the 
+c  number of scanline in the depth of the image.  also compute the size
+c  of the image file including the header. 
+c**********************************************************************
+c original constructs:
+c     xs =width*cell_width
+c     ys = depth*cell_depth
+c     size = ys*xs+header_size
 
-      SIZE = nlfi*nefi+HEADER_SIZE*4   !note HEADER_SIZE = 256*4=1024
-C
-C**********************************************************************
-C  Open the file that contains the GVAR header and pixel data.  The
-C  record length in the direct access read is set equal to the SIZE
-C**********************************************************************
+      size = nlfi*nefi+header_size*4   !note header_size = 256*4=1024
+c
+c**********************************************************************
+c  open the file that contains the gvar header and pixel data.  the
+c  record length in the direct access read is set equal to the size
+c**********************************************************************
 c
       nf=index(filename,' ')-1
-      OPEN(UNIT=8, FILE=FILENAME, ERR=100, IOSTAT=IOSTATUS,
-     & ACCESS='DIRECT', FORM='UNFORMATTED',RECL= SIZE)
+      open(unit=8, file=filename, err=100, iostat=iostatus,
+     & access='direct', form='unformatted',recl= size)
 
       if(l_cell_afwa)then
          imagelen=(nlfi*nefi)/4
-         READ (8,REC=1,ERR=99)HEADER,IMAGEC
+         read (8,rec=1,err=99)header,imagec
       else
          imagelen=nlfi*nefi
          call read_binary_field(image_decell_1d,1,4,imagelen+
-     +HEADER_SIZE*4,filename,nf)
+     +header_size*4,filename,nf)
       endif
 
-      Close(8)
+      close(8)
 
       if(l_cell_afwa)then
 
-         call decellularize_image(IMAGEC,imagelen,width,depth,
+         call decellularize_image(imagec,imagelen,width,depth,
      &pixels_per_cell,cell_width,cell_depth,nefi,nlfi,image_decell_2d)
 
 c back as floating 10-bit info for the sector in domain.
@@ -175,11 +175,11 @@ c back as floating 10-bit info for the sector in domain.
 
       else ! afwa data not cellularized but bits need moving
 
-c GOES data = 10 bit; METEOSAT data = 8 bit.
+c goes data = 10 bit; meteosat data = 8 bit.
          r8to10=4.0
          if(isat.eq.2 .and. jtype.eq.4)r8to10=1.0
 
-         m=HEADER_SIZE*4
+         m=header_size*4
          do j=1,nlfi
          do i=1,nefi
             m=m+1
@@ -189,7 +189,7 @@ c GOES data = 10 bit; METEOSAT data = 8 bit.
 
          if(isat.eq.2 .and. jtype.eq.4)then
 
-c METEOSAT origin is SE corner (wrt ri/rj lut). Make it SW corner
+c meteosat origin is se corner (wrt ri/rj lut). make it sw corner
             do j=1,nlfi
             do i=1,nefi
                image_temp(nefi-i+1,j)=image_decell_2d(i,j)
@@ -203,7 +203,7 @@ c METEOSAT origin is SE corner (wrt ri/rj lut). Make it SW corner
 
          endif
 c
-c now load that part within the LAPS domain; convert to 10-bit.
+c now load that part within the laps domain; convert to 10-bit.
 c
          jj=0
          do j=jstart,jend
@@ -211,7 +211,7 @@ c
             ii=0
          do i=istart,iend
             ii=ii+1
-            itempintgr=IBITS(image_decell_2d(i,j),0,8)
+            itempintgr=ibits(image_decell_2d(i,j),0,8)
             image_out(ii,jj)=float(itempintgr)*r8to10
          enddo
          enddo
@@ -221,16 +221,16 @@ c
       istatus = 1
       goto 1000
 
-99    Write(6,*)'Error Reading GWC file'
-      Write(6,*)'Filename = ',filename(1:nf)
-      Close(8)
+99    write(6,*)'error reading gwc file'
+      write(6,*)'filename = ',filename(1:nf)
+      close(8)
       return 
 
-100   IF (IOSTATUS .NE. 0)THEN
-        PRINT *, 'ERROR READING ',FILENAME, ' IO status is', 
-     &  IOSTATUS
+100   if (iostatus .ne. 0)then
+        print *, 'error reading ',filename, ' io status is', 
+     &  iostatus
         istatus = -1
-      END IF
+      end if
 
-1000  RETURN
-      END
+1000  return
+      end

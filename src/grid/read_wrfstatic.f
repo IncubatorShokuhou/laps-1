@@ -1,155 +1,155 @@
 
       subroutine read_wrfstatic(ni,nj,lat,lon,filename,topo,istatus)
       include 'netcdf.inc'
-      integer Time, south_north, west_east, nf_fid, nf_vid, nf_status
+      integer time, south_north, west_east, nf_fid, nf_vid, nf_status
       character*5 path
       character*255 filename
       data path/'data/'/
 
       real lat(ni,nj),lon(ni,nj),topo(ni,nj)
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       istatus = 1
 
       call s_len(filename,lenp)
       write(6,*)' read_wrfstatic - file is ',filename(1:lenp)
 
-      nf_status = NF_OPEN(filename(1:lenp),NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN geo_em.d01.nc'
+      nf_status = nf_open(filename(1:lenp),nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open geo_em.d01.nc'
         istatus = 0
         return
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of Time
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'Time',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim Time'
+c
+c  fill all dimension values
+c
+c
+c get size of time
+c
+      nf_status = nf_inq_dimid(nf_fid,'time',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim time'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,Time)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim Time'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,time)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim time'
       endif
-C
-C Get size of south_north
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'south_north',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of south_north
+c
+      nf_status = nf_inq_dimid(nf_fid,'south_north',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim south_north'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,south_north)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,south_north)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim south_north'
       endif
-C
-C Get size of west_east
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'west_east',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of west_east
+c
+      nf_status = nf_inq_dimid(nf_fid,'west_east',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim west_east'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,west_east)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,west_east)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim west_east'
       endif
 
-      write(6,*)' WPS dims are ',west_east,south_north
+      write(6,*)' wps dims are ',west_east,south_north
       if(west_east .ne. ni .or. south_north .ne. nj)then
-          write(6,*)' ERROR: WPS dims differ from LAPS'
+          write(6,*)' error: wps dims differ from laps'
           write(6,*)
-     1    ' Only matching grids are currently supported: should be '
+     1    ' only matching grids are currently supported: should be '
      1    ,ni,nj
           istatus = 0
           return
       endif
 
-      call read_wrfstatic_sub(nf_fid , Time, south_north, west_east
+      call read_wrfstatic_sub(nf_fid , time, south_north, west_east
      1                       ,topo,lat,lon,istatus)                     
 
       return
       end
-C
-C
-      subroutine read_wrfstatic_sub(nf_fid, Time, south_north
-     1                    ,west_east,HGT_M, XLAT_M, XLONG_M,istatus)
+c
+c
+      subroutine read_wrfstatic_sub(nf_fid, time, south_north
+     1                    ,west_east,hgt_m, xlat_m, xlong_m,istatus)
       include 'netcdf.inc'
-      integer Time, south_north, west_east, nf_fid, nf_vid, nf_status
-      real HGT_M( west_east,  south_north, Time), 
-     +   XLAT_M( west_east,  south_north, Time), 
-     +   XLONG_M( west_east,  south_north, Time)
-      call read_netcdf(nf_fid , Time, south_north, west_east,
-     +    HGT_M, XLAT_M, XLONG_M)
-C
-C The netcdf variables are filled - your code goes here
-C
+      integer time, south_north, west_east, nf_fid, nf_vid, nf_status
+      real hgt_m( west_east,  south_north, time), 
+     +   xlat_m( west_east,  south_north, time), 
+     +   xlong_m( west_east,  south_north, time)
+      call read_netcdf(nf_fid , time, south_north, west_east,
+     +    hgt_m, xlat_m, xlong_m)
+c
+c the netcdf variables are filled - your code goes here
+c
       return
       end
 
-      subroutine read_netcdf(nf_fid , Time, south_north, west_east,
-     +    HGT_M, XLAT_M, XLONG_M)
+      subroutine read_netcdf(nf_fid , time, south_north, west_east,
+     +    hgt_m, xlat_m, xlong_m)
       include 'netcdf.inc'
-      integer Time, south_north, west_east, nf_fid, nf_vid, nf_status
+      integer time, south_north, west_east, nf_fid, nf_vid, nf_status
 
-      real HGT_M( west_east,  south_north, Time), 
-     +   XLAT_M( west_east,  south_north, Time), 
-     +   XLONG_M( west_east,  south_north, Time)
-C
-C     Variable        NETCDF Long Name
-C      HGT_M        
-C
-      nf_status = NF_INQ_VARID(nf_fid,'HGT_M',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var HGT_M'
+      real hgt_m( west_east,  south_north, time), 
+     +   xlat_m( west_east,  south_north, time), 
+     +   xlong_m( west_east,  south_north, time)
+c
+c     variable        netcdf long name
+c      hgt_m        
+c
+      nf_status = nf_inq_varid(nf_fid,'hgt_m',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var hgt_m'
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,HGT_M)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ HGT_M '
+      nf_status = nf_get_var_real(nf_fid,nf_vid,hgt_m)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ hgt_m '
       endif
-C
-C     Variable        NETCDF Long Name
-C      XLAT_M       
-C
-      nf_status = NF_INQ_VARID(nf_fid,'XLAT_M',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var XLAT_M'
+c
+c     variable        netcdf long name
+c      xlat_m       
+c
+      nf_status = nf_inq_varid(nf_fid,'xlat_m',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var xlat_m'
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,XLAT_M)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ XLAT_M '
+      nf_status = nf_get_var_real(nf_fid,nf_vid,xlat_m)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ xlat_m '
       endif
-C
-C     Variable        NETCDF Long Name
-C      XLONG_M      
-C
-      nf_status = NF_INQ_VARID(nf_fid,'XLONG_M',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var XLONG_M'
+c
+c     variable        netcdf long name
+c      xlong_m      
+c
+      nf_status = nf_inq_varid(nf_fid,'xlong_m',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var xlong_m'
       endif
-      nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,XLONG_M)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ XLONG_M '
+      nf_status = nf_get_var_real(nf_fid,nf_vid,xlong_m)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ xlong_m '
       endif
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

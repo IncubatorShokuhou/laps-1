@@ -7,7 +7,7 @@
      &                        nlf,laps_data,istatus)
 c
 c routine loads image satellite data that has already been
-c navigated to the laps domain. Currently this is only from AFWA.
+c navigated to the laps domain. currently this is only from afwa.
 c
       implicit none
 
@@ -43,15 +43,15 @@ c
          if(lstatus.ne.0)goto 900
 
          if(ispec.eq.1)then
-           print*,'Not ready to deal with gms visible data'
+           print*,'not ready to deal with gms visible data'
 
 c           call some-routine-to-deal-with-gms-visible-data
 c           if(r_image_status(i).lt.0.3333)then
 c           nlf=nlf+1
 c           call move(visraw,laps_data(1,1,nlf),nx_l,ny_l)
-c           var_lvd(nlf) = 'SVS'       ! satellite, visible
-c           c_lvd(nlf)=csatid//' (VISIBLE) SATELLITE - RAW'
-c           units_lvd(nlf) = 'COUNTS'
+c           var_lvd(nlf) = 'svs'       ! satellite, visible
+c           c_lvd(nlf)=csatid//' (visible) satellite - raw'
+c           units_lvd(nlf) = 'counts'
 c and more
 c
 c only goes has 3.9u
@@ -62,12 +62,12 @@ c
             if(r_image_status(i).le.0.3333)then
                nlf=nlf+1
                call move(image_39,laps_data(1,1,nlf),nx_l,ny_l)
-               var_lvd(nlf) = 'S3A'       ! satellite, , averaged
-               c_lvd(nlf)=csatid//' (3.9u) IR B-TEMPS'
+               var_lvd(nlf) = 's3a'       ! satellite, , averaged
+               c_lvd(nlf)=csatid//' (3.9u) ir b-temps'
                nlf=nlf+1
                call move(image_39,laps_data(1,1,nlf),nx_l,ny_l)
-               var_lvd(nlf)  = 'S3C'       ! satellite, , filtered
-               c_lvd(nlf)=csatid//' (3.9u) IR B-TEMPS'
+               var_lvd(nlf)  = 's3c'       ! satellite, , filtered
+               c_lvd(nlf)=csatid//' (3.9u) ir b-temps'
             else
                write(6,*)'39u image not processed: missing data'
             endif
@@ -78,12 +78,12 @@ c
          if(r_image_status(i).le.0.3333)then
             nlf=nlf+1
             call move(image_67,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf) = 'S4A'       ! satellite, averaged
-            c_lvd(nlf)=csatid//' (6.7u) IR B-TEMPS'
+            var_lvd(nlf) = 's4a'       ! satellite, averaged
+            c_lvd(nlf)=csatid//' (6.7u) ir b-temps'
             nlf=nlf+1
             call move(image_67,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf) = 'S4C'       ! satellite, filtered
-            c_lvd(nlf)=csatid//' (6.7u) IR B-TEMPS'
+            var_lvd(nlf) = 's4c'       ! satellite, filtered
+            c_lvd(nlf)=csatid//' (6.7u) ir b-temps'
          else
             write(6,*)'wv image not processed: missing data'
          endif
@@ -93,18 +93,18 @@ c
          if(r_image_status(i).lt.0.3333)then
             nlf=nlf+1
             call move(image_ir,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf)  = 'S8A'       ! satellite, channel-4, averaged
-            c_lvd(nlf)=csatid//' (11.0u) IR B-TEMPS'
+            var_lvd(nlf)  = 's8a'       ! satellite, channel-4, averaged
+            c_lvd(nlf)=csatid//' (11.0u) ir b-temps'
             nlf=nlf+1
             call move(image_ir,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf)='S8W'       ! satellite, channel-4, warm pixel
-            c_lvd(nlf)=csatid//' (11.0u) IR B-TEMPS'
+            var_lvd(nlf)='s8w'       ! satellite, channel-4, warm pixel
+            c_lvd(nlf)=csatid//' (11.0u) ir b-temps'
             nlf=nlf+1
             call move(image_ir,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf)='S8C'       ! satellite, channel-4, warm pixel
-            c_lvd(nlf)=csatid//' (11.0u) IR B-TEMPS'
+            var_lvd(nlf)='s8c'       ! satellite, channel-4, warm pixel
+            c_lvd(nlf)=csatid//' (11.0u) ir b-temps'
          else
-            write(6,*)'IR image not processed: missing ir data'
+            write(6,*)'ir image not processed: missing ir data'
          endif
 
          elseif(ispec.eq.5)then
@@ -112,12 +112,12 @@ c
          if(r_image_status(i).lt.0.3333)then
             nlf=nlf+1
             call move(image_12,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf) = 'SCA'       ! satellite, averaged
-            c_lvd(nlf)=csatid//' (12.0u) IR B-TEMPS'
+            var_lvd(nlf) = 'sca'       ! satellite, averaged
+            c_lvd(nlf)=csatid//' (12.0u) ir b-temps'
             nlf=nlf+1
             call move(image_12,laps_data(1,1,nlf),nx_l,ny_l)
-            var_lvd(nlf) = 'SCC'       ! satellite, averaged
-            c_lvd(nlf)=csatid//' (12.0u) IR B-TEMPS'
+            var_lvd(nlf) = 'scc'       ! satellite, averaged
+            c_lvd(nlf)=csatid//' (12.0u) ir b-temps'
          else
             write(6,*)'12u image not processed: missing data'
          endif

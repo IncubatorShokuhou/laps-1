@@ -9,38 +9,38 @@
       real f(n1) , nfmissing
       character*(*) fname
 
-      print*,'HERE: in read_netcdf_real A, n1=',n1
+      print*,'here: in read_netcdf_real a, n1=',n1
 
       istatus=0
-      nf_status = NF_INQ_VARID(nf_fid,fname,nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_varid(nf_fid,fname,nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var ', fname
         istatus = 1
         return
       endif
 
       if(start(1).eq.0.and.count(1).eq.0) then
-         print*,'HERE: in read_netcdf_real B1'
-         nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,f)
+         print*,'here: in read_netcdf_real b1'
+         nf_status = nf_get_var_real(nf_fid,nf_vid,f)
       else
-         print*,'HERE: in read_netcdf_real B2',start,count
-         nf_status = NF_GET_VARA_REAL(nf_fid,nf_vid,start,count,f)
+         print*,'here: in read_netcdf_real b2',start,count
+         nf_status = nf_get_vara_real(nf_fid,nf_vid,start,count,f)
       endif
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in NF_GET_VAR_ ', fname
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in nf_get_var_ ', fname
         istatus = 1
         return
       endif
 
-      print*,'HERE: in read_netcdf_real C'
+      print*,'here: in read_netcdf_real c'
 
-      if(fname.ne.'isoLevel')then
-         nf_status = NF_GET_ATT_REAL(nf_fid,nf_vid,'_FillValue'
+      if(fname.ne.'isolevel')then
+         nf_status = nf_get_att_real(nf_fid,nf_vid,'_fillvalue'
      .,nfmissing)
-         if(nf_status.ne.NF_NOERR) then
-            print *, NF_STRERROR(nf_status)
+         if(nf_status.ne.nf_noerr) then
+            print *, nf_strerror(nf_status)
          endif
       endif
       do i=1,n1

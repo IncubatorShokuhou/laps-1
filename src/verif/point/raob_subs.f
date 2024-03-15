@@ -1,7 +1,7 @@
       subroutine get_laps(nx,ny,nk,dir_in,i4time_syn,a9_time,
-     1     uLapsGS,vLapsGS,tLapsGS,rhLapsGS,htLapsGS,
-     1     uLapsGP,vLapsGP,tLapsGP,rhLapsGP,
-     1     htLapsGP,htLgaGS,htLgaGP,
+     1     ulapsgs,vlapsgs,tlapsgs,rhlapsgs,htlapsgs,
+     1     ulapsgp,vlapsgp,tlapsgp,rhlapsgp,
+     1     htlapsgp,htlgags,htlgagp,
      1     balance,laps_levels,status)
 
       implicit none
@@ -10,12 +10,12 @@
       integer       nx, ny, nk
       character*(*)   dir_in
       integer       i4time_syn,status(2,6)
-      real          uLapsGS(nx,ny,nk), vLapsGS(nx,ny,nk), 
-     1                tLapsGS(nx,ny,nk), rhLapsGS(nx,ny,nk),
-     1                htLapsGS(nx,ny,nk),uLapsGP(nx,ny,nk), 
-     1                vLapsGP(nx,ny,nk),tLapsGP(nx,ny,nk), 
-     1                rhLapsGP(nx,ny,nk), htLapsGP(nx,ny,nk),
-     1                htLgaGS(nx,ny,nk), htLgaGP(nx,ny,nk)
+      real          ulapsgs(nx,ny,nk), vlapsgs(nx,ny,nk), 
+     1                tlapsgs(nx,ny,nk), rhlapsgs(nx,ny,nk),
+     1                htlapsgs(nx,ny,nk),ulapsgp(nx,ny,nk), 
+     1                vlapsgp(nx,ny,nk),tlapsgp(nx,ny,nk), 
+     1                rhlapsgp(nx,ny,nk), htlapsgp(nx,ny,nk),
+     1                htlgags(nx,ny,nk), htlgagp(nx,ny,nk)
       real          laps_levels(nk) !laps pressure levels in mb
       real          make_rh
 
@@ -25,19 +25,19 @@
       character*20    cmdltype
       character*125   comment(nk)
       character*180   fdir_in
-      character*9     fnameSyn,fnamePrev,fnamePPrev,a9_time
-      integer       i, j, k, lvl(nk), fdir_len, i4time_Pprev,
+      character*9     fnamesyn,fnameprev,fnamepprev,a9_time
+      integer       i, j, k, lvl(nk), fdir_len, i4time_pprev,
      1                i4time_prev, len_dir_in, istatus,
      1                balance
       integer         i4time_init,i4time_fcst
 
 ! begin
       i4time_prev = i4time_syn - 3600
-      call make_fnam_lp(i4time_syn,fnameSyn,istatus)
-      call make_fnam_lp(i4time_prev,fnamePrev,istatus)
+      call make_fnam_lp(i4time_syn,fnamesyn,istatus)
+      call make_fnam_lp(i4time_prev,fnameprev,istatus)
 
-! status(1,x) = Syn  (2,x) = Prev
-! status(x,1)=u (x,2)=v (x,3)=t (x,4)=ht (x,5)=rh (x,6)=LGAht
+! status(1,x) = syn  (2,x) = prev
+! status(x,1)=u (x,2)=v (x,3)=t (x,4)=ht (x,5)=rh (x,6)=lgaht
 
       status = 1
 
@@ -48,8 +48,8 @@
       var='ht'
       lvl=laps_levels
 c
-c JS: this needs to consider nest7grid.parms fdda_model_source
-c     since that can be our background too. Done: 10-11-02 with
+c js: this needs to consider nest7grid.parms fdda_model_source
+c     since that can be our background too. done: 10-11-02 with
 c     mod to wind3d.pl
 c     ext = 'lga'
 
@@ -59,83 +59,83 @@ c     ext = 'lga'
 c     write(6,*) dir_in
 c     write(6,*) fdir_in
 
-c JS: need to determine what background was actually used in the
+c js: need to determine what background was actually used in the
 c     analysis and configure i4time_syn appropriately (likely will
 c     need an i4time_syn_valid too as second argument to this sub)
-C     read LGA HT valid i4time_syn
+c     read lga ht valid i4time_syn
 
       call bkgd_wgi(a9_time,i4time_init,i4time_fcst
      +,ext,cmdltype,balance,istatus)
       if(istatus.ne.1)then
-         print*,'Failure in bkgd_wgi to get model bkgd time'
+         print*,'failure in bkgd_wgi to get model bkgd time'
          status=0
          return
       endif
 
       call read_laps(i4time_init,i4time_fcst,fdir_in,ext,
      1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-     1                    units,comment,htLgaGS,istatus)
+     1                    units,comment,htlgags,istatus)
 
-c     call get_modelfg_3d(i4time_syn,var(1),nx,ny,nk,htLgaGS
+c     call get_modelfg_3d(i4time_syn,var(1),nx,ny,nk,htlgags
 c    1,istatus)
 
       if (istatus .ne. 1) then
 
-        write (6,*) ' Error in readlapsdata for LGA HT Syn',
-     1             fdir_in(1:fdir_len)//fnameSyn//'0000.'//ext(1:3)
+        write (6,*) ' error in readlapsdata for lga ht syn',
+     1             fdir_in(1:fdir_len)//fnamesyn//'0000.'//ext(1:3)
       endif
 
-C       try previous hr run, 1 hr fcst
+c       try previous hr run, 1 hr fcst
 c       call read_laps(i4time_prev,i4time_syn,fdir_in,ext,
 c    1                      nx,ny,nk,nk,var,lvl,lvl_coord,
-c    1                      units,comment,htLgaGS,istatus)
-c       call get_modelfg_3d(i4time_prev,var(1),nx,ny,nk,htLgaGS
+c    1                      units,comment,htlgags,istatus)
+c       call get_modelfg_3d(i4time_prev,var(1),nx,ny,nk,htlgags
 c    1,istatus)
 c       if (istatus .ne. 1) then
-c         write (6,*) ' Error in readlapsdata for LGA HT Syn',
-c    1            fdir_in(1:fdir_len)//fnamePrev//'0100.'//ext(1:3)
+c         write (6,*) ' error in readlapsdata for lga ht syn',
+c    1            fdir_in(1:fdir_len)//fnameprev//'0100.'//ext(1:3)
 c         status(1,j) = 0
 c       else
-c         write(6,*) 'Success reading LGA HT from ',
-c    1            fdir_in(1:fdir_len)//fnamePrev//'0100.'//ext(1:3)
+c         write(6,*) 'success reading lga ht from ',
+c    1            fdir_in(1:fdir_len)//fnameprev//'0100.'//ext(1:3)
 c       endif
 c     else
-c       write(6,*) 'Success reading LGA HT from ',
-c    1             fdir_in(1:fdir_len)//fnameSyn//'0000.'//ext(1:3)
+c       write(6,*) 'success reading lga ht from ',
+c    1             fdir_in(1:fdir_len)//fnamesyn//'0000.'//ext(1:3)
 c     endif
-C     read LGA HT valid i4time_prev
-c JS: probably don't need to get the previous hour lga.  If the
+c     read lga ht valid i4time_prev
+c js: probably don't need to get the previous hour lga.  if the
 c     current one doesn't exist, then we cannot verify. 
 c     call read_laps(i4time_prev,i4time_prev,fdir_in,ext,
 c    1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-c    1                    units,comment,htLgaGP,istatus)
-c     call get_modelfg_3d(i4time_prev,var(1),nx,ny,nk,htLgaGP
+c    1                    units,comment,htlgagp,istatus)
+c     call get_modelfg_3d(i4time_prev,var(1),nx,ny,nk,htlgagp
 c    1,istatus)
 c     if (istatus .ne. 1) then
-c       write (6,*) ' Error in readlapsdata for LGA HT Prev',
-c    1             fdir_in(1:fdir_len)//fnamePrev//'0000.'//ext(1:3)
+c       write (6,*) ' error in readlapsdata for lga ht prev',
+c    1             fdir_in(1:fdir_len)//fnameprev//'0000.'//ext(1:3)
 c       try previous hr run, 1 hr fcst
-c       i4time_Pprev = i4time_prev-3600
-c       call make_fnam_lp(i4time_Pprev,fnamePPrev,istatus)
-c       call read_laps(i4time_Pprev,i4time_prev,fdir_in,ext,
+c       i4time_pprev = i4time_prev-3600
+c       call make_fnam_lp(i4time_pprev,fnamepprev,istatus)
+c       call read_laps(i4time_pprev,i4time_prev,fdir_in,ext,
 c    1                      nx,ny,nk,nk,var,lvl,lvl_coord,
-c    1                      units,comment,htLgaGP,istatus)
-c       call get_modelfg_3d(i4time_Pprev,var(1),nx,ny,nk,htLgaGP
+c    1                      units,comment,htlgagp,istatus)
+c       call get_modelfg_3d(i4time_pprev,var(1),nx,ny,nk,htlgagp
 c    1,istatus)
 c       if (istatus .ne. 1) then
-c         write (6,*) ' Error in readlapsdata for LGA HT PPrev',
-c    1            fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+c         write (6,*) ' error in readlapsdata for lga ht pprev',
+c    1            fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
 c         status(2,j) = 0
 c       else
-c         write(6,*) 'Success reading LGA HT from ',
-c    1            fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+c         write(6,*) 'success reading lga ht from ',
+c    1            fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
 c       endif
 c     else
-c       write(6,*) 'Success reading LGA HT from ',
-c    1             fdir_in(1:fdir_len)//fnamePrev//'0000.'//ext(1:3)
+c       write(6,*) 'success reading lga ht from ',
+c    1             fdir_in(1:fdir_len)//fnameprev//'0000.'//ext(1:3)
 c     endif
 
-c JS: new code for verifying background with sounding or profiler
+c js: new code for verifying background with sounding or profiler
 c   we'll use balance code = 2 to indicate verification of background.
 
       if(balance.eq.2)then
@@ -144,50 +144,50 @@ c   we'll use balance code = 2 to indicate verification of background.
          var = 't3'
          call read_laps(i4time_init,i4time_fcst,fdir_in,ext,
      1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-     1                    units,comment,tLapsGS,istatus)
+     1                    units,comment,tlapsgs,istatus)
          if(istatus.ne.1)then
-            write (6,*) ' Error in readlapsdata for LGA HT PPrev',
-     1fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+            write (6,*) ' error in readlapsdata for lga ht pprev',
+     1fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
             status(1,3)=0
             return
          endif
          var='ht'
          call read_laps(i4time_init,i4time_fcst,fdir_in,ext,
      1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-     1                    units,comment,htLapsGS,istatus)
+     1                    units,comment,htlapsgs,istatus)
          if(istatus.ne.1)then
-            write (6,*) ' Error in readlapsdata for LGA HT PPrev',
-     1fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+            write (6,*) ' error in readlapsdata for lga ht pprev',
+     1fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
             status(1,4)=0
             return
          endif
          var='u3'
          call read_laps(i4time_init,i4time_fcst,fdir_in,ext,
      1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-     1                    units,comment,uLapsGS,istatus)
+     1                    units,comment,ulapsgs,istatus)
          if(istatus.ne.1)then
-            write (6,*) ' Error in readlapsdata for LGA HT PPrev',
-     1fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+            write (6,*) ' error in readlapsdata for lga ht pprev',
+     1fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
             status(1,1)=0
             return
          endif
          var='v3'
          call read_laps(i4time_init,i4time_fcst,fdir_in,ext,
      1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-     1                    units,comment,vLapsGS,istatus)
+     1                    units,comment,vlapsgs,istatus)
          if(istatus.ne.1)then
-            write (6,*) ' Error in readlapsdata for LGA HT PPrev',
-     1fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+            write (6,*) ' error in readlapsdata for lga ht pprev',
+     1fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
             status(1,2)=0
             return
          endif
          var='sh'
          call read_laps(i4time_init,i4time_fcst,fdir_in,ext,
      1                    nx,ny,nk,nk,var,lvl,lvl_coord,
-     1                    units,comment,rhLapsGS,istatus)
+     1                    units,comment,rhlapsgs,istatus)
          if(istatus.ne.1)then
-            write (6,*) ' Error in readlapsdata for LGA HT PPrev',
-     1fdir_in(1:fdir_len)//fnamePPrev//'0100.'//ext(1:3)
+            write (6,*) ' error in readlapsdata for lga ht pprev',
+     1fdir_in(1:fdir_len)//fnamepprev//'0100.'//ext(1:3)
             status(1,5)=0
             return
          endif
@@ -195,8 +195,8 @@ c   we'll use balance code = 2 to indicate verification of background.
          do k=1,nk
           do j=1,ny
            do i=1,nx
-              rhLapsGS(i,j,k)=make_rh(laps_levels(k)
-     1,tLapsGS(i,j,k)-273.16,rhLapsGS(i,j,k)*1000.,-132.)*100.
+              rhlapsgs(i,j,k)=make_rh(laps_levels(k)
+     1,tlapsgs(i,j,k)-273.16,rhlapsgs(i,j,k)*1000.,-132.)*100.
            enddo
           enddo
          enddo
@@ -217,26 +217,26 @@ c   we'll use balance code = 2 to indicate verification of background.
 
       call read_laps_data(i4time_syn,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,uLapsGS,istatus)
+     1                    units,comment,ulapsgs,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LW3 U Syn'
+        write (6,*) ' error in readlapsdata for lw3 u syn'
         status(1,j) = 0
       else
-        write(6,*) 'Success reading U3 from ',
-     1             fdir_in(1:fdir_len)//fnameSyn//'.'//ext(1:3)
+        write(6,*) 'success reading u3 from ',
+     1             fdir_in(1:fdir_len)//fnamesyn//'.'//ext(1:3)
       endif
 
       call read_laps_data(i4time_prev,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,uLapsGP,istatus)
+     1                    units,comment,ulapsgp,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LW3 U Prev'
+        write (6,*) ' error in readlapsdata for lw3 u prev'
         status(2,j) = 0
       else
-        write(6,*) 'Success reading U3 from ',
-     1             fdir_in(1:fdir_len)//fnamePrev//'.'//ext(1:3)
+        write(6,*) 'success reading u3 from ',
+     1             fdir_in(1:fdir_len)//fnameprev//'.'//ext(1:3)
       endif
 
       j = 2
@@ -246,26 +246,26 @@ c   we'll use balance code = 2 to indicate verification of background.
 
       call read_laps_data(i4time_syn,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,vLapsGS,istatus)
+     1                    units,comment,vlapsgs,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LW3 V Syn'
+        write (6,*) ' error in readlapsdata for lw3 v syn'
         status(1,j) = 0
       else
-        write(6,*) 'Success reading V3 from ',
-     1             fdir_in(1:fdir_len)//fnameSyn//'.'//ext(1:3)
+        write(6,*) 'success reading v3 from ',
+     1             fdir_in(1:fdir_len)//fnamesyn//'.'//ext(1:3)
       endif
 
       call read_laps_data(i4time_prev,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,vLapsGP,istatus)
+     1                    units,comment,vlapsgp,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LW3 V Prev'
+        write (6,*) ' error in readlapsdata for lw3 v prev'
         status(2,j) = 0
       else
-        write(6,*) 'Success reading V3 from ',
-     1             fdir_in(1:fdir_len)//fnamePrev//'.'//ext(1:3)
+        write(6,*) 'success reading v3 from ',
+     1             fdir_in(1:fdir_len)//fnameprev//'.'//ext(1:3)
       endif
 
       ext = 'lt1'
@@ -283,27 +283,27 @@ c   we'll use balance code = 2 to indicate verification of background.
 
       call read_laps_data(i4time_syn,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,tLapsGS,istatus)
+     1                    units,comment,tlapsgs,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LT1 T3 Syn '
+        write (6,*) ' error in readlapsdata for lt1 t3 syn '
         status(1,j) = 0
         status = 0
       else
-        write(6,*) 'Success reading T3 from ',
-     1             fdir_in(1:fdir_len)//fnameSyn//'.'//ext(1:3)
+        write(6,*) 'success reading t3 from ',
+     1             fdir_in(1:fdir_len)//fnamesyn//'.'//ext(1:3)
       endif
 
       call read_laps_data(i4time_prev,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,tLapsGP,istatus)
+     1                    units,comment,tlapsgp,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LT1 T3 Prev '
+        write (6,*) ' error in readlapsdata for lt1 t3 prev '
         status(2,j) = 0
       else
-        write(6,*) 'Success reading T3 from ',
-     1             fdir_in(1:fdir_len)//fnamePrev//'.'//ext(1:3)
+        write(6,*) 'success reading t3 from ',
+     1             fdir_in(1:fdir_len)//fnameprev//'.'//ext(1:3)
       endif
 
       j = 4
@@ -313,26 +313,26 @@ c   we'll use balance code = 2 to indicate verification of background.
 
       call read_laps_data(i4time_syn,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,htLapsGS,istatus)
+     1                    units,comment,htlapsgs,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LT1 HT Syn'
+        write (6,*) ' error in readlapsdata for lt1 ht syn'
         status(1,j) = 0
       else
-        write(6,*) 'Success reading HT from ',
-     1             fdir_in(1:fdir_len)//fnameSyn//'.'//ext(1:3)
+        write(6,*) 'success reading ht from ',
+     1             fdir_in(1:fdir_len)//fnamesyn//'.'//ext(1:3)
       endif
 
       call read_laps_data(i4time_prev,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,htLapsGP,istatus)
+     1                    units,comment,htlapsgp,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LT1 HT Prev'
+        write (6,*) ' error in readlapsdata for lt1 ht prev'
         status(2,j) = 0
       else
-        write(6,*) 'Success reading HT from ',
-     1             fdir_in(1:fdir_len)//fnamePrev//'.'//ext(1:3)
+        write(6,*) 'success reading ht from ',
+     1             fdir_in(1:fdir_len)//fnameprev//'.'//ext(1:3)
       endif
 
       ext = 'lh3'
@@ -353,26 +353,26 @@ c     enddo
 
       call read_laps_data(i4time_syn,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,rhLapsGS,istatus)
+     1                    units,comment,rhlapsgs,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LH3 RH3 Syn'
+        write (6,*) ' error in readlapsdata for lh3 rh3 syn'
         status(1,j) = 0
       else
-        write(6,*) 'Success reading RH from ',
-     1             fdir_in(1:fdir_len)//fnameSyn//'.'//ext(1:3)
+        write(6,*) 'success reading rh from ',
+     1             fdir_in(1:fdir_len)//fnamesyn//'.'//ext(1:3)
       endif
 
       call read_laps_data(i4time_prev,fdir_in,ext,nx,ny,nk,
      1                    nk,var,lvl,lvl_coord,
-     1                    units,comment,rhLapsGP,istatus)
+     1                    units,comment,rhlapsgp,istatus)
 
       if (istatus .ne. 1) then
-        write (6,*) ' Error in readlapsdata for LH3 RH3 Prev'
+        write (6,*) ' error in readlapsdata for lh3 rh3 prev'
         status(2,j) = 0
       else
-        write(6,*) 'Success reading RH from ',
-     1             fdir_in(1:fdir_len)//fnamePrev//'.'//ext(1:3)
+        write(6,*) 'success reading rh from ',
+     1             fdir_in(1:fdir_len)//fnameprev//'.'//ext(1:3)
       endif
 
       endif
@@ -380,186 +380,186 @@ c     enddo
       return
       end
 !1.....................................................................................
-      subroutIne ascend_w(timeSyn, timeRel, numSigW, numW,fileAvail,
-     1                    wmoStaNum, staLat, staLon, staElev, maxW,
-     1                    max_ht_m_proc,typeW,
-     1                    maxRaob, nx, ny, nk, raobId, statusL,
-     1                    htSigW, wdSigW, wsSigW,  !remember (maxW,maxRaob)
-     1                    uLapsGS,vLapsGS,uLapsGP,vLapsGP,  !(nx,ny,nk)
-     1                    htLapsGS, htLapsGP, raob_missing_data,
+      subroutine ascend_w(timesyn, timerel, numsigw, numw,fileavail,
+     1                    wmostanum, stalat, stalon, staelev, maxw,
+     1                    max_ht_m_proc,typew,
+     1                    maxraob, nx, ny, nk, raobid, statusl,
+     1                    htsigw, wdsigw, wssigw,  !remember (maxw,maxraob)
+     1                    ulapsgs,vlapsgs,ulapsgp,vlapsgp,  !(nx,ny,nk)
+     1                    htlapsgs, htlapsgp, raob_missing_data,
      1                    verif_missing_data,
      1                    lat, lon, laps_levels,  !(nx,ny)
 !................................variables below returned...................
-     1                    riW,rjW,rkW,latW,lonW,htW, uIW,vIW,
-     1                    uPW,vPW,timeLapsW,status)
+     1                    riw,rjw,rkw,latw,lonw,htw, uiw,viw,
+     1                    upw,vpw,timelapsw,status)
 
       include 'trigd.inc'
 
       implicit none
 
       real          height_to_zcoord3
-      integer       timeSyn, timeRel, numSigW, numW, fileAvail,
-     1                wmoStaNum
-      real          staLat, staLon, staElev,max_ht_m_proc
-      character*1     typeW(maxW,maxRaob),typeWM(maxW,maxRaob)
-      integer       maxW, maxRaob,nx,ny,nk, raobId,statusL(2,6)
-      real          htSigW(maxW,maxRaob),
-     1                wdSigW(maxW,maxRaob), wsSigW(maxW,maxRaob),
-     1                uLapsGS(nx,ny,nk), vLapsGS(nx,ny,nk),
-     1                uLapsGP(nx,ny,nk), vLapsGP(nx,ny,nk),
-     1                htLapsGS(nx,ny,nk), htLapsGP(nx,ny,nk),
+      integer       timesyn, timerel, numsigw, numw, fileavail,
+     1                wmostanum
+      real          stalat, stalon, staelev,max_ht_m_proc
+      character*1     typew(maxw,maxraob),typewm(maxw,maxraob)
+      integer       maxw, maxraob,nx,ny,nk, raobid,statusl(2,6)
+      real          htsigw(maxw,maxraob),
+     1                wdsigw(maxw,maxraob), wssigw(maxw,maxraob),
+     1                ulapsgs(nx,ny,nk), vlapsgs(nx,ny,nk),
+     1                ulapsgp(nx,ny,nk), vlapsgp(nx,ny,nk),
+     1                htlapsgs(nx,ny,nk), htlapsgp(nx,ny,nk),
      1                raob_missing_data, verif_missing_data,
      1                lat(nx,ny), lon(nx,ny),
      1                laps_levels(nk), 
-     1                riW(maxW,maxRaob),rjW(maxW,maxRaob),
-     1                rkW(maxW,maxRaob),latW(maxW,maxRaob),
-     1                lonW(maxW,maxRaob),htW(maxW,maxRaob),
-     1		      uIW(maxW,maxRaob),vIW(maxW,maxRaob),
-     1		      uPW(maxW,maxRaob),vPW(maxW,maxRaob)
-      integer       timeLapsW(maxW,maxRaob), status
+     1                riw(maxw,maxraob),rjw(maxw,maxraob),
+     1                rkw(maxw,maxraob),latw(maxw,maxraob),
+     1                lonw(maxw,maxraob),htw(maxw,maxraob),
+     1		      uiw(maxw,maxraob),viw(maxw,maxraob),
+     1		      upw(maxw,maxraob),vpw(maxw,maxraob)
+      integer       timelapsw(maxw,maxraob), status
 
-      integer       j,lvl,timePrev,index, time_tot, istatus,
-     1                timePrevComp, timeSynComp,int_ri,int_rj
-      real          prSigW, uSigW(maxW),vSigW(maxW),
+      integer       j,lvl,timeprev,index, time_tot, istatus,
+     1                timeprevcomp, timesyncomp,int_ri,int_rj
+      real          prsigw, usigw(maxw),vsigw(maxw),
      1                u_disp, v_disp, delta_h,delta_t, delta_u,
-     1                delta_v, rise_rate, maxHtProc, rilaps, 
+     1                delta_v, rise_rate, maxhtproc, rilaps, 
      1                rjlaps, rklaps, u_laps, v_laps, delta_s
 
-! BEGIN
+! begin
       status = 1   !assume a good return
-      timePrev = timeSyn - 3600
-      timeSynComp = timeSyn
-      timePrevComp = timePrev
-      if (fileAvail .eq. 1) timePrevComp = 0
-      if (fileAvail .eq. 2) timeSynComp = 0
+      timeprev = timesyn - 3600
+      timesyncomp = timesyn
+      timeprevcomp = timeprev
+      if (fileavail .eq. 1) timeprevcomp = 0
+      if (fileavail .eq. 2) timesyncomp = 0
 
-      if ((timePrevComp .eq. 0) .and. (timeSynComp .eq. 0)) then
-        write(6,*) ' No wind data to process '
+      if ((timeprevcomp .eq. 0) .and. (timesyncomp .eq. 0)) then
+        write(6,*) ' no wind data to process '
         istatus = 0
         return
       endif
 
-      maxHtProc = max_ht_m_proc  !max htSigW value to process (in meters)
+      maxhtproc = max_ht_m_proc  !max htsigw value to process (in meters)
 
 !     setup for ascention
       index = 0
       u_disp = 0.
       v_disp = 0.
-      time_tot = timeRel
+      time_tot = timerel
       rise_rate = 300. / 60. ! m/s
 
 !     loop thru levels
-      numW = -1
+      numw = -1
       lvl = 1
-      do while (lvl .le. numSigW)
-        if ((htSigW(lvl,raobId) .gt. 0) .and.
-     1      (htSigW(lvl,raobId) .le. maxHtProc) .and.
-     1      (htSigW(lvl,raobId) .ne. raob_missing_data)) then
+      do while (lvl .le. numsigw)
+        if ((htsigw(lvl,raobid) .gt. 0) .and.
+     1      (htsigw(lvl,raobid) .le. maxhtproc) .and.
+     1      (htsigw(lvl,raobid) .ne. raob_missing_data)) then
           index = index + 1
 
           if (index .ge. 1) then
-            if(index .gt. 1)then ! Lower level is above 1st (sfc) level
-              delta_h = htSigW(lvl,raobId) - htSigW(lvl-1,raobId)
-            else                 ! Lower level is at the sfc
-              delta_h = htSigW(lvl,raobId) - staElev
+            if(index .gt. 1)then ! lower level is above 1st (sfc) level
+              delta_h = htsigw(lvl,raobid) - htsigw(lvl-1,raobid)
+            else                 ! lower level is at the sfc
+              delta_h = htsigw(lvl,raobid) - staelev
             endif
 
-            htW(index,raobId) = htSigW(lvl,raobId)
-            typeWM(index,raobId) = typeW(index,raobId)
+            htw(index,raobid) = htsigw(lvl,raobid)
+            typewm(index,raobid) = typew(index,raobid)
 
-            if ((wdSigW(lvl,raobId) .eq. raob_missing_data) .or.
-     1          (wsSigW(lvl,raobId) .eq. raob_missing_data)) then
+            if ((wdsigw(lvl,raobid) .eq. raob_missing_data) .or.
+     1          (wssigw(lvl,raobid) .eq. raob_missing_data)) then
               index = index - 1  ! don't use this lvl ob...go to next
               lvl = lvl + 1
               goto 777
             else
-              call disp_to_uv(wdSigW(lvl,raobId),wsSigW(lvl,raobId),
-     1                        uPW(index,raobId),vPW(index,raobId))
+              call disp_to_uv(wdsigw(lvl,raobid),wssigw(lvl,raobid),
+     1                        upw(index,raobid),vpw(index,raobid))
             endif
 
             delta_t = delta_h / rise_rate
             time_tot = time_tot + nint(delta_t + 0.5)
-            if (abs(time_tot - timeSynComp) .gt. 
-     1          abs(time_tot - timePrevComp)) then
-              timeLapsW(index,raobId) = timePrev
+            if (abs(time_tot - timesyncomp) .gt. 
+     1          abs(time_tot - timeprevcomp)) then
+              timelapsw(index,raobid) = timeprev
             else
-              timeLapsW(index,raobId) = timeSyn
+              timelapsw(index,raobid) = timesyn
             endif
-            delta_s = wsSigW(lvl,raobId) * delta_t
-            delta_u = -sind(wdSigW(lvl,raobId)) * delta_s
-            delta_v = -cosd(wdSigW(lvl,raobId)) * delta_s
+            delta_s = wssigw(lvl,raobid) * delta_t
+            delta_u = -sind(wdsigw(lvl,raobid)) * delta_s
+            delta_v = -cosd(wdsigw(lvl,raobid)) * delta_s
             u_disp = u_disp + delta_u
             v_disp = v_disp + delta_v
-            latW(index,raobId) = staLat + v_disp / 111000.
-            lonW(index,raobId) = staLon + u_disp / 
-     1          (111000.* cosd((staLat+latW(index,raobId))/2))
+            latw(index,raobid) = stalat + v_disp / 111000.
+            lonw(index,raobid) = stalon + u_disp / 
+     1          (111000.* cosd((stalat+latw(index,raobid))/2))
 
-!           Determine LAPS i,j,k, calc deltaU and deltaV
+!           determine laps i,j,k, calc deltau and deltav
 !           index has number of elements to correlate
 
-            call latlon_to_rlapsgrid(latW(index,raobId),
-     1                               lonW(index,raobId),
+            call latlon_to_rlapsgrid(latw(index,raobid),
+     1                               lonw(index,raobid),
      1                               lat,lon,nx,ny,
-     1                               riW(index,raobId),
-     1                               rjW(index,raobId),istatus)
+     1                               riw(index,raobid),
+     1                               rjw(index,raobid),istatus)
 
             if (istatus .ne. 1) then  !if this level is out, rest probably will be too
-              numW = index -1
-              lvl = numSigW + 1
+              numw = index -1
+              lvl = numsigw + 1
               if (index .gt. 1) then  !keep what have
                 goto 777
               else
-                write(6,*) 'Raob ',wmoStaNum,' not in Laps domain  ',
-     1                   latW(index,raobId),' ',lonW(index,raobId)
+                write(6,*) 'raob ',wmostanum,' not in laps domain  ',
+     1                   latw(index,raobid),' ',lonw(index,raobid)
                 goto 777
               endif
             endif
              
-C           get integral ri, rj for height_to_zcoord3
-            int_ri = nint(riW(index,raobId))
-            int_rj = nint(rjW(index,raobId))
+c           get integral ri, rj for height_to_zcoord3
+            int_ri = nint(riw(index,raobid))
+            int_rj = nint(rjw(index,raobid))
 
-            if (timeLapsW(index,raobId) .eq. timeSyn) then   !use htLapsGS
-              rkW(index,raobId) = height_to_zcoord3(htSigW(lvl,raobId),
-     1                                       htLapsGS,laps_levels,
+            if (timelapsw(index,raobid) .eq. timesyn) then   !use htlapsgs
+              rkw(index,raobid) = height_to_zcoord3(htsigw(lvl,raobid),
+     1                                       htlapsgs,laps_levels,
      1                                       nx,ny,nk,int_ri,
      1                                       int_rj,istatus)
-            else  !use htLapsGP
-              rkW(index,raobId) = height_to_zcoord3(htSigW(lvl,raobId),
-     1                                       htLapsGP,laps_levels,
+            else  !use htlapsgp
+              rkw(index,raobid) = height_to_zcoord3(htsigw(lvl,raobid),
+     1                                       htlapsgp,laps_levels,
      1                                       nx,ny,nk,int_ri,
      1                                       int_rj,istatus)
             endif
 
-            if ((istatus .eq. 1) .and. (rkW(index,raobId) .le. nk)) then
+            if ((istatus .eq. 1) .and. (rkw(index,raobid) .le. nk)) then
 
-!             determine which LAPS grid to use
-              if (timeLapsW(index,raobId) .eq. timeSyn) then
-                call trilinear_laps(riW(index,raobId),rjW(index,raobId),
-     1                              rkW(index,raobId),nx,ny,nk,
-     1                              uLapsGS, uIW(index,raobId))
+!             determine which laps grid to use
+              if (timelapsw(index,raobid) .eq. timesyn) then
+                call trilinear_laps(riw(index,raobid),rjw(index,raobid),
+     1                              rkw(index,raobid),nx,ny,nk,
+     1                              ulapsgs, uiw(index,raobid))
 
-                call trilinear_laps(riW(index,raobId),rjW(index,raobId),
-     1                              rkW(index,raobId),nx,ny,nk,
-     1                              vLapsGS, vIW(index,raobId))
+                call trilinear_laps(riw(index,raobid),rjw(index,raobid),
+     1                              rkw(index,raobid),nx,ny,nk,
+     1                              vlapsgs, viw(index,raobid))
               else
-                call trilinear_laps(riW(index,raobId),rjW(index,raobId),
-     1                              rkW(index,raobId),nx,ny,nk,
-     1                              uLapsGP, uIW(index,raobId))
+                call trilinear_laps(riw(index,raobid),rjw(index,raobid),
+     1                              rkw(index,raobid),nx,ny,nk,
+     1                              ulapsgp, uiw(index,raobid))
 
-                call trilinear_laps(riW(index,raobId),rjW(index,raobId),
-     1                              rkW(index,raobId),nx,ny,nk,
-     1                              vLapsGP, vIW(index,raobId))
+                call trilinear_laps(riw(index,raobid),rjw(index,raobid),
+     1                              rkw(index,raobid),nx,ny,nk,
+     1                              vlapsgp, viw(index,raobid))
               endif
 
-            else  !height is above Laps domain
-              numW = index - 1
-              lvl = numSigW + 1
+            else  !height is above laps domain
+              numw = index - 1
+              lvl = numsigw + 1
               if (index .gt. 1) then  !save what have
                 goto 777
               else
-                write(6,*) 'Raob ',wmoStaNum, ' above Laps domain  ',
-     1                     rkW(index,raobId)
+                write(6,*) 'raob ',wmostanum, ' above laps domain  ',
+     1                     rkw(index,raobid)
                 goto 777
               endif
             endif
@@ -572,31 +572,31 @@ C           get integral ri, rj for height_to_zcoord3
 
       enddo
 
-      if (numW .eq. -1) numW = index
+      if (numw .eq. -1) numw = index
 
-C     pass back modified typeW
-      do j = 1, numW
-        typeW(j,raobId) = typeWM(j,raobId)
+c     pass back modified typew
+      do j = 1, numw
+        typew(j,raobid) = typewm(j,raobid)
       enddo
  
       return
       end
 !2.....................................................................................
-      subroutine ascend_t(timeSyn, timeRel, numSigT,
-     1                    numT,fileAvailUV,fileAvail,wmoStaNum,
-     1                    staLat, staLon, staElev, typeT,
-     1                    maxT, maxW, max_ht_m_proc,
-     1                    maxRaob, nx, ny, nk, raobId, statusL,
-     1                    prSigT, tSigT, tdSigT,htSigT,
-     1                    tLapsGS,rhLapsGS,htLapsGS,tLapsGP,  !(nx,ny,nk)
-     1                    rhLapsGP, htLapsGP,
-     1                    htLgaGS, htLgaGP, raob_missing_data,
+      subroutine ascend_t(timesyn, timerel, numsigt,
+     1                    numt,fileavailuv,fileavail,wmostanum,
+     1                    stalat, stalon, staelev, typet,
+     1                    maxt, maxw, max_ht_m_proc,
+     1                    maxraob, nx, ny, nk, raobid, statusl,
+     1                    prsigt, tsigt, tdsigt,htsigt,
+     1                    tlapsgs,rhlapsgs,htlapsgs,tlapsgp,  !(nx,ny,nk)
+     1                    rhlapsgp, htlapsgp,
+     1                    htlgags, htlgagp, raob_missing_data,
      1                    verif_missing_data, lat,lon, !(nx,ny,nk)
-     1                    laps_levels, numSigW,
-     1                    htSigW, wdSigW, wsSigW, !remember (maxW,maxRaob)
+     1                    laps_levels, numsigw,
+     1                    htsigw, wdsigw, wssigw, !remember (maxw,maxraob)
 !................................variables below returned...................
-     1                    riT,rjT,rkT,latT,lonT,htT,prIT,tIT,tdIT,
-     1                    prPT,tPT,tdPT,timeLapsT,status)
+     1                    rit,rjt,rkt,latt,lont,htt,prit,tit,tdit,
+     1                    prpt,tpt,tdpt,timelapst,status)
 
       include 'trigd.inc'
 
@@ -605,130 +605,130 @@ C     pass back modified typeW
       real          ztopsa, zcoord_of_logpressure, psatoz,
      1                make_ssh, k_to_c, make_td, c_to_k
 
-      integer       timeSyn, timeRel, numSigT, numT,
-     1                fileAvailUV, fileAvail,wmoStaNum
-      real          staLat, staLon, staElev,max_ht_m_proc
-      character*1     typeT(maxT,maxRaob),typeTM(maxT,maxRaob)
-      integer       maxT, maxW, maxRaob,nx,ny,nk
-      integer       raobId, statusL(2,6)
-      real          prSigT(maxT,maxRaob),
-     1                tSigT(maxT,maxRaob), 
-     1                tdSigT(maxT,maxRaob), 
-     1                htSigT(maxT,maxRaob), 
-     1                tLapsGS(nx,ny,nk), htLapsGS(nx,ny,nk),
-     1                tLapsGP(nx,ny,nk), htLapsGP(nx,ny,nk),
-     1                rhLapsGS(nx,ny,nk), rhLapsGP(nx,ny,nk),
-     1                htLgaGS(nx,ny,nk), htLgaGP(nx,ny,nk),
+      integer       timesyn, timerel, numsigt, numt,
+     1                fileavailuv, fileavail,wmostanum
+      real          stalat, stalon, staelev,max_ht_m_proc
+      character*1     typet(maxt,maxraob),typetm(maxt,maxraob)
+      integer       maxt, maxw, maxraob,nx,ny,nk
+      integer       raobid, statusl(2,6)
+      real          prsigt(maxt,maxraob),
+     1                tsigt(maxt,maxraob), 
+     1                tdsigt(maxt,maxraob), 
+     1                htsigt(maxt,maxraob), 
+     1                tlapsgs(nx,ny,nk), htlapsgs(nx,ny,nk),
+     1                tlapsgp(nx,ny,nk), htlapsgp(nx,ny,nk),
+     1                rhlapsgs(nx,ny,nk), rhlapsgp(nx,ny,nk),
+     1                htlgags(nx,ny,nk), htlgagp(nx,ny,nk),
      1                raob_missing_data,verif_missing_data,
      1                lat(nx,ny), lon(nx,ny), laps_levels(nk)
-      integer	      numSigW
-      real          htSigW(maxW,maxRaob), wdSigW(maxW,maxRaob),
-     1                wsSigW(maxW,maxRaob),
-     1                riT(maxT,maxRaob),rjT(maxT,maxRaob),
-     1                rkT(maxT,maxRaob),latT(maxT,maxRaob),
-     1                lonT(maxT,maxRaob),htT(maxT,maxRaob),
-     1		      prIT(maxT,maxRaob),tIT(maxT,maxRaob),
-     1		      tdIT(maxT,maxRaob),prPT(maxT,maxRaob),
-     1                tPT(maxT,maxRaob),tdPT(maxT,maxRaob)
-      integer       timeLapsT(maxT,maxRaob), status
+      integer	      numsigw
+      real          htsigw(maxw,maxraob), wdsigw(maxw,maxraob),
+     1                wssigw(maxw,maxraob),
+     1                rit(maxt,maxraob),rjt(maxt,maxraob),
+     1                rkt(maxt,maxraob),latt(maxt,maxraob),
+     1                lont(maxt,maxraob),htt(maxt,maxraob),
+     1		      prit(maxt,maxraob),tit(maxt,maxraob),
+     1		      tdit(maxt,maxraob),prpt(maxt,maxraob),
+     1                tpt(maxt,maxraob),tdpt(maxt,maxraob)
+      integer       timelapst(maxt,maxraob), status
 
-      integer       timePrevComp, timeSynComp,istatus,
-     1                j,lvl,timePrev,index, time_tot,
-     1                bkgPrev, bkgSyn,int_ri,int_rj
-      real          wd, ws, rh, q, t_ref, tC,
+      integer       timeprevcomp, timesyncomp,istatus,
+     1                j,lvl,timeprev,index, time_tot,
+     1                bkgprev, bkgsyn,int_ri,int_rj
+      real          wd, ws, rh, q, t_ref, tc,
      1                u_disp, v_disp,delta_h,delta_t,delta_u,
-     1                delta_v, rise_rate, maxHtProc,htM,htZ, 
-     1                t_laps, ht, htPrev,delta_s,pres_pa
+     1                delta_v, rise_rate, maxhtproc,htm,htz, 
+     1                t_laps, ht, htprev,delta_s,pres_pa
 
-! BEGIN
+! begin
       status = 1   !assume a good return
 
-      timePrev = timeSyn - 3600
-      timeSynComp = timeSyn
-      timePrevComp = timePrev
-      if ((fileAvail .eq. 1) .or. (fileAvailUV .eq. 1)) timePrevComp = 0
-      if ((fileAvail .eq. 2) .or. (fileAvailUV .eq. 2)) timeSynComp = 0
-      if (statusL(1,6) .eq. 1) then
-        bkgSyn = 1 
+      timeprev = timesyn - 3600
+      timesyncomp = timesyn
+      timeprevcomp = timeprev
+      if ((fileavail .eq. 1) .or. (fileavailuv .eq. 1)) timeprevcomp = 0
+      if ((fileavail .eq. 2) .or. (fileavailuv .eq. 2)) timesyncomp = 0
+      if (statusl(1,6) .eq. 1) then
+        bkgsyn = 1 
       else
-        bkgSyn = 0 
+        bkgsyn = 0 
       endif
-      if (statusL(2,6) .eq. 1) then
-        bkgPrev = 1 
+      if (statusl(2,6) .eq. 1) then
+        bkgprev = 1 
       else
-        bkgPrev = 0 
+        bkgprev = 0 
       endif
 
-      if ((bkgSyn .eq. 0) .and. (bkgPrev .eq. 0)) then
-        write(6,*) 'No LGA background available...',
+      if ((bkgsyn .eq. 0) .and. (bkgprev .eq. 0)) then
+        write(6,*) 'no lga background available...',
      1             'using psatoz for pressure/height calcs for temp'
       endif
-      if ((timePrevComp .eq. 0) .and. (timeSynComp .eq. 0)) then
-        write(6,*) ' No temp/wind data to process '
+      if ((timeprevcomp .eq. 0) .and. (timesyncomp .eq. 0)) then
+        write(6,*) ' no temp/wind data to process '
         status = 0
         return
       endif
 
-      maxHtProc = max_ht_m_proc  !max htSigW value to process (in meters)
+      maxhtproc = max_ht_m_proc  !max htsigw value to process (in meters)
 
 !     setup for ascention
       index = 0
       u_disp = 0.
       v_disp = 0.
-      time_tot = timeRel
+      time_tot = timerel
       rise_rate = 300. / 60. ! m/s
-      htPrev = staElev
+      htprev = staelev
 
 !     loop thru levels
-      numT = -1
+      numt = -1
       lvl = 1
 
-      do while (lvl .le. numSigT)
+      do while (lvl .le. numsigt)
 
-c       write(6,*) 'prSigT(lvl,raobId)=',prSigT(lvl,raobId), lvl, raobId
+c       write(6,*) 'prsigt(lvl,raobid)=',prsigt(lvl,raobid), lvl, raobid
 
-        if (htSigT(lvl,raobId) .ne. verif_missing_data) then 
-          write(6,*) 'Height from htMan used'
-          ht = htSigT(lvl,raobId)
+        if (htsigt(lvl,raobid) .ne. verif_missing_data) then 
+          write(6,*) 'height from htman used'
+          ht = htsigt(lvl,raobid)
         else
-          if (prSigT(lvl,raobId) .ne. raob_missing_data) then
-C           quick and dirty for now...need ri,rj,timeLaps for pressure_to_height
-            ht = psatoz(prSigT(lvl,raobId))
+          if (prsigt(lvl,raobid) .ne. raob_missing_data) then
+c           quick and dirty for now...need ri,rj,timelaps for pressure_to_height
+            ht = psatoz(prsigt(lvl,raobid))
           else
             ht = raob_missing_data
           endif
         endif
 
-c       write(6,*) 'height from ztopsa=',ht, prSigT(lvl,raobId)
+c       write(6,*) 'height from ztopsa=',ht, prsigt(lvl,raobid)
 
-C       stop below htSigW(max) because of ascend
-        if ((ht .gt. 0) .and. (ht .le. maxHtProc) .and.
+c       stop below htsigw(max) because of ascend
+        if ((ht .gt. 0) .and. (ht .le. maxhtproc) .and.
      1      (ht .ne. raob_missing_data) .and.
-     1      (ht .le. htSigW(numSigW,raobId))) then
+     1      (ht .le. htsigw(numsigw,raobid))) then
 
-          call interpWind2T(maxW, maxRaob, numSigW, wdSigW, 
-     1                      wsSigW, htSigW, raobId, maxHtProc, 
+          call interpwind2t(maxw, maxraob, numsigw, wdsigw, 
+     1                      wssigw, htsigw, raobid, maxhtproc, 
      1                      ht, ws, wd, istatus)
           if (istatus .eq.1) then
             index = index + 1
 
             if (index .ge. 1) then
 
-C             fill in prPT, tPT, tdPT from sigT vars
-              prPT(index,raobId) = prSigT(lvl,raobId)
-              tPT(index,raobId) = tSigT(lvl,raobId)
-              tdPT(index,raobId) = tdSigT(lvl,raobId)
-              typeTM(index,raobId) = typeT(lvl,raobId)
+c             fill in prpt, tpt, tdpt from sigt vars
+              prpt(index,raobid) = prsigt(lvl,raobid)
+              tpt(index,raobid) = tsigt(lvl,raobid)
+              tdpt(index,raobid) = tdsigt(lvl,raobid)
+              typetm(index,raobid) = typet(lvl,raobid)
 
-              delta_h = ht - htPrev
+              delta_h = ht - htprev
 
               delta_t = delta_h / rise_rate
               time_tot = time_tot + nint(delta_t + 0.5)
-              if (abs(time_tot - timeSynComp) .gt. 
-     1            abs(time_tot - timePrevComp)) then
-                timeLapsT(index,raobId) = timePrev
+              if (abs(time_tot - timesyncomp) .gt. 
+     1            abs(time_tot - timeprevcomp)) then
+                timelapst(index,raobid) = timeprev
               else
-                timeLapsT(index,raobId) = timeSyn
+                timelapst(index,raobid) = timesyn
               endif
 
               delta_s = ws * delta_t
@@ -736,57 +736,57 @@ C             fill in prPT, tPT, tdPT from sigT vars
               delta_v = -cosd(wd) * delta_s
               u_disp = u_disp + delta_u
               v_disp = v_disp + delta_v
-              latT(index,raobId) = staLat + v_disp / 111000.
-              lonT(index,raobId) = staLon + u_disp / 
-     1                 (111000.* cosd((staLat+latT(index,raobId))/2))
-              htPrev = ht
+              latt(index,raobid) = stalat + v_disp / 111000.
+              lont(index,raobid) = stalon + u_disp / 
+     1                 (111000.* cosd((stalat+latt(index,raobid))/2))
+              htprev = ht
 
-!             Determine LAPS i,j,k
+!             determine laps i,j,k
 
-              call latlon_to_rlapsgrid(latT(index,raobId),
-     1                                 lonT(index,raobId),
+              call latlon_to_rlapsgrid(latt(index,raobid),
+     1                                 lont(index,raobid),
      1                                 lat,lon,nx,ny,
-     1                                 riT(index,raobId),
-     1                                 rjT(index,raobId),
+     1                                 rit(index,raobid),
+     1                                 rjt(index,raobid),
      1                                 istatus)
 
-              if (istatus .ne. 1) then  !out of Laps domain...rest probably too
-                 numT = index - 1
-                 lvl = numSigT + 1
+              if (istatus .ne. 1) then  !out of laps domain...rest probably too
+                 numt = index - 1
+                 lvl = numsigt + 1
                 if (index .gt. 1) then  !save what have
                   goto 777
                 else
-                  write(6,*) 'Raob ',wmoStaNum,' not in Laps domain  ',
-     1                      latT(index,raobId),' ',lonT(index,raobId)
+                  write(6,*) 'raob ',wmostanum,' not in laps domain  ',
+     1                      latt(index,raobid),' ',lont(index,raobid)
                   goto 777
                 endif
               endif
 
-C             re-calc height more accurately now that have ri, rj
-              if (htSigT(lvl,raobId) .eq. verif_missing_data) then  !not Man height...recalc
+c             re-calc height more accurately now that have ri, rj
+              if (htsigt(lvl,raobid) .eq. verif_missing_data) then  !not man height...recalc
               else
-                htM = ht
+                htm = ht
               endif
 
-                pres_pa = prSigT(lvl,raobId) * 100
-                int_ri = nint(riT(index,raobId))
-                int_rj = nint(rjT(index,raobId))
+                pres_pa = prsigt(lvl,raobid) * 100
+                int_ri = nint(rit(index,raobid))
+                int_rj = nint(rjt(index,raobid))
 
-                if ((bkgSyn.eq.1).and.(bkgPrev.eq.1)) then  !use bkg closest to timeLaps(index,raobId)
-                  if (timeLapsT(index,raobId) .eq. timeSyn) then
-                    call pressure_to_height(pres_pa,htLgaGS,nx,ny,
+                if ((bkgsyn.eq.1).and.(bkgprev.eq.1)) then  !use bkg closest to timelaps(index,raobid)
+                  if (timelapst(index,raobid) .eq. timesyn) then
+                    call pressure_to_height(pres_pa,htlgags,nx,ny,
      1                                      nk,int_ri,int_rj,ht,istatus)
                   else
-                    call pressure_to_height(pres_pa,htLgaGP,nx,ny,
+                    call pressure_to_height(pres_pa,htlgagp,nx,ny,
      1                                      nk,int_ri,int_rj,ht,istatus)
                   endif
                 else
-                  if (bkgSyn .eq. 1) then  ! use htLgaGS
-                    call pressure_to_height(pres_pa,htLgaGS,nx,ny,
+                  if (bkgsyn .eq. 1) then  ! use htlgags
+                    call pressure_to_height(pres_pa,htlgags,nx,ny,
      1                                      nk,int_ri,int_rj,ht,istatus)
                   else
-                    if (bkgPrev .eq. 1) then  ! use htLgaGP
-                      call pressure_to_height(pres_pa,htLgaGP,nx,ny,
+                    if (bkgprev .eq. 1) then  ! use htlgagp
+                      call pressure_to_height(pres_pa,htlgagp,nx,ny,
      1                                      nk,int_ri,int_rj,ht,istatus)
                     else
                       ! leave calc from psatoz
@@ -795,84 +795,84 @@ C             re-calc height more accurately now that have ri, rj
                 endif
 c             endif
 
-              if (htSigT(lvl,raobId) .eq. verif_missing_data) then  !not Man height...recalc
-              htT(index,raobId) = ht
+              if (htsigt(lvl,raobid) .eq. verif_missing_data) then  !not man height...recalc
+              htt(index,raobid) = ht
               else
-              htT(index,raobId) = htM
-              htZ = psatoz(prSigT(lvl,raobId))
-              write(6,*) 'ht=',ht,'  htM=',htM,'  htZ=',htZ
+              htt(index,raobid) = htm
+              htz = psatoz(prsigt(lvl,raobid))
+              write(6,*) 'ht=',ht,'  htm=',htm,'  htz=',htz
 
               endif
-              rkT(index,raobId) = 
-     1          zcoord_of_logpressure(prSigT(lvl,raobId)*100.)
+              rkt(index,raobid) = 
+     1          zcoord_of_logpressure(prsigt(lvl,raobid)*100.)
 
-              if (rkT(index,raobId) .le. nk) then
+              if (rkt(index,raobid) .le. nk) then
 
-!               determine which LAPS grid to use and interpolate T in the vertical 
-                if (timeLapsT(index,raobId) .eq. timeSyn) then
+!               determine which laps grid to use and interpolate t in the vertical 
+                if (timelapst(index,raobid) .eq. timesyn) then
 
-                  call trilinear_laps(riT(index,raobId),
-     1                                rjT(index,raobId),
-     1                                rkT(index,raobId),nx,ny,nk,
-     1                                tLapsGS, tIT(index,raobId))
+                  call trilinear_laps(rit(index,raobid),
+     1                                rjt(index,raobid),
+     1                                rkt(index,raobid),nx,ny,nk,
+     1                                tlapsgs, tit(index,raobid))
 
-                  call trilinear_laps(riT(index,raobId),
-     1                                rjT(index,raobId),
-     1                                rkT(index,raobId),nx,ny,nk,
-     1                                htLapsGS, ht)
+                  call trilinear_laps(rit(index,raobid),
+     1                                rjt(index,raobid),
+     1                                rkt(index,raobid),nx,ny,nk,
+     1                                htlapsgs, ht)
 
-                  call trilinear_laps(riT(index,raobId),
-     1                                rjT(index,raobId),
-     1                                rkT(index,raobId),nx,ny,nk,
-     1                                rhLapsGS, rh)
+                  call trilinear_laps(rit(index,raobid),
+     1                                rjt(index,raobid),
+     1                                rkt(index,raobid),nx,ny,nk,
+     1                                rhlapsgs, rh)
 
                   rh = rh/100.0
-                  prIT(index,raobId) = ztopsa(ht)
+                  prit(index,raobid) = ztopsa(ht)
                   t_ref = -132.0
-                  tC = k_to_c(tIT(index,raobId))
-                  q = make_ssh(prIT(index,raobId),tC,rh,t_ref) 
-                  tdIT(index,raobId) = 
-     1              make_td(prIT(index,raobId),tC,q,t_ref)
-                  tdIT(index,raobId) = c_to_k(tdIT(index,raobId))
+                  tc = k_to_c(tit(index,raobid))
+                  q = make_ssh(prit(index,raobid),tc,rh,t_ref) 
+                  tdit(index,raobid) = 
+     1              make_td(prit(index,raobid),tc,q,t_ref)
+                  tdit(index,raobid) = c_to_k(tdit(index,raobid))
 
                 else
 
-                  call trilinear_laps(riT(index,raobId),
-     1                                rjT(index,raobId),
-     1                                rkT(index,raobId),nx,ny,nk,
-     1                                tLapsGP, tIT(index,raobId))
+                  call trilinear_laps(rit(index,raobid),
+     1                                rjt(index,raobid),
+     1                                rkt(index,raobid),nx,ny,nk,
+     1                                tlapsgp, tit(index,raobid))
 
-                  call trilinear_laps(riT(index,raobId),
-     1                                rjT(index,raobId),
-     1                                rkT(index,raobId),nx,ny,nk,
-     1                                htLapsGS, ht)
+                  call trilinear_laps(rit(index,raobid),
+     1                                rjt(index,raobid),
+     1                                rkt(index,raobid),nx,ny,nk,
+     1                                htlapsgs, ht)
 
-                  call trilinear_laps(riT(index,raobId),
-     1                                rjT(index,raobId),
-     1                                rkT(index,raobId),nx,ny,nk,
-     1                                rhLapsGP, rh)
+                  call trilinear_laps(rit(index,raobid),
+     1                                rjt(index,raobid),
+     1                                rkt(index,raobid),nx,ny,nk,
+     1                                rhlapsgp, rh)
 
-                  prIT(index,raobId) = ztopsa(ht)
+                  prit(index,raobid) = ztopsa(ht)
                   t_ref = -132.0
-                  tC = k_to_c(tIT(index,raobId))
-                  q = make_ssh(prIT(index,raobId),tC,rh,t_ref) 
-                  tdIT(index,raobId) = 
-     1               make_td(prIT(index,raobId),tC,q,t_ref)
+                  tc = k_to_c(tit(index,raobid))
+                  q = make_ssh(prit(index,raobid),tc,rh,t_ref) 
+                  tdit(index,raobid) = 
+     1               make_td(prit(index,raobid),tc,q,t_ref)
 
                 endif
 
-!               check tIT(index,raobId) for validity
-                if (tIT(index,raobId) .ge. 350) then
+!               check tit(index,raobid) for validity
+                if (tit(index,raobid) .ge. 350) then
                   index = index - 1
                 endif
               else
-                numT = index - 1
-                lvl = numSigT + 1
+                numt = index - 1
+                lvl = numsigt + 1
                 if (index .gt. 1) then  !save what have
                   goto 777
                 else
-                 write(6,*) 'Raob ',wmoStaNum,' is above Laps domain  ',
-     1                       rkT(index,raobId)
+                 write(6,*) 'raob ',wmostanum,' is above laps domain  ',
+     1                       rkt(index,raobid)
                   goto 777
                 endif
               endif
@@ -886,75 +886,75 @@ c             endif
 
       enddo
 
-      if (numT .eq. -1) numT = index
+      if (numt .eq. -1) numt = index
 
-C     pass back modified typeT
-      do j = 1, numT
-        typeT(j,raobId) = typeTM(j,raobId)
+c     pass back modified typet
+      do j = 1, numt
+        typet(j,raobid) = typetm(j,raobid)
       enddo
  
       return
       end
 !3.....................................................................................
-      subroutine interpWind2T(maxW, maxRaob, numSigW, wdSigW, 
-     1                        wsSigW, htSigW, raobId, maxHtProc, 
+      subroutine interpwind2t(maxw, maxraob, numsigw, wdsigw, 
+     1                        wssigw, htsigw, raobid, maxhtproc, 
      1                        ht, ws, wd, istatus)
 
       implicit none
-      integer    maxW, maxRaob, numSigW, raobId, maxHtProc, 
+      integer    maxw, maxraob, numsigw, raobid, maxhtproc, 
      1             istatus, u, l, i, true, false, found, last
-      real       htSigW(maxW,maxRaob), wdSigW(maxW,maxRaob),
-     1             wsSigW(maxW,maxRaob), ht, ws, wd, deltaWS
+      real       htsigw(maxw,maxraob), wdsigw(maxw,maxraob),
+     1             wssigw(maxw,maxraob), ht, ws, wd, deltaws
 
 ! begin
       istatus = 1
       true = 1
       false = 0
 
-!     We know that ht < maxHtProc and ht <= htSigW(numSigW,raobId)
+!     we know that ht < maxhtproc and ht <= htsigw(numsigw,raobid)
         l = 1
-      if (htSigW(1,raobId) .eq. 0.0) then
-        if (numSigW .ge. 3) then
+      if (htsigw(1,raobid) .eq. 0.0) then
+        if (numsigw .ge. 3) then
           l = 2
           u = 3
         else
           istatus = 0
           return
         endif
-      elseif (numSigW .ge. 2) then
+      elseif (numsigw .ge. 2) then
         l = 1
         u = 2
       endif
 
-      if (ht .lt. htSigW(l,raobId)) then
+      if (ht .lt. htsigw(l,raobid)) then
         istatus = 0
         return
       endif
 
-!     We know that ht >= htSigW(l,raobId) and ht <= htSigW(numSigW,raobId)
+!     we know that ht >= htsigw(l,raobid) and ht <= htsigw(numsigw,raobid)
 
       found = false
       last = false
-      do while ((u .le. numSigW) .and. (found .eq. false) .and.
+      do while ((u .le. numsigw) .and. (found .eq. false) .and.
      1          (last .eq. false)) 
-        if ((ht .ge. htSigW(l,raobId)) .and.
-     1      (ht .le. htSigW(u,raobId))) then
+        if ((ht .ge. htsigw(l,raobid)) .and.
+     1      (ht .le. htsigw(u,raobid))) then
           found = true
-        elseif (u .eq. numSigW) then
+        elseif (u .eq. numsigw) then
           last = true
-        elseif (ht .gt. htSigW(u,raobId)) then
+        elseif (ht .gt. htsigw(u,raobid)) then
           l = l + 1
           u = u + 1
         endif
       enddo
 
       if (found .eq. true) then
-        ws = wsSigW(l,raobId) + ((ht-htSigW(l,raobId)) *
-     1       ((wsSigW(u,raobId)-wsSigW(l,raobId)) /
-     1        (htSigW(u,raobId)-htSigW(l,raobId))))
-        wd = wdSigW(l,raobId) + ((ht-htSigW(l,raobId)) *
-     1       ((wdSigW(u,raobId)-wdSigW(l,raobId)) /
-     1        (htSigW(u,raobId)-htSigW(l,raobId))))
+        ws = wssigw(l,raobid) + ((ht-htsigw(l,raobid)) *
+     1       ((wssigw(u,raobid)-wssigw(l,raobid)) /
+     1        (htsigw(u,raobid)-htsigw(l,raobid))))
+        wd = wdsigw(l,raobid) + ((ht-htsigw(l,raobid)) *
+     1       ((wdsigw(u,raobid)-wdsigw(l,raobid)) /
+     1        (htsigw(u,raobid)-htsigw(l,raobid))))
         istatus = 1
       else
         istatus = 0
@@ -963,340 +963,340 @@ C     pass back modified typeT
       return
       end
 !4....................................................................................
-      subroutine mergeTW(MAX_HTS,MAX_RAOBS,maxW,maxT,numW,numT,
-     1                   nRaobs,use_raob,n_raobs_use,
-     1                   ri,rj,rk,lat,lon,hts,type,uP,uI,vP,vI,
-     1                   tP,tI,tdP,tdI,prP,prI,timeLaps,nHts,
-     1                   riT,rjT,rkT,latT,lonT,htT,typeT,
-     1                   riW,rjW,rkW,latW,lonW,htW,typeW,
-     1                   uIW,vIW,uPW,vPW,timeLapsW,
-     1                   prIT,tIT,tdIT,prPT,tPT,tdPT,timeLapsT,
+      subroutine mergetw(max_hts,max_raobs,maxw,maxt,numw,numt,
+     1                   nraobs,use_raob,n_raobs_use,
+     1                   ri,rj,rk,lat,lon,hts,type,up,ui,vp,vi,
+     1                   tp,ti,tdp,tdi,prp,pri,timelaps,nhts,
+     1                   rit,rjt,rkt,latt,lont,htt,typet,
+     1                   riw,rjw,rkw,latw,lonw,htw,typew,
+     1                   uiw,viw,upw,vpw,timelapsw,
+     1                   prit,tit,tdit,prpt,tpt,tdpt,timelapst,
      1                   verif_missing_data, raob_missing_data,
      1                   istatus)
 
       implicit none
 
-      integer		MAX_HTS,MAX_RAOBS,maxW,maxT,
-     1                  nRaobs,use_raob(MAX_RAOBS),
+      integer		max_hts,max_raobs,maxw,maxt,
+     1                  nraobs,use_raob(max_raobs),
      1                  n_raobs_use
 
-C     data written out
-      real            ri(MAX_HTS,MAX_RAOBS),
-     1                  rj(MAX_HTS,MAX_RAOBS),
-     1                  rk(MAX_HTS,MAX_RAOBS),
-     1                  lat(MAX_HTS,MAX_RAOBS),
-     1                  lon(MAX_HTS,MAX_RAOBS),
-     1                  hts(MAX_HTS,MAX_RAOBS)
-      character*1       type(MAX_HTS,MAX_RAOBS)
-      real            uP(MAX_HTS,MAX_RAOBS),
-     1                  uI(MAX_HTS,MAX_RAOBS),
-     1                  vP(MAX_HTS,MAX_RAOBS),
-     1                  vI(MAX_HTS,MAX_RAOBS),
-     1                  tP(MAX_HTS,MAX_RAOBS),
-     1                  tI(MAX_HTS,MAX_RAOBS),
-     1                  tdP(MAX_HTS,MAX_RAOBS),
-     1                  tdI(MAX_HTS,MAX_RAOBS),
-     1                  prP(MAX_HTS,MAX_RAOBS),
-     1                  prI(MAX_HTS,MAX_RAOBS)
-      integer         timeLaps(MAX_HTS,MAX_RAOBS),
-     1                  nHts(MAX_RAOBS)
+c     data written out
+      real            ri(max_hts,max_raobs),
+     1                  rj(max_hts,max_raobs),
+     1                  rk(max_hts,max_raobs),
+     1                  lat(max_hts,max_raobs),
+     1                  lon(max_hts,max_raobs),
+     1                  hts(max_hts,max_raobs)
+      character*1       type(max_hts,max_raobs)
+      real            up(max_hts,max_raobs),
+     1                  ui(max_hts,max_raobs),
+     1                  vp(max_hts,max_raobs),
+     1                  vi(max_hts,max_raobs),
+     1                  tp(max_hts,max_raobs),
+     1                  ti(max_hts,max_raobs),
+     1                  tdp(max_hts,max_raobs),
+     1                  tdi(max_hts,max_raobs),
+     1                  prp(max_hts,max_raobs),
+     1                  pri(max_hts,max_raobs)
+      integer         timelaps(max_hts,max_raobs),
+     1                  nhts(max_raobs)
 
-C     temp variables
-      integer         numT(MAX_RAOBS),
-     1			timeLapsT(maxT,MAX_RAOBS)
-      character*1       typeT(maxT,MAX_RAOBS)
-      real            riT(maxT,MAX_RAOBS),
-     1                  rjT(maxT,MAX_RAOBS),
-     1                  rkT(maxT,MAX_RAOBS),
-     1                  latT(maxT,MAX_RAOBS),
-     1                  lonT(maxT,MAX_RAOBS),
-     1                  htT(maxT,MAX_RAOBS),
-     1                  prIT(maxT,MAX_RAOBS),
-     1                  tIT(maxT,MAX_RAOBS),
-     1                  tdIT(maxT,MAX_RAOBS),
-     1                  prPT(maxT,MAX_RAOBS),
-     1                  tPT(maxT,MAX_RAOBS),
-     1                  tdPT(maxT,MAX_RAOBS)
+c     temp variables
+      integer         numt(max_raobs),
+     1			timelapst(maxt,max_raobs)
+      character*1       typet(maxt,max_raobs)
+      real            rit(maxt,max_raobs),
+     1                  rjt(maxt,max_raobs),
+     1                  rkt(maxt,max_raobs),
+     1                  latt(maxt,max_raobs),
+     1                  lont(maxt,max_raobs),
+     1                  htt(maxt,max_raobs),
+     1                  prit(maxt,max_raobs),
+     1                  tit(maxt,max_raobs),
+     1                  tdit(maxt,max_raobs),
+     1                  prpt(maxt,max_raobs),
+     1                  tpt(maxt,max_raobs),
+     1                  tdpt(maxt,max_raobs)
 
-C     wind variables
-      integer         numW(MAX_RAOBS),
-     1 			timeLapsW(maxW,MAX_RAOBS)
-      character*1       typeW(maxW,MAX_RAOBS)
-      real            riW(maxW,MAX_RAOBS),
-     1                  rjW(maxW,MAX_RAOBS),
-     1                  rkW(maxW,MAX_RAOBS),
-     1                  latW(maxW,MAX_RAOBS),
-     1                  lonW(maxW,MAX_RAOBS),
-     1                  htW(maxW,MAX_RAOBS),
-     1                  uIW(maxW,MAX_RAOBS),
-     1                  vIW(maxW,MAX_RAOBS),
-     1                  uPW(maxW,MAX_RAOBS),
-     1                  vPW(maxW,MAX_RAOBS)
+c     wind variables
+      integer         numw(max_raobs),
+     1 			timelapsw(maxw,max_raobs)
+      character*1       typew(maxw,max_raobs)
+      real            riw(maxw,max_raobs),
+     1                  rjw(maxw,max_raobs),
+     1                  rkw(maxw,max_raobs),
+     1                  latw(maxw,max_raobs),
+     1                  lonw(maxw,max_raobs),
+     1                  htw(maxw,max_raobs),
+     1                  uiw(maxw,max_raobs),
+     1                  viw(maxw,max_raobs),
+     1                  upw(maxw,max_raobs),
+     1                  vpw(maxw,max_raobs)
 
       real		verif_missing_data,
      1                  raob_missing_data
       integer		istatus
 
-C     local variables
+c     local variables
 
-      integer		tPtr,wPtr,index,i,j,nDiff
-      real		sumDiff,avgDiff,pctDiff,
-     1                  sumPctDiff,avgPctDiff,
-     1                  rkDiff
+      integer		tptr,wptr,index,i,j,ndiff
+      real		sumdiff,avgdiff,pctdiff,
+     1                  sumpctdiff,avgpctdiff,
+     1                  rkdiff
 
-C
-C     BEGIN
-C
+c
+c     begin
+c
       istatus = 1   !assume good return
-      nDiff = 0
-      sumDiff = 0
+      ndiff = 0
+      sumdiff = 0
 
-C     loop through raobs
-      do i = 1, nRaobs
+c     loop through raobs
+      do i = 1, nraobs
         if (use_raob(i) .eq. 1) then
 
-          write(6,*) 'Raob ',i,' before merge'
-          write(6,*) numW(i)
-          write(6,*) 'htW, typeW, uPW, vPW'
-          do j = 1, numW(i)
-            write(6,*) j,htW(j,i),typeW(j,i),uPW(j,i),
-     1                 vPW(j,i)
+          write(6,*) 'raob ',i,' before merge'
+          write(6,*) numw(i)
+          write(6,*) 'htw, typew, upw, vpw'
+          do j = 1, numw(i)
+            write(6,*) j,htw(j,i),typew(j,i),upw(j,i),
+     1                 vpw(j,i)
           enddo
 
-          write(6,*) numT(i)
-          write(6,*) 'htT, typeT, prPT, tPT, tdPT'
-          do j = 1, numT(i)
-            write(6,*) j,htT(j,i),typeT(j,i),prPT(j,i),
-     1                 tPT(j,i),tdPT(j,i)
+          write(6,*) numt(i)
+          write(6,*) 'htt, typet, prpt, tpt, tdpt'
+          do j = 1, numt(i)
+            write(6,*) j,htt(j,i),typet(j,i),prpt(j,i),
+     1                 tpt(j,i),tdpt(j,i)
           enddo
 
-C         setup pointers
-          tPtr = 1
-          wPtr = 1
+c         setup pointers
+          tptr = 1
+          wptr = 1
           index = 1
 
-C         both htT and htW should have no missing data...if it does, don't use it
-C         drive by sigT because it has more levels
+c         both htt and htw should have no missing data...if it does, don't use it
+c         drive by sigt because it has more levels
 
-          do while (tPtr .le. numT(i))
-            if (wPtr .le. numW(i)) then
+          do while (tptr .le. numt(i))
+            if (wptr .le. numw(i)) then
 
-C             verify ri,rj,rk,lat,lon,ht are valid
+c             verify ri,rj,rk,lat,lon,ht are valid
 
-              if (htW(wPtr,i) .lt. htT(tPtr,i)) then  ! W ob
-                hts(index,i) = htW(wPtr,i)
-                ri(index,i) = riW(wPtr,i)
-                rj(index,i) = rjW(wPtr,i)
-                rk(index,i) = rkW(wPtr,i)
-                lat(index,i) = latW(wPtr,i)
-                lon(index,i) = lonW(wPtr,i)
-                uP(index,i) = uPW(wPtr,i)
-                uI(index,i) = uIW(wPtr,i)
-                vP(index,i) = vPW(wPtr,i)
-                vI(index,i) = vIW(wPtr,i)
-                tP(index,i) = verif_missing_data
-                tI(index,i) = verif_missing_data
-                tdP(index,i) = verif_missing_data
-                tdI(index,i) = verif_missing_data
-                prP(index,i) = verif_missing_data
-                prI(index,i) = verif_missing_data
-                type(index,i) = 'W'
-                if (typeW(wPtr,i) .eq. 'M') then 
-                  write(6,*)'Raob ',i,' has mismatch Man htW.lt.htT',
-     1                      wPtr,' ',tPtr,' ',htW(wPtr,i),' ',
-     1                      htT(tPtr,i)
+              if (htw(wptr,i) .lt. htt(tptr,i)) then  ! w ob
+                hts(index,i) = htw(wptr,i)
+                ri(index,i) = riw(wptr,i)
+                rj(index,i) = rjw(wptr,i)
+                rk(index,i) = rkw(wptr,i)
+                lat(index,i) = latw(wptr,i)
+                lon(index,i) = lonw(wptr,i)
+                up(index,i) = upw(wptr,i)
+                ui(index,i) = uiw(wptr,i)
+                vp(index,i) = vpw(wptr,i)
+                vi(index,i) = viw(wptr,i)
+                tp(index,i) = verif_missing_data
+                ti(index,i) = verif_missing_data
+                tdp(index,i) = verif_missing_data
+                tdi(index,i) = verif_missing_data
+                prp(index,i) = verif_missing_data
+                pri(index,i) = verif_missing_data
+                type(index,i) = 'w'
+                if (typew(wptr,i) .eq. 'm') then 
+                  write(6,*)'raob ',i,' has mismatch man htw.lt.htt',
+     1                      wptr,' ',tptr,' ',htw(wptr,i),' ',
+     1                      htt(tptr,i)
                 endif
-                wPtr = wPtr + 1
+                wptr = wptr + 1
                 index = index + 1
               else
-                if (htT(tPtr,i) .lt. htW(wPtr,i)) then
-                  hts(index,i) = htT(tPtr,i)
-                  ri(index,i) = riT(tPtr,i)
-                  rj(index,i) = rjT(tPtr,i)
-                  rk(index,i) = rkT(tPtr,i)
-                  lat(index,i) = latT(tPtr,i)
-                  lon(index,i) = lonT(tPtr,i)
-                  uP(index,i) = verif_missing_data
-                  uI(index,i) = verif_missing_data
-                  vP(index,i) = verif_missing_data
-                  vI(index,i) = verif_missing_data
-                  tP(index,i) = tPT(tPtr,i)
-                  tI(index,i) = tIT(tPtr,i)
-                  tdP(index,i) = tdPT(tPtr,i)
-                  tdI(index,i) = tdIT(tPtr,i)
-                  prP(index,i) = prPT(tPtr,i)
-                  prI(index,i) = prIT(tPtr,i)
-                  type(index,i) = 'T'
-                  if (typeT(tPtr,i) .eq. 'M') then 
-                    write(6,*)'Raob ',i,' has mismatch Man htT.lt.htW',
-     1                        wPtr,' ',tPtr,' ',htW(wPtr,i),' ',
-     1                        htT(tPtr,i)
+                if (htt(tptr,i) .lt. htw(wptr,i)) then
+                  hts(index,i) = htt(tptr,i)
+                  ri(index,i) = rit(tptr,i)
+                  rj(index,i) = rjt(tptr,i)
+                  rk(index,i) = rkt(tptr,i)
+                  lat(index,i) = latt(tptr,i)
+                  lon(index,i) = lont(tptr,i)
+                  up(index,i) = verif_missing_data
+                  ui(index,i) = verif_missing_data
+                  vp(index,i) = verif_missing_data
+                  vi(index,i) = verif_missing_data
+                  tp(index,i) = tpt(tptr,i)
+                  ti(index,i) = tit(tptr,i)
+                  tdp(index,i) = tdpt(tptr,i)
+                  tdi(index,i) = tdit(tptr,i)
+                  prp(index,i) = prpt(tptr,i)
+                  pri(index,i) = prit(tptr,i)
+                  type(index,i) = 't'
+                  if (typet(tptr,i) .eq. 'm') then 
+                    write(6,*)'raob ',i,' has mismatch man htt.lt.htw',
+     1                        wptr,' ',tptr,' ',htw(wptr,i),' ',
+     1                        htt(tptr,i)
                   endif
-                  tPtr = tPtr + 1
+                  tptr = tptr + 1
                   index = index + 1
                 else
-                  if (htW(wPtr,i) .eq. htT(tPtr,i)) then
-                    if ((typeW(wPtr,i) .eq. 'M') .and.  !find corresponding entry in T data
-     1                  (riW(wPtr,i) .eq. riT(tPtr,i)) .and.
-     1                  (rjW(wPtr,i) .eq. rjT(tPtr,i)) .and.
-     1                  (latW(wPtr,i) .eq. latT(tPtr,i)) .and.
-     1                  (lonW(wPtr,i) .eq. lonT(tPtr,i))) then
-c                     if (abs(rkDiff) .lt. 0.02) then
-                        hts(index,i) = htW(wPtr,i)
-                        ri(index,i) = riW(wPtr,i)
-                        rj(index,i) = rjW(wPtr,i)
-                        rk(index,i) = rkW(wPtr,i)
-                        lat(index,i) = latW(wPtr,i)
-                        lon(index,i) = lonW(wPtr,i)
-                        uP(index,i) = uPW(wPtr,i)
-                        uI(index,i) = uIW(wPtr,i)
-                        vP(index,i) = vPW(wPtr,i)
-                        vI(index,i) = vIW(wPtr,i)
-                        tP(index,i) = tPT(tPtr,i)
-                        tI(index,i) = tIT(tPtr,i)
-                        tdP(index,i) = tdPT(tPtr,i)
-                        tdI(index,i) = tdIT(tPtr,i)
-                        prP(index,i) = prPT(tPtr,i)
-                        prI(index,i) = prIT(tPtr,i)
-                        type(index,i) = 'M'
+                  if (htw(wptr,i) .eq. htt(tptr,i)) then
+                    if ((typew(wptr,i) .eq. 'm') .and.  !find corresponding entry in t data
+     1                  (riw(wptr,i) .eq. rit(tptr,i)) .and.
+     1                  (rjw(wptr,i) .eq. rjt(tptr,i)) .and.
+     1                  (latw(wptr,i) .eq. latt(tptr,i)) .and.
+     1                  (lonw(wptr,i) .eq. lont(tptr,i))) then
+c                     if (abs(rkdiff) .lt. 0.02) then
+                        hts(index,i) = htw(wptr,i)
+                        ri(index,i) = riw(wptr,i)
+                        rj(index,i) = rjw(wptr,i)
+                        rk(index,i) = rkw(wptr,i)
+                        lat(index,i) = latw(wptr,i)
+                        lon(index,i) = lonw(wptr,i)
+                        up(index,i) = upw(wptr,i)
+                        ui(index,i) = uiw(wptr,i)
+                        vp(index,i) = vpw(wptr,i)
+                        vi(index,i) = viw(wptr,i)
+                        tp(index,i) = tpt(tptr,i)
+                        ti(index,i) = tit(tptr,i)
+                        tdp(index,i) = tdpt(tptr,i)
+                        tdi(index,i) = tdit(tptr,i)
+                        prp(index,i) = prpt(tptr,i)
+                        pri(index,i) = prit(tptr,i)
+                        type(index,i) = 'm'
 c                     else   !mismatch on nav...write out wind only
-c                       hts(index,i) = htW(wPtr,i)
-c                       ri(index,i) = riW(wPtr,i)
-c                       rj(index,i) = rjW(wPtr,i)
-c                       rk(index,i) = rkW(wPtr,i)
-c                       lat(index,i) = latW(wPtr,i)
-c                       lon(index,i) = lonW(wPtr,i)
-c                       uP(index,i) = uPW(wPtr,i)
-c                       uI(index,i) = uIW(wPtr,i)
-c                       vP(index,i) = vPW(wPtr,i)
-c                       vI(index,i) = vIW(wPtr,i)
-c                       tP(index,i) = verif_missing_data
-c                       tI(index,i) = verif_missing_data
-c                       tdP(index,i) = verif_missing_data
-c                       tdI(index,i) = verif_missing_data
-c                       prP(index,i) = verif_missing_data
-c                       prI(index,i) = verif_missing_data
-c                       type(index,i) = 'M'
+c                       hts(index,i) = htw(wptr,i)
+c                       ri(index,i) = riw(wptr,i)
+c                       rj(index,i) = rjw(wptr,i)
+c                       rk(index,i) = rkw(wptr,i)
+c                       lat(index,i) = latw(wptr,i)
+c                       lon(index,i) = lonw(wptr,i)
+c                       up(index,i) = upw(wptr,i)
+c                       ui(index,i) = uiw(wptr,i)
+c                       vp(index,i) = vpw(wptr,i)
+c                       vi(index,i) = viw(wptr,i)
+c                       tp(index,i) = verif_missing_data
+c                       ti(index,i) = verif_missing_data
+c                       tdp(index,i) = verif_missing_data
+c                       tdi(index,i) = verif_missing_data
+c                       prp(index,i) = verif_missing_data
+c                       pri(index,i) = verif_missing_data
+c                       type(index,i) = 'm'
 
 c                     endif
                     else
-                      hts(index,i) = htW(wPtr,i)
-                      ri(index,i) = riW(wPtr,i)
-                      rj(index,i) = rjW(wPtr,i)
-                      rk(index,i) = rkW(wPtr,i)
-                      lat(index,i) = latW(wPtr,i)
-                      lon(index,i) = lonW(wPtr,i)
-                      uP(index,i) = uPW(wPtr,i)
-                      uI(index,i) = uIW(wPtr,i)
-                      vP(index,i) = vPW(wPtr,i)
-                      vI(index,i) = vIW(wPtr,i)
-                      tP(index,i) = verif_missing_data
-                      tI(index,i) = verif_missing_data
-                      tdP(index,i) = verif_missing_data
-                      tdI(index,i) = verif_missing_data
-                      prP(index,i) = verif_missing_data
-                      prI(index,i) = verif_missing_data
-                      type(index,i) = 'M'
+                      hts(index,i) = htw(wptr,i)
+                      ri(index,i) = riw(wptr,i)
+                      rj(index,i) = rjw(wptr,i)
+                      rk(index,i) = rkw(wptr,i)
+                      lat(index,i) = latw(wptr,i)
+                      lon(index,i) = lonw(wptr,i)
+                      up(index,i) = upw(wptr,i)
+                      ui(index,i) = uiw(wptr,i)
+                      vp(index,i) = vpw(wptr,i)
+                      vi(index,i) = viw(wptr,i)
+                      tp(index,i) = verif_missing_data
+                      ti(index,i) = verif_missing_data
+                      tdp(index,i) = verif_missing_data
+                      tdi(index,i) = verif_missing_data
+                      prp(index,i) = verif_missing_data
+                      pri(index,i) = verif_missing_data
+                      type(index,i) = 'm'
 
-                      rkDiff = rkW(wPtr,i) - rkT(tPtr,i)
-                      write(6,*) 'rkDiff = ',rkDiff
+                      rkdiff = rkw(wptr,i) - rkt(tptr,i)
+                      write(6,*) 'rkdiff = ',rkdiff
   
-                      pctDiff = ((rkW(wPtr,i)-rkT(tPtr,i))/
-     1                         rkW(wPtr,i))*100
-                      sumPctDiff = sumPctDiff + pctDiff
-                      sumDiff = sumDiff + (rkW(wPtr,i)-rkT(tPtr,i))
-                      nDiff = nDiff + 1
-                      write(6,*)'Raob ',i, ' has Man data'
-     1                         , ' rkW rkT pres %diff(w-t)/w ht'
-                      write(6,*)rkW(wPtr,i),rkT(tPtr,i),prPT(tPtr,i),
-     1                          pctDiff,hts(index,i)
-                      write(6,*) 'latW/T lonW/T riW/T rjW/T'
-                      write(6,*) latW(wPtr,i), latT(tPtr,i),
-     1                           lonW(wPtr,i), lonT(tPtr,i),
-     1                           riW(wPtr,i), riT(tPtr,i),
-     1                           rjW(wPtr,i), rjT(tPtr,i)
+                      pctdiff = ((rkw(wptr,i)-rkt(tptr,i))/
+     1                         rkw(wptr,i))*100
+                      sumpctdiff = sumpctdiff + pctdiff
+                      sumdiff = sumdiff + (rkw(wptr,i)-rkt(tptr,i))
+                      ndiff = ndiff + 1
+                      write(6,*)'raob ',i, ' has man data'
+     1                         , ' rkw rkt pres %diff(w-t)/w ht'
+                      write(6,*)rkw(wptr,i),rkt(tptr,i),prpt(tptr,i),
+     1                          pctdiff,hts(index,i)
+                      write(6,*) 'latw/t lonw/t riw/t rjw/t'
+                      write(6,*) latw(wptr,i), latt(tptr,i),
+     1                           lonw(wptr,i), lont(tptr,i),
+     1                           riw(wptr,i), rit(tptr,i),
+     1                           rjw(wptr,i), rjt(tptr,i)
                       write(6,*)
                     endif
 
-                    wPtr = wPtr + 1
-                    tPtr = tPtr + 1
+                    wptr = wptr + 1
+                    tptr = tptr + 1
                     index = index + 1
 
-                  endif   !htW(wPtr,i) .eq. htT(tPtr,i)
-                endif   !htT(tPtr,i) .lt. htW(wPtr,i)
-              endif   !htW(wPtr,i) .lt. htT(tPtr,i) 
+                  endif   !htw(wptr,i) .eq. htt(tptr,i)
+                endif   !htt(tptr,i) .lt. htw(wptr,i)
+              endif   !htw(wptr,i) .lt. htt(tptr,i) 
 
-            else  !wPtr .gt numW(i)
+            else  !wptr .gt numw(i)
 
-              do while (tPtr .le. numT(i))
-                hts(index,i) = htT(tPtr,i)
-                ri(index,i) = riT(tPtr,i)
-                rj(index,i) = rjT(tPtr,i)
-                rk(index,i) = rkT(tPtr,i)
-                lat(index,i) = latT(tPtr,i)
-                lon(index,i) = lonT(tPtr,i)
-                uP(index,i) = verif_missing_data
-                uI(index,i) = verif_missing_data
-                vP(index,i) = verif_missing_data
-                vI(index,i) = verif_missing_data
-                tP(index,i) = tPT(tPtr,i)
-                tI(index,i) = tIT(tPtr,i)
-                tdP(index,i) = tdPT(tPtr,i)
-                tdI(index,i) = tdIT(tPtr,i)
-                prP(index,i) = prPT(tPtr,i)
-                prI(index,i) = prIT(tPtr,i)
-                type(index,i) = 'T'
+              do while (tptr .le. numt(i))
+                hts(index,i) = htt(tptr,i)
+                ri(index,i) = rit(tptr,i)
+                rj(index,i) = rjt(tptr,i)
+                rk(index,i) = rkt(tptr,i)
+                lat(index,i) = latt(tptr,i)
+                lon(index,i) = lont(tptr,i)
+                up(index,i) = verif_missing_data
+                ui(index,i) = verif_missing_data
+                vp(index,i) = verif_missing_data
+                vi(index,i) = verif_missing_data
+                tp(index,i) = tpt(tptr,i)
+                ti(index,i) = tit(tptr,i)
+                tdp(index,i) = tdpt(tptr,i)
+                tdi(index,i) = tdit(tptr,i)
+                prp(index,i) = prpt(tptr,i)
+                pri(index,i) = prit(tptr,i)
+                type(index,i) = 't'
 
-                tPtr = tPtr + 1
+                tptr = tptr + 1
                 index = index + 1
               enddo
-            endif  !wPtr .le. numW(i)
+            endif  !wptr .le. numw(i)
 
-          enddo    !tPtr .le. numT(i)
+          enddo    !tptr .le. numt(i)
 
-C         save number of heights for raob(i)
-          nHts(i) = index - 1
+c         save number of heights for raob(i)
+          nhts(i) = index - 1
 
-C         do final sweep on data to make sure all missing values equal verif_missing_data
-          do j = 1, nHts(i)
-            if (uP(j,i).eq.raob_missing_data)  
-     1          uP(j,i) = verif_missing_data
-            if (uI(j,i).eq.raob_missing_data)  
-     1          uI(j,i) = verif_missing_data
-            if (vP(j,i).eq.raob_missing_data)  
-     1          vP(j,i) = verif_missing_data
-            if (vI(j,i).eq.raob_missing_data)  
-     1          vI(j,i) = verif_missing_data
-            if (tP(j,i).eq.raob_missing_data)  
-     1          tP(j,i) = verif_missing_data
-            if (tI(j,i).eq.raob_missing_data)  
-     1          tI(j,i) = verif_missing_data
-            if (tdP(j,i).eq.raob_missing_data)  
-     1          tdP(j,i) = verif_missing_data
-            if (tdI(j,i).eq.raob_missing_data)  
-     1          tdI(j,i) = verif_missing_data
-            if (prP(j,i).eq.raob_missing_data)  
-     1          prP(j,i) = verif_missing_data
-            if (prI(j,i).eq.raob_missing_data)  
-     1          prI(j,i) = verif_missing_data
+c         do final sweep on data to make sure all missing values equal verif_missing_data
+          do j = 1, nhts(i)
+            if (up(j,i).eq.raob_missing_data)  
+     1          up(j,i) = verif_missing_data
+            if (ui(j,i).eq.raob_missing_data)  
+     1          ui(j,i) = verif_missing_data
+            if (vp(j,i).eq.raob_missing_data)  
+     1          vp(j,i) = verif_missing_data
+            if (vi(j,i).eq.raob_missing_data)  
+     1          vi(j,i) = verif_missing_data
+            if (tp(j,i).eq.raob_missing_data)  
+     1          tp(j,i) = verif_missing_data
+            if (ti(j,i).eq.raob_missing_data)  
+     1          ti(j,i) = verif_missing_data
+            if (tdp(j,i).eq.raob_missing_data)  
+     1          tdp(j,i) = verif_missing_data
+            if (tdi(j,i).eq.raob_missing_data)  
+     1          tdi(j,i) = verif_missing_data
+            if (prp(j,i).eq.raob_missing_data)  
+     1          prp(j,i) = verif_missing_data
+            if (pri(j,i).eq.raob_missing_data)  
+     1          pri(j,i) = verif_missing_data
           enddo 
 
-          write(6,*) 'Raob ',i,' after merge'
-          write(6,*) nHts(i)
-          write(6,*) 'hts, type, prP, tP, uP, vP'
-          do j = 1, nHts(i)
-            write(6,*) j,hts(j,i),type(j,i), prP(j,i),
-     1                 tP(j,i), uP(j,i), vP(j,i)
+          write(6,*) 'raob ',i,' after merge'
+          write(6,*) nhts(i)
+          write(6,*) 'hts, type, prp, tp, up, vp'
+          do j = 1, nhts(i)
+            write(6,*) j,hts(j,i),type(j,i), prp(j,i),
+     1                 tp(j,i), up(j,i), vp(j,i)
           enddo
 
         endif    !use_raob(i) .eq. 1
       enddo    !loop through raobs
 
-      if (nDiff .gt. 0) then
-        avgPctDiff = sumPctDiff/nDiff
-        avgDiff = sumDiff/nDiff
-        write(6,*) 'Avg diff on rk = ',avgDiff,'  nDiff = ',nDiff
-        write(6,*) 'Avg pct diff = ',avgPctDiff
+      if (ndiff .gt. 0) then
+        avgpctdiff = sumpctdiff/ndiff
+        avgdiff = sumdiff/ndiff
+        write(6,*) 'avg diff on rk = ',avgdiff,'  ndiff = ',ndiff
+        write(6,*) 'avg pct diff = ',avgpctdiff
         write(6,*)
       endif
 

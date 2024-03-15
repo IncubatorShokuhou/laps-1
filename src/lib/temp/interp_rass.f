@@ -8,11 +8,11 @@
      1                             max_rs,max_rs_levels,r_missing_data,
      1                             temp_bkg_3d,heights_3d,pres_3d)
 
-!       Profiler Stuff
+!       profiler stuff
         real lat_pr(max_rs)
         real lon_pr(max_rs)
 
-!       RASS Observations
+!       rass observations
         integer nlevels_obs(max_rs)
         real ob_pr_ht_obs(max_rs,max_rs_levels)
         real ob_pr_t_obs(max_rs,max_rs_levels)
@@ -23,12 +23,12 @@
 
         t_interp = r_missing_data
 
-!  ***  Interpolate the LAPS temps to the input RASS heights *******
+!  ***  interpolate the laps temps to the input rass heights *******
         do k_laps = 2,nk
 
             if( heights_3d(i_ob,j_ob,k_laps-1) .le. 
      1                                         ob_pr_ht_obs(i_pr,k_rass)
-     1                                    .AND.
+     1                                    .and.
      1          heights_3d(i_ob,j_ob,k_laps)   .ge. 
      1                                         ob_pr_ht_obs(i_pr,k_rass)
      1                                                             )then

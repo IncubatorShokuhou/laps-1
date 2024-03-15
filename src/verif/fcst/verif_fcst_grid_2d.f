@@ -8,7 +8,7 @@
      1                  n_fcst_times,
      1                  j_status)
 
-        use mem_namelist, ONLY: path_to_gps
+        use mem_namelist, only: path_to_gps
 
         real var_anal_2d(ni,nj)
         real var_fcst_2d(ni,nj)
@@ -33,7 +33,7 @@
         integer max_fcst_times
         parameter (max_fcst_times=200)
 
-        character EXT*31, directory*255, c_model*30
+        character ext*31, directory*255, c_model*30
 
         character*10  units_2d
         character*125 comment_2d
@@ -50,19 +50,19 @@
 
         logical l_persist, l_good_persist 
 
-!       Specify what is being verified
-        data ext_fcst_a /'fsf'/ ! 2-D
-        data ext_anal_a /'lcv'/ ! 2-D
-        data var_a /'S8A'/
+!       specify what is being verified
+        data ext_fcst_a /'fsf'/ ! 2-d
+        data ext_anal_a /'lcv'/ ! 2-d
+        data var_a /'s8a'/
       
         real rms_a (n_fields,maxbgmodels,0:max_fcst_times)
 
-!       Declarations from compare_analysis_to_rad
+!       declarations from compare_analysis_to_rad
         real cloud_frac_vis_a(ni,nj),tb8_k(ni,nj),t_gnd_k(ni,nj)
      1        ,t_sfc_k(ni,nj),cvr_max(ni,nj),cvr_sao_max(ni,nj)
      1        ,dbz_max_2d(ni,nj),solar_alt(ni,nj),swi_2d(ni,nj)
 
-!       How much the solar radiation varies with changes in cloud fraction
+!       how much the solar radiation varies with changes in cloud fraction
         real cvr_scl_a(ni,nj) 
 
         real rad_clr(ni,nj)
@@ -95,18 +95,18 @@
         character*1 c1_c
         character title*60, ver_file*256, filename*9
 
-!       End Declarations 
+!       end declarations 
 
-        write(6,*)' Start subroutine verif_fcst_grid_2d...'
+        write(6,*)' start subroutine verif_fcst_grid_2d...'
 
-        l_persist = .true. ! Add persistence forecast for evaluation
+        l_persist = .true. ! add persistence forecast for evaluation
 
         rmiss = -99.9
 
         call get_laps_domain_95(ni,nj,lat,lon,topo
      1           ,rlaps_land_frac,grid_spacing_cen_m,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS domain'
+            write(6,*)' error getting laps domain'
             return
         endif
 
@@ -120,13 +120,13 @@
 
         lun_in = 21
 
-!       Get fdda_model_source from static file
+!       get fdda_model_source from static file
         call get_fdda_model_source(c_fdda_mdl_src,n_fdda_models,istatus)
 
         if(l_persist .eqv. .true.)then
             n_fdda_models = n_fdda_models + 1
             c_fdda_mdl_src(n_fdda_models) = 'persistence'
-            write(6,*)' Adding persistence to fdda_models'
+            write(6,*)' adding persistence to fdda_models'
         endif
 
         write(6,*)' n_fdda_models = ',n_fdda_models
@@ -134,14 +134,14 @@
      1            ,(c_fdda_mdl_src(m),m=1,n_fdda_models)
 
 !       if(n_fdda_models .ne. n_models + 1)then
-!           write(6,*)' ERROR n_models differs from n_fdda_models '
+!           write(6,*)' error n_models differs from n_fdda_models '
 !    1                       ,n_models,n_fdda_models
 !           stop
 !       endif
 
         if(n_fdda_models .lt. 2)then
-            write(6,*)' WARNING: n_fdda_models is less than 2'
-            write(6,*)' Check nest7grid.parms specification'
+            write(6,*)' warning: n_fdda_models is less than 2'
+            write(6,*)' check nest7grid.parms specification'
         endif
 
         do ifield = 1,n_fields
@@ -154,11 +154,11 @@
 
           write(6,*) 
           write(6,*) 
-          write(6,*)' Processing field ',trim(var_2d) 
+          write(6,*)' processing field ',trim(var_2d) 
 
           call get_directory('verif',verif_dir,len_verif)
 
-          if(trim(var_2d) .eq. 'S8A')then      
+          if(trim(var_2d) .eq. 's8a')then      
               istart_fcst = 1
           else
               istart_fcst = 0
@@ -184,7 +184,7 @@
           write(6,*)'hist_file = ',hist_file(1:len_histf)
           open(lun_out,file=hist_file(1:len_histf),status='unknown')
 
-!         Write comment with model member names
+!         write comment with model member names
           write(lun_out,902)(trim(c_fdda_mdl_src(imodel))
      1                     ,imodel=2,n_fdda_models)
 902       format('# ',30(1x,a))
@@ -204,7 +204,7 @@
             if(c_model(1:3) .ne. 'lga')then
 
               write(6,*)
-              write(6,*)' Processing model ',c_model
+              write(6,*)' processing model ',c_model
 
               call s_len(c_model,len_model)
 
@@ -225,7 +225,7 @@
                 call make_fnam_lp(i4_valid,a9time_valid,istatus)
 
                 write(6,*) 
-                write(6,*)' Processing time ',a9time_valid
+                write(6,*)' processing time ',a9time_valid
 
                 call cv_i4tim_asc_lp(i4_valid,atime_s,istatus)
 
@@ -233,7 +233,7 @@
                 ybar = rmiss
                 std = rmiss
 
-                write(6,*)' Reading 2D analysis i4_valid = ',i4_valid
+                write(6,*)' reading 2d analysis i4_valid = ',i4_valid
 
                 i4_fcst = i4_valid - i4_initial
 
@@ -255,16 +255,16 @@
                     pct_missing = (float(nmissing) / float(ni*nj))*100.
 
                     if(pct_missing .le. 10.)then
-                        write(6,*)' WARNING: missing analysis data for '
+                        write(6,*)' warning: missing analysis data for '
      1                             ,var_2d,nmissing,pct_missing
                     else
-                        write(6,*)' ERROR: missing analysis data for '
+                        write(6,*)' error: missing analysis data for '
      1                             ,var_2d,nmissing,pct_missing
                         goto 980
                     endif
 
                 elseif(istatus .ne. 1)then
-                    write(6,*)' Error reading 2D Analysis for '
+                    write(6,*)' error reading 2d analysis for '
      1                         ,var_2d
                     goto 980
                 endif
@@ -280,19 +280,19 @@
                 if(c_fdda_mdl_src(imodel) .ne. 'persistence')then
 
                  if(itime_fcst .lt. istart_fcst)then
-                  write(6,*)' Forecast unavailable at time ',itime_fcst       
+                  write(6,*)' forecast unavailable at time ',itime_fcst       
                   goto 990
                  endif
 
-                 if(trim(var_2d) .ne. 'SSF')then
+                 if(trim(var_2d) .ne. 'ssf')then
 
-                  write(6,*)' Reading forecast field ',atime_s
+                  write(6,*)' reading forecast field ',atime_s
 
-!                 Read forecast field
+!                 read forecast field
                   ext = ext_fcst_a(ifield)
                   call get_directory(ext,directory,len_dir)
 
-                  DIRECTORY=directory(1:len_dir)//c_model(1:len_model)
+                  directory=directory(1:len_dir)//c_model(1:len_model)
      1                                          //'/'
 
                   call get_lapsdata_2d(i4_initial,i4_valid
@@ -302,17 +302,17 @@
      1                          ,var_fcst_2d
      1                          ,istatus)
 
-!                 Suppress 00hr SWI if from some models since it would have been
-!                 pulled in via LFMPOST from a LAPS analysis
+!                 suppress 00hr swi if from some models since it would have been
+!                 pulled in via lfmpost from a laps analysis
 
-                  if(trim(var_2d) .eq. 'SWI')then              
+                  if(trim(var_2d) .eq. 'swi')then              
                      l_parse_result=
-     1                   (l_parse(c_model(1:len_model),'hrrr') .OR.
-     1                    l_parse(c_model(1:len_model),'rr'  ) .OR.
+     1                   (l_parse(c_model(1:len_model),'hrrr') .or.
+     1                    l_parse(c_model(1:len_model),'rr'  ) .or.
      1                    l_parse(c_model(1:len_model),'rap-nh'))
                      if(l_parse_result .eqv. .true.)then       
                         if(i4_valid .eq. i4_initial)then
-                           write(6,*)' Suppressing 00hr SWI from '
+                           write(6,*)' suppressing 00hr swi from '
      1                                ,c_model(1:len_model)
                           istatus = 0
                         endif
@@ -320,7 +320,7 @@
                   endif
 
                   if(istatus .ne. 1)then
-                       write(6,*)' Error reading 2D Forecast for '
+                       write(6,*)' error reading 2d forecast for '
      1                           ,var_2d
                        goto 990
                   endif
@@ -328,18 +328,18 @@
                   write(6,*)var_2d,' fcst range is ',minval(var_fcst_2d)
      1                                              ,maxval(var_fcst_2d)
 
-                 else ! SSF
+                 else ! ssf
 
-                  write(6,*)' Reading forecast U/V to yield speed'
+                  write(6,*)' reading forecast u/v to yield speed'
 
-!                 Read forecast field
+!                 read forecast field
                   ext = ext_fcst_a(ifield)
                   call get_directory(ext,directory,len_dir)
 
-                  DIRECTORY=directory(1:len_dir)//c_model(1:len_model)
+                  directory=directory(1:len_dir)//c_model(1:len_model)
      1                                          //'/'
 
-                  var_2d_wind = 'USF'
+                  var_2d_wind = 'usf'
                   call get_lapsdata_2d(i4_initial,i4_valid
      1                          ,directory,var_2d_wind
      1                          ,units_2d,comment_2d
@@ -347,12 +347,12 @@
      1                          ,u_fcst_2d
      1                          ,istatus)
                   if(istatus .ne. 1)then
-                       write(6,*)' Error reading 2D Forecast for '
+                       write(6,*)' error reading 2d forecast for '
      1                           ,var_2d_wind
                        goto 990
                   endif
 
-                  var_2d_wind = 'VSF'
+                  var_2d_wind = 'vsf'
                   call get_lapsdata_2d(i4_initial,i4_valid
      1                          ,directory,var_2d_wind
      1                          ,units_2d,comment_2d
@@ -360,12 +360,12 @@
      1                          ,u_fcst_2d
      1                          ,istatus)
                   if(istatus .ne. 1)then
-                       write(6,*)' Error reading 2D Forecast for '
+                       write(6,*)' error reading 2d forecast for '
      1                           ,var_2d_wind
                        goto 990
                   endif
 
-                  var_2d_wind = 'VSF'
+                  var_2d_wind = 'vsf'
                   call get_lapsdata_2d(i4_initial,i4_valid
      1                          ,directory,var_2d_wind
      1                          ,units_2d,comment_2d
@@ -373,12 +373,12 @@
      1                          ,v_fcst_2d
      1                          ,istatus)
                   if(istatus .ne. 1)then
-                       write(6,*)' Error reading 2D Forecast for '
+                       write(6,*)' error reading 2d forecast for '
      1                           ,var_2d_wind
                        goto 990
                   endif
 
-!                 Convert U and V to wind speed
+!                 convert u and v to wind speed
                   do i = 1,ni
                   do j = 1,nj
                       call uv_to_disp(u_fcst_2d(i,j)
@@ -388,19 +388,19 @@
                   enddo ! j
                   enddo ! i
 
-                 endif ! SSF field
+                 endif ! ssf field
 
                 elseif(l_good_persist .eqv. .true.)then
                     write(6,*)
-     1                  ' Setting forecast to persistence gridded data '
+     1                  ' setting forecast to persistence gridded data '
      1                  ,var_2d
                     var_fcst_2d = var_prst_2d
                 else
-                    write(6,*)' Persistence fcst unavailable'
+                    write(6,*)' persistence fcst unavailable'
                     goto 990
                 endif
 
-                if(trim(var_2d) .eq. 'SWI')then
+                if(trim(var_2d) .eq. 'swi')then
                   swi_2d = var_fcst_2d
                 endif
                
@@ -417,7 +417,7 @@
 
                   var_s(ista) = var_anal_2d(i,j)
 
-                  if(var_s(ista) .gt. threshval .AND.
+                  if(var_s(ista) .gt. threshval .and.
      1               var_s(ista) .ne. r_missing_data)then ! valid ob  
                 
                     i_i = i
@@ -457,17 +457,17 @@
                 enddo ! i
 
                 write(6,*)
-                write(6,*)' Generic stats, cnt = ',nint(cnt)
+                write(6,*)' generic stats, cnt = ',nint(cnt)
 
                 if(cnt .eq. 0.)then
-                  write(6,*)' No obs - skipping calculation of stats'
-                  goto 980 ! Skip calculation of stats and write initialized flag values
+                  write(6,*)' no obs - skipping calculation of stats'
+                  goto 980 ! skip calculation of stats and write initialized flag values
                 endif
  
-1200            if(trim(var_2d) .eq. 'S8A')then
+1200            if(trim(var_2d) .eq. 's8a')then
                   maxsta = ni*nj
                   call stats_1d(maxsta,var_fcst_s,var_s
-     1                   ,'11 micron Sat: '
+     1                   ,'11 micron sat: '
      1                   ,a_t,b_t,xbar,ybar
      1                   ,bias,std,r_missing_data,istatus)
                   rms_a(ifield,imodel,itime_fcst) = std
@@ -477,16 +477,16 @@
 
 990             continue
  
-!               In General:
+!               in general:
 !               xbar is mean forecast value at the stations
 !               ybar is mean observed value at the stations
 
-!               For WSF (Surface Wind)
-!               xbar is the rms of U
-!               ybar is the rms of V
+!               for wsf (surface wind)
+!               xbar is the rms of u
+!               ybar is the rms of v
 
                 write(6,*)
-                write(6,*)' Writing to lun_out ',lun_out
+                write(6,*)' writing to lun_out ',lun_out
                 write(6,710)atime_s,xbar,ybar,std
                 write(lun_out,710)atime_s,xbar,ybar,std
 !               write(39,710)atime_s,xbar,ybar,std
@@ -502,12 +502,12 @@
 
           enddo ! model
 
-          write(6,*)' Closing lun_out ',lun_out
+          write(6,*)' closing lun_out ',lun_out
           close (lun_out) 
 
         enddo ! fields
 
- 999    write(6,*)' End of subroutine verif_fcst_grid_2d'
+ 999    write(6,*)' end of subroutine verif_fcst_grid_2d'
 
         return
 

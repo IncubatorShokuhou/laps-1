@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -42,20 +42,20 @@ cdis
      1  lat,lon,stdlat,stdlon,umean,vmean,nstorm,
      1  istorm,jstorm,storm_u,storm_v,istatus)
 
-c    Routine is called once per hour (actually at 20 after the hour).
-c    Each run, the previous hour centroid file is read and the next
-c    three (20 after, 40 after and on the hour) are run.  For example,
-c    at 1823, it reads in 1700, and then runs 1720, 1740 and 1800.  At 1900,
+c    routine is called once per hour (actually at 20 after the hour).
+c    each run, the previous hour centroid file is read and the next
+c    three (20 after, 40 after and on the hour) are run.  for example,
+c    at 1823, it reads in 1700, and then runs 1720, 1740 and 1800.  at 1900,
 c    it reads 1800, and then runs 1820, 1840 and 1900.
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c                               changes
 c
-c     7-11-91    mj   Deletes centroids within centroids.
-c                mj   Changed threshold for cells within areas to 40 dbz
+c     7-11-91    mj   deletes centroids within centroids.
+c                mj   changed threshold for cells within areas to 40 dbz
 c                          from 35 dbz.
 
-C INCLUDES AND DECLARATION OF VAR PASSED IN  ===========================
+c includes and declaration of var passed in  ===========================
 
         integer mxs
         parameter(mxs=75)
@@ -79,7 +79,7 @@ C INCLUDES AND DECLARATION OF VAR PASSED IN  ===========================
         real storm_u(mxs),storm_v(mxs)
         integer istorm(mxs),jstorm(mxs),nstorm
 
-C LOCAL VARIABLE DECLARATIONS *ALL COMMENTED OUT FOR NOW* ==============
+c local variable declarations *all commented out for now* ==============
 
 c       include 'segparms.for'
 
@@ -155,7 +155,7 @@ c    1           prv_max_jpos,new_flag(mxs)
 
 c       logical available(maxseg),l_low_fill,l_high_fill
 
-c.....  Stuff for LAPS Surface file (standard).
+c.....  stuff for laps surface file (standard).
 c
 c       real sigecho_flag
 
@@ -188,7 +188,7 @@ c
 c  dimensions for derived laps surface variables
 c
 c       real ref_thresh,thresh_ovlp,thresh_range
-c       data ref_thresh/30.0/,thresh_ovlp/-1.0E-3/,thresh_range/40.0/
+c       data ref_thresh/30.0/,thresh_ovlp/-1.0e-3/,thresh_range/40.0/
 
 c       integer thresh_run
 c       data thresh_run/1/
@@ -202,16 +202,16 @@ c       data dtr /0.01745329/       !degrees to radians
 c       real r(4),
 
 c       integer i4time_tol,i4time_hour,
-c    1          i4time_get,sys$trnlog,lenfil,ISTATUS,
+c    1          i4time_get,sys$trnlog,lenfil,istatus,
 c    1          itimes
 
-C BEGIN SUBROUTINE======================================================
+c begin subroutine======================================================
 
         nstorm = 0
         istatus = 1
 
         write(6,91)
-91      format(' Finished with dummy storm centroid/tracking',/,
+91      format(' finished with dummy storm centroid/tracking',/,
      1       ' =====================================')
         write(6,*)
         write(6,*)

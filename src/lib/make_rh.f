@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -32,11 +32,11 @@ cdis
         function make_rh (p,t,ssh,t_ref)
 
 c       this function is designed to compute (rh) from basic variables
-c       p (mb), t(c) and q (g/kg) to give rh in fraction.  The reference
+c       p (mb), t(c) and q (g/kg) to give rh in fraction.  the reference
 c       temperature t_ref (c) is used to describe the temperature at which
 c       the liquid and ice phase change occurs.
 
-c       Dan Birkenheuer    14 May 1993
+c       dan birkenheuer    14 may 1993
 
         implicit none
 
@@ -82,7 +82,7 @@ c                                               eslo approx
 
         else ! situation not covered (impossible)
 
-           write(6,*) 'Warning.. t and t_ref conflict, missing data
+           write(6,*) 'warning.. t and t_ref conflict, missing data
      1 returned'
            call get_r_missing_data(rmd, istatus)
 

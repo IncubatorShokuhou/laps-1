@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -40,20 +40,20 @@ cdis
       subroutine barnes_r5(t,imax,jmax,kmax,to,wt_p,cf_modelfg
      1  ,l_perimeter,cld_snd_in,wt_snd_in,r_missing_data
      1  ,grid_spacing_m,i_snd,j_snd,n_cld_snd,max_cld_snd
-     1  ,max_obs,weight_modelfg,NX_DIM_LUT,NY_DIM_LUT
-     1  ,IX_LOW,IX_HIGH,IY_LOW,IY_HIGH,n_fnorm,istatus)
+     1  ,max_obs,weight_modelfg,nx_dim_lut,ny_dim_lut
+     1  ,ix_low,ix_high,iy_low,iy_high,n_fnorm,istatus)
 
-!     1997 Aug 01  K. Dritz  - Added NX_DIM_LUT, NY_DIM_LUT, IX_LOW,
-!                              IX_HIGH, IY_LOW, IY_HIGH, and n_fnorm as
+!     1997 aug 01  k. dritz  - added nx_dim_lut, ny_dim_lut, ix_low,
+!                              ix_high, iy_low, iy_high, and n_fnorm as
 !                              dummy arguments.
-!     1997 Aug 01  K. Dritz  - Removed PARAMETER statements for the above.
-!     1997 Aug 01  K. Dritz  - Changed NX_L_MAX to imax and NY_L_MAX to jmax.
-!     1997 Aug 01  K. Dritz  - Added r_missing_data as dummy argument.
-!     1997 Aug 01  K. Dritz  - Removed include of lapsparms.for.
+!     1997 aug 01  k. dritz  - removed parameter statements for the above.
+!     1997 aug 01  k. dritz  - changed nx_l_max to imax and ny_l_max to jmax.
+!     1997 aug 01  k. dritz  - added r_missing_data as dummy argument.
+!     1997 aug 01  k. dritz  - removed include of lapsparms.for.
 
       include 'laps_cloud.inc'
 
-      integer NX_DIM_LUT,NY_DIM_LUT,IX_LOW,IX_HIGH,IY_LOW,IY_HIGH
+      integer nx_dim_lut,ny_dim_lut,ix_low,ix_high,iy_low,iy_high
 
       integer nskip,n_fnorm
 !     parameter (nskip = 2)
@@ -89,33 +89,33 @@ cdis
 
       real*8 weight,sum,sumwt,fraci,fracj,z1,z2,z3,z4
 
-      real*8 iiilut(-NX_DIM_LUT:NX_DIM_LUT,-NY_DIM_LUT:NY_DIM_LUT)
-      integer nlast(KCLOUD)
-      logical l_analyze(KCLOUD), l_diff_snd, l_debug
+      real*8 iiilut(-nx_dim_lut:nx_dim_lut,-ny_dim_lut:ny_dim_lut)
+      integer nlast(kcloud)
+      logical l_analyze(kcloud), l_diff_snd, l_debug
 
       write(6,*)' subroutine barnes_r5...'
 
-      allocate( cld_snd(max_cld_snd,kmax), STAT=istat_alloc )
+      allocate( cld_snd(max_cld_snd,kmax), stat=istat_alloc )
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate cldsnd'
+          write(6,*)' error: could not allocate cldsnd'
       endif
 
-      allocate( wt_snd(max_cld_snd,KCLOUD), STAT=istat_alloc )
+      allocate( wt_snd(max_cld_snd,kcloud), stat=istat_alloc )
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate wt_snd'
+          write(6,*)' error: could not allocate wt_snd'
       endif
 
-      allocate( cld_snd_diff(max_cld_snd,kmax), STAT=istat_alloc )
+      allocate( cld_snd_diff(max_cld_snd,kmax), stat=istat_alloc )
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate cldsnd_diff'
+          write(6,*)' error: could not allocate cldsnd_diff'
       endif
 
-      allocate( wt_snd_diff(max_cld_snd,KCLOUD), STAT=istat_alloc )
+      allocate( wt_snd_diff(max_cld_snd,kcloud), stat=istat_alloc )
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate wt_snd_diff'
+          write(6,*)' error: could not allocate wt_snd_diff'
       endif
 
-!     Convert from real to real*8
+!     convert from real to real*8
       cld_snd = cld_snd_in 
       wt_snd = wt_snd_in
 
@@ -126,21 +126,21 @@ cdis
 !     n_cld_snd = 9 ! enable for debug testing (use 'n_cld_snd_in' in arg list)
 
       if(n_cld_snd .gt. max_cld_snd)then
-          write(6,*)' barnes_r5: ERROR, too many cloud soundings'
+          write(6,*)' barnes_r5: error, too many cloud soundings'
           istatus = 0
           return
       endif 
 
-!     Note that this routine is considerably longer than it might need to
+!     note that this routine is considerably longer than it might need to
 !     be to allow maximum efficiency. 'nskip' controls how many points
-!     to skip in the i & j directions during the looping/analysis. The
+!     to skip in the i & j directions during the looping/analysis. the
 !     remaining points are filled in later by a faster bilinear interpolation
-!     step. Also, l_analyze(k) controls which levels are analyzed. If the
+!     step. also, l_analyze(k) controls which levels are analyzed. if the
 !     obs at a given level are a repeat of the obs at the next lower level,
 !     the looping again is skipped and the relevant summations are copied
 !     up from the lower level.
 
-!     Obtain and/or iterate for value of nskip
+!     obtain and/or iterate for value of nskip
       nskip = nint(20000. / grid_spacing_m)
       nskip = min(max(nskip,1),4)
 
@@ -149,27 +149,27 @@ cdis
 
       if(abs(rden_ratioi - nint(rden_ratioi))  .gt. .001
      1  .or.(rden_ratioj - nint(rden_ratioj))  .gt. .001)then
-          write(6,*)' Bad value of nskip'
+          write(6,*)' bad value of nskip'
           if(nskip .gt. 1)then
               nskip = nskip - 1
               goto 100
           elseif(nskip .eq. 1)then
-              write(6,*)' Code error - stop'
+              write(6,*)' code error - stop'
               stop
           endif
       else
-          write(6,*)' Good value of nskip = ',nskip
+          write(6,*)' good value of nskip = ',nskip
       endif
 
       if(l_diff_snd .and. l_debug)then
           nskip = 1
-          write(6,*)' Resetting nskip to ',nskip
+          write(6,*)' resetting nskip to ',nskip
       endif
 
       if(l_debug)then
           n_debug = 1000
 
-!         Extra output for test sounding (AIA in ROC domain)
+!         extra output for test sounding (aia in roc domain)
           it1 = 169
           jt1 = 129
 
@@ -181,7 +181,7 @@ cdis
 
       endif
 
-      write(6,*)' Number of cloud soundings = ',n_cld_snd
+      write(6,*)' number of cloud soundings = ',n_cld_snd
 
       istatus = 1
       exponent_distance_wt = 5.0
@@ -191,16 +191,16 @@ cdis
       iiione = 0
       iiifg = 0
       iiib = 0
-      grid_spacing_mc = grid_spacing_m * 10000. / 10080.8 ! For testing
+      grid_spacing_mc = grid_spacing_m * 10000. / 10080.8 ! for testing
 
       dist_norm = 100000. ! at 100km distance, ob weight = 1.
       dist_norm = dist_norm * sqrt(fnrmscl/1.533)
-      dist_norm_grid = dist_norm / grid_spacing_mc ! Normalized dist in grid pts
+      dist_norm_grid = dist_norm / grid_spacing_mc ! normalized dist in grid pts
       dist_norm_grid_sq = dist_norm_grid**2
 
       iiicorners = ((imax-1)**2 * (jmax-1)**2) * fnrmscl + 1
 
-!     More efficient way to say weight = (d / 100km) ** exponent_distance_wt
+!     more efficient way to say weight = (d / 100km) ** exponent_distance_wt
       do iii = 1,n_fnorm ! iii is loosely the dist in grid points squared
         fnorm(iii) = (dist_norm_grid_sq / float(iii)) 
      1                                 ** (exponent_distance_wt / 2.0)       
@@ -208,7 +208,7 @@ cdis
         rnorm = sqrt(float(iii) / dist_norm_grid_sq) ! normalized radius
         range = (dist_norm * rnorm) / sqrt(fnrmscl)
 
-!       Add ramp so we reach zero earlier
+!       add ramp so we reach zero earlier
         if(l_bterm)then
             b = max( min((6.-rnorm),1.) ,0.)
             fnorm_orig = fnorm(iii)
@@ -263,16 +263,16 @@ cdis
      1                                     * (dist_norm/1000.)
      1                                     * (1./sqrt(fnrmscl))
 
-! LSW comment added for AWIPS logging 7/1/04
-      write(6,*)' Optimizing Model background weight ...'
-      write(6,*)' Model background weight  = ',weight_modelfg
+! lsw comment added for awips logging 7/1/04
+      write(6,*)' optimizing model background weight ...'
+      write(6,*)' model background weight  = ',weight_modelfg
       write(6,*)' dist_norm = ',dist_norm
-      write(6,*)' Approx radius of influence (km) = '
+      write(6,*)' approx radius of influence (km) = '
      1         ,radius_of_influence_km
-      write(6,*)' Min possible ob weight   = ',fnorm(n_fnorm)
-      write(6,*)' Max possible ob weight   = ',fnorm(1)
-      write(6,*)' Weight Epsilon   = ',weight_epsilon
-      write(6,*)' Radius of influence (epsilon) = '
+      write(6,*)' min possible ob weight   = ',fnorm(n_fnorm)
+      write(6,*)' max possible ob weight   = ',fnorm(1)
+      write(6,*)' weight epsilon   = ',weight_epsilon
+      write(6,*)' radius of influence (epsilon) = '
      1                               ,radius_of_influence_eps
       write(6,*)' l_bterm = ',l_bterm
 
@@ -285,11 +285,11 @@ cdis
             do n = 1,n_cld_snd
               if(cld_snd(n,k) .eq. r_missing_data) go to 233
 
-!             Test if out of bounds of established perimeter around LAPS domain
-              if(i_snd(n) .lt. IX_LOW .or. 
-     1           i_snd(n) .gt. IX_HIGH) go to 233
-              if(j_snd(n) .lt. IY_LOW .or. 
-     1           j_snd(n) .gt. IY_HIGH) go to 233
+!             test if out of bounds of established perimeter around laps domain
+              if(i_snd(n) .lt. ix_low .or. 
+     1           i_snd(n) .gt. ix_high) go to 233
+              if(j_snd(n) .lt. iy_low .or. 
+     1           j_snd(n) .gt. iy_high) go to 233
 
               ncnt=ncnt+1
               iob(ncnt)=i_snd(n)
@@ -326,14 +326,14 @@ cdis
 
       enddo ! k
 
-!     Calculate difference soundings (soundings relative to level below)
-!     This will allow more efficient summing
-!     It is assumed for now that 'wt_snd' is always 1.00 or 'r_missing_data'
+!     calculate difference soundings (soundings relative to level below)
+!     this will allow more efficient summing
+!     it is assumed for now that 'wt_snd' is always 1.00 or 'r_missing_data'
       if(l_diff_snd)then
 
-          write(6,*)' Calculating difference soundings'
+          write(6,*)' calculating difference soundings'
 
-!         Initialize arrays
+!         initialize arrays
           cld_snd_diff = r_missing_data
           wt_snd_diff = r_missing_data
 
@@ -344,12 +344,12 @@ cdis
               wt_snd_diff(n,1) = wt_snd(n,1)
               if(n .le. n_debug)then 
                   write(6,*)
-                  write(6,*)' Cloud sounding # ',n,' at ',i_snd(n)
+                  write(6,*)' cloud sounding # ',n,' at ',i_snd(n)
      1                                                   ,j_snd(n)
 
                   if(l_debug)then
                       if(i_snd(n) .eq. it1 .and. j_snd(n) .eq. jt1)then
-                          write(6,*)' ******TEST SOUNDING ******'
+                          write(6,*)' ******test sounding ******'
                       endif
                   endif
 
@@ -373,7 +373,7 @@ cdis
 !                         if(cld_snd_diff(n,k) .eq. 0.)then ! identical
 !                             wt_snd_diff(n,k) = r_missing_data
 !                         else                              ! different
-                              wt_snd_diff(n,k) = 0D0
+                              wt_snd_diff(n,k) = 0d0
 !                         endif
                       endif
                   endif
@@ -398,10 +398,10 @@ cdis
          istatus = 1
          return
       else
-         write(6,*)' Ncnt/l_diff_snd = ',ncnt,l_diff_snd
+         write(6,*)' ncnt/l_diff_snd = ',ncnt,l_diff_snd
       endif
 
-      rr_max = (NX_DIM_LUT-1)**2 + (NY_DIM_LUT-1)**2
+      rr_max = (nx_dim_lut-1)**2 + (ny_dim_lut-1)**2
       iii_max = fnrmscl * rr_max + 1.
 
       write(6,*)' fnrmscl/iii_max/n_fnorm = '
@@ -414,9 +414,9 @@ cdis
           return
       endif
 
-!     Create a lookup table for fnorm(iii)
-      do i = -NX_DIM_LUT,NX_DIM_LUT
-      do j = -NY_DIM_LUT,NY_DIM_LUT
+!     create a lookup table for fnorm(iii)
+      do i = -nx_dim_lut,nx_dim_lut
+      do j = -ny_dim_lut,ny_dim_lut
           rr=i*i+j*j
           iii=fnrmscl*rr+1.
           if(iii .gt. n_fnorm)iii=n_fnorm
@@ -425,8 +425,8 @@ cdis
       enddo
 
       if(l_diff_snd)then
-          sum_a=0D0  
-          sumwt_a=0D0
+          sum_a=0d0  
+          sumwt_a=0d0
       endif
 
       do k=1,kmax
@@ -445,15 +445,15 @@ cdis
             write(6,*)k
      1                 ,sum_a(it1,jt1),sumwt_a(it1,jt1)
 !    1                 ,sum_a(it2,jt2),sumwt_a(it2,jt2)
-     1                 ,' SUM-A'
+     1                 ,' sum-a'
         endif
 
         if((l_analyze(k) .and. nobs .ge. 1) .or. k .eq. 1 
      1                                      .or. l_diff_snd)then
 
-          if( (.not. l_diff_snd) .OR. k .eq. 1)then
-              sum_a=0D0  
-              sumwt_a=0D0
+          if( (.not. l_diff_snd) .or. k .eq. 1)then
+              sum_a=0d0  
+              sumwt_a=0d0
           endif
 
           if(l_diff_snd)then
@@ -473,11 +473,11 @@ cdis
               else
                 l_use_snd = .true.
 
-!               Test if out of bounds of established perimeter around LAPS domain
-                if(i_snd(n) .lt. IX_LOW .or. 
-     1             i_snd(n) .gt. IX_HIGH) l_use_snd = .false.
-                if(j_snd(n) .lt. IY_LOW .or. 
-     1             j_snd(n) .gt. IY_HIGH) l_use_snd = .false.
+!               test if out of bounds of established perimeter around laps domain
+                if(i_snd(n) .lt. ix_low .or. 
+     1             i_snd(n) .gt. ix_high) l_use_snd = .false.
+                if(j_snd(n) .lt. iy_low .or. 
+     1             j_snd(n) .gt. iy_high) l_use_snd = .false.
 
                 ii = i_snd(n)
                 jj = j_snd(n)
@@ -486,7 +486,7 @@ cdis
 
               if(l_use_snd)then
 
-                if( (.not. l_diff_snd) .OR. k .eq. 1)then
+                if( (.not. l_diff_snd) .or. k .eq. 1)then
 
                   nanl = nanl + 1
 
@@ -510,13 +510,13 @@ cdis
                       endif
                   endif
 
-!                 Analyze every few grid points
+!                 analyze every few grid points
                   do j=jlow,jhigh,nskip
                   jmjj = j-jj
                   do i=ilow,ihigh,nskip
                       weight = iiilut(i-ii,jmjj) * wt_snd(nn,k) 
 
-!                     Obs are being weighted
+!                     obs are being weighted
                       sum_a(i,j)=weight*cld_snd(nn,k)+sum_a(i,j)
                       sumwt_a(i,j)=sumwt_a(i,j)+weight
 
@@ -530,23 +530,23 @@ cdis
      1                              ,weight_dbg
      1                              ,sum_a(it1,jt1),sumwt_a(it1,jt1)
 !    1                              ,sum_a(it2,jt2),sumwt_a(it2,jt2)
-     1                              ,' A'
+     1                              ,' a'
 
                   endif
 
                 else ! process difference soundings
 
-!                 Check if both sounding levels have valid values          
+!                 check if both sounding levels have valid values          
                   if(wt_snd_diff(nn,k) .eq. 0.)then 
                       nanl = nanl + 1
 
-!                     Analyze every few grid points
+!                     analyze every few grid points
                       do j=1,jmax,nskip
                       jmjj = j-jj
                       do i=1,imax,nskip
                           weight = iiilut(i-ii,jmjj) * wt_snd(nn,k) 
 
-!                         Obs are being weighted
+!                         obs are being weighted
                           sum_a(i,j)=weight*cld_snd_diff(nn,k)
      1                                     +sum_a(i,j)      
 
@@ -555,22 +555,22 @@ cdis
 
                       if(l_debug)then
                           write(6,*)k,nn
-     1                              ,' B'
+     1                              ,' b'
 
                       endif
 
-!                 Check if we are changing between valid and missing values
+!                 check if we are changing between valid and missing values
                   elseif(wt_snd_diff(nn,k) .ne. r_missing_data)then
 
                       nanl = nanl + 1
 
-!                     Analyze every few grid points
+!                     analyze every few grid points
                       do j=1,jmax,nskip
                       jmjj = j-jj
                       do i=1,imax,nskip
                           weight = iiilut(i-ii,jmjj) * wt_snd_diff(nn,k)
 
-!                         Obs are being weighted
+!                         obs are being weighted
                           sum_a(i,j)=weight*cld_snd_diff(nn,k)
      1                                     +sum_a(i,j)      
                           sumwt_a(i,j)=sumwt_a(i,j)+weight
@@ -586,7 +586,7 @@ cdis
      1                              ,weight_dbg
      1                              ,sum_a(it1,jt1),sumwt_a(it1,jt1)
 !    1                              ,sum_a(it2,jt2),sumwt_a(it2,jt2)
-     1                              ,' C'
+     1                              ,' c'
                       endif
 
                   endif ! wt_snd_diff
@@ -601,7 +601,7 @@ cdis
                 write(6,*)k
      1                 ,sum_a(it1,jt1),sumwt_a(it1,jt1)
 !    1                 ,sum_a(it2,jt2),sumwt_a(it2,jt2)
-     1                 ,' SUM-B'
+     1                 ,' sum-b'
           endif
 
           write(6,50)k,nstart,nstop,nobs,nanl
@@ -610,36 +610,36 @@ cdis
           do j=1,jmax,nskip
           do i=1,imax,nskip
 
-            if(l_diff_snd)then ! QC summations
+            if(l_diff_snd)then ! qc summations
 
-!             Prevent below zero values                 
-              sum_a(i,j) = dmax1(sum_a(i,j),0D0) 
-              sumwt_a(i,j) = dmax1(sumwt_a(i,j),0D0)
+!             prevent below zero values                 
+              sum_a(i,j) = dmax1(sum_a(i,j),0d0) 
+              sumwt_a(i,j) = dmax1(sumwt_a(i,j),0d0)
 
-!             Prevent sum from exceeding weight (cover > 1)
+!             prevent sum from exceeding weight (cover > 1)
               sum_a(i,j) = dmin1(sum_a(i,j),sumwt_a(i,j))
 
             endif
 
-!           Add in model first guess as an ob
+!           add in model first guess as an ob
             sum = sum_a(i,j) + weight_modelfg * cf_modelfg(i,j,k)
             sumwt = sumwt_a(i,j) + weight_modelfg
 
-!           Divide weights to get analysis = f(obs + background)
+!           divide weights to get analysis = f(obs + background)
             if (sumwt.eq.0.)then
               t(i,j,k) = r_missing_data
               istatus = 0
-            ELSE
+            else
               t(i,j,k)=sum/sumwt
             end if
 
             if(l_debug)then
                 if(i .eq. it1 .and. j .eq. jt1)then
-                  write(6,*)' Total sum',i,j,k,cf_modelfg(i,j,k)
+                  write(6,*)' total sum',i,j,k,cf_modelfg(i,j,k)
      1                        ,weight_modelfg,sum,sumwt,t(i,j,k)
                 endif
                 if(i .eq. it2 .and. j .eq. jt2)then
-                  write(6,*)' Total sum',i,j,k,cf_modelfg(i,j,k)
+                  write(6,*)' total sum',i,j,k,cf_modelfg(i,j,k)
      1                        ,weight_modelfg,sum,sumwt,t(i,j,k)
                 endif
             endif ! l_debug
@@ -651,12 +651,12 @@ cdis
                 write(6,*)k
      1                 ,sum_a(it1,jt1),sumwt_a(it1,jt1)
 !    1                 ,sum_a(it2,jt2),sumwt_a(it2,jt2)
-     1                 ,' SUM-C'
+     1                 ,' sum-c'
           endif
 
-!         Bilinearly interpolate to fill in rest of domain
-!         Fills in final analysis value and weights from obs alone
-!         We may have to extrapolate at the N and E edges
+!         bilinearly interpolate to fill in rest of domain
+!         fills in final analysis value and weights from obs alone
+!         we may have to extrapolate at the n and e edges
           do i = 1,imax
               lowi_lut(i) = (i-1)/nskip*nskip + 1
               il = lowi_lut(i)
@@ -681,7 +681,7 @@ cdis
                     if(i .eq. it1 .and. j .eq. jt1)then
                         write(6,*)k
      1                         ,sum_a(it1,jt1),sumwt_a(it1,jt1)
-     1                         ,' SUM-C1'
+     1                         ,' sum-c1'
                     endif
                   endif
 
@@ -689,32 +689,32 @@ cdis
                   ih = il + nskip
                   fraci = dble(i-il)/dble(nskip)
 
-!                 Calculate interpolated cloud cover
-                  Z1=t(il,jl,k)
-                  Z2=t(ih,jl,k)
-                  Z3=t(ih,jh,k)
-                  Z4=t(il,jh,k)
+!                 calculate interpolated cloud cover
+                  z1=t(il,jl,k)
+                  z2=t(ih,jl,k)
+                  z3=t(ih,jh,k)
+                  z4=t(il,jh,k)
 
-                  t(i,j,k) =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                - (Z2+Z4-Z3-Z1)*fraci*fracj
+                  t(i,j,k) =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                - (z2+z4-z3-z1)*fraci*fracj
 
-!                 Calculate interpolated ob summation
-                  Z1=sum_a(il,jl)
-                  Z2=sum_a(ih,jl)
-                  Z3=sum_a(ih,jh)
-                  Z4=sum_a(il,jh)
+!                 calculate interpolated ob summation
+                  z1=sum_a(il,jl)
+                  z2=sum_a(ih,jl)
+                  z3=sum_a(ih,jh)
+                  z4=sum_a(il,jh)
 
-                  sum_a(i,j) =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                        - (Z2+Z4-Z3-Z1)*fraci*fracj
+                  sum_a(i,j) =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                        - (z2+z4-z3-z1)*fraci*fracj
 
-!                 Calculate interpolated ob weight summation
-                  Z1=sumwt_a(il,jl)
-                  Z2=sumwt_a(ih,jl)
-                  Z3=sumwt_a(ih,jh)
-                  Z4=sumwt_a(il,jh)
+!                 calculate interpolated ob weight summation
+                  z1=sumwt_a(il,jl)
+                  z2=sumwt_a(ih,jl)
+                  z3=sumwt_a(ih,jh)
+                  z4=sumwt_a(il,jh)
 
-                  sumwt_a(i,j) =  Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1                        - (Z2+Z4-Z3-Z1)*fraci*fracj
+                  sumwt_a(i,j) =  z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1                        - (z2+z4-z3-z1)*fraci*fracj
 
               enddo ! i
           enddo ! j
@@ -723,45 +723,45 @@ cdis
                 write(6,*)k
      1                 ,sum_a(it1,jt1),sumwt_a(it1,jt1)
 !    1                 ,sum_a(it2,jt2),sumwt_a(it2,jt2)
-     1                 ,' SUM-D'
+     1                 ,' sum-d'
           endif
 
-        elseif(nobs .gt. 0)then ! Obs are identical to lvl below; 
-                                ! Use analysis weights from last analyzed level
+        elseif(nobs .gt. 0)then ! obs are identical to lvl below; 
+                                ! use analysis weights from last analyzed level
           write(6,51)k,nstart,nstop,nobs,nanl
 51        format(' lvl,nstart,nstop,nobs,nanl=',5i6,
-     1           ' Identical Obs; Copy wts from last analyzed lvl')       
+     1           ' identical obs; copy wts from last analyzed lvl')       
 
           km1 = k - 1
 
           do j=1,jmax
           do i=1,imax
 
-!             Recover weight summations from last analyzed level below
+!             recover weight summations from last analyzed level below
               sum = sum_a(i,j)
               sumwt = sumwt_a(i,j)
 
-!             Add in model first guess as an ob to 'sum'
-!             Note that sumwt does not need to be modified
+!             add in model first guess as an ob to 'sum'
+!             note that sumwt does not need to be modified
 
               sum   = sum   + weight_modelfg * cf_modelfg(i,j,k)
               sumwt = sumwt + weight_modelfg
 
-!             Divide weights to get analysis = f(obs + background)
+!             divide weights to get analysis = f(obs + background)
               if (sumwt.eq.0.)then
                 t(i,j,k) = r_missing_data
                 istatus = 0
-              ELSE
+              else
                 t(i,j,k)=sum/sumwt
               end if
 
           enddo ! i
           enddo ! j
 
-        else ! No Obs; Set level to model first guess
+        else ! no obs; set level to model first guess
           write(6,52)k,nstart,nstop,nobs,nanl
 52        format(' lvl,nstart,nstop,nobs,nanl=',5i6,
-     1                  ' No Obs; Set level to model fg')
+     1                  ' no obs; set level to model fg')
 
           do j=1,jmax
           do i=1,imax
@@ -779,9 +779,9 @@ cdis
       enddo ! k
 
       if(istatus .eq. 0)then
-          write(6,*)' WARNING: Distant obs given zero weight in barnes_r
+          write(6,*)' warning: distant obs given zero weight in barnes_r
      15'
-          write(6,*)' Try increasing bias_iii'
+          write(6,*)' try increasing bias_iii'
           write(6,*)' weight_modelfg = ',weight_modelfg
       endif
 

@@ -1,23 +1,23 @@
 
         subroutine equ_to_altaz_r(dec,ha,phi,alt,az)
 
-        IMPLICIT REAL*8(A-Z)
+        implicit real*8(a-z)
 
-        sindec = DSIN(dec)
-        cosdec = DCOS(dec)
-        sinphi = DSIN(phi)
-        cosphi = DCOS(phi)
-        cosha  = DCOS(ha)
+        sindec = dsin(dec)
+        cosdec = dcos(dec)
+        sinphi = dsin(phi)
+        cosphi = dcos(phi)
+        cosha  = dcos(ha)
 
-        alt=ASIN (sinphi*sindec+cosphi*cosdec*cosha)
-        az =ACOS((cosphi*sindec-sinphi*cosdec*cosha)/dcos(alt))
+        alt=asin (sinphi*sindec+cosphi*cosdec*cosha)
+        az =acos((cosphi*sindec-sinphi*cosdec*cosha)/dcos(alt))
 
         if(ha .gt. 0 .and. ha .lt. 3.1415926535897932d0)then !    0 to +180
-            az = 6.2831853071796D0 - az
+            az = 6.2831853071796d0 - az
         endif
 
         if(ha .lt. -3.1415926535897932d0)then                ! -360 to -180
-            az = 6.2831853071796D0 - az
+            az = 6.2831853071796d0 - az
         endif
 
         return
@@ -26,18 +26,18 @@
         subroutine angcoord_2d(c_conv,ni,nj,arg1,arg2,lat1,lon1,phi
      1                                               ,lat2,lon2)
 
-!       General purpose angular coordinate transformations in 2D
-!       This version works with single precision arguments in degrees
+!       general purpose angular coordinate transformations in 2d
+!       this version works with single precision arguments in degrees
 
         include 'trigd.inc'
 
-        parameter (pi = 3.1415926535897932E0)
+        parameter (pi = 3.1415926535897932e0)
         parameter (rpd = pi/180.)
 
-        ANGDIF(X,Y)=MOD(X-Y+9.4247779607694E0,6.2831853071796E0)
-     1                     -3.1415926535897932E0
+        angdif(x,y)=mod(x-y+9.4247779607694e0,6.2831853071796e0)
+     1                     -3.1415926535897932e0
 
-        ATAN3DF(x,y) = MOD((ATAN2(x,y)/rpd+360E0),360E0)
+        atan3df(x,y) = mod((atan2(x,y)/rpd+360e0),360e0)
 
         character*20 c_conv
 
@@ -52,7 +52,7 @@
           do i = 1,ni
           do j = 1,nj
             z = 90. - lat1(i,j)
-            azi = lon1(i,j) - 180. ! Counted from meridian
+            azi = lon1(i,j) - 180. ! counted from meridian
 
             sindec = cosd(z)*sind(phi)-sind(z)*cosd(phi)*cosd(azi)
             sindec = max(min(sindec,1.0),-1.0)

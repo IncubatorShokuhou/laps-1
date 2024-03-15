@@ -1,73 +1,73 @@
 
       subroutine land_albedo(lu,ni,nj,albedo)
 
-!     This routine takes land use categories and broadband albedo relationship
+!     this routine takes land use categories and broadband albedo relationship
 !     to derive a 3 color albedo
 
-      real lu(ni,nj)          ! Land Use (USGS 24 category)
-      real albedo(3,ni,nj)    ! Albedo (Red, Green, Blue)
+      real lu(ni,nj)          ! land use (usgs 24 category)
+      real albedo(3,ni,nj)    ! albedo (red, green, blue)
 
-!     See http://www.mmm.ucar.edu/mm5/mm5v2/landuse-usgs-tbl.html
+!     see http://www.mmm.ucar.edu/mm5/mm5v2/landuse-usgs-tbl.html
 
       do i = 1,ni
       do j = 1,nj
-          if(lu(i,j) .eq. 1.)then      ! Urban and Built-up Land   (.18 Gray)
+          if(lu(i,j) .eq. 1.)then      ! urban and built-up land   (.18 gray)
               albedo(1,i,j) = 0.13
               albedo(2,i,j) = 0.18
               albedo(3,i,j) = 0.11
-          elseif(lu(i,j) .eq. 2.)then  ! Dryland Cropland/Pasture  (.17 Brown)
+          elseif(lu(i,j) .eq. 2.)then  ! dryland cropland/pasture  (.17 brown)
               albedo(1,i,j) = 0.17
               albedo(2,i,j) = 0.17
               albedo(3,i,j) = 0.10
-          elseif(lu(i,j) .eq. 3.)then  ! Irrigtd Cropland/Pasture  (.18 Green)
+          elseif(lu(i,j) .eq. 3.)then  ! irrigtd cropland/pasture  (.18 green)
               albedo(1,i,j) = 0.13
               albedo(2,i,j) = 0.18
               albedo(3,i,j) = 0.09
-          elseif(lu(i,j) .eq. 4.)then  ! Mixed                     (.18 Green)
+          elseif(lu(i,j) .eq. 4.)then  ! mixed                     (.18 green)
               albedo(1,i,j) = 0.14
               albedo(2,i,j) = 0.18
               albedo(3,i,j) = 0.09
-          elseif(lu(i,j) .eq. 5.)then  ! Cropland Grassland Mosaic (.18 Green)
+          elseif(lu(i,j) .eq. 5.)then  ! cropland grassland mosaic (.18 green)
               albedo(1,i,j) = 0.14
               albedo(2,i,j) = 0.18
               albedo(3,i,j) = 0.09
-          elseif(lu(i,j) .eq. 6.)then  ! Cropland Woodland Mosaic  (.16 Green)
+          elseif(lu(i,j) .eq. 6.)then  ! cropland woodland mosaic  (.16 green)
               albedo(1,i,j) = 0.13
               albedo(2,i,j) = 0.16
               albedo(3,i,j) = 0.08
-          elseif(lu(i,j) .eq. 7.)then  ! Grassland                 (.19 Brown)
+          elseif(lu(i,j) .eq. 7.)then  ! grassland                 (.19 brown)
               albedo(1,i,j) = 0.19
               albedo(2,i,j) = 0.19
               albedo(3,i,j) = 0.10
-          elseif(lu(i,j) .eq. 8.)then  ! Shrubland                 (.22 Brown)
+          elseif(lu(i,j) .eq. 8.)then  ! shrubland                 (.22 brown)
               albedo(1,i,j) = 0.22
               albedo(2,i,j) = 0.22
               albedo(3,i,j) = 0.10
-          elseif(lu(i,j) .eq. 9.)then  ! Mixed Shrubland/Grassland (.20 Brown)
+          elseif(lu(i,j) .eq. 9.)then  ! mixed shrubland/grassland (.20 brown)
               albedo(1,i,j) = 0.20
               albedo(2,i,j) = 0.20
               albedo(3,i,j) = 0.10
-          elseif(lu(i,j) .eq. 10.)then ! Savanna                   (.20 Brown)
+          elseif(lu(i,j) .eq. 10.)then ! savanna                   (.20 brown)
               albedo(1,i,j) = 0.20
               albedo(2,i,j) = 0.20
               albedo(3,i,j) = 0.10
-          elseif(lu(i,j) .eq. 11.)then ! Deciduous Broadleaf       (.16 Green)
+          elseif(lu(i,j) .eq. 11.)then ! deciduous broadleaf       (.16 green)
               albedo(1,i,j) = 0.13
               albedo(2,i,j) = 0.16
               albedo(3,i,j) = 0.08
-          elseif(lu(i,j) .eq. 12.)then ! Deciduous Needleleaf      (.14 Green)
+          elseif(lu(i,j) .eq. 12.)then ! deciduous needleleaf      (.14 green)
               albedo(1,i,j) = 0.11
               albedo(2,i,j) = 0.14
               albedo(3,i,j) = 0.07
-          elseif(lu(i,j) .eq. 13.)then ! Evergreen Broadleaf       (.12 Green)
+          elseif(lu(i,j) .eq. 13.)then ! evergreen broadleaf       (.12 green)
               albedo(1,i,j) = 0.07
               albedo(2,i,j) = 0.09
               albedo(3,i,j) = 0.045
-          elseif(lu(i,j) .eq. 14.)then ! Evergreen Needleleaf      (.12 Green)
+          elseif(lu(i,j) .eq. 14.)then ! evergreen needleleaf      (.12 green)
               albedo(1,i,j) = 0.07
               albedo(2,i,j) = 0.09
               albedo(3,i,j) = 0.045
-          elseif(lu(i,j) .eq. 15.)then ! Mixed Forest              (.13 Green)
+          elseif(lu(i,j) .eq. 15.)then ! mixed forest              (.13 green)
               albedo(1,i,j) = 0.075
               albedo(2,i,j) = 0.10
               albedo(3,i,j) = 0.05
@@ -75,7 +75,7 @@
               albedo(1,i,j) = 0.08
               albedo(2,i,j) = 0.08
               albedo(3,i,j) = 0.08
-          elseif(lu(i,j) .eq. 19.)then ! Barren or Sparsely Vegetated (.25 Brown)
+          elseif(lu(i,j) .eq. 19.)then ! barren or sparsely vegetated (.25 brown)
               albedo(1,i,j) = 0.25
               albedo(2,i,j) = 0.15
               albedo(3,i,j) = 0.07
@@ -94,28 +94,28 @@
      1                         ,albedo,bm_counts,istatus)
 
       use ppm
-      use mem_namelist, ONLY: c6_maproj, grid_spacing_m
-      use mem_allsky, ONLY: nc
+      use mem_namelist, only: c6_maproj, grid_spacing_m
+      use mem_allsky, only: nc
 
       include 'wa.inc'
 
-!     Read and interpolate from sector of Blue Marble Image
-!     See code in /scratch/staging/fab/albers/nasa
+!     read and interpolate from sector of blue marble image
+!     see code in /scratch/staging/fab/albers/nasa
 
-      real albedo(3,ni,nj)    ! Albedo (Red, Green, Blue)
-      real bm_counts(3,ni,nj) ! Counts (Red, Green, Blue)
+      real albedo(3,ni,nj)    ! albedo (red, green, blue)
+      real bm_counts(3,ni,nj) ! counts (red, green, blue)
       real albedo_buff(3,ni,nj) 
-      real result(ni,nj)      ! Interpolated image channel
+      real result(ni,nj)      ! interpolated image channel
       character*13 cvt_i4time_wfo_fname13,c13_time
       character*2 c2_mn
 
 !     convert -crop 2000x2000+12000+9000 -compress none
-!     world.200404.3x21600x21600.A1.png world.200404.3x21600x21600.A1.crop2.ppm
+!     world.200404.3x21600x21600.a1.png world.200404.3x21600x21600.a1.crop2.ppm
 !     convert -compress none
 !     world.200408.3x5400x2700.png world.200408.3x5400x2700.ppm
 
       character*255 directory
-      character*255 file            ! Blue Marble image data
+      character*255 file            ! blue marble image data
       character*255 file_bm,file_dc ! remapped to model grid
       character*10  c10_fname /'nest7grid'/
       integer u,u_out
@@ -145,46 +145,46 @@
       c13_time = cvt_i4time_wfo_fname13(i4time)
       c2_mn = c13_time(5:6)
 
-      write(6,*)' Subroutine land_albedo_bm...',c2_mn
+      write(6,*)' subroutine land_albedo_bm...',c2_mn
 
       call get_directory('static',directory,len_dir)
 
       file_bm=trim(directory)//'albedo_multispectral_'//c2_mn//'.dat'
       inquire(file=trim(file_bm),exist=l_there)
-      write(6,*)' File being inquired is ',trim(file_bm),' ',l_there
+      write(6,*)' file being inquired is ',trim(file_bm),' ',l_there
 
       if(l_there)then
-        write(6,*)' Blue Marble binary remapped albedo file exists'
+        write(6,*)' blue marble binary remapped albedo file exists'
         open(u,file=trim(file_bm),form='unformatted' 
      1      ,status='old',err=999)
-        write(6,*)' Successful open, now reading'
+        write(6,*)' successful open, now reading'
         read(u,err=999)albedo
         close(u)
         write(6,*)' first point is ',albedo(1,1,1)
         if(albedo(1,1,1) .gt. 1.0)then
-          write(6,*)' ERROR bad first point'
+          write(6,*)' error bad first point'
           goto 999
         endif
       else
         write(6,*)
-     1' Blue Marble binary file is absent, generate and create from ppm'
+     1' blue marble binary file is absent, generate and create from ppm'
 
         if(grid_spacing_m .ge. 2500. .and.
      1     grid_spacing_m .le. 7400.      )then ! mid-range of grid spacing
           file=trim(directory)//'world.2004'
      1                      //c2_mn//'.global_montage.20.ppm'
           inquire(file=trim(file),exist=l_there)
-          write(6,*)' File being inquired is ',trim(file),' ',l_there
+          write(6,*)' file being inquired is ',trim(file),' ',l_there
         else ! outside mid-range of grid spacing
           l_there = .false.
         endif
 
         file_dc=trim(directory)//'vhires_dc_crop.ppm'       
         inquire(file=trim(file_dc),exist=l_there_dc)
-        write(6,*)' File being inquired is ',trim(file_dc),' '
+        write(6,*)' file being inquired is ',trim(file_dc),' '
      1                                      ,l_there_dc      
 
-        if(l_there_dc)then                    ! Descartes data
+        if(l_there_dc)then                    ! descartes data
           pix_latlon_we = 1. / 865.954              
           pix_latlon_sn = 1. / 1130.26
           l_global_bm = .false.
@@ -200,7 +200,7 @@
         elseif(c6_maproj .ne. 'latlon' .and.
      1         grid_spacing_m .le. 2500.)then ! local domain (~500m pixels)
                                               ! for 500m to 2.5km grid
-          write(6,*)' Looking for 500m BM tile'
+          write(6,*)' looking for 500m bm tile'
           file=trim(directory)//'world.2004' 
      1                        //c2_mn//'.3x21600x21600.crop.ppm'
           pix_latlon_we = 1. / 240. !                 (90x180 degree tile)
@@ -217,14 +217,14 @@
           perimeter = 0.2
 
         else
-          write(6,*)' conditions unsatisifed for BMNG land albedo data'
+          write(6,*)' conditions unsatisifed for bmng land albedo data'
           goto 999
 
         endif
 
-        write(6,*)' Open for reading ',trim(file)
+        write(6,*)' open for reading ',trim(file)
 
-!       Read section of NASA Blue Marble Image in PPM format
+!       read section of nasa blue marble image in ppm format
         open(u,file=trim(file),status='old',err=999)
         read(u,*)   
         read(u,*)iwidth,iheight
@@ -238,14 +238,14 @@
         allocate(rlon_img(iwidth,iheight))
         allocate(array_2d(iwidth,iheight))
 
-!       Consider dynamic means to get rlat_start and rlon_start
-!       Use domain lat/lon bounds with a 0.2 deg cushion
+!       consider dynamic means to get rlat_start and rlon_start
+!       use domain lat/lon bounds with a 0.2 deg cushion
         call get_domain_perimeter(ni,nj,c10_fname  
      1                  ,rlat_laps,rlon_laps,topo_laps_dum
      1                  ,perimeter,rnorth,south,east,west,istatus)
 
         write(6,5)perimeter,rnorth,south,east,west
-5       format('  NSEW Domain perimeter',5f9.3)                 
+5       format('  nsew domain perimeter',5f9.3)                 
 
         if(l_global_bm)then
           rlat_start = +90.                         
@@ -259,40 +259,40 @@
           rlon_end = rlon_start + float(iwidth)  * pix_latlon_we
         endif
 
-        write(6,*)' BM PPM lat range: ',rlat_start,rlat_end
-        write(6,*)' BM PPM lon range: ',rlon_start,rlon_end
+        write(6,*)' bm ppm lat range: ',rlat_start,rlat_end
+        write(6,*)' bm ppm lon range: ',rlon_start,rlon_end
 
-!       Fill arrays of image lat/lons and LAPS ri,rj
+!       fill arrays of image lat/lons and laps ri,rj
         istatus_img = 1
         do i = 1,ni     
         do j = 1,nj     
           rj_img(i,j) = (rlat_start - rlat_laps(i,j)) / pix_latlon_sn
           ri_img(i,j) = (rlon_laps(i,j) - rlon_start) / pix_latlon_we
-          if(rlat_laps(i,j) .gt. rlat_start .OR.
-     1       rlat_laps(i,j) .lt. rlat_end   .OR.
-     1       rlon_laps(i,j) .lt. rlon_start .OR. 
+          if(rlat_laps(i,j) .gt. rlat_start .or.
+     1       rlat_laps(i,j) .lt. rlat_end   .or.
+     1       rlon_laps(i,j) .lt. rlon_start .or. 
      1       rlon_laps(i,j) .gt. rlon_end)then
             istatus_img = 0
           endif
         enddo ! j
         enddo ! i
 
-        write(6,*)' Image location of domain point',idb,jdb
+        write(6,*)' image location of domain point',idb,jdb
      1                                ,ri_img(idb,jdb),rj_img(idb,jdb)
 
-        write(6,*)' Image location of SW domain corner',1,1
+        write(6,*)' image location of sw domain corner',1,1
      1                                ,ri_img(1,1),rj_img(1,1)        
 
-        write(6,*)' Image location of NW domain corner',1,nj
+        write(6,*)' image location of nw domain corner',1,nj
      1                                ,ri_img(1,nj),rj_img(1,nj)        
 
         if(istatus_img .eq. 0)then
-          write(6,*)' WARNING: LAPS grid extends outside image'
+          write(6,*)' warning: laps grid extends outside image'
         else
-          write(6,*)' LAPS grid is contained within image'      
+          write(6,*)' laps grid is contained within image'      
         endif
 
-        write(6,*)' Sampling of image ',rlat_start,rlon_start
+        write(6,*)' sampling of image ',rlat_start,rlon_start
         do i = 1,iwidth,120
 !       do j = 1,iheight,200
         do j = iheight/2,iheight/2,1
@@ -306,11 +306,11 @@
         enddo ! j
         enddo ! i
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        write(6,*)' Bilinearly Interpolate'
+        write(6,*)' bilinearly interpolate'
 
-!       Interpolate to LAPS grid using bilinear_laps_2d
+!       interpolate to laps grid using bilinear_laps_2d
         do ic = 1,3
           array_2d(:,:) = img(ic,:,:)
           call bilinear_laps_2d(ri_img,rj_img,iwidth,iheight,ni,nj 
@@ -318,9 +318,9 @@
           do i = 1,ni
           do j = 1,nj
 
-!           http://earthobservatory.nasa.gov/Features/BlueMarble/bmng.pdf
+!           http://earthobservatory.nasa.gov/features/bluemarble/bmng.pdf
 
-            if(result(i,j) .le. 179.)then ! Based on NASA spline
+            if(result(i,j) .le. 179.)then ! based on nasa spline
 !             albedo(ic,i,j) = result(i,j) / 716.                  
               albedo(ic,i,j) = .0010 * result(i,j)
      1                       + 6.92e-11 * result(i,j)**4.0
@@ -336,37 +336,37 @@
 
           enddo ! j
           enddo ! i
-          write(6,*)' Color / Count / Albedo (observer)',ic
+          write(6,*)' color / count / albedo (observer)',ic
      1                          ,result(idb,jdb),albedo(ic,idb,jdb)          
         enddo ! ic
 
-        write(6,*)' Initial albedo: ',albedo(:,idb,jdb)
+        write(6,*)' initial albedo: ',albedo(:,idb,jdb)
 
-!       Adjust colors based on wavelengths
-!       BM data is .645, .555, .470 microns
+!       adjust colors based on wavelengths
+!       bm data is .645, .555, .470 microns
         albedo_buff(:,:,:) = albedo(:,:,:)
         red_f = (wa(1) - wa(2)) / (.645 - wa(2))
         grn_f = 1.0 - red_f
-        write(6,*)' Adjusting R color based on wavelengths',red_f,grn_f
+        write(6,*)' adjusting r color based on wavelengths',red_f,grn_f
         albedo(1,:,:) = albedo_buff(1,:,:) * red_f
      1                + albedo_buff(2,:,:) * grn_f    
 
         blu_f = (wa(3) - wa(2)) / (.470 - wa(2))
         grn_f = 1.0 - blu_f
-        write(6,*)' Adjusting B color based on wavelengths',blu_f,grn_f
+        write(6,*)' adjusting b color based on wavelengths',blu_f,grn_f
         albedo(3,:,:) = albedo_buff(3,:,:) * blu_f
      1                + albedo_buff(2,:,:) * grn_f    
         
-        write(6,*)' Adjusted albedo: ',albedo(:,idb,jdb)
+        write(6,*)' adjusted albedo: ',albedo(:,idb,jdb)
 
         if(albedo(2,idb,jdb) .gt. 1.0)then
-          write(6,*)' ERROR bad interpolated albedo point'
+          write(6,*)' error bad interpolated albedo point'
           goto 999
         endif
 
-!       Write albedo file in binary format
+!       write albedo file in binary format
         u_out = 12
-        write(6,*)' Writing albedo file to '//file_bm
+        write(6,*)' writing albedo file to '//file_bm
         open(u_out,file=trim(file_bm),form='unformatted'
      1      ,status='new',err=999)
         write(u_out)albedo
@@ -374,11 +374,11 @@
 
       endif ! binary file exists
 
-!     Normal end
+!     normal end
       istatus = 1
       goto 9999
 
-!     Error condition
+!     error condition
 999   istatus = 0
       write(6,*)' error in land_albedo_bm'
 
@@ -393,14 +393,14 @@
       subroutine get_nlights(ni,nj,grid_spacing_m,rlat_laps,rlon_laps
      1                      ,gnd_glow)
 
-!     Read in VIIRS imagery for night lights.
-!     Merging of code in 'get_sfc_glow' and 'land_albedo_bm'
+!     read in viirs imagery for night lights.
+!     merging of code in 'get_sfc_glow' and 'land_albedo_bm'
 
       use ppm
-      use mem_namelist, ONLY: c6_maproj 
+      use mem_namelist, only: c6_maproj 
 
-      real sfc_glow_c(3,ni,nj) ! Sfc Glow (Red, Green, Blue)
-      real result(ni,nj)       ! Interpolated image channel
+      real sfc_glow_c(3,ni,nj) ! sfc glow (red, green, blue)
+      real result(ni,nj)       ! interpolated image channel
       real sfc_glow(ni,nj)     ! surface lighting intensity of clouds (nl)
       real gnd_glow(ni,nj)     ! zenithal ground lighting intensity (wm2sr)
       character*255 directory
@@ -431,7 +431,7 @@
       real, allocatable :: ri_laps(:,:)                   
       real, allocatable :: rj_laps(:,:)                   
 
-      write(6,*)' Subroutine get_nlights...'
+      write(6,*)' subroutine get_nlights...'
 
       u = 11
       idb = min(893,ni) ! min(878,ni) or ni/2
@@ -440,29 +440,29 @@
       call get_directory('static',directory,len_dir)
       file_bm=trim(directory)//'nlights_multispectral.dat'
       inquire(file=trim(file_bm),exist=l_there)
-      write(6,*)' File being inquired is ',trim(file_bm),' ',l_there
+      write(6,*)' file being inquired is ',trim(file_bm),' ',l_there
 
       if(l_there)then
-        write(6,*)' Nlights binary remapped sfc_glow_c file exists'
+        write(6,*)' nlights binary remapped sfc_glow_c file exists'
         open(u,file=trim(file_bm),form='unformatted' 
      1      ,status='old',err=999)
-        write(6,*)' Successful open, now reading'
+        write(6,*)' successful open, now reading'
         read(u,err=999)sfc_glow_c
         close(u)
         write(6,*)' first point is ',sfc_glow_c(1,1,1)
         if(sfc_glow_c(1,1,1) .lt. 0.0)then
-          write(6,*)' ERROR bad first point'
+          write(6,*)' error bad first point'
           goto 999
         endif
         sfc_glow = sfc_glow_c(2,:,:)
 
       else ! binary file is absent
         write(6,*)
-     1' Nlights binary file is absent, generate and create it from ppm'       
+     1' nlights binary file is absent, generate and create it from ppm'       
 
        file=trim(directory)//'viirs_global_montage_20.ppm' 
        inquire(file=trim(file),exist=l_there)
-       write(6,*)' PPM file being inquired is ',trim(file),' ',l_there
+       write(6,*)' ppm file being inquired is ',trim(file),' ',l_there
        if(l_there)then                     ! local domain (2.5km pixels)
          pix_latlon = 1. / 48.             ! 17280x8640 image
          offset_lat = 0.     ! positional error in remapping
@@ -485,10 +485,10 @@
 
        endif
 
-       write(6,*)' Open for reading ',trim(file)
+       write(6,*)' open for reading ',trim(file)
        write(6,*)' pix_latlon,l_global_nl = ',pix_latlon,l_global_nl
 
-!      Read section of VIIRS Image in PPM format
+!      read section of viirs image in ppm format
        open(u,file=trim(file),status='old',err=999)
        read(u,*)   
        read(u,*)iwidth,iheight
@@ -505,8 +505,8 @@
        allocate(ri_laps(iwidth,iheight))
        allocate(rj_laps(iwidth,iheight))
 
-!      Consider dynamic means to get rlat_start and rlon_start
-!      Use domain lat/lon bounds with a 0.2 deg cushion
+!      consider dynamic means to get rlat_start and rlon_start
+!      use domain lat/lon bounds with a 0.2 deg cushion
        if(l_global_nl)then
           rnorth = +90.
           south = -90.
@@ -518,25 +518,25 @@
      1                  ,0.2,rnorth,south,east,west,istatus)
        endif
 
-       write(6,*)' NSEW',rnorth,south,east,west
+       write(6,*)' nsew',rnorth,south,east,west
 
        rlat_start = rnorth - offset_lat                         
        rlon_start = west   - offset_lon                       
        rlat_end = rlat_start - float(iheight) * pix_latlon
        rlon_end = rlon_start + float(iwidth)  * pix_latlon
 
-       write(6,*)' NL PPM lat range: ',rlat_start,rlat_end
-       write(6,*)' NL PPM lon range: ',rlon_start,rlon_end
+       write(6,*)' nl ppm lat range: ',rlat_start,rlat_end
+       write(6,*)' nl ppm lon range: ',rlon_start,rlon_end
 
-!      Fill arrays of image lat/lons and LAPS ri,rj
+!      fill arrays of image lat/lons and laps ri,rj
        istatus_img = 1
        do i = 1,ni     
        do j = 1,nj     
         rj_img(i,j) = (rlat_start - rlat_laps(i,j)) / pix_latlon
         ri_img(i,j) = (rlon_laps(i,j) - rlon_start) / pix_latlon
-        if(rlat_laps(i,j) .gt. rlat_start .OR.
-     1     rlat_laps(i,j) .lt. rlat_end   .OR.
-     1     rlon_laps(i,j) .lt. rlon_start .OR. 
+        if(rlat_laps(i,j) .gt. rlat_start .or.
+     1     rlat_laps(i,j) .lt. rlat_end   .or.
+     1     rlon_laps(i,j) .lt. rlon_start .or. 
      1     rlon_laps(i,j) .gt. rlon_end)then
             istatus_img = 0
         endif
@@ -544,9 +544,9 @@
        enddo ! i
 
        if(istatus_img .eq. 0)then
-          write(6,*)' WARNING: LAPS grid extends outside image'
+          write(6,*)' warning: laps grid extends outside image'
        else
-          write(6,*)' LAPS grid is contained within image'      
+          write(6,*)' laps grid is contained within image'      
        endif
 
        do i = 1,iwidth,400
@@ -561,17 +561,17 @@
        write(6,*)' img max before interpolation (nwcm2sr) = '
      1          ,maxval(img)
 
-       I4_elapsed = ishow_timer()
+       i4_elapsed = ishow_timer()
 
        reslights_m = 10000.
 
-!      Interpolate to LAPS grid using bilinear_laps_2d
+!      interpolate to laps grid using bilinear_laps_2d
        do ic = 1,3
         array_2d(:,:) = img(1,:,:)
 
         if(grid_spacing_m / reslights_m .lt. 1.5)then
 !       if(.true.)then
-          write(6,*)' Bilinearly Interpolate ',ic,grid_spacing_m
+          write(6,*)' bilinearly interpolate ',ic,grid_spacing_m
      1                                        ,reslights_m
           write(6,*)' lat/lon is ',rlat_laps(idb,jdb),rlon_laps(idb,jdb)
           write(6,*)' rij_img is ',idb,jdb,ri_img(idb,jdb)
@@ -590,15 +590,15 @@
 
           if(ic .eq. 1)then
 
-!           Loop through image array
+!           loop through image array
             do i = 1,iwidth
             do j = 1,iheight
 
-!             Fill lat/lon of each image pixel
+!             fill lat/lon of each image pixel
               rlon_img(i,j) = rlon_start + float(i) * pix_latlon
               rlat_img(i,j) = rlat_start - float(j) * pix_latlon
 
-!             Fill LAPS ri/rj of each image pixel
+!             fill laps ri/rj of each image pixel
               call latlon_to_rlapsgrid(rlat_img(i,j),rlon_img(i,j)
      1                                ,rlat_laps,rlon_laps,ni,nj
      1                                ,ri_laps(i,j),rj_laps(i,j)
@@ -609,19 +609,19 @@
 
           endif ! 1st color in loop
 
-          write(6,*)' Pixel Ave Interpolate ',ic,grid_spacing_m
+          write(6,*)' pixel ave interpolate ',ic,grid_spacing_m
      1                                       ,reslights_m
           call pixelave_interp(ri_laps,rj_laps,iwidth,iheight,ni,nj 
      1                        ,0.,array_2d,result)
-          write(6,*)' Max result value is (nanoWatts/cm2/sr)'
+          write(6,*)' max result value is (nanowatts/cm2/sr)'
      1               ,maxval(result)
         endif ! interpolation method
 
-!       This conversion should reduce values by 10^5
+!       this conversion should reduce values by 10^5
         do i = 1,ni
         do j = 1,nj
-!         Input units are nanoWatts/cm2/sr
-          arg1 = result(i,j)                     ! nanoWatts/cm2/sr
+!         input units are nanowatts/cm2/sr
+          arg1 = result(i,j)                     ! nanowatts/cm2/sr
           sfc_glow(i,j) = nwcm2sr_to_wm2sr(arg1) ! wm2sr
           sfc_glow_c(ic,i,j) = sfc_glow(i,j)
         enddo ! j
@@ -629,25 +629,25 @@
 
        enddo ! ic
 
-cdoc   Interpolate 2-d array to find the field values at fractional grid
+cdoc   interpolate 2-d array to find the field values at fractional grid
 cdoc   points.
 
-!      real array_2d(imax,jmax)                         ! I
-!      real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! I
-!      real result(nx_laps,ny_laps)                     ! O
+!      real array_2d(imax,jmax)                         ! i
+!      real ri_a(nx_laps,ny_laps),rj_a(nx_laps,ny_laps) ! i
+!      real result(nx_laps,ny_laps)                     ! o
 
-       write(6,*)' Interpolated sfc_glow_c (wm2sr): '
+       write(6,*)' interpolated sfc_glow_c (wm2sr): '
      1          ,sfc_glow_c(:,idb,jdb)
 
        if(sfc_glow_c(2,idb,jdb) .lt. 0.0)then
-        write(6,*)' ERROR bad interpolated sfc_glow_c point'
+        write(6,*)' error bad interpolated sfc_glow_c point'
         goto 999
        endif
 
-!      Write sfc_glow_c file in binary format
+!      write sfc_glow_c file in binary format
        u_out = 12
        file_bm=trim(directory)//'nlights_multispectral.dat'
-       write(6,*)' Writing sfc_glow_c file to '//file_bm
+       write(6,*)' writing sfc_glow_c file to '//file_bm
        open(u_out,file=trim(file_bm),form='unformatted'
      1     ,status='new',err=999)
        write(u_out)sfc_glow_c
@@ -660,12 +660,12 @@ cdoc   points.
 
       gnd_glow = sfc_glow
 
-!     Normal end
+!     normal end
       istatus = 1
       write(6,*)' normal return from get_nlights'
       goto 9999
 
-!     Error condition
+!     error condition
 999   istatus = 0
       gnd_glow = 0.
       write(6,*)' error in get_nlights'
@@ -683,12 +683,12 @@ cdoc   points.
       subroutine compare_land_albedo(lu,ni,nj,albedo_usgs,albedo_bm
      1                                       ,albedo_static)
 
-!     This routine compares USGS, Blue Marble, and static albedo fields
+!     this routine compares usgs, blue marble, and static albedo fields
 
-      real lu(ni,nj)               ! Land Use (USGS 24 category)
-      real albedo_usgs(3,ni,nj)    ! Albedo (Red, Green, Blue)
-      real albedo_bm(3,ni,nj)      ! Albedo (Red, Green, Blue)
-      real albedo_static(ni,nj)    ! Albedo (broadband)
+      real lu(ni,nj)               ! land use (usgs 24 category)
+      real albedo_usgs(3,ni,nj)    ! albedo (red, green, blue)
+      real albedo_bm(3,ni,nj)      ! albedo (red, green, blue)
+      real albedo_static(ni,nj)    ! albedo (broadband)
 
 
       write(6,*)' subroutine compare_land_albedo...'
@@ -699,7 +699,7 @@ cdoc   points.
       albedo_mean_static = sum(albedo_static(:,:))/rpts
 
       write(6,11)albedo_mean_bm,albedo_mean_usgs,albedo_mean_static
-11    format('  Mean albedo bm/usgs/static ',3f9.4)
+11    format('  mean albedo bm/usgs/static ',3f9.4)
 
       return
       end 

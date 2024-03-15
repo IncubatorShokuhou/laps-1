@@ -1,19 +1,19 @@
 
-        FUNCTION Obliquity(T)
+        function obliquity(t)
 
-c       T is the Julian Date (TDT)
+c       t is the julian date (tdt)
 
-        IMPLICIT REAL*8 (A-Z)
+        implicit real*8 (a-z)
 
-        PI = 3.1415926535897932d0
-        RPD = PI/180.d0
+        pi = 3.1415926535897932d0
+        rpd = pi/180.d0
 
-        Tu = (T-2451545d0)/36525d0
-        O = 23.439291d0 + Tu *
-     1  (-.0130042d0 + Tu * (-.00000016d0 + Tu * .000000504d0))
+        tu = (t-2451545d0)/36525d0
+        o = 23.439291d0 + tu *
+     1  (-.0130042d0 + tu * (-.00000016d0 + tu * .000000504d0))
 
-        Obliquity = O * RPD
+        obliquity = o * rpd
 
-        RETURN
-        END
+        return
+        end
 

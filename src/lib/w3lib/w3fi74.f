@@ -1,357 +1,357 @@
-      SUBROUTINE W3FI74 (IGDS,ICOMP,GDS,LENGDS,NPTS,IGERR)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    W3FI74      CONSTRUCT GRID DEFINITION SECTION (GDS)
-C   PRGMMR: FARLEY           ORG: W/NMC42    DATE: 93-08-24
-C
-C ABSTRACT: THIS SUBROUTINE CONSTRUCTS A GRIB GRID DEFINITION
-C   SECTION.
-C
-C PROGRAM HISTORY LOG:
-C   92-07-07  M. FARLEY   ORIGINAL AUTHOR
-C   92-10-16  R.E.JONES   ADD CODE TO LAT/LON SECTION TO DO
-C                         GAUSSIAN GRIDS.
-C   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C   93-08-24  R.E.JONES   CHANGES FOR GRIB GRIDS 37-44
-C   93-09-29  R.E.JONES   CHANGES FOR GAUSSIAN GRID FOR DOCUMENT
-C                         CHANGE IN W3FI71.
-C   94-02-15  R.E.JONES   CHANGES FOR ETA MODEL GRIDS 90-93
-C   95-04-20  R.E.JONES   CHANGE 200 AND 201 TO 201 AND 202
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-08-20  BALDWIN     ADD TYPE 203
-C
-C
-C USAGE:    CALL W3FI74 (IGDS, ICOMP, GDS, LENGDS, NPTS, IGERR)
-C   INPUT ARGUMENT LIST:
-C     IGDS        - INTEGER ARRAY SUPPLIED BY W3FI71
-C     ICOMP       - TABLE 7- RESOLUTION & COMPONENT FLAG (BIT 5)
-C                   FOR GDS(17) WIND COMPONENTS
-C
-C   OUTPUT ARGUMENT LIST:
-C     GDS       - COMPLETED GRIB GRID DEFINITION SECTION
-C     LENGDS    - LENGTH OF GDS
-C     NPTS      - NUMBER OF POINTS IN GRID
-C     IGERR     - 1, GRID REPRESENTATION TYPE NOT VALID
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY CFT77 FORTRAN 77, IBM370 VS FORTRAN
-C   MACHINE:  CRAY C916-128, CRAY Y-MP8/864, CRAY Y-MP EL2/256, HDS
-C
-C$$$
-C
-      INTEGER       IGDS  (*)
-C
-      CHARACTER*1   GDS   (*)
-C
-      ISUM  = 0
-      IGERR = 0
-C
-C       PRINT *,' '
-C       PRINT *,'(W3FI74-IGDS = )'
-C       PRINT *,(IGDS(I),I=1,18)
-C       PRINT *,' '
-C
-C     COMPUTE LENGTH OF GDS IN OCTETS (OCTETS 1-3)
-C       LENGTH =  32 FOR LAT/LON, GNOMIC, GAUSIAN LAT/LON,
-C                    POLAR STEREOGRAPHIC, SPHERICAL HARMONICS
-C       LENGTH =  42 FOR MERCATOR, LAMBERT, TANGENT CONE
-C       LENGTH = 178 FOR MERCATOR, LAMBERT, TANGENT CONE
-C
-      IF (IGDS(3) .EQ. 0  .OR.  IGDS(3) .EQ. 2  .OR.
-     &    IGDS(3) .EQ. 4  .OR.  IGDS(3) .EQ. 5  .OR.
-     &    IGDS(3) .EQ. 50 .OR.  IGDS(3) .EQ. 201.OR.
-     &    IGDS(3) .EQ. 202.OR.  IGDS(3) .EQ. 203) THEN
-          LENGDS = 32
-C
-C       CORRECTION FOR GRIDS 37-44
-C
-        IF (IGDS(3).EQ.0.AND.IGDS(1).EQ.0.AND.IGDS(2).NE.
-     &  255) THEN
-          LENGDS = IGDS(5) * 2 + 32
-        ENDIF
-      ELSE IF (IGDS(3) .EQ. 1  .OR.  IGDS(3) .EQ. 3  .OR.
-     &         IGDS(3) .EQ. 13) THEN
-        LENGDS = 42
-      ELSE
-C       PRINT *,' W3FI74 ERROR, GRID REPRESENTATION TYPE NOT VALID'
-        IGERR = 1
-        RETURN
-      ENDIF
-C
-C     PUT LENGTH OF GDS SECTION IN BYTES 1,2,3
-C
-      GDS(1) = CHAR(MOD(LENGDS/65536,256))
-      GDS(2) = CHAR(MOD(LENGDS/  256,256))
-      GDS(3) = CHAR(MOD(LENGDS      ,256))
-C
-C     OCTET 4 = NV, NUMBER OF VERTICAL COORDINATE PARAMETERS
-C     OCTET 5 = PV, PL OR 255
-C     OCTET 6 = DATA REPRESENTATION TYPE (TABLE 6)
-C
-      GDS(4) = CHAR(IGDS(1))
-      GDS(5) = CHAR(IGDS(2))
-      GDS(6) = CHAR(IGDS(3))
-C
-C     FILL OCTET THE REST OF THE GDS BASED ON DATA REPRESENTATION
-C     TYPE (TABLE 6)
-C
-C$$
-C     PROCESS LAT/LON GRID TYPES OR GAUSSIAN GRID OR ARAKAWA
-C     STAGGERED, SEMI-STAGGERED, OR FILLED E-GRIDS
-C
-      IF (IGDS(3).EQ.0.OR.IGDS(3).EQ.4.OR.
-     &    IGDS(3).EQ.201.OR.IGDS(3).EQ.202.OR.
-     &    IGDS(3).EQ.203) THEN
-        GDS( 7) = CHAR(MOD(IGDS(4)/256,256))
-        GDS( 8) = CHAR(MOD(IGDS(4)    ,256))
-        GDS( 9) = CHAR(MOD(IGDS(5)/256,256))
-        GDS(10) = CHAR(MOD(IGDS(5)    ,256))
-        LATO    = IGDS(6)
-        IF (LATO .LT. 0) THEN
-          LATO = -LATO
-          LATO = IOR(LATO,8388608)
-        ENDIF
-        GDS(11) = CHAR(MOD(LATO/65536,256))
-        GDS(12) = CHAR(MOD(LATO/  256,256))
-        GDS(13) = CHAR(MOD(LATO      ,256))
-        LONO    = IGDS(7)
-        IF (LONO .LT. 0) THEN
-          LONO = -LONO
-          LONO = IOR(LONO,8388608)
-        ENDIF
-        GDS(14) = CHAR(MOD(LONO/65536,256))
-        GDS(15) = CHAR(MOD(LONO/  256,256))
-        GDS(16) = CHAR(MOD(LONO      ,256))
-        LATEXT  = IGDS(9)
-        IF (LATEXT .LT. 0) THEN
-          LATEXT = -LATEXT
-          LATEXT = IOR(LATEXT,8388608)
-        ENDIF
-        GDS(18) = CHAR(MOD(LATEXT/65536,256))
-        GDS(19) = CHAR(MOD(LATEXT/  256,256))
-        GDS(20) = CHAR(MOD(LATEXT      ,256))
-        LONEXT  = IGDS(10)
-        IF (LONEXT .LT. 0) THEN
-          LONEXT = -LONEXT
-          LONEXT = IOR(LONEXT,8388608)
-        ENDIF
-        GDS(21) = CHAR(MOD(LONEXT/65536,256))
-        GDS(22) = CHAR(MOD(LONEXT/  256,256))
-        GDS(23) = CHAR(MOD(LONEXT      ,256))
-        IRES    = IAND(IGDS(8),128)
-        IF (IGDS(3).EQ.201.OR.IGDS(3).EQ.202.OR.IGDS(3).EQ.203) THEN
-          GDS(24) = CHAR(MOD(IGDS(11)/256,256))
-          GDS(25) = CHAR(MOD(IGDS(11)    ,256))
-        ELSE IF (IRES.EQ.0) THEN
-          GDS(24) = CHAR(255)
-          GDS(25) = CHAR(255)
-        ELSE
-          GDS(24) = CHAR(MOD(IGDS(12)/256,256))
-          GDS(25) = CHAR(MOD(IGDS(12)    ,256))
-        END IF
-        IF (IGDS(3).EQ.4) THEN
-          GDS(26) = CHAR(MOD(IGDS(11)/256,256))
-          GDS(27) = CHAR(MOD(IGDS(11)    ,256))
-        ELSE IF (IGDS(3).EQ.201.OR.IGDS(3).EQ.202.OR.
-     &           IGDS(3).EQ.203) THEN
-          GDS(26) = CHAR(MOD(IGDS(12)/256,256))
-          GDS(27) = CHAR(MOD(IGDS(12)    ,256))
-        ELSE IF (IRES.EQ.0) THEN
-          GDS(26) = CHAR(255)
-          GDS(27) = CHAR(255)
-        ELSE
-          GDS(26) = CHAR(MOD(IGDS(11)/256,256))
-          GDS(27) = CHAR(MOD(IGDS(11)    ,256))
-        END IF
-        GDS(28) = CHAR(IGDS(13))
-        GDS(29) = CHAR(0)
-        GDS(30) = CHAR(0)
-        GDS(31) = CHAR(0)
-        GDS(32) = CHAR(0)
-        IF (LENGDS.GT.32) THEN
-          ISUM = 0
-          I    = 19
-          DO 10 J = 33,LENGDS,2
-            ISUM     = ISUM + IGDS(I)
-            GDS(J)   = CHAR(MOD(IGDS(I)/256,256))
-            GDS(J+1) = CHAR(MOD(IGDS(I)    ,256))
-            I        = I + 1
- 10       CONTINUE
-        END IF
-C
-C$$     PROCESS MERCATOR GRID TYPES
-C
-      ELSE IF (IGDS(3) .EQ. 1) THEN
-        GDS( 7) = CHAR(MOD(IGDS(4)/256,256))
-        GDS( 8) = CHAR(MOD(IGDS(4)    ,256))
-        GDS( 9) = CHAR(MOD(IGDS(5)/256,256))
-        GDS(10) = CHAR(MOD(IGDS(5)    ,256))
-        LATO = IGDS(6)
-        IF (LATO .LT. 0) THEN
-          LATO = -LATO
-          LATO = IOR(LATO,8388608)
-        ENDIF
-        GDS(11) = CHAR(MOD(LATO/65536,256))
-        GDS(12) = CHAR(MOD(LATO/  256,256))
-        GDS(13) = CHAR(MOD(LATO      ,256))
-        LONO = IGDS(7)
-        IF (LONO .LT. 0) THEN
-          LONO = -LONO
-          LONO = IOR(LONO,8388608)
-        ENDIF
-        GDS(14) = CHAR(MOD(LONO/65536,256))
-        GDS(15) = CHAR(MOD(LONO/  256,256))
-        GDS(16) = CHAR(MOD(LONO      ,256))
-        LATEXT = IGDS(9)
-        IF (LATEXT .LT. 0) THEN
-          LATEXT = -LATEXT
-          LATEXT = IOR(LATEXT,8388608)
-        ENDIF
-        GDS(18) = CHAR(MOD(LATEXT/65536,256))
-        GDS(19) = CHAR(MOD(LATEXT/  256,256))
-        GDS(20) = CHAR(MOD(LATEXT      ,256))
-        LONEXT  = IGDS(10)
-        IF (LONEXT .LT. 0) THEN
-          LONEXT = -LONEXT
-          LONEXT = IOR(LONEXT,8388608)
-        ENDIF
-        GDS(21) = CHAR(MOD(LONEXT/65536,256))
-        GDS(22) = CHAR(MOD(LONEXT/  256,256))
-        GDS(23) = CHAR(MOD(LONEXT      ,256))
-        GDS(24) = CHAR(MOD(IGDS(13)/65536,256))
-        GDS(25) = CHAR(MOD(IGDS(13)/  256,256))
-        GDS(26) = CHAR(MOD(IGDS(13)      ,256))
-        GDS(27) = CHAR(0)
-        GDS(28) = CHAR(IGDS(14))
-        GDS(29) = CHAR(MOD(IGDS(12)/65536,256))
-        GDS(30) = CHAR(MOD(IGDS(12)/  256,256))
-        GDS(31) = CHAR(MOD(IGDS(12)      ,256))
-        GDS(32) = CHAR(MOD(IGDS(11)/65536,256))
-        GDS(33) = CHAR(MOD(IGDS(11)/  256,256))
-        GDS(34) = CHAR(MOD(IGDS(11)      ,256))
-        GDS(35) = CHAR(0)
-        GDS(36) = CHAR(0)
-        GDS(37) = CHAR(0)
-        GDS(38) = CHAR(0)
-        GDS(39) = CHAR(0)
-        GDS(40) = CHAR(0)
-        GDS(41) = CHAR(0)
-        GDS(42) = CHAR(0)
-C$$     PROCESS LAMBERT CONFORMAL GRID TYPES
-      ELSE IF (IGDS(3) .EQ. 3) THEN
-        GDS( 7) = CHAR(MOD(IGDS(4)/256,256))
-        GDS( 8) = CHAR(MOD(IGDS(4)    ,256))
-        GDS( 9) = CHAR(MOD(IGDS(5)/256,256))
-        GDS(10) = CHAR(MOD(IGDS(5)    ,256))
-        LATO = IGDS(6)
-        IF (LATO .LT. 0) THEN
-          LATO = -LATO
-          LATO = IOR(LATO,8388608)
-        ENDIF
-        GDS(11) = CHAR(MOD(LATO/65536,256))
-        GDS(12) = CHAR(MOD(LATO/  256,256))
-        GDS(13) = CHAR(MOD(LATO      ,256))
-        LONO = IGDS(7)
-        IF (LONO .LT. 0) THEN
-          LONO = -LONO
-          LONO = IOR(LONO,8388608)
-        ENDIF
-        GDS(14) = CHAR(MOD(LONO/65536,256))
-        GDS(15) = CHAR(MOD(LONO/  256,256))
-        GDS(16) = CHAR(MOD(LONO      ,256))
-        LONM = IGDS(9)
-        IF (LONM .LT. 0) THEN
-          LONM = -LONM
-          LONM = IOR(LONM,8388608)
-        ENDIF
-        GDS(18) = CHAR(MOD(LONM/65536,256))
-        GDS(19) = CHAR(MOD(LONM/  256,256))
-        GDS(20) = CHAR(MOD(LONM      ,256))
-        GDS(21) = CHAR(MOD(IGDS(10)/65536,256))
-        GDS(22) = CHAR(MOD(IGDS(10)/  256,256))
-        GDS(23) = CHAR(MOD(IGDS(10)      ,256))
-        GDS(24) = CHAR(MOD(IGDS(11)/65536,256))
-        GDS(25) = CHAR(MOD(IGDS(11)/  256,256))
-        GDS(26) = CHAR(MOD(IGDS(11)      ,256))
-        GDS(27) = CHAR(IGDS(12))
-        GDS(28) = CHAR(IGDS(13))
-        GDS(29) = CHAR(MOD(IGDS(15)/65536,256))
-        GDS(30) = CHAR(MOD(IGDS(15)/  256,256))
-        GDS(31) = CHAR(MOD(IGDS(15)      ,256))
-        GDS(32) = CHAR(MOD(IGDS(16)/65536,256))
-        GDS(33) = CHAR(MOD(IGDS(16)/  256,256))
-        GDS(34) = CHAR(MOD(IGDS(16)      ,256))
-        GDS(35) = CHAR(MOD(IGDS(17)/65536,256))
-        GDS(36) = CHAR(MOD(IGDS(17)/  256,256))
-        GDS(37) = CHAR(MOD(IGDS(17)      ,256))
-        GDS(38) = CHAR(MOD(IGDS(18)/65536,256))
-        GDS(39) = CHAR(MOD(IGDS(18)/  256,256))
-        GDS(40) = CHAR(MOD(IGDS(18)      ,256))
-        GDS(41) = CHAR(0)
-        GDS(42) = CHAR(0)
-C$$     PROCESS POLAR STEREOGRAPHIC GRID TYPES
-      ELSE IF (IGDS(3) .EQ. 5) THEN
-        GDS( 7) = CHAR(MOD(IGDS(4)/256,256))
-        GDS( 8) = CHAR(MOD(IGDS(4)    ,256))
-        GDS( 9) = CHAR(MOD(IGDS(5)/256,256))
-        GDS(10) = CHAR(MOD(IGDS(5)    ,256))
-        LATO = IGDS(6)
-        IF (LATO .LT. 0) THEN
-          LATO = -LATO
-          LATO = IOR(LATO,8388608)
-        ENDIF
-        GDS(11) = CHAR(MOD(LATO/65536,256))
-        GDS(12) = CHAR(MOD(LATO/  256,256))
-        GDS(13) = CHAR(MOD(LATO      ,256))
-        LONO = IGDS(7)
-        IF (LONO .LT. 0) THEN
-          LONO = -LONO
-          LONO = IOR(LONO,8388608)
-        ENDIF
-        GDS(14) = CHAR(MOD(LONO/65536,256))
-        GDS(15) = CHAR(MOD(LONO/  256,256))
-        GDS(16) = CHAR(MOD(LONO      ,256))
-        LONM = IGDS(9)
-        IF (LONM .LT. 0) THEN
-          LONM = -LONM
-          LONM = IOR(LONM,8388608)
-        ENDIF
-        GDS(18) = CHAR(MOD(LONM/65536,256))
-        GDS(19) = CHAR(MOD(LONM/   256,256))
-        GDS(20) = CHAR(MOD(LONM       ,256))
-        GDS(21) = CHAR(MOD(IGDS(10)/65536,256))
-        GDS(22) = CHAR(MOD(IGDS(10)/  256,256))
-        GDS(23) = CHAR(MOD(IGDS(10)      ,256))
-        GDS(24) = CHAR(MOD(IGDS(11)/65536,256))
-        GDS(25) = CHAR(MOD(IGDS(11)/  256,256))
-        GDS(26) = CHAR(MOD(IGDS(11)      ,256))
-        GDS(27) = CHAR(IGDS(12))
-        GDS(28) = CHAR(IGDS(13))
-        GDS(29) = CHAR(0)
-        GDS(30) = CHAR(0)
-        GDS(31) = CHAR(0)
-        GDS(32) = CHAR(0)
-      ENDIF
-C       PRINT 10,(GDS(IG),IG=1,32)
-C10     FORMAT ('  GDS= ',32(1X,Z2.2))
-C
-C     COMPUTE NUMBER OF POINTS IN GRID BY MULTIPLYING
-C       IGDS(4) AND IGDS(5) ... NEEDED FOR PACKER
-C
-      IF (IGDS(3).EQ.0.AND.IGDS(1).EQ.0.AND.IGDS(2).NE.
-     & 255) THEN
-        NPTS = ISUM
-      ELSE
-        NPTS = IGDS(4) * IGDS(5)
-      ENDIF
-C
-C     'IOR' ICOMP-BIT 5 RESOLUTION & COMPONENT FLAG FOR WINDS
-C       WITH IGDS(8) INFO (REST OF RESOLUTION & COMPONENT FLAG DATA)
-C
-      ICOMP   = ISHFT(ICOMP,3)
-      GDS(17) = CHAR(IOR(IGDS(8),ICOMP))
-C
-      RETURN
-      END
+      subroutine w3fi74 (igds,icomp,gds,lengds,npts,igerr)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    w3fi74      construct grid definition section (gds)
+c   prgmmr: farley           org: w/nmc42    date: 93-08-24
+c
+c abstract: this subroutine constructs a grib grid definition
+c   section.
+c
+c program history log:
+c   92-07-07  m. farley   original author
+c   92-10-16  r.e.jones   add code to lat/lon section to do
+c                         gaussian grids.
+c   93-03-29  r.e.jones   add save statement
+c   93-08-24  r.e.jones   changes for grib grids 37-44
+c   93-09-29  r.e.jones   changes for gaussian grid for document
+c                         change in w3fi71.
+c   94-02-15  r.e.jones   changes for eta model grids 90-93
+c   95-04-20  r.e.jones   change 200 and 201 to 201 and 202
+c   95-10-31  iredell     removed saves and prints
+c   98-08-20  baldwin     add type 203
+c
+c
+c usage:    call w3fi74 (igds, icomp, gds, lengds, npts, igerr)
+c   input argument list:
+c     igds        - integer array supplied by w3fi71
+c     icomp       - table 7- resolution & component flag (bit 5)
+c                   for gds(17) wind components
+c
+c   output argument list:
+c     gds       - completed grib grid definition section
+c     lengds    - length of gds
+c     npts      - number of points in grid
+c     igerr     - 1, grid representation type not valid
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: cray cft77 fortran 77, ibm370 vs fortran
+c   machine:  cray c916-128, cray y-mp8/864, cray y-mp el2/256, hds
+c
+c$$$
+c
+      integer       igds  (*)
+c
+      character*1   gds   (*)
+c
+      isum  = 0
+      igerr = 0
+c
+c       print *,' '
+c       print *,'(w3fi74-igds = )'
+c       print *,(igds(i),i=1,18)
+c       print *,' '
+c
+c     compute length of gds in octets (octets 1-3)
+c       length =  32 for lat/lon, gnomic, gausian lat/lon,
+c                    polar stereographic, spherical harmonics
+c       length =  42 for mercator, lambert, tangent cone
+c       length = 178 for mercator, lambert, tangent cone
+c
+      if (igds(3) .eq. 0  .or.  igds(3) .eq. 2  .or.
+     &    igds(3) .eq. 4  .or.  igds(3) .eq. 5  .or.
+     &    igds(3) .eq. 50 .or.  igds(3) .eq. 201.or.
+     &    igds(3) .eq. 202.or.  igds(3) .eq. 203) then
+          lengds = 32
+c
+c       correction for grids 37-44
+c
+        if (igds(3).eq.0.and.igds(1).eq.0.and.igds(2).ne.
+     &  255) then
+          lengds = igds(5) * 2 + 32
+        endif
+      else if (igds(3) .eq. 1  .or.  igds(3) .eq. 3  .or.
+     &         igds(3) .eq. 13) then
+        lengds = 42
+      else
+c       print *,' w3fi74 error, grid representation type not valid'
+        igerr = 1
+        return
+      endif
+c
+c     put length of gds section in bytes 1,2,3
+c
+      gds(1) = char(mod(lengds/65536,256))
+      gds(2) = char(mod(lengds/  256,256))
+      gds(3) = char(mod(lengds      ,256))
+c
+c     octet 4 = nv, number of vertical coordinate parameters
+c     octet 5 = pv, pl or 255
+c     octet 6 = data representation type (table 6)
+c
+      gds(4) = char(igds(1))
+      gds(5) = char(igds(2))
+      gds(6) = char(igds(3))
+c
+c     fill octet the rest of the gds based on data representation
+c     type (table 6)
+c
+c$$
+c     process lat/lon grid types or gaussian grid or arakawa
+c     staggered, semi-staggered, or filled e-grids
+c
+      if (igds(3).eq.0.or.igds(3).eq.4.or.
+     &    igds(3).eq.201.or.igds(3).eq.202.or.
+     &    igds(3).eq.203) then
+        gds( 7) = char(mod(igds(4)/256,256))
+        gds( 8) = char(mod(igds(4)    ,256))
+        gds( 9) = char(mod(igds(5)/256,256))
+        gds(10) = char(mod(igds(5)    ,256))
+        lato    = igds(6)
+        if (lato .lt. 0) then
+          lato = -lato
+          lato = ior(lato,8388608)
+        endif
+        gds(11) = char(mod(lato/65536,256))
+        gds(12) = char(mod(lato/  256,256))
+        gds(13) = char(mod(lato      ,256))
+        lono    = igds(7)
+        if (lono .lt. 0) then
+          lono = -lono
+          lono = ior(lono,8388608)
+        endif
+        gds(14) = char(mod(lono/65536,256))
+        gds(15) = char(mod(lono/  256,256))
+        gds(16) = char(mod(lono      ,256))
+        latext  = igds(9)
+        if (latext .lt. 0) then
+          latext = -latext
+          latext = ior(latext,8388608)
+        endif
+        gds(18) = char(mod(latext/65536,256))
+        gds(19) = char(mod(latext/  256,256))
+        gds(20) = char(mod(latext      ,256))
+        lonext  = igds(10)
+        if (lonext .lt. 0) then
+          lonext = -lonext
+          lonext = ior(lonext,8388608)
+        endif
+        gds(21) = char(mod(lonext/65536,256))
+        gds(22) = char(mod(lonext/  256,256))
+        gds(23) = char(mod(lonext      ,256))
+        ires    = iand(igds(8),128)
+        if (igds(3).eq.201.or.igds(3).eq.202.or.igds(3).eq.203) then
+          gds(24) = char(mod(igds(11)/256,256))
+          gds(25) = char(mod(igds(11)    ,256))
+        else if (ires.eq.0) then
+          gds(24) = char(255)
+          gds(25) = char(255)
+        else
+          gds(24) = char(mod(igds(12)/256,256))
+          gds(25) = char(mod(igds(12)    ,256))
+        end if
+        if (igds(3).eq.4) then
+          gds(26) = char(mod(igds(11)/256,256))
+          gds(27) = char(mod(igds(11)    ,256))
+        else if (igds(3).eq.201.or.igds(3).eq.202.or.
+     &           igds(3).eq.203) then
+          gds(26) = char(mod(igds(12)/256,256))
+          gds(27) = char(mod(igds(12)    ,256))
+        else if (ires.eq.0) then
+          gds(26) = char(255)
+          gds(27) = char(255)
+        else
+          gds(26) = char(mod(igds(11)/256,256))
+          gds(27) = char(mod(igds(11)    ,256))
+        end if
+        gds(28) = char(igds(13))
+        gds(29) = char(0)
+        gds(30) = char(0)
+        gds(31) = char(0)
+        gds(32) = char(0)
+        if (lengds.gt.32) then
+          isum = 0
+          i    = 19
+          do 10 j = 33,lengds,2
+            isum     = isum + igds(i)
+            gds(j)   = char(mod(igds(i)/256,256))
+            gds(j+1) = char(mod(igds(i)    ,256))
+            i        = i + 1
+ 10       continue
+        end if
+c
+c$$     process mercator grid types
+c
+      else if (igds(3) .eq. 1) then
+        gds( 7) = char(mod(igds(4)/256,256))
+        gds( 8) = char(mod(igds(4)    ,256))
+        gds( 9) = char(mod(igds(5)/256,256))
+        gds(10) = char(mod(igds(5)    ,256))
+        lato = igds(6)
+        if (lato .lt. 0) then
+          lato = -lato
+          lato = ior(lato,8388608)
+        endif
+        gds(11) = char(mod(lato/65536,256))
+        gds(12) = char(mod(lato/  256,256))
+        gds(13) = char(mod(lato      ,256))
+        lono = igds(7)
+        if (lono .lt. 0) then
+          lono = -lono
+          lono = ior(lono,8388608)
+        endif
+        gds(14) = char(mod(lono/65536,256))
+        gds(15) = char(mod(lono/  256,256))
+        gds(16) = char(mod(lono      ,256))
+        latext = igds(9)
+        if (latext .lt. 0) then
+          latext = -latext
+          latext = ior(latext,8388608)
+        endif
+        gds(18) = char(mod(latext/65536,256))
+        gds(19) = char(mod(latext/  256,256))
+        gds(20) = char(mod(latext      ,256))
+        lonext  = igds(10)
+        if (lonext .lt. 0) then
+          lonext = -lonext
+          lonext = ior(lonext,8388608)
+        endif
+        gds(21) = char(mod(lonext/65536,256))
+        gds(22) = char(mod(lonext/  256,256))
+        gds(23) = char(mod(lonext      ,256))
+        gds(24) = char(mod(igds(13)/65536,256))
+        gds(25) = char(mod(igds(13)/  256,256))
+        gds(26) = char(mod(igds(13)      ,256))
+        gds(27) = char(0)
+        gds(28) = char(igds(14))
+        gds(29) = char(mod(igds(12)/65536,256))
+        gds(30) = char(mod(igds(12)/  256,256))
+        gds(31) = char(mod(igds(12)      ,256))
+        gds(32) = char(mod(igds(11)/65536,256))
+        gds(33) = char(mod(igds(11)/  256,256))
+        gds(34) = char(mod(igds(11)      ,256))
+        gds(35) = char(0)
+        gds(36) = char(0)
+        gds(37) = char(0)
+        gds(38) = char(0)
+        gds(39) = char(0)
+        gds(40) = char(0)
+        gds(41) = char(0)
+        gds(42) = char(0)
+c$$     process lambert conformal grid types
+      else if (igds(3) .eq. 3) then
+        gds( 7) = char(mod(igds(4)/256,256))
+        gds( 8) = char(mod(igds(4)    ,256))
+        gds( 9) = char(mod(igds(5)/256,256))
+        gds(10) = char(mod(igds(5)    ,256))
+        lato = igds(6)
+        if (lato .lt. 0) then
+          lato = -lato
+          lato = ior(lato,8388608)
+        endif
+        gds(11) = char(mod(lato/65536,256))
+        gds(12) = char(mod(lato/  256,256))
+        gds(13) = char(mod(lato      ,256))
+        lono = igds(7)
+        if (lono .lt. 0) then
+          lono = -lono
+          lono = ior(lono,8388608)
+        endif
+        gds(14) = char(mod(lono/65536,256))
+        gds(15) = char(mod(lono/  256,256))
+        gds(16) = char(mod(lono      ,256))
+        lonm = igds(9)
+        if (lonm .lt. 0) then
+          lonm = -lonm
+          lonm = ior(lonm,8388608)
+        endif
+        gds(18) = char(mod(lonm/65536,256))
+        gds(19) = char(mod(lonm/  256,256))
+        gds(20) = char(mod(lonm      ,256))
+        gds(21) = char(mod(igds(10)/65536,256))
+        gds(22) = char(mod(igds(10)/  256,256))
+        gds(23) = char(mod(igds(10)      ,256))
+        gds(24) = char(mod(igds(11)/65536,256))
+        gds(25) = char(mod(igds(11)/  256,256))
+        gds(26) = char(mod(igds(11)      ,256))
+        gds(27) = char(igds(12))
+        gds(28) = char(igds(13))
+        gds(29) = char(mod(igds(15)/65536,256))
+        gds(30) = char(mod(igds(15)/  256,256))
+        gds(31) = char(mod(igds(15)      ,256))
+        gds(32) = char(mod(igds(16)/65536,256))
+        gds(33) = char(mod(igds(16)/  256,256))
+        gds(34) = char(mod(igds(16)      ,256))
+        gds(35) = char(mod(igds(17)/65536,256))
+        gds(36) = char(mod(igds(17)/  256,256))
+        gds(37) = char(mod(igds(17)      ,256))
+        gds(38) = char(mod(igds(18)/65536,256))
+        gds(39) = char(mod(igds(18)/  256,256))
+        gds(40) = char(mod(igds(18)      ,256))
+        gds(41) = char(0)
+        gds(42) = char(0)
+c$$     process polar stereographic grid types
+      else if (igds(3) .eq. 5) then
+        gds( 7) = char(mod(igds(4)/256,256))
+        gds( 8) = char(mod(igds(4)    ,256))
+        gds( 9) = char(mod(igds(5)/256,256))
+        gds(10) = char(mod(igds(5)    ,256))
+        lato = igds(6)
+        if (lato .lt. 0) then
+          lato = -lato
+          lato = ior(lato,8388608)
+        endif
+        gds(11) = char(mod(lato/65536,256))
+        gds(12) = char(mod(lato/  256,256))
+        gds(13) = char(mod(lato      ,256))
+        lono = igds(7)
+        if (lono .lt. 0) then
+          lono = -lono
+          lono = ior(lono,8388608)
+        endif
+        gds(14) = char(mod(lono/65536,256))
+        gds(15) = char(mod(lono/  256,256))
+        gds(16) = char(mod(lono      ,256))
+        lonm = igds(9)
+        if (lonm .lt. 0) then
+          lonm = -lonm
+          lonm = ior(lonm,8388608)
+        endif
+        gds(18) = char(mod(lonm/65536,256))
+        gds(19) = char(mod(lonm/   256,256))
+        gds(20) = char(mod(lonm       ,256))
+        gds(21) = char(mod(igds(10)/65536,256))
+        gds(22) = char(mod(igds(10)/  256,256))
+        gds(23) = char(mod(igds(10)      ,256))
+        gds(24) = char(mod(igds(11)/65536,256))
+        gds(25) = char(mod(igds(11)/  256,256))
+        gds(26) = char(mod(igds(11)      ,256))
+        gds(27) = char(igds(12))
+        gds(28) = char(igds(13))
+        gds(29) = char(0)
+        gds(30) = char(0)
+        gds(31) = char(0)
+        gds(32) = char(0)
+      endif
+c       print 10,(gds(ig),ig=1,32)
+c10     format ('  gds= ',32(1x,z2.2))
+c
+c     compute number of points in grid by multiplying
+c       igds(4) and igds(5) ... needed for packer
+c
+      if (igds(3).eq.0.and.igds(1).eq.0.and.igds(2).ne.
+     & 255) then
+        npts = isum
+      else
+        npts = igds(4) * igds(5)
+      endif
+c
+c     'ior' icomp-bit 5 resolution & component flag for winds
+c       with igds(8) info (rest of resolution & component flag data)
+c
+      icomp   = ishft(icomp,3)
+      gds(17) = char(ior(igds(8),icomp))
+c
+      return
+      end

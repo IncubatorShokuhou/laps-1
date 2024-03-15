@@ -1,27 +1,27 @@
-SUBROUTINE Grid2Obs
+subroutine grid2obs
 
 !*************************************************
-!  This routine maps grid functions to observation
+!  this routine maps grid functions to observation
 !  sites.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !*************************************************
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER :: iobs,ier
+  integer :: iobs,ier
 
-  DO iobs=1,nobs
+  do iobs=1,nobs
 
-     CALL Intplt3d(o(2,iobs),l,n,d,dm, &
+     call intplt3d(o(2,iobs),l,n,d,dm, &
                    idx(1,iobs),coe(1,iobs),ier)
 
-     IF (ier .NE. 0) THEN
+     if (ier .ne. 0) then
         w(iobs) = 0.0
         idx(1:3,iobs) = 1
         coe(1:3,iobs) = 0.0
-     ENDIF
+     endif
 
-  ENDDO
+  enddo
 
-END SUBROUTINE Grid2Obs
+end subroutine grid2obs

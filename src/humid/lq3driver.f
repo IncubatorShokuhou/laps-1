@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -56,7 +56,7 @@ c     modules be compiled with the highest permissible optimization.
 c     especially the satellite structure inclusion can take up to 1/2 hour
 c     of cpu time when run without optimization.
 c     this software has recently been modified to place all of the 
-c     state variable I/O routines in the driver or calling routine, thus
+c     state variable i/o routines in the driver or calling routine, thus
 c     passing all state variables to the subroutine lq3_driver1a.f via
 c     a parameter list.  
 c
@@ -69,7 +69,7 @@ c     there are some current caveats that one should be aware of.  some
 c     variables in the calling routine such as this driver, contain information
 c     that is changed in the called routine.  for this reason it is recommended
 c     that duplicate variables be used for the call so that original state
-c     variables can be kept in a pristine manner.  At this time the following
+c     variables can be kept in a pristine manner.  at this time the following
 c     variables are potentially modified by the call to lq3_driver1a.f the
 c     main moisture subroutine:
 c     t (surface temperature)
@@ -77,7 +77,7 @@ c     td (surface dew point)
 c     p (surface pressure)
 c     at this time all other variables are returned in their original state.
 
-      USE module_sfc_structure
+      use module_sfc_structure
 
       implicit none
       
@@ -152,7 +152,7 @@ c     surface variables preserved and passed
       data rhext/'lh3'/
 
 c     create common block for cloud_sat data (direct insert)
-c     via Steve Albers new function for humidification
+c     via steve albers new function for humidification
 c     the variable with the _nl suffix is from the namelist and will be
 c     assigned here since a namelist variable cannot be in a 
 c     common block also
@@ -187,7 +187,7 @@ c     namelist data
       integer sounder_switch
       integer sat_skip
       integer gvap_switch
-      integer IHOP_flag
+      integer ihop_flag
       integer time_diff         !time allowed for latency (sec)
       integer sfc_mix
       integer mod_4dda_1
@@ -201,7 +201,7 @@ c     namelist data
      1     raob_radius, goes_switch, cloud_switch, cloud_d,
      1     max_cdelrh_nl,cf_set_nl,cloud_weight_nl,radio_wt_nl
      1     ,tiros_switch, sounder_switch, sat_skip
-     1     ,gvap_switch, IHOP_flag, time_diff, gps_switch
+     1     ,gvap_switch, ihop_flag, time_diff, gps_switch
      1     ,sfc_mix, mod_4dda_1,mod_4dda_factor,
      1     t_ref,path_to_gvap12,path_to_gvap10,path_to_gps,
      1     path2covar
@@ -211,10 +211,10 @@ c     namelist data
 
 c  code
 
-      write (6,*) 'LQ3 Starting now'
+      write (6,*) 'lq3 starting now'
       write (6,*)
 
-      ISTAT = INIT_TIMER()
+      istat = init_timer()
 
       iout = 1 ! have subroutine generate output files
 
@@ -234,7 +234,7 @@ c  code
       endif
 
 
-      write (6,*) ' ALL directory information has been read'
+      write (6,*) ' all directory information has been read'
 
 
 
@@ -247,7 +247,7 @@ c     set namelist parameters to defaults
       cloud_d = 0
       max_cdelrh_nl = 0.11 ! test default; the 0.11 value should not appear in code
       cf_set_nl = 0.6 ! test default: 0.3 is better value
-      cloud_weight = 0.5 ! normal default up to 3/8/12 DB
+      cloud_weight = 0.5 ! normal default up to 3/8/12 db
       radio_wt_nl = 1.0 ! current default
       raob_switch = 0
       radiometer_switch = 2000
@@ -259,7 +259,7 @@ c     set namelist parameters to defaults
       tiros_switch = 0
       sat_skip = 0
       gvap_switch = 1
-      IHOP_flag = 0 
+      ihop_flag = 0 
       time_diff = 0
       gps_switch = 1
       sfc_mix = 0
@@ -281,7 +281,7 @@ c     set namelist parameters to defaults
       close (23)
 
       write (6,*)
-      write (6,*) 'NAMELIST has been read'
+      write (6,*) 'namelist has been read'
 
 
 c-----------------------end filling namelist ---
@@ -291,9 +291,9 @@ c-----------------------end filling namelist ---
 
 
 c     assign name list cloud_sat parameter to the variable in the common block
-c     namelist variable suggested by Steve Albers for routine Cloud_sat.f only
+c     namelist variable suggested by steve albers for routine cloud_sat.f only
 c     this is a direct insert from the namelist into that routine via a special
-c     common block that was deviced in Feb 2012
+c     common block that was deviced in feb 2012
       max_cdelrh = max_cdelrh_nl
       cf_set = cf_set_nl
       cloud_weight = cloud_weight_nl
@@ -327,7 +327,7 @@ c     get vertical dimension kk
       write (6,*)
 
 
-      write(6,*) 'ALLOCATING ARRAYS NOW top level driver'
+      write(6,*) 'allocating arrays now top level driver'
 c     allocate arrays now dimensions known
       allocate (lat(ii,jj),lon(ii,jj))
       write(6,*) 'lat lon done'
@@ -421,7 +421,7 @@ c     get the location of the static grid directory
 
       call check_nan2 (lat,ii,jj,istatus)
       if (istatus.ne.1) then
-         write(6,*) 'NaNs in lat file  abort'
+         write(6,*) 'nans in lat file  abort'
          stop
       endif
       
@@ -436,7 +436,7 @@ c     get the location of the static grid directory
       
       call check_nan2 (lon,ii,jj,istatus)
       if (istatus.ne.1) then
-         write(6,*) 'NaNs in lon file  abort'
+         write(6,*) 'nans in lon file  abort'
          go to 666
       endif   
 
@@ -529,7 +529,7 @@ c     read in the laps 3-d temperature field
       if (t_istatus.ne.1) then
          print*, 'no lt1 quality control performed...'
          print*, 'missing 3-d temp data'
-         write(6,*) 'ABORTING MOISTURE RUN...!!!'
+         write(6,*) 'aborting moisture run...!!!'
          istatus = 0            ! failure
          go to 666
       endif
@@ -565,7 +565,7 @@ c     initialize data field with special missing data flag for sh
 
       call check_nan3 (data,ii,jj,kk,istatus)
       if (istatus.ne.1) then
-         write(6,*) 'NaN detected from RUC/MAPS...abort'
+         write(6,*) 'nan detected from ruc/maps...abort'
          go to 666
       endif
 
@@ -586,13 +586,13 @@ c     test is passed
 
           enddo ! jj
         enddo ! ii
-         write(6,*) 'Data in SH input array are all EQUAL in value'
-         write (6,*) 'Value detected = ', data(1,1,k), ' level ', k
-         write(6,*) 'Assuming such a constant field is an ERROR'
-         write(6,*) 'Aborting LQ3 run'
+         write(6,*) 'data in sh input array are all equal in value'
+         write (6,*) 'value detected = ', data(1,1,k), ' level ', k
+         write(6,*) 'assuming such a constant field is an error'
+         write(6,*) 'aborting lq3 run'
          go to 666
 555      continue  ! made it past kill loop for all same data
-         write (6,*) 'Success in variable SH field, level ',k
+         write (6,*) 'success in variable sh field, level ',k
       enddo ! kk
 
 
@@ -615,14 +615,14 @@ c     ****   laps cloud data. used for cloud, bl, goes
 
       call check_nan3 (cg,ii,jj,kk,istatus)
       if (istatus.ne.1) then
-         write(6,*) 'NaN detected from Cloud Grid...ABORT'
+         write(6,*) 'nan detected from cloud grid...abort'
          go to 666
       endif
 
 
 
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
 
 
@@ -636,7 +636,7 @@ c     get surface temperature and save pristine array (gt)
       call check_nan2 (gt,ii,jj,istatus)
 
       if(istatus.ne.1) then
-         write(6,*) 'NaN detected in var:t  routine:lsin.f'
+         write(6,*) 'nan detected in var:t  routine:lsin.f'
          go to 666
       endif
      
@@ -648,7 +648,7 @@ c     get surface temperature and save pristine array (gt)
 
 
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
 
 
@@ -662,7 +662,7 @@ c     get surface pressure  (gp)
       call check_nan2 (gp,ii,jj,istatus)
 
       if(istatus.ne.1) then
-         write(6,*) 'NaN detected in var:p  routine:lsin.f'
+         write(6,*) 'nan detected in var:p  routine:lsin.f'
          go to 666
       endif
 
@@ -682,7 +682,7 @@ c     obtain surface td value
       call check_nan2 (gtd,ii,jj,istatus)
 
       if(istatus.ne.1) then
-         write(6,*) 'NaN detected in var:td  routine:lsin.f'
+         write(6,*) 'nan detected in var:td  routine:lsin.f'
          go to 666
       endif
 
@@ -729,7 +729,7 @@ c     call the main humidity algorighm with filled state variables
      1     tiros_switch,
      1     sat_skip,
      1     gvap_switch,
-     1     IHOP_flag, 
+     1     ihop_flag, 
      1     time_diff,
      1     gps_switch,
      1     sfc_mix,
@@ -745,9 +745,9 @@ c     call the main humidity algorighm with filled state variables
       write(6,*) 'lq3, lh3, and lh4 (1=success)'
       write(6,*) jstatus, ' output matrix'
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
-c     FINISHED
+c     finished
 
  666  continue  !  stop statements go here to deallocate
 

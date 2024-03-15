@@ -8,15 +8,15 @@
 
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 !
 !-----------------------------------------------------------------------
-!     This routine calculates the scattering amplitudes for a spheriod
+!     this routine calculates the scattering amplitudes for a spheriod
 !     (oblate/prolate/spherical) samll compared with wavelength using
-!     the Rayleigh's approximation.
+!     the rayleigh's approximation.
 !-----------------------------------------------------------------------
 !
 !      common/glhydbdy/glbdy(12),glcad(2,6)
@@ -29,7 +29,7 @@
     real*8, parameter :: ppi=3.14159265358979d0
       data vlght/3.d8/
 !
-!===> Calculate lz (L3) for oblate/prolate spheroid.
+!===> calculate lz (l3) for oblate/prolate spheroid.
 !
       ffreq  = freq*1e9
       refrc = cmplx(refre,refim)
@@ -72,7 +72,7 @@
 !
       endif
 !
-!===> Calculate polarizibility and scattering amplitude components.
+!===> calculate polarizibility and scattering amplitude components.
 !
       hat=(ppi*ffreq/vlght)**2*ddeq**3/6.0d0*(eps-1.0d0)    !
 
@@ -91,19 +91,19 @@
       subroutine miesphere()
 
 
-      Implicit none
+      implicit none
 
 !
 !-----------------------------------------------------------------------
-!     This routine calculates the scattering amplitudes for a sphere of
-!     arbitrary size using the Mie theory algorithm described by van de
-!     Hulst, 1981: "Light Scattering by Small Particles", Chapter 9.
-!     This routine uses SI units.  by C. Tang, cxt@lance.colostate.edu
+!     this routine calculates the scattering amplitudes for a sphere of
+!     arbitrary size using the mie theory algorithm described by van de
+!     hulst, 1981: "light scattering by small particles", chapter 9.
+!     this routine uses si units.  by c. tang, cxt@lance.colostate.edu
 !-----------------------------------------------------------------------
 !
 
-      Include 'parameter.incf'
-      Include 'variablen.incf'
+      include 'parameter.incf'
+      include 'variablen.incf'
     
 !      common/glhydbdy/glbdy(12),glcad(2,6)
 !      common/ensemmtx/stks
@@ -125,7 +125,7 @@
     
       
 !
-!===> Series terminated after n terms
+!===> series terminated after n terms
 !
      
       refrc = cmplx(refre,refim)
@@ -138,11 +138,11 @@
 
       x=wvnm*ddeq/2
     
-      n=INT(x+4*x**(1.0d0/3.0d0)+20)
+      n=int(x+4*x**(1.0d0/3.0d0)+20)
 
 
 
-!===> Calculate logarithmic derivatives of Riccati-Bessel functions psiz
+!===> calculate logarithmic derivatives of riccati-bessel functions psiz
 !     (of complex argument refrc*x), and ratio of psix (of real argument
 !     x, rpsix(i)=psix(i-1)/psix(i)).
 !
@@ -175,8 +175,8 @@
       dpsiz(i)=ztmp-1.0d0/(dpsiz(ia1)+ztmp)
  20   continue
 !
-!===> Recur upward to calculate Riccati-Bessel functions psix and chix
-!     all of real argument x.  Then compute the a and b arrays.
+!===> recur upward to calculate riccati-bessel functions psix and chix
+!     all of real argument x.  then compute the a and b arrays.
 !
       psix1=sin(x)
       chix0=cos(x)
@@ -200,9 +200,9 @@
       chix1=chix2
  30   continue
 !
-!===> Starting with order 1 and 2, recur upward to calculate associated
-!     Legendre functions divided by sin(theta) (argument cos(theta), at
-!     azimuthal mode m=1).  Then compute scattering amplitudes.
+!===> starting with order 1 and 2, recur upward to calculate associated
+!     legendre functions divided by sin(theta) (argument cos(theta), at
+!     azimuthal mode m=1).  then compute scattering amplitudes.
 !
       do 50 ids=1,nds
 
@@ -227,7 +227,7 @@
 
  50   continue
 !
-!===> Elements in extinction and backscattering Mueller matrices.
+!===> elements in extinction and backscattering mueller matrices.
 !
     
       sem(1)=-2*real(samp(1,1)*cmplx(0.0,-1.0))

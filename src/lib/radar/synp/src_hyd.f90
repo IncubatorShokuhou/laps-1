@@ -8,7 +8,7 @@ module src_hyd
               subroutine hydaggrs(dsz,epsice,scmix0,aovrb,refreagg,refimagg)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     aggregate of characteristic size dsz=deq
 !-----------------------------------------------------------------------
@@ -32,7 +32,7 @@ module src_hyd
 !         sctmp,scmix, scmix0
       real*8 aovrb
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !        (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -42,7 +42,7 @@ module src_hyd
 !        (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !        (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       refre=refreagg
       refim=refimagg
@@ -51,9 +51,9 @@ module src_hyd
       aovrb=1.0
       dmx=deq*aovrb**(2.d0/3.d0)/min(1.0d0,aovrb)
 !
-!===> Orientation parameters of the body symmetry axis.
+!===> orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       if(dsz.gt. 1.00) cdtyp(1)=0
@@ -63,7 +63,7 @@ module src_hyd
       caavr(1)=  0
       cadev(1)= 45
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)=  0
@@ -76,7 +76,7 @@ module src_hyd
         subroutine hydgraup(dsz,epswtr,epsice,scmix0, refregr, refimgr, aovrb, thetag, thetagd)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     conical graupel of characterictic size dsz=wcnzc
 !-----------------------------------------------------------------------
@@ -98,7 +98,7 @@ module src_hyd
 !      real cdtyp(2),canum(2),calow(2),caupp(2),caavr(2),cadev(2),  freq, &
 !         sctmp,scmix, scmix0
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !        (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -108,11 +108,11 @@ module src_hyd
 !        (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !        (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       refre=refregr
       refim=refimgr
-      scshp=1    !2 denotes Wang's Conical shape
+      scshp=1    !2 denotes wang's conical shape
       wcnzc=dsz
       wcnxl=dsz*0.9
       wcnlm=2
@@ -121,9 +121,9 @@ module src_hyd
       deq=dmx/aovrb**(2.d0/3.d0)*min(1.0d0,aovrb)
 !      deq = deq*((1./0.9)**(1./3.))
 !
-!===> Orientation parameters of the body symmetry axis.
+!===> orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       if(dsz.gt.1.00) cdtyp(1)=0
@@ -133,7 +133,7 @@ module src_hyd
       caavr(1)=  0
       cadev(1)= thetagd
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)=  0
@@ -146,7 +146,7 @@ module src_hyd
       subroutine hydhlcnc(dsz,epswtr,epsice,scmix0,refreha,refimha, aovrb)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     conical hail of characteristic size dsz=wcnxl.
 !-----------------------------------------------------------------------
@@ -169,7 +169,7 @@ module src_hyd
 !      real cdtyp(2),canum(2),calow(2),caupp(2),caavr(2),cadev(2),  freq, &
 !        sctmp,scmix
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !        (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -179,18 +179,18 @@ module src_hyd
 !        (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !        (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       refre=refreha
       refim=refimha
-      scshp= 2    ! 2 denotes Wang's conical shape
+      scshp= 2    ! 2 denotes wang's conical shape
       wcnxl=dsz
       wcnzc=dsz*0.8
       wcnlm=20
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       if(dsz.gt.1.00) cdtyp(1)=0
@@ -200,7 +200,7 @@ module src_hyd
       caavr(1)=  0
       cadev(1)= 20
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)=  0
@@ -214,7 +214,7 @@ module src_hyd
             subroutine hydhlsph(dsz,epswtr,epsice,scmix0,refreha, refimha,aovrb)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     oblate hail of characterictic size dsz=deq.
 !-----------------------------------------------------------------------
@@ -238,7 +238,7 @@ module src_hyd
 !      real cdtyp(2),canum(2),calow(2),caupp(2),caavr(2),cadev(2),  freq, &
 !       sctmp,scmix
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !        (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -248,7 +248,7 @@ module src_hyd
 !        (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !        (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       refre=refreha
       refim=refimha
@@ -258,9 +258,9 @@ module src_hyd
 !      aovrb=1.00
       aovrb=0.8
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       canum(1)= 10
@@ -269,7 +269,7 @@ module src_hyd
       caavr(1)= 0
       cadev(1)= 45
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)= 0 
@@ -283,7 +283,7 @@ module src_hyd
       subroutine hydicclm(dsz,epsice,aovrb,refreclm,refimclm)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     colume-like pristine crystal of characterictic size dsz=dmx
 !-----------------------------------------------------------------------
@@ -312,7 +312,7 @@ module src_hyd
 !         sctmp,scmix,scshp,deq,dmx,wcnxl,wcnzc,wcnlm
 
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !       (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -322,7 +322,7 @@ module src_hyd
 !        (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !        (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       sctmp=tempenv
 !      call watereps(freq,sctmp,epswtr,epsice)
@@ -338,9 +338,9 @@ module src_hyd
 !      aovrb=10
       deq=dmx/aovrb**(2.d0/3.d0)*min(1.0d0,aovrb)
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       if(dsz.gt.0.07) cdtyp(1)=0
@@ -350,7 +350,7 @@ module src_hyd
       caavr(1)= 90
       cadev(1)= 20
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)=  0
@@ -364,7 +364,7 @@ module src_hyd
       subroutine hydicplt(dsz,epsice,refreplt, refimplt, aovrb, thetas, thetasd)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     plate-like pristine crystal of characteristic size dsz=dmx
 !-----------------------------------------------------------------------
@@ -388,7 +388,7 @@ module src_hyd
 !      real cdtyp(2),canum(2),calow(2),caupp(2),caavr(2),cadev(2),  freq, &
 !           sctmp,scmix, hoehe
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !       (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -398,7 +398,7 @@ module src_hyd
  !     (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !      (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       refre=refreplt
       refim=refimplt
@@ -407,20 +407,20 @@ module src_hyd
       scshp=1    ! 1 denotes sphere/spheroid shape
       dmx=dsz
       aovrb =0.3
-!      hoehe = 1.3E-2 * (2* dsz)**0.375
-!      hoehe = 0.138 * dsz**0.778     !Pruppacher S. 51, ohne 0.5
+!      hoehe = 1.3e-2 * (2* dsz)**0.375
+!      hoehe = 0.138 * dsz**0.778     !pruppacher s. 51, ohne 0.5
 !      aovrb = (hoehe/dsz)
 !      aovrb = 0.1
-!      aovrb=0.1    ! should size dependent, consult with Bob Walco
+!      aovrb=0.1    ! should size dependent, consult with bob walco
 
       deq=dmx/aovrb**(2.d0/3.d0)*min(1.0d0,aovrb)
      !  deq = dmx !deq equivolume diameter, dmx maximum dimension
 !      write(*,*) dmx, deq 
 !      deq = deq * ((1./0.6)**(1./3.)) !volumenkorrektur günther
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       if(dsz.gt. 1.00) cdtyp(1)=0
@@ -430,7 +430,7 @@ module src_hyd
       caavr(1)=  0
       cadev(1)= thetasd
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)=  0
@@ -443,7 +443,7 @@ module src_hyd
  subroutine hydcloudice(dsz,epsice,refreclice,refimclice,aovrb)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     snow flake of characteristic size dsz=dmx
 !-----------------------------------------------------------------------
@@ -464,7 +464,7 @@ module src_hyd
 
     real*8 aovrb
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !        (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -474,7 +474,7 @@ module src_hyd
 !        (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !        (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
 
       refre=refreclice
@@ -486,9 +486,9 @@ module src_hyd
       aovrb=.2
       deq=dmx/aovrb**(2.d0/3.d0)*min(1.0d0,aovrb)
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       if(dsz.gt. 1.0) cdtyp(1)=0
@@ -498,7 +498,7 @@ module src_hyd
       caavr(1)=  0
       cadev(1)= 5
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10
       calow(2)=  0
@@ -516,7 +516,7 @@ module src_hyd
     implicit none
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     cloud droplet of characterictic size dsz=deq.
 !-----------------------------------------------------------------------
@@ -536,7 +536,7 @@ module src_hyd
 !           sctmp,scmix
       real*8 freq,aovrb
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !         (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -546,7 +546,7 @@ module src_hyd
 !         (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !         (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
 
       
@@ -559,9 +559,9 @@ module src_hyd
       aovrb=1.0
       dmx=deq*aovrb**(2.d0/3.d0)/min(1.0d0,aovrb)
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: one point Uniform distribution
+!-->  polar angle: one point uniform distribution
 !
       cdtyp(1)= 1
       if(dsz.gt.0.025) cdtyp(1)=0
@@ -569,7 +569,7 @@ module src_hyd
       calow(1)=-1
       caupp(1)= 1
 
-!-->  azimuthal angle: one point Uniform distribution
+!-->  azimuthal angle: one point uniform distribution
       cdtyp(2)= 1
       canum(2)= 1
       calow(2)= -1
@@ -582,14 +582,14 @@ module src_hyd
       subroutine hydrains(dsz,epswtr,aovrb)
 !
 !-----------------------------------------------------------------------
-!     This routine defines particle information necessary to scattering
+!     this routine defines particle information necessary to scattering
 !     computation and canting angle distribution integration, for single
 !     rain drop of characteristic size dsz=deq.
 !-----------------------------------------------------------------------
 !
     
 
-    Implicit none
+    implicit none
 
       complex epswtr, epsice
 
@@ -607,7 +607,7 @@ module src_hyd
 !         sctmp,scmix
       real*8 freq, aovrb
 !
-!-->  Global arrays glbdy, glcad are equivalent to these parameters:
+!-->  global arrays glbdy, glcad are equivalent to these parameters:
 !
 !      equivalence (glbdy(1),freq),(glbdy(2),sctmp),(glbdy(3),scmix), &
 !      (glbdy(4),refre),(glbdy(5),refim),(glbdy(6),scshp), &
@@ -617,7 +617,7 @@ module src_hyd
 !       (glcad(1,3),calow(1)),(glcad(1,4),caupp(1)), &
 !       (glcad(1,5),caavr(1)),(glcad(1,6),cadev(1))
 !
-!===> Define particle size, shape and electromagnetic properties.
+!===> define particle size, shape and electromagnetic properties.
 !
       
 !      call watereps(sctmp,epswtr,epsice)
@@ -632,15 +632,15 @@ module src_hyd
       
 
 !
-!     Set aspect ratio to one to speed up code for RAMS
+!     set aspect ratio to one to speed up code for rams
 !     processing
 !
 !      aovrb=1.0
 !
 !*********************************************************
-!-->  Bear and Chung's aspect ratio formulae
-!     Slight change in Beard/Chuang formula. Is from 
-!     Andsager etaal   Bringi 
+!-->  bear and chung's aspect ratio formulae
+!     slight change in beard/chuang formula. is from 
+!     andsager etaal   bringi 
 !
      if(deq.gt.1.) then        !vorher 0.3 mal zum testen raufgesetzt
        aovrb=1.0048+.0057*(deq/10.)-2.628*(deq/10.)**2 &
@@ -650,7 +650,7 @@ module src_hyd
      endif
 !   
 !*********************************************************
-!     This is a Prupacher-Pitter formula : Equilibrium axis ratio
+!     this is a prupacher-pitter formula : equilibrium axis ratio
 !mh   if (deq .gt. 0.49) then
 !mh     aovrb = 1.03 - 0.062*deq
 !mh   else
@@ -660,30 +660,30 @@ module src_hyd
 !*********************************************************
 !vorher gelaufen, jetzt 1. variation
 !
-!   Added Andsager fit for accounting for drop oscillations
-!   Bringi 
+!   added andsager fit for accounting for drop oscillations
+!   bringi 
       
 !      if (deq.le.1..or.deq.gt.4.) then
-!    Use Beard and Chuang equilibrium shapes
+!    use beard and chuang equilibrium shapes
 !        aovrb = 1.0048+0.0057*(deq/10.)-2.628*(deq/10.)**2+3.682*(deq/10.)**3-1.677*(deq/10.)**4
 !      else
-!     this Andsager and Beard fit for oscillating drops using
-!     27 data points from Chandra et al,Beard,Kubesh and Beard
-!     and 4 data points from Andsager et al.
+!     this andsager and beard fit for oscillating drops using
+!     27 data points from chandra et al,beard,kubesh and beard
+!     and 4 data points from andsager et al.
         aovrb=1.012-0.1445*(deq/10.)-1.028*(deq/10.)**2
 !      endif 
       
 
 !**********************************************************
-!  Use NR fit proposed by Keenan et al. (1999)
+!  use nr fit proposed by keenan et al. (1999)
 !mh   aovrb = 0.9939 + 0.00736*deq - 0.018485*deq*deq + 
 !mh  &        0.001456*deq*deq*deq
 !mh   if (aovrb .gt. 1.0) aovrb = 1.0
 !**********************************************************
 !
-!===> Define orientation parameters of the body symmetry axis.
+!===> define orientation parameters of the body symmetry axis.
 !
-!-->  polar angle: Gaussian distribution
+!-->  polar angle: gaussian distribution
 !
       cdtyp(1)= 2
       canum(1)= 10
@@ -696,7 +696,7 @@ module src_hyd
 !     for tropical rain. 
       cadev(1)= 5
 
-!-->  azimuthal angle: Uniform distribution
+!-->  azimuthal angle: uniform distribution
       cdtyp(2)= 1
       canum(2)= 10 
       calow(2)= 10

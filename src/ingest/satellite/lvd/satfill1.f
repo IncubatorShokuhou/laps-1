@@ -19,13 +19,13 @@ c
       integer   i,n,j,nt
       integer   record
 
-      REAL      la1
-      REAL      lo1
-      REAL      dx,dy
-      REAL      latin
-      REAL      lov
-      INTEGER   validTime
-      Integer   nx2,ny2
+      real      la1
+      real      lo1
+      real      dx,dy
+      real      latin
+      real      lov
+      integer   validtime
+      integer   nx2,ny2
       integer   rcode,ncid
 
       character*13  cfname13
@@ -79,7 +79,7 @@ c
 c if any bad/missing data points found then acquire image from
 c 15 minutes previous
 c
-      write(6,*)'    Num of msng pix in satfill (current image): ',bcnt
+      write(6,*)'    num of msng pix in satfill (current image): ',bcnt
       write(6,*)'    percent missing: ',percent_missing
 c
 c only try to fill current image with pixels from previous (no more than 15 min)
@@ -102,25 +102,25 @@ c
      1          ,i4time_needed_in,i4time_nearest)
 
          if(abs(i4time_needed_in-i4time_nearest).le.181)then
-            write(*,*)'    Found file for qc fill'
+            write(*,*)'    found file for qc fill'
             if(csat_type.eq.'wfo')then
                cfname13=cvt_i4time_wfo_fname13(i4time_nearest)
                c_filename=cdirpath(1:n-1)//cfname13
             else
                call make_fnam_lp(i4time_nearest,cfname,lstatus)
                c_filename=cdirpath(1:n-1)//cfname//'_'//c_type(1:nt)
-               rcode=NF_OPEN(c_filename,NF_NOWRITE,NCID)
+               rcode=nf_open(c_filename,nf_nowrite,ncid)
                if(rcode.ne.nf_noerr) return
                call get_cdf_dims(ncid,record,nx2,ny2,istatus)
                record=1
                if(istatus.eq.1)then
-                  print*,'Error reading cdf dimensions'
+                  print*,'error reading cdf dimensions'
                   return
                endif
  
             endif
             n=index(c_filename,' ')
-            write(6,*)'    Filename: ',c_filename(1:n-1)
+            write(6,*)'    filename: ',c_filename(1:n-1)
 
             call readcdf(csat_id,csat_type,c_type,
 !    &                   nx2,ny2,
@@ -130,31 +130,31 @@ c
      &                   latitude,
      &                   longitude,
      &                   la1,lo1,
-     &                   Dx,Dy,
-     &                   Latin,Lov,
-     &                   validTime,
+     &                   dx,dy,
+     &                   latin,lov,
+     &                   validtime,
      &                   ncid,
      &                   io_status)
             if(io_status .ne. 1)then
-               write(6,*)'    Error getting image for qc'
-               write(6,*)'    Filename: ',c_filename(1:n-1)
+               write(6,*)'    error getting image for qc'
+               write(6,*)'    filename: ',c_filename(1:n-1)
                goto 998
             endif
 c
-c The missing data flag is r_missing_data!
-c First examine the previous image for missing data.
-c Get missing satellite data value.
+c the missing data flag is r_missing_data!
+c first examine the previous image for missing data.
+c get missing satellite data value.
 c
             call  set_missing_sat(csat_id,csat_type,c_type,
      &               image_prev,n_elems,n_lines,
      &               smsng,r_missing_data,
      &               istatus)
             if(istatus .lt. 0)then
-               write(6,*)'    Found missing data in set_missing_sat'
-               write(6,*)'    Num of msng pix in prev img',abs(istatus)
+               write(6,*)'    found missing data in set_missing_sat'
+               write(6,*)'    num of msng pix in prev img',abs(istatus)
                goto 998
             else
-               write(6,*)'    No missing pixels in previous image'
+               write(6,*)'    no missing pixels in previous image'
                write(6,*)'    using previous image in image_compare'
             endif
 c
@@ -166,7 +166,7 @@ c
      &                         iqstatus)
 
             if(iqstatus.gt.0)then
-               write(6,*)'    Sat pixels filled in image_compare'
+               write(6,*)'    sat pixels filled in image_compare'
                write(6,*)'    = ',iqstatus
                write(6,*)'    recompute percent_missing'
 c
@@ -186,32 +186,32 @@ c
                percent_missing=float(bcnt)/float(itot)
 
             elseif(iqstatus.lt.0)then
-               write(6,*)'    Error filling points in image_compare'
+               write(6,*)'    error filling points in image_compare'
                goto 1000
             else
-               write(6,*)'    No pixels filled in image_compare'
+               write(6,*)'    no pixels filled in image_compare'
             endif
 
          else
 
-            write(6,*)'    No previous image exist for fill routine'
+            write(6,*)'    no previous image exist for fill routine'
 
          endif
 
       elseif(percent_missing.ge.0.25)then
 
-         write(6,*)'    More than 25% of current image missing!'
+         write(6,*)'    more than 25% of current image missing!'
          write(6,*)'    ***************************************'
 
       else
 
-         write(6,*)'    No filling required for image_main'
+         write(6,*)'    no filling required for image_main'
 
       endif
 
       goto 1000
 
-998   write(6,*)'Not using prev image to fill'
+998   write(6,*)'not using prev image to fill'
 
 1000  return
       end

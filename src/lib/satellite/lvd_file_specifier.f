@@ -37,7 +37,7 @@
      &    lvd_index=5
 
       if(lvd_index.eq.0)then
-         write(6,*)'Error getting lvd_index ',c_type
+         write(6,*)'error getting lvd_index ',c_type
          istatus = -1
          stop ! for debugging
       endif

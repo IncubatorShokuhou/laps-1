@@ -5,7 +5,7 @@
      &,image_wv,image_12u,nimages,nft,ntm,c_type,i4time_data
      &,istatus)
 c
-c routine to read binary satellite data file from HKO.
+c routine to read binary satellite data file from hko.
 c
       implicit none
 
@@ -60,7 +60,7 @@ c
 
          call lvd_file_specifier(chtype(k),ispec,istatus)
          if(istatus.ne.0)then
-            print*,'Error setting ispec from lvd_file_specifier'
+            print*,'error setting ispec from lvd_file_specifier'
             return
          endif
 
@@ -75,7 +75,7 @@ c
             nlines=nlines_ir
          endif
 
-c add file-time source here. HKO names are yyjjjhhmm_"type"
+c add file-time source here. hko names are yyjjjhhmm_"type"
 
          call s_len(path_to_raw_sat(ispec),lp)
          fname_sat=path_to_raw_sat(ispec)(1:lp)//'/*_'
@@ -84,11 +84,11 @@ c add file-time source here. HKO names are yyjjjhhmm_"type"
          call s_len(fname_sat,ls)
 
          print*
-         print*,'Get latest satellite time'
+         print*,'get latest satellite time'
          call get_latest_file_time(fname_sat,i4time_latest_sat) 
          call make_fnam_lp(i4time_latest_sat,fname9_sat,istatus)
 
-         print*,'Get latest lvd time'
+         print*,'get latest lvd time'
          call get_directory('lvd',fname_lvd,lv)
          fname_lvd=fname_lvd(1:lv)//csatid//'/*.lvd'
          call get_latest_file_time(fname_lvd,i4time_latest_lvd)
@@ -96,7 +96,7 @@ c add file-time source here. HKO names are yyjjjhhmm_"type"
 c check if this is new data
 
          if(i4time_latest_sat.le.i4time_latest_lvd)then
-            print*,'No new data found for hko/gmssat/',chtype(k)
+            print*,'no new data found for hko/gmssat/',chtype(k)
             goto 20
          endif
 
@@ -110,7 +110,7 @@ c check if this is new data
 
          call get_r_missing_data(r_missing_data,istatus)
          if (istatus.ne.1) then
-            print*,'Error getting r_missing_data'
+            print*,'error getting r_missing_data'
          return
          endif
 
@@ -143,7 +143,7 @@ c load block for known i-j start/end locations
             enddo
 
             if(icnt.gt.0)then
-               print*,'found missing VISIBLE data: ',icnt
+               print*,'found missing visible data: ',icnt
             endif
 
             ntm(nft)=ntm(nft)+1
@@ -152,11 +152,11 @@ c load block for known i-j start/end locations
 
          elseif(ispec.eq.3)then
             print*
-            print*,'Reading Water Vapor data'
+            print*,'reading water vapor data'
             call read_gms_image (filename, image_data, rlut, istatus)
             if (istatus .eq. 0 )then
-                print*,'*********** Error ************'
-                print*,'Error returned: read_gms_image'
+                print*,'*********** error ************'
+                print*,'error returned: read_gms_image'
                 print*,'******************************'
                 goto 20
             endif
@@ -177,7 +177,7 @@ c load block for known i-j start/end locations
             enddo
 
             if(icnt.gt.0)then
-               print*,'found missing Water Vapor data: ',icnt
+               print*,'found missing water vapor data: ',icnt
             endif
 
             ntm(nft)=ntm(nft)+1
@@ -186,11 +186,11 @@ c load block for known i-j start/end locations
 
          elseif(ispec.eq.4)then
             print*
-            print*,'Reading 11u data'
+            print*,'reading 11u data'
             call read_gms_image (filename, image_data, rlut, istatus)
             if (istatus .eq. 0 )then
-                print*,'*********** Error ************'
-                print*,'Error returned: read_gms_image'
+                print*,'*********** error ************'
+                print*,'error returned: read_gms_image'
                 print*,'******************************'
                 goto 20
             endif
@@ -211,7 +211,7 @@ c load block for known i-j start/end locations
             enddo
 
             if(icnt.gt.0)then
-               print*,'found missing 11u-IR data: ',icnt
+               print*,'found missing 11u-ir data: ',icnt
             endif
 
             ntm(nft)=ntm(nft)+1
@@ -220,11 +220,11 @@ c load block for known i-j start/end locations
 
          elseif(ispec.eq.5)then
             print*
-            print*,'Reading 12u data'
+            print*,'reading 12u data'
 	    call read_gms_image (filename, image_data, rlut, istatus)
 	    if (istatus .eq. 0 )then
-                print*,'*********** Error ************'
-                print*,'Error returned: read_gms_image'
+                print*,'*********** error ************'
+                print*,'error returned: read_gms_image'
                 print*,'******************************'
                 goto 20
             endif
@@ -245,7 +245,7 @@ c load block for known i-j start/end locations
             enddo
 
             if(icnt.gt.0)then
-               print*,'found missing 12u-IR data: ',icnt
+               print*,'found missing 12u-ir data: ',icnt
             endif
 
             ntm(nft)=ntm(nft)+1
@@ -265,7 +265,7 @@ c load block for known i-j start/end locations
       istatus = 1
       return
 
-99    print*,'Error opening hko file: ',filename(1:lf)
+99    print*,'error opening hko file: ',filename(1:lf)
       nft=0
       return
       end 

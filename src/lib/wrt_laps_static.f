@@ -9,12 +9,12 @@
 
       implicit none
 
-C This routine calls functions in static_routines.c.  To create the new
-C static file, a cdl file named <laps_dom_file>.cdl (ie. nest7grid.cdl)
-C must be located in the LAPS cdl directory and is written out to the
-C directory specified in "dir".
+c this routine calls functions in static_routines.c.  to create the new
+c static file, a cdl file named <laps_dom_file>.cdl (ie. nest7grid.cdl)
+c must be located in the laps cdl directory and is written out to the
+c directory specified in "dir".
 
-C Passed in variables
+c passed in variables
       character      dir*(*),laps_dom_file*(*)
       integer        imax, jmax, n_grids
       real         dx, dy, lov, latin1, latin2
@@ -34,7 +34,7 @@ C Passed in variables
       integer n
 !mp
 
-C Local variables
+c local variables
 
       integer        i4time_now_gg, dom_len, map_len
       integer        origin_len, unixtime, nx_lp, ny_lp
@@ -44,19 +44,19 @@ C Local variables
       character*30   map_projection
       
       integer        i4time,
-     1               ERROR(2),
+     1               error(2),
      1               flag
 
       integer        f_len
 
-      COMMON         /PRT/flag
+      common         /prt/flag
 
       include       'grid_fname.cmn'
 
-      ERROR(1)=1
-      ERROR(2)=0
+      error(1)=1
+      error(2)=0
 
-C  BEGIN SUBROUTINE
+c  begin subroutine
 
       print*,'wrt_laps_static'
       print*,'make_static_fname'
@@ -72,20 +72,20 @@ C  BEGIN SUBROUTINE
 	write(6,*) 'laps_dom_file= ', laps_dom_file
 	write(6,*) 'file_name= ', file_name
 	write(6,*) 'f_len= ', f_len
-      if (status .eq. ERROR(2)) goto 990
+      if (status .eq. error(2)) goto 990
 
       print*,'call i4time_now_gg'
       i4time = i4time_now_gg()
       print*,'i4time = ',i4time
       call cv_i4tim_asc_lp(i4time,asctime,status)
       if(status .ne. 1)then
-         print*,'Error returned: cv_i4tim_asc_lp: ',i4time
+         print*,'error returned: cv_i4tim_asc_lp: ',i4time
          return
       endif
 
       unixtime = i4time - 315619200
 
-c get NX_L and NY_L from namelist (or common if namelist read already).
+c get nx_l and ny_l from namelist (or common if namelist read already).
       if(nest.eq.1)then
          write(6,*) 'call get_grid_dim_xy: ' 
          call get_grid_dim_xy(nx_lp, ny_lp, status)
@@ -96,7 +96,7 @@ c get NX_L and NY_L from namelist (or common if namelist read already).
          ny_lp=jmax
       endif
 
-      print*,'Dimensions used in wrt_cdf_static: ',nx_lp,ny_lp
+      print*,'dimensions used in wrt_cdf_static: ',nx_lp,ny_lp
         
       asc_len = len(asctime)
       call s_len(laps_dom_file, dom_len)
@@ -140,48 +140,48 @@ c get NX_L and NY_L from namelist (or common if namelist read already).
      1                      origin,origin_len,map_projection,map_len,
      1                      unixtime, status)
 
-      if (status .eq. -2) GOTO 940
-      if (status .eq. -3) GOTO 950
-      if (status .eq. -4) GOTO 960
-      if (status .eq. -5) GOTO 970
-      if (status .eq. -6) GOTO 980
-C
-C ****  Return normally.
-C
-      status = ERROR(1)
+      if (status .eq. -2) goto 940
+      if (status .eq. -3) goto 950
+      if (status .eq. -4) goto 960
+      if (status .eq. -5) goto 970
+      if (status .eq. -6) goto 980
+c
+c ****  return normally.
+c
+      status = error(1)
 999   return
-C
-C ****  Error trapping.
-C
+c
+c ****  error trapping.
+c
 930   if (flag .ne. 1)
      1write(6,*) 
-     1'Error getting info from ',laps_dom_file(1:dom_len),
+     1'error getting info from ',laps_dom_file(1:dom_len),
      1'.parms..write aborted.'
-      status = ERROR(2)
+      status = error(2)
       goto 999
-C
+c
 940   if (flag .ne. 1)
-     1write(6,*) 'Error opening file to be written to...write aborted.'
-      status = ERROR(2)
+     1write(6,*) 'error opening file to be written to...write aborted.'
+      status = error(2)
       goto 999
-C
+c
 950   if (flag .ne. 1)
-     1   write(6,*) 'Error in imax,jmax, or n_grids...write aborted.'
-      status = ERROR(2)
+     1   write(6,*) 'error in imax,jmax, or n_grids...write aborted.'
+      status = error(2)
       goto 999
-C
+c
 960   if (flag .ne. 1)
-     1   write(6,*) 'Error writing data to file...write aborted.'
-      status = ERROR(2)
+     1   write(6,*) 'error writing data to file...write aborted.'
+      status = error(2)
       goto 999
-C
+c
 970   if (flag .ne. 1)
-     1write(6,*) 'Error writing file header info...write aborted.'
-      status = ERROR(2)
+     1write(6,*) 'error writing file header info...write aborted.'
+      status = error(2)
       goto 999
-C
+c
 980   if (flag .ne. 1)then
-       if(TRIM(grid_fnam_common) == 'nest7grid')then
+       if(trim(grid_fnam_common) == 'nest7grid')then
             write(6,*) 'x and y values in ',laps_dom_file(1:dom_len),
      1'.cdl do not match imax and jmax in ',laps_dom_file(1:dom_len),
      1'.parms ... write aborted.'
@@ -192,16 +192,16 @@ C
             write(6,*)'nx_lp,ny_lp | imax,jmax ',nx_lp,ny_lp,imax,jmax
        endif
 
-       status = ERROR(2)
+       status = error(2)
        goto 999
       endif
-C
+c
 990   if (flag .ne. 1) then
-        write(6,*) 'Length of dir+file-name is greater than 150 char.'
-        write(6,*) 'Static file cannot be accessed.'
+        write(6,*) 'length of dir+file-name is greater than 150 char.'
+        write(6,*) 'static file cannot be accessed.'
       endif
-      status = ERROR(2)
+      status = error(2)
       goto 999
-C
+c
       end
 

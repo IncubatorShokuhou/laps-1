@@ -1,41 +1,41 @@
-      REAL FUNCTION FMKIEEE(A)
- !$$$ SUBPROGRAM DOCUMENTATION BLOCK
+      real function fmkieee(a)
+ !$$$ subprogram documentation block
  ! . . . .
- ! SUBPROGRAM: mkieee 
- ! PRGMMR: Gilbert ORG: W/NP11 DATE: 2000-05-09
+ ! subprogram: mkieee 
+ ! prgmmr: gilbert org: w/np11 date: 2000-05-09
  !
- ! ABSTRACT: This subroutine stores a list of real values in 
- ! 32-bit IEEE floating point format.
+ ! abstract: this subroutine stores a list of real values in 
+ ! 32-bit ieee floating point format.
  !
- ! PROGRAM HISTORY LOG:
- ! 2000-05-09 Gilbert
+ ! program history log:
+ ! 2000-05-09 gilbert
  !
- ! USAGE: CALL mkieee(a)
- ! INPUT ARGUMENT LIST:
- ! a - Input floating point value.
+ ! usage: call mkieee(a)
+ ! input argument list:
+ ! a - input floating point value.
  !
- ! OUTPUT ARGUMENT LIST: None.
+ ! output argument list: none.
  !
- ! REMARKS: None
+ ! remarks: none
  !
- ! ATTRIBUTES:
- ! LANGUAGE: Fortran 90
- ! MACHINE: IBM SP
+ ! attributes:
+ ! language: fortran 90
+ ! machine: ibm sp
  !
  !$$$
 
-      PARAMETER (two23=2.**23)
-      PARAMETER (two126=2.**126)
-C
-      EQUIVALENCE(RTEMP,IEEE)
-C
+      parameter (two23=2.**23)
+      parameter (two126=2.**126)
+c
+      equivalence(rtemp,ieee)
+c
       alog2=alog(2.0)
 
       ieee=0
 
       if (a.ne.0.) then
  !
- ! Set Sign bit (bit 31 - leftmost bit)
+ ! set sign bit (bit 31 - leftmost bit)
  !
          if (a.lt.0.0) then
            ieee=ibset(ieee,31)
@@ -45,16 +45,16 @@ C
            atemp=a
          endif
  !
- ! Determine exponent n with base 2
+ ! determine exponent n with base 2
  !
-         n=INT(flr(alog(atemp)/alog2))
+         n=int(flr(alog(atemp)/alog2))
          iexp=n+127
          if (n.gt.127) iexp=255 ! overflow
          if (n.lt.-127) iexp=0
          ! set exponent bits ( bits 30-23 )
          call mvbits(iexp,0,8,ieee,23)
  !
- ! Determine Mantissa
+ ! determine mantissa
  ! 
          if (iexp.ne.255) then
            if (iexp.ne.0) then
@@ -69,7 +69,7 @@ C
          ! set mantissa bits ( bits 22-0 )
          call mvbits(imant,0,23,ieee,0)
       endif
-C
-      FMKIEEE=RTEMP
+c
+      fmkieee=rtemp
       return
       end

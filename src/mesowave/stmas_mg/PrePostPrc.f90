@@ -1,311 +1,311 @@
-!dis Forecast Systems Laboratory
-!dis NOAA/OAR/ERL/FSL
-!dis 325 Broadway
-!dis Boulder, CO 80303
+!dis forecast systems laboratory
+!dis noaa/oar/erl/fsl
+!dis 325 broadway
+!dis boulder, co 80303
 !dis
-!dis Forecast Research Division
-!dis Local Analysis and Prediction Branch
-!dis LAPS
+!dis forecast research division
+!dis local analysis and prediction branch
+!dis laps
 !dis
-!dis This software and its documentation are in the public domain and
-!dis are furnished "as is." The United States government, its
+!dis this software and its documentation are in the public domain and
+!dis are furnished "as is." the united states government, its
 !dis instrumentalities, officers, employees, and agents make no
 !dis warranty, express or implied, as to the usefulness of the software
-!dis and documentation for any purpose. They assume no responsibility
+!dis and documentation for any purpose. they assume no responsibility
 !dis (1) for the use of the software and documentation; or (2) to provide
 !dis technical support to users.
 !dis
-!dis Permission to use, copy, modify, and distribute this software is
+!dis permission to use, copy, modify, and distribute this software is
 !dis hereby granted, provided that the entire disclaimer notice appears
-!dis in all copies. All modifications to this software must be clearly
+!dis in all copies. all modifications to this software must be clearly
 !dis documented, and are solely the responsibility of the agent making
-!dis the modifications. If significant modifications or enhancements
-!dis are made to this software, the FSL Software Policy Manager
+!dis the modifications. if significant modifications or enhancements
+!dis are made to this software, the fsl software policy manager
 !dis (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
 
-MODULE PrePostPrc
+module prepostprc
 
 !==========================================================
-! This module sets up STMAS pre/post processes.
+! this module sets up stmas pre/post processes.
 !
-! HISTORY:
-! Creation: YUANFU XIE 8-2005
+! history:
+! creation: yuanfu xie 8-2005
 !==========================================================
 
-  USE Definition
+  use definition
 
-CONTAINS
+contains
 
-SUBROUTINE PrPstNLs
+subroutine prpstnls
 
 !==========================================================
-! This routine reads in namelists for STMAS multigrid.
+! this routine reads in namelists for stmas multigrid.
 !
-! HISTORY:
-! Creation: YUANFU XIE 8-2005
+! history:
+! creation: yuanfu xie 8-2005
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER*200 :: dir
-  INTEGER :: nam,ios
+  character*200 :: dir
+  integer :: nam,ios
 
-  ! Get namelist for STMAS:
-  CALL get_directory('static',dirstc,dirlen)
+  ! get namelist for stmas:
+  call get_directory('static',dirstc,dirlen)
   dir = dirstc(1:dirlen)//'stmas_mg.nl'
-  OPEN(unit=11,file=dir(1:dirlen+12),form='formatted')
-  READ(11,NML=STMAS,IOSTAT=ios)
-  CLOSE(11)
-  ! Check the numtmf consistent to numgrd
-  IF (numtmf .NE. numgrd(3)) THEN
-    PRINT*,'STMAS>PrPstNLs: Error in stmas_mg.nl, numtmf does not match numgrd'
-    STOP
-  ENDIF
+  open(unit=11,file=dir(1:dirlen+12),form='formatted')
+  read(11,nml=stmas,iostat=ios)
+  close(11)
+  ! check the numtmf consistent to numgrd
+  if (numtmf .ne. numgrd(3)) then
+    print*,'stmas>prpstnls: error in stmas_mg.nl, numtmf does not match numgrd'
+    stop
+  endif
 
-  ! Check the limit for number of variables to be analyzed:
-  IF (numvar .GT. MAXVAR) THEN
-    WRITE(*,*) 'STMAS>PrPstNLs: Error: too many variables!'
-    WRITE(*,*) 'STMAS>PrPstNLs: Increase MAXVAR and rerun!'
-    STOP
-  ENDIF
+  ! check the limit for number of variables to be analyzed:
+  if (numvar .gt. maxvar) then
+    write(*,*) 'stmas>prpstnls: error: too many variables!'
+    write(*,*) 'stmas>prpstnls: increase maxvar and rerun!'
+    stop
+  endif
 
-  ! Get names of analyzing variables:
+  ! get names of analyzing variables:
   dir = dirstc(1:dirlen)//'stmas_mg.vr'
-  OPEN(unit=11,file=dir(1:dirlen+12),form='formatted')
-  DO nam=1,numvar
-    READ(11,*) varnam(nam),thresh(nam),needbk(nam),bounds(nam),radius(nam),pnlt_v(nam),lndsea(nam),slevel(nam)
-  ENDDO
-  CLOSE(11)
+  open(unit=11,file=dir(1:dirlen+12),form='formatted')
+  do nam=1,numvar
+    read(11,*) varnam(nam),thresh(nam),needbk(nam),bounds(nam),radius(nam),pnlt_v(nam),lndsea(nam),slevel(nam)
+  enddo
+  close(11)
 
-END SUBROUTINE PrPstNLs
+end subroutine prpstnls
 
-SUBROUTINE PrPstLSX
+subroutine prpstlsx
 
 !==========================================================
-! This routine writes out the analyses into LSX gridded
-! data in NetCDF format.
+! this routine writes out the analyses into lsx gridded
+! data in netcdf format.
 !
-! HISTORY:
-! Creation: YUANFU XIE 6-2005
-! Modified: YUANFU XIE 6-2006: Write out more time frame.
-! Modified: YUANFU XIE 6-2006: Add sfc pressure and change
+! history:
+! creation: yuanfu xie 6-2005
+! modified: yuanfu xie 6-2006: write out more time frame.
+! modified: yuanfu xie 6-2006: add sfc pressure and change
 !			       the equations for theta and
-!			       thetae from REDP to SFCP.
+!			       thetae from redp to sfcp.
 !==========================================================
 
-  USE Definition
+  use definition
 
-  IMPLICIT NONE
+  implicit none
 
-  ! Local variables:
-  CHARACTER :: ext*3,dir*200
-  CHARACTER*125 :: cmt(LSXVAR)
-  CHARACTER*3 :: vnm(LSXVAR)		! Variable names
-  CHARACTER*3 :: vun(LSXVAR)		! Units
-  CHARACTER*3 :: crd(LSXVAR)		! Coordinates
+  ! local variables:
+  character :: ext*3,dir*200
+  character*125 :: cmt(lsxvar)
+  character*3 :: vnm(lsxvar)		! variable names
+  character*3 :: vun(lsxvar)		! units
+  character*3 :: crd(lsxvar)		! coordinates
 
-  INTEGER :: i,j,ncm
-  INTEGER :: ngd(2)	! Actual grid points
-  INTEGER :: lvl(LSXVAR) ! Number of levels of each field
-  INTEGER :: itm	! Time frame to write out
-  INTEGER :: i4t	! i4 time corresponding to itm
-  INTEGER :: idx(MAXVAR)! Indices for derived variables;
-  INTEGER :: iwv	! Index of V; 
-  INTEGER :: nvr,mvr	! Number of variables;
-  INTEGER :: len
-  INTEGER :: sts	! Return status
+  integer :: i,j,ncm
+  integer :: ngd(2)	! actual grid points
+  integer :: lvl(lsxvar) ! number of levels of each field
+  integer :: itm	! time frame to write out
+  integer :: i4t	! i4 time corresponding to itm
+  integer :: idx(maxvar)! indices for derived variables;
+  integer :: iwv	! index of v; 
+  integer :: nvr,mvr	! number of variables;
+  integer :: len
+  integer :: sts	! return status
 
-  REAL, EXTERNAL :: EPT
-  REAL :: tmp,dew,td_c,pr_m
-  REAL :: gdx(numgrd(1),numgrd(2))	! Grid spacing (X)
-  REAL :: gdy(numgrd(1),numgrd(2))	! Grid spacing (Y)
-  REAL :: gdp(numgrd(1),numgrd(2))	! Pressure in mb
-  REAL :: gdt(numgrd(1),numgrd(2))	! Theta
-  REAL :: dum(numgrd(1),numgrd(2))	! Unused value
-  REAL :: dmm(numgrd(1),numgrd(2))	! Unused value
-  REAL :: mrc(numgrd(1),numgrd(2))
-  REAL :: dat(numgrd(1)-2*numfic(1),numgrd(2)-2*numfic(2),LSXVAR)
+  real, external :: ept
+  real :: tmp,dew,td_c,pr_m
+  real :: gdx(numgrd(1),numgrd(2))	! grid spacing (x)
+  real :: gdy(numgrd(1),numgrd(2))	! grid spacing (y)
+  real :: gdp(numgrd(1),numgrd(2))	! pressure in mb
+  real :: gdt(numgrd(1),numgrd(2))	! theta
+  real :: dum(numgrd(1),numgrd(2))	! unused value
+  real :: dmm(numgrd(1),numgrd(2))	! unused value
+  real :: mrc(numgrd(1),numgrd(2))
+  real :: dat(numgrd(1)-2*numfic(1),numgrd(2)-2*numfic(2),lsxvar)
 
   ! added by min-ken hsieh
-  ! declare L1S array to store 1 hr and 24 hr precip.
-  ! then output to L1S file via write_laps_data
-  REAL :: L1S(numgrd(1)-2*numfic(1),numgrd(2)-2*numfic(2),2)
-  CHARACTER*125 :: L1S_cmt(2)
-  CHARACTER*3 :: L1S_vnm(2)		! Variable names
-  CHARACTER*3 :: L1S_vun(2)		! Units
-  CHARACTER*3 :: L1S_crd(2)		! Coordinates
-  CHARACTER*3 :: LWM_vnm(2)		! Variable names
+  ! declare l1s array to store 1 hr and 24 hr precip.
+  ! then output to l1s file via write_laps_data
+  real :: l1s(numgrd(1)-2*numfic(1),numgrd(2)-2*numfic(2),2)
+  character*125 :: l1s_cmt(2)
+  character*3 :: l1s_vnm(2)		! variable names
+  character*3 :: l1s_vun(2)		! units
+  character*3 :: l1s_crd(2)		! coordinates
+  character*3 :: lwm_vnm(2)		! variable names
 
-  INTEGER :: L1S_lvl(2)			! Number of levels of each field
+  integer :: l1s_lvl(2)			! number of levels of each field
 
-  ! Mixing ratio function from TD and P:
-  REAL :: WMR
+  ! mixing ratio function from td and p:
+  real :: wmr
 
-  ! Time frame to write out:
-  !DO itm = numgrd(3)-numfic(3),max0(1,numgrd(3)-numfic(3)-2),-1	! Time frame
-  ! Yuanfu: change output to current time frame only for forecast:
-  DO itm = numgrd(3)-numfic(3),max0(1,numgrd(3)-numfic(3)),-1	! Time frame
+  ! time frame to write out:
+  !do itm = numgrd(3)-numfic(3),max0(1,numgrd(3)-numfic(3)-2),-1	! time frame
+  ! yuanfu: change output to current time frame only for forecast:
+  do itm = numgrd(3)-numfic(3),max0(1,numgrd(3)-numfic(3)),-1	! time frame
 
   i4t = i4time-(numgrd(3)-numfic(3)-itm)*lapsdt	! i4time corresponding to itm
-  mvr = LSXVAR
+  mvr = lsxvar
   lvl = 0
-  crd = 'AGL'
+  crd = 'agl'
 
-  ! Number of gridpoints without fictitous points:
+  ! number of gridpoints without fictitous points:
   ngd = numgrd(1:2)-2*numfic(1:2)
   gdx = phydxy(1)
   gdy = phydxy(2)
 
-  ! Parsing the variable names:
+  ! parsing the variable names:
   nvr = 0
-  DO i=1,numvar
+  do i=1,numvar
 
-    SELECT CASE (varnam(i))
-    CASE ("TEMP")	! Temperature
+    select case (varnam(i))
+    case ("temp")	! temperature
       nvr = nvr+1
-      IF (nvr .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
-      vnm(nvr) = 'T  '
-      vun(nvr) = 'K  '
-      cmt(nvr) = 'Surface temperature'
+      if (nvr .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
+      vnm(nvr) = 't  '
+      vun(nvr) = 'k  '
+      cmt(nvr) = 'surface temperature'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("VISB")	! Visibility
+    case ("visb")	! visibility
       nvr = nvr+1
-      IF (nvr .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
-      vnm(nvr) = 'VIS'
-      vun(nvr) = 'M  '
-      cmt(nvr) = 'Visibilty'
+      if (nvr .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
+      vnm(nvr) = 'vis'
+      vun(nvr) = 'm  '
+      cmt(nvr) = 'visibilty'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("CEIL")	! Cloud ceiling
+    case ("ceil")	! cloud ceiling
       nvr = nvr+1
-      IF (nvr .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
-      vnm(nvr) = 'CC'
-      vun(nvr) = 'M  '
-      cmt(nvr) = 'Cloud ceiling'
+      if (nvr .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
+      vnm(nvr) = 'cc'
+      vun(nvr) = 'm  '
+      cmt(nvr) = 'cloud ceiling'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("DEWP")	! Dew point temperature
+    case ("dewp")	! dew point temperature
       nvr = nvr+1
-      IF (nvr .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
-      vnm(nvr) = 'TD '
-      vun(nvr) = 'K  '
-      cmt(nvr) = 'Dewpoint'
+      if (nvr .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
+      vnm(nvr) = 'td '
+      vun(nvr) = 'k  '
+      cmt(nvr) = 'dewpoint'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("TGD ")	! Ground temperature
+    case ("tgd ")	! ground temperature
       nvr = nvr+1
-      IF (nvr .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
-      vnm(nvr) = 'TGD'
-      vun(nvr) = 'K  '
-      cmt(nvr) = 'Ground Temperature'
+      if (nvr .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
+      vnm(nvr) = 'tgd'
+      vun(nvr) = 'k  '
+      cmt(nvr) = 'ground temperature'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("MSLP")	! Mean Sea Level Pressure
+    case ("mslp")	! mean sea level pressure
       nvr = nvr+1
-      IF (nvr .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
-      vnm(nvr) = 'MSL'
-      vun(nvr) = 'PA '
-      cmt(nvr) = 'MSL Pressure'
+      if (nvr .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
+      vnm(nvr) = 'msl'
+      vun(nvr) = 'pa '
+      cmt(nvr) = 'msl pressure'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("REDP")	! Reduced pressure
-      IF (nvr+2 .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
+    case ("redp")	! reduced pressure
+      if (nvr+2 .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
       nvr = nvr+1
-      vnm(nvr) = 'P  '
-      vun(nvr) = 'PA '
-      write(cmt(nvr),11) int(rdplvl),' M REDUCED PRESSURE'
+      vnm(nvr) = 'p  '
+      vun(nvr) = 'pa '
+      write(cmt(nvr),11) int(rdplvl),' m reduced pressure'
  11   format(i5,a19)
-      ! cmt(nvr) = '0  M REDUCED PRESSURE'
+      ! cmt(nvr) = '0  m reduced pressure'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-      IF (press_pert .EQ. 1) THEN
+      if (press_pert .eq. 1) then
         nvr = nvr+1
-        vnm(nvr) = 'PP '
-        vun(nvr) = 'PA '
-        cmt(nvr) = '0  M REDUCED PRESSURE CHANGE'
-        CALL PresChng(dat(1,1,nvr-1),ngd,dat(1,1,nvr))
-      ENDIF
-    CASE ("SFCP")	! Surface pressure
-      IF (nvr+1 .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
+        vnm(nvr) = 'pp '
+        vun(nvr) = 'pa '
+        cmt(nvr) = '0  m reduced pressure change'
+        call preschng(dat(1,1,nvr-1),ngd,dat(1,1,nvr))
+      endif
+    case ("sfcp")	! surface pressure
+      if (nvr+1 .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
       nvr = nvr+1
-      vnm(nvr) = 'PS '
-      vun(nvr) = 'PA '
-      cmt(nvr) = 'SURFACE PRESSURE'
+      vnm(nvr) = 'ps '
+      vun(nvr) = 'pa '
+      cmt(nvr) = 'surface pressure'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("WNDU") 	! U wind binded with WNDV
+    case ("wndu") 	! u wind binded with wndv
       iwv = 0
-      DO j=1,numvar
-        IF (varnam(j) .EQ. 'WNDV') iwv = j
-      ENDDO
-      IF (iwv .EQ. 0) THEN
-	WRITE(*,3)
-        STOP
-      ENDIF
-      IF (nvr+4 .GT. LSXVAR) THEN
-	WRITE(*,2)
-        STOP
-      ENDIF
+      do j=1,numvar
+        if (varnam(j) .eq. 'wndv') iwv = j
+      enddo
+      if (iwv .eq. 0) then
+	write(*,3)
+        stop
+      endif
+      if (nvr+4 .gt. lsxvar) then
+	write(*,2)
+        stop
+      endif
       nvr = nvr+1
-      vnm(nvr) = 'U  '
-      vun(nvr) = 'M/S'
-      cmt(nvr) = 'U component'
+      vnm(nvr) = 'u  '
+      vun(nvr) = 'm/s'
+      cmt(nvr) = 'u component'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,i)
       nvr = nvr+1
-      vnm(nvr) = 'V  '
-      vun(nvr) = 'M/S'
-      cmt(nvr) = 'V component'
+      vnm(nvr) = 'v  '
+      vun(nvr) = 'm/s'
+      cmt(nvr) = 'v component'
       dat(1:ngd(1),1:ngd(2),nvr) = &
 	analys(numfic(1)+1:numgrd(1)-numfic(1), &
 	       numfic(2)+1:numgrd(2)-numfic(2),itm,iwv)
 
-      ! Write surface wind to lwm for plot purpose:
-      ! LWM_vnm(1) = 'SU '
-      ! LWM_vnm(2) = 'SV '
-      ! CALL PUT_LAPS_MULTI_2D(i4t,'lwm',LWM_vnm,vun(nvr-1),cmt(nvr-1), &
+      ! write surface wind to lwm for plot purpose:
+      ! lwm_vnm(1) = 'su '
+      ! lwm_vnm(2) = 'sv '
+      ! call put_laps_multi_2d(i4t,'lwm',lwm_vnm,vun(nvr-1),cmt(nvr-1), &
       !                        dat(1,1,nvr-1),ngd(1),ngd(2),2,sts)
 
       nvr = nvr+1
-      vnm(nvr) = 'VOR'
-      vun(nvr) = '/S '
-      cmt(nvr) = 'Vorticity'
-      ! Interior:
+      vnm(nvr) = 'vor'
+      vun(nvr) = '/s '
+      cmt(nvr) = 'vorticity'
+      ! interior:
       dat(2:ngd(1)-1,2:ngd(2)-1,nvr) = 0.5/phydxy(2)*( &
 	analys(numfic(1)+2:numgrd(1)-numfic(1)-1, &
 	       numfic(2)+1:numgrd(2)-numfic(2)-2,itm,i)- &
@@ -316,13 +316,13 @@ SUBROUTINE PrPstLSX
 	       numfic(2)+2:numgrd(2)-numfic(2)-1,itm,iwv)- &
 	analys(numfic(1)+1:numgrd(1)-numfic(1)-2, &
 	       numfic(2)+2:numgrd(2)-numfic(2)-1,itm,iwv))
-      ! Extrapolate boundary values:
-      CALL Extraplt(dat(1,1,nvr),ngd)
+      ! extrapolate boundary values:
+      call extraplt(dat(1,1,nvr),ngd)
       nvr = nvr+1
-      vnm(nvr) = 'DIV'
-      vun(nvr) = '/S '
-      cmt(nvr) = 'Divergence'
-      ! Interior:
+      vnm(nvr) = 'div'
+      vun(nvr) = '/s '
+      cmt(nvr) = 'divergence'
+      ! interior:
       dat(2:ngd(1)-1,2:ngd(2)-1,nvr) = -0.5/phydxy(2)*( &
 	analys(numfic(1)+2:numgrd(1)-numfic(1)-1, &
 	       numfic(2)+1:numgrd(2)-numfic(2)-2,itm,iwv)- &
@@ -333,311 +333,311 @@ SUBROUTINE PrPstLSX
 	       numfic(2)+2:numgrd(2)-numfic(2)-1,itm,i)- &
 	analys(numfic(1)+1:numgrd(1)-numfic(1)-2, &
 	       numfic(2)+2:numgrd(2)-numfic(2)-1,itm,i))
-      ! Extrapolate boundary values:
-      CALL Extraplt(dat(1,1,nvr),ngd)
-    CASE ("WNDV")	! V wind dealt with U
-    CASE ("PCP1")	! 1 hour precip accumulation		added by min-ken hsieh
-      ! make a copy in L1S array
-      L1S(1:ngd(1),1:ngd(2),1) = &
+      ! extrapolate boundary values:
+      call extraplt(dat(1,1,nvr),ngd)
+    case ("wndv")	! v wind dealt with u
+    case ("pcp1")	! 1 hour precip accumulation		added by min-ken hsieh
+      ! make a copy in l1s array
+      l1s(1:ngd(1),1:ngd(2),1) = &
         analys(numfic(1)+1:numgrd(1)-numfic(1), &
                numfic(2)+1:numgrd(2)-numfic(2),itm,i)
 
-    CASE ("PC24")	! 24 hour precip accumulation		added by min-ken hsieh
-      ! make a copy in L1S array
-      L1S(1:ngd(1),1:ngd(2),2) = &
+    case ("pc24")	! 24 hour precip accumulation		added by min-ken hsieh
+      ! make a copy in l1s array
+      l1s(1:ngd(1),1:ngd(2),2) = &
         analys(numfic(1)+1:numgrd(1)-numfic(1), &
                numfic(2)+1:numgrd(2)-numfic(2),itm,i)
-    CASE ("PCP3")
-    CASE ("PCP6")
-    CASE DEFAULT
-      WRITE(*,1) varnam(i)
-    END SELECT
-  ENDDO
+    case ("pcp3")
+    case ("pcp6")
+    case default
+      write(*,1) varnam(i)
+    end select
+  enddo
 
-1 FORMAT('PrPstPrc>PrPstLSX: no such variable to write: ',a4)
-2 FORMAT('PrPstPrc>PrPstLSX: too much variables to write; aborts')
-3 FORMAT('PrPstPrc>PrPstLSX: V wind is missing')
+1 format('prpstprc>prpstlsx: no such variable to write: ',a4)
+2 format('prpstprc>prpstlsx: too much variables to write; aborts')
+3 format('prpstprc>prpstlsx: v wind is missing')
 
   !======================
-  ! Other derived fields:
+  ! other derived fields:
   !======================
     
-  ! Theta and Theta_e:	potential/equivalent potential temperature:
-  ! Search necessary basic variables:
+  ! theta and theta_e:	potential/equivalent potential temperature:
+  ! search necessary basic variables:
   ncm = 0
   idx = 0
-  DO j=1,numvar
-    IF (varnam(j) .EQ. "TEMP") THEN
+  do j=1,numvar
+    if (varnam(j) .eq. "temp") then
       ncm = ncm+1
       idx(1) = j
-    ENDIF
-    IF (varnam(j) .EQ. "DEWP") THEN
+    endif
+    if (varnam(j) .eq. "dewp") then
       ncm = ncm+1
       idx(2) = j
-    ENDIF
-    IF (varnam(j) .EQ. "SFCP") THEN
+    endif
+    if (varnam(j) .eq. "sfcp") then
       ncm = ncm+1
       idx(3) = j
-    ENDIF
-  ENDDO
-  ! Found necessary variables for potential temperature:
-  IF ((idx(1) .NE. 0) .AND. (idx(3) .NE. 0)) THEN
+    endif
+  enddo
+  ! found necessary variables for potential temperature:
+  if ((idx(1) .ne. 0) .and. (idx(3) .ne. 0)) then
     nvr = nvr+1
-    IF (nvr .GT. LSXVAR) THEN
-      WRITE(*,2)
-      STOP
-    ENDIF
-    vnm(nvr) = 'TH '
-    vun(nvr) = 'K  '
-    cmt(nvr) = 'Potential temperature'
-    ! Theta:
+    if (nvr .gt. lsxvar) then
+      write(*,2)
+      stop
+    endif
+    vnm(nvr) = 'th '
+    vun(nvr) = 'k  '
+    cmt(nvr) = 'potential temperature'
+    ! theta:
     gdt(1:numgrd(1),1:numgrd(2)) = &
       analys(1:numgrd(1),1:numgrd(2),itm,idx(1))* &
 	(1.0e5/analys(1:numgrd(1),1:numgrd(2),itm,idx(3))) &
 	**(gascnt/spheat)
-    ! Remove fictitous point and convert to r4:
+    ! remove fictitous point and convert to r4:
     dat(1:ngd(1),1:ngd(2),nvr) = &
       gdt(numfic(1)+1:numgrd(1)-numfic(1), &
 	  numfic(2)+1:numgrd(2)-numfic(2))
-  ENDIF
-  ! Found necessary variables for mixing ratio:
-  IF ((idx(2) .NE. 0) .AND. (idx(3) .NE. 0)) THEN
+  endif
+  ! found necessary variables for mixing ratio:
+  if ((idx(2) .ne. 0) .and. (idx(3) .ne. 0)) then
     nvr = nvr+1
-    IF (nvr .GT. LSXVAR) THEN
-      WRITE(*,2)
-      STOP
-    ENDIF
-    vnm(nvr) = 'MR '
-    vun(nvr) = 'G/KG'
+    if (nvr .gt. lsxvar) then
+      write(*,2)
+      stop
+    endif
+    vnm(nvr) = 'mr '
+    vun(nvr) = 'g/kg'
     cmt(nvr) = 'mixing ratio'
-    ! Mixing ratio from td and p:
-    DO j=1,ngd(2)
-      DO i=1,ngd(1)
-        td_c = analys(i,j,itm,idx(2))-temp_0	! Dewpoint in celsius
-        pr_m = analys(i,j,itm,idx(3))/100.0	! Pressure in mb
-        dat(i,j,nvr) = WMR(pr_m,td_c)
-      ENDDO
-    ENDDO
-  ENDIF
-  ! Found necessary variables for relative humidity:
-  IF ((idx(1) .NE. 0) .AND. (idx(2) .NE. 0)) THEN
+    ! mixing ratio from td and p:
+    do j=1,ngd(2)
+      do i=1,ngd(1)
+        td_c = analys(i,j,itm,idx(2))-temp_0	! dewpoint in celsius
+        pr_m = analys(i,j,itm,idx(3))/100.0	! pressure in mb
+        dat(i,j,nvr) = wmr(pr_m,td_c)
+      enddo
+    enddo
+  endif
+  ! found necessary variables for relative humidity:
+  if ((idx(1) .ne. 0) .and. (idx(2) .ne. 0)) then
     nvr = nvr+1
-    IF (nvr .GT. LSXVAR) THEN
-      WRITE(*,2)
-      STOP
-    ENDIF
-    vnm(nvr) = 'RH '
-    vun(nvr) = 'M  '
+    if (nvr .gt. lsxvar) then
+      write(*,2)
+      stop
+    endif
+    vnm(nvr) = 'rh '
+    vun(nvr) = 'm  '
     cmt(nvr) = 'relative humidity'
-    ! RH from T and td: HUM returns RH in [0,1]
-    CALL HUM(analys(1,1,itm,idx(1)),analys(1,1,itm,idx(2)), &
+    ! rh from t and td: hum returns rh in [0,1]
+    call hum(analys(1,1,itm,idx(1)),analys(1,1,itm,idx(2)), &
               dat(1,1,nvr),numgrd(1),numgrd(2),dum,dmm)
-    dat(1:ngd(1),1:ngd(2),nvr) = dat(1:ngd(1),1:ngd(2),nvr)*100		! RH in [0,100]
-  ENDIF
-  ! Found necessary variables for equivalent potential temperature:
-  IF (ncm .EQ. 3) THEN
+    dat(1:ngd(1),1:ngd(2),nvr) = dat(1:ngd(1),1:ngd(2),nvr)*100		! rh in [0,100]
+  endif
+  ! found necessary variables for equivalent potential temperature:
+  if (ncm .eq. 3) then
     nvr = nvr+1
-    IF (nvr .GT. LSXVAR) THEN
-      WRITE(*,2)
-      STOP
-    ENDIF
-    vnm(nvr) = 'THE'
-    vun(nvr) = 'K  '
-    cmt(nvr) = 'Equivalent potential temperature'
-    ! Use LAPS function EPT to compute theta_e:
-    gdp = analys(1:numgrd(1),1:numgrd(2),itm,idx(3))/mb2pas! Pressure(mb)
-    DO j=1,ngd(2)
-      DO i=1,ngd(1)
+    if (nvr .gt. lsxvar) then
+      write(*,2)
+      stop
+    endif
+    vnm(nvr) = 'the'
+    vun(nvr) = 'k  '
+    cmt(nvr) = 'equivalent potential temperature'
+    ! use laps function ept to compute theta_e:
+    gdp = analys(1:numgrd(1),1:numgrd(2),itm,idx(3))/mb2pas! pressure(mb)
+    do j=1,ngd(2)
+      do i=1,ngd(1)
 	tmp = analys(numfic(1)+i,numfic(2)+j,itm,idx(1))-temp_0
 	dew = analys(numfic(1)+i,numfic(2)+j,itm,idx(2))-temp_0
-        dat(i,j,nvr) = EPT(tmp,dew,gdp(i+numfic(1),j+numfic(2)))+temp_0
-      ENDDO
-    ENDDO
-  ENDIF
+        dat(i,j,nvr) = ept(tmp,dew,gdp(i+numfic(1),j+numfic(2)))+temp_0
+      enddo
+    enddo
+  endif
 
-  ! Moisture convergence:
-  ! Search necessary basic variables:
+  ! moisture convergence:
+  ! search necessary basic variables:
   ncm = 0
   idx = 0
-  DO j=1,numvar
-    IF (varnam(j) .EQ. "TEMP") THEN
+  do j=1,numvar
+    if (varnam(j) .eq. "temp") then
       ncm = ncm+1
       idx(1) = j
-    ENDIF
-    IF (varnam(j) .EQ. "DEWP") THEN
+    endif
+    if (varnam(j) .eq. "dewp") then
       ncm = ncm+1
       idx(2) = j
-    ENDIF
-    IF (varnam(j) .EQ. "REDP") THEN
+    endif
+    if (varnam(j) .eq. "redp") then
       ncm = ncm+1
       idx(3) = j
-    ENDIF
-    IF (varnam(j) .EQ. "WNDU") THEN
+    endif
+    if (varnam(j) .eq. "wndu") then
       ncm = ncm+1
       idx(4) = j
-    ENDIF
-    IF (varnam(j) .EQ. "WNDV") THEN
+    endif
+    if (varnam(j) .eq. "wndv") then
       ncm = ncm+1
       idx(5) = j
-    ENDIF
-  ENDDO
-  ! Found necessary variables:
-  IF (ncm .EQ. 5) THEN
+    endif
+  enddo
+  ! found necessary variables:
+  if (ncm .eq. 5) then
     nvr = nvr+1
-    IF (nvr .GT. LSXVAR) THEN
-      WRITE(*,2)
-      STOP
-    ENDIF
-    vnm(nvr) = 'MRC'
-    vun(nvr) = '/S '
-    cmt(nvr) = 'Moisture convergence'
-    CALL MESO_ANL(analys(1,1,itm,idx(4)),analys(1,1,itm,idx(5)), &
+    if (nvr .gt. lsxvar) then
+      write(*,2)
+      stop
+    endif
+    vnm(nvr) = 'mrc'
+    vun(nvr) = '/s '
+    cmt(nvr) = 'moisture convergence'
+    call meso_anl(analys(1,1,itm,idx(4)),analys(1,1,itm,idx(5)), &
       gdp,analys(1,1,itm,idx(1)),analys(1,1,itm,idx(2)), &
       gdt,gdx,gdy,dum,mrc,dum,dum,dum,numgrd(1),numgrd(2))
     dat(1:ngd(1),1:ngd(2),nvr) = &
       mrc(numfic(1)+1:numgrd(1)-numfic(1), &
 	  numfic(2)+1:numgrd(2)-numfic(2))
-  ENDIF
+  endif
 
   !====================
-  !  Write to LSX file:
+  !  write to lsx file:
   !====================
 
-  ! Get the directory for LSX file:
+  ! get the directory for lsx file:
   ext = 'lsx'
-  CALL GET_DIRECTORY(ext,dir,len)
+  call get_directory(ext,dir,len)
 
-  ! Write data to a lsx file:
-  CALL WRITE_LAPS_DATA(i4t,dir,ext,ngd(1),ngd(2),nvr,nvr, &
+  ! write data to a lsx file:
+  call write_laps_data(i4t,dir,ext,ngd(1),ngd(2),nvr,nvr, &
      		       vnm,lvl,crd,vun,cmt,dat,sts)
 
-  ! Write data to a lsx file under balance:
+  ! write data to a lsx file under balance:
   dir(len-3:len+8) = 'balance/lsx/'
-  CALL WRITE_LAPS_DATA(i4t,dir(1:len+8),ext,ngd(1),ngd(2),nvr,nvr, &
+  call write_laps_data(i4t,dir(1:len+8),ext,ngd(1),ngd(2),nvr,nvr, &
      		       vnm,lvl,crd,vun,cmt,dat,sts)
 
   !====================
-  !  Write to L1S file:
+  !  write to l1s file:
   !====================
 
-  ! Get the directory for L1S file:
+  ! get the directory for l1s file:
   ext = 'l1s'
-  CALL GET_DIRECTORY(ext,dir,len)
-  L1S_cmt(1) = 'LAPS 60 Minute Snow Accumulation'
-  L1S_cmt(2) = 'storm total precip. accum.'
-  L1S_vnm(1) = 'R01'
-  L1S_vnm(2) = 'RTO'
-  L1S_vun = 'M'
-  L1S_crd = 'MSL'
-  L1S_lvl = 0
+  call get_directory(ext,dir,len)
+  l1s_cmt(1) = 'laps 60 minute snow accumulation'
+  l1s_cmt(2) = 'storm total precip. accum.'
+  l1s_vnm(1) = 'r01'
+  l1s_vnm(2) = 'rto'
+  l1s_vun = 'm'
+  l1s_crd = 'msl'
+  l1s_lvl = 0
 
-  ! Write data to a lsx file:
-  ! Temporarily turn off L1S output as soil analysis needs snow as well
-  ! however, Mile's work is only on rain.
-  ! CALL WRITE_LAPS_DATA(i4t,dir,ext,ngd(1),ngd(2),2,2, &
-  !   		       L1S_vnm,L1S_lvl,L1S_crd,L1S_vun,L1S_cmt,L1S,sts)
-  ! End of writing a series of time frames:
-  ENDDO
+  ! write data to a lsx file:
+  ! temporarily turn off l1s output as soil analysis needs snow as well
+  ! however, mile's work is only on rain.
+  ! call write_laps_data(i4t,dir,ext,ngd(1),ngd(2),2,2, &
+  !   		       l1s_vnm,l1s_lvl,l1s_crd,l1s_vun,l1s_cmt,l1s,sts)
+  ! end of writing a series of time frames:
+  enddo
 
-END SUBROUTINE PrPstLSX
+end subroutine prpstlsx
 
-SUBROUTINE PresChng(pres,ngrd,chng)
+subroutine preschng(pres,ngrd,chng)
 
 !==========================================================
-!  This routine computes pressure change from pressure.
+!  this routine computes pressure change from pressure.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIe.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: ngrd(2)
-  REAL, INTENT(IN) :: pres(ngrd(1),ngrd(2))
-  REAL, INTENT(OUT) :: chng(ngrd(1),ngrd(2))
+  integer, intent(in) :: ngrd(2)
+  real, intent(in) :: pres(ngrd(1),ngrd(2))
+  real, intent(out) :: chng(ngrd(1),ngrd(2))
 
-  ! Local variables:
-  INTEGER :: i,j,nbi,nbj,nbs,ips
-  REAL :: gam,kap,val,wgt,wsm
-  REAL :: prs(ngrd(1),ngrd(2))
+  ! local variables:
+  integer :: i,j,nbi,nbj,nbs,ips
+  real :: gam,kap,val,wgt,wsm
+  real :: prs(ngrd(1),ngrd(2))
 
-  ! Barnes parameters:
+  ! barnes parameters:
   gam = 0.2
-  kap = 2.0e3/gam	! Kapa_0
-  nbs = 60		! Neighbors to analyzed
+  kap = 2.0e3/gam	! kapa_0
+  nbs = 60		! neighbors to analyzed
   
-  ! Initial:
+  ! initial:
   chng = 0.0
   prs = 0.0
 
-  ! Barnes analysis:
-  DO ips=1,1
+  ! barnes analysis:
+  do ips=1,1
 
-    kap = kap*gam	! Adjust kappa
+    kap = kap*gam	! adjust kappa
 
-    ! Every gridpoint:
-    DO j=1,ngrd(2)
-      DO i=1,ngrd(1)
+    ! every gridpoint:
+    do j=1,ngrd(2)
+      do i=1,ngrd(1)
 	
-	! For all considered neighbors: every other one to save time
+	! for all considered neighbors: every other one to save time
 	val = 0.0
 	wsm = 0.0
-	DO nbj=-nbs,nbs,4
-	  DO nbi=-nbs,nbs,4
+	do nbj=-nbs,nbs,4
+	  do nbi=-nbs,nbs,4
 
-	    wgt = EXP(-(FLOAT(nbi)**2+FLOAT(nbj)**2)/kap)
-	    IF ((i+nbi .GE. 1) .AND. (i+nbi .LE. ngrd(1)) .AND. &
-	        (j+nbj .GE. 1) .AND. (j+nbj .LE. ngrd(2))) THEN
+	    wgt = exp(-(float(nbi)**2+float(nbj)**2)/kap)
+	    if ((i+nbi .ge. 1) .and. (i+nbi .le. ngrd(1)) .and. &
+	        (j+nbj .ge. 1) .and. (j+nbj .le. ngrd(2))) then
 	      val = val+(pres(i+nbi,j+nbj)-prs(i+nbi,j+nbj))*wgt
 	      wsm = wsm + wgt
-	    ENDIF
+	    endif
 	  
-	  ENDDO
-	ENDDO
+	  enddo
+	enddo
 
-        ! Update grid value:
+        ! update grid value:
         chng(i,j) = chng(i,j)+val/wsm
 
-      ENDDO
-    ENDDO
+      enddo
+    enddo
 
-    ! Save iterated result:
+    ! save iterated result:
     prs = chng
 
-  ENDDO
+  enddo
 
-  ! Compute pressure changes:
+  ! compute pressure changes:
   chng = pres-prs
 
-END SUBROUTINE PresChng
+end subroutine preschng
 
-SUBROUTINE Extraplt(grid,ngrd)
+subroutine extraplt(grid,ngrd)
 
 !==========================================================
-!  This routine extrapolates interior points to its boundary
+!  this routine extrapolates interior points to its boundary
 !  values assuming ngrd > 3.
 !
-!  HISTORY:
-!	Creation: 9-2005 by YUANFU XIE.
+!  history:
+!	creation: 9-2005 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: ngrd(2)
-  REAL, INTENT(INOUT) :: grid(ngrd(1),ngrd(2))
+  integer, intent(in) :: ngrd(2)
+  real, intent(inout) :: grid(ngrd(1),ngrd(2))
 
-  ! X:
+  ! x:
   grid(1,2:ngrd(2)-1) = &
     2.0*grid(2,2:ngrd(2)-1)-grid(3,2:ngrd(2)-1)
   grid(ngrd(1),2:ngrd(2)-1) = &
     2.0*grid(ngrd(1)-1,2:ngrd(2)-1)-grid(ngrd(1)-2,2:ngrd(2)-1)
 
-  ! Y:
+  ! y:
   grid(1:ngrd(1),1) = &
     2.0*grid(1:ngrd(1),2)-grid(1:ngrd(1),3)
   grid(1:ngrd(1),ngrd(2)) = &
     2.0*grid(1:ngrd(1),ngrd(2)-1)-grid(1:ngrd(1),ngrd(2)-2)
 
-END SUBROUTINE Extraplt
+end subroutine extraplt
 
-END MODULE PrePostPrc
+end module prepostprc

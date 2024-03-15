@@ -1,55 +1,55 @@
       subroutine gf_unpack7(cgrib,lcgrib,iofst,igdsnum,igdstmpl,
      &                      idrsnum,idrstmpl,ndpts,fld,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_unpack7 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2002-01-24
+! subprogram:    gf_unpack7 
+!   prgmmr: gilbert         org: w/np11    date: 2002-01-24
 !
-! ABSTRACT: This subroutine unpacks GRIB2 Section 7 (Data Section).
+! abstract: this subroutine unpacks grib2 section 7 (data section).
 !
-! PROGRAM HISTORY LOG:
-! 2002-01-24  Gilbert
-! 2002-12-17  Gilbert  - Added support for new templates using 
-!                        PNG and JPEG2000 algorithms/templates.
-! 2004-12-29  Gilbert  - Added check on comunpack return code.
+! program history log:
+! 2002-01-24  gilbert
+! 2002-12-17  gilbert  - added support for new templates using 
+!                        png and jpeg2000 algorithms/templates.
+! 2004-12-29  gilbert  - added check on comunpack return code.
 !
-! USAGE:    CALL gf_unpack7(cgrib,lcgrib,iofst,igdsnum,igdstmpl,
+! usage:    call gf_unpack7(cgrib,lcgrib,iofst,igdsnum,igdstmpl,
 !    &                      idrsnum,idrstmpl,ndpts,fld,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array that contains the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     iofst    - Bit offset of the beginning of Section 7.
-!     igdsnum  - Grid Definition Template Number ( see Code Table 3.0)
-!                (Only required to unpack DRT 5.51)
-!     igdstmpl - Pointer to an integer array containing the data values for
-!                the specified Grid Definition
-!                Template ( N=igdsnum ).  Each element of this integer
-!                array contains an entry (in the order specified) of Grid
-!                Definition Template 3.N
-!                (Only required to unpack DRT 5.51)
-!     idrsnum  - Data Representation Template Number ( see Code Table 5.0)
-!     idrstmpl - Pointer to an integer array containing the data values for
-!                the specified Data Representation
-!                Template ( N=idrsnum ).  Each element of this integer
-!                array contains an entry (in the order specified) of Data
-!                Representation Template 5.N
-!     ndpts    - Number of data points unpacked and returned.
+!   input argument list:
+!     cgrib    - character array that contains the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     iofst    - bit offset of the beginning of section 7.
+!     igdsnum  - grid definition template number ( see code table 3.0)
+!                (only required to unpack drt 5.51)
+!     igdstmpl - pointer to an integer array containing the data values for
+!                the specified grid definition
+!                template ( n=igdsnum ).  each element of this integer
+!                array contains an entry (in the order specified) of grid
+!                definition template 3.n
+!                (only required to unpack drt 5.51)
+!     idrsnum  - data representation template number ( see code table 5.0)
+!     idrstmpl - pointer to an integer array containing the data values for
+!                the specified data representation
+!                template ( n=idrsnum ).  each element of this integer
+!                array contains an entry (in the order specified) of data
+!                representation template 5.n
+!     ndpts    - number of data points unpacked and returned.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     iofst    - Bit offset at the end of Section 7, returned.
-!     fld()    - Pointer to a real array containing the unpacked data field.
-!     ierr     - Error return code.
+!   output argument list:      
+!     iofst    - bit offset at the end of section 7, returned.
+!     fld()    - pointer to a real array containing the unpacked data field.
+!     ierr     - error return code.
 !                0 = no error
-!                4 = Unrecognized Data Representation Template
-!                5 = One of GDT 3.50 through 3.53 required to unpack DRT 5.51
+!                4 = unrecognized data representation template
+!                5 = one of gdt 3.50 through 3.53 required to unpack drt 5.51
 !                6 = memory allocation error
 !                7 = corrupt section 7.
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -64,7 +64,7 @@
       ierr=0
       nullify(fld)
 
-      call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+      call gbyte(cgrib,lensec,iofst,32)        ! get length of section
       iofst=iofst+32    
       iofst=iofst+8     ! skip section number
 
@@ -81,36 +81,36 @@
       elseif (idrsnum.eq.2.or.idrsnum.eq.3) then
         call comunpack(cgrib(ipos),lensec-5,lensec,idrsnum,idrstmpl,
      &                 ndpts,fld,ier)
-        if ( ier .NE. 0 ) then
+        if ( ier .ne. 0 ) then
            ierr=7
            return
         endif
-      elseif (idrsnum.eq.50) then      !  Spectral simple
+      elseif (idrsnum.eq.50) then      !  spectral simple
         call simunpack(cgrib(ipos),lensec-5,idrstmpl,ndpts-1,
      &                 fld(2))
         ieee=idrstmpl(5)
         call rdieee(ieee,fld(1),1)
-      elseif (idrsnum.eq.51) then      !  Spectral complex
-        if (igdsnum.ge.50.AND.igdsnum.le.53) then
+      elseif (idrsnum.eq.51) then      !  spectral complex
+        if (igdsnum.ge.50.and.igdsnum.le.53) then
           call specunpack(cgrib(ipos),lensec-5,idrstmpl,ndpts,
      &                    igdstmpl(1),igdstmpl(2),igdstmpl(3),fld)
         else
-          print *,'gf_unpack7: Cannot use GDT 3.',igdsnum,
-     &            ' to unpack Data Section 5.51.'
+          print *,'gf_unpack7: cannot use gdt 3.',igdsnum,
+     &            ' to unpack data section 5.51.'
           ierr=5
           nullify(fld)
           return
         endif
-#ifdef USE_JPEG2000
-      elseif (idrsnum.eq.40 .OR. idrsnum.eq.40000) then
+#ifdef use_jpeg2000
+      elseif (idrsnum.eq.40 .or. idrsnum.eq.40000) then
         call jpcunpack(cgrib(ipos),lensec-5,idrstmpl,ndpts,fld)
-#endif  /* USE_JPEG2000 */
-#ifdef USE_PNG
-      elseif (idrsnum.eq.41 .OR. idrsnum.eq.40010) then
+#endif  /* use_jpeg2000 */
+#ifdef use_png
+      elseif (idrsnum.eq.41 .or. idrsnum.eq.40010) then
         call pngunpack(cgrib(ipos),lensec-5,idrstmpl,ndpts,fld)
-#endif  /* USE_PNG */
+#endif  /* use_png */
       else
-        print *,'gf_unpack7: Data Representation Template ',idrsnum,
+        print *,'gf_unpack7: data representation template ',idrsnum,
      &          ' not yet implemented.'
         ierr=4
         nullify(fld)
@@ -119,6 +119,6 @@
 
       iofst=iofst+(8*lensec)
       
-      return    ! End of Section 7 processing
+      return    ! end of section 7 processing
       end
 

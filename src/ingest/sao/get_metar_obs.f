@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -55,29 +55,29 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to gather METAR (and SYNOP) data for LAPS.   
+cdoc    routine to gather metar (and synop) data for laps.   
 c
-c	Changes:
-c		P. Stamus  10-30-96  Original version (from get_sao_obs).
-c                          11-13-96  Pass in full path to data.
-c                          12-06-96  Put Atype (01 or 02) in obstype var.
-c	                   06-09-97  Changes for new METAR CDL.
-c                          01-29-98  Upgrades for LS2.
-c                          05-01-98  Add soil moisture variables.
-c                          06-21-99  Change ob location check to gridpt space.
-c                                      Figure box size in gridpoint space from
+c	changes:
+c		p. stamus  10-30-96  original version (from get_sao_obs).
+c                          11-13-96  pass in full path to data.
+c                          12-06-96  put atype (01 or 02) in obstype var.
+c	                   06-09-97  changes for new metar cdl.
+c                          01-29-98  upgrades for ls2.
+c                          05-01-98  add soil moisture variables.
+c                          06-21-99  change ob location check to gridpt space.
+c                                      figure box size in gridpoint space from
 c                                      user-defined size (deg) and grid_spacing.
-c                          07-22-99  Add elev ck for badflag.  Fix wmoid var.
+c                          07-22-99  add elev ck for badflag.  fix wmoid var.
 c
 c
 c*****************************************************************************
 c
 	include 'netcdf.inc'
 c
-c.....  Read arrays.
+c.....  read arrays.
 c
         integer maxobs ! raw data file
-        integer maxsta ! output LSO file
+        integer maxsta ! output lso file
 	real*8  timeobs(maxobs)
 	real  lats(maxobs), lons(maxobs), elev(maxobs)
 	real  t(maxobs), td(maxobs), tt(maxobs), ttd(maxobs)
@@ -101,7 +101,7 @@ c
 	integer  i4time_ob, wmoid(maxobs), wmoid_in(maxobs)
 	integer  i4time_before, i4time_after
 	integer    rtime, dpchar(maxobs)
-	integer    maxSkyCover, recNum, nf_fid, nf_vid, nf_status
+	integer    maxskycover, recnum, nf_fid, nf_vid, nf_status
 c
 	character  stname(maxobs)*5, save_stn(maxobs)*5
 	character  data_file*150, timech*9, time*4, metar_format*(*)
@@ -123,7 +123,7 @@ c
         data cnt/0/
 c
 c
-c.....	Set jstatus flag for the sao data to bad until we find otherwise.
+c.....	set jstatus flag for the sao data to bad until we find otherwise.
 c
 	jstatus = -1
 
@@ -135,37 +135,37 @@ c
 
         l_dupe_time = .false.
 
-!       Initialize variables mainly used for CWB combined synop/local data
+!       initialize variables mainly used for cwb combined synop/local data
         ddg  = badflag
         stnp = badflag
         rh   = badflag
         sr   = badflag
         st   = badflag
 c
-c.....  Figure out the size of the "box" in gridpoints.  User defines
+c.....  figure out the size of the "box" in gridpoints.  user defines
 c.....  the 'box_size' variable in degrees, then we convert that to an
 c.....  average number of gridpoints based on the grid spacing.
 c
         box_length = box_size * 111.137 !km/deg lat (close enough for lon)
         ibox_points = box_length / (grid_spacing / 1000.) !in km
 c
-c.....	Zero out the counters.
+c.....	zero out the counters.
 c
 	n_sao_g = 0		! # of saos in the laps grid
 	n_sao_b = 0		! # of saos in the box
 c
-c.....  Set up the time window.
+c.....  set up the time window.
 c
 	i4time_before = i4time_sys - itime_before
 	i4time_after  = i4time_sys + itime_after
 
         call s_len(metar_format,len_metar_format)
 
-        if(     l_parse(metar_format,'FSL') 
-     1     .or. l_parse(metar_format,'NIMBUS')
-     1     .or. l_parse(metar_format,'WFO')     
-     1     .or. l_parse(metar_format,'MADIS')     
-     1                                             )then ! NetCDF format
+        if(     l_parse(metar_format,'fsl') 
+     1     .or. l_parse(metar_format,'nimbus')
+     1     .or. l_parse(metar_format,'wfo')     
+     1     .or. l_parse(metar_format,'madis')     
+     1                                             )then ! netcdf format
 
             ix = 1
 
@@ -187,18 +187,18 @@ c
 
                 call make_fnam_lp(i4time_file,a9time,istatus)
 
-                if(metar_format(1:len_metar_format) .eq. 'NIMBUS')then
+                if(metar_format(1:len_metar_format) .eq. 'nimbus')then
 	            data_file = path_to_metar(1:len_path)
      1                            //a9time// '0100o'
 
-                elseif(metar_format(1:len_metar_format) .eq. 'WFO'
-     1            .or. metar_format(1:len_metar_format) .eq. 'MADIS'
+                elseif(metar_format(1:len_metar_format) .eq. 'wfo'
+     1            .or. metar_format(1:len_metar_format) .eq. 'madis'
      1                                                           )then      
                     filename13=fname9_to_wfo_fname13(a9time)       
                     data_file = path_to_metar(1:len_path) // filename13       
 
                 else
-                    write(6,*)' ERROR: unknown metar format '
+                    write(6,*)' error: unknown metar format '
      1                       ,metar_format          
                     istatus = 0
                     return
@@ -206,76 +206,76 @@ c
                 endif
 
                 do while(.not. exists 
-     &                           .AND. 
+     &                           .and. 
      &                    cnt .le. minutes_to_wait_for_metars
-     &                           .AND.
+     &                           .and.
      &                    i4time_file .eq. i4time_file_a        
-     &                           .AND.
+     &                           .and.
      &                    i4time_file .le. i4time_now_gg()        )
 c
-	            INQUIRE(FILE=data_file,EXIST=exists)
+	            inquire(file=data_file,exist=exists)
                     if(.not. exists) then
                         if(cnt .lt. minutes_to_wait_for_metars)then
-                            print*,'Waiting for file ', data_file
+                            print*,'waiting for file ', data_file
                             call waiting_c(60)
                         endif
                         cnt = cnt+1               
 	            endif
 
-	        enddo ! While in waiting loop
+	        enddo ! while in waiting loop
 
 c
-c.....          Get the data from the NetCDF file.  First, open the file.
+c.....          get the data from the netcdf file.  first, open the file.
 c 
-	        nf_status = NF_OPEN(data_file,NF_NOWRITE,nf_fid)
+	        nf_status = nf_open(data_file,nf_nowrite,nf_fid)
 
-	        if(nf_status.ne.NF_NOERR) then ! No file found to open
-	           print *, NF_STRERROR(nf_status)
+	        if(nf_status.ne.nf_noerr) then ! no file found to open
+	           print *, nf_strerror(nf_status)
 	           print *, data_file
-                   write(6,*)' WARNING: not found in get_metar_obs - '
+                   write(6,*)' warning: not found in get_metar_obs - '
      1                      ,data_file       
                    n_metar_file = 0
                    goto580
                 else
-                   write(6,*)' File found - ',data_file
+                   write(6,*)' file found - ',data_file
 	        endif
 c
-c.....          Get the dimension of some of the variables.
-c.....          "maxSkyCover"
+c.....          get the dimension of some of the variables.
+c.....          "maxskycover"
 c
-	        nf_status = NF_INQ_DIMID(nf_fid,'maxSkyCover',nf_vid)
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
-	           print *,'dim maxSkyCover'
+	        nf_status = nf_inq_dimid(nf_fid,'maxskycover',nf_vid)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
+	           print *,'dim maxskycover'
 	        endif
-	        nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxSkyCover)
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
-	           print *,'dim maxSkyCover'
+	        nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxskycover)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
+	           print *,'dim maxskycover'
 	        endif
 c
-c.....          "recNum"
+c.....          "recnum"
 c
-	        nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
-	           print *,'dim recNum'
+	        nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
+	           print *,'dim recnum'
 	        endif
-	        nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-	        if(nf_status.ne.NF_NOERR) then
-	           print *, NF_STRERROR(nf_status)
-	           print *,'dim recNum'
+	        nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+	        if(nf_status.ne.nf_noerr) then
+	           print *, nf_strerror(nf_status)
+	           print *,'dim recnum'
 	        endif
 
                 if(recnum .gt. maxobs-ix+1)then
                     write(6,*)
-     1              ' ERROR: exceeded maxobs limits in get_metar_obs'
+     1              ' error: exceeded maxobs limits in get_metar_obs'
                     go to 590
                 endif
 c
-c.....          Call the read routine.
+c.....          call the read routine.
 c
-	        call read_metar(nf_fid , maxSkyCover, recNum, alt(ix),       
+	        call read_metar(nf_fid , maxskycover, recnum, alt(ix),       
      &             atype_in(ix), td(ix), ttd(ix), elev(ix),
      &             lats(ix), lons(ix), max24t(ix), min24t(ix),
      &             pcp1(ix), pcp24(ix), pcp3(ix), pcp6(ix),
@@ -287,10 +287,10 @@ c
 
                 if(istatus .ne. 1)then
                     write(6,*)
-     1              '     Warning: bad status return from READ_METAR'       
+     1              '     warning: bad status return from read_metar'       
                     n_metar_file = 0
                 else
-                    n_metar_file = recNum
+                    n_metar_file = recnum
                     write(6,*)'     n_metar_file = ',n_metar_file
                 endif
 
@@ -300,26 +300,26 @@ c
 
             n_sao_all = ix - 1
             i4time_offset = 315619200
-            c11_provider = 'NWS        '
+            c11_provider = 'nws        '
 
-        else ! Read CWB Metar and Synop Obs
+        else ! read cwb metar and synop obs
             i4time_file = (i4time_sys/3600) * 3600
             call make_fnam_lp(i4time_file,a9time,istatus)
             a8time = a9_to_a8(a9time(1:9))
 
             call s_len(path_to_metar,len_path)
 
-!           Read Metar Obs
-            maxSkyCover=6
-            recNum = maxobs
+!           read metar obs
+            maxskycover=6
+            recnum = maxobs
 
 	    data_file = 
      1            path_to_metar(1:len_path)//'metar'//a8time//'.dat'
 
             call s_len(data_file,len_file)
-            write(6,*)' CWB Metar Data: ',data_file(1:len_file)
+            write(6,*)' cwb metar data: ',data_file(1:len_file)
 
-            call read_metar_cwb(data_file , maxSkyCover, recNum, alt,    
+            call read_metar_cwb(data_file , maxskycover, recnum, alt,    
      &         atype_in, td, ttd, elev,
      &         lats, lons, max24t, min24t,
      &         pcp1, pcp24, pcp3, pcp6,
@@ -333,13 +333,13 @@ c
 
             ix = n_metar_cwb + 1
 
-!           Read Synop Obs
+!           read synop obs
             i4time_file = (i4time_sys/3600) * 3600
             call make_fnam_lp(i4time_file,a9time,istatus)
             a8time = a9_to_a8(a9time(1:9))
 
-            maxSkyCover=6
-            recNum = maxobs-ix+1
+            maxskycover=6
+            recnum = maxobs-ix+1
 
 	    data_file = 
      1          path_to_metar(1:len_path)//'synop'//a8time//'.dat'
@@ -347,12 +347,12 @@ c
             path_to_local_cwb = path_to_metar(1:len_path)//'../loc/'
 
             call s_len(data_file,len_file)
-            write(6,*)' CWB Synop/Local (via read_synop_cwb): '
+            write(6,*)' cwb synop/local (via read_synop_cwb): '
      1                ,data_file(1:len_file)       
 
             n_synop_cwb = 0
 
-            call read_synop_cwb(data_file , maxSkyCover, recNum, 
+            call read_synop_cwb(data_file , maxskycover, recnum, 
      &         i4time_sys, path_to_local_cwb,
      &         alt(ix), atype_in(ix), td(ix), ttd(ix), elev(ix),
      &         lats(ix), lons(ix), max24t(ix), min24t(ix),
@@ -375,31 +375,31 @@ c
 
             i4time_offset = 0
 
-            c11_provider = 'CWB        '
+            c11_provider = 'cwb        '
 
         endif
 c
         write(6,*)' n_sao_all = ',n_sao_all
 
 	if(n_sao_all .gt. maxobs)then
-            write(6,*)' ERROR, n_sao_all > maxobs ',n_sao_all,maxobs
+            write(6,*)' error, n_sao_all > maxobs ',n_sao_all,maxobs
             return
         endif
 c
-c.....  First check the data coming from the NetCDF file.  There can be
-c.....  "FloatInf" (used as fill value) in some of the variables.  These
-c.....  are not handled the same by different operating systems.  For 
-c.....  example, IBM systems make "FloatInf" into "NaN" and store them that
-c.....  way in the LSO, which messes up other LAPS routines.  This code
-c.....  checks for "FloatInf" and sets the variable to 'badflag'.  If the
-c.....  "FloatInf" is in the lat, lon, elevation, or time of observation,
+c.....  first check the data coming from the netcdf file.  there can be
+c.....  "floatinf" (used as fill value) in some of the variables.  these
+c.....  are not handled the same by different operating systems.  for 
+c.....  example, ibm systems make "floatinf" into "nan" and store them that
+c.....  way in the lso, which messes up other laps routines.  this code
+c.....  checks for "floatinf" and sets the variable to 'badflag'.  if the
+c.....  "floatinf" is in the lat, lon, elevation, or time of observation,
 c.....  we toss the whole ob since we can't be sure where it is.
 c
 	do i=1,n_sao_all
 c
-c.....  Toss the ob if lat/lon/elev or observation time are bad by setting 
+c.....  toss the ob if lat/lon/elev or observation time are bad by setting 
 c.....  lat to badflag (-99.9), which causes the bounds check to think that
-c.....  the ob is outside the LAPS domain.
+c.....  the ob is outside the laps domain.
 c
 	   if( nanf( lats(i) ) .eq. 1 ) lats(i)  = badflag
 	   if( nanf( lons(i) ) .eq. 1 ) lats(i)  = badflag
@@ -434,7 +434,7 @@ c
 	enddo !i
 c
 c..................................
-c.....	Now loop over all the obs.
+c.....	now loop over all the obs.
 c..................................
 c
 	jfirst = 1
@@ -444,8 +444,8 @@ c
 c 
 	do 125 i=1,n_sao_all
 c
-c.....  Bounds check: is station in the box?  Find the ob i,j location
-c.....  on the LAPS grid, then check if outside past box boundary.
+c.....  bounds check: is station in the box?  find the ob i,j location
+c.....  on the laps grid, then check if outside past box boundary.
 c
            if(lats(i) .lt. -90.) go to 125   !badflag (-99.9)...from nan ck
            call latlon_to_rlapsgrid(lats(i),lons(i),lat,lon,ni,nj,
@@ -453,22 +453,22 @@ c
            if(ri_loc.lt.box_low .or. ri_loc.gt.box_idir) go to 125
            if(rj_loc.lt.box_low .or. rj_loc.gt.box_jdir) go to 125
 c
-c.....  Elevation ok?
+c.....  elevation ok?
 c
           if(elev(i) .eq. badflag) go to 125 !from read_metar (missing elev)
           if(elev(i).gt.5200. .or. elev(i).lt.-400.) go to 125
 c
-c.....  Check to see if its in the desired time window (if the flag
+c.....  check to see if its in the desired time window (if the flag
 c.....  says to check this).
 c
 	  i4time_ob = nint(timeobs(i)) + i4time_offset
 c
-	  if(ick_METAR_time .eq. 1) then
+	  if(ick_metar_time .eq. 1) then
 	    if(i4time_ob.lt.i4time_before 
      1    .or. i4time_ob.gt.i4time_after) go to 125
 	  endif
 c
-c.....  Right time, right location...
+c.....  right time, right location...
 
  	  call make_fnam_lp(i4time_ob,timech,istatus)
 	  time = timech(6:9)
@@ -476,7 +476,7 @@ c.....  Right time, right location...
 
 !         write(6,*)'debug ',i,stname(i),timech
 c
-c.....  Check if station is reported more than once this
+c.....  check if station is reported more than once this
 c.....  time period.
 c
           istn_reject = 0
@@ -492,14 +492,14 @@ c
 
           else ! all subsequent stations
              if(isaved_sta .eq. i)then ! this violates assumed logic of code
-                 write(6,*)'ERROR isaved_sta = i',i
+                 write(6,*)'error isaved_sta = i',i
                  stop
              endif
 
-!            Do duplication check unless station names are 'UNK'
+!            do duplication check unless station names are 'unk'
 	     do k=1,isaved_sta
 	        if(stname(i) .eq. save_stn(k))then
-                   if(stname(i)(1:3) .ne. 'UNK')then
+                   if(stname(i)(1:3) .ne. 'unk')then
 
 !                      i4time_ob_k = nint(timeobs(k)) + i4time_offset
                        int_obtime = store_1(k,4)
@@ -507,25 +507,25 @@ c
      1                                    ,i4time_ob_k,istatus)
                        if(istatus .ne. 1)then
                            write(6,*)
-     1                            ' ERROR returned from get_sfc_obtime'       
+     1                            ' error returned from get_sfc_obtime'       
                            return
                        endif
 
-!                      Alternatively set l_dupe_time based on abs(obstime-systime)
+!                      alternatively set l_dupe_time based on abs(obstime-systime)
                        i_diff = abs(i4time_ob   - i4time_sys)
                        k_diff = abs(i4time_ob_k - i4time_sys)
 
                        if(i_diff .ge. k_diff)then
-                          istn_reject = i ! current METAR isn't closer to systime
+                          istn_reject = i ! current metar isn't closer to systime
                           istn_keep   = k 
                        else
-                          istn_reject = k ! current METAR is closer to systime
+                          istn_reject = k ! current metar is closer to systime
                           istn_keep   = i 
                        endif
 
                        call filter_string(stname(i))
 
-                       write(6,*)' Dupe METAR at ',stname(i),timech,i,k
+                       write(6,*)' dupe metar at ',stname(i),timech,i,k
      1                          ,i_diff,k_diff,istn_keep,istn_reject
 
                        l_dupe_time(i) = .true.
@@ -537,7 +537,7 @@ c
              if(l_dupe_time(i))then
                  if(istn_keep .eq. i)then 
                     np = istn_reject
-                    write(6,*)' Backfill METAR at closer time '
+                    write(6,*)' backfill metar at closer time '
      1                        ,stname(i),i,istn_keep,np
 
                  else ! skip processing of duplicate station
@@ -551,14 +551,14 @@ c
 
                  nn = nn + 1
                  np = nn 
-!                write(6,*)' Advancing isaved_sta/np to ',isaved_sta,np       
+!                write(6,*)' advancing isaved_sta/np to ',isaved_sta,np       
 
              endif
 
           endif ! first station
 
           if(np .gt. maxsta)then
-              write(6,*)' ERROR in get_metar_obs: increase maxsta '
+              write(6,*)' error in get_metar_obs: increase maxsta '
      1                 ,np,maxsta
               stop
           endif
@@ -573,43 +573,43 @@ c
 
 	  n_sao_b = n_sao_b + 1	!station is in the box
 c
-c.....  Check if its in the LAPS grid.
+c.....  check if its in the laps grid.
 c
           if(ri_loc.lt.1. .or. ri_loc.gt.float(ni)) go to 151  !off grid
           if(rj_loc.lt.1. .or. rj_loc.gt.float(nj)) go to 151  !off grid
 	  n_sao_g = n_sao_g + 1  !on grid...count it
  151	  continue
 c
-c.....	Figure out the cloud data.
+c.....	figure out the cloud data.
 c
 	  k_layers = 0               ! number of cloud layers
 c
-!         This requires that the first array element has a cloud layer in it
+!         this requires that the first array element has a cloud layer in it
 	  if(cvr(1,i)(1:1) .eq. ' ' .and. .false.) then
 	     k_layers = 0
 
-!            Test section to help determine whether this if block is needed
+!            test section to help determine whether this if block is needed
              k_layers1 = 0
 	     do k=1,5
 		if(cvr(k,i)(1:1) .ne. ' ') k_layers1 = k_layers1 + 1       
 	     enddo !k
 
              if(k_layers1 .ne. 0)then
-                 write(6,*)' WARNING: k_layers1 is > 0',k_layers1
+                 write(6,*)' warning: k_layers1 is > 0',k_layers1
              endif
 
 	  else
 	     do k=1,5
                 call s_len(cvr(k,i),lenc)   
-!               if(cvr(k,i)(1:1) .ne. ' ' .and.        ! Valid layer coverage
-		if(lenc .gt. 0            .and.        ! Valid layer coverage
-     1             cvr(k,i)(1:2) .ne. '-9'       )then ! CWB error check
+!               if(cvr(k,i)(1:1) .ne. ' ' .and.        ! valid layer coverage
+		if(lenc .gt. 0            .and.        ! valid layer coverage
+     1             cvr(k,i)(1:2) .ne. '-9'       )then ! cwb error check
                     k_layers = k_layers + 1       
                 endif
 	     enddo !k
 	  endif
 c
-	  if(k_layers .eq. 0) then   ! no cloud data...probably AMOS station
+	  if(k_layers .eq. 0) then   ! no cloud data...probably amos station
 	    go to 126		     ! skip rest of cloud stuff
 	  endif
 
@@ -618,23 +618,23 @@ c
 	  do ii=1,iihigh
 	    if(ht(ii,i) .gt. 25000.0) ht(ii,i) = badflag
 c
-	    if(cvr(ii,i)(1:3) .eq. 'SKC') then
-	       ht(ii,i) = 22500.0    ! Manual Ob
+	    if(cvr(ii,i)(1:3) .eq. 'skc') then
+	       ht(ii,i) = 22500.0    ! manual ob
 
-	    elseif(cvr(ii,i)(1:3) .eq. 'CLR') then
-	       ht(ii,i) = 3657.4     ! Automatic Ob
+	    elseif(cvr(ii,i)(1:3) .eq. 'clr') then
+	       ht(ii,i) = 3657.4     ! automatic ob
 
-            elseif(ht(ii,i) .gt. 17000.0    .OR.
-     1             ht(ii,i) .eq. badflag        ) then ! Check for bad height
-               write(6,*)' WARNING in get_metar_obs: '      
+            elseif(ht(ii,i) .gt. 17000.0    .or.
+     1             ht(ii,i) .eq. badflag        ) then ! check for bad height
+               write(6,*)' warning in get_metar_obs: '      
      1                   ,' reject cloud ob, height = '
      1                   ,ht(ii,i),stname(i),k_layers
                ht(ii,i) = badflag
                k_layers = 0
 
-            elseif(ii .ge. 2)then              ! Check for out of order heights
+            elseif(ii .ge. 2)then              ! check for out of order heights
                if(ht(ii,i) .lt. ht(ii-1,i))then 
-                   write(6,*)' WARNING in get_metar_obs: '      
+                   write(6,*)' warning in get_metar_obs: '      
      1                      ,' reject cloud ob, out of order heights = '       
      1                      ,ht(ii-1,i),ht(ii,i),stname(i)
                    ht(ii,i) = badflag
@@ -647,8 +647,8 @@ c
 
  126	  continue
 c
-c.....	Check cloud info for very high heights...set to max if greater.
-c.....	Also convert agl cloud heights to msl by adding elevation.
+c.....	check cloud info for very high heights...set to max if greater.
+c.....	also convert agl cloud heights to msl by adding elevation.
 c
 	if(k_layers .gt. 0) then
 	  do ii=1,k_layers
@@ -660,9 +660,9 @@ c
 	endif
 c
 c
-c.....  Convert units for storage. Some QC checking.
+c.....  convert units for storage. some qc checking.
 c
-c.....  Temperature and dewpoint
+c.....  temperature and dewpoint
 c
 	temp_k = tt(i)                        !set to temp_from_tenths
 	if(temp_k .eq. badflag) temp_k = t(i) !no temp_from_tenths, set to t
@@ -681,7 +681,7 @@ c
 	   dewp_f = k_to_f(dewp_k)
 	endif
 c
-c..... Wind speed and direction
+c..... wind speed and direction
 c
         call sfc_climo_qc_r('dir_deg',dd(i))
         call sfc_climo_qc_r('spd_ms',ff(i))
@@ -694,22 +694,22 @@ c
 	   if(ddg(i) .eq. badflag)ddg(i) = dd(i)
 	endif
 c
-c..... Pressure...MSL and altimeter, 3-h pressure change
+c..... pressure...msl and altimeter, 3-h pressure change
 c
-	if(alt(i)  .ne. badflag)  alt(i) =  alt(i) * 0.01   !Pa to mb
+	if(alt(i)  .ne. badflag)  alt(i) =  alt(i) * 0.01   !pa to mb
         call sfc_climo_qc_r('alt_mb',alt(i))
 
-	if(mslp(i) .ne. badflag) mslp(i) = mslp(i) * 0.01   !Pa to mb
+	if(mslp(i) .ne. badflag) mslp(i) = mslp(i) * 0.01   !pa to mb
         call sfc_climo_qc_r('mslp_mb',mslp(i))
 
-	if(stnp(i) .ne. badflag) stnp(i) = stnp(i) * 0.01   !Pa to mb
+	if(stnp(i) .ne. badflag) stnp(i) = stnp(i) * 0.01   !pa to mb
         call sfc_climo_qc_r('stnp_mb',stnp(i))
 
-	if(dp(i)   .ne. badflag)   dp(i) =   dp(i) * 0.01   !Pa to mb
+	if(dp(i)   .ne. badflag)   dp(i) =   dp(i) * 0.01   !pa to mb
 c
-c..... Visibility
+c..... visibility
 c
-        if(vis(i) .lt. 0.0 .OR. vis(i) .ge. 1e6) then ! QC check
+        if(vis(i) .lt. 0.0 .or. vis(i) .ge. 1e6) then ! qc check
            vis(i) = badflag
         endif
 	if(vis(i) .ne. badflag) then
@@ -717,7 +717,7 @@ c
 	   vis(i) = 0.621371 * vis(i)  !km to miles
 	endif
 c
-c..... Climo-type stuff...Precip and snow cover, Max/min temps
+c..... climo-type stuff...precip and snow cover, max/min temps
 c
 	if(pcp1(i)  .ne. badflag)  pcp1(i) =  pcp1(i) * 39.370079 ! m to in
 	if(pcp3(i)  .ne. badflag)  pcp3(i) =  pcp3(i) * 39.370079 ! m to in
@@ -738,47 +738,47 @@ c
 	endif
 c
 c
-c..... Fill the expected accuracy arrays.  Values are based on information
-c..... in the 'Federal Meteorological Handbook No. 1' for the METARs, 
-c..... Appendix C (http://www.nws.noaa.gov/oso/oso1/oso12/fmh1/fmh1appc.htm)
-c..... Note that we convert the units in Appendix C to match what we're 
+c..... fill the expected accuracy arrays.  values are based on information
+c..... in the 'federal meteorological handbook no. 1' for the metars, 
+c..... appendix c (http://www.nws.noaa.gov/oso/oso1/oso12/fmh1/fmh1appc.htm)
+c..... note that we convert the units in appendix c to match what we're 
 c..... using here.
 c
-c..... Temperature (deg F)
+c..... temperature (deg f)
 c
-	fon = 9. / 5.  !ratio when converting C to F
+	fon = 9. / 5.  !ratio when converting c to f
 	store_2ea(np,1) = 5.0 * fon        ! start...we don't know what we have
 	if(temp_f .ne. badflag) then
 	   if(temp_f.ge.c2f(-62.) .and. temp_f.le.c2f(-50.)) then
-	      store_2ea(np,1) = 1.1 * fon  ! conv to deg F
+	      store_2ea(np,1) = 1.1 * fon  ! conv to deg f
 	   elseif(temp_f.gt.c2f(-50.) .and. temp_f.lt.c2f(50.)) then
-	      store_2ea(np,1) = 0.6 * fon  ! conv to deg F
+	      store_2ea(np,1) = 0.6 * fon  ! conv to deg f
 	   elseif(temp_f.ge.c2f(50.) .and. temp_f.le.c2f(54.)) then
-	      store_2ea(np,1) = 1.1 * fon  ! conv to deg F
+	      store_2ea(np,1) = 1.1 * fon  ! conv to deg f
 	   endif
 	endif
 c
-c..... Dew point (deg F).  Also estimate a RH accuracy based on the dew point.
-c..... Estimates for the RH expected accuracy are from playing around with the
-c..... Psychrometric Tables for various T/Td combinations (including their
-c..... accuracies from the FMH-1 Appendix C).
+c..... dew point (deg f).  also estimate a rh accuracy based on the dew point.
+c..... estimates for the rh expected accuracy are from playing around with the
+c..... psychrometric tables for various t/td combinations (including their
+c..... accuracies from the fmh-1 appendix c).
 c
 	 store_2ea(np,2) = 5.0 * fon       ! start...don't know what we have 
-	 store_2ea(np,3) = 50.0            ! Relative Humidity %
+	 store_2ea(np,3) = 50.0            ! relative humidity %
 	 if(dewp_f .ne. badflag) then
 	    if(dewp_f.ge.c2f(-34.) .and. dewp_f.lt.c2f(-24.)) then
-	       store_2ea(np,2) = 2.2 * fon ! conv to deg F
-	       store_2ea(np,3) = 20.0      ! RH (%) 
+	       store_2ea(np,2) = 2.2 * fon ! conv to deg f
+	       store_2ea(np,3) = 20.0      ! rh (%) 
 	    elseif(dewp_f.ge.c2f(-24.) .and. dewp_f.lt.c2f(-1.)) then
-	       store_2ea(np,2) = 1.7 * fon ! conv to deg F
-	       store_2ea(np,3) = 12.0      ! RH (%) 
+	       store_2ea(np,2) = 1.7 * fon ! conv to deg f
+	       store_2ea(np,3) = 12.0      ! rh (%) 
 	    elseif(dewp_f.ge.c2f(-1.) .and. dewp_f.le.c2f(30.)) then
-	       store_2ea(np,2) = 1.1 * fon ! conv to deg F
-	       store_2ea(np,3) = 8.0       ! RH (%) 
+	       store_2ea(np,2) = 1.1 * fon ! conv to deg f
+	       store_2ea(np,3) = 8.0       ! rh (%) 
 	    endif
 	 endif
 c
-c..... Wind direction (deg) and speed (kts)
+c..... wind direction (deg) and speed (kts)
 c
 	 store_3ea(np,1) = 10.0    ! deg 
 	 store_3ea(np,2) =  1.0    ! kt
@@ -794,20 +794,20 @@ c
 	    endif
 	 endif
 c
-c..... Pressure and altimeter (mb)
+c..... pressure and altimeter (mb)
 c
 	 store_4ea(np,1) = 0.68            ! pressure (mb)
 	 store_4ea(np,2) = 0.68            ! altimeter (mb)
 c
-c..... Visibility (miles).  For automated stations use a guess based 
-c..... on Table C-2 in Appendix C of FMH-1.  For manual stations, use
+c..... visibility (miles).  for automated stations use a guess based 
+c..... on table c-2 in appendix c of fmh-1.  for manual stations, use
 c..... a guess based on the range between reportable values (e.g., for
 c..... reported visibility between 0 and 3/8th mile, set accuracy to 
-c..... 1/16th mile).  This isn't ideal, but its a start.
+c..... 1/16th mile).  this isn't ideal, but its a start.
 c
-	 store_5ea(np,1) = 10.00         ! Start with this (miles)
+	 store_5ea(np,1) = 10.00         ! start with this (miles)
 	 if(vis(i) .ne. badflag) then
-	    if(atype_in(i)(1:2) .eq. 'A0') then   ! have an auto station
+	    if(atype_in(i)(1:2) .eq. 'a0') then   ! have an auto station
 	       if(vis(i) .lt. 2.0) then
 		  store_5ea(np,1) = 0.25         ! miles
 	       elseif(vis(i).ge.2.0 .and. vis(i).lt.3.0) then
@@ -830,7 +830,7 @@ c
 	    endif
 	 endif
 c
-c..... Other stuff.  Don't really know about the precip, but probably
+c..... other stuff.  don't really know about the precip, but probably
 c..... worse that this guess.
 c
 	 store_5ea(np,2) = 0.0             ! solar radiation 
@@ -841,9 +841,9 @@ c
 	 store_6ea(np,2) = 1.0             ! snow cover (in) 
 c
 c
-c..... Output the data to the storage arrays
+c..... output the data to the storage arrays
 c
-!        write(6,*)' Saving station ',i,np,stname(i),rtime
+!        write(6,*)' saving station ',i,np,stname(i),rtime
 
 	 call s_len(stname(i), len)
 	 stations(np)(1:len) = stname(i)(1:len) ! station name
@@ -871,7 +871,7 @@ c
 c
 	 store_2(np,1) = temp_f                 ! temperature (deg f)
 	 store_2(np,2) = dewp_f                 ! dew point (deg f)
-	 store_2(np,3) = rh(i)                  ! Relative Humidity
+	 store_2(np,3) = rh(i)                  ! relative humidity
 c
 	 store_3(np,1) = dd(i)                  ! wind dir (deg)
 	 store_3(np,2) = ff(i)                  ! wind speed (kt)
@@ -880,7 +880,7 @@ c
 c
 	 store_4(np,1) = alt(i)                 ! altimeter setting (mb)
 	 store_4(np,2) = stnp(i)                ! station pressure (mb)
-	 store_4(np,3) = mslp(i)                ! MSL pressure (mb)
+	 store_4(np,3) = mslp(i)                ! msl pressure (mb)
 	 store_4(np,4) = float(dpchar(i))       ! 3-h press change character
          store_4(np,5) = dp(i)                  ! 3-h press change (mb)
 c
@@ -899,7 +899,7 @@ c
 	 store_7(np,2) = max24t(i)              ! 24-h max temperature
 	 store_7(np,3) = min24t(i)              ! 24-h min temperature
 c
-c.....	Store cloud info if we have any. 
+c.....	store cloud info if we have any. 
 c
 	 if(k_layers .gt. 0) then
 	   do ii=1,k_layers
@@ -915,17 +915,17 @@ c
          write(6,*)' n_sao_all/np = ',n_sao_all,np
 c
 c
-c.....  That's it...lets go home.
+c.....  that's it...lets go home.
 c
-	 print *,' Found ',n_sao_b,' METAR/SYNOPs in the LAPS box'
-	 print *,' Found ',n_sao_g,' METAR/SYNOPs in the LAPS grid'
+	 print *,' found ',n_sao_b,' metar/synops in the laps box'
+	 print *,' found ',n_sao_g,' metar/synops in the laps grid'
 	 print *,' '
 	 jstatus = 1		! everything's ok...
 	 return
 c
  990	 continue		! no data available
 	 jstatus = 0
-	 print *,' WARNING: No data available from READ_METAR.'
+	 print *,' warning: no data available from read_metar.'
 	 return
 c
 	 end
@@ -933,7 +933,7 @@ c
 c
 	function c2f(temp_c)
 c
-c       Takes a single value in deg C and returns deg F.
+c       takes a single value in deg c and returns deg f.
 c
 	c2f = (temp_c * 9./5.) + 32.
 c
@@ -988,7 +988,7 @@ c
             if(arg .lt.   0.)arg = badflag
 
         else
-            write(6,*)' Warning: unknown variable in sfc_climo_qc_r'
+            write(6,*)' warning: unknown variable in sfc_climo_qc_r'
      1	             ,c_var
 
         endif

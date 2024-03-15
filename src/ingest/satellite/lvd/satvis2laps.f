@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,7 +29,7 @@ cdis
 cdis 
 cdis 
 cdis 
-       SUBROUTINE satdat2laps_vis(
+       subroutine satdat2laps_vis(
      &                  r_grid_ratio,
      &                  r_llij_lut_ri,
      &                  r_llij_lut_rj,
@@ -39,57 +39,57 @@ cdis
      &                  sv,                ! model grid
      &                  istatus)
 c
-c.....       This is the Chandran version returing visible values
-c.....       Modified by Steve Albers to average a window the size of a LAPS
-c.....       Grid box, giving it better resolution and faster run times.
-c           Changes:  P. Stamus  11-13-92  Install in operational sfc code.
+c.....       this is the chandran version returing visible values
+c.....       modified by steve albers to average a window the size of a laps
+c.....       grid box, giving it better resolution and faster run times.
+c           changes:  p. stamus  11-13-92  install in operational sfc code.
 c
-c                     J. Smart   3-1-94    Install for using ISPAN feed for
+c                     j. smart   3-1-94    install for using ispan feed for
 c                                          satellite data.
-c                                          Allow analysis technique to vary
+c                                          allow analysis technique to vary
 c                                          as function of input/output ratio
-       Implicit none
+       implicit none
 
-       Integer max_elem,max_line
+       integer max_elem,max_line
        parameter (max_elem = 100)
        parameter (max_line = 100)
 
-       Integer imax, jmax
-       Integer line_dim, elem_dim
+       integer imax, jmax
+       integer line_dim, elem_dim
 
-       Real sv(IMAX,JMAX)                  ! model grid
-       Real t_array(max_line*max_elem)
-       Real image_vis(elem_dim,line_dim)   ! satellite grid
-       Real r_llij_lut_ri(imax,jmax)
-       Real r_llij_lut_rj(imax,jmax)
-       Real elem_mn,elem_mx
-       Real line_mn,line_mx
+       real sv(imax,jmax)                  ! model grid
+       real t_array(max_line*max_elem)
+       real image_vis(elem_dim,line_dim)   ! satellite grid
+       real r_llij_lut_ri(imax,jmax)
+       real r_llij_lut_rj(imax,jmax)
+       real elem_mn,elem_mx
+       real line_mn,line_mx
 
-c      Integer i_s(imax*jmax)
-c      Integer j_s(imax*jmax)
+c      integer i_s(imax*jmax)
+c      integer j_s(imax*jmax)
 
-       Integer npix
-       Integer maxpix
-       Integer i,j,ii,jj
-       Integer istart
-       Integer iend
-       Integer jstart
-       Integer jend
-       Integer istatus
-       Integer qcstatus
-       Integer insufdata
-       Integer icnt
+       integer npix
+       integer maxpix
+       integer i,j,ii,jj
+       integer istart
+       integer iend
+       integer jstart
+       integer jend
+       integer istatus
+       integer qcstatus
+       integer insufdata
+       integer icnt
 
-       Real r_missing_data
-       Real Temp
-       Real r_grid_ratio
-       Real result
-       Logical lforce_switch, l_rhombus /.false./
+       real r_missing_data
+       real temp
+       real r_grid_ratio
+       real result
+       logical lforce_switch, l_rhombus /.false./
 c
 c -----------------------------begin--------------------------------
 c
        call get_r_missing_data(r_missing_data, istatus)
-       CALL ZERO(SV,IMAX,JMAX)
+       call zero(sv,imax,jmax)
        istatus = 0
        qcstatus =0
 c
@@ -98,11 +98,11 @@ c    1       (  xlat(1,2) - xlat(1,1)                   )**2
 c    1     + ( (xlon(1,2) - xlon(1,1))*cosd(xlat(1,1))  )**2 
 c    1                         )   
 
-c.....       Define half of the window dimensions
+c.....       define half of the window dimensions
 
 c      wdw_lat =  grid_spacing_deg / 2.
 c      wdw_lon = (grid_spacing_deg / 2.) / cosd(xlat(1,1))
-c      write(6,*)' GET VIS: wdw_lat, wdw_lon = ',wdw_lat,wdw_lon
+c      write(6,*)' get vis: wdw_lat, wdw_lon = ',wdw_lat,wdw_lon
 
        insufdata=0
        lforce_switch=.false.
@@ -116,28 +116,28 @@ c      write(6,*)' GET VIS: wdw_lat, wdw_lon = ',wdw_lat,wdw_lon
        enddo
        if(icnt.gt.(.1*elem_dim*line_dim))then
           lforce_switch=.true.
-          print*,'More than 10% of data missing: '
+          print*,'more than 10% of data missing: '
      &,float(icnt)/float(imax*jmax)
-          print*,'Force grid point averaging in satir2laps'
+          print*,'force grid point averaging in satir2laps'
        endif
 
        if(r_grid_ratio .lt. 0.5.or.lforce_switch)then
 
 c      ------------------------------
-c In this block the average pixel value is used for remapping the visible
-c satellite to the output LAPS grid.
+c in this block the average pixel value is used for remapping the visible
+c satellite to the output laps grid.
 c
-          write(6,*)'Image ratio .lt. 0.5 ',r_grid_ratio
-          write(6,*)'Use pixel avg for VIS count'
-          DO 10 J=1,JMAX
-          DO 10 I=1,IMAX
-            IF(SV(I,J).NE.0.) GO TO 10
+          write(6,*)'image ratio .lt. 0.5 ',r_grid_ratio
+          write(6,*)'use pixel avg for vis count'
+          do 10 j=1,jmax
+          do 10 i=1,imax
+            if(sv(i,j).ne.0.) go to 10
 c
-c Compute the line and element for a window surrounding LAPS grid point,
+c compute the line and element for a window surrounding laps grid point,
 c using a simple assumption that the satellite grid has the same orientation
 c as the model with a 1:1 aspect ratio.
 c
-c This might also be done by projecting the model grid box onto the satellite
+c this might also be done by projecting the model grid box onto the satellite
 c grid as a rhombus, and determining whether each satellite point is included in
 c the rhombus.
 c
@@ -157,7 +157,7 @@ c
      &           iend   .gt. elem_dim .or. jend   .gt. line_dim)then
 c               write(*,*)'outside visible lat/lon sector'
 c               write(*,1020)i,j
-c1020	        format(1x,'LAPS grid (i,j) = ',i3,1x,i3)
+c1020	        format(1x,'laps grid (i,j) = ',i3,1x,i3)
 
                 insufdata=insufdata+1
                 sv(i,j)=r_missing_data
@@ -167,18 +167,18 @@ c               j_s(insufdata)=j
 
    	      else
  
-c **** FIND THE AVERAGE VISIBLE PIXELS AROUND GRID POINT
+c **** find the average visible pixels around grid point
 c
-                Temp = 0.0
+                temp = 0.0
                 npix = 0
                 maxpix = 0
 
                 if(.not. l_rhombus)then
-                  DO JJ=jstart,jend
-                  DO II=istart,iend
-                    IF(image_vis(II,JJ) .ne. r_missing_data)then
+                  do jj=jstart,jend
+                  do ii=istart,iend
+                    if(image_vis(ii,jj) .ne. r_missing_data)then
                       npix = npix + 1
-                      t_array(npix) = image_vis(II,JJ)
+                      t_array(npix) = image_vis(ii,jj)
                     endif
                   enddo ! ii
                   enddo ! jj
@@ -186,7 +186,7 @@ c
 
                 if(npix .ge. maxpix)maxpix=npix
 c
-c Added 11-6-95... A quality control test on the group of pixels used to
+c added 11-6-95... a quality control test on the group of pixels used to
 c                  derive the laps average pixel value.
 c
                 if(npix.ge.2)then
@@ -195,7 +195,7 @@ c
                      temp = temp + t_array(ii)
                   enddo
 
-                  sv(i,j) = Temp/ npix
+                  sv(i,j) = temp/ npix
 
                 elseif(npix.eq.1)then
 
@@ -207,10 +207,10 @@ c
 
                 endif
 
-Cd              if(i .eq. i/10*10 .and. j .eq. j/10*10)then
-Cd                write(6,5555)i,j,wm,wc,npix,nwarm,sc(i,j)
-Cd5555            format(1x,2i4,2f10.2,2i5,f10.2)
-Cd              endif
+cd              if(i .eq. i/10*10 .and. j .eq. j/10*10)then
+cd                write(6,5555)i,j,wm,wc,npix,nwarm,sc(i,j)
+cd5555            format(1x,2i4,2f10.2,2i5,f10.2)
+cd              endif
 
               end if
 
@@ -218,25 +218,25 @@ Cd              endif
               sv(i,j)=r_missing_data
             endif
 
-   10     CONTINUE ! I,J
+   10     continue ! i,j
 
-          write(6,*)'Max num vis pixels for avg: ',maxpix
-          write(6,*)'Number of vis satellite pixels modified'
+          write(6,*)'max num vis pixels for avg: ',maxpix
+          write(6,*)'number of vis satellite pixels modified'
           write(6,*)'           by statistical qc: ',qcstatus
 
        else
 c      ----------------------------
-c This block bilinearly interpolates four surrounding grid points to the
+c this block bilinearly interpolates four surrounding grid points to the
 c output grid point.
 c
           write(6,*)'grid ratio .ge. 0.5 ',r_grid_ratio
-          write(6,*)'use bilinear interp for VIS count'
-          DO 20 J=1,JMAX
-          DO 20 I=1,IMAX
+          write(6,*)'use bilinear interp for vis count'
+          do 20 j=1,jmax
+          do 20 i=1,imax
 
-            IF(SV(I,J).NE.0.) GO TO 20
+            if(sv(i,j).ne.0.) go to 20
 c
-c line/elem are floating point i/j positions in ISPAN grid for input lat/lon
+c line/elem are floating point i/j positions in ispan grid for input lat/lon
 c 
 c bilinear_interp_extrap checks on boundary conditions and
 c uses r_missing_data if out of bounds.
@@ -266,15 +266,15 @@ c
                sv(i,j)=r_missing_data
             endif
 
-   20     CONTINUE ! I,J
+   20     continue ! i,j
 
         end if
 
-C       WRITE(6,1234) IB,I4VTIME,ICT
-1234       FORMAT(1X,'BAND ',I4,' COUNT FOR I4TIME ',I10,' IS ',I8)
+c       write(6,1234) ib,i4vtime,ict
+1234       format(1x,'band ',i4,' count for i4time ',i10,' is ',i8)
 
         if(insufdata.gt.0)then
-           print*,'Found ',insufdata,' points that are too'
+           print*,'found ',insufdata,' points that are too'
            print*,'close to data edge to compute average'
 
 c          do i=1,insufdata,10

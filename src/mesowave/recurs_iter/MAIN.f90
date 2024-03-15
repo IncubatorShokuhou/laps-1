@@ -1,48 +1,48 @@
-PROGRAM MAIN
+program main
 
 !*********************************************************
-!  This program analyzes a set of surface in time using a
+!  this program analyzes a set of surface in time using a
 !  recursive filter.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !*********************************************************
 
-  USE Definition
-  USE Initialize
-  USE Minimizatn
-  USE ConfigLaps
+  use definition
+  use initialize
+  use minimizatn
+  use configlaps
 
-  IMPLICIT NONE
+  implicit none
 
-  ! Local variable:
-  INTEGER :: id,ierr
-  REAL    :: ds(3)
+  ! local variable:
+  integer :: id,ierr
+  real    :: ds(3)
 
-  CALL LapsInfo
-  CALL LSO_Data
+  call lapsinfo
+  call lso_data
 
-  ! CALL Namelist
+  ! call namelist
 
-  ! CALL ReadObsn
+  ! call readobsn
 
-  CALL Grid2Obs
+  call grid2obs
 
-  !CALL Minimize
+  !call minimize
   ds(1) = grid_spacingx
   ds(2) = grid_spacingy
   ds(3) = d(3)
-  DO id=1,n(4)
-     IF (id .NE. 4) THEN  ! do not analyze station pressure
-        CALL Iterates(id,bkgd,ldf,nx,ny,ds,ncycles,nvlaps,nfic)
-        PRINT*,'Variable ',id,' has been analyzed'
-     ENDIF
-  ENDDO
+  do id=1,n(4)
+     if (id .ne. 4) then  ! do not analyze station pressure
+        call iterates(id,bkgd,ldf,nx,ny,ds,ncycles,nvlaps,nfic)
+        print*,'variable ',id,' has been analyzed'
+     endif
+  enddo
 
-  ! Release memory of ldf:
-  DEALLOCATE(bkgd,ldf,STAT=ierr)
+  ! release memory of ldf:
+  deallocate(bkgd,ldf,stat=ierr)
 
-  ! CALL Writeout
-  ! CALL Writeout
-  CALL WriteAnalysis(s(1:n(1),1:n(2),1:n(3),1:n(4)),n)
+  ! call writeout
+  ! call writeout
+  call writeanalysis(s(1:n(1),1:n(2),1:n(3),1:n(4)),n)
 
-END PROGRAM MAIN
+end program main

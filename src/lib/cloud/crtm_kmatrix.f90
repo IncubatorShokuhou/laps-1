@@ -1,325 +1,325 @@
 !====================================================================
 !>
-!! CRTM AMSU-B module for STMAS assimilation
+!! crtm amsu-b module for stmas assimilation
 !!
 !! \history \n
-!! Creation: Yuanfu Xie 2013
+!! creation: yuanfu xie 2013
 !
 !====================================================================
-MODULE crtm_kmatrix
+module crtm_kmatrix
 
-  USE CRTM_MODULE
-  USE prmtrs_stmas_cloud, only : satellite_obs
+  use crtm_module
+  use prmtrs_stmas_cloud, only : satellite_obs
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER(*), PARAMETER :: program_name = 'lvd_da'
+  character(*), parameter :: program_name = 'lvd_da'
 
-  ! Parameters which could be ported to sat_da.nl later.
-  INTEGER, PARAMETER :: num_lvd_sensor = 1
-  INTEGER, PARAMETER :: num_lvd_absorber = 2
-  INTEGER, PARAMETER :: num_lvd_cloud = 0
-  INTEGER, PARAMETER :: num_lvd_aerosol = 0
-  REAL(FP),    PARAMETER :: lvd_zenith_angle=-34.04_fp, lvd_scan_angle=-30.20_fp
+  ! parameters which could be ported to sat_da.nl later.
+  integer, parameter :: num_lvd_sensor = 1
+  integer, parameter :: num_lvd_absorber = 2
+  integer, parameter :: num_lvd_cloud = 0
+  integer, parameter :: num_lvd_aerosol = 0
+  real(fp),    parameter :: lvd_zenith_angle=-34.04_fp, lvd_scan_angle=-30.20_fp
 
-  INTEGER :: num_lvd_channels
+  integer :: num_lvd_channels
 
-  type(CRTM_ChannelInfo_Type), allocatable:: lvd_ChannelInfo(:)
-  type(CRTM_Geometry_Type),    allocatable:: lvd_GeometryInfo(:)
-  type(CRTM_Atmosphere_Type),  allocatable:: lvd_Atm(:)     ! Profiles
-  type(CRTM_Atmosphere_Type),  allocatable:: lvd_Atm_K(:,:) ! Channel x profiles
-  type(CRTM_Surface_Type),     allocatable:: lvd_Sfc(:)     ! Profiles
-  type(CRTM_Surface_Type),     allocatable:: lvd_Sfc_K(:,:) ! Channel x profile
-  ! RTSolution and RTSolution_K: Channels x profiles
-  type(CRTM_RTSolution_Type),  allocatable:: lvd_RTSolution(:,:), &
-                                             lvd_RTSolution_K(:,:)
-CONTAINS
+  type(crtm_channelinfo_type), allocatable:: lvd_channelinfo(:)
+  type(crtm_geometry_type),    allocatable:: lvd_geometryinfo(:)
+  type(crtm_atmosphere_type),  allocatable:: lvd_atm(:)     ! profiles
+  type(crtm_atmosphere_type),  allocatable:: lvd_atm_k(:,:) ! channel x profiles
+  type(crtm_surface_type),     allocatable:: lvd_sfc(:)     ! profiles
+  type(crtm_surface_type),     allocatable:: lvd_sfc_k(:,:) ! channel x profile
+  ! rtsolution and rtsolution_k: channels x profiles
+  type(crtm_rtsolution_type),  allocatable:: lvd_rtsolution(:,:), &
+                                             lvd_rtsolution_k(:,:)
+contains
 
 !====================================================================
 !> 
-!! CRTM configuration for GOES.
+!! crtm configuration for goes.
 !!
 !! \history \n
-!! Creation: Yuanfu Xie 2013, S Albers (modified for GOES)
+!! creation: yuanfu xie 2013, s albers (modified for goes)
 !
 !====================================================================
 
-SUBROUTINE conf4lvd(lvd,numgrid,sensor_id,coe_path,moist_unit,&
+subroutine conf4lvd(lvd,numgrid,sensor_id,coe_path,moist_unit,&
                       badflag)
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER(*), INTENT(IN) :: sensor_id,coe_path,moist_unit
-  INTEGER, INTENT(IN) :: numgrid(4)
-  REAL,    INTENT(IN) :: badflag
-  TYPE(SATELLITE_OBS), INTENT(IN) :: lvd
-  REAL(fp) :: angle(4,lvd%numpro)
+  character(*), intent(in) :: sensor_id,coe_path,moist_unit
+  integer, intent(in) :: numgrid(4)
+  real,    intent(in) :: badflag
+  type(satellite_obs), intent(in) :: lvd
+  real(fp) :: angle(4,lvd%numpro)
 
-  ! Local variables:
-  CHARACTER(256) :: message
-  INTEGER :: istatus,np
+  ! local variables:
+  character(256) :: message
+  integer :: istatus,np
 
-  ! Allocate memory for AMSU-B assimilation:
-  ALLOCATE(lvd_ChannelInfo(num_lvd_sensor), &
-           lvd_GeometryInfo(lvd%numpro), &
-           STAT=istatus)
+  ! allocate memory for amsu-b assimilation:
+  allocate(lvd_channelinfo(num_lvd_sensor), &
+           lvd_geometryinfo(lvd%numpro), &
+           stat=istatus)
 
-  istatus = CRTM_Init( (/sensor_id/), lvd_ChannelInfo, &
-                        EmisCoeff_File='Wu-Smith.EmisCoeff.bin', &
-                        File_Path=TRIM(coe_path)//'Coefficient_Data/', &
-                        Quiet = .TRUE.)  
-  IF ( istatus /= SUCCESS ) THEN
-    message = 'Error initializing CRTM'
-    CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-    STOP
-  ELSE
-    message = 'CRTM initialized'
-    call Display_Message( program_name, message, SUCCESS )
-  ENDIF
-  num_lvd_channels = SUM(lvd_ChannelInfo%n_channels)
-  IF (num_lvd_channels .NE. lvd%numchs) THEN
-    PRINT*,'Numbers of AMSUB channels do not match!'
-    STOP
-  ENDIF
+  istatus = crtm_init( (/sensor_id/), lvd_channelinfo, &
+                        emiscoeff_file='wu-smith.emiscoeff.bin', &
+                        file_path=trim(coe_path)//'coefficient_data/', &
+                        quiet = .true.)  
+  if ( istatus /= success ) then
+    message = 'error initializing crtm'
+    call display_message( program_name, message, failure )
+    stop
+  else
+    message = 'crtm initialized'
+    call display_message( program_name, message, success )
+  endif
+  num_lvd_channels = sum(lvd_channelinfo%n_channels)
+  if (num_lvd_channels .ne. lvd%numchs) then
+    print*,'numbers of amsub channels do not match!'
+    stop
+  endif
 
-  ! Allocate memory for CRTM arrays:
-  ALLOCATE(lvd_RTSolution(lvd%numchs,lvd%numpro), &
-           lvd_RTsolution_K(lvd%numchs,lvd%numpro), &
-           lvd_Atm(lvd%numpro), &
-           lvd_Sfc(lvd%numpro), &
-           lvd_Atm_K(lvd%numchs,lvd%numpro), &
-           lvd_Sfc_K(lvd%numchs,lvd%numpro), &
-           STAT=istatus)
+  ! allocate memory for crtm arrays:
+  allocate(lvd_rtsolution(lvd%numchs,lvd%numpro), &
+           lvd_rtsolution_k(lvd%numchs,lvd%numpro), &
+           lvd_atm(lvd%numpro), &
+           lvd_sfc(lvd%numpro), &
+           lvd_atm_k(lvd%numchs,lvd%numpro), &
+           lvd_sfc_k(lvd%numchs,lvd%numpro), &
+           stat=istatus)
 
-  ! Create CRTM:
-  CALL CRTM_Atmosphere_Create(lvd_Atm,numgrid(3),num_lvd_absorber, &
+  ! create crtm:
+  call crtm_atmosphere_create(lvd_atm,numgrid(3),num_lvd_absorber, &
                               num_lvd_cloud,num_lvd_aerosol)
-  IF ( ANY(.NOT. CRTM_Atmosphere_Associated(lvd_Atm)) ) THEN
-     message = 'Error allocating CRTM Atmosphere structures'
-     CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-     STOP
-  ENDIF
-  CALL CRTM_Atmosphere_Create(lvd_Atm_K,numgrid(3),num_lvd_absorber, &
+  if ( any(.not. crtm_atmosphere_associated(lvd_atm)) ) then
+     message = 'error allocating crtm atmosphere structures'
+     call display_message( program_name, message, failure )
+     stop
+  endif
+  call crtm_atmosphere_create(lvd_atm_k,numgrid(3),num_lvd_absorber, &
                               num_lvd_cloud,num_lvd_aerosol)
-  IF ( ANY(.NOT. CRTM_Atmosphere_Associated(lvd_Atm)) ) THEN
-     message = 'Error allocating CRTM Atmosphere_K structures'
-     CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-     STOP
-  ENDIF
+  if ( any(.not. crtm_atmosphere_associated(lvd_atm)) ) then
+     message = 'error allocating crtm atmosphere_k structures'
+     call display_message( program_name, message, failure )
+     stop
+  endif
 
-  ! Data type conversion: real to real(fp) of CRTM:
+  ! data type conversion: real to real(fp) of crtm:
   angle = lvd%angles
 
-  ! Geometry setting:
-  CALL CRTM_Geometry_SetValue( lvd_GeometryInfo, &
-                               iFOV = lvd%numpro, &
-                               Sensor_Zenith_Angle  = angle(1,1:lvd%numpro), & 
-                               Sensor_Azimuth_Angle = angle(2,1:lvd%numpro), &
-                               Source_Zenith_Angle  = angle(3,1:lvd%numpro), &
-                               Source_Azimuth_Angle = angle(4,1:lvd%numpro) ) 
+  ! geometry setting:
+  call crtm_geometry_setvalue( lvd_geometryinfo, &
+                               ifov = lvd%numpro, &
+                               sensor_zenith_angle  = angle(1,1:lvd%numpro), & 
+                               sensor_azimuth_angle = angle(2,1:lvd%numpro), &
+                               source_zenith_angle  = angle(3,1:lvd%numpro), &
+                               source_azimuth_angle = angle(4,1:lvd%numpro) ) 
 
-  ! Pass the non-control profile values to CRTM:
-  DO np=1,lvd%numpro
+  ! pass the non-control profile values to crtm:
+  do np=1,lvd%numpro
 
-    IF (lvd%lndcvr(np) .GT. 0) THEN
-      lvd_Sfc(np)%Land_Coverage  = 1.0_fp
-      lvd_Sfc(np)%Water_Coverage  = 0.0_fp
-    ELSE
-      lvd_Sfc(np)%Land_Coverage  = 0.0_fp
-      lvd_Sfc(np)%Water_Coverage  = 1.0_fp
-    ENDIF
-    lvd_Sfc(np)%Land_type      = 1 ! COMPACTED SOIL, ACCORDING CRTM 2.1.1
-    lvd_Sfc(np)%Water_type     = 1 ! SEA_WATER
-    lvd_Atm(np)%Absorber_Id    = (/ H2O_ID , O3_ID /)
-    lvd_Atm(np)%Absorber(:,2)  = 2.53e-3  ! Fake value as MHS does not use O3
+    if (lvd%lndcvr(np) .gt. 0) then
+      lvd_sfc(np)%land_coverage  = 1.0_fp
+      lvd_sfc(np)%water_coverage  = 0.0_fp
+    else
+      lvd_sfc(np)%land_coverage  = 0.0_fp
+      lvd_sfc(np)%water_coverage  = 1.0_fp
+    endif
+    lvd_sfc(np)%land_type      = 1 ! compacted soil, according crtm 2.1.1
+    lvd_sfc(np)%water_type     = 1 ! sea_water
+    lvd_atm(np)%absorber_id    = (/ h2o_id , o3_id /)
+    lvd_atm(np)%absorber(:,2)  = 2.53e-3  ! fake value as mhs does not use o3
 
-    ! Currently, use mass mixing ratio only CRTM user guide 2.1.1 section 4.6:
-    IF (moist_unit .EQ. 'MASS_MIXING_RATIO_UNITS') THEN
-      lvd_Atm(np)%Absorber_Units = (/ MASS_MIXING_RATIO_UNITS,  &
-                                        VOLUME_MIXING_RATIO_UNITS /)      
-    ELSE
-      PRINT*,'Not implemented, check the namelist, sat_da.nl'
-      STOP
-    ENDIF
+    ! currently, use mass mixing ratio only crtm user guide 2.1.1 section 4.6:
+    if (moist_unit .eq. 'mass_mixing_ratio_units') then
+      lvd_atm(np)%absorber_units = (/ mass_mixing_ratio_units,  &
+                                        volume_mixing_ratio_units /)      
+    else
+      print*,'not implemented, check the namelist, sat_da.nl'
+      stop
+    endif
     
-  ENDDO
+  enddo
 
-END SUBROUTINE conf4lvd
+end subroutine conf4lvd
 
 !====================================================================
 !>
-!! CRTM forward and K-matrix calculation for AMSU-B.
+!! crtm forward and k-matrix calculation for amsu-b.
 !!
 !! \history \n
-!! Creation: Yuanfu Xie 2013
+!! creation: yuanfu xie 2013
 !
 !====================================================================
 
-SUBROUTINE lvd_costgrad(numgrid,u_sfc,v_sfc,pres,sh,temp,lvd,tf, &
+subroutine lvd_costgrad(numgrid,u_sfc,v_sfc,pres,sh,temp,lvd,tf, &
                           badflag,cost,grad,lvd_channels_used, &
                           iu,iv,it,iq)
 
-  IMPLICIT NONE
+  implicit none
 
-  TYPE(satellite_obs), INTENT(IN) :: lvd
+  type(satellite_obs), intent(in) :: lvd
 
-  INTEGER, INTENT(IN) :: numgrid(4),lvd_channels_used(*)
-  INTEGER, INTENT(IN) :: tf,iu,iv,it,iq  ! Time frame and indices for control variables
-  REAL,    INTENT(IN) :: pres(numgrid(3))
-  REAL,    INTENT(IN) ::   sh(lvd%numpro,numgrid(3))
-  REAL,    INTENT(IN) :: temp(lvd%numpro,numgrid(3))
-  REAL,    INTENT(IN) :: u_sfc(lvd%numpro)
-  REAL,    INTENT(IN) :: v_sfc(lvd%numpro)
-  REAL,    INTENT(IN) :: badflag
-  REAL,   INTENT(OUT) :: cost,grad(numgrid(1),numgrid(2),numgrid(3),numgrid(4),*)
+  integer, intent(in) :: numgrid(4),lvd_channels_used(*)
+  integer, intent(in) :: tf,iu,iv,it,iq  ! time frame and indices for control variables
+  real,    intent(in) :: pres(numgrid(3))
+  real,    intent(in) ::   sh(lvd%numpro,numgrid(3))
+  real,    intent(in) :: temp(lvd%numpro,numgrid(3))
+  real,    intent(in) :: u_sfc(lvd%numpro)
+  real,    intent(in) :: v_sfc(lvd%numpro)
+  real,    intent(in) :: badflag
+  real,   intent(out) :: cost,grad(numgrid(1),numgrid(2),numgrid(3),numgrid(4),*)
 
-  ! Local variables:
-  REAL, PARAMETER :: pi=3.1415926
-  CHARACTER(256) :: message
-  DOUBLE PRECISION :: f
-  INTEGER :: np,nl,nc,istatus
-  REAL    :: bt,spd,weight
+  ! local variables:
+  real, parameter :: pi=3.1415926
+  character(256) :: message
+  double precision :: f
+  integer :: np,nl,nc,istatus
+  real    :: bt,spd,weight
 
-  PRINT*,'AMSUB cost function and gradient calculation...'
+  print*,'amsub cost function and gradient calculation...'
 
-  DO np=1,lvd%numpro
+  do np=1,lvd%numpro
 
-    ! 2D fields:
-    lvd_Sfc(np)%Land_Temperature = temp(np,1)
-    lvd_Sfc(np)%Wind_Speed = SQRT(u_sfc(np)**2+v_sfc(np)**2)
-    lvd_Sfc(np)%Wind_Direction = (2.0*pi+ASIN(v_sfc(np)/lvd_Sfc(np)%Wind_Speed))*180.0/pi
+    ! 2d fields:
+    lvd_sfc(np)%land_temperature = temp(np,1)
+    lvd_sfc(np)%wind_speed = sqrt(u_sfc(np)**2+v_sfc(np)**2)
+    lvd_sfc(np)%wind_direction = (2.0*pi+asin(v_sfc(np)/lvd_sfc(np)%wind_speed))*180.0/pi
 
-    ! 3D fields:
-    ! Note: future improvement would be using terrain-following coordinate:
-    ! Currently, we do not treat terrain!!!
-    lvd_Atm(np)%Level_Pressure(0) = 1.5*pres(numgrid(3))-0.5*pres(numgrid(3)-1)
-    DO nl=1,numgrid(3)-1
-      lvd_Atm(np)%Level_Pressure(nl) = 0.5*(pres(numgrid(3)-nl)+pres(numgrid(3)-nl+1))
-      lvd_Atm(np)%Pressure(nl)       = pres(numgrid(3)-nl+1)
-    ENDDO
-    lvd_Atm(np)%Level_Pressure(numgrid(3)) = 1.5*pres(1)-0.5*pres(2)
-    lvd_Atm(np)%Pressure(numgrid(3)) = pres(1)
+    ! 3d fields:
+    ! note: future improvement would be using terrain-following coordinate:
+    ! currently, we do not treat terrain!!!
+    lvd_atm(np)%level_pressure(0) = 1.5*pres(numgrid(3))-0.5*pres(numgrid(3)-1)
+    do nl=1,numgrid(3)-1
+      lvd_atm(np)%level_pressure(nl) = 0.5*(pres(numgrid(3)-nl)+pres(numgrid(3)-nl+1))
+      lvd_atm(np)%pressure(nl)       = pres(numgrid(3)-nl+1)
+    enddo
+    lvd_atm(np)%level_pressure(numgrid(3)) = 1.5*pres(1)-0.5*pres(2)
+    lvd_atm(np)%pressure(numgrid(3)) = pres(1)
 
-    ! Assign meteorological profiles to CRTM structured data:
+    ! assign meteorological profiles to crtm structured data:
 
-    ! Convert specific humidity to mass mixing ratio:
-    ! From the book of "Fundamentals of Atmospheric Modeling by Mark Z. Jacobson,
+    ! convert specific humidity to mass mixing ratio:
+    ! from the book of "fundamentals of atmospheric modeling by mark z. jacobson,
     ! mass mixing ratio (mmr) = rho_v/rho_d (equation 2.26) and 
-    ! specific humidity (sh)  = rho_v/(rho_d+rho_v) (equation 2.27). Thus
+    ! specific humidity (sh)  = rho_v/(rho_d+rho_v) (equation 2.27). thus
     ! mmr = sh/(1-sh).
-    DO nl=1,numgrid(3)
-      ! CRTM mass mixing ratio is in g/kg: Table 4.7 CRTM user guide 2.1.1:
-      lvd_Atm(np)%Absorber(nl,1) = 1.0e3*sh(np,numgrid(3)-nl+1)/(1.0e3-sh(np,numgrid(3)-nl+1))
-      IF (lvd_Atm(np)%Absorber(nl,1) .lt. 0.0) then
-        PRINT*,'Negative Vapor? ',lvd_Atm(np)%Absorber(nl,1),nl,np
-        lvd_Atm(np)%Absorber(nl,1) = 0.0
-      ENDIF
+    do nl=1,numgrid(3)
+      ! crtm mass mixing ratio is in g/kg: table 4.7 crtm user guide 2.1.1:
+      lvd_atm(np)%absorber(nl,1) = 1.0e3*sh(np,numgrid(3)-nl+1)/(1.0e3-sh(np,numgrid(3)-nl+1))
+      if (lvd_atm(np)%absorber(nl,1) .lt. 0.0) then
+        print*,'negative vapor? ',lvd_atm(np)%absorber(nl,1),nl,np
+        lvd_atm(np)%absorber(nl,1) = 0.0
+      endif
 
-      lvd_Atm(np)%Temperature(nl) = temp(np,numgrid(3)-nl+1)
-    ENDDO
+      lvd_atm(np)%temperature(nl) = temp(np,numgrid(3)-nl+1)
+    enddo
     
-  ENDDO
+  enddo
 
-  ! Clean up arrays for K-matrix:
-  CALL CRTM_Atmosphere_Zero( lvd_Atm_k )
-  CALL CRTM_Surface_Zero( lvd_Sfc_K )
-  lvd_RTSolution_K%brightness_Temperature = ONE
-  lvd_RTSolution_K%Radiance = ZERO
+  ! clean up arrays for k-matrix:
+  call crtm_atmosphere_zero( lvd_atm_k )
+  call crtm_surface_zero( lvd_sfc_k )
+  lvd_rtsolution_k%brightness_temperature = one
+  lvd_rtsolution_k%radiance = zero
 
-  print*,'Calling k_matrix...'
+  print*,'calling k_matrix...'
 
-  ! K-Matrix:
-  istatus = CRTM_K_Matrix( lvd_Atm         , &
-                           lvd_Sfc         , &
-                           lvd_RTSolution_K, &
-                           lvd_GeometryInfo, &
-                           lvd_ChannelInfo , &
-                           lvd_Atm_K       , &
-                           lvd_Sfc_K       , &
-                           lvd_RTSolution  )
-  IF ( istatus /= SUCCESS ) THEN
-    Message = 'Error in CRTM K_Matrix Model'
-    CALL Display_Message( program_name, message, FAILURE )
-    STOP
-  ENDIF
+  ! k-matrix:
+  istatus = crtm_k_matrix( lvd_atm         , &
+                           lvd_sfc         , &
+                           lvd_rtsolution_k, &
+                           lvd_geometryinfo, &
+                           lvd_channelinfo , &
+                           lvd_atm_k       , &
+                           lvd_sfc_k       , &
+                           lvd_rtsolution  )
+  if ( istatus /= success ) then
+    message = 'error in crtm k_matrix model'
+    call display_message( program_name, message, failure )
+    stop
+  endif
 
-  ! Cost and grad:
-  f = 0.0D0
-  ! Break function and gradient for calculating weight:
+  ! cost and grad:
+  f = 0.0d0
+  ! break function and gradient for calculating weight:
   weight = 0.0
-  DO np=1,lvd%numpro
+  do np=1,lvd%numpro
 
-    DO nc=1,lvd%numchs
-      IF (lvd_channels_used(nc) .NE. 1) CYCLE
+    do nc=1,lvd%numchs
+      if (lvd_channels_used(nc) .ne. 1) cycle
 
-      bt = lvd_RTSolution(nc,np)%Brightness_Temperature
+      bt = lvd_rtsolution(nc,np)%brightness_temperature
 
-      ! Cost:
+      ! cost:
       f = f+(bt-lvd%satval(nc,np))**2
       weight = weight+0.5
-    ENDDO
+    enddo
 
-  ENDDO
-  ! Pass the double precision cost function value to the output variable:
-  ! weight = SQRT(weight)
+  enddo
+  ! pass the double precision cost function value to the output variable:
+  ! weight = sqrt(weight)
 
   cost = 1.0*f/weight
 
-  DO np=1,lvd%numpro
+  do np=1,lvd%numpro
 
-    DO nc=1,lvd%numchs
-      IF (lvd_channels_used(nc) .NE. 1) CYCLE
+    do nc=1,lvd%numchs
+      if (lvd_channels_used(nc) .ne. 1) cycle
 
-      bt = lvd_RTSolution(nc,np)%Brightness_Temperature
+      bt = lvd_rtsolution(nc,np)%brightness_temperature
 
-      ! Grad:
-      ! Surface:
-      spd = SQRT(u_sfc(np)**2+v_sfc(np)**2)
+      ! grad:
+      ! surface:
+      spd = sqrt(u_sfc(np)**2+v_sfc(np)**2)
       grad(lvd%grdidx(1,np),lvd%grdidx(2,np),1,tf,it) = &
       grad(lvd%grdidx(1,np),lvd%grdidx(2,np),1,tf,it)+(bt-lvd%satval(nc,np))/weight* &
-        lvd_Sfc_K(nc,np)%Land_Temperature
+        lvd_sfc_k(nc,np)%land_temperature
       grad(lvd%grdidx(1,np),lvd%grdidx(2,np),1,tf,iu) = &
       grad(lvd%grdidx(1,np),lvd%grdidx(2,np),1,tf,iu)+(bt-lvd%satval(nc,np))/weight* &
-        (lvd_Sfc_K(nc,np)%Wind_Speed*     u_sfc(np)/spd - &
-         lvd_Sfc_K(nc,np)%Wind_Direction*SIGN(1.0,u_sfc(np))*v_sfc(np)/(spd*spd))*180.0/pi
+        (lvd_sfc_k(nc,np)%wind_speed*     u_sfc(np)/spd - &
+         lvd_sfc_k(nc,np)%wind_direction*sign(1.0,u_sfc(np))*v_sfc(np)/(spd*spd))*180.0/pi
       grad(lvd%grdidx(1,np),lvd%grdidx(2,np),1,tf,iu) = &
       grad(lvd%grdidx(1,np),lvd%grdidx(2,np),1,tf,iv)+(bt-lvd%satval(nc,np))/weight* &
-        (lvd_Sfc_K(nc,np)%Wind_Speed*     v_sfc(np)/spd + &
-         lvd_Sfc_K(nc,np)%Wind_Direction*ABS(u_sfc(np))/(spd*spd))*180.0/pi
+        (lvd_sfc_k(nc,np)%wind_speed*     v_sfc(np)/spd + &
+         lvd_sfc_k(nc,np)%wind_direction*abs(u_sfc(np))/(spd*spd))*180.0/pi
 
-      ! 3D profiles:
-      DO nl=1,numgrid(3)
+      ! 3d profiles:
+      do nl=1,numgrid(3)
         grad(lvd%grdidx(1,np),lvd%grdidx(2,np),numgrid(3)-nl+1,tf,it) = &
         grad(lvd%grdidx(1,np),lvd%grdidx(2,np),numgrid(3)-nl+1,tf,it) + &
-          (bt-lvd%satval(nc,np))/weight*lvd_Atm_K(nc,np)%Temperature(nl)
+          (bt-lvd%satval(nc,np))/weight*lvd_atm_k(nc,np)%temperature(nl)
         grad(lvd%grdidx(1,np),lvd%grdidx(2,np),numgrid(3)-nl+1,tf,iq) = &
         grad(lvd%grdidx(1,np),lvd%grdidx(2,np),numgrid(3)-nl+1,tf,iq) + &
-          (bt-lvd%satval(nc,np))/weight*lvd_Atm_K(nc,np)%Absorber(nl,1)* &
+          (bt-lvd%satval(nc,np))/weight*lvd_atm_k(nc,np)%absorber(nl,1)* &
           1.0e6/(1.0e3-sh(np,numgrid(3)-nl+1))**2
-      ENDDO
-    ENDDO
+      enddo
+    enddo
 
-  ENDDO
+  enddo
 
-END SUBROUTINE lvd_costgrad
+end subroutine lvd_costgrad
 
 !====================================================================
 !>
-!! Destroy the CRTM for AMSU-B.
+!! destroy the crtm for amsu-b.
 !!
 !! \history \n
-!! Creation: Yuanfu Xie 2013
+!! creation: yuanfu xie 2013
 !
 !====================================================================
 
-SUBROUTINE dstrylvd
+subroutine dstrylvd
 
-  ! Local variables:
-  INTEGER :: istatus
+  ! local variables:
+  integer :: istatus
 
-  istatus = CRTM_Destroy(lvd_ChannelInfo)
+  istatus = crtm_destroy(lvd_channelinfo)
 
-END SUBROUTINE dstrylvd
+end subroutine dstrylvd
 
-END MODULE crtm_kmatrix
+end module crtm_kmatrix
 

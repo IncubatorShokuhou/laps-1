@@ -2,7 +2,7 @@
      &                   image_main,image_prev,
      &                   iqstatus)
 c
-c This routine compares pixel by pixel image_main and
+c this routine compares pixel by pixel image_main and
 c image_prev to fill missing data points in image_main
 c
       implicit none

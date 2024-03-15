@@ -1,57 +1,57 @@
       subroutine compack(fld,ndpts,idrsnum,idrstmpl,cpack,lcpack)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    compack
-!   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2000-06-21
+! subprogram:    compack
+!   prgmmr: gilbert          org: w/np11    date: 2000-06-21
 !
-! ABSTRACT: This subroutine packs up a data field using a complex
-!   packing algorithm as defined in the GRIB2 documention.  It
-!   supports GRIB2 complex packing templates with or without
-!   spatial differences (i.e. DRTs 5.2 and 5.3).
-!   It also fills in GRIB2 Data Representation Template 5.2 or 5.3 
+! abstract: this subroutine packs up a data field using a complex
+!   packing algorithm as defined in the grib2 documention.  it
+!   supports grib2 complex packing templates with or without
+!   spatial differences (i.e. drts 5.2 and 5.3).
+!   it also fills in grib2 data representation template 5.2 or 5.3 
 !   with the appropriate values.
 !
-! PROGRAM HISTORY LOG:
-! 2000-06-21  Gilbert
+! program history log:
+! 2000-06-21  gilbert
 !
-! USAGE:    CALL compack(fld,ndpts,idrsnum,idrstmpl,cpack,lcpack)
-!   INPUT ARGUMENT LIST:
-!     fld()    - Contains the data values to pack
-!     ndpts    - The number of data values in array fld()
-!     idrsnum  - Data Representation Template number 5.N
-!                Must equal 2 or 3.
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.2 or 5.3
-!                (1) = Reference value - ignored on input
-!                (2) = Binary Scale Factor
-!                (3) = Decimal Scale Factor
+! usage:    call compack(fld,ndpts,idrsnum,idrstmpl,cpack,lcpack)
+!   input argument list:
+!     fld()    - contains the data values to pack
+!     ndpts    - the number of data values in array fld()
+!     idrsnum  - data representation template number 5.n
+!                must equal 2 or 3.
+!     idrstmpl - contains the array of values for data representation
+!                template 5.2 or 5.3
+!                (1) = reference value - ignored on input
+!                (2) = binary scale factor
+!                (3) = decimal scale factor
 !                    .
 !                    .
-!                (7) = Missing value management
-!                (8) = Primary missing value
-!                (9) = Secondary missing value
+!                (7) = missing value management
+!                (8) = primary missing value
+!                (9) = secondary missing value
 !                    .
 !                    .
-!               (17) = Order of Spatial Differencing  ( 1 or 2 )
+!               (17) = order of spatial differencing  ( 1 or 2 )
 !                    .
 !                    .
 !
-!   OUTPUT ARGUMENT LIST: 
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.3
-!                (1) = Reference value - set by compack routine.
-!                (2) = Binary Scale Factor - unchanged from input
-!                (3) = Decimal Scale Factor - unchanged from input
+!   output argument list: 
+!     idrstmpl - contains the array of values for data representation
+!                template 5.3
+!                (1) = reference value - set by compack routine.
+!                (2) = binary scale factor - unchanged from input
+!                (3) = decimal scale factor - unchanged from input
 !                    .
 !                    .
-!     cpack    - The packed data field (character*1 array)
+!     cpack    - the packed data field (character*1 array)
 !     lcpack   - length of packed field cpack().
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: XL Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: xl fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -74,7 +74,7 @@
       bscale=2.0**real(-idrstmpl(2))
       dscale=10.0**real(idrstmpl(3))
 !
-!  Find max and min values in the data
+!  find max and min values in the data
 !
       rmax=fld(1)
       rmin=fld(1)
@@ -83,8 +83,8 @@
         if (fld(j).lt.rmin) rmin=fld(j)
       enddo
 !
-!  If max and min values are not equal, pack up field.
-!  If they are equal, we have a constant field, and the reference
+!  if max and min values are not equal, pack up field.
+!  if they are equal, we have a constant field, and the reference
 !  value (rmin) is the value for each point in the field and
 !  set nbits to 0.
 !
@@ -95,16 +95,16 @@
         allocate(gwidth(ndpts))
         allocate(glen(ndpts))
         !
-        !  Scale original data
+        !  scale original data
         !
-        if (idrstmpl(2).eq.0) then        !  No binary scaling
+        if (idrstmpl(2).eq.0) then        !  no binary scaling
            imin=nint(rmin*dscale)
            !imax=nint(rmax*dscale)
            rmin=real(imin)
            do j=1,ndpts
              ifld(j)=nint(fld(j)*dscale)-imin
            enddo
-        else                              !  Use binary scaling factor
+        else                              !  use binary scaling factor
            rmin=rmin*dscale
            !rmax=rmax*dscale
            do j=1,ndpts
@@ -112,7 +112,7 @@
            enddo
         endif
         !
-        !  Calculate Spatial differences, if using DRS Template 5.3
+        !  calculate spatial differences, if using drs template 5.3
         !
         if (idrsnum.eq.3) then        ! spatial differences
            if (idrstmpl(17).ne.1.and.idrstmpl(17).ne.2) idrstmpl(17)=2
@@ -157,7 +157,7 @@
            !   increase number of bits to even multiple of 8 ( octet )
            if (mod(nbitsd,8).ne.0) nbitsd=nbitsd+(8-mod(nbitsd,8))
            !
-           !  Store extra spatial differencing info into the packed
+           !  store extra spatial differencing info into the packed
            !  data section.
            !
            if (nbitsd.ne.0) then
@@ -194,10 +194,10 @@
                  iofst=iofst+nbitsd-1
               endif
            endif
-         !print *,'SDp ',ival1,ival2,minsd,nbitsd
+         !print *,'sdp ',ival1,ival2,minsd,nbitsd
         endif     !  end of spatial diff section
         !
-        !   Determine Groups to be used.
+        !   determine groups to be used.
         !
         if ( simple_alg ) then
            !  set group length to 10 :  calculate number of groups
@@ -210,7 +210,7 @@
               glen(ngroups)=itemp
            endif
         else
-           ! Use Dr. Glahn's algorithm for determining grouping.
+           ! use dr. glahn's algorithm for determining grouping.
            !
            kfildo=6
            minpk=10
@@ -223,7 +223,7 @@
            call pack_gp(kfildo,ifld,ndpts,missopt,minpk,inc,miss1,miss2,
      &                  jmin,jmax,lbit,glen,maxgrps,ngroups,ibit,jbit,
      &                  kbit,novref,lbitref,ier)
-           !print *,'SAGier = ',ier,ibit,jbit,kbit,novref,lbitref
+           !print *,'sagier = ',ier,ibit,jbit,kbit,novref,lbitref
            do ng=1,ngroups
               glen(ng)=glen(ng)+novref
            enddo
@@ -232,7 +232,7 @@
            deallocate(lbit)
         endif
         !  
-        !  For each group, find the group's reference value
+        !  for each group, find the group's reference value
         !  and the number of bits needed to hold the remaining values
         !
         n=1
@@ -253,7 +253,7 @@
            else
               gwidth(ng)=0
            endif
-           !   Subtract min from data
+           !   subtract min from data
            j=n
            do lg=1,glen(ng)
               ifld(j)=ifld(j)-gref(ng)
@@ -263,11 +263,11 @@
            n=n+glen(ng)
         enddo
         !  
-        !  Find max of the group references and calc num of bits needed 
+        !  find max of the group references and calc num of bits needed 
         !  to pack each groups reference value, then
         !  pack up group reference values
         !
-        !write(77,*)'GREFS: ',(gref(j),j=1,ngroups)
+        !write(77,*)'grefs: ',(gref(j),j=1,ngroups)
         igmax=maxval(gref(1:ngroups))
         if (igmax.ne.0) then
            temp=alog(real(igmax+1))/alog2
@@ -275,7 +275,7 @@
            call sbytes(cpack,gref,iofst,nbitsgref,0,ngroups)
            itemp=nbitsgref*ngroups
            iofst=iofst+itemp
-           !         Pad last octet with Zeros, if necessary,
+           !         pad last octet with zeros, if necessary,
            if (mod(itemp,8).ne.0) then
               left=8-mod(itemp,8)
               call sbyte(cpack,zero,iofst,left)
@@ -285,11 +285,11 @@
            nbitsgref=0
         endif
         !
-        !  Find max/min of the group widths and calc num of bits needed
+        !  find max/min of the group widths and calc num of bits needed
         !  to pack each groups width value, then
         !  pack up group width values
         !
-        !write(77,*)'GWIDTHS: ',(gwidth(j),j=1,ngroups)
+        !write(77,*)'gwidths: ',(gwidth(j),j=1,ngroups)
         iwmax=maxval(gwidth(1:ngroups))
         ngwidthref=minval(gwidth(1:ngroups))
         if (iwmax.ne.ngwidthref) then
@@ -301,7 +301,7 @@
            call sbytes(cpack,gwidth,iofst,nbitsgwidth,0,ngroups)
            itemp=nbitsgwidth*ngroups
            iofst=iofst+itemp
-           !         Pad last octet with Zeros, if necessary,
+           !         pad last octet with zeros, if necessary,
            if (mod(itemp,8).ne.0) then
               left=8-mod(itemp,8)
               call sbyte(cpack,zero,iofst,left)
@@ -312,11 +312,11 @@
            gwidth(1:ngroups)=0
         endif
         !
-        !  Find max/min of the group lengths and calc num of bits needed
+        !  find max/min of the group lengths and calc num of bits needed
         !  to pack each groups length value, then
         !  pack up group length values
         !
-        !write(77,*)'GLENS: ',(glen(j),j=1,ngroups)
+        !write(77,*)'glens: ',(glen(j),j=1,ngroups)
         ilmax=maxval(glen(1:ngroups-1))
         nglenref=minval(glen(1:ngroups-1))
         nglenlast=glen(ngroups)
@@ -329,7 +329,7 @@
            call sbytes(cpack,glen,iofst,nbitsglen,0,ngroups)
            itemp=nbitsglen*ngroups
            iofst=iofst+itemp
-           !         Pad last octet with Zeros, if necessary,
+           !         pad last octet with zeros, if necessary,
            if (mod(itemp,8).ne.0) then
               left=8-mod(itemp,8)
               call sbyte(cpack,zero,iofst,left)
@@ -340,27 +340,27 @@
            glen(1:ngroups)=0
         endif
         !
-        !  For each group, pack data values
+        !  for each group, pack data values
         !
-        !write(77,*)'IFLDS: ',(ifld(j),j=1,ndpts)
+        !write(77,*)'iflds: ',(ifld(j),j=1,ndpts)
         n=1
         ij=0
         do ng=1,ngroups
            glength=glen(ng)+nglenref
            if (ng.eq.ngroups ) glength=nglenlast
            grpwidth=gwidth(ng)+ngwidthref
-       !write(77,*)'NGP ',ng,grpwidth,glength,gref(ng)
+       !write(77,*)'ngp ',ng,grpwidth,glength,gref(ng)
            if ( grpwidth.ne.0 ) then
               call sbytes(cpack,ifld(n),iofst,grpwidth,0,glength)
               iofst=iofst+(grpwidth*glength)
            endif
            do kk=1,glength
               ij=ij+1
-       !write(77,*)'SAG ',ij,fld(ij),ifld(ij),gref(ng),bscale,rmin,dscale
+       !write(77,*)'sag ',ij,fld(ij),ifld(ij),gref(ng),bscale,rmin,dscale
            enddo
            n=n+glength
         enddo
-        !         Pad last octet with Zeros, if necessary,
+        !         pad last octet with zeros, if necessary,
         if (mod(iofst,8).ne.0) then
            left=8-mod(iofst,8)
            call sbyte(cpack,zero,iofst,left)
@@ -372,7 +372,7 @@
         if ( allocated(gref) ) deallocate(gref)
         if ( allocated(gwidth) ) deallocate(gwidth)
         if ( allocated(glen) ) deallocate(glen)
-      else           !   Constant field ( max = min )
+      else           !   constant field ( max = min )
         nbits=0
         lcpack=0
         nbitsgref=0
@@ -380,24 +380,24 @@
       endif
 
 !
-!  Fill in ref value and number of bits in Template 5.2
+!  fill in ref value and number of bits in template 5.2
 !
-      call mkieee(rmin,ref,1)   ! ensure reference value is IEEE format
+      call mkieee(rmin,ref,1)   ! ensure reference value is ieee format
 !      call gbyte(ref,idrstmpl(1),0,32)
       iref=transfer(ref,iref)
       idrstmpl(1)=iref
       idrstmpl(4)=nbitsgref
       idrstmpl(5)=0         ! original data were reals
       idrstmpl(6)=1         ! general group splitting
-      idrstmpl(7)=0         ! No internal missing values
-      idrstmpl(8)=0         ! Primary missing value
+      idrstmpl(7)=0         ! no internal missing values
+      idrstmpl(8)=0         ! primary missing value
       idrstmpl(9)=0         ! secondary missing value
-      idrstmpl(10)=ngroups          ! Number of groups
+      idrstmpl(10)=ngroups          ! number of groups
       idrstmpl(11)=ngwidthref       ! reference for group widths
       idrstmpl(12)=nbitsgwidth      ! num bits used for group widths
-      idrstmpl(13)=nglenref         ! Reference for group lengths
+      idrstmpl(13)=nglenref         ! reference for group lengths
       idrstmpl(14)=1                ! length increment for group lengths
-      idrstmpl(15)=nglenlast        ! True length of last group
+      idrstmpl(15)=nglenlast        ! true length of last group
       idrstmpl(16)=nbitsglen        ! num bits used for group lengths
       if (idrsnum.eq.3) then
          idrstmpl(18)=nbitsd/8      ! num bits used for extra spatial

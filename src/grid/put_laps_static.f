@@ -9,33 +9,33 @@
  
       include 'trigd.inc' 
 
-      integer   mkmax                   !This should be max as defined in calling routine.
+      integer   mkmax                   !this should be max as defined in calling routine.
       integer   ngrids
 
-      INTEGER  	IMAX,		        !I4time of data
-     1		JMAX,KMAX,	        !# cols, # rows, # fields
-     1		KDIM,i,j,k,		!K dimension of DATA array
-     1		ISTATUS
-C
-      REAL  	DATA(imax,jmax,mkmax),	!Raw data to be written
+      integer  	imax,		        !i4time of data
+     1		jmax,kmax,	        !# cols, # rows, # fields
+     1		kdim,i,j,k,		!k dimension of data array
+     1		istatus
+c
+      real  	data(imax,jmax,mkmax),	!raw data to be written
      1		grid_spacing,val,
      1          center_lat,center_lon,
      1          la1,lo1,la2,lo2
-C
-      CHARACTER*150     DIR_out		!Directory to be written to
-      CHARACTER*31	EXT		!File name ext (up to 31 chars)
-      CHARACTER*3	VAR(mkmax)	!3 letter ID of each field
-      CHARACTER*10	UNITS(mkmax)	!units of each field
-      CHARACTER*(*)	COMMENT(mkmax)	!Comments for each field
+c
+      character*150     dir_out		!directory to be written to
+      character*31	ext		!file name ext (up to 31 chars)
+      character*3	var(mkmax)	!3 letter id of each field
+      character*10	units(mkmax)	!units of each field
+      character*(*)	comment(mkmax)	!comments for each field
       character*(*)     model
-      character*80      origin          !Run time parameter - c80_description
-      character*10  c10_grid_f          ! Type of domain (nest7grid, wrfsi)
-      character*10  c10_grid_fname      ! Actual filename, cdl (nest7grid for now)
+      character*80      origin          !run time parameter - c80_description
+      character*10  c10_grid_f          ! type of domain (nest7grid, wrfsi)
+      character*10  c10_grid_fname      ! actual filename, cdl (nest7grid for now)
 !mp      character*9       laps_dom_file
       character*16       laps_dom_file
-      character*6       c6_maproj       !Map projection
-      character*200     cdataroot       !Dummy Variable used in find_domain_name.
-      character*2       cnest           !domain number (including MOAD)
+      character*6       c6_maproj       !map projection
+      character*200     cdataroot       !dummy variable used in find_domain_name.
+      character*2       cnest           !domain number (including moad)
       integer len,lf 
       integer avgelem
       integer parent_id,ratio_2_parent
@@ -48,7 +48,7 @@ C
 
       call find_domain_name(cdataroot,c10_grid_f,istatus)
       if(istatus.ne.1)then
-         print*,'Error returned from find_domain_name'
+         print*,'error returned from find_domain_name'
          return
       endif
       call s_len(c10_grid_f,lf)
@@ -66,7 +66,7 @@ C
       laps_dom_file = c10_grid_fname(1:len_fname)
 
       if(c10_grid_f(1:lf).eq.'wrfsi')then
-        IF (c6_maproj .ne. 'rotlat') THEN
+        if (c6_maproj .ne. 'rotlat') then
          indxt=51  !c-stagger
          indxl=12
          indxlat=7
@@ -78,17 +78,17 @@ C
          la2=data(imax-1,jmax-1,7)
          lo1=data(1,1,8)
          lo2=data(imax-1,jmax-1,8)
-        ELSE
+        else
          laps_dom_file = c10_grid_fname(1:len_fname)//'.rotlat'
-         avgelem=18 ! actually AVC, not AVG.
-        ENDIF
+         avgelem=18 ! actually avc, not avg.
+        endif
       else
         indxt=3  !laps analysis grid
         indxl=12
         indxlat=1
         indxlon=2
 
-c commented JRS 5-10-05
+c commented jrs 5-10-05
 c       la1=data(1,1,1)
 c       la2=data(imax,jmax,1)
 c       lo1=data(1,1,2)
@@ -100,17 +100,17 @@ c       lo2=data(imax,jmax,2)
         lo2=-999.0
       endif
 
-      print*,'Static domain file name: ',laps_dom_file
+      print*,'static domain file name: ',laps_dom_file
 
-!     Calculate deltax_cdf and deltay_cdf
+!     calculate deltax_cdf and deltay_cdf
       deltax_cdf = deltax
       deltay_cdf = deltay
       std_lat_cdf = std_lat
 
       if(c6_maproj .eq. 'plrstr')then
 
-! Per Steve Albers, standardize polar stereo grids to +/-60.0 degrees
-! LW this is only for writing Dx and Dy to the static file!
+! per steve albers, standardize polar stereo grids to +/-60.0 degrees
+! lw this is only for writing dx and dy to the static file!
             if(std_lat2 .eq. 90.)then
               call get_grid_spacing_actual(60.0,std_lon,deltax_cdf,
      1                                     istatus)
@@ -122,22 +122,22 @@ c       lo2=data(imax,jmax,2)
             endif
 
             if(istatus .ne. 1)then
-                write(6,*) ' Error calling get_grid_spacing_actual '
+                write(6,*) ' error calling get_grid_spacing_actual '
      1          ,'from put_laps_static'
                 return
             endif
 
             deltay_cdf = deltax_cdf
-            write(6,*)' Polar Stereographic grid identified'
-            write(6,*)' Dx and Dy for writing to static file:'
-            write(6,*)' Dx = deltax_cdf, Dy = deltay_cdf ',
+            write(6,*)' polar stereographic grid identified'
+            write(6,*)' dx and dy for writing to static file:'
+            write(6,*)' dx = deltax_cdf, dy = deltay_cdf ',
      1                 deltax_cdf, deltay_cdf
 
       endif
 
       write(6,*) dir_out(1:len),len
 	
-      write(6,*)' List of vars:'
+      write(6,*)' list of vars:'
       do i = 1,kmax
           write(6,11)i,var(i),comment(i)(1:60)
 11        format(i4,1x,a3,1x,a60)
@@ -158,7 +158,7 @@ c       lo2=data(imax,jmax,2)
      1                      urj,parent_id,ratio_2_parent,istatus)
       write(6,*) 'return wrt_laps_static ', istatus
       if(istatus .ne. 1)then
-          write (6,*)'ERROR wrt_laps_static: status = ',istatus
+          write (6,*)'error wrt_laps_static: status = ',istatus
       else
           write (6,*)'wrt_laps_static: status = ',istatus
 
@@ -169,7 +169,7 @@ c       lo2=data(imax,jmax,2)
           if(istatus .eq. 1)then
              write (6,*)'rd_laps_static: status = ',istatus
           else
-             write (6,*)'ERROR rd_laps_static: status = ',istatus
+             write (6,*)'error rd_laps_static: status = ',istatus
           endif
 
       endif
@@ -178,7 +178,7 @@ c       lo2=data(imax,jmax,2)
          call terrain_stats(imax,jmax,data(1,1,indxt),data(1,1,indxl)
      &,data(1,1,indxlat),data(1,1,indxlon),c10_grid_fname(1:lf),istat)
          if(istat.eq.0)then
-            print*,'Error: returned from terrain_stats'
+            print*,'error: returned from terrain_stats'
             istatus=0
          endif
       endif
@@ -208,7 +208,7 @@ c
       real          sumuadvt,sumvadvt,sumuvadvt
       real          avgul,avgvl,avguvl
       real          dxdyp2,dterdx2,dterdy2,gspacing,gspace2
-      real          dterdx,dterdy,uxdterdx,vxdterdy,uvXdter_tot
+      real          dterdx,dterdy,uxdterdx,vxdterdy,uvxdter_tot
       real          uconst,vconst
 
       real, allocatable :: dxpdy2(:)
@@ -219,7 +219,7 @@ c
       istat = 0
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.eq.0)then
-         print*,'Error: get_r_missing_data'
+         print*,'error: get_r_missing_data'
          return
       endif
 
@@ -276,7 +276,7 @@ c
 
       call get_grid_spacing(gspacing,istatus)
       if(istatus .eq. 0)then
-         print*,'Error: returned from get_grid_spacing'
+         print*,'error: returned from get_grid_spacing'
          return
       endif
       allocate (dxpdy2(icl))
@@ -308,7 +308,7 @@ c
           dterdy=(tera(i,j+1)-tera(i,j))/gspacing
           uxdterdx=dterdx*uconst
           vxdterdy=dterdy*vconst
-          uvXdter_tot=uxdterdx+vxdterdy
+          uvxdter_tot=uxdterdx+vxdterdy
 
 c land-only stats
           if(landmask(i,j) .eq. 1)then
@@ -327,18 +327,18 @@ c laplacian stats
 c terrain advection stats
              if(uxdterdx.gt.maxluadvt)maxluadvt=uxdterdx
              if(vxdterdy.gt.maxlvadvt)maxlvadvt=vxdterdy
-             if(uvXdter_tot.gt.maxluvadvt)maxluvadvt=uvXdter_tot
+             if(uvxdter_tot.gt.maxluvadvt)maxluvadvt=uvxdter_tot
              if(uxdterdx.lt.minluadvt)minluadvt=uxdterdx
              if(vxdterdy.lt.minlvadvt)minlvadvt=vxdterdy
-             if(uvXdter_tot.lt.minluvadvt)minluvadvt=uvXdter_tot
+             if(uvxdter_tot.lt.minluvadvt)minluvadvt=uvxdter_tot
 
              sumuadvt=sumuadvt+abs(uxdterdx)
              sumvadvt=sumvadvt+abs(vxdterdy)
-             sumuvadvt=sumuvadvt+abs(uvXdter_tot)
+             sumuvadvt=sumuvadvt+abs(uvxdter_tot)
 
              udterdx(icg)=uxdterdx
              vdterdy(icg)=vxdterdy
-             uvdter_tot(icg)=uvXdter_tot
+             uvdter_tot(icg)=uvxdter_tot
 
           endif
        enddo
@@ -353,27 +353,27 @@ c terrain advection stats
      &            ave,adev,sdev,var,skew,curt,
      &            istatus)
       if(istatus.eq.1)then
-         print*,'Error: returned from sub moment'
+         print*,'error: returned from sub moment'
          return
       endif
 
       print*
-      print*,'Terrain Statistics: # = ',ic
+      print*,'terrain statistics: # = ',ic
       print*,'-------------------'
-      print*,'Terrain: Max: ',maxt
-      print*,'Terrain: Min: ',mint
-      print*,'Terrain: Avg: ',avgt
-      print*,'Terrain: Average deviation: ', adev
-      print*,'Terrain: Standard deviation: ', sdev
-      print*,'Terrain: Variance: ', var
+      print*,'terrain: max: ',maxt
+      print*,'terrain: min: ',mint
+      print*,'terrain: avg: ',avgt
+      print*,'terrain: average deviation: ', adev
+      print*,'terrain: standard deviation: ', sdev
+      print*,'terrain: variance: ', var
       print*
 
       print*
-      print*,'Terrain Statistics - land only # = ',icl
+      print*,'terrain statistics - land only # = ',icl
       print*,'----------------------------------------'
-      print*,'Land Only: Max Terrain: ',maxtl
-      print*,'Land Only: Min Terrain: ',mintl
-      print*,'Land Only: Avg Terrain: ',avgtl
+      print*,'land only: max terrain: ',maxtl
+      print*,'land only: min terrain: ',mintl
+      print*,'land only: avg terrain: ',avgtl
       print*
 
       call moment(dxpdy2,icg,
@@ -381,60 +381,60 @@ c terrain advection stats
      &            istatus)
 
       print*
-      print*,'Terrain Laplacian (land only) Statistics '
-      print*,'Units: m of terrain change per km grid space'
+      print*,'terrain laplacian (land only) statistics '
+      print*,'units: m of terrain change per km grid space'
       print*,'---------------------------------------------'
-      print*,'Laplacian: Max Terrain: ',maxgl2
-      print*,'Laplacian: Min Terrain: ',mingl2
-      print*,'Laplacian: Avg Terrain: ',avggl2
-      print*,'Laplacian: Avg Deviation: ', adev
-      print*,'Laplacian: Std Deviation: ', sdev
-      print*,'Laplacian: Variance:  ', var
+      print*,'laplacian: max terrain: ',maxgl2
+      print*,'laplacian: min terrain: ',mingl2
+      print*,'laplacian: avg terrain: ',avggl2
+      print*,'laplacian: avg deviation: ', adev
+      print*,'laplacian: std deviation: ', sdev
+      print*,'laplacian: variance:  ', var
       print*
 
       call moment(udterdx,icg,
      &            ave,adev,sdev,var,skew,curt,
      &            istatus)
       print*
-      print*,'Terrain Advection (land only) '
-      print*,'Units: m**2/s of terrain change '
+      print*,'terrain advection (land only) '
+      print*,'units: m**2/s of terrain change '
       print*,'---------------------------------------------'
-      print*,'U-comp Terrain Adv: Max Terrain: ',maxluadvt
-      print*,'U-comp Terrain Adv: Min Terrain: ',minluadvt
-      print*,'U-comp Terrain Adv: Avg Terrain: ',ave
-      print*,'U-comp Terrain Adv: Avg Deviation: ', adev
-      print*,'U-comp Terrain Adv: Std Deviation: ', sdev
-      print*,'U-comp Terrain Adv: Variance:  ', var
+      print*,'u-comp terrain adv: max terrain: ',maxluadvt
+      print*,'u-comp terrain adv: min terrain: ',minluadvt
+      print*,'u-comp terrain adv: avg terrain: ',ave
+      print*,'u-comp terrain adv: avg deviation: ', adev
+      print*,'u-comp terrain adv: std deviation: ', sdev
+      print*,'u-comp terrain adv: variance:  ', var
       print*
 
       call moment(vdterdy,icg,
      &            ave,adev,sdev,var,skew,curt,
      &            istatus)
       print*
-      print*,'Terrain Advection (land only) '
-      print*,'Units: m**2/s of terrain change '
+      print*,'terrain advection (land only) '
+      print*,'units: m**2/s of terrain change '
       print*,'---------------------------------------------'
-      print*,'V-comp Terrain Adv: Max Terrain: ',maxlvadvt
-      print*,'V-comp Terrain Adv: Min Terrain: ',minlvadvt
-      print*,'V-comp Terrain Adv: Avg Terrain: ',ave
-      print*,'V-comp Terrain Adv: Avg Deviation: ', adev
-      print*,'V-comp Terrain Adv: Std Deviation: ', sdev
-      print*,'V-comp Terrain Adv: Variance:  ', var
+      print*,'v-comp terrain adv: max terrain: ',maxlvadvt
+      print*,'v-comp terrain adv: min terrain: ',minlvadvt
+      print*,'v-comp terrain adv: avg terrain: ',ave
+      print*,'v-comp terrain adv: avg deviation: ', adev
+      print*,'v-comp terrain adv: std deviation: ', sdev
+      print*,'v-comp terrain adv: variance:  ', var
       print*
 
       call moment(uvdter_tot,icg,
      &            ave,adev,sdev,var,skew,curt,
      &            istatus)
       print*
-      print*,'Terrain Advection (land only) '
-      print*,'Units: m**2/s of terrain change '
+      print*,'terrain advection (land only) '
+      print*,'units: m**2/s of terrain change '
       print*,'---------------------------------------------'
-      print*,'Total Terrain Adv: Max Terrain: ',maxluvadvt
-      print*,'Total Terrain Adv: Min Terrain: ',minluvadvt
-      print*,'Total Terrain Adv: Avg Terrain: ',ave
-      print*,'Total Terrain Adv: Avg Deviation: ', adev
-      print*,'Total Terrain Adv: Std Deviation: ', sdev
-      print*,'Total Terrain Adv: Variance:  ', var
+      print*,'total terrain adv: max terrain: ',maxluvadvt
+      print*,'total terrain adv: min terrain: ',minluvadvt
+      print*,'total terrain adv: avg terrain: ',ave
+      print*,'total terrain adv: avg deviation: ', adev
+      print*,'total terrain adv: std deviation: ', sdev
+      print*,'total terrain adv: variance:  ', var
       print*
 
       deallocate (dxpdy2)

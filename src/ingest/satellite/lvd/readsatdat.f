@@ -58,20 +58,20 @@ c
       character csat_id*6
       character csat_type*3
 c
-      INTEGER   record
-      INTEGER   ncid
-      INTEGER   rcode
-      INTEGER   ivalidTime
+      integer   record
+      integer   ncid
+      integer   rcode
+      integer   ivalidtime
       doubleprecision validtime
-      REAL    dummy,scale_img
-      REAL    la1_vis,la1_ir,la1_wv
-      REAL    lo1_vis,lo1_ir,lo1_wv
-      REAL    dx_vis,dx_ir,dx_wv
-      REAL    dy_vis,dy_ir,dy_wv
-      REAL    latin_vis,latin_ir,latin_wv
-      REAL    lov_vis,lov_ir,lov_wv
+      real    dummy,scale_img
+      real    la1_vis,la1_ir,la1_wv
+      real    lo1_vis,lo1_ir,lo1_wv
+      real    dx_vis,dx_ir,dx_wv
+      real    dy_vis,dy_ir,dy_wv
+      real    latin_vis,latin_ir,latin_wv
+      real    lov_vis,lov_ir,lov_wv
 
-      write(6,*)' Subroutine readsatdat...',csat_type,' ',csat_id
+      write(6,*)' subroutine readsatdat...',csat_type,' ',csat_id
       write(6,*)' nelemir/nlinesir = ',nelemir,nlinesir               
       write(6,*)' nelemvis/nlinesvis = ',nelemvis,nlinesvis               
 
@@ -91,7 +91,7 @@ c
                n=index(c_filename,' ')
             elseif(csat_type.eq.'rll')then
                n=index(c_dir_path(1),' ')-1
-               if(trim(csat_id)     .eq. 'mtsat' .OR.
+               if(trim(csat_id)     .eq. 'mtsat' .or.
      &                 csat_id(1:3) .eq. 'him'        )then ! himawari
                  if(trim(c_type(j,i)) .eq. '10p')then
                    c_filename=c_dir_path(1)(1:n)//c_fname_data(i)//
@@ -119,18 +119,18 @@ c
      &                    '_'//c_type(j,i)
             endif
             n=index(c_filename,' ')
-            print*,'Reading: ',c_filename(1:n)
+            print*,'reading: ',c_filename(1:n)
 
-            rcode=NF_OPEN(c_filename,NF_NOWRITE,NCID)
+            rcode=nf_open(c_filename,nf_nowrite,ncid)
             if(rcode.ne.nf_noerr)then
-                write(6,*)'File open error: ',rcode
+                write(6,*)'file open error: ',rcode
                 istatus=-1
                 return
             endif
 
             if(csat_type .eq. 'rll')then         !check for lat/lon arrays                
-               write(6,*)' Checking for lat/lon arrays in readsatdat'        
-               write(6,*)' UNDER CONSTRUCTION'                  
+               write(6,*)' checking for lat/lon arrays in readsatdat'        
+               write(6,*)' under construction'                  
             endif
 
             if(ispec.ne.1.and.ispec.ne.3)then    !check for visible and water vapor
@@ -143,15 +143,15 @@ c
      &                    ir_image,scale_img,
      &                    image_lat_ir,image_lon_ir,
      &                    la1_ir,lo1_ir,
-     &                    Dx_ir,Dy_ir,
-     &                    Latin_ir,Lov_ir,
-     &                    ivalidTime,
+     &                    dx_ir,dy_ir,
+     &                    latin_ir,lov_ir,
+     &                    ivalidtime,
      &                    ncid,
      &                    istatus_ir)
                if(istatus_ir.eq.1)then
-                  write(6,*)'Successful return from readcdf'
+                  write(6,*)'successful return from readcdf'
                else
-                  Write(6,*)'readcdf NOT Successful!!'
+                  write(6,*)'readcdf not successful!!'
                   istatus=-1
                   goto 125
                endif
@@ -159,8 +159,8 @@ c
 
 cisido          
 		write(6,*)'la1_ir',la1_ir,'lo1_ir',lo1_ir,
-     &                     'Dx_ir',Dx_ir,'Dy_ir',Dy_ir,
-     &                     'Latin_ir',Latin_ir,'Lov_ir',Lov_ir 
+     &                     'dx_ir',dx_ir,'dy_ir',dy_ir,
+     &                     'latin_ir',latin_ir,'lov_ir',lov_ir 
 cisid
 
 c
@@ -182,24 +182,24 @@ c
      &                    vis_image,scale_img,
      &                    image_lat_ir,image_lon_ir,
      &                    la1_vis,lo1_vis,
-     &                    Dx_vis,Dy_vis,
-     &                    Latin_vis,Lov_vis,
-     &                    ivalidTime,
+     &                    dx_vis,dy_vis,
+     &                    latin_vis,lov_vis,
+     &                    ivalidtime,
      &                    ncid,
      &                    istatus_vis)
                if(istatus_vis.eq.1)then
-                  write(6,*)'Successful return from readcdf'
+                  write(6,*)'successful return from readcdf'
                   call move(vis_image,image_vis(1,1,i),nelemvis,
      &                      nlinesvis)
                else
-                  Write(6,*)'readcdf NOT Successful!!'
+                  write(6,*)'readcdf not successful!!'
                   istatus=-1
                endif
 
 cisido
                write(6,*)'la1_vis',la1_vis,'lo1_vis',lo1_vis,
-     &                   'Dx_vis',Dx_vis,'Dy_vis',Dy_vis,
-     &                   'Latin_vis',Latin_vis,'Lov_vis',Lov_vis
+     &                   'dx_vis',dx_vis,'dy_vis',dy_vis,
+     &                   'latin_vis',latin_vis,'lov_vis',lov_vis
 cisid
 
 c
@@ -215,24 +215,24 @@ c
      &                    wv_image,scale_img,
      &                    image_lat_ir,image_lon_ir,
      &                    la1_wv,lo1_wv,
-     &                    Dx_wv,Dy_wv,
-     &                    Latin_wv,Lov_wv,
-     &                    ivalidTime,
+     &                    dx_wv,dy_wv,
+     &                    latin_wv,lov_wv,
+     &                    ivalidtime,
      &                    ncid,
      &                    istatus_wv)
                if(istatus_wv.eq.1)then
-                  write(6,*)'Successful return from readcdf'
+                  write(6,*)'successful return from readcdf'
                   call move(wv_image,image_67(1,1,i),nelemwv,
      &                      nlineswv)
                else
-                  Write(6,*)'readcdf NOT Successful!!'
+                  write(6,*)'readcdf not successful!!'
                   istatus=-1
                endif
 
 cisido
                 write(6,*)'la1_wv',la1_wv,'lo1_wv',lo1_wv,
-     &                     'Dx_wv',Dx_wv,'Dy_wv',Dy_wv,
-     &                     'Latin_wv',Latin_wv,'Lov_wv',Lov_wv
+     &                     'dx_wv',dx_wv,'dy_wv',dy_wv,
+     &                     'latin_wv',latin_wv,'lov_wv',lov_wv
 cisid
 
 
@@ -244,7 +244,7 @@ c load vis attributes
 c
             endif
 
-            rcode= NF_CLOSE(ncid)
+            rcode= nf_close(ncid)
 
 125      enddo
       enddo

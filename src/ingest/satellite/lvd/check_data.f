@@ -5,7 +5,7 @@ c
        icnt = 0
        istatus = 0       ! error return
 c
-       write(6,*)'Subroutine check - r_missing_data is ',r_missing_data
+       write(6,*)'subroutine check - r_missing_data is ',r_missing_data
 
        do j=1,ny_l
        do i=1,nx_l
@@ -45,7 +45,7 @@ c------------------------------------------------------------------
       real thresh
 
       print*
-      print*,'Computing field ave: '
+      print*,'computing field ave: '
 
       call get_r_missing_data(r_missing_data,istatus)
 
@@ -66,14 +66,14 @@ c------------------------------------------------------------------
       if(nn.gt.0)then
          ave=btempsum/nn
          print*,'------------------------------------'
-         print*,'Field max:  ',rmxbtemp,' (K)'
-         print*,'Field min:  ',rmnbtemp,' (K)'
-         print*,'Field ave:  ',ave, ' (K)'
-c            print*,'Field sdev: ',sdev,' (K)'
-c            print*,'Field adev: ',adev,' (K)'
+         print*,'field max:  ',rmxbtemp,' (k)'
+         print*,'field min:  ',rmnbtemp,' (k)'
+         print*,'field ave:  ',ave, ' (k)'
+c            print*,'field sdev: ',sdev,' (k)'
+c            print*,'field adev: ',adev,' (k)'
          print*,'------------------------------------'
       else
-         print*,'No Stats computed: missing data'
+         print*,'no stats computed: missing data'
       endif
       print*
 

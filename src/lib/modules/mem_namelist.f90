@@ -1,22 +1,22 @@
-Module mem_namelist
+module mem_namelist
 
 include 'lapsparms.for'
 
-!       Globally used variables that are independent of the namelists
+!       globally used variables that are independent of the namelists
 !       character(len=200) :: generic_data_root, cstaticdir, grid_fnam_common
 
-!       Declarations for namelist variables
+!       declarations for namelist variables
         integer    iflag_lapsparms
         real       max_radar_files_nl   ! max_radar_files is in lapsparms.for
-        real       PRESSURE_INTERVAL_L
-        real       PRESSURE_0_L
+        real       pressure_interval_l
+        real       pressure_0_l
         integer    nk_laps
         real       standard_latitude
         real       standard_latitude2
         real       standard_longitude
-        integer    NX_L
-        integer    NY_L
-        integer    I_PERIMETER
+        integer    nx_l
+        integer    ny_l
+        integer    i_perimeter
         real grid_spacing_m
         real grid_cen_lat
         real grid_cen_lon
@@ -27,7 +27,7 @@ include 'lapsparms.for'
         integer i2_missing_data
         integer iverbose
         real    r_missing_data
-        integer  MAX_RADARS
+        integer  max_radars
         real ref_base
         real ref_base_useable
         real r_hybrid_first_gate
@@ -36,7 +36,7 @@ include 'lapsparms.for'
         real hydrometeor_scale_cld
         real solalt_thr_vis
         integer  maxstns
-        integer  N_PIREP
+        integer  n_pirep
         integer max_snd_grid
         integer max_snd_levels
         real redp_lvl
@@ -50,7 +50,7 @@ include 'lapsparms.for'
         integer iwrite_output
         integer i_offset_radar
 
-!       Aerosol species are urban, dust, smoke, seasalt, xxxxx
+!       aerosol species are urban, dust, smoke, seasalt, xxxxx
         integer, parameter :: nasp=5
         real aod_sp(nasp),frac_asp(nasp),aod_asy_sp(3,3,nasp)
         real aod,aod_bin(3),aod_asy(3,3),fcterm,aod_ha,ht_ha(4),ssa(3)
@@ -98,15 +98,15 @@ include 'lapsparms.for'
         logical*1    l_superob_barnes, l_mosaic_sat, l_fsf_gridgen
 
         common  /lapsparms/ iflag_lapsparms &
-        ,max_radar_files_nl,PRESSURE_INTERVAL_L,PRESSURE_0_L &
+        ,max_radar_files_nl,pressure_interval_l,pressure_0_l &
         ,nk_laps,standard_latitude,standard_latitude2        &
-        ,standard_longitude,NX_L, NY_L, I_PERIMETER          &
+        ,standard_longitude,nx_l, ny_l, i_perimeter          &
         ,grid_spacing_m,grid_cen_lat,grid_cen_lon            &
         ,earth_radius                                        &
         ,laps_cycle_time                                     &
-        ,i2_missing_data, r_missing_data, MAX_RADARS         &
+        ,i2_missing_data, r_missing_data, max_radars         &
         ,ref_base,ref_base_useable,r_hybrid_first_gate       &
-        ,maxstns,N_PIREP                                     &
+        ,maxstns,n_pirep                                     &
         ,max_snd_grid,max_snd_levels                         &
         ,redp_lvl,prtop                                      &
         ,vert_rad_meso,vert_rad_sao                          &
@@ -196,14 +196,14 @@ character(len=256) ::  path_to_gvap12, path_to_gvap10, path_to_gps, path2covar
 logical ::  hotstart, balance, make_sfc_uv 
 character(len=16) :: output_format(10)
 real ::  snow_thresh, lwc2vapor_thresh,rai_frac, sno_frac
-         ! RAMS processing variables
+         ! rams processing variables
 real ::  sfcinf
 character(len=256) :: var_prefix
 
 
 
 
-Contains
+contains
 
 !-------------------------------------------------------------------
 
@@ -219,10 +219,10 @@ implicit none
 character(len=*), intent(in) :: namelist_name, filename
 
 
-namelist /lapsparms_NL/ iflag_lapsparms &
-                  ,max_radar_files_nl,PRESSURE_INTERVAL_L &
+namelist /lapsparms_nl/ iflag_lapsparms &
+                  ,max_radar_files_nl,pressure_interval_l &
                   ,nk_laps,standard_latitude,standard_latitude2    &    
-                  ,standard_longitude,NX_L, NY_L, I_PERIMETER &
+                  ,standard_longitude,nx_l, ny_l, i_perimeter &
                   ,l_compress_radar,l_dual_pol,l_use_tamdar,l_3dvar &
                   ,l_accum_fg, l_accum_radar, l_accum_gauge &
                   ,l_superob_barnes, l_mosaic_sat &
@@ -231,11 +231,11 @@ namelist /lapsparms_NL/ iflag_lapsparms &
                   ,laps_cycle_time,precip_cycle_time &
                   ,model_cycle_time, model_fcst_intvl, model_fcst_len &
                   ,purge_time &
-                  ,i2_missing_data, iverbose, r_missing_data, MAX_RADARS, i_offset_radar &
+                  ,i2_missing_data, iverbose, r_missing_data, max_radars, i_offset_radar &
                   ,aod,aod_bin,aod_asy,fcterm,aod_ha,ht_ha,ssa,aero_scaleht,o3_du,h_o3,d_o3 &
                   ,fcterm_a,angstrom_exp_a &
                   ,ref_base,ref_base_useable,r_hybrid_first_gate &
-                  ,maxstns,N_PIREP &
+                  ,maxstns,n_pirep &
                   ,max_snd_grid,max_snd_levels,redp_lvl,prtop &
                   ,hydrometeor_scale_pcp,hydrometeor_scale_cld,solalt_thr_vis &
                   ,vert_rad_meso,vert_rad_sao &
@@ -316,8 +316,8 @@ namelist/lapsprep_nl/ var_prefix, sfcinf, hotstart, balance  &
                   
 
 print*
-print*,'======> Read_namelist_laps: ',trim(namelist_name)
-print*,'======>          File_name: ',trim(filename)
+print*,'======> read_namelist_laps: ',trim(namelist_name)
+print*,'======>          file_name: ',trim(filename)
 
 ! open the namelist file name
 
@@ -325,33 +325,33 @@ open (12, file=filename, status='old')
 
 ! read the requested namelist
 if (namelist_name == 'ilaps_control') then
-   ! Set some default values
+   ! set some default values
 !  proc_grids = 0
 
-   ! Read ILAPS options information
+   ! read ilaps options information
 !  read(12,ilaps_control)
 
-elseif (namelist_name == 'RAMS') then
-   ! Read RAMS grid point information
-!  open(1,status='OLD',file=rams_grid_input_file)
+elseif (namelist_name == 'rams') then
+   ! read rams grid point information
+!  open(1,status='old',file=rams_grid_input_file)
 !  read(1,model_grids)
 !  close(1)
    
-   ! Since there is more stuff in the LAPS nest7parm file, read this also. 
-   !  Then overwrite LAPS grid params with RAMS grid params later.
-   !open(1,status='OLD',file=laps_grid_input_file)
-   !open(1,status='OLD',file=filename)
-   print*,'======> Reading namelist: lapsparms_nl',nk_laps,nx_l,ny_l
+   ! since there is more stuff in the laps nest7parm file, read this also. 
+   !  then overwrite laps grid params with rams grid params later.
+   !open(1,status='old',file=laps_grid_input_file)
+   !open(1,status='old',file=filename)
+   print*,'======> reading namelist: lapsparms_nl',nk_laps,nx_l,ny_l
    read(12,lapsparms_nl)
-   print*,'======> Reading namelist: lapsparms_nl',nk_laps,nx_l,ny_l
+   print*,'======> reading namelist: lapsparms_nl',nk_laps,nx_l,ny_l
    !close(1)
    
-elseif (namelist_name == 'LAPS') then
-   ! Set some default values
+elseif (namelist_name == 'laps') then
+   ! set some default values
 !  proc_grids = 0 ; proc_grids(1) = 1 
    
-   ! Read LAPS grid point information
-   !open(1,status='OLD',file=laps_grid_input_file)
+   ! read laps grid point information
+   !open(1,status='old',file=laps_grid_input_file)
    read(12,lapsparms_nl)
    !close(1)
    
@@ -361,9 +361,9 @@ elseif (namelist_name == 'pressures') then
 elseif (namelist_name == 'lapsparms') then
 
 !  default values
-   earth_radius = 6370000. ! WRF value
-   lvl_coord_cdf = 'HPA'
-   prtop = 10000.          ! 100mb for SIGMA_P grid
+   earth_radius = 6370000. ! wrf value
+   lvl_coord_cdf = 'hpa'
+   prtop = 10000.          ! 100mb for sigma_p grid
    l_superob_barnes = .false.
    l_mosaic_sat     = .false.
    l_dual_pol       = .false.
@@ -377,14 +377,14 @@ elseif (namelist_name == 'lapsparms') then
    aero_scaleht = 1500.    ! default aerosol scale height (m)
    fcterm = 0.05           ! range from 0.00 to 0.09 for large aerosols
                            ! corresponding phase function peak from 20-110
-   fcterm_a(:) = -99.      ! coarse model term for pair of DHG functions (each wavelength - flag value)
+   fcterm_a(:) = -99.      ! coarse model term for pair of dhg functions (each wavelength - flag value)
    aod_ha = .004           ! high altitude aerosol optical depth
    ht_ha(1)=13000.; ht_ha(2)=13000.; ht_ha(3)=25000.; ht_ha(4)=31000.
    o3_du = 300.
    h_o3 = 22000.
    d_o3 = 11000.
 
-!  Single scattering albedo for aerosols
+!  single scattering albedo for aerosols
    ssa(1) = .90  ; ssa(2) = .90 ; ssa(3) = .90 ! non-dust
 !  ssa(1) = .92  ; ssa(2) = .92 ; ssa(3) = .92 ! urban
 !  ssa(1) = .99  ; ssa(2) = .99 ; ssa(3) = .99 ! non-absorbing (sea salt)
@@ -392,7 +392,7 @@ elseif (namelist_name == 'lapsparms') then
 !  ssa(1) = .95  ; ssa(2) = .85 ; ssa(3) = .75 ! smoke
 
 !  fraction of aerosols in each bin & asymmetry factor
-!  Factor of 2 back scatter increase from minimum, peak of 50
+!  factor of 2 back scatter increase from minimum, peak of 50
 !  aod_bin(1) = 0.000 
 !  aod_bin(2) = 0.987 
 !  aod_bin(3) = 0.013 
@@ -401,104 +401,104 @@ elseif (namelist_name == 'lapsparms') then
 
 !-------------------------------------------------------------------------   
 
-!  Urban Aerosol Species Default Values
+!  urban aerosol species default values
 
-!  Coarse mode aerosols (rgb)
+!  coarse mode aerosols (rgb)
    aod_asy_sp(1,1,1) = +0.957 ; aod_asy_sp(1,2,1) = +0.962 ; aod_asy_sp(1,3,1) = +0.967
 
-!  Fine mode aerosols (rgb)
+!  fine mode aerosols (rgb)
    aod_asy_sp(2,1,1) = +0.49  ; aod_asy_sp(2,2,1) = +0.50  ; aod_asy_sp(2,3,1) = +0.51 
 
-!  Backscattering aerosols
+!  backscattering aerosols
    aod_asy_sp(3,:,1) = +0.55 
 
 !-------------------------------------------------------------------------   
 
-!  Dust Aerosol Species Default Values
+!  dust aerosol species default values
 
-!  Coarse mode aerosols (rgb)
+!  coarse mode aerosols (rgb)
    aod_asy_sp(1,1,2) = +0.957 ; aod_asy_sp(1,2,2) = +0.962 ; aod_asy_sp(1,3,2) = +0.967
 
-!  Fine mode aerosols (rgb)
+!  fine mode aerosols (rgb)
    aod_asy_sp(2,1,2) = +0.49  ; aod_asy_sp(2,2,2) = +0.50  ; aod_asy_sp(2,3,2) = +0.51 
 
-!  Backscattering aerosols
+!  backscattering aerosols
    aod_asy_sp(3,:,2) = +0.55 
 
 !-------------------------------------------------------------------------   
 
-!  Smoke Aerosol Species Default Values
+!  smoke aerosol species default values
 
-!  Coarse mode aerosols (rgb)
+!  coarse mode aerosols (rgb)
    aod_asy_sp(1,1,3) = +0.957 ; aod_asy_sp(1,2,3) = +0.962 ; aod_asy_sp(1,3,3) = +0.967
 
-!  Fine mode aerosols (rgb)
+!  fine mode aerosols (rgb)
    aod_asy_sp(2,1,3) = +0.49  ; aod_asy_sp(2,2,3) = +0.50  ; aod_asy_sp(2,3,3) = +0.51 
 
-!  Backscattering aerosols
+!  backscattering aerosols
    aod_asy_sp(3,:,3) = +0.55 
 
 !-------------------------------------------------------------------------   
 
-!  Sea Salt Aerosol Species Default Values
+!  sea salt aerosol species default values
 
-!  Coarse mode aerosols (rgb)
+!  coarse mode aerosols (rgb)
    aod_asy_sp(1,1,4) = +0.957 ; aod_asy_sp(1,2,4) = +0.962 ; aod_asy_sp(1,3,4) = +0.967
 
-!  Fine mode aerosols (rgb)
+!  fine mode aerosols (rgb)
    aod_asy_sp(2,1,4) = +0.49  ; aod_asy_sp(2,2,4) = +0.50  ; aod_asy_sp(2,3,4) = +0.51 
 
-!  Backscattering aerosols
+!  backscattering aerosols
    aod_asy_sp(3,:,4) = +0.55 
 
 !-------------------------------------------------------------------------   
 
-!  xxxxx Aerosol Species Default Values
+!  xxxxx aerosol species default values
 
-!  Coarse mode aerosols (rgb)
+!  coarse mode aerosols (rgb)
    aod_asy_sp(1,1,5) = +0.957 ; aod_asy_sp(1,2,5) = +0.962 ; aod_asy_sp(1,3,5) = +0.967
 
-!  Fine mode aerosols (rgb)
+!  fine mode aerosols (rgb)
    aod_asy_sp(2,1,5) = +0.49  ; aod_asy_sp(2,2,5) = +0.50  ; aod_asy_sp(2,3,5) = +0.51 
 
-!  Backscattering aerosols
+!  backscattering aerosols
    aod_asy_sp(3,:,5) = +0.55 
 
 !-------------------------------------------------------------------------   
 !-------------------------------------------------------------------------   
 
-!  Composite Aerosols
+!  composite aerosols
 
-!  Coarse mode aerosols (rgb)
+!  coarse mode aerosols (rgb)
    aod_asy(1,1) = +0.957 ; aod_asy(1,2) = +0.962 ; aod_asy(1,3) = +0.967
 
-!  Fine mode aerosols (rgb)
+!  fine mode aerosols (rgb)
    aod_asy(2,1) = +0.49  ; aod_asy(2,2) = +0.50  ; aod_asy(2,3) = +0.51 
 
-!  Backscattering aerosols
+!  backscattering aerosols
    aod_asy(3,:) = +0.55 
 
-!  Factor of 10 back scatter increase from minimum
+!  factor of 10 back scatter increase from minimum
 !  aod_bin(1) = 0.70   ;   aod_asy(1) = +0.65  
 !  aod_bin(2) = 0.12   ;   aod_asy(2) = +0.95      
 !  aod_bin(3) = 0.18   ;   aod_asy(3) = -0.65      
 
-!  Factor of ~3 back scatter increase from minimum
+!  factor of ~3 back scatter increase from minimum
 !  aod_bin(1) = 0.80   ;   aod_asy(1) = +0.65  
 !  aod_bin(2) = 0.14   ;   aod_asy(2) = +0.95      
 !  aod_bin(3) = 0.06   ;   aod_asy(3) = -0.65      
 
-!  Original
+!  original
 !  aod_bin(1) = 0.85   ;   aod_asy(1) = +0.65  
 !  aod_bin(2) = 0.15   ;   aod_asy(2) = +0.95      
 !  aod_bin(3) = 0.00   ;   aod_asy(3) = -0.65      
 
    read (12, lapsparms_nl, err=901)
    write(6,1)nk_laps,nx_l,ny_l
-1  format(' ======> Read from namelist: lapsparms_nl',3i8)
-!  print*,'======> Read from namelist: lapsparms_nl',nk_laps,nx_l,ny_l
+1  format(' ======> read from namelist: lapsparms_nl',3i8)
+!  print*,'======> read from namelist: lapsparms_nl',nk_laps,nx_l,ny_l
    
-   ! QC the input variables if desired
+   ! qc the input variables if desired
    !  .
    !  .
    !  .
@@ -513,9 +513,9 @@ elseif (namelist_name == 'wind') then
 
    read (12, wind_nl, err=905)
    
-   ! QC the input variables if desired
+   ! qc the input variables if desired
    if(r0_barnes_max_m .le. 0)then
-       write(6,*)' Error in value of r0_barnes_max_m ',r0_barnes_max_m
+       write(6,*)' error in value of r0_barnes_max_m ',r0_barnes_max_m
        goto 905
    endif
 
@@ -523,7 +523,7 @@ elseif (namelist_name == 'sfc_anal') then
 
    read (12, surface_analysis, err=906)
    
-   ! QC the input variables if desired
+   ! qc the input variables if desired
    !  .
    !  .
    !  .
@@ -535,7 +535,7 @@ elseif (namelist_name == 'temp_anal') then
 
    read (12, temp_nl, err=907)
    
-   ! QC the input variables if desired
+   ! qc the input variables if desired
    !  .
    !  .
    !  .
@@ -551,7 +551,7 @@ elseif (namelist_name == 'cloud_anal') then
 
    read (12, cloud_nl, err=908)
    
-   ! QC the input variables if desired
+   ! qc the input variables if desired
    !  .
    !  .
    !  .
@@ -561,21 +561,21 @@ elseif (namelist_name == 'moisture_anal') then
 
    read (12, moisture_switch_nl)
    
-   ! QC the input variables if desired
+   ! qc the input variables if desired
    !  .
    !  .
    !  .
    !  .
 
 elseif (namelist_name == 'lapsprep') then
-   ! Set some default values
+   ! set some default values
    output_format = ' '
    
-   ! Read LAPSPREP info for RAMS-vfile processing
+   ! read lapsprep info for rams-vfile processing
    read(12,lapsprep_nl)
    
 else
-   print*,'Illegal namelist_name in read_namelist_laps:', trim(namelist_name)
+   print*,'illegal namelist_name in read_namelist_laps:', trim(namelist_name)
    stop 'read_namelist_laps: illegal namelist_name'
 endif
 
@@ -613,4 +613,4 @@ end subroutine
 
 !---------------------------------------------------------------------
 
-end Module
+end module

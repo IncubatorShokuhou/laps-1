@@ -1,45 +1,44 @@
-  SUBROUTINE saturate_ice_points(t,p,thresh,sh_m,rh_m)
+  subroutine saturate_ice_points(t, p, thresh, sh_m, rh_m)
 
-  ! Subroutine to saturate grid boxes with respect to ice 
+     ! subroutine to saturate grid boxes with respect to ice
 
-    IMPLICIT NONE
+     implicit none
 
-    ! Inputs:
+     ! inputs:
 
-    REAL, INTENT(IN)    :: t      ! Temperature (K)
-    REAL, INTENT(IN)    :: p      ! Pressure (Pa)
-    REAL, INTENT(IN)    :: thresh ! Saturation factor    
-              ! Set thresh to 1.0 to convert cloud ice up to
-              ! ice saturation
+     real, intent(in)    :: t      ! temperature (k)
+     real, intent(in)    :: p      ! pressure (pa)
+     real, intent(in)    :: thresh ! saturation factor
+     ! set thresh to 1.0 to convert cloud ice up to
+     ! ice saturation
 
-    ! Outputs:
-   
-    REAL, INTENT(OUT)   :: sh_m   ! Adjusted specific humidity
-    REAL, INTENT(OUT)   :: rh_m   ! Adjusted RH (%)
+     ! outputs:
 
-    ! Locals
+     real, intent(out)   :: sh_m   ! adjusted specific humidity
+     real, intent(out)   :: rh_m   ! adjusted rh (%)
 
-    REAL :: shsat,mr,mrsat,mrmax,tc,esi,esw,e
-    REAL, EXTERNAL :: ssh2,es,esice
+     ! locals
 
-    tc = t - 273.15
-  
-    ! Determine ice satuaration vapor pressure
-    esi = esice(tc)
+     real :: shsat, mr, mrsat, mrmax, tc, esi, esw, e
+     real, external :: ssh2, es, esice
 
-    ! Determine water saturation vapor pressure
-    esw = es(tc)
+     tc = t - 273.15
 
+     ! determine ice satuaration vapor pressure
+     esi = esice(tc)
 
-    ! Compute the e needed to reach thresh saturation wrt ice
-    e = thresh * esi
+     ! determine water saturation vapor pressure
+     esw = es(tc)
 
-    ! Compute rh wrt liquid for this new e
-    rh_m = e/esw * 100.
-    ! Compute saturated sh by seting e = esi in the
-    ! typical formula for q
+     ! compute the e needed to reach thresh saturation wrt ice
+     e = thresh*esi
 
-    sh_m = (0.622 * esi) / ( p - 0.378 * esi)
- 
-    RETURN
-  END SUBROUTINE saturate_ice_points
+     ! compute rh wrt liquid for this new e
+     rh_m = e/esw*100.
+     ! compute saturated sh by seting e = esi in the
+     ! typical formula for q
+
+     sh_m = (0.622*esi)/(p - 0.378*esi)
+
+     return
+  end subroutine saturate_ice_points

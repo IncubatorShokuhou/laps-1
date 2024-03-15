@@ -1,210 +1,208 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
 
-
-  SUBROUTINE CAPECIN (PSIG, TSIG, THETAESIG, THETASIG, &
-                      RHSIG, ZSIGFULL, &
-                      TPRS, LI, & 
-                      POSBUOYEN, NEGBUOYEN, K500, IMAX, JMAX, KSIG, KPRS)
+  subroutine capecin(psig, tsig, thetaesig, thetasig, &
+                     rhsig, zsigfull, &
+                     tprs, li, &
+                     posbuoyen, negbuoyen, k500, imax, jmax, ksig, kprs)
 
 !-----------------------------------------------------------------------
 !--
-!--   PURPOSE
+!--   purpose
 !--   =======
-!--   CALCULATE POSITIVE BUOYANT ENERGY (OR CONVECTIVE AVAILABLE
-!--   ENERGY) AND NEGATIVE BUOYANT ENERGY (OR CONVECTIVE INHIBITION).
+!--   calculate positive buoyant energy (or convective available
+!--   energy) and negative buoyant energy (or convective inhibition).
 !--
-!--   ALSO CALCULATE LIFTED INDEX.
+!--   also calculate lifted index.
 !--
-!--   REFERENCE
+!--   reference
 !--   =========
-!--   DOSWELL AND RASMUSSEN (1994), WEA AND FCSTING, P 625.
+!--   doswell and rasmussen (1994), wea and fcsting, p 625.
 !--
-!--   UPDATES
+!--   updates
 !--   =======
-!--   4 Jan 01  - Adapted from USAF Weather Agency routine
-!--               B. Shaw, NOAA/FSL
+!--   4 jan 01  - adapted from usaf weather agency routine
+!--               b. shaw, noaa/fsl
 !-----------------------------------------------------------------------
 
-      USE constants
-      IMPLICIT NONE
+     use constants
+     implicit none
 
-      INTEGER                     :: I
-      INTEGER,   INTENT(IN)       :: IMAX
-      INTEGER                     :: J
-      INTEGER,   INTENT(IN)       :: JMAX
-      INTEGER                     :: K
-      INTEGER,   INTENT(IN)       :: K500
-      INTEGER                     :: KMAX
-      INTEGER,   INTENT(IN)       :: KSIG
-      INTEGER,   INTENT(IN)       :: KPRS
-      REAL,      INTENT(OUT)      :: LI        ( imax , jmax )
-      REAL,      INTENT(OUT)      :: NEGBUOYEN ( imax , jmax )    
-      REAL,      INTENT(OUT)      :: POSBUOYEN ( imax , jmax )    
-      REAL                        :: PRSLCL
-      REAL,      INTENT(IN)       :: PSIG      ( imax , jmax , ksig )
-      REAL,      INTENT(IN)       :: RHSIG     ( imax , jmax , ksig )
-      REAL,      INTENT(IN)       :: THETASIG  ( imax , jmax , ksig )
-      REAL,      INTENT(IN)       :: THETAESIG ( imax , jmax , ksig )
-      REAL                        :: THW
-      REAL                        :: THWMAX
-      REAL,      EXTERNAL         :: TLCL
-      REAL                        :: TMPLCL
-      REAL                        :: TPARCEL
-      REAL,      INTENT(IN)       :: TPRS      ( imax , jmax , kprs )
-      REAL,      INTENT(IN)       :: TSIG      ( imax , jmax , ksig )
-      REAL,      EXTERNAL         :: WOBF
-      REAL,      INTENT(IN)       :: ZSIGFULL  ( imax , jmax , ksig + 1 )
-      REAL                        :: deltaz, dtheta, thetaparcel
-      REAL, EXTERNAL              :: potential_temp
-      REAL, PARAMETER             :: PREF = 1000.
-      REAL                        :: psave
-      LOGICAL                     :: compute_cin
-      REAL, ALLOCATABLE           :: buoy(:)
-      POSBUOYEN = 0.0
-      NEGBUOYEN = 0.0
-      ALLOCATE(buoy(ksig)) 
-      DO J = 1, JMAX
-        DO I = 1, IMAX
+     integer                     :: i
+     integer, intent(in)       :: imax
+     integer                     :: j
+     integer, intent(in)       :: jmax
+     integer                     :: k
+     integer, intent(in)       :: k500
+     integer                     :: kmax
+     integer, intent(in)       :: ksig
+     integer, intent(in)       :: kprs
+     real, intent(out)      :: li(imax, jmax)
+     real, intent(out)      :: negbuoyen(imax, jmax)
+     real, intent(out)      :: posbuoyen(imax, jmax)
+     real                        :: prslcl
+     real, intent(in)       :: psig(imax, jmax, ksig)
+     real, intent(in)       :: rhsig(imax, jmax, ksig)
+     real, intent(in)       :: thetasig(imax, jmax, ksig)
+     real, intent(in)       :: thetaesig(imax, jmax, ksig)
+     real                        :: thw
+     real                        :: thwmax
+     real, external         :: tlcl
+     real                        :: tmplcl
+     real                        :: tparcel
+     real, intent(in)       :: tprs(imax, jmax, kprs)
+     real, intent(in)       :: tsig(imax, jmax, ksig)
+     real, external         :: wobf
+     real, intent(in)       :: zsigfull(imax, jmax, ksig + 1)
+     real                        :: deltaz, dtheta, thetaparcel
+     real, external              :: potential_temp
+     real, parameter             :: pref = 1000.
+     real                        :: psave
+     logical                     :: compute_cin
+     real, allocatable           :: buoy(:)
+     posbuoyen = 0.0
+     negbuoyen = 0.0
+     allocate (buoy(ksig))
+     do j = 1, jmax
+        do i = 1, imax
 
-          THWMAX = -9999.0
+           thwmax = -9999.0
 
-          find_most_unstable: DO K = 1, KSIG
-
-!           ------------------------------------------------------------
-!           PICK THE MOST UNSTABLE PARCEL IN THE LOWEST 50 MB AS
-!           INDICATED BY THE SIGMA LEVEL WITH THE HIGHEST WET BULB
-!           POTENTIAL TEMPERATURE.  STORE INDEX IN KMAX.
-!           ------------------------------------------------------------
-
-            IF ( ((PSIG(I,J,1) - PSIG(I,J,K)) .LT. 50.0) ) THEN
-
-              THW = THETAESIG(I,J,K) - WOBF(THETAESIG(I,J,K) - T0)
-
-              IF (THW .GT. THWMAX) THEN
-                KMAX = K
-                THWMAX = THW
-              END IF
-
-            ELSE
-
-              EXIT find_most_unstable
-
-            END IF
-
-          ENDDO find_most_unstable
-
-!         --------------------------------------------------------------
-!         CALCULATE LIFTED INDEX BY LIFTING THE MOST UNSTABLE
-!         PARCEL.
-!         --------------------------------------------------------------
-
-          CALL THE2T (THETAESIG(I,J,KMAX), 500.0, TPARCEL)
-          LI(I,J)  = TPRS(I,J,K500) - TPARCEL
-    
-!         --------------------------------------------------------------
-!         CALCULATE THE TEMPERATURE AND PRESSURE OF THE LIFTING
-!         CONDENSATION LEVEL.
-!         --------------------------------------------------------------
-
-          TMPLCL = TLCL ( TSIG(I,J,KMAX), RHSIG(I,J,KMAX) )
-          PRSLCL = PSIG(I,J,KMAX) * (TMPLCL / TSIG(I,J,KMAX)) ** CPOR
-
-!         --------------------------------------------------------------
-!         CALCULATE THE BUOYANCY.
-!         --------------------------------------------------------------
-          posbuoyen(i,j) = 0.
-          negbuoyen(i,j) = 0.
-          DO K = KMAX, KSIG
+           find_most_unstable: do k = 1, ksig
 
 !           ------------------------------------------------------------
-!           ABOVE THE LCL, CALCULATE VIRTUAL TEMPERATURE OF THE
-!           PARCEL AS IT MOVES ALONG A MOIST ADIABAT.  BELOW THE
-!           LCL, LIFT PARCEL ALONG A DRY ADIABAT.
+!           pick the most unstable parcel in the lowest 50 mb as
+!           indicated by the sigma level with the highest wet bulb
+!           potential temperature.  store index in kmax.
 !           ------------------------------------------------------------
-            
-            IF (PSIG(I,J,K) .LE. PRSLCL) THEN
-              
-              CALL THE2T (THETAESIG(I,J,KMAX), PSIG(I,J,K), TPARCEL)
-            ELSE
-   
-              TPARCEL   = THETASIG(I,J,KMAX) /(PREF / PSIG(I,J,K)) ** KAPPA
 
-            END IF
+              if (((psig(i, j, 1) - psig(i, j, k)) .lt. 50.0)) then
 
-            
-            ! Compute the potential temperature of the parcel
-            thetaparcel = potential_temp(tparcel, psig(i,j,k)*100.)
-            dtheta = thetaparcel - thetasig(i,j,k)
-            deltaz = zsigfull(i,j,k+1) - zsigfull(i,j,k)
-            buoy(k) = deltaz * dtheta/thetasig(i,j,k)
-          ENDDO
-          
-          ! Now loop through the column again, partitioning the buoyency
-          ! into positive (CAPE) and negative (CIN) component.  We terminate
-          ! the contribution to CIN when/if a layer of CAPE greater than
-          ! 150 mb deep is found.
- 
-          compute_cin = .true.
-          psave = -100.
-          DO k = kmax, ksig
-            IF (buoy(k) .GT. 0.) THEN
-              IF (psave .LT. 0) THEN
-                psave = psig(i,j,k)
-              ELSE
-                IF ( (psave-psig(i,j,k)) .GT. 150.) THEN
-                  compute_cin = .false.
-                ENDIF
-              ENDIF
-              posbuoyen(i,j) = posbuoyen(i,j) + buoy(k)
-            ELSE IF (buoy(k).LT.0.) THEN
-              psave = -100.
-              IF (compute_cin) THEN
-                negbuoyen(i,j) = negbuoyen(i,j) + buoy(k)
-              ENDIF
-            ENDIF 
-          ENDDO
-        ENDDO
-      ENDDO
-    
-      posbuoyen = grav * posbuoyen
-      negbuoyen = grav * negbuoyen
- 
-      ! Cap the negative buoyancy to a maximum value of 700 J/kg
+                 thw = thetaesig(i, j, k) - wobf(thetaesig(i, j, k) - t0)
 
-      WHERE(negbuoyen .LT. -700) negbuoyen = -700. 
-      DEALLOCATE(buoy)
-      END SUBROUTINE CAPECIN
+                 if (thw .gt. thwmax) then
+                    kmax = k
+                    thwmax = thw
+                 end if
+
+              else
+
+                 exit find_most_unstable
+
+              end if
+
+           end do find_most_unstable
+
+!         --------------------------------------------------------------
+!         calculate lifted index by lifting the most unstable
+!         parcel.
+!         --------------------------------------------------------------
+
+           call the2t(thetaesig(i, j, kmax), 500.0, tparcel)
+           li(i, j) = tprs(i, j, k500) - tparcel
+
+!         --------------------------------------------------------------
+!         calculate the temperature and pressure of the lifting
+!         condensation level.
+!         --------------------------------------------------------------
+
+           tmplcl = tlcl(tsig(i, j, kmax), rhsig(i, j, kmax))
+           prslcl = psig(i, j, kmax)*(tmplcl/tsig(i, j, kmax))**cpor
+
+!         --------------------------------------------------------------
+!         calculate the buoyancy.
+!         --------------------------------------------------------------
+           posbuoyen(i, j) = 0.
+           negbuoyen(i, j) = 0.
+           do k = kmax, ksig
+
+!           ------------------------------------------------------------
+!           above the lcl, calculate virtual temperature of the
+!           parcel as it moves along a moist adiabat.  below the
+!           lcl, lift parcel along a dry adiabat.
+!           ------------------------------------------------------------
+
+              if (psig(i, j, k) .le. prslcl) then
+
+                 call the2t(thetaesig(i, j, kmax), psig(i, j, k), tparcel)
+              else
+
+                 tparcel = thetasig(i, j, kmax)/(pref/psig(i, j, k))**kappa
+
+              end if
+
+              ! compute the potential temperature of the parcel
+              thetaparcel = potential_temp(tparcel, psig(i, j, k)*100.)
+              dtheta = thetaparcel - thetasig(i, j, k)
+              deltaz = zsigfull(i, j, k + 1) - zsigfull(i, j, k)
+              buoy(k) = deltaz*dtheta/thetasig(i, j, k)
+           end do
+
+           ! now loop through the column again, partitioning the buoyency
+           ! into positive (cape) and negative (cin) component.  we terminate
+           ! the contribution to cin when/if a layer of cape greater than
+           ! 150 mb deep is found.
+
+           compute_cin = .true.
+           psave = -100.
+           do k = kmax, ksig
+              if (buoy(k) .gt. 0.) then
+                 if (psave .lt. 0) then
+                    psave = psig(i, j, k)
+                 else
+                    if ((psave - psig(i, j, k)) .gt. 150.) then
+                       compute_cin = .false.
+                    end if
+                 end if
+                 posbuoyen(i, j) = posbuoyen(i, j) + buoy(k)
+              else if (buoy(k) .lt. 0.) then
+                 psave = -100.
+                 if (compute_cin) then
+                    negbuoyen(i, j) = negbuoyen(i, j) + buoy(k)
+                 end if
+              end if
+           end do
+        end do
+     end do
+
+     posbuoyen = grav*posbuoyen
+     negbuoyen = grav*negbuoyen
+
+     ! cap the negative buoyancy to a maximum value of 700 j/kg
+
+     where (negbuoyen .lt. -700) negbuoyen = -700.
+     deallocate (buoy)
+  end subroutine capecin

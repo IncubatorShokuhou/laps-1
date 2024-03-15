@@ -9,51 +9,51 @@
       integer ntbg,istatus
       integer ivaltimes(ntbg)
       integer nf_fid,nf_vid,nf_status
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       istatus = 1
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', filename
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', filename
         return
       endif
 
-      nf_status = NF_INQ_VARID(nf_fid,'model',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_varid(nf_fid,'model',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
          print *,'in var model'
          return
       endif
-      nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,model)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      nf_status = nf_get_var_text(nf_fid,nf_vid,model)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
-      nf_status=NF_INQ_VARID(nf_fid,'valtimeMINUSreftime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      nf_status=nf_inq_varid(nf_fid,'valtimeminusreftime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
-      nf_status=NF_GET_VARA_INT(nf_fid,nf_vid,1,ntbg,ivaltimes)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      nf_status=nf_get_vara_int(nf_fid,nf_vid,1,ntbg,ivaltimes)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
         return
       endif
 
       if(model(1:3).ne.cmodel(1:3))then
-         print*,'Mismatch between model and cmodel'
+         print*,'mismatch between model and cmodel'
          print*,model,cmodel
       endif
 
@@ -95,62 +95,62 @@ C
       integer nattr
       integer nf_attid,nf_attnum
       character*13 fname9_to_wfo_fname13, fname13
-C
+c
       istatus = 0
       call s_len(cdfname,slen)
-C
-C Get size of n_valtimes
-C
+c
+c get size of n_valtimes
+c
 
       call get_nvaltimes_unidata(cdfname,n_valtimes,ivaltimes,istatus)
       if(istatus.ne.1) then
-         print *,'Error: get_nvaltimes '
+         print *,'error: get_nvaltimes '
          return
       endif
-C
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(cdfname,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN unidata'
+c
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(cdfname,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open unidata'
       endif
-C
-C Get everything for each variable
-C
+c
+c get everything for each variable
+c
       call s_len(cmodel,nclen)
  
       nvars = 6 
-      IF ( (cmodel(1:nclen) .EQ. 'RUC_ISO') .OR. 
-     +     (cmodel(1:nclen) .EQ. 'GFS_ISO') ) THEN
-        cvars(1)='Z               '
-        cvars(2)='RH              '
-        cvars(3)='T               '
+      if ( (cmodel(1:nclen) .eq. 'ruc_iso') .or. 
+     +     (cmodel(1:nclen) .eq. 'gfs_iso') ) then
+        cvars(1)='z               '
+        cvars(2)='rh              '
+        cvars(3)='t               '
         cvars(4)='u               ' 
         cvars(5)='v               '
         cvars(6)='omega           '
-      ELSEIF(cmodel(1:nclen) .EQ. 'RUC_HYB')  THEN
-        cvars(1)='Z_hybr          '
+      elseif(cmodel(1:nclen) .eq. 'ruc_hyb')  then
+        cvars(1)='z_hybr          '
         cvars(2)='hum_mix_hybr    '
         cvars(3)='vptmp_hybr      '
         cvars(4)='u_hybr          '
         cvars(5)='v_hybr          '
         cvars(6)='omega_hybr      '
-      ELSE
-        PRINT *, "Unsupported Unidata model: ", cmodel
+      else
+        print *, "unsupported unidata model: ", cmodel
         istatus = 0
         return
-      ENDIF
+      endif
 
       do i=1,nvars
 
-         nf_status = NF_INQ_VARID(nf_fid, cvars(i),nf_vid)
-         nf_status = NF_INQ_VAR(nf_fid,nf_vid,cvars(i)
+         nf_status = nf_inq_varid(nf_fid, cvars(i),nf_vid)
+         nf_status = nf_inq_var(nf_fid,nf_vid,cvars(i)
      +,itype,ndims,dimids,nattr)
          print *, cvars(i),nf_vid,ndims
          do j=1,ndims
-            nf_status = NF_INQ_DIMLEN(nf_fid,dimids(j),dimlen)
+            nf_status = nf_inq_dimlen(nf_fid,dimids(j),dimlen)
             idims(j,i)= dimlen
          enddo
 
@@ -171,8 +171,8 @@ C
       enddo
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
         return
       endif
@@ -205,54 +205,54 @@ c     l2=.false.
 c     inquire(file=cdfname,opened=l2)
 c     if(.not.l2)then
 
-      nf_status = NF_OPEN(cdfname,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'NF_OPEN: get_nvaltimes'
+      nf_status = nf_open(cdfname,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'nf_open: get_nvaltimes'
       endif
 
 c     endif
          
 c switched from n_valtimes to record to handle incomplete files
-c LW 7-9-03
-c     nf_status = NF_INQ_DIMID(nf_fid,'n_valtimes',nf_vid)
-      nf_status = NF_INQ_DIMID(nf_fid,'record',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c lw 7-9-03
+c     nf_status = nf_inq_dimid(nf_fid,'n_valtimes',nf_vid)
+      nf_status = nf_inq_dimid(nf_fid,'record',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim n_valtimes'
         return
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,nvaltimes)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,nvaltimes)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim n_valtimes'
         return
       endif
-      nf_status=NF_INQ_VARID(nf_fid,'valtime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      nf_status=nf_inq_varid(nf_fid,'valtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
-      ALLOCATE(ilocaltimes(nvaltimes))
-      nf_status=NF_GET_VARA_INT(nf_fid,nf_vid,1,nvaltimes,ilocaltimes)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      allocate(ilocaltimes(nvaltimes))
+      nf_status=nf_get_vara_int(nf_fid,nf_vid,1,nvaltimes,ilocaltimes)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
 
-      ! Get the reftimes
-      nf_status=NF_INQ_VARID(nf_fid,'reftime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      ! get the reftimes
+      nf_status=nf_inq_varid(nf_fid,'reftime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
-      nf_status=NF_GET_VARA_INT(nf_fid,nf_vid,1,nvaltimes,ireftimes)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
-         print *,'in NF_GET_VAR_ model '
+      nf_status=nf_get_vara_int(nf_fid,nf_vid,1,nvaltimes,ireftimes)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
+         print *,'in nf_get_var_ model '
          return
       endif
 
@@ -260,10 +260,10 @@ c     nf_status = NF_INQ_DIMID(nf_fid,'n_valtimes',nf_vid)
 
         ivaltimes(t) = (ilocaltimes(t) - ireftimes(t)) * 3600
       enddo
-      DEALLOCATE(ilocaltimes)
+      deallocate(ilocaltimes)
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-         print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+         print *, nf_strerror(nf_status)
          print *,'nf_close: get_nvaltimes'
          return
       endif
@@ -271,8 +271,8 @@ c     nf_status = NF_INQ_DIMID(nf_fid,'n_valtimes',nf_vid)
       istatus=1
       return
       end
-C
-C ------------------------------------------------------------
+c
+c ------------------------------------------------------------
       subroutine read_unidata_iso(cdfname,af,cmodel,
      .nxbg,nybg,nzbght,nzbgtp,nzbgsh,nzbguv,nzbgww,
      .prbght,prbgsh,prbguv,prbgww,
@@ -292,7 +292,7 @@ c     integer ncid, lenstr, ntp, nvdim, nvs, ndsize
 c     model_out=1  => lga
 c     model_out=2  => dprep
 
-      integer ndims ,dimids(NF_MAX_VAR_DIMS)
+      integer ndims ,dimids(nf_max_var_dims)
       integer itype,nattr
 
       integer nxbg,nybg
@@ -310,7 +310,7 @@ c     model_out=2  => dprep
 c
       real, intent(out)  ::   mslp(nxbg,nybg)
 
-c *** 3D Output arrays.
+c *** 3d output arrays.
 c
       real, intent(out)  :: prbght(nxbg,nybg,nzbght)
       real, intent(out)  :: prbgsh(nxbg,nybg,nzbgsh)
@@ -370,7 +370,7 @@ c
 c
 c -------------------------------------------------------
 
-      print*,'HERE: read_unidata_iso'
+      print*,'here: read_unidata_iso'
 
       istatus = 1
 
@@ -382,10 +382,10 @@ c -------------------------------------------------------
 c
       print*,'opening cdf file: ',cdfname(1:slen)
 
-      rcode = NF_OPEN(cdfname,NF_NOWRITE,ncid)
-      if(rcode.ne.NF_NOERR) then
-         print *, NF_STRERROR(rcode)
-         print *,'NF_OPEN ',cdfname(1:slen)
+      rcode = nf_open(cdfname,nf_nowrite,ncid)
+      if(rcode.ne.nf_noerr) then
+         print *, nf_strerror(rcode)
+         print *,'nf_open ',cdfname(1:slen)
          return
       endif
 
@@ -397,14 +397,14 @@ c
       enddo
       if(ivaltimes(n)/3600.ne.nn) then
 
-         print*,'ERROR: No record valid at requested time '
+         print*,'error: no record valid at requested time '
          print*,'ntbg/nn/af/n/ivaltimes(n) ',ntbg,' ',nn,' ',af,
      &' ',n,' ',ivaltimes(n)
 
-         rcode= NF_CLOSE(ncid)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR: ',cmodel
+         rcode= nf_close(ncid)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var: ',cmodel
             return
          endif
 
@@ -412,27 +412,27 @@ c
 
       else
 
-         print*,'Found valid record at ivaltime'
+         print*,'found valid record at ivaltime'
          print*,'ntbg/nn/af/n/ivaltimes(n) ',ntbg,' ',nn,' ',af,
      &' ',n,' ',ivaltimes(n) 
          print*
       endif
 
-      ! Get the pressure levels for this data
-      nf_status = NF_INQ_VARID(ncid,'level',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      ! get the pressure levels for this data
+      nf_status = nf_inq_varid(ncid,'level',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in level '
         istatus = 0
         return
       endif
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,prbg)
+      nf_status = nf_get_var_real(ncid,nf_vid,prbg)
      
-      ! Get index for 2m and 10m winds
+      ! get index for 2m and 10m winds
       ind2m = 1
       ind10m = 2
   
-      ! Set some indices
+      ! set some indices
       start(1)=1
       count(1)=nxbg
       start(2)=1
@@ -443,22 +443,22 @@ c
       count(4)=1
 
       print*,'read ht'
-      cvar='Z'
+      cvar='z'
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),ht,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (Z): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (z): ',cmodel
          else
-            print *,'Missing HT data detected: return'
+            print *,'missing ht data detected: return'
          endif
          print*
          return
       endif
 
 c
-c ****** Statements to fill tp.
+c ****** statements to fill tp.
 c
       start(1)=1
       count(1)=nxbg
@@ -470,23 +470,23 @@ c
       count(4)=1
 
       print*,'read tp'
-      cvar='T'
+      cvar='t'
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),tp,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (t): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (t): ',cmodel
          else
-            print *,'Missing T data detected: return'
+            print *,'missing t data detected: return'
          endif
          print*
          return
       endif
 
 c
-c ****** Statements to fill rh.                           
+c ****** statements to fill rh.                           
 c
       start(1)=1
       count(1)=nxbg
@@ -498,36 +498,36 @@ c
       count(4)=1
 
       print*,'read rh'
-      cvar='RH'
+      cvar='rh'
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),sh,start
      +     ,count,rcode)
      
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (rh): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (rh): ',cmodel
          else
-c          RH is missing above 100 mb in GFS
-           IF (cmodel .EQ. 'GFS_ISO') THEN
-            print *, "FILLING RH AT TOP LEVELS!"
+c          rh is missing above 100 mb in gfs
+           if (cmodel .eq. 'gfs_iso') then
+            print *, "filling rh at top levels!"
              do j=1,nybg
              do i=1,nxbg
              do k = 1,nzbgsh
-               if ((sh(i,j,k) .LT. 0.).OR. 
-     +             (sh(i,j,k) .GT. 200.)) THEN
+               if ((sh(i,j,k) .lt. 0.).or. 
+     +             (sh(i,j,k) .gt. 200.)) then
                  sh(i,j,k) = 1.0
                endif
              enddo
              enddo
              enddo
            else
-             print *,'Missing RH data detected: return'
+             print *,'missing rh data detected: return'
              return
            endif
          endif
       endif
 c
-c ****** Statements to fill uw. 
+c ****** statements to fill uw. 
 c
       start(1)=1
       count(1)=nxbg
@@ -543,19 +543,19 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),uw,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (uw): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (uw): ',cmodel
          else
-            print *,'Missing U data detected: return'
+            print *,'missing u data detected: return'
          endif
          print*
          return
       endif
 
 c
-c ****** Statements to fill vw.                           
+c ****** statements to fill vw.                           
 c
       start(1)=1
       count(1)=nxbg
@@ -571,18 +571,18 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),vw,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (vw): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (vw): ',cmodel
          else
-            print *,'Missing V data detected: return'
+            print *,'missing v data detected: return'
          endif
          print*
          return
       endif
 c
-c ****** Statements to fill ww.
+c ****** statements to fill ww.
 c
       start(1)=1
       count(1)=nxbg
@@ -598,33 +598,33 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),ww  
      +  ,start,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (ww): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (ww): ',cmodel
          else
-C           ww is missing above 100 mb in GFS
-           IF (cmodel .EQ. 'GFS_ISO') THEN
+c           ww is missing above 100 mb in gfs
+           if (cmodel .eq. 'gfs_iso') then
              do j=1,nybg
              do i=1,nxbg
              do k = 1,nzbgww
-               if ((ww(i,j,k) .LT. -1000.) .OR.
-     +             (ww(i,j,k) .GT. 1000)) THEN
+               if ((ww(i,j,k) .lt. -1000.) .or.
+     +             (ww(i,j,k) .gt. 1000)) then
                  ww(i,j,k) = 0.
                endif
              enddo
              enddo
              enddo
            else
-             print *,'Missing WW data detected: return'
-             print *,'Missing ww data detected: continue without'
-             print *,'Filling ww with 0.0'
+             print *,'missing ww data detected: return'
+             print *,'missing ww data detected: continue without'
+             print *,'filling ww with 0.0'
              ww(:,:,:) = 0.0
            endif
          endif
       endif
 
-C   Get 2m T and RH, 10m U and V
+c   get 2m t and rh, 10m u and v
       start(1)=1
       count(1)=nxbg
       start(2)=1
@@ -635,13 +635,13 @@ C   Get 2m T and RH, 10m U and V
       count(4)=1
       print*,'read tp_sfc'
       lcmpsfcq=.true.
-      cvar='T_fhg'
+      cvar='t_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,tp_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (tp_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (tp_sfc): ',cmodel
          endif
       endif
       start(1)=1
@@ -654,13 +654,13 @@ C   Get 2m T and RH, 10m U and V
       count(4)=1
       print*,'read ht_sfc'
       lcmpsfcq=.true.
-      cvar='Z_sfc'
+      cvar='z_sfc'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,ht_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (ht_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (ht_sfc): ',cmodel
          endif
       endif
 
@@ -674,13 +674,13 @@ C   Get 2m T and RH, 10m U and V
       count(4)=1
       print*,'read sh_sfc'
       lcmpsfcq=.true.
-      cvar='RH_fhg'
+      cvar='rh_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,sh_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (sh_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (sh_sfc): ',cmodel
          endif
       endif
 
@@ -697,10 +697,10 @@ C   Get 2m T and RH, 10m U and V
       cvar='u_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,uw_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (uw_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (uw_sfc): ',cmodel
          endif
       endif
 
@@ -717,10 +717,10 @@ C   Get 2m T and RH, 10m U and V
       cvar='v_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,vw_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (vw_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (vw_sfc): ',cmodel
          endif
       endif
 
@@ -740,16 +740,16 @@ c
 
       lcmpsfcq=.true.
       
-      cvar='P_sfc'
+      cvar='p_sfc'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,pr_sfc,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (p): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (p): ',cmodel
          endif
-         print *,'Missing sfc p data detected'
+         print *,'missing sfc p data detected'
          print*,' -> continue without; compute in sfcbkgd'
          lcmpsfcq=.false.
          print*
@@ -758,40 +758,40 @@ c        return
 c
 c get mslp (this field name differs from one model to the other)
 c
-      if(cmodel(1:3).eq.'RUC')THEN
-         cvar='Pm_msl'
+      if(cmodel(1:3).eq.'ruc')then
+         cvar='pm_msl'
       else
-         cvar='P_msl'
+         cvar='p_msl'
       endif
       call read_netcdf_real(ncid,cvar,nxbg*nybg,mslp
      +           ,start,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
         if(rcode.gt.-61)then
-          print *, NF_STRERROR(rcode)
-          print *,'in NF_GET_VAR (emsp): ',cmodel
+          print *, nf_strerror(rcode)
+          print *,'in nf_get_var (emsp): ',cmodel
         else
-          print*,'Error status returned from read_netcdf_real'
+          print*,'error status returned from read_netcdf_real'
         endif
-        print *,'Missing emsp data detected'
+        print *,'missing emsp data detected'
         print*
         return
       endif
 
 c
-c *** Close netcdf file.
+c *** close netcdf file.
 c
-      rcode= NF_CLOSE(ncid)
-      if(rcode.ne.NF_NOERR) then
-         print *, NF_STRERROR(rcode)
-         print *,'in NF_GET_VAR: ',cmodel
+      rcode= nf_close(ncid)
+      if(rcode.ne.nf_noerr) then
+         print *, nf_strerror(rcode)
+         print *,'in nf_get_var: ',cmodel
          return
       endif
 c
 ccc      endif
 
 c
-c *** Fill ouput arrays.
-c *** Convert rh to sh.
+c *** fill ouput arrays.
+c *** convert rh to sh.
 c
       print*,'load prbg arrays'
       do j=1,nybg
@@ -844,7 +844,7 @@ c
 
 
       if(ibdtp.gt.0.or.ibduv.gt.0)then
-         print*,'Found bad sfc data (tp/uv) ',ibdtp,ibduv
+         print*,'found bad sfc data (tp/uv) ',ibdtp,ibduv
          return
       endif
 
@@ -875,8 +875,8 @@ c
       enddo
 
       if(ibdht.gt.0.or.ibdtp.gt.0.or.ibduv.gt.0)then
-         print*,'Found bad 3d data (ht/t/uv) ',ibdht,ibdtp,ibduv
-         print*,'Return to read_bgdata'
+         print*,'found bad 3d data (ht/t/uv) ',ibdht,ibdtp,ibduv
+         print*,'return to read_bgdata'
          return
       endif
 
@@ -903,8 +903,8 @@ c
       print*,'done computing 3d sh'
 
       if(ibdsh.gt.0)then
-         print*,'Found bad rh 3d data',ibdsh
-         print*,'Return to read_bgdata'
+         print*,'found bad rh 3d data',ibdsh
+         print*,'return to read_bgdata'
          return
       endif
 
@@ -913,7 +913,7 @@ c this for dprep ... ingnore for now!
 c -----------------------------------
       if(.false. .and. model_out.eq.2) then
 c
-c Compute exner and convert temp to theta
+c compute exner and convert temp to theta
 c
          do k=1,nzbght
             do j=1,nybg
@@ -931,14 +931,14 @@ c
 
 
 c     if(istatus_211 .eq. 0) then
-c       print*, 'No valid data found for',fname, af
+c       print*, 'no valid data found for',fname, af
 c       return
 c     endif
 
 c      istatus = 1
 
       if(0.eq.1) then
- 900     print*,'ERROR: bad dimension specified in netcdf file'
+ 900     print*,'error: bad dimension specified in netcdf file'
          print*, (count(i),i=1,4)
          istatus=-1
       endif
@@ -947,263 +947,263 @@ c      istatus = 1
 
 c -----------------------------------------------------------
 
-      subroutine get_unidata_grid(filename,cmodel,NX,NY
-     &,StdLat1,StdLat2,Lov,La1,Lo1,La2,Lo2,Dx,Dy,gproj, istatus)
+      subroutine get_unidata_grid(filename,cmodel,nx,ny
+     &,stdlat1,stdlat2,lov,la1,lo1,la2,lo2,dx,dy,gproj, istatus)
 c
       implicit none
       include 'netcdf.inc'
 
-      real    StdLat1,StdLat2
-      real    Lov
-      real    La1,Lo1
-      real    La2,Lo2
-      real    Dx, Dy
+      real    stdlat1,stdlat2
+      real    lov
+      real    la1,lo1
+      real    la2,lo2
+      real    dx, dy
       character*2 gproj
       character*100 grid_type
-      integer  NX, NY, nf_fid, nf_vid, nf_status
+      integer  nx, ny, nf_fid, nf_vid, nf_status
       character filename*200
       character cmodel*(*)
       character*2, dimname
       integer istatus
 
       istatus = 0
-C
-C  Open netcdf File for reading
-C
-      print *, "OPENING:  ", trim(filename)
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', filename
+c
+c  open netcdf file for reading
+c
+      print *, "opening:  ", trim(filename)
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', filename
         return
       endif
-C
-C     Variable        NETCDF Long Name
-C     grid_type
-C
-      nf_status = NF_INQ_VARID(nf_fid,'grid_type',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c     grid_type
+c
+      nf_status = nf_inq_varid(nf_fid,'grid_type',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var grid_type'
       endif
-      nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,grid_type)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_get_var_text(nf_fid,nf_vid,grid_type)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var grid_type'
       endif
                                                                             
-      IF (grid_type(1:7) .EQ. "Lambert") THEN
-        gproj = "LC"
-      ELSEIF(grid_type(1:18) .EQ. "Latitude/Longitude") THEN
-        gproj = "LL"
-      ELSE
-        print *, "Found unsupported grid_type:",trim(grid_type)
-        print *, "In get_unidata_grid"
+      if (grid_type(1:7) .eq. "lambert") then
+        gproj = "lc"
+      elseif(grid_type(1:18) .eq. "latitude/longitude") then
+        gproj = "ll"
+      else
+        print *, "found unsupported grid_type:",trim(grid_type)
+        print *, "in get_unidata_grid"
         istatus = 0
         return
-      ENDIF
+      endif
 
-C     Nx
-      IF (gproj .NE. "LL") THEN
-        dimname = "Nx"
-      ELSE
-        dimname = "Ni"
-      ENDIF
-      nf_status = NF_INQ_VARID(nf_fid,dimname,nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c     nx
+      if (gproj .ne. "ll") then
+        dimname = "nx"
+      else
+        dimname = "ni"
+      endif
+      nf_status = nf_inq_varid(nf_fid,dimname,nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var ',dimname
         istatus = 0
         return
       else  
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,nx)
+        nf_status = nf_get_var_int(nf_fid,nf_vid,nx)
       endif
 
-C     Ny
-      IF (gproj .NE. "LL") THEN
-        dimname = "Ny"
-      ELSE
-        dimname = "Nj"
-      ENDIF
+c     ny
+      if (gproj .ne. "ll") then
+        dimname = "ny"
+      else
+        dimname = "nj"
+      endif
 
-      nf_status = NF_INQ_VARID(nf_fid,dimname,nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_varid(nf_fid,dimname,nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var ',dimname
         istatus = 0
         return
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,ny)
+        nf_status = nf_get_var_int(nf_fid,nf_vid,ny)
       endif
 
 
-C
-C     Variable        NETCDF Long Name
-C      La1          "first latitude"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'La1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+c
+c     variable        netcdf long name
+c      la1          "first latitude"
+c
+      nf_status = nf_inq_varid(nf_fid,'la1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lo1          "first longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+c
+c     variable        netcdf long name
+c      lo1          "first longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'lo1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-      IF (lo1 .GT. 180.) lo1 = lo1 - 360.
-C
-C     Variable        NETCDF Long Name
-C      Lov          "orientation of grid"
-C
-      IF (gproj .NE. "LL") THEN
-        nf_status = NF_INQ_VARID(nf_fid,'Lov',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Lov'
+      if (lo1 .gt. 180.) lo1 = lo1 - 360.
+c
+c     variable        netcdf long name
+c      lov          "orientation of grid"
+c
+      if (gproj .ne. "ll") then
+        nf_status = nf_inq_varid(nf_fid,'lov',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lov'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,lov)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Lov - lov'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,lov)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lov - lov'
         endif
-        if (lov .GT. 180.) lov = lov - 360.
-C
-Ci      Variable        NETCDF Long Name
-C       Latin1
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Latin1',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Latin1'
+        if (lov .gt. 180.) lov = lov - 360.
+c
+ci      variable        netcdf long name
+c       latin1
+c
+        nf_status = nf_inq_varid(nf_fid,'latin1',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var latin1'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,StdLat1)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Latin1 - StdLat1'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,stdlat1)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var latin1 - stdlat1'
         endif
-C
-C       Variable        NETCDF Long Name
-C         Latin2
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Latin2',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Latin2'
+c
+c       variable        netcdf long name
+c         latin2
+c
+        nf_status = nf_inq_varid(nf_fid,'latin2',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var latin2'
         endif
-          nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,StdLat2)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Latin2 - StdLat2'
+          nf_status = nf_get_var_real(nf_fid,nf_vid,stdlat2)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var latin2 - stdlat2'
         endif
-      ENDIF
-C
-C     Variable        NETCDF Long Name
-C     Dx 
-C
-      IF (gproj .NE. "LL") THEN
-        dimname = "Dx"
-      ELSE 
-        dimname = "Di"
-      ENDIF 
-      nf_status = NF_INQ_VARID(nf_fid,dimname,nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dx'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,dx)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dx'
+c
+c     variable        netcdf long name
+c     dx 
+c
+      if (gproj .ne. "ll") then
+        dimname = "dx"
+      else 
+        dimname = "di"
+      endif 
+      nf_status = nf_inq_varid(nf_fid,dimname,nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dx'
       endif
-C
-C     Variable        NETCDF Long Name
-C     Dy
-C
-      IF (gproj .NE. "LL") THEN
-        dimname = "Dy"
-      ELSE
-        dimname = "Dj"
-      ENDIF
-      nf_status = NF_INQ_VARID(nf_fid,dimname,nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dy'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,dx)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dx'
       endif
-       nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,dy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Dy'
+c
+c     variable        netcdf long name
+c     dy
+c
+      if (gproj .ne. "ll") then
+        dimname = "dy"
+      else
+        dimname = "dj"
+      endif
+      nf_status = nf_inq_varid(nf_fid,dimname,nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dy'
+      endif
+       nf_status = nf_get_var_real(nf_fid,nf_vid,dy)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dy'
       endif
 
-      ! Set or compute corner points
+      ! set or compute corner points
 
-      IF (cmodel(1:3) .EQ. "RUC") THEN
-        La2=55.481
-        Lo2=-57.381
-      ELSEIF(gproj .EQ. "LL") THEN
-C
-C       Variable        NETCDF Long Name
-C       La2          "last latitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'La2',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var La2'
+      if (cmodel(1:3) .eq. "ruc") then
+        la2=55.481
+        lo2=-57.381
+      elseif(gproj .eq. "ll") then
+c
+c       variable        netcdf long name
+c       la2          "last latitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'la2',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var la2'
         endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La2)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var La2'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la2)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var la2'
         endif
-C
-C       Variable        NETCDF Long Name
-C       Lo2          "last longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo2',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Lo1'
+c
+c       variable        netcdf long name
+c       lo2          "last longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'lo2',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lo1'
         endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo2)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var Lo1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo2)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lo1'
         endif
-        IF (lo2 .GT. 180.) lo2 = lo2 - 360.
+        if (lo2 .gt. 180.) lo2 = lo2 - 360.
 
-      ELSE
-        print *, "Need to add computation of la2,lo2"
-        print *, " In get_unidata_grid"
+      else
+        print *, "need to add computation of la2,lo2"
+        print *, " in get_unidata_grid"
         istatus = 0
         return
-      ENDIF
+      endif
 
-      nf_status = NF_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_close(nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         return
       endif
 
       istatus=1 
       return
       end
-C
-C ------------------------------------------------------------
+c
+c ------------------------------------------------------------
       subroutine read_unidata_ruc_hyb(cdfname,af,cmodel,
      .nxbg,nybg,nzbght,nzbgtp,nzbgsh,nzbguv,nzbgww,
      .prbght,prbgsh,prbguv,prbgww,
@@ -1223,7 +1223,7 @@ c     integer ncid, lenstr, ntp, nvdim, nvs, ndsize
 c     model_out=1  => lga
 c     model_out=2  => dprep
 
-      integer ndims ,dimids(NF_MAX_VAR_DIMS)
+      integer ndims ,dimids(nf_max_var_dims)
       integer itype,nattr
 
       integer nxbg,nybg
@@ -1241,7 +1241,7 @@ c     model_out=2  => dprep
 c
       real, intent(out)  ::   mslp(nxbg,nybg)
 
-c *** 3D Output arrays.
+c *** 3d output arrays.
 c
       real, intent(out)  :: prbght(nxbg,nybg,nzbght)
       real, intent(out)  :: prbgsh(nxbg,nybg,nzbgsh)
@@ -1297,7 +1297,7 @@ c
 c
 c -------------------------------------------------------
 
-      print*,'HERE: read_unidata_ruc_hyb'
+      print*,'here: read_unidata_ruc_hyb'
 
       istatus = 1
 
@@ -1309,10 +1309,10 @@ c -------------------------------------------------------
 c
       print*,'opening cdf file: ',cdfname(1:slen)
 
-      rcode = NF_OPEN(cdfname,NF_NOWRITE,ncid)
-      if(rcode.ne.NF_NOERR) then
-         print *, NF_STRERROR(rcode)
-         print *,'NF_OPEN ',cdfname(1:slen)
+      rcode = nf_open(cdfname,nf_nowrite,ncid)
+      if(rcode.ne.nf_noerr) then
+         print *, nf_strerror(rcode)
+         print *,'nf_open ',cdfname(1:slen)
          return
       endif
 
@@ -1324,14 +1324,14 @@ c
       enddo
       if(ivaltimes(n)/3600.ne.nn) then
 
-         print*,'ERROR: No record valid at requested time '
+         print*,'error: no record valid at requested time '
          print*,'ntbg/nn/af/n/ivaltimes(n) ',ntbg,' ',nn,' ',af,
      &' ',n,' ',ivaltimes(n)
 
-         rcode= NF_CLOSE(ncid)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR: ',cmodel
+         rcode= nf_close(ncid)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var: ',cmodel
             return
          endif
 
@@ -1339,27 +1339,27 @@ c
 
       else
 
-         print*,'Found valid record at ivaltime'
+         print*,'found valid record at ivaltime'
          print*,'ntbg/nn/af/n/ivaltimes(n) ',ntbg,' ',nn,' ',af,
      &' ',n,' ',ivaltimes(n) 
          print*
       endif
 
-      ! Get the pressure levels for this data
-      nf_status = NF_INQ_VARID(ncid,'P_hybr',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      ! get the pressure levels for this data
+      nf_status = nf_inq_varid(ncid,'p_hybr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in level '
         istatus = 0
         return
       endif
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,prbght)
+      nf_status = nf_get_var_real(ncid,nf_vid,prbght)
  
-      ! Get index for 2m and 10m winds
+      ! get index for 2m and 10m winds
       ind2m = 1
       ind10m = 2
   
-      ! Set some indices
+      ! set some indices
       start(1)=1
       count(1)=nxbg
       start(2)=1
@@ -1370,22 +1370,22 @@ c
       count(4)=1
 
       print*,'read ht'
-      cvar='Z_hybr'
+      cvar='z_hybr'
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),ht,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (Z): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (z): ',cmodel
          else
-            print *,'Missing HT data detected: return'
+            print *,'missing ht data detected: return'
          endif
          print*
          return
       endif
 
 c
-c ****** Statements to fill tp.
+c ****** statements to fill tp.
 c
       start(1)=1
       count(1)=nxbg
@@ -1401,19 +1401,19 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),tp,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (t): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (t): ',cmodel
          else
-            print *,'Missing T data detected: return'
+            print *,'missing t data detected: return'
          endif
          print*
          return
       endif
 
 c
-c ****** Statements to fill sh.                           
+c ****** statements to fill sh.                           
 c
       start(1)=1
       count(1)=nxbg
@@ -1429,18 +1429,18 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),sh,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (qv): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (qv): ',cmodel
          else
-            print *,'Missing qv data detected: return'
+            print *,'missing qv data detected: return'
          endif
          print*
          return
       endif
 c
-c ****** Statements to fill uw. 
+c ****** statements to fill uw. 
 c
       start(1)=1
       count(1)=nxbg
@@ -1456,19 +1456,19 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),uw,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (uw): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (uw): ',cmodel
          else
-            print *,'Missing U data detected: return'
+            print *,'missing u data detected: return'
          endif
          print*
          return
       endif
 
 c
-c ****** Statements to fill vw.                           
+c ****** statements to fill vw.                           
 c
       start(1)=1
       count(1)=nxbg
@@ -1484,18 +1484,18 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),vw,start
      +     ,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (vw): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (vw): ',cmodel
          else
-            print *,'Missing V data detected: return'
+            print *,'missing v data detected: return'
          endif
          print*
          return
       endif
 c
-c ****** Statements to fill ww.
+c ****** statements to fill ww.
 c
       start(1)=1
       count(1)=nxbg
@@ -1511,19 +1511,19 @@ c
       call read_netcdf_real(ncid,cvar,nxbg*nybg*count(3),ww  
      +  ,start,count,rcode)
 
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (ww): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (ww): ',cmodel
          else
-            print *,'Missing ww data detected: continue without'
-            print *,'Filling ww with 0.0'
+            print *,'missing ww data detected: continue without'
+            print *,'filling ww with 0.0'
             ww(:,:,:) = 0.0
          endif
          print*
       endif
 
-C   Get 2m T and RH, 10m U and V
+c   get 2m t and rh, 10m u and v
       start(1)=1
       count(1)=nxbg
       start(2)=1
@@ -1534,17 +1534,17 @@ C   Get 2m T and RH, 10m U and V
       count(4)=1
       print*,'read t_2m'
       lcmpsfcq=.true.
-      cvar='T_fhg'
+      cvar='t_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,tp_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (tp_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (tp_sfc): ',cmodel
          endif
       endif
 
-c  No surface height...so use lowest hybrid level heigh
+c  no surface height...so use lowest hybrid level heigh
       ht_sfc = ht(:,:,1)
 
       start(1)=1
@@ -1560,10 +1560,10 @@ c  No surface height...so use lowest hybrid level heigh
       cvar='hum_mix_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,sh_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (sh_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (sh_sfc): ',cmodel
          endif
       endif
 
@@ -1580,10 +1580,10 @@ c  No surface height...so use lowest hybrid level heigh
       cvar='u_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,uw_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (uw_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (uw_sfc): ',cmodel
          endif
       endif
 
@@ -1600,10 +1600,10 @@ c  No surface height...so use lowest hybrid level heigh
       cvar='v_fhg'
       call read_netcdf_real(ncid,cvar,nxbg*nybg,vw_sfc,start
      +     ,count,rcode)
-      if(rcode.ne.NF_NOERR) then
+      if(rcode.ne.nf_noerr) then
          if(rcode.gt.-61)then
-            print *, NF_STRERROR(rcode)
-            print *,'in NF_GET_VAR (vw_sfc): ',cmodel
+            print *, nf_strerror(rcode)
+            print *,'in nf_get_var (vw_sfc): ',cmodel
          endif
       endif
 
@@ -1615,19 +1615,19 @@ c
 
 c get mslp (this field name differs from one model to the other)
 c
-      if(cmodel(1:3).eq.'RUC')THEN
+      if(cmodel(1:3).eq.'ruc')then
 
-         cvar='Pm_msl'
+         cvar='pm_msl'
          call read_netcdf_real(ncid,cvar,nxbg*nybg,mslp
      +           ,start,count,rcode)
-         if(rcode.ne.NF_NOERR) then
+         if(rcode.ne.nf_noerr) then
             if(rcode.gt.-61)then
-               print *, NF_STRERROR(rcode)
-               print *,'in NF_GET_VAR (emsp): ',cmodel
+               print *, nf_strerror(rcode)
+               print *,'in nf_get_var (emsp): ',cmodel
             else
-               print*,'Error status returned from read_netcdf_real'
+               print*,'error status returned from read_netcdf_real'
             endif
-            print *,'Missing emsp data detected'
+            print *,'missing emsp data detected'
             print*
             return
          endif
@@ -1635,22 +1635,22 @@ c
       endif
 
 c
-c *** Close netcdf file.
+c *** close netcdf file.
 c
-      rcode= NF_CLOSE(ncid)
-      if(rcode.ne.NF_NOERR) then
-         print *, NF_STRERROR(rcode)
-         print *,'in NF_GET_VAR: ',cmodel
+      rcode= nf_close(ncid)
+      if(rcode.ne.nf_noerr) then
+         print *, nf_strerror(rcode)
+         print *,'in nf_get_var: ',cmodel
          return
       endif
 c
 ccc      endif
 
 c
-c *** Fill ouput arrays.
+c *** fill ouput arrays.
 c ***   convert theta-v to temperature
 c ***   convert mixing ratio to specific humidity
-c ***   convert 3d pressure level arrays to from Pa to mb
+c ***   convert 3d pressure level arrays to from pa to mb
 c ***   load remaining pressure arrays
 c
 c for laps-lgb
@@ -1663,22 +1663,22 @@ c for laps-lgb
         do i=1,nxbg
            do k = 1, nzbght
 
-c             Conver pressure to mb and fill additional arrays
+c             conver pressure to mb and fill additional arrays
               prbght(i,j,k) = prbght(i,j,k) * 0.01
               prbgsh(i,j,k) = prbght(i,j,k)
               prbguv(i,j,k) = prbght(i,j,k)
               prbgww(i,j,k) = prbght(i,j,k)
 
-c             Convert theta-v into virtual temp
+c             convert theta-v into virtual temp
               tv = tp(i,j,k) * (prbgsh(i,j,k)*0.001)**rcp
-C             Convert virtual temp into temp
+c             convert virtual temp into temp
               tp(i,j,k) = tv/(1.0+0.61*sh(i,j,k))
 
-c             Convert mixrat into spechum
+c             convert mixrat into spechum
               sh(i,j,k) = sh(i,j,k)/(1.+sh(i,j,k))
 
            enddo
-c          Also convert surface mixrat into spechum
+c          also convert surface mixrat into spechum
            sh_sfc(i,j)=sh_sfc(i,j)/(1.+sh_sfc(i,j))
          enddo
        enddo
@@ -1689,13 +1689,13 @@ c          Also convert surface mixrat into spechum
         print 850, k,prbght(ic,jc,k),ht(ic,jc,k),tp(ic,jc,k), 
      +              sh(ic,jc,k),uw(ic,jc,k),vw(ic,jc,k),ww(ic,jc,k)
       enddo
-! Honglig Jiang: change from F7.5 to F8.5. 11/27/2013
- 850  FORMAT(I2,1x,F6.1,1x,F7.1,1x,F5.1,1x,F8.5,1x,F5.1,1x,F5.1,1x,
-     +   F8.5)
+! honglig jiang: change from f7.5 to f8.5. 11/27/2013
+ 850  format(i2,1x,f6.1,1x,f7.1,1x,f5.1,1x,f8.5,1x,f5.1,1x,f5.1,1x,
+     +   f8.5)
     
       istatus =  1
       if(0.eq.1) then
- 900     print*,'ERROR: bad dimension specified in netcdf file'
+ 900     print*,'error: bad dimension specified in netcdf file'
          print*, (count(i),i=1,4)
          istatus=-1
       endif

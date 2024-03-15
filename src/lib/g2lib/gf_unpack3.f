@@ -1,66 +1,66 @@
       subroutine gf_unpack3(cgrib,lcgrib,iofst,igds,igdstmpl,
      &                   mapgridlen,ideflist,idefnum,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_unpack3 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-26
+! subprogram:    gf_unpack3 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-26
 !
-! ABSTRACT: This subroutine unpacks Section 3 (Grid Definition Section)
-!   starting at octet 6 of that Section.  
+! abstract: this subroutine unpacks section 3 (grid definition section)
+!   starting at octet 6 of that section.  
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-26  Gilbert
-! 2002-01-24  Gilbert  - Changed to dynamically allocate arrays
+! program history log:
+! 2000-05-26  gilbert
+! 2002-01-24  gilbert  - changed to dynamically allocate arrays
 !                        and to pass pointers to those arrays through
 !                        the argument list.
 !
-! USAGE:    CALL gf_unpack3(cgrib,lcgrib,lensec,iofst,igds,igdstmpl,
+! usage:    call gf_unpack3(cgrib,lcgrib,lensec,iofst,igds,igdstmpl,
 !    &                   mapgridlen,ideflist,idefnum,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array that contains the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     iofst    - Bit offset of the beginning of Section 3.
+!   input argument list:
+!     cgrib    - character array that contains the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     iofst    - bit offset of the beginning of section 3.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     iofst    - Bit offset at the end of Section 3, returned.
-!     igds     - Contains information read from the appropriate GRIB Grid 
-!                Definition Section 3 for the field being returned.
-!                Must be dimensioned >= 5.
-!                igds(1)=Source of grid definition (see Code Table 3.0)
-!                igds(2)=Number of grid points in the defined grid.
-!                igds(3)=Number of octets needed for each 
+!   output argument list:      
+!     iofst    - bit offset at the end of section 3, returned.
+!     igds     - contains information read from the appropriate grib grid 
+!                definition section 3 for the field being returned.
+!                must be dimensioned >= 5.
+!                igds(1)=source of grid definition (see code table 3.0)
+!                igds(2)=number of grid points in the defined grid.
+!                igds(3)=number of octets needed for each 
 !                            additional grid points definition.  
-!                            Used to define number of
+!                            used to define number of
 !                            points in each row ( or column ) for
 !                            non-regular grids.  
 !                            = 0, if using regular grid.
-!                igds(4)=Interpretation of list for optional points 
-!                            definition.  (Code Table 3.11)
-!                igds(5)=Grid Definition Template Number (Code Table 3.1)
-!     igdstmpl - Pointer to integer array containing the data values for 
-!                the specified Grid Definition
-!                Template ( NN=igds(5) ).  Each element of this integer 
-!                array contains an entry (in the order specified) of Grid
-!                Defintion Template 3.NN
-!     mapgridlen- Number of elements in igdstmpl().  i.e. number of entries
-!                in Grid Defintion Template 3.NN  ( NN=igds(5) ).
-!     ideflist - (Used if igds(3) .ne. 0)  Pointer to integer array containing
+!                igds(4)=interpretation of list for optional points 
+!                            definition.  (code table 3.11)
+!                igds(5)=grid definition template number (code table 3.1)
+!     igdstmpl - pointer to integer array containing the data values for 
+!                the specified grid definition
+!                template ( nn=igds(5) ).  each element of this integer 
+!                array contains an entry (in the order specified) of grid
+!                defintion template 3.nn
+!     mapgridlen- number of elements in igdstmpl().  i.e. number of entries
+!                in grid defintion template 3.nn  ( nn=igds(5) ).
+!     ideflist - (used if igds(3) .ne. 0)  pointer to integer array containing
 !                the number of grid points contained in each row ( or column ).
-!                (part of Section 3)
-!     idefnum  - (Used if igds(3) .ne. 0)  The number of entries
+!                (part of section 3)
+!     idefnum  - (used if igds(3) .ne. 0)  the number of entries
 !                in array ideflist.  i.e. number of rows ( or columns )
 !                for which optional grid points are defined.
-!     ierr     - Error return code.
+!     ierr     - error return code.
 !                0 = no error
-!                5 = "GRIB" message contains an undefined Grid Definition
-!                    Template.
+!                5 = "grib" message contains an undefined grid definition
+!                    template.
 !                6 = memory allocation error
 !
-! REMARKS: Uses Fortran 90 module gridtemplates and module re_alloc.
+! remarks: uses fortran 90 module gridtemplates and module re_alloc.
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -81,24 +81,24 @@
       ierr=0
       nullify(igdstmpl,ideflist)
 
-      call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+      call gbyte(cgrib,lensec,iofst,32)        ! get length of section
       iofst=iofst+32
       iofst=iofst+8     ! skip section number
 
-      call gbyte(cgrib,igds(1),iofst,8)     ! Get source of Grid def.
+      call gbyte(cgrib,igds(1),iofst,8)     ! get source of grid def.
       iofst=iofst+8
-      call gbyte(cgrib,igds(2),iofst,32)    ! Get number of grid pts.
+      call gbyte(cgrib,igds(2),iofst,32)    ! get number of grid pts.
       iofst=iofst+32
-      call gbyte(cgrib,igds(3),iofst,8)     ! Get num octets for opt. list
+      call gbyte(cgrib,igds(3),iofst,8)     ! get num octets for opt. list
       iofst=iofst+8
-      call gbyte(cgrib,igds(4),iofst,8)     ! Get interpret. for opt. list
+      call gbyte(cgrib,igds(4),iofst,8)     ! get interpret. for opt. list
       iofst=iofst+8
-      call gbyte(cgrib,igds(5),iofst,16)    ! Get Grid Def Template num.
+      call gbyte(cgrib,igds(5),iofst,16)    ! get grid def template num.
       iofst=iofst+16
 !      if (igds(1).eq.0) then
-      if (igds(1).eq.0.OR.igds(1).eq.255) then  ! FOR ECMWF TEST ONLY
+      if (igds(1).eq.0.or.igds(1).eq.255) then  ! for ecmwf test only
         allocate(mapgrid(lensec))
-        !   Get Grid Definition Template
+        !   get grid definition template
         call getgridtemplate(igds(5),mapgridlen,mapgrid,needext,
      &                       iret)
         if (iret.ne.0) then
@@ -112,7 +112,7 @@
         needext=.false.
       endif
       !
-      !   Unpack each value into array igdstmpl from the
+      !   unpack each value into array igdstmpl from the
       !   the appropriate number of octets, which are specified in
       !   corresponding entries in array mapgrid.
       !
@@ -138,15 +138,15 @@
         ibyttem=ibyttem+iabs(mapgrid(i))
       enddo
       !
-      !   Check to see if the Grid Definition Template needs to be
+      !   check to see if the grid definition template needs to be
       !   extended.
-      !   The number of values in a specific template may vary
+      !   the number of values in a specific template may vary
       !   depending on data specified in the "static" part of the
       !   template.
       !
       if ( needext ) then
         call extgridtemplate(igds(5),igdstmpl,newmapgridlen,mapgrid)
-        !   Unpack the rest of the Grid Definition Template
+        !   unpack the rest of the grid definition template
         call realloc(igdstmpl,mapgridlen,newmapgridlen,istat)
         do i=mapgridlen+1,newmapgridlen
           nbits=iabs(mapgrid(i))*8
@@ -164,8 +164,8 @@
       endif
       if( allocated(mapgrid) ) deallocate(mapgrid)
       !
-      !   Unpack optional list of numbers defining number of points
-      !   in each row or column, if included.  This is used for non regular
+      !   unpack optional list of numbers defining number of points
+      !   in each row or column, if included.  this is used for non regular
       !   grids.
       !
       if ( igds(3).ne.0 ) then
@@ -185,5 +185,5 @@
          nullify(ideflist)
       endif
       
-      return    ! End of Section 3 processing
+      return    ! end of section 3 processing
       end

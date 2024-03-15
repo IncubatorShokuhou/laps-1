@@ -1,35 +1,35 @@
 
-        subroutine mean_wind_bunkers(uanl,vanl,topo,imax,jmax,kmax  ! I
-     1                              ,heights_3d                     ! I
-     1                              ,umean,vmean                    ! O
-     1                              ,ushear,vshear                  ! O
-     1                              ,ustorm,vstorm,istatus)         ! O
+        subroutine mean_wind_bunkers(uanl,vanl,topo,imax,jmax,kmax  ! i
+     1                              ,heights_3d                     ! i
+     1                              ,umean,vmean                    ! o
+     1                              ,ushear,vshear                  ! o
+     1                              ,ustorm,vstorm,istatus)         ! o
 
         logical ltest_vertical_grid
 
-        real umean(imax,jmax),vmean(imax,jmax)                    ! O
-        real ustorm(imax,jmax),vstorm(imax,jmax)                  ! O
-        real ushear(imax,jmax),vshear(imax,jmax)                  ! O
-        real uanl(imax,jmax,kmax),vanl(imax,jmax,kmax)            ! I
-        real heights_3d(imax,jmax,kmax)                           ! I
+        real umean(imax,jmax),vmean(imax,jmax)                    ! o
+        real ustorm(imax,jmax),vstorm(imax,jmax)                  ! o
+        real ushear(imax,jmax),vshear(imax,jmax)                  ! o
+        real uanl(imax,jmax,kmax),vanl(imax,jmax,kmax)            ! i
+        real heights_3d(imax,jmax,kmax)                           ! i
 
-        real topo(imax,jmax)                                      ! I
+        real topo(imax,jmax)                                      ! i
 
-        real sum(imax,jmax)                                       ! L
-        real usum(imax,jmax)                                      ! L
-        real vsum(imax,jmax)                                      ! L
-        integer klow(imax,jmax)                                   ! L
-        integer khigh(imax,jmax)                                  ! L
+        real sum(imax,jmax)                                       ! l
+        real usum(imax,jmax)                                      ! l
+        real vsum(imax,jmax)                                      ! l
+        integer klow(imax,jmax)                                   ! l
+        integer khigh(imax,jmax)                                  ! l
 
         write(6,*)
-        write(6,*)' Calculating Mean Wind (BSM)'
+        write(6,*)' calculating mean wind (bsm)'
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)return
 
         do j = 1,jmax
           do i = 1,imax
-!            Layer is 0-6 km AGL, denoted from "sfc" to "top"
+!            layer is 0-6 km agl, denoted from "sfc" to "top"
 
              klow(i,j) = nint(height_to_zcoord2(topo(i,j)      
      1                       ,heights_3d,imax,jmax,kmax,i,j,istatus))
@@ -63,17 +63,17 @@
         do j = 1,jmax
           do i = 1,imax
 
-C            COMPUTE STORM MOTION VECTOR (a la the RUC code)
-C            IT IS DEFINED AS 7.5 M/S TO THE RIGHT OF THE 0-6 KM MEAN
-C            WIND CONSTRAINED ALONG A LINE WHICH IS BOTH PERPENDICULAR
-C            TO THE 0-6 KM MEAN VERTICAL WIND SHEAR VECTOR AND PASSES
-C            THROUGH THE 0-6 KM MEAN WIND.  
+c            compute storm motion vector (a la the ruc code)
+c            it is defined as 7.5 m/s to the right of the 0-6 km mean
+c            wind constrained along a line which is both perpendicular
+c            to the 0-6 km mean vertical wind shear vector and passes
+c            through the 0-6 km mean wind.  
 
-!            Mean wind through the layer
+!            mean wind through the layer
              umean(i,j) = usum(i,j) / sum(i,j)
              vmean(i,j) = vsum(i,j) / sum(i,j)
 
-!            Shear Vector through the layer
+!            shear vector through the layer
              if(uanl(i,j,klow(i,j)) .ne. r_missing_data .and.
      1          vanl(i,j,klow(i,j)) .ne. r_missing_data       )then
                  ushear(i,j) = uanl(i,j,khigh(i,j))-uanl(i,j,klow(i,j))
@@ -86,7 +86,7 @@ C            THROUGH THE 0-6 KM MEAN WIND.
                  vstorm(i,j) = vmean(i,j) - (7.5*ushear(i,j)/shearspeed)
 
              else
-                 write(6,*)' Error in meanwind, missing low level wind'       
+                 write(6,*)' error in meanwind, missing low level wind'       
 
              endif
 
@@ -103,23 +103,23 @@ C            THROUGH THE 0-6 KM MEAN WIND.
 
         logical ltest_vertical_grid
 
-        real umean(imax,jmax),vmean(imax,jmax)                  ! Output
-        real ustorm(imax,jmax),vstorm(imax,jmax)                ! Output
-        real uanl(imax,jmax,kmax),vanl(imax,jmax,kmax)          ! Input
+        real umean(imax,jmax),vmean(imax,jmax)                  ! output
+        real ustorm(imax,jmax),vstorm(imax,jmax)                ! output
+        real uanl(imax,jmax,kmax),vanl(imax,jmax,kmax)          ! input
 
-        real topo(imax,jmax)                                    ! Input
+        real topo(imax,jmax)                                    ! input
 
-        real sum(imax,jmax)                                     ! Local
-        real usum(imax,jmax)                                    ! Local
-        real vsum(imax,jmax)                                    ! Local
-        integer klow(imax,jmax)                                 ! Local
+        real sum(imax,jmax)                                     ! local
+        real usum(imax,jmax)                                    ! local
+        real vsum(imax,jmax)                                    ! local
+        integer klow(imax,jmax)                                 ! local
 
         write(6,*)
-        write(6,*)' Calculating Mean Wind (LSM)'
+        write(6,*)' calculating mean wind (lsm)'
 
-        if(ltest_vertical_grid('HEIGHT'))then
+        if(ltest_vertical_grid('height'))then
             khigh = nint(height_to_zcoord(5000.,istatus))
-        elseif(ltest_vertical_grid('PRESSURE'))then
+        elseif(ltest_vertical_grid('pressure'))then
             pres_mb = 300.
             pres_pa = pres_mb * 100.
             khigh = nint(zcoord_of_pressure(pres_pa))
@@ -132,16 +132,16 @@ C            THROUGH THE 0-6 KM MEAN WIND.
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus .ne. 1)return
 
-        write(6,*)' Top level of mean wind computation = ',khigh
+        write(6,*)' top level of mean wind computation = ',khigh
 
-!       Mean wind (mass weighted) is calculated for whole levels within the 
+!       mean wind (mass weighted) is calculated for whole levels within the 
 !       range.
         do j = 1,jmax
           do i = 1,imax
              klow(i,j) =
      1            max(nint(height_to_zcoord(topo(i,j),istatus)),1)
              if(istatus .ne. 1)then
-                 write(6,*)' mean_wind: ERROR in height_to_zcoord'
+                 write(6,*)' mean_wind: error in height_to_zcoord'
                  return
              endif
              sum(i,j) = 0.
@@ -167,16 +167,16 @@ C            THROUGH THE 0-6 KM MEAN WIND.
         do j = 1,jmax
           do i = 1,imax
 
-!            Mean wind through the layer
+!            mean wind through the layer
              umean(i,j) = usum(i,j) / sum(i,j)
              vmean(i,j) = vsum(i,j) / sum(i,j)
 
-!            Shear Vector through the layer
+!            shear vector through the layer
              ushear = uanl(i,j,khigh) - uanl(i,j,klow(i,j))
              vshear = vanl(i,j,khigh) - vanl(i,j,klow(i,j))
 
-!            Estimate storm motion of a right moving storm
-!            Rotate shear vector by 90 deg, multiply by .15, add to mean wind
+!            estimate storm motion of a right moving storm
+!            rotate shear vector by 90 deg, multiply by .15, add to mean wind
              ustorm(i,j) = umean(i,j) ! + 0.15 * vshear
              vstorm(i,j) = vmean(i,j) ! - 0.15 * ushear
 

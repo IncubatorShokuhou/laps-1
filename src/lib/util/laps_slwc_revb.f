@@ -1,243 +1,243 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
 
-      Subroutine LAPS_SLWC_REVb(CB_PA,CB_K,GT_PA,GT_K,CT_K,
-     1           ADIABATIC_LWC,ADJUSTED_LWC,ADJUSTED_SLWC,
-     2           I_STATUS1,I_STATUS2)
-C
-C.......................HISTORY.............................
-C
-C        WRITTEN: CA. 1982 BY W. A. COOPER IN HP FORTRAN 4
-C
-C....... CALCULATES TEMPERATURE T AND LIQUID WATER CONTENT FROM
-C..      CLOUD BASE PRESSURE P0 AND TEMPERATURE T0, FOR ADIABATIC
-C..      ASCENT TO THE PRESSURE P.
-C..     ->  INPUT:  CLOUD BASE PRESSURE P0 AND TEMPERATURE T0
-C..                 PRESSURE AT OBSERVATION LEVEL P
-C..     ->  OUTPUT: "ADIABATIC" TEMPERATURE T AND LIQUID WATER CONTENT
-C
-C        MODIFIED: November 1989 by Paul Lawson for LAPS/WISP.  Routine
+      subroutine laps_slwc_revb(cb_pa,cb_k,gt_pa,gt_k,ct_k,
+     1           adiabatic_lwc,adjusted_lwc,adjusted_slwc,
+     2           i_status1,i_status2)
+c
+c.......................history.............................
+c
+c        written: ca. 1982 by w. a. cooper in hp fortran 4
+c
+c....... calculates temperature t and liquid water content from
+c..      cloud base pressure p0 and temperature t0, for adiabatic
+c..      ascent to the pressure p.
+c..     ->  input:  cloud base pressure p0 and temperature t0
+c..                 pressure at observation level p
+c..     ->  output: "adiabatic" temperature t and liquid water content
+c
+c        modified: november 1989 by paul lawson for laps/wisp.  routine
 c                  now calculates adiabatic liquid water content
-c                  (ADIABATIC_LWC) using cloud base pressure and grid-top
-c                  temperature and pressure.  Also calculated are ADJUSTED_LWC,
-c                  which adjusts ADIABATIC_LWC using an empirical cloud
-c                  water depletion algorithm, and ADJUSTED_SLWC, which is
-c                  ADIABATIC_LWC in regions where T < 0 C adjusted
-c                  using an empirical algorithm by Marcia Politovich.
+c                  (adiabatic_lwc) using cloud base pressure and grid-top
+c                  temperature and pressure.  also calculated are adjusted_lwc,
+c                  which adjusts adiabatic_lwc using an empirical cloud
+c                  water depletion algorithm, and adjusted_slwc, which is
+c                  adiabatic_lwc in regions where t < 0 c adjusted
+c                  using an empirical algorithm by marcia politovich.
 c
-c                  Subroutine is now hardwired for stratiform cloud only.
-c                  Can be modified to include Cu with input from LAPS main.
+c                  subroutine is now hardwired for stratiform cloud only.
+c                  can be modified to include cu with input from laps main.
 c
-c                  revb: ca 12/89 Calculate adiabatic lwc by going from cloud
-c                        base to LAPS grid level instead to cloud top, thus
+c                  revb: ca 12/89 calculate adiabatic lwc by going from cloud
+c                        base to laps grid level instead to cloud top, thus
 c                        helping to better calculate in layer clouds.
-c                        Add TG (grid temperature) to calcualtion.
+c                        add tg (grid temperature) to calcualtion.
 c
-c                  revc: 2/27/90 Correct error in code.  Zero-out slwc when grid
-c                        temperature (GT) > 0.
+c                  revc: 2/27/90 correct error in code.  zero-out slwc when grid
+c                        temperature (gt) > 0.
 c
-c                  revd: 1/27/99 Correct apparent error in test for I_STATUS1
-c                        (Steve Albers)
-c
-c
-c        OUTPUTS:  ADIABATIC_LWC
-c                  ADJUSTED_LWC
-c                  ADJUSTED_SLWC
-c                  I_STATUS1 - 1 when -20 < cld_top_temp < 0 for Stratus
-c                              0 Otherwise
-c                  I_STATUS2 - 1 when valid input data provided from main
-c
-      DATA EPS/0.622/,CPD/1.0042E3/,CW/4.218E3/,RD/287.05/,ALHV/2.501E6/
-      Integer CTY
-      Integer I_STATUS1, I_STATUS2
-      I_STATUS1=1
-      I_STATUS2=1
-c   2 Print *,'ENTER: P-BASE(mb), T-BASE(C), P-TOP, T-TOP, CLD TYPE'
-c     READ(5,*) P0, T0, P, CTT, CTY
-c     If(CTY.ne.0.and.CTY.ne.1) Go to 2
-c
-c     Hardwire cloud type (CTY) for stratus for now
-c
-      CTY=0
-c
-c.....Convert Pa to mb and Kelvin to Celcius
-c
-      P0 = CB_PA/100.
-      P  = GT_PA/100.
-      T0 = CB_K - 273.15
-      TG = GT_K - 273.15
-      CTT= CT_K - 273.15
-c     Print *, 'CTT in Sub = ', CTT
-c
-c     Check for valid input data...
-c
-        If(P0.gt.1013..or.P0.lt.50.) Then
-          I_STATUS2=0
-          RETURN
-        Else
-        Endif
+c                  revd: 1/27/99 correct apparent error in test for i_status1
+c                        (steve albers)
 c
 c
-        If(T0.gt.50..or.T0.lt.-70.) Then
-          I_STATUS2=0
-          RETURN
-        Else
-        Endif
+c        outputs:  adiabatic_lwc
+c                  adjusted_lwc
+c                  adjusted_slwc
+c                  i_status1 - 1 when -20 < cld_top_temp < 0 for stratus
+c                              0 otherwise
+c                  i_status2 - 1 when valid input data provided from main
+c
+      data eps/0.622/,cpd/1.0042e3/,cw/4.218e3/,rd/287.05/,alhv/2.501e6/
+      integer cty
+      integer i_status1, i_status2
+      i_status1=1
+      i_status2=1
+c   2 print *,'enter: p-base(mb), t-base(c), p-top, t-top, cld type'
+c     read(5,*) p0, t0, p, ctt, cty
+c     if(cty.ne.0.and.cty.ne.1) go to 2
+c
+c     hardwire cloud type (cty) for stratus for now
+c
+      cty=0
+c
+c.....convert pa to mb and kelvin to celcius
+c
+      p0 = cb_pa/100.
+      p  = gt_pa/100.
+      t0 = cb_k - 273.15
+      tg = gt_k - 273.15
+      ctt= ct_k - 273.15
+c     print *, 'ctt in sub = ', ctt
+c
+c     check for valid input data...
+c
+        if(p0.gt.1013..or.p0.lt.50.) then
+          i_status2=0
+          return
+        else
+        endif
 c
 c
-        If(P.gt.1013..or.P.lt.50.) Then
-          I_STATUS2=0
-          RETURN
-        Else
-        Endif
+        if(t0.gt.50..or.t0.lt.-70.) then
+          i_status2=0
+          return
+        else
+        endif
 c
-c     Set I_STATUS1 = F if 0 < cld top < -20 C (for stratus).
 c
-      If(CTT.GE.0..OR.CTT.LE.-20.) I_STATUS1=0
+        if(p.gt.1013..or.p.lt.50.) then
+          i_status2=0
+          return
+        else
+        endif
 c
-      TK=T0+273.15
-      E=VAPOR(T0)
-      R=EPS*E/(P0-E)
-      CPT=CPD+R*CW
-      THETAQ=TK*(1000./(P0-E))**(RD/CPT)*EXP(ALHV*R/(CPT*TK))
-C 1ST APPROX
-      T1=TK
-      E=VAPOR(T1-273.15)
-      RV=EPS*E/(P-E)
-      T1=THETAQ/((1000./(P-E))**(RD/CPT)*EXP(ALHV*RV/(CPT*T1)))
-C SUCCESSIVE APPROXIMATIONS
-      DO 1 I=1,10
-      E=VAPOR(T1-273.15)
-      RV=EPS*E/(P-E)
-      T1=(THETAQ/((1000./(P-E))**(RD/CPT)*EXP(ALHV*RV/(CPT*T1)))
-     $   +T1)/2.
-      T=T1-273.15
-C     Print *, P0,T0,P,T,E,RV,THETAQ
-1     CONTINUE
-C GET LWC
-      E=VAPOR(T)
-      RV=EPS*E/(P-E)
-      TW=R-RV
-      ADIABATIC_LWC=TW*P*28.9644/(8.314E7*T1)*1.E9
-      If(ADIABATIC_LWC.lt.0.) ADIABATIC_LWC=0.
-c     Print *, 'Adiabtic LWC = ', ADIABATIC_LWC
-      If(TG.ge.0.) Then
+c     set i_status1 = f if 0 < cld top < -20 c (for stratus).
 c
-      ADJUSTED_Slwc=0.                                          ! Added 2/27/90
+      if(ctt.ge.0..or.ctt.le.-20.) i_status1=0
+c
+      tk=t0+273.15
+      e=vapor(t0)
+      r=eps*e/(p0-e)
+      cpt=cpd+r*cw
+      thetaq=tk*(1000./(p0-e))**(rd/cpt)*exp(alhv*r/(cpt*tk))
+c 1st approx
+      t1=tk
+      e=vapor(t1-273.15)
+      rv=eps*e/(p-e)
+      t1=thetaq/((1000./(p-e))**(rd/cpt)*exp(alhv*rv/(cpt*t1)))
+c successive approximations
+      do 1 i=1,10
+      e=vapor(t1-273.15)
+      rv=eps*e/(p-e)
+      t1=(thetaq/((1000./(p-e))**(rd/cpt)*exp(alhv*rv/(cpt*t1)))
+     $   +t1)/2.
+      t=t1-273.15
+c     print *, p0,t0,p,t,e,rv,thetaq
+1     continue
+c get lwc
+      e=vapor(t)
+      rv=eps*e/(p-e)
+      tw=r-rv
+      adiabatic_lwc=tw*p*28.9644/(8.314e7*t1)*1.e9
+      if(adiabatic_lwc.lt.0.) adiabatic_lwc=0.
+c     print *, 'adiabtic lwc = ', adiabatic_lwc
+      if(tg.ge.0.) then
+c
+      adjusted_slwc=0.                                          ! added 2/27/90
 c
 
-         If(CTY.eq.0.) Then
-           If(CTT.lt.-20.) Then
-             ADJUSTED_LWC=0.
-           Elseif(CTT.lt.-15..and.CTT.ge.-20.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/8.
-           Elseif(CTT.lt.-10..and.CTT.ge.-15.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/4.
-           Else
-             ADJUSTED_LWC=ADIABATIC_LWC/2.
-           Endif
-         Else
-           If(CTT.lt.-25.) Then
-             ADJUSTED_LWC=0.
-           Elseif(CTT.lt.-15..and.CTT.ge.-25.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/8.
-           Elseif(CTT.lt.-10..and.CTT.ge.-15.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/4.
-           Else
-             ADJUSTED_LWC=ADIABATIC_LWC/2.
-           Endif
-         Endif
-      Else
-         If(CTY.eq.0.) Then
-           If(CTT.lt.-20.) Then
-             ADJUSTED_LWC=0.
-             ADJUSTED_SLWC=0.
-           Elseif(CTT.lt.-15..and.CTT.ge.-20.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/8.
-             ADJUSTED_SLWC=ADIABATIC_LWC/8.
-           Elseif(CTT.lt.-10..and.CTT.ge.-15.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/4.
-             ADJUSTED_SLWC=ADIABATIC_LWC/4.
-           Else
-             ADJUSTED_LWC=ADIABATIC_LWC/2.
-             ADJUSTED_SLWC=ADIABATIC_LWC/2.
-           Endif
-         Else
-           If(CTT.lt.-25.) Then
-             ADJUSTED_LWC=0.
-             ADJUSTED_SLWC=0.
-           Elseif(CTT.lt.-15..and.CTT.ge.-25.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/8.
-             ADJUSTED_SLWC=ADIABATIC_LWC/8.
-           Elseif(CTT.lt.-10..and.CTT.ge.-15.) Then
-             ADJUSTED_LWC=ADIABATIC_LWC/4.
-             ADJUSTED_SLWC=ADIABATIC_LWC/4.
-           Else
-             ADJUSTED_LWC=ADIABATIC_LWC/2.
-             ADJUSTED_SLWC=ADIABATIC_LWC/2.
-           Endif
-         Endif
-      Endif
-c     Print *,'Adjusted LWC = ', ADJUSTED_LWC
-c     Print *,'Adjusted SLWC = ', ADJUSTED_SLWC
-      END
-C  FUNCTION TO CALCULATE VAPOR PRESSURE:
-C
-      FUNCTION VAPOR(TFP)
-C INPUT IS IN DEGREES C.  IF GT 0, ASSUMED TO BE DEW POINT.  IF
-C LESS THAN 0, ASSUMED TO BE FROST POINT.
-C ROUTINE CODES GOFF-GRATCH FORMULA
-      TVAP=273.16+TFP
-      IF(TFP.GT.0.) GO TO 1
-C THIS IS ICE SATURATION VAPOR PRESSURE
-      IF(TVAP.LE.0) TVAP=1E-20
-      E=-9.09718*(273.16/TVAP-1.)-3.56654*ALOG10(273.16/TVAP)
-     $  +0.876793*(1.-TVAP/273.16)
-      VAPOR=6.1071*10.**E
-      RETURN
- 1    CONTINUE
-C THIS IS WATER SATURATION VAPOR PRESSURE
-      IF(TVAP.LE.0) TVAP=1E-20
-      E=-7.90298*(373.16/TVAP-1.)+5.02808*ALOG10(373.16/TVAP)
-     $  -1.3816E-7*(10.**(11.344*(1.-TVAP/373.16))-1.)
-     $  +8.1328E-3*(10.**(3.49149*(1-373.16/TVAP))-1)
-      VAPOR=1013.246*10.**E
-      RETURN
-      END
+         if(cty.eq.0.) then
+           if(ctt.lt.-20.) then
+             adjusted_lwc=0.
+           elseif(ctt.lt.-15..and.ctt.ge.-20.) then
+             adjusted_lwc=adiabatic_lwc/8.
+           elseif(ctt.lt.-10..and.ctt.ge.-15.) then
+             adjusted_lwc=adiabatic_lwc/4.
+           else
+             adjusted_lwc=adiabatic_lwc/2.
+           endif
+         else
+           if(ctt.lt.-25.) then
+             adjusted_lwc=0.
+           elseif(ctt.lt.-15..and.ctt.ge.-25.) then
+             adjusted_lwc=adiabatic_lwc/8.
+           elseif(ctt.lt.-10..and.ctt.ge.-15.) then
+             adjusted_lwc=adiabatic_lwc/4.
+           else
+             adjusted_lwc=adiabatic_lwc/2.
+           endif
+         endif
+      else
+         if(cty.eq.0.) then
+           if(ctt.lt.-20.) then
+             adjusted_lwc=0.
+             adjusted_slwc=0.
+           elseif(ctt.lt.-15..and.ctt.ge.-20.) then
+             adjusted_lwc=adiabatic_lwc/8.
+             adjusted_slwc=adiabatic_lwc/8.
+           elseif(ctt.lt.-10..and.ctt.ge.-15.) then
+             adjusted_lwc=adiabatic_lwc/4.
+             adjusted_slwc=adiabatic_lwc/4.
+           else
+             adjusted_lwc=adiabatic_lwc/2.
+             adjusted_slwc=adiabatic_lwc/2.
+           endif
+         else
+           if(ctt.lt.-25.) then
+             adjusted_lwc=0.
+             adjusted_slwc=0.
+           elseif(ctt.lt.-15..and.ctt.ge.-25.) then
+             adjusted_lwc=adiabatic_lwc/8.
+             adjusted_slwc=adiabatic_lwc/8.
+           elseif(ctt.lt.-10..and.ctt.ge.-15.) then
+             adjusted_lwc=adiabatic_lwc/4.
+             adjusted_slwc=adiabatic_lwc/4.
+           else
+             adjusted_lwc=adiabatic_lwc/2.
+             adjusted_slwc=adiabatic_lwc/2.
+           endif
+         endif
+      endif
+c     print *,'adjusted lwc = ', adjusted_lwc
+c     print *,'adjusted slwc = ', adjusted_slwc
+      end
+c  function to calculate vapor pressure:
+c
+      function vapor(tfp)
+c input is in degrees c.  if gt 0, assumed to be dew point.  if
+c less than 0, assumed to be frost point.
+c routine codes goff-gratch formula
+      tvap=273.16+tfp
+      if(tfp.gt.0.) go to 1
+c this is ice saturation vapor pressure
+      if(tvap.le.0) tvap=1e-20
+      e=-9.09718*(273.16/tvap-1.)-3.56654*alog10(273.16/tvap)
+     $  +0.876793*(1.-tvap/273.16)
+      vapor=6.1071*10.**e
+      return
+ 1    continue
+c this is water saturation vapor pressure
+      if(tvap.le.0) tvap=1e-20
+      e=-7.90298*(373.16/tvap-1.)+5.02808*alog10(373.16/tvap)
+     $  -1.3816e-7*(10.**(11.344*(1.-tvap/373.16))-1.)
+     $  +8.1328e-3*(10.**(3.49149*(1-373.16/tvap))-1)
+      vapor=1013.246*10.**e
+      return
+      end
 

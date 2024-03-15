@@ -1,143 +1,143 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETIDX(LUGB,LUGI,CINDEX,NLEN,NNUM,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETIDX         FINDS, READS OR GENERATES A GRIB2 INDEX 
-C   PRGMMR: GILBERT          ORG: W/NP11     DATE: 2005-03-15
-C
-C ABSTRACT: FINDS, READS OR GENERATES A GRIB2 INDEX FOR THE GRIB2 FILE
-C  ASSOCIATED WITH UNIT LUGB.  IF THE INDEX ALREADY EXISTS, IT IS RETURNED.
-C  OTHERWISE, THE INDEX IS (1) READ FROM AN EXISTING INDEXFILE ASSOCIATED WITH
-C  UNIT LUGI. OR (2) GENERATED FROM THE GRIB2FILE LUGB ( IF LUGI=0 ). 
-C  USERS CAN FORCE A REGENERATION OF AN INDEX.  IF LUGI EQUALS LUGB, THE INDEX
-C  WILL BE REGENERATED FROM THE DATA IN FILE LUGB.  IF LUGI IS LESS THAN
-C  ZERO, THEN THE INDEX IS RE READ FROM INDEX FILE ABS(LUGI).  
-C
-C PROGRAM HISTORY LOG:
-C 2005-03-15  GILBERT
-C
-C USAGE:    CALL GETIDX(LUGB,LUGI,CINDEX,NLEN,NNUM,IRET)
-C
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE.
-C                  FILE MUST BE OPENED WITH BAOPEN OR BAOPENR BEFORE CALLING 
-C                  THIS ROUTINE.
-C     LUGI         INTEGER UNIT OF THE UNBLOCKED GRIB INDEX FILE.
-C                  IF NONZERO, FILE MUST BE OPENED WITH BAOPEN BAOPENR BEFORE 
-C                  CALLING THIS ROUTINE.
-C                  >0 - READ INDEX FROM INDEX FILE LUGI, IF INDEX DOESN"T 
-C                       ALREADY EXIST.
-C                  =0 - TO GET INDEX BUFFER FROM THE GRIB FILE, IF INDEX 
-C                       DOESN"T ALREADY EXIST.
-C                  <0 - FORCE REREAD OF INDEX FROM INDEX FILE ABS(LUGI).
-C                  =LUGB - FORCE REGENERATION OF INDEX FROM GRIB2 FILE LUGB.
-C
-C   OUTPUT ARGUMENTS:
-C     CINDEX       CHARACTER*1 POINTER TO A BUFFER THAT CONTAINS INDEX RECORDS.
-C     NLEN         INTEGER TOTAL LENGTH OF ALL INDEX RECORDS
-C     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    90     UNIT NUMBER OUT OF RANGE
-C                    96     ERROR READING/CREATING INDEX FILE
-C
-C SUBPROGRAMS CALLED:
-C   GETG2I          READ INDEX FILE
-C   GETG2IR         READ INDEX BUFFER FROM GRIB FILE
-C
-C REMARKS: 
-C
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C
-C$$$
+c-----------------------------------------------------------------------
+      subroutine getidx(lugb,lugi,cindex,nlen,nnum,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getidx         finds, reads or generates a grib2 index 
+c   prgmmr: gilbert          org: w/np11     date: 2005-03-15
+c
+c abstract: finds, reads or generates a grib2 index for the grib2 file
+c  associated with unit lugb.  if the index already exists, it is returned.
+c  otherwise, the index is (1) read from an existing indexfile associated with
+c  unit lugi. or (2) generated from the grib2file lugb ( if lugi=0 ). 
+c  users can force a regeneration of an index.  if lugi equals lugb, the index
+c  will be regenerated from the data in file lugb.  if lugi is less than
+c  zero, then the index is re read from index file abs(lugi).  
+c
+c program history log:
+c 2005-03-15  gilbert
+c
+c usage:    call getidx(lugb,lugi,cindex,nlen,nnum,iret)
+c
+c   input arguments:
+c     lugb         integer unit of the unblocked grib data file.
+c                  file must be opened with baopen or baopenr before calling 
+c                  this routine.
+c     lugi         integer unit of the unblocked grib index file.
+c                  if nonzero, file must be opened with baopen baopenr before 
+c                  calling this routine.
+c                  >0 - read index from index file lugi, if index doesn"t 
+c                       already exist.
+c                  =0 - to get index buffer from the grib file, if index 
+c                       doesn"t already exist.
+c                  <0 - force reread of index from index file abs(lugi).
+c                  =lugb - force regeneration of index from grib2 file lugb.
+c
+c   output arguments:
+c     cindex       character*1 pointer to a buffer that contains index records.
+c     nlen         integer total length of all index records
+c     nnum         integer number of index records
+c     iret         integer return code
+c                    0      all ok
+c                    90     unit number out of range
+c                    96     error reading/creating index file
+c
+c subprograms called:
+c   getg2i          read index file
+c   getg2ir         read index buffer from grib file
+c
+c remarks: 
+c
+c
+c attributes:
+c   language: fortran 90
+c
+c$$$
 
-      INTEGER,INTENT(IN) :: LUGB,LUGI
-      INTEGER,INTENT(OUT) :: NLEN,NNUM,IRET
-      CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CINDEX
+      integer,intent(in) :: lugb,lugi
+      integer,intent(out) :: nlen,nnum,iret
+      character(len=1),pointer,dimension(:) :: cindex
 
-      INTEGER,PARAMETER :: MAXIDX=100
-      INTEGER,PARAMETER :: MSK1=32000,MSK2=4000
+      integer,parameter :: maxidx=100
+      integer,parameter :: msk1=32000,msk2=4000
  
-      TYPE GINDEX
+      type gindex
          integer :: nlen
          integer :: nnum
          character(len=1),pointer,dimension(:) :: cbuf
-      END TYPE GINDEX
+      end type gindex
      
-      TYPE(GINDEX),SAVE :: IDXLIST(100)
+      type(gindex),save :: idxlist(100)
 
-      DATA LUX/0/
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  DECLARE INTERFACES (REQUIRED FOR CBUF POINTER)
-      INTERFACE
-         SUBROUTINE GETG2I(LUGI,CBUF,NLEN,NNUM,IRET)
-            CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-            INTEGER,INTENT(IN) :: LUGI
-            INTEGER,INTENT(OUT) :: NLEN,NNUM,IRET
-         END SUBROUTINE GETG2I
-         SUBROUTINE GETG2IR(LUGB,MSK1,MSK2,MNUM,CBUF,NLEN,NNUM,
-     &                      NMESS,IRET)
-            CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-            INTEGER,INTENT(IN) :: LUGB,MSK1,MSK2,MNUM
-            INTEGER,INTENT(OUT) :: NLEN,NNUM,NMESS,IRET
-         END SUBROUTINE GETG2IR
-      END INTERFACE
+      data lux/0/
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  declare interfaces (required for cbuf pointer)
+      interface
+         subroutine getg2i(lugi,cbuf,nlen,nnum,iret)
+            character(len=1),pointer,dimension(:) :: cbuf
+            integer,intent(in) :: lugi
+            integer,intent(out) :: nlen,nnum,iret
+         end subroutine getg2i
+         subroutine getg2ir(lugb,msk1,msk2,mnum,cbuf,nlen,nnum,
+     &                      nmess,iret)
+            character(len=1),pointer,dimension(:) :: cbuf
+            integer,intent(in) :: lugb,msk1,msk2,mnum
+            integer,intent(out) :: nlen,nnum,nmess,iret
+         end subroutine getg2ir
+      end interface
 
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  DETERMINE WHETHER INDEX BUFFER NEEDS TO BE INITIALIZED
-      LUX=0
-      IRET=0
-      IF ( LUGB.LE.0 .AND. LUGB.GT.100 ) THEN
-         IRET=90
-         RETURN
-      ENDIF
-      IF (LUGI.EQ.LUGB) THEN      ! Force regeneration of index from GRIB2 File
-         IF ( ASSOCIATED( IDXLIST(LUGB)%CBUF ) ) 
-     &                  DEALLOCATE(IDXLIST(LUGB)%CBUF)
-         NULLIFY(IDXLIST(LUGB)%CBUF)
-         IDXLIST(LUGB)%NLEN=0
-         IDXLIST(LUGB)%NNUM=0
-         LUX=0
-      ENDIF
-      IF (LUGI.LT.0) THEN      ! Force re-read of index from indexfile
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  determine whether index buffer needs to be initialized
+      lux=0
+      iret=0
+      if ( lugb.le.0 .and. lugb.gt.100 ) then
+         iret=90
+         return
+      endif
+      if (lugi.eq.lugb) then      ! force regeneration of index from grib2 file
+         if ( associated( idxlist(lugb)%cbuf ) ) 
+     &                  deallocate(idxlist(lugb)%cbuf)
+         nullify(idxlist(lugb)%cbuf)
+         idxlist(lugb)%nlen=0
+         idxlist(lugb)%nnum=0
+         lux=0
+      endif
+      if (lugi.lt.0) then      ! force re-read of index from indexfile
                                ! associated with unit abs(lugi)
-         IF ( ASSOCIATED( IDXLIST(LUGB)%CBUF ) ) 
-     &                  DEALLOCATE(IDXLIST(LUGB)%CBUF)
-         NULLIFY(IDXLIST(LUGB)%CBUF)
-         IDXLIST(LUGB)%NLEN=0
-         IDXLIST(LUGB)%NNUM=0
-         LUX=ABS(LUGI)
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  Check if index already exists in memory
-      IF ( ASSOCIATED( IDXLIST(LUGB)%CBUF ) ) THEN
-         CINDEX => IDXLIST(LUGB)%CBUF
-         NLEN = IDXLIST(LUGB)%NLEN
-         NNUM = IDXLIST(LUGB)%NNUM
-         RETURN
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IRGI=0
-      IF(LUX.GT.0) THEN
-        CALL GETG2I(LUX,IDXLIST(LUGB)%CBUF,NLEN,NNUM,IRGI)
-      ELSEIF(LUX.LE.0) THEN
-        MSKP=0
-        CALL GETG2IR(LUGB,MSK1,MSK2,MSKP,IDXLIST(LUGB)%CBUF,
-     &               NLEN,NNUM,NMESS,IRGI)
-      ENDIF
-      IF(IRGI.EQ.0) THEN
-         CINDEX => IDXLIST(LUGB)%CBUF
-         IDXLIST(LUGB)%NLEN = NLEN
-         IDXLIST(LUGB)%NNUM = NNUM
-      ELSE
-         NLEN = 0
-         NNUM = 0
-         IRET=96
-         RETURN
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+         if ( associated( idxlist(lugb)%cbuf ) ) 
+     &                  deallocate(idxlist(lugb)%cbuf)
+         nullify(idxlist(lugb)%cbuf)
+         idxlist(lugb)%nlen=0
+         idxlist(lugb)%nnum=0
+         lux=abs(lugi)
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  check if index already exists in memory
+      if ( associated( idxlist(lugb)%cbuf ) ) then
+         cindex => idxlist(lugb)%cbuf
+         nlen = idxlist(lugb)%nlen
+         nnum = idxlist(lugb)%nnum
+         return
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      irgi=0
+      if(lux.gt.0) then
+        call getg2i(lux,idxlist(lugb)%cbuf,nlen,nnum,irgi)
+      elseif(lux.le.0) then
+        mskp=0
+        call getg2ir(lugb,msk1,msk2,mskp,idxlist(lugb)%cbuf,
+     &               nlen,nnum,nmess,irgi)
+      endif
+      if(irgi.eq.0) then
+         cindex => idxlist(lugb)%cbuf
+         idxlist(lugb)%nlen = nlen
+         idxlist(lugb)%nnum = nnum
+      else
+         nlen = 0
+         nnum = 0
+         iret=96
+         return
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

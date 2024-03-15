@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -52,13 +52,13 @@ c
       include 'satellite_dims_lvd.inc'
       include 'satellite_common_lvd.inc'
 c
-c ======================== START ==============================
-c Acquiring LAPS latitude and longitude arrays.
+c ======================== start ==============================
+c acquiring laps latitude and longitude arrays.
 c -------------------------------------------------------------------
-c     write(6,*)'Get LAPS lat/lon grid'
+c     write(6,*)'get laps lat/lon grid'
 c     call get_laps_domain(nx_l,ny_l,'nest7grid',lat,lon,topo,istatus)
-c     if(istatus.ne.1)Then
-c        write(6,*)'Error - Unable to get lat/lon data'
+c     if(istatus.ne.1)then
+c        write(6,*)'error - unable to get lat/lon data'
 c        goto 900 
 c     end if
 c-----------------------------------------------------------------
@@ -68,7 +68,7 @@ c input values "js" (representing the satellite id) and "it" (representing
 c the format type for that satellite) direct this subroutine to
 c compute the appropriate mapping nav arrays.
 c
-      write(6,*)'Subroutine genlvdlut_lvd: ',it,js,c_sat_types(it,js)
+      write(6,*)'subroutine genlvdlut_lvd: ',it,js,c_sat_types(it,js)
 
       istatus = -1
 
@@ -84,7 +84,7 @@ c
 
              write(6,59)c_sat_id(js),c_sat_types(it,js),
      &c_channel_types(lc,it,js)
-59           format(/,'Generate Mapping Arrays: ',a6,"/",a3,"/",a3)
+59           format(/,'generate mapping arrays: ',a6,"/",a3,"/",a3)
 
              if(c_sat_types(it,js).eq.'gnp' .or.
      &          c_sat_types(it,js).eq.'gr2')then
@@ -96,11 +96,11 @@ c
              endif
 
              if(istatus.eq.1)then
-              write(6,*)'Finished '
+              write(6,*)'finished '
              elseif(istatus.eq.0)then
-              write(*,*)'Mapping arrays already generated'
+              write(*,*)'mapping arrays already generated'
              else
-              write(6,*)'Error! mapping arrays not generated ',
+              write(6,*)'error! mapping arrays not generated ',
      &c_sat_id(js),'/',c_sat_types(it,js),'/',c_channel_types(lc,it,js)
              endif
 
@@ -123,11 +123,11 @@ c
              call gen_gvarimage_lut(js,it,lc,nx_l,ny_l,lat,lon,
      & gri(1,1,lc),grj(1,1,lc),istatus)
              if(istatus.eq.1)then
-              write(6,*)'Mapping array successfully generated'
+              write(6,*)'mapping array successfully generated'
              elseif(istatus.eq.0)then
-              write(*,*)'IR mapping already generated'
+              write(*,*)'ir mapping already generated'
              else
-              write(6,*)'IR mapping not generated ',
+              write(6,*)'ir mapping not generated ',
      &c_channel_types(lc,it,js)
              endif
             else
@@ -142,7 +142,7 @@ c
 
 c         elseif(c_sat_types(it,js).eq.'asc')then
 c
-c          write(6,*)'Generate LUTs for ascii data'
+c          write(6,*)'generate luts for ascii data'
 c           do lc=1,maxchannel
 c              lc=ichannels(lc,it,js)
 c              call get_ascii_dimensions(path_to_data_cdf,
@@ -151,15 +151,15 @@ c              call gen_ascii_lut(path_to_data_cdf,
 c    &csatid,c_sat_types(i,j),c_channel_types(lch,i,j),
 c    &nelem,nlines,nx_l,ny_l,lat,lon,istatus)
 c              if(istatus.eq.1)then
-c                 write(6,*)'LUT generated'
+c                 write(6,*)'lut generated'
 c              else
-c                 write(6,*)'LUT not generated ',c_channel_types(lch,i)
+c                 write(6,*)'lut not generated ',c_channel_types(lch,i)
 c              endif
 c           enddo
 
       elseif(c_sat_types(it,js).eq.'hko')then
 
-            print*,'Compute mapping arrays for merc ll - hko'
+            print*,'compute mapping arrays for merc ll - hko'
             do lc=1,maxchannel
 
                if(ichannels(lc,it,js).eq.1)then
@@ -171,11 +171,11 @@ c           enddo
      & lat,lon,gri(1,1,lc),grj(1,1,lc),istatus)
 
                   if(istatus.eq.1)then
-                     write(6,*)'LUT generated'
+                     write(6,*)'lut generated'
                   elseif(istatus.eq.0)then
-                     write(*,*)'ir LUT already generated'
+                     write(*,*)'ir lut already generated'
                   else
-                     write(6,*)'Error! LUT not generated ',
+                     write(6,*)'error! lut not generated ',
      &c_sat_id(js),'/',c_sat_types(it,js),'/',c_channel_types(lc,it,js)
                   endif
 
@@ -189,7 +189,7 @@ c           enddo
       elseif(c_sat_types(it,js).eq.'nll' .or.
      &       c_sat_types(it,js).eq.'jma'      )then
 
-            print*,'Compute mapping arrays for ',c_sat_types(it,js)
+            print*,'compute mapping arrays for ',c_sat_types(it,js)
             do lc=1,maxchannel
 
                if(ichannels(lc,it,js).eq.1)then
@@ -201,11 +201,11 @@ c           enddo
      & lat,lon,gri(1,1,lc),grj(1,1,lc),istatus)
 
                   if(istatus.eq.1)then
-                     write(6,*)'LUT generated'
+                     write(6,*)'lut generated'
                   elseif(istatus.eq.0)then
-                     write(*,*)'ir LUT already generated'
+                     write(*,*)'ir lut already generated'
                   else
-                     write(6,*)'Error! LUT not generated ',
+                     write(6,*)'error! lut not generated ',
      &c_sat_id(js),'/',c_sat_types(it,js),'/',c_channel_types(lc,it,js)
                   endif
 
@@ -220,7 +220,7 @@ c polar orbiter/netcdf/polar stereographic projected data
 c ---------------------------------------------------------
       elseif(c_sat_types(it,js).eq.'ncp')then
 
-        print*,'Compute mapping arrays for polar stereo - ncp'
+        print*,'compute mapping arrays for polar stereo - ncp'
         do lc=1,maxchannel
            if(ichannels(lc,it,js).eq.1)then
 
@@ -231,9 +231,9 @@ c ---------------------------------------------------------
      & lat,lon,gri(1,1,lc),grj(1,1,lc),istatus)
 
               if(istatus.eq.1)then
-                 write(6,*)'Mapping arrays successfully generated'
+                 write(6,*)'mapping arrays successfully generated'
               else
-                write(6,*)'Error! LUT not generated ',
+                write(6,*)'error! lut not generated ',
      &c_sat_id(js),'/',c_sat_types(it,js),'/',c_channel_types(lc,it,js)
               endif
 
@@ -246,8 +246,8 @@ c ---------------------------------------------------------
 
       elseif(c_sat_types(it,js).ne.'     ')then
 
-        write(6,*)'Unknown satellite data type! '
-        write(6,*)'Check static/satellite_lvd.nl'
+        write(6,*)'unknown satellite data type! '
+        write(6,*)'check static/satellite_lvd.nl'
 
       endif
 

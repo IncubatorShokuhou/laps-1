@@ -1,58 +1,58 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis 
 
       subroutine taugim(t,w,o,theta,ngoes,kan,tau)
-c * GOES/I-M TAU via McMillin-Fleming-Woolf-Eyre regression model
-c   Input temperatures ('T'), water-vapor mixing ratios ('W'),
-c        and ozone mixing ratios ('O') must be at the 'STANDARD'
+c * goes/i-m tau via mcmillin-fleming-woolf-eyre regression model
+c   input temperatures ('t'), water-vapor mixing ratios ('w'),
+c        and ozone mixing ratios ('o') must be at the 'standard'
 c        40 levels used for radiative-transfer calculations.
-c   If ozone profile is not available, pass a zero-filled array.  This
+c   if ozone profile is not available, pass a zero-filled array.  this
 c        will cause the reference profile to be used.
-c   Units -- T: degrees Kelvin; W: grams/kilogram; O: ppm by volume.
-c   Logical unit number 15 is used for the coefficient file.
-c      THETA = local (satellite) zenith angle in degrees
-c      NGOES = GOES satellite number, e.g. 8 (GOES/I)
-c        KAN = channel number (1,...,25)
-c               1 thru 18 are SOUNDER
-c              22 thru 25 are IMAGER
-c   To get Planck-function, band correction, and TSKIN coefficients,
+c   units -- t: degrees kelvin; w: grams/kilogram; o: ppm by volume.
+c   logical unit number 15 is used for the coefficient file.
+c      theta = local (satellite) zenith angle in degrees
+c      ngoes = goes satellite number, e.g. 8 (goes/i)
+c        kan = channel number (1,...,25)
+c               1 thru 18 are sounder
+c              22 thru 25 are imager
+c   to get planck-function, band correction, and tskin coefficients,
 c    plus gammas, deltas, epsilons, and 'use' flags,
-c        user *MUST* call PFCGIM!
-c   Total transmittance is returned via the formal parameter TAU.
-c   Separate DRY/WET/OZO transmittances are returned via COMMON.
+c        user *must* call pfcgim!
+c   total transmittance is returned via the formal parameter tau.
+c   separate dry/wet/ozo transmittances are returned via common.
 c
       parameter (nc=3,nk=25,nl=40,nlm1=nl-1,nt=2,nv=20,nx=9,nxp1=nx+1)
       parameter (iuc=15,lenc=nxp1*nl*nc,lencb=lenc*4)
@@ -71,7 +71,7 @@ c
       real fast_coef(30000)
       equivalence (fast_coef(1), coef(1,1,1,1) )
       character*8 cfile
-      data cfile/'GOESRTCF'/
+      data cfile/'goesrtcf'/
       character*200 fname
       integer len
 c
@@ -191,7 +191,7 @@ crma     do=do+abs(o(j)-ol(j))
          dt=delt(j)
          ss=sums(j)
          st=sumt(j)
-c **** DRY
+c **** dry
          xx(1,j,1)=dt*path
          xx(2,j,1)=dt*dt*path
          xx(3,j,1)=st*path
@@ -201,7 +201,7 @@ c **** DRY
          xx(7,j,1)=st*pathm1
          xx(8,j,1)=ss*pathm1
          xx(9,j,1)=dt*pathm1
-c **** WET
+c **** wet
          sqpw=sqrtp*sqw(j)
          dw=delw(j)
          sw=sumw(j)
@@ -214,7 +214,7 @@ c **** WET
          xx(7,j,2)=dw*sqpw
          xx(8,j,2)=dw*dw*sqpw
          xx(9,j,2)=dw*dt*sqpw
-c **** OZO
+c **** ozo
          sqpo=sqrtp*sqo(j)
          do=delo(j)
          so=sumo(j)
@@ -258,7 +258,7 @@ c
   200 return
       end
       block data refpro
-c $ Transmittance-Model Reference = U.S. Standard Atmosphere, 1976
+c $ transmittance-model reference = u.s. standard atmosphere, 1976
       parameter (nl=40)
       common/refatm/pref(nl),tref(nl),wref(nl),oref(nl)
       data pref/ .1,.2,.5,1.,1.5,2.,3.,4.,5.,7.,10.,15.,20.,25.,30.,
@@ -289,9 +289,9 @@ c    +   2.202,  2.819,  3.168,  4.411,  5.416,  6.397,  6.846,  7.564/
      + 0.03384,0.03342,0.03319,0.03249,0.03070,0.02878,0.02805,0.02689/
       end
       subroutine pfcgim(ngoes)
-c * Input GOES/I-M Planck-function, band-cor'n & TSKIN coeff's
+c * input goes/i-m planck-function, band-cor'n & tskin coeff's
 c        plus gammas, deltas, epsilons, and 'use' flags
-c        NGOES = GOES satellite number, e.g. 8 (GOES/I)
+c        ngoes = goes satellite number, e.g. 8 (goes/i)
       parameter (iuc=15,lenc=1200,nk=25,nt=2,lenp=nk*(nt+3),lent=30)
       parameter (leng=nk*3,lenu=nk*nt,lenr=lenc*4)
       parameter (mbg=200,mbu=300,nrc=20)
@@ -302,7 +302,7 @@ c        NGOES = GOES satellite number, e.g. 8 (GOES/I)
       dimension cbuf(lenc)
       save
       character*8 cfile
-      data cfile/'GOESRTCF'/
+      data cfile/'goesrtcf'/
       character*200 fname
       integer len
 c
@@ -324,7 +324,7 @@ c
 
 c
 c
-c....dont call original code (follows if test)... only runs on IBM
+c....dont call original code (follows if test)... only runs on ibm
 c
 c
       if (1.eq.1) return

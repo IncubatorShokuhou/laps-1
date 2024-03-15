@@ -1,37 +1,37 @@
 !------------------------------------------------------------------------------
 !
-! NAME:
-!       optran90_fm ! initial interface to f90 code to the LAPS system
+! name:
+!       optran90_fm ! initial interface to f90 code to the laps system
 !                     built on optran90 test code
-!                     and Paul van Delst (acknowledged below)
-!                     Forecast systems laboratory
+!                     and paul van delst (acknowledged below)
+!                     forecast systems laboratory
 !
-!  Copywrite (C) 2003 Daniel Birkenheuer
+!  copywrite (c) 2003 daniel birkenheuer
 !
 !
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS/SSEC 20-Aug-2001
+! creation history:
+!       written by:     paul van delst, cimss/ssec 20-aug-2001
 !                       paul.vandelst@ssec.wisc.edu
-!                       Modified by Dan Birkenheuer
-!                       birk@fsl.noaa.gov for interface to LAPS
-!                       Used in LAPS per permission of Paul van Delst
+!                       modified by dan birkenheuer
+!                       birk@fsl.noaa.gov for interface to laps
+!                       used in laps per permission of paul van delst
 !
-!  Copyright (C) 2001 Paul van Delst
+!  copyright (c) 2001 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
 !
 !------------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@
           sfc_refl, &
           sec_za, &
           sec_solar, &
-          Mchan, &
+          mchan, &
           tau90, &
           flx_tau, &
           sol_tau, &
@@ -57,30 +57,30 @@
 
 
   !#----------------------------------------------------------------------------#
-  !#                             -- MODULE USAGE --                             #
+  !#                             -- module usage --                             #
   !#----------------------------------------------------------------------------#
 
-  USE type_kinds
-  USE file_utility
-  USE error_handler
-  USE parameters
-  USE initialize
-  USE forward_model, ONLY: compute_rtm
+  use type_kinds
+  use file_utility
+  use error_handler
+  use parameters
+  use initialize
+  use forward_model, only: compute_rtm
 
-  ! -- For access to IS_MICROWAVE_CHANNEL only.
-  USE spectral_coefficients
+  ! -- for access to is_microwave_channel only.
+  use spectral_coefficients
 
 
 
   !#----------------------------------------------------------------------------#
-  !#                           -- TYPE DECLARATIONS --                          #
+  !#                           -- type declarations --                          #
   !#----------------------------------------------------------------------------#
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
   integer kk
   integer mchan
@@ -109,115 +109,115 @@
 
 
   ! ------------------
-  ! Program parameters
+  ! program parameters
   ! ------------------
 
-  ! path for LAPS
+  ! path for laps
 
   character*256 fname
   integer len
   integer channels_used
 
 
-  ! -- Name
-  CHARACTER( * ),  PARAMETER :: PROGRAM_NAME = 'RTM_TEST_FWD'
+  ! -- name
+  character( * ),  parameter :: program_name = 'rtm_test_fwd'
 
-  ! -- Angle definitions
-  INTEGER,         PARAMETER :: N_ANGLES  = 1
-  REAL( fp_kind ), PARAMETER :: MIN_ANGLE =  0.0_fp_kind
-  REAL( fp_kind ), PARAMETER :: MAX_ANGLE = 0.0_fp_kind
+  ! -- angle definitions
+  integer,         parameter :: n_angles  = 1
+  real( fp_kind ), parameter :: min_angle =  0.0_fp_kind
+  real( fp_kind ), parameter :: max_angle = 0.0_fp_kind
 
-  ! -- Profile definitions
-  CHARACTER( * ),  PARAMETER :: PROFILE_FILE        = 'profiles_LAYER.bin'
-  INTEGER,         PARAMETER :: N_PROFILES          = 1
-  INTEGER N_LAYERS    ! arbitrary level number to be kk
+  ! -- profile definitions
+  character( * ),  parameter :: profile_file        = 'profiles_layer.bin'
+  integer,         parameter :: n_profiles          = 1
+  integer n_layers    ! arbitrary level number to be kk
 
 
-  ! -- Other dimension parameters
-  INTEGER,         PARAMETER :: N_ABSORBERS  = MAX_N_ABSORBERS
-  INTEGER,         PARAMETER :: N_PREDICTORS = MAX_N_PREDICTORS
+  ! -- other dimension parameters
+  integer,         parameter :: n_absorbers  = max_n_absorbers
+  integer,         parameter :: n_predictors = max_n_predictors
 
-  ! -- Emissivity parameters
-  REAL( fp_kind ), PARAMETER :: DEFAULT_MW_EMISSIVITY = 0.6_fp_kind
-  REAL( fp_kind ), PARAMETER :: DEFAULT_IR_EMISSIVITY = 0.96_fp_kind
+  ! -- emissivity parameters
+  real( fp_kind ), parameter :: default_mw_emissivity = 0.6_fp_kind
+  real( fp_kind ), parameter :: default_ir_emissivity = 0.96_fp_kind
 
-  ! -- Default solar angle secant (> 11.47 means no solar)
-  REAL( fp_kind ), PARAMETER :: DEFAULT_SECANT_SOLAR_ANGLE = 12.0_fp_kind
+  ! -- default solar angle secant (> 11.47 means no solar)
+  real( fp_kind ), parameter :: default_secant_solar_angle = 12.0_fp_kind
 
 
   ! -----------------
-  ! Program variables
+  ! program variables
   ! -----------------
 
-  ! -- Error message
-  CHARACTER( 128 ) :: message 
+  ! -- error message
+  character( 128 ) :: message 
 
-  ! -- Status variables
-  INTEGER :: error_status
-  INTEGER :: allocate_status
-  INTEGER :: io_status
+  ! -- status variables
+  integer :: error_status
+  integer :: allocate_status
+  integer :: io_status
 
-  ! -- Loop counters, dimensions and file lun
-  INTEGER :: i, j, k, l, m, il
-  INTEGER :: n_available_channels, l1, l2, begin_channel, end_channel, n_channels
-  INTEGER :: record_length, record_number
-  INTEGER :: lun
-  INTEGER :: lun_FWD
+  ! -- loop counters, dimensions and file lun
+  integer :: i, j, k, l, m, il
+  integer :: n_available_channels, l1, l2, begin_channel, end_channel, n_channels
+  integer :: record_length, record_number
+  integer :: lun
+  integer :: lun_fwd
 
-  ! -- Secant angle arrays
-  INTEGER         :: i_angle
-  REAL( fp_kind ) :: d_angle
-  REAL( fp_kind ), DIMENSION( N_ANGLES ) :: view_angle
-  REAL( fp_kind ), DIMENSION( N_ANGLES ) :: secant_view_angle
-  REAL( fp_kind ), DIMENSION( N_ANGLES ) :: secant_solar_angle
-  REAL( fp_kind ), DIMENSION( N_ANGLES ) :: surface_temperature
+  ! -- secant angle arrays
+  integer         :: i_angle
+  real( fp_kind ) :: d_angle
+  real( fp_kind ), dimension( n_angles ) :: view_angle
+  real( fp_kind ), dimension( n_angles ) :: secant_view_angle
+  real( fp_kind ), dimension( n_angles ) :: secant_solar_angle
+  real( fp_kind ), dimension( n_angles ) :: surface_temperature
 
-  ! -- Profile read array
-  REAL( fp_kind ), DIMENSION( : ), ALLOCATABLE  :: level_pressure
-  REAL( fp_kind ), DIMENSION( : ), ALLOCATABLE  :: layer_pressure
-  REAL( fp_kind ), DIMENSION( : ), ALLOCATABLE  :: layer_temperature
-  REAL( fp_kind ), DIMENSION( : ), ALLOCATABLE  :: layer_water_vapor
-  REAL( fp_kind ), DIMENSION( : ), ALLOCATABLE  :: layer_ozone
+  ! -- profile read array
+  real( fp_kind ), dimension( : ), allocatable  :: level_pressure
+  real( fp_kind ), dimension( : ), allocatable  :: layer_pressure
+  real( fp_kind ), dimension( : ), allocatable  :: layer_temperature
+  real( fp_kind ), dimension( : ), allocatable  :: layer_water_vapor
+  real( fp_kind ), dimension( : ), allocatable  :: layer_ozone
 
 
 
-  ! -- Profile data arrays
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: level_p
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: layer_p
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: layer_t
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: layer_w
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: layer_o
+  ! -- profile data arrays
+  real( fp_kind ), dimension( :, : ), allocatable :: level_p
+  real( fp_kind ), dimension( :, : ), allocatable :: layer_p
+  real( fp_kind ), dimension( :, : ), allocatable :: layer_t
+  real( fp_kind ), dimension( :, : ), allocatable :: layer_w
+  real( fp_kind ), dimension( :, : ), allocatable :: layer_o
  
-  ! -- Number of channels processed for each profile
-  INTEGER, DIMENSION( N_ANGLES ) :: n_channels_per_profile
+  ! -- number of channels processed for each profile
+  integer, dimension( n_angles ) :: n_channels_per_profile
 
-  ! -- Allocatable arrays
-  REAL( fp_kind ), DIMENSION( : ),    ALLOCATABLE :: surface_emissivity
-  REAL( fp_kind ), DIMENSION( : ),    ALLOCATABLE :: surface_reflectivity
-  INTEGER,         DIMENSION( : ),    ALLOCATABLE :: channel_index
+  ! -- allocatable arrays
+  real( fp_kind ), dimension( : ),    allocatable :: surface_emissivity
+  real( fp_kind ), dimension( : ),    allocatable :: surface_reflectivity
+  integer,         dimension( : ),    allocatable :: channel_index
 
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: tau
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: flux_tau
-  REAL( fp_kind ), DIMENSION( :, : ), ALLOCATABLE :: solar_tau
+  real( fp_kind ), dimension( :, : ), allocatable :: tau
+  real( fp_kind ), dimension( :, : ), allocatable :: flux_tau
+  real( fp_kind ), dimension( :, : ), allocatable :: solar_tau
 
-  REAL( fp_kind ), DIMENSION( : ),    ALLOCATABLE :: upwelling_radiance
-  REAL( fp_kind ), DIMENSION( : ),    ALLOCATABLE :: brightness_temperature
+  real( fp_kind ), dimension( : ),    allocatable :: upwelling_radiance
+  real( fp_kind ), dimension( : ),    allocatable :: brightness_temperature
 
-  ! -- Stuff for emissivities
-  REAL( fp_kind ) :: angle_modifier
-  REAL( fp_kind ), DIMENSION( N_ANGLES ) :: mw_emissivity
-  REAL( fp_kind ), DIMENSION( N_ANGLES ) :: ir_emissivity
+  ! -- stuff for emissivities
+  real( fp_kind ) :: angle_modifier
+  real( fp_kind ), dimension( n_angles ) :: mw_emissivity
+  real( fp_kind ), dimension( n_angles ) :: ir_emissivity
   integer ::  first_time = 1
 
 
   ! ----------
-  ! Intrinsics
+  ! intrinsics
   ! ----------
 
-  INTRINSIC COS, &
-            MIN, MAX, &
-            REAL, &
-            TRIM
+  intrinsic cos, &
+            min, max, &
+            real, &
+            trim
 
 
 
@@ -225,13 +225,13 @@
   !##############################################################################
   !##############################################################################
   !#                                                                            #
-  !#                         -- INITIALIZE THE RTM --                           #
+  !#                         -- initialize the rtm --                           #
   !#                                                                            #
   !##############################################################################
   !##############################################################################
   !##############################################################################
 
-  N_LAYERS = kk  ! profile dependent length
+  n_layers = kk  ! profile dependent length
 
 
   if (first_time == 1) then ! first time it is called
@@ -245,12 +245,12 @@
                    path = fname(1:len),  &
                spectral_file = sndr_coeff(1:sndr_coeff_len)  )
 
-     IF ( error_status /= SUCCESS ) THEN
-        CALL display_message( PROGRAM_NAME, &
-             'Error initialzing RTM', &
+     if ( error_status /= success ) then
+        call display_message( program_name, &
+             'error initialzing rtm', &
              error_status )
-        STOP
-     END IF
+        stop
+     end if
 
   endif ! first_time called
 
@@ -259,74 +259,74 @@
   !##############################################################################
   !##############################################################################
   !#                                                                            #
-  !#               -- SETUP DATA AND ARRAYS FOR CALCULATIONS --                 #
+  !#               -- setup data and arrays for calculations --                 #
   !#                                                                            #
   !##############################################################################
   !##############################################################################
   !##############################################################################
 
   !#----------------------------------------------------------------------------#
-  !#                    -- ALLOCATE ARRAYS FOR RTM MODEL --                     #
+  !#                    -- allocate arrays for rtm model --                     #
   !#----------------------------------------------------------------------------#
 
   ! ----------------------------------
-  ! Get the number of channels read in
+  ! get the number of channels read in
   ! from the coefficient data files
   ! ----------------------------------
 
-! ALLOCATE ARRAYS FOR VARIABLE PROFILE CONTENTS
+! allocate arrays for variable profile contents
 !
 
-  ALLOCATE (      level_p                  ( N_LAYERS,N_ANGLES), &
-                  layer_p                  ( N_LAYERS,N_ANGLES), &    
-                  layer_t                  ( N_LAYERS,N_ANGLES), & 
-                  layer_w                  ( N_LAYERS,N_ANGLES), & 
-                  layer_o                  ( N_LAYERS,N_ANGLES), &
-                  level_pressure           ( N_LAYERS), &
-                  layer_pressure           ( N_LAYERS), & 
-                  layer_temperature        ( N_LAYERS), & 
-                  layer_water_vapor        ( N_LAYERS), & 
-                  layer_ozone              ( N_LAYERS)   )
+  allocate (      level_p                  ( n_layers,n_angles), &
+                  layer_p                  ( n_layers,n_angles), &    
+                  layer_t                  ( n_layers,n_angles), & 
+                  layer_w                  ( n_layers,n_angles), & 
+                  layer_o                  ( n_layers,n_angles), &
+                  level_pressure           ( n_layers), &
+                  layer_pressure           ( n_layers), & 
+                  layer_temperature        ( n_layers), & 
+                  layer_water_vapor        ( n_layers), & 
+                  layer_ozone              ( n_layers)   )
 
-  CALL get_max_n_channels( n_channels )
+  call get_max_n_channels( n_channels )
 
   begin_channel = 1
   end_channel   = n_channels
 
 
   ! ---------------------------------------------------
-  ! Allocate the Forward model channel dependent arrays
+  ! allocate the forward model channel dependent arrays
   ! ---------------------------------------------------
 
-  ALLOCATE( surface_emissivity(   n_channels * N_ANGLES ),   &  ! Input,  L*M
-            surface_reflectivity( n_channels * N_ANGLES ),   &  ! Input,  L*M
-            channel_index(        n_channels * N_ANGLES ),   &  ! Input,  L*M
+  allocate( surface_emissivity(   n_channels * n_angles ),   &  ! input,  l*m
+            surface_reflectivity( n_channels * n_angles ),   &  ! input,  l*m
+            channel_index(        n_channels * n_angles ),   &  ! input,  l*m
 
-            tau(       N_LAYERS, n_channels * N_ANGLES ),    &  ! Output, K x L*M
-            flux_tau(  N_LAYERS, n_channels * N_ANGLES ),    &  ! Output, K x L*M
-            solar_tau( N_LAYERS, n_channels * N_ANGLES ),    &  ! Output, K x L*M
+            tau(       n_layers, n_channels * n_angles ),    &  ! output, k x l*m
+            flux_tau(  n_layers, n_channels * n_angles ),    &  ! output, k x l*m
+            solar_tau( n_layers, n_channels * n_angles ),    &  ! output, k x l*m
 
-            upwelling_radiance(     n_channels * N_ANGLES ), &  ! Output, L*M
-            brightness_temperature( n_channels * N_ANGLES ), &  ! Output, L*M
+            upwelling_radiance(     n_channels * n_angles ), &  ! output, l*m
+            brightness_temperature( n_channels * n_angles ), &  ! output, l*m
 
-            STAT = allocate_status )
+            stat = allocate_status )
 
-  IF ( allocate_status /= 0 ) THEN
-    WRITE( message, '( "Error allocating forward model channel ", &
-                      &"dependent arrays. STAT = ", i5 )' ) &
+  if ( allocate_status /= 0 ) then
+    write( message, '( "error allocating forward model channel ", &
+                      &"dependent arrays. stat = ", i5 )' ) &
                     allocate_status
-    CALL display_message( PROGRAM_NAME,    &
-                          TRIM( message ), &
-                          FAILURE          )
-    STOP
-  END IF
+    call display_message( program_name,    &
+                          trim( message ), &
+                          failure          )
+    stop
+  end if
 
 
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                           -- Assign variable from LAPS input             #
+    !#                           -- assign variable from laps input             #
     !#--------------------------------------------------------------------------#
 
       do k = 1, kk
@@ -357,46 +357,46 @@
    
 
     !#--------------------------------------------------------------------------#
-    !#                            -- FORWARD MODEL --                           #
+    !#                            -- forward model --                           #
     !#--------------------------------------------------------------------------#
 
 
     error_status = compute_rtm( &
-                                ! -- Forward inputs
-                                level_p,                &  ! Input,  K x M
-                                layer_p,                &  ! Input,  K x M
-                                layer_t,                &  ! Input,  K x M
-                                layer_w,                &  ! Input,  K x M
-                                layer_o,                &  ! Input,  K x M
+                                ! -- forward inputs
+                                level_p,                &  ! input,  k x m
+                                layer_p,                &  ! input,  k x m
+                                layer_t,                &  ! input,  k x m
+                                layer_w,                &  ! input,  k x m
+                                layer_o,                &  ! input,  k x m
 
-!                                layer_t(N_Layers,:),    &  ! Input, M
-                                surface_temperature,    &  ! Input, M
-                                surface_emissivity,     &  ! Input, L*M
-                                surface_reflectivity,   &  ! Input, L*M
+!                                layer_t(n_layers,:),    &  ! input, m
+                                surface_temperature,    &  ! input, m
+                                surface_emissivity,     &  ! input, l*m
+                                surface_reflectivity,   &  ! input, l*m
 
-                                secant_view_angle,      &  ! Input, M
-                                secant_solar_angle,     &  ! Input, M
-                                n_channels_per_profile, &  ! Input, M
-                                channel_index,          &  ! Input, L*M
+                                secant_view_angle,      &  ! input, m
+                                secant_solar_angle,     &  ! input, m
+                                n_channels_per_profile, &  ! input, m
+                                channel_index,          &  ! input, l*m
 
-                                ! -- Forward outputs
-                                tau,                    &  ! Output, K x L*M
-                                flux_tau,               &  ! Output, K x L*M
-                                solar_tau,              &  ! Output, K x L*M
+                                ! -- forward outputs
+                                tau,                    &  ! output, k x l*m
+                                flux_tau,               &  ! output, k x l*m
+                                solar_tau,              &  ! output, k x l*m
 
-                                upwelling_radiance,     &  ! Output, L*M
-                                brightness_temperature  )  ! Output, L*M
+                                upwelling_radiance,     &  ! output, l*m
+                                brightness_temperature  )  ! output, l*m
 
-    IF ( error_status /= SUCCESS ) THEN
-      CALL display_message( PROGRAM_NAME, &
-                            'Error occured in COMPUTE_RTM', &
+    if ( error_status /= success ) then
+      call display_message( program_name, &
+                            'error occured in compute_rtm', &
                             error_status )
-      STOP
-    END IF
+      stop
+    end if
 
 ! here the returned arrays (upwelling_radiance and brightness_temperature)
-! have dimensions of the insturment channels.  The LAPS array however is a 
-! fixed one of 18.  this takes and only uses the part of the LAPS array needed
+! have dimensions of the insturment channels.  the laps array however is a 
+! fixed one of 18.  this takes and only uses the part of the laps array needed
 
     
     channels_used = size (upwelling_radiance)
@@ -410,98 +410,98 @@
 
 
   !#----------------------------------------------------------------------------#
-  !#                           -- DESTROY THE RTM --                            #
+  !#                           -- destroy the rtm --                            #
   !#----------------------------------------------------------------------------#
 
   ! ---------------------------------------
-  ! Deallocate the channel dependent arrays
+  ! deallocate the channel dependent arrays
   ! ---------------------------------------
 
-  ! -- Forward model
+  ! -- forward model
 
-  DEALLOCATE (  layer_p,  layer_t  ,layer_w  ,layer_o ,  layer_pressure,  layer_temperature , layer_water_vapor ,  layer_ozone,  &
+  deallocate (  layer_p,  layer_t  ,layer_w  ,layer_o ,  layer_pressure,  layer_temperature , layer_water_vapor ,  layer_ozone,  &
                 level_p, level_pressure  )
 
-  DEALLOCATE( surface_emissivity,     &  ! Input,  L*M
-              surface_reflectivity,   &  ! Input,  L*M
-              channel_index,          &  ! Input,  L*M
+  deallocate( surface_emissivity,     &  ! input,  l*m
+              surface_reflectivity,   &  ! input,  l*m
+              channel_index,          &  ! input,  l*m
 
-              tau,                    &  ! Output, K x L*M
-              flux_tau,               &  ! Output, K x L*M
-              solar_tau,              &  ! Output, K x L*M
+              tau,                    &  ! output, k x l*m
+              flux_tau,               &  ! output, k x l*m
+              solar_tau,              &  ! output, k x l*m
 
-              upwelling_radiance,     &  ! Output, L*M
-              brightness_temperature, &  ! Output, L*M
+              upwelling_radiance,     &  ! output, l*m
+              brightness_temperature, &  ! output, l*m
 
-              STAT = allocate_status  )
+              stat = allocate_status  )
 
-  IF ( allocate_status /= 0 ) THEN
-    WRITE( message, '( "Error deallocating forward model channel ", &
-                      &"dependent arrays. STAT = ", i5 )' ) &
+  if ( allocate_status /= 0 ) then
+    write( message, '( "error deallocating forward model channel ", &
+                      &"dependent arrays. stat = ", i5 )' ) &
                     allocate_status
-    CALL display_message( PROGRAM_NAME,    &
-                          TRIM( message ), &
-                          WARNING          )
-  END IF
+    call display_message( program_name,    &
+                          trim( message ), &
+                          warning          )
+  end if
 
 
   ! ---------------------------------
-  ! Deallocate the coefficient arrays
+  ! deallocate the coefficient arrays
   ! ---------------------------------
 
  ! this utility is now handled by the new module below.  called from 
  ! variational.f after all calls to the forward model are complete.
 
-END SUBROUTINE  optran90_fm
+end subroutine  optran90_fm
 
-SUBROUTINE optran_deallocate (istatus)
+subroutine optran_deallocate (istatus)
 
-!  USE type_kinds
-!  USE file_utility
-!  USE error_handler
-!  USE parameters
+!  use type_kinds
+!  use file_utility
+!  use error_handler
+!  use parameters
 
-  USE initialize
+  use initialize
   integer :: istatus
   
   istatus = destroy_rtm()
   
-!  IF ( error_status /= SUCCESS ) THEN
-!     CALL display_message( PROGRAM_NAME, &
-!          'Error destroying RTM', &
+!  if ( error_status /= success ) then
+!     call display_message( program_name, &
+!          'error destroying rtm', &
 !          error_status )
-!     STOP
-!  END IF
+!     stop
+!  end if
   
 
-END SUBROUTINE optran_deallocate
+end subroutine optran_deallocate
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.3  2003/07/10 17:09:24  birk
+! $log$
+! revision 1.3  2003/07/10 17:09:24  birk
 ! ready for laps optran90
 !
-! Revision 1.2  2002/11/18 20:01:39  birk
+! revision 1.2  2002/11/18 20:01:39  birk
 ! changes made to avoid compilation errors on jet, statement order specifics.
 !
-! Revision 1.1  2002/11/15 15:21:32  birk
-! Added to cvs mainly to see how this compiles on other platforms, it currently
-! seems to compile on the IBM
+! revision 1.1  2002/11/15 15:21:32  birk
+! added to cvs mainly to see how this compiles on other platforms, it currently
+! seems to compile on the ibm
 !
-! Revision 1.1  2001/09/13 22:08:13  paulv
-! Initial checkin.
+! revision 1.1  2001/09/13 22:08:13  paulv
+! initial checkin.
 !
 !
 !

@@ -1,45 +1,45 @@
-SUBROUTINE Namelist
+subroutine namelist
 
 !*********************************************************
-!  This routine reads in namelist for the surface analysis
+!  this routine reads in namelist for the surface analysis
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !*********************************************************
 
-  USE Definition
+  use definition
 
-  INTEGER :: i
+  integer :: i
 
-  OPEN(unit=10,file='run/Namelist.txt',status='old')
-  READ(10,*) ! skip headline
+  open(unit=10,file='run/namelist.txt',status='old')
+  read(10,*) ! skip headline
 
   l(1:4) = (/mx,my,mt,mv/)
 
-  ! Grid dimensions:
-  READ(10,*) n(1),n(2),n(3),n(4)
+  ! grid dimensions:
+  read(10,*) n(1),n(2),n(3),n(4)
 
-  ! Check:
-  IF ((n(1) .GT. mx) .OR. (n(2) .GT. my) .OR. &
-      (n(3) .GT. mt) .OR. (n(4) .GT. mv)) THEN
-     PRINT*,'Namelist: Analysis array is too small!'
-     STOP
-  ENDIF
+  ! check:
+  if ((n(1) .gt. mx) .or. (n(2) .gt. my) .or. &
+      (n(3) .gt. mt) .or. (n(4) .gt. mv)) then
+     print*,'namelist: analysis array is too small!'
+     stop
+  endif
 
-  ! Data filename:
-  READ(10,*) namelens,datafile
+  ! data filename:
+  read(10,*) namelens,datafile
 
-  ! Recursive filters:
-  READ(10,*) ! Skip a specification line
-  DO i=1,n(4)
-     READ(10,*) al(1:3,i),np(1:3,i)
-  ENDDO
+  ! recursive filters:
+  read(10,*) ! skip a specification line
+  do i=1,n(4)
+     read(10,*) al(1:3,i),np(1:3,i)
+  enddo
 
-  ! Number of minimization iterations:
-  READ(10,*) maxitr
+  ! number of minimization iterations:
+  read(10,*) maxitr
 
-  ! Number of recursive filter iterations:
-  READ(10,*) nrf(1:n(4))
+  ! number of recursive filter iterations:
+  read(10,*) nrf(1:n(4))
 
-  CLOSE(10)
+  close(10)
 
-END SUBROUTINE Namelist
+end subroutine namelist

@@ -1,82 +1,82 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
         subroutine insert_radar(i4time,cldcv,cld_hts
-     1         ,temp_3d,temp_sfc_k,td_sfc_k                          ! I
-     1         ,grid_spacing_m,ni,nj,nk,kcloud                       ! I
-     1         ,cloud_base,ref_base                                  ! I
-!    1         ,tb8_k,sh_3d                                          ! I
-     1         ,topo,solar_alt,r_missing_data                        ! I
-     1         ,grid_ra_ref,dbz_max_2d                               ! I/O
-     1         ,vis_radar_thresh_dbz                                 ! I
-     1         ,l_unresolved                                         ! O
-     1         ,heights_3d                                           ! I
-     1         ,istatus)                                             ! O
+     1         ,temp_3d,temp_sfc_k,td_sfc_k                          ! i
+     1         ,grid_spacing_m,ni,nj,nk,kcloud                       ! i
+     1         ,cloud_base,ref_base                                  ! i
+!    1         ,tb8_k,sh_3d                                          ! i
+     1         ,topo,solar_alt,r_missing_data                        ! i
+     1         ,grid_ra_ref,dbz_max_2d                               ! i/o
+     1         ,vis_radar_thresh_dbz                                 ! i
+     1         ,l_unresolved                                         ! o
+     1         ,heights_3d                                           ! i
+     1         ,istatus)                                             ! o
 
-!       Insert radar data into cloud grid and reconcile cloud/radar fields.
+!       insert radar data into cloud grid and reconcile cloud/radar fields.
 
-!       For wideband radar, "resolved" echoes can be added in as cloud if the 
-!       echo top is >2000m AGL and the echo is located above an existing 
-!       "nominal" cloud base. The nominal cloud base is taken (if present) from 
+!       for wideband radar, "resolved" echoes can be added in as cloud if the 
+!       echo top is >2000m agl and the echo is located above an existing 
+!       "nominal" cloud base. the nominal cloud base is taken (if present) from 
 !       the pre-existing cloud field, either at the horizontal grid location 
 !       in question or from a neighboring grid point that has existing cloud.
 
-!       High echo tops with consistent cloud bases are treated as "resolved".
-!       Low echo tops are treated as "unresolved" as are echoes that lack
+!       high echo tops with consistent cloud bases are treated as "resolved".
+!       low echo tops are treated as "unresolved" as are echoes that lack
 !       pre-existing cloud.
 
-!       For all "unresolved" echoes no cloud is added and the echo is blanked 
+!       for all "unresolved" echoes no cloud is added and the echo is blanked 
 !       out.
 
-!       THIS PARAGRAPH SHOULD BE REVIEWED TO ENSURE IT IS CURRENT
-!       Narrowband radar is treated similarly, except that the echo top
-!       threshold does not apply. Instead, this subroutine will be actively
+!       this paragraph should be reviewed to ensure it is current
+!       narrowband radar is treated similarly, except that the echo top
+!       threshold does not apply. instead, this subroutine will be actively
 !       adding clouds (between the pre-existing cloud layers) only for 
-!       "trusted" narrowband radars such as NOWRAD. For other narrowband 
+!       "trusted" narrowband radars such as nowrad. for other narrowband 
 !       radars, the radar is blanked out if there is no pre-existing cloud 
 !       in the calling routine 'laps_cloud_sub'.
 
-!       Further reconciling of radar and satellite/cloud information is done 
+!       further reconciling of radar and satellite/cloud information is done 
 !       later on in subroutine 'insert_vis'.
 
-!       1992 - 2003        Steve Albers
+!       1992 - 2003        steve albers
 
-        use mem_namelist, ONLY: echotop_thr_a
+        use mem_namelist, only: echotop_thr_a
 
         real temp_3d(ni,nj,nk)
         real heights_3d(ni,nj,nk)
@@ -90,20 +90,20 @@ cdis
         real dbz_max_2d(ni,nj)
         real dbz_max_thr(ni,nj)
         real cloud_base(ni,nj)
-        real cloud_base_buf(ni,nj) ! Lowest SAO/IR base within search radius
+        real cloud_base_buf(ni,nj) ! lowest sao/ir base within search radius
         real topo(ni,nj)
         real solar_alt(ni,nj)
 
-        real echo_top(ni,nj)           ! L
-        real echo_top_agl(ni,nj)       ! L
-        real echo_top_temp(ni,nj)      ! L
-        real echo_agl_thr(ni,nj)       ! L
-        real lcl_agl(ni,nj)            ! L
+        real echo_top(ni,nj)           ! l
+        real echo_top_agl(ni,nj)       ! l
+        real echo_top_temp(ni,nj)      ! l
+        real echo_agl_thr(ni,nj)       ! l
+        real lcl_agl(ni,nj)            ! l
 
-        integer idebug_a(ni,nj)        ! L
+        integer idebug_a(ni,nj)        ! l
 
-!       Cloud not filled in unless radar echo is higher than base calculated
-!       with THIS threshold.
+!       cloud not filled in unless radar echo is higher than base calculated
+!       with this threshold.
         real     thresh_cvr
         parameter (thresh_cvr = 0.10)
 
@@ -111,13 +111,13 @@ cdis
         logical l_resolved(ni,nj)
         logical l_unresolved(ni,nj)
 
-!       Calculate Cloud Bases
+!       calculate cloud bases
         unlimited_ceiling = 200000.
 
-!       Echo top threshold
+!       echo top threshold
 !       echo_agl_thr = 2000.
 
-!       Search radius for cloud bases
+!       search radius for cloud bases
         search_radius_m = 60000.
 
         call get_ref_base_useable(ref_base_useable,istatus)
@@ -128,7 +128,7 @@ cdis
         do j = 1,nj
         do i = 1,ni
 
-!           Approximation based on a 4 deg F dewpoint depression for each
+!           approximation based on a 4 deg f dewpoint depression for each
 !           1000 ft of cloud base above the ground
             lcl_agl(i,j) = (temp_sfc_k(i,j) - td_sfc_k(i,j)) * 137.16 ! meters
 
@@ -177,7 +177,7 @@ cdis
 
         kp1 = nk
 
-        do k = nk,1,-1 ! Essential that this go downward to detect radar tops
+        do k = nk,1,-1 ! essential that this go downward to detect radar tops
                        ! in time to search for a new cloud base
 
             icount_radar_lvl = 0
@@ -186,8 +186,8 @@ cdis
             klow = 10000
             khigh = -1
 
-           !Find range of cloud grid levels for this LAPS grid level
-           !Find lowest level
+           !find range of cloud grid levels for this laps grid level
+           !find lowest level
             do kk = 1,kcloud
 c               write(6,*)k,kk,height_to_zcoord(cld_hts(kk),istatus)
                 if(nint(height_to_zcoord(cld_hts(kk),istatus)) .eq. k
@@ -207,16 +207,16 @@ c                   write(6,*)' khigh = ',kk
             enddo
 
             if(istatus .ne. 1)then
-                write(6,*)' Error in insert_radar'
+                write(6,*)' error in insert_radar'
                 return
             endif
 
             if(klow .eq. 10000 .or. khigh .eq. -1)then   
-                write(6,*)' Skip looping, no cloud levels'
+                write(6,*)' skip looping, no cloud levels'
                 goto600
             endif
 
-500         write(6,*)' Looping through level ',k,klow,khigh
+500         write(6,*)' looping through level ',k,klow,khigh
 
             do i = 1,ni
             do j = 1,nj
@@ -226,8 +226,8 @@ c                   write(6,*)' khigh = ',kk
                 if(temp_3d(i,j,k) .lt. 278.)then
                     ref_thresh = ref_base_useable
                 else
-                    ref_thresh = ref_base_useable ! Lowered from 20. and 13. 9/94
-!                   ref_thresh = 20.              ! Raised back to 13. in 2012          
+                    ref_thresh = ref_base_useable ! lowered from 20. and 13. 9/94
+!                   ref_thresh = 20.              ! raised back to 13. in 2012          
                 endif
 
 !               if(idebug_a(i,j) .eq. 1 .and. k .eq. 29)then
@@ -245,7 +245,7 @@ c                   write(6,*)' khigh = ',kk
 !    1                        ,grid_ra_ref(i,j,k),grid_ra_ref(i,j,kp1)
 !                   endif
 
-!                   Test if we are at echo top
+!                   test if we are at echo top
                     if(k .eq. nk   .or. 
      1                 grid_ra_ref(i,j,kp1) .lt. ref_thresh)then
 
@@ -254,16 +254,16 @@ c                   write(6,*)' khigh = ',kk
                         echo_top_temp(i,j) = temp_3d(i,j,k)                     
 
 !                       if(idebug_a(i,j) .eq. 1)then
-!                           write(6,*)'Echo top found:',i,j,k
+!                           write(6,*)'echo top found:',i,j,k
 !    1                                                  ,echo_top(i,j)
 !                       endif
 
-!                       Test if we are below the cloud base
+!                       test if we are below the cloud base
                         if(echo_top(i,j) .lt. cloud_base(i,j))then
 
-!                           Radar Echo Top is below analyzed cloud base
-!                           Various tests attempting to resolve...
-!                           Search for Modified Cloud Base, i.e. other neighboring
+!                           radar echo top is below analyzed cloud base
+!                           various tests attempting to resolve...
+!                           search for modified cloud base, i.e. other neighboring
 !                           bases lower than the current buffer value
 
                             ilow =  max(i-isearch_radius,1)
@@ -281,11 +281,11 @@ c                   write(6,*)' khigh = ',kk
                             enddo ! jj
 
                             if(cloud_base_buf(i,j) .lt. echo_top(i,j)
-     1                                       .AND. 
+     1                                       .and. 
      1                         echo_top_agl(i,j) .gt. echo_agl_thr(i,j)
-     1                                       .AND. 
-     1                         echo_top_temp(i,j) .le. 278.15   ! Cold Precip          
-     1                                       .AND. 
+     1                                       .and. 
+     1                         echo_top_temp(i,j) .le. 278.15   ! cold precip          
+     1                                       .and. 
      1                         dbz_max_2d(i,j) .ge. dbz_max_thr(i,j)
      1                                                             )then
 
@@ -295,25 +295,25 @@ c                   write(6,*)' khigh = ',kk
      1                                    ,nint(echo_top(i,j))
      1                                    ,nint(cloud_base(i,j))
      1                                    ,nint(cloud_base_buf(i,j))
-71                              format(' Rdr Top > Bse ',2i4,i3,3i7
-     1                                ,' Resolved')
+71                              format(' rdr top > bse ',2i4,i3,3i7
+     1                                ,' resolved')
                               endif
 
-!                             l_resolved is still TRUE
+!                             l_resolved is still true
 
-                            else ! Unresolved base
+                            else ! unresolved base
                               l_resolved(i,j) = .false.
 
-                            endif ! Resolved Base tests (nearby base, high echo
+                            endif ! resolved base tests (nearby base, high echo
                                   !                      top, and cold)
 
-                        endif ! Below Cloud Base (try to resolve)
+                        endif ! below cloud base (try to resolve)
 
-                    endif ! At Echo Top
+                    endif ! at echo top
 
-!                   Loop through range of cloud grid levels for this LAPS level
+!                   loop through range of cloud grid levels for this laps level
                     do kk = klow,khigh
-!                       Insert radar if we are above cloud base
+!                       insert radar if we are above cloud base
                         if(cld_hts(kk) .gt. cloud_base_buf(i,j)
      1                                .and. (l_resolved(i,j).eqv..true.)
      1                                                           )then
@@ -321,7 +321,7 @@ c                   write(6,*)' khigh = ',kk
                             insert_count_lvl = insert_count_lvl + 1
                             insert_count_tot = insert_count_tot + 1
                             l_inserted = .true.
-                        else ! Radar Echo below cloud base
+                        else ! radar echo below cloud base
                             l_below_base = .true.
                         endif
                     enddo ! kk
@@ -331,18 +331,18 @@ c                   write(6,*)' khigh = ',kk
                         if(idebug_a(i,j) .eq. 1)then 
                             write(6,81)i,j,k,nint(cld_hts(klow))
      1                                  ,nint(cloud_base_buf(i,j))
-81                          format(' Rdr     < Bse ',2i4,i3,2i7)
+81                          format(' rdr     < bse ',2i4,i3,2i7)
                         endif
                     endif ! below base
 
-                endif ! Reflectivity > thresh
+                endif ! reflectivity > thresh
 
-                if( (l_inserted .eqv. .true.) .AND. 
+                if( (l_inserted .eqv. .true.) .and. 
      1              (idebug_a(i,j) .eq. 1)          )then
                     write(6,591)i,j,k,l_resolved(i,j)
      1                         ,dbz_max_2d(i,j),echo_top(i,j)
      1                         ,echo_top_temp(i,j)
-591                 format(' Inserted radar',2i4,i3,l2
+591                 format(' inserted radar',2i4,i3,l2
      1                                      ,1x,f8.1,f8.0,f8.2)
                     if(echo_top(i,j) .eq. r_missing_data)then
                         write(6,*)grid_ra_ref(i,j,:)
@@ -355,15 +355,15 @@ c                   write(6,*)' khigh = ',kk
 
             write(6,592)k,klow,khigh
      1          ,icount_radar_lvl,insert_count_lvl,insert_count_tot
-592         format(' Inserted radar',3i3,3i8)
+592         format(' inserted radar',3i3,3i8)
  
             kp1 = k
 
 600         continue
 
-        enddo ! k (LAPS grid level)
+        enddo ! k (laps grid level)
 
-        write(6,*)' Total cloud grid points modified by radar = '
+        write(6,*)' total cloud grid points modified by radar = '
      1                                          ,insert_count_tot
 
         do i = 1,ni
@@ -373,7 +373,7 @@ c                   write(6,*)' khigh = ',kk
                 if(echo_top_agl(i,j) .lt. echo_agl_thr(i,j) .and. 
      1             (l_resolved(i,j).eqv..true.)       )then
 
-!                   Should we set these to unresolved here or better yet above?
+!                   should we set these to unresolved here or better yet above?
                     if(echo_top_temp(i,j) .ge. 278.15)then
                       iwarm_resolved = 1
                       l_resolved(i,j) = .false.
@@ -389,30 +389,30 @@ c                   write(6,*)' khigh = ',kk
      1                        ,nint(cloud_base(i,j))
      1                        ,nint(cloud_base_buf(i,j))
      1                        ,echo_top_temp(i,j),iwarm_resolved
- 610                  format('CLD_RDR - Low echo top yet resolved '
-     1                    ,3i5,' ET',2i5,' Base',2i7,f7.1,i3)
+ 610                  format('cld_rdr - low echo top yet resolved '
+     1                    ,3i5,' et',2i5,' base',2i7,f7.1,i3)
                     endif
                 endif
             endif
 
             if(l_resolved(i,j) .eqv. .false.)then
 
-!               Reconcile radar and satellite 
-!               (Block out "unresolved" radar echoes)
+!               reconcile radar and satellite 
+!               (block out "unresolved" radar echoes)
 
                 if(dbz_max_2d(i,j) .lt. vis_radar_thresh_dbz)then
-!                   Blank out radar
+!                   blank out radar
                     if(idebug_a(i,j) .eq. 1)then 
                       write(6,601)i,j,dbz_max_2d(i,j)
      1                         ,nint(echo_top_agl(i,j))
      1                         ,nint(echo_agl_thr(i,j))
      1                         ,echo_top_temp(i,j)
-601                   format('CLD_RDR - insert_radar: '
-     1                         ,'Blank out radar < '
+601                   format('cld_rdr - insert_radar: '
+     1                         ,'blank out radar < '
      1                         ,2x,2i4,f6.1,' dbz',i6,1x,i6,' agl',f8.1)       
                     endif
 
-                    if(.true.)then ! Block out the radar
+                    if(.true.)then ! block out the radar
                         do k = 1,nk
                             grid_ra_ref(i,j,k) = ref_base
                         enddo ! k
@@ -421,11 +421,11 @@ c                   write(6,*)' khigh = ',kk
 
                 else
 
-!                   This situation is undesirable because we want to
+!                   this situation is undesirable because we want to
 !                   avoid cases where the radar reflectivity is high
-!                   but is "unresolved" (e.g. analyzed (SAO/IR) clouds at 
-!                   this point in) the analysis. We should check as to why 
-!                   it is unresolved (e.g. no clouds analyzed). For now we 
+!                   but is "unresolved" (e.g. analyzed (sao/ir) clouds at 
+!                   this point in) the analysis. we should check as to why 
+!                   it is unresolved (e.g. no clouds analyzed). for now we 
 !                   blank out the radar, but we could also create a cloud at 
 !                   the radar echo location.
 
@@ -434,12 +434,12 @@ c                   write(6,*)' khigh = ',kk
      1                         ,nint(echo_top_agl(i,j))       
      1                         ,nint(echo_agl_thr(i,j))
      1                         ,echo_top_temp(i,j)
-602                   format('CLD_RDR - insert_radar: '
-     1                         ,'Blank out radar > *'
+602                   format('cld_rdr - insert_radar: '
+     1                         ,'blank out radar > *'
      1                         ,1x,2i4,f6.1,' dbz',i6,1x,i6,' agl',f8.1)
                     endif
 
-                    if(.true.)then ! Block out the radar
+                    if(.true.)then ! block out the radar
                         do k = 1,nk
                             grid_ra_ref(i,j,k) = ref_base
                         enddo ! k
@@ -453,17 +453,17 @@ c                   write(6,*)' khigh = ',kk
                     if(echo_top(i,j) .ne. r_missing_data)then
                         write(6,612)i,j,nint(cloud_base(i,j))
      1                             ,nint(echo_top(i,j))
-612                     format('Resolved ',2i4,1x,2i6)                    
+612                     format('resolved ',2i4,1x,2i6)                    
                     endif
                 endif
 
             endif ! l_resolved
 
             if(echo_top(i,j) .ne. r_missing_data)then
-                if(echo_top_temp(i,j) .ge. 278.15  .AND.  
+                if(echo_top_temp(i,j) .ge. 278.15  .and.  
      1             dbz_max_2d(i,j)    .ge. ref_base_useable)then   
                     if(idebug_a(i,j) .eq. 1)then
-                        write(6,*)' Warm echo remaining at',i,j
+                        write(6,*)' warm echo remaining at',i,j
      1                           ,dbz_max_2d(i,j),echo_top_agl(i,j)
      1                           ,echo_top_temp(i,j)
                     endif
@@ -473,7 +473,7 @@ c                   write(6,*)' khigh = ',kk
         enddo ! j
         enddo ! i
 
-!       Blank out echoes less than "useable"
+!       blank out echoes less than "useable"
         where (grid_ra_ref .lt. ref_base_useable)grid_ra_ref = ref_base       
         where (dbz_max_2d  .lt. ref_base_useable)dbz_max_2d  = ref_base       
 

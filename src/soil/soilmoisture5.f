@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,400 +29,400 @@ cdis
 cdis 
 cdis 
 cdis 
-      Subroutine Soil_Moisture(imax,jmax,
-     &           Laps_u,Laps_v,Laps_T,Laps_TD,
-     &           Laps_Rain,Laps_sc,Laps_IN,Laps_WFZ,
-     &           Laps_MWF,Laps_MWF_pre,Laps_Wx,SoilType,    !Inputs down to here
-     &           GridDry,Laps_Evap,Laps_SMC_3D,istatus)
+      subroutine soil_moisture(imax,jmax,
+     &           laps_u,laps_v,laps_t,laps_td,
+     &           laps_rain,laps_sc,laps_in,laps_wfz,
+     &           laps_mwf,laps_mwf_pre,laps_wx,soiltype,    !inputs down to here
+     &           griddry,laps_evap,laps_smc_3d,istatus)
 
-C     LAPS SoilMoisture Subroutine. Driver is program LSM (LAPS Soil Moisture).
-C     Original version implemented for FSL Demonstration PC Workstation by
-C     Chandran Subramaniam
-C     2/8/93
+c     laps soilmoisture subroutine. driver is program lsm (laps soil moisture).
+c     original version implemented for fsl demonstration pc workstation by
+c     chandran subramaniam
+c     2/8/93
       
-C     John Smart 12/1/93: Adapt the software to run in real time on the
-C     			  UNIX platform.  Set up LAPS standard I/O.
-c     John Smart 9/22/97: Dynamic array mods
+c     john smart 12/1/93: adapt the software to run in real time on the
+c     			  unix platform.  set up laps standard i/o.
+c     john smart 9/22/97: dynamic array mods
 
       integer*4 imax,jmax
-      Include 'soilm.inc'
-C
-C**** MODEL12 is a Soil Moisture Content model developed in June l986, and
-C     based upon the Remote Sensing Based Watershed Model developed at
-C     the University of Maryland from 1982 to 1985.  This is Version 12.4,
-C     as submitted to Water Resources Bulletin in January 1989.
-C     Created by Groves.
+      include 'soilm.inc'
+c
+c**** model12 is a soil moisture content model developed in june l986, and
+c     based upon the remote sensing based watershed model developed at
+c     the university of maryland from 1982 to 1985.  this is version 12.4,
+c     as submitted to water resources bulletin in january 1989.
+c     created by groves.
 
 
-      DIMENSION R(100)
-      REAL 	KSAT,LAMDA,IN
+      dimension r(100)
+      real 	ksat,lamda,in
       real*4    rmiss
-      DATA 	DAY,SUMR,IN,OLDWEA/4*0./
-      INTEGER   Istatus
-      INTEGER   icycle_time
-      LOGICAL 	Dry, GridDry
-      INTEGER   SoilType(Imax,Jmax)
-      REAL      Laps_u(Imax,Jmax)     !u-component
-      REAL      Laps_v(Imax,Jmax)     !v-component
-      REAL      Laps_T(Imax,Jmax)     !Temperature
-      REAL      Laps_TD(Imax,Jmax)    !Dewpoint Temperature
-      REAL      Laps_SC(Imax,Jmax)    !Snow Cover - Estimate - (0.0 to 1.0)
-      REAL      Laps_IN(Imax,Jmax)    !Infiltration
-      REAL      Laps_Wx(Imax,Jmax)    !Weather data
-      REAL      Laps_WFZ(Imax,Jmax)   !Wetting Front Depth, z
-      REAL      Laps_MWF(Imax,Jmax)   !Wetting Front Moisture Content
-      REAL      Laps_MWF_pre(Imax,Jmax)!Previous Wetting Front Moisture Content
-      REAL 	Laps_Rain(Imax, Jmax) !Radar-estimated Liq precip
-      REAL      Laps_Evap(Imax,Jmax)  !Amount of Evaporation (Calc within)
-      REAL      Laps_SMC_3D(Imax,Jmax,3)!Three layer Soil Moisture Content
+      data 	day,sumr,in,oldwea/4*0./
+      integer   istatus
+      integer   icycle_time
+      logical 	dry, griddry
+      integer   soiltype(imax,jmax)
+      real      laps_u(imax,jmax)     !u-component
+      real      laps_v(imax,jmax)     !v-component
+      real      laps_t(imax,jmax)     !temperature
+      real      laps_td(imax,jmax)    !dewpoint temperature
+      real      laps_sc(imax,jmax)    !snow cover - estimate - (0.0 to 1.0)
+      real      laps_in(imax,jmax)    !infiltration
+      real      laps_wx(imax,jmax)    !weather data
+      real      laps_wfz(imax,jmax)   !wetting front depth, z
+      real      laps_mwf(imax,jmax)   !wetting front moisture content
+      real      laps_mwf_pre(imax,jmax)!previous wetting front moisture content
+      real 	laps_rain(imax, jmax) !radar-estimated liq precip
+      real      laps_evap(imax,jmax)  !amount of evaporation (calc within)
+      real      laps_smc_3d(imax,jmax,3)!three layer soil moisture content
 
       call get_laps_cycle_time(icycle_time,istat)
       if(istat.ne.1)then
-         write(6,*)'Error getting laps cycle time'
-         write(6,*)'WARNING: Setting DELT = 1.0'
-         write(6,*)'Assuming cycle time = 3600 sec'
+         write(6,*)'error getting laps cycle time'
+         write(6,*)'warning: setting delt = 1.0'
+         write(6,*)'assuming cycle time = 3600 sec'
          icycle_time = 3600
       endif
-      DELT = float(icycle_time)/3600.
+      delt = float(icycle_time)/3600.
 
       call get_r_missing_data(rmiss,istat)
       if(istat.ne.1)goto 1000
 
-      Write(6,*)'Calculating Pan Evaporation'
-      Call Calc_Evap(imax,jmax,Laps_u,Laps_v,
-     &               Laps_T,Laps_TD,    !Input to here.
-     &               Laps_Evap,IStatus)
-      If (IStatus.eq.1) Then
- 	 Write(6,*)'Completed Calculating Evaporation'
-      Else
-         Write(6,*)'Error computing evaporation, returning'
+      write(6,*)'calculating pan evaporation'
+      call calc_evap(imax,jmax,laps_u,laps_v,
+     &               laps_t,laps_td,    !input to here.
+     &               laps_evap,istatus)
+      if (istatus.eq.1) then
+ 	 write(6,*)'completed calculating evaporation'
+      else
+         write(6,*)'error computing evaporation, returning'
          istatus = -1
          return
-      Endif
+      endif
 
-      Write(6,*)' Begin Soil Moisture Calculation for grid'
+      write(6,*)' begin soil moisture calculation for grid'
 
-      Do J = 1, Jmax
-      Do I = 1, Imax
+      do j = 1, jmax
+      do i = 1, imax
 
-	ISOIL = SoilType(I,J)
-        CALL SOILS(ISOIL,KSAT,THS,THR,PSIF,PSIAE,LAMDA)
-        CALL AMC(THFC,ISOIL,THS)
+	isoil = soiltype(i,j)
+        call soils(isoil,ksat,ths,thr,psif,psiae,lamda)
+        call amc(thfc,isoil,ths)
 
-        OLDWEA = Laps_Wx(I,J)	     
-        IN = Laps_IN(I,J)
-        Z = Laps_WFZ(I,J)
-	THI = Laps_MWF(I,J)
-        XTHI = Laps_MWF_pre(I,J)
+        oldwea = laps_wx(i,j)	     
+        in = laps_in(i,j)
+        z = laps_wfz(i,j)
+	thi = laps_mwf(i,j)
+        xthi = laps_mwf_pre(i,j)
 
-        if(IN .ne.rmiss.and.  Z .ne.rmiss.and.
-     &     THI.ne.rmiss.and.XTHI.ne.rmiss)then
+        if(in .ne.rmiss.and.  z .ne.rmiss.and.
+     &     thi.ne.rmiss.and.xthi.ne.rmiss)then
 
-        If((Laps_sc(i,j).lt.snowthres).or.(laps_sc(i,j).gt.1.e30))then
+        if((laps_sc(i,j).lt.snowthres).or.(laps_sc(i,j).gt.1.e30))then
 
-          Dry = .FALSE.
-          IF((GridDry).OR.(Laps_Rain(I,J).LT.RainThres))dry=.true.
-          IF (Dry) THEN
-	    PAN = Laps_Evap(I,J)
-C	    IF(OLDWEA.LE.0.)XTHI=THI     ! I'm Not Sure  about this statement
-            CALL MOIST(XTHI,IN,XDAY,KSAT,THS,THR,PSIAE,LAMDA,THI,
-     1                 DEPTH,PAN,CUMD,CUMET,BAL,Z,RZST,OLDWEA)
-	    CALL SPLIT(Z,THI,XTHI,THI1,THI2,THI3,HOR1,HOR2,HOR3)
-            OLDWEA = 1.0/24.
-            IN = 0.0
-          ELSE        ! Rain 
-            IF(Z.LT.DCM)XTHI=(THI*Z+XTHI*(DCM-Z))/DCM
-            R(1) = Laps_Rain(I,J)
-	    CALL ENTRY(CUMQ,IN,XTHI,KSAT,THS,PSIF,DELT,R,DEPTH,N)
-	    Z=IN/(THS-XTHI)
-	    CALL SPLIT(Z,THS,XTHI,THI1,THI2,THI3,HOR1,HOR2,HOR3)
-            OLDWEA = -1./24
-            THI = THS
-          ENDIF
-          Laps_MWF(I,J) = THI
-          Laps_MWF_pre(i,j) = XTHI
-          Laps_WFZ(i,j)= Z
-  	  Laps_IN(I,J) = IN
-	  Laps_Wx(I,J) = OLDWEA
-          if(THS.eq.0.0)then
-             Laps_SMC_3D(I,J,1) = 0.0
-             Laps_SMC_3D(I,J,2) = 0.0
-             Laps_SMC_3D(I,J,3) = 0.0
+          dry = .false.
+          if((griddry).or.(laps_rain(i,j).lt.rainthres))dry=.true.
+          if (dry) then
+	    pan = laps_evap(i,j)
+c	    if(oldwea.le.0.)xthi=thi     ! i'm not sure  about this statement
+            call moist(xthi,in,xday,ksat,ths,thr,psiae,lamda,thi,
+     1                 depth,pan,cumd,cumet,bal,z,rzst,oldwea)
+	    call split(z,thi,xthi,thi1,thi2,thi3,hor1,hor2,hor3)
+            oldwea = 1.0/24.
+            in = 0.0
+          else        ! rain 
+            if(z.lt.dcm)xthi=(thi*z+xthi*(dcm-z))/dcm
+            r(1) = laps_rain(i,j)
+	    call entry(cumq,in,xthi,ksat,ths,psif,delt,r,depth,n)
+	    z=in/(ths-xthi)
+	    call split(z,ths,xthi,thi1,thi2,thi3,hor1,hor2,hor3)
+            oldwea = -1./24
+            thi = ths
+          endif
+          laps_mwf(i,j) = thi
+          laps_mwf_pre(i,j) = xthi
+          laps_wfz(i,j)= z
+  	  laps_in(i,j) = in
+	  laps_wx(i,j) = oldwea
+          if(ths.eq.0.0)then
+             laps_smc_3d(i,j,1) = 0.0
+             laps_smc_3d(i,j,2) = 0.0
+             laps_smc_3d(i,j,3) = 0.0
           else
-	     THSPER = THS / 100.0 
-	     Laps_SMC_3D(I,J,1) = THI1 ! / THSPER
-	     Laps_SMC_3D(I,J,2) = THI2 ! / THSPER
-	     Laps_SMC_3D(I,J,3) = THI3 ! / THSPER
+	     thsper = ths / 100.0 
+	     laps_smc_3d(i,j,1) = thi1 ! / thsper
+	     laps_smc_3d(i,j,2) = thi2 ! / thsper
+	     laps_smc_3d(i,j,3) = thi3 ! / thsper
 
           endif
 
         else
 
-          Laps_MWF(i,j)=ths
-          Laps_MWF_pre(i,j)=xthi
-	  Laps_WFZ(I,J) = hor1*2.54
-          Laps_IN(i,j)=0.1  !Not sure about this
-	  Laps_Wx(I,J) = 1./24. 
+          laps_mwf(i,j)=ths
+          laps_mwf_pre(i,j)=xthi
+	  laps_wfz(i,j) = hor1*2.54
+          laps_in(i,j)=0.1  !not sure about this
+	  laps_wx(i,j) = 1./24. 
 
-          if(THS.eq.0.0)then
-             Laps_SMC_3D(I,J,1) = 0.0
-             Laps_SMC_3D(I,J,2) = 0.0
-             Laps_SMC_3D(I,J,3) = 0.0
+          if(ths.eq.0.0)then
+             laps_smc_3d(i,j,1) = 0.0
+             laps_smc_3d(i,j,2) = 0.0
+             laps_smc_3d(i,j,3) = 0.0
           else
-	     THSPER = ths / 100.0 
-	     Laps_SMC_3D(I,J,1) = ths ! / THSPER
-	     Laps_SMC_3D(I,J,2) = ths ! / THSPER
-	     Laps_SMC_3D(I,J,3) = ths ! / THSPER
+	     thsper = ths / 100.0 
+	     laps_smc_3d(i,j,1) = ths ! / thsper
+	     laps_smc_3d(i,j,2) = ths ! / thsper
+	     laps_smc_3d(i,j,3) = ths ! / thsper
           endif
 
         endif
 
         endif
 
-      Enddo
-      Enddo	
-      Write(6,*)' Completed SM Calculation for grid'
+      enddo
+      enddo	
+      write(6,*)' completed sm calculation for grid'
       istatus = 1
-C
-100   WRITE(6,*)'End of Simulation'
+c
+100   write(6,*)'end of simulation'
       goto 1000
-C
-1000  Return
-      END
+c
+1000  return
+      end
 
-C ====================================================================
+c ====================================================================
 
-      SUBROUTINE SOILS(ISOIL,KSAT,THS,THR,PSIF,PSIAE,LAMDA)
-C**** Subroutine provides default values for soil hydraulic parameters
-      DIMENSION SATCON(6),RESPOR(6),EFFPOR(6),BUBPR(6)
-      REAL KSAT,LAM(6),LAMDA
-      DATA SATCON/10.,3.5,.65,1.3,.08,.03/
-      DATA RESPOR/.04,.05,.08,.10,.08,.11/
-      DATA EFFPOR/.39,.4,.39,.32,.4,.38/
-      DATA BUBPR/10.,15.,27.,15.,80.,130./
-      DATA LAM/.43,.38,.31,.23,.23,.20/
-      THE=EFFPOR(ISOIL)
-      KSAT=SATCON(ISOIL)/60.
-      THR=RESPOR(ISOIL)
-      PSIBUB=BUBPR(ISOIL)
-      LAMDA=LAM(ISOIL)
-      THS=THR+THE
-      PSIAE=PSIBUB/2.
-      PSIF=PSIAE*(2.+3.*LAMDA)/(1.+3.*LAMDA)
-      RETURN
-      END
-C
-      SUBROUTINE AMC(THI,ISOIL,THS)
-C**** Subroutine assigns initial soil moisture value
-      DIMENSION THFC(6),THWILT(6)
-      DATA THWILT/.06,.075,.13,.16,.22,.27/
-      DATA THFC/.125,.175,.25,.23,.37,.425/
-      THI=THFC(ISOIL)
-      IF(THI.LT.THWILT(ISOIL))XTHI=THWILT(ISOIL)
-      IF(THI.GT.THS)XTHI=THS
-      RETURN
-      END
-C
-      SUBROUTINE ENTRY(RO,IN,THI,KSAT,THS,PSIF,DELT,R,IDEPTH,N)
-C**** Subroutine calculates infiltration volume for rainfall period
-      DIMENSION CUMF(100),R(100),CUMQ(100),Q(100)
-      REAL KSAT,IN
-      INTEGER IDEPTH
-      IF(THI.GT.THS)THI=THS
-      SMAX=(THS-THI)*float(IDEPTH)*2.54
-      CUMF(1)=IN
-C      CUMF(1)=0.
-      CUMQ(1)=0.
-      FC=KSAT*DELT*60.
-      DO 10  IT=2,N+1
-	IF(CUMF(IT-1).GT.SMAX) GO TO 2
-	CALL INFIL(THI,DELT,KSAT,THS,PSIF,CUMF(IT-1),DELI)
-	GO TO 4
-2	DELI=FC
-4	IF(DELI.GT.R(IT-1)) DELI=R(IT-1)
-	CUMF(IT)=CUMF(IT-1)+DELI
-	Q(IT)=R(IT-1)-DELI
-	CUMQ(IT)=CUMQ(IT-1)+Q(IT)
-	RO=CUMQ(IT)
-10	IN=CUMF(IT)
-      RETURN
-      END
-C
-      SUBROUTINE INFIL(THI,DELT,KSAT,THS,PSIF,IN,DELI)
-C**** Subroutine calculates incremental infiltration volume
-      REAL KSAT,IN,ITX
-      DT=DELT*60.
-      BB=PSIF*(THS-THI)
-      IF(IN.LE.0.)IN=0.01
-      XE=EXP(-IN/BB)
-      TI=(IN-BB+BB*XE)/KSAT
-      TX=TI+DT
-      ITX=IN
-      DO 10 M=1,5
-	If(ITX .GT. 5)GOTO 20
-	XE=EXP(-ITX/BB)
-10	ITX=ITX-(ITX-BB+BB*XE-KSAT*TX)/(1.-XE)
-20    DELI=ITX-IN
-      IF(IN.EQ..01)IN=0.
-      RETURN
-      END
-C
-      SUBROUTINE MOIST(XTHI,XIN,XDAY,KSAT,TS,TR,PS,LA,
-     1THETA,IRD,PR,CUMD,CUMTR,BAL,Z,RZST,OLDWEA)
-C**** Subroutine simulates redistribution of soil moisture between storms
-      COMMON/COM1/PTR,DTHETA,THETAA,THETAB
-      COMMON/COM2/KS,THS,THR,PSIAE,LAMDA,RZD,T
-      REAL KSAT,KS,LAMDA,LA
-      DATA PSIA,PSIB/15500.,5166./
-      KS=KSAT/60.
-      THS=TS
-      THR=TR
-      PSIAE=PS
-      LAMDA=LA
-      RZD=IRD*2.54
-c      IF(RZD.LT.50.)RZD=50.
-      PTR=PR*2.54/86400.
-C**** Change time units to seconds
-      TSTART=0.
-      T=TSTART*86400.
-      TOUT=XDAY*86400.
-C**** Initialize THETA, Z, storages
-      IF(OLDWEA.LT.0.)THEN
-	 THETA=THS
-	 Z=XIN/(THETA-XTHI)
-	 OLDRZS=THETA*RZD
-	 IF(Z.LT.RZD)OLDRZS=Z*THETA+(RZD-Z)*XTHI
-      ELSE
-	 OLDRZS=RZST
-      ENDIF
-      CUMD=0.
-      CUMTR=0.
-C**** Determine ET thresholds
-      PSIBUB=PSIAE*2.
-      THE=THS-THR
-      THETAA=THE*(PSIBUB/PSIA)**LAMDA+THR
+      subroutine soils(isoil,ksat,ths,thr,psif,psiae,lamda)
+c**** subroutine provides default values for soil hydraulic parameters
+      dimension satcon(6),respor(6),effpor(6),bubpr(6)
+      real ksat,lam(6),lamda
+      data satcon/10.,3.5,.65,1.3,.08,.03/
+      data respor/.04,.05,.08,.10,.08,.11/
+      data effpor/.39,.4,.39,.32,.4,.38/
+      data bubpr/10.,15.,27.,15.,80.,130./
+      data lam/.43,.38,.31,.23,.23,.20/
+      the=effpor(isoil)
+      ksat=satcon(isoil)/60.
+      thr=respor(isoil)
+      psibub=bubpr(isoil)
+      lamda=lam(isoil)
+      ths=thr+the
+      psiae=psibub/2.
+      psif=psiae*(2.+3.*lamda)/(1.+3.*lamda)
+      return
+      end
+c
+      subroutine amc(thi,isoil,ths)
+c**** subroutine assigns initial soil moisture value
+      dimension thfc(6),thwilt(6)
+      data thwilt/.06,.075,.13,.16,.22,.27/
+      data thfc/.125,.175,.25,.23,.37,.425/
+      thi=thfc(isoil)
+      if(thi.lt.thwilt(isoil))xthi=thwilt(isoil)
+      if(thi.gt.ths)xthi=ths
+      return
+      end
+c
+      subroutine entry(ro,in,thi,ksat,ths,psif,delt,r,idepth,n)
+c**** subroutine calculates infiltration volume for rainfall period
+      dimension cumf(100),r(100),cumq(100),q(100)
+      real ksat,in
+      integer idepth
+      if(thi.gt.ths)thi=ths
+      smax=(ths-thi)*float(idepth)*2.54
+      cumf(1)=in
+c      cumf(1)=0.
+      cumq(1)=0.
+      fc=ksat*delt*60.
+      do 10  it=2,n+1
+	if(cumf(it-1).gt.smax) go to 2
+	call infil(thi,delt,ksat,ths,psif,cumf(it-1),deli)
+	go to 4
+2	deli=fc
+4	if(deli.gt.r(it-1)) deli=r(it-1)
+	cumf(it)=cumf(it-1)+deli
+	q(it)=r(it-1)-deli
+	cumq(it)=cumq(it-1)+q(it)
+	ro=cumq(it)
+10	in=cumf(it)
+      return
+      end
+c
+      subroutine infil(thi,delt,ksat,ths,psif,in,deli)
+c**** subroutine calculates incremental infiltration volume
+      real ksat,in,itx
+      dt=delt*60.
+      bb=psif*(ths-thi)
+      if(in.le.0.)in=0.01
+      xe=exp(-in/bb)
+      ti=(in-bb+bb*xe)/ksat
+      tx=ti+dt
+      itx=in
+      do 10 m=1,5
+	if(itx .gt. 5)goto 20
+	xe=exp(-itx/bb)
+10	itx=itx-(itx-bb+bb*xe-ksat*tx)/(1.-xe)
+20    deli=itx-in
+      if(in.eq..01)in=0.
+      return
+      end
+c
+      subroutine moist(xthi,xin,xday,ksat,ts,tr,ps,la,
+     1theta,ird,pr,cumd,cumtr,bal,z,rzst,oldwea)
+c**** subroutine simulates redistribution of soil moisture between storms
+      common/com1/ptr,dtheta,thetaa,thetab
+      common/com2/ks,ths,thr,psiae,lamda,rzd,t
+      real ksat,ks,lamda,la
+      data psia,psib/15500.,5166./
+      ks=ksat/60.
+      ths=ts
+      thr=tr
+      psiae=ps
+      lamda=la
+      rzd=ird*2.54
+c      if(rzd.lt.50.)rzd=50.
+      ptr=pr*2.54/86400.
+c**** change time units to seconds
+      tstart=0.
+      t=tstart*86400.
+      tout=xday*86400.
+c**** initialize theta, z, storages
+      if(oldwea.lt.0.)then
+	 theta=ths
+	 z=xin/(theta-xthi)
+	 oldrzs=theta*rzd
+	 if(z.lt.rzd)oldrzs=z*theta+(rzd-z)*xthi
+      else
+	 oldrzs=rzst
+      endif
+      cumd=0.
+      cumtr=0.
+c**** determine et thresholds
+      psibub=psiae*2.
+      the=ths-thr
+      thetaa=the*(psibub/psia)**lamda+thr
 c ******************************************
-c  Hard wire minimum theta to be lower here. This sets it
+c  hard wire minimum theta to be lower here. this sets it
 c    to the wilting point.
-c  Try 20% of THS first
-      THETAA=.2*THS
+c  try 20% of ths first
+      thetaa=.2*ths
 c ******************************************
-      THETAB=THE*(PSIBUB/PSIB)**LAMDA+THR
-C**** Advance soil moisture from TSTART to XDAY
-      CALL INTGRL(THETA,XTHI,Z,CUMD,CUMTR,TOUT)
-C**** Calculate storages
-      RZST=THETA*RZD
-      IF(Z.LT.RZD)RZST=Z*THETA+(RZD-Z)*XTHI
-      BAL=-CUMTR-CUMD-(RZST-OLDRZS)
-C     IF(Z.EQ.0.)Z=RZD
-      RETURN
-      END
-C
-      SUBROUTINE INTGRL(THETA,XTHI,Z,CUMD,CUMTR,TOUT)
-C**** Subroutine integrates soil moisture variables
-      COMMON/COM1/PTR,DTHETA,THETAA,THETAB
-      COMMON/COM2/KS,THS,THR,PSIAE,LAMDA,RZD,T
-      DIMENSION X(5),DX(5),DX1(5),X1(5)
-      REAL KS,LAMDA
-      X(1)=THETA
-      X(2)=XTHI
-      X(3)=Z
-      X(4)=CUMD
-      X(5)=CUMTR
-      DTHETA=1.
-      DX1(1)=1.
-      GO TO 10
-1     CONTINUE
-C**** Check for small change in THETA at wetting front
-      IF(Z.EQ.0.)GO TO 10
-      IF(DTHETA.GT..03.AND.Z.LT.(.9*RZD))GO TO 10
-      IF(Z.LT.RZD)X(1)=X(2)+X(3)*(X(1)-X(2))/RZD
-      X(2)=X(1)
-      X(3)=0.
-C**** Calculate DT
-10    DT=AMIN1(-.004/DX1(1),TOUT-T)
-      IF(DT.LT.1.)DT=1.
-      DT2=DT/2.
-C**** Integration routine
-      CALL RATE (X(1),X(2),X(3),DX1(1),DX1(2),DX1(3),DX1(4),DX1(5))
-      DO 20 I=1,5
-20    X1(I)=X(I)+DT2*DX1(I)
-      T=T+DT
-      CALL RATE (X(1),X(2),X(3),DX(1),DX(2),DX(3),DX(4),DX(5))
-      DO 30 I=1,5
-30    X(I)=X(I)+DT2*(DX1(I)+DX(I))
-      THETA=X(1)
-      XTHI=X(2)
-      Z=X(3)
-      CUMD=X(4)
-      CUMTR=X(5)
-      IF(T.LT.TOUT)GO TO 1
-      RETURN
-      END
-C
-      SUBROUTINE RATE(THETA,XTHI,Z,DTHDT,DTHIDT,DZDT,DRN,TR)
-C**** Subroutine calculates rates of change of soil moisture redistribution
-      COMMON/COM1/PTR,DTHETA,THETAA,THETAB
-      COMMON/COM2/KS,THS,THR,PSIAE,LAMDA,RZD,T
-      REAL KS,LAMDA,LAM23
-      THE=THS-THR
-      C1=PSIAE/(1.+3.*LAMDA)
-      LAM23=3.+2./LAMDA
-      TR1=0.
-      IF(Z.EQ.0.)GO TO 10
-C**** Determine rates above the wetting front
-      DTHETA=THETA-XTHI
-      If (Dtheta .EQ. 0) Then
-        Z = 0
-	Go To 10
-      Endif
-      QZ=KS*(C1*((THETA-THR)/THE)**(3.+1./LAMDA)/Z+((THETA-THR)
-     1/THE)**LAM23)
-      DZDT=QZ/DTHETA
-      F1=1.
-      IF(THETA.LT.THETAB)F1=(THETA-THETAA)/(THETAB-THETAA)
-      IF(THETA.LT.THETAA)F1=0.
-      TR1=F1*PTR*Z/RZD
-      DTHDT=-((QZ)+TR1)/Z
-C**** Determine ET below the wetting front
-10    F1=1.
-      IF(XTHI.LT.THETAB)F1=(XTHI-THETAA)/(THETAB-THETAA)
-      IF(XTHI.LT.THETAA)F1=0.
-      TR2=F1*PTR*(RZD-Z)/RZD
-C**** Determine moisture loss rates
-      TR=TR1+TR2
-      DRN=KS*((XTHI-THR)/THE)**LAM23
-      DTHIDT=-(DRN+TR2)/(RZD-Z)
-      IF(Z.NE.0.)RETURN
-      DZDT=0.
-      DTHDT=DTHIDT
-      RETURN
-      END
-C
-      SUBROUTINE SPLIT(Z,THI,XTHI,THI1,THI2,THI3,HOR1,HOR2,HOR3)
-C**** Subroutine calculates moisture content for three soil horizons
-      H1=HOR1*2.54
-      H2=HOR2*2.54
-      H3=HOR3*2.54
-      IF(Z.LE.H1)THEN
-	THI1=(Z*THI+(H1-Z)*XTHI)/H1
-	THI2=XTHI
-	THI3=XTHI
-	RETURN
-      ELSE IF (Z.LE.H2)THEN
-	THI1=THI
-	THI2=((Z-H1)*THI+(H2-Z)*XTHI)/(H2-H1)
-	THI3=XTHI
-	RETURN
-      ELSE IF(Z.LE.H3)THEN
-	THI1=THI
-	THI2=THI
-	THI3=((Z-H2)*THI+(H3-Z)*XTHI)/(H3-H2)
-	RETURN
-      ELSE
-	THI1=THI
-	THI2=THI
-	THI3=THI
-      ENDIF
-      RETURN
-      END	
+      thetab=the*(psibub/psib)**lamda+thr
+c**** advance soil moisture from tstart to xday
+      call intgrl(theta,xthi,z,cumd,cumtr,tout)
+c**** calculate storages
+      rzst=theta*rzd
+      if(z.lt.rzd)rzst=z*theta+(rzd-z)*xthi
+      bal=-cumtr-cumd-(rzst-oldrzs)
+c     if(z.eq.0.)z=rzd
+      return
+      end
+c
+      subroutine intgrl(theta,xthi,z,cumd,cumtr,tout)
+c**** subroutine integrates soil moisture variables
+      common/com1/ptr,dtheta,thetaa,thetab
+      common/com2/ks,ths,thr,psiae,lamda,rzd,t
+      dimension x(5),dx(5),dx1(5),x1(5)
+      real ks,lamda
+      x(1)=theta
+      x(2)=xthi
+      x(3)=z
+      x(4)=cumd
+      x(5)=cumtr
+      dtheta=1.
+      dx1(1)=1.
+      go to 10
+1     continue
+c**** check for small change in theta at wetting front
+      if(z.eq.0.)go to 10
+      if(dtheta.gt..03.and.z.lt.(.9*rzd))go to 10
+      if(z.lt.rzd)x(1)=x(2)+x(3)*(x(1)-x(2))/rzd
+      x(2)=x(1)
+      x(3)=0.
+c**** calculate dt
+10    dt=amin1(-.004/dx1(1),tout-t)
+      if(dt.lt.1.)dt=1.
+      dt2=dt/2.
+c**** integration routine
+      call rate (x(1),x(2),x(3),dx1(1),dx1(2),dx1(3),dx1(4),dx1(5))
+      do 20 i=1,5
+20    x1(i)=x(i)+dt2*dx1(i)
+      t=t+dt
+      call rate (x(1),x(2),x(3),dx(1),dx(2),dx(3),dx(4),dx(5))
+      do 30 i=1,5
+30    x(i)=x(i)+dt2*(dx1(i)+dx(i))
+      theta=x(1)
+      xthi=x(2)
+      z=x(3)
+      cumd=x(4)
+      cumtr=x(5)
+      if(t.lt.tout)go to 1
+      return
+      end
+c
+      subroutine rate(theta,xthi,z,dthdt,dthidt,dzdt,drn,tr)
+c**** subroutine calculates rates of change of soil moisture redistribution
+      common/com1/ptr,dtheta,thetaa,thetab
+      common/com2/ks,ths,thr,psiae,lamda,rzd,t
+      real ks,lamda,lam23
+      the=ths-thr
+      c1=psiae/(1.+3.*lamda)
+      lam23=3.+2./lamda
+      tr1=0.
+      if(z.eq.0.)go to 10
+c**** determine rates above the wetting front
+      dtheta=theta-xthi
+      if (dtheta .eq. 0) then
+        z = 0
+	go to 10
+      endif
+      qz=ks*(c1*((theta-thr)/the)**(3.+1./lamda)/z+((theta-thr)
+     1/the)**lam23)
+      dzdt=qz/dtheta
+      f1=1.
+      if(theta.lt.thetab)f1=(theta-thetaa)/(thetab-thetaa)
+      if(theta.lt.thetaa)f1=0.
+      tr1=f1*ptr*z/rzd
+      dthdt=-((qz)+tr1)/z
+c**** determine et below the wetting front
+10    f1=1.
+      if(xthi.lt.thetab)f1=(xthi-thetaa)/(thetab-thetaa)
+      if(xthi.lt.thetaa)f1=0.
+      tr2=f1*ptr*(rzd-z)/rzd
+c**** determine moisture loss rates
+      tr=tr1+tr2
+      drn=ks*((xthi-thr)/the)**lam23
+      dthidt=-(drn+tr2)/(rzd-z)
+      if(z.ne.0.)return
+      dzdt=0.
+      dthdt=dthidt
+      return
+      end
+c
+      subroutine split(z,thi,xthi,thi1,thi2,thi3,hor1,hor2,hor3)
+c**** subroutine calculates moisture content for three soil horizons
+      h1=hor1*2.54
+      h2=hor2*2.54
+      h3=hor3*2.54
+      if(z.le.h1)then
+	thi1=(z*thi+(h1-z)*xthi)/h1
+	thi2=xthi
+	thi3=xthi
+	return
+      else if (z.le.h2)then
+	thi1=thi
+	thi2=((z-h1)*thi+(h2-z)*xthi)/(h2-h1)
+	thi3=xthi
+	return
+      else if(z.le.h3)then
+	thi1=thi
+	thi2=thi
+	thi3=((z-h2)*thi+(h3-z)*xthi)/(h3-h2)
+	return
+      else
+	thi1=thi
+	thi2=thi
+	thi3=thi
+      endif
+      return
+      end	

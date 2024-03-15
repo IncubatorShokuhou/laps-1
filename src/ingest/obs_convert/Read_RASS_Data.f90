@@ -1,117 +1,117 @@
-SUBROUTINE READ_RASS_DATA(I4TIME_SYS,CYCLE_TIME,MAX_RASS,MAX_LEVELS,RVALUE_MISSING, &
-                            I4TIME_OBS,NUM_RASS,LVL_RASS,C5_NAMES,C8_TYPE, &
-                            LAT_RASS,LON_RASS,ELV_RASS,ERR_RASS, &
-                            HGT_RASS,TMP_RASS,ISTATUS)
+subroutine read_rass_data(i4time_sys,cycle_time,max_rass,max_levels,rvalue_missing, &
+                            i4time_obs,num_rass,lvl_rass,c5_names,c8_type, &
+                            lat_rass,lon_rass,elv_rass,err_rass, &
+                            hgt_rass,tmp_rass,istatus)
 
 !==============================================================================
-!doc  THIS ROUTINE READS RASS RAW DATA FROM LAPS LRS FILES.
-!doc  IT IS THE SAME AS THE FIRST PART OF READ_TSND.F
+!doc  this routine reads rass raw data from laps lrs files.
+!doc  it is the same as the first part of read_tsnd.f
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	JAN. 2009
+!doc  history:
+!doc	creation:	yuanfu xie	jan. 2009
 !==============================================================================
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: I4TIME_SYS,CYCLE_TIME,MAX_RASS,MAX_LEVELS
-  REAL,    INTENT(IN) :: RVALUE_MISSING
+  integer, intent(in) :: i4time_sys,cycle_time,max_rass,max_levels
+  real,    intent(in) :: rvalue_missing
 
-  CHARACTER, INTENT(OUT) :: C5_NAMES(MAX_RASS)*5,C8_TYPE(MAX_RASS)*8
-  INTEGER,   INTENT(OUT) :: NUM_RASS,LVL_RASS(MAX_RASS),I4TIME_OBS(MAX_RASS)
-  REAL,      INTENT(OUT) :: LAT_RASS(MAX_RASS),LON_RASS(MAX_RASS), &
-                            ELV_RASS(MAX_RASS),ERR_RASS(MAX_RASS), &
-                            HGT_RASS(MAX_RASS,MAX_LEVELS), &		! M
-                            TMP_RASS(MAX_RASS,MAX_LEVELS)		! C
+  character, intent(out) :: c5_names(max_rass)*5,c8_type(max_rass)*8
+  integer,   intent(out) :: num_rass,lvl_rass(max_rass),i4time_obs(max_rass)
+  real,      intent(out) :: lat_rass(max_rass),lon_rass(max_rass), &
+                            elv_rass(max_rass),err_rass(max_rass), &
+                            hgt_rass(max_rass,max_levels), &		! m
+                            tmp_rass(max_rass,max_levels)		! c
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: EXT*3, C_FILESPEC*255,A9TIME*9
-  INTEGER   :: I4TIME_FILE,LAG_TIME,I4TIME_RASS_OFFSET, &
-               STTNID,I_QC,I_RASS,I_LEVEL,N_LEVEL,ISTATUS
-  LOGICAL   :: L_STRING_CONTAINS
-  REAL      :: RCYCLES
-  REAL,PARAMETER :: SURFACE_RASS_BUFFER = 30.0
+  ! local variables:
+  character :: ext*3, c_filespec*255,a9time*9
+  integer   :: i4time_file,lag_time,i4time_rass_offset, &
+               sttnid,i_qc,i_rass,i_level,n_level,istatus
+  logical   :: l_string_contains
+  real      :: rcycles
+  real,parameter :: surface_rass_buffer = 30.0
   
-  EXT = 'lrs'
-  CALL GET_FILESPEC(EXT,2,C_FILESPEC,ISTATUS)
-  CALL GET_FILE_TIME(C_FILESPEC,I4TIME_SYS,I4TIME_FILE)
+  ext = 'lrs'
+  call get_filespec(ext,2,c_filespec,istatus)
+  call get_file_time(c_filespec,i4time_sys,i4time_file)
 
-  LAG_TIME = 0 ! Middle of rass hourly sampling period
-  I4TIME_RASS_OFFSET = I4TIME_SYS - (I4TIME_FILE + LAG_TIME)
-  RCYCLES = FLOAT(I4TIME_RASS_OFFSET) / FLOAT(CYCLE_TIME)
+  lag_time = 0 ! middle of rass hourly sampling period
+  i4time_rass_offset = i4time_sys - (i4time_file + lag_time)
+  rcycles = float(i4time_rass_offset) / float(cycle_time)
 
-  WRITE(6,*)' i4time_rass_offset/rcycles = ',i4time_rass_offset,rcycles
+  write(6,*)' i4time_rass_offset/rcycles = ',i4time_rass_offset,rcycles
 
-  ! INITIALIZATION:
-  NUM_RASS = 0
-  LVL_RASS = 0
+  ! initialization:
+  num_rass = 0
+  lvl_rass = 0
 
-  IF (ABS(I4TIME_RASS_OFFSET) .gt. CYCLE_TIME) THEN
-    WRITE(6,*)' RASS file/offset is > LAPS cycle time'
-    WRITE(6,*)' Skipping the use of RASS'
-    RETURN
-  ENDIF
+  if (abs(i4time_rass_offset) .gt. cycle_time) then
+    write(6,*)' rass file/offset is > laps cycle time'
+    write(6,*)' skipping the use of rass'
+    return
+  endif
 
-  CALL OPEN_LAPSPRD_FILE_READ(12,I4TIME_FILE,EXT,ISTATUS)
-  IF (ISTATUS .NE. 1) THEN
-    PRINT*,'Read_RASS_Data: cannot open data file: ',EXT
-    RETURN
-  ENDIF
+  call open_lapsprd_file_read(12,i4time_file,ext,istatus)
+  if (istatus .ne. 1) then
+    print*,'read_rass_data: cannot open data file: ',ext
+    return
+  endif
 
-  DO I_RASS = 1,MAX_RASS
+  do i_rass = 1,max_rass
 
-    NUM_RASS = NUM_RASS+1	! COUNT
+    num_rass = num_rass+1	! count
 
-340 CONTINUE
+340 continue
 
-    READ(12,401,end=500) STTNID,N_LEVEL, &
-	LAT_RASS(NUM_RASS),LON_RASS(NUM_RASS),ELV_RASS(NUM_RASS), &
-        C5_NAMES(NUM_RASS),A9TIME,C8_TYPE(NUM_RASS)
-401 FORMAT(i12,i12,f11.0,f15.0,f15.0,5x,a5,3x,a9,1x,a8)
+    read(12,401,end=500) sttnid,n_level, &
+	lat_rass(num_rass),lon_rass(num_rass),elv_rass(num_rass), &
+        c5_names(num_rass),a9time,c8_type(num_rass)
+401 format(i12,i12,f11.0,f15.0,f15.0,5x,a5,3x,a9,1x,a8)
 
-    ! CONVERT A9TIME TO I4TIME:
-    CALL CV_ASC_I4TIME(A9TIME,I4TIME_OBS(NUM_RASS),ISTATUS)
+    ! convert a9time to i4time:
+    call cv_asc_i4time(a9time,i4time_obs(num_rass),istatus)
 
-    IF (N_LEVEL .gt. MAX_LEVELS) THEN
-      WRITE(6,*)'Read_RASS_Data ERROR: too many levels in the LRS file: ', &
-                I_RASS,N_LEVEL,MAX_LEVELS
-      ISTATUS = 0
-      RETURN
-    ENDIF
+    if (n_level .gt. max_levels) then
+      write(6,*)'read_rass_data error: too many levels in the lrs file: ', &
+                i_rass,n_level,max_levels
+      istatus = 0
+      return
+    endif
 
-    IF (L_STRING_CONTAINS(C8_TYPE(NUM_RASS),'SAT',ISTATUS)) THEN
-       ERR_RASS(NUM_RASS) = 5.0
-    ELSE
-       ERR_RASS(NUM_RASS) = 1.0
-    ENDIF
+    if (l_string_contains(c8_type(num_rass),'sat',istatus)) then
+       err_rass(num_rass) = 5.0
+    else
+       err_rass(num_rass) = 1.0
+    endif
 
-    DO I_LEVEL = 1,N_LEVEL
+    do i_level = 1,n_level
 
-      READ(12,*,ERR=340) HGT_RASS(NUM_RASS,I_LEVEL),TMP_RASS(NUM_RASS,I_LEVEL),I_QC
+      read(12,*,err=340) hgt_rass(num_rass,i_level),tmp_rass(num_rass,i_level),i_qc
 
-      ! SUPPOSE LRS FILES CONTAIN TEMPERATURE IN KELVIN:
-      IF (I_QC .EQ. 1 .AND. &
-          HGT_RASS(NUM_RASS,I_LEVEL) .LT. RVALUE_MISSING .AND. &
-          TMP_RASS(NUM_RASS,I_LEVEL) .GT. 200.0 .AND. &
-          TMP_RASS(NUM_RASS,I_LEVEL) .LT. 450.0 .AND. &
-          HGT_RASS(NUM_RASS,I_LEVEL) .GT. ELV_RASS(NUM_RASS)+SURFACE_RASS_BUFFER .AND. &
-          I_LEVEL .LE. MAX_LEVELS ) THEN
+      ! suppose lrs files contain temperature in kelvin:
+      if (i_qc .eq. 1 .and. &
+          hgt_rass(num_rass,i_level) .lt. rvalue_missing .and. &
+          tmp_rass(num_rass,i_level) .gt. 200.0 .and. &
+          tmp_rass(num_rass,i_level) .lt. 450.0 .and. &
+          hgt_rass(num_rass,i_level) .gt. elv_rass(num_rass)+surface_rass_buffer .and. &
+          i_level .le. max_levels ) then
 
-        LVL_RASS(NUM_RASS) = LVL_RASS(NUM_RASS) + 1		! COUNT LEVELS
+        lvl_rass(num_rass) = lvl_rass(num_rass) + 1		! count levels
 
-        HGT_RASS(NUM_RASS,LVL_RASS(NUM_RASS)) = HGT_RASS(NUM_RASS,I_LEVEL)
-        TMP_RASS(NUM_RASS,LVL_RASS(NUM_RASS)) = TMP_RASS(NUM_RASS,I_LEVEL)-273.15	! IN CENTIGRADE
+        hgt_rass(num_rass,lvl_rass(num_rass)) = hgt_rass(num_rass,i_level)
+        tmp_rass(num_rass,lvl_rass(num_rass)) = tmp_rass(num_rass,i_level)-273.15	! in centigrade
 
-      ENDIF
+      endif
 
-    ENDDO ! LEVEL
+    enddo ! level
 
-    IF (LVL_RASS(NUM_RASS) .EQ. 0) NUM_RASS=NUM_RASS-1
+    if (lvl_rass(num_rass) .eq. 0) num_rass=num_rass-1
 
-  ENDDO ! RASS
+  enddo ! rass
 
-500 CONTINUE
-  NUM_RASS=NUM_RASS-1	! WHEN REACHING THE END OF FILE, NUM_RASS HAS BEEN ADDED
+500 continue
+  num_rass=num_rass-1	! when reaching the end of file, num_rass has been added
 
-  CLOSE(12)	! CLOSE LRS FILE
+  close(12)	! close lrs file
 
-END SUBROUTINE READ_RASS_DATA
+end subroutine read_rass_data

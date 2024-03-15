@@ -6,9 +6,9 @@
 
       dimension t(imax,jmax)
 
-!     Bilinearly interpolate to fill in rest of domain
-!     Fills in final analysis value and weights from obs alone
-!     We may have to extrapolate at the N and E edges
+!     bilinearly interpolate to fill in rest of domain
+!     fills in final analysis value and weights from obs alone
+!     we may have to extrapolate at the n and e edges
       do i = 1,imax
           lowi_lut(i) = ((i-1)/nskip)*nskip + 1
           il = lowi_lut(i)
@@ -37,14 +37,14 @@
 !             write(6,*)' i,il,ih',i,il,ih
 !             write(6,*)i,j,il,ih,jl,jh
 
-!             Calculate interpolated cloud cover
-              Z1=t(il,jl)
-              Z2=t(ih,jl)
-              Z3=t(ih,jh)
-              Z4=t(il,jh)
+!             calculate interpolated cloud cover
+              z1=t(il,jl)
+              z2=t(ih,jl)
+              z3=t(ih,jh)
+              z4=t(il,jh)
 
-              t(i,j) = Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj &
-                     - (Z2+Z4-Z3-Z1)*fraci*fracj
+              t(i,j) = z1+(z2-z1)*fraci+(z4-z1)*fracj &
+                     - (z2+z4-z3-z1)*fraci*fracj
 
           enddo ! i
       enddo ! j

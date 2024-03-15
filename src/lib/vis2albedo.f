@@ -17,54 +17,54 @@
 c
 c program computes albedo given visible image array normalized for brightness.
 c
-c     J. Smart       17-Mar-1994           Original version taken from vis_to_
-c                                          albedo written by S. Albers.
-c     S. Albers       2-Mar-1995           Set threshold solar alt to 15.
-c     S. Albers      22-Nov-1995           Extra phase angle constraint
-c     S. Albers      22-Aug-1996           Extra specular ref angle constraint
-c     J. Smart        8-Apr-1998           Added csatid to argument list, added to
+c     j. smart       17-mar-1994           original version taken from vis_to_
+c                                          albedo written by s. albers.
+c     s. albers       2-mar-1995           set threshold solar alt to 15.
+c     s. albers      22-nov-1995           extra phase angle constraint
+c     s. albers      22-aug-1996           extra specular ref angle constraint
+c     j. smart        8-apr-1998           added csatid to argument list, added to
 c                                          formatted output.
-c       "             6-Jul-1999           Added Emission_angle_d to argument list
+c       "             6-jul-1999           added emission_angle_d to argument list
 c
-C***Parameter and variables list
+c***parameter and variables list
 c
-        use mem_namelist, ONLY: solalt_thr_vis
+        use mem_namelist, only: solalt_thr_vis
 
-        Implicit None
+        implicit none
 
-        Real          cld_cnts,cld_albedo,frac,term1,term2
-        Real          cloud_frac_vis
-        Real          albedo_to_cloudfrac,cloudfrac_to_albedo
-        Real          rlnd_cnts,rlnd_albedo
+        real          cld_cnts,cld_albedo,frac,term1,term2
+        real          cloud_frac_vis
+        real          albedo_to_cloudfrac,cloudfrac_to_albedo
+        real          rlnd_cnts,rlnd_albedo
         parameter       (cld_cnts=220.,
      &                   rlnd_cnts=68.,
      &                   cld_albedo=0.85,
      &                   rlnd_albedo=0.15)
 
-        Integer         imax,jmax
-        Integer         i4time
+        integer         imax,jmax
+        integer         i4time
 
-        Real          r_norm_vis_cnts_in(imax,jmax)
-        Real          lat(imax,jmax)
-        Real          lon(imax,jmax)
-        Real          phase_angle_d(imax,jmax)
-        Real          specular_ref_angle_d(imax,jmax)
-        Real          rland_frac(imax,jmax)
-        Real          solar_alt_d
-        Real          albedo
-        Real          albedo_out(imax,jmax)
-        Real          albedo_min,albedo_max
-        Real          r_norm_vis_cnts_mn,r_norm_vis_cnts_mx 
-        Real          r_missing_data
-        Real          jline, iline, jdiff, idiff
-        Real          Emission_angle_d(imax,jmax)
-        Integer         istatus, n_missing_albedo
-        Integer         i,j
+        real          r_norm_vis_cnts_in(imax,jmax)
+        real          lat(imax,jmax)
+        real          lon(imax,jmax)
+        real          phase_angle_d(imax,jmax)
+        real          specular_ref_angle_d(imax,jmax)
+        real          rland_frac(imax,jmax)
+        real          solar_alt_d
+        real          albedo
+        real          albedo_out(imax,jmax)
+        real          albedo_min,albedo_max
+        real          r_norm_vis_cnts_mn,r_norm_vis_cnts_mx 
+        real          r_missing_data
+        real          jline, iline, jdiff, idiff
+        real          emission_angle_d(imax,jmax)
+        integer         istatus, n_missing_albedo
+        integer         i,j
 
-        Real arg
-        Character*(*)   csatid
+        real arg
+        character*(*)   csatid
 c
-c     ------------------------- BEGIN ---------------------------------
+c     ------------------------- begin ---------------------------------
 
         write(6,*)' solalt_thr_vis (from namelist) =',solalt_thr_vis
 !       solalt_thr_vis = 15.
@@ -76,7 +76,7 @@ c     ------------------------- BEGIN ---------------------------------
         r_norm_vis_cnts_mx = 0.
         r_norm_vis_cnts_mn = 256.
 
-        write(6,*)' Subroutine vis2albedo:'
+        write(6,*)' subroutine vis2albedo:'
 c
 c       write(6,28)
 c28      format(1x,' i   j   n vis cnts   solalt deg',/,40('-'))
@@ -96,14 +96,14 @@ c                write(6,29)i,j,r_norm_vis_cnts_in(i,j),solar_alt_d
 c29               format(1x,2i3,2x,2f8.2)
 c             end if
 
-!                Test for favorable geometry
+!                test for favorable geometry
                  if(      solar_alt_d .gt. solalt_thr_vis
-     1                            .AND.
+     1                            .and.
      1          (solar_alt_d .gt. 23. .or. phase_angle_d(i,j) .gt. 20.)
-     1                            .AND.
+     1                            .and.
      1          (rland_frac(i,j) .gt. 0.5 
      1                         .or. specular_ref_angle_d(i,j) .gt. 10.)
-     1                            .AND.
+     1                            .and.
      1                    emission_angle_d(i,j) .gt. 15.       
      1                                                            )then       
 
@@ -112,10 +112,10 @@ c             end if
          
                    albedo = rlnd_albedo + arg *
      &                   (cld_albedo - rlnd_albedo)
-                   albedo_out(i,j)=min(max(albedo,-0.5),+1.5) ! Reasonable
+                   albedo_out(i,j)=min(max(albedo,-0.5),+1.5) ! reasonable
 
                    if(solar_alt_d .lt. 20.)then ! enabled for now
-!                    Fudge the albedo at low solar elevation angles < 20 deg
+!                    fudge the albedo at low solar elevation angles < 20 deg
                      frac = (20. - solar_alt_d) / 10.
                      term1 = .13 * frac
                      term2 = 1. + term1
@@ -127,11 +127,11 @@ c             end if
      1                           cloudfrac_to_albedo(cloud_frac_vis)
                    endif
 
-!                  Additional stretch
+!                  additional stretch
 !                  call stretch2(0.0,1.0,.09,1.0 ,albedo_out(i,j))
                    call stretch2(0.0,1.0,.04,1.15,albedo_out(i,j))      
 c                                                               excesses
-c Accumulate extrema
+c accumulate extrema
 c
                    r_norm_vis_cnts_mn = min(r_norm_vis_cnts_in(i,j)
      1                                     ,r_norm_vis_cnts_mn)
@@ -140,12 +140,12 @@ c
                    albedo_min = min(albedo_out(i,j),albedo_min)
                    albedo_max = max(albedo_out(i,j),albedo_max)
    
-                 else              ! Albedo .eq. missing_data
+                 else              ! albedo .eq. missing_data
 
                    albedo_out(i,j) = r_missing_data
                    n_missing_albedo = n_missing_albedo + 1
 
-                 endif             ! QC based on geometry
+                 endif             ! qc based on geometry
 
               else
 
@@ -161,20 +161,20 @@ c
          write(6,105)csatid,r_norm_vis_cnts_mn,r_norm_vis_cnts_mx
          write(6,106)csatid,albedo_min,albedo_max
 
- 105     format(1x,a6,'  Normalized Counts Range: ',2f10.2)
- 106     format(1x,a6,'  ALBEDO Range:            ',2f10.2)
+ 105     format(1x,a6,'  normalized counts range: ',2f10.2)
+ 106     format(1x,a6,'  albedo range:            ',2f10.2)
 
-        Return
-        End
+        return
+        end
 
         function albedo_to_cloudfrac(albedo)
 
-!       We might refer to a new version of this to return several quantities:
+!       we might refer to a new version of this to return several quantities:
 !       cloud fraction/opacity 
 !       cloud albedo (assuming a black terrain surface), related to back scatter
 !       cloud optical depth
 
-!       Such a routine, 'albedo_to_clouds', is in 
+!       such a routine, 'albedo_to_clouds', is in 
 !           'src/lib/modules/module_cloud_rad.f90'
 
         clear_albedo = .2097063
@@ -207,12 +207,12 @@ c
         return
         end
 
-C-------------------------------------------------------------------------------
-        Subroutine Stretch2(IL,IH,JL,JH,rArg)
+c-------------------------------------------------------------------------------
+        subroutine stretch2(il,ih,jl,jh,rarg)
 
-        Implicit        None
+        implicit        none
 
-        Real          A,B,IL,IH,JL,JH,rarg
+        real          a,b,il,ih,jl,jh,rarg
 
         a = (jh - jl) / (ih - il)
         b =  jl - il * a

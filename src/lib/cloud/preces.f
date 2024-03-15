@@ -1,58 +1,58 @@
 
-      SUBROUTINE PRECES(TI,TF,X,Y,Z,MODE)
-      IMPLICIT REAL*8(A,B,C,D,E,F,G,H,O,P,Q,R,S,T,U,V,W,X,Y,Z)
+      subroutine preces(ti,tf,x,y,z,mode)
+      implicit real*8(a,b,c,d,e,f,g,h,o,p,q,r,s,t,u,v,w,x,y,z)
 
-      ATAN3(X,Y)=DMOD((DATAN2(X,Y)+6.2831853071796D0),6.2831853071796D0)
+      atan3(x,y)=dmod((datan2(x,y)+6.2831853071796d0),6.2831853071796d0)
 
-      T0=(TI-2415020.313417D0)/36524.21988D0
-      TT=(TF-TI)/36524.21988D0
-      ZT=(.011171319D0+6.767999D-6*T0)*TT+1.4641D-6*TT*TT+ 8.68D-8*TT**3
-      ZZ=                              ZT+3.8349D-6*TT*TT
-      TH=(.009718973D0-4.135460D-6*T0)*TT-2.0653D-6*TT*TT-20.36D-8*TT**3
+      t0=(ti-2415020.313417d0)/36524.21988d0
+      tt=(tf-ti)/36524.21988d0
+      zt=(.011171319d0+6.767999d-6*t0)*tt+1.4641d-6*tt*tt+ 8.68d-8*tt**3
+      zz=                              zt+3.8349d-6*tt*tt
+      th=(.009718973d0-4.135460d-6*t0)*tt-2.0653d-6*tt*tt-20.36d-8*tt**3
 
-      IF(MODE.EQ.1)then
-          X0=X
-          Y0=Y
-          Z0=Z
+      if(mode.eq.1)then
+          x0=x
+          y0=y
+          z0=z
 
-      else ! MODE .EQ. 2
-          X0=DCOS(Y)*DCOS(X)
-          Y0=DSIN(Y)*DCOS(X)
-          Z0=DSIN(X)
+      else ! mode .eq. 2
+          x0=dcos(y)*dcos(x)
+          y0=dsin(y)*dcos(x)
+          z0=dsin(x)
 
       endif
 
-      SINZT=SIN(ZT)
-C     PRINT*,'X0,Y0,Z0',X0,Y0,Z0
-      COSZT=COS(ZT)
-      SINTH=SIN(TH)
-      COSTH=COS(TH)
-      SINZZ=SIN(ZZ)
-      COSZZ=COS(ZZ)
-      XX=-SINZT*SINZZ+COSZT*COSTH*COSZZ
-      XY=-COSZT*SINZZ-SINZT*COSTH*COSZZ
-      XZ=-SINTH*COSZZ
-      YX= SINZT*COSZZ+COSZT*COSTH*SINZZ
-      YY= COSZT*COSZZ-SINZT*COSTH*SINZZ
-      YZ=-SINTH*SINZZ
-      ZX= SINTH*COSZT
-      ZY=-SINTH*SINZT
-      ZZ= COSTH
-      X   =XX*X0+XY*Y0+XZ*Z0
-      Y   =YX*X0+YY*Y0+YZ*Z0
-      ZDUM=ZX*X0+ZY*Y0+ZZ*Z0
-C     PRINT*,'X,YDUM,ZDUM',X,YDUM,ZDUM
+      sinzt=sin(zt)
+c     print*,'x0,y0,z0',x0,y0,z0
+      coszt=cos(zt)
+      sinth=sin(th)
+      costh=cos(th)
+      sinzz=sin(zz)
+      coszz=cos(zz)
+      xx=-sinzt*sinzz+coszt*costh*coszz
+      xy=-coszt*sinzz-sinzt*costh*coszz
+      xz=-sinth*coszz
+      yx= sinzt*coszz+coszt*costh*sinzz
+      yy= coszt*coszz-sinzt*costh*sinzz
+      yz=-sinth*sinzz
+      zx= sinth*coszt
+      zy=-sinth*sinzt
+      zz= costh
+      x   =xx*x0+xy*y0+xz*z0
+      y   =yx*x0+yy*y0+yz*z0
+      zdum=zx*x0+zy*y0+zz*z0
+c     print*,'x,ydum,zdum',x,ydum,zdum
 
-      IF(MODE.EQ.1)THEN
-          Z=ZDUM
-C         PRINT*,'PRECES - X,Y,Z',X,Y,Z
+      if(mode.eq.1)then
+          z=zdum
+c         print*,'preces - x,y,z',x,y,z
 
-      ELSE ! MODE .EQ. 2
-          Y=ATAN3(Y,X)
-          X=ASIN(ZDUM)
-C         PRINT*,'PRECES RA=',Y,' DEC = ',X
+      else ! mode .eq. 2
+          y=atan3(y,x)
+          x=asin(zdum)
+c         print*,'preces ra=',y,' dec = ',x
 
-      ENDIF
+      endif
 
-      RETURN
-      END
+      return
+      end

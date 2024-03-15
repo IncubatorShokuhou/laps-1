@@ -1,241 +1,240 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!! Module:  laps2grib_config
+!! module:  laps2grib_config
 !!
 
-MODULE laps2grib_config
+module laps2grib_config
 
-  ! Modules from the LAPS shared module library
-  USE map_utils
+   ! modules from the laps shared module library
+   use map_utils
 
-  IMPLICIT NONE
+   implicit none
 
-  TYPE (proj_info)           :: laps_proj
-  INTEGER                    :: nx,ny,nz
-  INTEGER                    :: i4time
-  INTEGER                    :: num_grids
-  CHARACTER(LEN=9)           :: a9time
-  REAL, ALLOCATABLE          :: plevels_pa(:)
-  CHARACTER(LEN=512)         :: output_path,output_path2
-  INTEGER                    :: center_id, subcenter_id
-  INTEGER                    :: process_id,prod_status
-  LOGICAL                    :: lrun_laps2grib
- 
-CONTAINS 
-  
-   SUBROUTINE get_laps_proj(laps_data_root)
+   type(proj_info)           :: laps_proj
+   integer                    :: nx, ny, nz
+   integer                    :: i4time
+   integer                    :: num_grids
+   character(len=9)           :: a9time
+   real, allocatable          :: plevels_pa(:)
+   character(len=512)         :: output_path, output_path2
+   integer                    :: center_id, subcenter_id
+   integer                    :: process_id, prod_status
+   logical                    :: lrun_laps2grib
 
-     IMPLICIT NONE
+contains
 
-     CHARACTER(LEN=*),INTENT(IN) :: laps_data_root
-     INTEGER                 :: ncid,dimid,varid,nfstat,proj_code
-     CHARACTER(LEN=132)      :: grid_type
-     CHARACTER(LEN=256)      :: static_file
-     LOGICAL                 :: file_exists
-     REAL                    :: dx_m,la1,lo1,latin1,latin2,lov
+   subroutine get_laps_proj(laps_data_root)
 
-     INCLUDE 'netcdf.inc'   
+      implicit none
 
-     static_file = TRIM(laps_data_root)//'/static/static.nest7grid'
-     INQUIRE(FILE=static_file,EXIST=file_exists)
-     IF (.NOT.file_exists) THEN
-       PRINT *, "-- Static file not found:",TRIM(static_file)
-       STOP "no static_file"
-     ENDIF
+      character(len=*), intent(in) :: laps_data_root
+      integer                 :: ncid, dimid, varid, nfstat, proj_code
+      character(len=132)      :: grid_type
+      character(len=256)      :: static_file
+      logical                 :: file_exists
+      real                    :: dx_m, la1, lo1, latin1, latin2, lov
 
-     ! Open the file
-     nfstat = NF_OPEN(static_file,NF_NOWRITE,ncid)
-     IF (nfstat .NE. NF_NOERR) THEN
-       PRINT *, "-- Error returned from NF_OPEN: ",nfstat
-       STOP "netcdf file open error"
-     ENDIF
+      include 'netcdf.inc'
 
-     ! Get the data dimensions
-     nx = 0
-     ny = 0
-     nfstat = NF_INQ_DIMID(ncid,'x',dimid)
-     nfstat = NF_INQ_DIMLEN(ncid,dimid,nx)
-     nfstat = NF_INQ_DIMID(ncid,'y',dimid)
-     nfstat = NF_INQ_DIMLEN(ncid,dimid,ny)
-     IF ((nx .LT. 1).OR.(ny .LT. 1)) THEN
-       PRINT *,"-- Bad nx or ny: ",nx,ny
-       STOP "bad dimensions"
-     ENDIF
+      static_file = trim(laps_data_root)//'/static/static.nest7grid'
+      inquire (file=static_file, exist=file_exists)
+      if (.not. file_exists) then
+         print *, "-- static file not found:", trim(static_file)
+         stop "no static_file"
+      end if
 
-     ! Get the LAPS grid type
-     nfstat = NF_INQ_VARID(ncid,'grid_type',varid)
-     nfstat = NF_GET_VAR_TEXT(ncid,varid,grid_type)
-     IF (grid_type(1:4) .EQ. 'merc') THEN
-       proj_code = PROJ_MERC 
-     ELSEIF((grid_type(1:4) .EQ. 'seca').OR.&
-            (grid_type(1:4) .EQ. 'tang')) THEN 
-       proj_code = PROJ_LC
-     ELSEIF(grid_type(1:4) .EQ. 'pola') THEN
-       proj_code = PROJ_PS
-     ELSEIF(grid_type(1:4) .EQ. 'latl') THEN
-       proj_code = PROJ_LATLON
-     ELSE
-       PRINT *,"-- Unknown LAPS grid_type: ",TRIM(grid_type)
-       STOP "bad grid_type"
-     ENDIF
+      ! open the file
+      nfstat = nf_open(static_file, nf_nowrite, ncid)
+      if (nfstat .ne. nf_noerr) then
+         print *, "-- error returned from nf_open: ", nfstat
+         stop "netcdf file open error"
+      end if
 
-     ! Get the grid spacing
-     nfstat = NF_INQ_VARID(ncid,'Dx',varid)
-     nfstat = NF_GET_VAR_REAL(ncid,varid,dx_m)
+      ! get the data dimensions
+      nx = 0
+      ny = 0
+      nfstat = nf_inq_dimid(ncid, 'x', dimid)
+      nfstat = nf_inq_dimlen(ncid, dimid, nx)
+      nfstat = nf_inq_dimid(ncid, 'y', dimid)
+      nfstat = nf_inq_dimlen(ncid, dimid, ny)
+      if ((nx .lt. 1) .or. (ny .lt. 1)) then
+         print *, "-- bad nx or ny: ", nx, ny
+         stop "bad dimensions"
+      end if
 
-     ! Get the truelat1/truelat2/lov
-     nfstat = NF_INQ_VARID(ncid,'Latin1',varid)
-     nfstat = NF_GET_VAR_REAL(ncid,varid,latin1)
-     nfstat = NF_INQ_VARID(ncid,'Latin2',varid)
-     nfstat = NF_GET_VAR_REAL(ncid,varid,latin2)
-     nfstat = NF_INQ_VARID(ncid,'LoV',varid)
-     nfstat = NF_GET_VAR_REAL(ncid,varid,lov)
+      ! get the laps grid type
+      nfstat = nf_inq_varid(ncid, 'grid_type', varid)
+      nfstat = nf_get_var_text(ncid, varid, grid_type)
+      if (grid_type(1:4) .eq. 'merc') then
+         proj_code = proj_merc
+      elseif ((grid_type(1:4) .eq. 'seca') .or. &
+              (grid_type(1:4) .eq. 'tang')) then
+         proj_code = proj_lc
+      elseif (grid_type(1:4) .eq. 'pola') then
+         proj_code = proj_ps
+      elseif (grid_type(1:4) .eq. 'latl') then
+         proj_code = proj_latlon
+      else
+         print *, "-- unknown laps grid_type: ", trim(grid_type)
+         stop "bad grid_type"
+      end if
 
-     ! Get lower left corner lat/lon
-     nfstat = NF_INQ_VARID(ncid,'La1',varid)
-     nfstat = NF_GET_VAR_REAL(ncid,varid,la1)
-     nfstat = NF_INQ_VARID(ncid,'Lo1',varid)
-     nfstat = NF_GET_VAR_REAL(ncid,varid,lo1)
+      ! get the grid spacing
+      nfstat = nf_inq_varid(ncid, 'dx', varid)
+      nfstat = nf_get_var_real(ncid, varid, dx_m)
 
-     ! Set up the laps_proj structure
-     IF (lo1 .GT. 180.) lo1 = lo1 - 360.
-     IF (lov .GT. 180.) lov = lov - 360.
-     CALL map_set(proj_code,la1,lo1,dx_m,lov,latin1,latin2,nx,ny, &
-                  laps_proj)
-          
-     ! Close the file
-     nfstat = NF_CLOSE(ncid)   
-     RETURN  
-   END SUBROUTINE get_laps_proj
-  
+      ! get the truelat1/truelat2/lov
+      nfstat = nf_inq_varid(ncid, 'latin1', varid)
+      nfstat = nf_get_var_real(ncid, varid, latin1)
+      nfstat = nf_inq_varid(ncid, 'latin2', varid)
+      nfstat = nf_get_var_real(ncid, varid, latin2)
+      nfstat = nf_inq_varid(ncid, 'lov', varid)
+      nfstat = nf_get_var_real(ncid, varid, lov)
+
+      ! get lower left corner lat/lon
+      nfstat = nf_inq_varid(ncid, 'la1', varid)
+      nfstat = nf_get_var_real(ncid, varid, la1)
+      nfstat = nf_inq_varid(ncid, 'lo1', varid)
+      nfstat = nf_get_var_real(ncid, varid, lo1)
+
+      ! set up the laps_proj structure
+      if (lo1 .gt. 180.) lo1 = lo1 - 360.
+      if (lov .gt. 180.) lov = lov - 360.
+      call map_set(proj_code, la1, lo1, dx_m, lov, latin1, latin2, nx, ny, &
+                   laps_proj)
+
+      ! close the file
+      nfstat = nf_close(ncid)
+      return
+   end subroutine get_laps_proj
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   SUBROUTINE get_laps_plevels(laps_data_root)
+   subroutine get_laps_plevels(laps_data_root)
 
-      IMPLICIT NONE
-      
-      CHARACTER(LEN=*), INTENT(IN)      :: laps_data_root
-      CHARACTER(LEN=256)                :: nl_file
-      INTEGER, PARAMETER                :: max_lev = 100
-      INTEGER                           :: k
-      LOGICAL                           :: file_exists 
-      REAL             :: pressures(max_lev)
-      NAMELIST /pressures_nl/ pressures
+      implicit none
 
-      ! Look for and open the pressures.nl file
-      nl_file = TRIM(laps_data_root)//'/static/pressures.nl'
-      INQUIRE(FILE=nl_file,EXIST=file_exists)
-      IF (.NOT. file_exists) THEN
-        PRINT *, "-- No pressures.nl file found: ",TRIM(nl_file)
-        STOP "no pressures.nl"
-      ENDIF
+      character(len=*), intent(in)      :: laps_data_root
+      character(len=256)                :: nl_file
+      integer, parameter                :: max_lev = 100
+      integer                           :: k
+      logical                           :: file_exists
+      real             :: pressures(max_lev)
+      namelist /pressures_nl/ pressures
+
+      ! look for and open the pressures.nl file
+      nl_file = trim(laps_data_root)//'/static/pressures.nl'
+      inquire (file=nl_file, exist=file_exists)
+      if (.not. file_exists) then
+         print *, "-- no pressures.nl file found: ", trim(nl_file)
+         stop "no pressures.nl"
+      end if
 
       pressures(:) = 0.0
-      OPEN(FILE=nl_file,UNIT=10,FORM='FORMATTED',STATUS='OLD')
-      READ(10,NML=pressures_nl)
-      CLOSE(10)
+      open (file=nl_file, unit=10, form='formatted', status='old')
+      read (10, nml=pressures_nl)
+      close (10)
 
-      ! Search through the levels in reverse order, because LAPS
+      ! search through the levels in reverse order, because laps
       ! stores the data from the top down and the levels are specified
       ! in pressures_nl from the bottom up
 
-      DO k = max_lev,1,-1
-  
-        IF (pressures(k) .GT. 0.) THEN
+      do k = max_lev, 1, -1
 
-          IF (.NOT. ALLOCATED(plevels_pa)) THEN
-            nz = k
-            ALLOCATE(plevels_pa(nz))
-          ENDIF
-          plevels_pa(nz-k+1) = pressures(k)
-        ENDIF
-      ENDDO
-      PRINT *, "-- Number of pressure levels found: ",nz
-      PRINT *, plevels_pa 
-      RETURN
-    END SUBROUTINE get_laps_plevels
+         if (pressures(k) .gt. 0.) then
+
+            if (.not. allocated(plevels_pa)) then
+               nz = k
+               allocate (plevels_pa(nz))
+            end if
+            plevels_pa(nz - k + 1) = pressures(k)
+         end if
+      end do
+      print *, "-- number of pressure levels found: ", nz
+      print *, plevels_pa
+      return
+   end subroutine get_laps_plevels
 
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    SUBROUTINE get_laps_analtime
+   subroutine get_laps_analtime
 
-      IMPLICIT NONE 
-      INTEGER   :: istatus
+      implicit none
+      integer   :: istatus
 
-      CALL get_systime(i4time,a9time,istatus)     
+      call get_systime(i4time, a9time, istatus)
 
-      IF (istatus .NE. 1) THEN
-        PRINT *, "-- Error getting LAPS analysis time!"
-        STOP "get_laps_analtime"
-      ENDIF
-      PRINT *, "-- LAPS Analysis Time: ", a9time
-      RETURN
-    END SUBROUTINE get_laps_analtime
+      if (istatus .ne. 1) then
+         print *, "-- error getting laps analysis time!"
+         stop "get_laps_analtime"
+      end if
+      print *, "-- laps analysis time: ", a9time
+      return
+   end subroutine get_laps_analtime
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    SUBROUTINE get_laps_modeltime(modeltime,modeltime_passed_in)
-      IMPLICIT NONE 
-      CHARACTER(LEN=*), INTENT(IN)   :: modeltime
-      INTEGER   :: modeltime_passed_in,istatus
+   subroutine get_laps_modeltime(modeltime, modeltime_passed_in)
+      implicit none
+      character(len=*), intent(in)   :: modeltime
+      integer   :: modeltime_passed_in, istatus
 
-      IF (modeltime_passed_in .EQ. 1) THEN
-        print*, "Generating model i4time using ",trim(modeltime)
-        CALL i4time_fname_lp(modeltime,i4time,istatus)
-        IF (istatus .NE. 1) THEN
-          PRINT *, "-- Error converting ",trim(modeltime)," to i4time!"
-          STOP "STOP in get_laps_modeltime"
-        ENDIF
-        a9time = trim(modeltime)
-      ELSE
-        CALL get_modeltime(i4time,a9time,istatus)
-        IF (istatus .NE. 1) THEN
-           PRINT *, "-- Error getting LAPS modeltime.dat!"
-           STOP "STOP in get_laps_modeltime"
-        ENDIF
-      ENDIF
+      if (modeltime_passed_in .eq. 1) then
+         print *, "generating model i4time using ", trim(modeltime)
+         call i4time_fname_lp(modeltime, i4time, istatus)
+         if (istatus .ne. 1) then
+            print *, "-- error converting ", trim(modeltime), " to i4time!"
+            stop "stop in get_laps_modeltime"
+         end if
+         a9time = trim(modeltime)
+      else
+         call get_modeltime(i4time, a9time, istatus)
+         if (istatus .ne. 1) then
+            print *, "-- error getting laps modeltime.dat!"
+            stop "stop in get_laps_modeltime"
+         end if
+      end if
 
-      PRINT *, "-- LAPS Model Time: ", a9time
-    END SUBROUTINE get_laps_modeltime
+      print *, "-- laps model time: ", a9time
+   end subroutine get_laps_modeltime
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    SUBROUTINE read_laps2grib_nl(laps_data_root)
-  
-      IMPLICIT NONE
-      CHARACTER(LEN=*), INTENT(IN)   :: laps_data_root
-      CHARACTER(LEN=256)             :: nl_file
-      LOGICAL                        :: file_exists
-      NAMELIST /laps2grib_nl/ output_path,output_path2,num_grids,&
-                              center_id,subcenter_id,&
-                              process_id, prod_status,lrun_laps2grib
+   subroutine read_laps2grib_nl(laps_data_root)
 
+      implicit none
+      character(len=*), intent(in)   :: laps_data_root
+      character(len=256)             :: nl_file
+      logical                        :: file_exists
+      namelist /laps2grib_nl/ output_path, output_path2, num_grids, &
+         center_id, subcenter_id, &
+         process_id, prod_status, lrun_laps2grib
 
-      ! Set defaults
-      num_grids=1
-      output_path(:)  = " "
+      ! set defaults
+      num_grids = 1
+      output_path(:) = " "
       output_path2(:) = " "
-      center_id = 59 ! NOAA ESRL GSD (aka FSL), for use with templates
+      center_id = 59 ! noaa esrl gsd (aka fsl), for use with templates
       subcenter_id = 1
       process_id = 100
       prod_status = 0
       lrun_laps2grib = .false.
 
-      nl_file = TRIM(laps_data_root)//'/static/laps2grib.nl'
-      INQUIRE(FILE=nl_file,EXIST=file_exists)
-      IF (file_exists) THEN
-        OPEN(FILE=nl_file,UNIT=10,FORM='FORMATTED',STATUS='OLD')
-        READ(10,NML=laps2grib_nl)
-        CLOSE(10)
-      ELSE
-        PRINT *, "-- No laps2grib.nl file found: ",TRIM(nl_file)
-        PRINT *, "-- Will use default values!"
-      ENDIF
-      IF (LEN_TRIM(output_path).LT.1) THEN 
-        output_path = TRIM(laps_data_root)//'/lapsprd/gr2'
-        output_path2 = TRIM(laps_data_root)//'/lapsprd/grb'
-      ENDIF
- 
-      PRINT *, "-- Other configuration: "
-      PRINT *, "   Center ID:       ",center_id
-      PRINT *, "   Subcenter ID:    ",subcenter_id
-      PRINT *, "   Process ID:      ",process_id
-      PRINT *, "   Prod Status:     ",prod_status
-      PRINT *, "   Output Path:     ",TRIM(output_path)
-      RETURN
-    END SUBROUTINE read_laps2grib_nl
+      nl_file = trim(laps_data_root)//'/static/laps2grib.nl'
+      inquire (file=nl_file, exist=file_exists)
+      if (file_exists) then
+         open (file=nl_file, unit=10, form='formatted', status='old')
+         read (10, nml=laps2grib_nl)
+         close (10)
+      else
+         print *, "-- no laps2grib.nl file found: ", trim(nl_file)
+         print *, "-- will use default values!"
+      end if
+      if (len_trim(output_path) .lt. 1) then
+         output_path = trim(laps_data_root)//'/lapsprd/gr2'
+         output_path2 = trim(laps_data_root)//'/lapsprd/grb'
+      end if
 
-END MODULE laps2grib_config
+      print *, "-- other configuration: "
+      print *, "   center id:       ", center_id
+      print *, "   subcenter id:    ", subcenter_id
+      print *, "   process id:      ", process_id
+      print *, "   prod status:     ", prod_status
+      print *, "   output path:     ", trim(output_path)
+      return
+   end subroutine read_laps2grib_nl
+
+end module laps2grib_config

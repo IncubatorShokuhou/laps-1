@@ -1,16 +1,16 @@
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       subroutine hor_cov(i4time,v_inno
      +                         ,num_of_ens
-     +                         ,ix,iy,iz,isoLevel
+     +                         ,ix,iy,iz,isolevel
      +                         ,dx,dy
      +                         ,ilength,jlength
      +                         ,covhor)
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-c c History:
-c Date         Name          Action
+c c history:
+c date         name          action
 c --------     -----------   -------------------------------------------
-c 03/05/2007   Ok-Yeon Kim   Created. 
+c 03/05/2007   ok-yeon kim   created. 
 c ----------------------------------------------------------------------
 
       implicit none
@@ -21,7 +21,7 @@ c ----------------------------------------------------------------------
       integer       ilength,jlength
       integer       ib,ie,jb,je,inc
       integer     i4time
-      integer     isoLevel(iz)
+      integer     isolevel(iz)
       real          dx,dy
       real        v_inno(ix,iy,iz,20)
       real        amean(ix,iy,iz)
@@ -29,10 +29,10 @@ c ----------------------------------------------------------------------
       real        var(ix,iy,iz)
       real        covhor(9,9,ix,iy,iz)
 
-c--------------- End of Diclaration -----------------------------------
+c--------------- end of diclaration -----------------------------------
 
 
-c Average of innovation at each point  !!
+c average of innovation at each point  !!
       amean=0.
       do n=1,num_of_ens
         do k=1,iz
@@ -53,7 +53,7 @@ c Average of innovation at each point  !!
       enddo
 
 
-c Deviation, variance at each point  !!
+c deviation, variance at each point  !!
       var=0.
       do k=1,iz
         do j=1,iy  
@@ -67,7 +67,7 @@ c Deviation, variance at each point  !!
       enddo
 
 
-c Covariance in the horizontal length  !!
+c covariance in the horizontal length  !!
 
       iens=num_of_ens-1            
       do k=1,iz

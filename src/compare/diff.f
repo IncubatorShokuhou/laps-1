@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -38,39 +38,39 @@ cdis
 
 !       parameter (imax=79)
 !       parameter (jmax=73)
-        parameter (imax=NX_L)
-        parameter (jmax=NY_L)
+        parameter (imax=nx_l)
+        parameter (jmax=ny_l)
         parameter (kmax=300)
         parameter (nlvl=300)
       
-      INTEGER*4	I4TIME,		!I4time of data
-     1		LVL(nlvl),        !Level of each field (4 digit max)
-     1		LVL_AVAIL(nlvl),        !Level of each field (4 digit max)
-     1		I,J,K,
-     1		ISTATUS
-C
-      REAL*4	DATA1(imax,jmax,kmax)	!Raw data to be written
-      REAL*4	DATA2(imax,jmax,kmax)	!Raw data to be written
-C
-      CHARACTER*70	DIR_in		!Directory to be written to
-      CHARACTER*70	DIR_out		!Directory to be written to
-      CHARACTER*31	EXT		!File name ext (up to 31 chars)
-      CHARACTER*3	VAR(nlvl) 	        !3 letter ID of each field
-      CHARACTER*3	LAPS_VAR_AVAIL(nlvl) 	!3 letter ID of each field
-      character*19      VAR_AVAIL(nlvl)
-      CHARACTER*4	LVL_COORD(nlvl)	!Vertical coordinate for each field
-      CHARACTER*10	UNITS(nlvl)	!units of each field
-!     CHARACTER*250	COMMENT1(nlvl)	!Comments for each field
-!     CHARACTER*210	COMMENT2(nlvl)	!Comments for each field
-      CHARACTER*125	COMMENT1(nlvl)	!Comments for each field
-      CHARACTER*125	COMMENT2(nlvl)	!Comments for each field
-      CHARACTER*17	ASCTIME
+      integer*4	i4time,		!i4time of data
+     1		lvl(nlvl),        !level of each field (4 digit max)
+     1		lvl_avail(nlvl),        !level of each field (4 digit max)
+     1		i,j,k,
+     1		istatus
+c
+      real*4	data1(imax,jmax,kmax)	!raw data to be written
+      real*4	data2(imax,jmax,kmax)	!raw data to be written
+c
+      character*70	dir_in		!directory to be written to
+      character*70	dir_out		!directory to be written to
+      character*31	ext		!file name ext (up to 31 chars)
+      character*3	var(nlvl) 	        !3 letter id of each field
+      character*3	laps_var_avail(nlvl) 	!3 letter id of each field
+      character*19      var_avail(nlvl)
+      character*4	lvl_coord(nlvl)	!vertical coordinate for each field
+      character*10	units(nlvl)	!units of each field
+!     character*250	comment1(nlvl)	!comments for each field
+!     character*210	comment2(nlvl)	!comments for each field
+      character*125	comment1(nlvl)	!comments for each field
+      character*125	comment2(nlvl)	!comments for each field
+      character*17	asctime
       
-      CHARACTER*4	VERSION
-      CHARACTER*131	MODEL 		!Meteorological model in file
-      CHARACTER*131	ORIGIN		!Location where file was created
-      CHARACTER*11    LAPS_DOM_FILE   !Name of domain file e.g. NEST7GRID
-      LOGICAL         l_packed_data
+      character*4	version
+      character*131	model 		!meteorological model in file
+      character*131	origin		!location where file was created
+      character*11    laps_dom_file   !name of domain file e.g. nest7grid
+      logical         l_packed_data
 
       logical l_pass, l_is_vxx
 
@@ -89,7 +89,7 @@ C
       l_pass = .true.
       num_diff_field_thresh = 0
 
-      write(6,*)' Enter 1 if comparing different machines, 0 if same'
+      write(6,*)' enter 1 if comparing different machines, 0 if same'
       read(5,*)machine_factor
 
       write(6,*)' filename?'
@@ -109,30 +109,30 @@ C
       if(filename(1:6) .eq. 'static')then
           if(.false.)then
               khmax = 24
-              var(1) = 'LAT'
-              var(2) = 'LON'
-              var(3) = 'AVG'
-              var(4) = 'STD'
-              var(5) = 'ZIN'
-              var(6) = 'LDF'
-              var(7) = 'LND'
-              var(8) = 'USE'
-              var(9) = 'SLN'
-              var(10) = 'SLT'
-              var(11) = 'STL'
-              var(12) = 'SBL'
-              var(13) = 'A01'
-              var(14) = 'A02'
-              var(15) = 'A03'
-              var(16) = 'A04'
-              var(17) = 'A05'
-              var(18) = 'A06'
-              var(19) = 'A07'
-              var(20) = 'A08'
-              var(21) = 'A09'
-              var(22) = 'A10'
-              var(23) = 'A11'
-              var(24) = 'A12'
+              var(1) = 'lat'
+              var(2) = 'lon'
+              var(3) = 'avg'
+              var(4) = 'std'
+              var(5) = 'zin'
+              var(6) = 'ldf'
+              var(7) = 'lnd'
+              var(8) = 'use'
+              var(9) = 'sln'
+              var(10) = 'slt'
+              var(11) = 'stl'
+              var(12) = 'sbl'
+              var(13) = 'a01'
+              var(14) = 'a02'
+              var(15) = 'a03'
+              var(16) = 'a04'
+              var(17) = 'a05'
+              var(18) = 'a06'
+              var(19) = 'a07'
+              var(20) = 'a08'
+              var(21) = 'a09'
+              var(22) = 'a10'
+              var(23) = 'a11'
+              var(24) = 'a12'
           else
               khmax = 38
               call get_gridgen_var(nlvl,khmax,var,comment1)
@@ -142,7 +142,7 @@ C
      1                     ,comment1,data1,grid_spacing_m,istatus)
 
           if(istatus .ne. 1)then
-              write(6,*)' Bad status reading 1st static file'
+              write(6,*)' bad status reading 1st static file'
               stop
           endif
 
@@ -150,7 +150,7 @@ C
      1                     ,comment2,data2,grid_spacing_m,istatus)
 
           if(istatus .ne. 1)then
-              write(6,*)' Bad status reading 2nd static file'
+              write(6,*)' bad status reading 2nd static file'
               stop
           endif
 
@@ -187,40 +187,40 @@ C
               jhmax = jmax
               call get_laps_dimensions(nk,istatus)
               if(istatus .ne. 1)then
-                  write(6,*)' Bad status returned from get_laps_dims'
+                  write(6,*)' bad status returned from get_laps_dims'
                   stop
               endif
 
               call rlh(ext,nk,var,lvl,khmax,istatus)
               if(istatus .ne. 1)then
-                  write(6,*)' Bad status returned from rlh'
+                  write(6,*)' bad status returned from rlh'
                   stop
               endif
 
           else
-!             call READ_LAPS_HEADER(
-!    1                         I4TIME,DIR_IN,EXT,IHMAX,JHMAX,KHMAX,
-!    1                         LAPS_DOM_FILE,ASCTIME,VERSION,
-!    1                         MODEL,ORIGIN,VAR,LVL,NUM_VARIABLES,
-!    1                         VAR_AVAIL,LAPS_VAR_AVAIL,NUM_LEVELS,
-!    1                         LVL_AVAIL,LVL_COORD,UNITS,
-!    1                         COMMENT1,L_PACKED_DATA,ISTATUS)
+!             call read_laps_header(
+!    1                         i4time,dir_in,ext,ihmax,jhmax,khmax,
+!    1                         laps_dom_file,asctime,version,
+!    1                         model,origin,var,lvl,num_variables,
+!    1                         var_avail,laps_var_avail,num_levels,
+!    1                         lvl_avail,lvl_coord,units,
+!    1                         comment1,l_packed_data,istatus)
 
           endif
  
-!         For this extension, set default values of:
+!         for this extension, set default values of:
 !         thresh_write_pair, thresh_count_diff, or num_diff_field_thresh
 
           thresh_write_pair = 1e-05
           thresh_count_diff = 0.
           num_diff_field_thresh = 10
 
-!         For this particular extension, set values of: 
+!         for this particular extension, set values of: 
 !         thresh_write_pair, thresh_count_diff, or num_diff_field_thresh
 
           if(ext(1:3) .eq. 'lc3')then
               do i = 1,42
-                  var(i) = 'LC3'
+                  var(i) = 'lc3'
                   lvl(i) = i
               enddo
               thresh_write_pair = .01
@@ -290,10 +290,10 @@ C
               do i = 1,4
                   lvl(i) = 0
               enddo
-              var(1) = 'R01'
-              var(2) = 'RTO'
-              var(3) = 'S01'
-              var(4) = 'STO'
+              var(1) = 'r01'
+              var(2) = 'rto'
+              var(3) = 's01'
+              var(4) = 'sto'
               thresh_write_pair = .0001
               thresh_count_diff = .0001
 
@@ -309,7 +309,7 @@ C
 
           endif
 
-!         Adjust values for this extension (dependent on machine) of: 
+!         adjust values for this extension (dependent on machine) of: 
 !         thresh_count_diff and num_diff_field_thresh
 
           if(machine_factor .eq. 0.)then
@@ -319,20 +319,20 @@ C
               thresh_count_diff = thresh_count_diff * machine_factor
           endif
 
-          if(var(1) .eq. 'RH')var(1) = 'LHE'
+          if(var(1) .eq. 'rh')var(1) = 'lhe'
 
-!         Read first file
+!         read first file
           call s_len(dir_in,len_dir_in)
 
           if(lenf .eq. 13)then
-              write(6,*)' Reading: ',dir_in(1:len_dir_in),a9_time
+              write(6,*)' reading: ',dir_in(1:len_dir_in),a9_time
      1                           ,'.',ext(1:3)
 
               call read_laps_data(i4time,dir_in,ext,ihmax,jhmax,khmax,
      1             khmax,var,lvl,lvl_coord,units,comment1,data1,
      1             istatus)
           else ! lga/lgb files
-              write(6,*)' Reading: ',dir_in(1:len_dir_in),a9_time
+              write(6,*)' reading: ',dir_in(1:len_dir_in),a9_time
      1                           ,'.',ext(1:3)
               i4_valid = i4time + 7200
               call read_laps(i4time,i4_valid,dir_in,ext,
@@ -345,11 +345,11 @@ C
           if(istatus .ne. 1)then
             if(.not. l_is_vxx(ext) )then
               if(l_pass)then
-                  write(6,*)' READ ERROR: OVERALL CRITERIA FAILURE'
+                  write(6,*)' read error: overall criteria failure'
                   l_pass = .false.     
               endif
             else
-              write(6,*)' Attempting compressed radar data read'
+              write(6,*)' attempting compressed radar data read'
               do if = 1,3
                   write(6,*)' if = ',if
                   kp = 1 + ((if-1) * nk)
@@ -360,23 +360,23 @@ C
      1                               ,data1(1,1,kp),istatus)
               enddo ! if
               if(istatus .ne. 1)then
-                  write(6,*)' READ ERROR: OVERALL CRITERIA FAILURE'
+                  write(6,*)' read error: overall criteria failure'
                   l_pass = .false.     
               endif
             endif
           endif
 
-!         Read second file
+!         read second file
           call s_len(dir_out,len_dir_out)
 
           if(lenf .eq. 13)then  
-              write(6,*)' Reading: ',dir_out(1:len_dir_out),a9_time
+              write(6,*)' reading: ',dir_out(1:len_dir_out),a9_time
      1                     ,'.',ext(1:3)
               call read_laps_data(i4time,dir_out,ext,ihmax,jhmax,khmax,
      1             khmax,var,lvl,lvl_coord,units,comment2,data2,
      1             istatus)
           else ! lga/lgb
-              write(6,*)' Reading: ',dir_out(1:len_dir_out),a9_time
+              write(6,*)' reading: ',dir_out(1:len_dir_out),a9_time
      1                           ,'.',ext(1:3)
               i4_valid = i4time + 7200
               call read_laps(i4time,i4_valid,dir_out,ext,
@@ -389,11 +389,11 @@ C
           if(istatus .ne. 1)then
             if(.not. l_is_vxx(ext) )then
               if(l_pass)then
-                  write(6,*)' READ ERROR: OVERALL CRITERIA FAILURE'
+                  write(6,*)' read error: overall criteria failure'
                   l_pass = .false.     
               endif
             else
-              write(6,*)' Attempting compressed radar data read'
+              write(6,*)' attempting compressed radar data read'
               do if = 1,3
                   write(6,*)' if = ',if
                   kp = 1 + ((if-1) * nk)
@@ -404,7 +404,7 @@ C
      1                               ,data2(1,1,kp),istatus)
               enddo ! if
               if(istatus .ne. 1)then
-                  write(6,*)' READ ERROR: OVERALL CRITERIA FAILURE'
+                  write(6,*)' read error: overall criteria failure'
                   l_pass = .false.     
               endif
             endif
@@ -412,7 +412,7 @@ C
 
       endif ! static file
 
-!       write(6,*)' Hit RETURN to CONTINUE'
+!       write(6,*)' hit return to continue'
 !	read(5,*)
 
         thresh_write_pair = thresh_write_pair * machine_factor
@@ -426,11 +426,11 @@ C
 
         do k = 1,khmax
 
-!       Test whether we should switch variables within this file
+!       test whether we should switch variables within this file
         if(k .gt. 1)then
             if(var(k) .ne. var(k-1))then
                 if(n_levels .gt. 1)then
-                    write(6,*)' Max diff for variable ',var(k-1)(1:3)
+                    write(6,*)' max diff for variable ',var(k-1)(1:3)
      1                      ,' =',diff_max_var
                     write(6,*)
                     diff_max_var = 0.
@@ -440,86 +440,86 @@ C
             endif
         endif
 
-!       Test if new variable
+!       test if new variable
         if(var(k)(1:3) .ne. var_last)then
 
             write(6,*)
-            write(6,*)' New var = ',var(k)(1:3)
+            write(6,*)' new var = ',var(k)(1:3)
 
-!           For this variable, set values of:
+!           for this variable, set values of:
 !           thresh_write_pair, thresh_count_diff, or num_diff_field_thresh
 
             if    (ext(1:3) .eq. 'lvd')thresh_write_pair = 1.0
 
-            if    (ext(1:3) .eq. 'lt1' .and. var(k)(1:2) .eq. 'HT')then       
+            if    (ext(1:3) .eq. 'lt1' .and. var(k)(1:2) .eq. 'ht')then       
                 thresh_count_diff = 2.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lt1' .and. var(k)(1:2) .eq. 'T3')then
+            elseif(ext(1:3) .eq. 'lt1' .and. var(k)(1:2) .eq. 't3')then
                 thresh_count_diff = .02 * machine_factor
-            elseif(ext(1:3) .eq. 'lga' .and. var(k)(1:2) .eq. 'HT')then
+            elseif(ext(1:3) .eq. 'lga' .and. var(k)(1:2) .eq. 'ht')then
                 thresh_count_diff = .01 * machine_factor
-            elseif(ext(1:3) .eq. 'lga' .and. var(k)(1:2) .eq. 'T3')then
+            elseif(ext(1:3) .eq. 'lga' .and. var(k)(1:2) .eq. 't3')then
                 thresh_count_diff = .001 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'USF')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'usf')then
                 thresh_count_diff = .001 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'VSF')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'vsf')then
                 thresh_count_diff = .001 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'TSF')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'tsf')then
                 thresh_count_diff = .001 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'DSF')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'dsf')then
                 thresh_count_diff = .001 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'TGD')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'tgd')then
                 thresh_count_diff = .002 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'SLP')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'slp')then
                 thresh_count_diff = 15.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'PSF')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'psf')then
                 thresh_count_diff = 15.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'P')then
+            elseif(ext(1:3) .eq. 'lgb' .and. var(k)(1:3) .eq. 'p')then
                 thresh_count_diff = 15.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lmt' .and. var(k)(1:3) .eq. 'LMT')then
+            elseif(ext(1:3) .eq. 'lmt' .and. var(k)(1:3) .eq. 'lmt')then
                 thresh_count_diff = 2.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lmt' .and. var(k)(1:3) .eq. 'LLR')then
+            elseif(ext(1:3) .eq. 'lmt' .and. var(k)(1:3) .eq. 'llr')then
                 thresh_count_diff = 2.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:1) .eq. 'U')then
+            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:1) .eq. 'u')then
                 thresh_count_diff = .02 * machine_factor
-            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:1) .eq. 'V')then
+            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:1) .eq. 'v')then
                 thresh_count_diff = .02 * machine_factor
-            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:1) .eq. 'P')then
+            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:1) .eq. 'p')then
                 thresh_count_diff = 15.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:3) .eq. 'MSL')then
+            elseif(ext(1:3) .eq. 'lsx' .and. var(k)(1:3) .eq. 'msl')then
                 thresh_count_diff = 40.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lhe' .and. var(k)(1:3) .eq. 'LHE')then
+            elseif(ext(1:3) .eq. 'lhe' .and. var(k)(1:3) .eq. 'lhe')then
                 thresh_count_diff = 0.1 * machine_factor
-            elseif(ext(1:3) .eq. 'lst' .and. var(k)(1:3) .eq. 'WB0')then
+            elseif(ext(1:3) .eq. 'lst' .and. var(k)(1:3) .eq. 'wb0')then
                 thresh_count_diff = 5.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lvd' .and. var(k)(1:3) .eq. 'SVN')then
+            elseif(ext(1:3) .eq. 'lvd' .and. var(k)(1:3) .eq. 'svn')then
                 thresh_count_diff = 10.0 * machine_factor
-            elseif(ext(1:3) .eq. 'lvd' .and. var(k)(1:3) .eq. 'ALB')then
+            elseif(ext(1:3) .eq. 'lvd' .and. var(k)(1:3) .eq. 'alb')then
                 thresh_count_diff = 0.01 * machine_factor
-                thresh_write_pair = 0.01              !JSmart addition 11-1-96
-!           elseif(ext(1:3) .eq. 'lw3' .and. var(k)(1:2) .ne. 'OM')then
+                thresh_write_pair = 0.01              !jsmart addition 11-1-96
+!           elseif(ext(1:3) .eq. 'lw3' .and. var(k)(1:2) .ne. 'om')then
 !               thresh_count_diff = .1 * machine_factor
             elseif(ext(1:9) .eq. 'nest7grid'
-     1                                .and. var(k)(1:3) .eq. 'LAT')then
+     1                                .and. var(k)(1:3) .eq. 'lat')then
                 thresh_count_diff = .0005 * machine_factor
             elseif(ext(1:9) .eq. 'nest7grid'
-     1                                .and. var(k)(1:3) .eq. 'LON')then
+     1                                .and. var(k)(1:3) .eq. 'lon')then
                 thresh_count_diff = .0005 * machine_factor
             elseif(ext(1:9) .eq. 'nest7grid'
-     1                                .and. var(k)(1:3) .eq. 'AVG')then
+     1                                .and. var(k)(1:3) .eq. 'avg')then
                 thresh_count_diff = 10.0 * machine_factor
             elseif(ext(1:9) .eq. 'nest7grid'
-     1                                .and. var(k)(1:3) .eq. 'LDF')then
+     1                                .and. var(k)(1:3) .eq. 'ldf')then
                 thresh_count_diff = .005 * machine_factor
             endif
 
             write(6,*)
-     1      ' Threshold to write (first ten) grid point pairs = '
+     1      ' threshold to write (first ten) grid point pairs = '
      1                                               ,thresh_write_pair
             write(6,*)
-     1      ' Threshold to count lvl grid point differences   = '
+     1      ' threshold to count lvl grid point differences   = '
      1                                               ,thresh_count_diff
             write(6,*)
-     1      ' Max allowed count of lvl grid point differences = '
+     1      ' max allowed count of lvl grid point differences = '
      1                                           ,num_diff_field_thresh
             write(6,*)
 
@@ -549,22 +549,22 @@ C
           if(istatus_1 .eq. 0 .or. istatus_2 .eq. 0)then
             iwrite = iwrite + 1
             if(iwrite .le. 10)then
-                write(6,21)i,j,k,' Nan'
+                write(6,21)i,j,k,' nan'
             endif
             inan = inan + 1
           else
             diff     = abs(data1(i,j,k)-data2(i,j,k))
 
-!           Test if one of the points is missing and the other isn't
+!           test if one of the points is missing and the other isn't
             if(   (data1(i,j,k) .eq. r_missing_data .or.
      1             data2(i,j,k) .eq. r_missing_data      )        
-     1                          .AND.
+     1                          .and.
      1                     diff .gt. 0.                     )then
 
                 ndiff_msg = ndiff_msg + 1
                 idiff_msg_flag = 1
 
-            else ! Both data points are non-missing
+            else ! both data points are non-missing
 
                 diff_max_file = max(diff_max_file,diff)
                 diff_max_var = max(diff_max_var,diff)
@@ -602,7 +602,7 @@ C
 21                  format(1x,3i5,2f14.6,f12.6)
 22              endif
             endif
-          endif ! Nan test
+          endif ! nan test
         enddo ! j
         enddo ! i
 
@@ -621,7 +621,7 @@ C
             write(6,*)'parallel    comment',trim(comment1(k)(1:80))
             write(6,*)'operational comment',trim(comment2(k)(1:80))
         endif
-        if(inan .gt. 0)write(6,*)' # of Nans = ',inan
+        if(inan .gt. 0)write(6,*)' # of nans = ',inan
 
         if(abs_value_max .gt. 0.)then
 !          if(ndiff_msg .eq. 0)then
@@ -646,21 +646,21 @@ C
         if(k .eq. khmax .and. nvar .gt. 1 
      1                  .and. n_levels .gt. 1)then
                 write(6,*)
-                write(6,*)' Max diff for variable ',var(k)(1:3),' ='
+                write(6,*)' max diff for variable ',var(k)(1:3),' ='
      1                      ,diff_max_var
                 nvar = nvar + 1
         endif
 
         if(ndiff_msg .gt. 0)then
             write(6,*)
-            write(6,*)' WARNING: # OF POINTS DIFFERING '
-     1                ,'WRT MISSING DATA = ',
+            write(6,*)' warning: # of points differing '
+     1                ,'wrt missing data = ',
      1                  ndiff_msg
         endif
 
         if(ndiff + ndiff_msg .gt. num_diff_field_thresh)then
           if(l_pass)then
-            write(6,*)' OVERALL CRITERIA FAILURE'
+            write(6,*)' overall criteria failure'
      1                           ,ndiff,ndiff_msg,num_diff_field_thresh
             l_pass = .false.     
           endif
@@ -673,9 +673,9 @@ C
         enddo ! k
 
 
-      if (istatus .ne. 1) write (6,*)'Error in readlapsdata'
+      if (istatus .ne. 1) write (6,*)'error in readlapsdata'
 
-	   write(6,*)' OVERALL FILE diff_max (',ext(1:3)
+	   write(6,*)' overall file diff_max (',ext(1:3)
      1      ,') [abs/rel/#] = ',diff_max_file,diff_max_file_rel
      1               ,ndiff_file
            write(6,*)
@@ -688,25 +688,25 @@ C
 
         if(n_files .gt. 1)then
           if(l_pass)then
-             write(6,*)' MAX difference (all files)  [abs/rel/#] = '
+             write(6,*)' max difference (all files)  [abs/rel/#] = '
      1              ,diff_max_all,diff_max_all_rel
-     1              ,ndiff_all ! ,' PASSED'
+     1              ,ndiff_all ! ,' passed'
              write(6,*)
-             write(6,*)' PASSED'
+             write(6,*)' passed'
           else
-             write(6,*)' MAX difference (all files)  [abs/rel/#] = '
+             write(6,*)' max difference (all files)  [abs/rel/#] = '
      1              ,diff_max_all,diff_max_all_rel
-     1              ,ndiff_all ! ,' FAILED'
+     1              ,ndiff_all ! ,' failed'
              write(6,*)
-             write(6,*)' FAILED'
+             write(6,*)' failed'
           endif
            write(6,*)
         else
           if(l_pass)then
-            write(6,*)' PASSED'
+            write(6,*)' passed'
             write(6,*)
           else
-            write(6,*)' FAILED'
+            write(6,*)' failed'
             write(6,*)
           endif
         endif
@@ -714,7 +714,7 @@ C
  
         if(idiff_msg_flag .eq. 1)then
             write(6,*)
-            write(6,*)' WARNING: DIFFERENCES WRT MISSING DATA DETECTED'
+            write(6,*)' warning: differences wrt missing data detected'
             write(6,*)
         endif
 
@@ -724,7 +724,7 @@ C
       
 
       subroutine rlh(ext,nz_l,var,lvl,khmax,istatus)
-!                     I   I    O   O    O      O
+!                     i   i    o   o    o      o
       
       character*(*) var(*)
       character*3 ext
@@ -733,20 +733,20 @@ C
       khmax = 0
       istatus = 1
       
-      if    (ext .eq. 'lt1')then                                  ! TEMP
-          call fill_3d_header('T3',var,lvl,nz_l,khmax)
-          call fill_3d_header('HT',var,lvl,nz_l,khmax)
+      if    (ext .eq. 'lt1')then                                  ! temp
+          call fill_3d_header('t3',var,lvl,nz_l,khmax)
+          call fill_3d_header('ht',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'lsx')then
           khmax = 7
-          var(1) = 'T'
-          var(2) = 'TD'
-          var(3) = 'U'
-          var(4) = 'V'
-          var(5) = 'P'
-          var(6) = 'PS'
-          var(7) = 'MSL'
-!         var(8) = 'VIS'
+          var(1) = 't'
+          var(2) = 'td'
+          var(3) = 'u'
+          var(4) = 'v'
+          var(5) = 'p'
+          var(6) = 'ps'
+          var(7) = 'msl'
+!         var(8) = 'vis'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
@@ -758,14 +758,14 @@ C
 
       elseif(ext .eq. 'lst')then
           khmax = 8
-          var(1) = 'PBE'
-          var(2) = 'NBE'
-          var(3) = 'LI'
-          var(4) = 'SI'
-          var(5) = 'TT'
-          var(6) = 'LCL'
-          var(7) = 'K'
-          var(8) = 'WB0'
+          var(1) = 'pbe'
+          var(2) = 'nbe'
+          var(3) = 'li'
+          var(4) = 'si'
+          var(5) = 'tt'
+          var(6) = 'lcl'
+          var(7) = 'k'
+          var(8) = 'wb0'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
@@ -777,34 +777,34 @@ C
 
       elseif(ext .eq. 'vrc')then
           khmax = 1
-          var(1) = 'REF'
+          var(1) = 'ref'
           lvl(1) = 0
 
-      elseif(ext .eq. 'lw3')then                                  ! WIND
-          call fill_3d_header('U3',var,lvl,nz_l,khmax)
-          call fill_3d_header('V3',var,lvl,nz_l,khmax)
-          call fill_3d_header('OM',var,lvl,nz_l,khmax)
+      elseif(ext .eq. 'lw3')then                                  ! wind
+          call fill_3d_header('u3',var,lvl,nz_l,khmax)
+          call fill_3d_header('v3',var,lvl,nz_l,khmax)
+          call fill_3d_header('om',var,lvl,nz_l,khmax)
 
-      elseif(ext .eq. 'lga')then                                  ! LGA
-          call fill_3d_header('HT',var,lvl,nz_l,khmax)
-          call fill_3d_header('T3',var,lvl,nz_l,khmax)
-          call fill_3d_header('SH',var,lvl,nz_l,khmax)
-          call fill_3d_header('U3',var,lvl,nz_l,khmax)
-          call fill_3d_header('V3',var,lvl,nz_l,khmax)
-          call fill_3d_header('OM',var,lvl,nz_l,khmax)
+      elseif(ext .eq. 'lga')then                                  ! lga
+          call fill_3d_header('ht',var,lvl,nz_l,khmax)
+          call fill_3d_header('t3',var,lvl,nz_l,khmax)
+          call fill_3d_header('sh',var,lvl,nz_l,khmax)
+          call fill_3d_header('u3',var,lvl,nz_l,khmax)
+          call fill_3d_header('v3',var,lvl,nz_l,khmax)
+          call fill_3d_header('om',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'lgb')then
           khmax = 9  
-          var(1) = 'USF'
-          var(2) = 'VSF'
-          var(3) = 'TSF'
-          var(4) = 'TGD'
-          var(5) = 'DSF'
-          var(6) = 'SLP'
-          var(7) = 'PSF'
-          var(8) = 'RSF'
-          var(9) = 'P'
-!         var(10) = 'PCP'
+          var(1) = 'usf'
+          var(2) = 'vsf'
+          var(3) = 'tsf'
+          var(4) = 'tgd'
+          var(5) = 'dsf'
+          var(6) = 'slp'
+          var(7) = 'psf'
+          var(8) = 'rsf'
+          var(9) = 'p'
+!         var(10) = 'pcp'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
@@ -816,43 +816,43 @@ C
           lvl(9) = 0
 !         lvl(10) = 0
 
-      elseif(ext(1:2) .eq. 'v0')then                              ! V0x
-          call fill_3d_header('REF',var,lvl,nz_l,khmax)
-          call fill_3d_header('VEL',var,lvl,nz_l,khmax)
-          call fill_3d_header('NYQ',var,lvl,nz_l,khmax)
+      elseif(ext(1:2) .eq. 'v0')then                              ! v0x
+          call fill_3d_header('ref',var,lvl,nz_l,khmax)
+          call fill_3d_header('vel',var,lvl,nz_l,khmax)
+          call fill_3d_header('nyq',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'vrz')then                                  
-          call fill_3d_header('REF',var,lvl,nz_l,khmax)
+          call fill_3d_header('ref',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'lwm')then
           khmax = 2
-          var(1) = 'SU'
-          var(2) = 'SV'
+          var(1) = 'su'
+          var(2) = 'sv'
           lvl(1) = 0
           lvl(2) = 0
 
       elseif(ext .eq. 'liw')then
           khmax = 2
-          var(1) = 'LIW'
-          var(2) = 'UMF'
+          var(1) = 'liw'
+          var(2) = 'umf'
           lvl(1) = 0
           lvl(2) = 0
 
       elseif(ext .eq. 'lhe')then
           khmax = 3
-          var(1) = 'LHE'
-          var(2) = 'MU'
-          var(3) = 'MV'
+          var(1) = 'lhe'
+          var(2) = 'mu'
+          var(3) = 'mv'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
 
       elseif(ext .eq. 'lil')then
           khmax = 2
-          var(1) = 'LIL'
-          var(2) = 'LIC'
-!         var(3) = 'COD'
-!         var(4) = 'CLA'
+          var(1) = 'lil'
+          var(2) = 'lic'
+!         var(3) = 'cod'
+!         var(4) = 'cla'
           lvl(1) = 0
           lvl(2) = 0
 !         lvl(3) = 0
@@ -860,94 +860,94 @@ C
 
       elseif(ext .eq. 'lfr')then
           khmax = 4
-          var(1) = 'VNT'
-          var(2) = 'HAM'
-          var(3) = 'HAH'
-          var(4) = 'FWI'
+          var(1) = 'vnt'
+          var(2) = 'ham'
+          var(3) = 'hah'
+          var(4) = 'fwi'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
           lvl(4) = 0
 
-      elseif(ext .eq. 'lc3')then                                  ! CLOUD
-          call fill_3d_header('LC3',var,lvl,42,khmax)
+      elseif(ext .eq. 'lc3')then                                  ! cloud
+          call fill_3d_header('lc3',var,lvl,42,khmax)
 
       elseif(ext .eq. 'lcp')then
-          call fill_3d_header('LCP',var,lvl,nz_l,khmax)
+          call fill_3d_header('lcp',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'lco')then
-          call fill_3d_header('COM',var,lvl,nz_l,khmax)
+          call fill_3d_header('com',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'cty')then
-          call fill_3d_header('CTY',var,lvl,nz_l,khmax)
+          call fill_3d_header('cty',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'pty')then
-          call fill_3d_header('PTY',var,lvl,nz_l,khmax)
+          call fill_3d_header('pty',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'lwc')then
-          call fill_3d_header('LWC',var,lvl,nz_l,khmax)
-          call fill_3d_header('ICE',var,lvl,nz_l,khmax)
-          call fill_3d_header('PCN',var,lvl,nz_l,khmax)
-          call fill_3d_header('RAI',var,lvl,nz_l,khmax)
-          call fill_3d_header('SNO',var,lvl,nz_l,khmax)
+          call fill_3d_header('lwc',var,lvl,nz_l,khmax)
+          call fill_3d_header('ice',var,lvl,nz_l,khmax)
+          call fill_3d_header('pcn',var,lvl,nz_l,khmax)
+          call fill_3d_header('rai',var,lvl,nz_l,khmax)
+          call fill_3d_header('sno',var,lvl,nz_l,khmax)
 
       elseif(ext .eq. 'lct')then                                
           khmax = 3
-          var(1) = 'PTT'
-          var(2) = 'PTY'
-          var(3) = 'SCT'
+          var(1) = 'ptt'
+          var(2) = 'pty'
+          var(3) = 'sct'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
 
       elseif(ext .eq. 'lcb')then                                
           khmax = 3
-          var(1) = 'LCB'
-          var(2) = 'LCT'
-          var(3) = 'CCE'
+          var(1) = 'lcb'
+          var(2) = 'lct'
+          var(3) = 'cce'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
 
       elseif(ext .eq. 'lcv')then                                
           khmax = 2
-          var(1) = 'LCV'
-          var(2) = 'CSC'
+          var(1) = 'lcv'
+          var(2) = 'csc'
           lvl(1) = 0
           lvl(2) = 0
 
       elseif(ext .eq. 'lmt')then                                
           khmax = 2
-          var(1) = 'LMT'
-          var(2) = 'LLR'
+          var(1) = 'lmt'
+          var(2) = 'llr'
           lvl(1) = 0
           lvl(2) = 0
 
       elseif(ext .eq. 'lmr')then                                
           khmax = 1
-          var(1) = 'R'
+          var(1) = 'r'
           lvl(1) = 0
 
       elseif(ext .eq. 'lps')then
-          call fill_3d_header('REF',var,lvl,nz_l,khmax)
+          call fill_3d_header('ref',var,lvl,nz_l,khmax)
 
-      elseif(ext .eq. 'l1s')then                                  ! ACCUM
+      elseif(ext .eq. 'l1s')then                                  ! accum
           khmax = 4
-          var(1) = 'S01'
-          var(2) = 'STO'
-          var(3) = 'R01'
-          var(4) = 'RTO'
+          var(1) = 's01'
+          var(2) = 'sto'
+          var(3) = 'r01'
+          var(4) = 'rto'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
           lvl(4) = 0
 
-      elseif(ext .eq. 'lvd')then                                  ! LVD
+      elseif(ext .eq. 'lvd')then                                  ! lvd
           khmax = 4
-          var(1) = 'ALB'
-          var(2) = 'SVS'
-          var(3) = 'SVN'
-          var(4) = 'S8A'
+          var(1) = 'alb'
+          var(2) = 'svs'
+          var(3) = 'svn'
+          var(4) = 's8a'
           lvl(1) = 0
           lvl(2) = 0
           lvl(3) = 0
@@ -963,7 +963,7 @@ C
       end
 
       subroutine fill_3d_header(varin,var,lvl,nz_l,khmax)
-!                                 I    O   O   I     O
+!                                 i    o   o   i     o
 
       character*(*) varin,var(*)
       integer lvl(*)

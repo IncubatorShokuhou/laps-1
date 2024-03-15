@@ -1,169 +1,169 @@
-      subroutine get_ruc2_dims(filename,cmodel,NX,NY,NZ
-     &,StdLat1,StdLat2,Lon0,La1,Lo1,La2,Lo2,istatus)
+      subroutine get_ruc2_dims(filename,cmodel,nx,ny,nz
+     &,stdlat1,stdlat2,lon0,la1,lo1,la2,lo2,istatus)
 c
-c updated to get all nav info - JS 4-01
+c updated to get all nav info - js 4-01
 c
       implicit none
       include 'netcdf.inc'
 
-      real    StdLat1,StdLat2
-      real    Lon0
-      real    La1,Lo1
-      real    La2,Lo2
+      real    stdlat1,stdlat2
+      real    lon0
+      real    la1,lo1
+      real    la2,lo2
 
-      integer  NX, NY, NZ, nf_fid, nf_vid, nf_status
+      integer  nx, ny, nz, nf_fid, nf_vid, nf_status
       character filename*200
       character cmodel*(*)
       integer istatus
 
       istatus = 0
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', filename
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', filename
         return
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of record
-C
-c      nf_status = NF_INQ_DIMID(nf_fid,'record',nf_vid)
-c      if(nf_status.ne.NF_NOERR) then
-c        print *, NF_STRERROR(nf_status)
+c
+c  fill all dimension values
+c
+c
+c get size of record
+c
+c      nf_status = nf_inq_dimid(nf_fid,'record',nf_vid)
+c      if(nf_status.ne.nf_noerr) then
+c        print *, nf_strerror(nf_status)
 c        print *,'dim record'
 c      endif
-c      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,record)
-c      if(nf_status.ne.NF_NOERR) then
-c        print *, NF_STRERROR(nf_status)
+c      nf_status = nf_inq_dimlen(nf_fid,nf_vid,record)
+c      if(nf_status.ne.nf_noerr) then
+c        print *, nf_strerror(nf_status)
 c        print *,'dim record'
 c      endif
-C
-C Get size of x
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'x',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of x
+c
+      nf_status = nf_inq_dimid(nf_fid,'x',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim x'
         return
       endif
 
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,NX)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,nx)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim x'
         return
       endif
 
-C
-C Get size of y
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'y',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of y
+c
+      nf_status = nf_inq_dimid(nf_fid,'y',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim y'
         return
       endif
 
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,NY)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,ny)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim y'
         return
       endif
 
-C
-C Get size of z
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'z',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of z
+c
+      nf_status = nf_inq_dimid(nf_fid,'z',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim z'
         return
       endif
 
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,NZ)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,nz)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim z'
         return
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      La1          "first latitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'La1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+c
+c     variable        netcdf long name
+c      la1          "first latitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'la1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Latin        "conic tangent latitude"
-C
-      if(cmodel.eq.'RUC40_NATIVE')then
-        nf_status = NF_INQ_VARID(nf_fid,'Latin',nf_vid)
+c
+c     variable        netcdf long name
+c      latin        "conic tangent latitude"
+c
+      if(cmodel.eq.'ruc40_native')then
+        nf_status = nf_inq_varid(nf_fid,'latin',nf_vid)
       else
-        nf_status = NF_INQ_VARID(nf_fid,'Latin1',nf_vid)
+        nf_status = nf_inq_varid(nf_fid,'latin1',nf_vid)
       endif
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Latin'
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var latin'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,StdLat1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Latin - StdLat'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stdlat1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var latin - stdlat'
       endif
 
 c not in netcdf file
-      StdLat2=StdLat1
-C
-C     Variable        NETCDF Long Name
-C      Lo1          "first longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+      stdlat2=stdlat1
+c
+c     variable        netcdf long name
+c      lo1          "first longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'lo1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lov          "orientation of grid"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lov',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lov'
+c
+c     variable        netcdf long name
+c      lov          "orientation of grid"
+c
+        nf_status = nf_inq_varid(nf_fid,'lov',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lov'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lon0)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lov - Lon0'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lon0)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lov - lon0'
       endif
 
 c these not in netcdf file!
-      La2=55.4818
-      Lo2=-57.3794
+      la2=55.4818
+      lo2=-57.3794
 
-      nf_status = NF_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_close(nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close ruc2'
         return
       endif
@@ -171,135 +171,135 @@ c these not in netcdf file!
       istatus=1 
       return
       end
-C
-C
-C
-C  Subroutine to read the file "Hybrid-B 40km Rapid Update Cycle" 
-C
-      subroutine read_ruc2_hybb(filename, NX, NY, NZ, mmsp
+c
+c
+c
+c  subroutine to read the file "hybrid-b 40km rapid update cycle" 
+c
+      subroutine read_ruc2_hybb(filename, nx, ny, nz, mmsp
      +     ,hgt, p, qv, u, v, vpt, w,istatus)
       implicit none
       include 'netcdf.inc'
-C     integer NX, NY, NZ, nf_fid, nf_vid, nf_status,istatus
-      integer NX, NY, NZ, nf_fid, nf_status,istatus
+c     integer nx, ny, nz, nf_fid, nf_vid, nf_status,istatus
+      integer nx, ny, nz, nf_fid, nf_status,istatus
       character*200 filename
       character*4   cvar
       integer nxny,nxnynz
-      real mmsp(nx,ny), hgt( NX,  NY,  NZ), 
-     +     p( NX,  NY,  NZ), qv( NX,  NY,  NZ), 
-     +     u( NX,  NY,  NZ), v( NX,  NY,  NZ), 
-     +     vpt( NX,  NY,  NZ), w( NX,  NY,  NZ)
+      real mmsp(nx,ny), hgt( nx,  ny,  nz), 
+     +     p( nx,  ny,  nz), qv( nx,  ny,  nz), 
+     +     u( nx,  ny,  nz), v( nx,  ny,  nz), 
+     +     vpt( nx,  ny,  nz), w( nx,  ny,  nz)
 
       istatus = 1
       nxny=nx*ny
       nxnynz=nx*ny*nz
 
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', filename
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', filename
         return
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      MMSP         "MAPS mean sea level pressure" 
-C
-      cvar='MMSP'
+c
+c     variable        netcdf long name
+c      mmsp         "maps mean sea level pressure" 
+c
+      cvar='mmsp'
       call read_netcdf_real(nf_fid,cvar,nxny,mmsp,0,0,nf_status)
 
-C
-C     Variable        NETCDF Long Name
-C      hgt          "geopotential height" 
-C
+c
+c     variable        netcdf long name
+c      hgt          "geopotential height" 
+c
       cvar='hgt '
       call read_netcdf_real(nf_fid,cvar,nxnynz,hgt,0,0,nf_status)
 
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the height field is missing'
-         print*, 'ABORTING file processing for ruc2 file ',filename
+         print*, 'a substantial portion of the height field is missing'
+         print*, 'aborting file processing for ruc2 file ',filename
          return
       endif
 
 
-C
-C     Variable        NETCDF Long Name
-C      p            "pressure" 
-C
+c
+c     variable        netcdf long name
+c      p            "pressure" 
+c
       cvar='p   '
       call read_netcdf_real(nf_fid,cvar,nxnynz,p,0,0,nf_status)
 
       if(nf_status.lt.-0.5*nxnynz) then
-      print*, 'A substantial portion of the pressure field is missing'
-         print*, 'ABORTING file processing for ruc2 file ',filename
+      print*, 'a substantial portion of the pressure field is missing'
+         print*, 'aborting file processing for ruc2 file ',filename
          return
       endif
-C
-C     Variable        NETCDF Long Name
-C      qv           "water vapor mixing ratio" 
-C
+c
+c     variable        netcdf long name
+c      qv           "water vapor mixing ratio" 
+c
       cvar='qv  '
       call read_netcdf_real(nf_fid,cvar,nxnynz,qv,0,0,nf_status)
 
       if(nf_status.lt.-0.5*nxnynz) then
-      print*,'A substantial portion of the water vapor field is missing'
-         print*, 'ABORTING file processing for ruc2 file ',filename
+      print*,'a substantial portion of the water vapor field is missing'
+         print*, 'aborting file processing for ruc2 file ',filename
          return
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      u            "u-component of wind" 
-C
+c
+c     variable        netcdf long name
+c      u            "u-component of wind" 
+c
       cvar='u   '
       call read_netcdf_real(nf_fid,cvar,nxnynz,u,0,0,nf_status)
 
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the u-wind field is missing'
-         print*, 'ABORTING file processing for ruc2 file ',filename
+         print*, 'a substantial portion of the u-wind field is missing'
+         print*, 'aborting file processing for ruc2 file ',filename
          return
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      v            "v-component of wind" 
-C
+c
+c     variable        netcdf long name
+c      v            "v-component of wind" 
+c
       cvar='v   '
       call read_netcdf_real(nf_fid,cvar,nxnynz,v,0,0,nf_status)
 
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the v-wind field is missing'
-         print*, 'ABORTING file processing for ruc2 file ',filename
+         print*, 'a substantial portion of the v-wind field is missing'
+         print*, 'aborting file processing for ruc2 file ',filename
          return
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      vpt          "virtual potential temperature" 
-C
+c
+c     variable        netcdf long name
+c      vpt          "virtual potential temperature" 
+c
       cvar='vpt '
       call read_netcdf_real(nf_fid,cvar,nxnynz,vpt,0,0,nf_status)
 
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the vpt field is missing'
-         print*, 'ABORTING file processing for ruc2 file ',filename
+         print*, 'a substantial portion of the vpt field is missing'
+         print*, 'aborting file processing for ruc2 file ',filename
          return
       endif
 
-C
-C     Variable        NETCDF Long Name
-C      w            "vertical velocity" 
-C
+c
+c     variable        netcdf long name
+c      w            "vertical velocity" 
+c
       cvar='w   '
       call read_netcdf_real(nf_fid,cvar,nxnynz,w,0,0,nf_status)
 
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
         return
       endif

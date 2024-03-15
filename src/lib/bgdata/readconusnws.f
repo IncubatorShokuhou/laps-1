@@ -12,45 +12,45 @@ c
       character*31  dummy
 c_______________________________________________________________________________
 c
-c *** Open the netcdf file.
+c *** open the netcdf file.
 c
-      rcode=NF_OPEN(fname,NF_NOWRITE,ncid)
+      rcode=nf_open(fname,nf_nowrite,ncid)
 c
-c *** Statements to fill nx.
+c *** statements to fill nx.
 c
-      call NCVINQ(ncid,16,dummy,ntp,nvdim,vdims,nvs,rcode)
+      call ncvinq(ncid,16,dummy,ntp,nvdim,vdims,nvs,rcode)
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_INT(ncid,16,start,count,nx)
+      rcode=nf_get_vara_int(ncid,16,start,count,nx)
 c
-c *** Statements to fill ny.
+c *** statements to fill ny.
 c
-      call NCVINQ(ncid,17,dummy,ntp,nvdim,vdims,nvs,rcode)
+      call ncvinq(ncid,17,dummy,ntp,nvdim,vdims,nvs,rcode)
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_INT(ncid,17,start,count,ny)
+      rcode=nf_get_vara_int(ncid,17,start,count,ny)
 c
-c *** Statements to fill nz.
+c *** statements to fill nz.
 c
-      call NCVINQ(ncid,18,dummy,ntp,nvdim,vdims,nvs,rcode)
+      call ncvinq(ncid,18,dummy,ntp,nvdim,vdims,nvs,rcode)
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_INT(ncid,18,start,count,nz)
+      rcode=nf_get_vara_int(ncid,18,start,count,nz)
 c
       rcode=nf_close(ncid)
 c
@@ -73,7 +73,7 @@ c
 c
       integer rcode
 c
-c *** Output arrays.
+c *** output arrays.
 c
       real   pr(nx,ny,nz)
      .      ,ht(nx,ny,nz)
@@ -100,11 +100,11 @@ c
 c
       real   msgflg
 c
-c *** Common block variables for Lambert-conformal grid.
+c *** common block variables for lambert-conformal grid.
 c
-      integer nx_lc,ny_lc,nz_lc  !No. of LC domain grid points
-      real   lat1,lat2,lon0,     !Lambert-conformal std lat1, lat, lon
-     .       sw(2),ne(2)         !SW lat, lon, NE lat, lon
+      integer nx_lc,ny_lc,nz_lc  !no. of lc domain grid points
+      real   lat1,lat2,lon0,     !lambert-conformal std lat1, lat, lon
+     .       sw(2),ne(2)         !sw lat, lon, ne lat, lon
       common /lcgrid/nx_lc,ny_lc,nz_lc,lat1,lat2,lon0,sw,ne
       real   lon0_lc
       real   lat1_lc,lat2_lc
@@ -114,177 +114,177 @@ c
 
       msgflg=1.e30
 c
-c *** Open the netcdf file.
+c *** open the netcdf file.
 c
       call s_len(path,len)
       bgname=path(1:len)//'/'//fname//af
-      rcode=NF_OPEN(bgname,NF_NOWRITE,ncid)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_open(bgname,nf_nowrite,ncid)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Read netcdf data.
-c *** Statements to fill prn.
+c *** read netcdf data.
+c *** statements to fill prn.
 c
-      call NCVINQ(ncid,1,dummy,ntp,nvdim,vdims,nvs,rcode)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      call ncvinq(ncid,1,dummy,ntp,nvdim,vdims,nvs,rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             return
          endif
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_REAL(ncid,1,start,count,prn)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,1,start,count,prn)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Statements to fill ht.
+c *** statements to fill ht.
 c
-      call NCVINQ(ncid,2,dummy,ntp,nvdim,vdims,nvs,rcode)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      call ncvinq(ncid,2,dummy,ntp,nvdim,vdims,nvs,rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             return
          endif
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_REAL(ncid,2,start,count,ht)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,2,start,count,ht)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Statements to fill tp.
+c *** statements to fill tp.
 c
-      call NCVINQ(ncid,3,dummy,ntp,nvdim,vdims,nvs,rcode)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      call ncvinq(ncid,3,dummy,ntp,nvdim,vdims,nvs,rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             return
          endif
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_REAL(ncid,3,start,count,tp)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,3,start,count,tp)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Statements to fill sh.
+c *** statements to fill sh.
 c
-      call NCVINQ(ncid,4,dummy,ntp,nvdim,vdims,nvs,rcode)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      call ncvinq(ncid,4,dummy,ntp,nvdim,vdims,nvs,rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             return
          endif
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_REAL(ncid,4,start,count,sh)
-      rcode=NF_GET_VARA_REAL(ncid,3,start,count,tp)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,4,start,count,sh)
+      rcode=nf_get_vara_real(ncid,3,start,count,tp)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
-      rcode=NF_GET_VARA_REAL(ncid,3,start,count,tp)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,3,start,count,tp)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Statements to fill uw.
+c *** statements to fill uw.
 c
-      call NCVINQ(ncid,5,dummy,ntp,nvdim,vdims,nvs,rcode)
-      rcode=NF_GET_VARA_REAL(ncid,3,start,count,tp)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      call ncvinq(ncid,5,dummy,ntp,nvdim,vdims,nvs,rcode)
+      rcode=nf_get_vara_real(ncid,3,start,count,tp)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             return
          endif
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_REAL(ncid,5,start,count,uw)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,5,start,count,uw)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Statements to fill vw.
+c *** statements to fill vw.
 c
-      call NCVINQ(ncid,6,dummy,ntp,nvdim,vdims,nvs,rcode)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      call ncvinq(ncid,6,dummy,ntp,nvdim,vdims,nvs,rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
       lenstr=1
       do j=1,nvdim
-         call NCDINQ(ncid,vdims(j),dummy,ndsize,rcode)
-         if(rcode.ne.NF_NOERR) then
-            print *, NF_STRERROR(rcode)
+         call ncdinq(ncid,vdims(j),dummy,ndsize,rcode)
+         if(rcode.ne.nf_noerr) then
+            print *, nf_strerror(rcode)
             return
          endif
          lenstr=lenstr*ndsize
          start(j)=1
          count(j)=ndsize
       enddo
-      rcode=NF_GET_VARA_REAL(ncid,6,start,count,vw)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      rcode=nf_get_vara_real(ncid,6,start,count,vw)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Close netcdf file.
+c *** close netcdf file.
 c
       rcode=nf_close(ncid)
-      if(rcode.ne.NF_NOERR) then
-        print *, NF_STRERROR(rcode)
+      if(rcode.ne.nf_noerr) then
+        print *, nf_strerror(rcode)
         return
       endif
 c
-c *** Fill missing value flag (in netcdf file, missing = -99999.)
+c *** fill missing value flag (in netcdf file, missing = -99999.)
 c
       do k=1,nz
       do j=1,ny
@@ -299,9 +299,9 @@ c
       enddo
       enddo
 c         
-c *** Fill Lambert-conformal common block variables.
+c *** fill lambert-conformal common block variables.
 c
-      gproj='LC'
+      gproj='lc'
       nx_lc=nx
       ny_lc=ny
       lat1=25.0
@@ -315,7 +315,7 @@ c
       ne(1)=57.29
       ne(2)=-49.3849
 c
-c *** Convert ruc winds from grid north to true north.
+c *** convert ruc winds from grid north to true north.
 c
 cc      do j=1,ny
 cc      do i=1,nx

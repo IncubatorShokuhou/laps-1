@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -36,7 +36,7 @@ c
      .                  i4time_valid1,i4time_valid2,i4time_now,
      .                  time1,fcst1,time2,fcst2)
 
-      use mem_namelist, ONLY: vertical_grid
+      use mem_namelist, only: vertical_grid
 c
       implicit none
       include 'bgdata.inc'
@@ -80,7 +80,7 @@ c
       character*9    fname9,a9reftime,a9validtime
       character*4    af
 
-!!    add by Huiling Yuan  for getting background information, 20120905, AAA001
+!!    add by huiling yuan  for getting background information, 20120905, aaa001
       character*256 bgpaths(maxbgmodels)
       character*132 cmodel(maxbgmodels)
       integer bgmodels(maxbgmodels)
@@ -92,14 +92,14 @@ c
       logical smooth_fields
       logical lgb_only
       integer  i4reftime,i4valtime
-!!    end by Huiling Yuan, AAA001
+!!    end by huiling yuan, aaa001
 c_______________________________________________________________________________
 c
-      write(6,*)' Subroutine time_interp...',trim(ext),ngrids
+      write(6,*)' subroutine time_interp...',trim(ext),ngrids
 
-!! add Huiling Yuan 20120905, AAA002
+!! add huiling yuan 20120905, aaa002
 c
-c Read information from static/background.nl,  from src/lib/laps_io.f 
+c read information from static/background.nl,  from src/lib/laps_io.f 
 c
       call get_background_info(bgpaths,bgmodels
      +,forecast_length
@@ -110,56 +110,56 @@ c
       print*, 'time_interp: use_analysis = ',use_analysis
       print*, '             use_forecast = ',use_forecast
       print*, '----------------------------------------------'
-!! end Huiling Yuan AAA002
+!! end huiling yuan aaa002
 
       if(ext.eq.'lga') then
          do k=1,nz
-            if(vertical_grid .ne. 'SIGMA_HT')then
+            if(vertical_grid .ne. 'sigma_ht')then
                ip(k)=int(pr(k))
-               var(k,1)='HT '
+               var(k,1)='ht '
             else
                ip(k)= int(ht_1d(k)) 
-               var(k,1)='P3 '
+               var(k,1)='p3 '
             endif
-            var(k,2)='T3 '
-            var(k,3)='SH '
-            var(k,4)='U3 '
-            var(k,5)='V3 '
-            if(vertical_grid .ne. 'SIGMA_HT')then
-              var(k,6)='OM '
+            var(k,2)='t3 '
+            var(k,3)='sh '
+            var(k,4)='u3 '
+            var(k,5)='v3 '
+            if(vertical_grid .ne. 'sigma_ht')then
+              var(k,6)='om '
             else
-              var(k,6)='W3 '
+              var(k,6)='w3 '
             endif
          enddo
       else
          do k=1,nz
             ip(k)=0
          enddo
-         var(1,1)='USF'
-         var(1,2)='VSF'
-         var(1,3)='TSF'
-         var(1,4)='PSF'
-         var(1,5)='SLP'
-         var(1,6)='RSF'
-         var(1,7)='DSF'
-         var(1,8)='P  '
-         var(1,9)='TGD'
-         var(1,10)='R01'
+         var(1,1)='usf'
+         var(1,2)='vsf'
+         var(1,3)='tsf'
+         var(1,4)='psf'
+         var(1,5)='slp'
+         var(1,6)='rsf'
+         var(1,7)='dsf'
+         var(1,8)='p  '
+         var(1,9)='tgd'
+         var(1,10)='r01'
       endif
 
 
       weight=float(i4time_valid2-i4time_now)/
      .       float(i4time_valid2-i4time_valid1)
-      print*,'Time interp weight = ',weight
+      print*,'time interp weight = ',weight
 
       write(af,'(i4.4)') fcst1/3600
       call  make_fnam_lp(time1, fname9, nstatus)
-      print*,'Time interp file 1: ',fname9,af,'.'//ext
+      print*,'time interp file 1: ',fname9,af,'.'//ext
       write(af,'(i4.4)') fcst2/3600
       call  make_fnam_lp(time2, fname9, nstatus)
-      print*,'Time interp file 2: ',fname9,af,'.'//ext
+      print*,'time interp file 2: ',fname9,af,'.'//ext
 
-!     add Huiling Yuan, 20120906, AAA003
+!     add huiling yuan, 20120906, aaa003
       if((use_analysis. eqv. .true.) .and. 
      1   (use_forecast .eqv. .false.))then   
         newfcst=i4time_now-i4time_valid1
@@ -167,7 +167,7 @@ c
         imin=mod(newfcst,3600)/60
         ihour=newfcst/3600
         write(af,'(2i2.2)') ihour,imin
-        print *,'Time interp output file: ',fname9//af,'.'//ext(1:3)
+        print *,'time interp output file: ',fname9//af,'.'//ext(1:3)
 
       else
         newfcst=fcst1-(i4time_valid2-i4time_now)
@@ -175,15 +175,15 @@ c
         imin=mod(newfcst,3600)/60
         ihour=newfcst/3600
         write(af,'(2i2.2)') ihour,imin
-        print *,'Time interp output file: ',fname9//af,'.'//ext(1:3)
-      endif   ! end if block use_analysis=true, Huiling Yuan, 20120906, AAA003
+        print *,'time interp output file: ',fname9//af,'.'//ext(1:3)
+      endif   ! end if block use_analysis=true, huiling yuan, 20120906, aaa003
 
       call s_len(dir,lend)
       cfilespec=dir(1:lend)//'/'//fname9//af//'.'//ext
       inquire(file=cfilespec,exist=lexist)
       if(lexist)then
-         print*,'Output file already exists in ',ext
-         print*,'Returning to lga_driver. No time interp.'
+         print*,'output file already exists in ',ext
+         print*,'returning to lga_driver. no time interp.'
          return
       endif
 
@@ -199,7 +199,7 @@ c
      .        grid1,istatus)
 c
          if(istatus.ne.1) then
-            print *, 'ERROR returned from read_laps, time1'
+            print *, 'error returned from read_laps, time1'
             call  make_fnam_lp(time1, a9reftime, nstatus)
             call  make_fnam_lp(time1+fcst1, a9validtime, nstatus)
             print *, 'time1/fcst1 = ',time1,fcst1
@@ -212,25 +212,25 @@ c
      .        nx,ny,nz,nz,var(1,n),ip,lvl_coord,units,comment,
      .        grid2,istatus)
          if(istatus.ne.1) then
-            print *, 'ERROR returned from read_laps, time2'
+            print *, 'error returned from read_laps, time2'
             print *, 'time2/fcst2 = ',time2,fcst2
             print *, 'n / ngrids = ',n,ngrids                        
             stop 'time_interp'
          endif
 c
-c *** Do interpolation with time for each new file.
+c *** do interpolation with time for each new file.
 c
          warncnt = 0
 
          call check_nan3(grid1,nx,ny,nz,nan_flag)
          if(nan_flag .ne. 1) then
-            print *,' ERROR: NaN found in grid1 array '
+            print *,' error: nan found in grid1 array '
             goto 99
          endif
 c
          call check_nan3(grid2,nx,ny,nz,nan_flag)
          if(nan_flag .ne. 1) then
-            print *,' ERROR: NaN found in grid2 array '
+            print *,' error: nan found in grid2 array '
             goto 99
          endif
 
@@ -244,27 +244,27 @@ c
          enddo
          enddo
 
-!        add Huiling Yuan, 20120906, AAA004
-         if((use_analysis. eqv. .true.) .AND. 
+!        add huiling yuan, 20120906, aaa004
+         if((use_analysis. eqv. .true.) .and. 
      1      (use_forecast .eqv. .false.)      )then   
             i4reftime=time2
             i4valtime=time2+newfcst
          else
             i4reftime=time1
             i4valtime=time1+newfcst
-         endif    ! end Huiling Yuan, AAA004
+         endif    ! end huiling yuan, aaa004
  
 c
 !        istatus = ishow_timer()
          i4_elapsed =ishow_timer()
-         comment(1) = 'Writing Interpolated Time: '//comment(1)
+         comment(1) = 'writing interpolated time: '//comment(1)
          if(ext.eq.'lga')then
-!YHL 20120906            call write_laps(time1,time1+newfcst,dir,ext,
+!yhl 20120906            call write_laps(time1,time1+newfcst,dir,ext,
             call write_laps(i4reftime,i4valtime,dir,ext,
      .           nx,ny,nz,nz,var(1,n),ip,lvl_coord,units,comment,
      .           gridn,istatus)
          else
-!YHL 20120906            call write_laps(time1,time1+newfcst,dir,ext,
+!yhl 20120906            call write_laps(time1,time1+newfcst,dir,ext,
             call write_laps(i4reftime,i4valtime,dir,ext,
      .           nx,ny,1,1,var(1,n),ip,lvl_coord,units,comment,
      .           gridn,istatus)

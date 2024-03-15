@@ -1,83 +1,83 @@
-      SUBROUTINE FI7517 (IRET,IWORK,NPTS,ISTRTB,INRNGA,
-     *                           MAXB,MINB,MXVALB,LWIDEB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7517      SCAN BACKWARD
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 94-01-21
-C
-C ABSTRACT: SCAN BACKWARDS UNTIL A VALUE EXCEEDS RANGE OF GROUP B
-C           THIS MAY SHORTEN GROUP A
-C
-C PROGRAM HISTORY LOG:
-C   94-01-21  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-06-17  IREDELL     REMOVED ALTERNATE RETURN
-C
-C USAGE:    CALL FI7517 (IRET,IWORK,NPTS,ISTRTB,INRNGA,
-C    *                           MAXB,MINB,MXVALB,LWIDEB)
-C   INPUT ARGUMENT LIST:
-C     IWORK    -
-C     ISTRTB   -
-C     NPTS     -
-C     INRNGA   -
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IRET     -
-C     JLAST    -
-C     MAXB     -
-C     MINB     -
-C     LWIDTH   - NUMBER OF BITS TO CONTAIN MAX DIFF
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-      INTEGER        IWORK(*),NPTS,ISTRTB,INRNGA
-      INTEGER        MAXB,MINB,LWIDEB,MXVALB
-      INTEGER        IBITS(31)
-C
-      DATA           IBITS/1,3,7,15,31,63,127,255,511,1023,2047,
+      subroutine fi7517 (iret,iwork,npts,istrtb,inrnga,
+     *                           maxb,minb,mxvalb,lwideb)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    fi7517      scan backward
+c   prgmmr: cavanaugh        org: w/nmc42    date: 94-01-21
+c
+c abstract: scan backwards until a value exceeds range of group b
+c           this may shorten group a
+c
+c program history log:
+c   94-01-21  cavanaugh
+c   95-10-31  iredell     removed saves and prints
+c   98-06-17  iredell     removed alternate return
+c
+c usage:    call fi7517 (iret,iwork,npts,istrtb,inrnga,
+c    *                           maxb,minb,mxvalb,lwideb)
+c   input argument list:
+c     iwork    -
+c     istrtb   -
+c     npts     -
+c     inrnga   -
+c
+c   output argument list:      (including work arrays)
+c     iret     -
+c     jlast    -
+c     maxb     -
+c     minb     -
+c     lwidth   - number of bits to contain max diff
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+      integer        iwork(*),npts,istrtb,inrnga
+      integer        maxb,minb,lwideb,mxvalb
+      integer        ibits(31)
+c
+      data           ibits/1,3,7,15,31,63,127,255,511,1023,2047,
      *               4095,8191,16383,32767,65535,131071,262143,
      *               524287,1048575,2097151,4194303,8388607,
      *               16777215,33554431,67108863,134217727,268435455,
      *               536870911,1073741823,2147483647/
-C  ----------------------------------------------------------------
-      IRET=0
-C     PRINT *,'          FI7517'
-      NPOS  = ISTRTB - 1
-      ITST  = 0
-      KSET  = INRNGA
-C
- 1000 CONTINUE
-C     PRINT *,'TRY NPOS',NPOS,IWORK(NPOS),MAXB,MINB
-      ITST  = ITST + 1
-      IF (ITST.LE.KSET) THEN
-          IF (IWORK(NPOS).GT.MAXB) THEN
-              IF ((IWORK(NPOS)-MINB).GT.MXVALB) THEN
-C                 PRINT *,'WENT OUT OF RANGE AT',NPOS
-                  IRET=1
-                  RETURN
-              ELSE
-                  MAXB    = IWORK(NPOS)
-              END IF
-          ELSE IF (IWORK(NPOS).LT.MINB) THEN
-              IF ((MAXB-IWORK(NPOS)).GT.MXVALB) THEN
-C                 PRINT *,'WENT OUT OF RANGE AT',NPOS
-                  IRET=1
-                  RETURN
-              ELSE
-                  MINB    = IWORK(NPOS)
-              END IF
-          END IF
-          INRNGA  = INRNGA - 1
-          NPOS  = NPOS - 1
-          GO TO 1000
-      END IF
-C  ----------------------------------------------------------------
-C
- 9000 CONTINUE
-      RETURN
-      END
+c  ----------------------------------------------------------------
+      iret=0
+c     print *,'          fi7517'
+      npos  = istrtb - 1
+      itst  = 0
+      kset  = inrnga
+c
+ 1000 continue
+c     print *,'try npos',npos,iwork(npos),maxb,minb
+      itst  = itst + 1
+      if (itst.le.kset) then
+          if (iwork(npos).gt.maxb) then
+              if ((iwork(npos)-minb).gt.mxvalb) then
+c                 print *,'went out of range at',npos
+                  iret=1
+                  return
+              else
+                  maxb    = iwork(npos)
+              end if
+          else if (iwork(npos).lt.minb) then
+              if ((maxb-iwork(npos)).gt.mxvalb) then
+c                 print *,'went out of range at',npos
+                  iret=1
+                  return
+              else
+                  minb    = iwork(npos)
+              end if
+          end if
+          inrnga  = inrnga - 1
+          npos  = npos - 1
+          go to 1000
+      end if
+c  ----------------------------------------------------------------
+c
+ 9000 continue
+      return
+      end

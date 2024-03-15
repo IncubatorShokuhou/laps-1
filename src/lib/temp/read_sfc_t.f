@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,45 +29,45 @@ cdis
 cdis 
 cdis 
 cdis 
-        subroutine rd_sfc_t(i4time,heights_3d,temp_bkg_3d           ! I
-     1                       ,pres_3d                               ! I
-     1                       ,MAX_SFC                               ! I
-     1                       ,n_good_sfc                            ! O
-     1                       ,ext_in                                ! I
-!    1                       ,u_maps_inc,v_maps_inc                 ! I
-     1                       ,ni,nj,nk                              ! I
-     1                       ,lat,lon,r_missing_data                ! I
-     1                       ,temp_obs,max_obs,n_obs                ! I/O
-     1                       ,istatus)                              ! O
+        subroutine rd_sfc_t(i4time,heights_3d,temp_bkg_3d           ! i
+     1                       ,pres_3d                               ! i
+     1                       ,max_sfc                               ! i
+     1                       ,n_good_sfc                            ! o
+     1                       ,ext_in                                ! i
+!    1                       ,u_maps_inc,v_maps_inc                 ! i
+     1                       ,ni,nj,nk                              ! i
+     1                       ,lat,lon,r_missing_data                ! i
+     1                       ,temp_obs,max_obs,n_obs                ! i/o
+     1                       ,istatus)                              ! o
 
-!       2001        Steve Albers, FSL      Can be called for sfc temps
+!       2001        steve albers, fsl      can be called for sfc temps
 
 !******************************************************************************
 
-        use mem_namelist, ONLY: iwrite_output
+        use mem_namelist, only: iwrite_output
 
         include 'tempobs.inc'
 
-!       LAPS Grid Dimensions
+!       laps grid dimensions
         real lat(ni,nj)
         real lon(ni,nj)
 
-!       Sfc Stations
+!       sfc stations
 
-        integer sfc_i(MAX_SFC)     ! I sfc gridpoint
-        integer sfc_j(MAX_SFC)     ! J sfc gridpoint
-        integer sfc_ht(MAX_SFC)    ! HT sfc
-        real    sfc_temp(MAX_SFC)  ! sfc temp
+        integer sfc_i(max_sfc)     ! i sfc gridpoint
+        integer sfc_j(max_sfc)     ! j sfc gridpoint
+        integer sfc_ht(max_sfc)    ! ht sfc
+        real    sfc_temp(max_sfc)  ! sfc temp
 
-        real sfc_lat(MAX_SFC)
-        real sfc_lon(MAX_SFC)
-        real sfc_elev(MAX_SFC)
+        real sfc_lat(max_sfc)
+        real sfc_lon(max_sfc)
+        real sfc_elev(max_sfc)
 
 c
         integer i4time, jstatus
 c
         character filetime*9, infile*256, btime*24
-        character stations(MAX_SFC)*20, provider(MAX_SFC)*11
+        character stations(max_sfc)*20, provider(max_sfc)*11
 
 
 !******************************************************************************
@@ -85,7 +85,7 @@ c
         logical l_eof
 
         write(6,*)
-        write(6,*)' Subroutine rd_sfc_t...'
+        write(6,*)' subroutine rd_sfc_t...'
 
         n_sfc_read = 0
         n_sfc_obs = 0
@@ -96,7 +96,7 @@ c
         ext = 'tmg'
         close(lun_tmg)
 
-!       Open output intermediate graphics file
+!       open output intermediate graphics file
         if(iwrite_output .ge. 1)then
             call open_lapsprd_file_append(lun_tmg,i4time,ext,istatus)       
             if(istatus .ne. 1)go to 888
@@ -106,22 +106,22 @@ c
         if(istatus .eq. 1)then
             write(6,*)' ilaps_cycle_time = ',ilaps_cycle_time
         else
-            write(6,*)' Error getting laps_cycle_time'
+            write(6,*)' error getting laps_cycle_time'
             return
         endif
 
-        call get_tempob_time_window('SFC',i4_window_sfc,istatus)
+        call get_tempob_time_window('sfc',i4_window_sfc,istatus)
         if(istatus .eq. 1)then
             write(6,*)' i4_window_sfc = ',i4_window_sfc
         else
-            write(6,*)' Error getting i4_window_sfc'
+            write(6,*)' error getting i4_window_sfc'
             return
         endif
 
         write(6,*)
-        write(6,*)'             Reading SFC Obs: ',ext_in
+        write(6,*)'             reading sfc obs: ',ext_in
         write(6,*)
-     1  '   n   i  j  k   T-Raw  T-grid  bias  '
+     1  '   n   i  j  k   t-raw  t-grid  bias  '
 
 10      i_qc = 1
 
@@ -138,7 +138,7 @@ c
 	call read_sfc_temp(i4time,btime,n_obs_g,n_obs_b 
      1                    ,stations,provider
      1                    ,sfc_lat,sfc_lon,sfc_elev
-     1                    ,sfc_temp,MAX_SFC
+     1                    ,sfc_temp,max_sfc
      1                    ,jstatus)
 
         do i = 1,n_obs_b
@@ -158,7 +158,7 @@ c
             rcycles = float(i4time - i4time_sfc) 
      1              / float(ilaps_cycle_time)
 
-!           Climo QC check
+!           climo qc check
             if(temp_ob .lt. 500. .and. i_qc .eq. 1)then
 
                 call latlon_to_rlapsgrid(sfc_lat(i),sfc_lon(i)
@@ -170,13 +170,13 @@ c
                 if(i_grid .ge.  1 .and. j_grid .ge. 1 .and.
      1             i_grid .le. ni .and. j_grid .le. nj)then
 
-!                   SFC is in horizontal domain
+!                   sfc is in horizontal domain
 
                     if(ext_in .eq. 'pin')then
-!                       Assume SFC elev is pressure altitude MSL
+!                       assume sfc elev is pressure altitude msl
                         elev_std = elev_in
 
-                        if(abs(elev_std) .lt. 90000.)then ! Within flag value
+                        if(abs(elev_std) .lt. 90000.)then ! within flag value
                             pres_mb = ztopsa(elev_std)
                             pres_pa = pres_mb * 100.
                             call pressure_to_height(pres_pa,heights_3d       
@@ -194,7 +194,7 @@ c
                         endif
 
                         if(istatus_rk .ne. 1)then
-                            write(6,*)' WARNING: rejecting SFC ',
+                            write(6,*)' warning: rejecting sfc ',
      1                      'elevation questionable ',elev_std,elev_geo       
                         endif
 
@@ -208,13 +208,13 @@ c
 
                     if(istatus_rk .eq. 1
      1             .and. k_grid .le. nk
-     1             .and. k_grid .ge. 1    )then ! SFC is in vertical domain
+     1             .and. k_grid .ge. 1    )then ! sfc is in vertical domain
 
                         n_sfc_obs = n_sfc_obs + 1
 
-                        if(n_sfc_obs .gt. MAX_SFC)then
-                           write(6,*)' Warning: Too many sfcs, '
-     1                              ,'limit is ',MAX_SFC
+                        if(n_sfc_obs .gt. max_sfc)then
+                           write(6,*)' warning: too many sfcs, '
+     1                              ,'limit is ',max_sfc
                            istatus = 0
                            return
                         endif
@@ -230,48 +230,48 @@ c
                         pres_ob = r_missing_data
 
                         call interp_tobs_to_laps(
-     1                             elev_geo,temp_ob,                     ! I
-     1                             pres_ob,                              ! I
-     1                             t_diff,temp_bkg_3d,                   ! I
-     1                             t_interp,                             ! O
-     1                             1,iwrite,k_grid,.true.,               ! I
-     1                             1,                                    ! I
-     1                             lat_pr,lon_pr,i_grid,j_grid,          ! I
-     1                             ni,nj,nk,                             ! I
-     1                             1,1,r_missing_data,                   ! I
-     1                             pres_3d,                              ! I
-     1                             heights_3d)                           ! I
+     1                             elev_geo,temp_ob,                     ! i
+     1                             pres_ob,                              ! i
+     1                             t_diff,temp_bkg_3d,                   ! i
+     1                             t_interp,                             ! o
+     1                             1,iwrite,k_grid,.true.,               ! i
+     1                             1,                                    ! i
+     1                             lat_pr,lon_pr,i_grid,j_grid,          ! i
+     1                             ni,nj,nk,                             ! i
+     1                             1,1,r_missing_data,                   ! i
+     1                             pres_3d,                              ! i
+     1                             heights_3d)                           ! i
 
                         if(t_interp .eq. r_missing_data)then
-                            write(6,*)' ERROR: t_interp = ',t_interp
+                            write(6,*)' error: t_interp = ',t_interp
                             istatus = 0
                             return
                         endif
 
                         if(iwrite_output .ge. 1)then
                             write(lun_tmg,*)ri,rj,k_grid
-     1                                     ,t_interp,'SFC'
+     1                                     ,t_interp,'sfc'
                         endif
 
-!                       Calculate observation bias
+!                       calculate observation bias
                         bias = t_interp - 
      1                         temp_bkg_3d(i_grid,j_grid,k_grid)
 
-!                       QC check of bias
+!                       qc check of bias
                         if(abs(bias) .le. 10.)then
                             n_good_sfc = n_good_sfc + 1            
                             n_obs = n_obs + 1
 
                             if(n_obs .gt. max_obs)then
                                 write(6,*)
-     1                        ' Error - too many obs in data structure'       
+     1                        ' error - too many obs in data structure'       
                                 write(6,*)
-     1                        ' Increase max_obs parameter from',max_obs     
+     1                        ' increase max_obs parameter from',max_obs     
                                 istatus = 0
                                 return
                             endif
 
-!                           Insert ob into data structure
+!                           insert ob into data structure
                             temp_obs(n_obs,i_ri) = i_grid
                             temp_obs(n_obs,i_rj) = j_grid
                             temp_obs(n_obs,i_rk) = rk
@@ -300,33 +300,33 @@ c
 21                      continue
 
                     else
-                        write(6,*)' Note: Out of vertical Bounds'
+                        write(6,*)' note: out of vertical bounds'
      1                             ,n_sfc_read       
 
-                    endif ! In vertical bounds
+                    endif ! in vertical bounds
 
                 else
-                    write(6,*)' Out of horizontal bounds'
+                    write(6,*)' out of horizontal bounds'
      1                        ,n_sfc_read,i_grid,j_grid        
 
-                endif ! In horizontal bounds
-            endif ! Good data
+                endif ! in horizontal bounds
+            endif ! good data
 
           else
-            write(6,*)' Out of temporal bounds',n_sfc_read
+            write(6,*)' out of temporal bounds',n_sfc_read
      1                              ,abs(i4time_sfc - i4time)
 
-          endif ! In temporal bounds
+          endif ! in temporal bounds
 
 900     enddo ! i
 
-        write(6,*)' End of SFC ',ext_in,' file'
+        write(6,*)' end of sfc ',ext_in,' file'
 
-        write(6,*)' # of SFC read in = ',n_sfc_read
-        write(6,*)' # of SFC passing bounds checks = ',n_sfc_obs      
-        write(6,*)' # of SFC passing QC check = ',n_good_sfc
-        write(6,*)' # of SFC failing QC check = ',n_bad_sfc
-        write(6,*)' % of SFC failing QC check = ',
+        write(6,*)' # of sfc read in = ',n_sfc_read
+        write(6,*)' # of sfc passing bounds checks = ',n_sfc_obs      
+        write(6,*)' # of sfc passing qc check = ',n_good_sfc
+        write(6,*)' # of sfc failing qc check = ',n_bad_sfc
+        write(6,*)' % of sfc failing qc check = ',
      1                     pct_rejected(n_good_sfc,n_bad_sfc)
 
         close(lun_tmg)
@@ -335,12 +335,12 @@ c
 
         return
 
-999     write(6,*)' No sfc data present'
+999     write(6,*)' no sfc data present'
         istatus = 1
         return
 
 
-888     write(6,*)' Open error for TMG file'
+888     write(6,*)' open error for tmg file'
         istatus = 0
         close(lun_tmg)
         return

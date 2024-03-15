@@ -1,200 +1,200 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       absorber_profile
 !
-! PURPOSE:
-!       Module containing routines to compute and assemble the integrated
+! purpose:
+!       module containing routines to compute and assemble the integrated
 !       absorber profiles.
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE absorber_profile
+! calling sequence:
+!       use absorber_profile
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       parameters:  Module containing parameter definitions for the
-!                    RT model.
+! modules:
+!       parameters:  module containing parameter definitions for the
+!                    rt model.
 !
-! CONTAINS:
-!       compute_absorber_amount:     PUBLIC subroutine to compute the integrated
-!                                    absorber profiles. Currently the absorbers
+! contains:
+!       compute_absorber_amount:     public subroutine to compute the integrated
+!                                    absorber profiles. currently the absorbers
 !                                    are:
-!                                      - Water vapor
-!                                      - Dry/fixed gases
-!                                      - Ozone
+!                                      - water vapor
+!                                      - dry/fixed gases
+!                                      - ozone
 !
-!       compute_absorber_amount_TL:  PUBLIC subroutine to compute the tangent-
+!       compute_absorber_amount_tl:  public subroutine to compute the tangent-
 !                                    linear form of the integrated absorber 
 !                                    profiles.
 !
-!       compute_absorber_amount_AD:  PUBLIC subroutine to compute the adjoint of
+!       compute_absorber_amount_ad:  public subroutine to compute the adjoint of
 !                                    the integrated absorber profiles.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None.
+! side effects:
+!       none.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 01-Aug-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 01-aug-2000
 !                       pvandelst@ncep.noaa.gov
 !
-!       Adapted from code written by: Thomas J.Kleespies
-!                                     NOAA/NESDIS/ORA
+!       adapted from code written by: thomas j.kleespies
+!                                     noaa/nesdis/ora
 !                                     tkleespies@nesdis.noaa.gov
 !
-!  Copyright (C) 2000 Thomas Kleespies, Paul van Delst
+!  copyright (c) 2000 thomas kleespies, paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE absorber_profile
+module absorber_profile
 
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
 
-  USE type_kinds, ONLY : fp_kind
-  USE parameters
-  USE transmittance_coefficients, ONLY : alpha, &
+  use type_kinds, only : fp_kind
+  use parameters
+  use transmittance_coefficients, only : alpha, &
                                          absorber_space_levels
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------------
-  ! Default visibility
+  ! default visibility
   ! ------------------
 
-  PRIVATE
+  private
 
 
   ! ----------------------------------
-  ! Explicit visibility of subprograms
+  ! explicit visibility of subprograms
   ! ----------------------------------
 
-  PUBLIC :: compute_absorber_amount
-  PUBLIC :: compute_absorber_amount_TL
-  PUBLIC :: compute_absorber_amount_AD
-  PUBLIC :: find_absorber_layer_index
+  public :: compute_absorber_amount
+  public :: compute_absorber_amount_tl
+  public :: compute_absorber_amount_ad
+  public :: find_absorber_layer_index
 
 
-CONTAINS
+contains
 
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       compute_absorber_amount
 !
-! PURPOSE:
-!       PUBLIC subroutine to compute the integrated profiles for all the
-!       absorbers. Currently the number of absorbers are:
-!         - Water vapor
-!         - Dry/fixed gases (pressure == absorber amount)
-!         - Ozone
+! purpose:
+!       public subroutine to compute the integrated profiles for all the
+!       absorbers. currently the number of absorbers are:
+!         - water vapor
+!         - dry/fixed gases (pressure == absorber amount)
+!         - ozone
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_absorber_amount( pressure,    &  ! Input,  K
-!                                     water_vapor, &  ! Input,  K
-!                                     ozone,       &  ! Input,  K
-!                                     absorber     )  ! Output, 0:K x J
+! calling sequence:
+!       call compute_absorber_amount( pressure,    &  ! input,  k
+!                                     water_vapor, &  ! input,  k
+!                                     ozone,       &  ! input,  k
+!                                     absorber     )  ! output, 0:k x j
 !
-! INPUT ARGUMENTS:
-!       pressure:     Profile LEVEL pressure array.
-!                     UNITS:      hPa
-!                     TYPE:       REAL( fp_kind )
-!                     DIMENSION:  K
-!                     ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:     profile level pressure array.
+!                     units:      hpa
+!                     type:       real( fp_kind )
+!                     dimension:  k
+!                     attributes: intent( in )
 !
-!       water_vapor:  Profile LAYER water vapor mixing ratio array.
-!                     UNITS:      g/kg
-!                     TYPE:       REAL( fp_kind )
-!                     DIMENSION:  K
-!                     ATTRIBUTES: INTENT( IN )
+!       water_vapor:  profile layer water vapor mixing ratio array.
+!                     units:      g/kg
+!                     type:       real( fp_kind )
+!                     dimension:  k
+!                     attributes: intent( in )
 !
-!       ozone:        Profile LAYER ozone mixing ratio array.
-!                     UNITS:      ppmv
-!                     TYPE:       REAL( fp_kind )
-!                     DIMENSION:  K
-!                     ATTRIBUTES: INTENT( IN )
+!       ozone:        profile layer ozone mixing ratio array.
+!                     units:      ppmv
+!                     type:       real( fp_kind )
+!                     dimension:  k
+!                     attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       absorber:     Profile LEVEL integrated absorber amount array.
-!                     UNITS:      Varies with absorber
-!                     TYPE:       REAL( fp_kind )
-!                     DIMENSION:  0:K x J
-!                     ATTRIBUTES: INTENT( OUT )
+! output arguments:
+!       absorber:     profile level integrated absorber amount array.
+!                     units:      varies with absorber
+!                     type:       real( fp_kind )
+!                     dimension:  0:k x j
+!                     attributes: intent( out )
 !
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None.
+! calls:
+!       none.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The function calculates and accumulates the integrated path length
+! procedure:
+!       the function calculates and accumulates the integrated path length
 !       through k atmospheric layers,
 !
 !                     __ k
@@ -205,443 +205,443 @@ CONTAINS
 !
 !       with the units of u dependent on those of the input mixing ratio, q.
 !
-!       The exception is the dry gas absorber amount which is represented
+!       the exception is the dry gas absorber amount which is represented
 !       by the pressure (which is already an integrated quantity).
 !
-!       Also,
+!       also,
 !
 !         u(0) = 0.0          for water vapor and ozone
-!              = TOA_PRESSURE for dry/fixed gases
+!              = toa_pressure for dry/fixed gases
 !
-!       The routine loop over layers, k, with each absorber amount calculated
-!       independently (like looping over absorber, j). This is opposite
+!       the routine loop over layers, k, with each absorber amount calculated
+!       independently (like looping over absorber, j). this is opposite
 !       to what is recommended (since the arrays are dimensioned [k,j]) but 
 !       later use of the arrays require the [k,j] ordering where the absorber
-!       loop over j is the OUTSIDE loop (see COMPUTE_TRANSMITTANCE()).
-!S-
+!       loop over j is the outside loop (see compute_transmittance()).
+!s-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_absorber_amount( pressure,    &  ! Input,  K
-                                      water_vapor, &  ! Input,  K
-                                      ozone,       &  ! Input,  K
-                                      absorber     )  ! Output, 0:K x J
+  subroutine compute_absorber_amount( pressure,    &  ! input,  k
+                                      water_vapor, &  ! input,  k
+                                      ozone,       &  ! input,  k
+                                      absorber     )  ! output, 0:k x j
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: pressure     ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: water_vapor  ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: ozone        ! Input,  K
+    real( fp_kind ), dimension( : ),     intent( in )  :: pressure     ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: water_vapor  ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: ozone        ! input,  k
 
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( OUT ) :: absorber     ! Output, 0:K x J
+    real( fp_kind ), dimension( 0:, : ), intent( out ) :: absorber     ! output, 0:k x j
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k
-    REAL( fp_kind ) :: dp
+    integer :: k
+    real( fp_kind ) :: dp
 
 
 
     !#--------------------------------------------------------------------------#
-    !#              -- Initialise 0'th LEVEL absorber amounts --                #
+    !#              -- initialise 0'th level absorber amounts --                #
     !#                                                                          #
-    !# This is done so that layer differences and averages can be calculated    #
+    !# this is done so that layer differences and averages can be calculated    #
     !# simply in the predictor and transmittance routines.                      #
     !#--------------------------------------------------------------------------#
 
-    absorber( 0, : ) = ZERO
+    absorber( 0, : ) = zero
 
 
 
     !#--------------------------------------------------------------------------#
-    !#             -- Assemble the NADIR LEVEL absorber profiles --             #
+    !#             -- assemble the nadir level absorber profiles --             #
     !#--------------------------------------------------------------------------#
 
     ! ---------------------------------------------
-    ! TOA layer. Pressure is dimensioned as K hence
+    ! toa layer. pressure is dimensioned as k hence
     ! the top input layer is treated separately
     ! ---------------------------------------------
 
     dp = pressure( 1 )
 
-    ! -- Integrated absorber amount
-    absorber( 1, 1 ) = RECIPROCAL_GRAVITY * dp * water_vapor( 1 )
+    ! -- integrated absorber amount
+    absorber( 1, 1 ) = reciprocal_gravity * dp * water_vapor( 1 )
     absorber( 1, 2 ) = dp
-    absorber( 1, 3 ) = RECIPROCAL_GRAVITY * dp * ozone( 1 )
+    absorber( 1, 3 ) = reciprocal_gravity * dp * ozone( 1 )
 
 
     ! --------------------------------
-    ! Loop over layers, TOA - 1 -> SFC
+    ! loop over layers, toa - 1 -> sfc
     ! --------------------------------
 
-    k_layer_loop: DO k = 2, SIZE( pressure )
+    k_layer_loop: do k = 2, size( pressure )
 
-      ! -- Layer pressure difference
+      ! -- layer pressure difference
       dp = pressure( k ) - pressure( k-1 )
 
-      ! -- Integrated absorber amounts
-      absorber( k, 1 ) = absorber( k-1, 1 ) + ( RECIPROCAL_GRAVITY * dp * water_vapor( k ) )
+      ! -- integrated absorber amounts
+      absorber( k, 1 ) = absorber( k-1, 1 ) + ( reciprocal_gravity * dp * water_vapor( k ) )
       absorber( k, 2 ) = pressure( k )
-      absorber( k, 3 ) = absorber( k-1, 3 ) + ( RECIPROCAL_GRAVITY * dp * ozone( k ) )
+      absorber( k, 3 ) = absorber( k-1, 3 ) + ( reciprocal_gravity * dp * ozone( k ) )
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_absorber_amount
+  end subroutine compute_absorber_amount
 
 
 
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_absorber_amount_TL
+!s+
+! name:
+!       compute_absorber_amount_tl
 !
-! PURPOSE:
-!       PUBLIC subroutine to compute the tangent linear form of the integrated
-!       profiles for all the absorbers. Currently the number of absorbers
+! purpose:
+!       public subroutine to compute the tangent linear form of the integrated
+!       profiles for all the absorbers. currently the number of absorbers
 !       are:
-!         - Water vapor
-!         - Dry/fixed gases (pressure == absorber amount)
-!         - Ozone
+!         - water vapor
+!         - dry/fixed gases (pressure == absorber amount)
+!         - ozone
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_absorber_amount_TL( &
-!                                        ! -- Forward input
-!                                        pressure,       &  ! Input, K
-!                                        water_vapor,    &  ! Input, K
-!                                        ozone,          &  ! Input, K
+! calling sequence:
+!       call compute_absorber_amount_tl( &
+!                                        ! -- forward input
+!                                        pressure,       &  ! input, k
+!                                        water_vapor,    &  ! input, k
+!                                        ozone,          &  ! input, k
 !
-!                                        ! -- Tangent-linear input
-!                                        pressure_TL,    &  ! Input, K
-!                                        water_vapor_TL, &  ! Input, K
-!                                        ozone_TL,       &  ! Input, K
+!                                        ! -- tangent-linear input
+!                                        pressure_tl,    &  ! input, k
+!                                        water_vapor_tl, &  ! input, k
+!                                        ozone_tl,       &  ! input, k
 !
-!                                        ! -- Tangent-linear output
-!                                        absorber_TL     )  ! Output, 0:K x J
+!                                        ! -- tangent-linear output
+!                                        absorber_tl     )  ! output, 0:k x j
 !
-! INPUT ARGUMENTS:
-!       pressure:        Profile LEVEL pressure array.
-!                        UNITS:      hPa
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:        profile level pressure array.
+!                        units:      hpa
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       water_vapor:     Profile LAYER water vapor mixing ratio array.
-!                        UNITS:      g/kg
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+!       water_vapor:     profile layer water vapor mixing ratio array.
+!                        units:      g/kg
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       ozone:           Profile LAYER ozone mixing ratio array.
-!                        UNITS:      ppmv
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+!       ozone:           profile layer ozone mixing ratio array.
+!                        units:      ppmv
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       pressure_TL:     Profile LEVEL tangent-linear pressure array,
+!       pressure_tl:     profile level tangent-linear pressure array,
 !                        i.e. the pressure perturbation.
-!                        UNITS:      hPa
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K, number of levels - 1
-!                        ATTRIBUTES: INTENT( IN )
+!                        units:      hpa
+!                        type:       real( fp_kind )
+!                        dimension:  k, number of levels - 1
+!                        attributes: intent( in )
 !
-!       water_vapor_TL:  Profile LAYER tangent-linear water vapor mixing
+!       water_vapor_tl:  profile layer tangent-linear water vapor mixing
 !                        ratio array, i.e. the water vapor mixing
 !                        ratio perturbation.
-!                        UNITS:      g/kg
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+!                        units:      g/kg
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       ozone_TL:        Profile LAYER tangent-linear ozone mixing ratio
+!       ozone_tl:        profile layer tangent-linear ozone mixing ratio
 !                        array i.e. the ozone mixing ratio perturbation.
-!                        UNITS:      ppmv
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+!                        units:      ppmv
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       absorber_TL:     Profile LEVEL tangent-linear average integrated 
+! output arguments:
+!       absorber_tl:     profile level tangent-linear average integrated 
 !                        absorber amount array.
-!                        UNITS:      Varies with absorber.
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  0:K x J
-!                        ATTRIBUTES: INTENT( OUT )
+!                        units:      varies with absorber.
+!                        type:       real( fp_kind )
+!                        dimension:  0:k x j
+!                        attributes: intent( out )
 !
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The function calculates and accumulates the tangent-linear of the
+! procedure:
+!       the function calculates and accumulates the tangent-linear of the
 !       integrated path length through k atmospheric layers,
 !                        __ k
 !                    1  \
-!         u_TL(k) = ---  >  [ q_TL(i).dp(i) + q(i).dp_TL(i) ]
+!         u_tl(k) = ---  >  [ q_tl(i).dp(i) + q(i).dp_tl(i) ]
 !                    g  /__
 !                          i=1
 !
 !       with the units of u dependent on those of the input mixing ratio, q.
 !
-!       The exception is the dry gas absorber amount which is represented
+!       the exception is the dry gas absorber amount which is represented
 !       by the tangent linear of the pressure (i.e. a perturbation).
 !
-!       Also,
+!       also,
 !
 !         u(0)    = 0.0          for water vapor and ozone
-!                 = TOA_PRESSURE for dry/fixed gases
+!                 = toa_pressure for dry/fixed gases
 !
-!         u_TL(0) = 0.0 for all absorbers
+!         u_tl(0) = 0.0 for all absorbers
 !
-!       The routine loop over layers, k, with each absorber amount calculated
-!       independently (like looping over absorber, j). This is opposite
+!       the routine loop over layers, k, with each absorber amount calculated
+!       independently (like looping over absorber, j). this is opposite
 !       to what is recommended (since the arrays are dimensioned [k,j]) but 
 !       later use of the arrays require the [k,j] ordering where the absorber
-!       loop over j is the OUTSIDE loop (see COMPUTE_TRANSMITTANCE_TL()).
-!S-
+!       loop over j is the outside loop (see compute_transmittance_tl()).
+!s-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE compute_absorber_amount_TL( &
-                                         ! -- Forward input
-                                         pressure,       &  ! Input,  K
-                                         water_vapor,    &  ! Input,  K
-                                         ozone,          &  ! Input,  K
+  subroutine compute_absorber_amount_tl( &
+                                         ! -- forward input
+                                         pressure,       &  ! input,  k
+                                         water_vapor,    &  ! input,  k
+                                         ozone,          &  ! input,  k
 
-                                         ! -- Tangent-linear input
-                                         pressure_TL,    &  ! Input,  K
-                                         water_vapor_TL, &  ! Input,  K
-                                         ozone_TL,       &  ! Input,  K
+                                         ! -- tangent-linear input
+                                         pressure_tl,    &  ! input,  k
+                                         water_vapor_tl, &  ! input,  k
+                                         ozone_tl,       &  ! input,  k
 
-                                         ! -- Tangent-linear output
-                                         absorber_TL     )  ! Output, 0:K x J
+                                         ! -- tangent-linear output
+                                         absorber_tl     )  ! output, 0:k x j
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: pressure        ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: water_vapor     ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: ozone           ! Input,  K
+    ! -- forward input
+    real( fp_kind ), dimension( : ),     intent( in )  :: pressure        ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: water_vapor     ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: ozone           ! input,  k
 
-    ! -- Tangent-linear input
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: pressure_TL     ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: water_vapor_TL  ! Input,  K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )  :: ozone_TL        ! Input,  K
+    ! -- tangent-linear input
+    real( fp_kind ), dimension( : ),     intent( in )  :: pressure_tl     ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: water_vapor_tl  ! input,  k
+    real( fp_kind ), dimension( : ),     intent( in )  :: ozone_tl        ! input,  k
 
-    ! -- Tangent-linear output
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( OUT ) :: absorber_TL     ! Output, 0:K x J
+    ! -- tangent-linear output
+    real( fp_kind ), dimension( 0:, : ), intent( out ) :: absorber_tl     ! output, 0:k x j
 
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k
+    integer :: k
 
-    REAL( fp_kind ) :: dp
-    REAL( fp_kind ) :: dp_TL
+    real( fp_kind ) :: dp
+    real( fp_kind ) :: dp_tl
 
 
 
     !#--------------------------------------------------------------------------#
-    !#            -- Initialise 0'th LEVEL TL absorber amounts --               #
+    !#            -- initialise 0'th level tl absorber amounts --               #
     !#                                                                          #
-    !# This is done so that layer differences and averages can be calculated    #
+    !# this is done so that layer differences and averages can be calculated    #
     !# simply in the predictor and transmittance routines.                      #
     !#--------------------------------------------------------------------------#
 
-    absorber_TL( 0, : ) = ZERO
+    absorber_tl( 0, : ) = zero
 
 
 
     !#--------------------------------------------------------------------------#
-    !#        -- Assemble the NADIR tangent-linear absorber profiles --         #
+    !#        -- assemble the nadir tangent-linear absorber profiles --         #
     !#--------------------------------------------------------------------------#
 
     ! -----------------------------------------------
-    ! TOA layer. Profile inputs are dimensioned as K
+    ! toa layer. profile inputs are dimensioned as k
     ! hence the top input layer is treated separately
     ! -----------------------------------------------
 
-    absorber_TL( 1, 1 ) = RECIPROCAL_GRAVITY * (( water_vapor_TL( 1 ) * pressure( 1 )    ) + &
-                                                ( water_vapor( 1 )    * pressure_TL( 1 ) ))
-    absorber_TL( 1, 2 ) = pressure_TL( 1 )
-    absorber_TL( 1, 3 ) = RECIPROCAL_GRAVITY * (( ozone_TL( 1 ) * pressure( 1 )    ) + &
-                                                ( ozone( 1 )    * pressure_TL( 1 ) ))
+    absorber_tl( 1, 1 ) = reciprocal_gravity * (( water_vapor_tl( 1 ) * pressure( 1 )    ) + &
+                                                ( water_vapor( 1 )    * pressure_tl( 1 ) ))
+    absorber_tl( 1, 2 ) = pressure_tl( 1 )
+    absorber_tl( 1, 3 ) = reciprocal_gravity * (( ozone_tl( 1 ) * pressure( 1 )    ) + &
+                                                ( ozone( 1 )    * pressure_tl( 1 ) ))
 
 
     ! --------------------------------
-    ! Loop over layers, TOA - 1 -> SFC
+    ! loop over layers, toa - 1 -> sfc
     ! --------------------------------
 
-    k_layer_loop: DO k = 2, SIZE( pressure )
+    k_layer_loop: do k = 2, size( pressure )
 
-      ! -- Layer pressure differences
+      ! -- layer pressure differences
       dp    = pressure( k )    - pressure( k-1 )
-      dp_TL = pressure_TL( k ) - pressure_TL( k-1 )
+      dp_tl = pressure_tl( k ) - pressure_tl( k-1 )
 
-      ! -- Integrated TL absorber amounts
-      absorber_TL( k, 1 ) = absorber_TL( k-1, 1 ) + &
-                            ( RECIPROCAL_GRAVITY * (( water_vapor_TL( k ) * dp    ) + &
-                                                    ( water_vapor( k )    * dp_TL )) )
-      absorber_TL( k, 2 ) = pressure_TL( k )
+      ! -- integrated tl absorber amounts
+      absorber_tl( k, 1 ) = absorber_tl( k-1, 1 ) + &
+                            ( reciprocal_gravity * (( water_vapor_tl( k ) * dp    ) + &
+                                                    ( water_vapor( k )    * dp_tl )) )
+      absorber_tl( k, 2 ) = pressure_tl( k )
 
-      absorber_TL( k, 3 ) = absorber_TL( k-1, 3 ) + &
-                            ( RECIPROCAL_GRAVITY * (( ozone_TL( k ) * dp    ) + &
-                                                    ( ozone( k )    * dp_TL )) )
+      absorber_tl( k, 3 ) = absorber_tl( k-1, 3 ) + &
+                            ( reciprocal_gravity * (( ozone_tl( k ) * dp    ) + &
+                                                    ( ozone( k )    * dp_tl )) )
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
-  END SUBROUTINE compute_absorber_amount_TL
+  end subroutine compute_absorber_amount_tl
 
 
 
 
 
 !--------------------------------------------------------------------------------
-!S+
-! NAME:
-!       compute_absorber_amount_AD
+!s+
+! name:
+!       compute_absorber_amount_ad
 !
-! PURPOSE:
-!       PUBLIC subroutine to compute the adjoint of the integrated
-!       profiles for all the absorbers. Currently the number of absorbers
+! purpose:
+!       public subroutine to compute the adjoint of the integrated
+!       profiles for all the absorbers. currently the number of absorbers
 !       are:
-!         - Water vapor
-!         - Dry/fixed gases (pressure == absorber amount)
-!         - Ozone
+!         - water vapor
+!         - dry/fixed gases (pressure == absorber amount)
+!         - ozone
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       CALL compute_absorber_amount_AD( &
-!                                        ! -- Forward input
-!                                        pressure,       &  ! Input, K
-!                                        water_vapor,    &  ! Input, K
-!                                        ozone,          &  ! Input, K
+! calling sequence:
+!       call compute_absorber_amount_ad( &
+!                                        ! -- forward input
+!                                        pressure,       &  ! input, k
+!                                        water_vapor,    &  ! input, k
+!                                        ozone,          &  ! input, k
 !
-!                                        ! -- Adjoint input
-!                                        absorber_AD,    &  ! In/Output, 0:K x J
+!                                        ! -- adjoint input
+!                                        absorber_ad,    &  ! in/output, 0:k x j
 !
-!                                        ! -- Adjoint output
-!                                        pressure_AD,    &  ! In/Output, K
-!                                        water_vapor_AD, &  ! In/Output, K
-!                                        ozone_AD        )  ! In/Output, K
+!                                        ! -- adjoint output
+!                                        pressure_ad,    &  ! in/output, k
+!                                        water_vapor_ad, &  ! in/output, k
+!                                        ozone_ad        )  ! in/output, k
 !
-! INPUT ARGUMENTS:
-!       pressure:        Profile LEVEL pressure array.
-!                        UNITS:      hPa
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       pressure:        profile level pressure array.
+!                        units:      hpa
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       water_vapor:     Profile LAYER water vapor mixing ratio array.
-!                        UNITS:      g/kg
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+!       water_vapor:     profile layer water vapor mixing ratio array.
+!                        units:      g/kg
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       ozone:           Profile LAYER ozone mixing ratio array.
-!                        UNITS:      ppmv
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN )
+!       ozone:           profile layer ozone mixing ratio array.
+!                        units:      ppmv
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in )
 !
-!       absorber_AD:     Profile LEVEL adjoint average integrated 
+!       absorber_ad:     profile level adjoint average integrated 
 !                        absorber amount array.
-!                        ** THIS ARGUMENT IS SET TO ZERO ON OUTPUT **.
-!                        UNITS:      Varies with absorber
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  0:K x J
-!                        ATTRIBUTES: INTENT( OUT )
+!                        ** this argument is set to zero on output **.
+!                        units:      varies with absorber
+!                        type:       real( fp_kind )
+!                        dimension:  0:k x j
+!                        attributes: intent( out )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       None.
+! optional input arguments:
+!       none.
 !
-! OUTPUT ARGUMENTS:
-!       pressure_AD:     Profile LAYER adjoint pressure array.
-!                        UNITS:      hPa
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN OUT )
+! output arguments:
+!       pressure_ad:     profile layer adjoint pressure array.
+!                        units:      hpa
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in out )
 !
-!       water_vapor_AD:  Profile LAYER adjoint water vapor array.
-!                        UNITS:      g/kg
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN OUT )
+!       water_vapor_ad:  profile layer adjoint water vapor array.
+!                        units:      g/kg
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in out )
 !
-!       ozone_AD:        Profile LAYER adjoint ozone water vapor array.
-!                        UNITS:      ppmv
-!                        TYPE:       REAL( fp_kind )
-!                        DIMENSION:  K
-!                        ATTRIBUTES: INTENT( IN OUT )
+!       ozone_ad:        profile layer adjoint ozone water vapor array.
+!                        units:      ppmv
+!                        type:       real( fp_kind )
+!                        dimension:  k
+!                        attributes: intent( in out )
 !
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! CALLS:
-!       None
+! calls:
+!       none
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       The input argument ABSORBER_AD is set to zero on output.
+! side effects:
+!       the input argument absorber_ad is set to zero on output.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The function calculates the adjoints of the integrated path length
-!       through k atmospheric layers. Given the tangent-linear expression,
+! procedure:
+!       the function calculates the adjoints of the integrated path length
+!       through k atmospheric layers. given the tangent-linear expression,
 !
 !                        __ k
 !                    1  \
-!         u_TL(k) = ---  >  [ q_TL(i).dp(i) + q(i).dp_TL(i) ]
+!         u_tl(k) = ---  >  [ q_tl(i).dp(i) + q(i).dp_tl(i) ]
 !                    g  /__
 !                          i=1
 !
@@ -649,250 +649,250 @@ CONTAINS
 !       given by,
 !
 !                              1
-!         dp_AD     = dp_AD + --- q(k).u_AD(k)
+!         dp_ad     = dp_ad + --- q(k).u_ad(k)
 !                              g
 !
 !                                1
-!         q_AD(k)   = q_AD(k) + --- dp.u_AD(k)
+!         q_ad(k)   = q_ad(k) + --- dp.u_ad(k)
 !                                g
 !
 !
-!         u_AD(k-1) = u_AD(k-1) + u_AD(k)
+!         u_ad(k-1) = u_ad(k-1) + u_ad(k)
 !
-!         u_AD(k)   = 0.0
+!         u_ad(k)   = 0.0
 !
 !       looping over the layer index, k, from the surface (max.) to the
-!       top of the atmosphere. For the dry absorber component, which uses
+!       top of the atmosphere. for the dry absorber component, which uses
 !       pressure as the absorber amount proxy, the tangent-linear expression
 !       is simply,
 !
-!         u_TL(k) = p_TL(k)
+!         u_tl(k) = p_tl(k)
 !
-!       The adjoint is thus,
+!       the adjoint is thus,
 !
-!         p_AD(k) = p_AD(k) + u_AD(k)
+!         p_ad(k) = p_ad(k) + u_ad(k)
 !
-!         u_AD(k) = 0.0
+!         u_ad(k) = 0.0
 !
-!       The actual execution of the above expressions in the code are done to
+!       the actual execution of the above expressions in the code are done to
 !       prevent recalculation of the the same quantities in individual loops.
 !
-!       Typically, the adjoint quantities that correspond to INPUTS in the
-!       forward model (pressure_AD, water_vapor_AD, and ozone_AD) are set to
+!       typically, the adjoint quantities that correspond to inputs in the
+!       forward model (pressure_ad, water_vapor_ad, and ozone_ad) are set to
 !       0.0 before entering this routine, and the adjoint quantities 
-!       corresponding to OUTPUTS in the forward model (absorber_AD) are set to
-!       1.0 before entering this routine. This will return the gradient vector
+!       corresponding to outputs in the forward model (absorber_ad) are set to
+!       1.0 before entering this routine. this will return the gradient vector
 !       of the output variable with respect to the input variable (partial
-!       derivative.) E.g. if the forward problem is defined as,
+!       derivative.) e.g. if the forward problem is defined as,
 !
 !
 !         u = f(q,p)
 !
-!       then the TL form would be,
+!       then the tl form would be,
 !
 !                 df          df
-!         u_TL = ---- q_TL + ---- p_TL   (NOTE: the df/dX is partial)
+!         u_tl = ---- q_tl + ---- p_tl   (note: the df/dx is partial)
 !                 dq          dp
 !
-!       If u_AD = 1.0 and q_AD,p_AD = 0.0 on input, then on output,
+!       if u_ad = 1.0 and q_ad,p_ad = 0.0 on input, then on output,
 !
 !                 df            df
-!         q_AD = ---- , p_AD = ---- , and u_AD = 0.0
+!         q_ad = ---- , p_ad = ---- , and u_ad = 0.0
 !                 dq            dp 
 ! 
-!S-
+!s-
 !--------------------------------------------------------------------------------
 
-  SUBROUTINE  compute_absorber_amount_AD( &
-                                          ! -- Forward input
-                                          pressure,       &  ! Input, K
-                                          water_vapor,    &  ! Input, K
-                                          ozone,          &  ! Input, K
+  subroutine  compute_absorber_amount_ad( &
+                                          ! -- forward input
+                                          pressure,       &  ! input, k
+                                          water_vapor,    &  ! input, k
+                                          ozone,          &  ! input, k
 
-                                          ! -- Adjoint input
-                                          absorber_AD,    &  ! In/Output, 0:K x J
+                                          ! -- adjoint input
+                                          absorber_ad,    &  ! in/output, 0:k x j
 
-                                          ! -- Adjoint output
-                                          pressure_AD,    &  ! In/Output, K
-                                          water_vapor_AD, &  ! In/Output, K
-                                          ozone_AD        )  ! In/Output, K
+                                          ! -- adjoint output
+                                          pressure_ad,    &  ! in/output, k
+                                          water_vapor_ad, &  ! in/output, k
+                                          ozone_ad        )  ! in/output, k
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    ! -- Forward input
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: pressure        ! Input, K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: water_vapor     ! Input, K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN )     :: ozone           ! Input, K
+    ! -- forward input
+    real( fp_kind ), dimension( : ),     intent( in )     :: pressure        ! input, k
+    real( fp_kind ), dimension( : ),     intent( in )     :: water_vapor     ! input, k
+    real( fp_kind ), dimension( : ),     intent( in )     :: ozone           ! input, k
 
-    ! -- Adjoint input
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN OUT ) :: absorber_AD     ! In/Output, 0:K x J
+    ! -- adjoint input
+    real( fp_kind ), dimension( 0:, : ), intent( in out ) :: absorber_ad     ! in/output, 0:k x j
 
-    ! -- Adjoint output
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: pressure_AD     ! In/Output, K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: water_vapor_AD  ! In/Output, K
-    REAL( fp_kind ), DIMENSION( : ),     INTENT( IN OUT ) :: ozone_AD        ! In/Output, K
+    ! -- adjoint output
+    real( fp_kind ), dimension( : ),     intent( in out ) :: pressure_ad     ! in/output, k
+    real( fp_kind ), dimension( : ),     intent( in out ) :: water_vapor_ad  ! in/output, k
+    real( fp_kind ), dimension( : ),     intent( in out ) :: ozone_ad        ! in/output, k
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: k
+    integer :: k
 
-    REAL( fp_kind ) :: dp
-    REAL( fp_kind ) :: dp_AD
+    real( fp_kind ) :: dp
+    real( fp_kind ) :: dp_ad
 
 
 
     !#--------------------------------------------------------------------------#
-    !#           -- Assemble the NADIR adjoint absorber profiles --             #
+    !#           -- assemble the nadir adjoint absorber profiles --             #
     !#--------------------------------------------------------------------------#
 
     ! --------------------------------
-    ! Loop over layers, SFC -> TOA - 1
+    ! loop over layers, sfc -> toa - 1
     ! --------------------------------
 
-    k_layer_loop: DO k = SIZE( pressure ), 2, -1
+    k_layer_loop: do k = size( pressure ), 2, -1
 
-      ! -- Layer pressure differences
+      ! -- layer pressure differences
       dp = pressure( k ) - pressure( k-1 )
 
-      ! -- Ozone absorber adjoint
-      ozone_AD( k )       = ozone_AD( k ) + &
-                            ( RECIPROCAL_GRAVITY * dp * absorber_AD( k, 3 ) )
+      ! -- ozone absorber adjoint
+      ozone_ad( k )       = ozone_ad( k ) + &
+                            ( reciprocal_gravity * dp * absorber_ad( k, 3 ) )
 
-      ! -- Pressure absorber adjoint
-      pressure_AD( k )    = pressure_AD( k ) + absorber_AD( k, 2 )
+      ! -- pressure absorber adjoint
+      pressure_ad( k )    = pressure_ad( k ) + absorber_ad( k, 2 )
 
-      ! -- Water vapor absorber adjoint
-      water_vapor_AD( k ) = water_vapor_AD( k ) + &
-                            ( RECIPROCAL_GRAVITY * dp * absorber_AD( k, 1 ) )
+      ! -- water vapor absorber adjoint
+      water_vapor_ad( k ) = water_vapor_ad( k ) + &
+                            ( reciprocal_gravity * dp * absorber_ad( k, 1 ) )
 
-      ! -- Layer pressure difference adjoint
-      dp_AD = RECIPROCAL_GRAVITY * ( ( water_vapor( k ) * absorber_AD( k, 1 ) ) + &
-                                     ( ozone( k )       * absorber_AD( k, 3 ) )   )
-      pressure_AD( k )   = pressure_AD( k )   + dp_AD
-      pressure_AD( k-1 ) = pressure_AD( k-1 ) - dp_AD
-      ! NOTE: No dp_AD = ZERO here as it is reinitialised every layer
+      ! -- layer pressure difference adjoint
+      dp_ad = reciprocal_gravity * ( ( water_vapor( k ) * absorber_ad( k, 1 ) ) + &
+                                     ( ozone( k )       * absorber_ad( k, 3 ) )   )
+      pressure_ad( k )   = pressure_ad( k )   + dp_ad
+      pressure_ad( k-1 ) = pressure_ad( k-1 ) - dp_ad
+      ! note: no dp_ad = zero here as it is reinitialised every layer
 
-      ! -- Previous layer absorber amounts
-      absorber_AD( k-1, 3 ) = absorber_AD( k-1, 3 ) + absorber_AD( k, 3 )
-      absorber_AD( k,   3 ) = ZERO
+      ! -- previous layer absorber amounts
+      absorber_ad( k-1, 3 ) = absorber_ad( k-1, 3 ) + absorber_ad( k, 3 )
+      absorber_ad( k,   3 ) = zero
 
-      absorber_AD( k,   2 ) = ZERO
+      absorber_ad( k,   2 ) = zero
 
-      absorber_AD( k-1, 1 ) = absorber_AD( k-1, 1 ) + absorber_AD( k, 1 )
-      absorber_AD( k,   1 ) = ZERO
+      absorber_ad( k-1, 1 ) = absorber_ad( k-1, 1 ) + absorber_ad( k, 1 )
+      absorber_ad( k,   1 ) = zero
 
-    END DO k_layer_loop
+    end do k_layer_loop
 
 
     ! -----------------------------------------------
-    ! TOA layer. Profile inputs are dimensioned as K
+    ! toa layer. profile inputs are dimensioned as k
     ! hence the top input layer is treated separately
     ! -----------------------------------------------
 
-    ! -- Ozone
-    ozone_AD( 1 )       = ozone_AD( 1 ) + &
-                          ( RECIPROCAL_GRAVITY * pressure( 1 ) * absorber_AD( 1, 3 ) )
+    ! -- ozone
+    ozone_ad( 1 )       = ozone_ad( 1 ) + &
+                          ( reciprocal_gravity * pressure( 1 ) * absorber_ad( 1, 3 ) )
 
-    ! -- Pressure
-    pressure_AD( 1 )    = pressure_AD( 1 ) + &
-                          ( RECIPROCAL_GRAVITY * ( ( ozone( 1 )       * absorber_AD( 1, 3 ) ) + &
-                                                   ( water_vapor( 1 ) * absorber_AD( 1, 1 ) )   ) ) + &
-                          absorber_AD( 1, 2 )
-    ! -- Water vapor
-    water_vapor_AD( 1 ) = water_vapor_AD( 1 ) + &
-                          ( RECIPROCAL_GRAVITY * pressure( 1 ) * absorber_AD( 1, 1 ) )
+    ! -- pressure
+    pressure_ad( 1 )    = pressure_ad( 1 ) + &
+                          ( reciprocal_gravity * ( ( ozone( 1 )       * absorber_ad( 1, 3 ) ) + &
+                                                   ( water_vapor( 1 ) * absorber_ad( 1, 1 ) )   ) ) + &
+                          absorber_ad( 1, 2 )
+    ! -- water vapor
+    water_vapor_ad( 1 ) = water_vapor_ad( 1 ) + &
+                          ( reciprocal_gravity * pressure( 1 ) * absorber_ad( 1, 1 ) )
 
-    ! -- Zero absorber amount adjoints
-    absorber_AD( 0:1, : ) = ZERO
+    ! -- zero absorber amount adjoints
+    absorber_ad( 0:1, : ) = zero
 
-  END SUBROUTINE compute_absorber_amount_AD
-
-
+  end subroutine compute_absorber_amount_ad
 
 
 
 
-  SUBROUTINE find_absorber_layer_index( absorber,   &  ! Input,  0:K x J
-                                        layer_index )  ! Output, K x J
-
-    REAL( fp_kind ), DIMENSION( 0:, : ), INTENT( IN )  :: absorber
-    INTEGER,         DIMENSION(  :, : ), INTENT( OUT ) :: layer_index
-
-    INTEGER :: j,  n_absorbers
-    INTEGER :: k,  n_layers
-
-    REAL( fp_kind ) :: ave_absorber
 
 
-    INTRINSIC ABS, &
-              SIZE
+  subroutine find_absorber_layer_index( absorber,   &  ! input,  0:k x j
+                                        layer_index )  ! output, k x j
+
+    real( fp_kind ), dimension( 0:, : ), intent( in )  :: absorber
+    integer,         dimension(  :, : ), intent( out ) :: layer_index
+
+    integer :: j,  n_absorbers
+    integer :: k,  n_layers
+
+    real( fp_kind ) :: ave_absorber
 
 
-
-    !#--------------------------------------------------------------------------#
-    !#                  -- Determine the array dimension --                     #
-    !#--------------------------------------------------------------------------#
-
-    n_layers    = SIZE( absorber, DIM = 1 ) - 1
-    n_absorbers = SIZE( absorber, DIM = 2 )
+    intrinsic abs, &
+              size
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                       -- Loop over absorbers --                          #
+    !#                  -- determine the array dimension --                     #
     !#--------------------------------------------------------------------------#
 
-    j_absorber_loop: DO j = 1, n_absorbers
+    n_layers    = size( absorber, dim = 1 ) - 1
+    n_absorbers = size( absorber, dim = 2 )
+
+
+
+    !#--------------------------------------------------------------------------#
+    !#                       -- loop over absorbers --                          #
+    !#--------------------------------------------------------------------------#
+
+    j_absorber_loop: do j = 1, n_absorbers
 
 
       ! ------------------------------
-      ! Loop over the user layer space
+      ! loop over the user layer space
       ! ------------------------------
 
-      k_user_space_loop: DO k = 1, n_layers
+      k_user_space_loop: do k = 1, n_layers
 
 
         ! ---------------------------------------
-        ! Calculate layer average absorber amount
+        ! calculate layer average absorber amount
         ! ---------------------------------------
 
-        ave_absorber = POINT_5 * ( absorber( k, j ) + absorber( k-1, j ) )
+        ave_absorber = point_5 * ( absorber( k, j ) + absorber( k-1, j ) )
 
 
         ! -------------------------------------------------------
-        ! Calculate the absorber space bracket layer, ka, for:
+        ! calculate the absorber space bracket layer, ka, for:
         !
         !   abs_spc(ka-1) < absorber < abs_spc(ka)
         !
-        ! This is done using the exponential parameter, alpha,
+        ! this is done using the exponential parameter, alpha,
         ! used in determining the absorber space layers to 
         ! begin with:
         !
-        !                   EXP( ka.alpha ) - 1
-        !   A(ka) = A(1) . ---------------------
-        !                    EXP( alpha ) - 1
+        !                   exp( ka.alpha ) - 1
+        !   a(ka) = a(1) . ---------------------
+        !                    exp( alpha ) - 1
         !
-        ! so given an absorber amount, A(k), the required ka
+        ! so given an absorber amount, a(k), the required ka
         ! value is found using:
         !
-        !          1        (  A(k)                        )
-        !   k = ------- . LN( ------( EXP(alpha)-1 )  +  1 )
-        !        alpha      (  A(1)                        )
+        !          1        (  a(k)                        )
+        !   k = ------- . ln( ------( exp(alpha)-1 )  +  1 )
+        !        alpha      (  a(1)                        )
         !
-        ! The use of the CEILING intrinsic function provides the
+        ! the use of the ceiling intrinsic function provides the
         ! integer value equal to or greater than the argument.
-        ! Then use of MAX( MIN( ka, MAX_N_ABSORBERS_LAYERS ), 1 )
+        ! then use of max( min( ka, max_n_absorbers_layers ), 1 )
         ! is to ensure that the calculated value never exceeds the 
         ! maximum number of absorber space layers - which could
         ! happen if an input absorber profile contained amounts
@@ -901,112 +901,112 @@ CONTAINS
         ! absorber profile has adjacent layers with zero amounts.
         ! -------------------------------------------------------
 
-        layer_index( k, j ) = MAX( MIN( INT( CEILING( ( ONE / alpha(j) ) * &
-                                                 LOG( ( ave_absorber / absorber_space_levels(1,j) ) * &
-                                                      ( EXP( alpha(j) ) - ONE ) + ONE ) ) ), &
-                                   MAX_N_ABSORBER_LAYERS ), 1 )
+        layer_index( k, j ) = max( min( int( ceiling( ( one / alpha(j) ) * &
+                                                 log( ( ave_absorber / absorber_space_levels(1,j) ) * &
+                                                      ( exp( alpha(j) ) - one ) + one ) ) ), &
+                                   max_n_absorber_layers ), 1 )
 
 
-      END DO k_user_space_loop
+      end do k_user_space_loop
 
-    END DO j_absorber_loop
+    end do j_absorber_loop
 
-  END SUBROUTINE find_absorber_layer_index
+  end subroutine find_absorber_layer_index
 
-END MODULE absorber_profile
+end module absorber_profile
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $Name$
+! $name$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.11  2001/09/25 15:51:29  paulv
-! - Changed the calculation of the bracketing absorber space layer in
-!   sbroutine FIND_ABSORBER_LAYER_INDEX from
-!     MIN( ka, MAX_N_ABSORBERS_LAYERS )
+! $log$
+! revision 1.11  2001/09/25 15:51:29  paulv
+! - changed the calculation of the bracketing absorber space layer in
+!   sbroutine find_absorber_layer_index from
+!     min( ka, max_n_absorbers_layers )
 !   to
-!     MAX( MIN( ka, MAX_N_ABSORBERS_LAYERS ), 1 )
+!     max( min( ka, max_n_absorbers_layers ), 1 )
 !   so as to avoid the result ever being zero - which could happen before if
 !   adjacent layers of the input absorber profile were zero.
 !
-! Revision 1.10  2001/08/31 20:41:18  paulv
-! - Altered method of searching for bracketing absorber space layers in
-!   FIND_ABSORBER_LAYER_INDEX. Previosuly a trickle down search was performed.
-!   Now the actual corresponding layer is calculated using the exponential
+! revision 1.10  2001/08/31 20:41:18  paulv
+! - altered method of searching for bracketing absorber space layers in
+!   find_absorber_layer_index. previosuly a trickle down search was performed.
+!   now the actual corresponding layer is calculated using the exponential
 !   factor used in generating the absorber space.
 !
-! Revision 1.9  2001/08/16 16:30:38  paulv
-! - Updated documentation.
+! revision 1.9  2001/08/16 16:30:38  paulv
+! - updated documentation.
 !
-! Revision 1.8  2001/08/01 16:36:34  paulv
-! - Removed use of module ABSORBER_SPACE and replaced it with
-!     USE transmittance_coefficients, ONLY : absorber_space_levels
-!   to reflect changes in code. The absorber space levels are no longer
+! revision 1.8  2001/08/01 16:36:34  paulv
+! - removed use of module absorber_space and replaced it with
+!     use transmittance_coefficients, only : absorber_space_levels
+!   to reflect changes in code. the absorber space levels are no longer
 !   calculated during model initialisation, but are precalculated and stored
 !   in the transmittance coefficient data file.
 !
-! Revision 1.7  2001/06/05 21:18:10  paulv
-! - Changed adjoint routine slightly to make adjoint calcs a bit clearer
+! revision 1.7  2001/06/05 21:18:10  paulv
+! - changed adjoint routine slightly to make adjoint calcs a bit clearer
 !   when looking at the tangent-linear code.
-! - Corrected bug in TOA layer pressure_AD calculation.
+! - corrected bug in toa layer pressure_ad calculation.
 !
-! Revision 1.6  2001/05/29 17:32:51  paulv
-! - Some cosmetic changes
-! - Removed subtraction of the TOA_PRESSURE parameter from the DRY absorber
-!   calculation. This was causing the upper level channels to produce
+! revision 1.6  2001/05/29 17:32:51  paulv
+! - some cosmetic changes
+! - removed subtraction of the toa_pressure parameter from the dry absorber
+!   calculation. this was causing the upper level channels to produce
 !   spurious numbers in the forward calculation.
-! - Added the  FIND_ABSORBER_LAYER_INDEX routine. Removed it from the FORWARD_MODEL
-!   module. It seemed more appropriate in this one.
-! - Using pressure array data directly in first layer calcs rather than
-!   DP variable.
+! - added the  find_absorber_layer_index routine. removed it from the forward_model
+!   module. it seemed more appropriate in this one.
+! - using pressure array data directly in first layer calcs rather than
+!   dp variable.
 !
-! Revision 1.5  2001/03/26 18:45:59  paulv
-! - Now use TYPE_KINDS module parameter FP_KIND to set the floating point
+! revision 1.5  2001/03/26 18:45:59  paulv
+! - now use type_kinds module parameter fp_kind to set the floating point
 !   data type.
-! - Module parameter RECIPROCAL_GRAVITY moved to PARAMETERS module.
-! - ONLY clause used in USE PARAMETERS statement. Only parameters available
-!   in ABSORBER_PROFILE module are ZERO, TOA_PRESSURE, and RECIPROCAL_GRAVITY.
-! - Output ABSORBER argument is now dimensioned as 0:K. This eliminates the
-!   need for using an ABSORBER_KM1 variable in other routines that use the
-!   ABSORBER array variable where the layer loop always goes from 1 -> n_layers.
-! - Removed output arguments of AVE_ABSORBER and DELTA_ABSORBER due to the
-!   ABSORBER dimension change to 0:K. Calculating the average and layer
+! - module parameter reciprocal_gravity moved to parameters module.
+! - only clause used in use parameters statement. only parameters available
+!   in absorber_profile module are zero, toa_pressure, and reciprocal_gravity.
+! - output absorber argument is now dimensioned as 0:k. this eliminates the
+!   need for using an absorber_km1 variable in other routines that use the
+!   absorber array variable where the layer loop always goes from 1 -> n_layers.
+! - removed output arguments of ave_absorber and delta_absorber due to the
+!   absorber dimension change to 0:k. calculating the average and layer
 !   difference absorber amounts in other routines can now be done simply
-!   by averaging or differencing ABOSRBER(K) and ABSORBER(K-1) even for
+!   by averaging or differencing abosrber(k) and absorber(k-1) even for
 !   layer #1.
-! - Integration of absorber amount for the TOA layer is done OUTSIDE of the
-!   layer loop. This avoids the need for a PRESSURE_KM1 variable since
-!   pressure is dimensioned 1:K.
-! - Layer loop, thus, goes from 2 -> n_layers.
-! - Changed order of argument list in COMPUTE_PREDICTORS_TL and its
-!   associated routines. All forward arguments are listed followed by
+! - integration of absorber amount for the toa layer is done outside of the
+!   layer loop. this avoids the need for a pressure_km1 variable since
+!   pressure is dimensioned 1:k.
+! - layer loop, thus, goes from 2 -> n_layers.
+! - changed order of argument list in compute_predictors_tl and its
+!   associated routines. all forward arguments are listed followed by
 !   the tangent-linear arguments rather than interspersing them as before.
-! - Added adjoint routine COMPUTE_ABSORBER_AMOUNT_AD.
+! - added adjoint routine compute_absorber_amount_ad.
 !
-! Revision 1.4  2001/03/26 18:30:54  paulv
-! - Removed integrate_absorber_profile and integrate_absorber_profile_tl
-!   functions. Integration is now done in-line in the main routines.
+! revision 1.4  2001/03/26 18:30:54  paulv
+! - removed integrate_absorber_profile and integrate_absorber_profile_tl
+!   functions. integration is now done in-line in the main routines.
 !
-! Revision 1.3  2000/11/09 20:29:40  paulv
-! - Added tangent linear form of the absorber profile routines.
+! revision 1.3  2000/11/09 20:29:40  paulv
+! - added tangent linear form of the absorber profile routines.
 !
-! Revision 1.2  2000/08/31 19:36:31  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.2  2000/08/31 19:36:31  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.1  2000/08/24 13:11:27  paulv
-! Initial checkin.
+! revision 1.1  2000/08/24 13:11:27  paulv
+! initial checkin.
 !
 !
 !

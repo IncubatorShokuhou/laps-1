@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -46,22 +46,22 @@ c
 
 c
 !abdel      
-      DOUBLE PRECISION GRSP,DPOLAT,DPOLON,DSW(2),DNE(2)
-      INTEGER IRGL
+      double precision grsp,dpolat,dpolon,dsw(2),dne(2)
+      integer irgl
       
-      DATA GRSP,IRGL / 1.D0 , 0  /
-      PARAMETER (NCRA=10000,NGPS=10,LRWK=2*NCRA)
+      data grsp,irgl / 1.d0 , 0  /
+      parameter (ncra=10000,ngps=10,lrwk=2*ncra)
 
-      DIMENSION XCRA(NCRA),YCRA(NCRA)
-      DIMENSION RWRK(LRWK)     
-      EQUIVALENCE (RWRK(1),XCRA(1)),(RWRK(NCRA+1),YCRA(1))
+      dimension xcra(ncra),ycra(ncra)
+      dimension rwrk(lrwk)     
+      equivalence (rwrk(1),xcra(1)),(rwrk(ncra+1),ycra(1))
 ! abdel     
 
       integer jproj,jjlts,jgrid,jus,jdot,ier
 c
-      COMMON/SUPMP9/DS,DI,DSRDI
+      common/supmp9/ds,di,dsrdi
       common /zoom/       zoom 
-!     DI = 50.
+!     di = 50.
 !     polat=90.
 
 !     rrot=0.
@@ -75,7 +75,7 @@ c
 
 !     call get_lapsplot_parms(namelist_parms,istatus)       
 
-!     1 means use local version of supmap, 2 means use the NCARGlib version
+!     1 means use local version of supmap, 2 means use the ncarglib version
 !     3 means to try newer (ezmap) routines
       mode_supmap = namelist_parms%mode_supmap
 
@@ -85,24 +85,24 @@ c
           stop
       else
           write(6,*)
-          write(6,*)' Subroutine draw_county_map...',mode_supmap,jproj
+          write(6,*)' subroutine draw_county_map...',mode_supmap,jproj
       endif
 
       domsize = (float(nj)-1.) * grid_spacing_m / zoom
 
-!     Plot Counties
+!     plot counties
       if(jdot .eq. 1)then
-          call gsln(3) ! Dotted
+          call gsln(3) ! dotted
       else
-          call gsln(1) ! Solid
+          call gsln(1) ! solid
       endif
 
-      jgrid=namelist_parms%latlon_int        ! Draw lat/lon lines?
+      jgrid=namelist_parms%latlon_int        ! draw lat/lon lines?
 
       if(domsize .le. 1500e3 .and. 
      1   namelist_parms%continent_line_width .gt. 0)then
-          write(6,*)' Plotting Counties ',domsize,mode_supmap,jgrid
-          call setusv_dum(2HIN,icol_cou)
+          write(6,*)' plotting counties ',domsize,mode_supmap,jgrid
+          call setusv_dum(2hin,icol_cou)
 
           if(mode_supmap .eq. 1)then
               jus=-4
@@ -113,125 +113,125 @@ c
               call supmap      (jproj,polat,polon,rrot,pl1,pl2,pl3,pl4,
      +                          jjlts,jgrid*1000,iout,jdot,ier)
           elseif(mode_supmap .eq. 3)then
-              write(6,*)' Calling MPLNDR, etc. for counties...'
+              write(6,*)' calling mplndr, etc. for counties...'
 !             call mapdrw()
               call mapint
 !             call maplot
-              CALL MPLNDR ('Earth..2',5)
+              call mplndr ('earth..2',5)
               if(jgrid .gt. 0)then ! draw lat/lon lines
-                  call mpsetr('GR',float(jgrid))
+                  call mpsetr('gr',float(jgrid))
                   call mapgrd()
               endif
 c abdel	      
           elseif(mode_supmap .eq. 4)then
-              write(6,*)' Calling SUB submap=4 for europe...'
-              DPOLAT=polat
-              DPOLON=polon
-              DSW(1)=sw(1)
-              DSW(2)=sw(2)
-              DNE(1)=ne(1)
-              DNE(2)=ne(2)
-              CALL MDPROJ ('ST',DPOLAT,DPOLON,0.D0)
-              CALL MDPSET ('CO',DSW(1),DSW(2),DNE(1),DNE(2))
-              CALL MAPSTD ('GR',GRSP)
-              CALL MDRGOL (IRGL,RWRK,LRWK)    
+              write(6,*)' calling sub submap=4 for europe...'
+              dpolat=polat
+              dpolon=polon
+              dsw(1)=sw(1)
+              dsw(2)=sw(2)
+              dne(1)=ne(1)
+              dne(2)=ne(2)
+              call mdproj ('st',dpolat,dpolon,0.d0)
+              call mdpset ('co',dsw(1),dsw(2),dne(1),dne(2))
+              call mapstd ('gr',grsp)
+              call mdrgol (irgl,rwrk,lrwk)    
           
           elseif(mode_supmap .eq. 5)then
-              write(6,*)' Accessing RANGS database...'
-              write(6,*)' Not yet supported - stop' 
+              write(6,*)' accessing rangs database...'
+              write(6,*)' not yet supported - stop' 
               stop
           endif
           if(ier .ne. 0)write(6,*)' ier = ',ier
 
           call sflush
 
-          jgrid=0                        ! Do not draw subsequent lat/lon lines
+          jgrid=0                        ! do not draw subsequent lat/lon lines
 
       else
-          write(6,*)' Omitting counties ',domsize
+          write(6,*)' omitting counties ',domsize
      1             ,namelist_parms%continent_line_width
 
       endif
 
       call gsln(1)
-      call setusv_dum('IN',namelist_parms%icol_state)
+      call setusv_dum('in',namelist_parms%icol_state)
 
-      call GSLWSC(namelist_parms%continent_line_width)
+      call gslwsc(namelist_parms%continent_line_width)
 
       if(mode_supmap .eq. 1)then
-          write(6,*)' Plotting States From Counties ',mode_supmap,jgrid
+          write(6,*)' plotting states from counties ',mode_supmap,jgrid
           jus=-8
           call supmap_local(jproj,polat,polon,rrot,pl1,pl2,pl3,pl4,
      +                      jjlts,jgrid,jus,jdot,ier)
       elseif(mode_supmap .eq. 2)then
-          write(6,*)' Plotting States From Counties ',mode_supmap,jgrid
+          write(6,*)' plotting states from counties ',mode_supmap,jgrid
           iout = 0
           call supmap      (jproj,polat,polon,rrot,pl1,pl2,pl3,pl4,
      +                      jjlts,jgrid*1000,iout,jdot,ier)
       elseif(mode_supmap .eq. 3)then
           call mapint
 
-          if(namelist_parms%state_line_width .gt. 0. .OR.
+          if(namelist_parms%state_line_width .gt. 0. .or.
      1       namelist_parms%country_line_width .gt. 0.     )then
-              write(6,*)' Calling MAPDRW, etc. for countries/states...'
+              write(6,*)' calling mapdrw, etc. for countries/states...'
      1                 ,namelist_parms%state_line_width
      1                 ,namelist_parms%icol_country
      1                 ,icol_sta
-              call GSLWSC(namelist_parms%state_line_width)
-              call setusv_dum('IN',namelist_parms%icol_state) 
-              CALL MPLNDR ('Earth..2',4) ! states & countries
+              call gslwsc(namelist_parms%state_line_width)
+              call setusv_dum('in',namelist_parms%icol_state) 
+              call mplndr ('earth..2',4) ! states & countries
           else
-              write(6,*)' Skip plot of countries/states'
+              write(6,*)' skip plot of countries/states'
               if(namelist_parms%continent_line_width .gt. 0.)then
-                  write(6,*)' Calling MAPDRW just for continents...'
-                  call GSLWSC(namelist_parms%continent_line_width)
-                  call setusv_dum('IN',namelist_parms%icol_continent) 
-                  CALL MPLNDR ('Earth..2',2) ! continents
+                  write(6,*)' calling mapdrw just for continents...'
+                  call gslwsc(namelist_parms%continent_line_width)
+                  call setusv_dum('in',namelist_parms%icol_continent) 
+                  call mplndr ('earth..2',2) ! continents
               endif
           endif
 
           if( (namelist_parms%icol_country .ne. 
      1         namelist_parms%icol_state) 
-     1                     .OR.
+     1                     .or.
      1        (namelist_parms%country_line_width .eq. 0. 
-     1                     .AND.
+     1                     .and.
      1         namelist_parms%state_line_width .gt. 0.)       
      1                                                 )then
               write(6,*)
-     1              ' Replotting countries in separate color/width: '
+     1              ' replotting countries in separate color/width: '
      1                 ,0
      1                 ,namelist_parms%state_line_width
-              call GSLWSC(namelist_parms%state_line_width)
+              call gslwsc(namelist_parms%state_line_width)
               if(namelist_parms%country_line_width .eq. 0.)then
-                  call setusv_dum('IN',0) 
+                  call setusv_dum('in',0) 
               else
-                  call setusv_dum('IN',namelist_parms%icol_country) 
+                  call setusv_dum('in',namelist_parms%icol_country) 
               endif
-              CALL MPLNDR ('Earth..2',3) ! countries
+              call mplndr ('earth..2',3) ! countries
           endif
 
           if(jgrid .gt. 0)then ! draw lat/lon lines
-              call setusv_dum(2HIN,icol_cou)
-              call mpsetr('GR',float(jgrid))
+              call setusv_dum(2hin,icol_cou)
+              call mpsetr('gr',float(jgrid))
               call mapgrd()
           endif
 c abdel	  
       elseif(mode_supmap .eq. 4)then
-            write(6,*)' Calling SUB submap=4 for europe...'
-            DPOLAT=polat
-            DPOLON=polon
-            DSW(1)=sw(1)
-            DSW(2)=sw(2)
-            DNE(1)=ne(1)
-            DNE(2)=ne(2)
-            CALL MDPROJ ('ST',DPOLAT,DPOLON,0.D0)
-            CALL MDPSET ('CO',DSW(1),DSW(2),DNE(1),DNE(2))
-            CALL MAPSTD ('GR',GRSP)
-            CALL MDRGOL (IRGL,RWRK,LRWK)	  
+            write(6,*)' calling sub submap=4 for europe...'
+            dpolat=polat
+            dpolon=polon
+            dsw(1)=sw(1)
+            dsw(2)=sw(2)
+            dne(1)=ne(1)
+            dne(2)=ne(2)
+            call mdproj ('st',dpolat,dpolon,0.d0)
+            call mdpset ('co',dsw(1),dsw(2),dne(1),dne(2))
+            call mapstd ('gr',grsp)
+            call mdrgol (irgl,rwrk,lrwk)	  
 	  
       else
-          write(6,*)' Accessing RANGS database...'
-          write(6,*)' Not yet supported - stop' 
+          write(6,*)' accessing rangs database...'
+          write(6,*)' not yet supported - stop' 
           stop
 
       endif
@@ -241,24 +241,24 @@ c abdel
       call sflush
 
       call gsln(1)
-      call setusv_dum(2HIN,icol_sta)
+      call setusv_dum(2hin,icol_sta)
 
-      jgrid=0                                ! Do not draw lat/lon lines
+      jgrid=0                                ! do not draw lat/lon lines
        
       if(mode_supmap .eq. 1)then
-          write(6,*)' Plotting Continents ',mode_supmap,jgrid
+          write(6,*)' plotting continents ',mode_supmap,jgrid
           jus=-1
           call supmap_local(jproj,polat,polon,rrot,pl1,pl2,pl3,pl4,
      +                      jjlts,jgrid,jus,jdot,ier)
       elseif(mode_supmap .eq. 2)then
-          write(6,*)' Plotting Continents ',mode_supmap,jgrid
+          write(6,*)' plotting continents ',mode_supmap,jgrid
           iout = 2
           call supmap      (jproj,polat,polon,rrot,pl1,pl2,pl3,pl4,
      +                      jjlts,jgrid*1000,iout,jdot,ier)
       endif
       if(ier .ne. 0)write(6,*)' ier = ',ier
 
-      call GSLWSC(1.0)
+      call gslwsc(1.0)
 
       call sflush
 
@@ -268,20 +268,20 @@ c abdel
       end
 
 cabdel       
-              SUBROUTINE MDRGDI (DINM)
-C
-C This is a user-replaceable routine that returns the name of the
-C directory in which the RANGS/GSHHS data files have been placed.
-C
-       CHARACTER*(*) DINM
+              subroutine mdrgdi (dinm)
+c
+c this is a user-replaceable routine that returns the name of the
+c directory in which the rangs/gshhs data files have been placed.
+c
+       character*(*) dinm
 
-C Fitxer bo
-C Return the name of the directory where the RANGS/GSHHS data reside.
-C
-       DINM='/usr/local/ncarg/lib/ncarg/database/RANGS_GSHHS'
-C
-C Done.
-C
-       RETURN
+c fitxer bo
+c return the name of the directory where the rangs/gshhs data reside.
+c
+       dinm='/usr/local/ncarg/lib/ncarg/database/rangs_gshhs'
+c
+c done.
+c
+       return
 
-       END
+       end

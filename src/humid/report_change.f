@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -73,25 +73,25 @@ c     this block is planned for a future suboutine.
       write(6,*) 'precheck data in report'
       call check_nan3(data_in,ii,jj,kk,istatus)
       if(istatus.ne.1)then 
-         write(6,*) 'NaN in var:data_in routine:report_change'
+         write(6,*) 'nan in var:data_in routine:report_change'
          return
       endif
 
       call check_nan3(data,ii,jj,kk,istatus)
       if(istatus.ne.1)then 
-         write(6,*) 'NaN in var:data routine:report_change'
+         write(6,*) 'nan in var:data routine:report_change'
          return
       endif     
 
       call check_nan3(p_3d,ii,jj,kk,istatus)
       if(istatus.ne.1)then 
-         write(6,*) 'NaN in var:p_3d routine:report_change'
+         write(6,*) 'nan in var:p_3d routine:report_change'
          return
       endif
 
       call check_nan (mdf, istatus)
       if(istatus.ne.1)then 
-         write(6,*) 'NaN in var:mdf routine:report_change'
+         write(6,*) 'nan in var:mdf routine:report_change'
          return
       endif     
       write(6,*) 'data_in, data, p_3d, mdf check okay'
@@ -105,9 +105,9 @@ c     this block is planned for a future suboutine.
         write(6,*)
         write(6,*)
         
-        write(6,*) 'Delta moisture stats:'
-        write(6,*) 'Avg = Average difference (g/g) Q'
-        write(6,*) 'Std Dev = +/- difference (g/g) Q'
+        write(6,*) 'delta moisture stats:'
+        write(6,*) 'avg = average difference (g/g) q'
+        write(6,*) 'std dev = +/- difference (g/g) q'
         
         do k = 1,kk
            delta_moisture(k) = 0.0
@@ -129,15 +129,15 @@ c     this block is planned for a future suboutine.
               call moment_b (diff_data,counter,ave,adev,sdev,
      1             var,skew,curt,istatus)
               write(6,*) 'level ',k, 'approx pressure ',
-     1             p_3d(1,1,k), ave, ' +/-', sdev,' g/g Q'  
+     1             p_3d(1,1,k), ave, ' +/-', sdev,' g/g q'  
            endif
            
         enddo
         write(6,*)
         write(6,*)
         
-        write(6,*) 'Relative moisture change % each level'
-        write(6,*) 'Avg delta moisture/Avg moisture for level*100'
+        write(6,*) 'relative moisture change % each level'
+        write(6,*) 'avg delta moisture/avg moisture for level*100'
         
         do k = 1,kk
            write(6,*) 'level ',k, delta_moisture(k)*100.,'%'

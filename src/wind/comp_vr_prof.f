@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -42,22 +42,22 @@ cdis
      1                        ,v_nyquist_2,unfolding_thresh
      1                  ,heights_1d,rlat_radar,rlon_radar,rheight_radar)
 
-!       This routine dealiases the radar data by comparing to the profilers
-!       No other QC thresholding is presently done, but could be easily added
+!       this routine dealiases the radar data by comparing to the profilers
+!       no other qc thresholding is presently done, but could be easily added
 
-!       Steve Albers
-!       Jan 1992, A fix now sets the radar velocity to missing if the
-!       Profiler reference analysis has missing data. If no de-aliasing
+!       steve albers
+!       jan 1992, a fix now sets the radar velocity to missing if the
+!       profiler reference analysis has missing data. if no de-aliasing
 !       of the radar data can be done, it is thrown out.
 
-!       A future fix might include using the first guess analysis as the
+!       a future fix might include using the first guess analysis as the
 !       reference for de-aliasing the radar instead of the preliminary
 !       profiler analysis.
 
-!       Dec 1992 - De-aliasing moved to subroutine 'qc_radar_obs'. Turned off
+!       dec 1992 - de-aliasing moved to subroutine 'qc_radar_obs'. turned off
 !       here, but still being diagnosed.
 
-!       Apr 1993 - Removed arrays include
+!       apr 1993 - removed arrays include
 
         real grid_ra_vel(ni,nj,nk)
         real grid_pr_r(ni,nj,nk)
@@ -68,7 +68,7 @@ cdis
         integer i_profiler_nearest(ni,nj,nk)
 
         write(6,2)
-2       format(/'                  Comparing Radial Velocities to Profil
+2       format(/'                  comparing radial velocities to profil
      1er'
      1  /'    i   j   k   radar  prof   diff    wt   prof  nobs')
 
@@ -77,18 +77,18 @@ cdis
         do j = 1,nj
         do i = 1,ni
 
-!           Check for presence of radar ob at this grid point
+!           check for presence of radar ob at this grid point
             if(grid_pr_r(i,j,k) .ne. r_missing_data
      1  .and. grid_ra_vel(i,j,k) .ne. r_missing_data)then
 
                 nobs1 = nobs1 + 1
 
-!               Compare radar radial velocity to profiler first guess
+!               compare radar radial velocity to profiler first guess
                 diff = grid_pr_r(i,j,k) - grid_ra_vel(i,j,k)
 
-!               Check for folded radar data (up to +/- 1 Nyquist velocity)
-!               Test if residual is more than about 1.3 V Nyquist and
-!                                   less than about 2.7 V Nyquist
+!               check for folded radar data (up to +/- 1 nyquist velocity)
+!               test if residual is more than about 1.3 v nyquist and
+!                                   less than about 2.7 v nyquist
                 if(abs(abs(diff)-v_nyquist_2) .lt. unfolding_thresh)then
                     call latlon_to_radar(lat(i,j),lon(i,j),heights_1d(k)
      1                  ,azimuth,slant_range,elev
@@ -96,7 +96,7 @@ cdis
 
                     velold = grid_ra_vel(i,j,k)
 
-!                   Adjust the velocity value
+!                   adjust the velocity value
                     if(.false.)then
                         r_nyquist_number = nint(diff/v_nyquist_2)
                         diff = diff - r_nyquist_number * v_nyquist_2
@@ -114,7 +114,7 @@ cdis
      1                                  ,nint(slant_range/1000.)
      1                                  ,elev
 
-102                 format(1x,'Folding at'
+102                 format(1x,'folding at'
      1            ,i3,i3,i3,' vp,vr,vrnw',3f6.1,' df',f6.1
      1            ,' azran=',i3,'/',i3,' el=',f4.1)
 
@@ -140,18 +140,18 @@ cdis
                 endif
 
 
-            else ! Missing data in profiler anal or radar data
+            else ! missing data in profiler anal or radar data
 !               if(k .eq. 13)then
-!                   write(6,*)i,j,k,' Radar Present, profiler?, k = 13'
+!                   write(6,*)i,j,k,' radar present, profiler?, k = 13'
 !               endif
 
 !               if(grid_pr_r(i,j,k) .eq. r_missing_data)then
-!                   write(6,*)i,j,k,' Radar Present, profiler absent'
+!                   write(6,*)i,j,k,' radar present, profiler absent'
 !               endif
 
-!               Make sure radar data is not used if there is no profiler
+!               make sure radar data is not used if there is no profiler
 !               data present to de-alias it.
-                if(.false.)then ! QCing mode
+                if(.false.)then ! qcing mode
                     grid_ra_vel(i,j,k) = r_missing_data
                 endif
 
@@ -177,16 +177,16 @@ cdis
             rmsra2 = 0.
         endif
 
-        write(6,*)' RMS between radial velocities & profiler anal= ',nob
+        write(6,*)' rms between radial velocities & profiler anal= ',nob
      1s1,rms1
-        write(6,*)' RMS Of profiler,radar = ',rmspr2,rmsra2
-        write(6,*)' RMS between radial velocities & profiler obs = ',nob
+        write(6,*)' rms of profiler,radar = ',rmspr2,rmsra2
+        write(6,*)' rms between radial velocities & profiler obs = ',nob
      1s2,rms2
 
-        write(15,*)' RMS between radial velocities & profiler anal = ',n
+        write(15,*)' rms between radial velocities & profiler anal = ',n
      1obs1,rms1
-        write(15,*)' RMS Of profiler,radar = ',rmspr2,rmsra2
-        write(15,*)' RMS between radial velocities & profiler obs = ',no
+        write(15,*)' rms of profiler,radar = ',rmspr2,rmsra2
+        write(15,*)' rms between radial velocities & profiler obs = ',no
      1bs2,rms2
 
         return

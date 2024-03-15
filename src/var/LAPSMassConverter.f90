@@ -1,284 +1,282 @@
 !dis
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
 !dis
-!dis    This software is distributed under the Open Source Definition,
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
 !dis
-!dis    In particular, redistribution and use in source and binary forms,
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
 !dis
-!dis    - Redistributions of source code must retain this notice, this
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
 !dis
-!dis    - Redistributions in binary form must provide access to this
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
 !dis
-!dis    - All modifications to this software must be clearly documented,
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
 !dis
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
 !dis
 
-SUBROUTINE LAPS2Mass(vlaps,imax,jmax,kmax,plaps,psurf,eta, &
-                     iorder,logP,vmass)
+subroutine laps2mass(vlaps, imax, jmax, kmax, plaps, psurf, eta, &
+                     iorder, logp, vmass)
 
 !==========================================================
-!  This routine converts the LAPS grid function into GSI
+!  this routine converts the laps grid function into gsi
 !  grid over mass coordinate.
 !
-!  HISTORY: JUL. 2006 by YUANFU XIE.
+!  history: jul. 2006 by yuanfu xie.
 !==========================================================
 
-  ! This routine converts a LAPS variable (varlaps) on LAPS
-  ! coordinate into one on a mass coordinate.
+   ! this routine converts a laps variable (varlaps) on laps
+   ! coordinate into one on a mass coordinate.
 
-  IMPLICIT NONE
-      
-  INTEGER, INTENT(IN) :: imax,jmax,kmax  	! 3D array dimensions
-  INTEGER, INTENT(IN) :: iorder		! 2rd or 4th order 
-						! interpolation (2 or 4)
-  INTEGER, INTENT(IN) :: logP			! Use of log(p) in
-  						! interpolation
-  REAL, INTENT(IN) :: vlaps(imax,jmax,kmax)
-  REAL, INTENT(IN) :: eta(kmax)		! eta=(p-pt)/(ps-pt)
-  REAL, INTENT(IN) :: plaps(kmax)		! LAPS pressure level
-  REAL, INTENT(IN) :: psurf(imax,jmax)	! Surface pressure
-  REAL, INTENT(OUT) :: vmass(imax,jmax,kmax)
+   implicit none
 
-  ! Local variables:
-  INTEGER :: i,j,k,l,mp,istart,iend
-  REAL :: a(4),x(4),p
+   integer, intent(in) :: imax, jmax, kmax          ! 3d array dimensions
+   integer, intent(in) :: iorder                ! 2rd or 4th order
+   ! interpolation (2 or 4)
+   integer, intent(in) :: logp                        ! use of log(p) in
+   ! interpolation
+   real, intent(in) :: vlaps(imax, jmax, kmax)
+   real, intent(in) :: eta(kmax)                ! eta=(p-pt)/(ps-pt)
+   real, intent(in) :: plaps(kmax)                ! laps pressure level
+   real, intent(in) :: psurf(imax, jmax)        ! surface pressure
+   real, intent(out) :: vmass(imax, jmax, kmax)
 
-  ! Conversion:
-  DO j=1,jmax
-    DO i=1,imax
+   ! local variables:
+   integer :: i, j, k, l, mp, istart, iend
+   real :: a(4), x(4), p
 
-      ! Use pressure decreasing property from bottom to top:
-      mp = 1	! Memorize the previous level searched
+   ! conversion:
+   do j = 1, jmax
+      do i = 1, imax
 
-      ! Convert:
-      DO k=1,kmax
+         ! use pressure decreasing property from bottom to top:
+         mp = 1        ! memorize the previous level searched
 
-	! Mass pressure:
-	p = eta(k)*(psurf(i,j)-plaps(kmax))+plaps(kmax)
+         ! convert:
+         do k = 1, kmax
 
-	! Search the interval of LAPS pressure levels 
-        ! containing the mass level:
-	DO l=mp,kmax
-	  IF (p .GE. plaps(l)) then
-            mp = l			! Memorize
+            ! mass pressure:
+            p = eta(k)*(psurf(i, j) - plaps(kmax)) + plaps(kmax)
 
-            ! Find indices for interpolation:
-            istart = l-iorder/2
-	    IF (l .LE. iorder/2) istart = 1
-	    IF (l+iorder/4 .GT. kmax) istart = kmax-iorder+1
-	    iend = istart+iorder-1
-            
-            ! Check if log P is needed:
-            IF (logP .EQ. 1) THEN
-              x(1:iorder) = LOG(plaps(istart:iend))
-              p = LOG(p)
-            ELSE
-              x(1:iorder) = plaps(istart:iend)
-            ENDIF
+            ! search the interval of laps pressure levels
+            ! containing the mass level:
+            do l = mp, kmax
+               if (p .ge. plaps(l)) then
+                  mp = l                        ! memorize
 
-            ! Second order:
-            IF (iorder .EQ. 2) &
-              CALL Intplt2(p,x,vlaps(i,j,istart:iend),vmass(i,j,k))
+                  ! find indices for interpolation:
+                  istart = l - iorder/2
+                  if (l .le. iorder/2) istart = 1
+                  if (l + iorder/4 .gt. kmax) istart = kmax - iorder + 1
+                  iend = istart + iorder - 1
 
-            ! Fourth order:
-            IF (iorder .EQ. 4) &
-              CALL Intplt4(p,x,vlaps(i,j,istart:iend),vmass(i,j,k))
+                  ! check if log p is needed:
+                  if (logp .eq. 1) then
+                     x(1:iorder) = log(plaps(istart:iend))
+                     p = log(p)
+                  else
+                     x(1:iorder) = plaps(istart:iend)
+                  end if
 
-            ! End of search for k
-	    GOTO 10
+                  ! second order:
+                  if (iorder .eq. 2) &
+                     call intplt2(p, x, vlaps(i, j, istart:iend), vmass(i, j, k))
 
-	  ENDIF
-	ENDDO
+                  ! fourth order:
+                  if (iorder .eq. 4) &
+                     call intplt4(p, x, vlaps(i, j, istart:iend), vmass(i, j, k))
 
-        ! Search next k:
-10	CONTINUE
+                  ! end of search for k
+                  goto 10
 
-      ENDDO
-    ENDDO
-  ENDDO
+               end if
+            end do
 
-END SUBROUTINE LAPS2Mass
+            ! search next k:
+10          continue
 
-SUBROUTINE Mass2LAPS(vlaps,imax,jmax,kmax,plaps,psurf,eta, &
-                     iorder,logP,vmass)
+         end do
+      end do
+   end do
+
+end subroutine laps2mass
+
+subroutine mass2laps(vlaps, imax, jmax, kmax, plaps, psurf, eta, &
+                     iorder, logp, vmass)
 
 !==========================================================
-!  This routine converts the LAPS grid function into GSI
+!  this routine converts the laps grid function into gsi
 !  grid over mass coordinate.
 !
-!  HISTORY: JUL. 2006 by YUANFU XIE.
+!  history: jul. 2006 by yuanfu xie.
 !==========================================================
 
-  ! This routine converts a LAPS variable (vlaps) on LAPS
-  ! coordinate into one on a mass coordinate.
+   ! this routine converts a laps variable (vlaps) on laps
+   ! coordinate into one on a mass coordinate.
 
-  IMPLICIT NONE
-      
-  INTEGER, INTENT(IN) :: imax,jmax,kmax  	! 3D array dimensions
-  INTEGER, INTENT(IN) :: iorder		! 2rd or 4th order 
-						! interpolation (2 or 4)
-  INTEGER, INTENT(IN) :: logP			! Use of log(p) in
-  						! interpolation
-  REAL, INTENT(OUT) :: vlaps(imax,jmax,kmax)
-  REAL, INTENT(IN) :: eta(kmax)		! eta=(p-pt)/(ps-pt)
-  REAL, INTENT(IN) :: plaps(kmax)		! LAPS pressure level
-  REAL, INTENT(IN) :: psurf(imax,jmax)	! Surface pressure
-  REAL, INTENT(IN) :: vmass(imax,jmax,kmax)
+   implicit none
 
-  ! Local variables:
-  INTEGER :: i,j,k,l,mp,m,istart,iend
-  REAL :: a(4),x(4),p
+   integer, intent(in) :: imax, jmax, kmax          ! 3d array dimensions
+   integer, intent(in) :: iorder                ! 2rd or 4th order
+   ! interpolation (2 or 4)
+   integer, intent(in) :: logp                        ! use of log(p) in
+   ! interpolation
+   real, intent(out) :: vlaps(imax, jmax, kmax)
+   real, intent(in) :: eta(kmax)                ! eta=(p-pt)/(ps-pt)
+   real, intent(in) :: plaps(kmax)                ! laps pressure level
+   real, intent(in) :: psurf(imax, jmax)        ! surface pressure
+   real, intent(in) :: vmass(imax, jmax, kmax)
 
-  ! Conversion:
-  DO j=1,jmax
-    DO i=1,imax
+   ! local variables:
+   integer :: i, j, k, l, mp, m, istart, iend
+   real :: a(4), x(4), p
 
-      ! Use pressure decreasing property from bottom to top:
-      mp = 1	! Memorize the previous level searched
+   ! conversion:
+   do j = 1, jmax
+      do i = 1, imax
 
-      ! Convert:
-      DO k=1,kmax
+         ! use pressure decreasing property from bottom to top:
+         mp = 1        ! memorize the previous level searched
 
-	! Search the interval of mass levels 
-        ! containing the LAPS pressure level:
-	DO l=mp,kmax
-          p = eta(l)*(psurf(i,j)-plaps(kmax))+plaps(kmax)
+         ! convert:
+         do k = 1, kmax
 
-          IF (plaps(k) .GE. p) THEN
+            ! search the interval of mass levels
+            ! containing the laps pressure level:
+            do l = mp, kmax
+               p = eta(l)*(psurf(i, j) - plaps(kmax)) + plaps(kmax)
 
-            mp = l
+               if (plaps(k) .ge. p) then
 
-	    ! Find indices for interpolation:
-            istart = l-iorder/2
-	    IF (l .LE. iorder/2) istart = 1
-	    IF (l+iorder/4 .GT. kmax) istart = kmax-iorder+1
-	    iend = istart+iorder-1
-            
-	    ! Mass values:
-            DO m=1,iorder
-              x(m) = eta(istart+m-1)* &
-		(psurf(i,j)-plaps(kmax))+plaps(kmax)
-            ENDDO
-            p = plaps(k)
+                  mp = l
 
-            ! Check if log P is needed:
-            IF (logP .EQ. 1) THEN
-              x(1:iorder) = LOG(x(1:iorder))
-              p = LOG(plaps(k))
-            ENDIF
+                  ! find indices for interpolation:
+                  istart = l - iorder/2
+                  if (l .le. iorder/2) istart = 1
+                  if (l + iorder/4 .gt. kmax) istart = kmax - iorder + 1
+                  iend = istart + iorder - 1
 
-            ! Second order:
-            IF (iorder .EQ. 2) &
-              CALL Intplt2(p,x,vmass(i,j,istart:iend),vlaps(i,j,k))
+                  ! mass values:
+                  do m = 1, iorder
+                     x(m) = eta(istart + m - 1)* &
+                            (psurf(i, j) - plaps(kmax)) + plaps(kmax)
+                  end do
+                  p = plaps(k)
 
-            ! Fourth order:
-            IF (iorder .EQ. 4) &
-              CALL Intplt4(p,x,vmass(i,j,istart:iend),vlaps(i,j,k))
+                  ! check if log p is needed:
+                  if (logp .eq. 1) then
+                     x(1:iorder) = log(x(1:iorder))
+                     p = log(plaps(k))
+                  end if
 
-            ! End of search for k
-	      GOTO 10
+                  ! second order:
+                  if (iorder .eq. 2) &
+                     call intplt2(p, x, vmass(i, j, istart:iend), vlaps(i, j, k))
 
-          ENDIF
+                  ! fourth order:
+                  if (iorder .eq. 4) &
+                     call intplt4(p, x, vmass(i, j, istart:iend), vlaps(i, j, k))
 
-	ENDDO
+                  ! end of search for k
+                  goto 10
 
-10	CONTINUE
+               end if
 
-      ENDDO
+            end do
 
-    ENDDO
-  ENDDO
+10          continue
 
-END SUBROUTINE Mass2LAPS
+         end do
 
+      end do
+   end do
 
+end subroutine mass2laps
 
-SUBROUTINE dryairmass(dam,pdam,imax,jmax,kmax,pres_1d, &
-     		      heights_3d,p_laps_bkg,t_laps_bkg)
+subroutine dryairmass(dam, pdam, imax, jmax, kmax, pres_1d, &
+                      heights_3d, p_laps_bkg, t_laps_bkg)
 
 !==========================================================
-!  This routine computes the dry air mass and perturbation
+!  this routine computes the dry air mass and perturbation
 !  using temperature field.
 !
-!  HISTORY: MAR. 2006 by YUANFU XIE.
+!  history: mar. 2006 by yuanfu xie.
 !==========================================================
 
-  IMPLICIT NONE
+   implicit none
 
-  INTEGER, INTENT(IN) :: imax,jmax,kmax  	! 3D array dimensions
-  REAL, INTENT(OUT) :: dam(imax,jmax)   ! dry air mass in column
-  REAL, INTENT(OUT) :: pdam(imax,jmax)  ! perturbation of dam
-  REAL, INTENT(IN) :: pres_1d(kmax)    ! pressure values@levels
-  REAL, INTENT(IN) :: heights_3d(imax,jmax,kmax)   ! heights
-  REAL, INTENT(IN) :: p_laps_bkg(imax,jmax,kmax)   ! p bkg
-  REAL, INTENT(IN) :: t_laps_bkg(imax,jmax,kmax)   ! t bkg
+   integer, intent(in) :: imax, jmax, kmax          ! 3d array dimensions
+   real, intent(out) :: dam(imax, jmax)   ! dry air mass in column
+   real, intent(out) :: pdam(imax, jmax)  ! perturbation of dam
+   real, intent(in) :: pres_1d(kmax)    ! pressure values@levels
+   real, intent(in) :: heights_3d(imax, jmax, kmax)   ! heights
+   real, intent(in) :: p_laps_bkg(imax, jmax, kmax)   ! p bkg
+   real, intent(in) :: t_laps_bkg(imax, jmax, kmax)   ! t bkg
 
-  ! Local variables:
-  INTEGER :: i,j,k
+   ! local variables:
+   integer :: i, j, k
 
-  ! Use pressure equation: dp/p = - g/(RT) dz [pp 20 Holton]
-  ! Integration between P_top and P_surface:
-  ! int_z=h(surface)^h(top) d ln(p) = - g/R int_h(s)^h(t) dz/T.
-  ! Thus: p(h(s)) = p(h(t))*exp(g/R*int_h(s)^h(t) dz/T, where
-  ! p(h(t)) = pressure at the highest level: pres_1d(kmax).
-  ! Integration is replaced by Riemann sum. 
-  DO j=1,jmax
-    DO i=1,imax
-      ! Riemann sum:
-      dam(i,j) = 0.0		! Initial summation
-      pdam(i,j) = p_laps_bkg(i,j,1)	! Default value at bottom
-      DO k=kmax,2,-1
-        ! Summation til height=0
-        IF (heights_3d(i,j,k-1) .gt. 0.0) then
-	  ! Summation approximates integral:
-          dam(i,j) = dam(i,j)+2.0/ &
-     		    (t_laps_bkg(i,j,k)+t_laps_bkg(i,j,k-1))* &
-     		    (heights_3d(i,j,k)-heights_3d(i,j,k-1))
-	ELSE
-          ! Interpolate the full pressure between +/- heights:
-	  ! Note: the values of these heights are the weights
-	  ! so the indices are swapped:
-          pdam(i,j) = (p_laps_bkg(i,j,k-1)*heights_3d(i,j,k  )- &
-     		       p_laps_bkg(i,j,k  )*heights_3d(i,j,k-1))/ &
-     		       (heights_3d(i,j,k)-heights_3d(i,j,k-1))
+   ! use pressure equation: dp/p = - g/(rt) dz [pp 20 holton]
+   ! integration between p_top and p_surface:
+   ! int_z=h(surface)^h(top) d ln(p) = - g/r int_h(s)^h(t) dz/t.
+   ! thus: p(h(s)) = p(h(t))*exp(g/r*int_h(s)^h(t) dz/t, where
+   ! p(h(t)) = pressure at the highest level: pres_1d(kmax).
+   ! integration is replaced by riemann sum.
+   do j = 1, jmax
+      do i = 1, imax
+         ! riemann sum:
+         dam(i, j) = 0.0                ! initial summation
+         pdam(i, j) = p_laps_bkg(i, j, 1)        ! default value at bottom
+         do k = kmax, 2, -1
+            ! summation til height=0
+            if (heights_3d(i, j, k - 1) .gt. 0.0) then
+               ! summation approximates integral:
+               dam(i, j) = dam(i, j) + 2.0/ &
+                           (t_laps_bkg(i, j, k) + t_laps_bkg(i, j, k - 1))* &
+                           (heights_3d(i, j, k) - heights_3d(i, j, k - 1))
+            else
+               ! interpolate the full pressure between +/- heights:
+               ! note: the values of these heights are the weights
+               ! so the indices are swapped:
+               pdam(i, j) = (p_laps_bkg(i, j, k - 1)*heights_3d(i, j, k) - &
+                             p_laps_bkg(i, j, k)*heights_3d(i, j, k - 1))/ &
+                            (heights_3d(i, j, k) - heights_3d(i, j, k - 1))
 
-	  ! Riemann sum over the partial grid:
-	  ! Positive height * 0.5*(t_k + interpolated t at z =0):
-          dam(i,j) = dam(i,j)+2.0*heights_3d(i,j,k  )/ &
-     		(t_laps_bkg(i,j,k)+ &
-     		(t_laps_bkg(i,j,k-1)*heights_3d(i,j,k  )- &
-     	 	 t_laps_bkg(i,j,k  )*heights_3d(i,j,k-1))/ &
-     		(heights_3d(i,j,k)-heights_3d(i,j,k-1)) )
-	  GOTO 10
-        ENDIF
-      ENDDO
-      ! Dry air mass: Integral of T -> dry surface pressure:
-10    dam(i,j) = exp(9.806/287.0*dam(i,j))*pres_1d(kmax)
-    ENDDO
-  ENDDO
+               ! riemann sum over the partial grid:
+               ! positive height * 0.5*(t_k + interpolated t at z =0):
+               dam(i, j) = dam(i, j) + 2.0*heights_3d(i, j, k)/ &
+                           (t_laps_bkg(i, j, k) + &
+                            (t_laps_bkg(i, j, k - 1)*heights_3d(i, j, k) - &
+                             t_laps_bkg(i, j, k)*heights_3d(i, j, k - 1))/ &
+                            (heights_3d(i, j, k) - heights_3d(i, j, k - 1)))
+               goto 10
+            end if
+         end do
+         ! dry air mass: integral of t -> dry surface pressure:
+10       dam(i, j) = exp(9.806/287.0*dam(i, j))*pres_1d(kmax)
+      end do
+   end do
 
-  ! Perturbation pressure:
-  pdam(1:imax,1:jmax) = pdam(1:imax,1:jmax)-dam(1:imax,1:jmax)
+   ! perturbation pressure:
+   pdam(1:imax, 1:jmax) = pdam(1:imax, 1:jmax) - dam(1:imax, 1:jmax)
 
-END SUBROUTINE dryairmass
+end subroutine dryairmass
 

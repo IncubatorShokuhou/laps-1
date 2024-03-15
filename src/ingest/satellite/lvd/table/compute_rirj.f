@@ -1,5 +1,5 @@
 
-      Subroutine compute_rirj(nx,ny,n_elems_tot,n_lines_tot,
+      subroutine compute_rirj(nx,ny,n_elems_tot,n_lines_tot,
      &nelems,nlines,rlat,rlon,lat,lon,ri,rj,istatus)
 c
 c routine generates the ri/rj arrays for mapping laps grid points
@@ -39,8 +39,8 @@ c
       integer init_timer
       integer itstatus
 
-      write(6,*)'This could take awhile, maybe hours.'
-      write(6,*)'Some output is coming, and timing stats'
+      write(6,*)'this could take awhile, maybe hours.'
+      write(6,*)'some output is coming, and timing stats'
       write(6,*)
 
       itstatus=init_timer()
@@ -59,7 +59,7 @@ c        first_time = .true.
 
          if(idiff.eq.0.00 .and. jdiff.eq.0.00)then
             write(6,29)i,j
-29          format(1x,'LAPS(i,j) ',2i6)
+29          format(1x,'laps(i,j) ',2i6)
          end if
 
          l=lstart

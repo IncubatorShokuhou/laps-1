@@ -1,163 +1,163 @@
       module grib_mod
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! MODULE:    grib_mod 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2002-01-23
+! module:    grib_mod 
+!   prgmmr: gilbert         org: w/np11    date: 2002-01-23
 !
-! ABSTRACT: This Fortran Module contains the declaration
+! abstract: this fortran module contains the declaration
 !   of derived type gribfield.
-!   If variable gfld is declared of type gribfield 
-!   ( i.e. TYPE(GRIBFIELD) :: GFLD ), it would have the following componenets:
+!   if variable gfld is declared of type gribfield 
+!   ( i.e. type(gribfield) :: gfld ), it would have the following componenets:
 !
-!        gfld%version = GRIB edition number ( currently 2 )
-!        gfld%discipline = Message Discipline ( see Code Table 0.0 )
-!        gfld%idsect() = Contains the entries in the Identification
-!                        Section ( Section 1 )
-!                        This element is actually a pointer to an array
+!        gfld%version = grib edition number ( currently 2 )
+!        gfld%discipline = message discipline ( see code table 0.0 )
+!        gfld%idsect() = contains the entries in the identification
+!                        section ( section 1 )
+!                        this element is actually a pointer to an array
 !                        that holds the data.
-!            gfld%idsect(1)  = Identification of originating Centre
-!                                    ( see Common Code Table C-1 )
-!                             7 - US National Weather Service
-!            gfld%idsect(2)  = Identification of originating Sub-centre
-!            gfld%idsect(3)  = GRIB Master Tables Version Number
-!                                    ( see Code Table 1.0 )
-!                             0 - Experimental
-!                             1 - Initial operational version number
-!            gfld%idsect(4)  = GRIB Local Tables Version Number
-!                                    ( see Code Table 1.1 )
-!                             0     - Local tables not used
-!                             1-254 - Number of local tables version used
-!            gfld%idsect(5)  = Significance of Reference Time (Code Table 1.2)
-!                             0 - Analysis
-!                             1 - Start of forecast
-!                             2 - Verifying time of forecast
-!                             3 - Observation time
-!            gfld%idsect(6)  = Year ( 4 digits )
-!            gfld%idsect(7)  = Month
-!            gfld%idsect(8)  = Day
-!            gfld%idsect(9)  = Hour
-!            gfld%idsect(10)  = Minute
-!            gfld%idsect(11)  = Second
-!            gfld%idsect(12)  = Production status of processed data
-!                                    ( see Code Table 1.3 )
-!                              0 - Operational products
-!                              1 - Operational test products
-!                              2 - Research products
-!                              3 - Re-analysis products
-!            gfld%idsect(13)  = Type of processed data ( see Code Table 1.4 )
-!                              0  - Analysis products
-!                              1  - Forecast products
-!                              2  - Analysis and forecast products
-!                              3  - Control forecast products
-!                              4  - Perturbed forecast products
-!                              5  - Control and perturbed forecast products
-!                              6  - Processed satellite observations
-!                              7  - Processed radar observations
-!        gfld%idsectlen = Number of elements in gfld%idsect().
-!        gfld%local() = Pointer to character array containing contents
-!                       of Local Section 2, if included
+!            gfld%idsect(1)  = identification of originating centre
+!                                    ( see common code table c-1 )
+!                             7 - us national weather service
+!            gfld%idsect(2)  = identification of originating sub-centre
+!            gfld%idsect(3)  = grib master tables version number
+!                                    ( see code table 1.0 )
+!                             0 - experimental
+!                             1 - initial operational version number
+!            gfld%idsect(4)  = grib local tables version number
+!                                    ( see code table 1.1 )
+!                             0     - local tables not used
+!                             1-254 - number of local tables version used
+!            gfld%idsect(5)  = significance of reference time (code table 1.2)
+!                             0 - analysis
+!                             1 - start of forecast
+!                             2 - verifying time of forecast
+!                             3 - observation time
+!            gfld%idsect(6)  = year ( 4 digits )
+!            gfld%idsect(7)  = month
+!            gfld%idsect(8)  = day
+!            gfld%idsect(9)  = hour
+!            gfld%idsect(10)  = minute
+!            gfld%idsect(11)  = second
+!            gfld%idsect(12)  = production status of processed data
+!                                    ( see code table 1.3 )
+!                              0 - operational products
+!                              1 - operational test products
+!                              2 - research products
+!                              3 - re-analysis products
+!            gfld%idsect(13)  = type of processed data ( see code table 1.4 )
+!                              0  - analysis products
+!                              1  - forecast products
+!                              2  - analysis and forecast products
+!                              3  - control forecast products
+!                              4  - perturbed forecast products
+!                              5  - control and perturbed forecast products
+!                              6  - processed satellite observations
+!                              7  - processed radar observations
+!        gfld%idsectlen = number of elements in gfld%idsect().
+!        gfld%local() = pointer to character array containing contents
+!                       of local section 2, if included
 !        gfld%locallen = length of array gfld%local()
-!        gfld%ifldnum = field number within GRIB message
-!        gfld%griddef = Source of grid definition (see Code Table 3.0)
-!                      0 - Specified in Code table 3.1
-!                      1 - Predetermined grid Defined by originating centre
-!        gfld%ngrdpts = Number of grid points in the defined grid.
-!        gfld%numoct_opt = Number of octets needed for each
+!        gfld%ifldnum = field number within grib message
+!        gfld%griddef = source of grid definition (see code table 3.0)
+!                      0 - specified in code table 3.1
+!                      1 - predetermined grid defined by originating centre
+!        gfld%ngrdpts = number of grid points in the defined grid.
+!        gfld%numoct_opt = number of octets needed for each
 !                          additional grid points definition.
-!                          Used to define number of
+!                          used to define number of
 !                          points in each row ( or column ) for
 !                          non-regular grids.
 !                          = 0, if using regular grid.
-!        gfld%interp_opt = Interpretation of list for optional points
-!                          definition.  (Code Table 3.11)
-!        gfld%igdtnum = Grid Definition Template Number (Code Table 3.1)
-!        gfld%igdtmpl() = Contains the data values for the specified Grid
-!                         Definition Template ( NN=gfld%igdtnum ).  Each
+!        gfld%interp_opt = interpretation of list for optional points
+!                          definition.  (code table 3.11)
+!        gfld%igdtnum = grid definition template number (code table 3.1)
+!        gfld%igdtmpl() = contains the data values for the specified grid
+!                         definition template ( nn=gfld%igdtnum ).  each
 !                         element of this integer array contains an entry (in
-!                         the order specified) of Grid Defintion Template 3.NN
-!                         This element is actually a pointer to an array
+!                         the order specified) of grid defintion template 3.nn
+!                         this element is actually a pointer to an array
 !                         that holds the data.
-!        gfld%igdtlen = Number of elements in gfld%igdtmpl().  i.e. number of
-!                       entries in Grid Defintion Template 3.NN
-!                       ( NN=gfld%igdtnum ).
-!        gfld%list_opt() = (Used if gfld%numoct_opt .ne. 0)  This array
+!        gfld%igdtlen = number of elements in gfld%igdtmpl().  i.e. number of
+!                       entries in grid defintion template 3.nn
+!                       ( nn=gfld%igdtnum ).
+!        gfld%list_opt() = (used if gfld%numoct_opt .ne. 0)  this array
 !                          contains the number of grid points contained in
-!                          each row ( or column ).  (part of Section 3)
-!                          This element is actually a pointer to an array
-!                          that holds the data.  This pointer is nullified
+!                          each row ( or column ).  (part of section 3)
+!                          this element is actually a pointer to an array
+!                          that holds the data.  this pointer is nullified
 !                          if gfld%numoct_opt=0.
-!        gfld%num_opt = (Used if gfld%numoct_opt .ne. 0)  The number of entries
+!        gfld%num_opt = (used if gfld%numoct_opt .ne. 0)  the number of entries
 !                       in array ideflist.  i.e. number of rows ( or columns )
-!                       for which optional grid points are defined.  This value
+!                       for which optional grid points are defined.  this value
 !                       is set to zero, if gfld%numoct_opt=0.
-!        gfdl%ipdtnum = Product Definition Template Number (see Code Table 4.0)
-!        gfld%ipdtmpl() = Contains the data values for the specified Product
-!                         Definition Template ( N=gfdl%ipdtnum ).  Each element
+!        gfdl%ipdtnum = product definition template number (see code table 4.0)
+!        gfld%ipdtmpl() = contains the data values for the specified product
+!                         definition template ( n=gfdl%ipdtnum ).  each element
 !                         of this integer array contains an entry (in the
-!                         order specified) of Product Defintion Template 4.N.
-!                         This element is actually a pointer to an array
+!                         order specified) of product defintion template 4.n.
+!                         this element is actually a pointer to an array
 !                         that holds the data.
-!        gfld%ipdtlen = Number of elements in gfld%ipdtmpl().  i.e. number of
-!                       entries in Product Defintion Template 4.N
-!                       ( N=gfdl%ipdtnum ).
-!        gfld%coord_list() = Real array containing floating point values
+!        gfld%ipdtlen = number of elements in gfld%ipdtmpl().  i.e. number of
+!                       entries in product defintion template 4.n
+!                       ( n=gfdl%ipdtnum ).
+!        gfld%coord_list() = real array containing floating point values
 !                            intended to document the vertical discretisation
 !                            associated to model data on hybrid coordinate
-!                            vertical levels.  (part of Section 4)
-!                            This element is actually a pointer to an array
+!                            vertical levels.  (part of section 4)
+!                            this element is actually a pointer to an array
 !                            that holds the data.
 !        gfld%num_coord = number of values in array gfld%coord_list().
-!        gfld%ndpts = Number of data points unpacked and returned.
-!        gfld%idrtnum = Data Representation Template Number
-!                       ( see Code Table 5.0)
-!        gfld%idrtmpl() = Contains the data values for the specified Data
-!                         Representation Template ( N=gfld%idrtnum ).  Each
+!        gfld%ndpts = number of data points unpacked and returned.
+!        gfld%idrtnum = data representation template number
+!                       ( see code table 5.0)
+!        gfld%idrtmpl() = contains the data values for the specified data
+!                         representation template ( n=gfld%idrtnum ).  each
 !                         element of this integer array contains an entry
-!                         (in the order specified) of Product Defintion
-!                         Template 5.N.
-!                         This element is actually a pointer to an array
+!                         (in the order specified) of product defintion
+!                         template 5.n.
+!                         this element is actually a pointer to an array
 !                         that holds the data.
-!        gfld%idrtlen = Number of elements in gfld%idrtmpl().  i.e. number
-!                       of entries in Data Representation Template 5.N
-!                       ( N=gfld%idrtnum ).
+!        gfld%idrtlen = number of elements in gfld%idrtmpl().  i.e. number
+!                       of entries in data representation template 5.n
+!                       ( n=gfld%idrtnum ).
 !        gfld%unpacked = logical value indicating whether the bitmap and
-!                        data values were unpacked.  If false,
+!                        data values were unpacked.  if false,
 !                        gfld%bmap and gfld%fld pointers are nullified.
-!        gfld%expanded = Logical value indicating whether the data field
+!        gfld%expanded = logical value indicating whether the data field
 !                         was expanded to the grid in the case where a
-!                         bit-map is present.  If true, the data points in
+!                         bit-map is present.  if true, the data points in
 !                         gfld%fld match the grid points and zeros were
 !                         inserted at grid points where data was bit-mapped
-!                         out.  If false, the data values in gfld%fld were
+!                         out.  if false, the data values in gfld%fld were
 !                         not expanded to the grid and are just a consecutive
 !                         array of data points corresponding to each value of
 !                         "1" in gfld%bmap.
-!        gfld%ibmap = Bitmap indicator ( see Code Table 6.0 )
-!                     0 = bitmap applies and is included in Section 6.
-!                     1-253 = Predefined bitmap applies
-!                     254 = Previously defined bitmap applies to this field
-!                     255 = Bit map does not apply to this product.
-!        gfld%bmap() = Logical*1 array containing decoded bitmap,
-!                      if ibmap=0 or ibap=254.  Otherwise nullified.
-!                      This element is actually a pointer to an array
+!        gfld%ibmap = bitmap indicator ( see code table 6.0 )
+!                     0 = bitmap applies and is included in section 6.
+!                     1-253 = predefined bitmap applies
+!                     254 = previously defined bitmap applies to this field
+!                     255 = bit map does not apply to this product.
+!        gfld%bmap() = logical*1 array containing decoded bitmap,
+!                      if ibmap=0 or ibap=254.  otherwise nullified.
+!                      this element is actually a pointer to an array
 !                      that holds the data.
-!        gfld%fld() = Array of gfld%ndpts unpacked data points.
-!                     This element is actually a pointer to an array
+!        gfld%fld() = array of gfld%ndpts unpacked data points.
+!                     this element is actually a pointer to an array
 !                     that holds the data.
 !
 !
-! PROGRAM HISTORY LOG:
-! 2002-01-23  Gilbert
+! program history log:
+! 2002-01-23  gilbert
 !
-! USAGE:    use grib_mod
+! usage:    use grib_mod
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
-      character(len=12) :: G2_VERSION="g2lib-1.0.7"
+      character(len=12) :: g2_version="g2lib-1.0.7"
 
       type gribfield
           integer :: version,discipline

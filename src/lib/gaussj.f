@@ -1,21 +1,21 @@
 
-      subroutine GAUSSJ(a,n,np,b,m,mp,ierr)
+      subroutine gaussj(a,n,np,b,m,mp,ierr)
 
-c  Purpose: Solution of the system of linear equations AX = B by
-c     Gauss-Jordan elimination, where A is a matrix of order N and B is
-c     an N x M matrix.  On output A is replaced by its matrix inverse
-c     and B is preplaced by the corresponding set of solution vectors.
+c  purpose: solution of the system of linear equations ax = b by
+c     gauss-jordan elimination, where a is a matrix of order n and b is
+c     an n x m matrix.  on output a is replaced by its matrix inverse
+c     and b is preplaced by the corresponding set of solution vectors.
 
-c  Source: W.H. Press et al, "Numerical Recipes," 1989, p. 28.
+c  source: w.h. press et al, "numerical recipes," 1989, p. 28.
 
-c  Modifications: 
-c     1. Double  precision.
-c     2. Error parameter IERR included.  0 = no error. 1 = singular 
+c  modifications: 
+c     1. double  precision.
+c     2. error parameter ierr included.  0 = no error. 1 = singular 
 c        matrix encountered; no inverse is returned.
 
-c  Prepared by J. Applequist, 8/17/91.
+c  prepared by j. applequist, 8/17/91.
 
-c        Set largest anticipated value of N.
+c        set largest anticipated value of n.
 
       dimension a(np,np),b(np,mp),ipiv(n),indxr(n),indxc(n)
 

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -33,19 +33,19 @@ cdis
         subroutine smooth_cross_laps(ni,nj,i_l,i_h,j_l,j_h,r4_img
      1                              ,n_cross_in)
 
-        integer n_cross_in    ! ODD
-        real r4_img(ni,nj) ! Input/Output
-        real r4_buf(ni,nj) ! Local use
+        integer n_cross_in    ! odd
+        real r4_img(ni,nj) ! input/output
+        real r4_buf(ni,nj) ! local use
 
         if(n_cross_in .gt. ni .or. n_cross_in .gt. nj)then
-            write(6,*)' Error in smooth_cross_laps',n_cross_in,ni,nj
-            write(6,*)' Aborting execution'
+            write(6,*)' error in smooth_cross_laps',n_cross_in,ni,nj
+            write(6,*)' aborting execution'
             stop
         endif
 
         n_cross = n_cross_in/2
 
-!       Smooth in the I direction
+!       smooth in the i direction
 
         do j = j_l,j_h
 
@@ -73,7 +73,7 @@ cdis
 
         enddo ! j
 
-!       Smooth in the J direction
+!       smooth in the j direction
 
         do i = i_l,i_h
 

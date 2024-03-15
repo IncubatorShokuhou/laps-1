@@ -4,8 +4,8 @@
      1                  model_fcst_len,
      1                  model_cycle_time,
      1                  laps_cycle_time,
-     1                  NX_L,NY_L,
-     1                  NZ_L,
+     1                  nx_l,ny_l,
+     1                  nz_l,
      1                  r_missing_data,
      1                  n_plot_times,
      1                  l_persist,
@@ -13,12 +13,12 @@
 
         include 'lapsparms.for' ! maxbgmodels 
 
-        real var_anal_3d(NX_L,NY_L,NZ_L)
-        real var_fcst_3d(NX_L,NY_L,NZ_L)
-        real rqc(NX_L,NY_L)
+        real var_anal_3d(nx_l,ny_l,nz_l)
+        real var_fcst_3d(nx_l,ny_l,nz_l)
+        real rqc(nx_l,ny_l)
 
-        logical lmask_and_3d(NX_L,NY_L,NZ_L)
-        logical lmask_rqc_3d(NX_L,NY_L,NZ_L)
+        logical lmask_and_3d(nx_l,ny_l,nz_l)
+        logical lmask_rqc_3d(nx_l,ny_l,nz_l)
         logical l_col /.true./
         logical l_exist
         logical l_plot_criteria 
@@ -44,7 +44,7 @@
         integer jl(maxbgmodels,max_fcst_times,max_regions)
         integer jh(maxbgmodels,max_fcst_times,max_regions)
 
-        character EXT*31, directory*255, c_model*30
+        character ext*31, directory*255, c_model*30
 
         character*10  units_2d
         character*125 comment_2d
@@ -68,8 +68,8 @@
         character*2 c2_region
         character*10 c_thr
 
-!       Specify what is being verified
-        data var_a  /'REF','LMR','PCP_01','PCP_03','PCP_06','PCP_24'/ ! 3-D / composite ref
+!       specify what is being verified
+        data var_a  /'ref','lmr','pcp_01','pcp_03','pcp_06','pcp_24'/ ! 3-d / composite ref
         data nthr_a   /5,5,7,7,7,7/        
         data istart_a /0,0,1,1,1,1/        
 
@@ -83,7 +83,7 @@
         real pcp_thr(7)
         data pcp_thr /.01,.05,0.1,0.5,1.0,2.0,5.0/
 
-        real cont_4d(NX_L,NY_L,NZ_L,maxthr)
+        real cont_4d(nx_l,ny_l,nz_l,maxthr)
         real bias(maxbgmodels,0:max_fcst_times,max_regions,maxthr)
         real ets(maxbgmodels,0:max_fcst_times,max_regions,maxthr)
         real bias_comp(maxbgmodels,0:max_fcst_times,max_regions,maxthr)
@@ -97,7 +97,7 @@
         integer (kind=k12) :: 
      1  n_sum(maxbgmodels,0:max_fcst_times,max_regions,maxthr,0:1,0:1)
 
-!       Diagnostic logging arrays
+!       diagnostic logging arrays
         real ets_max(maxbgmodels,0:max_fcst_times,maxthr)
         real ets_min(maxbgmodels,0:max_fcst_times,maxthr)
         real ets_sum(maxbgmodels,0:max_fcst_times,maxthr)
@@ -111,7 +111,7 @@
         integer n_plot_times_m(maxbgmodels,0:max_fcst_times,n_fields)
 
        write(6,*)
-       write(6,*)' Start subroutine verif_radar_composite...'
+       write(6,*)' start subroutine verif_radar_composite...'
 
        l_time_outcoord_hhmm = .true.
 
@@ -125,21 +125,21 @@
          compdir = 'comp2'
         endif
 
-        write(6,*)' Processing stats for period/dir = ',ndays,compdir
+        write(6,*)' processing stats for period/dir = ',ndays,compdir
 
         rmiss = -999.
         imiss = -999
 
         thresh_var = 20. ! lowest threshold for this variable
 
-        write(6,*)' Time is ',i4time_sys,a9time
+        write(6,*)' time is ',i4time_sys,a9time
         write(6,*)' n_plot_times ',n_plot_times
 
         n_plot_times_m(:,:,:) = 1
 
         i4_initial = i4time_sys
 
-!       Determine verification timing
+!       determine verification timing
         model_verif_intvl = max(laps_cycle_time,model_fcst_intvl)
         n_fcst_times = (model_fcst_len*60) / model_verif_intvl
 
@@ -154,27 +154,27 @@
         lun_ets_out = 42
         lun_summary_out = 43
 
-!       Get fdda_model_source and 'n_fdda_models' from static file
+!       get fdda_model_source and 'n_fdda_models' from static file
         call get_fdda_model_source(c_fdda_mdl_src,n_fdda_models,istatus)
 
         if(l_persist .eqv. .true.)then
             n_fdda_models = n_fdda_models + 1
             c_fdda_mdl_src(n_fdda_models) = 'persistence'
-            write(6,*)' Adding persistence to fdda_models'
+            write(6,*)' adding persistence to fdda_models'
         endif
 
         write(6,*)' n_fdda_models = ',n_fdda_models
         write(6,*)' c_fdda_mdl_src = '
      1            ,(c_fdda_mdl_src(m),m=1,n_fdda_models)
 
-!       Update array of n_plot_times_m for available model exceptions
+!       update array of n_plot_times_m for available model exceptions
         do imodel = 2,n_fdda_models
 
-!           Advection available just for LMR out to 3 hours
+!           advection available just for lmr out to 3 hours
             if(.false.)then
               if(trim(c_fdda_mdl_src(imodel)) .eq. 'advection')then
                 do ifield = 1,n_fields 
-                    if(var_a(ifield) .ne. 'LMR')then ! only LMR is available
+                    if(var_a(ifield) .ne. 'lmr')then ! only lmr is available
                         n_plot_times_m(imodel,:,ifield) = 0
                     else ! block out forecasts > 3 hours
                         n_fcst_times_m = 10800 / model_verif_intvl
@@ -188,22 +188,22 @@
               endif
             endif
 
-!           Only LMR available from the HRRR, RR, RAP-NH
-            if(trim(c_fdda_mdl_src(imodel)) .eq. 'wrf-hrrr' .OR.
-     1         trim(c_fdda_mdl_src(imodel)) .eq. 'rr'       .OR.
+!           only lmr available from the hrrr, rr, rap-nh
+            if(trim(c_fdda_mdl_src(imodel)) .eq. 'wrf-hrrr' .or.
+     1         trim(c_fdda_mdl_src(imodel)) .eq. 'rr'       .or.
      1         trim(c_fdda_mdl_src(imodel)) .eq. 'rap-nh'        )then
-                do ifield = 1,n_fields ! only LMR is available
-                    if(var_a(ifield) .ne. 'LMR')then
+                do ifield = 1,n_fields ! only lmr is available
+                    if(var_a(ifield) .ne. 'lmr')then
                         n_plot_times_m(imodel,:,ifield) = 0
                     endif
                 enddo
             endif
 
-!           Only LMR & PCP_03 available from the NAM, every 3 hours
+!           only lmr & pcp_03 available from the nam, every 3 hours
             if(trim(c_fdda_mdl_src(imodel)) .eq. 'nam')then
                 do ifield = 1,n_fields                                 
-                    if(var_a(ifield) .eq. 'LMR'                          
-     1            .OR. var_a(ifield) .eq. 'PCP_03')then ! LMR & PCP_03 avail                    
+                    if(var_a(ifield) .eq. 'lmr'                          
+     1            .or. var_a(ifield) .eq. 'pcp_03')then ! lmr & pcp_03 avail                    
                         nam_fcst_intvl = 10800          ! every 3 hours
                         do itime_fcst = 0,n_fcst_times
                             i4_fcst = itime_fcst*model_verif_intvl      
@@ -220,11 +220,11 @@
                 enddo
             endif
 
-!           Only LMR & PCP_06 available from the NAM-NH, every 6 hours
+!           only lmr & pcp_06 available from the nam-nh, every 6 hours
             if(trim(c_fdda_mdl_src(imodel)) .eq. 'nam-nh')then
                 do ifield = 1,n_fields                                 
-                    if(var_a(ifield) .eq. 'LMR'                          
-     1            .OR. var_a(ifield) .eq. 'PCP_06')then ! LMR & PCP_06 avail                    
+                    if(var_a(ifield) .eq. 'lmr'                          
+     1            .or. var_a(ifield) .eq. 'pcp_06')then ! lmr & pcp_06 avail                    
                         nam_fcst_intvl = 21600          ! every 6 hours
                         do itime_fcst = 0,n_fcst_times
                             i4_fcst = itime_fcst*model_verif_intvl      
@@ -241,10 +241,10 @@
                 enddo
             endif
 
-!           Just use 1-hourly fields for PCP_01
+!           just use 1-hourly fields for pcp_01
             intvl_pcp = 3600
             do ifield = 1,n_fields                                 
-                if(var_a(ifield) .eq. 'PCP_01')then ! PCP_01 avail every 1 hour
+                if(var_a(ifield) .eq. 'pcp_01')then ! pcp_01 avail every 1 hour
                     do itime_fcst = 0,n_fcst_times
                         i4_fcst = itime_fcst*model_verif_intvl      
                         if(i4_fcst .ne. (i4_fcst/intvl_pcp)*intvl_pcp
@@ -258,10 +258,10 @@
                 endif
             enddo
 
-!           Just use 3-hourly fields for PCP_03
+!           just use 3-hourly fields for pcp_03
             intvl_pcp = 10800
             do ifield = 1,n_fields                                 
-                if(var_a(ifield) .eq. 'PCP_03')then ! PCP_03 avail every 3 hours
+                if(var_a(ifield) .eq. 'pcp_03')then ! pcp_03 avail every 3 hours
                     do itime_fcst = 0,n_fcst_times
                         i4_fcst = itime_fcst*model_verif_intvl      
                         if(i4_fcst .ne. (i4_fcst/intvl_pcp)*intvl_pcp
@@ -275,10 +275,10 @@
                 endif
             enddo
 
-!           Just use 6-hourly fields for PCP_06
+!           just use 6-hourly fields for pcp_06
             intvl_pcp = 21600
             do ifield = 1,n_fields                                 
-                if(var_a(ifield) .eq. 'PCP_06')then ! PCP_06 avail every 6 hours
+                if(var_a(ifield) .eq. 'pcp_06')then ! pcp_06 avail every 6 hours
                     do itime_fcst = 0,n_fcst_times
                         i4_fcst = itime_fcst*model_verif_intvl      
                         if(i4_fcst .ne. (i4_fcst/intvl_pcp)*intvl_pcp
@@ -292,10 +292,10 @@
                 endif
             enddo
 
-!           Just use 24-hourly fields for PCP_24
+!           just use 24-hourly fields for pcp_24
             intvl_pcp = 86400
             do ifield = 1,n_fields                                 
-                if(var_a(ifield) .eq. 'PCP_24')then ! PCP_24 avail every 24 hrs
+                if(var_a(ifield) .eq. 'pcp_24')then ! pcp_24 avail every 24 hrs
                     do itime_fcst = 0,n_fcst_times
                         i4_fcst = itime_fcst*model_verif_intvl      
                         if(i4_fcst .ne. (i4_fcst/intvl_pcp)*intvl_pcp
@@ -309,44 +309,44 @@
                 endif
             enddo
 
-!           Only REF & LMR available from persistence
+!           only ref & lmr available from persistence
             if(trim(c_fdda_mdl_src(imodel)) .eq. 'persistence')then
-                do ifield = 1,n_fields ! all unavailable except REF & LMR
-                    if(var_a(ifield) .ne. 'REF' .AND.
-     1                 var_a(ifield) .ne. 'LMR'       )then
+                do ifield = 1,n_fields ! all unavailable except ref & lmr
+                    if(var_a(ifield) .ne. 'ref' .and.
+     1                 var_a(ifield) .ne. 'lmr'       )then
                         n_plot_times_m(imodel,:,ifield) = 0
                     endif
                 enddo
             endif
 
-!           Assume WNDW-WARW isn't available for composite forecasts  
+!           assume wndw-warw isn't available for composite forecasts  
 !           if(trim(c_fdda_mdl_src(imodel)) .eq. 'wndw-warw')then
 !               n_plot_times_m(imodel,:,:) = 0
 !           endif
 
-!           Assume NAM isn't available for composite forecasts  
+!           assume nam isn't available for composite forecasts  
 !           if(trim(c_fdda_mdl_src(imodel)) .eq. 'nam')then
 !               n_plot_times_m(imodel,:,:) = 0
 !           endif
 
-!           Assume WRF-TOM isn't available for composite forecasts  
+!           assume wrf-tom isn't available for composite forecasts  
 !           if(trim(c_fdda_mdl_src(imodel)) .eq. 'wrf-tom')then
 !               n_plot_times_m(imodel,:,:) = 0
 !           endif
 
         enddo ! imodel
 
-!       Read in data file with region points
+!       read in data file with region points
         n_models = n_fdda_models
 !       call read_region_info(maxbgmodels,max_fcst_times,max_regions
 !    1                       ,n_models,n_fcst_times,n_regions
 !    1                       ,il,ih,jl,jh,lun_in)
 
-!       In 'nest7grid.parms' model #1 is lga usually
-!       In 'verif_regions.dat' model #1 represents the analysis
+!       in 'nest7grid.parms' model #1 is lga usually
+!       in 'verif_regions.dat' model #1 represents the analysis
 
 !       if(n_fdda_models .ne. n_models)then
-!           write(6,*)' ERROR n_models differs from n_fdda_models '
+!           write(6,*)' error n_models differs from n_fdda_models '
 !    1                       ,n_models,n_fdda_models
 !           stop
 !       endif
@@ -357,13 +357,13 @@
 
         do ifield = 1,n_fields
 
-!        Initialize arrays
+!        initialize arrays
          bias = -999.
          ets = -999.
          frac_coverage = -999.
          n_sum = 0
         
-!        Diagnostic array initialization
+!        diagnostic array initialization
          ets_max   = -999.9
          ets_min   = +999.9
          ets_sum   =   0.
@@ -395,20 +395,20 @@
           incomplete_run = 0   ! based on any of the models
           incomplete_run_m = 0 ! based on each model
 
-          n = imiss ! Initialize
+          n = imiss ! initialize
 
           i4_initial = i4time_sys - (init * model_cycle_time)       
           call make_fnam_lp(i4_initial,a9time_initial,istatus)
 
           write(6,*)                                            
-          write(6,*)' Processing model cycle ',a9time_initial
+          write(6,*)' processing model cycle ',a9time_initial
 
-!         Read individual bias files
+!         read individual bias files
           write(6,*)' nthr before assigning = ',nthr
           nthr = nthr_a(ifield) ! nthr may be unset or have earlier been stepped on
           do idbz = 1,nthr
 
-           if(var_2d(1:3) .ne. 'PCP')then
+           if(var_2d(1:3) .ne. 'pcp')then
                rdbz = float(idbz*10) + 10
                write(c_thr,901)nint(rdbz)
  901           format(i2)
@@ -423,7 +423,7 @@
 !    1                                      //'/'
            len_plot = len_verif + 5 + lenvar ! + len_model
 
-!          write GNUplot file for the time series of this model (region 1)
+!          write gnuplot file for the time series of this model (region 1)
            bias_file_in = plot_dir(1:len_plot)//'/'
      1                                     //trim(c_thr)//'/'
      1                                     //a9time_initial     
@@ -445,20 +445,20 @@
 
            inquire(file=bias_file_in,exist=l_exist)
            if(.not. l_exist)then
-               write(6,*)' WARNING: file does not exist:',bias_file_in
+               write(6,*)' warning: file does not exist:',bias_file_in
                goto958
            endif ! l_exist
 
            inquire(file=ets_file_in,exist=l_exist)
            if(.not. l_exist)then
-               write(6,*)' ERROR: file does not exist:',ets_file_in       
+               write(6,*)' error: file does not exist:',ets_file_in       
                goto958
            endif ! l_exist
 
            open(lun_bias_in,file=bias_file_in,status='old')
            open(lun_ets_in,file=ets_file_in,status='old')
 
-!          Read comment with model member names
+!          read comment with model member names
            read(lun_bias_in,*,err=958,end=958)
            read(lun_ets_in,51,err=958,end=958) cline
  51        format(a)
@@ -468,7 +468,7 @@
            call csplit(cline,c_fdda_mdl_hdr,nelems,n_fdda_models,char
      1                ,istatus)
            if(istatus .ne. 1)then
-               write(6,*)' Read error in ets file header line...'
+               write(6,*)' read error in ets file header line...'
                goto958
            endif
 
@@ -478,7 +478,7 @@
 906        format('# ',30(1x,a))  
 
            if(l_col)then
-!              Read bias and ets values
+!              read bias and ets values
                do itime_fcst = 0,n_fcst_times
                    i4_valid = i4_initial + itime_fcst*model_verif_intvl      
                    call cv_i4tim_asc_lp(i4_valid,a24time_valid_expected
@@ -492,7 +492,7 @@
                    if(a24time_valid .ne.
      1                a24time_valid_expected)then
                        write(6,*)
-     1                 ' WARNING: imodel / a24time (expected/file-1)'
+     1                 ' warning: imodel / a24time (expected/file-1)'
      1                 ,imodel,itime,a24time_valid_expected            
      1                              ,a24time_valid              
                        goto958
@@ -505,7 +505,7 @@
                    if(a24time_valid .ne.
      1                a24time_valid_expected)then
                        write(6,*)
-     1                 ' WARNING: imodel / a24time (expected/file-2)'
+     1                 ' warning: imodel / a24time (expected/file-2)'
      1                 ,imodel,itime,a24time_valid_expected           
      1                              ,a24time_valid         
                        goto958
@@ -514,7 +514,7 @@
 911                format(a24,3x,20f12.3)
                enddo ! itime_fcst
 
-!              Read N values from separate blocks                     
+!              read n values from separate blocks                     
                do jn = 0,1
                do in = 0,1
                  read(lun_bias_in,*)
@@ -533,12 +533,12 @@
 
                    if(n(imodel,itime_fcst,iregion,idbz,in,jn) 
      1                                            .lt. -1000)then
-                       write(6,*)' WARNING: anomalous N value',
+                       write(6,*)' warning: anomalous n value',
      1                     n(imodel,itime_fcst,iregion,idbz,in,jn)
                    endif
 
                    goto914
-913                write(6,*)' read ERROR in bias file N vals '
+913                write(6,*)' read error in bias file n vals '
                    write(6,*)' check if model config has changed'
                    write(6,*)in,jn,itime_fcst
                    write(6,*)cline
@@ -546,7 +546,7 @@
 
 914                continue
 
-!                  Blank out N values if we're not expecting/desiring data
+!                  blank out n values if we're not expecting/desiring data
 !                  where(n_plot_times_m(:,itime_fcst,ifield) 
 !    1                                                 .eq. 0)
 !                      n(:,itime_fcst,iregion,idbz,in,jn) = 0
@@ -561,7 +561,7 @@
                    if(a24time_valid .ne.
      1                a24time_valid_expected)then
                        write(6,*)
-     1                 ' WARNING: imodel / a24time (expected/file-3)'
+     1                 ' warning: imodel / a24time (expected/file-3)'
      1                 ,imodel,itime,a24time_valid_expected           
      1                              ,a24time_valid              
                        goto958
@@ -570,7 +570,7 @@
                enddo ! jn
                enddo ! in
 
-!              Test for missing data in all times/models for this threshold
+!              test for missing data in all times/models for this threshold
                do itime_fcst = istart_a(ifield),n_fcst_times
                  do imodel = 2,n_fdda_models
                    i_good_timestep_model = 0
@@ -583,15 +583,15 @@
                    enddo ! jn
                    enddo ! in
 
-!                  Flag as incomplete if missing during expected time
-                   if(i_good_timestep_model .eq. 0 .AND.
+!                  flag as incomplete if missing during expected time
+                   if(i_good_timestep_model .eq. 0 .and.
      1                n_plot_times_m(imodel,itime_fcst,ifield) .eq. 1 
      1                                                   )then
 
                      if(incomplete_run .eq. 0)then       
                        write(6,916)init,itime_fcst,a9time_initial,imodel
 916                    format(
-     1                 ' WARNING: missing N values for init/time/model '
+     1                 ' warning: missing n values for init/time/model '
      1                        ,2i6,1x,a9,1x,i6)                      
                        incomplete_run = 1 
                      endif
@@ -605,7 +605,7 @@
                  enddo ! im
                enddo ! itime_fcst
 
-!              Read fractional coverage values
+!              read fractional coverage values
                read(lun_bias_in,*)
                read(lun_bias_in,*)
                do itime_fcst = 0,n_fcst_times
@@ -624,14 +624,14 @@
                    if(a24time_valid .ne.
      1                a24time_valid_expected)then
                        write(6,*)
-     1                 ' WARNING: imodel / a24time (expected/file-4)'
+     1                 ' warning: imodel / a24time (expected/file-4)'
      1                 ,imodel,itime,a24time_valid_expected           
      1                              ,a24time_valid                           
                        goto958
                    endif
                enddo ! itime_fcst
 
-!              Read members.txt file
+!              read members.txt file
                open(lun_mem,file=members_file,status='old')
                do imodel = 2,n_fdda_models
                  read(lun_mem,*)c_model ! from members.txt               
@@ -643,20 +643,20 @@
 
                  if(trim(c_model) .ne. 'persistence')then
 
-!                  Compare members.txt file and namelist fdda parms
+!                  compare members.txt file and namelist fdda parms
                    if(trim(c_model) .ne. 
      1                              trim(c_fdda_mdl_src(imodel)))then
                        write(6,*)
-     1             ' ERROR: Models did not match (members.txt/namelist)'
+     1             ' error: models did not match (members.txt/namelist)'
                        close(lun_mem)
                        return
                    endif
 
-!                  Compare ets file header and namelist fdda parms
+!                  compare ets file header and namelist fdda parms
                    if(trim(c_model) .ne. 
      1                              trim(c_fdda_mdl_hdr(imodel)))then
                        write(6,*)
-     1       ' WARNING: Models did not match (ets file header/namelist)'
+     1       ' warning: models did not match (ets file header/namelist)'
                        close(lun_mem)
                        goto 958
                    endif
@@ -673,7 +673,7 @@
 
           enddo ! idbz 
 
-!         Update arrays for all models
+!         update arrays for all models
 !         where(n_plot_times_m(:,ifield) .gt. -1)
               nsuccess_m(:) = nsuccess_m(:) + (1 - incomplete_run_m(:))
 !         endwhere
@@ -686,17 +686,17 @@
               nincomplete_t = nincomplete_t + incomplete_run_m(imodel)
           enddo 
 
-          if(nincomplete_t .eq. 0 .OR. 
+          if(nincomplete_t .eq. 0 .or. 
      1                             (l_req_all_mdls .eqv. .false.) )then
-              write(6,*)' Accumulating sums for this run '
+              write(6,*)' accumulating sums for this run '
               nsuccess = nsuccess + 1
 
               where (n(:,:,:,:,:,:) .ne. imiss)                
                n_sum(:,:,:,:,:,:) = n_sum(:,:,:,:,:,:) + n(:,:,:,:,:,:)
               end where
 
-!             Write to log for diagnostic purposes
-              if(var_2d .eq. 'LMR')then
+!             write to log for diagnostic purposes
+              if(var_2d .eq. 'lmr')then
                  write(6,*)'...............'
 
                  itime_start =  3600/model_verif_intvl
@@ -708,24 +708,24 @@
 
                    do imodel=2,n_fdda_models
 
-!                    Calculated summed skill scores so far
+!                    calculated summed skill scores so far
                      contable(:,:) = 
      1                   n_sum(imodel,itime_fcst,1,1,:,:)
 
                      idbz = 1
 
-                     call skill_scores(contable,0                      ! I
-     1                                ,frac_cvr_val                    ! O
-     1                                ,frac_obs                        ! O
-     1                                ,frac_fcst                       ! O
-     1                                ,bias_val                        ! O
-     1                                ,ets_val)                        ! O
+                     call skill_scores(contable,0                      ! i
+     1                                ,frac_cvr_val                    ! o
+     1                                ,frac_obs                        ! o
+     1                                ,frac_fcst                       ! o
+     1                                ,bias_val                        ! o
+     1                                ,ets_val)                        ! o
 
                      ihits_sum  = contable(0,0)
                      idenom_sum = contable(1,0) + contable(0,1) 
      1                          + contable(0,0) 
 
-!                    idenom_sum2 = frac_cvr_val * float(NX_L*NY_L) 
+!                    idenom_sum2 = frac_cvr_val * float(nx_l*ny_l) 
 !    1                           * ets_count(imodel,idbz)
 
                      ets_min(imodel,itime_fcst,idbz) = 
@@ -747,10 +747,10 @@
                          ets_mean(imodel,itime_fcst,idbz) = rmiss
                      endif
 
-                     idenom_sum2 = frac_cvr_val * float(NX_L*NY_L) 
+                     idenom_sum2 = frac_cvr_val * float(nx_l*ny_l) 
      1                           * ets_count(imodel,itime_fcst,idbz)
 
-!                    Process contingency table for run
+!                    process contingency table for run
                      contable(:,:) = 
      1                   n(imodel,itime_fcst,1,1,:,:)
 
@@ -761,7 +761,7 @@
 !    1                  .ne. -999.)then
 !                        idenom_run2 = 
 !    1                   frac_coverage(imodel,itime_fcst,iregion,idbz)
-!    1                    * float(NX_L*NY_L)
+!    1                    * float(nx_l*ny_l)
 !                    else
 !                        idenom_run2 = -999
 !                    endif
@@ -782,17 +782,17 @@
      1                    ,ets_max(imodel,itime_fcst,idbz)
 
 950                  format(a9,1x,a10,1x,a3,' itime_fcst',i3
-     1                      ,' Negs (run/sum):',2i11
-     1                      ,' Hits (run/sum):',2i10
-     1                      ,' Denom (run/sum):',2i10 
-     1                      ,' ETS (run/sum/mean/min/max) = '
+     1                      ,' negs (run/sum):',2i11
+     1                      ,' hits (run/sum):',2i10
+     1                      ,' denom (run/sum):',2i10 
+     1                      ,' ets (run/sum/mean/min/max) = '
      1                      ,i3,3f9.3,2x,2f9.3)
 
                    enddo ! imodel
                  enddo ! itime_fcst
-              endif ! var_2d = 'LMR'
+              endif ! var_2d = 'lmr'
           else
-              write(6,*)' Not accumulating sums for this run'
+              write(6,*)' not accumulating sums for this run'
 
           endif ! accumulate sums for this run
 
@@ -805,7 +805,7 @@
       
           goto 960 ! success for this time
 
-!         Error Condition for this time
+!         error condition for this time
 958       nmissing = nmissing + 1
 
 960      enddo                    ! init (initialization time)
@@ -844,7 +844,7 @@
 
          write(6,*)'l_plot_criteria = ',l_plot_criteria
 
-!        Calculate composite bias/ets
+!        calculate composite bias/ets
          do idbz = 1,nthr
            do imodel=2,n_fdda_models
              do itime_fcst = 0,n_fcst_times
@@ -865,18 +865,18 @@
      1                      ,contable
 !    1                      ,contable(0,0),contable(1,0)   
 !    1                      ,contable(0,1),contable(1,1)   
-970              format(/' Calling skill scores for ',a10,i3,3x,8i10)       
+970              format(/' calling skill scores for ',a10,i3,3x,8i10)       
 
-!                Test whether this model satisfies completeness criteria
-!                Plots will show up for each model that has thresh % of runs with a complete set of forecast times
+!                test whether this model satisfies completeness criteria
+!                plots will show up for each model that has thresh % of runs with a complete set of forecast times
                  if(nsuccess_m(imodel) .ge. nsuccess_thr)then ! satisfies completeness criteria
                    lun_out = 6
-                   call skill_scores(contable,lun_out                  ! I
-     1                  ,frac_cvr_comp(imodel,itime_fcst,iregion,idbz) ! O
-     1                  ,frac_obs_comp                                 ! O
-     1                  ,frac_fcst                                     ! O
-     1                  ,bias_comp(imodel,itime_fcst,iregion,idbz)     ! O
-     1                  , ets_comp(imodel,itime_fcst,iregion,idbz))    ! O
+                   call skill_scores(contable,lun_out                  ! i
+     1                  ,frac_cvr_comp(imodel,itime_fcst,iregion,idbz) ! o
+     1                  ,frac_obs_comp                                 ! o
+     1                  ,frac_fcst                                     ! o
+     1                  ,bias_comp(imodel,itime_fcst,iregion,idbz)     ! o
+     1                  , ets_comp(imodel,itime_fcst,iregion,idbz))    ! o
 
                  else                                         ! does not satisfy criteria
                    frac_cvr_comp(imodel,itime_fcst,iregion,idbz) = rmiss
@@ -889,7 +889,7 @@
            enddo ! imodel
          enddo ! idbz
 
-!        Define and write to summary*.txt file
+!        define and write to summary*.txt file
          summary_file_out = verif_dir(1:len_verif)//var_2d(1:lenvar)
      1                              //'/plot'
      1                              //'/summary_'//trim(compdir)//'.txt'       
@@ -911,18 +911,18 @@
          close(lun_summary_out)
 
          if(nsuccess .lt. nsuccess_thr)then
-             write(6,*)' Insufficient successful times to plot'
+             write(6,*)' insufficient successful times to plot'
              goto 980
          endif
 
          write(6,*)
          write(6,*)
-     1        ' Write output composite bias/ets files ############# '                                           
+     1        ' write output composite bias/ets files ############# '                                           
          write(6,*)' nthr before assigning = ',nthr
          nthr = nthr_a(ifield) ! nthr may be unset or have earlier been stepped on
          do idbz = 1,nthr
 
-           if(var_2d(1:3) .ne. 'PCP')then
+           if(var_2d(1:3) .ne. 'pcp')then
                rdbz = float(idbz*10) + 10
                write(c_thr,901)nint(rdbz)
            else
@@ -938,7 +938,7 @@
            i4_initial = i4time_sys                                   
            call make_fnam_lp(i4_initial,a9time_initial,istatus)
 
-!          write GNUplot file for the time series of this model (region 1)
+!          write gnuplot file for the time series of this model (region 1)
            bias_file_out = plot_dir(1:len_plot)//'/'
      1                                     //trim(c_thr)
      1                                     //'_'//trim(compdir)//'/'
@@ -958,13 +958,13 @@
            open(lun_bias_out,file=bias_file_out,status='unknown')
            open(lun_ets_out,file=ets_file_out,status='unknown')
 
-!          Write comment with model member names
+!          write comment with model member names
            write(lun_bias_out,906)(trim(c_fdda_mdl_src(imodel))
      1                              ,imodel=2,n_fdda_models)  
            write(lun_ets_out,906)(trim(c_fdda_mdl_src(imodel))
      1                              ,imodel=2,n_fdda_models)  
            if(l_col)then
-!              Write bias and ets values
+!              write bias and ets values
                do itime_fcst = 0,n_fcst_times
                    i4_fcst = itime_fcst*model_verif_intvl      
                    if(l_time_outcoord_hhmm .eqv. .true.)then
@@ -986,7 +986,7 @@
      1                              ,imodel=2,n_fdda_models)     
                enddo ! itime_fcst
 
-!              Write n values in separate blocks                     
+!              write n values in separate blocks                     
                do jn = 0,1
                do in = 0,1
                  write(lun_bias_out,*)
@@ -1013,7 +1013,7 @@
                enddo ! jn
                enddo ! in
 
-!              Write fractional coverage values
+!              write fractional coverage values
                write(lun_bias_out,*)
                write(lun_bias_out,*)
                do itime_fcst = 0,n_fcst_times
@@ -1045,7 +1045,7 @@
 
        enddo ! i_period
 
- 999   write(6,*)' End of subroutine verif_radar_composite'
+ 999   write(6,*)' end of subroutine verif_radar_composite'
 
        return
 

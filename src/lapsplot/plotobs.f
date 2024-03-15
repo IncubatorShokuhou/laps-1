@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -41,8 +41,8 @@ cdis
      1    ,imax,jmax,kmax,n_plotted,grid_ra_ref,grid_ra_vel,lat,lon
      1    ,topo,grid_spacing_m,mode)
 
-!       Steve A         Nov  1989       Original Version
-!       Steve A         Nov  1991       Adjustable Dimensions
+!       steve a         nov  1989       original version
+!       steve a         nov  1991       adjustable dimensions
 
         include 'trigd.inc'
         include 'lapsplot.inc'
@@ -79,26 +79,26 @@ cdis
 
         data init/0/
 
-        Real
+        real
      1  azimuth_deg,
-     1  X,
-     1  Y,
+     1  x,
+     1  y,
      1  spd_kt,
-     1  SPEED_ms,
-     1  DIR,
-     1  DU,
-     1  PROJROT,
+     1  speed_ms,
+     1  dir,
+     1  du,
+     1  projrot,
      1  range_km,
      1  pix_per_km,
      1  mspkt
 
         data
-     1  PROJROT/0./,
+     1  projrot/0./,
      1  mspkt/.518/
 
-        Character
+        character
      1  c_obs_type*1,c_map*1,c_mode*1,c_anl*1,c_radial*1,c_pin*1,
-     1  c_sfcpro*1,STRING,wx*25
+     1  c_sfcpro*1,string,wx*25
 
         common /plotobs/ c_obs_type,c_map,c_mode,c_anl,c_radial
 
@@ -111,7 +111,7 @@ cdis
 
         call get_r_missing_data(r_missing_data, istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in plot_obs'
+            write(6,*)' error in plot_obs'
         endif
 
         call get_vert_rads (    vert_rad_pirep,
@@ -120,7 +120,7 @@ cdis
      1                          vert_rad_prof,
      1                          istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error in plot_obs'
+            write(6,*)' error in plot_obs'
         endif
 
 !       mode (1: call from 'wd'/'ob' options, 2: call from 'rd'/'vi')
@@ -147,7 +147,7 @@ cdis
 
         size_factor = size_factor * plot_parms%obs_size
 
-        write(6,*)' Subroutine plot_obs: size_factor = ',size_factor
+        write(6,*)' subroutine plot_obs: size_factor = ',size_factor
 
         size_prof = 3.   * size_factor / zoom
         size_pirep = 3.0 * size_factor / zoom
@@ -183,24 +183,24 @@ cdis
 
         endif
 
-        LUN_IN = 5
+        lun_in = 5
 
         call getset(mxa,mxb,mya,myb,umin,umax,vmin,vmax,ltype)
 
-        write(6,*)' Subroutine plot_obs at ',asc9_tim,': Level '
+        write(6,*)' subroutine plot_obs at ',asc9_tim,': level '
      1           ,k_level
 
-        call setusv_dum(2hIN,201)
+        call setusv_dum(2hin,201)
 
-!       Plot Radar Obs   *********************************************************************
+!       plot radar obs   *********************************************************************
 
         write(6,95)
-95      format(' Want Radial Velocities     [y,n,a,<RET>=y] ? ',$)
+95      format(' want radial velocities     [y,n,a,<ret>=y] ? ',$)
         if(l_ask_questions)read(lun_in,211)c_radial
 
         if(c_radial(1:1) .eq. 'n')goto205
 
-        write(6,*)' Skipping call to ht_of_level to get retheight'       
+        write(6,*)' skipping call to ht_of_level to get retheight'       
 !       retheight = ht_of_level(k_level)
 
         c1_plottype = 'y'
@@ -220,7 +220,7 @@ cdis
 152             format('v',i2)
             endif
 
-            var_2d = 'VEL'
+            var_2d = 'vel'
 
             write(6,*)' calling get_laps_3dgrid'
 
@@ -248,7 +248,7 @@ cdis
                 k_sfc = -99
               endif
 
-              if(k_grid  .eq. k_level                   .OR.
+              if(k_grid  .eq. k_level                   .or.
      1           k_level .eq. 0 .and. k_sfc .eq. k_grid      )then
 
                 if(grid_ra_vel(i_grid,j_grid,k_grid)
@@ -275,12 +275,12 @@ cdis
 
         if(mode .eq. 2)return
 
-!******  Derived Radar Obs ********************************
+!******  derived radar obs ********************************
 
 205     call cv_asc_i4time(asc9_tim,i4time)
 
         write(6,210)
-210     format(' Derived radar obs  [r, Ret = None]',30x,'? ',$)    
+210     format(' derived radar obs  [r, ret = none]',30x,'? ',$)    
         if(l_ask_questions)read(lun_in,211)c_obs_type
 211     format(a1)
 
@@ -288,9 +288,9 @@ cdis
         if(c_obs_type(1:1) .eq. 'r')then
 
         write(6,*)
-        write(6,*)' Derived Radar Obs'
+        write(6,*)' derived radar obs'
 
-        call setusv_dum(2hIN,5) ! Orange
+        call setusv_dum(2hin,5) ! orange
 
         lun = 61
 
@@ -327,8 +327,8 @@ cdis
 
                 spd_kt = speed_ms / mspkt
 
-                if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1             nint(rj) .ge. 1 .AND. nint(rj) .le. jmax      )then
+                if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1             nint(rj) .ge. 1 .and. nint(rj) .le. jmax      )then
 
                     aspect = aspect_a(nint(ri),nint(rj))
 
@@ -339,7 +339,7 @@ cdis
 
                 write(6,*)nint(ri),nint(rj),dir,spd_kt,aspect
 
-!               Note the 'false' passed as DXX winds are grid north
+!               note the 'false' passed as dxx winds are grid north
                 call plot_windob(dir,spd_kt,ri,rj,lat,lon,imax,jmax
      1                          ,size_radar,aspect,'false')
 
@@ -357,11 +357,11 @@ cdis
         endif
 
 
-!       Plot SUW obs   ****************************************************************************************************************
+!       plot suw obs   ****************************************************************************************************************
 
         if(c_obs_type(1:1) .eq. 's')then
 
-222         call setusv_dum(2hIN,201)
+222         call setusv_dum(2hin,201)
 
             lun = 32
             ext = 'suw'
@@ -389,13 +389,13 @@ cdis
 !               call latlon_ram(alat,alon,x,y,x0,y0,pix_per_km)
 !               call latlon_ram_laps(alat,alon,x,y,init,'p')
 
-                spd_kt = SPEED_ms  / mspkt
+                spd_kt = speed_ms  / mspkt
 
 c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 112             format(1x,f6.1,i4,2f7.0,4x,2f7.0,i4)
 
-                if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1             nint(rj) .ge. 1 .AND. nint(rj) .le. jmax      )then
+                if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1             nint(rj) .ge. 1 .and. nint(rj) .le. jmax      )then
 
                     aspect = aspect_a(nint(ri),nint(rj))
 
@@ -408,7 +408,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
      1                          ,imax,jmax,size_suw,aspect,'true')
               endif
 
-            end if ! Valid Wind
+            end if ! valid wind
 
         goto230
 240     continue
@@ -417,11 +417,11 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         dularge = dusmall * 2.
 
-!       Plot VAD wind  *************************************************
+!       plot vad wind  *************************************************
         write(6,*)
-        write(6,*)' Plotting VAD Wind'
+        write(6,*)' plotting vad wind'
 
-        call setusv_dum(2hIN,229)
+        call setusv_dum(2hin,229)
 
         lun = 21
         ext = 'vad'
@@ -446,13 +446,13 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 !               call latlon_ram(alat,alon,x,y,x0,y0,pix_per_km)
 !               call latlon_ram_laps(alat,alon,x,y,init,'p')
 
-                spd_kt = SPEED_ms  / mspkt
+                spd_kt = speed_ms  / mspkt
 
                 write(6,111)alat,alon,max(dir,-99.),spd_kt
 111             format(1x,2f8.1,4x,f7.0,f7.0,i4,2f8.3)
 
-                if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1             nint(rj) .ge. 1 .AND. nint(rj) .le. jmax      )then
+                if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1             nint(rj) .ge. 1 .and. nint(rj) .le. jmax      )then
 
                     aspect = aspect_a(nint(ri),nint(rj))
 
@@ -470,16 +470,16 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
  30     continue
 
-!       Plot Sfc/METAR winds  ***********************************************
+!       plot sfc/metar winds  ***********************************************
         write(6,97)
-97      format(' Plot SFC / Profiler Winds?     [y,n,<RET>=y] ? ',$)
+97      format(' plot sfc / profiler winds?     [y,n,<ret>=y] ? ',$)
         if(l_ask_questions)read(lun_in,211)c_sfcpro
 
         if(c_sfcpro(1:1) .ne. 'n')then
 
-50          write(6,*)' Sfc/METAR Data'
+50          write(6,*)' sfc/metar data'
 
-            call setusv_dum(2hIN,14) ! RoyalBlue
+            call setusv_dum(2hin,14) ! royalblue
 
             lun = 32
             ext = 'sag'
@@ -499,8 +499,8 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
             if(abs(k - k_level) .le. vert_rad_sao .or. k_level .eq. 0
      1                                                           )then
 
-                if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1             nint(rj) .ge. 1 .AND. nint(rj) .le. jmax      )then
+                if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1             nint(rj) .ge. 1 .and. nint(rj) .le. jmax      )then
 
                     aspect = aspect_a(nint(ri),nint(rj))
 
@@ -513,12 +513,12 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
      1                     ,k,wt_vert,aspect      
 
                 if(k .eq. k_level)then
-                    call setusv_dum(2hIN,12) ! Aqua
+                    call setusv_dum(2hin,12) ! aqua
                 else
-                    call setusv_dum(2hIN,15) ! Slate Blue
+                    call setusv_dum(2hin,15) ! slate blue
                 endif
 
-                spd_kt = SPEED_ms  / mspkt
+                spd_kt = speed_ms  / mspkt
 
                 call plot_windob(dir,spd_kt,ri,rj,lat,lon,imax,jmax
      1                          ,size_meso,aspect,'true')
@@ -533,10 +533,10 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
             call getset(mxa,mxb,mya,myb,umin,umax,vmin,vmax,ltype)
 
-!           Plot Profile winds  ***********************************************
+!           plot profile winds  ***********************************************
 811         write(6,*)
             write(6,*)
-     1          ' Profile Winds (e.g. Profiler, Tower, Raob, Dropsonde)'       
+     1          ' profile winds (e.g. profiler, tower, raob, dropsonde)'       
 
             lun = 32
             ext = 'prg'
@@ -562,10 +562,10 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 !                   call latlon_ram(alat,alon,x,y,x0,y0,pix_per_km)
 !                   call latlon_ram_laps(alat,alon,x,y,init,'p')
 
-                    spd_kt = SPEED_ms  / mspkt
+                    spd_kt = speed_ms  / mspkt
 
-                    if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1                 nint(rj) .ge. 1 .AND. nint(rj) .le. jmax  )then
+                    if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1                 nint(rj) .ge. 1 .and. nint(rj) .le. jmax  )then
 
                         aspect = aspect_a(nint(ri),nint(rj))
 
@@ -574,10 +574,10 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
                     endif
 
-                    if(c8_obstype(1:4) .eq. 'RAOB')then
-                        call setusv_dum(2hIN,3)  ! Red
+                    if(c8_obstype(1:4) .eq. 'raob')then
+                        call setusv_dum(2hin,3)  ! red
                     else
-                        call setusv_dum(2hIN,17) ! Lavender
+                        call setusv_dum(2hin,17) ! lavender
                     endif
 
                     call plot_windob(dir,spd_kt,ri,rj,lat,lon,imax,jmax
@@ -599,20 +599,20 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         endif ! plot sfc and profiler winds
 
-!       Plot Pirep winds  ***********************************************
+!       plot pirep winds  ***********************************************
 911     write(6,96)
- 96     format(' Plot ACARS / Pireps Winds?     [y,w,n,<RET>=y] ? ',$)
+ 96     format(' plot acars / pireps winds?     [y,w,n,<ret>=y] ? ',$)
         if(l_ask_questions)read(lun_in,211)c_pin
         write(6,*)
         if(c_pin(1:1) .eq. 'n')then
-            write(6,*)' Plotting WISDOM / Cloud Drift Winds'
-            write(6,*)' ACARS / Pireps Winds - not plotted'
+            write(6,*)' plotting wisdom / cloud drift winds'
+            write(6,*)' acars / pireps winds - not plotted'
         elseif(c_pin(1:1) .eq. 'w')then
-            write(6,*)' Plotting WISDOM Balloon Winds'
+            write(6,*)' plotting wisdom balloon winds'
             write(6,*)
-     1           ' ACARS / Pireps / Cloud Drift Winds - not plotted'      
+     1           ' acars / pireps / cloud drift winds - not plotted'      
         else
-            write(6,*)' ACARS / Pireps / WISDOM / Cloud Drift Winds'
+            write(6,*)' acars / pireps / wisdom / cloud drift winds'
         endif
 
         lun = 32
@@ -633,29 +633,29 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
                 if(k .eq. k_level)then
                     if(c3_obsext .eq. 'pin')then
-                        call setusv_dum(2hIN,12) ! Aqua
+                        call setusv_dum(2hin,12) ! aqua
                     elseif(c3_obsext .eq. 'wis')then
-                        call setusv_dum(2hIN,5)  ! Orange
+                        call setusv_dum(2hin,5)  ! orange
                     else
-                        call setusv_dum(2hIN,8)  ! Green-Yellow
+                        call setusv_dum(2hin,8)  ! green-yellow
                     endif
                 else
                     if(c3_obsext .eq. 'pin')then
-                        call setusv_dum(2hIN,15) ! Slate Blue
+                        call setusv_dum(2hin,15) ! slate blue
                     elseif(c3_obsext .eq. 'wis')then
-                        call setusv_dum(2hIN,26) ! Pale Orange
+                        call setusv_dum(2hin,26) ! pale orange
                     else
-                        call setusv_dum(2hIN,34) ! Grey
+                        call setusv_dum(2hin,34) ! grey
                     endif
                 endif
 
 !               call latlon_ram(alat,alon,x,y,x0,y0,pix_per_km)
 !               call latlon_ram_laps(alat,alon,x,y,init,'p')
 
-                spd_kt = SPEED_ms  / mspkt
+                spd_kt = speed_ms  / mspkt
 
-                if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1             nint(rj) .ge. 1 .AND. nint(rj) .le. jmax      )then
+                if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1             nint(rj) .ge. 1 .and. nint(rj) .le. jmax      )then
 
                     aspect = aspect_a(nint(ri),nint(rj))
 
@@ -664,14 +664,14 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
                 endif
 
-!               Check if ACARS/Pireps are included
-                if(c3_obsext .ne. 'pin' .OR. c_pin(1:1) .eq. 'y')then 
+!               check if acars/pireps are included
+                if(c3_obsext .ne. 'pin' .or. c_pin(1:1) .eq. 'y')then 
                     l_plot_thisob = .true.
                 else
                     l_plot_thisob = .false.
                 endif
 
-!               Option for plotting WISDOM only
+!               option for plotting wisdom only
                 if(c_pin(1:1) .eq. 'w')then
                     if(c3_obsext .eq. 'wis')then 
                         l_plot_thisob = .true.
@@ -699,7 +699,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 922                 format(1x,3f8.1,4x,f7.0,f7.0,2x,a3,' not plotted')
                   endif
  
-                endif ! ACARS/Pireps are included
+                endif ! acars/pireps are included
 
             endif ! k .eq. k_level
 
@@ -711,11 +711,11 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
 
 
-!       Plot MODEL winds  ***********************************************
+!       plot model winds  ***********************************************
 930     write(6,*)
-        write(6,*)' MODEL Winds'
+        write(6,*)' model winds'
 
-        call setusv_dum(2hIN,203)
+        call setusv_dum(2hin,203)
 
 
         lun = 32
@@ -743,10 +743,10 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
      1                          alat,
      1                          alon)
 
-                spd_kt = SPEED_ms / mspkt
+                spd_kt = speed_ms / mspkt
 
-                if(nint(ri) .ge. 1 .AND. nint(ri) .le. imax .AND.
-     1             nint(rj) .ge. 1 .AND. nint(rj) .le. jmax      )then
+                if(nint(ri) .ge. 1 .and. nint(ri) .le. imax .and.
+     1             nint(rj) .ge. 1 .and. nint(rj) .le. jmax      )then
 
                     aspect = aspect_a(nint(ri),nint(rj))
 
@@ -788,16 +788,16 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         logical l_found_file
 
-!       Plot Temperature Obs  ***********************************************
+!       plot temperature obs  ***********************************************
 
 !       size_temp = 8. * float(max(imax,jmax)) / 300.
         size_temp = 1.1 ! 3.33
 
         write(6,*)
-        write(6,*)' Plot Temperature Obs, size_temp = ',size_temp
+        write(6,*)' plot temperature obs, size_temp = ',size_temp
 
         write(6,96)
- 96     format(' Plot ACARS Temps?     [y,n,<RET>=y] ? ',$)
+ 96     format(' plot acars temps?     [y,n,<ret>=y] ? ',$)
         read(5,211)c_pin
  211    format(a1)
 
@@ -812,7 +812,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
         l_found_file = .true.
         go to 32
        
- 31     write(6,*)' Could not open ',filename(1:len_file)
+ 31     write(6,*)' could not open ',filename(1:len_file)
         l_found_file = .false.
         go to 42
 
@@ -824,7 +824,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         nobs_temp = 0
 
-        do while (.true.) ! Count the temperature obs
+        do while (.true.) ! count the temperature obs
             read(32,*,end=41,err=36)ri,rj,rk,t_k,c8_obstype
  36         continue
 
@@ -832,7 +832,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
             k_sfc = 2
 
             if( k .eq. k_level  
-     1                      .OR.
+     1                      .or.
      1         (k_level .eq. 0 .and. k .eq. k_sfc)  )then
 
               if(t_k .ne. r_missing_data)then
@@ -849,9 +849,9 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         rewind(32)
 
-42      write(6,*)' Number of temperature obs = ',nobs_temp
+42      write(6,*)' number of temperature obs = ',nobs_temp
 
-        do while (l_found_file) ! Plot the temp obs
+        do while (l_found_file) ! plot the temp obs
             read(32,*,end=141,err=150)ri,rj,rk,t_k,c8_obstype
 150         continue
 
@@ -859,46 +859,46 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
             k_sfc = 2
 
             if( k .eq. k_level  
-     1                      .OR.
+     1                      .or.
      1         (k_level .eq. 0 .and. k .eq. k_sfc)  )then
 
               if(t_k .ne. r_missing_data)then
 
                 t_c = t_k - 273.15
 
-!               spd_kt = SPEED_ms  / mspkt
+!               spd_kt = speed_ms  / mspkt
 
                 iflag = 3
 
-                if(c8_obstype(1:3) .eq. 'RAS')then      ! RASS
-                    icol_in = 12 ! Aqua
-                elseif(c8_obstype(1:3) .eq. 'WIS')then  ! WISDOM Balloons
-                    icol_in = 12 ! Aqua
-                elseif(c8_obstype(1:3) .eq. 'RAO')then  ! RAOB
-                    icol_in = 7  ! Yellow
-                elseif(c8_obstype(1:3) .eq. 'RAD')then  ! Radiometer
-                    icol_in = 5  ! Orange
-                elseif(c8_obstype(1:3) .eq. 'DRO')then  ! Dropsonde
-                    icol_in = 14 ! Royal Blue
-                elseif(c8_obstype(1:3) .eq. 'TOW')then  ! Tower
-                    icol_in = 14 ! Royal Blue
-                elseif(c8_obstype(1:2) .eq. 'SA')then   ! SATSND
-                    icol_in = 17 ! Lavender
-                elseif(c8_obstype(1:4) .eq. 'GOES')then ! GOES Satellite
-                    icol_in = 17 ! Lavender
-                elseif(c8_obstype(1:4) .eq. 'POES')then ! POES Satellite
-                    icol_in = 16 ! Dark violet
-                elseif(c8_obstype(1:5) .eq. 'METAR')then ! METAR
-                    icol_in = 11 ! Green
-                else                                    ! ACARS
-                    icol_in = 3  ! Red
+                if(c8_obstype(1:3) .eq. 'ras')then      ! rass
+                    icol_in = 12 ! aqua
+                elseif(c8_obstype(1:3) .eq. 'wis')then  ! wisdom balloons
+                    icol_in = 12 ! aqua
+                elseif(c8_obstype(1:3) .eq. 'rao')then  ! raob
+                    icol_in = 7  ! yellow
+                elseif(c8_obstype(1:3) .eq. 'rad')then  ! radiometer
+                    icol_in = 5  ! orange
+                elseif(c8_obstype(1:3) .eq. 'dro')then  ! dropsonde
+                    icol_in = 14 ! royal blue
+                elseif(c8_obstype(1:3) .eq. 'tow')then  ! tower
+                    icol_in = 14 ! royal blue
+                elseif(c8_obstype(1:2) .eq. 'sa')then   ! satsnd
+                    icol_in = 17 ! lavender
+                elseif(c8_obstype(1:4) .eq. 'goes')then ! goes satellite
+                    icol_in = 17 ! lavender
+                elseif(c8_obstype(1:4) .eq. 'poes')then ! poes satellite
+                    icol_in = 16 ! dark violet
+                elseif(c8_obstype(1:5) .eq. 'metar')then ! metar
+                    icol_in = 11 ! green
+                else                                    ! acars
+                    icol_in = 3  ! red
                 endif
 
-                call setusv_dum(2hIN,icol_in)
+                call setusv_dum(2hin,icol_in)
 
                 iflag_cv = 0
 
-                if(icol_in .ne. 3 .or. c_pin .eq. 'y')then ! filter out ACARS?
+                if(icol_in .ne. 3 .or. c_pin .eq. 'y')then ! filter out acars?
                   call plot_mesoob(dir,spd_kt,gust,t_c,td,p,ri,rj
      1                            ,lat,lon,imax,jmax,size_temp
      1                            ,zoom,nobs_temp
@@ -950,7 +950,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         logical l_found_file
 
-!       Plot Dewpoint Obs  ***********************************************
+!       plot dewpoint obs  ***********************************************
 
 !       size_temp = 8. * float(max(imax,jmax)) / 300.
         size_temp = 1.1 ! 3.33
@@ -958,19 +958,19 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
         write(6,*)
 
         if(mode .eq. 1)then
-            write(6,*)' Plot Dewpoint Obs, size_td = ',size_temp
+            write(6,*)' plot dewpoint obs, size_td = ',size_temp
             call get_border(imax,jmax,x_1,x_2,y_1,y_2)
             call set(x_1,x_2,y_1,y_2,1.,float(imax),1.,float(jmax),1)
         elseif(mode .eq. 2)then
-            write(6,*)' Plot SH Obs (from dewpoint), size = ',size_temp
+            write(6,*)' plot sh obs (from dewpoint), size = ',size_temp
             call get_border(imax,jmax,x_1,x_2,y_1,y_2)
             call set(x_1,x_2,y_1,y_2,1.,float(imax),1.,float(jmax),1)
         elseif(mode .ge. 3)then
-            write(6,*)' Plot PW (GPS) Obs, mode/size = ',mode,size_temp
-!           c_label = 'Integrated Vapor Obs (cm)'
-            c_label = 'IWV Obs, Grid-Obs (cm)'
+            write(6,*)' plot pw (gps) obs, mode/size = ',mode,size_temp
+!           c_label = 'integrated vapor obs (cm)'
+            c_label = 'iwv obs, grid-obs (cm)'
             i_overlay = i_overlay + 1
-            call setusv_dum(2hIN,icolors(i_overlay))
+            call setusv_dum(2hin,icolors(i_overlay))
             call set(.00,1.0,.00,1.0,.00,1.0,.00,1.0,1)
             call make_fnam_lp(i4time,asc_tim_9,istatus)
             call write_label_lplot(imax,jmax,c_label,asc_tim_9
@@ -991,7 +991,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
         l_found_file = .true.
         go to 32
        
- 31     write(6,*)' Could not open ',filename(1:len_file)
+ 31     write(6,*)' could not open ',filename(1:len_file)
         l_found_file = .false.
         go to 42
 
@@ -1003,7 +1003,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         nobs_temp = 0
 
-        do while (.true.) ! Count the dewpoint obs
+        do while (.true.) ! count the dewpoint obs
             read(32,*,end=41,err=36)ri,rj,rk,t_k,c8_obstype,c_staname
  36         continue
 
@@ -1011,7 +1011,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
             k_sfc = 2
 
             if( k .eq. k_level  
-     1                      .OR.
+     1                      .or.
      1         (k_level .eq. 0 .and. k .eq. k_sfc)  )then
 
               if(t_k .ne. r_missing_data)then
@@ -1028,9 +1028,9 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
 
         rewind(32)
 
-42      write(6,*)' Number of dewpoint obs = ',nobs_temp
+42      write(6,*)' number of dewpoint obs = ',nobs_temp
 
-        do while (l_found_file) ! Plot the dewpoint obs
+        do while (l_found_file) ! plot the dewpoint obs
             if(mode .lt. 3)then
               read(32,*,end=141,err=150)ri,rj,rk,t_k,c8_obstype
      1                                              ,c_staname       
@@ -1043,7 +1043,7 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
             k_sfc = 2
 
             if( k .eq. k_level  
-     1                      .OR.
+     1                      .or.
      1         (k_level .eq. 0 .and. k .eq. k_sfc)  )then
 
               if(t_k .ne. r_missing_data)then
@@ -1057,11 +1057,11 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
                   t_c = t_k
                   c_staname = ' '
 
-                  if(trim(c8_obstype) .ne. 'GPSTPW')then
-                    write(6,*)' Skipping: ',ri,rj,rk,c8_obstype
+                  if(trim(c8_obstype) .ne. 'gpstpw')then
+                    write(6,*)' skipping: ',ri,rj,rk,c8_obstype
                     goto 140         
                   else
-                    write(6,*)' Keeping:  ',ri,rj,rk,c8_obstype
+                    write(6,*)' keeping:  ',ri,rj,rk,c8_obstype
                   endif
                 elseif(mode .eq. 4)then                  
                   if(t_k .lt. 0.)goto 140
@@ -1069,41 +1069,41 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
                   t_c = field_value - t_k 
                   c_staname = ' '
 
-                  if(trim(c8_obstype) .ne. 'GPSTPW')then
-                    write(6,*)' Skipping: ',ri,rj,rk,c8_obstype
+                  if(trim(c8_obstype) .ne. 'gpstpw')then
+                    write(6,*)' skipping: ',ri,rj,rk,c8_obstype
                     goto 140         
                   else
-                    write(6,*)' Keeping:  ',ri,rj,rk,c8_obstype,t_k
+                    write(6,*)' keeping:  ',ri,rj,rk,c8_obstype,t_k
      1                                     ,field_value,t_c
                   endif
                 endif
 
-!               spd_kt = SPEED_ms  / mspkt
+!               spd_kt = speed_ms  / mspkt
 
                 iflag = 3
 
-                if(c8_obstype(1:3) .eq. 'RAS')then      ! RASS
-                    icol_in = 12 ! Aqua
-                elseif(c8_obstype(1:3) .eq. 'RAO')then  ! RAOB
-                    icol_in = 7  ! Yellow
-                elseif(c8_obstype(1:3) .eq. 'RAD')then  ! Radiometer
-                    icol_in = 5  ! Orange
-                elseif(c8_obstype(1:3) .eq. 'DRO')then  ! Dropsonde
-                    icol_in = 14 ! Royal Blue
-                elseif(c8_obstype(1:2) .eq. 'SA')then   ! SATSND
-                    icol_in = 17 ! Lavender
-                elseif(c8_obstype(1:4) .eq. 'GOES')then ! GOES Satellite
-                    icol_in = 17 ! Lavender
-                elseif(c8_obstype(1:4) .eq. 'POES')then ! POES Satellite
-                    icol_in = 16 ! Dark violet
-                elseif(c8_obstype(1:5) .eq. 'METAR')then ! METAR
-                    icol_in = 11 ! Green
-                else                                    ! ACARS / GPS
-                    icol_in = 3  ! Red
+                if(c8_obstype(1:3) .eq. 'ras')then      ! rass
+                    icol_in = 12 ! aqua
+                elseif(c8_obstype(1:3) .eq. 'rao')then  ! raob
+                    icol_in = 7  ! yellow
+                elseif(c8_obstype(1:3) .eq. 'rad')then  ! radiometer
+                    icol_in = 5  ! orange
+                elseif(c8_obstype(1:3) .eq. 'dro')then  ! dropsonde
+                    icol_in = 14 ! royal blue
+                elseif(c8_obstype(1:2) .eq. 'sa')then   ! satsnd
+                    icol_in = 17 ! lavender
+                elseif(c8_obstype(1:4) .eq. 'goes')then ! goes satellite
+                    icol_in = 17 ! lavender
+                elseif(c8_obstype(1:4) .eq. 'poes')then ! poes satellite
+                    icol_in = 16 ! dark violet
+                elseif(c8_obstype(1:5) .eq. 'metar')then ! metar
+                    icol_in = 11 ! green
+                else                                    ! acars / gps
+                    icol_in = 3  ! red
                 endif
 
                 if(mode .lt. 3)then
-                    call setusv_dum(2hIN,icol_in)
+                    call setusv_dum(2hin,icol_in)
                 endif
 
                 if(mode .eq. 2)then ! convert from td to q
@@ -1130,46 +1130,46 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
                 du2 = (du / zoom_eff) * 0.6
                 xsta = ri
                 ysta = rj
-                ANGD = 0.
-                CNTR = 0.
+                angd = 0.
+                cntr = 0.
                 charsize = .0040 / zoom_eff
 
-!               Plot station name if it exists
-                if(c_staname .ne. 'NONAME')then
+!               plot station name if it exists
+                if(c_staname .ne. 'noname')then
                     call s_len(c_staname,len_name)
-                    CALL PCHIQU(xsta, ysta-du2*3.5, 
+                    call pchiqu(xsta, ysta-du2*3.5, 
      1                          c_staname(1:len_name),
-     1                          charsize,ANGD,CNTR)      
+     1                          charsize,angd,cntr)      
                 endif
 
-!               Plot ob location (with a plus sign)
-                if(mode .ge. 3 .OR.
-     1             c8_obstype(1:3) .eq. 'RAO')then 
+!               plot ob location (with a plus sign)
+                if(mode .ge. 3 .or.
+     1             c8_obstype(1:3) .eq. 'rao')then 
                     call line(xsta,ysta+du2*0.5,xsta,ysta-du2*0.5)
                     call line(xsta+du2*0.5,ysta,xsta-du2*0.5,ysta)
                 endif
 
-!               Plot ob
+!               plot ob
                 if(mode .lt. 3)then
                   write(t1,100,err=101) nint(t_c)
  100              format(i3)
  101              call left_justify(t1)
                   call s_len(t1,len_t1)
-                  if(c8_obstype(1:3) .eq. 'RAO')then 
+                  if(c8_obstype(1:3) .eq. 'rao')then 
                       xloc = xsta + du2*4.0
                   else
                       xloc = xsta
                   endif
-                  CALL PCMEQU(xloc,ysta,t1(1:len_t1),charsize,ANGD,CNTR)
+                  call pcmequ(xloc,ysta,t1(1:len_t1),charsize,angd,cntr)
                   write(6,102,err=103)ri,rj,t_c,t1,c8_obstype,c_staname
  102              format(1x,3f8.1,1x,a8,1x,a10)
  103              continue
-                else ! GPS PW
+                else ! gps pw
                   write(pw,110,err=111) t_k             
  110              format(f5.2)
  111              call left_justify(pw)
-                  CALL PCHIQU(xsta+du2*7.0,ysta+du2*3.0,trim(pw)
-     1                       ,charsize,ANGD,CNTR)
+                  call pchiqu(xsta+du2*7.0,ysta+du2*3.0,trim(pw)
+     1                       ,charsize,angd,cntr)
  
                   if(mode .eq. 3)then
                     write(6,121,err=122)ri,rj,t_c,pw,c8_obstype
@@ -1180,8 +1180,8 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
                   elseif(mode .eq. 4)then ! plot difference ob
                     write(pw,110,err=131) t_c             
  131                call left_justify(pw)
-                    CALL PCHIQU(xsta+du2*7.0,ysta-du2*3.0,trim(pw)
-     1                       ,charsize,ANGD,CNTR)
+                    call pchiqu(xsta+du2*7.0,ysta-du2*3.0,trim(pw)
+     1                       ,charsize,angd,cntr)
                     write(6,132,err=133)ri,rj,t_k,t_c,c8_obstype
      1                                               ,c_staname
  132                format(1x,4f8.1,1x,a8,1x,a10)
@@ -1225,23 +1225,23 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
          
         real dum1_3d(imax,jmax,kmax) ! dummy variable
 
-!       Arrays returned from read_tdsnd
+!       arrays returned from read_tdsnd
         real lat_tdsnd(max_snd)
         real lon_tdsnd(max_snd)
         real bias_htlow(max_snd)
-        real ob_pr_td(max_snd,kmax) ! Vertically interpolated TSND temp
+        real ob_pr_td(max_snd,kmax) ! vertically interpolated tsnd temp
         real inst_err_tdsnd(max_snd)
         character*5 c5_name(max_snd) 
         character*8 c8_sndtype(max_snd) 
 
-        write(6,*)' Subroutine plot_td_sndobs'
+        write(6,*)' subroutine plot_td_sndobs'
 
         i4_window_raob_file = 3600
         ilaps_cycle_time = 3600
 
         call get_pres_3d(i4time,imax,jmax,kmax,pres_3d,istatus)
 
-!       Set up standard atmosphere for heights
+!       set up standard atmosphere for heights
         do k = 1,kmax
         do i = 1,imax
         do j = 1,jmax
@@ -1250,22 +1250,22 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
         enddo ! i
         enddo ! k
        
-!       Read dewpoint obs from HMG file (generating this if needed)
-        call  read_tdsnd(i4time,heights_3d,dum1_3d,               ! Input
-     1                   pres_3d,                                 ! Input
-     1                   lat_tdsnd,lon_tdsnd,                     ! Output
-     1                   lat,lon,                                 ! Input
-     1                   max_snd,max_snd_levels,                  ! Input
-     1                   ob_pr_td,inst_err_tdsnd,                 ! Output
-     1                   c5_name,c8_sndtype,                      ! Output
-     1                   .true.,.false.,                          ! Input
-     1                   i4_window_raob_file,                     ! Input
-     1                   bias_htlow,                              ! Output
-     1                   n_tdsnd,                                 ! Output
-     1                   ilaps_cycle_time,                        ! Input
-     1                   imax,jmax,kmax,                          ! Input
-     1                   r_missing_data,                          ! Input
-     1                   istatus)                                 ! Output
+!       read dewpoint obs from hmg file (generating this if needed)
+        call  read_tdsnd(i4time,heights_3d,dum1_3d,               ! input
+     1                   pres_3d,                                 ! input
+     1                   lat_tdsnd,lon_tdsnd,                     ! output
+     1                   lat,lon,                                 ! input
+     1                   max_snd,max_snd_levels,                  ! input
+     1                   ob_pr_td,inst_err_tdsnd,                 ! output
+     1                   c5_name,c8_sndtype,                      ! output
+     1                   .true.,.false.,                          ! input
+     1                   i4_window_raob_file,                     ! input
+     1                   bias_htlow,                              ! output
+     1                   n_tdsnd,                                 ! output
+     1                   ilaps_cycle_time,                        ! input
+     1                   imax,jmax,kmax,                          ! input
+     1                   r_missing_data,                          ! input
+     1                   istatus)                                 ! output
 
         write(6,*)' back from read_tdsnd, # soundings = ',n_tdsnd
 
@@ -1275,14 +1275,14 @@ c               write(6,112)elev_deg,k,range_km,azimuth_deg,dir,spd_kt
         subroutine check_ob_density(riob_a,rjob_a,maxobs
      1                             ,iob,ri,rj,dist_plot,l_plot)
 
-!       Determine whether to plot an ob based on its distance to the previously
+!       determine whether to plot an ob based on its distance to the previously
 !       plotted obs
 
-        real riob_a(maxobs) ! I/O
-        real rjob_a(maxobs) ! I/O
-        real dist_plot    ! I    number of gridpoints allowed between obs
-        integer iob       ! I/O
-        logical l_plot    ! O
+        real riob_a(maxobs) ! i/o
+        real rjob_a(maxobs) ! i/o
+        real dist_plot    ! i    number of gridpoints allowed between obs
+        integer iob       ! i/o
+        logical l_plot    ! o
 
         l_plot = .false.
 

@@ -1,133 +1,133 @@
 ! 
-! Write Portable PixMap Image File (ppm, pbm, pgm) 
-! with Fortran 
+! write portable pixmap image file (ppm, pbm, pgm) 
+! with fortran 
 !
-!   Charles O'Neill Oct 23, 2009
+!   charles o'neill oct 23, 2009
 !    charles.oneill@gmail.com
 !    www.caselab.okstate.edu
 !
-! Copyright (c) 2009 Charles O'Neill
+! copyright (c) 2009 charles o'neill
 !
-! Permission is hereby granted, free of charge, to any person
+! permission is hereby granted, free of charge, to any person
 ! obtaining a copy of this software and associated documentation
-! files (the "Software"), to deal in the Software without
+! files (the "software"), to deal in the software without
 ! restriction, including without limitation the rights to use,
 ! copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the
-! Software is furnished to do so, subject to the following
+! copies of the software, and to permit persons to whom the
+! software is furnished to do so, subject to the following
 ! conditions:
 !
-! The above copyright notice and this permission notice shall be
-! included in all copies or substantial portions of the Software.
+! the above copyright notice and this permission notice shall be
+! included in all copies or substantial portions of the software.
 !
-! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-! EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-! OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-! NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-! HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-! WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-! FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-! OTHER DEALINGS IN THE SOFTWARE.
+! the software is provided "as is", without warranty of any kind,
+! express or implied, including but not limited to the warranties
+! of merchantability, fitness for a particular purpose and
+! noninfringement. in no event shall the authors or copyright
+! holders be liable for any claim, damages or other liability,
+! whether in an action of contract, tort or otherwise, arising
+! from, out of or in connection with the software or the use or
+! other dealings in the software.
 !
 
-module PPM
+module ppm
   implicit none
 
 contains
 
   !--------------------------------------------------------------
-  ! Portable PixMap Type 1 (Black and White)
-  subroutine writeppm1Matrix(M,text)
-    integer :: M(:,:)
+  ! portable pixmap type 1 (black and white)
+  subroutine writeppm1matrix(m,text)
+    integer :: m(:,:)
     character(len=*) :: text
     integer :: cols,rows
     integer :: i,j
  
-    ! Open File   
+    ! open file   
     open(unit=100, file=trim(text)//".pbm", status='unknown')
     
-    ! Write Header and ppm file type
-    write(100,'( A )') "P1"
-    write(100,'( A )') "# PPM Type 1 File (generated with fortran)"
+    ! write header and ppm file type
+    write(100,'( a )') "p1"
+    write(100,'( a )') "# ppm type 1 file (generated with fortran)"
  
-    ! Write Image Size
-    cols = size(M,2)
-    rows = size(M,1)
+    ! write image size
+    cols = size(m,2)
+    rows = size(m,1)
     write(100,'( i6, 1x, i6 )') cols, rows
     
-    ! Write Image
+    ! write image
     do i=1,rows
       do j=1,cols
-        write(100,'( i1 )', advance='no') M(i,j)
+        write(100,'( i1 )', advance='no') m(i,j)
       enddo
-      write(100,*) ! Endline
+      write(100,*) ! endline
     enddo
   end subroutine
 
   !--------------------------------------------------------------
-  ! Portable PixMap Type 2 (Grayscale)
-  subroutine writeppm2Matrix(M,text)
-    integer :: M(:,:)
+  ! portable pixmap type 2 (grayscale)
+  subroutine writeppm2matrix(m,text)
+    integer :: m(:,:)
     character(len=*) :: text
     integer :: cols,rows
     integer :: i,j
     integer :: maxvalue
 
-    ! Open File   
+    ! open file   
     open(unit=100, file=trim(text)//".pgm", status='unknown')
     
-    ! Write Header and ppm file type
-    write(100,'( A )') "P2"
-    write(100,'( A )') "# PPM Type 2 File (generated with fortran)"
+    ! write header and ppm file type
+    write(100,'( a )') "p2"
+    write(100,'( a )') "# ppm type 2 file (generated with fortran)"
  
-    ! Write Image Size
-    cols = size(M,2)
-    rows = size(M,1)
+    ! write image size
+    cols = size(m,2)
+    rows = size(m,1)
     write(100,'( i6, 1x, i6 )') cols, rows
     
-    ! Write Maximum Value
-    maxvalue = maxval(maxval(M,dim=1),dim=1)
+    ! write maximum value
+    maxvalue = maxval(maxval(m,dim=1),dim=1)
     write(100,'( i6 )') maxvalue
     
-    ! Write Image
+    ! write image
     do i=1,rows
       do j=1,cols
-        write(100,'( i5,1x )', advance='no') M(i,j)
+        write(100,'( i5,1x )', advance='no') m(i,j)
       enddo
-      write(100,*) ! Endline
+      write(100,*) ! endline
     enddo
   end subroutine
 
   !--------------------------------------------------------------
-  ! Portable PixMap Type 3 (RGB color)
-  subroutine writeppm3Matrix(R,G,B,text)
-    integer :: R(:,:),G(:,:),B(:,:)
+  ! portable pixmap type 3 (rgb color)
+  subroutine writeppm3matrix(r,g,b,text)
+    integer :: r(:,:),g(:,:),b(:,:)
     character(len=*) :: text
     integer :: cols,rows
     integer :: i,j
     integer :: maxvalue,maxr,maxg,maxb
  
-    ! Open File   
+    ! open file   
     open(unit=100, file=trim(text)//".ppm", status='unknown')
     
-    ! Write Header and ppm file type
-    write(100,'( A )') "P3"
-    write(100,'( A )') "# PPM Type 2 File (generated with fortran)"
+    ! write header and ppm file type
+    write(100,'( a )') "p3"
+    write(100,'( a )') "# ppm type 2 file (generated with fortran)"
  
-    ! Write Image Size
-    cols = size(R,2)
-    rows = size(R,1)
+    ! write image size
+    cols = size(r,2)
+    rows = size(r,1)
     write(100,'( i6, 1x, i6 )') cols, rows
     
-    ! Write Maximum Value
-    maxr = maxval(maxval(R,dim=1),dim=1)
-    maxg = maxval(maxval(G,dim=1),dim=1)
-    maxb = maxval(maxval(B,dim=1),dim=1)
+    ! write maximum value
+    maxr = maxval(maxval(r,dim=1),dim=1)
+    maxg = maxval(maxval(g,dim=1),dim=1)
+    maxb = maxval(maxval(b,dim=1),dim=1)
     maxvalue = max(maxr,maxg,maxb)
-    write(6,*)' Image maxvalue is ',maxr,maxg,maxb,maxvalue
+    write(6,*)' image maxvalue is ',maxr,maxg,maxb,maxvalue
 
-!   Set brightness scaling in the image at a floor value
-!   Image will always have a max >= 85 counts
+!   set brightness scaling in the image at a floor value
+!   image will always have a max >= 85 counts
 !   if(maxvalue .lt. 64)then
 !       maxvalue = 4 * maxvalue
     if(maxvalue .lt. 85)then
@@ -136,13 +136,13 @@ contains
         maxvalue = 255
     endif
 
-    write(6,*)' Image scaled to   ',maxvalue
+    write(6,*)' image scaled to   ',maxvalue
     write(100,'( i6 )') maxvalue
     
-    ! Write Image
+    ! write image
     do i=1,rows
       do j=1,cols
-        write(100,'( 3(i5,1x) )') R(i,j),G(i,j),B(i,j)
+        write(100,'( 3(i5,1x) )') r(i,j),g(i,j),b(i,j)
       enddo
     enddo
 
@@ -150,95 +150,95 @@ contains
   end subroutine
 
   !--------------------------------------------------------------
-  ! Portable PixMap Type 3 (RGB color)
-  subroutine writeppm3_16bit(R,G,B,text)
-    integer :: R(:,:),G(:,:),B(:,:)
+  ! portable pixmap type 3 (rgb color)
+  subroutine writeppm3_16bit(r,g,b,text)
+    integer :: r(:,:),g(:,:),b(:,:)
     character(len=*) :: text
     integer :: cols,rows
     integer :: i,j
     integer :: maxvalue
  
-    ! Open File   
+    ! open file   
     open(unit=100, file=trim(text)//".ppm", status='unknown')
     
-    ! Write Header and ppm file type
-    write(100,'( A )') "P3"
-    write(100,'( A )') "# PPM Type 2 File (generated with fortran)"
+    ! write header and ppm file type
+    write(100,'( a )') "p3"
+    write(100,'( a )') "# ppm type 2 file (generated with fortran)"
  
-    ! Write Image Size
-    cols = size(R,2)
-    rows = size(R,1)
+    ! write image size
+    cols = size(r,2)
+    rows = size(r,1)
     write(100,'( i6, 1x, i6 )') cols, rows
     
-    ! Write Maximum Value
-    maxvalue = max( maxval(maxval(R,dim=1),dim=1)&
-                   ,maxval(maxval(G,dim=1),dim=1)&
-                   ,maxval(maxval(B,dim=1),dim=1))
-    write(6,*)' Image maxvalue is ',maxvalue
+    ! write maximum value
+    maxvalue = max( maxval(maxval(r,dim=1),dim=1)&
+                   ,maxval(maxval(g,dim=1),dim=1)&
+                   ,maxval(maxval(b,dim=1),dim=1))
+    write(6,*)' image maxvalue is ',maxvalue
     maxvalue = 65535
-    write(6,*)' Image scaled to   ',maxvalue
+    write(6,*)' image scaled to   ',maxvalue
     write(100,'( i6 )') maxvalue
     
-    ! Write Image
+    ! write image
     do i=1,rows
       do j=1,cols
-        write(100,'( 3(i5,1x) )') R(i,j),G(i,j),B(i,j)
+        write(100,'( 3(i5,1x) )') r(i,j),g(i,j),b(i,j)
       enddo
     enddo
   end subroutine
 
   !--------------------------------------------------------------
-  ! Test Module
-  subroutine testPPM
-    integer,parameter :: N = 100
-    integer :: A(N,N)
-    integer :: R(N,N)
-    integer :: G(N,N)
-    integer :: B(N,N)
-    real :: AA(N,N)
+  ! test module
+  subroutine testppm
+    integer,parameter :: n = 100
+    integer :: a(n,n)
+    integer :: r(n,n)
+    integer :: g(n,n)
+    integer :: b(n,n)
+    real :: aa(n,n)
     integer :: i,j
 
-    ! Show the PixMap Format with a simple case
+    ! show the pixmap format with a simple case
     open(unit=100, file="test.ppm", status='unknown')
-    write(100,'( A )') "P1"
-    write(100,'( A )') "# This is an example bitmap"
-    write(100,'( A )') "18 10"
-    write(100,'( A )') "0 0 0 0 0 0   0 0 0 0 0 0   0 0 0 0 0 0"
-    write(100,'( A )') "0 0 1 1 0 0   0 0 1 1 1 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 1 0 0 1 0   0 1 0 0 1 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 1 0 0 1 0   0 1 0 0 0 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 1 0 0 1 0   0 0 1 0 0 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 1 0 0 1 0   0 0 0 1 0 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 1 0 0 1 0   0 0 0 0 1 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 1 0 0 1 0   0 1 0 0 1 0   0 1 0 0 1 0"
-    write(100,'( A )') "0 0 1 1 0 0   0 1 1 1 0 0   0 0 1 1 0 0"
-    write(100,'( A )') "0 0 0 0 0 0   0 0 0 0 0 0   0 0 0 0 0 0"
+    write(100,'( a )') "p1"
+    write(100,'( a )') "# this is an example bitmap"
+    write(100,'( a )') "18 10"
+    write(100,'( a )') "0 0 0 0 0 0   0 0 0 0 0 0   0 0 0 0 0 0"
+    write(100,'( a )') "0 0 1 1 0 0   0 0 1 1 1 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 1 0 0 1 0   0 1 0 0 1 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 1 0 0 1 0   0 1 0 0 0 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 1 0 0 1 0   0 0 1 0 0 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 1 0 0 1 0   0 0 0 1 0 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 1 0 0 1 0   0 0 0 0 1 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 1 0 0 1 0   0 1 0 0 1 0   0 1 0 0 1 0"
+    write(100,'( a )') "0 0 1 1 0 0   0 1 1 1 0 0   0 0 1 1 0 0"
+    write(100,'( a )') "0 0 0 0 0 0   0 0 0 0 0 0   0 0 0 0 0 0"
     close(100)
         
-    ! Get a matrix of random numbers
-    CALL RANDOM_SEED()
-    call RANDOM_NUMBER(AA)
+    ! get a matrix of random numbers
+    call random_seed()
+    call random_number(aa)
     
-    ! Setup and write type 1
-    A = AA + 0.5
-    call writeppm1Matrix(A,"subtest")
-    write(*,*) "writeppm1Matrix"
+    ! setup and write type 1
+    a = aa + 0.5
+    call writeppm1matrix(a,"subtest")
+    write(*,*) "writeppm1matrix"
   
-    ! Setup and write type 2
-    A = AA * 256
-    call writeppm2Matrix(A,"subtest2")
-    write(*,*) "writeppm2Matrix"
+    ! setup and write type 2
+    a = aa * 256
+    call writeppm2matrix(a,"subtest2")
+    write(*,*) "writeppm2matrix"
 
-    ! Setup and write type 3 
-    do i=1,N
-      do j=1,N
-        R(i,j) = abs( mod(i+j,N/5) )
-        G(i,j) = abs( mod(i-j,N/5) )
-        B(i,j) = abs( mod(i*j,N/5) )
+    ! setup and write type 3 
+    do i=1,n
+      do j=1,n
+        r(i,j) = abs( mod(i+j,n/5) )
+        g(i,j) = abs( mod(i-j,n/5) )
+        b(i,j) = abs( mod(i*j,n/5) )
       enddo
     enddo
-    call writeppm3Matrix(R,G,B,"subtest3")
-    write(*,*) "writeppm3Matrix"
+    call writeppm3matrix(r,g,b,"subtest3")
+    write(*,*) "writeppm3matrix"
   end subroutine
 
   subroutine read_ppm(u,img,ncol,iwidth,iheight)
@@ -250,7 +250,7 @@ contains
     integer u
     character(2) :: sign
 
-    read(u, '(A2)') sign
+    read(u, '(a2)') sign
     read(u, *) iwidth2,iheight2
     read(u, *) ncol2
 
@@ -265,7 +265,7 @@ contains
 
     read(u,*)img
 
-    write(6,*)' Image has been read in subroutine read_ppm'
+    write(6,*)' image has been read in subroutine read_ppm'
 
   end subroutine
 

@@ -9,19 +9,19 @@
         
 c
         call get_grid_dim_xy(nx,ny,istatus)
-        if(istatus .ne. 1) print*, 'Error getting nx,ny' 
+        if(istatus .ne. 1) print*, 'error getting nx,ny' 
         call get_standard_latitudes(stanlat,stanlat2,istatus)
-        if(istatus .ne. 1) print*, 'Error getting latitudes' 
+        if(istatus .ne. 1) print*, 'error getting latitudes' 
         call get_standard_longitude(stanlon,istatus)
-        if(istatus .ne. 1) print*, 'Error getting longitude'
+        if(istatus .ne. 1) print*, 'error getting longitude'
         call get_laps_cycle_time(laps_cycle_time,istatus)
-        if(istatus .ne. 1) print*, 'Error getting cycle time'
+        if(istatus .ne. 1) print*, 'error getting cycle time'
         call get_r_missing_data(badflag,istatus) 
-        if(istatus .ne. 1) print*, 'Error getting badflag'
+        if(istatus .ne. 1) print*, 'error getting badflag'
         call get_maxstns(maxstations,istatus)
-        if(istatus .ne. 1) print*, 'Error getting maxstations'
+        if(istatus .ne. 1) print*, 'error getting maxstations'
         call get_c6_maproj(mapproj,istatus)
-        if(istatus .ne. 1) print*, 'Error getting map projection'
+        if(istatus .ne. 1) print*, 'error getting map projection'
      
         return
         end

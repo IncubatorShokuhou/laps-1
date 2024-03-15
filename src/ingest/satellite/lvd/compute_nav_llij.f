@@ -31,16 +31,16 @@
       nstatus=-1
 
 c ---------------------------------------------
-c acquiring LAPS latitude and longitude arrays.
+c acquiring laps latitude and longitude arrays.
 c ---------------------------------------------
       call find_domain_name(cgenericdataroot,c_gridfname,istatus)
       call get_domain_laps(nx_l,ny_l,c_gridfname,lat,lon,topo,
      &grid_spacing_laps_m,istatus)
       if(istatus.eq.1)then
-         write(6,*)'LAPS lat/lon/grid_spacing obtained'
+         write(6,*)'laps lat/lon/grid_spacing obtained'
          write(6,*)
       else
-         write(6,*)'Error getting LAPS lat/lon data'
+         write(6,*)'error getting laps lat/lon data'
          stop
       end if
 c
@@ -51,25 +51,25 @@ c    &chtype,nx_l,ny_l,rdumij,rdumij,istatus)
 
       if(istatus.eq.1)then
 
-c        write(6,*)'LUT not obtained: ',csatid,'/',csattype
+c        write(6,*)'lut not obtained: ',csatid,'/',csattype
          print*,'-------------------------------------------'
-         write(6,*)'Computing gri and grj with genlvdlut_lvd'
+         write(6,*)'computing gri and grj with genlvdlut_lvd'
          print*,'-------------------------------------------'
 c        call genlvdlut_sub(nx_l,ny_l,gstatus)
          call genlvdlut_lvd(nx_l,ny_l,maxchannels,lat,lon
      +,jtype,isat,gri,grj,gstatus)
          if(gstatus.lt.0)then
-            write(6,*)'Error generating mapping arrays - terminating'
+            write(6,*)'error generating mapping arrays - terminating'
             goto 910
 c        endif
 c        else
-c           print*,'Still in test mode and rewriting nav info'
-c           print*,'Current Version: 9-29-06'
+c           print*,'still in test mode and rewriting nav info'
+c           print*,'current version: 9-29-06'
 c           print*,'rewrite satellite_lvd.nl'
 c           print*
 c           call rewrite_satellite_lvd_nl(istatus)
          else
-            write(6,*)' Returned from genlvdlut_lvd'
+            write(6,*)' returned from genlvdlut_lvd'
          endif
 
          nstatus=1
@@ -77,19 +77,19 @@ c           call rewrite_satellite_lvd_nl(istatus)
       endif
 
 c     else
-c        write(6,*)'Compute ll/ij mapping arrays '
-c        write(6,*)'Check if luts are up-to-date'
+c        write(6,*)'compute ll/ij mapping arrays '
+c        write(6,*)'check if luts are up-to-date'
 c        call check_luts(cfname_cur,isat,jtype,
 c    &chtype,maxchannels,nchannels,lut_flag,istatus)
 c        if(lut_flag.and.istatus.eq.0)then
 c           print*,'************************************************'
-c           write(6,*)'Found difference in nav parms',
+c           write(6,*)'found difference in nav parms',
 c    +' - rebuild the lut'
 c           print*,'************************************************'
 c           call genlvdlut_lvd(nx_l,ny_l,lat,lon,jtype,isat,
 c    +gstatus)
 c           if(gstatus.lt.0)then
-c              write(6,*)'Error generating LUT - terminating'
+c              write(6,*)'error generating lut - terminating'
 c              goto 910
 c           else
 c              write(6,*)'**********************************'
@@ -98,20 +98,20 @@ c              call rewrite_satellite_lvd_nl(istatus)
 c           endif
 c           nstatus=1
 c        elseif(istatus.eq.0)then
-c           write(6,*)'Lut checked out ok'
+c           write(6,*)'lut checked out ok'
 c           write(6,*)
 c           nstatus=0
 c        else
-c           write(6,*)'Error status returned from check_lut'
+c           write(6,*)'error status returned from check_lut'
 c           goto 910
 c        endif
 c     endif
 
-      print*,' Returning from compute_nav_llij '
+      print*,' returning from compute_nav_llij '
 
       goto 1000
 
-910   print*,' ERROR: compute_nav_llij '
+910   print*,' error: compute_nav_llij '
 
 1000  return
       end

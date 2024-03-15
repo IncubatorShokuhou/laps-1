@@ -2,66 +2,66 @@
      ~             nx_l, ny_l, i4time_raob_earliest, i4time_raob_latest,
      ~             a9_time, filename, istatus )
 
-      integer   loopNum, levelNum  
-      parameter ( loopNum=20, levelNum=300 )
+      integer   loopnum, levelnum  
+      parameter ( loopnum=20, levelnum=300 )
 
       character*(*)  filename
-      character*3    reportFlag
+      character*3    reportflag
       character*2    yy, mo, dd, hh, mn, flag
-      character*9    a9time(loopNum), a9timeDummy, a10_to_a9, a9_time
+      character*9    a9time(loopnum), a9timedummy, a10_to_a9, a9_time
       character*10   time
 
       real  lat_a(nx_l,ny_l), lon_a(nx_l,ny_l), topo_a(nx_l,ny_l)
-      real  elevationDummy, latitudeDummy, longitudeDummy
-      real  elevation(loopNum), latitude(loopNum), longitude(loopNum)
-      real  pressure(loopNum,levelNum), height(loopNum,levelNum)
-      real  temperature(loopNum,levelNum)
-      real  tempDewDiff(loopNum,levelNum), dewpoint(loopNum,levelNum)
-      real  windDir(loopNum,levelNum), windSpeed(loopNum,levelNum)
+      real  elevationdummy, latitudedummy, longitudedummy
+      real  elevation(loopnum), latitude(loopnum), longitude(loopnum)
+      real  pressure(loopnum,levelnum), height(loopnum,levelnum)
+      real  temperature(loopnum,levelnum)
+      real  tempdewdiff(loopnum,levelnum), dewpoint(loopnum,levelnum)
+      real  winddir(loopnum,levelnum), windspeed(loopnum,levelnum)
 
-      integer wmoId(loopNum), layerNum(loopNum)
-      integer heightQua(loopNum,levelNum), dewpointQua(loopNum,levelNum)       
-      integer temperatureQua(loopNum,levelNum),windQua(loopNum,levelNum)
-      integer recNum, inNum, jumpNum, logicRecNum
-      integer d(12), wmoIdDummy, dupliStation
+      integer wmoid(loopnum), layernum(loopnum)
+      integer heightqua(loopnum,levelnum), dewpointqua(loopnum,levelnum)       
+      integer temperaturequa(loopnum,levelnum),windqua(loopnum,levelnum)
+      integer recnum, innum, jumpnum, logicrecnum
+      integer d(12), wmoiddummy, duplistation
 
-      real latitude_out(loopNum,levelNum)
-      real longitude_out(loopNum,levelNum)
-      character*9 a9time_out(loopNum,levelNum)
-      character c8_obstype(loopNum)*8
-      character c5_staid(loopNum)*5
+      real latitude_out(loopnum,levelnum)
+      real longitude_out(loopnum,levelnum)
+      character*9 a9time_out(loopnum,levelnum)
+      character c8_obstype(loopnum)*8
+      character c5_staid(loopnum)*5
 
       data  d / 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
-      data  dupliStation / 58968 /
+      data  duplistation / 58968 /
 
       call get_r_missing_data(r_missing_data,istatus)
       if ( istatus .ne. 1 ) then
-         write (6,*) ' Error getting r_missing_data'
+         write (6,*) ' error getting r_missing_data'
          return
       endif
 
-      recNum= 0
-      inNum= 0        ! inNum : the record number within time window
+      recnum= 0
+      innum= 0        ! innum : the record number within time window
       istatus= 0
       open ( 1, file=filename, status='old', err=1000 )
 
       istatus= 1
 
-      do i= 1,loopNum
-         read (1,5,end=99,err=29) reportFlag, wmoIdDummy,elevationDummy,      
-     ~                            latitudeDummy, longitudeDummy,
-     ~                            iy, m1, id, ih, m2, logicRecNum
+      do i= 1,loopnum
+         read (1,5,end=99,err=29) reportflag, wmoiddummy,elevationdummy,      
+     ~                            latitudedummy, longitudedummy,
+     ~                            iy, m1, id, ih, m2, logicrecnum
 5        format ( a3, i5, f4.0, 2f5.2, 2x, 5i2, i3 )
 
-         if ( reportFlag .ne. '*11' )  then
+         if ( reportflag .ne. '*11' )  then
             write (6,*) 
-     ~          ' Error reading sounding data of identification -reject'
-	    write (6,*) reportFlag, wmoIdDummy
+     ~          ' error reading sounding data of identification -reject'
+	    write (6,*) reportflag, wmoiddummy
          endif
 
-         if ( reportFlag.ne.'*11' .or. wmoIdDummy.eq.dupliStation ) then
-            jumpNum= logicRecNum -1
-            do 11 k= 1,jumpNum
+         if ( reportflag.ne.'*11' .or. wmoiddummy.eq.duplistation ) then
+            jumpnum= logicrecnum -1
+            do 11 k= 1,jumpnum
 11             read (1,*) 
 	    go to 51
          endif
@@ -121,43 +121,43 @@ c               ------ creat a9time in yydddhhmm format ------
          call i2a ( m2, mn )
 
          time= yy//mo//dd//hh//mn
-         a9timeDummy= a10_to_a9(time,istatus)
-         call cv_asc_i4time( a9timeDummy, i4time_raob )
+         a9timedummy= a10_to_a9(time,istatus)
+         call cv_asc_i4time( a9timedummy, i4time_raob )
 
 c          ----------    test if raob is within time window    ----------
          if ( i4time_raob .ne. 0 ) then    
             if ( i4time_raob .ge. i4time_raob_earliest .and.
      ~           i4time_raob .le. i4time_raob_latest )  then
-	       write (6,*) reportFlag, wmoIdDummy, elevationDummy,
-     ~                     latitudeDummy, longitudeDummy,
-     ~                     yy, mo, dd, hh, mn, logicRecNum,
-     ~                     ' Inside time window'
-	       inNum= inNum +1
+	       write (6,*) reportflag, wmoiddummy, elevationdummy,
+     ~                     latitudedummy, longitudedummy,
+     ~                     yy, mo, dd, hh, mn, logicrecnum,
+     ~                     ' inside time window'
+	       innum= innum +1
 
-               wmoId(inNum)= wmoIdDummy
-	       elevation(inNum)= elevationDummy
-	       latitude(inNum)= latitudeDummy
-	       longitude(inNum)= longitudeDummy
-	       a9time(inNum)= a9timeDummy
+               wmoid(innum)= wmoiddummy
+	       elevation(innum)= elevationdummy
+	       latitude(innum)= latitudedummy
+	       longitude(innum)= longitudedummy
+	       a9time(innum)= a9timedummy
 
-               layerNum(inNum)= logicRecNum -2
-               do j= 1,layerNum(inNum)
-                  read (1,15,err=19,end=99) pressure(inNum,j),
-     ~              height(inNum,j), heightQua(inNum,j),      
-     ~              temperature(inNum,j), temperatureQua(inNum,j),        
-     ~              tempDewDiff(inNum,j), dewpointQua(inNum,j),
-     ~              windDir(inNum,j),windSpeed(inNum,j),windQua(inNum,j)      
+               layernum(innum)= logicrecnum -2
+               do j= 1,layernum(innum)
+                  read (1,15,err=19,end=99) pressure(innum,j),
+     ~              height(innum,j), heightqua(innum,j),      
+     ~              temperature(innum,j), temperaturequa(innum,j),        
+     ~              tempdewdiff(innum,j), dewpointqua(innum,j),
+     ~              winddir(innum,j),windspeed(innum,j),windqua(innum,j)      
 15                format ( 2x, f5.1, f5.0, i2, 2(f4.1,i2), 2f3.0, i2 )
 	          go to 20
 
-19                write (6,*)' Error reading variables of sounding data'
+19                write (6,*)' error reading variables of sounding data'
                   do k= 1,j
-                     write (6,*) pressure(inNum,k),
-     ~                    height(inNum,k), heightQua(inNum,k),       
-     ~                    temperature(inNum,k), temperatureQua(inNum,k),
-     ~                    tempDewDiff(inNum,k), dewpointQua(inNum,k),
-     ~                    windDir(inNum,k), windSpeed(inNum,k),
-     ~                    windQua(inNum,k)
+                     write (6,*) pressure(innum,k),
+     ~                    height(innum,k), heightqua(innum,k),       
+     ~                    temperature(innum,k), temperaturequa(innum,k),
+     ~                    tempdewdiff(innum,k), dewpointqua(innum,k),
+     ~                    winddir(innum,k), windspeed(innum,k),
+     ~                    windqua(innum,k)
                   enddo
 20             enddo
 
@@ -165,92 +165,92 @@ c          ----------    test if raob is within time window    ----------
     	       goto 50
 
             else
-	       write (6,*) reportFlag, wmoIdDummy, elevationDummy,
-     ~                     latitudeDummy, longitudeDummy,
-     ~                     yy, mo, dd, hh, mn, logicRecNum,
-     ~                     ' Outside time window -reject'
+	       write (6,*) reportflag, wmoiddummy, elevationdummy,
+     ~                     latitudedummy, longitudedummy,
+     ~                     yy, mo, dd, hh, mn, logicrecnum,
+     ~                     ' outside time window -reject'
     	       goto 40
 
 	    endif
          endif
 
-29       write (6,*) ' Error reading sounding codes of stations -reject'
-	 write (6,*) reportFlag, wmoIdDummy,
-     ~               elevationDummy, latitudeDummy, longitudeDummy,
-     ~               iy, m1, id, ih, m2, logicRecNum
-	 do k= 1,levelNum
+29       write (6,*) ' error reading sounding codes of stations -reject'
+	 write (6,*) reportflag, wmoiddummy,
+     ~               elevationdummy, latitudedummy, longitudedummy,
+     ~               iy, m1, id, ih, m2, logicrecnum
+	 do k= 1,levelnum
             read (1,'(a2)') flag
 	    if ( flag .eq. '25' )  go to 50
 	 enddo
 
-40       jumpNum= logicRecNum -1
-         do 41 k= 1,jumpNum
+40       jumpnum= logicrecnum -1
+         do 41 k= 1,jumpnum
 41          read (1,*) 
 
-50       recNum= recNum +1
+50       recnum= recnum +1
 51    enddo
 
 c      ----------     examing data quality and changing units     ---------    
 c      when elevation is missing, return -999. without change for the sake of 
 c      format f15.0 in snd files
-99    do 100 i= 1,inNum
-      do 100 j= 1,layerNum(i)
+99    do 100 i= 1,innum
+      do 100 j= 1,layernum(i)
 
          if ( pressure(i,j) .eq. -999. )  pressure(i,j)= r_missing_data
-         if ( heightQua(i,j) .ne. 1 )  height(i,j)= r_missing_data
-         if ( temperatureQua(i,j).ne.1 ) temperature(i,j)=r_missing_data
+         if ( heightqua(i,j) .ne. 1 )  height(i,j)= r_missing_data
+         if ( temperaturequa(i,j).ne.1 ) temperature(i,j)=r_missing_data
 
-         if ( temperatureQua(i,j).eq.1 .and. dewpointQua(i,j).eq.1 )then
-               dewpoint(i,j)= temperature(i,j) -tempDewDiff(i,j)
+         if ( temperaturequa(i,j).eq.1 .and. dewpointqua(i,j).eq.1 )then
+               dewpoint(i,j)= temperature(i,j) -tempdewdiff(i,j)
             else
                dewpoint(i,j)= r_missing_data
          endif
 
-c wen modify         if ( windQua(i,j) .ne. 1 )  then
-         if ( windQua(i,j) .eq. 11 ) go to 100 
-         if ( windQua(i,j) .eq. 21 ) go to 100 
-         if ( windQua(i,j) .eq. 31 ) go to 100 
-            ! write(*,*)' wen test windQua',windQua(i,j),windDir(i,j)
-            windDir(i,j)= r_missing_data
-            windSpeed(i,j)= r_missing_data
+c wen modify         if ( windqua(i,j) .ne. 1 )  then
+         if ( windqua(i,j) .eq. 11 ) go to 100 
+         if ( windqua(i,j) .eq. 21 ) go to 100 
+         if ( windqua(i,j) .eq. 31 ) go to 100 
+            ! write(*,*)' wen test windqua',windqua(i,j),winddir(i,j)
+            winddir(i,j)= r_missing_data
+            windspeed(i,j)= r_missing_data
 100   continue
 
-!     do 900 i= 1,inNum
-! write(11,895) wmoId(i), layerNum(i), latitude(i), longitude(i),
-!    ~                 elevation(i), '     ', a9time(i), 'RAOB'
+!     do 900 i= 1,innum
+! write(11,895) wmoid(i), layernum(i), latitude(i), longitude(i),
+!    ~                 elevation(i), '     ', a9time(i), 'raob'
 !895      format (i12, i12, f11.4, f15.4, f15.0, 1x, a5, 3x, a9, 1x, a8)
 
-!        do 900 j= 1,layerNum(i)
+!        do 900 j= 1,layernum(i)
 !           write (11,*) height(i,j), pressure(i,j), temperature(i,j),
-!    ~                   dewpoint(i,j), windDir(i,j), windSpeed(i,j)
+!    ~                   dewpoint(i,j), winddir(i,j), windspeed(i,j)
 !900   continue
 
-      do 900 i= 1,inNum
+      do 900 i= 1,innum
           latitude_out(i,:) = latitude(i)
           longitude_out(i,:) = longitude(i)
           a9time_out(i,:) = a9time(i)
-          c8_obstype(i) = 'RAOB    '
+          c8_obstype(i) = 'raob    '
           c5_staid(i) = '     '
 900   continue
 
-!     Call write_snd routine
-      call write_snd(      21                                 ! I
-     1                    ,loopNum,levelNum,inNum             ! I
-     1                    ,wmoId                              ! I
-     1                    ,latitude_out,longitude_out,staelev ! I
-     1                    ,c5_staid,a9time_out,c8_obstype     ! I
-     1                    ,layerNum                           ! I
-     1                    ,height                             ! I
-     1                    ,pressure                           ! I
-     1                    ,temperature                        ! I
-     1                    ,dewpoint                           ! I
-     1                    ,windDir                            ! I
-     1                    ,windSpeed                          ! I
-     1                    ,istatus)                           ! O
+!     call write_snd routine
+      call write_snd(      21                                 ! i
+     1                    ,loopnum,levelnum,innum             ! i
+     1                    ,wmoid                              ! i
+     1                    ,latitude_out,longitude_out,staelev ! i
+     1                    ,c5_staid,a9time_out,c8_obstype     ! i
+     1                    ,layernum                           ! i
+     1                    ,height                             ! i
+     1                    ,pressure                           ! i
+     1                    ,temperature                        ! i
+     1                    ,dewpoint                           ! i
+     1                    ,winddir                            ! i
+     1                    ,windspeed                          ! i
+     1                    ,istatus)                           ! o
 
-      write (6,*) ' found', inNum, 
+      write (6,*) ' found', innum, 
      ~            'stations available within time window in',
-     ~            recNum, 'raob stations'
+     ~            recnum, 'raob stations'
 
 1000  return
       end

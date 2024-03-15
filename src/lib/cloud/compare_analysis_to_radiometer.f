@@ -29,7 +29,7 @@
         character*1 c1_c
         character title*60, ver_file*256, filename*9
 
-        write(6,*)' Comparing cloud/sat/sfc data to radiometer'         
+        write(6,*)' comparing cloud/sat/sfc data to radiometer'         
 
         if(.true.)then
             iwrite = 0
@@ -67,7 +67,7 @@
 
                     if(iwrite .eq. iwrite/20*20)then
                         write(6,*)'sv '
-                        write(6,*)'sv Sta   i    j   VIS frac tb8_k  '
+                        write(6,*)'sv sta   i    j   vis frac tb8_k  '
      1                  //'t_gnd_k t_sfc_k cv_s_mx cvr_mx '
      1                  //'solalt cv_r rad_an '
      1                  //'rad_ob rad_th ratio cv_sol  df'
@@ -78,20 +78,20 @@
                     c1_c = ' '
                     c3_discrep = '   '
 
-!                   QC checks
+!                   qc checks
                     if(radob_ratio .lt. 0.5      .and.
      1                 cloud_liquid_int(ista) .ge. 100.           )then
-                        c1_c = '+' ! Suspected high analysis
+                        c1_c = '+' ! suspected high analysis
                     endif
 
                     if(radob_ratio .gt. 2.0      .and.      
      1                 cloud_liquid_int(ista) .ge. 100.           )then
-                        c1_c = '-' ! Suspected low analysis
+                        c1_c = '-' ! suspected low analysis
                     endif
 
                     if(radob_ratio .lt. 0.1 .and. 
      1                 swi_s(ista) .ge. 100.      )then
-                        c1_c = '*' ! QC'd out
+                        c1_c = '*' ! qc'd out
                         rad2_s(ista) = r_missing_data
                     endif
 
@@ -100,7 +100,7 @@
                        if(rad_clr(i_i,i_j) .gt. 100.)then
                           if(cloud_liquid_int(ista)/rad_clr(i_i,i_j) 
      1                                              .gt. 2.5)then
-                             c1_c = '*' ! QC'd out
+                             c1_c = '*' ! qc'd out
                              rad2_s(ista) = r_missing_data
                           endif
                        endif
@@ -112,7 +112,7 @@
      1                              ,rad_clr(i_i,i_j))      
 
                     if(iqc .ne. 0)then
-                       c1_c = '*' ! QC'd out
+                       c1_c = '*' ! qc'd out
                        rad2_s(ista) = r_missing_data
                     endif
 
@@ -153,24 +153,24 @@
             enddo ! isnd
 
             write(6,*)
-            write(6,*)' Generic stats:'
+            write(6,*)' generic stats:'
             call stats_1d(maxstns,swi_s,rad2_s
-     1                   ,'Solar Radiation (QCed): '
+     1                   ,'solar radiation (qced): '
      1                   ,a_t,b_t,xbar,ybar
      1                   ,bias,std,r_missing_data,istatus)
 
-!           Write out line of stats for gnuplot (if data are valid)
+!           write out line of stats for gnuplot (if data are valid)
             call cv_i4tim_asc_lp(i4time,a24time,istatus)
             if(cnt .gt. 0)then
                 write(6,710)a24time,xbar,ybar,std,sumclr/cnt
             else
-                write(6,*)' Write missing data due to zero count'
+                write(6,*)' write missing data due to zero count'
                 pmsg = -99.9
                 write(6,710)a24time,pmsg,pmsg,pmsg,pmsg       
             endif
 710         format(1x,a24,4f10.3,' gnuplot')
 
-!           Calculate other stats
+!           calculate other stats
             if(cnt .gt. 0.)then
                 write(6,*)' radiometer comparison stats'
                 if(sumanl .gt. 0.)then
@@ -192,13 +192,13 @@
             endif
 
             write(6,*)
-            write(6,*)' Do regression on residuals vs cloud fraction'
+            write(6,*)' do regression on residuals vs cloud fraction'
             call regression(maxstns,cvr_s,resid_s
-     1                   ,'Residuals vs cloud fraction: '
+     1                   ,'residuals vs cloud fraction: '
      1                   ,a_t,b_t,xbar,ybar
      1                   ,bias,std,r_missing_data,istatus)
 
-!           Open file and call verification routine
+!           open file and call verification routine
             iunit = 11
             call get_directory('log', ver_file, len)
             ver_file = ver_file(1:len)//'qc/laps_sol.ver.'
@@ -206,7 +206,7 @@
             call s_len(ver_file, len)
             open(iunit,file=ver_file(1:len),status='unknown',err=990)
 
-            title = 'Solar Radiation (before qc): '
+            title = 'solar radiation (before qc): '
 
             call verify(swi_2d,cloud_liquid_int,stn,maxstns,title,iunit 
      &                 ,ni,nj,maxstns,dum_s,dum_s,dum_2d

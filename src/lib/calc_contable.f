@@ -1,8 +1,8 @@
 
         subroutine calc_contable_3d(
-     1             o,f,thresh,ni,nj,nk,                    ! I
-     1             lmask_rqc_3d,r_missing_data,            ! I
-     1             cont_3d)                                ! O
+     1             o,f,thresh,ni,nj,nk,                    ! i
+     1             lmask_rqc_3d,r_missing_data,            ! i
+     1             cont_3d)                                ! o
 
         character*150 cont_dir,filename
         character*31 ext
@@ -13,7 +13,7 @@
 
         logical lmask_rqc_3d(ni,nj,nk)
 
-!       Calculate 3-D contingency table
+!       calculate 3-d contingency table
         do k = 1,nk
         do i = 1,ni
         do j = 1,nj

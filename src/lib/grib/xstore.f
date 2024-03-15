@@ -1,47 +1,47 @@
-      SUBROUTINE XSTORE(COUT,CON,MWORDS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    XSTORE      STORES A CONSTANT VALUE INTO AN ARRAY
-C   PRGMMR: KEYSER           ORG: W/NMC22    DATE: 07-02-92
-C
-C ABSTRACT: STORES AN 4-BYTE (FULLWORD) VALUE THROUGH CONSECUTIVE
-C   STORAGE LOCATIONS.  (MOVING IS ACCOMPLISHED WITH A DO LOOP.)
-C
-C PROGRAM HISTORY LOG:
-C   92-07-02  D. A. KEYSER (W/NMC22)
-C   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C   93-04-15  R.E.JONES   CHANGES FOR MICROSOFT FORTRAN 5.0
-C
-C USAGE:    CALL XSTORE(COUT,CON,MWORDS)
-C   INPUT ARGUMENT LIST:
-C     CON      - CONSTANT TO BE STORED INTO "MWORDS" CONSECUTIVE
-C                FULLWORDS BEGINNING WITH "COUT" ARRAY
-C     MWORDS   - NUMBER OF FULLWORDS IN "COUT" ARRAY TO STORE "CON";
-C                MUST BE .GT. ZERO (NOT CHECKED FOR THIS)
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     COUT     - STARTING ADDRESS FOR ARRAY OF "MWORDS" FULLWORDS
-C                SET TO THE CONTENTS OF THE VALUE "CON"
-C
-C REMARKS: THE VERSION OF THIS SUBROUTINE ON THE HDS COMMON LIBRARY
-C   IS NAS-SPECIFIC SUBR. WRITTEN IN ASSEMBLY LANG. TO ALLOW FAST
-C   COMPUTATION TIME.  SUBR. PLACED IN CRAY W3LIB TO ALLOW CODES TO
-C   COMPILE ON BOTH THE HDS AND CRAY MACHINES.
-C
-C ATTRIBUTES:    
-C   LANGUAGE: MICROSOFT FORTRAN 5.0 OPTIMIZING COMPILER
-C   MACHINE:  IBM PC, AT, PS/2, 386, 486, 586, CLONES.
-C
-C$$$
-C
-      DIMENSION  COUT(*)
-C
-      SAVE
-C
-      DO 1000  I = 1,MWORDS
-        COUT(I) = CON
-1000  CONTINUE   
-C
-      RETURN     
-      END
+      subroutine xstore(cout,con,mwords)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    xstore      stores a constant value into an array
+c   prgmmr: keyser           org: w/nmc22    date: 07-02-92
+c
+c abstract: stores an 4-byte (fullword) value through consecutive
+c   storage locations.  (moving is accomplished with a do loop.)
+c
+c program history log:
+c   92-07-02  d. a. keyser (w/nmc22)
+c   93-03-29  r.e.jones   add save statement
+c   93-04-15  r.e.jones   changes for microsoft fortran 5.0
+c
+c usage:    call xstore(cout,con,mwords)
+c   input argument list:
+c     con      - constant to be stored into "mwords" consecutive
+c                fullwords beginning with "cout" array
+c     mwords   - number of fullwords in "cout" array to store "con";
+c                must be .gt. zero (not checked for this)
+c
+c   output argument list:      (including work arrays)
+c     cout     - starting address for array of "mwords" fullwords
+c                set to the contents of the value "con"
+c
+c remarks: the version of this subroutine on the hds common library
+c   is nas-specific subr. written in assembly lang. to allow fast
+c   computation time.  subr. placed in cray w3lib to allow codes to
+c   compile on both the hds and cray machines.
+c
+c attributes:    
+c   language: microsoft fortran 5.0 optimizing compiler
+c   machine:  ibm pc, at, ps/2, 386, 486, 586, clones.
+c
+c$$$
+c
+      dimension  cout(*)
+c
+      save
+c
+      do 1000  i = 1,mwords
+        cout(i) = con
+1000  continue   
+c
+      return     
+      end
 

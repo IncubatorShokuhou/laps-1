@@ -1,8 +1,8 @@
 
 
-      subroutine map_aoml_sub(nilaps,njlaps,aoml_path_in,vrc_outdir    ! I
-     1                       ,i4time_sys,laps_cycle_time               ! I
-     1                       ,istatus)                                 ! O
+      subroutine map_aoml_sub(nilaps,njlaps,aoml_path_in,vrc_outdir    ! i
+     1                       ,i4time_sys,laps_cycle_time               ! i
+     1                       ,istatus)                                 ! o
 
       real lat(nilaps,njlaps)
       real lon(nilaps,njlaps)
@@ -34,7 +34,7 @@ c read in laps lat/lon and topo
      1                       ,rlaps_land_frac
      1                       ,grid_spacing_cen_m,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error getting LAPS domain'
+          write(6,*)' error getting laps domain'
           istatus = 0
           return
       endif
@@ -42,12 +42,12 @@ c read in laps lat/lon and topo
       i4time_proc_end  = i4time_sys + laps_cycle_time/2 + 1800
       i4time_proc_strt = i4time_sys - laps_cycle_time/2 - 1800
 
-!     Get times of output files
+!     get times of output files
       i_vrc = 2
       call get_vrc_full_path(i_vrc,vrc_outdir
      1                        ,vrc_full_path,lenv,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Return from map_aoml_sub without AOML processing'
+          write(6,*)' return from map_aoml_sub without aoml processing'
           return
       endif
 
@@ -55,7 +55,7 @@ c read in laps lat/lon and topo
      1                   ,i4times_out,i_nbr_files_out,istatus)
 
 
-!     Get names and times of input files
+!     get names and times of input files
       call s_len(aoml_path_in,lenp)
       if(lenp .eq. 0)then
           write(6,*)'map_aoml_sub: aoml_path_in has zero length'
@@ -68,7 +68,7 @@ c read in laps lat/lon and topo
      1                   ,max_files,istatus)
 
       if(i_nbr_files_in .eq. 0)then
-          write(6,*)'No AOML files available'
+          write(6,*)'no aoml files available'
           istatus = 0
           return
       endif
@@ -77,11 +77,11 @@ c read in laps lat/lon and topo
 
           write(6,*)
 
-!         basename = 'lf050705I1_stm_230058.swp'
+!         basename = 'lf050705i1_stm_230058.swp'
 !         call s_len(basename,lenb)
 !         fname_in = path(1:lenp)//'/'//basename(1:lenb)
 
-!         Split out basename from full file name
+!         split out basename from full file name
           fname_in = c_fnames_in(ifile_in)
           call s_len(fname_in,lenf)
 
@@ -99,8 +99,8 @@ c read in laps lat/lon and topo
               return
           endif
 
-!         Obtain i4time corresponding to the basename, we handle the hours
-!         and minutes separately since AOML can go to more than 24 hours
+!         obtain i4time corresponding to the basename, we handle the hours
+!         and minutes separately since aoml can go to more than 24 hours
           wfo_fname13 = '20'//basename(3:8)//'_'//basename(16:19)
           write(6,*)'wfo_fname13 = ',wfo_fname13 
 
@@ -116,10 +116,10 @@ c read in laps lat/lon and topo
           write(6,*)' ihour/imin/i4time_file_in = '
      1               ,ihour,imin,i4time_file_in
 
-          if(i4time_file_in .ge. i4time_proc_strt .AND.
+          if(i4time_file_in .ge. i4time_proc_strt .and.
      1       i4time_file_in .le. i4time_proc_end        )then 
 
-!             Check for a match with output file times
+!             check for a match with output file times
               l_match = .false.
               do ifile_out = 1,i_nbr_files_out
                   if(i4time_file_in .eq. i4times_out(ifile_out))then
@@ -128,7 +128,7 @@ c read in laps lat/lon and topo
               enddo ! ifile_out
 
               if(.not. l_match)then
-                  write(6,*)' No output match - processing this time'
+                  write(6,*)' no output match - processing this time'
                   call map_aoml_sweep(nilaps,njlaps,lat,lon,dbz,fname_in
      1                           ,r_missing_data
      1                           ,rlat_radar,rlon_radar)
@@ -142,12 +142,12 @@ c read in laps lat/lon and topo
      1                        ,vrc_outdir,r_missing_data,istatus)
 
               else
-                  write(6,*)' Output already exists - skip this time'
+                  write(6,*)' output already exists - skip this time'
 
               endif
 
           else
-              write(6,*)' Outside Time Window'
+              write(6,*)' outside time window'
 
           endif
 
@@ -169,7 +169,7 @@ c read in laps lat/lon and topo
       real sum(nilaps,njlaps)
       integer npt(nilaps,njlaps)
 
-      CHARACTER      keyword*4, fltname*8, stmname*12, radarid*4,
+      character      keyword*4, fltname*8, stmname*12, radarid*4,
      +               trackname*32, createtime*32, ramname*28,
      +               name*140, jfile*140
 
@@ -177,8 +177,8 @@ c read in laps lat/lon and topo
       parameter (jmax=240)
       parameter (max_x=imax)
       parameter (max_y=jmax)
-      INTEGER*2    zarray(0:max_x-1,0:max_y-1) !ROW OF DBZ VALUES TO BE 
-      INTEGER*2    kpac(32767)
+      integer*2    zarray(0:max_x-1,0:max_y-1) !row of dbz values to be 
+      integer*2    kpac(32767)
       lunit = 1
       luout = 2
 
@@ -186,17 +186,17 @@ c read in laps lat/lon and topo
 
       ierr = 0
 
-      CALL READHEAD(luout, name, lunit, ierr, keyword, fltname,
+      call readhead(luout, name, lunit, ierr, keyword, fltname,
      +  stmname, radarid, trackname, createtime, ramname, imax, jmax,
      +  kmax, nsweeps, nmosmflag, iunfoldflag, intattflag, ieditflag,
      +  iextra2, iextra3, stime, etime, olat, olon, sx, sy, sz, xdis,
      +  ydis, z0, rot, radaralt, calibco1, calibco2, azmcor, elcor,
      +  thresh, dbzrs, pcor, dcor, rcor, starthorelev, htbb, dbb)
-C     OPENS RADAR DATA FILE AND READS RADAR HEADER DATA VALUES.
-C     PAUL A. LEIGHTON, USDC/NOAA/AOML/HRD, 4 JUN 1991
+c     opens radar data file and reads radar header data values.
+c     paul a. leighton, usdc/noaa/aoml/hrd, 4 jun 1991
 
       if(ierr .ne. 0)then
-          write(6,*)' Note: ierr from AOML READHEAD = ',ierr
+          write(6,*)' note: ierr from aoml readhead = ',ierr
           return
       endif
 
@@ -207,7 +207,7 @@ C     PAUL A. LEIGHTON, USDC/NOAA/AOML/HRD, 4 JUN 1991
       write(6,*)' sx,sy = ',sx,sy
       write(6,*)' radaralt = ',radaralt
 
-      CALL PASSXCMP(lunit, imax, jmax, max_x, max_y, zarray)
+      call passxcmp(lunit, imax, jmax, max_x, max_y, zarray)
 
 !     write(10,*)zarray
 
@@ -217,11 +217,11 @@ C     PAUL A. LEIGHTON, USDC/NOAA/AOML/HRD, 4 JUN 1991
       elev = 0.
       rheight_radar = 3000.
 
-!     Initialize arrays
+!     initialize arrays
       sum = 0.
       npt = 0
 
-!     Use pixel averaging onto laps grid
+!     use pixel averaging onto laps grid
       do i = 0,imax-1
       do j = 0,jmax-1
 
@@ -251,7 +251,7 @@ C     PAUL A. LEIGHTON, USDC/NOAA/AOML/HRD, 4 JUN 1991
       enddo ! j
       enddo ! i
 
-!     Divide arrays
+!     divide arrays
       do il = 1,nilaps
       do jl = 1,njlaps
           if(npt(il,jl) .gt. 0)then
@@ -263,4 +263,4 @@ C     PAUL A. LEIGHTON, USDC/NOAA/AOML/HRD, 4 JUN 1991
       enddo ! il
 
       return
-      END
+      end

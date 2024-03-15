@@ -1,10 +1,10 @@
         subroutine magnitude(iplan,       ! planet number
      1                       isat,        ! satellite number (0 for the planet)
-     1                       EX,EY,EZ,    ! Sun - Observer radius vector (AU)
-     1                       PX,PY,PZ,    ! Sun - Satellite radius vector (AU)
-     1                       mag,diam_sec)! Magnitude, diameter in arcsec
+     1                       ex,ey,ez,    ! sun - observer radius vector (au)
+     1                       px,py,pz,    ! sun - satellite radius vector (au)
+     1                       mag,diam_sec)! magnitude, diameter in arcsec
 
-        Implicit real*8(a-z)
+        implicit real*8(a-z)
 
         include '../../include/astparms.for'
 
@@ -16,21 +16,21 @@
 
         character*150 c_ast_root,c_mag_file,c_line
 
-!     Saturns rings (zx,zy,zz are already present in utilparms.for)
-      DATA XX,XY,XZ/-.6216568507D0,0.7832897037D0,0.D0/
-      DATA YX,YY,YZ/-.7779524722D0,-.6174209639D0,0.1165388524D0/
-!     DATA ZX,ZY,ZZ/-.0912836831D0,-.0724471759D0,-.9931861335D0/
+!     saturns rings (zx,zy,zz are already present in utilparms.for)
+      data xx,xy,xz/-.6216568507d0,0.7832897037d0,0.d0/
+      data yx,yy,yz/-.7779524722d0,-.6174209639d0,0.1165388524d0/
+!     data zx,zy,zz/-.0912836831d0,-.0724471759d0,-.9931861335d0/
 
         other_corr = 0.
 
-        DX=PX-EX
-        DY=PY-EY
-        DZ=PZ-EZ
-        RLC=SQRT(PX*PX+PY*PY+PZ*PZ)
-        DELTA=SQRT(DX*DX+DY*DY+DZ*DZ)
+        dx=px-ex
+        dy=py-ey
+        dz=pz-ez
+        rlc=sqrt(px*px+py*py+pz*pz)
+        delta=sqrt(dx*dx+dy*dy+dz*dz)
 
         if(iplan .eq. 0)then
-            mag = v10(iplan,isat) + 5.*dLOG10(DELTA)
+            mag = v10(iplan,isat) + 5.*dlog10(delta)
             goto400
         endif
 
@@ -39,7 +39,7 @@
             return
         endif
 
-        call phase(EX,EY,EZ,PX,PY,PZ,phase_angle_rad,r_ill)
+        call phase(ex,ey,ez,px,py,pz,phase_angle_rad,r_ill)
 
         phase_angle_deg = phase_angle_rad * dpr
 
@@ -48,20 +48,20 @@
         call phase_func(iplan,isat,phase_angle_deg
      1                 ,phase_corr)       
 
-!       Saturn
+!       saturn
         if(iplan .eq. 6)then
             if(isat .eq. 0)then
-                SINB=-(ZX*DX+ZY*DY+ZZ*DZ)/DELTA
-                other_corr = ! +2.5210143D0*DU
-     1                         -ABS(2.6D0*SINB)+1.25D0*SINB*SINB
-            else if(isat .eq. 8)then ! Iapetus
+                sinb=-(zx*dx+zy*dy+zz*dz)/delta
+                other_corr = ! +2.5210143d0*du
+     1                         -abs(2.6d0*sinb)+1.25d0*sinb*sinb
+            else if(isat .eq. 8)then ! iapetus
                 theta = 0.! angle from western elongation
                 h = 0.571 - .429 * sin(theta)
                 other_corr = -5. * dlog10(h/.571)
             endif
         endif
 
-        mag = v10(iplan,isat) + 5.*dLOG10(RLC*DELTA)
+        mag = v10(iplan,isat) + 5.*dlog10(rlc*delta)
      1                      + phase_corr + other_corr
 
         radii = (r_km(iplan,isat)/km_per_au) / delta ! radius / distance
@@ -133,7 +133,7 @@
 
         subroutine get_physical_data(v10,r_km,nm)       
 
-        Implicit real*8(a-z)
+        implicit real*8(a-z)
 
         integer i,j,len_ast_root,len_mag_file,len_dir
 
@@ -155,7 +155,7 @@
 
 !       nm = '          '
 
-!       Read i, j, v10(i,j), r_km(i,j), nm(i,j)
+!       read i, j, v10(i,j), r_km(i,j), nm(i,j)
         c_mag_file = filename
         call s_len(filename,len_mag_file)
 
@@ -188,7 +188,7 @@
         subroutine phase_func(iplan,isat,phase_angle_deg
      1                       ,phase_corr)       
 
-        Implicit real*8(a-z)
+        implicit real*8(a-z)
 
         include '../../include/astparms.for'
 
@@ -202,15 +202,15 @@
 
         phase_corr = 0.
 
-!       Default phase corrections
+!       default phase corrections
         arg = phase_angle_deg
-        icy_corr = 0.0323  * arg - .00066 * arg**2                ! Ganymede
+        icy_corr = 0.0323  * arg - .00066 * arg**2                ! ganymede
 
         arg = phase_angle_deg / 100.
-        rocky_corr  = 4.98 * arg - 4.88 * arg**2 + 3.02 * arg**3  ! Mercury
-        cloudy_corr = 0.09 * arg + 2.39 * arg**2 - 0.65 * arg**3  ! Venus
+        rocky_corr  = 4.98 * arg - 4.88 * arg**2 + 3.02 * arg**3  ! mercury
+        cloudy_corr = 0.09 * arg + 2.39 * arg**2 - 0.65 * arg**3  ! venus
 
-!       Earth
+!       earth
         if(iplan .eq. 1)then 
             arg = phase_angle_deg / 100.
             if(isat .eq. 0)
@@ -221,40 +221,40 @@
 !               phase2 = 10.1 - ((180. - phase_angle_deg) * 0.11)
                 phase2 = 10.1 - ((180. - phase_angle_deg) * 0.26)
                 phase_corr = max(phase_corr,phase2)
-              else ! Shevchenko (1980)
+              else ! shevchenko (1980)
                 phase_corr = 3.38 * arg - 1.07 * arg**2 + 0.99 * arg**3
               endif
             endif
         endif
 
-!       Mercury
+!       mercury
         if(iplan .eq. 2)then 
             arg = phase_angle_deg / 100.
-!           phase_corr = 3.80 * arg - 2.73 * arg**2 + 2.00 * arg**3 ! Orig
-            phase_corr = 4.98 * arg - 4.88 * arg**2 + 3.02 * arg**3 ! Hilton 2005
+!           phase_corr = 3.80 * arg - 2.73 * arg**2 + 2.00 * arg**3 ! orig
+            phase_corr = 4.98 * arg - 4.88 * arg**2 + 3.02 * arg**3 ! hilton 2005
         endif
 
-!       Venus
+!       venus
         if(iplan .eq. 3)then 
             arg = phase_angle_deg / 100.
 
-!           Original
+!           original
 !           phase_corr = 0.09 * arg + 2.39 * arg**2 - 0.65 * arg**3
 
-!           Hilton ~2005
+!           hilton ~2005
 !           if(phase_angle_deg .le. 163.6)then
 !               phase_corr = 1.03 * arg + 0.57 * arg**2 + 0.13 * arg**3
 !           else
 !               phase_corr = 5.45 - 1.02 * arg
 !           endif
 
-!           Mallama 2006 (smoother inflection by S. Albers 2017)
+!           mallama 2006 (smoother inflection by s. albers 2017)
             arg = phase_angle_deg
             aint = 163.72d0
             ahw = 4d0
             acoeff = .03d0 / ahw
             if(phase_angle_deg .le. aint)then
-                phase_corr =       -1.04396E-3*arg +3.68682e-4*arg**2
+                phase_corr =       -1.04396e-3*arg +3.68682e-4*arg**2
      1                                             -2.81374e-6*arg**3
      1                                             +8.93796e-9*arg**4
                 if(phase_angle_deg .ge. aint-ahw)then
@@ -273,32 +273,32 @@
 !           write(6,*)'phase/phase_corr',phase_angle_deg,phase_corr
         endif
 
-!       Mars
+!       mars
         if(iplan .eq. 4)then
             if(isat .eq. 0)phase_corr = .016 * phase_angle_deg
 !           if(isat .ge. 1)phase_corr = rocky_corr
         endif
 
-!       Jupiter
+!       jupiter
         if(iplan .eq. 5)then
             arg = phase_angle_deg
             if(isat .eq. 0)phase_corr = .005 * phase_angle_deg
-            if(isat .eq. 1)phase_corr = 0.046  * arg - .0010  * arg**2 ! Io
-            if(isat .eq. 2)phase_corr = 0.0312 * arg - .00125 * arg**2 ! Europa
-            if(isat .eq. 3)phase_corr = 0.0323 * arg - .00066 * arg**2 ! Ganymede
-            if(isat .eq. 4)phase_corr = 0.078  * arg - .00274 * arg**2 ! Callisto
+            if(isat .eq. 1)phase_corr = 0.046  * arg - .0010  * arg**2 ! io
+            if(isat .eq. 2)phase_corr = 0.0312 * arg - .00125 * arg**2 ! europa
+            if(isat .eq. 3)phase_corr = 0.0323 * arg - .00066 * arg**2 ! ganymede
+            if(isat .eq. 4)phase_corr = 0.078  * arg - .00274 * arg**2 ! callisto
             if(isat .ge. 5)phase_corr = rocky_corr
         endif
 
-!       Saturn
+!       saturn
         if(iplan .eq. 6)then
             if(isat .eq. 0)then
                 phase_corr = .044 * phase_angle_deg
 
-            else if(isat .eq. 6)then ! Titan
+            else if(isat .eq. 6)then ! titan
                 phase_corr = cloudy_corr
 
-            else if(isat .eq. 8)then ! Iapetus
+            else if(isat .eq. 8)then ! iapetus
                 phase_corr = 0.5 * (rocky_corr + icy_corr)
 
             else if(isat .le. 18 .and. isat .ne. 9)then
@@ -310,7 +310,7 @@
             endif
         endif
 
-!       Uranus
+!       uranus
         if(iplan .eq. 7)then
             if(isat .eq. 0)then
                 phase_corr = cloudy_corr
@@ -321,7 +321,7 @@
             endif
         endif
 
-!       Neptune
+!       neptune
         if(iplan .eq. 8)then
             if(isat .eq. 0)then
                 phase_corr = cloudy_corr
@@ -332,7 +332,7 @@
             endif
         endif
 
-!       Pluto
+!       pluto
         if(iplan .eq. 9)then
             if(isat .le. 1)then
                 phase_corr = icy_corr
@@ -349,7 +349,7 @@
 
         include 'trigd.inc'
 
-        Implicit real*8(a-z)
+        implicit real*8(a-z)
 
         include '../../include/astparms.for'
 
@@ -374,10 +374,10 @@
 
         frac_ill = 0.5 + (cosd(phase_angle_deg)/2.)
 
-!       Determine (distance/radius) within which terminator is invisible
+!       determine (distance/radius) within which terminator is invisible
         r_term_vis = 1.0 / sin_phase_angle
 
-!       Assume illuminated frac varies approximately as inverse distance
+!       assume illuminated frac varies approximately as inverse distance
         if(dradii .le. r_term_vis)then ! terminator is invisible
             if(frac_ill .lt. .50)then
                 mag_new = 1e37

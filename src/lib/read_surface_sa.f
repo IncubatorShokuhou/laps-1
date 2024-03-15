@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -38,20 +38,20 @@ cdis
 cdis
 c
 c
-        subroutine read_surface_sa(i4time,maxsta,                     ! I
-     &   n_obs_b,stn,reptype,atype,                                   ! O
-     &   lat,lon,elev,wx,t,td,                                        ! O
-     &   kloud,store_amt,store_hgt,                                   ! O
-     &   solar,solar_ea,obstime,istatus)                              ! O
+        subroutine read_surface_sa(i4time,maxsta,                     ! i
+     &   n_obs_b,stn,reptype,atype,                                   ! o
+     &   lat,lon,elev,wx,t,td,                                        ! o
+     &   kloud,store_amt,store_hgt,                                   ! o
+     &   solar,solar_ea,obstime,istatus)                              ! o
 c
-cdoc    This routine calls 'read_surface_data' and is used primarily to read
-cdoc    in cloud info along the lines of the arrays in the "old" LSO format.
-cdoc    This is called only from the cloud analysis at present.
+cdoc    this routine calls 'read_surface_data' and is used primarily to read
+cdoc    in cloud info along the lines of the arrays in the "old" lso format.
+cdoc    this is called only from the cloud analysis at present.
 c
 c
         real          badflag
 c
-c.....  Input arrays (for new format LSO)
+c.....  input arrays (for new format lso)
 c
 	real lat(maxsta), lon(maxsta), elev(maxsta)
 	real t(maxsta), t_ea(maxsta), max24t(maxsta), min24t(maxsta)
@@ -76,15 +76,15 @@ c
         character reptype(maxsta)*6, atype(maxsta)*6
 	character wx_in(maxsta)*25, store_amt(maxsta,5)*4
 c
-c.....  Output arrays (as old format LSO if different)
+c.....  output arrays (as old format lso if different)
 c
-        Integer   obstime(maxsta)
+        integer   obstime(maxsta)
 c
-        Character   atime*24,stn(maxsta)*3     
+        character   atime*24,stn(maxsta)*3     
         character   store_emv(maxsta,5)*1, wx(maxsta)*8
 c
 c
-c.....  Start here.  Set the status to nothing, zero out the cloud storage
+c.....  start here.  set the status to nothing, zero out the cloud storage
 c.....  and character arrays.
 c
         call get_sfc_badflag(badflag,istatus)
@@ -120,28 +120,28 @@ c
 c
 
         else
-           call read_cloud_obs(i4time,maxsta,                      ! I
-     &      n_obs_b,stations,reptype,                              ! O
-     &      atype,                                                 ! O
-     &      lat,lon,elev,wx_in,t,td,vis,solar,                     ! O
-     &      kloud,store_amt,store_hgt,obstime,jstatus)             ! O
+           call read_cloud_obs(i4time,maxsta,                      ! i
+     &      n_obs_b,stations,reptype,                              ! o
+     &      atype,                                                 ! o
+     &      lat,lon,elev,wx_in,t,td,vis,solar,                     ! o
+     &      kloud,store_amt,store_hgt,obstime,jstatus)             ! o
 
         endif
 
         if(jstatus .ne. 1 .and. jstatus .ne. -1) then
-           print *,' ERROR: No valid LSO file found for ', filetime       
+           print *,' error: no valid lso file found for ', filetime       
            istatus = -1
            return
         endif
 c
-c.....  Shuffle data for the differences between old and new formats.
-c.....  Now the station data.
+c.....  shuffle data for the differences between old and new formats.
+c.....  now the station data.
 c
         do i=1,n_obs_b
            wx(i)(1:8) = wx_in(i)(1:8)
 c
-           if(reptype(i)(1:4) .eq. 'LDAD') then
-              if(provider(i)(1:4) .eq. 'CDOT') then
+           if(reptype(i)(1:4) .eq. 'ldad') then
+              if(provider(i)(1:4) .eq. 'cdot') then
                  stn(i)(1:1) = stations(i)(1:1)
                  stn(i)(2:2) = stations(i)(3:3) ! skip the '-'
                  if(ichar(stations(i)(4:4)) .lt. 32) then
@@ -161,34 +161,34 @@ c
 c
         enddo !i
 c
-c..... End of data gathering. Let's go home...
+c..... end of data gathering. let's go home...
 c
         istatus = 1             ! everything's ok...
-        print *, ' Normal completion of new READ_SURFACE_SA'
+        print *, ' normal completion of new read_surface_sa'
 c
         return
         end
 
 c
 c
-        subroutine read_cloud_obs(i4time,maxsta,                      ! I
-     &   n_obs_b_out,stations_out,reptype_out,                        ! O
-     &   autostntype_out,                                             ! O
-     &   lat_s_out,lon_s_out,elev_s_out,wx_s_out,t_s_out,td_s_out,    ! O
-     &   vis_s_out,solar_s_out,                                       ! O
-     &   kloud_s_out,store_amt_out,store_hgt_out,obstime_out,istatus) ! O
+        subroutine read_cloud_obs(i4time,maxsta,                      ! i
+     &   n_obs_b_out,stations_out,reptype_out,                        ! o
+     &   autostntype_out,                                             ! o
+     &   lat_s_out,lon_s_out,elev_s_out,wx_s_out,t_s_out,td_s_out,    ! o
+     &   vis_s_out,solar_s_out,                                       ! o
+     &   kloud_s_out,store_amt_out,store_hgt_out,obstime_out,istatus) ! o
 c
-c       The argument list is or should be consistent with 'read_sfc.inc' except
+c       the argument list is or should be consistent with 'read_sfc.inc' except
 c       that a duplicate subset of '_out' arrays are used
 c
-cdoc    This routine calls 'read_surface_data' and is used primarily to read
-cdoc    in cloud info from the current LSO file and potentially SYNOP obs from
-cdoc    a wider time window. The initial design is to call this from the
+cdoc    this routine calls 'read_surface_data' and is used primarily to read
+cdoc    in cloud info from the current lso file and potentially synop obs from
+cdoc    a wider time window. the initial design is to call this from the
 cdoc    'read_surface_sa' routine.
 
         include 'read_sfc.inc'
 c
-c.....  Output arrays (duplicate declarations with _out suffix)
+c.....  output arrays (duplicate declarations with _out suffix)
 c
 	real lat_s_out(maxsta), lon_s_out(maxsta), elev_s_out(maxsta)
 	real t_s_out(maxsta), td_s_out(maxsta), vis_s_out(maxsta)
@@ -203,13 +203,13 @@ c
 
 	integer kloud_s_out(maxsta), obstime_out(maxsta)
 
-c       End of output arrays
+c       end of output arrays
 
         real          badflag
 c
 	character filetime*9
 c
-c.....  Start here.  Set the status to nothing, zero out the cloud storage
+c.....  start here.  set the status to nothing, zero out the cloud storage
 c.....  and character arrays.
 c
         call get_sfc_badflag(badflag,istatus)
@@ -218,9 +218,9 @@ c
         ibadflag = int(badflag)
         n_obs_b = 0 ! initialize
 c
-c.....  Figure out the i4time and call the read routine.
+c.....  figure out the i4time and call the read routine.
 c
-        call read_surface_data(i4time,atime_s,n_obs_g,n_obs_b, !regular LSO
+        call read_surface_data(i4time,atime_s,n_obs_g,n_obs_b, !regular lso
      &         obstime,wmoid,stations,provider,wx_s,reptype,autostntype,       
      &         lat_s,lon_s,elev_s,t_s,td_s,rh_s,dd_s,ff_s,ddg_s,ffg_s,
      &         alt_s,pstn_s,pmsl_s,delpch,delp,vis_s,solar_s,sfct,sfcm,
@@ -231,12 +231,12 @@ c
 c
         call make_fnam_lp(i4time,filetime,istatus)
         if(jstatus .ne. 1 .and. jstatus .ne. -1) then
-           print *,' ERROR: No valid LSO file found for ', filetime       
+           print *,' error: no valid lso file found for ', filetime       
            istatus = -1
            return
         endif
 c
-c.....  Place main cloud obs into output arrays
+c.....  place main cloud obs into output arrays
 
         n_obs_b_out = n_obs_b
         stations_out = stations
@@ -259,15 +259,15 @@ c.....  Place main cloud obs into output arrays
 
         n_obs_b_ontime = n_obs_b_out
 c
-c.....  Figure out the i4time and call the read routine for SYNOPs.
+c.....  figure out the i4time and call the read routine for synops.
 c
         i4time_synop = (i4time / 10800) * 10800
 
         if(i4time_synop .ne. i4time .and. .false.)then
 
-           write(6,*)' Reading 3 hourly sfc data for SYNOPs...'
+           write(6,*)' reading 3 hourly sfc data for synops...'
 
-           call read_surface_data(i4time_synop,atime_s,n_obs_g,n_obs_b, !regular LSO
+           call read_surface_data(i4time_synop,atime_s,n_obs_g,n_obs_b, !regular lso
      &         obstime,wmoid,stations,provider,wx_s,reptype,autostntype,       
      &         lat_s,lon_s,elev_s,t_s,td_s,rh_s,dd_s,ff_s,ddg_s,ffg_s,
      &         alt_s,pstn_s,pmsl_s,delpch,delp,vis_s,solar_s,sfct,sfcm,
@@ -277,18 +277,18 @@ c
      &         maxsta,jstatus)
 c
            if(jstatus .ne. 1 .and. jstatus .ne. -1) then
-              print *,' ERROR: No valid LSO file found for ', filetime       
+              print *,' error: no valid lso file found for ', filetime       
               istatus = -1
               return
            endif
 
 c
-c.....     Place synop cloud obs into output arrays
+c.....     place synop cloud obs into output arrays
 
            do i=1,n_obs_b
-              if(reptype(i)(1:5) .eq. 'SYNOP') then
+              if(reptype(i)(1:5) .eq. 'synop') then
 
-c                Check that station is not near other "on time" stations
+c                check that station is not near other "on time" stations
 
                  n_obs_b_out = n_obs_b_out + 1
                  stations_out(n_obs_b_out) = stations(i)
@@ -311,12 +311,12 @@ c                Check that station is not near other "on time" stations
 
            write(6,*)' n_obs_b_out = ',n_obs_b_out       
 
-        endif ! SYNOP time is different from current systime
+        endif ! synop time is different from current systime
 c
-c.....End of data gathering. Let's go home...
+c.....end of data gathering. let's go home...
 c
         istatus = 1             ! everything's ok...
-        print *, ' Normal completion of new READ_CLOUD_OBS'
+        print *, ' normal completion of new read_cloud_obs'
 c
         return
         end

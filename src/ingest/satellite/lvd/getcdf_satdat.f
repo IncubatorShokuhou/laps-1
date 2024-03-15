@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -39,43 +39,43 @@ cdis
      &                      nft,ntm,c_mtype,max_files,
      &                      image_ir,image_vis,
      &                      image_12,image_39,image_67,
-     &                      image_lat_ir,image_lon_ir,          ! O
-     &                      scale_img,                          ! O
+     &                      image_lat_ir,image_lon_ir,          ! o
+     &                      scale_img,                          ! o
      &                      i4time_data,
      &                      istatus)
 c
-c Subroutine determines files available for input time and returns
-c those image files. Input time (c_fname_in) is from i4time_now_gg
+c subroutine determines files available for input time and returns
+c those image files. input time (c_fname_in) is from i4time_now_gg
 c
-c J Smart               1/95        
-c J Smart              11/95    removed routine that set r_missing_data. This
+c j smart               1/95        
+c j smart              11/95    removed routine that set r_missing_data. this
 c                               now done in main program.
-c J Smart              12/95    nearly total rewrite to accomodate processing using the
+c j smart              12/95    nearly total rewrite to accomodate processing using the
 c                               "at" command.
-c J Smart               2/96    incorporate lvis_flag indicating visible availability
+c j smart               2/96    incorporate lvis_flag indicating visible availability
 c
-c J Smart               2/96    added 6.7 (channel 3) to data gathering process. This is
+c j smart               2/96    added 6.7 (channel 3) to data gathering process. this is
 c                               the /public file with _wv
-c J Smart               4/96    added max_channel to discriminate the number of satellite channels
+c j smart               4/96    added max_channel to discriminate the number of satellite channels
 c 				to process for a given satellite time period.
-c J Smart               6/96    add get_static_info routine for runtime parameters
+c j smart               6/96    add get_static_info routine for runtime parameters
 c
-c J Smart               7/96    Another major rewrite allowing for the process to acquire ground
-c                               station sat data. This has a different set of channel type nharacter
-c                               identifiers. Also consolidate to have only image_vis and image_ir arrays.
-c J Smart               9/97    Dynamic array mods
+c j smart               7/96    another major rewrite allowing for the process to acquire ground
+c                               station sat data. this has a different set of channel type nharacter
+c                               identifiers. also consolidate to have only image_vis and image_ir arrays.
+c j smart               9/97    dynamic array mods
 c   "                   2/98    modifications associated with satellite_dims.inc and satellite_common.inc.
       implicit none
 c
-c                                IMPORTANT: adjust i_delta_t to conform to the amount of time
+c                                important: adjust i_delta_t to conform to the amount of time
 c                                between the process run time (specified by c_fname_in) and the
 c                                expected time of the data to process.
-c				 For example, if n_images = 1 (only one set of satellite data to
+c				 for example, if n_images = 1 (only one set of satellite data to
 c				 process per run), and the data become available 15 minutes after the
 c				 data valid time (ie, the filename time), then i_delta_t should be just
-c 				 greater than 900 seconds. If n_images = 2, then i_delta_t should be
+c 				 greater than 900 seconds. if n_images = 2, then i_delta_t should be
 c				 just greater than 1800 seconds.
-c				 Conversely, if the data frequency is, say 5 minutes and they become
+c				 conversely, if the data frequency is, say 5 minutes and they become
 c				 available 4 minutes after their valid time n_images should = 1,
 c				 i_delta_t should be greater than 240 seconds but less than 300 seconds.
 c
@@ -182,24 +182,24 @@ c
          call s_len(path_to_raw_sat(ispec),in(j))
       enddo
 c
-c Adjust time when just past top of hour to ensure processing files that are
+c adjust time when just past top of hour to ensure processing files that are
 c just before top of hour.
  
       if(c_sat_type.eq.'wfo'.or.c_sat_type.eq.'ncp')then
-         print*,'Convert wfo or ncp to 9 char time'
+         print*,'convert wfo or ncp to 9 char time'
          wfo_fname13_in=fname9_to_wfo_fname13(c_fname_in)
          if(wfo_fname13_in(12:12).eq.'0')then
-            write(6,*)'Adjusting i4time'
+            write(6,*)'adjusting i4time'
             i4time_in=cvt_wfo_fname13_i4time(wfo_fname13_in)
-C           i4time_in = i4time_in-480
-C            480 seconds is not enough to subtract if running at
-C            more than 7 minutes past the hour...make it
-C            10 minutes to be safe...BLS 19 Jul 2002
-C            i4time_in = i4time_in - 600
-C Use namelist parameter for this time offset
+c           i4time_in = i4time_in-480
+c            480 seconds is not enough to subtract if running at
+c            more than 7 minutes past the hour...make it
+c            10 minutes to be safe...bls 19 jul 2002
+c            i4time_in = i4time_in - 600
+c use namelist parameter for this time offset
             i4time_in = i4time_in-i_delta_t
             wfo_fname13_in = cvt_i4time_wfo_fname13(i4time_in)
-            write(6,*)'New time: ',wfo_fname13_in
+            write(6,*)'new time: ',wfo_fname13_in
          endif
       else
         i4time_now = i4time_now_gg()
@@ -209,27 +209,27 @@ C Use namelist parameter for this time offset
 c          if(c_fname_in(8:8).eq.'0')then
             print*
 !           if(c_sat_type.eq.'rll')then ! global satellites can have latency
-!               write(6,*)'Adjusting I4time_In (for rll data) by ',3600
+!               write(6,*)'adjusting i4time_in (for rll data) by ',3600
 !               i4time_in = i4time_in-3600         
 !           else
-                write(6,*)'Adjusting I4time_In by i_delta_t ',i_delta_t       
+                write(6,*)'adjusting i4time_in by i_delta_t ',i_delta_t       
                 i4time_in = i4time_in-i_delta_t
 !           endif
             call make_fnam_lp (i4time_in, c_fname_in, i4status)
             if(i4status.ne.1)then
-               write(6,*)'Error converting i4time_in to new c_fname_in'
+               write(6,*)'error converting i4time_in to new c_fname_in'
                goto 992
             endif
-            write(6,*)'New time: ',c_fname_in
+            write(6,*)'new time: ',c_fname_in
 c          endif
         else
-           write(6,*)' No time adjustment for i4time_in (non-realtime)'
+           write(6,*)' no time adjustment for i4time_in (non-realtime)'
         endif
       endif
 
       ifiles_sat_raw = 0
 c
-c Find raw satellite data files in the path_to_raw_sat.
+c find raw satellite data files in the path_to_raw_sat.
 c
       if(c_sat_type.eq.'wfo'.or.c_sat_type.eq.'ncp')then  
 
@@ -239,7 +239,7 @@ c
       pathname=path_to_raw_sat(ispec)(1:in(j))//wfo_fname13_in(1:9)//'*'
          call s_len(pathname,n)
 c           n=index(pathname,' ')
-            print*,'Data pathname: ',TRIM(pathname)
+            print*,'data pathname: ',trim(pathname)
  
             call get_file_names(pathname,
      &                     ifiles_sat,
@@ -248,7 +248,7 @@ c           n=index(pathname,' ')
      &                     gfn_status)
 
             if(gfn_status.eq.1)then
-               write(*,*)'Success in GFN (Satellite): ifiles_sat = '
+               write(*,*)'success in gfn (satellite): ifiles_sat = '
      1                                               ,ifiles_sat
             endif
             do i=1,ifiles_sat
@@ -264,7 +264,7 @@ c           n=index(pathname,' ')
          enddo
 
          if(ifiles_sat_raw .le. 0)then
-            write(*,*)'+++ No Data Available +++ '
+            write(*,*)'+++ no data available +++ '
             goto 998
          else
             call get_file_names(lvd_dir,
@@ -273,15 +273,15 @@ c           n=index(pathname,' ')
      &                     max_files,
      &                     gfn_status)
             if(gfn_status.eq.1)then
-               write(*,*)'Success in GFN (lvd)'
+               write(*,*)'success in gfn (lvd)'
             else
-               write(6,*)'Error GFN (lvd - wfo) ',lvd_dir
+               write(6,*)'error gfn (lvd - wfo) ',lvd_dir
                istatus=-1
                goto 996
             endif
          endif
 c
-c ------   End of WFO switch  ------
+c ------   end of wfo switch  ------
 c
       else
 c
@@ -292,7 +292,7 @@ c
          pathname=path_to_raw_sat(1)(1:in(1))//c_fname_in(1:7)//'*'
          call s_len(pathname,n)
 c        n=index(pathname,' ')
-         print*,'Data pathname: ',TRIM(pathname)
+         print*,'data pathname: ',trim(pathname)
 c
 c get filenames for the indicated in pathname
 c
@@ -303,11 +303,11 @@ c
      &                     gfn_status)
 
          if(gfn_status.eq.1)then
-            write(*,*)'Success in GFN (Satellite): ifiles_sat_raw = '
+            write(*,*)'success in gfn (satellite): ifiles_sat_raw = '
      1                                            ,ifiles_sat_raw
 
             if(ifiles_sat_raw .le. 0)then
-               write(*,*)'+++ No Data Available +++ '
+               write(*,*)'+++ no data available +++ '
                goto 998
             else
                call get_file_names(lvd_dir,
@@ -316,9 +316,9 @@ c
      &                     max_files,
      &                     gfn_status)
                if(gfn_status.eq.1)then
-                  write(*,*)'Success in GFN (lvd)'
+                  write(*,*)'success in gfn (lvd)'
                else
-                  write(6,*)'Error GFN (lvd) ',lvd_dir
+                  write(6,*)'error gfn (lvd) ',lvd_dir
                   istatus=-1
                   goto 996
                endif
@@ -328,8 +328,8 @@ c
          il=9
          if(c_sat_type.eq.'ncp')il=13
          do i=1,ifiles_sat_raw
-          write(6,*)' Raw filename: ',trim(c_filename_sat(i))
-          write(6,*)' Raw a9time: ',c_filename_sat(i)(in(1)+1:in(1)+il)
+          write(6,*)' raw filename: ',trim(c_filename_sat(i))
+          write(6,*)' raw a9time: ',c_filename_sat(i)(in(1)+1:in(1)+il)
           call i4time_fname_lp(c_filename_sat(i)(in(1)+1:in(1)+il),
      &i4time_sat_raw(i),jstatus)
          enddo
@@ -358,7 +358,7 @@ c
          enddo
          if(.not.found_lvd_match)then
 
-!           Determine j as the beginning of the channel part
+!           determine j as the beginning of the channel part
             do k=255,1,-1
                if(c_filename_sat(i)(k:k).eq.'_')then
                   j=k+1
@@ -366,11 +366,11 @@ c
                endif
             enddo
 
-!           Determine jj as the end of the channel part
+!           determine jj as the end of the channel part
 121         jj=index(c_filename_sat(i),' ')-1
 
-!           So far jj (end of file index) is assumed to be the end of the
-!           channel part. We now strip off the '.nc' if present.
+!           so far jj (end of file index) is assumed to be the end of the
+!           channel part. we now strip off the '.nc' if present.
             if(c_filename_sat(i)(jj-2:jj) .eq. '.nc')then
                if(l_parse(c_filename_sat(i),'_vis.nc') 
      1                                        .eqv. .true.)then     
@@ -380,7 +380,7 @@ c
                endif
             endif
 
-!           Check channel type match in filename
+!           check channel type match in filename
             do k=1,nchannels
                if(c_sat_type .eq. 'jma')then ! one file has all channels
                   nfiles_sat(k) = nfiles_sat(k) + 1
@@ -499,7 +499,7 @@ c
 c
 c list the files found that need lvd processing
 c
-      write(6,*)'Number of new files found ',nft
+      write(6,*)'number of new files found ',nft
       write(6,*)'--------------------------------'
       do i=1,nft
          call make_fnam_lp(i4time_data(i),c_fname_data(i),
@@ -534,31 +534,31 @@ c
       enddo
 
       do i=1,nft
-         write(6,*)'Time: ',c_fname_data(i)
-         write(6,*)'Number of matches: ',ntm(i)
+         write(6,*)'time: ',c_fname_data(i)
+         write(6,*)'number of matches: ',ntm(i)
          ivar=ntm(i)
          write(6,101)(c_mtype(j,i),j=1,ivar)
 101      format(5x,5(:,a3,1x))
       enddo
 c
-c This write up must now consider that we are looking for 6.7 micron data too.
-c This discussion must consider parameter max_channel. (4-96)
+c this write up must now consider that we are looking for 6.7 micron data too.
+c this discussion must consider parameter max_channel. (4-96)
 c
-c This part tests for a full complement of files for lvd processing. We are
-c expecting at most 5 files (ir, 12, 39, 67, and vis). If, for the latest time,
+c this part tests for a full complement of files for lvd processing. we are
+c expecting at most 5 files (ir, 12, 39, 67, and vis). if, for the latest time,
 c there are less than 5 then subroutine wait_for_data is used to wait a preset
-c amount of time for this data to come in.  If the data do not come in then
-c only those files that have been found are processed by lvd. Otherwise, wait_for
+c amount of time for this data to come in.  if the data do not come in then
+c only those files that have been found are processed by lvd. otherwise, wait_for
 c data will allow processing of all 5 files.
 c
-c The following discussion must consider parameter max_image.
-c Before this, however, it is necessary to check for a large number of files to
-c be processed.  This will happen for a cold lvd start or if laps goes down and files
+c the following discussion must consider parameter max_image.
+c before this, however, it is necessary to check for a large number of files to
+c be processed.  this will happen for a cold lvd start or if laps goes down and files
 c continue to build up in /public
-c for a long time. Limit the number of new files processed to those within parameter
+c for a long time. limit the number of new files processed to those within parameter
 c i_delta_t (sec)
-c of the current processsing time.  This should limit the number of files processed.
-c Note: these may not be cronological.
+c of the current processsing time.  this should limit the number of files processed.
+c note: these may not be cronological.
 c
       if(nft.gt.n_images)then      !nft is the number of file times and is related to
 c                                     parameter n_images
@@ -600,8 +600,8 @@ c           endif
 
       elseif(nft.eq.0)then
 
-         write(6,*)'No new satellite data files found'
-         write(6,*)'Terminating lvd'
+         write(6,*)'no new satellite data files found'
+         write(6,*)'terminating lvd'
          istatus=-1
          goto 16
 
@@ -609,7 +609,7 @@ c           endif
 c
 c move stuff back into the original arrays
 c but first reinitialize the channel type (c_mtype) array!
-c     Need to have a second check to see if nft is > 0 since if
+c     need to have a second check to see if nft is > 0 since if
 c     data are too old then icnt = 0 as does ntf
 
       if(nft.gt.0)then
@@ -626,8 +626,8 @@ c     data are too old then icnt = 0 as does ntf
 
       else
 
-         write(6,*)'Data too old to process'
-         write(6,*)'Terminating lvd'
+         write(6,*)'data too old to process'
+         write(6,*)'terminating lvd'
          istatus=-1
          goto 16
 
@@ -640,7 +640,7 @@ c
 
       if(nft_tmp.eq.0)then
 
-         write(6,*)'Not enough files found for this time'
+         write(6,*)'not enough files found for this time'
          if(c_sat_type.eq.'wfo')then
             call wait_for_wfo_satdat(chtype,i4time_data(nft),ntm(nft),
      &path_to_raw_sat,max_channel,nchannels,c_mtype(1,nft),lvis_flag)
@@ -652,7 +652,7 @@ c
 
       elseif(nft_tmp.lt.nft)then
 
-         write(6,*)'Not enough files found for latest time'
+         write(6,*)'not enough files found for latest time'
          if(c_sat_type.eq.'wfo')then
             call wait_for_wfo_satdat(chtype,i4time_data(nft),ntm(nft),
      &path_to_raw_sat,max_channel,nchannels,c_mtype(1,nft),lvis_flag)
@@ -663,7 +663,7 @@ c
 
       else
 
-         write(6,*)'Full set of files found for all times!'
+         write(6,*)'full set of files found for all times!'
 
       endif
 c
@@ -684,25 +684,25 @@ c
      &                image_67,
      &                image_ir,image_12,
      &                image_39,image_vis,
-     &                image_lat_ir,image_lon_ir,         ! O
+     &                image_lat_ir,image_lon_ir,         ! o
      &                scale_img,
      &                istatus)
  
       goto 16
 
-992   write(6,*)'Error adjusting time'
+992   write(6,*)'error adjusting time'
       goto 16
 
-996   write(6,*)'Error getting lvd filenames'
+996   write(6,*)'error getting lvd filenames'
       goto 16
 
-997   write(6,*)'Error getting static info'
+997   write(6,*)'error getting static info'
       istatus = -1
       goto 16
 
- 998  write(*,*)' +++ neither IR or VIS data available'
+ 998  write(*,*)' +++ neither ir or vis data available'
       istatus = -1
 
- 16   write(*,*)' Normal completion in GETCDF_SATDAT'
+ 16   write(*,*)' normal completion in getcdf_satdat'
       return
       end

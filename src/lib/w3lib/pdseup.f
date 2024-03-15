@@ -1,110 +1,110 @@
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    PDSEUP.F    UNPACKS GRIB PDS EXTENSION 41- FOR ENSEMBLE
-C   PRGMMR: RICHARD WOBUS    ORG: W/NP20     DATE: 98-09-28
-C
-C ABSTRACT: UNPACKS GRIB PDS EXTENSION STARTING ON BYTE 41 FOR ENSEMBLE
-C	FORECAST PRODUCTS. FOR FORMAT OF PDS EXTENSION, SEE NMC OFFICE NOTE 38
-C
-C PROGRAM HISTORY LOG:
-C   95-03-14  ZOLTAN TOTH AND MARK IREDELL
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C   98-09-28  WOBUS       CORRECTED MEMBER EXTRACTION
-C
-C USAGE:    CALL PDSENS.F(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
-C   INPUT ARGUMENT LIST:
-C     ILAST    - LAST BYTE TO BE UNPACKED (IF GREATER/EQUAL TO FIRST BYT
-C                IN ANY OF FOUR SECTIONS BELOW, WHOLE SECTION IS PACKED.
-C     MSGA     - FULL PDS SECTION, INCLUDING NEW ENSEMBLE EXTENSION
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     KENS(5)  - BYTES 41-45 (GENERAL SECTION, ALWAYS PRESENT.)
-C     KPROB(2) - BYTES 46-47 (PROBABILITY SECTION, PRESENT ONLY IF NEEDE
-C     XPROB(2) - BYTES 48-51&52-55 (PROBABILITY SECTION, IF NEEDED.)
-C     KCLUST(16)-BYTES 61-76 (CLUSTERING SECTION, IF NEEDED.)
-C     KMEMBR(80)-BYTES 77-86 (CLUSTER MEMBERSHIP SECTION, IF NEEDED.)
-C
-C REMARKS: USE PDSENS.F FOR PACKING PDS ENSEMBLE EXTENSION.
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: CF77 FORTRAN
-C   MACHINE:  CRAY, WORKSTATIONS
-C
-C$$$
-C
-	  SUBROUTINE PDSEUP(KENS,KPROB,XPROB,KCLUST,KMEMBR,ILAST,MSGA)
-	  INTEGER KENS(5),KPROB(2),KCLUST(16),KMEMBR(80)
-	  DIMENSION XPROB(2)
-	  INTEGER KREF
-	  CHARACTER*1 MSGA(100)
-	  REAL REFNCE
-	  CHARACTER*1 CKREF(8)
-	  EQUIVALENCE   (CKREF(1),KREF,REFNCE)
-C	CHECKING TOTAL NUMBER OF BYTES IN PDS (IBYTES)
-	  CALL GBYTE(MSGA, IBYTES, 0,24)
-	  IF(ILAST.GT.IBYTES) THEN
-C	  ILAST=IBYTES
-	  GO TO 333
-	  ENDIF
-	  IF(ILAST.LT.41) THEN
-	  GO TO 333
-	  ENDIF
-C	UNPACKING FIRST SECTION (GENERAL INFORMATION)
-      CALL GBYTES(MSGA,KENS,40*8,8,0,5)
-C	UNPACKING 2ND SECTION (PROBABILITY SECTION)
-      IF(ILAST.GE.46) THEN
-      CALL GBYTES(MSGA,KPROB,45*8,8,0,2)
-C
-C
-      CALL GBYTE (MSGA,KREF,47*8,32)
-      CALL W3FI01(LW)
-      IF (LW.EQ.4) THEN
-        CALL GBYTE (CKREF,JSGN,0,1)
-        CALL GBYTE (CKREF,JEXP,1,7)
-        CALL GBYTE (CKREF,IFR,8,24)
-      ELSE
-        CALL GBYTE (CKREF,JSGN,32,1)
-        CALL GBYTE (CKREF,JEXP,33,7)
-        CALL GBYTE (CKREF,IFR,40,24)
-      ENDIF
-      IF (IFR.EQ.0) THEN
-          REFNCE  = 0.0
-      ELSE IF (JEXP.EQ.0.AND.IFR.EQ.0) THEN
-          REFNCE  = 0.0
-      ELSE
-          REFNCE  = FLOAT(IFR) * 16.0 ** (JEXP - 64 - 6)
-          IF (JSGN.NE.0) REFNCE = - REFNCE
-      END IF
-	  XPROB(1)=REFNCE
-C
-      CALL GBYTE (MSGA,KREF,51*8,32)
-      CALL W3FI01(LW)
-      IF (LW.EQ.4) THEN
-        CALL GBYTE (CKREF,JSGN,0,1)
-        CALL GBYTE (CKREF,JEXP,1,7)
-        CALL GBYTE (CKREF,IFR,8,24)
-      ELSE
-        CALL GBYTE (CKREF,JSGN,32,1)
-        CALL GBYTE (CKREF,JEXP,33,7)
-        CALL GBYTE (CKREF,IFR,40,24)
-      ENDIF
-      IF (IFR.EQ.0) THEN
-          REFNCE  = 0.0
-      ELSE IF (JEXP.EQ.0.AND.IFR.EQ.0) THEN
-          REFNCE  = 0.0
-      ELSE
-          REFNCE  = FLOAT(IFR) * 16.0 ** (JEXP - 64 - 6)
-          IF (JSGN.NE.0) REFNCE = - REFNCE
-      END IF
-	  XPROB(2)=REFNCE
-	  ENDIF
-C
-C	UNPACKING 3RD SECTION (CLUSTERING INFORMATION)
-      IF(ILAST.GE.61) CALL GBYTES(MSGA,KCLUST,60*8,8,0,16)
-C	UNPACKING 4TH SECTION (CLUSTERMEMBERSHIP INFORMATION)
-      IF(ILAST.GE.77) CALL GBYTES(MSGA,KMEMBR,76*8,1,0,80)
-C
- 333  CONTINUE
-	  RETURN
-	  END
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    pdseup.f    unpacks grib pds extension 41- for ensemble
+c   prgmmr: richard wobus    org: w/np20     date: 98-09-28
+c
+c abstract: unpacks grib pds extension starting on byte 41 for ensemble
+c	forecast products. for format of pds extension, see nmc office note 38
+c
+c program history log:
+c   95-03-14  zoltan toth and mark iredell
+c   95-10-31  iredell     removed saves and prints
+c   98-09-28  wobus       corrected member extraction
+c
+c usage:    call pdsens.f(kens,kprob,xprob,kclust,kmembr,ilast,msga)
+c   input argument list:
+c     ilast    - last byte to be unpacked (if greater/equal to first byt
+c                in any of four sections below, whole section is packed.
+c     msga     - full pds section, including new ensemble extension
+c
+c   output argument list:      (including work arrays)
+c     kens(5)  - bytes 41-45 (general section, always present.)
+c     kprob(2) - bytes 46-47 (probability section, present only if neede
+c     xprob(2) - bytes 48-51&52-55 (probability section, if needed.)
+c     kclust(16)-bytes 61-76 (clustering section, if needed.)
+c     kmembr(80)-bytes 77-86 (cluster membership section, if needed.)
+c
+c remarks: use pdsens.f for packing pds ensemble extension.
+c   subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: cf77 fortran
+c   machine:  cray, workstations
+c
+c$$$
+c
+	  subroutine pdseup(kens,kprob,xprob,kclust,kmembr,ilast,msga)
+	  integer kens(5),kprob(2),kclust(16),kmembr(80)
+	  dimension xprob(2)
+	  integer kref
+	  character*1 msga(100)
+	  real refnce
+	  character*1 ckref(8)
+	  equivalence   (ckref(1),kref,refnce)
+c	checking total number of bytes in pds (ibytes)
+	  call gbyte(msga, ibytes, 0,24)
+	  if(ilast.gt.ibytes) then
+c	  ilast=ibytes
+	  go to 333
+	  endif
+	  if(ilast.lt.41) then
+	  go to 333
+	  endif
+c	unpacking first section (general information)
+      call gbytes(msga,kens,40*8,8,0,5)
+c	unpacking 2nd section (probability section)
+      if(ilast.ge.46) then
+      call gbytes(msga,kprob,45*8,8,0,2)
+c
+c
+      call gbyte (msga,kref,47*8,32)
+      call w3fi01(lw)
+      if (lw.eq.4) then
+        call gbyte (ckref,jsgn,0,1)
+        call gbyte (ckref,jexp,1,7)
+        call gbyte (ckref,ifr,8,24)
+      else
+        call gbyte (ckref,jsgn,32,1)
+        call gbyte (ckref,jexp,33,7)
+        call gbyte (ckref,ifr,40,24)
+      endif
+      if (ifr.eq.0) then
+          refnce  = 0.0
+      else if (jexp.eq.0.and.ifr.eq.0) then
+          refnce  = 0.0
+      else
+          refnce  = float(ifr) * 16.0 ** (jexp - 64 - 6)
+          if (jsgn.ne.0) refnce = - refnce
+      end if
+	  xprob(1)=refnce
+c
+      call gbyte (msga,kref,51*8,32)
+      call w3fi01(lw)
+      if (lw.eq.4) then
+        call gbyte (ckref,jsgn,0,1)
+        call gbyte (ckref,jexp,1,7)
+        call gbyte (ckref,ifr,8,24)
+      else
+        call gbyte (ckref,jsgn,32,1)
+        call gbyte (ckref,jexp,33,7)
+        call gbyte (ckref,ifr,40,24)
+      endif
+      if (ifr.eq.0) then
+          refnce  = 0.0
+      else if (jexp.eq.0.and.ifr.eq.0) then
+          refnce  = 0.0
+      else
+          refnce  = float(ifr) * 16.0 ** (jexp - 64 - 6)
+          if (jsgn.ne.0) refnce = - refnce
+      end if
+	  xprob(2)=refnce
+	  endif
+c
+c	unpacking 3rd section (clustering information)
+      if(ilast.ge.61) call gbytes(msga,kclust,60*8,8,0,16)
+c	unpacking 4th section (clustermembership information)
+      if(ilast.ge.77) call gbytes(msga,kmembr,76*8,1,0,80)
+c
+ 333  continue
+	  return
+	  end

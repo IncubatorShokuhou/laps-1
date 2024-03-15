@@ -1,94 +1,94 @@
-      SUBROUTINE BCDTOINT (INPUT1, INPUT2, OUTPUT)
-C
-C *****************************************************************************
-C     SUBROUTINE TO CONVERT GOES/GVAR "BCD TIME" INTO TIME VALUE WHICH NOAA'S
-C     "GIMLOC" SOFTWARE REQUIRES.
-C  
-C     ORIGINAL:	BRUCE H. THOMAS, THE AEROSPACE CORPORATION
-C		DEFENSE METEOROLOGICAL SATELLITE PROGRAM (DMSP)
-C		ENVIRONMENTAL APPLICATIONS CENTER, MARCH 1997
-C
-C     NOTE:     THE SECOND HALF OF THE "BCD" DATE/TIME (OADATA(13)) IS EMPTY!!!
-C		GOES/GVAR SPEC INDICATES HOURS IN 1'S, MIN, SEC, MILLI SEC
-C		SHOULD BE PRESENT.  WORK LATER IF REQUIRED!!! 
-C *****************************************************************************
-C
-      IMPLICIT NONE
-C
-      LOGICAL PRINT_FLAG
-      INTEGER IY1000,IY100,IY10,IY1,IDOY100,IDOY10,IDOY1,IHR10
-      INTEGER INPUT1,INPUT2,IBYTE1,IBYTE2,IBYTE3,IBYTE4,IHB1,IHB2
-      INTEGER IYEAR,IDAY,IHOUR,IHR1
-      REAL*8 OUTPUT
-C
-      DATA PRINT_FLAG / .FALSE. /
-C
-      IBYTE1 = IBITS(INPUT1,00,8)
-      IHR10 = IBITS(IBYTE1,0,4)
-      IDOY1 = IBITS(IBYTE1,4,4)
-C
-      IBYTE2 = IBITS(INPUT1,08,8)
-      IDOY10 = IBITS(IBYTE2,0,4)
-      IDOY100 = IBITS(IBYTE2,4,4)
-C
-      IBYTE3 = IBITS(INPUT1,16,8)
-      IY1 = IBITS(IBYTE3,0,4)
-      IY10 = IBITS(IBYTE3,4,4)
-C
-      IBYTE4 = IBITS(INPUT1,24,8)
-      IY100 = IBITS(IBYTE4,0,4)
-      IY1000 = IBITS(IBYTE4,4,4)
-C
-      IYEAR = IY1000 * 1000 + IY100 * 100 + IY10 * 10 + IY1
-      IDAY = IDOY100 * 100 + IDOY10 * 10 + IDOY1
-      IHOUR = IHR10 * 10 + IHR1
-C
-      IF (PRINT_FLAG) THEN
-        PRINT *,'BCD_TO_INT: YEAR = ',IYEAR
-        PRINT *,'BCD_TO_INT: DAY OF YEAR = ',IDAY
-        PRINT *,'BCD_TO_INT: HOUR OF DAY = ',IHOUR
-      ENDIF
-C
-      IBYTE1 = IBITS(INPUT2,00,8)
-      IHB1 = IBITS(IBYTE1,0,4)
-      IHB2 = IBITS(IBYTE1,4,4)
-C
-      IF (PRINT_FLAG) THEN
-        PRINT *,'BCD_TO_INT: OADATA(13) INFORMATION.... '
-        PRINT *,'BCD_TO_INT: INPUT2 BYTE 1 = ',IBYTE1
-        PRINT *,'BCD_TO_INT: HALF BYTE 1 = ',IHB1
-        PRINT *,'BCD_TO_INT: HALF BYTE 2 = ',IHB2
-      ENDIF
-C
-      IBYTE2 = IBITS(INPUT2,08,8)
-      IHB1 = IBITS(IBYTE2,0,4)
-      IHB2 = IBITS(IBYTE2,4,4)
-C
-      IF (PRINT_FLAG) THEN
-        PRINT *,'BCD_TO_INT: INPUT2 BYTE 2 = ',IBYTE2
-        PRINT *,'BCD_TO_INT: HALF BYTE 1 = ',IHB1
-        PRINT *,'BCD_TO_INT: HALF BYTE 2 = ',IHB2
-      ENDIF
-C
-      IBYTE3 = IBITS(INPUT2,16,8)
-      IHB1 = IBITS(IBYTE3,0,4)
-      IHB2 = IBITS(IBYTE3,4,4)
-C
-      IF (PRINT_FLAG) THEN
-        PRINT *,'BCD_TO_INT: HALF BYTE 1 = ',IHB1
-        PRINT *,'BCD_TO_INT: HALF BYTE 2 = ',IHB2
-        PRINT *,'BCD_TO_INT: INPUT2 BYTE 3 = ',IBYTE3
-      ENDIF
-C
-      IBYTE4 = IBITS(INPUT2,24,8)
-      IHB1 = IBITS(IBYTE4,0,4)
-      IHB2 = IBITS(IBYTE4,4,4)
-C
-      IF (PRINT_FLAG) THEN
-        PRINT *,'BCD_TO_INT: INPUT2 BYTE 4 = ',IBYTE4
-        PRINT *,'BCD_TO_INT: HALF BYTE 1 = ',IHB1
-        PRINT *,'BCD_TO_INT: HALF BYTE 2 = ',IHB2
-      ENDIF
-C
-      RETURN
-      END
+      subroutine bcdtoint (input1, input2, output)
+c
+c *****************************************************************************
+c     subroutine to convert goes/gvar "bcd time" into time value which noaa's
+c     "gimloc" software requires.
+c  
+c     original:	bruce h. thomas, the aerospace corporation
+c		defense meteorological satellite program (dmsp)
+c		environmental applications center, march 1997
+c
+c     note:     the second half of the "bcd" date/time (oadata(13)) is empty!!!
+c		goes/gvar spec indicates hours in 1's, min, sec, milli sec
+c		should be present.  work later if required!!! 
+c *****************************************************************************
+c
+      implicit none
+c
+      logical print_flag
+      integer iy1000,iy100,iy10,iy1,idoy100,idoy10,idoy1,ihr10
+      integer input1,input2,ibyte1,ibyte2,ibyte3,ibyte4,ihb1,ihb2
+      integer iyear,iday,ihour,ihr1
+      real*8 output
+c
+      data print_flag / .false. /
+c
+      ibyte1 = ibits(input1,00,8)
+      ihr10 = ibits(ibyte1,0,4)
+      idoy1 = ibits(ibyte1,4,4)
+c
+      ibyte2 = ibits(input1,08,8)
+      idoy10 = ibits(ibyte2,0,4)
+      idoy100 = ibits(ibyte2,4,4)
+c
+      ibyte3 = ibits(input1,16,8)
+      iy1 = ibits(ibyte3,0,4)
+      iy10 = ibits(ibyte3,4,4)
+c
+      ibyte4 = ibits(input1,24,8)
+      iy100 = ibits(ibyte4,0,4)
+      iy1000 = ibits(ibyte4,4,4)
+c
+      iyear = iy1000 * 1000 + iy100 * 100 + iy10 * 10 + iy1
+      iday = idoy100 * 100 + idoy10 * 10 + idoy1
+      ihour = ihr10 * 10 + ihr1
+c
+      if (print_flag) then
+        print *,'bcd_to_int: year = ',iyear
+        print *,'bcd_to_int: day of year = ',iday
+        print *,'bcd_to_int: hour of day = ',ihour
+      endif
+c
+      ibyte1 = ibits(input2,00,8)
+      ihb1 = ibits(ibyte1,0,4)
+      ihb2 = ibits(ibyte1,4,4)
+c
+      if (print_flag) then
+        print *,'bcd_to_int: oadata(13) information.... '
+        print *,'bcd_to_int: input2 byte 1 = ',ibyte1
+        print *,'bcd_to_int: half byte 1 = ',ihb1
+        print *,'bcd_to_int: half byte 2 = ',ihb2
+      endif
+c
+      ibyte2 = ibits(input2,08,8)
+      ihb1 = ibits(ibyte2,0,4)
+      ihb2 = ibits(ibyte2,4,4)
+c
+      if (print_flag) then
+        print *,'bcd_to_int: input2 byte 2 = ',ibyte2
+        print *,'bcd_to_int: half byte 1 = ',ihb1
+        print *,'bcd_to_int: half byte 2 = ',ihb2
+      endif
+c
+      ibyte3 = ibits(input2,16,8)
+      ihb1 = ibits(ibyte3,0,4)
+      ihb2 = ibits(ibyte3,4,4)
+c
+      if (print_flag) then
+        print *,'bcd_to_int: half byte 1 = ',ihb1
+        print *,'bcd_to_int: half byte 2 = ',ihb2
+        print *,'bcd_to_int: input2 byte 3 = ',ibyte3
+      endif
+c
+      ibyte4 = ibits(input2,24,8)
+      ihb1 = ibits(ibyte4,0,4)
+      ihb2 = ibits(ibyte4,4,4)
+c
+      if (print_flag) then
+        print *,'bcd_to_int: input2 byte 4 = ',ibyte4
+        print *,'bcd_to_int: half byte 1 = ',ihb1
+        print *,'bcd_to_int: half byte 2 = ',ihb2
+      endif
+c
+      return
+      end

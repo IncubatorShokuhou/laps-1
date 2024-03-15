@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -47,7 +47,7 @@ cdis
      1     gw1,gw2,gw3,gww1,gww2,gww3,gvap_p,
      1     data_weights,ii,jj,print_switch,istatus)
 
-      USE module_sfc_structure
+      use module_sfc_structure
 
       implicit none
 
@@ -159,7 +159,7 @@ c     compute the fraction of data_out that is empty
       enddo
 
       if(ncount.eq.0) then      !abort gvap here
-         write(6,*) 'No GVAP/GPS data avail to process... abort'
+         write(6,*) 'no gvap/gps data avail to process... abort'
          istatus = 0
          return
       endif
@@ -186,12 +186,12 @@ c     now have fairly full data array.  now analyze
 
 c     prep the weighting array for the above analyzed sheet
 
-      r50 = 30.e+3 ! R50 assigned 30 km 11/19/01
+      r50 = 30.e+3 ! r50 assigned 30 km 11/19/01
 
       call weight_field (data_weights, mask,  ii,jj,r50 , istatus)
 
       if (istatus .ne. 1) then! test weight_field
-         write (6,*) 'Failure in weight_field from analz_gvap'
+         write (6,*) 'failure in weight_field from analz_gvap'
          return
       endif
 
@@ -208,16 +208,16 @@ c     equate weight field to gww1,2,and 3 fields
 
 c      call slv_laplc (data_weights, mask, ii,jj)
 
-c     test NaN values coming out of data_out and data_weights
+c     test nan values coming out of data_out and data_weights
 
       call check_nan2 (data_out,ii,jj,istatus)
       if (istatus.ne.1) then 
-         write (6,*) 'NaN detected in data_out in analz_gvap.f'
+         write (6,*) 'nan detected in data_out in analz_gvap.f'
          return
       endif
       call check_nan2 (data_weights,ii,jj,istatus)
       if (istatus.ne.1) then 
-         write (6,*) 'NaN detected in data_weights in analz_gvap.f'
+         write (6,*) 'nan detected in data_weights in analz_gvap.f'
          return
       endif
 

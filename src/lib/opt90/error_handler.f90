@@ -1,392 +1,392 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       error_handler
 !
-! PURPOSE:
-!       Module to define simple error codes and handle error conditions
+! purpose:
+!       module to define simple error codes and handle error conditions
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE error_handler
+! calling sequence:
+!       use error_handler
 !
-! OUTPUTS:
-!       SUCCESS:     Code specifying successful completion.
-!                    UNITS:      None.
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: PARAMETER, PUBLIC
+! outputs:
+!       success:     code specifying successful completion.
+!                    units:      none.
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: parameter, public
 !
-!       INFORMATION: Code specifying information output.
-!                    UNITS:      None.
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: PARAMETER, PUBLIC
+!       information: code specifying information output.
+!                    units:      none.
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: parameter, public
 !
-!       WARNING:     Code specifying warning state. Execution can
+!       warning:     code specifying warning state. execution can
 !                    continue but results may be incorrect.
-!                    UNITS:      None.
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: PARAMETER, PUBLIC
+!                    units:      none.
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: parameter, public
 !
-!       FAILURE:     Code specifying severe error. Execution cannot
+!       failure:     code specifying severe error. execution cannot
 !                    continue.
-!                    UNITS:      None.
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: PARAMETER, PUBLIC
+!                    units:      none.
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: parameter, public
 !
-!       UNDEFINED:   Code specifying undefined completion status.
-!                    UNITS:      None.
-!                    TYPE:       Integer
-!                    DIMENSION:  Scalar
-!                    ATTRIBUTES: PARAMETER, PUBLIC
+!       undefined:   code specifying undefined completion status.
+!                    units:      none.
+!                    type:       integer
+!                    dimension:  scalar
+!                    attributes: parameter, public
 !
 !
-! MODULES:
-!       file_utility: Module containing global file utility routines.
-!                     Only the get_lun() function is used in this
+! modules:
+!       file_utility: module containing global file utility routines.
+!                     only the get_lun() function is used in this
 !                     module.
 !
-! CONTAINS:
-!       display_message:  PUBLIC subroutine to display error/status messages
+! contains:
+!       display_message:  public subroutine to display error/status messages
 !                         either to standard output (default) or to a log file.
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! EXAMPLE:
-!       USE error_handler
+! example:
+!       use error_handler
 !       error_status = calculate_widget_size()
-!       IF ( error_status /= SUCCESS ) THEN
-!         CALL display_message( routine_name, &
-!                               'Error calculating widget size', &
+!       if ( error_status /= success ) then
+!         call display_message( routine_name, &
+!                               'error calculating widget size', &
 !                               error_status, &
 !                               message_log = 'error_log.txt' )
-!         RETURN
-!       END IF
+!         return
+!       end if
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 12-Jun-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 12-jun-2000
 !                       pvandelst@ncep.noaa.gov
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE error_handler
+module error_handler
 
 
   ! ---------------------
-  ! Module use statements
+  ! module use statements
   ! ---------------------
-  ! FSL Modification (BLS, 26 Nov 02):
-  !  Commented out the USE file_utility statement here, because
-  !  it causes problems when using PGF90.  It appears to pgf90
-  !  that get_lun is defined in two different modules.  This
-  !  USE statement is instead placed into the subroutine below
+  ! fsl modification (bls, 26 nov 02):
+  !  commented out the use file_utility statement here, because
+  !  it causes problems when using pgf90.  it appears to pgf90
+  !  that get_lun is defined in two different modules.  this
+  !  use statement is instead placed into the subroutine below
   !  that actually calls "get_lun"
-  !USE file_utility, ONLY: get_lun
+  !use file_utility, only: get_lun
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------------
-  ! Default visibility
+  ! default visibility
   ! ------------------
 
-  PRIVATE
+  private
 
 
   ! ------------------------------------
-  ! Definitions of public parameter data
+  ! definitions of public parameter data
   ! ------------------------------------
  
-  ! -- Integer values that define the error state.
-  ! -- Note: These values are totally arbitrary. 
-  INTEGER, PARAMETER, PUBLIC :: SUCCESS     = 0
-  INTEGER, PARAMETER, PUBLIC :: INFORMATION = SUCCESS + 1
-  INTEGER, PARAMETER, PUBLIC :: WARNING     = INFORMATION + 1
-  INTEGER, PARAMETER, PUBLIC :: FAILURE     = WARNING + 1
-  INTEGER, PARAMETER, PUBLIC :: UNDEFINED   = FAILURE + 1
+  ! -- integer values that define the error state.
+  ! -- note: these values are totally arbitrary. 
+  integer, parameter, public :: success     = 0
+  integer, parameter, public :: information = success + 1
+  integer, parameter, public :: warning     = information + 1
+  integer, parameter, public :: failure     = warning + 1
+  integer, parameter, public :: undefined   = failure + 1
 
 
   ! -----------------------------------
-  ! Definitions of local parameter data
+  ! definitions of local parameter data
   ! -----------------------------------
 
-  ! -- Character descriptors of the error states
-  INTEGER,         PARAMETER :: MAX_N_STATES = 5
-  CHARACTER( 11 ), PARAMETER, DIMENSION( 0:MAX_N_STATES-1 ) :: &
-    STATE_DESCRIPTOR = (/ 'SUCCESS    ', &
-                          'INFORMATION', &
-                          'WARNING    ', &
-                          'FAILURE    ', &
-                          'UNDEFINED  ' /)
+  ! -- character descriptors of the error states
+  integer,         parameter :: max_n_states = 5
+  character( 11 ), parameter, dimension( 0:max_n_states-1 ) :: &
+    state_descriptor = (/ 'success    ', &
+                          'information', &
+                          'warning    ', &
+                          'failure    ', &
+                          'undefined  ' /)
 
 
   ! ----------------------------------
-  ! Explicit visibility of subprograms
+  ! explicit visibility of subprograms
   ! ----------------------------------
 
-  PUBLIC :: display_message
+  public :: display_message
 
 
-CONTAINS
+contains
 
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       display_message
 !
-! PURPOSE:
-!       RECURSIVE PUBLIC routine to display messages.
+! purpose:
+!       recursive public routine to display messages.
 !
-! CALLING SEQUENCE:
-!       CALL display_message( routine_name, &
+! calling sequence:
+!       call display_message( routine_name, &
 !                             message,      &
 !                             error_state,  &
 !                             message_log  = message_log )
 !
-! INPUT ARGUMENTS:
-!       routine_name: Name of the routine in which the message originated.
-!                     UNITS:      None
-!                     TYPE:       Character
-!                     DIMENSION:  Scalar
-!                     ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       routine_name: name of the routine in which the message originated.
+!                     units:      none
+!                     type:       character
+!                     dimension:  scalar
+!                     attributes: intent( in )
 !
-!       message:      Message text
-!                     UNITS:      None
-!                     TYPE:       Character
-!                     DIMENSION:  Scalar
-!                     ATTRIBUTES: INTENT( IN )
+!       message:      message text
+!                     units:      none
+!                     type:       character
+!                     dimension:  scalar
+!                     attributes: intent( in )
 !
-!       error_state:  Flag corresponding to one of the defined error states.
-!                     If not, the error state is set to UNDEFINED.
-!                     UNITS:      None
-!                     TYPE:       Integer
-!                     DIMENSION:  Scalar
-!                     ATTRIBUTES: INTENT( IN )
+!       error_state:  flag corresponding to one of the defined error states.
+!                     if not, the error state is set to undefined.
+!                     units:      none
+!                     type:       integer
+!                     dimension:  scalar
+!                     attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       message_log:  Character string specifying a filename in which any
-!                     messages will be logged. If not specified, or if an
+! optional input arguments:
+!       message_log:  character string specifying a filename in which any
+!                     messages will be logged. if not specified, or if an
 !                     error occurs opening the log file, the default action
 !                     is to output messages to the screen.
-!                     UNITS:      None
-!                     TYPE:       Character
-!                     DIMENSION:  Scalar
-!                     ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                     units:      none
+!                     type:       character
+!                     dimension:  scalar
+!                     attributes: intent( in ), optional
 !
-! CALLS:
-!      get_lun:   Function to return a free logical unit number for
+! calls:
+!      get_lun:   function to return a free logical unit number for
 !                 file access.
-!                 SOURCE: file_utility module
+!                 source: file_utility module
 !
-!      Routine calls itself if the optional argument message_log is passed and
+!      routine calls itself if the optional argument message_log is passed and
 !      an error occurs opening the output log file.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       Output message format is:
+! procedure:
+!       output message format is:
 !
 !         "routine name"("state description") : "message"
 !
-!       For example, if an error occurs in this routine the output is:
+!       for example, if an error occurs in this routine the output is:
 !
-!         "DISPLAY_MESSAGE(FAILURE) : Error opening message log file"
-!S-
+!         "display_message(failure) : error opening message log file"
+!s-
 !------------------------------------------------------------------------------
 
-  RECURSIVE SUBROUTINE display_message ( routine_name, &
+  recursive subroutine display_message ( routine_name, &
                                          message,      &
                                          error_state,  &
                                          message_log   )
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
-    ! FSL Modification (BLS, 26 Nov 02)
-    !  Added the USE file_utility statement originally at top of
+    ! fsl modification (bls, 26 nov 02)
+    !  added the use file_utility statement originally at top of
     !  module to this private subroutine.
-    USE file_utility, ONLY: get_lun
+    use file_utility, only: get_lun
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    CHARACTER( * ), INTENT( IN )           :: routine_name
-    CHARACTER( * ), INTENT( IN )           :: message
-    INTEGER,        INTENT( IN )           :: error_state
-    CHARACTER( * ), INTENT( IN ), OPTIONAL :: message_log
+    character( * ), intent( in )           :: routine_name
+    character( * ), intent( in )           :: message
+    integer,        intent( in )           :: error_state
+    character( * ), intent( in ), optional :: message_log
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: THIS_ROUTINE_NAME = 'DISPLAY_MESSAGE'
+    character( * ), parameter :: this_routine_name = 'display_message'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: error_state_to_use
-    INTEGER :: log_to_file
-    INTEGER :: file_id
-    INTEGER :: io_status
+    integer :: error_state_to_use
+    integer :: log_to_file
+    integer :: file_id
+    integer :: io_status
 
-    CHARACTER( 28 ) :: fmt_string
+    character( 28 ) :: fmt_string
 
 
     ! ----------
-    ! Intrinsics
+    ! intrinsics
     ! ----------
 
-    INTRINSIC PRESENT, &
-              TRIM
+    intrinsic present, &
+              trim
 
 
     !#--------------------------------------------------------------------------#
-    !#                   -- Check the input error state --                      #
+    !#                   -- check the input error state --                      #
     !#--------------------------------------------------------------------------#
 
     error_state_to_use = error_state
-    IF ( error_state < 0 .OR. error_state > MAX_N_STATES ) THEN
-      error_state_to_use = UNDEFINED
-    END IF
+    if ( error_state < 0 .or. error_state > max_n_states ) then
+      error_state_to_use = undefined
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#      -- Set the message log. If not specified, output to screen --       #
+    !#      -- set the message log. if not specified, output to screen --       #
     !#--------------------------------------------------------------------------#
 
-    IF ( PRESENT( message_log ) ) THEN
+    if ( present( message_log ) ) then
 
       log_to_file = 1
       file_id     = get_lun()
 
-      OPEN( file_id, FILE     = message_log,  &
-                     ACCESS   = 'SEQUENTIAL', &
-                     FORM     = 'FORMATTED',  &
-                     STATUS   = 'UNKNOWN',    &
-                     POSITION = 'APPEND',     &
-                     ACTION   = 'READWRITE',  & ! Just READ may cause probs on some
-                                                ! systems using POSITION = 'APPEND'
-                     IOSTAT   = io_status )
+      open( file_id, file     = message_log,  &
+                     access   = 'sequential', &
+                     form     = 'formatted',  &
+                     status   = 'unknown',    &
+                     position = 'append',     &
+                     action   = 'readwrite',  & ! just read may cause probs on some
+                                                ! systems using position = 'append'
+                     iostat   = io_status )
 
-      IF ( io_status /= 0 ) THEN
-        CALL display_message( THIS_ROUTINE_NAME, &
-                              'Error opening message log file', &
-                              FAILURE )
+      if ( io_status /= 0 ) then
+        call display_message( this_routine_name, &
+                              'error opening message log file', &
+                              failure )
         log_to_file = 0
-      END IF
+      end if
 
-    ELSE
+    else
 
       log_to_file = 0
 
-    END IF
+    end if
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Output the message --                         #
+    !#                         -- output the message --                         #
     !#--------------------------------------------------------------------------#
 
     fmt_string = '( 1x, a, "(", a, ") : ", a )'
 
-    log_message: IF ( log_to_file == 0 ) THEN
-      WRITE( *, FMT = fmt_string ) &
-                TRIM( routine_name ), &
-                TRIM( STATE_DESCRIPTOR( error_state_to_use ) ), &
-                TRIM( message )
-    ELSE
-      WRITE( file_id, FMT = fmt_string ) &
-                      TRIM( routine_name ), &
-                      TRIM( STATE_DESCRIPTOR( error_state_to_use ) ), &
-                      TRIM( message )
-      CLOSE( file_id )
-    END IF log_message
+    log_message: if ( log_to_file == 0 ) then
+      write( *, fmt = fmt_string ) &
+                trim( routine_name ), &
+                trim( state_descriptor( error_state_to_use ) ), &
+                trim( message )
+    else
+      write( file_id, fmt = fmt_string ) &
+                      trim( routine_name ), &
+                      trim( state_descriptor( error_state_to_use ) ), &
+                      trim( message )
+      close( file_id )
+    end if log_message
 
-  END SUBROUTINE display_message
+  end subroutine display_message
 
-END MODULE error_handler
+end module error_handler
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.1  2002/11/15 15:21:31  birk
-! Added to cvs mainly to see how this compiles on other platforms, it currently
-! seems to compile on the IBM
+! $log$
+! revision 1.1  2002/11/15 15:21:31  birk
+! added to cvs mainly to see how this compiles on other platforms, it currently
+! seems to compile on the ibm
 !
-! Revision 1.3  2000/08/31 19:36:32  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.3  2000/08/31 19:36:32  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.2  2000/08/24 15:27:18  paulv
-! - The DISPLAY_MESSAGE subprogram was made RECURSIVE so it can call itself
+! revision 1.2  2000/08/24 15:27:18  paulv
+! - the display_message subprogram was made recursive so it can call itself
 !   if an error occurs opening the message log file defined by the optional
-!   input argument MESSAGE_LOG.
-! - The message log file is now closed after the message is written (as it
+!   input argument message_log.
+! - the message log file is now closed after the message is written (as it
 !   should have always been...oops).
-! - Updated module and subprogram documentation.
+! - updated module and subprogram documentation.
 !
-! Revision 1.1  2000/07/12 16:08:10  paulv
-! Initial checked in version
+! revision 1.1  2000/07/12 16:08:10  paulv
+! initial checked in version
 !
 !
 !

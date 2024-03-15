@@ -1,354 +1,352 @@
-MODULE WCOMPT_GRADT
+module wcompt_gradt
 !*************************************************
-! CALCULATE THE VERTICAL VELOCITY AND IT'S GRADIENTS TO CONTROL VARIABLES
-! HISTORY: JANUARY 2008, SEPARATED FROM INPUT_BG_OBS MODULE by ZHONGJIE HE.
+! calculate the vertical velocity and it's gradients to control variables
+! history: january 2008, separated from input_bg_obs module by zhongjie he.
 !*************************************************
 
-  USE PRMTRS_STMAS
+   use prmtrs_stmas
 
-  PUBLIC  WCOMPGERNL, WWGRADIENT
+   public wcompgernl, wwgradient
 
 !***************************************************
-!!COMMENT:
-!   THIS MODULE IS USED BY THE MODULE OF COSTFUN_GRAD TO CALCULATE THE VERTICAL VELOCITY AND GRADIENTS TO CONTROL VARIABLES.
-!   SUBROUTINES:
-!      WCOMPGERNL: CALCULATE VERTICAL VELOCITIES AT EACH GRID POINTS.
-!      WWGRADIENT: CALCULATE THE GRADIENT OF VERTICAL VELOCITIES TO CONTROL VARIABLES.
+!!comment:
+!   this module is used by the module of costfun_grad to calculate the vertical velocity and gradients to control variables.
+!   subroutines:
+!      wcompgernl: calculate vertical velocities at each grid points.
+!      wwgradient: calculate the gradient of vertical velocities to control variables.
 !***************************************************
-CONTAINS
+contains
 
-SUBROUTINE WCOMPGERNL
+   subroutine wcompgernl
 !*************************************************
-! CALCULATE THE VERTICAL VELOCITY WWW FOR GENERAL COORDINATE 
-! HISTORY : JANUARY 2008, MODIFIED FROM WEI LI'S PROGRAM BY ZHONGJIE HE
+! calculate the vertical velocity www for general coordinate
+! history : january 2008, modified from wei li's program by zhongjie he
 !
 !*************************************************
 
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,UU,VV,ZZ,K2,K1
-  REAL     :: HT(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4)),SZ
+      integer  :: i, j, k, t, i1, i2, j1, j2, uu, vv, zz, k2, k1
+      real     :: ht(numgrid(1), numgrid(2), numgrid(3), numgrid(4)), sz
 ! ---------------------
-! DECLARE :
-!          'HT' IS THE TEMPORARY ARRAY TO SAVE HEIGHT OF EACH GRID POINT
-!          'UU', 'VV' AND 'ZZ' ARE INDEXES OF THE CONTRAL VARIABLES FOR U, V AND HEIGHT RESPECTIVELY
+! declare :
+!          'ht' is the temporary array to save height of each grid point
+!          'uu', 'vv' and 'zz' are indexes of the contral variables for u, v and height respectively
 ! --------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  ZZ=PRESSURE
-  DO K=1,NUMGRID(3)
-  DO T=1,NUMGRID(4)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    WWW(I,J,K,T)=0.0
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      zz = pressure
+      do k = 1, numgrid(3)
+      do t = 1, numgrid(4)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         www(i, j, k, t) = 0.0
+      end do
+      end do
+      end do
+      end do
 
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2) THEN         ! FOR SIGMA AND HEIGHT COORDINATE
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      HT(I,J,K,T)=ZZZ(I,J,K,T)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    SZ=SCP(PSL)
-  ELSE                                            ! FOR PRESSURE COORDINATE
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      HT(I,J,K,T)=PPP(K)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    SZ=SCP(PSL)
-  ENDIF
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then         ! for sigma and height coordinate
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            ht(i, j, k, t) = zzz(i, j, k, t)
+         end do
+         end do
+         end do
+         end do
+         sz = scp(psl)
+      else                                            ! for pressure coordinate
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            ht(i, j, k, t) = ppp(k)
+         end do
+         end do
+         end do
+         end do
+         sz = scp(psl)
+      end if
 
-  DO K=2,NUMGRID(3)
-  DO T=1,NUMGRID(4)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    I1=MAX0(I-1,1)
-    I2=MIN0(I+1,NUMGRID(1))
-    J1=MAX0(J-1,1)
-    J2=MIN0(J+1,NUMGRID(2))
-    
-    WWW(I,J,K,T)=WWW(I,J,K-1,T)-(HT(I,J,K,T)-HT(I,J,K-1,T))*SZ/2.0 &
-                *((GRDANALS(I2,J,K-1,T,UU)-GRDANALS(I1,J,K-1,T,UU) &
-                  +GRDBKGND(I2,J,K-1,T,UU)-GRDBKGND(I1,J,K-1,T,UU)) &
-                 /(XXX(I2,J)-XXX(I1,J))/SCP(XSL)*1.0 &
-                 +(GRDANALS(I,J2,K-1,T,VV)-GRDANALS(I,J1,K-1,T,VV) &
-                  +GRDBKGND(I,J2,K-1,T,VV)-GRDBKGND(I,J1,K-1,T,VV)) &
-                 /(YYY(I,J2)-YYY(I,J1))/SCP(YSL)*1.0 &
-                 +(GRDANALS(I2,J,K  ,T,UU)-GRDANALS(I1,J,K  ,T,UU) &
-                  +GRDBKGND(I2,J,K  ,T,UU)-GRDBKGND(I1,J,K  ,T,UU)) &
-                 /(XXX(I2,J)-XXX(I1,J))/SCP(XSL)*1.0 &
-                 +(GRDANALS(I,J2,K  ,T,VV)-GRDANALS(I,J1,K  ,T,VV) &
-                  +GRDBKGND(I,J2,K  ,T,VV)-GRDBKGND(I,J1,K  ,T,VV)) &
-                 /(YYY(I,J2)-YYY(I,J1))/SCP(YSL)*1.0 &
-                 -(GRDANALS(I,J2,K-1,T,UU)-GRDANALS(I,J1,K-1,T,UU) &
-                  +GRDBKGND(I,J2,K-1,T,UU)-GRDBKGND(I,J1,K-1,T,UU)) &
-                 /(YYY(I,J2)-YYY(I,J1))/SCP(YSL)*0.0 &
-                 +(GRDANALS(I2,J,K-1,T,VV)-GRDANALS(I1,J,K-1,T,VV) &
-                  +GRDBKGND(I2,J,K-1,T,VV)-GRDBKGND(I1,J,K-1,T,VV)) &
-                 /(XXX(I2,J)-XXX(I1,J))/SCP(XSL)*0.0 &
-                 -(GRDANALS(I,J2,K  ,T,UU)-GRDANALS(I,J1,K  ,T,UU) &
-                  +GRDBKGND(I,J2,K  ,T,UU)-GRDBKGND(I,J1,K  ,T,UU)) &
-                 /(YYY(I,J2)-YYY(I,J1))/SCP(YSL)*0.0 &
-                 +(GRDANALS(I2,J,K  ,T,VV)-GRDANALS(I1,J,K  ,T,VV) &
-                  +GRDBKGND(I2,J,K  ,T,VV)-GRDBKGND(I1,J,K  ,T,VV)) &
-                 /(XXX(I2,J)-XXX(I1,J))/SCP(XSL)*0.0)
+      do k = 2, numgrid(3)
+      do t = 1, numgrid(4)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         i1 = max0(i - 1, 1)
+         i2 = min0(i + 1, numgrid(1))
+         j1 = max0(j - 1, 1)
+         j2 = min0(j + 1, numgrid(2))
 
-    IF(IFPCDNT.EQ.0) THEN                                          !     FOR SIGMA
-      WWW(I,J,K,T)=WWW(I,J,K,T)-(HT(I,J,K,T)-HT(I,J,K-1,T))*SZ/2.0 &
-                *((GRDANALS(I,J,K,T,UU)-GRDANALS(I,J,K-1,T,UU)  &
-                  +GRDBKGND(I,J,K,T,UU)-GRDBKGND(I,J,K-1,T,UU))  &
-                 /(HT(I,J,K,T)-HT(I,J,K-1,T))  &
-                 *(HT(I2,J,K,T)-HT(I1,J,K,T)+HT(I2,J,K-1,T)-HT(I1,J,K-1,T)) &
-                 /(XXX(I2,J)-XXX(I1,J))/SCP(XSL)*1.0  &
-                 +(GRDANALS(I,J,K,T,VV)-GRDANALS(I,J,K-1,T,VV)  &
-                  +GRDBKGND(I,J,K,T,VV)-GRDBKGND(I,J,K-1,T,VV))  &
-                 /(HT(I,J,K,T)-HT(I,J,K-1,T))  &
-                 *(HT(I,J2,K,T)-HT(I,J1,K,T)+HT(I,J2,K-1,T)-HT(I,J1,K-1,T)) &
-                 /(YYY(I,J2)-YYY(I,J1))/SCP(YSL)*1.0  &
-                - (GRDANALS(I,J,K,T,UU)-GRDANALS(I,J,K-1,T,UU)  &
-                  +GRDBKGND(I,J,K,T,UU)-GRDBKGND(I,J,K-1,T,UU))  &
-                 /(HT(I,J,K,T)-HT(I,J,K-1,T))  &
-                 *(HT(I,J2,K,T)-HT(I,J1,K,T)+HT(I,J2,K-1,T)-HT(I,J1,K-1,T)) &
-                 /(YYY(I,J2)-YYY(I,J1))/SCP(YSL)*0.0  &
-                 +(GRDANALS(I,J,K,T,VV)-GRDANALS(I,J,K-1,T,VV)  &
-                  +GRDBKGND(I,J,K,T,VV)-GRDBKGND(I,J,K-1,T,VV))  &
-                 /(HT(I,J,K,T)-HT(I,J,K-1,T))  &
-                 *(HT(I2,J,K,T)-HT(I1,J,K,T)+HT(I2,J,K-1,T)-HT(I1,J,K-1,T)) &
-                 /(XXX(I2,J)-XXX(I1,J))/SCP(XSL)*0.0 )
-    ENDIF
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+         www(i, j, k, t) = www(i, j, k - 1, t) - (ht(i, j, k, t) - ht(i, j, k - 1, t))*sz/2.0 &
+                           *((grdanals(i2, j, k - 1, t, uu) - grdanals(i1, j, k - 1, t, uu) &
+                              + grdbkgnd(i2, j, k - 1, t, uu) - grdbkgnd(i1, j, k - 1, t, uu)) &
+                             /(xxx(i2, j) - xxx(i1, j))/scp(xsl)*1.0 &
+                             + (grdanals(i, j2, k - 1, t, vv) - grdanals(i, j1, k - 1, t, vv) &
+                                + grdbkgnd(i, j2, k - 1, t, vv) - grdbkgnd(i, j1, k - 1, t, vv)) &
+                             /(yyy(i, j2) - yyy(i, j1))/scp(ysl)*1.0 &
+                             + (grdanals(i2, j, k, t, uu) - grdanals(i1, j, k, t, uu) &
+                                + grdbkgnd(i2, j, k, t, uu) - grdbkgnd(i1, j, k, t, uu)) &
+                             /(xxx(i2, j) - xxx(i1, j))/scp(xsl)*1.0 &
+                             + (grdanals(i, j2, k, t, vv) - grdanals(i, j1, k, t, vv) &
+                                + grdbkgnd(i, j2, k, t, vv) - grdbkgnd(i, j1, k, t, vv)) &
+                             /(yyy(i, j2) - yyy(i, j1))/scp(ysl)*1.0 &
+                             - (grdanals(i, j2, k - 1, t, uu) - grdanals(i, j1, k - 1, t, uu) &
+                                + grdbkgnd(i, j2, k - 1, t, uu) - grdbkgnd(i, j1, k - 1, t, uu)) &
+                             /(yyy(i, j2) - yyy(i, j1))/scp(ysl)*0.0 &
+                             + (grdanals(i2, j, k - 1, t, vv) - grdanals(i1, j, k - 1, t, vv) &
+                                + grdbkgnd(i2, j, k - 1, t, vv) - grdbkgnd(i1, j, k - 1, t, vv)) &
+                             /(xxx(i2, j) - xxx(i1, j))/scp(xsl)*0.0 &
+                             - (grdanals(i, j2, k, t, uu) - grdanals(i, j1, k, t, uu) &
+                                + grdbkgnd(i, j2, k, t, uu) - grdbkgnd(i, j1, k, t, uu)) &
+                             /(yyy(i, j2) - yyy(i, j1))/scp(ysl)*0.0 &
+                             + (grdanals(i2, j, k, t, vv) - grdanals(i1, j, k, t, vv) &
+                                + grdbkgnd(i2, j, k, t, vv) - grdbkgnd(i1, j, k, t, vv)) &
+                             /(xxx(i2, j) - xxx(i1, j))/scp(xsl)*0.0)
 
-  IF(IFPCDNT.EQ.1) THEN                                          !     FOR PRESSURE
-    DO K=2,NUMGRID(3)
-    DO T=1,NUMGRID(4)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      K1=K-1
-      K2=MIN(K+1,NUMGRID(3))
-      WWW(I,J,K,T)=WWW(I,J,K,T)   &
-                  *(GRDANALS(I,J,K2,T,ZZ)-GRDANALS(I,J,K1,T,ZZ)      &
-                   +GRDBKGND(I,J,K2,T,ZZ)-GRDBKGND(I,J,K1,T,ZZ))     &
-                  /(HT(I,J,K2,T)-HT(I,J,K1,T))*SCL(ZZ)*Z_TRANS/SCP(PSL)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE WCOMPGERNL
+         if (ifpcdnt .eq. 0) then                                          !     for sigma
+            www(i, j, k, t) = www(i, j, k, t) - (ht(i, j, k, t) - ht(i, j, k - 1, t))*sz/2.0 &
+                              *((grdanals(i, j, k, t, uu) - grdanals(i, j, k - 1, t, uu) &
+                                 + grdbkgnd(i, j, k, t, uu) - grdbkgnd(i, j, k - 1, t, uu)) &
+                                /(ht(i, j, k, t) - ht(i, j, k - 1, t)) &
+                                *(ht(i2, j, k, t) - ht(i1, j, k, t) + ht(i2, j, k - 1, t) - ht(i1, j, k - 1, t)) &
+                                /(xxx(i2, j) - xxx(i1, j))/scp(xsl)*1.0 &
+                                + (grdanals(i, j, k, t, vv) - grdanals(i, j, k - 1, t, vv) &
+                                   + grdbkgnd(i, j, k, t, vv) - grdbkgnd(i, j, k - 1, t, vv)) &
+                                /(ht(i, j, k, t) - ht(i, j, k - 1, t)) &
+                                *(ht(i, j2, k, t) - ht(i, j1, k, t) + ht(i, j2, k - 1, t) - ht(i, j1, k - 1, t)) &
+                                /(yyy(i, j2) - yyy(i, j1))/scp(ysl)*1.0 &
+                                - (grdanals(i, j, k, t, uu) - grdanals(i, j, k - 1, t, uu) &
+                                   + grdbkgnd(i, j, k, t, uu) - grdbkgnd(i, j, k - 1, t, uu)) &
+                                /(ht(i, j, k, t) - ht(i, j, k - 1, t)) &
+                                *(ht(i, j2, k, t) - ht(i, j1, k, t) + ht(i, j2, k - 1, t) - ht(i, j1, k - 1, t)) &
+                                /(yyy(i, j2) - yyy(i, j1))/scp(ysl)*0.0 &
+                                + (grdanals(i, j, k, t, vv) - grdanals(i, j, k - 1, t, vv) &
+                                   + grdbkgnd(i, j, k, t, vv) - grdbkgnd(i, j, k - 1, t, vv)) &
+                                /(ht(i, j, k, t) - ht(i, j, k - 1, t)) &
+                                *(ht(i2, j, k, t) - ht(i1, j, k, t) + ht(i2, j, k - 1, t) - ht(i1, j, k - 1, t)) &
+                                /(xxx(i2, j) - xxx(i1, j))/scp(xsl)*0.0)
+         end if
+      end do
+      end do
+      end do
+      end do
 
-SUBROUTINE WWGRADIENT(CC,ST)
+      if (ifpcdnt .eq. 1) then                                          !     for pressure
+         do k = 2, numgrid(3)
+         do t = 1, numgrid(4)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            k1 = k - 1
+            k2 = min(k + 1, numgrid(3))
+            www(i, j, k, t) = www(i, j, k, t) &
+                              *(grdanals(i, j, k2, t, zz) - grdanals(i, j, k1, t, zz) &
+                                + grdbkgnd(i, j, k2, t, zz) - grdbkgnd(i, j, k1, t, zz)) &
+                              /(ht(i, j, k2, t) - ht(i, j, k1, t))*scl(zz)*z_trans/scp(psl)
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine wcompgernl
+
+   subroutine wwgradient(cc, st)
 !*************************************************
-! CALCULATE THE GRADIENT OF DW/DU, DW/DV AND DW/DZ
-! HISTORY : JANUARY 25 2008, CODED BY ZHONGJIE HE
+! calculate the gradient of dw/du, dw/dv and dw/dz
+! history : january 25 2008, coded by zhongjie he
 !*************************************************
 ! --------------------
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER           :: I,J,K,T,I1,I2,J1,J2,K1,K2,UU,VV,ZZ,M,N,S,O,NO
-  REAL              :: Z1,Z2,Z3,Z4,SZ
-  INTEGER           :: NP(MAXDIMS)
-  REAL              :: HT(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4))
-  REAL ,INTENT(IN)  :: CC(NGPTOBS,NALLOBS)
-  INTEGER,INTENT(IN):: ST
-  REAL              :: SG(NUMGRID(1),NUMGRID(2)),CG(NUMGRID(1),NUMGRID(2)),ZP(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4))
-  REAL              :: XSCLE,YSCLE,XCOEFC,YCOEFC,XCOEFS,YCOEFS
+      integer           :: i, j, k, t, i1, i2, j1, j2, k1, k2, uu, vv, zz, m, n, s, o, no
+      real              :: z1, z2, z3, z4, sz
+      integer           :: np(maxdims)
+      real              :: ht(numgrid(1), numgrid(2), numgrid(3), numgrid(4))
+      real, intent(in)  :: cc(ngptobs, nallobs)
+      integer, intent(in):: st
+     real              :: sg(numgrid(1), numgrid(2)), cg(numgrid(1), numgrid(2)), zp(numgrid(1), numgrid(2), numgrid(3), numgrid(4))
+      real              :: xscle, yscle, xcoefc, ycoefc, xcoefs, ycoefs
 ! ---------------------
-! DECLARE :
-!          'CC' IS THE COEFFICENT USED TO CALCULATE GW
-!          'HT' IS THE TEMPORARY ARRAY TO SAVE HEIGHT OF EACH GRID POINT
-!          'NP' IS THE INDEX OF THE GRID THAT INVOLVES THE OBSERVATION
-!          'SG' AND 'CG' ARE THE COS AND SIN VALUES OF DEG RESPECTIVELY
-!          'UU', 'VV' AND 'ZZ' ARE INDEXES OF THE CONTRAL VARIABLES FOR U, V AND HEIGHT RESPECTIVELY
-!          'ST' IS THE INDEX OF THE OBSERVATION STATE
+! declare :
+!          'cc' is the coefficent used to calculate gw
+!          'ht' is the temporary array to save height of each grid point
+!          'np' is the index of the grid that involves the observation
+!          'sg' and 'cg' are the cos and sin values of deg respectively
+!          'uu', 'vv' and 'zz' are indexes of the contral variables for u, v and height respectively
+!          'st' is the index of the observation state
 ! ---------------------
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  ZZ=PRESSURE
-  IF(NALLOBS.EQ.0)RETURN
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      zz = pressure
+      if (nallobs .eq. 0) return
 
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2) THEN           ! FOR SIGMA AND HEIGHT COORDINATE
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      HT(I,J,K,T)=ZZZ(I,J,K,T)
-      ZP(I,J,K,T)=1.0
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    SZ=SCP(PSL)
-  ELSE                                              ! FOR PRESSURE COORDINATE
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      HT(I,J,K,T)=PPP(K)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    SZ=SCP(PSL)
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then           ! for sigma and height coordinate
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            ht(i, j, k, t) = zzz(i, j, k, t)
+            zp(i, j, k, t) = 1.0
+         end do
+         end do
+         end do
+         end do
+         sz = scp(psl)
+      else                                              ! for pressure coordinate
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            ht(i, j, k, t) = ppp(k)
+         end do
+         end do
+         end do
+         end do
+         sz = scp(psl)
 
-!   THE FOLLOWING IS CODED FOR THE CASE OF OMIGA
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      K1=MAX(K-1,1)
-      K2=MIN(K+1,NUMGRID(3))
-      ZP(I,J,K,T)=(GRDANALS(I,J,K2,T,ZZ)-GRDANALS(I,J,K1,T,ZZ)      &
-                  +GRDBKGND(I,J,K2,T,ZZ)-GRDBKGND(I,J,K1,T,ZZ))     &
-                  /(HT(I,J,K2,T)-HT(I,J,K1,T))*SCL(ZZ)*Z_TRANS/SCP(PSL)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
+!   the following is coded for the case of omiga
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            k1 = max(k - 1, 1)
+            k2 = min(k + 1, numgrid(3))
+            zp(i, j, k, t) = (grdanals(i, j, k2, t, zz) - grdanals(i, j, k1, t, zz) &
+                              + grdbkgnd(i, j, k2, t, zz) - grdbkgnd(i, j, k1, t, zz)) &
+                             /(ht(i, j, k2, t) - ht(i, j, k1, t))*scl(zz)*z_trans/scp(psl)
+         end do
+         end do
+         end do
+         end do
 
-  ENDIF
+      end if
 
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         sg(i, j) = 0.0
+         cg(i, j) = 1.0
+      end do
+      end do
 
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    SG(I,J)=0.0
-    CG(I,J)=1.0
-  ENDDO
-  ENDDO
+      xscle = sz/scp(xsl)/2.0
+      yscle = sz/scp(ysl)/2.0
 
-  XSCLE=SZ/SCP(XSL)/2.0
-  YSCLE=SZ/SCP(YSL)/2.0
+! this do loop is to calculate the gradient of vertical velocity to the control variable of u and v, the horizontal velocity.
+      o = 0
+      do s = 1, st - 1
+         o = o + nobstat(s)
+      end do
+      s = st
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            i1 = max0(i - 1, 1)
+            i2 = min0(i + 1, numgrid(1))
+            j1 = max0(j - 1, 1)
+            j2 = min0(j + 1, numgrid(2))
+            xcoefc = cc(m, o)/(xxx(i2, j) - xxx(i1, j))*xscle*cg(i, j)*zp(i, j, k, t)
+            ycoefc = cc(m, o)/(yyy(i, j2) - yyy(i, j1))*yscle*cg(i, j)*zp(i, j, k, t)
+            xcoefs = cc(m, o)/(xxx(i2, j) - xxx(i1, j))*xscle*sg(i, j)*zp(i, j, k, t)
+            ycoefs = cc(m, o)/(yyy(i, j2) - yyy(i, j1))*yscle*sg(i, j)*zp(i, j, k, t)
+            do k1 = 2, k
+               z2 = ht(i, j, k1, t)
+               z1 = ht(i, j, k1 - 1, t)
 
-! THIS DO LOOP IS TO CALCULATE THE GRADIENT OF VERTICAL VELOCITY TO THE CONTROL VARIABLE OF U AND V, THE HORIZONTAL VELOCITY.
-  O=0
-  DO S=1,ST-1
-    O=O+NOBSTAT(S)
-  ENDDO
-  S=ST
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      I1=MAX0(I-1,1)
-      I2=MIN0(I+1,NUMGRID(1))
-      J1=MAX0(J-1,1)
-      J2=MIN0(J+1,NUMGRID(2))
-      XCOEFC=CC(M,O)/(XXX(I2,J)-XXX(I1,J))*XSCLE*CG(I,J)*ZP(I,J,K,T)
-      YCOEFC=CC(M,O)/(YYY(I,J2)-YYY(I,J1))*YSCLE*CG(I,J)*ZP(I,J,K,T)
-      XCOEFS=CC(M,O)/(XXX(I2,J)-XXX(I1,J))*XSCLE*SG(I,J)*ZP(I,J,K,T)
-      YCOEFS=CC(M,O)/(YYY(I,J2)-YYY(I,J1))*YSCLE*SG(I,J)*ZP(I,J,K,T)
-      DO K1=2,K
-        Z2=HT(I,J,K1  ,T)
-        Z1=HT(I,J,K1-1,T)
-        
-        GRADINT(I2,J,K1-1,T,UU)=GRADINT(I2,J,K1-1,T,UU)-(Z2-Z1)*XCOEFC
-        GRADINT(I1,J,K1-1,T,UU)=GRADINT(I1,J,K1-1,T,UU)+(Z2-Z1)*XCOEFC
-        GRADINT(I,J2,K1-1,T,VV)=GRADINT(I,J2,K1-1,T,VV)-(Z2-Z1)*YCOEFC
-        GRADINT(I,J1,K1-1,T,VV)=GRADINT(I,J1,K1-1,T,VV)+(Z2-Z1)*YCOEFC
-        GRADINT(I2,J,K1  ,T,UU)=GRADINT(I2,J,K1  ,T,UU)-(Z2-Z1)*XCOEFC
-        GRADINT(I1,J,K1  ,T,UU)=GRADINT(I1,J,K1  ,T,UU)+(Z2-Z1)*XCOEFC
-        GRADINT(I,J2,K1  ,T,VV)=GRADINT(I,J2,K1  ,T,VV)-(Z2-Z1)*YCOEFC
-        GRADINT(I,J1,K1  ,T,VV)=GRADINT(I,J1,K1  ,T,VV)+(Z2-Z1)*YCOEFC
-        GRADINT(I,J2,K1-1,T,UU)=GRADINT(I,J2,K1-1,T,UU)+(Z2-Z1)*YCOEFS
-        GRADINT(I,J1,K1-1,T,UU)=GRADINT(I,J1,K1-1,T,UU)-(Z2-Z1)*YCOEFS
-        GRADINT(I2,J,K1-1,T,VV)=GRADINT(I2,J,K1-1,T,VV)-(Z2-Z1)*XCOEFS
-        GRADINT(I1,J,K1-1,T,VV)=GRADINT(I1,J,K1-1,T,VV)+(Z2-Z1)*XCOEFS
-        GRADINT(I,J2,K1  ,T,UU)=GRADINT(I,J2,K1  ,T,UU)+(Z2-Z1)*YCOEFS
-        GRADINT(I,J1,K1  ,T,UU)=GRADINT(I,J1,K1  ,T,UU)-(Z2-Z1)*YCOEFS
-        GRADINT(I2,J,K1  ,T,VV)=GRADINT(I2,J,K1  ,T,VV)-(Z2-Z1)*XCOEFS
-        GRADINT(I1,J,K1  ,T,VV)=GRADINT(I1,J,K1  ,T,VV)+(Z2-Z1)*XCOEFS
-      ENDDO
+               gradint(i2, j, k1 - 1, t, uu) = gradint(i2, j, k1 - 1, t, uu) - (z2 - z1)*xcoefc
+               gradint(i1, j, k1 - 1, t, uu) = gradint(i1, j, k1 - 1, t, uu) + (z2 - z1)*xcoefc
+               gradint(i, j2, k1 - 1, t, vv) = gradint(i, j2, k1 - 1, t, vv) - (z2 - z1)*ycoefc
+               gradint(i, j1, k1 - 1, t, vv) = gradint(i, j1, k1 - 1, t, vv) + (z2 - z1)*ycoefc
+               gradint(i2, j, k1, t, uu) = gradint(i2, j, k1, t, uu) - (z2 - z1)*xcoefc
+               gradint(i1, j, k1, t, uu) = gradint(i1, j, k1, t, uu) + (z2 - z1)*xcoefc
+               gradint(i, j2, k1, t, vv) = gradint(i, j2, k1, t, vv) - (z2 - z1)*ycoefc
+               gradint(i, j1, k1, t, vv) = gradint(i, j1, k1, t, vv) + (z2 - z1)*ycoefc
+               gradint(i, j2, k1 - 1, t, uu) = gradint(i, j2, k1 - 1, t, uu) + (z2 - z1)*ycoefs
+               gradint(i, j1, k1 - 1, t, uu) = gradint(i, j1, k1 - 1, t, uu) - (z2 - z1)*ycoefs
+               gradint(i2, j, k1 - 1, t, vv) = gradint(i2, j, k1 - 1, t, vv) - (z2 - z1)*xcoefs
+               gradint(i1, j, k1 - 1, t, vv) = gradint(i1, j, k1 - 1, t, vv) + (z2 - z1)*xcoefs
+               gradint(i, j2, k1, t, uu) = gradint(i, j2, k1, t, uu) + (z2 - z1)*ycoefs
+               gradint(i, j1, k1, t, uu) = gradint(i, j1, k1, t, uu) - (z2 - z1)*ycoefs
+               gradint(i2, j, k1, t, vv) = gradint(i2, j, k1, t, vv) - (z2 - z1)*xcoefs
+               gradint(i1, j, k1, t, vv) = gradint(i1, j, k1, t, vv) + (z2 - z1)*xcoefs
+            end do
 
-      IF(IFPCDNT.EQ.0) THEN
-      DO K1=2,K
-        Z1=HT(I1,J,K1  ,T)
-        Z2=HT(I2,J,K1  ,T)
-        Z3=HT(I1,J,K1-1,T)
-        Z4=HT(I2,J,K1-1,T)
-        GRADINT(I,J,K1  ,T,UU)=GRADINT(I,J,K1  ,T,UU)-(Z2-Z1+Z4-Z3)*XCOEFC
-        GRADINT(I,J,K1-1,T,UU)=GRADINT(I,J,K1-1,T,UU)+(Z2-Z1+Z4-Z3)*XCOEFC
-        GRADINT(I,J,K1  ,T,VV)=GRADINT(I,J,K1  ,T,VV)-(Z2-Z1+Z4-Z3)*XCOEFS
-        GRADINT(I,J,K1-1,T,VV)=GRADINT(I,J,K1-1,T,VV)+(Z2-Z1+Z4-Z3)*XCOEFS
-      ENDDO
-      DO K1=2,K
-        Z1=HT(I,J1,K1  ,T)
-        Z2=HT(I,J2,K1  ,T)
-        Z3=HT(I,J1,K1-1,T)
-        Z4=HT(I,J2,K1-1,T)
-        GRADINT(I,J,K1  ,T,VV)=GRADINT(I,J,K1  ,T,VV)-(Z2-Z1+Z4-Z3)*YCOEFC
-        GRADINT(I,J,K1-1,T,VV)=GRADINT(I,J,K1-1,T,VV)+(Z2-Z1+Z4-Z3)*YCOEFC
-        GRADINT(I,J,K1  ,T,UU)=GRADINT(I,J,K1  ,T,UU)+(Z2-Z1+Z4-Z3)*YCOEFS
-        GRADINT(I,J,K1-1,T,UU)=GRADINT(I,J,K1-1,T,UU)-(Z2-Z1+Z4-Z3)*YCOEFS
-      ENDDO
-      ENDIF
+            if (ifpcdnt .eq. 0) then
+            do k1 = 2, k
+               z1 = ht(i1, j, k1, t)
+               z2 = ht(i2, j, k1, t)
+               z3 = ht(i1, j, k1 - 1, t)
+               z4 = ht(i2, j, k1 - 1, t)
+               gradint(i, j, k1, t, uu) = gradint(i, j, k1, t, uu) - (z2 - z1 + z4 - z3)*xcoefc
+               gradint(i, j, k1 - 1, t, uu) = gradint(i, j, k1 - 1, t, uu) + (z2 - z1 + z4 - z3)*xcoefc
+               gradint(i, j, k1, t, vv) = gradint(i, j, k1, t, vv) - (z2 - z1 + z4 - z3)*xcoefs
+               gradint(i, j, k1 - 1, t, vv) = gradint(i, j, k1 - 1, t, vv) + (z2 - z1 + z4 - z3)*xcoefs
+            end do
+            do k1 = 2, k
+               z1 = ht(i, j1, k1, t)
+               z2 = ht(i, j2, k1, t)
+               z3 = ht(i, j1, k1 - 1, t)
+               z4 = ht(i, j2, k1 - 1, t)
+               gradint(i, j, k1, t, vv) = gradint(i, j, k1, t, vv) - (z2 - z1 + z4 - z3)*ycoefc
+               gradint(i, j, k1 - 1, t, vv) = gradint(i, j, k1 - 1, t, vv) + (z2 - z1 + z4 - z3)*ycoefc
+               gradint(i, j, k1, t, uu) = gradint(i, j, k1, t, uu) + (z2 - z1 + z4 - z3)*ycoefs
+               gradint(i, j, k1 - 1, t, uu) = gradint(i, j, k1 - 1, t, uu) - (z2 - z1 + z4 - z3)*ycoefs
+            end do
+            end if
 
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+         end do
+         end do
+         end do
+         end do
+      end do
 
+! the following statement is to calculate the gradient of vertical velocity to the variable of height, this is only necessary for the case of presure vertical coordinate.
 
-! THE FOLLOWING STATEMENT IS TO CALCULATE THE GRADIENT OF VERTICAL VELOCITY TO THE VARIABLE OF HEIGHT, THIS IS ONLY NECESSARY FOR THE CASE OF PRESURE VERTICAL COORDINATE.
+      if (ifpcdnt .eq. 1) then
+         o = 0
+         do s = 1, st - 1
+            o = o + nobstat(s)
+         end do
+         s = st
+         do no = 1, nobstat(s)
+            o = o + 1
+            do n = 1, maxdims
+               np(n) = obsidxpc(n, o)
+            end do
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               i1 = max0(i - 1, 1)
+               i2 = min0(i + 1, numgrid(1))
+               j1 = max0(j - 1, 1)
+               j2 = min0(j + 1, numgrid(2))
 
-  IF(IFPCDNT.EQ.1) THEN
-    O=0
-    DO S=1,ST-1
-      O=O+NOBSTAT(S)
-    ENDDO
-    S=ST
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        I1=MAX0(I-1,1)
-        I2=MIN0(I+1,NUMGRID(1))
-        J1=MAX0(J-1,1)
-        J2=MIN0(J+1,NUMGRID(2))
+               k1 = max(k - 1, 1)
+               k2 = min(k + 1, numgrid(3))
+   gradint(i, j, k1, t, zz) = gradint(i, j, k1, t, zz) + www(i, j, k, t)/zp(i, j, k, t)*(-1.0/(ppp(k2) - ppp(k1))/scp(psl))*cc(m, o)
+    gradint(i, j, k2, t, zz) = gradint(i, j, k2, t, zz) + www(i, j, k, t)/zp(i, j, k, t)*(1.0/(ppp(k2) - ppp(k1))/scp(psl))*cc(m, o)
 
-        K1=MAX(K-1,1)
-        K2=MIN(K+1,NUMGRID(3))
-        GRADINT(I,J,K1,T,ZZ)=GRADINT(I,J,K1,T,ZZ)+WWW(I,J,K,T)/ZP(I,J,K,T)*(-1.0/(PPP(K2)-PPP(K1))/SCP(PSL))*CC(M,O)
-        GRADINT(I,J,K2,T,ZZ)=GRADINT(I,J,K2,T,ZZ)+WWW(I,J,K,T)/ZP(I,J,K,T)*( 1.0/(PPP(K2)-PPP(K1))/SCP(PSL))*CC(M,O)
+            end do
+            end do
+            end do
+            end do
+         end do
+      end if
 
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
-  ENDIF
-  
-END SUBROUTINE WWGRADIENT
+   end subroutine wwgradient
 
-END MODULE WCOMPT_GRADT
+end module wcompt_gradt

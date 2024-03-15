@@ -1,40 +1,40 @@
 module src_global
 
-Implicit none
-Include 'variablen.incf'
+implicit none
+include 'variablen.incf'
 
-Integer, parameter :: mpnt = 32
-Real*8 :: u(mpnt),v(mpnt),wt(mpnt),xkr(mpnt),dkr(mpnt)
-Complex*16 ::pjzhx(mrank1,mrank1,mpnt),&
+integer, parameter :: mpnt = 32
+real*8 :: u(mpnt),v(mpnt),wt(mpnt),xkr(mpnt),dkr(mpnt)
+complex*16 ::pjzhx(mrank1,mrank1,mpnt),&
              pjzjx(mrank1,mrank1,mpnt),&
              rbjz(mrank1,mpnt),&
              rbhx(mrank1,mpnt), &
              refrc, eps, tmt(m2rank,m2rank,mrank1), pvz, phy
-Real*8 :: rbjx(mrank1,mpnt), wvnm
-Integer :: kxysym
-REAL :: scshp, deq, dmx, wcnxl, wcnzc, wcnlm, &
+real*8 :: rbjx(mrank1,mpnt), wvnm
+integer :: kxysym
+real :: scshp, deq, dmx, wcnxl, wcnzc, wcnlm, &
           temp, scmix, refre, refim
-REAL :: caupp(2), &
+real :: caupp(2), &
     cdtyp(2),&
     caavr(2),&
     cadev(2),&
         calow(2)
-INTEGER :: canum(2), ndr
-REAL ::  extm(4,4,mdr),&
+integer :: canum(2), ndr
+real ::  extm(4,4,mdr),&
      bmum(4,4,mdr), &
          stks(14,mdr)
-REAL :: cdprb(mca2,mdr),&        !Canting parameters
+real :: cdprb(mca2,mdr),&        !canting parameters
     cdpth(mca2,mdr),&
         cdpab(mca2,mdr),&
     cdpdd(mca2,mdr),&
     cdpab2(mca2,mdr),&
         cdpdd2(mca2,mdr),&
     cdpabd(mca2,mdr)
-Integer ::  cdpnum(mdr), n2rank, n2mode
-Complex*16 :: tmat(m2rank,m2rank)
-!Complex*16 :: aaa(m2rank,m2rank),&
+integer ::  cdpnum(mdr), n2rank, n2mode
+complex*16 :: tmat(m2rank,m2rank)
+!complex*16 :: aaa(m2rank,m2rank),&
 !              b(m2rank,m2rank)
-Save pjzhx, pjzjx, rbjz, rbhx, rbjx, wvnm, refrc, eps, kxysym, tmat,  &
+save pjzhx, pjzjx, rbjz, rbhx, rbjx, wvnm, refrc, eps, kxysym, tmat,  &
   u, v, wt, xkr, dkr, scshp, deq, dmx, wcnxl, wcnzc, wcnlm, refre, refim, &
        caupp, cdtyp, caavr, cadev, calow, temp, scmix,  cdprb, cdpth, &
         cdpab,&
@@ -44,4 +44,4 @@ Save pjzhx, pjzjx, rbjz, rbhx, rbjx, wvnm, refrc, eps, kxysym, tmat,  &
     cdpabd,ndr,  &
         cdpnum, extm, bmum, stks,  tmt, n2rank, n2mode, pvz, phy
 
-End Module src_global
+end module src_global

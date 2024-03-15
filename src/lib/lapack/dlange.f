@@ -1,145 +1,145 @@
-      DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
+      double precision function dlange( norm, m, n, a, lda, work )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      CHARACTER          NORM
-      INTEGER            LDA, M, N
+*     .. scalar arguments ..
+      character          norm
+      integer            lda, m, n
 *     ..
-*     .. Array Arguments ..
-      DOUBLE PRECISION   A( LDA, * ), WORK( * )
+*     .. array arguments ..
+      double precision   a( lda, * ), work( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLANGE  returns the value of the one norm,  or the Frobenius norm, or
+*  dlange  returns the value of the one norm,  or the frobenius norm, or
 *  the  infinity norm,  or the  element of  largest absolute value  of a
-*  real matrix A.
+*  real matrix a.
 *
-*  Description
+*  description
 *  ===========
 *
-*  DLANGE returns the value
+*  dlange returns the value
 *
-*     DLANGE = ( max(abs(A(i,j))), NORM = 'M' or 'm'
+*     dlange = ( max(abs(a(i,j))), norm = 'm' or 'm'
 *              (
-*              ( norm1(A),         NORM = '1', 'O' or 'o'
+*              ( norm1(a),         norm = '1', 'o' or 'o'
 *              (
-*              ( normI(A),         NORM = 'I' or 'i'
+*              ( normi(a),         norm = 'i' or 'i'
 *              (
-*              ( normF(A),         NORM = 'F', 'f', 'E' or 'e'
+*              ( normf(a),         norm = 'f', 'f', 'e' or 'e'
 *
 *  where  norm1  denotes the  one norm of a matrix (maximum column sum),
-*  normI  denotes the  infinity norm  of a matrix  (maximum row sum) and
-*  normF  denotes the  Frobenius norm of a matrix (square root of sum of
-*  squares).  Note that  max(abs(A(i,j)))  is not a  matrix norm.
+*  normi  denotes the  infinity norm  of a matrix  (maximum row sum) and
+*  normf  denotes the  frobenius norm of a matrix (square root of sum of
+*  squares).  note that  max(abs(a(i,j)))  is not a  matrix norm.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  NORM    (input) CHARACTER*1
-*          Specifies the value to be returned in DLANGE as described
+*  norm    (input) character*1
+*          specifies the value to be returned in dlange as described
 *          above.
 *
-*  M       (input) INTEGER
-*          The number of rows of the matrix A.  M >= 0.  When M = 0,
-*          DLANGE is set to zero.
+*  m       (input) integer
+*          the number of rows of the matrix a.  m >= 0.  when m = 0,
+*          dlange is set to zero.
 *
-*  N       (input) INTEGER
-*          The number of columns of the matrix A.  N >= 0.  When N = 0,
-*          DLANGE is set to zero.
+*  n       (input) integer
+*          the number of columns of the matrix a.  n >= 0.  when n = 0,
+*          dlange is set to zero.
 *
-*  A       (input) DOUBLE PRECISION array, dimension (LDA,N)
-*          The m by n matrix A.
+*  a       (input) double precision array, dimension (lda,n)
+*          the m by n matrix a.
 *
-*  LDA     (input) INTEGER
-*          The leading dimension of the array A.  LDA >= max(M,1).
+*  lda     (input) integer
+*          the leading dimension of the array a.  lda >= max(m,1).
 *
-*  WORK    (workspace) DOUBLE PRECISION array, dimension (LWORK),
-*          where LWORK >= M when NORM = 'I'; otherwise, WORK is not
+*  work    (workspace) double precision array, dimension (lwork),
+*          where lwork >= m when norm = 'i'; otherwise, work is not
 *          referenced.
 *
 * =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE, ZERO
-      PARAMETER          ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. parameters ..
+      double precision   one, zero
+      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      INTEGER            I, J
-      DOUBLE PRECISION   SCALE, SUM, VALUE
+*     .. local scalars ..
+      integer            i, j
+      double precision   scale, sum, value
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DLASSQ
+*     .. external subroutines ..
+      external           dlassq
 *     ..
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
+*     .. external functions ..
+      logical            lsame
+      external           lsame
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          ABS, MAX, MIN, SQRT
+*     .. intrinsic functions ..
+      intrinsic          abs, max, min, sqrt
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      IF( MIN( M, N ).EQ.0 ) THEN
-         VALUE = ZERO
-      ELSE IF( LSAME( NORM, 'M' ) ) THEN
+      if( min( m, n ).eq.0 ) then
+         value = zero
+      else if( lsame( norm, 'm' ) ) then
 *
-*        Find max(abs(A(i,j))).
+*        find max(abs(a(i,j))).
 *
-         VALUE = ZERO
-         DO 20 J = 1, N
-            DO 10 I = 1, M
-               VALUE = MAX( VALUE, ABS( A( I, J ) ) )
-   10       CONTINUE
-   20    CONTINUE
-      ELSE IF( ( LSAME( NORM, 'O' ) ) .OR. ( NORM.EQ.'1' ) ) THEN
+         value = zero
+         do 20 j = 1, n
+            do 10 i = 1, m
+               value = max( value, abs( a( i, j ) ) )
+   10       continue
+   20    continue
+      else if( ( lsame( norm, 'o' ) ) .or. ( norm.eq.'1' ) ) then
 *
-*        Find norm1(A).
+*        find norm1(a).
 *
-         VALUE = ZERO
-         DO 40 J = 1, N
-            SUM = ZERO
-            DO 30 I = 1, M
-               SUM = SUM + ABS( A( I, J ) )
-   30       CONTINUE
-            VALUE = MAX( VALUE, SUM )
-   40    CONTINUE
-      ELSE IF( LSAME( NORM, 'I' ) ) THEN
+         value = zero
+         do 40 j = 1, n
+            sum = zero
+            do 30 i = 1, m
+               sum = sum + abs( a( i, j ) )
+   30       continue
+            value = max( value, sum )
+   40    continue
+      else if( lsame( norm, 'i' ) ) then
 *
-*        Find normI(A).
+*        find normi(a).
 *
-         DO 50 I = 1, M
-            WORK( I ) = ZERO
-   50    CONTINUE
-         DO 70 J = 1, N
-            DO 60 I = 1, M
-               WORK( I ) = WORK( I ) + ABS( A( I, J ) )
-   60       CONTINUE
-   70    CONTINUE
-         VALUE = ZERO
-         DO 80 I = 1, M
-            VALUE = MAX( VALUE, WORK( I ) )
-   80    CONTINUE
-      ELSE IF( ( LSAME( NORM, 'F' ) ) .OR. ( LSAME( NORM, 'E' ) ) ) THEN
+         do 50 i = 1, m
+            work( i ) = zero
+   50    continue
+         do 70 j = 1, n
+            do 60 i = 1, m
+               work( i ) = work( i ) + abs( a( i, j ) )
+   60       continue
+   70    continue
+         value = zero
+         do 80 i = 1, m
+            value = max( value, work( i ) )
+   80    continue
+      else if( ( lsame( norm, 'f' ) ) .or. ( lsame( norm, 'e' ) ) ) then
 *
-*        Find normF(A).
+*        find normf(a).
 *
-         SCALE = ZERO
-         SUM = ONE
-         DO 90 J = 1, N
-            CALL DLASSQ( M, A( 1, J ), 1, SCALE, SUM )
-   90    CONTINUE
-         VALUE = SCALE*SQRT( SUM )
-      END IF
+         scale = zero
+         sum = one
+         do 90 j = 1, n
+            call dlassq( m, a( 1, j ), 1, scale, sum )
+   90    continue
+         value = scale*sqrt( sum )
+      end if
 *
-      DLANGE = VALUE
-      RETURN
+      dlange = value
+      return
 *
-*     End of DLANGE
+*     end of dlange
 *
-      END
+      end

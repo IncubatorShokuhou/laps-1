@@ -1,17 +1,17 @@
-Module mem_vol  
+module mem_vol  
 
-integer, allocatable, dimension(:,:,:) :: Reflectivity, Reflectivity_HI, RadialVelocity, RadialVelocity_HI
+integer, allocatable, dimension(:,:,:) :: reflectivity, reflectivity_hi, radialvelocity, radialvelocity_hi
 
-real, allocatable, dimension(:,:) :: elevationR, elevationR_HI, elevationV, elevationV_HI          
+real, allocatable, dimension(:,:) :: elevationr, elevationr_hi, elevationv, elevationv_hi          
 
-real, allocatable, dimension(:,:) :: azimuthR, azimuthR_HI, azimuthV, azimuthV_HI          
+real, allocatable, dimension(:,:) :: azimuthr, azimuthr_hi, azimuthv, azimuthv_hi          
 
-real, allocatable, dimension(:) :: distanceR, distanceR_HI, distanceV, distanceV_HI, nyquistVelocityV, nyquistVelocityV_HI          
+real, allocatable, dimension(:) :: distancer, distancer_hi, distancev, distancev_hi, nyquistvelocityv, nyquistvelocityv_hi          
 
-integer :: gateR, gateR_HI, gateV, gateV_HI, radialR, radialR_HI, &
-           radialV, radialV_HI, scanR, scanR_HI, scanV, &
-           scanV_HI,nf_fid, nf_vid, nf_status  
+integer :: gater, gater_hi, gatev, gatev_hi, radialr, radialr_hi, &
+           radialv, radialv_hi, scanr, scanr_hi, scanv, &
+           scanv_hi,nf_fid, nf_vid, nf_status  
 
 character*8 :: c8_fname_format
 
-end Module
+end module

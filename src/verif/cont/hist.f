@@ -1,28 +1,28 @@
 
-        subroutine radarhist(NX_L,NY_L,NZ_L,dbz_3d
+        subroutine radarhist(nx_l,ny_l,nz_l,dbz_3d
      1                      ,ilow,ihigh,jlow,jhigh
      1                      ,lmask_3d,lun_out)
  
-        real dbz_3d(NX_L,NY_L,NZ_L)
-        logical lmask_3d(NX_L,NY_L,NZ_L)
+        real dbz_3d(nx_l,ny_l,nz_l)
+        logical lmask_3d(nx_l,ny_l,nz_l)
 
         parameter (nbins=10)
 
         integer ihist(nbins)
-        integer ihist_2d(NZ_L,nbins)
+        integer ihist_2d(nz_l,nbins)
 
-!       Initialize histograms
+!       initialize histograms
         ihist = 0
         ihist_2d = 0
 
-!       Define area of interest
+!       define area of interest
         klow = 1
-        khigh = NZ_L
+        khigh = nz_l
 
         hist_low = 0.
         hist_intvl = 10.
 
-!       Note bin #1 is from 0-10 dbz and so on at 10dbz increments
+!       note bin #1 is from 0-10 dbz and so on at 10dbz increments
         do k = klow,khigh
         do i = ilow,ihigh
         do j = jlow,jhigh
@@ -37,7 +37,7 @@
         enddo ! i
         enddo ! k
 
-!       Write full volume histogram
+!       write full volume histogram
         do ibin = 1,nbins
             v1 = hist_low + hist_intvl * float(ibin-1)
             v2 = hist_low + hist_intvl * float(ibin  )
@@ -45,10 +45,10 @@
  1          format(' bin/range/count = ',i10,f6.1,f6.1,i10)
         enddo ! ibin
 
-!       Write histogram by level
+!       write histogram by level
         write(lun_out,*)
-        write(lun_out,*)' Histogram by level'
-        write(lun_out,*)'  Level    bin1      bin2      bin3      bin4'
+        write(lun_out,*)' histogram by level'
+        write(lun_out,*)'  level    bin1      bin2      bin3      bin4'
      1                 ,'      bin5      bin6      bin7      bin8  '     
      1                 ,'    bin9     bin10'   
         do k = klow,khigh

@@ -1,5 +1,5 @@
 
-Module mem_sfcanl
+module mem_sfcanl
 
 
 
@@ -11,13 +11,13 @@ end type
 
 type(sfcanl_fields) :: sfcanl
 
-! Pointers for renaming arrays in lapsvanl 
+! pointers for renaming arrays in lapsvanl 
 real, pointer, dimension(:,:) :: &
          u_a,v_a,p_a,t,td,vv,rh,hi,mslp,tadv,theta,thetae,psfc  &
         ,vort,q,qcon,div,thadv,qadv,spd,cssi,vis,fire,tgd_k
 
 
-Contains
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -160,4 +160,4 @@ end subroutine nullify_sfcanl_arrays
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-end Module
+end module

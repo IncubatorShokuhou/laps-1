@@ -1,125 +1,125 @@
 
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
  
-        subroutine read_profiles(i4time_sys,heights_3d,             ! I
-     1                   lat_pr,lon_pr,obstype,c5_name_a,           ! O
-     1                   lat,lon,topo,i4time_ob_pr,                 ! I
-     1                   MAX_PR,MAX_PR_LEVELS,                      ! I
-     1                   l_use_raob,l_use_all_nontower_lvls,        ! I
-     1                   ob_pr_u , ob_pr_v ,                        ! O
-     1                   max_obs,obs_point,nobs_point,weight_prof,  ! I/O
-     1                   nlevels_obs_pr, n_profiles,                ! O
-     1                   rlat_radar,rlon_radar,rheight_radar,       ! I
-     1                   n_vel_grids,                               ! I
-     1                   u_mdl_bkg_4d,v_mdl_bkg_4d,NTMIN,NTMAX,     ! I
-     1                   ilaps_cycle_time,r_missing_data,           ! I
-     1                   imax,jmax,kmax,                            ! I
-     1                   istatus                )                   ! O
+        subroutine read_profiles(i4time_sys,heights_3d,             ! i
+     1                   lat_pr,lon_pr,obstype,c5_name_a,           ! o
+     1                   lat,lon,topo,i4time_ob_pr,                 ! i
+     1                   max_pr,max_pr_levels,                      ! i
+     1                   l_use_raob,l_use_all_nontower_lvls,        ! i
+     1                   ob_pr_u , ob_pr_v ,                        ! o
+     1                   max_obs,obs_point,nobs_point,weight_prof,  ! i/o
+     1                   nlevels_obs_pr, n_profiles,                ! o
+     1                   rlat_radar,rlon_radar,rheight_radar,       ! i
+     1                   n_vel_grids,                               ! i
+     1                   u_mdl_bkg_4d,v_mdl_bkg_4d,ntmin,ntmax,     ! i
+     1                   ilaps_cycle_time,r_missing_data,           ! i
+     1                   imax,jmax,kmax,                            ! i
+     1                   istatus                )                   ! o
 
-!       1992 Steve Albers
-!       Note that the profiler data in the .PRO files are in knots...
-!       1994 Keith Brewster   Added reading of sounding data
-c       1995 Keith Brewster   Re-Added reading of sounding data, improved
+!       1992 steve albers
+!       note that the profiler data in the .pro files are in knots...
+!       1994 keith brewster   added reading of sounding data
+c       1995 keith brewster   re-added reading of sounding data, improved
 c                             error handling
-c       1996 Steve Albers     Added read of ob times from PRO files
-c       1996 Steve Albers     Read nearest PRO file, even if its time does
-c                             not exactly match the LAPS analysis time. 
-c                             Accept only those profiler obs whose 
-c                             mid-window times are within one LAPS cycle
-c                             time of the current LAPS analysis time.
-c	2006 Yuanfu Xie	      Use of the fraction grid values of obs_point.
+c       1996 steve albers     added read of ob times from pro files
+c       1996 steve albers     read nearest pro file, even if its time does
+c                             not exactly match the laps analysis time. 
+c                             accept only those profiler obs whose 
+c                             mid-window times are within one laps cycle
+c                             time of the current laps analysis time.
+c	2006 yuanfu xie	      use of the fraction grid values of obs_point.
 
 
 !*****************************************************************************
 
-        use mem_namelist, ONLY: iwrite_output
+        use mem_namelist, only: iwrite_output
 
         include 'barnesob.inc'
         type (barnesob) :: obs_point(max_obs)                           
 
-!       LAPS Grid Dimensions
+!       laps grid dimensions
 
         real lat(imax,jmax)
         real lon(imax,jmax)
         real topo(imax,jmax)
 
-!       Profile Stuff
-        real lat_pr(MAX_PR)
-        real lon_pr(MAX_PR)
-        real elev_pr(MAX_PR)
-        real rcycles_pr(MAX_PR)
-        integer i4time_ob_pr(MAX_PR)
+!       profile stuff
+        real lat_pr(max_pr)
+        real lon_pr(max_pr)
+        real elev_pr(max_pr)
+        real rcycles_pr(max_pr)
+        integer i4time_ob_pr(max_pr)
 
-!       Profiler Observations
+!       profiler observations
 
-        integer nlevels_obs_pr(MAX_PR)
-        character*8 obstype(MAX_PR)
-        real ob_pr_ht_obs(MAX_PR,MAX_PR_LEVELS)                             ! L
-        real ob_pr_pr_obs(MAX_PR,MAX_PR_LEVELS)                             ! L
-!       real ob_pr_di_obs(MAX_PR_LEVELS)                                    ! L
-!       real ob_pr_sp_obs(MAX_PR_LEVELS)                                    ! L
-        real ob_pr_u_obs(MAX_PR,MAX_PR_LEVELS)                              ! L
-        real ob_pr_v_obs(MAX_PR,MAX_PR_LEVELS)                              ! L
-        real ob_pr_rms_obs(MAX_PR,MAX_PR_LEVELS)                            ! L
-        real ob_pr_t_obs(MAX_PR,MAX_PR_LEVELS)                              ! L
-        real ob_pr_td_obs(MAX_PR,MAX_PR_LEVELS)                             ! L
-        real ob_pr_ht(MAX_PR,kmax)                                          ! L
-        real ob_pr_di(MAX_PR,kmax)                                          ! L
-        real ob_pr_sp(MAX_PR,kmax)                                          ! L
-        real ob_pr_u (MAX_PR,kmax) ! Vertically interpolated Profiler wind  ! O
-        real ob_pr_v (MAX_PR,kmax) ! Vertically interpolated Profiler wind  ! O
+        integer nlevels_obs_pr(max_pr)
+        character*8 obstype(max_pr)
+        real ob_pr_ht_obs(max_pr,max_pr_levels)                             ! l
+        real ob_pr_pr_obs(max_pr,max_pr_levels)                             ! l
+!       real ob_pr_di_obs(max_pr_levels)                                    ! l
+!       real ob_pr_sp_obs(max_pr_levels)                                    ! l
+        real ob_pr_u_obs(max_pr,max_pr_levels)                              ! l
+        real ob_pr_v_obs(max_pr,max_pr_levels)                              ! l
+        real ob_pr_rms_obs(max_pr,max_pr_levels)                            ! l
+        real ob_pr_t_obs(max_pr,max_pr_levels)                              ! l
+        real ob_pr_td_obs(max_pr,max_pr_levels)                             ! l
+        real ob_pr_ht(max_pr,kmax)                                          ! l
+        real ob_pr_di(max_pr,kmax)                                          ! l
+        real ob_pr_sp(max_pr,kmax)                                          ! l
+        real ob_pr_u (max_pr,kmax) ! vertically interpolated profiler wind  ! o
+        real ob_pr_v (max_pr,kmax) ! vertically interpolated profiler wind  ! o
 
-!       Profiler surface data (not currently used)
-        real sfc_t(MAX_PR), sfc_p(MAX_PR), sfc_rh(MAX_PR)                   ! L
-        real sfc_u(MAX_PR), sfc_v(MAX_PR)                                   ! L
+!       profiler surface data (not currently used)
+        real sfc_t(max_pr), sfc_p(max_pr), sfc_rh(max_pr)                   ! l
+        real sfc_u(max_pr), sfc_v(max_pr)                                   ! l
 
 !*****************************************************************************
 
         real heights_3d(imax,jmax,kmax)
 
-        dimension u_mdl_bkg_4d(imax,jmax,kmax,NTMIN:NTMAX)
-        dimension v_mdl_bkg_4d(imax,jmax,kmax,NTMIN:NTMAX)
+        dimension u_mdl_bkg_4d(imax,jmax,kmax,ntmin:ntmax)
+        dimension v_mdl_bkg_4d(imax,jmax,kmax,ntmin:ntmax)
 
         character*255 c_filespec
         character ext*31
-        character*5 c5_name, c5_name_a(MAX_PR)
+        character*5 c5_name, c5_name_a(max_pr)
         character*9 a9time_ob
         character*12 c_obstype
 
@@ -127,15 +127,15 @@ c	2006 Yuanfu Xie	      Use of the fraction grid values of obs_point.
 
         r_mspkt = .518
 
-        write(6,*)' Subroutine read_profiles: i4time = ',i4time_sys
+        write(6,*)' subroutine read_profiles: i4time = ',i4time_sys
 
-!       Initialize
+!       initialize
 
-        do i_pr = 1,MAX_PR
+        do i_pr = 1,max_pr
             nlevels_obs_pr(i_pr) = 0
         enddo
 
-        do i_pr = 1,MAX_PR
+        do i_pr = 1,max_pr
             do level = 1,kmax
 
                 ob_pr_ht(i_pr,level) = r_missing_data
@@ -155,34 +155,34 @@ c	2006 Yuanfu Xie	      Use of the fraction grid values of obs_point.
             if(istatus .ne. 1)go to 880
         endif
 
-! ***   Read in profiler data    ***************************************
+! ***   read in profiler data    ***************************************
 
-!       Open nearest PRO file to the LAPS analysis time
+!       open nearest pro file to the laps analysis time
         ext = 'pro'
         call get_filespec(ext,2,c_filespec,istatus)
         call get_file_time(c_filespec,i4time_sys,i4time_prof)
 
         lun = 12
-        call read_pro_data(lun,i4time_prof,ext                        ! I
-     1                         ,MAX_PR,MAX_PR_LEVELS                  ! I
-     1                         ,n_profiles                            ! O
-     1                         ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr  ! O
-     1                         ,c5_name_a,i4time_ob_pr,obstype        ! O
-     1                         ,ob_pr_ht_obs                          ! O
-     1                         ,ob_pr_u_obs,ob_pr_v_obs               ! O
-     1                         ,ob_pr_rms_obs                         ! O
-     1                         ,sfc_t,sfc_p,sfc_rh,sfc_u,sfc_v        ! O
-     1                         ,istatus)                              ! O
+        call read_pro_data(lun,i4time_prof,ext                        ! i
+     1                         ,max_pr,max_pr_levels                  ! i
+     1                         ,n_profiles                            ! o
+     1                         ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr  ! o
+     1                         ,c5_name_a,i4time_ob_pr,obstype        ! o
+     1                         ,ob_pr_ht_obs                          ! o
+     1                         ,ob_pr_u_obs,ob_pr_v_obs               ! o
+     1                         ,ob_pr_rms_obs                         ! o
+     1                         ,sfc_t,sfc_p,sfc_rh,sfc_u,sfc_v        ! o
+     1                         ,istatus)                              ! o
 
         n_profilers = n_profiles
 
-c ***   Read in sonde data    ***************************************
+c ***   read in sonde data    ***************************************
 c
 
       write(6,*)
 
       if(.not. l_use_raob)then
-          write(6,*)' Not using raobs, l_use_raob = ',l_use_raob
+          write(6,*)' not using raobs, l_use_raob = ',l_use_raob
       endif
 
       i4time_raob_file_window = 0
@@ -193,10 +193,10 @@ c
 
       i4time_diff = abs(i4time_sys - i4time_nearest)
       if(i4time_diff .le. i4time_raob_file_window)then
-          write(6,*)' Nearest SND file is within time window'
+          write(6,*)' nearest snd file is within time window'
      1                ,i4time_diff,i4time_raob_file_window
       else
-          write(6,*)' Warning: Nearest SND file is outside time window'       
+          write(6,*)' warning: nearest snd file is outside time window'       
      1                ,i4time_diff,i4time_raob_file_window
           go to 600
       endif
@@ -205,31 +205,31 @@ c
 
       lun = 12
       mode = 1 ! key levels off of wind data
-      call read_snd_data(lun,i4time_snd,ext                             ! I
-     1                         ,MAX_PR,MAX_PR_LEVELS                    ! I
-     1                         ,lat,lon,topo,imax,jmax,kmax             ! I
-     1                         ,heights_3d,.true.                       ! I
-     1                         ,mode                                    ! I
-     1                         ,n_profiles                              ! I/O
-     1                         ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr    ! O
-     1                         ,c5_name_a,i4time_ob_pr,obstype          ! O
-     1                         ,ob_pr_ht_obs,ob_pr_pr_obs               ! O
-     1                         ,ob_pr_u_obs,ob_pr_v_obs                 ! O
-     1                         ,ob_pr_t_obs,ob_pr_td_obs                ! O
-     1                         ,istatus)                                ! O
+      call read_snd_data(lun,i4time_snd,ext                             ! i
+     1                         ,max_pr,max_pr_levels                    ! i
+     1                         ,lat,lon,topo,imax,jmax,kmax             ! i
+     1                         ,heights_3d,.true.                       ! i
+     1                         ,mode                                    ! i
+     1                         ,n_profiles                              ! i/o
+     1                         ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr    ! o
+     1                         ,c5_name_a,i4time_ob_pr,obstype          ! o
+     1                         ,ob_pr_ht_obs,ob_pr_pr_obs               ! o
+     1                         ,ob_pr_u_obs,ob_pr_v_obs                 ! o
+     1                         ,ob_pr_t_obs,ob_pr_td_obs                ! o
+     1                         ,istatus)                                ! o
 
  600  continue
 
       n_snd=n_profiles-n_profilers
 
       write(6,*)
-      write(6,*) ' Read ',n_profilers,' wind profiler(s).'
-      write(6,*) ' Read ',n_snd,' sounding(s).'
+      write(6,*) ' read ',n_profilers,' wind profiler(s).'
+      write(6,*) ' read ',n_snd,' sounding(s).'
       write(6,*)
 c
-c     Process all wind profiles.  Interpolate heights to LAPS levels.
+c     process all wind profiles.  interpolate heights to laps levels.
 c
-      DO i_pr=1,n_profiles
+      do i_pr=1,n_profiles
 
             if(i_pr .le. 10)then
                 idebug = 1
@@ -245,10 +245,10 @@ c
                 istatus = 1
             else
                 iwrite = 0
-                istatus = 100 ! Suppress write statement in 'latlon_to_rlapsgrid'
+                istatus = 100 ! suppress write statement in 'latlon_to_rlapsgrid'
             endif
 
-!           Determine if profile is in the LAPS domain
+!           determine if profile is in the laps domain
 
             call latlon_to_rlapsgrid(lat_pr(i_pr),lon_pr(i_pr),lat,lon
      1                              ,imax,jmax,ri,rj,istatus)
@@ -258,12 +258,12 @@ c
             if(i_ob .ge. 1 .and. i_ob .le. imax .and.
      1         j_ob .ge. 1 .and. j_ob .le. jmax      )then
                 if(iwrite .eq. 1)
-     1             write(6,*)'Profile  # ',i_pr,' In Bounds - Doing '       
-     1                   ,'Vertical Interpolation'
+     1             write(6,*)'profile  # ',i_pr,' in bounds - doing '       
+     1                   ,'vertical interpolation'
             else
                 if(iwrite .eq. 1)
-     1             write(6,*)'Profile  # ',i_pr,' Out of Domain Bounds'       
-                nlevels_obs_pr(i_pr)=0 ! This effectively throws out the profile
+     1             write(6,*)'profile  # ',i_pr,' out of domain bounds'       
+                nlevels_obs_pr(i_pr)=0 ! this effectively throws out the profile
             endif
 
             call get_windob_time_window(obstype(i_pr),i4_window_ob
@@ -274,26 +274,26 @@ c
 
             rcyc_thresh = min(1.0,rcyc_thresh)
 
-!           Determine if profile was obtained close enough in time....
+!           determine if profile was obtained close enough in time....
             if(abs(rcycles_pr(i_pr)) .gt. rcyc_thresh)then
                 if(iwrite .eq. 1)
-     1             write(6,*)'Profile  # ',i_pr,' Out of time bounds:'       
+     1             write(6,*)'profile  # ',i_pr,' out of time bounds:'       
      1                                    ,rcycles_pr(i_pr)
-                nlevels_obs_pr(i_pr)=0 ! This effectively throws out the profile
+                nlevels_obs_pr(i_pr)=0 ! this effectively throws out the profile
             endif
 
-!  ***  Interpolate the profiles to the LAPS grid levels  *******
+!  ***  interpolate the profiles to the laps grid levels  *******
 
             if(nlevels_obs_pr(i_pr) .gt. 0)then
 
-              if(l_use_all_nontower_lvls .OR. 
-     1           obstype(i_pr)(1:5) .eq. 'TOWER' .OR.
-     1           obstype(i_pr)(1:5) .eq. 'SODAR'
+              if(l_use_all_nontower_lvls .or. 
+     1           obstype(i_pr)(1:5) .eq. 'tower' .or.
+     1           obstype(i_pr)(1:5) .eq. 'sodar'
      1                                           )then ! remap all levels
 
                 write(6,311)i_pr,i_ob,j_ob,nlevels_obs_pr(i_pr)
      1                     ,obstype(i_pr),c5_name_a(i_pr)
- 311            format(1x,' Remapping profile ',4i6,1x,a8,1x,a5
+ 311            format(1x,' remapping profile ',4i6,1x,a8,1x,a5
      1                ,' (all levels)')      
 
                 rklaps_min = r_missing_data
@@ -314,9 +314,9 @@ c
                         rklaps_max = max(rklaps,rklaps_max)
                         n_good_lvl = n_good_lvl + 1
 
-!                       Obtain time terms
+!                       obtain time terms
                         call get_time_term(u_mdl_bkg_4d,imax,jmax,kmax
-     1                                    ,NTMIN,NTMAX
+     1                                    ,ntmin,ntmax
      1                                    ,i_ob,j_ob,klaps
      1                                    ,i4time_sys,i4time_ob_pr(i_pr)       
      1                                    ,u_time_interp,u_diff_term
@@ -327,7 +327,7 @@ c
                         u_diff = -u_diff_term
 
                         call get_time_term(v_mdl_bkg_4d,imax,jmax,kmax
-     1                                    ,NTMIN,NTMAX
+     1                                    ,ntmin,ntmax
      1                                    ,i_ob,j_ob,klaps
      1                                    ,i4time_sys,i4time_ob_pr(i_pr)
      1                                    ,v_time_interp,v_diff_term
@@ -336,19 +336,19 @@ c
 !                       v_diff      = dv/dt * [t(anal) - t(ob)]
                         v_diff = -v_diff_term
 
-!                       Add to data structure (full sampling)
+!                       add to data structure (full sampling)
                         nobs_point = nobs_point + 1
                         obs_point(nobs_point)%i = i_ob
                         obs_point(nobs_point)%j = j_ob
                         obs_point(nobs_point)%k = klaps
-                        obs_point(nobs_point)%ri = ri	! Yuanfu
-                        obs_point(nobs_point)%rj = rj	! Yuanfu
+                        obs_point(nobs_point)%ri = ri	! yuanfu
+                        obs_point(nobs_point)%rj = rj	! yuanfu
                         obs_point(nobs_point)%rk = rklaps
                         obs_point(nobs_point)%valuef(1) = ob_u + u_diff       
                         obs_point(nobs_point)%valuef(2) = ob_v + v_diff
                         obs_point(nobs_point)%weight = weight_prof       
                         obs_point(nobs_point)%vert_rad_rat = 1.0
-                        if(obstype(i_pr)(1:5) .eq. 'TOWER')then
+                        if(obstype(i_pr)(1:5) .eq. 'tower')then
                             call downcase(obstype(i_pr),c_obstype)
                             obs_point(nobs_point)%type = c_obstype
                         else
@@ -357,7 +357,7 @@ c
                         obs_point(nobs_point)%file = 'pro'      
                         obs_point(nobs_point)%i4time = 
      1                                        i4time_ob_pr(i_pr)           
-                        if(obstype(i_pr)(1:4) .eq. 'RAOB')then
+                        if(obstype(i_pr)(1:4) .eq. 'raob')then
                           if(.not. l_use_raob)then
                             obs_point(nobs_point)%l_withhold = .true.
                           endif
@@ -375,7 +375,7 @@ c
 
                 enddo ! lvl
 
-!               Calculate mean # of laps levels between sounding levels
+!               calculate mean # of laps levels between sounding levels
                 if(n_good_lvl .gt. 1)then
                     rklaps_range = rklaps_max - rklaps_min
                     rklaps_mean = rklaps_range / float(n_good_lvl-1)
@@ -386,10 +386,10 @@ c
      1                 ,n_good_lvl,n_cross,rklaps_range,rklaps_mean
      1                 ,wt_factor
 
-!                   Adjust the weights for this profile?
+!                   adjust the weights for this profile?
                 endif
 
-              else ! interpolate from levels to LAPS grid
+              else ! interpolate from levels to laps grid
                 do level = 1,kmax
 
                     ht = heights_3d(i_ob,j_ob,level)
@@ -397,7 +397,7 @@ c
                     ob_pr_ht(i_pr,level) = ht
 
                     call get_time_term(u_mdl_bkg_4d,imax,jmax,kmax
-     1                                ,NTMIN,NTMAX
+     1                                ,ntmin,ntmax
      1                                ,i_ob,j_ob,level
      1                                ,i4time_sys,i4time_ob_pr(i_pr)
      1                                ,u_time_interp,u_diff_term
@@ -408,7 +408,7 @@ c
                     u_diff = -u_diff_term
 
                     call get_time_term(v_mdl_bkg_4d,imax,jmax,kmax
-     1                                ,NTMIN,NTMAX
+     1                                ,ntmin,ntmax
      1                                ,i_ob,j_ob,level
      1                                ,i4time_sys,i4time_ob_pr(i_pr)
      1                                ,v_time_interp,v_diff_term
@@ -417,20 +417,20 @@ c
 !                   v_diff      = dv/dt * [t(anal) - t(ob)]
                     v_diff = -v_diff_term
 
-                    call interp_prof(ob_pr_ht_obs,ob_pr_u_obs,     ! I
-     1                               ob_pr_v_obs,                  ! I
-     1                               u_diff,                       ! I
-     1                               v_diff,                       ! I
-     1                               ob_pr_u(i_pr,level),          ! O
-     1                               ob_pr_v(i_pr,level),          ! O
-     1                               ob_pr_di(i_pr,level),         ! O
-     1                               ob_pr_sp(i_pr,level),         ! O
-     1                               i_pr,ht,level,nlevels_obs_pr, ! I
-     1                               lat_pr,lon_pr,i_ob,j_ob,      ! I
-     1                               r_missing_data,               ! I
-     1                               heights_3d,imax,jmax,kmax,    ! I
-     1                               MAX_PR,MAX_PR_LEVELS,         ! I
-     1                               n_vel_grids,istatus)          ! I/O
+                    call interp_prof(ob_pr_ht_obs,ob_pr_u_obs,     ! i
+     1                               ob_pr_v_obs,                  ! i
+     1                               u_diff,                       ! i
+     1                               v_diff,                       ! i
+     1                               ob_pr_u(i_pr,level),          ! o
+     1                               ob_pr_v(i_pr,level),          ! o
+     1                               ob_pr_di(i_pr,level),         ! o
+     1                               ob_pr_sp(i_pr,level),         ! o
+     1                               i_pr,ht,level,nlevels_obs_pr, ! i
+     1                               lat_pr,lon_pr,i_ob,j_ob,      ! i
+     1                               r_missing_data,               ! i
+     1                               heights_3d,imax,jmax,kmax,    ! i
+     1                               max_pr,max_pr_levels,         ! i
+     1                               n_vel_grids,istatus)          ! i/o
 
                     if(idebug .eq. 1)write(6,411,err=412)i_pr,level
      1                              ,ob_pr_ht(i_pr,level)
@@ -455,7 +455,7 @@ c
 
             else
               if(iwrite .eq. 1)then
-                  write(6,*)' This profile is set to 0 levels',i_pr
+                  write(6,*)' this profile is set to 0 levels',i_pr
      1                      ,obstype(i_pr)
               endif
 
@@ -467,8 +467,8 @@ c
         istatus=1
         return
 
-  880   CONTINUE
-        write(6,*) ' Error opening PRG file'
+  880   continue
+        write(6,*) ' error opening prg file'
         istatus=0
         return
         end

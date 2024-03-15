@@ -1,60 +1,60 @@
 cdis
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
       subroutine make_optran_layers (a,b,c,aa,bb,cc,p,pp,kk,istatus)
 c
-c     Author: D. Birkenheuer
-c     Date: 9/4/2002
-c     Project: JCDSA
-c     Function: 
-c     This routine is designed to generate density weighted 
-c     layer averages for use in OPTRAN90, the FORTRAN90 
-c     version of OPTRAN initially written by Tom Kleespies 
-c     in F77 and later converted to F90 by Paul vanDelst.  
-c     OPTRAN90 requires layer-density weighted values 
+c     author: d. birkenheuer
+c     date: 9/4/2002
+c     project: jcdsa
+c     function: 
+c     this routine is designed to generate density weighted 
+c     layer averages for use in optran90, the fortran90 
+c     version of optran initially written by tom kleespies 
+c     in f77 and later converted to f90 by paul vandelst.  
+c     optran90 requires layer-density weighted values 
 c     for temperature, water vapor and ozone mixing ratios along 
-c     with pressure.  These are accomplished by calling 
+c     with pressure.  these are accomplished by calling 
 c     this routine with these independent variables as the first 
-c     4 arguments, and the p variable is pressure.  The 
+c     4 arguments, and the p variable is pressure.  the 
 c     routine is set to process profiles independently thus allowing 
-c     for the LAPS domain to possess vertical profiles 
+c     for the laps domain to possess vertical profiles 
 c     with different pressure levels.
 
 
-C     PARAMETER VARIABLES
+c     parameter variables
       integer, intent (in) :: kk
       integer, intent (in out) ::  istatus
       real, dimension (0:kk), intent (in) :: a,b,c,p ! a-c are arbitrary
@@ -62,12 +62,12 @@ C     PARAMETER VARIABLES
                                 !                      p is pressure
       real, dimension (kk), intent (out) :: aa,bb,cc,pp ! arbitrary outputs
 
-C     INTERNAL VARIABLES
-      integer :: k              ! index to KK
+c     internal variables
+      integer :: k              ! index to kk
 
       istatus = 0               ! set fault
 
-c     compute layer pressure (density weighted) per Van Delst
+c     compute layer pressure (density weighted) per van delst
       do k = 1, kk
          pp(k) = ( p(k-1)-p(k))/log( p(k-1)/p(k) )
       enddo                     !k
@@ -75,7 +75,7 @@ c     compute layer pressure (density weighted) per Van Delst
 c     in certain cases where the surface is very close to the lowest level
 c     a roundoff error will cause the pp(kk) value to be larger than p(kk)! 
 c     this in turn causes an out-of bounds extrapolation in the following code
-c     plus may damage the integration in the optran code.  To get around this,
+c     plus may damage the integration in the optran code.  to get around this,
 c     here a test is done to compare the values and if the pp(kk) is larger
 c     than p(kk), and average approximation is used for pp(kk)
 

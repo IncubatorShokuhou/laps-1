@@ -1,23 +1,23 @@
            
-      subroutine write_snd(lun_out                         ! I
-     1                    ,maxsnd,maxlvl,nsnd              ! I
-     1                    ,iwmostanum                      ! I
-     1                    ,stalat,stalon,staelev           ! I
-     1                    ,c5_staid,a9time_ob,c8_obstype   ! I
-     1                    ,nlvl                            ! I
-     1                    ,height_m                        ! I
-     1                    ,pressure_mb                     ! I
-     1                    ,temp_c                          ! I
-     1                    ,dewpoint_c                      ! I
-     1                    ,dir_deg                         ! I
-     1                    ,spd_mps                         ! I
-     1                    ,istatus)                        ! O
+      subroutine write_snd(lun_out                         ! i
+     1                    ,maxsnd,maxlvl,nsnd              ! i
+     1                    ,iwmostanum                      ! i
+     1                    ,stalat,stalon,staelev           ! i
+     1                    ,c5_staid,a9time_ob,c8_obstype   ! i
+     1                    ,nlvl                            ! i
+     1                    ,height_m                        ! i
+     1                    ,pressure_mb                     ! i
+     1                    ,temp_c                          ! i
+     1                    ,dewpoint_c                      ! i
+     1                    ,dir_deg                         ! i
+     1                    ,spd_mps                         ! i
+     1                    ,istatus)                        ! o
 
-!     Steve Albers FSL    2001
+!     steve albers fsl    2001
 
-!     Write routine for 'snd' file
+!     write routine for 'snd' file
 
-!     For missing data values, 'r_missing_data' should be passed in 
+!     for missing data values, 'r_missing_data' should be passed in 
 
 !.............................................................................
 
@@ -50,18 +50,18 @@
 
 !............................................................................
 
-!     Get RAOB Time Window
-      call get_windob_time_window('RAOB',i4_wind_ob,istatus)
+!     get raob time window
+      call get_windob_time_window('raob',i4_wind_ob,istatus)
       if(istatus .ne. 1)goto 990
 
-      call get_tempob_time_window('RAOB',i4_temp_ob,istatus)
+      call get_tempob_time_window('raob',i4_temp_ob,istatus)
       if(istatus .ne. 1)goto 990
 
       i4_raob_window = max(i4_wind_ob,i4_temp_ob)
 
       if(nsnd_total .eq. 0)then ! initialize variables
-!         Get systime
-          call GETENV('LAPS_A9TIME',a9_time)
+!         get systime
+          call getenv('laps_a9time',a9_time)
           call s_len(a9_time,ilen)
 
           if(ilen .eq. 9)then
@@ -78,7 +78,7 @@
 
         nsnd_total = nsnd_total + 1
 
-!       Reject observation times outside time window        
+!       reject observation times outside time window        
         call i4time_fname_lp(a9time_ob(isnd,1),i4time_raob,status)
         if(abs(i4time_raob - i4time_sys) .gt. i4_raob_window)then
             write(6,*)a9time_ob(isnd,1),
@@ -86,18 +86,18 @@
             goto 900
         endif
 
-!       Default QC for 'iwmostanum' and 'c5_staid'
+!       default qc for 'iwmostanum' and 'c5_staid'
         call check_nan(iwmostanum(isnd),istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Nan detected for WMOID, set to sounding # ',isnd
+            write(6,*)' nan detected for wmoid, set to sounding # ',isnd
             iwmo_out = isnd
         else
             iwmo_out = iwmostanum(isnd)
         endif
 
-        if(iwmostanum(isnd) .lt. 0 .OR. 
+        if(iwmostanum(isnd) .lt. 0 .or. 
      1     iwmostanum(isnd) .gt. 99999)then
-            write(6,*)' WMOID out of bounds, set to sounding # ',isnd
+            write(6,*)' wmoid out of bounds, set to sounding # ',isnd
             iwmo_out = isnd
         endif
 
@@ -106,7 +106,7 @@
             c5_sta = c5_staid(isnd)
 
         else 
-            write(6,*)' Filling in blank staid with WMOID # '
+            write(6,*)' filling in blank staid with wmoid # '
      1               ,isnd,iwmo_out
 
             write(c5_sta,101)iwmo_out
@@ -114,9 +114,9 @@
 
         endif
 
-!       Write Sounding Header
+!       write sounding header
 
-        if(c8_obstype(isnd) .ne. 'RADIOMTR')then
+        if(c8_obstype(isnd) .ne. 'radiomtr')then
             write(6,511,err=990)
      1             iwmo_out,nlvl(isnd)
      1            ,stalat(isnd,1),stalon(isnd,1),staelev(isnd)
@@ -146,10 +146,10 @@
 
         do lvl = 1,nlvl(isnd)
 
-!         Write Sounding Level (the character array helps keep everything
+!         write sounding level (the character array helps keep everything
 !                               in one line when using free format)
 
-          if(c8_obstype(isnd) .ne. 'RADIOMTR')then
+          if(c8_obstype(isnd) .ne. 'radiomtr')then
             write(c_line,*)height_m(isnd,lvl)," "
      1              ,pressure_mb(isnd,lvl)," "
      1              ,temp_c(isnd,lvl)," "
@@ -187,7 +187,7 @@
 
       go to 999
 
- 990  write(6,*)' ERROR in write_snd'
+ 990  write(6,*)' error in write_snd'
       istatus=0
       return
 

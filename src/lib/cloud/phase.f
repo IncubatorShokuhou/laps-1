@@ -1,8 +1,8 @@
 
-      SUBROUTINE phase(ox,oy,oz,PX,PY,PZ,phase_angle,ill_frac) ! in radians
-      IMPLICIT REAL*8 (A,B,C,D,E,F,G,H,O,P,Q,R,S,T,U,V,W,X,Y,Z)
+      subroutine phase(ox,oy,oz,px,py,pz,phase_angle,ill_frac) ! in radians
+      implicit real*8 (a,b,c,d,e,f,g,h,o,p,q,r,s,t,u,v,w,x,y,z)
       real*8 ill_frac
-      ACOS(X)=ATAN2(SQRT(1.-X*X),X)
+      acos(x)=atan2(sqrt(1.-x*x),x)
 
       dx = ox - px
       dy = oy - py
@@ -11,6 +11,6 @@
       phase_angle = angle_vectors(-px,-py,-pz,dx,dy,dz)
       ill_frac = (1. + cos(phase_angle)) / 2.
 
-      RETURN
+      return
 
-      END
+      end

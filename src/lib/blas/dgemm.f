@@ -1,313 +1,313 @@
-      SUBROUTINE DGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB,
-     $                   BETA, C, LDC )
-*     .. Scalar Arguments ..
-      CHARACTER*1        TRANSA, TRANSB
-      INTEGER            M, N, K, LDA, LDB, LDC
-      DOUBLE PRECISION   ALPHA, BETA
-*     .. Array Arguments ..
-      DOUBLE PRECISION   A( LDA, * ), B( LDB, * ), C( LDC, * )
+      subroutine dgemm ( transa, transb, m, n, k, alpha, a, lda, b, ldb,
+     $                   beta, c, ldc )
+*     .. scalar arguments ..
+      character*1        transa, transb
+      integer            m, n, k, lda, ldb, ldc
+      double precision   alpha, beta
+*     .. array arguments ..
+      double precision   a( lda, * ), b( ldb, * ), c( ldc, * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DGEMM  performs one of the matrix-matrix operations
+*  dgemm  performs one of the matrix-matrix operations
 *
-*     C := alpha*op( A )*op( B ) + beta*C,
+*     c := alpha*op( a )*op( b ) + beta*c,
 *
-*  where  op( X ) is one of
+*  where  op( x ) is one of
 *
-*     op( X ) = X   or   op( X ) = X',
+*     op( x ) = x   or   op( x ) = x',
 *
-*  alpha and beta are scalars, and A, B and C are matrices, with op( A )
-*  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+*  alpha and beta are scalars, and a, b and c are matrices, with op( a )
+*  an m by k matrix,  op( b )  a  k by n matrix and  c an m by n matrix.
 *
-*  Parameters
+*  parameters
 *  ==========
 *
-*  TRANSA - CHARACTER*1.
-*           On entry, TRANSA specifies the form of op( A ) to be used in
+*  transa - character*1.
+*           on entry, transa specifies the form of op( a ) to be used in
 *           the matrix multiplication as follows:
 *
-*              TRANSA = 'N' or 'n',  op( A ) = A.
+*              transa = 'n' or 'n',  op( a ) = a.
 *
-*              TRANSA = 'T' or 't',  op( A ) = A'.
+*              transa = 't' or 't',  op( a ) = a'.
 *
-*              TRANSA = 'C' or 'c',  op( A ) = A'.
+*              transa = 'c' or 'c',  op( a ) = a'.
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  TRANSB - CHARACTER*1.
-*           On entry, TRANSB specifies the form of op( B ) to be used in
+*  transb - character*1.
+*           on entry, transb specifies the form of op( b ) to be used in
 *           the matrix multiplication as follows:
 *
-*              TRANSB = 'N' or 'n',  op( B ) = B.
+*              transb = 'n' or 'n',  op( b ) = b.
 *
-*              TRANSB = 'T' or 't',  op( B ) = B'.
+*              transb = 't' or 't',  op( b ) = b'.
 *
-*              TRANSB = 'C' or 'c',  op( B ) = B'.
+*              transb = 'c' or 'c',  op( b ) = b'.
 *
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  M      - INTEGER.
-*           On entry,  M  specifies  the number  of rows  of the  matrix
-*           op( A )  and of the  matrix  C.  M  must  be at least  zero.
-*           Unchanged on exit.
+*  m      - integer.
+*           on entry,  m  specifies  the number  of rows  of the  matrix
+*           op( a )  and of the  matrix  c.  m  must  be at least  zero.
+*           unchanged on exit.
 *
-*  N      - INTEGER.
-*           On entry,  N  specifies the number  of columns of the matrix
-*           op( B ) and the number of columns of the matrix C. N must be
+*  n      - integer.
+*           on entry,  n  specifies the number  of columns of the matrix
+*           op( b ) and the number of columns of the matrix c. n must be
 *           at least zero.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  K      - INTEGER.
-*           On entry,  K  specifies  the number of columns of the matrix
-*           op( A ) and the number of rows of the matrix op( B ). K must
+*  k      - integer.
+*           on entry,  k  specifies  the number of columns of the matrix
+*           op( a ) and the number of rows of the matrix op( b ). k must
 *           be at least  zero.
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  ALPHA  - DOUBLE PRECISION.
-*           On entry, ALPHA specifies the scalar alpha.
-*           Unchanged on exit.
+*  alpha  - double precision.
+*           on entry, alpha specifies the scalar alpha.
+*           unchanged on exit.
 *
-*  A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
-*           k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
-*           Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
-*           part of the array  A  must contain the matrix  A,  otherwise
-*           the leading  k by m  part of the array  A  must contain  the
-*           matrix A.
-*           Unchanged on exit.
+*  a      - double precision array of dimension ( lda, ka ), where ka is
+*           k  when  transa = 'n' or 'n',  and is  m  otherwise.
+*           before entry with  transa = 'n' or 'n',  the leading  m by k
+*           part of the array  a  must contain the matrix  a,  otherwise
+*           the leading  k by m  part of the array  a  must contain  the
+*           matrix a.
+*           unchanged on exit.
 *
-*  LDA    - INTEGER.
-*           On entry, LDA specifies the first dimension of A as declared
-*           in the calling (sub) program. When  TRANSA = 'N' or 'n' then
-*           LDA must be at least  max( 1, m ), otherwise  LDA must be at
+*  lda    - integer.
+*           on entry, lda specifies the first dimension of a as declared
+*           in the calling (sub) program. when  transa = 'n' or 'n' then
+*           lda must be at least  max( 1, m ), otherwise  lda must be at
 *           least  max( 1, k ).
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
-*           n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
-*           Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
-*           part of the array  B  must contain the matrix  B,  otherwise
-*           the leading  n by k  part of the array  B  must contain  the
-*           matrix B.
-*           Unchanged on exit.
+*  b      - double precision array of dimension ( ldb, kb ), where kb is
+*           n  when  transb = 'n' or 'n',  and is  k  otherwise.
+*           before entry with  transb = 'n' or 'n',  the leading  k by n
+*           part of the array  b  must contain the matrix  b,  otherwise
+*           the leading  n by k  part of the array  b  must contain  the
+*           matrix b.
+*           unchanged on exit.
 *
-*  LDB    - INTEGER.
-*           On entry, LDB specifies the first dimension of B as declared
-*           in the calling (sub) program. When  TRANSB = 'N' or 'n' then
-*           LDB must be at least  max( 1, k ), otherwise  LDB must be at
+*  ldb    - integer.
+*           on entry, ldb specifies the first dimension of b as declared
+*           in the calling (sub) program. when  transb = 'n' or 'n' then
+*           ldb must be at least  max( 1, k ), otherwise  ldb must be at
 *           least  max( 1, n ).
-*           Unchanged on exit.
+*           unchanged on exit.
 *
-*  BETA   - DOUBLE PRECISION.
-*           On entry,  BETA  specifies the scalar  beta.  When  BETA  is
-*           supplied as zero then C need not be set on input.
-*           Unchanged on exit.
+*  beta   - double precision.
+*           on entry,  beta  specifies the scalar  beta.  when  beta  is
+*           supplied as zero then c need not be set on input.
+*           unchanged on exit.
 *
-*  C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
-*           Before entry, the leading  m by n  part of the array  C must
-*           contain the matrix  C,  except when  beta  is zero, in which
-*           case C need not be set on entry.
-*           On exit, the array  C  is overwritten by the  m by n  matrix
-*           ( alpha*op( A )*op( B ) + beta*C ).
+*  c      - double precision array of dimension ( ldc, n ).
+*           before entry, the leading  m by n  part of the array  c must
+*           contain the matrix  c,  except when  beta  is zero, in which
+*           case c need not be set on entry.
+*           on exit, the array  c  is overwritten by the  m by n  matrix
+*           ( alpha*op( a )*op( b ) + beta*c ).
 *
-*  LDC    - INTEGER.
-*           On entry, LDC specifies the first dimension of C as declared
-*           in  the  calling  (sub)  program.   LDC  must  be  at  least
+*  ldc    - integer.
+*           on entry, ldc specifies the first dimension of c as declared
+*           in  the  calling  (sub)  program.   ldc  must  be  at  least
 *           max( 1, m ).
-*           Unchanged on exit.
+*           unchanged on exit.
 *
 *
-*  Level 3 Blas routine.
+*  level 3 blas routine.
 *
-*  -- Written on 8-February-1989.
-*     Jack Dongarra, Argonne National Laboratory.
-*     Iain Duff, AERE Harwell.
-*     Jeremy Du Croz, Numerical Algorithms Group Ltd.
-*     Sven Hammarling, Numerical Algorithms Group Ltd.
+*  -- written on 8-february-1989.
+*     jack dongarra, argonne national laboratory.
+*     iain duff, aere harwell.
+*     jeremy du croz, numerical algorithms group ltd.
+*     sven hammarling, numerical algorithms group ltd.
 *
 *
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
-*     .. External Subroutines ..
-      EXTERNAL           XERBLA
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX
-*     .. Local Scalars ..
-      LOGICAL            NOTA, NOTB
-      INTEGER            I, INFO, J, L, NCOLA, NROWA, NROWB
-      DOUBLE PRECISION   TEMP
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE         , ZERO
-      PARAMETER        ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. external functions ..
+      logical            lsame
+      external           lsame
+*     .. external subroutines ..
+      external           xerbla
+*     .. intrinsic functions ..
+      intrinsic          max
+*     .. local scalars ..
+      logical            nota, notb
+      integer            i, info, j, l, ncola, nrowa, nrowb
+      double precision   temp
+*     .. parameters ..
+      double precision   one         , zero
+      parameter        ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
-*     transposed and set  NROWA, NCOLA and  NROWB  as the number of rows
-*     and  columns of  A  and the  number of  rows  of  B  respectively.
+*     set  nota  and  notb  as  true if  a  and  b  respectively are not
+*     transposed and set  nrowa, ncola and  nrowb  as the number of rows
+*     and  columns of  a  and the  number of  rows  of  b  respectively.
 *
-      NOTA  = LSAME( TRANSA, 'N' )
-      NOTB  = LSAME( TRANSB, 'N' )
-      IF( NOTA )THEN
-         NROWA = M
-         NCOLA = K
-      ELSE
-         NROWA = K
-         NCOLA = M
-      END IF
-      IF( NOTB )THEN
-         NROWB = K
-      ELSE
-         NROWB = N
-      END IF
+      nota  = lsame( transa, 'n' )
+      notb  = lsame( transb, 'n' )
+      if( nota )then
+         nrowa = m
+         ncola = k
+      else
+         nrowa = k
+         ncola = m
+      end if
+      if( notb )then
+         nrowb = k
+      else
+         nrowb = n
+      end if
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      IF(      ( .NOT.NOTA                 ).AND.
-     $         ( .NOT.LSAME( TRANSA, 'C' ) ).AND.
-     $         ( .NOT.LSAME( TRANSA, 'T' ) )      )THEN
-         INFO = 1
-      ELSE IF( ( .NOT.NOTB                 ).AND.
-     $         ( .NOT.LSAME( TRANSB, 'C' ) ).AND.
-     $         ( .NOT.LSAME( TRANSB, 'T' ) )      )THEN
-         INFO = 2
-      ELSE IF( M  .LT.0               )THEN
-         INFO = 3
-      ELSE IF( N  .LT.0               )THEN
-         INFO = 4
-      ELSE IF( K  .LT.0               )THEN
-         INFO = 5
-      ELSE IF( LDA.LT.MAX( 1, NROWA ) )THEN
-         INFO = 8
-      ELSE IF( LDB.LT.MAX( 1, NROWB ) )THEN
-         INFO = 10
-      ELSE IF( LDC.LT.MAX( 1, M     ) )THEN
-         INFO = 13
-      END IF
-      IF( INFO.NE.0 )THEN
-         CALL XERBLA( 'DGEMM ', INFO )
-         RETURN
-      END IF
+      info = 0
+      if(      ( .not.nota                 ).and.
+     $         ( .not.lsame( transa, 'c' ) ).and.
+     $         ( .not.lsame( transa, 't' ) )      )then
+         info = 1
+      else if( ( .not.notb                 ).and.
+     $         ( .not.lsame( transb, 'c' ) ).and.
+     $         ( .not.lsame( transb, 't' ) )      )then
+         info = 2
+      else if( m  .lt.0               )then
+         info = 3
+      else if( n  .lt.0               )then
+         info = 4
+      else if( k  .lt.0               )then
+         info = 5
+      else if( lda.lt.max( 1, nrowa ) )then
+         info = 8
+      else if( ldb.lt.max( 1, nrowb ) )then
+         info = 10
+      else if( ldc.lt.max( 1, m     ) )then
+         info = 13
+      end if
+      if( info.ne.0 )then
+         call xerbla( 'dgemm ', info )
+         return
+      end if
 *
-*     Quick return if possible.
+*     quick return if possible.
 *
-      IF( ( M.EQ.0 ).OR.( N.EQ.0 ).OR.
-     $    ( ( ( ALPHA.EQ.ZERO ).OR.( K.EQ.0 ) ).AND.( BETA.EQ.ONE ) ) )
-     $   RETURN
+      if( ( m.eq.0 ).or.( n.eq.0 ).or.
+     $    ( ( ( alpha.eq.zero ).or.( k.eq.0 ) ).and.( beta.eq.one ) ) )
+     $   return
 *
-*     And if  alpha.eq.zero.
+*     and if  alpha.eq.zero.
 *
-      IF( ALPHA.EQ.ZERO )THEN
-         IF( BETA.EQ.ZERO )THEN
-            DO 20, J = 1, N
-               DO 10, I = 1, M
-                  C( I, J ) = ZERO
-   10          CONTINUE
-   20       CONTINUE
-         ELSE
-            DO 40, J = 1, N
-               DO 30, I = 1, M
-                  C( I, J ) = BETA*C( I, J )
-   30          CONTINUE
-   40       CONTINUE
-         END IF
-         RETURN
-      END IF
+      if( alpha.eq.zero )then
+         if( beta.eq.zero )then
+            do 20, j = 1, n
+               do 10, i = 1, m
+                  c( i, j ) = zero
+   10          continue
+   20       continue
+         else
+            do 40, j = 1, n
+               do 30, i = 1, m
+                  c( i, j ) = beta*c( i, j )
+   30          continue
+   40       continue
+         end if
+         return
+      end if
 *
-*     Start the operations.
+*     start the operations.
 *
-      IF( NOTB )THEN
-         IF( NOTA )THEN
+      if( notb )then
+         if( nota )then
 *
-*           Form  C := alpha*A*B + beta*C.
+*           form  c := alpha*a*b + beta*c.
 *
-            DO 90, J = 1, N
-               IF( BETA.EQ.ZERO )THEN
-                  DO 50, I = 1, M
-                     C( I, J ) = ZERO
-   50             CONTINUE
-               ELSE IF( BETA.NE.ONE )THEN
-                  DO 60, I = 1, M
-                     C( I, J ) = BETA*C( I, J )
-   60             CONTINUE
-               END IF
-               DO 80, L = 1, K
-                  IF( B( L, J ).NE.ZERO )THEN
-                     TEMP = ALPHA*B( L, J )
-                     DO 70, I = 1, M
-                        C( I, J ) = C( I, J ) + TEMP*A( I, L )
-   70                CONTINUE
-                  END IF
-   80          CONTINUE
-   90       CONTINUE
-         ELSE
+            do 90, j = 1, n
+               if( beta.eq.zero )then
+                  do 50, i = 1, m
+                     c( i, j ) = zero
+   50             continue
+               else if( beta.ne.one )then
+                  do 60, i = 1, m
+                     c( i, j ) = beta*c( i, j )
+   60             continue
+               end if
+               do 80, l = 1, k
+                  if( b( l, j ).ne.zero )then
+                     temp = alpha*b( l, j )
+                     do 70, i = 1, m
+                        c( i, j ) = c( i, j ) + temp*a( i, l )
+   70                continue
+                  end if
+   80          continue
+   90       continue
+         else
 *
-*           Form  C := alpha*A'*B + beta*C
+*           form  c := alpha*a'*b + beta*c
 *
-            DO 120, J = 1, N
-               DO 110, I = 1, M
-                  TEMP = ZERO
-                  DO 100, L = 1, K
-                     TEMP = TEMP + A( L, I )*B( L, J )
-  100             CONTINUE
-                  IF( BETA.EQ.ZERO )THEN
-                     C( I, J ) = ALPHA*TEMP
-                  ELSE
-                     C( I, J ) = ALPHA*TEMP + BETA*C( I, J )
-                  END IF
-  110          CONTINUE
-  120       CONTINUE
-         END IF
-      ELSE
-         IF( NOTA )THEN
+            do 120, j = 1, n
+               do 110, i = 1, m
+                  temp = zero
+                  do 100, l = 1, k
+                     temp = temp + a( l, i )*b( l, j )
+  100             continue
+                  if( beta.eq.zero )then
+                     c( i, j ) = alpha*temp
+                  else
+                     c( i, j ) = alpha*temp + beta*c( i, j )
+                  end if
+  110          continue
+  120       continue
+         end if
+      else
+         if( nota )then
 *
-*           Form  C := alpha*A*B' + beta*C
+*           form  c := alpha*a*b' + beta*c
 *
-            DO 170, J = 1, N
-               IF( BETA.EQ.ZERO )THEN
-                  DO 130, I = 1, M
-                     C( I, J ) = ZERO
-  130             CONTINUE
-               ELSE IF( BETA.NE.ONE )THEN
-                  DO 140, I = 1, M
-                     C( I, J ) = BETA*C( I, J )
-  140             CONTINUE
-               END IF
-               DO 160, L = 1, K
-                  IF( B( J, L ).NE.ZERO )THEN
-                     TEMP = ALPHA*B( J, L )
-                     DO 150, I = 1, M
-                        C( I, J ) = C( I, J ) + TEMP*A( I, L )
-  150                CONTINUE
-                  END IF
-  160          CONTINUE
-  170       CONTINUE
-         ELSE
+            do 170, j = 1, n
+               if( beta.eq.zero )then
+                  do 130, i = 1, m
+                     c( i, j ) = zero
+  130             continue
+               else if( beta.ne.one )then
+                  do 140, i = 1, m
+                     c( i, j ) = beta*c( i, j )
+  140             continue
+               end if
+               do 160, l = 1, k
+                  if( b( j, l ).ne.zero )then
+                     temp = alpha*b( j, l )
+                     do 150, i = 1, m
+                        c( i, j ) = c( i, j ) + temp*a( i, l )
+  150                continue
+                  end if
+  160          continue
+  170       continue
+         else
 *
-*           Form  C := alpha*A'*B' + beta*C
+*           form  c := alpha*a'*b' + beta*c
 *
-            DO 200, J = 1, N
-               DO 190, I = 1, M
-                  TEMP = ZERO
-                  DO 180, L = 1, K
-                     TEMP = TEMP + A( L, I )*B( J, L )
-  180             CONTINUE
-                  IF( BETA.EQ.ZERO )THEN
-                     C( I, J ) = ALPHA*TEMP
-                  ELSE
-                     C( I, J ) = ALPHA*TEMP + BETA*C( I, J )
-                  END IF
-  190          CONTINUE
-  200       CONTINUE
-         END IF
-      END IF
+            do 200, j = 1, n
+               do 190, i = 1, m
+                  temp = zero
+                  do 180, l = 1, k
+                     temp = temp + a( l, i )*b( j, l )
+  180             continue
+                  if( beta.eq.zero )then
+                     c( i, j ) = alpha*temp
+                  else
+                     c( i, j ) = alpha*temp + beta*c( i, j )
+                  end if
+  190          continue
+  200       continue
+         end if
+      end if
 *
-      RETURN
+      return
 *
-*     End of DGEMM .
+*     end of dgemm .
 *
-      END
+      end

@@ -1,1026 +1,1024 @@
-MODULE COSTFUN_GRAD
+module costfun_grad
 !*************************************************
-! CALCULATE COST FUNCTION AND THE RELEVENT GRADIENTS
-! HISTORY: DEPARTED FROM STMAS4D_CORE MODULE BY ZHONGJIE HE, AUGUST 2007.
+! calculate cost function and the relevent gradients
+! history: departed from stmas4d_core module by zhongjie he, august 2007.
 !*************************************************
 
-  USE PRMTRS_STMAS
-  USE WCOMPT_GRADT
-  USE SMCOSTF_GRAD
-  USE GSBCOST_GRAD
-  USE HYDCOST_GRAD,ONLY:HYDROCOST,HYDROGRAD,HYDROCOST_XIE,HYDROGRAD_XIE,HYDROCOST_SHUYUAN,HYDROGRAD_SHUYUAN
+   use prmtrs_stmas
+   use wcompt_gradt
+   use smcostf_grad
+   use gsbcost_grad
+   use hydcost_grad, only: hydrocost, hydrograd, hydrocost_xie, hydrograd_xie, hydrocost_shuyuan, hydrograd_shuyuan
 
-  PUBLIC    COSTFUNCT, COSTGRADT, COSTFUNCT1, COSTGRADT1, COSTFUNCT2, COSTGRADT2, CG_VALUE, CG_GRAD
+   public costfunct, costgradt, costfunct1, costgradt1, costfunct2, costgradt2, cg_value, cg_grad
 
 !***************************************************
-!!COMMENT:
-!   THIS MODULE IS USED BY THE MODULE OF STMAS4D_CORE, THE FUNCTION IS TO CALCULATE THE VALUE OF COSTFUNCTION AND GRADIENTS.
-!   SUBROUTINES:
-!      COSTFUNCT: CALCULATE THE VALUE OF COSTFUNCTION, WHILE FOR THE RADIAL WIND DATA, THE VERTICAL VELOCITY IS NOT CONSIDERED.
-!      COSTGRADT: CALCULATE THE GRADIENT OF COSTFUNCTIONS CORRESPOND TO COSTFUNCT.
-!      COSTFUNCT1: CALCULATE THE VALUE OF COSTFUNCTION, FOR THE CASE THAT VERTICAL VELOCITYS ARE STATE VARIABLES.
-!      COSTGRADT1: CALCULATE THE GRADIENT OF COSTFUNCTIONS CORRESPOND TO COSTFUNCT1.
-!      COSTFUNCT2: JUST LIKE THE SUBROUTINE OF COSTFUNCT, WHILE THE VERTICAL VELOCITY IS CONSIDERED, BUT NOT STATE VARIABLES.
-!      COSTGRADT2: CALCULATE THE GRADIENT OF COSTFUNCTIONS CORRESPOND TO COSTFUNCT2.
+!!comment:
+!   this module is used by the module of stmas4d_core, the function is to calculate the value of costfunction and gradients.
+!   subroutines:
+!      costfunct: calculate the value of costfunction, while for the radial wind data, the vertical velocity is not considered.
+!      costgradt: calculate the gradient of costfunctions correspond to costfunct.
+!      costfunct1: calculate the value of costfunction, for the case that vertical velocitys are state variables.
+!      costgradt1: calculate the gradient of costfunctions correspond to costfunct1.
+!      costfunct2: just like the subroutine of costfunct, while the vertical velocity is considered, but not state variables.
+!      costgradt2: calculate the gradient of costfunctions correspond to costfunct2.
 !***************************************************
-CONTAINS
+contains
 
-SUBROUTINE COSTFUNCT1
+   subroutine costfunct1
 !*************************************************
-! CALCULATE COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! calculate cost function
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,O,NO,M,N,UU,VV,WW
-  INTEGER  :: NP(MAXDIMS)
-  REAL  :: HT,OI,HU,HV,HW,DG,DV
-  REAL  :: HT0,HU0,HV0,HW0
-  REAL  :: CS(NUMSTAT),CM,CB,CH
-  REAL  :: D2R
+      integer  :: i, j, k, t, s, o, no, m, n, uu, vv, ww
+      integer  :: np(maxdims)
+      real  :: ht, oi, hu, hv, hw, dg, dv
+      real  :: ht0, hu0, hv0, hw0
+      real  :: cs(numstat), cm, cb, ch
+      real  :: d2r
 
-  D2R = 3.14159/180.0
-
-! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  WW=W_CMPNNT
-! INITIALIZATION
-  COSTFUN=0.0
-  DO S=1,NUMSTAT
-    CS(S)=0.0
-  ENDDO
-  IF(NALLOBS.EQ.0)RETURN
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      OI=OBSERROR(O)**2
-      OI=1.0/OI
-      HT=0.0
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        HT=HT+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,S)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      COSTFUN=COSTFUN+(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))/(NOBSTAT(S)*1.0)
-      CS(S)=CS(S)+0.5*(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))/(NOBSTAT(S)*1.0)
-    ENDDO
-  ENDDO
-  S=NUMSTAT+1                                  !   FOR RADAR DATA
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,WW)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    DG=OBSEINF1(NO)
-    DV=OBSEINF2(NO)
-    HT=HU*SIN(D2R*DG)*COS(D2R*DV)+HV*COS(D2R*DG)*COS(D2R*DV)+HW*SIN(D2R*DV)
-    COSTFUN=COSTFUN+(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))*OBSRADAR
-  ENDDO
-  S=NUMSTAT+2                        ! FOR SRMR DATA
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    HU0=0.0
-    HV0=0.0
-    HW0=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,WW)
-      HU0=HU0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,UU)
-      HV0=HV0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,VV)
-      HW0=HW0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,WW)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=SQRT((HU+HU0)*(HU+HU0)+(HV+HV0)*(HV+HV0)+(HW+HW0)*(HW+HW0))
-    COSTFUN=COSTFUN+(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))*OBS_SFMR
-  ENDDO
-
-  COSTFUN=0.5D0*COSTFUN
-
-! SMOOTH TERM
-  CM=COSTFUN
-  CALL SMOTHCOST
-  CM=COSTFUN-CM
-
-! GEOSTROPHIC BALANCE TERM
-  IF(GRDLEVL .LE. ENDGSLV) THEN
-    CB=COSTFUN
-    IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN           ! FOR SIGMA AND HEIGHT COORDINATE
-      CALL GSBLNCOST_NON_UNIFORM_Z
-    ELSEIF(IFPCDNT.EQ.1)THEN                         ! FOR PRESSURE COORDINATE
-!    CALL GSBLNCOST_P_HS
-      CALL CNTNSCOST
-    ENDIF
-    CB=COSTFUN-CB
-  ENDIF
-
-!  WRITE(100,*)(CS(S),S=1,NUMSTAT),CM,CB
-
-! HYDROSTATIC CONDITION TERM                 ! ADDED BY ZHONGJIE HE
-  IF(GRDLEVL .LE. ENDHYLV) THEN
-    CH=COSTFUN
-    CALL HYDROCOST
-    CH=COSTFUN-CH
-  ENDIF
-
-  RETURN
-END SUBROUTINE COSTFUNCT1
-
-SUBROUTINE COSTGRADT1
-!*************************************************
-! CALCULATE GRADIENT OF COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!*************************************************
-  IMPLICIT NONE
-! --------------------
-  INTEGER  :: I,J,K,T,S,O,NO,M,N,UU,VV,WW
-  INTEGER  :: NP(MAXDIMS)
-  REAL     :: HT,OI,HU,HV,HW,DG,DV
-  REAL     :: HT0,HU0,HV0,HW0
-  REAL     :: D2R
-
-  D2R = 3.14159/180.0
+      d2r = 3.14159/180.0
 
 ! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  WW=W_CMPNNT
-! INITIALIZATION
-  DO S=1,NUMSTAT
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      GRADINT(I,J,K,T,S)=0.0
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
-  IF(NALLOBS.EQ.0)RETURN
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      OI=OBSERROR(O)**2
-      OI=1.0/OI
-      HT=0.0
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        HT=HT+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,S)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        GRADINT(I,J,K,T,S)=GRADINT(I,J,K,T,S)  &
-        +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)/(NOBSTAT(S)*1.0)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
-  ENDDO
-  S=NUMSTAT+1                         !  FOR RADAR DATA
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,WW)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    DG=OBSEINF1(NO)
-    DV=OBSEINF2(NO)
-    HT=HU*SIN(D2R*DG)*COS(D2R*DV)+HV*COS(D2R*DG)*COS(D2R*DV)+HW*SIN(D2R*DV)
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      GRADINT(I,J,K,T,UU)=GRADINT(I,J,K,T,UU)  &
-      +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*SIN(D2R*DG)*COS(D2R*DV)*OBSRADAR
-      GRADINT(I,J,K,T,VV)=GRADINT(I,J,K,T,VV)  &
-      +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*COS(D2R*DG)*COS(D2R*DV)*OBSRADAR
-      GRADINT(I,J,K,T,WW)=GRADINT(I,J,K,T,WW)  &
-      +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*SIN(D2R*DV)*OBSRADAR
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
-  S=NUMSTAT+2                !  FOR SFMR OBSERVATION
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)*OBSERROR(O)
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    HU0=0.0
-    HV0=0.0
-    HW0=0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,WW)
-      HU0=HU0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,UU)
-      HV0=HV0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,VV)
-      HW0=HW0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,WW)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=SQRT((HU+HU0)*(HU+HU0)+(HV+HV0)*(HV+HV0)+(HW+HW0)*(HW+HW0))
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      GRADINT(I,J,K,T,UU)=GRADINT(I,J,K,T,UU)  &
-      +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*(HU+HU0)/HT*OBS_SFMR
-      GRADINT(I,J,K,T,VV)=GRADINT(I,J,K,T,VV)  &
-      +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*(HV+HV0)/HT*OBS_SFMR
-      GRADINT(I,J,K,T,WW)=GRADINT(I,J,K,T,WW)  &
-      +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*(HW+HW0)/HT*OBS_SFMR
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      ww = w_cmpnnt
+! initialization
+      costfun = 0.0
+      do s = 1, numstat
+         cs(s) = 0.0
+      end do
+      if (nallobs .eq. 0) return
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            do n = 1, maxdims
+               np(n) = obsidxpc(n, o)
+            end do
+            oi = obserror(o)**2
+            oi = 1.0/oi
+            ht = 0.0
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               ht = ht + obscoeff(m, o)*grdanals(i, j, k, t, s)
+            end do
+            end do
+            end do
+            end do
+            costfun = costfun + (ht - obsvalue(o))*oi*(ht - obsvalue(o))/(nobstat(s)*1.0)
+            cs(s) = cs(s) + 0.5*(ht - obsvalue(o))*oi*(ht - obsvalue(o))/(nobstat(s)*1.0)
+         end do
+      end do
+      s = numstat + 1                                  !   for radar data
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*grdanals(i, j, k, t, ww)
+         end do
+         end do
+         end do
+         end do
+         dg = obseinf1(no)
+         dv = obseinf2(no)
+         ht = hu*sin(d2r*dg)*cos(d2r*dv) + hv*cos(d2r*dg)*cos(d2r*dv) + hw*sin(d2r*dv)
+         costfun = costfun + (ht - obsvalue(o))*oi*(ht - obsvalue(o))*obsradar
+      end do
+      s = numstat + 2                        ! for srmr data
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         hu0 = 0.0
+         hv0 = 0.0
+         hw0 = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*grdanals(i, j, k, t, ww)
+            hu0 = hu0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, uu)
+            hv0 = hv0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, vv)
+            hw0 = hw0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, ww)
+         end do
+         end do
+         end do
+         end do
+         ht = sqrt((hu + hu0)*(hu + hu0) + (hv + hv0)*(hv + hv0) + (hw + hw0)*(hw + hw0))
+         costfun = costfun + (ht - obsvalue(o))*oi*(ht - obsvalue(o))*obs_sfmr
+      end do
 
-! SMOOTH TERM
-  CALL SMOTHGRAD
+      costfun = 0.5d0*costfun
 
-! GEOSTROPHIC BALANCE TERM
-  IF(GRDLEVL .LE. ENDGSLV) THEN
-    IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN       ! FOR SIGMA AND HEIGHT COORDINATE
-      CALL GSBLNGRAD_NON_UNIFORM_Z
-    ELSEIF(IFPCDNT.EQ.1)THEN                     ! FOR PRESSURE COORDINATE
-!    CALL GSBLNGRAD_P_HS
-      CALL CNTNSGRAD
-    ENDIF
-  ENDIF
+! smooth term
+      cm = costfun
+      call smothcost
+      cm = costfun - cm
 
-! HYDROSTATIC CONDITION TERM                 ! ADDED BY ZHONGJIE HE
-  IF(GRDLEVL .LE. ENDHYLV) THEN
-    CALL HYDROGRAD
-  ENDIF
+! geostrophic balance term
+      if (grdlevl .le. endgslv) then
+         cb = costfun
+         if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then           ! for sigma and height coordinate
+            call gsblncost_non_uniform_z
+         elseif (ifpcdnt .eq. 1) then                         ! for pressure coordinate
+!    call gsblncost_p_hs
+            call cntnscost
+         end if
+         cb = costfun - cb
+      end if
 
+!  write(100,*)(cs(s),s=1,numstat),cm,cb
 
-  RETURN
-END SUBROUTINE COSTGRADT1
+! hydrostatic condition term                 ! added by zhongjie he
+      if (grdlevl .le. endhylv) then
+         ch = costfun
+         call hydrocost
+         ch = costfun - ch
+      end if
 
+      return
+   end subroutine costfunct1
 
-SUBROUTINE COSTFUNCT2
+   subroutine costgradt1
 !*************************************************
-! CALCULATE COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-! HISTORY: MODIFIED BY ZHONGJIE HE.
+! calculate gradient of cost function
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,O,NO,M,N,UU,VV
-  INTEGER  :: NP(MAXDIMS)
-  REAL  :: HT,OI,HU,HV,HW,DG,DV
-  REAL  :: HT0,HU0,HV0
-  REAL  :: CS(NUMSTAT+3),CM,CB,CH,ref
-  double precision :: rdr
+      integer  :: i, j, k, t, s, o, no, m, n, uu, vv, ww
+      integer  :: np(maxdims)
+      real     :: ht, oi, hu, hv, hw, dg, dv
+      real     :: ht0, hu0, hv0, hw0
+      real     :: d2r
+
+      d2r = 3.14159/180.0
+
+! --------------------
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      ww = w_cmpnnt
+! initialization
+      do s = 1, numstat
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            gradint(i, j, k, t, s) = 0.0
+         end do
+         end do
+         end do
+         end do
+      end do
+      if (nallobs .eq. 0) return
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            do n = 1, maxdims
+               np(n) = obsidxpc(n, o)
+            end do
+            oi = obserror(o)**2
+            oi = 1.0/oi
+            ht = 0.0
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               ht = ht + obscoeff(m, o)*grdanals(i, j, k, t, s)
+            end do
+            end do
+            end do
+            end do
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               gradint(i, j, k, t, s) = gradint(i, j, k, t, s) &
+                                        + (ht - obsvalue(o))*oi*obscoeff(m, o)/(nobstat(s)*1.0)
+            end do
+            end do
+            end do
+            end do
+         end do
+      end do
+      s = numstat + 1                         !  for radar data
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*grdanals(i, j, k, t, ww)
+         end do
+         end do
+         end do
+         end do
+         dg = obseinf1(no)
+         dv = obseinf2(no)
+         ht = hu*sin(d2r*dg)*cos(d2r*dv) + hv*cos(d2r*dg)*cos(d2r*dv) + hw*sin(d2r*dv)
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) &
+                                      + (ht - obsvalue(o))*oi*obscoeff(m, o)*sin(d2r*dg)*cos(d2r*dv)*obsradar
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) &
+                                      + (ht - obsvalue(o))*oi*obscoeff(m, o)*cos(d2r*dg)*cos(d2r*dv)*obsradar
+            gradint(i, j, k, t, ww) = gradint(i, j, k, t, ww) &
+                                      + (ht - obsvalue(o))*oi*obscoeff(m, o)*sin(d2r*dv)*obsradar
+         end do
+         end do
+         end do
+         end do
+      end do
+      s = numstat + 2                !  for sfmr observation
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)*obserror(o)
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         hu0 = 0.0
+         hv0 = 0.0
+         hw0 = 0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*grdanals(i, j, k, t, ww)
+            hu0 = hu0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, uu)
+            hv0 = hv0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, vv)
+            hw0 = hw0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, ww)
+         end do
+         end do
+         end do
+         end do
+         ht = sqrt((hu + hu0)*(hu + hu0) + (hv + hv0)*(hv + hv0) + (hw + hw0)*(hw + hw0))
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) &
+                                      + (ht - obsvalue(o))*oi*obscoeff(m, o)*(hu + hu0)/ht*obs_sfmr
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) &
+                                      + (ht - obsvalue(o))*oi*obscoeff(m, o)*(hv + hv0)/ht*obs_sfmr
+            gradint(i, j, k, t, ww) = gradint(i, j, k, t, ww) &
+                                      + (ht - obsvalue(o))*oi*obscoeff(m, o)*(hw + hw0)/ht*obs_sfmr
+         end do
+         end do
+         end do
+         end do
+      end do
+
+! smooth term
+      call smothgrad
+
+! geostrophic balance term
+      if (grdlevl .le. endgslv) then
+         if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then       ! for sigma and height coordinate
+            call gsblngrad_non_uniform_z
+         elseif (ifpcdnt .eq. 1) then                     ! for pressure coordinate
+!    call gsblngrad_p_hs
+            call cntnsgrad
+         end if
+      end if
+
+! hydrostatic condition term                 ! added by zhongjie he
+      if (grdlevl .le. endhylv) then
+         call hydrograd
+      end if
+
+      return
+   end subroutine costgradt1
+
+   subroutine costfunct2
+!*************************************************
+! calculate cost function
+! history: august 2007, coded by wei li.
+! history: modified by zhongjie he.
+!*************************************************
+      implicit none
+! --------------------
+      integer  :: i, j, k, t, s, o, no, m, n, uu, vv
+      integer  :: np(maxdims)
+      real  :: ht, oi, hu, hv, hw, dg, dv
+      real  :: ht0, hu0, hv0
+      real  :: cs(numstat + 3), cm, cb, ch, ref
+      double precision :: rdr
 ! added by shuyuan 20100907  for calculate ref, qr,qs..
-  REAL  ::rc     !   desity*rain water mixing ration    
-  REAL  ::sc     !   desity*snow water mixing ration 
-  REAL  :: Segma     !variance  for ref_obs
-  REAL  ::Temp_ref,tempr,temps
-  INTEGER  :: RR,RS  
-  REAL  :: D2R
+      real  ::rc     !   desity*rain water mixing ration
+      real  ::sc     !   desity*snow water mixing ration
+      real  :: segma     !variance  for ref_obs
+      real  ::temp_ref, tempr, temps
+      integer  :: rr, rs
+      real  :: d2r
 
-  D2R = 3.14159/180.0
+      d2r = 3.14159/180.0
 
-  UU=U_CMPNNT
-  VV=V_CMPNNT
+      uu = u_cmpnnt
+      vv = v_cmpnnt
 !added by shuyuan 20100728
-  RR=ROUR_CMPNNT
-  RS=ROUS_CMPNNT
+      rr = rour_cmpnnt
+      rs = rous_cmpnnt
 
-!  CALL WCOMPGERNL        !  MODIFIED BY ZHONGJIE HE.
-! INITIALIZATION
-  COSTFUN=0.0
-  DO S=1,NUMSTAT+3
-    CS(S)=0.0
-  ENDDO
-  IF(NALLOBS.EQ.0)RETURN
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      OI=OBSERROR(O)**2
-      OI=1.0/OI
-      HT=0.0
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        HT=HT+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,S)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      COSTFUN=COSTFUN+(HT-OBSVALUE(O))*(HT-OBSVALUE(O)) !/(NOBSTAT(S)*1.0)!!!modified by shuyuan   20101028
-      CS(S)=CS(S)+0.5*(HT-OBSVALUE(O))*(HT-OBSVALUE(O)) !/(NOBSTAT(S)*1.0)!!!modified by shuyuan   20101028
-    ENDDO
-  ENDDO
+!  call wcompgernl        !  modified by zhongjie he.
+! initialization
+      costfun = 0.0
+      do s = 1, numstat + 3
+         cs(s) = 0.0
+      end do
+      if (nallobs .eq. 0) return
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            do n = 1, maxdims
+               np(n) = obsidxpc(n, o)
+            end do
+            oi = obserror(o)**2
+            oi = 1.0/oi
+            ht = 0.0
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               ht = ht + obscoeff(m, o)*grdanals(i, j, k, t, s)
+            end do
+            end do
+            end do
+            end do
+            costfun = costfun + (ht - obsvalue(o))*(ht - obsvalue(o)) !/(nobstat(s)*1.0)!!!modified by shuyuan   20101028
+            cs(s) = cs(s) + 0.5*(ht - obsvalue(o))*(ht - obsvalue(o)) !/(nobstat(s)*1.0)!!!modified by shuyuan   20101028
+         end do
+      end do
 
-  ! FOR RADIAL WIND VELOCITY OBSERVATIONS
-  S=NUMSTAT+1
-  rdr = 0.0d0 !COSTFUN
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*WWW(I,J,K,T)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    DG=OBSEINF1(NO)
-    DV=OBSEINF2(NO)
-    HT=HU*SIN(D2R*DG)*COS(D2R*DV)+HV*COS(D2R*DG)*COS(D2R*DV)+HW*SIN(D2R*DV)
-    ! COSTFUN=COSTFUN+(HT-OBSVALUE(O))*(HT-OBSVALUE(O)) !*OBSRADAR!!!modified by shuyuan   20101028
-    rdr=rdr+(HT-OBSVALUE(O))*(HT-OBSVALUE(O))*OBSRADAR!!!modified by shuyuan   20101028
-  ENDDO
-  print*,'Radar radial wind cost: ',rdr,' obsradr= ',obsradar,' : ',costfun,rdr
-  CS(S) = rdr
-  COSTFUN = COSTFUN+rdr
+      ! for radial wind velocity observations
+      s = numstat + 1
+      rdr = 0.0d0 !costfun
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*www(i, j, k, t)
+         end do
+         end do
+         end do
+         end do
+         dg = obseinf1(no)
+         dv = obseinf2(no)
+         ht = hu*sin(d2r*dg)*cos(d2r*dv) + hv*cos(d2r*dg)*cos(d2r*dv) + hw*sin(d2r*dv)
+         ! costfun=costfun+(ht-obsvalue(o))*(ht-obsvalue(o)) !*obsradar!!!modified by shuyuan   20101028
+         rdr = rdr + (ht - obsvalue(o))*(ht - obsvalue(o))*obsradar!!!modified by shuyuan   20101028
+      end do
+      print *, 'radar radial wind cost: ', rdr, ' obsradr= ', obsradar, ' : ', costfun, rdr
+      cs(s) = rdr
+      costfun = costfun + rdr
 
-  ! FOR SFMR WIND VELOCITY OBSERVATIONS
-  S=NUMSTAT+2
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI 
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    HU0=0.0
-    HV0=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*WWW(I,J,K,T)
-      HU0=HU0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,UU)
-      HV0=HV0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,VV)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=SQRT((HU+HU0)*(HU+HU0)+(HV+HV0)*(HV+HV0)+HW*HW)
-    COSTFUN=COSTFUN+(HT-OBSVALUE(O))*(HT-OBSVALUE(O))!*OBS_SFMR!!!modified by shuyuan   20101028
-  ENDDO
+      ! for sfmr wind velocity observations
+      s = numstat + 2
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         hu0 = 0.0
+         hv0 = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*www(i, j, k, t)
+            hu0 = hu0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, uu)
+            hv0 = hv0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, vv)
+         end do
+         end do
+         end do
+         end do
+         ht = sqrt((hu + hu0)*(hu + hu0) + (hv + hv0)*(hv + hv0) + hw*hw)
+         costfun = costfun + (ht - obsvalue(o))*(ht - obsvalue(o))!*obs_sfmr!!!modified by shuyuan   20101028
+      end do
 
-  ! Reflectivity:
-  ref = COSTFUN
+      ! reflectivity:
+      ref = costfun
 ! --------------------
-! added by shuyuan 20100721    
-  ! CHECK IF RAIN ANALYSIS IS REQUESTED:
-  IF (NUMSTAT .LE. 5) GOTO 555
-  Segma=1.
-  S=NUMSTAT+3
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI
-    Temp_ref=0.0
-    M=0
-    rc=0.
-    sc=0.
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-            
-      M=M+1        
-      rc=rc+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,RR)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO     
-    !changed 20100907  shuyuan
-  
-    ! Temp_ref=(OBSVALUE(O)-43.1)/17.5
-    ! Temp_ref=(10.**Temp_ref)              !rc  unit is g/m3 
-    Temp_ref=OBSVALUE(O)
-    Temp_ref=(rc-Temp_ref)*(rc-Temp_ref)
+! added by shuyuan 20100721
+      ! check if rain analysis is requested:
+      if (numstat .le. 5) goto 555
+      segma = 1.
+      s = numstat + 3
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         temp_ref = 0.0
+         m = 0
+         rc = 0.
+         sc = 0.
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
 
-    !COSTFUN=COSTFUN+Temp_ref*OI/(Segma*Segma)/(NOBSTAT(S)*1.0) !!!!20101025
-    COSTFUN=COSTFUN+Temp_ref!!!!20101025
+            m = m + 1
+            rc = rc + obscoeff(m, o)*grdanals(i, j, k, t, rr)
+         end do
+         end do
+         end do
+         end do
+         !changed 20100907  shuyuan
 
-    CS(S)=CS(S)+0.5*Temp_ref
+         ! temp_ref=(obsvalue(o)-43.1)/17.5
+         ! temp_ref=(10.**temp_ref)              !rc  unit is g/m3
+         temp_ref = obsvalue(o)
+         temp_ref = (rc - temp_ref)*(rc - temp_ref)
 
-  ENDDO
-  print*,'Radar reflectivity cost: ',COSTFUN-ref, OBSVALUE(O-1),NOBSTAT(S),S,Segma
+         !costfun=costfun+temp_ref*oi/(segma*segma)/(nobstat(s)*1.0) !!!!20101025
+         costfun = costfun + temp_ref!!!!20101025
 
-  ! SKIP REFLECTIVITY:
-555 CONTINUE
+         cs(s) = cs(s) + 0.5*temp_ref
 
-  COSTFUN=0.5D0*COSTFUN
+      end do
+      print *, 'radar reflectivity cost: ', costfun - ref, obsvalue(o - 1), nobstat(s), s, segma
 
-! SMOOTH TERM
-  CM=COSTFUN
-  CALL SMOTHCOST
-  CM=COSTFUN-CM
+      ! skip reflectivity:
+555   continue
 
-! GEOSTROPHIC BALANCE TERM
-  CB = 0.0
-  IF(GRDLEVL .LE. ENDGSLV) THEN
-    CB=COSTFUN
-    IF(IFPCDNT.EQ. 0 .OR. IFPCDNT.EQ.2)THEN       ! FOR SIGMA AND HEIGHT COORDINATE
-      CALL GSBLNCOST_NON_UNIFORM_Z
-    ELSEIF(IFPCDNT.EQ.1)THEN                     ! FOR PRESSURE COORDINATE
-      CALL GSBLNCOST_P_HS
-    ENDIF
-    CB=COSTFUN-CB
-  ENDIF
+      costfun = 0.5d0*costfun
 
-! HYDROSTATIC CONDITION TERM                 ! ADDED BY ZHONGJIE HE
-  CH = 0.0
-  IF(GRDLEVL .LE. ENDHYLV) THEN
-    CH=COSTFUN
-    ! HYDROSTATIC IS BASED ON IF RAIN/SNOW IS ANALYZED:
-    IF (NUMSTAT .LE. 5) CALL HYDROCOST_XIE
-    IF (NUMSTAT .GT. 5) CALL HYDROCOST_SHUYUAN
-    CH=COSTFUN-CH
-  ENDIF
+! smooth term
+      cm = costfun
+      call smothcost
+      cm = costfun - cm
 
-  WRITE(*,1)(CS(S),S=1,NUMSTAT+3)
-1 FORMAT('Each state: ',10e12.4)
-  WRITE(*,2) CM,CB,CH
-2 FORMAT('Smoothing: ',e12.4,' Geostropic: ',e12.4,' Hydrostatic: ',e12.4)
+! geostrophic balance term
+      cb = 0.0
+      if (grdlevl .le. endgslv) then
+         cb = costfun
+         if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then       ! for sigma and height coordinate
+            call gsblncost_non_uniform_z
+         elseif (ifpcdnt .eq. 1) then                     ! for pressure coordinate
+            call gsblncost_p_hs
+         end if
+         cb = costfun - cb
+      end if
 
-  RETURN
-END SUBROUTINE COSTFUNCT2
+! hydrostatic condition term                 ! added by zhongjie he
+      ch = 0.0
+      if (grdlevl .le. endhylv) then
+         ch = costfun
+         ! hydrostatic is based on if rain/snow is analyzed:
+         if (numstat .le. 5) call hydrocost_xie
+         if (numstat .gt. 5) call hydrocost_shuyuan
+         ch = costfun - ch
+      end if
 
-SUBROUTINE COSTGRADT2
+      write (*, 1) (cs(s), s=1, numstat + 3)
+1     format('each state: ', 10e12.4)
+      write (*, 2) cm, cb, ch
+2     format('smoothing: ', e12.4, ' geostropic: ', e12.4, ' hydrostatic: ', e12.4)
+
+      return
+   end subroutine costfunct2
+
+   subroutine costgradt2
 !*************************************************
-! CALCULATE GRADIENT OF COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-! HISTORY: JANUARY 2008, MODIFIED BY ZHONGJIE HE
+! calculate gradient of cost function
+! history: august 2007, coded by wei li.
+! history: january 2008, modified by zhongjie he
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,I1,I2,J1,J2,K1,S,O,NO,M,N,UU,VV,ZZ,RR,RS
-  INTEGER  :: NP(MAXDIMS)
-  REAL     :: HT,OI,HU,HV,HW,DG,DV,Z1,Z2
-  REAL     :: HT0,HU0,HV0
-  REAL     :: CC(NGPTOBS,NALLOBS)
+      integer  :: i, j, k, t, i1, i2, j1, j2, k1, s, o, no, m, n, uu, vv, zz, rr, rs
+      integer  :: np(maxdims)
+      real     :: ht, oi, hu, hv, hw, dg, dv, z1, z2
+      real     :: ht0, hu0, hv0
+      real     :: cc(ngptobs, nallobs)
 !-------------------------------------------
 ! added by shuyuan 20100713  for calculate ref, qr,qs..
-  REAL  ::RouR ,rc     !   desity*rain water mixing ration,rc=ROUR  
-  REAL  ::RouS  ,sc    !   desity*snow water mixing ration,sc=ROUS
-  REAL  :: C1,C2    ! coeff  for rour and rous
-  REAL  :: Segma     !variance  for ref_obs
-  REAL  ::Temp_ref,temp,temp1
-  REAL  :: D2R
-   
-  D2R = 3.14159/180.0
+      real  ::rour, rc     !   desity*rain water mixing ration,rc=rour
+      real  ::rous, sc    !   desity*snow water mixing ration,sc=rous
+      real  :: c1, c2    ! coeff  for rour and rous
+      real  :: segma     !variance  for ref_obs
+      real  ::temp_ref, temp, temp1
+      real  :: d2r
 
-!  DECLARATION :
-!                'CC' IS THE COEFFICENT USED TO CALCULATE GRADIENT OF W TO CONTROL VARIABLE
+      d2r = 3.14159/180.0
+
+!  declaration :
+!                'cc' is the coefficent used to calculate gradient of w to control variable
 ! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  ZZ=PRESSURE
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      zz = pressure
 !added by shuyuan 20100728
-  RR=ROUR_CMPNNT
-  RS=ROUS_CMPNNT
-!  CALL WCOMPGERNL        ! MODIFIED BY ZHONGJIE HE
-! INITIALIZATION
+      rr = rour_cmpnnt
+      rs = rous_cmpnnt
+!  call wcompgernl        ! modified by zhongjie he
+! initialization
 
-  DO S=1,NUMSTAT
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      GRADINT(I,J,K,T,S)=0.0
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
-  IF(NALLOBS.EQ.0)RETURN
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      OI=OBSERROR(O)*OBSERROR(O)
-      OI=1.0/OI
-      HT=0.0
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        HT=HT+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,S)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        GRADINT(I,J,K,T,S)=GRADINT(I,J,K,T,S)  &
-        +(HT-OBSVALUE(O))*OBSCOEFF(M,O)!!!modified by shuyuan   20101028
-        ! +(HT-OBSVALUE(O))*OBSCOEFF(M,O)/(NOBSTAT(S)*1.0)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
-  ENDDO
-  S=NUMSTAT+1                           ! FOR RADIAL WIND OBSERVATIONS
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)*OBSERROR(O)
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*WWW(I,J,K,T)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-     
-    DG=OBSEINF1(NO)
-    DV=OBSEINF2(NO)
-    HT=HU*SIN(D2R*DG)*COS(D2R*DV)+HV*COS(D2R*DG)*COS(D2R*DV)+HW*SIN(D2R*DV)
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      GRADINT(I,J,K,T,UU)=GRADINT(I,J,K,T,UU)  &
-      +(HT-OBSVALUE(O))*OBSCOEFF(M,O)*SIN(D2R*DG)*COS(D2R*DV)*OBSRADAR
-     ! +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*SIN(D2R*DG)*COS(D2R*DV)*OBSRADAR!!!modified by shuyuan   20101028
-      GRADINT(I,J,K,T,VV)=GRADINT(I,J,K,T,VV)  &
-       +(HT-OBSVALUE(O))*OBSCOEFF(M,O)*COS(D2R*DG)*COS(D2R*DV)*OBSRADAR
-      !+(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*COS(D2R*DG)*COS(D2R*DV)*OBSRADAR!!!modified by shuyuan   20101028
-      CC(M,O)=(HT-OBSVALUE(O))*SIN(D2R*DV)*OBSCOEFF(M,O)*OBSRADAR!!!modified by shuyuan   20101028
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      do s = 1, numstat
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            gradint(i, j, k, t, s) = 0.0
+         end do
+         end do
+         end do
+         end do
+      end do
+      if (nallobs .eq. 0) return
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            do n = 1, maxdims
+               np(n) = obsidxpc(n, o)
+            end do
+            oi = obserror(o)*obserror(o)
+            oi = 1.0/oi
+            ht = 0.0
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               ht = ht + obscoeff(m, o)*grdanals(i, j, k, t, s)
+            end do
+            end do
+            end do
+            end do
+            m = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               gradint(i, j, k, t, s) = gradint(i, j, k, t, s) &
+                                        + (ht - obsvalue(o))*obscoeff(m, o)!!!modified by shuyuan   20101028
+               ! +(ht-obsvalue(o))*obscoeff(m,o)/(nobstat(s)*1.0)
+            end do
+            end do
+            end do
+            end do
+         end do
+      end do
+      s = numstat + 1                           ! for radial wind observations
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)*obserror(o)
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*www(i, j, k, t)
+         end do
+         end do
+         end do
+         end do
 
-  CALL WWGRADIENT(CC,S)  ! ADDED BY ZHONGJIE HE TO CALCULATE THE GRADIENT OF WWW TO U, V AND Z
+         dg = obseinf1(no)
+         dv = obseinf2(no)
+         ht = hu*sin(d2r*dg)*cos(d2r*dv) + hv*cos(d2r*dg)*cos(d2r*dv) + hw*sin(d2r*dv)
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) &
+                                      + (ht - obsvalue(o))*obscoeff(m, o)*sin(d2r*dg)*cos(d2r*dv)*obsradar
+            ! +(ht-obsvalue(o))*oi*obscoeff(m,o)*sin(d2r*dg)*cos(d2r*dv)*obsradar!!!modified by shuyuan   20101028
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) &
+                                      + (ht - obsvalue(o))*obscoeff(m, o)*cos(d2r*dg)*cos(d2r*dv)*obsradar
+            !+(ht-obsvalue(o))*oi*obscoeff(m,o)*cos(d2r*dg)*cos(d2r*dv)*obsradar!!!modified by shuyuan   20101028
+            cc(m, o) = (ht - obsvalue(o))*sin(d2r*dv)*obscoeff(m, o)*obsradar!!!modified by shuyuan   20101028
+         end do
+         end do
+         end do
+         end do
+      end do
 
-  S=NUMSTAT+2                !  FOR SFMR OBSERVATION
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)*OBSERROR(O)
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    HU0=0.0
-    HV0=0.0
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*WWW(I,J,K,T)
-      HU0=HU0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,UU)
-      HV0=HV0+OBSCOEFF(M,O)*GRDBKGND(I,J,K,T,VV)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    HT=SQRT((HU+HU0)*(HU+HU0)+(HV+HV0)*(HV+HV0)+HW*HW)
-    M=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      GRADINT(I,J,K,T,UU)=GRADINT(I,J,K,T,UU)  &
-       +(HT-OBSVALUE(O))*OBSCOEFF(M,O)*(HU+HU0)/HT
-     ! +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*(HU+HU0)/HT*OBS_SFMR!!!modified by shuyuan   20101028
-      GRADINT(I,J,K,T,VV)=GRADINT(I,J,K,T,VV)  &
-      +(HT-OBSVALUE(O))*OBSCOEFF(M,O)*(HV+HV0)/HT
-  !    +(HT-OBSVALUE(O))*OI*OBSCOEFF(M,O)*(HV+HV0)/HT*OBS_SFMR!!!modified by shuyuan   20101028
-      CC(M,O)=(HT-OBSVALUE(O))*OBSCOEFF(M,O)*HW/HT!*OI*OBS_SFMR!!!modified by shuyuan   20101028
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      call wwgradient(cc, s)  ! added by zhongjie he to calculate the gradient of www to u, v and z
 
-  CALL WWGRADIENT(CC,S)
+      s = numstat + 2                !  for sfmr observation
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)*obserror(o)
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         hu0 = 0.0
+         hv0 = 0.0
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*www(i, j, k, t)
+            hu0 = hu0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, uu)
+            hv0 = hv0 + obscoeff(m, o)*grdbkgnd(i, j, k, t, vv)
+         end do
+         end do
+         end do
+         end do
+         ht = sqrt((hu + hu0)*(hu + hu0) + (hv + hv0)*(hv + hv0) + hw*hw)
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            gradint(i, j, k, t, uu) = gradint(i, j, k, t, uu) &
+                                      + (ht - obsvalue(o))*obscoeff(m, o)*(hu + hu0)/ht
+            ! +(ht-obsvalue(o))*oi*obscoeff(m,o)*(hu+hu0)/ht*obs_sfmr!!!modified by shuyuan   20101028
+            gradint(i, j, k, t, vv) = gradint(i, j, k, t, vv) &
+                                      + (ht - obsvalue(o))*obscoeff(m, o)*(hv + hv0)/ht
+            !    +(ht-obsvalue(o))*oi*obscoeff(m,o)*(hv+hv0)/ht*obs_sfmr!!!modified by shuyuan   20101028
+            cc(m, o) = (ht - obsvalue(o))*obscoeff(m, o)*hw/ht!*oi*obs_sfmr!!!modified by shuyuan   20101028
+         end do
+         end do
+         end do
+         end do
+      end do
+
+      call wwgradient(cc, s)
 ! for radar  reflectivity !  shuyuan 20100721
 ! --20100907------------------
-   
-  ! CHECK IF RAIN ANALYSIS IS REQUESTED:
-  IF (NUMSTAT .LE. 5) GOTO 555
 
-  Segma=1.
-   S=NUMSTAT+3
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      OI=OBSERROR(O)*OBSERROR(O)
-      OI=1.0/OI
-      Temp_ref=0.0
-      M=0
-      rc=0.
-      sc=0.
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-       
-        M=M+1
-        rc=rc+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,RR)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      M=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1     
-      !changed 20100907 shuyuan  rc unit is  g/m3   
-      !Temp_ref=(OBSVALUE(O)-43.1)/17.5
-      !Temp_ref=10.**Temp_ref
-      Temp_ref=OBSVALUE(O)
-      temp=(rc-Temp_ref)/(Segma*Segma)
-      temp1=temp*OBSCOEFF(M,O)!!*OI/(NOBSTAT(S)*1.0)  !!!modified by shuyuan   20101028
-      GRADINT(I,J,K,T,RR)=GRADINT(I,J,K,T,RR)+temp1  
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
+      ! check if rain analysis is requested:
+      if (numstat .le. 5) goto 555
 
- ! SKIP REFLECTIVITY:
-555 CONTINUE
+      segma = 1.
+      s = numstat + 3
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)*obserror(o)
+         oi = 1.0/oi
+         temp_ref = 0.0
+         m = 0
+         rc = 0.
+         sc = 0.
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
 
-! SMOOTH TERM
-  CALL SMOTHGRAD
+            m = m + 1
+            rc = rc + obscoeff(m, o)*grdanals(i, j, k, t, rr)
+         end do
+         end do
+         end do
+         end do
+         m = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            !changed 20100907 shuyuan  rc unit is  g/m3
+            !temp_ref=(obsvalue(o)-43.1)/17.5
+            !temp_ref=10.**temp_ref
+            temp_ref = obsvalue(o)
+            temp = (rc - temp_ref)/(segma*segma)
+            temp1 = temp*obscoeff(m, o)!!*oi/(nobstat(s)*1.0)  !!!modified by shuyuan   20101028
+            gradint(i, j, k, t, rr) = gradint(i, j, k, t, rr) + temp1
+         end do
+         end do
+         end do
+         end do
+      end do
 
-! GEOSTROPHIC BALANCE TERM
-  IF(GRDLEVL .LE. ENDGSLV) THEN
-    IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN     ! FOR SIGMA AND HEIGHT COORDINATE
-      CALL GSBLNGRAD_NON_UNIFORM_Z
-    ELSEIF(IFPCDNT.EQ.1)THEN                   ! FOR PRESSURE COORDINATE
-      CALL GSBLNGRAD_P_HS
-    ENDIF
-  ENDIF
+      ! skip reflectivity:
+555   continue
 
-! HYDROSTATIC CONDITION TERM                 ! ADDED BY ZHONGJIE HE
-  IF(GRDLEVL .LE. ENDHYLV) THEN
-    ! HYDROSTATIC IS BASED ON IF RAIN/SNOW IS ANALYZED:
-    IF (NUMSTAT .LE. 5) CALL HYDROGRAD_XIE
-    IF (NUMSTAT .GT. 5) CALL HYDROGRAD_SHUYUAN
-  ENDIF
+! smooth term
+      call smothgrad
 
-  RETURN
-END SUBROUTINE COSTGRADT2
+! geostrophic balance term
+      if (grdlevl .le. endgslv) then
+         if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then     ! for sigma and height coordinate
+            call gsblngrad_non_uniform_z
+         elseif (ifpcdnt .eq. 1) then                   ! for pressure coordinate
+            call gsblngrad_p_hs
+         end if
+      end if
 
-SUBROUTINE TEST_FUN2
+! hydrostatic condition term                 ! added by zhongjie he
+      if (grdlevl .le. endhylv) then
+         ! hydrostatic is based on if rain/snow is analyzed:
+         if (numstat .le. 5) call hydrograd_xie
+         if (numstat .gt. 5) call hydrograd_shuyuan
+      end if
+
+      return
+   end subroutine costgradt2
+
+   subroutine test_fun2
 !*************************************************
-! SHOW THE DIFFERENCE BETWEEN THE ANALYSIS AND THE OBSERVATIONS
-! HISTORY: JANUARY 2008, CODED by ZHONGJIE HE.
+! show the difference between the analysis and the observations
+! history: january 2008, coded by zhongjie he.
 
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,O,NO,M,N,UU,VV
-  INTEGER  :: NP(MAXDIMS)
-  REAL  :: HT,OI,HU,HV,HW,DG,DV
-  REAL  :: CS(NUMSTAT),CM,CB
-  
-  REAL  :: OBS_X,OBS_Y,OBS_Z
-  REAL  :: D2R
+      integer  :: i, j, k, t, s, o, no, m, n, uu, vv
+      integer  :: np(maxdims)
+      real  :: ht, oi, hu, hv, hw, dg, dv
+      real  :: cs(numstat), cm, cb
 
-  D2R = 3.14159/180.0
+      real  :: obs_x, obs_y, obs_z
+      real  :: d2r
+
+      d2r = 3.14159/180.0
 
 ! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
+      uu = u_cmpnnt
+      vv = v_cmpnnt
 
-  CALL WCOMPGERNL        !  MODIFIED BY ZHONGJIE HE.
+      call wcompgernl        !  modified by zhongjie he.
 
-! INITIALIZATION
-  COSTFUN=0.0
-  DO S=1,NUMSTAT
-    CS(S)=0.0
-  ENDDO
-  IF(NALLOBS.EQ.0)RETURN
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      DO N=1,MAXDIMS
-        NP(N)=OBSIDXPC(N,O)
-      ENDDO
-      OI=OBSERROR(O)**2
-      OI=1.0/OI
-      HT=0.0
-      M=0
-      OBS_X=0
-      OBS_Y=0
-      OBS_Z=0
-      DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-      DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-      DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-      DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-        M=M+1
-        HT=HT+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,S)
-        OBS_X=OBS_X+OBSCOEFF(M,O)*I
-        OBS_Y=OBS_Y+OBSCOEFF(M,O)*J
-        OBS_Z=OBS_Z+OBSCOEFF(M,O)*K
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      COSTFUN=COSTFUN+(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))
-      CS(S)=CS(S)+0.5*(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))
-    ENDDO
-  ENDDO
-  S=NUMSTAT+1
-  DO NO=1,NOBSTAT(S)
-    O=O+1
-    DO N=1,MAXDIMS
-      NP(N)=OBSIDXPC(N,O)
-    ENDDO
-    OI=OBSERROR(O)**2
-    OI=1.0/OI
-    HU=0.0
-    HV=0.0
-    HW=0.0
-    M=0
-    OBS_X=0
-    OBS_Y=0
-    OBS_Z=0
-    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-      M=M+1
-      HU=HU+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,UU)
-      HV=HV+OBSCOEFF(M,O)*GRDANALS(I,J,K,T,VV)
-      HW=HW+OBSCOEFF(M,O)*WWW(I,J,K,T)
-      OBS_X=OBS_X+OBSCOEFF(M,O)*I
-      OBS_Y=OBS_Y+OBSCOEFF(M,O)*J
-      OBS_Z=OBS_Z+OBSCOEFF(M,O)*K
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    DG=OBSEINF1(NO)
-    DV=OBSEINF2(NO)
-    HT=HU*SIN(D2R*DG)*COS(D2R*DV)+HV*COS(D2R*DG)*COS(D2R*DV)+HW*SIN(D2R*DV)
-    COSTFUN=COSTFUN+(HT-OBSVALUE(O))*OI*(HT-OBSVALUE(O))*OBSRADAR
-  ENDDO
-  COSTFUN=0.5D0*COSTFUN
+! initialization
+      costfun = 0.0
+      do s = 1, numstat
+         cs(s) = 0.0
+      end do
+      if (nallobs .eq. 0) return
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            do n = 1, maxdims
+               np(n) = obsidxpc(n, o)
+            end do
+            oi = obserror(o)**2
+            oi = 1.0/oi
+            ht = 0.0
+            m = 0
+            obs_x = 0
+            obs_y = 0
+            obs_z = 0
+            do t = np(4), min0(np(4) + 1, numgrid(4))
+            do k = np(3), min0(np(3) + 1, numgrid(3))
+            do j = np(2), min0(np(2) + 1, numgrid(2))
+            do i = np(1), min0(np(1) + 1, numgrid(1))
+               m = m + 1
+               ht = ht + obscoeff(m, o)*grdanals(i, j, k, t, s)
+               obs_x = obs_x + obscoeff(m, o)*i
+               obs_y = obs_y + obscoeff(m, o)*j
+               obs_z = obs_z + obscoeff(m, o)*k
+            end do
+            end do
+            end do
+            end do
+            costfun = costfun + (ht - obsvalue(o))*oi*(ht - obsvalue(o))
+            cs(s) = cs(s) + 0.5*(ht - obsvalue(o))*oi*(ht - obsvalue(o))
+         end do
+      end do
+      s = numstat + 1
+      do no = 1, nobstat(s)
+         o = o + 1
+         do n = 1, maxdims
+            np(n) = obsidxpc(n, o)
+         end do
+         oi = obserror(o)**2
+         oi = 1.0/oi
+         hu = 0.0
+         hv = 0.0
+         hw = 0.0
+         m = 0
+         obs_x = 0
+         obs_y = 0
+         obs_z = 0
+         do t = np(4), min0(np(4) + 1, numgrid(4))
+         do k = np(3), min0(np(3) + 1, numgrid(3))
+         do j = np(2), min0(np(2) + 1, numgrid(2))
+         do i = np(1), min0(np(1) + 1, numgrid(1))
+            m = m + 1
+            hu = hu + obscoeff(m, o)*grdanals(i, j, k, t, uu)
+            hv = hv + obscoeff(m, o)*grdanals(i, j, k, t, vv)
+            hw = hw + obscoeff(m, o)*www(i, j, k, t)
+            obs_x = obs_x + obscoeff(m, o)*i
+            obs_y = obs_y + obscoeff(m, o)*j
+            obs_z = obs_z + obscoeff(m, o)*k
+         end do
+         end do
+         end do
+         end do
+         dg = obseinf1(no)
+         dv = obseinf2(no)
+         ht = hu*sin(d2r*dg)*cos(d2r*dv) + hv*cos(d2r*dg)*cos(d2r*dv) + hw*sin(d2r*dv)
+         costfun = costfun + (ht - obsvalue(o))*oi*(ht - obsvalue(o))*obsradar
+      end do
+      costfun = 0.5d0*costfun
 
-! SMOOTH TERM
-  CM=COSTFUN
-  CALL SMOTHCOST
-  CM=COSTFUN-CM
+! smooth term
+      cm = costfun
+      call smothcost
+      cm = costfun - cm
 
-! GEOSTROPHIC BALANCE TERM
-  CB=COSTFUN
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN      ! FOR SIGMA AND HEIGHT COORDINATE
-    CALL GSBLNCOST_NON_UNIFORM_Z
-  ELSEIF(IFPCDNT.EQ.1)THEN                    ! FOR PRESSURE COORDINATE
-    CALL GSBLNCOST_P_HS
-  ENDIF
-  CB=COSTFUN-CB
-!  WRITE(100,*)(CS(S),S=1,NUMSTAT),CM,CB
+! geostrophic balance term
+      cb = costfun
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then      ! for sigma and height coordinate
+         call gsblncost_non_uniform_z
+      elseif (ifpcdnt .eq. 1) then                    ! for pressure coordinate
+         call gsblncost_p_hs
+      end if
+      cb = costfun - cb
+!  write(100,*)(cs(s),s=1,numstat),cm,cb
 
-  RETURN
-END SUBROUTINE TEST_FUN2
+      return
+   end subroutine test_fun2
 
-SUBROUTINE CG_VALUE(F,X,NM)
+   subroutine cg_value(f, x, nm)
 !*************************************************
-! CALCULATE THE COSTFUNCTION, USED BY MINIMIZER_CG
-! HISTORY: APRIL 2008, CODED by ZHONGJIE HE.
+! calculate the costfunction, used by minimizer_cg
+! history: april 2008, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER    :: I,J,K,T,S,N,NM
-!  DOUBLE PRECISION :: X(NM),F
-  REAL :: X(NM),F
-  N=0
-  DO S=1,NUMSTAT
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      N=N+1
-      GRDANALS(I,J,K,T,S)=X(N)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      integer    :: i, j, k, t, s, n, nm
+!  double precision :: x(nm),f
+      real :: x(nm), f
+      n = 0
+      do s = 1, numstat
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            n = n + 1
+            grdanals(i, j, k, t, s) = x(n)
+         end do
+         end do
+         end do
+         end do
+      end do
 
-  IF(W_CMPNNT.NE.0) THEN
-    CALL COSTFUNCT1
-  ELSE
-    CALL WCOMPGERNL
-    CALL COSTFUNCT2
-  ENDIF
+      if (w_cmpnnt .ne. 0) then
+         call costfunct1
+      else
+         call wcompgernl
+         call costfunct2
+      end if
 
-  F=COSTFUN
+      f = costfun
 
-END SUBROUTINE CG_VALUE
+   end subroutine cg_value
 
-SUBROUTINE CG_GRAD(G,X,NM)
+   subroutine cg_grad(g, x, nm)
 !*************************************************
-! CALCULATE THE GRADIENT, USED BY MINIMIZER_CG
-! HISTORY: APRIL 2008, CODED by ZHONGJIE HE.
+! calculate the gradient, used by minimizer_cg
+! history: april 2008, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER    :: I,J,K,T,S,N,NM
-!  DOUBLE PRECISION :: X(NM),G(NM)
-  REAL :: X(NM),G(NM)
+      integer    :: i, j, k, t, s, n, nm
+!  double precision :: x(nm),g(nm)
+      real :: x(nm), g(nm)
 
-  N=0
-  DO S=1,NUMSTAT
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      N=N+1
-      GRDANALS(I,J,K,T,S)=X(N)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
-  IF(W_CMPNNT.NE.0) THEN
-    CALL COSTGRADT1
-  ELSE
-    CALL WCOMPGERNL
-    CALL COSTGRADT2
-  ENDIF
-  N=0
-  DO S=1,NUMSTAT
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      N=N+1
-      G(N)=GRADINT(I,J,K,T,S)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      n = 0
+      do s = 1, numstat
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            n = n + 1
+            grdanals(i, j, k, t, s) = x(n)
+         end do
+         end do
+         end do
+         end do
+      end do
+      if (w_cmpnnt .ne. 0) then
+         call costgradt1
+      else
+         call wcompgernl
+         call costgradt2
+      end if
+      n = 0
+      do s = 1, numstat
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            n = n + 1
+            g(n) = gradint(i, j, k, t, s)
+         end do
+         end do
+         end do
+         end do
+      end do
 
-END SUBROUTINE CG_GRAD
+   end subroutine cg_grad
 
-END MODULE COSTFUN_GRAD
+end module costfun_grad

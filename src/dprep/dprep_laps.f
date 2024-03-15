@@ -9,23 +9,23 @@ c
       real*4 cp,kappa
       parameter (cp=1004.,kappa=287./1004.)
 c
-      real*4 ht(nx,ny,nz),     !LAPS 3d height (m)
-     .       tp(nx,ny,nz),     !LAPS 3d temperature (K)
-     .       uw(nx,ny,nz),     !LAPS 3d u-wind (m/s)
-     .       vw(nx,ny,nz),     !LAPS 3d v-wind (m/s)
-     .       mr(nx,ny,nz),     !LAPS 3d mixing ratio (kg/kg)
-C     .       ex(nx,ny,nz),     !LAPS 3d Exner function
-     .       pr(nx,ny,nz),     !LAPS pressure levels (mb) in -> exner out
-     .       sht(nx,ny),       !LAPS surface height (m)
-     .       spr(nx,ny),       !LAPS surface pressure (mb)
-     .       slp(nx,ny),       !LAPS mean sea level pressure (mb)
-     .       sth(nx,ny),       !LAPS surface potential temperature (K)
-     .       suw(nx,ny),       !LAPS surface u-wind (m/s)
-     .       svw(nx,ny),       !LAPS surface v-wind (m/s)
-     .       smr(nx,ny),       !LAPS surface mixing ratio (kg/kg)
+      real*4 ht(nx,ny,nz),     !laps 3d height (m)
+     .       tp(nx,ny,nz),     !laps 3d temperature (k)
+     .       uw(nx,ny,nz),     !laps 3d u-wind (m/s)
+     .       vw(nx,ny,nz),     !laps 3d v-wind (m/s)
+     .       mr(nx,ny,nz),     !laps 3d mixing ratio (kg/kg)
+c     .       ex(nx,ny,nz),     !laps 3d exner function
+     .       pr(nx,ny,nz),     !laps pressure levels (mb) in -> exner out
+     .       sht(nx,ny),       !laps surface height (m)
+     .       spr(nx,ny),       !laps surface pressure (mb)
+     .       slp(nx,ny),       !laps mean sea level pressure (mb)
+     .       sth(nx,ny),       !laps surface potential temperature (k)
+     .       suw(nx,ny),       !laps surface u-wind (m/s)
+     .       svw(nx,ny),       !laps surface v-wind (m/s)
+     .       smr(nx,ny),       !laps surface mixing ratio (kg/kg)
      .       lat(nx,ny),
      .       lon(nx,ny),
-c    .       lat0,lon0,        !LAPS polar stereo grid pole point
+c    .       lat0,lon0,        !laps polar stereo grid pole point
      .       pri(nz),
      .       factor
 c    .       prbot,dpr, factor
@@ -36,8 +36,8 @@ c
 c_______________________________________________________________________________
 c
 c
-c *** Convert  3d temp to theta.
-c *** Compute Exner function.
+c *** convert  3d temp to theta.
+c *** compute exner function.
 c
 
       do k=1,nz
@@ -91,94 +91,94 @@ c
       character*125 comment
 c     character*3 sfcfields(6)
 c
-c *** Common block variables for Lambert-conformal grid.
+c *** common block variables for lambert-conformal grid.
 c
-      integer nx_lc,ny_lc,nz_lc  !No. of LC domain grid points
-      real*4 lat1,lat2,lon0,       !Lambert-conformal std lat1, lat, lon
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
+      integer nx_lc,ny_lc,nz_lc  !no. of lc domain grid points
+      real*4 lat1,lat2,lon0,       !lambert-conformal std lat1, lat, lon
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
       common /lcgrid/nx_lc,ny_lc,nz_lc,lat1,lat2,lon0,sw,ne
 c_______________________________________________________________________________
 c
-      error(1)=1   !Good istatus
-      error(2)=0   !Bad istatus
+      error(1)=1   !good istatus
+      error(2)=0   !bad istatus
 
 c
-c *** Define LAPS pressures.
+c *** define laps pressures.
 c
       call get_pres_3d(i4time,nx,ny,nz,pr,istatus)
 
 c
-c *** Get LAPS 3d temperature.
+c *** get laps 3d temperature.
 c
-      call get_laps_3d(i4time,nx,ny,nz,'lt1','T3',units,comment,tp,
+      call get_laps_3d(i4time,nx,ny,nz,'lt1','t3',units,comment,tp,
      .     istatus)
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS temperature data'
+         print *,'error getting laps temperature data'
          return
 c         stop
       endif
 c
-c *** Get LAPS 3d heights.
+c *** get laps 3d heights.
 c
-      call get_laps_3d(i4time,nx,ny,nz,'lt1','HT',units,comment,ht,
+      call get_laps_3d(i4time,nx,ny,nz,'lt1','ht',units,comment,ht,
      .     istatus)
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS height data'
+         print *,'error getting laps height data'
          return
 c         stop
       endif
 c
-c *** Get LAPS 3d specific humidity.
+c *** get laps 3d specific humidity.
 c
-      call get_laps_3d(i4time,nx,ny,nz,'lq3','SH',units,comment,mr,
+      call get_laps_3d(i4time,nx,ny,nz,'lq3','sh',units,comment,mr,
      .     istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS moisture data.'
+         print *,'error getting laps moisture data.'
          return
 c         stop
       endif
 
 c
-c *** Get LAPS U winds.
+c *** get laps u winds.
 c
-      call get_laps_3d(i4time,nx,ny,nz,'lw3','U3',units,comment,uw,
+      call get_laps_3d(i4time,nx,ny,nz,'lw3','u3',units,comment,uw,
      .     istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS wind data.'
+         print *,'error getting laps wind data.'
          return
 c         stop
       endif
 c
-c *** Get LAPS V winds.
+c *** get laps v winds.
 c
-      call get_laps_3d(i4time,nx,ny,nz,'lw3','V3',units,comment,vw,
+      call get_laps_3d(i4time,nx,ny,nz,'lw3','v3',units,comment,vw,
      .     istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS wind data.'
+         print *,'error getting laps wind data.'
          return
 c         stop
       endif
 
 
 c
-c *** Get LAPS surface data.
+c *** get laps surface data.
 c
       call s_len(laps_data_root,i)
       datadir = laps_data_root(1:i)//'/lapsprd/lsx/'
       call get_laps_sfc(datadir,i4time,'lsx',nx,ny,
      .                  spr,slp,sth,smr,suw,svw,istatus)
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS surface data.'
+         print *,'error getting laps surface data.'
          return
 c         stop
       endif
 
 
 c
-c *** Get LAPS topo.
+c *** get laps topo.
 c
 
       call get_laps_domain(nx,ny,'nest7grid',lat,lon,sht,istatus)
@@ -190,7 +190,7 @@ c
       ne(2)=lon(nx,ny)
 
 c
-c *** Do quick QC.
+c *** do quick qc.
 c
       do k=nz/2,1,-1 
       do j=1,ny
@@ -226,14 +226,14 @@ c
       implicit none
 c
       integer*4 nx,ny,nfld
-      parameter (nfld=6)    !Number of surface fields to be read.
+      parameter (nfld=6)    !number of surface fields to be read.
 c
-      real*4 spr(nx,ny),    !LAPS surface pressure (mb)
-     .       slp(nx,ny),    !LAPS mean sea level pressure (mb)
-     .       sth(nx,ny),    !LAPS surface potential temperature (K)
-     .       smr(nx,ny),    !LAPS surface mixing ratio (kg/kg)
-     .       suw(nx,ny),    !LAPS surface u-wind (m/s)
-     .       svw(nx,ny),    !LAPS surface v-wind (m/s)
+      real*4 spr(nx,ny),    !laps surface pressure (mb)
+     .       slp(nx,ny),    !laps mean sea level pressure (mb)
+     .       sth(nx,ny),    !laps surface potential temperature (k)
+     .       smr(nx,ny),    !laps surface mixing ratio (kg/kg)
+     .       suw(nx,ny),    !laps surface u-wind (m/s)
+     .       svw(nx,ny),    !laps surface v-wind (m/s)
      .       grid(nx,ny,nfld)
 c
       integer level_req(nfld),len,i4time,i,j,istatus
@@ -243,17 +243,17 @@ c
       character*500 ldir
       character*1 junk1(nfld),junk2(nfld),junk3(nfld)
 c
-      data fldname/'U','V','MSL','TH','PS','MR'/
+      data fldname/'u','v','msl','th','ps','mr'/
       data level_req/0,0,0,0,0,0/
-c     .     13,                  !Pressure id
-c     .            9,        !Mean sea level pressure id
-c     .           11,        !Theta id
-c     .           15,        !MR id
+c     .     13,                  !pressure id
+c     .            9,        !mean sea level pressure id
+c     .           11,        !theta id
+c     .           15,        !mr id
 c     .            1,        !u-wind id
 c     .            2/        !v-wind id
 c_______________________________________________________________________________
 c
-c *** Read requested LAPS surface data.
+c *** read requested laps surface data.
 c
       ldir=dir
       len=index(ldir,' ')-1
@@ -267,9 +267,9 @@ c      call get_laps_2d(i4time,ext,nx,ny,
 c     .                 nfld,fldid,grid,istatus)
       if (istatus .ne. 1) return
 c
-c *** Fill requested fields.
-c *** Convert surface pressure and mslp from Pa to mb.
-c *** Convert mixing ratio from g/kg to kg/kg.
+c *** fill requested fields.
+c *** convert surface pressure and mslp from pa to mb.
+c *** convert mixing ratio from g/kg to kg/kg.
 c
       do j=1,ny
          do i=1,nx

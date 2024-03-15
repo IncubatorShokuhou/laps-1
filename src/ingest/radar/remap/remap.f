@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -52,49 +52,49 @@ cdis
        
       logical l_realtime
 
-      call get_grid_dim_xy(NX_L,NY_L,istatus)
+      call get_grid_dim_xy(nx_l,ny_l,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting horizontal domain dimensions'
+          write (6,*) 'error getting horizontal domain dimensions'
           go to 999
       endif
 
-      call get_laps_dimensions(NZ_L,istatus)
+      call get_laps_dimensions(nz_l,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting vertical domain dimensions'
+          write (6,*) 'error getting vertical domain dimensions'
           go to 999
       endif
 
-      allocate(lat(NX_L,NY_L),STAT=istat_alloc)       
+      allocate(lat(nx_l,ny_l),stat=istat_alloc)       
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate lat'
+          write(6,*)' error: could not allocate lat'
           stop
       endif
 
-      allocate(lon(NX_L,NY_L),STAT=istat_alloc)       
+      allocate(lon(nx_l,ny_l),stat=istat_alloc)       
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate lon'
+          write(6,*)' error: could not allocate lon'
           stop
       endif
 
-      allocate(topo(NX_L,NY_L),STAT=istat_alloc)       
+      allocate(topo(nx_l,ny_l),stat=istat_alloc)       
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate topo'
+          write(6,*)' error: could not allocate topo'
           stop
       endif
 
-      allocate(dum_2d(NX_L,NY_L),STAT=istat_alloc)       
+      allocate(dum_2d(nx_l,ny_l),stat=istat_alloc)       
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate dum_2d'
+          write(6,*)' error: could not allocate dum_2d'
           stop
       endif
 
-!     This first call returns only 'n_radars_remap' and 'namelist_parms'
-      call get_remap_parms(0,n_radars_remap,max_times,path_to_radar     ! I/O
-     1       ,laps_radar_ext,radar_subdir_dum,path_to_vrc,ref_min       ! O
-     1       ,min_ref_samples,min_vel_samples,dgr,namelist_parms        ! O
-     1       ,istatus)                                                  ! O
+!     this first call returns only 'n_radars_remap' and 'namelist_parms'
+      call get_remap_parms(0,n_radars_remap,max_times,path_to_radar     ! i/o
+     1       ,laps_radar_ext,radar_subdir_dum,path_to_vrc,ref_min       ! o
+     1       ,min_ref_samples,min_vel_samples,dgr,namelist_parms        ! o
+     1       ,istatus)                                                  ! o
       if(istatus .ne. 1)then
-          write(6,*)'Warning: bad status return from get_remap_parms'       
+          write(6,*)'warning: bad status return from get_remap_parms'       
           go to 999
       endif
 
@@ -115,55 +115,55 @@ cdis
      1                                              ,radars_per_group
           i_radar_start = 1 + nint(float(i_group-1) * radars_per_group)
           i_radar_end   =     nint(float(i_group  ) * radars_per_group)
-          write(6,*)' Processing radar group ',i_radar_start,i_radar_end
+          write(6,*)' processing radar group ',i_radar_start,i_radar_end
       else
-          write(6,*)' Processing all radars'
+          write(6,*)' processing all radars'
           i_radar_start = 1
           i_radar_end = n_radars_remap
       endif
 
       call get_grid_center(grid_cen_lat_orig,grid_cen_lon_orig,istatus)
 
-      write(6,*)' REMAP > call get_laps_domain_95'
-      call get_laps_domain_95(NX_L,NY_L,lat,lon,topo
+      write(6,*)' remap > call get_laps_domain_95'
+      call get_laps_domain_95(nx_l,ny_l,lat,lon,topo
      1                       ,dum_2d,grid_spacing_cen_m
      1                       ,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' ERROR return from get_laps_domain_95'
+          write(6,*)' error return from get_laps_domain_95'
           goto 999
       endif
 
       do i_radar = i_radar_start,i_radar_end
 
-!        Update grid namelist parameters in case domain has relocalized
+!        update grid namelist parameters in case domain has relocalized
          call get_directory('root',dataroot,len_root)
          call force_get_laps_config(dataroot,istatus)
          call get_grid_center(grid_cen_lat,grid_cen_lon,istatus)
 
-!        Update lat/lon grid if grid location has changed
-         if(grid_cen_lat .ne. grid_cen_lat_orig .OR.
+!        update lat/lon grid if grid location has changed
+         if(grid_cen_lat .ne. grid_cen_lat_orig .or.
      1      grid_cen_lon .ne. grid_cen_lon_orig      )then
-            write(6,*)' REMAP > recall get_laps_domain_95'
-            call get_laps_domain_95(NX_L,NY_L,lat,lon,topo
+            write(6,*)' remap > recall get_laps_domain_95'
+            call get_laps_domain_95(nx_l,ny_l,lat,lon,topo
      1                             ,dum_2d,grid_spacing_cen_m
      1                             ,istatus)
             if(istatus .ne. 1)then
-                write(6,*)' ERROR return from get_laps_domain_95'
+                write(6,*)' error return from get_laps_domain_95'
                 goto 999
             endif
           endif
 
           write(6,*)
-          write(6,*)' Obtaining parameters for radar # ',i_radar
-          call get_remap_parms(i_radar,n_radars_remap,max_times       ! I/O
-     1                  ,path_to_radar                                ! O
-     1                  ,laps_radar_ext,radar_subdir_dum              ! O
-     1                  ,path_to_vrc                                  ! O
-     1                  ,ref_min,min_ref_samples,min_vel_samples,dgr  ! O
-     1                  ,namelist_parms,istatus)                      ! O
+          write(6,*)' obtaining parameters for radar # ',i_radar
+          call get_remap_parms(i_radar,n_radars_remap,max_times       ! i/o
+     1                  ,path_to_radar                                ! o
+     1                  ,laps_radar_ext,radar_subdir_dum              ! o
+     1                  ,path_to_vrc                                  ! o
+     1                  ,ref_min,min_ref_samples,min_vel_samples,dgr  ! o
+     1                  ,namelist_parms,istatus)                      ! o
           if(istatus .ne. 1)then
               write(6,*)
-     1            'Warning: bad status return from get_remap_parms'       
+     1            'warning: bad status return from get_remap_parms'       
               go to 999
           endif
 
@@ -171,24 +171,24 @@ cdis
 
           do itimes = 1,max_times
               write(6,*)
-              write(6,*)' Looping through radar/time # ',i_radar,itimes       
+              write(6,*)' looping through radar/time # ',i_radar,itimes       
      1                 ,laps_radar_ext
               call remap_sub(i_radar,itimes
-     1                      ,ntimes_radar                              ! I/O 
-     1                      ,l_realtime                                ! O
+     1                      ,ntimes_radar                              ! i/o 
+     1                      ,l_realtime                                ! o
      1                      ,laps_radar_ext       
      1                      ,radar_subdir_dum       
      1                      ,path_to_vrc,path_to_radar,ref_min
      1                      ,min_ref_samples,min_vel_samples,dgr
      1                      ,namelist_parms
-     1                      ,NX_L,NY_L,NZ_L
-     1                      ,lat,lon,topo                              ! I
+     1                      ,nx_l,ny_l,nz_l
+     1                      ,lat,lon,topo                              ! i
      1                      ,istatus)       
               if(istatus .ne. 1)then
                   write(6,*)' remap: istatus returned from remap_sub = '
      1                                             ,istatus
                   if(l_realtime)then
-!                     Note that missing tilts are given the same 0 value of
+!                     note that missing tilts are given the same 0 value of
 !                     istatus, and we assume that all radar times are experiencing
 !                     the missing tilts
                       go to 900 ! saves computer time searching directories
@@ -204,37 +204,37 @@ cdis
  999  end
 
       subroutine remap_sub(i_radar,itimes
-     1                    ,ntimes_radar                                ! I/O
-     1                    ,l_realtime                                  ! O
+     1                    ,ntimes_radar                                ! i/o
+     1                    ,l_realtime                                  ! o
      1                    ,laps_radar_ext
      1                    ,c3_radar_subdir,path_to_vrc,path_to_radar
      1                    ,ref_min,min_ref_samples,min_vel_samples,dgr       
      1                    ,namelist_parms
-     1                    ,NX_L,NY_L,NZ_L
-     1                    ,lat,lon,topo                                ! I
+     1                    ,nx_l,ny_l,nz_l
+     1                    ,lat,lon,topo                                ! i
      1                    ,istatus)
 
 c
-c     Velocity Obs
+c     velocity obs
 c
-!     real grid_rvel(NX_L,NY_L,NZ_L) 
-!     real grid_rvel_sq(NX_L,NY_L,NZ_L)
-!     real grid_nyq(NX_L,NY_L,NZ_L)
-!     integer ngrids_vel(NX_L,NY_L,NZ_L)
-!     integer n_pot_vel(NX_L,NY_L,NZ_L)
+!     real grid_rvel(nx_l,ny_l,nz_l) 
+!     real grid_rvel_sq(nx_l,ny_l,nz_l)
+!     real grid_nyq(nx_l,ny_l,nz_l)
+!     integer ngrids_vel(nx_l,ny_l,nz_l)
+!     integer n_pot_vel(nx_l,ny_l,nz_l)
 
-      real, allocatable, dimension(:,:,:) :: grid_rvel ! Radial radar velocities
+      real, allocatable, dimension(:,:,:) :: grid_rvel ! radial radar velocities
       real, allocatable, dimension(:,:,:) :: grid_rvel_sq
       real, allocatable, dimension(:,:,:) :: grid_nyq
       integer, allocatable, dimension(:,:,:) :: ngrids_vel
       integer, allocatable, dimension(:,:,:) :: n_pot_vel
 
 c
-c     Reflectivity Obs
+c     reflectivity obs
 c
-!     real grid_ref (NX_L,NY_L,NZ_L)  !  Radar reflectivities
-!     integer ngrids_ref (NX_L,NY_L,NZ_L)
-!     integer n_pot_ref (NX_L,NY_L,NZ_L)
+!     real grid_ref (nx_l,ny_l,nz_l)  !  radar reflectivities
+!     integer ngrids_ref (nx_l,ny_l,nz_l)
+!     integer n_pot_ref (nx_l,ny_l,nz_l)
 
       real, allocatable, dimension(:,:,:) :: grid_ref
       integer, allocatable, dimension(:,:,:) :: ngrids_ref
@@ -243,38 +243,38 @@ c
       include 'remap_dims.inc'
       include 'remap_constants.dat'      
 
-      integer MAX_REF_TILT
-      integer MAX_VEL_TILT
+      integer max_ref_tilt
+      integer max_vel_tilt
 
-      parameter (MAX_REF_TILT = MAX_REF_GATES * MAX_RAY_TILT)
-      parameter (MAX_VEL_TILT = MAX_VEL_GATES * MAX_RAY_TILT)
+      parameter (max_ref_tilt = max_ref_gates * max_ray_tilt)
+      parameter (max_vel_tilt = max_vel_gates * max_ray_tilt)
 
-!     Variables used only in remap_process
+!     variables used only in remap_process
       integer i_last_scan,i_first_scan
       integer i_tilt_proc_curr
       integer i4time_vol,i_num_finished_products
 
-!     Variables used for data access and in fill_common 
+!     variables used for data access and in fill_common 
    
-      real b_ref(MAX_REF_TILT)
-      real b_vel(MAX_VEL_TILT)
+      real b_ref(max_ref_tilt)
+      real b_vel(max_vel_tilt)
       real b_missing_data
 
-      real v_nyquist_ray_a(MAX_RAY_TILT)
-      real azim(MAX_RAY_TILT)
+      real v_nyquist_ray_a(max_ray_tilt)
+      real azim(max_ray_tilt)
       real eleva 
 
-!     Declarations for call to 'Read_data_88d'
-      Real  Slant_ranges_m (max_gates),
-     :        Elevation_deg,
-     :        Az_array(MAX_RAY_TILT) 
-      real, allocatable, dimension(:,:) :: Velocity
-      real, allocatable, dimension(:,:) :: Reflect
+!     declarations for call to 'read_data_88d'
+      real  slant_ranges_m (max_gates),
+     :        elevation_deg,
+     :        az_array(max_ray_tilt) 
+      real, allocatable, dimension(:,:) :: velocity
+      real, allocatable, dimension(:,:) :: reflect
 
       integer ref_index, vel_index, io_stat
       integer n_rays, i_scan, i_tilt, n_ref_gates, n_vel_gates
 
-!     Radar Location variables
+!     radar location variables
 
       integer i_lat,i_lon,i_alt
       real radar_lat
@@ -285,15 +285,15 @@ c
       character*3 c3_radar_subdir
       character*(*) path_to_vrc, path_to_radar
 
-      Integer       ioffset                 
-      Integer       joffset                 
-      Logical       l_offset_radar
+      integer       ioffset                 
+      integer       joffset                 
+      logical       l_offset_radar
 
-      real lat(NX_L,NY_L)      
-      real lon(NX_L,NY_L)      
-      real topo(NX_L,NY_L)     
+      real lat(nx_l,ny_l)      
+      real lon(nx_l,ny_l)      
+      real topo(nx_l,ny_l)     
 
-!     Misc Local variables
+!     misc local variables
 
       character*9 string_time
       character*91 full_fname
@@ -306,11 +306,11 @@ c
       integer i_vcp
       integer ref_ptr, vel_ptr
 
-      integer VERBOSE
+      integer verbose
 
       logical l_realtime
 
-!     Function call declarations
+!     function call declarations
       integer get_field_num
       integer get_altitude
       integer get_latitude
@@ -326,10 +326,10 @@ c
       integer get_status
       real    get_nyquist
 
-!     Beginning of Executable Code 
-!     Some initializations  
-      ISTAT = INIT_TIMER()
-      VERBOSE = 1
+!     beginning of executable code 
+!     some initializations  
+      istat = init_timer()
+      verbose = 1
 
       call get_r_missing_data(r_missing_data,istatus)
 
@@ -339,11 +339,11 @@ c
 
       write(6,*)' string_time length is ',len(string_time)
 
-      call radar_init(i_radar,path_to_radar,path_to_vrc,itimes         ! I
-     1               ,b_missing_data                                   ! I
-     1               ,i_tilt_proc_curr                                 ! I/O
-     1               ,l_realtime                                       ! O
-     1               ,i_last_scan,istatus)                             ! O
+      call radar_init(i_radar,path_to_radar,path_to_vrc,itimes         ! i
+     1               ,b_missing_data                                   ! i
+     1               ,i_tilt_proc_curr                                 ! i/o
+     1               ,l_realtime                                       ! o
+     1               ,i_last_scan,istatus)                             ! o
       write(6,*)' remap_sub: istatus from radar_init (1st call) ='
      1         ,istatus    
       if(istatus .ne. 1)then
@@ -352,7 +352,7 @@ c
 
       call get_radarname(rname_ptr,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' remap_sub: ERROR returned from get_radarname'      
+          write(6,*)' remap_sub: error returned from get_radarname'      
           return
       endif
 
@@ -365,14 +365,14 @@ c
       radar_alt=  float(i_alt)
       radar_lat=  0.00001 * float(i_lat)
       radar_lon=  0.00001 * float(i_lon) 
-      write(6,*)' Radar altitude (m): ',radar_alt  
-      write(6,*)' Radar latitude (degrees): ',radar_lat  
-      write(6,*)' Radar longitude (degrees): ',radar_lon  
+      write(6,*)' radar altitude (m): ',radar_alt  
+      write(6,*)' radar latitude (degrees): ',radar_lat  
+      write(6,*)' radar longitude (degrees): ',radar_lon  
 
-      if(radar_alt .eq. 0. .OR. 
-     1   radar_lat .eq. 0. .or. radar_lon .eq. 0. .OR.
+      if(radar_alt .eq. 0. .or. 
+     1   radar_lat .eq. 0. .or. radar_lon .eq. 0. .or.
      1   abs(radar_lat) .gt. 90.)then
-          write(6,*)' ERROR: radar coords not initialized'
+          write(6,*)' error: radar coords not initialized'
           istatus = 0
           return
       endif
@@ -381,117 +381,117 @@ c
 
       call get_grid_spacing_cen(grid_spacing_m, i_status)
       if(i_status .ne. 1)then
-          write(6,*)' Error in obtaining grid_spacing_m'
+          write(6,*)' error in obtaining grid_spacing_m'
           goto 900 ! return
       endif
 
-      call get_l_offset_radar(nx_l,ny_l,grid_spacing_m,         ! I
-     1                        nx_r,ny_r,igrid_r,l_offset_radar) ! O
+      call get_l_offset_radar(nx_l,ny_l,grid_spacing_m,         ! i
+     1                        nx_r,ny_r,igrid_r,l_offset_radar) ! o
 
-!     Turn off l_offset for testing
+!     turn off l_offset for testing
 !     nx_r = nx_l
 !     ny_r = ny_l
 !     igrid_r = 0
 !     l_offset_radar = .false.
 
-      call get_ij_offset_radars(nx_l,ny_l,1,                      ! I
-     1                          igrid_r,l_offset_radar,           ! I   
-     1                          lat,lon,radar_lat,radar_lon,      ! I
-     1                          ioffset,joffset)                  ! O
+      call get_ij_offset_radars(nx_l,ny_l,1,                      ! i
+     1                          igrid_r,l_offset_radar,           ! i   
+     1                          lat,lon,radar_lat,radar_lon,      ! i
+     1                          ioffset,joffset)                  ! o
 
-      write(6,*)' Returned from get_ij_offset_radars:',ioffset,joffset
+      write(6,*)' returned from get_ij_offset_radars:',ioffset,joffset
 
-!     call lut_gen FORTRAN routine 
+!     call lut_gen fortran routine 
       if(ntimes_radar .eq. 1)then ! first time we have data from this radar
           call lut_gen(rname_ptr,radar_lat,radar_lon,radar_alt
-     1                ,ioffset,joffset                            ! I
-     1                ,NX_L,NY_L,NZ_L)                            ! I
+     1                ,ioffset,joffset                            ! i
+     1                ,nx_l,ny_l,nz_l)                            ! i
       endif
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
 !     get data indices needed for other a2io library calls  
 
-      ref_index=get_field_num('DBZ') 
-      vel_index=get_field_num('VEL')
+      ref_index=get_field_num('dbz') 
+      vel_index=get_field_num('vel')
       write(6,*)
-      write(6,*)'  Retrieved reflectivity index as ',ref_index  
-      write(6,*)'  Retrieved velocity index as ',vel_index  
+      write(6,*)'  retrieved reflectivity index as ',ref_index  
+      write(6,*)'  retrieved velocity index as ',vel_index  
 
-!     Misc initializations  
+!     misc initializations  
 
       initial_ray  = 1
       n_rays=0 
       write_and_exit = 0
       alls_well = 1
 
-!     Allocate Velocity arrays
-      allocate(grid_rvel(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+!     allocate velocity arrays
+      allocate(grid_rvel(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate grid_rvel'
+          write(6,*)' error: could not allocate grid_rvel'
           stop
       endif
 
-      allocate(grid_rvel_sq(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+      allocate(grid_rvel_sq(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate grid_rvel_sq'
+          write(6,*)' error: could not allocate grid_rvel_sq'
           stop
       endif
 
-      allocate(grid_nyq(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+      allocate(grid_nyq(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate grid_nyq'
+          write(6,*)' error: could not allocate grid_nyq'
           stop
       endif
 
-      allocate(ngrids_vel(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+      allocate(ngrids_vel(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate ngrids_vel'
+          write(6,*)' error: could not allocate ngrids_vel'
           stop
       endif
 
-      allocate(n_pot_vel(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+      allocate(n_pot_vel(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate n_pot_vel'
+          write(6,*)' error: could not allocate n_pot_vel'
           stop
       endif
 
-!     Allocate Reflectivity arrays
-      allocate(grid_ref(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+!     allocate reflectivity arrays
+      allocate(grid_ref(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate grid_ref'
+          write(6,*)' error: could not allocate grid_ref'
           stop
       endif
 
-      allocate(ngrids_ref(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+      allocate(ngrids_ref(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate ngrids_ref'
+          write(6,*)' error: could not allocate ngrids_ref'
           stop
       endif
 
-      allocate(n_pot_ref(NX_R,NY_R,NZ_L),STAT=istat_alloc)      
+      allocate(n_pot_ref(nx_r,ny_r,nz_l),stat=istat_alloc)      
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate n_pot_ref'
+          write(6,*)' error: could not allocate n_pot_ref'
           stop
       endif
 
-!     Begin infinite loop to continuously read radar data  
+!     begin infinite loop to continuously read radar data  
 
       do while(alls_well .eq. 1) 
 
 
-!         Begin loop to fill buffer arrays with data from the circular buffer.
-!         Call remap routines and reset pointers at the end of a volume scan  
+!         begin loop to fill buffer arrays with data from the circular buffer.
+!         call remap routines and reset pointers at the end of a volume scan  
 
-! Test for existence of velocity data.
-! Do we also need to test for reflectivity data?   
+! test for existence of velocity data.
+! do we also need to test for reflectivity data?   
 
           if ( get_status(ref_index) .eq. 0 .or.
      1         get_status(vel_index) .eq. 0 ) then
             knt_bad_stat = 0 
             i_angle = get_fixed_angle() 
             if(i_angle .eq. i_missing_data)then
-                write(6,*)' Warning: invalid i_angle in remap_sub'
+                write(6,*)' warning: invalid i_angle in remap_sub'
                 istatus = 0
                 goto 900 ! return
             endif
@@ -500,13 +500,13 @@ c
             i_tilt = get_tilt() 
             num_rays = get_num_rays() 
             if(num_rays .lt. 0 .or. num_rays .gt. 10000)then
-                write(6,*)' Warning: num_rays out of bounds',num_rays
+                write(6,*)' warning: num_rays out of bounds',num_rays
                 istatus = 0
                 goto 900 ! return
             endif
 
             if(n_rays .eq. n_rays/10 * 10)then
-!             write(6,*)'  Good status received'
+!             write(6,*)'  good status received'
               write(6,*)'  i_angle1, i_tilt = ', i_angle, i_tilt
      1               ,len(string_time)
             endif
@@ -521,13 +521,13 @@ c
               call make_fnam_lp (i4time_vol,string_time,istatus) 
 
               i_vcp=get_vcp() 
-              write(6,*)'   VCP number for this volume: ',i_vcp
+              write(6,*)'   vcp number for this volume: ',i_vcp
 
-              if(VERBOSE .eq. 1)then
+              if(verbose .eq. 1)then
                 write(6,*)' i4time_vol returned ',i4time_vol
               endif
 
-              write(6,*)' Time is ',string_time
+              write(6,*)' time is ',string_time
               initial_ray = 0
 
               ref_ptr = 1
@@ -535,18 +535,18 @@ c
 
             endif ! initial_ray = 1
 
-!           Test for end of tilt
+!           test for end of tilt
             if( i_tilt .eq. past_tilt .and. i_scan .eq. past_scan 
-     1                                .and. n_rays .lt. MAX_RAY_TILT 
+     1                                .and. n_rays .lt. max_ray_tilt 
      1                                .and. n_rays .lt. num_rays) then
 
-!             Not end of tilt
+!             not end of tilt
               n_rays = n_rays + 1
               iarg = get_azi(n_rays)
               if(iarg .eq. i_missing_data)then
-                  write(6,*)' Warning: invalid azi in remap_sub',n_rays       
+                  write(6,*)' warning: invalid azi in remap_sub',n_rays       
 
-!                 We set this to missing and continue to try remainder of tilt
+!                 we set this to missing and continue to try remainder of tilt
                   azim(n_rays) = r_missing_data
 
               else
@@ -562,7 +562,7 @@ c
      1                   ,     ref_ptr,vel_ptr  
               endif
 
-              if(VERBOSE .eq. 1)then
+              if(verbose .eq. 1)then
                 n_ref_gates = get_number_of_gates(ref_index) 
                 call get_first_gate(ref_index,first_ref_m,gsp_ref) 
                 n_vel_gates = get_number_of_gates(vel_index) 
@@ -570,18 +570,18 @@ c
               endif
 
               io_stat = get_data_field(ref_index, b_ref(ref_ptr)
-     1                                ,ref_ptr  , MAX_REF_GATES
+     1                                ,ref_ptr  , max_ref_gates
      1                                , b_missing_data) 
               if(io_stat .ne. 1)then
-                  write(6,*)' WARNING: incorrect ref data'
+                  write(6,*)' warning: incorrect ref data'
                   return
               endif
 
               io_stat = get_data_field(vel_index, b_vel(vel_ptr)
-     1                                ,vel_ptr  , MAX_VEL_GATES
+     1                                ,vel_ptr  , max_vel_gates
      1                                , b_missing_data) 
               if(io_stat .ne. 1)then
-                  write(6,*)' WARNING: incorrect vel data'
+                  write(6,*)' warning: incorrect vel data'
                   return
               endif
 
@@ -593,9 +593,9 @@ c
               if( i_angle .lt. past_angle .or. i_scan .ne. past_scan )
      1             i_last_scan = 1
 
-! call FILL_COMMON to fill up the common data area for current tilt   
+! call fill_common to fill up the common data area for current tilt   
 
-              write(6,*)'  Calling fill_common, i_angle, past_angle ',
+              write(6,*)'  calling fill_common, i_angle, past_angle ',
      1                                          i_angle, past_angle
 
               write(6,*)'  n_rays, past_tilt, b_missing_data ',
@@ -604,7 +604,7 @@ c
               n_ref_gates = get_number_of_gates(ref_index) 
               n_vel_gates = get_number_of_gates(vel_index) 
 
-              if(VERBOSE .eq. 1)then
+              if(verbose .eq. 1)then
                 write(6,*)'  n_ref_gates, n_vel_gates ',
      1                       n_ref_gates, n_vel_gates  
 
@@ -622,22 +622,22 @@ c
      1               first_ref_m,gsp_ref,first_vel_m,gsp_vel,
      1               azim,v_nyquist_ray_a,eleva,b_missing_data) 
 
-! call RADAR_INIT to assess the current tilt (first/last) and read next tilt
+! call radar_init to assess the current tilt (first/last) and read next tilt
               i_tilt_proc_next = i_tilt_proc_curr + 1
-              call radar_init(i_radar,path_to_radar,path_to_vrc,itimes   ! I
-     1                       ,b_missing_data                             ! I
-     1                       ,i_tilt_proc_next                           ! I/O
-     1                       ,l_realtime,i_last_scan                     ! O
-     1                       ,istatus)                                   ! O
+              call radar_init(i_radar,path_to_radar,path_to_vrc,itimes   ! i
+     1                       ,b_missing_data                             ! i
+     1                       ,i_tilt_proc_next                           ! i/o
+     1                       ,l_realtime,i_last_scan                     ! o
+     1                       ,istatus)                                   ! o
               write(6,*)
      1        ' remap_sub: istatus from radar_init (2nd call) =',istatus    
               if(istatus .ne. 1)then
                   return
               endif
 
-! call REMAP_PROCESS with the current tilt
+! call remap_process with the current tilt
               write(6,*)
-     1        '  Calling remap_process: past_tilt/i_tilt_proc_curr',
+     1        '  calling remap_process: past_tilt/i_tilt_proc_curr',
      1                                  past_tilt,i_tilt_proc_curr
 
               if(min_ref_samples .eq. -1)then
@@ -662,71 +662,71 @@ c
               write(6,*)'  i4time_vol, i_num,  istatus',
      1                i4time_vol,i_num_finished_products,istatus
 
-c             Get radar data from the storage area (formerly in remap_process)
+c             get radar data from the storage area (formerly in remap_process)
 c
-              allocate(Velocity(max_gates,MAX_RAY_TILT)
-     1                                   ,STAT=istat_alloc)      
+              allocate(velocity(max_gates,max_ray_tilt)
+     1                                   ,stat=istat_alloc)      
               if(istat_alloc .ne. 0)then
-                  write(6,*)' ERROR: Could not allocate Velocity'
+                  write(6,*)' error: could not allocate velocity'
                   stop
               endif
 
-              allocate(Reflect(max_gates,MAX_RAY_TILT)
-     1                                  ,STAT=istat_alloc)       
+              allocate(reflect(max_gates,max_ray_tilt)
+     1                                  ,stat=istat_alloc)       
               if(istat_alloc .ne. 0)then
-                  write(6,*)' ERROR: Could not allocate Reflect'
+                  write(6,*)' error: could not allocate reflect'
                   stop
               endif
 
-              call Read_Data_88D(
+              call read_data_88d(
      :               i_tilt_proc_curr,
      :               vel_thr_rtau,
-     :               r_missing_data,       ! Input
+     :               r_missing_data,       ! input
      :               namelist_parms,
-     :               gate_spacing_m_ret,   ! Output
+     :               gate_spacing_m_ret,   ! output
      :               i_scan_mode,
-     :               Num_sweeps,
-     :               Elevation_deg,
+     :               num_sweeps,
+     :               elevation_deg,
      :               n_rays_88d,
-     :               n_gates_88d,     ! Ref and Vel are on the same # of gates
-     :               Slant_ranges_m,
-     :               Velocity,
-     :               Reflect,
-     :               Az_Array,
+     :               n_gates_88d,     ! ref and vel are on the same # of gates
+     :               slant_ranges_m,
+     :               velocity,
+     :               reflect,
+     :               az_array,
      :               vel_nyquist,
      :               istatus_tilt)
 
-!             QC check that elevation angle is within lookup table range
-              if(Elevation_deg .lt. MIN_ELEV)then
+!             qc check that elevation angle is within lookup table range
+              if(elevation_deg .lt. min_elev)then
                  write(6,*)
-     1               ' Warning: Elevation_deg < MIN_ELEV in remap_sub'
-     1                         ,Elevation_deg,MIN_ELEV
+     1               ' warning: elevation_deg < min_elev in remap_sub'
+     1                         ,elevation_deg,min_elev
                  istatus = 0
                  goto 900 ! return
               endif
 
               call remap_process(
-     1            i_tilt_proc_curr,i_last_scan,i_first_scan,             ! I
-     :            grid_rvel,grid_rvel_sq,grid_nyq,ngrids_vel,n_pot_vel,  ! O
-     :            grid_ref,ngrids_ref,n_pot_ref,                         ! O
-     1            NX_L,NY_L,NZ_L,NX_R,NY_R,                              ! I
-     1            l_offset_radar,ioffset,joffset,                        ! I
-     1            lat,lon,topo,                                          ! I
-     1            i_scan_mode,                                           ! I
-     :            Slant_ranges_m,                                        ! I
-     :            n_rays_88d,                                            ! I
-     :            n_gates_88d,                                           ! I
-     1            Velocity,Reflect,                                      ! I
-     1            Az_Array,MAX_RAY_TILT,Elevation_deg,                   ! I
-     1            vel_nyquist,                                           ! I
-     1            ref_min,min_ref_samples,min_vel_samples,dgr,           ! I
-     1            laps_radar_ext,c3_radar_subdir,path_to_vrc,            ! I
-     1            namelist_parms,                                        ! I
-     1            i4time_vol,                                            ! I
-     1            i_num_finished_products,istatus_tilt,istatus)          ! O
+     1            i_tilt_proc_curr,i_last_scan,i_first_scan,             ! i
+     :            grid_rvel,grid_rvel_sq,grid_nyq,ngrids_vel,n_pot_vel,  ! o
+     :            grid_ref,ngrids_ref,n_pot_ref,                         ! o
+     1            nx_l,ny_l,nz_l,nx_r,ny_r,                              ! i
+     1            l_offset_radar,ioffset,joffset,                        ! i
+     1            lat,lon,topo,                                          ! i
+     1            i_scan_mode,                                           ! i
+     :            slant_ranges_m,                                        ! i
+     :            n_rays_88d,                                            ! i
+     :            n_gates_88d,                                           ! i
+     1            velocity,reflect,                                      ! i
+     1            az_array,max_ray_tilt,elevation_deg,                   ! i
+     1            vel_nyquist,                                           ! i
+     1            ref_min,min_ref_samples,min_vel_samples,dgr,           ! i
+     1            laps_radar_ext,c3_radar_subdir,path_to_vrc,            ! i
+     1            namelist_parms,                                        ! i
+     1            i4time_vol,                                            ! i
+     1            i_num_finished_products,istatus_tilt,istatus)          ! o
 
-              deallocate(Velocity)
-              deallocate(Reflect)
+              deallocate(velocity)
+              deallocate(reflect)
 
               if(istatus .ne. 1)then
                   write(6,*)
@@ -735,7 +735,7 @@ c
               endif
 
               if(i_last_scan .eq. 1)then
-                  write(6,*)' Volume completed, return from remap_sub'
+                  write(6,*)' volume completed, return from remap_sub'
                   istatus = 1
                   goto 900 ! return
               endif
@@ -745,7 +745,7 @@ c
 
               if( i_angle .lt. past_angle .or. 
      1            i_scan  .ne. past_scan ) then 
-                write(6,*)' Reset to beginning of volume'
+                write(6,*)' reset to beginning of volume'
                 i_first_scan = 1
                 i_tilt_proc_curr = 0  
                 past_angle= i_angle 
@@ -760,7 +760,7 @@ c
 
  900  continue
 
-!     Deallocate arrays
+!     deallocate arrays
       deallocate (grid_rvel)
       deallocate (grid_rvel_sq)
       deallocate (grid_nyq)
@@ -775,25 +775,25 @@ c
       end
 
  
-       subroutine get_remap_parms(i_radar,n_radars_remap,max_times    ! I/O
-     1            ,path_to_radar,laps_radar_ext                       ! O
-     1            ,c3_radar_subdir,path_to_vrc                        ! O
-     1            ,ref_min,min_ref_samples,min_vel_samples,dgr        ! O
-     1            ,namelist_parms,istatus)                            ! O 
+       subroutine get_remap_parms(i_radar,n_radars_remap,max_times    ! i/o
+     1            ,path_to_radar,laps_radar_ext                       ! o
+     1            ,c3_radar_subdir,path_to_vrc                        ! o
+     1            ,ref_min,min_ref_samples,min_vel_samples,dgr        ! o
+     1            ,namelist_parms,istatus)                            ! o 
 
        include 'remap_constants.dat'      
        include 'radar_mosaic_dim.inc'      
 
-       integer MAX_RADARS_REMAP
-       parameter (MAX_RADARS_REMAP=max_radars_mosaic)
+       integer max_radars_remap
+       parameter (max_radars_remap=max_radars_mosaic)
 
-       character*150 path_to_radar_a(MAX_RADARS_REMAP),path_to_vrc_nl       
+       character*150 path_to_radar_a(max_radars_remap),path_to_vrc_nl       
        character*(*) path_to_radar,path_to_vrc
 
-!      character*4 c4_radarname_a(MAX_RADARS_REMAP)
+!      character*4 c4_radarname_a(max_radars_remap)
 !      character*4 c4_radarname
 
-       character*4   laps_radar_ext_a(MAX_RADARS_REMAP)
+       character*4   laps_radar_ext_a(max_radars_remap)
        character*(*) laps_radar_ext
 
        character*3 c3_radar_subdir
@@ -807,7 +807,7 @@ c
      1                    ,l_unfold,l_ppi_mode,n_groups
        character*150 static_dir,filename
 
-!      Default values
+!      default values
        l_ppi_mode = .false. ! for backwards compatability with the namelist
 
        call get_directory('nest7grid',static_dir,len_dir)
@@ -818,7 +818,7 @@ c
        read(1,remap_nl,err=901)
        close(1)
 
-!      Fill namelist parms
+!      fill namelist parms
        namelist_parms%abs_vel_min = abs_vel_min
        namelist_parms%l_line_ref_qc = l_line_ref_qc 
        namelist_parms%l_hybrid_first_gate = l_hybrid_first_gate
@@ -830,11 +830,11 @@ c
            return
        endif
 
-       if(i_radar        .gt. MAX_RADARS_REMAP  
-     1                   .OR. 
-     1    n_radars_remap .gt. MAX_RADARS_REMAP)then       
-           write(6,*)' ERROR: too many radars in get_remap_parms'
-     1              ,i_radar,n_radars_remap,MAX_RADARS_REMAP
+       if(i_radar        .gt. max_radars_remap  
+     1                   .or. 
+     1    n_radars_remap .gt. max_radars_remap)then       
+           write(6,*)' error: too many radars in get_remap_parms'
+     1              ,i_radar,n_radars_remap,max_radars_remap
            istatus = 0
            return
        endif
@@ -848,7 +848,7 @@ c
        length = min(len(path_to_vrc),len(path_to_vrc_nl))
        path_to_vrc    = path_to_vrc_nl(1:length)
 
-!      Determine name of radar_subdir if any
+!      determine name of radar_subdir if any
        i_ext = 0
        do i = 1,i_radar
            if(laps_radar_ext_a(i) .eq. 'vrc')then

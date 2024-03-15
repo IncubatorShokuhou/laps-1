@@ -1,12 +1,12 @@
 
-        subroutine get_latlon_perimeter(ni,nj,r_buffer             ! I
-     1                  ,lat,lon,topo                              ! O
-     1                  ,rnorth,south,east,west,istatus)           ! O
+        subroutine get_latlon_perimeter(ni,nj,r_buffer             ! i
+     1                  ,lat,lon,topo                              ! o
+     1                  ,rnorth,south,east,west,istatus)           ! o
 
-cdoc    Obtain lat/lon box surrounding laps grid, including a buffer
-cdoc    Works on the basis of max/min lat/lons and limited accounting
+cdoc    obtain lat/lon box surrounding laps grid, including a buffer
+cdoc    works on the basis of max/min lat/lons and limited accounting
 cdoc    for when the dateline or poles are near the box.
-cdoc    This version is more generic with static file source.
+cdoc    this version is more generic with static file source.
 
         real lat(ni,nj),lon(ni,nj)
         real topo(ni,nj),fracland(ni,nj)
@@ -14,7 +14,7 @@ cdoc    This version is more generic with static file source.
         call get_laps_domain_95(ni,nj,lat,lon,topo,fracland,gridsp
      1                      ,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS domain'
+            write(6,*)' error getting laps domain'
             return
         endif
 
@@ -43,27 +43,27 @@ cdoc    This version is more generic with static file source.
         west   = max(west  ,-180.)
 
         write(6,101)rnorth,south,east,west
-101     format(1x,' Lat/lon box around LAPS grid - NSEW ',4f10.3)
+101     format(1x,' lat/lon box around laps grid - nsew ',4f10.3)
 
         return
         end
 
-        subroutine get_domain_perimeter(ni,nj,LAPS_DOMAIN_FILE
+        subroutine get_domain_perimeter(ni,nj,laps_domain_file
      1                  ,lat,lon,topo
      1                  ,r_buffer,rnorth,south,east,west,istatus)
 
-cdoc    Obtain lat/lon box surrounding laps grid, including a buffer
-cdoc    Works on the basis of max/min lat/lons and limited accounting
+cdoc    obtain lat/lon box surrounding laps grid, including a buffer
+cdoc    works on the basis of max/min lat/lons and limited accounting
 cdoc    for when the dateline or poles are near the box.
 
         real lat(ni,nj),lon(ni,nj)
         real topo(ni,nj)
-        character*(*) LAPS_DOMAIN_FILE
+        character*(*) laps_domain_file
 
-        call get_laps_domain(ni,nj,LAPS_DOMAIN_FILE,lat,lon,topo
+        call get_laps_domain(ni,nj,laps_domain_file,lat,lon,topo
      1                      ,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS domain'
+            write(6,*)' error getting laps domain'
             return
         endif
 
@@ -92,19 +92,19 @@ cdoc    for when the dateline or poles are near the box.
         west   = max(west  ,-180.)
 
         write(6,101)rnorth,south,east,west
-101     format(1x,' Lat/lon box around LAPS grid - NSEW ',4f10.3)
+101     format(1x,' lat/lon box around laps grid - nsew ',4f10.3)
 
         return
         end
 
-C -----------------------------------------------------------
+c -----------------------------------------------------------
 
-        subroutine get_domain_perimeter_grid(ni,nj,LAPS_DOMAIN_FILE
+        subroutine get_domain_perimeter_grid(ni,nj,laps_domain_file
      1                  ,lat,lon
      1                  ,r_buffer,rnorth,south,east,west,istatus)
 
-cdoc    Obtain lat/lon box surrounding laps grid, including a buffer
-cdoc    Works on the basis of lat/lons and greater accounting
+cdoc    obtain lat/lon box surrounding laps grid, including a buffer
+cdoc    works on the basis of lat/lons and greater accounting
 cdoc    for when the dateline or poles are near or in the box.
 
         implicit none
@@ -113,7 +113,7 @@ cdoc    for when the dateline or poles are near or in the box.
         real east,west,rnorth,south
         real r_buffer
         real lat(ni,nj),lon(ni,nj)
-        character*(*) LAPS_DOMAIN_FILE
+        character*(*) laps_domain_file
         logical lfnddateline
         logical lfndgrenwich
         logical lfndpolen
@@ -177,7 +177,7 @@ c do we have a boundary to deal with?
               if(lon(ni,j).lt.0.0)
      &        east = max(east,lon(ni,j))
            enddo
-        elseif(lfndgrenwich)then  !Greenwich: we are set to go:
+        elseif(lfndgrenwich)then  !greenwich: we are set to go:
        
         endif
 

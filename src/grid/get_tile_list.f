@@ -35,67 +35,67 @@
       istatus = 1
 
       r8term=(min_lat-float(isbego))/float(itilesize)
-      ISOC1=(INT(r8term+200.)-200)*itilesize+ISBEGO
+      isoc1=(int(r8term+200.)-200)*itilesize+isbego
       r8term=(min_lon-float(iwbego))/float(itilesize)
-      IWOC1=(INT(r8term+400.)-400)*itilesize+IWBEGO
+      iwoc1=(int(r8term+400.)-400)*itilesize+iwbego
       r8term=(max_lat-float(isbego))/float(itilesize)
-      ISOC2=(INT(r8term+200.)-200)*itilesize+ISBEGO
+      isoc2=(int(r8term+200.)-200)*itilesize+isbego
       r8term=(max_lon-float(iwbego))/float(itilesize)
-      IWOC2=(INT(r8term+400.)-400)*itilesize+IWBEGO
+      iwoc2=(int(r8term+400.)-400)*itilesize+iwbego
 
       num_tiles_needed=0
 
-      if(IWOC1.lt.-180)then
+      if(iwoc1.lt.-180)then
          if(itilesize.eq.180)then
             iwocdif=iwoc2-iwoc1
-            IWOC1=IWOC1+IWOCDIF
-            IWOC2=IWOC2+abs(IWOCDIF)
+            iwoc1=iwoc1+iwocdif
+            iwoc2=iwoc2+abs(iwocdif)
 c        else
-c           IWOC1=360+IWOC1
+c           iwoc1=360+iwoc1
          endif
-c     elseif(IWOC1.gt.180)then
-c        IWOC1=360-IWOC1
+c     elseif(iwoc1.gt.180)then
+c        iwoc1=360-iwoc1
       endif
-      print*,'Noddy IWOC1, IWOC2 ',IWOC1,IWOC2
-      do IWOC = IWOC1,IWOC2,itilesize
+      print*,'noddy iwoc1, iwoc2 ',iwoc1,iwoc2
+      do iwoc = iwoc1,iwoc2,itilesize
 
-         IWOC0 = IWOC
-         IF(IWOC.LT.-180)IWOC0=360+IWOC0
-c        IF(IWOC.GT.+180)IWOC0=360-IWOC0
+         iwoc0 = iwoc
+         if(iwoc.lt.-180)iwoc0=360+iwoc0
+c        if(iwoc.gt.+180)iwoc0=360-iwoc0
 
-         IWOCPH=ABS(IWOC0)/100
-         IWOCPT=(ABS(IWOC0)-IWOCPH*100)/10
-         IWOCPO=ABS(IWOC0)-IWOCPH*100-IWOCPT*10
+         iwocph=abs(iwoc0)/100
+         iwocpt=(abs(iwoc0)-iwocph*100)/10
+         iwocpo=abs(iwoc0)-iwocph*100-iwocpt*10
 !
-! TH: 8 Aug 2002 We now allow 180E longitudes (and greater). The only 
-! time we want to assign W is when the longitude is less than 0.
+! th: 8 aug 2002 we now allow 180e longitudes (and greater). the only 
+! time we want to assign w is when the longitude is less than 0.
 !
-         IF(IWOC0.GE.0.and.IWOC0.LT.180) THEN
-            WRITE(EWTITLE,'(3I1,A1)')IWOCPH,IWOCPT,IWOCPO,'E'
-         ELSE
-            WRITE(EWTITLE,'(3I1,A1)')IWOCPH,IWOCPT,IWOCPO,'W'
-         ENDIF
+         if(iwoc0.ge.0.and.iwoc0.lt.180) then
+            write(ewtitle,'(3i1,a1)')iwocph,iwocpt,iwocpo,'e'
+         else
+            write(ewtitle,'(3i1,a1)')iwocph,iwocpt,iwocpo,'w'
+         endif
 
          if(ewtitle(1:1).eq.' ')ewtitle(1:1)='0'
          if(ewtitle(2:2).eq.' ')ewtitle(2:2)='0'
 
 c        ewtitle=ewtitle2//ewtitle1
 
-         do ISOC = ISOC1,ISOC2,itilesize
+         do isoc = isoc1,isoc2,itilesize
 
-            ISOCPT=ABS(ISOC)/10
-            ISOCPO=ABS(ISOC)-ISOCPT*10
+            isocpt=abs(isoc)/10
+            isocpo=abs(isoc)-isocpt*10
 
-            IF(ISOC.GE.0)THEN
-              WRITE(NSTITLE,'(2I1,A1)')ISOCPT,ISOCPO,'N'
-            ELSE
-              WRITE(NSTITLE,'(2I1,A1)')ISOCPT,ISOCPO,'S'
-            ENDIF
+            if(isoc.ge.0)then
+              write(nstitle,'(2i1,a1)')isocpt,isocpo,'n'
+            else
+              write(nstitle,'(2i1,a1)')isocpt,isocpo,'s'
+            endif
 
             num_tiles_needed=num_tiles_needed+1
 
             if(num_tiles_needed .gt. maxtiles_loc)then
-                print*,'more tiles needed than array allocation A'
+                print*,'more tiles needed than array allocation a'
      1                ,num_tiles_needed,maxtiles_loc
                 istatus = 0
                 return
@@ -115,7 +115,7 @@ c        ewtitle=ewtitle2//ewtitle1
             ctile_name_list(itile_ns)=ctilenamelist(itile_ns)
          enddo
       else
-         print*,'more tiles than array allocation B'
+         print*,'more tiles than array allocation b'
      1         ,num_tiles_needed,maxtiles
          istatus = 0
       endif

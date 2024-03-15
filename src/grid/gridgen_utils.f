@@ -17,13 +17,13 @@ c these returned to gridgen
       real    xtn(nnxp,n_staggers)
       real    ytn(nnyp,n_staggers)
 
-c these are the anchor points (SW corner) of the grid
+c these are the anchor points (sw corner) of the grid
       real    xmn1,ymn1
 
 c     real    lat(nnxp,nnyp)
 c     real    lon(nnxp,nnyp)
 
-c A-c staggers contained within these arrays.
+c a-c staggers contained within these arrays.
       real    lats(nnxp,nnyp,n_staggers)
       real    lons(nnxp,nnyp,n_staggers)
 
@@ -38,13 +38,13 @@ c A-c staggers contained within these arrays.
 
 c     call get_grid_center(mdlat,mdlon,istatus)
 c     if(istatus .ne. 1)then
-c        write(6,*)' Error returned: get_grid_center'
+c        write(6,*)' error returned: get_grid_center'
 c        return
 c     endif
 
       call get_earth_radius(erad,istatus)
       if(istatus .ne. 1)then
-         write(6,*)' Error calling get_earth_radius'
+         write(6,*)' error calling get_earth_radius'
          return
       endif
 
@@ -52,22 +52,22 @@ c     endif
 
          if(k.eq.1)then
 
-c Get X/Y for lower left corner
-            CALL POLAR_GP(mdlat,mdlon,XMN1,YMN1,DELTAX,DELTAY,
-     +  NNXP,NNYP,1.)
+c get x/y for lower left corner
+            call polar_gp(mdlat,mdlon,xmn1,ymn1,deltax,deltay,
+     +  nnxp,nnyp,1.)
             stagger_ns=0
             stagger_ew=0
             call get_xytn(deltax,deltay,nnxp,nnyp,stagger_ew
      +,stagger_ns,xmn1,ymn1,xtn(1,k),ytn(1,k))
  
-         elseif(k.eq.2)then    !this is A-stagger (.5 E-W stagger) 
+         elseif(k.eq.2)then    !this is a-stagger (.5 e-w stagger) 
 
             stagger_ew=0.5*deltax
             stagger_ns=0
             call get_xytn(deltax,deltay,nnxp,nnyp,stagger_ew
      +,stagger_ns,xmn1,ymn1,xtn(1,k),ytn(1,k))
 
-         elseif(k.eq.3)then !this is the B-stagger (.5 N-S stagger)
+         elseif(k.eq.3)then !this is the b-stagger (.5 n-s stagger)
 
             call get_xytn(deltax,deltay,nnxp,nnyp,0,0,xmn1,ymn1
      +,xtn(1,k),ytn(1,k))
@@ -76,7 +76,7 @@ c Get X/Y for lower left corner
             call get_xytn(deltax,deltay,nnxp,nnyp,stagger_ew
      +,stagger_ns,xmn1,ymn1,xtn(1,k),ytn(1,k)) 
 
-         elseif(k.eq.4)then !this is the C-stagger (.5 both N-S and E-W)
+         elseif(k.eq.4)then !this is the c-stagger (.5 both n-s and e-w)
 
             call get_xytn(deltax,deltay,nnxp,nnyp,0,0,xmn1,ymn1
      +,xtn(1,k),ytn(1,k))
@@ -86,16 +86,16 @@ c Get X/Y for lower left corner
      +,stagger_ns,xmn1,ymn1,xtn(1,k),ytn(1,k))
 
          endif
-C
-C*****************************************************************
-C*  Convert it to lat/lon using the library routines.            *
+c
+c*****************************************************************
+c*  convert it to lat/lon using the library routines.            *
          itstatus=ishow_timer()
 
-         Do J = 1,nnyp
-           Do I = 1,nnxp
+         do j = 1,nnyp
+           do i = 1,nnxp
 
              call xy_to_latlon(xtn(i,k),ytn(j,k),erad ! ,90.,std_lon     
-     1                                     ,lats(I,J,k),lons(I,J,k))
+     1                                     ,lats(i,j,k),lons(i,j,k))
 
 c            print *,'i,j,xtn,ytn,pla,lplo=',i,j,xtn,ytn,pla,plo
            enddo
@@ -137,29 +137,29 @@ c ----------------------------------------------
       xmn(1)=xmn1+stagger_ew
       ymn(1)=ymn1+stagger_ns
 
-      DO 600 I=2,NNXP
-         RIDIFF = float(I-1)
-         XMN(I)=XMN(1)+RIDIFF*DELTAX
- 600  CONTINUE
-      XMN(NNXP)=2*XMN(NNXP-1)-XMN(NNXP-2)
+      do 600 i=2,nnxp
+         ridiff = float(i-1)
+         xmn(i)=xmn(1)+ridiff*deltax
+ 600  continue
+      xmn(nnxp)=2*xmn(nnxp-1)-xmn(nnxp-2)
  
-      DO 610 J=2,NNYP
-         RJDIFF = float(J-1)
-         YMN(J)=YMN(1)+RJDIFF*DELTAY
- 610  CONTINUE
-      YMN(NNYP)=2*YMN(NNYP-1)-YMN(NNYP-2)
+      do 610 j=2,nnyp
+         rjdiff = float(j-1)
+         ymn(j)=ymn(1)+rjdiff*deltay
+ 610  continue
+      ymn(nnyp)=2*ymn(nnyp-1)-ymn(nnyp-2)
  
-      DO 650 I=2,NNXP
-         XTN(I)=.5*(XMN(I)+XMN(I-1))
- 650  CONTINUE
-      XTN(1)=1.5*XMN(1)-.5*XMN(2)
+      do 650 i=2,nnxp
+         xtn(i)=.5*(xmn(i)+xmn(i-1))
+ 650  continue
+      xtn(1)=1.5*xmn(1)-.5*xmn(2)
 
-      DO 660 J=2,NNYP
-         YTN(J)=.5*(YMN(J)+YMN(J-1))
- 660  CONTINUE
-      YTN(1)=1.5*YMN(1)-.5*YMN(2)
+      do 660 j=2,nnyp
+         ytn(j)=.5*(ymn(j)+ymn(j-1))
+ 660  continue
+      ytn(1)=1.5*ymn(1)-.5*ymn(2)
 
-      write(6,*)' Results at end of get_xytn:'
+      write(6,*)' results at end of get_xytn:'
       write(6,*)' deltax/deltay = ',deltax,deltay
       write(6,*)' xmn bounds = ',xmn(1),xmn(nnxp)
       write(6,*)' ymn bounds = ',ymn(1),ymn(nnyp)
@@ -199,7 +199,7 @@ c
 
       return
 
-999   print*,'Error returned: get_sigma'
+999   print*,'error returned: get_sigma'
 
       return
       end
@@ -249,7 +249,7 @@ c
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error returned: get_r_missing_data'
+         print*,'error returned: get_r_missing_data'
          return
       endif
 
@@ -289,7 +289,7 @@ c
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error returned: get_r_missing_data'
+         print*,'error returned: get_r_missing_data'
          return
       endif
 
@@ -308,7 +308,7 @@ c
          print*,'static_albedo ',water_albedo_cmn,' used ',
      +'at ',nwater,' grid points '
       else
-         print*,'No water grid points for water_albedo',
+         print*,'no water grid points for water_albedo',
      +' in this domain'
       endif
 
@@ -325,19 +325,19 @@ c this used only for getting topography on the c-staggered grid
       integer i,j,imax,jmax
       real result
       real array_2d(imax,jmax)
-      real Z1,Z2,Z3,Z4
+      real z1,z2,z3,z4
       real fraci,fracj
 
       fraci = 0.5
       fracj = 0.5
 
-      Z1=array_2d(i  , j  )
-      Z2=array_2d(i-1, j  )
-      Z3=array_2d(i-1, j-1)
-      Z4=array_2d(i  , j-1)
+      z1=array_2d(i  , j  )
+      z2=array_2d(i-1, j  )
+      z3=array_2d(i-1, j-1)
+      z4=array_2d(i  , j-1)
 
-      result= Z1+(Z2-Z1)*fraci+(Z4-Z1)*fracj
-     1     - (Z2+Z4-Z3-Z1)*fraci*fracj
+      result= z1+(z2-z1)*fraci+(z4-z1)*fracj
+     1     - (z2+z4-z3-z1)*fraci*fracj
 
       return
       end
@@ -356,51 +356,51 @@ c
 
       write(6,*)' get_gridgen_var: ngrids = ',ngrids
 
-      if(ngrids.eq.38)then  !this is the LAPS analysis section
+      if(ngrids.eq.38)then  !this is the laps analysis section
 
-         var(1)    = 'LAT'
-         var(2)    = 'LON'
-         var(3)    = 'AVG'
-         var(4)    = 'LDF'
-         var(5)    = 'USE'
-         var(6)    = 'ALB'  !now used for max snow alb 2-20-03 JS.
-         var(7)    = 'STD'
-         var(8)    = 'SLN'
-         var(9)    = 'SLT'
-         var(10)   = 'STL'
-         var(11)   = 'SBL'
-         var(12)   = 'LND'  ! Land-Water Mask based on USGS landuse
+         var(1)    = 'lat'
+         var(2)    = 'lon'
+         var(3)    = 'avg'
+         var(4)    = 'ldf'
+         var(5)    = 'use'
+         var(6)    = 'alb'  !now used for max snow alb 2-20-03 js.
+         var(7)    = 'std'
+         var(8)    = 'sln'
+         var(9)    = 'slt'
+         var(10)   = 'stl'
+         var(11)   = 'sbl'
+         var(12)   = 'lnd'  ! land-water mask based on usgs landuse
          i=12
          do j=1,12
             write(cat,'(i2.2)')j
             if(cat(1:1).eq.' ')cat(1:1)='0'
             if(cat(2:2).eq.' ')cat(2:2)='0'
-            var(i+j)= 'G'//cat   ! vegetation greenness fraction
+            var(i+j)= 'g'//cat   ! vegetation greenness fraction
          enddo
 
-         var(25)='TMP'
+         var(25)='tmp'
          i=25
          do j=1,12
             write(cat,'(i2.2)')j
             if(cat(1:1).eq.' ')cat(1:1)='0'
             if(cat(2:2).eq.' ')cat(2:2)='0'
-            var(i+j)= 'A'//cat   ! monthly albedo
+            var(i+j)= 'a'//cat   ! monthly albedo
          enddo
 
-         var(ngrids)   = 'ZIN'
+         var(ngrids)   = 'zin'
  
-         comment(1) = 'Lat: From MODEL by J. Smart/ S. Albers 2-03\0'
-         comment(2) = 'Lon: From MODEL by J. Smart/ S. Albers 2-03\0'
-         comment(3) = 'Average terrain elevation (m) \0'
-         comment(4) = 'Land Fraction: derived from USGS land use \0'
-         comment(5) = 'Land Use dominant category (USGS 24 Category) \0'
-         comment(6) = 'Maximum Snow Albedo; defined over land only \0'
-         comment(7) = 'Standard Deviation of Elevation data (m)\0'
-         comment(8) = 'Mean longitudinal terrain slope (m/m)\0'
-         comment(9) = 'Mean latitudinal terrain slope (m/m)\0'
-         comment(10)= 'Top layer (0-30cm) dominant category soiltype\0'
-         comment(11)= 'Bot layer (30-90cm) dominant category soiltype\0'
-         comment(12)= 'Land-Water Mask (0=water; 1 otherwise) \0'
+         comment(1) = 'lat: from model by j. smart/ s. albers 2-03\0'
+         comment(2) = 'lon: from model by j. smart/ s. albers 2-03\0'
+         comment(3) = 'average terrain elevation (m) \0'
+         comment(4) = 'land fraction: derived from usgs land use \0'
+         comment(5) = 'land use dominant category (usgs 24 category) \0'
+         comment(6) = 'maximum snow albedo; defined over land only \0'
+         comment(7) = 'standard deviation of elevation data (m)\0'
+         comment(8) = 'mean longitudinal terrain slope (m/m)\0'
+         comment(9) = 'mean latitudinal terrain slope (m/m)\0'
+         comment(10)= 'top layer (0-30cm) dominant category soiltype\0'
+         comment(11)= 'bot layer (30-90cm) dominant category soiltype\0'
+         comment(12)= 'land-water mask (0=water; 1 otherwise) \0'
 
          i=12
          do j=1,12
@@ -410,7 +410,7 @@ c
           comment(i+j)= 'vegetation greenness fraction: mon = '//cat
          enddo
 
-         comment(25)='Mean Annual Soil Temp (deg K)'
+         comment(25)='mean annual soil temp (deg k)'
          i=25
          do j=1,12
           write(cat,'(i2.2)')j
@@ -422,133 +422,133 @@ c
 
          comment(ngrids)='\0'
 
-      elseif(ngrids.eq.112)then   !this is the WRFSI section
+      elseif(ngrids.eq.112)then   !this is the wrfsi section
 
-         var(1)    = 'LAT'  ! non-staggered (Analysis-grid) lats
-         var(2)    = 'LON'  ! non-staggered (Analysis-grid) lons
-         var(3)    = 'LAA'  ! a-stagger (.5*deltax (e-w)) lats
-         var(4)    = 'LOA'  ! a-stagger (.5*deltax (e-w)) lons
-         var(5)    = 'LAB'  ! b-stagger (.5*deltay (n-s)) lats
-         var(6)    = 'LOB'  ! b-stagger (.5*deltay (n-s)) lons
-         var(7)    = 'LAC'  ! c-stagger (.5*deltax and .5*deltay) lats
-         var(8)    = 'LOC'  ! c-stagger (.5*deltay and .5*deltay) lons
+         var(1)    = 'lat'  ! non-staggered (analysis-grid) lats
+         var(2)    = 'lon'  ! non-staggered (analysis-grid) lons
+         var(3)    = 'laa'  ! a-stagger (.5*deltax (e-w)) lats
+         var(4)    = 'loa'  ! a-stagger (.5*deltax (e-w)) lons
+         var(5)    = 'lab'  ! b-stagger (.5*deltay (n-s)) lats
+         var(6)    = 'lob'  ! b-stagger (.5*deltay (n-s)) lons
+         var(7)    = 'lac'  ! c-stagger (.5*deltax and .5*deltay) lats
+         var(8)    = 'loc'  ! c-stagger (.5*deltay and .5*deltay) lons
 
-         var(9)    = 'AVG'  ! Topo (m) on Analysis-grid
+         var(9)    = 'avg'  ! topo (m) on analysis-grid
 
-         var(10)   = 'LDF'  ! Land Fraction
-         var(11)   = 'USE'  ! landuse dominant category
-         var(12)   = 'LND'  ! Land-Water Mask based on USGS landuse
-         var(13)   = 'STL'  ! Soiltype top layer dominant category
-         var(14)   = 'SBL'  ! Soiltype bot layer dominant category
+         var(10)   = 'ldf'  ! land fraction
+         var(11)   = 'use'  ! landuse dominant category
+         var(12)   = 'lnd'  ! land-water mask based on usgs landuse
+         var(13)   = 'stl'  ! soiltype top layer dominant category
+         var(14)   = 'sbl'  ! soiltype bot layer dominant category
 
          i=14
          do j=1,24
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'U'//cat
+          var(i+j)= 'u'//cat
          enddo
 
          i=39
-         var(i)     = 'SPR'  ! Sin(projection rotation) from true
-         var(i+1)   = 'CPR'  ! Cos(projection rotation) from true
-         var(i+2)   = 'MFL'  ! Map factor Analysis grid
-         var(i+3)   = 'MFA'  ! Map factor a-stagger grid
-         var(i+4)   = 'MFB'  ! Map factor b-stagger grid
-         var(i+5)   = 'MFC'  ! Map factor c-stagger grid
-         var(i+6)   = 'CPH'  ! Horizontal component of coriolis parameter
-         var(i+7)   = 'CPV'  ! Vertical component of coriolis parameter
+         var(i)     = 'spr'  ! sin(projection rotation) from true
+         var(i+1)   = 'cpr'  ! cos(projection rotation) from true
+         var(i+2)   = 'mfl'  ! map factor analysis grid
+         var(i+3)   = 'mfa'  ! map factor a-stagger grid
+         var(i+4)   = 'mfb'  ! map factor b-stagger grid
+         var(i+5)   = 'mfc'  ! map factor c-stagger grid
+         var(i+6)   = 'cph'  ! horizontal component of coriolis parameter
+         var(i+7)   = 'cpv'  ! vertical component of coriolis parameter
 
-         var(i+8)   = 'ALB'  ! Maximum snow albedo defined over land only
-         var(i+9)   = 'STD'  ! Standard Deviation of Elevation Data (m)
-         var(i+10)  = 'SLN'  ! Terrain Slope; Longitudinal Component (m/m)
-         var(i+11)  = 'SLT'  ! Terrain Slope; Latitudinal Component (m/m)
-         var(i+12)  = 'AVC'  ! Topo (m) on c-stagger grid
+         var(i+8)   = 'alb'  ! maximum snow albedo defined over land only
+         var(i+9)   = 'std'  ! standard deviation of elevation data (m)
+         var(i+10)  = 'sln'  ! terrain slope; longitudinal component (m/m)
+         var(i+11)  = 'slt'  ! terrain slope; latitudinal component (m/m)
+         var(i+12)  = 'avc'  ! topo (m) on c-stagger grid
 
          i=51
          do j=1,16
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'T'//cat   !top layer (0-30cm) soiltype (% dist)
+          var(i+j)= 't'//cat   !top layer (0-30cm) soiltype (% dist)
          enddo
          i=67
          do j=1,16
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'B'//cat   ! bot layer (30-90cm) soiltype (% dist)
+          var(i+j)= 'b'//cat   ! bot layer (30-90cm) soiltype (% dist)
          enddo
          i=83
          do j=1,12
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'G'//cat   ! vegetation greenness fraction
+          var(i+j)= 'g'//cat   ! vegetation greenness fraction
          enddo
 
-         var(96)='TMP'
+         var(96)='tmp'
 
          i=96
          do j=1,12
             write(cat,'(i2.2)')j
             if(cat(1:1).eq.' ')cat(1:1)='0'
             if(cat(2:2).eq.' ')cat(2:2)='0'
-            var(i+j)= 'A'//cat ! monthly albedo
+            var(i+j)= 'a'//cat ! monthly albedo
          enddo
 
-         var(109) = 'SLP'      !terrain slope index, dominant category
-         var(110) = 'GNX'      !max greenness fraction
-         var(111) = 'GNN'      !min greenness fraction
+         var(109) = 'slp'      !terrain slope index, dominant category
+         var(110) = 'gnx'      !max greenness fraction
+         var(111) = 'gnn'      !min greenness fraction
 
-         var(ngrids)   = 'ZIN'
+         var(ngrids)   = 'zin'
 
-         comment(1) = 'Made from MODEL by J. Smart/ S. Albers 2-03\0'
-         comment(2) = 'Made from MODEL by J. Smart/ S. Albers 2-03\0'
+         comment(1) = 'made from model by j. smart/ s. albers 2-03\0'
+         comment(2) = 'made from model by j. smart/ s. albers 2-03\0'
          comment(3) = 'a-stagger grid latitudes \0'
-         comment(4) = 'a-stagger grid longitudes for WRF_SI \0'
-         comment(5) = 'b-stagger grid latitudes for WRF_SI \0'
-         comment(6) = 'b-stagger grid longitudes for WRF_SI \0'
-         comment(7) = 'c-stagger grid latitudes for WRF_SI \0'
-         comment(8) = 'c-stagger grid longitudes for WRF_SI \0'
-         comment(9) = 'Average terrain elevation (m) \0'
-         comment(10)= 'Land Fraction computed from USGS landuse\0'
-         comment(11)= 'Land Use Dominant category \0'
-         comment(12)= 'Land-Water Mask (0=water; 1 otherwise) \0'
-         comment(13)= 'Soiltype Top Layer dominant category \0'
-         comment(14)= 'Soiltype Bot Layer dominant category \0'
+         comment(4) = 'a-stagger grid longitudes for wrf_si \0'
+         comment(5) = 'b-stagger grid latitudes for wrf_si \0'
+         comment(6) = 'b-stagger grid longitudes for wrf_si \0'
+         comment(7) = 'c-stagger grid latitudes for wrf_si \0'
+         comment(8) = 'c-stagger grid longitudes for wrf_si \0'
+         comment(9) = 'average terrain elevation (m) \0'
+         comment(10)= 'land fraction computed from usgs landuse\0'
+         comment(11)= 'land use dominant category \0'
+         comment(12)= 'land-water mask (0=water; 1 otherwise) \0'
+         comment(13)= 'soiltype top layer dominant category \0'
+         comment(14)= 'soiltype bot layer dominant category \0'
 
          i=14
          do j=1,24
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'U'//cat
-          comment(i+j)= '% Dist Land Use Category '//cat//' \0'
+          var(i+j)= 'u'//cat
+          comment(i+j)= '% dist land use category '//cat//' \0'
          enddo
 
          i=39
-         comment(i)= 'Sin of projection rotation (rad) \0'
-         comment(i+1)= 'Cosine of projection rotation (rad) \0'
-         comment(i+2)= 'Map Factor Analysis grid \0'
-         comment(i+3)= 'Map Factor a-stagger grid \0'
-         comment(i+4)='Map Factor b-stagger grid \0'
-         comment(i+5)= 'Map Factor c-stagger grid \0'
-         comment(i+6)= 'Horizontal component coriolis parameter \0'
-         comment(i+7)= 'Vertical component coriolis parameter \0'
+         comment(i)= 'sin of projection rotation (rad) \0'
+         comment(i+1)= 'cosine of projection rotation (rad) \0'
+         comment(i+2)= 'map factor analysis grid \0'
+         comment(i+3)= 'map factor a-stagger grid \0'
+         comment(i+4)='map factor b-stagger grid \0'
+         comment(i+5)= 'map factor c-stagger grid \0'
+         comment(i+6)= 'horizontal component coriolis parameter \0'
+         comment(i+7)= 'vertical component coriolis parameter \0'
 
-         comment(i+8)= 'Maximum Snow Albedo (%) over land only \0'
-         comment(i+9)= 'Standard Deviation of Elevation data (m)\0'
-         comment(i+10)= 'Mean longitudinal terrain slope (m/m)\0'
-         comment(i+11)= 'Mean latitudinal terrain slope (m/m)\0'
-         comment(i+12)= 'Average terrain elevation (c-stagger) (m)\0'
+         comment(i+8)= 'maximum snow albedo (%) over land only \0'
+         comment(i+9)= 'standard deviation of elevation data (m)\0'
+         comment(i+10)= 'mean longitudinal terrain slope (m/m)\0'
+         comment(i+11)= 'mean latitudinal terrain slope (m/m)\0'
+         comment(i+12)= 'average terrain elevation (c-stagger) (m)\0'
 
          i=51
          do j=1,16
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          comment(i+j)='% Dist Top Layer Soiltype Category '//cat
+          comment(i+j)='% dist top layer soiltype category '//cat
          enddo
 
          i=67
@@ -556,7 +556,7 @@ c
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          comment(i+j)= '% Dist Bot Layer Soiltype Category '//cat
+          comment(i+j)= '% dist bot layer soiltype category '//cat
          enddo
 
          i=83
@@ -567,7 +567,7 @@ c
           comment(i+j)= 'vegetation greenness fraction: mon = '//cat
          enddo
 
-         comment(96)='1 degree mean annual soiltemp (deg K)'
+         comment(96)='1 degree mean annual soiltemp (deg k)'
          i=96
          do j=1,12
           write(cat,'(i2.2)')j
@@ -582,36 +582,36 @@ c
 
          comment(ngrids)= '\0'
 
-	ELSEIF (ngrids .eq. 103) then ! rotlat case
+	elseif (ngrids .eq. 103) then ! rotlat case
 
-         var(1)   = 'LAH'  ! Mass(H)-point lats
-         var(2)   = 'LOH'  ! Mass(H)-point lons
-         var(3)   = 'LAV'  ! Wind(V)-point lats
-         var(4)   = 'LOV'  ! Wind(V)-point lons
-         var(5)   = 'LDF'  ! Land Fraction
-         var(6)   = 'USE'  ! landuse dominant category
-         var(7)   = 'LND'  ! Land-Water Mask based on USGS landuse
-         var(8)   = 'STL'  ! Soiltype top layer dominant category
-         var(9)   = 'SBL'  ! Soiltype bot layer dominant category
+         var(1)   = 'lah'  ! mass(h)-point lats
+         var(2)   = 'loh'  ! mass(h)-point lons
+         var(3)   = 'lav'  ! wind(v)-point lats
+         var(4)   = 'lov'  ! wind(v)-point lons
+         var(5)   = 'ldf'  ! land fraction
+         var(6)   = 'use'  ! landuse dominant category
+         var(7)   = 'lnd'  ! land-water mask based on usgs landuse
+         var(8)   = 'stl'  ! soiltype top layer dominant category
+         var(9)   = 'sbl'  ! soiltype bot layer dominant category
      
          i=10
                                                                         
-         var(i)     = 'SPR'  ! Sin(projection rotation) from true
-         var(i+1)   = 'CPR'  ! Cos(projection rotation) from true
-         var(i+2)   = 'CPH'  ! Horizontal component of coriolis parameter
-         var(i+3)   = 'CPV'  ! Vertical component of coriolis parameter
-         var(i+4)   = 'ALB'  ! Maximum snow albedo
-         var(i+5)   = 'STD'  ! Standard Deviation of Elevation Data (m)
-         var(i+6)  = 'SLN'  ! Terrain Slope; Longitudinal Component (m/m)
-         var(i+7)  = 'SLT'  ! Terrain Slope; Latitudinal Component (m/m)
-         var(i+8)  = 'AVC'  ! Topo (m) on mass points 
+         var(i)     = 'spr'  ! sin(projection rotation) from true
+         var(i+1)   = 'cpr'  ! cos(projection rotation) from true
+         var(i+2)   = 'cph'  ! horizontal component of coriolis parameter
+         var(i+3)   = 'cpv'  ! vertical component of coriolis parameter
+         var(i+4)   = 'alb'  ! maximum snow albedo
+         var(i+5)   = 'std'  ! standard deviation of elevation data (m)
+         var(i+6)  = 'sln'  ! terrain slope; longitudinal component (m/m)
+         var(i+7)  = 'slt'  ! terrain slope; latitudinal component (m/m)
+         var(i+8)  = 'avc'  ! topo (m) on mass points 
 
         i=18
          do j=1,24
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'U'//cat
+          var(i+j)= 'u'//cat
          enddo
                                                                          
          i=42
@@ -619,66 +619,66 @@ c
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'T'//cat   !top layer (0-30cm) soiltype (% dist)
+          var(i+j)= 't'//cat   !top layer (0-30cm) soiltype (% dist)
          enddo
          i=58
          do j=1,16
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'B'//cat   ! bot layer (30-90cm) soiltype (% dist)
+          var(i+j)= 'b'//cat   ! bot layer (30-90cm) soiltype (% dist)
          enddo
          i=74
          do j=1,12
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'G'//cat   ! vegetation greenness fraction
+          var(i+j)= 'g'//cat   ! vegetation greenness fraction
          enddo
                                                                           
-         var(87)='TMP'
+         var(87)='tmp'
                                                                               
          i=87
          do j=1,12
             write(cat,'(i2.2)')j
             if(cat(1:1).eq.' ')cat(1:1)='0'
             if(cat(2:2).eq.' ')cat(2:2)='0'
-            var(i+j)= 'A'//cat   ! monthly albedo
+            var(i+j)= 'a'//cat   ! monthly albedo
          enddo
                                                                            
-         var(100) = 'SLP'      !terrain slope index, dominant category
-         var(101) = 'GNX'      !max greenness fraction
-         var(102) = 'GNN'      !min greenness fraction
-         var(ngrids)   = 'ZIN'
+         var(100) = 'slp'      !terrain slope index, dominant category
+         var(101) = 'gnx'      !max greenness fraction
+         var(102) = 'gnn'      !min greenness fraction
+         var(ngrids)   = 'zin'
 
-         comment(1) = 'H-point (mass) latitudes \0'
-         comment(2) = 'H-point (mass) longitudes \0'
-         comment(3) = 'V-point (mass) latitudes \0'
-         comment(4) = 'V-point (mass) longitudes \0'
-         comment(5)= 'Land Fraction  \0'
-         comment(6)= 'Land Use Dominant category \0'
-         comment(7)= 'Land-Water Mask (0=water; 1 otherwise) \0'
-         comment(8)= 'Soiltype Top Layer dominant category \0'
-         comment(9)= 'Soiltype Bot Layer dominant category \0'
+         comment(1) = 'h-point (mass) latitudes \0'
+         comment(2) = 'h-point (mass) longitudes \0'
+         comment(3) = 'v-point (mass) latitudes \0'
+         comment(4) = 'v-point (mass) longitudes \0'
+         comment(5)= 'land fraction  \0'
+         comment(6)= 'land use dominant category \0'
+         comment(7)= 'land-water mask (0=water; 1 otherwise) \0'
+         comment(8)= 'soiltype top layer dominant category \0'
+         comment(9)= 'soiltype bot layer dominant category \0'
                                                                                          
          i=10
-         comment(i)= 'Sin of projection rotation (rad) \0'
-         comment(i+1)= 'Cosine of projection rotation (rad) \0'
-         comment(i+2)= 'Horizontal component coriolis parameter \0'
-         comment(i+3)= 'Vertical component coriolis parameter \0'
-         comment(i+4)= 'Maximum Snow Albedo (%) over land only \0'
-         comment(i+5)= 'Standard Deviation of Elevation data (m)\0'
-         comment(i+6)= 'Mean longitudinal terrain slope (m/m)\0'
-         comment(i+7)= 'Mean latitudinal terrain slope (m/m)\0'
-         comment(i+8)= 'Average terrain elevation (c-stagger) (m)\0'
+         comment(i)= 'sin of projection rotation (rad) \0'
+         comment(i+1)= 'cosine of projection rotation (rad) \0'
+         comment(i+2)= 'horizontal component coriolis parameter \0'
+         comment(i+3)= 'vertical component coriolis parameter \0'
+         comment(i+4)= 'maximum snow albedo (%) over land only \0'
+         comment(i+5)= 'standard deviation of elevation data (m)\0'
+         comment(i+6)= 'mean longitudinal terrain slope (m/m)\0'
+         comment(i+7)= 'mean latitudinal terrain slope (m/m)\0'
+         comment(i+8)= 'average terrain elevation (c-stagger) (m)\0'
                                                                                
          i=18
          do j=1,24
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          var(i+j)= 'U'//cat
-          comment(i+j)= '% Dist Land Use Category '//cat//' \0'
+          var(i+j)= 'u'//cat
+          comment(i+j)= '% dist land use category '//cat//' \0'
          enddo
 
          i=42
@@ -686,7 +686,7 @@ c
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          comment(i+j)='% Dist Top Layer Soiltype Category '//cat
+          comment(i+j)='% dist top layer soiltype category '//cat
          enddo
 
          i=58
@@ -694,7 +694,7 @@ c
           write(cat,'(i2.2)')j
           if(cat(1:1).eq.' ')cat(1:1)='0'
           if(cat(2:2).eq.' ')cat(2:2)='0'
-          comment(i+j)= '% Dist Bot Layer Soiltype Category '//cat
+          comment(i+j)= '% dist bot layer soiltype category '//cat
          enddo
 
          i=74
@@ -705,7 +705,7 @@ c
           comment(i+j)= 'vegetation greenness fraction: mon = '//cat
          enddo
 
-         comment(87)='1 degree mean annual soiltemp (deg K)'
+         comment(87)='1 degree mean annual soiltemp (deg k)'
          i=87
          do j=1,12
           write(cat,'(i2.2)')j
@@ -741,10 +741,10 @@ c       logical l1,l2
 	character*(*) unit_name
         character*1   ctiletype
 
-C	open(unit_no,file=unit_name,status='old',access='direct',
-C	. recl=nn2*nn1*2)
-C	inquire(unit_no,exist=l1,opened=l2)
-C	read(unit_no,rec=1) idata
+c	open(unit_no,file=unit_name,status='old',access='direct',
+c	. recl=nn2*nn1*2)
+c	inquire(unit_no,exist=l1,opened=l2)
+c	read(unit_no,rec=1) idata
 
 	call s_len(unit_name,len)
         call get_directory_length(unit_name,lend)
@@ -761,7 +761,7 @@ C	read(unit_no,rec=1) idata
 
 
         multiplier=1.0
-	if(ctiletype.eq.'T'.or.ctiletype.eq.'U')then
+	if(ctiletype.eq.'t'.or.ctiletype.eq.'u')then
            if(nn1.eq.1201)then
               open(unit_no,file=unit_name,status='old',
      .form='unformatted')
@@ -775,7 +775,7 @@ C	read(unit_no,rec=1) idata
                idata(countx,county) = ia (cdata(countx,county),2,0)
               enddo
               enddo
-              if(ctiletype.eq.'T')multiplier=.01  !(for T data these are temps * 100)
+              if(ctiletype.eq.'t')multiplier=.01  !(for t data these are temps * 100)
            endif
         else
            call read_binary_field(idata,i1,i2,nn1*nn2,unit_name,len)
@@ -787,10 +787,10 @@ C	read(unit_no,rec=1) idata
 	 if(idata(countx,county).eq.-9999) idata(countx,county)=0
 	  data(countx,county)=float(idata(countx,nn2-county+1))
      &*multiplier
-c SG97 initial data (DEM format) starts in the lower-left corner;
-c SG97 this format is wrapped around to have upper-left corner as its start.
+c sg97 initial data (dem format) starts in the lower-left corner;
+c sg97 this format is wrapped around to have upper-left corner as its start.
 c
-c JS00 some machines do not account for signed integers
+c js00 some machines do not account for signed integers
 	   if(data(countx,county).ge.15535.0)
      &data(countx,county)=data(countx,county)-65535
 
@@ -822,10 +822,10 @@ c       logical  l1,l2
         character*(*) unit_name
         character*1   ctype
 
-C       open(unit_no,file=unit_name,status='old',access='direct',
-C       . recl=nn2*nn1*2)
-C       inquire(unit_no,exist=l1,opened=l2)
-C       read(unit_no,rec=1) idata
+c       open(unit_no,file=unit_name,status='old',access='direct',
+c       . recl=nn2*nn1*2)
+c       inquire(unit_no,exist=l1,opened=l2)
+c       read(unit_no,rec=1) idata
 
         if(.not.allocated(idata))then
            print*,'allocate idata in read_dem_g'
@@ -846,10 +846,10 @@ C       read(unit_no,rec=1) idata
         call read_binary_field(idata,i1,i2,nn1*nn2*nn4,unit_name,len)
 
 c       if(nn1.ne.1250 .and. nn2.ne.1250)then
-        if(ctype.ne.'A' .and. 
-     &     ctype.ne.'G' .and.
-     &     ctype.ne.'I' .and.
-     &     ctype.ne.'M')then
+        if(ctype.ne.'a' .and. 
+     &     ctype.ne.'g' .and.
+     &     ctype.ne.'i' .and.
+     &     ctype.ne.'m')then
 
            do county=1,nn2
            do countx=1,nn1
@@ -861,15 +861,15 @@ c       if(nn1.ne.1250 .and. nn2.ne.1250)then
               data(countx,county,nofr,countz)=
      &float(idata(countz,countx,nn2-county+1))
 
-c SG97 initial data (DEM format) starts in the lower-left corner;
-c SG97 this format is wrapped around to have upper-left corner as its start.
+c sg97 initial data (dem format) starts in the lower-left corner;
+c sg97 this format is wrapped around to have upper-left corner as its start.
 
 
            enddo
            enddo
            enddo
 
-        else   !new greenfrac data starts at 90S
+        else   !new greenfrac data starts at 90s
 
            do county=1,nn2
            do countx=1,nn1
@@ -887,7 +887,7 @@ c SG97 this format is wrapped around to have upper-left corner as its start.
 c we'll resurrect the actual categories later
 c but for now we want categories 1-9 for
 c terrain slope index.
-        if(ctype == 'I')then
+        if(ctype == 'i')then
            do county=1,nn2
            do countx=1,nn1
               if(data(countx,county,1,1).eq.13)then
@@ -907,114 +907,114 @@ ccc      close(unit_no)
         return
         end
 
-C +------------------------------------------------------------------+
-	SUBROUTINE JCL
-	CHARACTER*(*) FILENM,FORMT
+c +------------------------------------------------------------------+
+	subroutine jcl
+	character*(*) filenm,formt
 
-C	-------------------------------------------------------
-	ENTRY JCLGET(IUNIT,FILENM,FORMT,IPRNT,istatus)
-C
-C	  This routine access an existing file with the file name of
-C	    FILENM and assigns it unit number IUNIT.
-C
-		IF(IPRNT.EQ.1) THEN
-	PRINT*,' Opening input unit ',IUNIT,' file name ',FILENM
-	PRINT*,'		format  ',FORMT
-	ENDIF
+c	-------------------------------------------------------
+	entry jclget(iunit,filenm,formt,iprnt,istatus)
+c
+c	  this routine access an existing file with the file name of
+c	    filenm and assigns it unit number iunit.
+c
+		if(iprnt.eq.1) then
+	print*,' opening input unit ',iunit,' file name ',filenm
+	print*,'		format  ',formt
+	endif
 
-	OPEN(IUNIT,STATUS='OLD',FILE=FILENM,FORM=FORMT,ERR=1)
+	open(iunit,status='old',file=filenm,form=formt,err=1)
 
 	istatus=1
-	RETURN
+	return
 
  1    istatus = 0
 	return
 
-	END
+	end
 !
 !----------------------------------------------------------------------
-        FUNCTION IA(CHR,N,ISPVAL)                         
+        function ia(chr,n,ispval)                         
 !                                                              
-!  PURPOSE: TO CONVERT A N-BYTES CHARACTER (CHR) TO INTEGER IA. 
-!        ** THE INTEGER DATA FILE IS SAVED AS A N-BYTE CHARACTER
-!           DATA FILE. THIS FUNCTION IS USED TO RECOVER THE    
-!           CHARACTER DATA TO THE INTEGER DATA.               
+!  purpose: to convert a n-bytes character (chr) to integer ia. 
+!        ** the integer data file is saved as a n-byte character
+!           data file. this function is used to recover the    
+!           character data to the integer data.               
 !                                                            
-!  N      --- THE NUMBER OF BYTES IN CHR                    
-!  ISPVAL --- DEFAULT VALUE FOR THE NEGATIVE INTEGER.      
+!  n      --- the number of bytes in chr                    
+!  ispval --- default value for the negative integer.      
 !                                                       
-        CHARACTER*2 :: CHR                                
-        integer  N, II1, II2, JJ, ISN, M, NBIT, MSHFT, IA2, ispval
-        INTEGER  BIT_1, BIT_2                            
+        character*2 :: chr                                
+        integer  n, ii1, ii2, jj, isn, m, nbit, mshft, ia2, ispval
+        integer  bit_1, bit_2                            
 !                                                    
-        BIT_1 = O'200'     ! BINARY '10000000'        
-        BIT_2 = O'377'     ! BINARY '11111111'       
-        IA    = 0                                   
+        bit_1 = o'200'     ! binary '10000000'        
+        bit_2 = o'377'     ! binary '11111111'       
+        ia    = 0                                   
 !                                                
-        II1 = ICHAR(CHR(1:1))                     
-        if(II1 < 0) II1=II1+256
+        ii1 = ichar(chr(1:1))                     
+        if(ii1 < 0) ii1=ii1+256
 
-! .. GET THE SIGN -- ISN=0 POSITIVE, ISN=1 NEGATIVE:
-        JJ  = IAND(II1,BIT_1)                        
-        ISN = ISHFT(JJ,-7)                          
+! .. get the sign -- isn=0 positive, isn=1 negative:
+        jj  = iand(ii1,bit_1)                        
+        isn = ishft(jj,-7)                          
 !                                                
-! .. FOR NEGATIVE NUMBER:
-!    BECAUSE THE NEGATIVE INTEGERS ARE REPRESENTED BY THE SUPPLEMENTARY
-!    BINARY CODE INSIDE MACHINE.
+! .. for negative number:
+!    because the negative integers are represented by the supplementary
+!    binary code inside machine.
 !                              
-        IF (ISN.EQ.1) THEN    
-          DO M = N+1,4   
-           NBIT = (M-1)*8   
-           JJ = ISHFT(BIT_2,NBIT)
-           IA = IEOR(JJ,IA)     
-          END DO                
-        ENDIF                   
+        if (isn.eq.1) then    
+          do m = n+1,4   
+           nbit = (m-1)*8   
+           jj = ishft(bit_2,nbit)
+           ia = ieor(jj,ia)     
+          end do                
+        endif                   
 !                              
-!   .. GET THE BYTE FROM CHR: 
-        DO M = 1,N          
-         II2 = ICHAR(CHR(M:M)) 
-         if(II2 < 0) II2=II2+256
-         MSHFT = (N-M)*8      
-         IA2   = ISHFT(II2,MSHFT)
-!   .. THE ABS(INTEGER):          
-         IA = IEOR(IA,IA2)     
-        END DO                 
+!   .. get the byte from chr: 
+        do m = 1,n          
+         ii2 = ichar(chr(m:m)) 
+         if(ii2 < 0) ii2=ii2+256
+         mshft = (n-m)*8      
+         ia2   = ishft(ii2,mshft)
+!   .. the abs(integer):          
+         ia = ieor(ia,ia2)     
+        end do                 
 !                              
-        IF (IA.LT.0) IA = ISPVAL
+        if (ia.lt.0) ia = ispval
 !                            
-        RETURN                
-        END
+        return                
+        end
 c
 c--------------------------------------------------------------------
 c
-       SUBROUTINE POLAR_GP(LAT,LON,X,Y,DX,DY,NX,NY,DIR)
-C
+       subroutine polar_gp(lat,lon,x,y,dx,dy,nx,ny,dir)
+c
       include 'trigd.inc'
-       REAL LAT,LON,X,Y,DX,DY,
-     1        ERAD,TLAT,TLON                                      ! ,PLAT,PLON,
-     1        XDIF,YDIF
-C
-       INTEGER   NX,NY
-       INTEGER   IDIR  !positive (1.) going from center Lat/Lon to SW X/Y;
-C                       negative (-1.) going from SW Lat/Lon to center X/Y.
-C
-       RAD=3.141592654/180.
+       real lat,lon,x,y,dx,dy,
+     1        erad,tlat,tlon                                      ! ,plat,plon,
+     1        xdif,ydif
+c
+       integer   nx,ny
+       integer   idir  !positive (1.) going from center lat/lon to sw x/y;
+c                       negative (-1.) going from sw lat/lon to center x/y.
+c
+       rad=3.141592654/180.
 
        call get_earth_radius(erad,istatus)
        if(istatus .ne. 1)then
-           write(6,*)' Error calling get_earth_radius'
+           write(6,*)' error calling get_earth_radius'
            stop
        endif
 
-!      Calculate xy coordinates at domain center
-       call latlon_to_xy(LAT,LON,ERAD,XDIF,YDIF)
+!      calculate xy coordinates at domain center
+       call latlon_to_xy(lat,lon,erad,xdif,ydif)
 
-       X=XDIF+(1.-DIR*FLOAT(NX)/2.)*DX
-       Y=YDIF+(1.-DIR*FLOAT(NY)/2.)*DY
+       x=xdif+(1.-dir*float(nx)/2.)*dx
+       y=ydif+(1.-dir*float(ny)/2.)*dy
  
-       RETURN
+       return
  
-       END
+       end
 c
 c------------------------------------------------------------
 c
@@ -1058,27 +1058,27 @@ c
       do i = 1,nnxp
       do j = 1,nnyp
 
-! Select 30s or 10m topo data for this grid point (or a blend)
+! select 30s or 10m topo data for this grid point (or a blend)
 
-!              Check whether 30s data is missing or zero
+!              check whether 30s data is missing or zero
          if(topt_30(i,j) .eq. 1e30 .or. topt_30(i,j) .eq. 0.
 !    1                              .or.
-!                  Are we in the Pittsburgh data hole?
+!                  are we in the pittsburgh data hole?
 !    1            (lats(i,j) .gt. 39.7 .and. lats(i,j) .lt. 41.3 .and.
 !    1             lons(i,j) .gt.-79.3 .and. lons(i,j) .lt.-77.7)
 !
      1                                                      )then 
 
-!                  Use 10 min data
+!                  use 10 min data
             topt_out(i,j) = topt_10(i,j)
             topt_out_s(i,j)=topt_10_s(i,j)
             topt_out_ln(i,j)=topt_10_ln(i,j)
             topt_out_lt(i,j)=topt_10_lt(i,j)
             icount_10 = icount_10 + 1
 
-         else ! Use 30s data, except ramp to 10m if near data boundary
+         else ! use 30s data, except ramp to 10m if near data boundary
 
-! Determine the northern boundary of the 30s data at this lon
+! determine the northern boundary of the 30s data at this lon
             if(lons(i,j).ge.-129..and.
      +         lons(i,j).le.-121.)then       
                nboundary = 51.
@@ -1118,7 +1118,7 @@ c
             alat1n = nboundary - 0.3
             alat2n = nboundary - 0.1
 
-! Determine the southern boundary of the 30s data at this lon
+! determine the southern boundary of the 30s data at this lon
             if    (lons(i,j) .le. -127.)then         
                    sboundary = 49. 
             elseif(lons(i,j) .le. -126.)then         
@@ -1155,9 +1155,9 @@ c
             alat1s = sboundary + 0.3
             alat2s = sboundary + 0.1
 
-! Decide whether to use 30s or 10m data (or a blend)
+! decide whether to use 30s or 10m data (or a blend)
 
-            if  (  lats(i,j) .ge. alat2n)then    ! Use 10m data
+            if  (  lats(i,j) .ge. alat2n)then    ! use 10m data
                    topt_out(i,j) = topt_10(i,j)
                    topt_out_s(i,j)=topt_10_s(i,j)
                    topt_out_ln(i,j)=topt_10_ln(i,j)
@@ -1167,7 +1167,7 @@ c
             elseif(lats(i,j) .ge. alat1n .and. 
      1             lats(i,j) .le. alat2n)then
 
-! Between alat1n and alat2n,        Use weighted average
+! between alat1n and alat2n,        use weighted average
 
                    width = alat2n - alat1n
                    frac10 = (lats(i,j) - alat1n) / width
@@ -1183,7 +1183,7 @@ c
 
                    if(icount_ramp .eq. (icount_ramp/5) * 5 )then       
                       write(6,*)
-                      write(6,*)'In blending zone, nboundary = '
+                      write(6,*)'in blending zone, nboundary = '
      1                                       ,nboundary,alat1n,alat2n       
                       write(6,*)'lat/lon/frac =',lats(i,j)
      1                               ,lons(i,j) ,frac10
@@ -1198,12 +1198,12 @@ c
                    topt_out_s(i,j)=topt_30_s(i,j)
                    topt_out_ln(i,j)=topt_30_ln(i,j)
                    topt_out_lt(i,j)=topt_30_lt(i,j)
-                   icount_30 = icount_30 + 1       ! Use 30s data
+                   icount_30 = icount_30 + 1       ! use 30s data
 
             elseif(lats(i,j) .ge. alat2s .and. 
      1             lats(i,j) .le. alat1s)then
 
-! Between alat1s and alat2s,        Use weighted average
+! between alat1s and alat2s,        use weighted average
 
                    width = alat1s - alat2s
                    frac10 = (alat1s - lats(i,j)) / width
@@ -1219,7 +1219,7 @@ c
 
                    if(icount_ramp .eq. (icount_ramp/5) * 5 )then       
                       write(6,*)
-                      write(6,*)'In blending zone, sboundary = '
+                      write(6,*)'in blending zone, sboundary = '
      1                                   ,sboundary,alat1s,alat2s       
                       write(6,*)'lat/lon/frac =',lats(i,j)
      1                           ,lons(i,j), frac10
@@ -1229,18 +1229,18 @@ c
                    endif
 
             elseif(lats(i,j) .le. alat2s)then    
-                   topt_out(i,j) = topt_10(i,j)    ! Use 10m data
+                   topt_out(i,j) = topt_10(i,j)    ! use 10m data
                    topt_out_s(i,j)=topt_10_s(i,j)
                    topt_out_ln(i,j)=topt_10_ln(i,j)
                    topt_out_lt(i,j)=topt_10_lt(i,j)
                    icount_10 = icount_10 + 1
 
             else
-                   write(6,*)' Software error in gridgen_model.f'
+                   write(6,*)' software error in gridgen_model.f'
                    write(6,*)' lat/lon = ',lats(i,j),lons(i,j)
                    stop
 
-            endif ! Test to see if we blend the data
+            endif ! test to see if we blend the data
 
          endif ! 30s data check
 
@@ -1265,7 +1265,7 @@ c
 
       istat=0
       call s_len(path_to_tiles,ldir)
-      open(22,file=path_to_tiles(1:ldir)//'/LATMEANTEMP.DAT'
+      open(22,file=path_to_tiles(1:ldir)//'/latmeantemp.dat'
      &,form='formatted',status='old',iostat=istat)
       if(istat.ne.0) then
 	write(6,*) 'insert bogus temp of 280'
@@ -1289,10 +1289,10 @@ c          ,rmeantemp(135),rmeantemp(180)
 
 222   format(1x,f6.2)
 
-  3   print*,'Error: opening LATMEANTEMP file '
+  3   print*,'error: opening latmeantemp file '
       print*,'path_to_tiles: ',path_to_tiles(1:ldir+3),ldir
       return
-  4   print*,'Error: reading LATMEANTEMP file '
+  4   print*,'error: reading latmeantemp file '
 
       return
       end
@@ -1300,7 +1300,7 @@ c
 c ---------------------------------------------------------
 c
       subroutine eval_localization(cstaticdir,nest,localize
-     .,cgrid_fname,La1_dom,Lo1_dom,istatus)
+     .,cgrid_fname,la1_dom,lo1_dom,istatus)
 
 c routine performs the following:
 c 1. tests if the static file has been generated for this domain
@@ -1312,7 +1312,7 @@ c
       implicit  none
 
       integer   nest,ifl
-      integer   Nx,Ny
+      integer   nx,ny
       integer   nx_dom,ny_dom
       integer   lf,ldir,len_cfl
       integer   istatus
@@ -1328,15 +1328,15 @@ c
       logical   localize
       logical   static_exists
 
-      real      Dx,Dy,La1,Lo1,LoV,Latin1,Latin2
+      real      dx,dy,la1,lo1,lov,latin1,latin2
       real      grid_spacing_dom_m,grid_spacing_m
-      real      La1_dom,Lo1_dom
+      real      la1_dom,lo1_dom
 
-      call GETENV('FORCE_LOCALIZATION',cfl)
+      call getenv('force_localization',cfl)
       call s_len(cfl,len_cfl)
 
       if(len_cfl.eq.1)then
-         print*,'Environment Variable FORCE_LOCALIZATION= ',cfl
+         print*,'environment variable force_localization= ',cfl
          read(cfl,'(i1.1)')ifl
          if(ifl.eq.nest)then
             localize = .true.
@@ -1348,7 +1348,7 @@ c
             localize = .true.
             return
          else
-            print*,'Unknown FORCE_LOCALIZATION setting ',cfl
+            print*,'unknown force_localization setting ',cfl
             stop
          endif
       endif
@@ -1365,55 +1365,55 @@ c
       call s_len(cstaticdir,ldir)
 
       call rd_static_attr(cstaticdir,nest,cgrid_fname
-     .,Nx, Ny, Dx, Dy, La1, Lo1, Latin1, Latin2, LoV
+     .,nx, ny, dx, dy, la1, lo1, latin1, latin2, lov
      .,c8_maproj,istatus)
 
       if(c8_maproj.eq.'lambert'.and. c6_maproj.ne.'lambrt')then
-         print*,'Static file map-proj differs from namelist'
-         print*,'**** Relocalize this domain ****'
+         print*,'static file map-proj differs from namelist'
+         print*,'**** relocalize this domain ****'
          localize=.true.
          return
       elseif(c8_maproj.eq.'polar'.and. c6_maproj.ne.'plrstr')then
-         print*,'Static file map-proj differs from namelist'
-         print*,'**** Relocalize this domain ****'
+         print*,'static file map-proj differs from namelist'
+         print*,'**** relocalize this domain ****'
          localize=.true.
          return
       elseif(c8_maproj.eq.'mercator'.and. c6_maproj.ne.'merctr')then
-         print*,'Static file map-proj differs from namelist'
-         print*,'**** Relocalize this domain ****'
+         print*,'static file map-proj differs from namelist'
+         print*,'**** relocalize this domain ****'
          localize=.true.
          return
       endif
 
       write(cnest,'(i2.2)')nest
-      cstaticfile=TRIM(cstaticdir)//'static.'//TRIM(cgrid_fname)
-      cstaticfile=TRIM(cstaticfile)//'.d'//cnest
+      cstaticfile=trim(cstaticdir)//'static.'//trim(cgrid_fname)
+      cstaticfile=trim(cstaticfile)//'.d'//cnest
 
-      IF (istatus .NE. 1) THEN
-        print *,' Eval Localization: Did not read WRF static file'
-        print *,' Status = ',istatus
+      if (istatus .ne. 1) then
+        print *,' eval localization: did not read wrf static file'
+        print *,' status = ',istatus
         localize = .true.
         return
-      END IF 
+      end if 
 
-      if(La1.ne.La1_dom)localize=.true.
-      if(Lo1.ne.Lo1_dom)localize=.true.
+      if(la1.ne.la1_dom)localize=.true.
+      if(lo1.ne.lo1_dom)localize=.true.
 
       call get_grid_dim_xy(nx_dom,ny_dom,istatus) 
-      if(Nx.ne.nx_dom)localize=.true.
-      if(Ny.ne.ny_dom)localize=.true.
+      if(nx.ne.nx_dom)localize=.true.
+      if(ny.ne.ny_dom)localize=.true.
 c
       call get_grid_spacing(grid_spacing_dom_m,istatus)
       if(dx.ne.grid_spacing_dom_m)localize=.true.
 
-      RETURN
+      return
       end
 c
 c --------------------------------------------------------
 c
       subroutine rd_static_attr(cstaticdir,nest
-     .,cgrid_fname,nx,ny,dx,dy,La1,Lo1,Latin1
-     .,Latin2,LoV,c8_maproj,istatus)
+     .,cgrid_fname,nx,ny,dx,dy,la1,lo1,latin1
+     .,latin2,lov,c8_maproj,istatus)
 
 c routine performs the following:
 c 1. tests if the static file has been generated for this domain or nest?
@@ -1425,7 +1425,7 @@ c
       implicit  none
 
       integer   nest
-      integer   Nx,Ny
+      integer   nx,ny
       integer   istatus
 
       character staticfile*200
@@ -1437,45 +1437,45 @@ c
       logical   localize
       logical   static_exists
 
-      real      Dx,Dy,La1,Lo1,LoV,Latin1,Latin2
+      real      dx,dy,la1,lo1,lov,latin1,latin2
       real      grid_spacing_dom_m,grid_spacing_m
 
       istatus = 1
 
-      staticfile=TRIM(cstaticdir)//'static.'//cgrid_fname
-      if(TRIM(cgrid_fname).eq.'wrfsi')then
+      staticfile=trim(cstaticdir)//'static.'//cgrid_fname
+      if(trim(cgrid_fname).eq.'wrfsi')then
          write(cnest,'(i2.2)')nest
-         staticfile=TRIM(staticfile)//'.d'//cnest
+         staticfile=trim(staticfile)//'.d'//cnest
       endif
 
-      INQUIRE(FILE=staticfile, EXIST=static_exists)
+      inquire(file=staticfile, exist=static_exists)
 
-      IF (static_exists) THEN
+      if (static_exists) then
 
-        print*,'Static file exists: rd_static_attr'
-        print*,'Static filename: ',TRIM(staticfile)
+        print*,'static file exists: rd_static_attr'
+        print*,'static filename: ',trim(staticfile)
 
-        call rd_static_attr_sub(staticfile, Nx, Ny
-     .,La1, Latin1, Latin2, Lo1, LoV, Dx, Dy
+        call rd_static_attr_sub(staticfile, nx, ny
+     .,la1, latin1, latin2, lo1, lov, dx, dy
      .,c8_maproj,istatus)
 
-        IF (istatus .NE. 1) THEN
+        if (istatus .ne. 1) then
 	write(6,*) '2nd time'
-           print '(A,I5)', ' Error reading WRF static file: ',istatus
+           print '(a,i5)', ' error reading wrf static file: ',istatus
            return
-        END IF
+        end if
 
-        IF (LoV .LT. -180.) LoV = LoV + 360.
-        IF (LoV .GT. 180.) LoV = LoV - 360.
-        IF (Lo1 .LT. -180.) Lo1 = Lo1 + 360.
-        IF (Lo1 .GT. 180.) Lo1 = Lo1 - 360.
+        if (lov .lt. -180.) lov = lov + 360.
+        if (lov .gt. 180.) lov = lov - 360.
+        if (lo1 .lt. -180.) lo1 = lo1 + 360.
+        if (lo1 .gt. 180.) lo1 = lo1 - 360.
 
-      ELSE
+      else
 
-        PRINT '(A)', 'Static file not found: ', TRIM(staticfile)
+        print '(a)', 'static file not found: ', trim(staticfile)
         istatus = 0
 
-      ENDIF
+      endif
 
       return
       end
@@ -1507,31 +1507,31 @@ c
 
       if(ii == 1)then
          thresh=0.0                 !terrain
-         print*,'Array Comparison:   Terrain'
+         print*,'array comparison:   terrain'
       elseif(ii == 2 .or. ii==3)then
          thresh=14                  !soil texture
-         print*,'Array Comparison:   Soil Texture'
+         print*,'array comparison:   soil texture'
       elseif(ii == 4)then 
          thresh=0.0                 !max greenness
-         print*,'Array Comparison:   Greeness: mo 6'  ! Max Greenness'
+         print*,'array comparison:   greeness: mo 6'  ! max greenness'
       elseif(ii == 5)then
          thresh=0.0                 !min greenness
-         print*,'Array Comparison:   Min Greenness'
+         print*,'array comparison:   min greenness'
       elseif(ii == 6)then
          thresh=rmsng               !deep soil temp
-         print*,'Array Comparison:   Deep Soil Temp'
+         print*,'array comparison:   deep soil temp'
       elseif(ii == 7)then
          thresh=0.0                 !terrain slope index
-         print*,'Array Comparison:   Terrain Slope Index'
+         print*,'array comparison:   terrain slope index'
       elseif(ii == 8)then
          thresh=0.08                !albedo: month 6
-         print*,'Array Comparison:   Albedo: month 6'
+         print*,'array comparison:   albedo: month 6'
       elseif(ii == 9)then
          thresh=0.08                !max snow albedo
-         print*,'Array Comparison:   Max Snow Albedo'
+         print*,'array comparison:   max snow albedo'
       elseif(ii == 10)then
          thresh=16                  !dominant cat landuse
-         print*,'Array Comparison:   Dominant Cat Landuse'
+         print*,'array comparison:   dominant cat landuse'
       endif
 
 

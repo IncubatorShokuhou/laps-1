@@ -1,19 +1,19 @@
 
-      Real Function ZtoTsa(Z)
+      real function ztotsa(z)
 
-C*  This routine converts a height in meters into a temperature in Kelvin
+c*  this routine converts a height in meters into a temperature in kelvin
 
-      If (Z.lt.11000.) Then
-          ZtoTsa=288. - Z/161.764              ! ramp to 220.
-      Else If (Z.lt.20000.) Then
-          ZtoTsa=220.
-      Else If (Z.lt.50000.) Then
-          ZtoTsa=220. + (Z-20000.) * .00166666 ! ramp to 270.
-      Else If (Z.lt.90000.) Then
-          ZtoTsa=270. - (Z-50000.) * .002      ! ramp to 190.
-      Else
-          ZtoTsa=190. + (Z-90000.) * .00566666 ! ramp to 360. (120km)
-      End If
+      if (z.lt.11000.) then
+          ztotsa=288. - z/161.764              ! ramp to 220.
+      else if (z.lt.20000.) then
+          ztotsa=220.
+      else if (z.lt.50000.) then
+          ztotsa=220. + (z-20000.) * .00166666 ! ramp to 270.
+      else if (z.lt.90000.) then
+          ztotsa=270. - (z-50000.) * .002      ! ramp to 190.
+      else
+          ztotsa=190. + (z-90000.) * .00566666 ! ramp to 360. (120km)
+      end if
 
-      Return
-      End
+      return
+      end

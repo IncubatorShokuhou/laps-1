@@ -1,20 +1,20 @@
 
        program ingest_aircraft
 
-!      Driver for aircraft ingest (PIN intermediate file)
+!      driver for aircraft ingest (pin intermediate file)
 
-!      Steve Albers      May-1999       Original Version
+!      steve albers      may-1999       original version
 
        write(6,*)
-       write(6,*)' Call ingest_pireps'
+       write(6,*)' call ingest_pireps'
        call ingest_pireps(istatus)
 
        write(6,*)
-       write(6,*)' Call ingest_acars'
+       write(6,*)' call ingest_acars'
        call ingest_acars(istatus)
 
        write(6,*)
-       write(6,*)' Call ingest_wisdom'
+       write(6,*)' call ingest_wisdom'
        call ingest_wisdom(istatus)
 
        end

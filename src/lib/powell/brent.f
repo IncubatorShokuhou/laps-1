@@ -1,115 +1,115 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis 
 
-      FUNCTION BRENT(AX,BX,CX,F,TOL,XMIN)
-      PARAMETER (ITMAX=100,CGOLD=.3819660,ZEPS=1.0E-10)
-      EXTERNAL F
-      A=MIN(AX,CX)
-      B=MAX(AX,CX)
-      V=BX
-      W=V
-      X=V
-      E=0.
-      FX=F(X)
-      FV=FX
-      FW=FX
-      DO 11 ITER=1,ITMAX
-        XM=0.5*(A+B)
-        TOL1=TOL*ABS(X)+ZEPS
-        TOL2=2.*TOL1
-        IF(ABS(X-XM).LE.(TOL2-.5*(B-A))) GOTO 3
-        IF(ABS(E).GT.TOL1) THEN
-          R=(X-W)*(FX-FV)
-          Q=(X-V)*(FX-FW)
-          P=(X-V)*Q-(X-W)*R
-          Q=2.*(Q-R)
-          IF(Q.GT.0.) P=-P
-          Q=ABS(Q)
-          ETEMP=E
-          E=D
-          IF(ABS(P).GE.ABS(.5*Q*ETEMP).OR.P.LE.Q*(A-X).OR. 
-     *        P.GE.Q*(B-X)) GOTO 1
-          D=P/Q
-          U=X+D
-          IF(U-A.LT.TOL2 .OR. B-U.LT.TOL2) D=SIGN(TOL1,XM-X)
-          GOTO 2
-        ENDIF
-1       IF(X.GE.XM) THEN
-          E=A-X
-        ELSE
-          E=B-X
-        ENDIF
-        D=CGOLD*E
-2       IF(ABS(D).GE.TOL1) THEN
-          U=X+D
-        ELSE
-          U=X+SIGN(TOL1,D)
-        ENDIF
-        FU=F(U)
-        IF(FU.LE.FX) THEN
-          IF(U.GE.X) THEN
-            A=X
-          ELSE
-            B=X
-          ENDIF
-          V=W
-          FV=FW
-          W=X
-          FW=FX
-          X=U
-          FX=FU
-        ELSE
-          IF(U.LT.X) THEN
-            A=U
-          ELSE
-            B=U
-          ENDIF
-          IF(FU.LE.FW .OR. W.EQ.X) THEN
-            V=W
-            FV=FW
-            W=U
-            FW=FU
-          ELSE IF(FU.LE.FV .OR. V.EQ.X .OR. V.EQ.W) THEN
-            V=U
-            FV=FU
-          ENDIF
-        ENDIF
-11    CONTINUE
-      write(6,*)  'Brent exceed maximum iterations.'
-3     XMIN=X
-      BRENT=FX
-      RETURN
-      END
+      function brent(ax,bx,cx,f,tol,xmin)
+      parameter (itmax=100,cgold=.3819660,zeps=1.0e-10)
+      external f
+      a=min(ax,cx)
+      b=max(ax,cx)
+      v=bx
+      w=v
+      x=v
+      e=0.
+      fx=f(x)
+      fv=fx
+      fw=fx
+      do 11 iter=1,itmax
+        xm=0.5*(a+b)
+        tol1=tol*abs(x)+zeps
+        tol2=2.*tol1
+        if(abs(x-xm).le.(tol2-.5*(b-a))) goto 3
+        if(abs(e).gt.tol1) then
+          r=(x-w)*(fx-fv)
+          q=(x-v)*(fx-fw)
+          p=(x-v)*q-(x-w)*r
+          q=2.*(q-r)
+          if(q.gt.0.) p=-p
+          q=abs(q)
+          etemp=e
+          e=d
+          if(abs(p).ge.abs(.5*q*etemp).or.p.le.q*(a-x).or. 
+     *        p.ge.q*(b-x)) goto 1
+          d=p/q
+          u=x+d
+          if(u-a.lt.tol2 .or. b-u.lt.tol2) d=sign(tol1,xm-x)
+          goto 2
+        endif
+1       if(x.ge.xm) then
+          e=a-x
+        else
+          e=b-x
+        endif
+        d=cgold*e
+2       if(abs(d).ge.tol1) then
+          u=x+d
+        else
+          u=x+sign(tol1,d)
+        endif
+        fu=f(u)
+        if(fu.le.fx) then
+          if(u.ge.x) then
+            a=x
+          else
+            b=x
+          endif
+          v=w
+          fv=fw
+          w=x
+          fw=fx
+          x=u
+          fx=fu
+        else
+          if(u.lt.x) then
+            a=u
+          else
+            b=u
+          endif
+          if(fu.le.fw .or. w.eq.x) then
+            v=w
+            fv=fw
+            w=u
+            fw=fu
+          else if(fu.le.fv .or. v.eq.x .or. v.eq.w) then
+            v=u
+            fv=fu
+          endif
+        endif
+11    continue
+      write(6,*)  'brent exceed maximum iterations.'
+3     xmin=x
+      brent=fx
+      return
+      end

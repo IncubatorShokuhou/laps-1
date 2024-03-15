@@ -13,18 +13,18 @@
       
       
 c
-c *** Common block variables for Lambert-conformal grid.
+c *** common block variables for lambert-conformal grid.
 c
-      integer nx_lc,ny_lc,nz_lc  !No. of LC domain grid points
-      real*4 lat1,lat2,lon0,       !Lambert-conformal std lat1, lat, lon
-     .       sw(2),ne(2)           !SW lat, lon, NE lat, lon
+      integer nx_lc,ny_lc,nz_lc  !no. of lc domain grid points
+      real*4 lat1,lat2,lon0,       !lambert-conformal std lat1, lat, lon
+     .       sw(2),ne(2)           !sw lat, lon, ne lat, lon
       common /lcgrid/nx_lc,ny_lc,nz_lc,lat1,lat2,lon0,sw,ne
 
-c *** Convert Pascals to mb.
-c *** Compute tv from thetav.
-c *** Compute height from msf.
-c *** Compute tp (returned in th) from tv.
-c *** Compute sh from mr.
+c *** convert pascals to mb.
+c *** compute tv from thetav.
+c *** compute height from msf.
+c *** compute tp (returned in th) from tv.
+c *** compute sh from mr.
 c
       do k=1,nz
          do j=1,ny
@@ -40,9 +40,9 @@ c
          enddo
       enddo
 c
-c *** Fill Lambert-conformal common block variables.
+c *** fill lambert-conformal common block variables.
 c
-      gproj='LC'
+      gproj='lc'
       nx_lc=nx
       ny_lc=ny
       lat1=25.0
@@ -53,8 +53,8 @@ c
       sw(2)=-126.1378
       ne(1)=55.4818
       ne(2)=-57.3794
-c **** No Longer Needed *****
-c *** Convert ruc winds from grid north to true north.
+c **** no longer needed *****
+c *** convert ruc winds from grid north to true north.
 c
 c      do j=1,ny
 c         do i=1,nx

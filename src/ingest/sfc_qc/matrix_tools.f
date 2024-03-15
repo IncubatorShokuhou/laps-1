@@ -3,12 +3,12 @@ c
       subroutine mvmult(a,b,c,imax,jmax,nmax,m)
 c
 c*********************************************************************
-c     Routine to compute the inner product of A B = C
+c     routine to compute the inner product of a b = c
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -33,14 +33,14 @@ c
 c
 c*********************************************************************
 c
-c     Routine adds two vectors or matricies.  Results are output in c.    
+c     routine adds two vectors or matricies.  results are output in c.    
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       13 Oct 1998  Peter Stamus, NOAA/FSL
-c          Removed subract option...put in separate routine.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       13 oct 1998  peter stamus, noaa/fsl
+c          removed subract option...put in separate routine.
 c
 c*********************************************************************
 c
@@ -61,11 +61,11 @@ c
 c
 c*********************************************************************
 c
-c     Routine subrtacts two vectors or matricies.  Results are output 
+c     routine subrtacts two vectors or matricies.  results are output 
 c     in c.    
 c
-c     Original: Peter Stamus, NOAA/FSL  13 Oct 1998 (from 'addmv')
-c     Changes:
+c     original: peter stamus, noaa/fsl  13 oct 1998 (from 'addmv')
+c     changes:
 c
 c*********************************************************************
 c
@@ -85,13 +85,13 @@ c
       subroutine trans(a,at,imax,jmax,m)
 c
 c*********************************************************************
-c     Routine creates the transposed matrix of a and places it in 
+c     routine creates the transposed matrix of a and places it in 
 c     the at array.
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -111,13 +111,13 @@ c
       subroutine vomult(a,b,c,imax,m)
 c
 c*********************************************************************
-c     Routine provides the outer product of two vectors a bt = c 
+c     routine provides the outer product of two vectors a bt = c 
 c     matrix.
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -137,12 +137,12 @@ c
       subroutine invert (a,n,np,y,maxsta)  
 c
 c*********************************************************************
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  Peter Stamus, NOAA/FSL
-c          Pass in max number of stations for 'ludcmp'. 
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  peter stamus, noaa/fsl
+c          pass in max number of stations for 'ludcmp'. 
 c
 c*********************************************************************
 c
@@ -163,35 +163,35 @@ c
       return
       end
 c
-      subroutine fastinv(A,imax,jmax,m)
-      real A(m,m)      
-c     This inverts a matrix that is diagonal only
+      subroutine fastinv(a,imax,jmax,m)
+      real a(m,m)      
+c     this inverts a matrix that is diagonal only
       if(imax.ne.jmax) print*,'matrix in fast invert is not square'
-      print*,'Matrix to be inverted is diagonal...using fast invert'
+      print*,'matrix to be inverted is diagonal...using fast invert'
       do j=1,jmax
-        if(A(j,j).eq.0) then
+        if(a(j,j).eq.0) then
          print*,' zero element in fast matrix inversion at ',j,j
-         A(j,j)=1.e-30
+         a(j,j)=1.e-30
         endif
-        A(j,j)=1/A(j,j)
+        a(j,j)=1/a(j,j)
       enddo
       return
       end
  
 c
-      subroutine avgerr(wr,wit,B,c,W,dwt,imax,iav,m,it)
+      subroutine avgerr(wr,wit,b,c,w,dwt,imax,iav,m,it)
 c
 c*********************************************************************
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          Add Bias error calculation.  Also some minor housekeeping.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          add bias error calculation.  also some minor housekeeping.
 c
 c*********************************************************************
 c
-      real B(m),c(m,m),W(m,m),wit(m,m),wr(m),dwt(m,m)
+      real b(m),c(m,m),w(m,m),wit(m,m),wr(m),dwt(m,m)
 c
       do l=m,2,-1
          do k=1,imax
@@ -203,7 +203,7 @@ c
       enddo !k
       do i=1,m
          do j=1,m
-            W(i,j)=0. 
+            w(i,j)=0. 
          enddo !j
       enddo !i
       if(iav.gt.it) then
@@ -216,57 +216,57 @@ c
       cnt = 0.
       do itt=1,ia
          do i=1,m
-            B(i)=wit(itt,i)   
-            sum = sum + B(i)
+            b(i)=wit(itt,i)   
+            sum = sum + b(i)
             cnt = cnt + 1.
          enddo !i
          do j=1,imax
             do i=1,imax
-               C(i,j)=B(i)*B(j)*dwt(i,j)
+               c(i,j)=b(i)*b(j)*dwt(i,j)
             enddo !i
          enddo !j
         do j=1,imax
            do i=1,imax
-              W(i,j)=W(i,j)+c(i,j)
+              w(i,j)=w(i,j)+c(i,j)
            enddo !i
         enddo !j
       enddo !itt
       do j=1,imax
          do i=1,imax
             if(i.eq.j) then
-               W(i,j)=W(i,j)/float(ia)
+               w(i,j)=w(i,j)/float(ia)
             else
-               W(i,j)=W(i,j)/float(iav)
+               w(i,j)=w(i,j)/float(iav)
             endif
          enddo !i
       enddo !j
 c
       if(cnt .gt. 0.) then
-         write(6,*) ' Bias Error for W and VV: ', sum / cnt
+         write(6,*) ' bias error for w and vv: ', sum / cnt
       else
-         write(6,*) ' In routine AVGERR: Cannot calculate bias ',
-     &              ' error for W and VV -- cnt = 0'
+         write(6,*) ' in routine avgerr: cannot calculate bias ',
+     &              ' error for w and vv -- cnt = 0'
       endif
 c
       return
       end
 c
 c
-      subroutine avgdiagerr(wit,B,c,W,imax,iav,m,it)
+      subroutine avgdiagerr(wit,b,c,w,imax,iav,m,it)
 c
 c*********************************************************************
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  John McGinley and Peter Stamus, NOAA/FSL
-c          Add Bias error calculation.  Also some minor housekeeping.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  john mcginley and peter stamus, noaa/fsl
+c          add bias error calculation.  also some minor housekeeping.
 c
 c*********************************************************************
 c
-      real B(m),c(m,m),W(m,m),wit(m,m)
+      real b(m),c(m,m),w(m,m),wit(m,m)
 c
-      call zero(W,m,m)
+      call zero(w,m,m)
       ia=iav
       if(ia.gt.it) ia=it
 c
@@ -274,24 +274,24 @@ c
       cnt = 0.
       do itt=1,ia
          do i=1,imax
-            B(i)=wit(i,itt)   
-            sum = sum + B(i)
+            b(i)=wit(i,itt)   
+            sum = sum + b(i)
             cnt = cnt + 1.
          enddo !i
          do i=1,imax    
-            W(i,i)=W(i,i)+b(i)*b(i)
+            w(i,i)=w(i,i)+b(i)*b(i)
          enddo !i
       enddo !itt
       do i=1,imax
-         W(i,i)=W(i,i)/float(ia)
+         w(i,i)=w(i,i)/float(ia)
       enddo !i
 c
       if(cnt .gt. 0.) then
-         write(6,*) ' Bias Error for W and VV: ', sum / cnt,' for ', ia
+         write(6,*) ' bias error for w and vv: ', sum / cnt,' for ', ia
      & ,' cycles'
       else
-         write(6,*) ' In routine AVGDIAGERR: Cannot calculate ',
-     &              ' bias error for W and VV -- cnt = 0'
+         write(6,*) ' in routine avgdiagerr: cannot calculate ',
+     &              ' bias error for w and vv -- cnt = 0'
       endif
 c
       return
@@ -301,10 +301,10 @@ c
       subroutine matrixanal(a,imax,jmax,m,idiag,char)
 c
 c*********************************************************************
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c*********************************************************************
 c
       real a(m,m)     
@@ -348,17 +348,17 @@ c
 c output results
 c
       write(6,1000)  char
- 1000 format(1x,'Diagnosis of matrix ',a10)
+ 1000 format(1x,'diagnosis of matrix ',a10)
       write (6,1001) dimx,dimn
- 1001 format(1x,'Max diagonal ',f8.3,' Min diagonal ',f8.3)
+ 1001 format(1x,'max diagonal ',f8.3,' min diagonal ',f8.3)
       write (6,1002) sumd
- 1002 format(1x,'Avg diagonal ',f8.3)
+ 1002 format(1x,'avg diagonal ',f8.3)
       write (6,1003) elmx,elmn
- 1003 format(1x,'Max non-diagonal ',f8.3,' Min non-diagonal ',f8.3)
+ 1003 format(1x,'max non-diagonal ',f8.3,' min non-diagonal ',f8.3)
       write (6,1004) sume
- 1004 format(1x,'Avg non-diagonal ',f8.3)
+ 1004 format(1x,'avg non-diagonal ',f8.3)
       write (6,1005) sumea
- 1005 format(1x,'Avg abs non-diagonal ',f8.3)
+ 1005 format(1x,'avg abs non-diagonal ',f8.3)
 c
 c flag matrix if it is purely diagonal
       if(elmx.eq.0..and.elmn.eq.0.) idiag=1
@@ -366,21 +366,21 @@ c flag matrix if it is purely diagonal
       end
 c
 c
-      Subroutine svdcmp(a,m,n,mp,np,w,v,nmax)
+      subroutine svdcmp(a,m,n,mp,np,w,v,nmax)
 c
 c*********************************************************************
 c
-c     Given a matrix a(m,n) with physical dimensions 'mp x np',
+c     given a matrix a(m,n) with physical dimensions 'mp x np',
 c     routine calculates a=u.w.vt. u repaces a on output
 c     diagonal matrix of singular values w is output as a vector
 c     v is output, not vtranspose.
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  Peter Stamus, NOAA/FSL
-c          Pass in max number of stations as nmax.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  peter stamus, noaa/fsl
+c          pass in max number of stations as nmax.
 c
 c*********************************************************************
 c
@@ -553,7 +553,7 @@ c
              endif
              if(its.eq.30) then
                 print *,
-     &       ' No convergence in sudcmp: inverted matrix may be suspect'
+     &       ' no convergence in sudcmp: inverted matrix may be suspect'
              endif
              x=w(l)
              nm=k-1
@@ -612,19 +612,19 @@ c
        end
 c
 c
-        Subroutine svbksb(u,w,v,m,n,mp,np,b,x,nmax)
+        subroutine svbksb(u,w,v,m,n,mp,np,b,x,nmax)
 c
 c*********************************************************************
 c
-c     This subroutine solves A.X=B for X where A is specified by
+c     this subroutine solves a.x=b for x where a is specified by
 c     arrays u,w,v from svdcmp.
 c
-c     Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       14 Dec 1999  Peter Stamus, NOAA/FSL
-c          Pass in max number of stations as nmax.
+c     original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       14 dec 1999  peter stamus, noaa/fsl
+c          pass in max number of stations as nmax.
 c
 c*********************************************************************
 c
@@ -659,13 +659,13 @@ c
 c
 c*********************************************************************
 c
-c     This subroutine performs lower/upper decomposition of a
+c     this subroutine performs lower/upper decomposition of a
 c     matrix "a".
 c
-c     Original: John McGinley, NOAA/FSL  December 1999
-c     Changes:
-c       14 Dec 1999  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  december 1999
+c     changes:
+c       14 dec 1999  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c
@@ -682,7 +682,7 @@ c
             if(abs(a(i,j)).gt.aamax) aamax=abs(a(i,j))
          enddo !j
          if(aamax.eq.0.) then
-            print *, 'All 0, singular matrix in ludcmp'
+            print *, 'all 0, singular matrix in ludcmp'
          endif
          vv(i)=1./aamax
       enddo !i
@@ -735,12 +735,12 @@ c
 c
 c*********************************************************************
 c
-c     This subroutine solves a set of 'n' linear equationsns (a.x=b).
+c     this subroutine solves a set of 'n' linear equationsns (a.x=b).
 c
-c     Original: John McGinley, NOAA/FSL  December 1999
-c     Changes:
-c       14 Dec 1999  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
+c     original: john mcginley, noaa/fsl  december 1999
+c     changes:
+c       14 dec 1999  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
 c
 c*********************************************************************
 c

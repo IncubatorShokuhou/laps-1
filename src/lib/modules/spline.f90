@@ -1,6 +1,6 @@
 
-! Downloaded by Steve Albers from an Iowa State Math Dept. Website produced 
-! by John Burkhardt: 
+! downloaded by steve albers from an iowa state math dept. website produced 
+! by john burkhardt: 
 
 ! http://orion.math.iastate.edu/burkardt/f_src/spline/spline.html
 
@@ -8,44 +8,44 @@ subroutine basis_function_b_val ( tdata, tval, yval )
 !
 !*******************************************************************************
 !
-!! BASIS_FUNCTION_B_VAL evaluates the B spline basis function.
+!! basis_function_b_val evaluates the b spline basis function.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The B spline basis function is a piecewise cubic which
+!    the b spline basis function is a piecewise cubic which
 !    has the properties that:
 !
-!    * it equals 2/3 at TDATA(3), 1/6 at TDATA(2) and TDATA(4);
-!    * it is 0 for TVAL <= TDATA(1) or TDATA(5) <= TVAL;
-!    * it is strictly increasing from TDATA(1) to TDATA(3),
-!      and strictly decreasing from TDATA(3) to TDATA(5);
+!    * it equals 2/3 at tdata(3), 1/6 at tdata(2) and tdata(4);
+!    * it is 0 for tval <= tdata(1) or tdata(5) <= tval;
+!    * it is strictly increasing from tdata(1) to tdata(3),
+!      and strictly decreasing from tdata(3) to tdata(5);
 !    * the function and its first two derivatives are continuous
-!      at each node TDATA(I).
+!      at each node tdata(i).
 !
-!  Reference:
+!  reference:
 !
-!    Alan Davies and Philip Samuels,
-!    An Introduction to Computational Geometry for Curves and Surfaces,
-!    Clarendon Press, 1996.
+!    alan davies and philip samuels,
+!    an introduction to computational geometry for curves and surfaces,
+!    clarendon press, 1996.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real TDATA(5), the nodes associated with the basis function.
-!    The entries of TDATA are assumed to be distinct and increasing.
+!    input, real tdata(5), the nodes associated with the basis function.
+!    the entries of tdata are assumed to be distinct and increasing.
 !
-!    Input, real TVAL, a point at which the B spline basis function is
+!    input, real tval, a point at which the b spline basis function is
 !    to be evaluated.
 !
-!    Output, real YVAL, the value of the function at TVAL.
+!    output, real yval, the value of the function at tval.
 !
   implicit none
 !
@@ -59,28 +59,28 @@ subroutine basis_function_b_val ( tdata, tval, yval )
   real yval
 !
   if ( tval <= tdata(1) .or. tval >= tdata(ndata) ) then
-    yval = 0.0E+00
+    yval = 0.0e+00
     return
   end if
 !
-!  Find the interval [ TDATA(LEFT), TDATA(RIGHT) ] containing TVAL.
+!  find the interval [ tdata(left), tdata(right) ] containing tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  U is the normalized coordinate of TVAL in this interval.
+!  u is the normalized coordinate of tval in this interval.
 !
   u = ( tval - tdata(left) ) / ( tdata(right) - tdata(left) )
 !
-!  Now evaluate the function.
+!  now evaluate the function.
 !
   if ( tval < tdata(2) ) then
-    yval = u**3 / 6.0E+00
+    yval = u**3 / 6.0e+00
   else if ( tval < tdata(3) ) then
-    yval = ( 1.0E+00 + 3.0E+00 * u + 3.0E+00 * u**2 - 3.0E+00 * u**3 ) / 6.0E+00
+    yval = ( 1.0e+00 + 3.0e+00 * u + 3.0e+00 * u**2 - 3.0e+00 * u**3 ) / 6.0e+00
   else if ( tval < tdata(4) ) then
-    yval = ( 4.0E+00 - 6.0E+00 * u**2 + 3.0E+00 * u**3 ) / 6.0E+00
+    yval = ( 4.0e+00 - 6.0e+00 * u**2 + 3.0e+00 * u**3 ) / 6.0e+00
   else if ( tval < tdata(5) ) then
-    yval = ( 1.0E+00 - u )**3 / 6.0E+00
+    yval = ( 1.0e+00 - u )**3 / 6.0e+00
   end if
 
   return
@@ -89,53 +89,53 @@ subroutine basis_function_beta_val ( beta1, beta2, tdata, tval, yval )
 !
 !*******************************************************************************
 !
-!! BASIS_FUNCTION_BETA_VAL evaluates the beta spline basis function.
+!! basis_function_beta_val evaluates the beta spline basis function.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    With BETA1 = 1 and BETA2 = 0, the beta spline basis function 
-!    equals the B spline basis function.
+!    with beta1 = 1 and beta2 = 0, the beta spline basis function 
+!    equals the b spline basis function.
 !
-!    With BETA1 large, and BETA2 = 0, the beta spline basis function
+!    with beta1 large, and beta2 = 0, the beta spline basis function
 !    skews to the right, that is, its maximum increases, and occurs
 !    to the right of the center.
 !
-!    With BETA1 = 1 and BETA2 large, the beta spline becomes more like
+!    with beta1 = 1 and beta2 large, the beta spline becomes more like
 !    a linear basis function; that is, its value in the outer two intervals
 !    goes to zero, and its behavior in the inner two intervals approaches
 !    a piecewise linear function that is 0 at the second node, 1 at the
 !    third, and 0 at the fourth.
 !
-!  Reference:
+!  reference:
 !
-!    Alan Davies and Philip Samuels,
-!    An Introduction to Computational Geometry for Curves and Surfaces,
-!    Clarendon Press, 1996, page 129.
+!    alan davies and philip samuels,
+!    an introduction to computational geometry for curves and surfaces,
+!    clarendon press, 1996, page 129.
 !
-!  Modified:
+!  modified:
 !
-!    09 April 1999
+!    09 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real BETA1, the skew or bias parameter.
-!    BETA1 = 1 for no skew or bias.
+!    input, real beta1, the skew or bias parameter.
+!    beta1 = 1 for no skew or bias.
 !
-!    Input, real BETA2, the tension parameter.
-!    BETA2 = 0 for no tension.
+!    input, real beta2, the tension parameter.
+!    beta2 = 0 for no tension.
 !
-!    Input, real TDATA(5), the nodes associated with the basis function.
-!    The entries of TDATA are assumed to be distinct and increasing.
+!    input, real tdata(5), the nodes associated with the basis function.
+!    the entries of tdata are assumed to be distinct and increasing.
 !
-!    Input, real TVAL, a point at which the B spline basis function is
+!    input, real tval, a point at which the b spline basis function is
 !    to be evaluated.
 !
-!    Output, real YVAL, the value of the function at TVAL.
+!    output, real yval, the value of the function at tval.
 !
   implicit none
 !
@@ -155,62 +155,62 @@ subroutine basis_function_beta_val ( beta1, beta2, tdata, tval, yval )
   real yval
 !
   if ( tval <= tdata(1) .or. tval >= tdata(ndata) ) then
-    yval = 0.0E+00
+    yval = 0.0e+00
     return
   end if
 !
-!  Find the interval [ TDATA(LEFT), TDATA(RIGHT) ] containing TVAL.
+!  find the interval [ tdata(left), tdata(right) ] containing tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  U is the normalized coordinate of TVAL in this interval.
+!  u is the normalized coordinate of tval in this interval.
 !
   u = ( tval - tdata(left) ) / ( tdata(right) - tdata(left) )
 !
-!  Now evaluate the function.
+!  now evaluate the function.
 !
   if ( tval < tdata(2) ) then
 
-    yval = 2.0E+00 * u**3 
+    yval = 2.0e+00 * u**3 
 
   else if ( tval < tdata(3) ) then
 
-    a = beta2 + 4.0E+00 * beta1 + 4.0E+00 * beta1**2 &
-      + 6.0E+00 * ( 1.0E+00 - beta1**2 ) &
-      - 3.0E+00 * ( 2.0E+00 + beta2 + 2.0E+00 * beta1 ) &
-      + 2.0E+00 * ( 1.0E+00 + beta2 + beta1 + beta1**2 )
+    a = beta2 + 4.0e+00 * beta1 + 4.0e+00 * beta1**2 &
+      + 6.0e+00 * ( 1.0e+00 - beta1**2 ) &
+      - 3.0e+00 * ( 2.0e+00 + beta2 + 2.0e+00 * beta1 ) &
+      + 2.0e+00 * ( 1.0e+00 + beta2 + beta1 + beta1**2 )
 
-    b = - 6.0E+00 * ( 1.0E+00 - beta1**2 ) &
-        + 6.0E+00 * ( 2.0E+00 + beta2 + 2.0E+00 * beta1 ) &
-        - 6.0E+00 * ( 1.0E+00 + beta2 + beta1 + beta1**2 )
+    b = - 6.0e+00 * ( 1.0e+00 - beta1**2 ) &
+        + 6.0e+00 * ( 2.0e+00 + beta2 + 2.0e+00 * beta1 ) &
+        - 6.0e+00 * ( 1.0e+00 + beta2 + beta1 + beta1**2 )
 
-    c = - 3.0E+00 * ( 2.0E+00 + beta2 + 2.0E+00 * beta1 ) &
-        + 6.0E+00 * ( 1.0E+00 + beta2 + beta1 + beta1**2 )
+    c = - 3.0e+00 * ( 2.0e+00 + beta2 + 2.0e+00 * beta1 ) &
+        + 6.0e+00 * ( 1.0e+00 + beta2 + beta1 + beta1**2 )
 
-    d = - 2.0E+00 * ( 1.0E+00 + beta2 + beta1 + beta1**2 )
+    d = - 2.0e+00 * ( 1.0e+00 + beta2 + beta1 + beta1**2 )
 
     yval = a + b * u + c * u**2 + d * u**3
 
   else if ( tval < tdata(4) ) then
 
-    a = beta2 + 4.0E+00 * beta1 + 4.0E+00 * beta1**2
+    a = beta2 + 4.0e+00 * beta1 + 4.0e+00 * beta1**2
 
-    b = - 6.0E+00 * ( beta1 - beta1**3 )
+    b = - 6.0e+00 * ( beta1 - beta1**3 )
 
-    c = - 3.0E+00 * ( beta2 + 2.0E+00 * beta1**2 + 2.0E+00 * beta1**3 )
+    c = - 3.0e+00 * ( beta2 + 2.0e+00 * beta1**2 + 2.0e+00 * beta1**3 )
 
-    d = 2.0E+00 * ( beta2 + beta1 + beta1**2 + beta1**3 )
+    d = 2.0e+00 * ( beta2 + beta1 + beta1**2 + beta1**3 )
 
     yval = a + b * u + c * u**2 + d * u**3
 
   else if ( tval < tdata(5) ) then
 
-    yval = 2.0E+00 * beta1**3 * ( 1.0E+00 - u )**3
+    yval = 2.0e+00 * beta1**3 * ( 1.0e+00 - u )**3
 
   end if
 
-  yval = yval / ( 2.0E+00 + beta2 + 4.0E+00 * beta1 + 4.0E+00 * beta1**2 &
-    + 2.0E+00 * beta1**3 )
+  yval = yval / ( 2.0e+00 + beta2 + 4.0e+00 * beta1 + 4.0e+00 * beta1**2 &
+    + 2.0e+00 * beta1**3 )
 
   return
 end
@@ -218,50 +218,50 @@ subroutine basis_matrix_b_uni ( mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_B_UNI sets up the uniform B spline basis matrix.
+!! basis_matrix_b_uni sets up the uniform b spline basis matrix.
 !
 !
-!  Reference:
+!  reference:
 !
-!    Foley, van Dam, Feiner, Hughes,
-!    Computer Graphics: Principles and Practice,
+!    foley, van dam, feiner, hughes,
+!    computer graphics: principles and practice,
 !    page 493.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real MBASIS(4,4), the basis matrix.
+!    output, real mbasis(4,4), the basis matrix.
 !
   implicit none
 !
   real mbasis(4,4)
 !
-  mbasis(1,1) = - 1.0E+00 / 6.0E+00
-  mbasis(1,2) =   3.0E+00 / 6.0E+00
-  mbasis(1,3) = - 3.0E+00 / 6.0E+00
-  mbasis(1,4) =   1.0E+00 / 6.0E+00
+  mbasis(1,1) = - 1.0e+00 / 6.0e+00
+  mbasis(1,2) =   3.0e+00 / 6.0e+00
+  mbasis(1,3) = - 3.0e+00 / 6.0e+00
+  mbasis(1,4) =   1.0e+00 / 6.0e+00
 
-  mbasis(2,1) =   3.0E+00 / 6.0E+00
-  mbasis(2,2) = - 6.0E+00 / 6.0E+00
-  mbasis(2,3) =   3.0E+00 / 6.0E+00
-  mbasis(2,4) =   0.0E+00
+  mbasis(2,1) =   3.0e+00 / 6.0e+00
+  mbasis(2,2) = - 6.0e+00 / 6.0e+00
+  mbasis(2,3) =   3.0e+00 / 6.0e+00
+  mbasis(2,4) =   0.0e+00
 
-  mbasis(3,1) = - 3.0E+00 / 6.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   3.0E+00 / 6.0E+00
-  mbasis(3,4) =   0.0E+00
+  mbasis(3,1) = - 3.0e+00 / 6.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   3.0e+00 / 6.0e+00
+  mbasis(3,4) =   0.0e+00
 
-  mbasis(4,1) =   1.0E+00 / 6.0E+00
-  mbasis(4,2) =   4.0E+00 / 6.0E+00
-  mbasis(4,3) =   1.0E+00 / 6.0E+00
-  mbasis(4,4) =   0.0E+00
+  mbasis(4,1) =   1.0e+00 / 6.0e+00
+  mbasis(4,2) =   4.0e+00 / 6.0e+00
+  mbasis(4,3) =   1.0e+00 / 6.0e+00
+  mbasis(4,4) =   0.0e+00
 
   return
 end
@@ -269,37 +269,37 @@ subroutine basis_matrix_beta_uni ( beta1, beta2, mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_BETA_UNI sets up the uniform beta spline basis matrix.
+!! basis_matrix_beta_uni sets up the uniform beta spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    If BETA1 = 1 and BETA2 = 0, then the beta spline reduces to 
-!    the B spline.
+!    if beta1 = 1 and beta2 = 0, then the beta spline reduces to 
+!    the b spline.
 !
-!  Reference:
+!  reference:
 !
-!    Foley, van Dam, Feiner, Hughes,
-!    Computer Graphics: Principles and Practice,
+!    foley, van dam, feiner, hughes,
+!    computer graphics: principles and practice,
 !    page 505.
 !
-!  Modified:
+!  modified:
 !
-!    03 April 1999
+!    03 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real BETA1, the skew or bias parameter.
-!    BETA1 = 1 for no skew or bias.
+!    input, real beta1, the skew or bias parameter.
+!    beta1 = 1 for no skew or bias.
 !
-!    Input, real BETA2, the tension parameter.
-!    BETA2 = 0 for no tension.
+!    input, real beta2, the tension parameter.
+!    beta2 = 0 for no tension.
 !
-!    Output, real MBASIS(4,4), the basis matrix.
+!    output, real mbasis(4,4), the basis matrix.
 !
   implicit none
 !
@@ -310,28 +310,28 @@ subroutine basis_matrix_beta_uni ( beta1, beta2, mbasis )
   integer j
   real mbasis(4,4)
 !
-  mbasis(1,1) = - 2.0E+00 * beta1**3
-  mbasis(1,2) =   2.0E+00 * ( beta2 + beta1**3 + beta1**2 + beta1 )
-  mbasis(1,3) = - 2.0E+00 * ( beta2 + beta1**2 + beta1 + 1.0E+00 )
-  mbasis(1,4) =   2.0E+00
+  mbasis(1,1) = - 2.0e+00 * beta1**3
+  mbasis(1,2) =   2.0e+00 * ( beta2 + beta1**3 + beta1**2 + beta1 )
+  mbasis(1,3) = - 2.0e+00 * ( beta2 + beta1**2 + beta1 + 1.0e+00 )
+  mbasis(1,4) =   2.0e+00
 
-  mbasis(2,1) =   6.0E+00 * beta1**3
-  mbasis(2,2) = - 3.0E+00 * ( beta2 + 2.0E+00 * beta1**3 + 2.0E+00 * beta1**2 )
-  mbasis(2,3) =   3.0E+00 * ( beta2 + 2.0E+00 * beta1**2 )
-  mbasis(2,4) =   0.0E+00
+  mbasis(2,1) =   6.0e+00 * beta1**3
+  mbasis(2,2) = - 3.0e+00 * ( beta2 + 2.0e+00 * beta1**3 + 2.0e+00 * beta1**2 )
+  mbasis(2,3) =   3.0e+00 * ( beta2 + 2.0e+00 * beta1**2 )
+  mbasis(2,4) =   0.0e+00
 
-  mbasis(3,1) = - 6.0E+00 * beta1**3
-  mbasis(3,2) =   6.0E+00 * beta1 * ( beta1 - 1.0E+00 ) * ( beta1 + 1.0E+00 )
-  mbasis(3,3) =   6.0E+00 * beta1
-  mbasis(3,4) =   0.0E+00
+  mbasis(3,1) = - 6.0e+00 * beta1**3
+  mbasis(3,2) =   6.0e+00 * beta1 * ( beta1 - 1.0e+00 ) * ( beta1 + 1.0e+00 )
+  mbasis(3,3) =   6.0e+00 * beta1
+  mbasis(3,4) =   0.0e+00
 
-  mbasis(4,1) =   2.0E+00 * beta1**3
-  mbasis(4,2) =   4.0E+00 * beta1 * ( beta1 + 1.0E+00 ) + beta2
-  mbasis(4,3) =   2.0E+00
-  mbasis(4,4) =   0.0E+00
+  mbasis(4,1) =   2.0e+00 * beta1**3
+  mbasis(4,2) =   4.0e+00 * beta1 * ( beta1 + 1.0e+00 ) + beta2
+  mbasis(4,3) =   2.0e+00
+  mbasis(4,4) =   0.0e+00
 
-  delta = beta2 + 2.0E+00 * beta1**3 + 4.0E+00 * beta1**2 &
-    + 4.0E+00 * beta1 + 2.0E+00
+  delta = beta2 + 2.0e+00 * beta1**3 + 4.0e+00 * beta1**2 &
+    + 4.0e+00 * beta1 + 2.0e+00
 
   mbasis(1:4,1:4) = mbasis(1:4,1:4) / delta
 
@@ -341,59 +341,59 @@ subroutine basis_matrix_bezier ( mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_BEZIER_UNI sets up the cubic Bezier spline basis matrix.
+!! basis_matrix_bezier_uni sets up the cubic bezier spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points are stored as
-!    ( P1, P2, P3, P4 ).  P1 is the function value at T = 0, while
-!    P2 is used to approximate the derivative at T = 0 by
-!    dP/dt = 3 * ( P2 - P1 ).  Similarly, P4 is the function value
-!    at T = 1, and P3 is used to approximate the derivative at T = 1
-!    by dP/dT = 3 * ( P4 - P3 ).
+!    this basis matrix assumes that the data points are stored as
+!    ( p1, p2, p3, p4 ).  p1 is the function value at t = 0, while
+!    p2 is used to approximate the derivative at t = 0 by
+!    dp/dt = 3 * ( p2 - p1 ).  similarly, p4 is the function value
+!    at t = 1, and p3 is used to approximate the derivative at t = 1
+!    by dp/dt = 3 * ( p4 - p3 ).
 !
-!  Reference:
+!  reference:
 !
-!    Foley, van Dam, Feiner, Hughes,
-!    Computer Graphics: Principles and Practice,
+!    foley, van dam, feiner, hughes,
+!    computer graphics: principles and practice,
 !    page 489.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real MBASIS(4,4), the basis matrix.
+!    output, real mbasis(4,4), the basis matrix.
 !
   implicit none
 !
   real mbasis(4,4)
 !
-  mbasis(1,1) = - 1.0E+00
-  mbasis(1,2) =   3.0E+00
-  mbasis(1,3) = - 3.0E+00
-  mbasis(1,4) =   1.0E+00
+  mbasis(1,1) = - 1.0e+00
+  mbasis(1,2) =   3.0e+00
+  mbasis(1,3) = - 3.0e+00
+  mbasis(1,4) =   1.0e+00
 
-  mbasis(2,1) =   3.0E+00
-  mbasis(2,2) = - 6.0E+00
-  mbasis(2,3) =   3.0E+00
-  mbasis(2,4) =   0.0E+00
+  mbasis(2,1) =   3.0e+00
+  mbasis(2,2) = - 6.0e+00
+  mbasis(2,3) =   3.0e+00
+  mbasis(2,4) =   0.0e+00
 
-  mbasis(3,1) = - 3.0E+00
-  mbasis(3,2) =   3.0E+00
-  mbasis(3,3) =   0.0E+00
-  mbasis(3,4) =   0.0E+00
+  mbasis(3,1) = - 3.0e+00
+  mbasis(3,2) =   3.0e+00
+  mbasis(3,3) =   0.0e+00
+  mbasis(3,4) =   0.0e+00
 
-  mbasis(4,1) =   1.0E+00
-  mbasis(4,2) =   0.0E+00
-  mbasis(4,3) =   0.0E+00
-  mbasis(4,4) =   0.0E+00
+  mbasis(4,1) =   1.0e+00
+  mbasis(4,2) =   0.0e+00
+  mbasis(4,3) =   0.0e+00
+  mbasis(4,4) =   0.0e+00
 
   return
 end
@@ -401,56 +401,56 @@ subroutine basis_matrix_hermite ( mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_HERMITE sets up the Hermite spline basis matrix.
+!! basis_matrix_hermite sets up the hermite spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points are stored as
-!    ( P1, P2, P1', P2' ), with P1 and P1' being the data value and 
-!    the derivative dP/dT at T = 0, while P2 and P2' apply at T = 1.
+!    this basis matrix assumes that the data points are stored as
+!    ( p1, p2, p1', p2' ), with p1 and p1' being the data value and 
+!    the derivative dp/dt at t = 0, while p2 and p2' apply at t = 1.
 !
-!  Reference:
+!  reference:
 !
-!    Foley, van Dam, Feiner, Hughes,
-!    Computer Graphics: Principles and Practice,
+!    foley, van dam, feiner, hughes,
+!    computer graphics: principles and practice,
 !    page 484.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real MBASIS(4,4), the basis matrix.
+!    output, real mbasis(4,4), the basis matrix.
 !
   implicit none
 !
   real mbasis(4,4)
 !
-  mbasis(1,1) =   2.0E+00
-  mbasis(1,2) = - 2.0E+00
-  mbasis(1,3) =   1.0E+00
-  mbasis(1,4) =   1.0E+00
+  mbasis(1,1) =   2.0e+00
+  mbasis(1,2) = - 2.0e+00
+  mbasis(1,3) =   1.0e+00
+  mbasis(1,4) =   1.0e+00
 
-  mbasis(2,1) = - 3.0E+00
-  mbasis(2,2) =   3.0E+00
-  mbasis(2,3) = - 2.0E+00
-  mbasis(2,4) = - 1.0E+00
+  mbasis(2,1) = - 3.0e+00
+  mbasis(2,2) =   3.0e+00
+  mbasis(2,3) = - 2.0e+00
+  mbasis(2,4) = - 1.0e+00
 
-  mbasis(3,1) =   0.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   1.0E+00
-  mbasis(3,4) =   0.0E+00
+  mbasis(3,1) =   0.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   1.0e+00
+  mbasis(3,4) =   0.0e+00
 
-  mbasis(4,1) =   1.0E+00
-  mbasis(4,2) =   0.0E+00
-  mbasis(4,3) =   0.0E+00
-  mbasis(4,4) =   0.0E+00
+  mbasis(4,1) =   1.0e+00
+  mbasis(4,2) =   0.0e+00
+  mbasis(4,3) =   0.0e+00
+  mbasis(4,4) =   0.0e+00
 
   return
 end
@@ -458,30 +458,30 @@ subroutine basis_matrix_overhauser_nonuni ( alpha, beta, mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_OVERHAUSER_NONUNI sets up the nonuniform Overhauser spline basis matrix.
+!! basis_matrix_overhauser_nonuni sets up the nonuniform overhauser spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points P1, P2, P3 and
-!    P4 are not uniformly spaced in T, and that P2 corresponds to T = 0,
-!    and P3 to T = 1.
+!    this basis matrix assumes that the data points p1, p2, p3 and
+!    p4 are not uniformly spaced in t, and that p2 corresponds to t = 0,
+!    and p3 to t = 1.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real ALPHA, BETA.
-!    ALPHA = | P2 - P1 | / ( | P3 - P2 | + | P2 - P1 | )
-!    BETA  = | P3 - P2 | / ( | P4 - P3 | + | P3 - P2 | ).
+!    input, real alpha, beta.
+!    alpha = | p2 - p1 | / ( | p3 - p2 | + | p2 - p1 | )
+!    beta  = | p3 - p2 | / ( | p4 - p3 | + | p3 - p2 | ).
 !
-!    Output, real MBASIS(4,4), the basis matrix.
+!    output, real mbasis(4,4), the basis matrix.
 !
   implicit none
 !
@@ -489,26 +489,26 @@ subroutine basis_matrix_overhauser_nonuni ( alpha, beta, mbasis )
   real beta
   real mbasis(4,4)
 !
-  mbasis(1,1) = - ( 1.0E+00 - alpha )**2 / alpha
-  mbasis(1,2) =   beta + ( 1.0E+00 - alpha ) / alpha
-  mbasis(1,3) =   alpha - 1.0E+00 / ( 1.0E+00 - beta )
-  mbasis(1,4) =   beta**2 / ( 1.0E+00 - beta )
+  mbasis(1,1) = - ( 1.0e+00 - alpha )**2 / alpha
+  mbasis(1,2) =   beta + ( 1.0e+00 - alpha ) / alpha
+  mbasis(1,3) =   alpha - 1.0e+00 / ( 1.0e+00 - beta )
+  mbasis(1,4) =   beta**2 / ( 1.0e+00 - beta )
 
-  mbasis(2,1) =   2.0E+00 * ( 1.0E+00 - alpha )**2 / alpha
-  mbasis(2,2) = ( - 2.0E+00 * ( 1.0E+00 - alpha ) - alpha * beta ) / alpha
-  mbasis(2,3) = ( 2.0E+00 * ( 1.0E+00 - alpha ) &
-    - beta * ( 1.0E+00 - 2.0E+00 * alpha ) ) / ( 1.0E+00 - beta )
-  mbasis(2,4) = - beta**2 / ( 1.0E+00 - beta )
+  mbasis(2,1) =   2.0e+00 * ( 1.0e+00 - alpha )**2 / alpha
+  mbasis(2,2) = ( - 2.0e+00 * ( 1.0e+00 - alpha ) - alpha * beta ) / alpha
+  mbasis(2,3) = ( 2.0e+00 * ( 1.0e+00 - alpha ) &
+    - beta * ( 1.0e+00 - 2.0e+00 * alpha ) ) / ( 1.0e+00 - beta )
+  mbasis(2,4) = - beta**2 / ( 1.0e+00 - beta )
 
-  mbasis(3,1) = - ( 1.0E+00 - alpha )**2 / alpha
-  mbasis(3,2) =   ( 1.0E+00 - 2.0E+00 * alpha ) / alpha
+  mbasis(3,1) = - ( 1.0e+00 - alpha )**2 / alpha
+  mbasis(3,2) =   ( 1.0e+00 - 2.0e+00 * alpha ) / alpha
   mbasis(3,3) =   alpha
-  mbasis(3,4) =   0.0E+00
+  mbasis(3,4) =   0.0e+00
 
-  mbasis(4,1) =   0.0E+00
-  mbasis(4,2) =   1.0E+00
-  mbasis(4,3) =   0.0E+00
-  mbasis(4,4) =   0.0E+00
+  mbasis(4,1) =   0.0e+00
+  mbasis(4,2) =   1.0e+00
+  mbasis(4,3) =   0.0e+00
+  mbasis(4,4) =   0.0e+00
 
   return
 end
@@ -516,46 +516,46 @@ subroutine basis_matrix_overhauser_nul ( alpha, mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_OVERHAUSER_NUL sets up the left nonuniform Overhauser spline basis matrix.
+!! basis_matrix_overhauser_nul sets up the left nonuniform overhauser spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points P1, P2, and
-!    P3 are not uniformly spaced in T, and that P1 corresponds to T = 0,
-!    and P2 to T = 1. (???)
+!    this basis matrix assumes that the data points p1, p2, and
+!    p3 are not uniformly spaced in t, and that p1 corresponds to t = 0,
+!    and p2 to t = 1. (???)
 !
-!  Modified:
+!  modified:
 !
-!    27 August 1999
+!    27 august 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real ALPHA.
-!    ALPHA = | P2 - P1 | / ( | P3 - P2 | + | P2 - P1 | )
+!    input, real alpha.
+!    alpha = | p2 - p1 | / ( | p3 - p2 | + | p2 - p1 | )
 !
-!    Output, real MBASIS(3,3), the basis matrix.
+!    output, real mbasis(3,3), the basis matrix.
 !
   implicit none
 !
   real alpha
   real mbasis(3,3)
 !
-  mbasis(1,1) =   1.0E+00 / alpha
-  mbasis(1,2) = - 1.0E+00 / ( alpha * ( 1.0E+00 - alpha ) )
-  mbasis(1,3) =   1.0E+00 / ( 1.0E+00 - alpha )
+  mbasis(1,1) =   1.0e+00 / alpha
+  mbasis(1,2) = - 1.0e+00 / ( alpha * ( 1.0e+00 - alpha ) )
+  mbasis(1,3) =   1.0e+00 / ( 1.0e+00 - alpha )
 
-  mbasis(2,1) = - ( 1.0E+00 + alpha ) / alpha
-  mbasis(2,2) =   1.0E+00 / ( alpha * ( 1.0E+00 - alpha ) )
-  mbasis(2,3) = - alpha / ( 1.0E+00 - alpha )
+  mbasis(2,1) = - ( 1.0e+00 + alpha ) / alpha
+  mbasis(2,2) =   1.0e+00 / ( alpha * ( 1.0e+00 - alpha ) )
+  mbasis(2,3) = - alpha / ( 1.0e+00 - alpha )
 
-  mbasis(3,1) =   1.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   0.0E+00
+  mbasis(3,1) =   1.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   0.0e+00
 
   return
 end
@@ -563,46 +563,46 @@ subroutine basis_matrix_overhauser_nur ( beta, mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_OVERHAUSER_NUR sets up the right nonuniform Overhauser spline basis matrix.
+!! basis_matrix_overhauser_nur sets up the right nonuniform overhauser spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points PN-2, PN-1, and
-!    PN are not uniformly spaced in T, and that PN-1 corresponds to T = 0,
-!    and PN to T = 1. (???)
+!    this basis matrix assumes that the data points pn-2, pn-1, and
+!    pn are not uniformly spaced in t, and that pn-1 corresponds to t = 0,
+!    and pn to t = 1. (???)
 !
-!  Modified:
+!  modified:
 !
-!    27 August 1999
+!    27 august 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real BETA.
-!    BETA = | P(N) - P(N-1) | / ( | P(N) - P(N-1) | + | P(N-1) - P(N-2) | )
+!    input, real beta.
+!    beta = | p(n) - p(n-1) | / ( | p(n) - p(n-1) | + | p(n-1) - p(n-2) | )
 !
-!    Output, real MBASIS(3,3), the basis matrix.
+!    output, real mbasis(3,3), the basis matrix.
 !
   implicit none
 !
   real beta
   real mbasis(3,3)
 !
-  mbasis(1,1) =   1.0E+00 / beta
-  mbasis(1,2) = - 1.0E+00 / ( beta * ( 1.0E+00 - beta ) )
-  mbasis(1,3) =   1.0E+00 / ( 1.0E+00 - beta )
+  mbasis(1,1) =   1.0e+00 / beta
+  mbasis(1,2) = - 1.0e+00 / ( beta * ( 1.0e+00 - beta ) )
+  mbasis(1,3) =   1.0e+00 / ( 1.0e+00 - beta )
 
-  mbasis(2,1) = - ( 1.0E+00 + beta ) / beta
-  mbasis(2,2) =   1.0E+00 / ( beta * ( 1.0E+00 - beta ) )
-  mbasis(2,3) = - beta / ( 1.0E+00 - beta )
+  mbasis(2,1) = - ( 1.0e+00 + beta ) / beta
+  mbasis(2,2) =   1.0e+00 / ( beta * ( 1.0e+00 - beta ) )
+  mbasis(2,3) = - beta / ( 1.0e+00 - beta )
 
-  mbasis(3,1) =   1.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   0.0E+00
+  mbasis(3,1) =   1.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   0.0e+00
 
   return
 end
@@ -610,56 +610,56 @@ subroutine basis_matrix_overhauser_uni ( mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_OVERHAUSER_UNI sets up the uniform Overhauser spline basis matrix.
+!! basis_matrix_overhauser_uni sets up the uniform overhauser spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points P1, P2, P3 and
-!    P4 are uniformly spaced in T, and that P2 corresponds to T = 0,
-!    and P3 to T = 1.
+!    this basis matrix assumes that the data points p1, p2, p3 and
+!    p4 are uniformly spaced in t, and that p2 corresponds to t = 0,
+!    and p3 to t = 1.
 !
-!  Reference:
+!  reference:
 !
-!    Foley, van Dam, Feiner, Hughes,
-!    Computer Graphics: Principles and Practice,
+!    foley, van dam, feiner, hughes,
+!    computer graphics: principles and practice,
 !    page 505.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real MBASIS(4,4), the basis matrix.
+!    output, real mbasis(4,4), the basis matrix.
 !
   implicit none
 !
   real mbasis(4,4)
 !
-  mbasis(1,1) = - 1.0E+00 / 2.0E+00
-  mbasis(1,2) =   3.0E+00 / 2.0E+00
-  mbasis(1,3) = - 3.0E+00 / 2.0E+00
-  mbasis(1,4) =   1.0E+00 / 2.0E+00
+  mbasis(1,1) = - 1.0e+00 / 2.0e+00
+  mbasis(1,2) =   3.0e+00 / 2.0e+00
+  mbasis(1,3) = - 3.0e+00 / 2.0e+00
+  mbasis(1,4) =   1.0e+00 / 2.0e+00
 
-  mbasis(2,1) =   2.0E+00 / 2.0E+00
-  mbasis(2,2) = - 5.0E+00 / 2.0E+00
-  mbasis(2,3) =   4.0E+00 / 2.0E+00
-  mbasis(2,4) = - 1.0E+00 / 2.0E+00
+  mbasis(2,1) =   2.0e+00 / 2.0e+00
+  mbasis(2,2) = - 5.0e+00 / 2.0e+00
+  mbasis(2,3) =   4.0e+00 / 2.0e+00
+  mbasis(2,4) = - 1.0e+00 / 2.0e+00
 
-  mbasis(3,1) = - 1.0E+00 / 2.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   1.0E+00 / 2.0E+00
-  mbasis(3,4) =   0.0E+00
+  mbasis(3,1) = - 1.0e+00 / 2.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   1.0e+00 / 2.0e+00
+  mbasis(3,4) =   0.0e+00
 
-  mbasis(4,1) =   0.0E+00
-  mbasis(4,2) =   2.0E+00 / 2.0E+00
-  mbasis(4,3) =   0.0E+00
-  mbasis(4,4) =   0.0E+00
+  mbasis(4,1) =   0.0e+00
+  mbasis(4,2) =   2.0e+00 / 2.0e+00
+  mbasis(4,3) =   0.0e+00
+  mbasis(4,4) =   0.0e+00
 
   return
 end
@@ -667,42 +667,42 @@ subroutine basis_matrix_overhauser_uni_l ( mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_OVERHAUSER_UNI_L sets up the left uniform Overhauser spline basis matrix.
+!! basis_matrix_overhauser_uni_l sets up the left uniform overhauser spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points P1, P2, and P3
-!    are not uniformly spaced in T, and that P1 corresponds to T = 0,
-!    and P2 to T = 1.
+!    this basis matrix assumes that the data points p1, p2, and p3
+!    are not uniformly spaced in t, and that p1 corresponds to t = 0,
+!    and p2 to t = 1.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real MBASIS(3,3), the basis matrix.
+!    output, real mbasis(3,3), the basis matrix.
 !
   implicit none
 !
   real mbasis(3,3)
 !
-  mbasis(1,1) =   2.0E+00
-  mbasis(1,2) = - 4.0E+00
-  mbasis(1,3) =   2.0E+00
+  mbasis(1,1) =   2.0e+00
+  mbasis(1,2) = - 4.0e+00
+  mbasis(1,3) =   2.0e+00
 
-  mbasis(2,1) = - 3.0E+00
-  mbasis(2,2) =   4.0E+00
-  mbasis(2,3) = - 1.0E+00
+  mbasis(2,1) = - 3.0e+00
+  mbasis(2,2) =   4.0e+00
+  mbasis(2,3) = - 1.0e+00
 
-  mbasis(3,1) =   1.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   0.0E+00
+  mbasis(3,1) =   1.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   0.0e+00
 
   return
 end
@@ -710,42 +710,42 @@ subroutine basis_matrix_overhauser_uni_r ( mbasis )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_OVERHAUSER_UNI_R sets up the right uniform Overhauser spline basis matrix.
+!! basis_matrix_overhauser_uni_r sets up the right uniform overhauser spline basis matrix.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This basis matrix assumes that the data points P(N-2), P(N-1), 
-!    and P(N) are uniformly spaced in T, and that P(N-1) corresponds to 
-!    T = 0, and P(N) to T = 1.
+!    this basis matrix assumes that the data points p(n-2), p(n-1), 
+!    and p(n) are uniformly spaced in t, and that p(n-1) corresponds to 
+!    t = 0, and p(n) to t = 1.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real MBASIS(3,3), the basis matrix.
+!    output, real mbasis(3,3), the basis matrix.
 !
   implicit none
 !
   real mbasis(3,3)
 !
-  mbasis(1,1) =   2.0E+00
-  mbasis(1,2) = - 4.0E+00
-  mbasis(1,3) =   2.0E+00
+  mbasis(1,1) =   2.0e+00
+  mbasis(1,2) = - 4.0e+00
+  mbasis(1,3) =   2.0e+00
 
-  mbasis(2,1) = - 3.0E+00
-  mbasis(2,2) =   4.0E+00
-  mbasis(2,3) = - 1.0E+00
+  mbasis(2,1) = - 3.0e+00
+  mbasis(2,2) =   4.0e+00
+  mbasis(2,3) = - 1.0e+00
 
-  mbasis(3,1) =   1.0E+00
-  mbasis(3,2) =   0.0E+00
-  mbasis(3,3) =   0.0E+00
+  mbasis(3,1) =   1.0e+00
+  mbasis(3,2) =   0.0e+00
+  mbasis(3,3) =   0.0e+00
 
   return
 end
@@ -753,50 +753,50 @@ subroutine basis_matrix_tmp ( left, n, mbasis, ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! BASIS_MATRIX_TMP computes Q = T * MBASIS * P
+!! basis_matrix_tmp computes q = t * mbasis * p
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    YDATA is a vector of data values, most frequently the values of some
-!    function sampled at uniformly spaced points.  MBASIS is the basis
-!    matrix for a particular kind of spline.  T is a vector of the
-!    powers of the normalized difference between TVAL and the left
+!    ydata is a vector of data values, most frequently the values of some
+!    function sampled at uniformly spaced points.  mbasis is the basis
+!    matrix for a particular kind of spline.  t is a vector of the
+!    powers of the normalized difference between tval and the left
 !    endpoint of the interval.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer LEFT, indicats that TVAL is in the interval
-!    [ TDATA(LEFT), TDATA(LEFT+1) ], or that this is the "nearest"
-!    interval to TVAL.
-!    For TVAL < TDATA(1), use LEFT = 1.
-!    For TVAL > TDATA(NDATA), use LEFT = NDATA - 1.
+!    input, integer left, indicats that tval is in the interval
+!    [ tdata(left), tdata(left+1) ], or that this is the "nearest"
+!    interval to tval.
+!    for tval < tdata(1), use left = 1.
+!    for tval > tdata(ndata), use left = ndata - 1.
 !
-!    Input, integer N, the order of the basis matrix.
+!    input, integer n, the order of the basis matrix.
 !
-!    Input, real MBASIS(N,N), the basis matrix.
+!    input, real mbasis(n,n), the basis matrix.
 !
-!    Input, integer NDATA, the dimension of the vectors TDATA and YDATA.
+!    input, integer ndata, the dimension of the vectors tdata and ydata.
 !
-!    Input, real TDATA(NDATA), the abscissa values.  This routine
-!    assumes that the TDATA values are uniformly spaced, with an
+!    input, real tdata(ndata), the abscissa values.  this routine
+!    assumes that the tdata values are uniformly spaced, with an
 !    increment of 1.0.
 !
-!    Input, real YDATA(NDATA), the data values to be interpolated or 
+!    input, real ydata(ndata), the data values to be interpolated or 
 !    approximated.
 !
-!    Input, real TVAL, the value of T at which the spline is to be
+!    input, real tval, the value of t at which the spline is to be
 !    evaluated.
 !
-!    Output, real YVAL, the value of the spline at TVAL.
+!    output, real yval, the value of the spline at tval.
 !
   implicit none
 !
@@ -824,16 +824,16 @@ subroutine basis_matrix_tmp ( left, n, mbasis, ndata, tdata, ydata, tval, yval )
     arg = tval - tdata(left)
     first = left - 1
   else if ( left == ndata - 1 ) then
-    arg = 0.5E+00 * ( 1.0E+00 + tval - tdata(left) )
+    arg = 0.5e+00 * ( 1.0e+00 + tval - tdata(left) )
     first = left - 1
   end if
 
   do i = 1, n - 1
     tvec(i) = arg**( n - i )
   end do
-  tvec(n) = 1.0E+00
+  tvec(n) = 1.0e+00
 
-  yval = 0.0E+00
+  yval = 0.0e+00
   do j = 1, n
     yval = yval + dot_product ( tvec(1:n), mbasis(1:n,j) ) &
       * ydata(first - 1 + j)
@@ -845,48 +845,48 @@ subroutine bc_val ( n, t, xcon, ycon, xval, yval )
 !
 !*******************************************************************************
 !
-!! BC_VAL evaluates a parameterized Bezier curve.
+!! bc_val evaluates a parameterized bezier curve.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    BC_VAL(T) is the value of a vector function of the form
+!    bc_val(t) is the value of a vector function of the form
 !
-!      BC_VAL(T) = ( X(T), Y(T) )
+!      bc_val(t) = ( x(t), y(t) )
 !
 !    where
 !
-!      X(T) = Sum (i = 0 to N) XCON(I) * BERN(I,N)(T)
-!      Y(T) = Sum (i = 0 to N) YCON(I) * BERN(I,N)(T)
+!      x(t) = sum (i = 0 to n) xcon(i) * bern(i,n)(t)
+!      y(t) = sum (i = 0 to n) ycon(i) * bern(i,n)(t)
 !
-!    where BERN(I,N)(T) is the I-th Bernstein polynomial of order N
-!    defined on the interval [0,1], and where XCON(*) and YCON(*)
-!    are the coordinates of N+1 "control points".
+!    where bern(i,n)(t) is the i-th bernstein polynomial of order n
+!    defined on the interval [0,1], and where xcon(*) and ycon(*)
+!    are the coordinates of n+1 "control points".
 !
-!  Modified:
+!  modified:
 !
-!    02 March 1999
+!    02 march 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the order of the Bezier curve, which
+!    input, integer n, the order of the bezier curve, which
 !    must be at least 0.
 !
-!    Input, real T, the point at which the Bezier curve should
-!    be evaluated.  The best results are obtained within the interval
-!    [0,1] but T may be anywhere.
+!    input, real t, the point at which the bezier curve should
+!    be evaluated.  the best results are obtained within the interval
+!    [0,1] but t may be anywhere.
 !
-!    Input, real XCON(0:N), YCON(0:N), the X and Y coordinates
-!    of the control points.  The Bezier curve will pass through
-!    the points ( XCON(0), YCON(0) ) and ( XCON(N), YCON(N) ), but
-!    generally NOT through the other control points.
+!    input, real xcon(0:n), ycon(0:n), the x and y coordinates
+!    of the control points.  the bezier curve will pass through
+!    the points ( xcon(0), ycon(0) ) and ( xcon(n), ycon(n) ), but
+!    generally not through the other control points.
 !
-!    Output, real XVAL, YVAL, the X and Y coordinates of the point
-!    on the Bezier curve corresponding to the given T value.
+!    output, real xval, yval, the x and y coordinates of the point
+!    on the bezier curve corresponding to the given t value.
 !
   implicit none
 !
@@ -911,53 +911,53 @@ function bez_val ( n, x, a, b, y )
 !
 !*******************************************************************************
 !
-!! BEZ_VAL evaluates a Bezier function at a point.
+!! bez_val evaluates a bezier function at a point.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The Bezier function has the form:
+!    the bezier function has the form:
 !
-!      BEZ(X) = Sum (i = 0 to N) Y(I) * BERN(N,I)( (X-A)/(B-A) )
+!      bez(x) = sum (i = 0 to n) y(i) * bern(n,i)( (x-a)/(b-a) )
 !
-!    where BERN(N,I)(X) is the I-th Bernstein polynomial of order N
-!    defined on the interval [0,1], and Y(*) is a set of
+!    where bern(n,i)(x) is the i-th bernstein polynomial of order n
+!    defined on the interval [0,1], and y(*) is a set of
 !    coefficients.
 !
-!    If we define the N+1 equally spaced
+!    if we define the n+1 equally spaced
 !
-!      X(I) = ( (N-I)*A + I*B)/ N,
+!      x(i) = ( (n-i)*a + i*b)/ n,
 !
-!    for I = 0 to N, then the pairs ( X(I), Y(I) ) can be regarded as
+!    for i = 0 to n, then the pairs ( x(i), y(i) ) can be regarded as
 !    "control points".
 !
-!  Modified:
+!  modified:
 !
-!    02 March 1999
+!    02 march 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the order of the Bezier function, which
+!    input, integer n, the order of the bezier function, which
 !    must be at least 0.
 !
-!    Input, real X, the point at which the Bezier function should
-!    be evaluated.  The best results are obtained within the interval
-!    [A,B] but X may be anywhere.
+!    input, real x, the point at which the bezier function should
+!    be evaluated.  the best results are obtained within the interval
+!    [a,b] but x may be anywhere.
 !
-!    Input, real A, B, the interval over which the Bezier function
-!    has been defined.  This is the interval in which the control
-!    points have been set up.  Note BEZ(A) = Y(0) and BEZ(B) = Y(N),
-!    although BEZ will not, in general pass through the other
-!    control points.  A and B must not be equal.
+!    input, real a, b, the interval over which the bezier function
+!    has been defined.  this is the interval in which the control
+!    points have been set up.  note bez(a) = y(0) and bez(b) = y(n),
+!    although bez will not, in general pass through the other
+!    control points.  a and b must not be equal.
 !
-!    Input, real Y(0:N), a set of data defining the Y coordinates
+!    input, real y(0:n), a set of data defining the y coordinates
 !    of the control points.
 !
-!    Output, real BEZ_VAL, the value of the Bezier function at X.
+!    output, real bez_val, the value of the bezier function at x.
 !
   implicit none
 !
@@ -973,10 +973,10 @@ function bez_val ( n, x, a, b, y )
   real x01
   real y(0:n)
 !
-  if ( b - a == 0.0E+00 ) then
+  if ( b - a == 0.0e+00 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'BEZ_VAL - Fatal error!'
-    write ( *, '(a,g14.6)' ) '  Null interval, A = B = ', a
+    write ( *, '(a)' ) 'bez_val - fatal error!'
+    write ( *, '(a,g14.6)' ) '  null interval, a = b = ', a
     stop
   end if
 
@@ -993,58 +993,58 @@ subroutine bp01 ( n, bern, x )
 !
 !*******************************************************************************
 !
-!! BP01 evaluates the Bernstein basis polynomials for [01,1] at a point X.
+!! bp01 evaluates the bernstein basis polynomials for [01,1] at a point x.
 !
 !
-!  Formula:
+!  formula:
 !
-!    BERN(N,I,X) = [N!/(I!*(N-I)!)] * (1-X)**(N-I) * X**I
+!    bern(n,i,x) = [n!/(i!*(n-i)!)] * (1-x)**(n-i) * x**i
 !
-!  First values:
+!  first values:
 !
-!    B(0,0,X) = 1
+!    b(0,0,x) = 1
 !
-!    B(1,0,X) =      1-X
-!    B(1,1,X) =                X
+!    b(1,0,x) =      1-x
+!    b(1,1,x) =                x
 !
-!    B(2,0,X) =     (1-X)**2
-!    B(2,1,X) = 2 * (1-X)    * X
-!    B(2,2,X) =                X**2
+!    b(2,0,x) =     (1-x)**2
+!    b(2,1,x) = 2 * (1-x)    * x
+!    b(2,2,x) =                x**2
 !
-!    B(3,0,X) =     (1-X)**3
-!    B(3,1,X) = 3 * (1-X)**2 * X
-!    B(3,2,X) = 3 * (1-X)    * X**2
-!    B(3,3,X) =                X**3
+!    b(3,0,x) =     (1-x)**3
+!    b(3,1,x) = 3 * (1-x)**2 * x
+!    b(3,2,x) = 3 * (1-x)    * x**2
+!    b(3,3,x) =                x**3
 !
-!    B(4,0,X) =     (1-X)**4
-!    B(4,1,X) = 4 * (1-X)**3 * X
-!    B(4,2,X) = 6 * (1-X)**2 * X**2
-!    B(4,3,X) = 4 * (1-X)    * X**3
-!    B(4,4,X) =                X**4
+!    b(4,0,x) =     (1-x)**4
+!    b(4,1,x) = 4 * (1-x)**3 * x
+!    b(4,2,x) = 6 * (1-x)**2 * x**2
+!    b(4,3,x) = 4 * (1-x)    * x**3
+!    b(4,4,x) =                x**4
 !
-!  Special values:
+!  special values:
 !
-!    B(N,I,1/2) = C(N,K) / 2**N
+!    b(n,i,1/2) = c(n,k) / 2**n
 !
-!  Modified:
+!  modified:
 !
-!    12 January 1999
+!    12 january 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the degree of the Bernstein basis polynomials.
-!    For any N greater than or equal to 0, there is a set of N+1 Bernstein
-!    basis polynomials, each of degree N, which form a basis for
+!    input, integer n, the degree of the bernstein basis polynomials.
+!    for any n greater than or equal to 0, there is a set of n+1 bernstein
+!    basis polynomials, each of degree n, which form a basis for
 !    all polynomials on [0,1].
 !
-!    Output, real BERN(0:N), the values of the N+1 Bernstein basis
-!    polynomials at X.
+!    output, real bern(0:n), the values of the n+1 bernstein basis
+!    polynomials at x.
 !
-!    Input, real X, the point at which the polynomials are to be
+!    input, real x, the point at which the polynomials are to be
 !    evaluated.
 !
   implicit none
@@ -1058,19 +1058,19 @@ subroutine bp01 ( n, bern, x )
 !
   if ( n == 0 ) then
 
-    bern(0) = 1.0E+00
+    bern(0) = 1.0e+00
 
   else if ( n > 0 ) then
 
-    bern(0) = 1.0E+00 - x
+    bern(0) = 1.0e+00 - x
     bern(1) = x
 
     do i = 2, n
       bern(i) = x * bern(i-1)
       do j = i-1, 1, -1
-        bern(j) = x * bern(j-1) + ( 1.0E+00 - x ) * bern(j)
+        bern(j) = x * bern(j-1) + ( 1.0e+00 - x ) * bern(j)
       end do
-      bern(0) = ( 1.0E+00 - x ) * bern(0)
+      bern(0) = ( 1.0e+00 - x ) * bern(0)
     end do
 
   end if
@@ -1081,55 +1081,55 @@ subroutine bp_approx ( n, a, b, ydata, xval, yval )
 !
 !*******************************************************************************
 !
-!! BP_APPROX evaluates the Bernstein polynomial for F(X) on [A,B].
+!! bp_approx evaluates the bernstein polynomial for f(x) on [a,b].
 !
 !
-!  Formula:
+!  formula:
 !
-!    BERN(F)(X) = SUM ( 0 <= I <= N ) F(X(I)) * B_BASE(I,X)
+!    bern(f)(x) = sum ( 0 <= i <= n ) f(x(i)) * b_base(i,x)
 !
 !    where
 !
-!      X(I) = ( ( N - I ) * A + I * B ) / N
-!      B_BASE(I,X) is the value of the I-th Bernstein basis polynomial at X.
+!      x(i) = ( ( n - i ) * a + i * b ) / n
+!      b_base(i,x) is the value of the i-th bernstein basis polynomial at x.
 !
-!  Discussion:
+!  discussion:
 !
-!    The Bernstein polynomial BERN(F) for F(X) is an approximant, not an
+!    the bernstein polynomial bern(f) for f(x) is an approximant, not an
 !    interpolant; in other words, its value is not guaranteed to equal
-!    that of F at any particular point.  However, for a fixed interval
-!    [A,B], if we let N increase, the Bernstein polynomial converges
-!    uniformly to F everywhere in [A,B], provided only that F is continuous.
-!    Even if F is not continuous, but is bounded, the polynomial converges
-!    pointwise to F(X) at all points of continuity.  On the other hand,
+!    that of f at any particular point.  however, for a fixed interval
+!    [a,b], if we let n increase, the bernstein polynomial converges
+!    uniformly to f everywhere in [a,b], provided only that f is continuous.
+!    even if f is not continuous, but is bounded, the polynomial converges
+!    pointwise to f(x) at all points of continuity.  on the other hand,
 !    the convergence is quite slow compared to other interpolation
 !    and approximation schemes.
 !
-!  Modified:
+!  modified:
 !
-!    10 April 1999
+!    10 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the degree of the Bernstein polynomial to be used.
+!    input, integer n, the degree of the bernstein polynomial to be used.
 !
-!    Input, real A, B, the endpoints of the interval on which the
-!    approximant is based.  A and B should not be equal.
+!    input, real a, b, the endpoints of the interval on which the
+!    approximant is based.  a and b should not be equal.
 !
-!    Input, real YDATA(0:N), the data values at N+1 equally spaced points 
-!    in [A,B].  If N = 0, then the evaluation point should be 0.5 * ( A + B).
-!    Otherwise, evaluation point I should be ( (N-I)*A + I*B ) / N ).
+!    input, real ydata(0:n), the data values at n+1 equally spaced points 
+!    in [a,b].  if n = 0, then the evaluation point should be 0.5 * ( a + b).
+!    otherwise, evaluation point i should be ( (n-i)*a + i*b ) / n ).
 !
-!    Input, real XVAL, the point at which the Bernstein polynomial 
-!    approximant is to be evaluated.  XVAL does not have to lie in the 
-!    interval [A,B].
+!    input, real xval, the point at which the bernstein polynomial 
+!    approximant is to be evaluated.  xval does not have to lie in the 
+!    interval [a,b].
 !
-!    Output, real YVAL, the value of the Bernstein polynomial approximant
-!    for F, based in [A,B], evaluated at XVAL.
+!    output, real yval, the value of the bernstein polynomial approximant
+!    for f, based in [a,b], evaluated at xval.
 !
   implicit none
 !
@@ -1143,11 +1143,11 @@ subroutine bp_approx ( n, a, b, ydata, xval, yval )
   real ydata(0:n)
   real yval
 !
-!  Evaluate the Bernstein basis polynomials at XVAL.
+!  evaluate the bernstein basis polynomials at xval.
 !
   call bpab ( n, bvec, xval, a, b )
 !
-!  Now compute the sum of YDATA(I) * BVEC(I).
+!  now compute the sum of ydata(i) * bvec(i).
 !
   yval = dot_product ( ydata(0:n), bvec(0:n) )
 
@@ -1157,58 +1157,58 @@ subroutine bpab ( n, bern, x, a, b )
 !
 !*******************************************************************************
 !
-!! BPAB evaluates the Bernstein basis polynomials for [A,B] at a point X.
+!! bpab evaluates the bernstein basis polynomials for [a,b] at a point x.
 !
 !
-!  Formula:
+!  formula:
 !
-!    BERN(N,I,X) = [N!/(I!*(N-I)!)] * (B-X)**(N-I) * (X-A)**I / (B-A)**N
+!    bern(n,i,x) = [n!/(i!*(n-i)!)] * (b-x)**(n-i) * (x-a)**i / (b-a)**n
 !
-!  First values:
+!  first values:
 !
-!    B(0,0,X) =   1
+!    b(0,0,x) =   1
 !
-!    B(1,0,X) = (      B-X                ) / (B-A)
-!    B(1,1,X) = (                 X-A     ) / (B-A)
+!    b(1,0,x) = (      b-x                ) / (b-a)
+!    b(1,1,x) = (                 x-a     ) / (b-a)
 !
-!    B(2,0,X) = (     (B-X)**2            ) / (B-A)**2
-!    B(2,1,X) = ( 2 * (B-X)    * (X-A)    ) / (B-A)**2
-!    B(2,2,X) = (                (X-A)**2 ) / (B-A)**2
+!    b(2,0,x) = (     (b-x)**2            ) / (b-a)**2
+!    b(2,1,x) = ( 2 * (b-x)    * (x-a)    ) / (b-a)**2
+!    b(2,2,x) = (                (x-a)**2 ) / (b-a)**2
 !
-!    B(3,0,X) = (     (B-X)**3            ) / (B-A)**3
-!    B(3,1,X) = ( 3 * (B-X)**2 * (X-A)    ) / (B-A)**3
-!    B(3,2,X) = ( 3 * (B-X)    * (X-A)**2 ) / (B-A)**3
-!    B(3,3,X) = (                (X-A)**3 ) / (B-A)**3
+!    b(3,0,x) = (     (b-x)**3            ) / (b-a)**3
+!    b(3,1,x) = ( 3 * (b-x)**2 * (x-a)    ) / (b-a)**3
+!    b(3,2,x) = ( 3 * (b-x)    * (x-a)**2 ) / (b-a)**3
+!    b(3,3,x) = (                (x-a)**3 ) / (b-a)**3
 !
-!    B(4,0,X) = (     (B-X)**4            ) / (B-A)**4
-!    B(4,1,X) = ( 4 * (B-X)**3 * (X-A)    ) / (B-A)**4
-!    B(4,2,X) = ( 6 * (B-X)**2 * (X-A)**2 ) / (B-A)**4
-!    B(4,3,X) = ( 4 * (B-X)    * (X-A)**3 ) / (B-A)**4
-!    B(4,4,X) = (                (X-A)**4 ) / (B-A)**4
+!    b(4,0,x) = (     (b-x)**4            ) / (b-a)**4
+!    b(4,1,x) = ( 4 * (b-x)**3 * (x-a)    ) / (b-a)**4
+!    b(4,2,x) = ( 6 * (b-x)**2 * (x-a)**2 ) / (b-a)**4
+!    b(4,3,x) = ( 4 * (b-x)    * (x-a)**3 ) / (b-a)**4
+!    b(4,4,x) = (                (x-a)**4 ) / (b-a)**4
 !
-!  Modified:
+!  modified:
 !
-!    12 January 1999
+!    12 january 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the degree of the Bernstein basis polynomials.
-!    For any N greater than or equal to 0, there is a set of N+1 
-!    Bernstein basis polynomials, each of degree N, which form a basis 
-!    for polynomials on [A,B].
+!    input, integer n, the degree of the bernstein basis polynomials.
+!    for any n greater than or equal to 0, there is a set of n+1 
+!    bernstein basis polynomials, each of degree n, which form a basis 
+!    for polynomials on [a,b].
 !
-!    Output, real BERN(0:N), the values of the N+1 Bernstein basis
-!    polynomials at X.
+!    output, real bern(0:n), the values of the n+1 bernstein basis
+!    polynomials at x.
 !
-!    Input, real X, the point at which the polynomials are to be
-!    evaluated.  X need not lie in the interval [A,B].
+!    input, real x, the point at which the polynomials are to be
+!    evaluated.  x need not lie in the interval [a,b].
 !
-!    Input, real A, B, the endpoints of the interval on which the
-!    polynomials are to be based.  A and B should not be equal.
+!    input, real a, b, the endpoints of the interval on which the
+!    polynomials are to be based.  a and b should not be equal.
 !
   implicit none
 !
@@ -1223,14 +1223,14 @@ subroutine bpab ( n, bern, x, a, b )
 !
   if ( b == a ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'BPAB - Fatal error!'
-    write ( *, '(a,g14.6)' ) '  A = B = ', a
+    write ( *, '(a)' ) 'bpab - fatal error!'
+    write ( *, '(a,g14.6)' ) '  a = b = ', a
     stop
   end if
 
   if ( n == 0 ) then
 
-    bern(0) = 1.0E+00
+    bern(0) = 1.0e+00
 
   else if ( n > 0 ) then
 
@@ -1253,36 +1253,36 @@ subroutine data_to_dif ( diftab, ntab, xtab, ytab )
 !
 !*******************************************************************************
 !
-!! DATA_TO_DIF sets up a divided difference table from raw data.
+!! data_to_dif sets up a divided difference table from raw data.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    Space can be saved by using a single array for both the DIFTAB and
-!    YTAB dummy parameters.  In that case, the divided difference table will
-!    overwrite the Y data without interfering with the computation.
+!    space can be saved by using a single array for both the diftab and
+!    ytab dummy parameters.  in that case, the divided difference table will
+!    overwrite the y data without interfering with the computation.
 !
-!  Modified:
+!  modified:
 !
-!    11 April 2000
+!    11 april 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Output, real DIFTAB(NTAB), the divided difference coefficients 
-!    corresponding to the input (XTAB,YTAB).
+!    output, real diftab(ntab), the divided difference coefficients 
+!    corresponding to the input (xtab,ytab).
 !
-!    Input, integer NTAB, the number of pairs of points
-!    (XTAB(I),YTAB(I)) which are to be used as data.  The
-!    number of entries to be used in DIFTAB, XTAB and YTAB.
+!    input, integer ntab, the number of pairs of points
+!    (xtab(i),ytab(i)) which are to be used as data.  the
+!    number of entries to be used in diftab, xtab and ytab.
 !
-!    Input, real XTAB(NTAB), the X values at which data was taken.
-!    These values must be distinct.
+!    input, real xtab(ntab), the x values at which data was taken.
+!    these values must be distinct.
 !
-!    Input, real YTAB(NTAB), the corresponding Y values.
+!    input, real ytab(ntab), the corresponding y values.
 !
   implicit none
 !
@@ -1297,16 +1297,16 @@ subroutine data_to_dif ( diftab, ntab, xtab, ytab )
 !
   if ( .not. rvec_distinct ( ntab, xtab ) ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'DATA_TO_DIF - Fatal error!'
-    write ( *, '(a)' ) '  Two entries of XTAB are equal!'
+    write ( *, '(a)' ) 'data_to_dif - fatal error!'
+    write ( *, '(a)' ) '  two entries of xtab are equal!'
     return
   end if
 !
-!  Copy the data values into DIFTAB.
+!  copy the data values into diftab.
 !
   diftab(1:ntab) = ytab(1:ntab)
 !
-!  Compute the divided differences.
+!  compute the divided differences.
 !
   do i = 2, ntab
     do j = ntab, i, -1
@@ -1322,31 +1322,31 @@ subroutine dif_val ( diftab, ntab, xtab, xval, yval )
 !
 !*******************************************************************************
 !
-!! DIF_VAL evaluates a divided difference polynomial at a point.
+!! dif_val evaluates a divided difference polynomial at a point.
 !
 !
-!  Modified:
+!  modified:
 !
-!    11 April 1999
+!    11 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real DIFTAB(NTAB), the divided difference polynomial coefficients.
+!    input, real diftab(ntab), the divided difference polynomial coefficients.
 !
-!    Input, integer NTAB, the number of divided difference
-!    coefficients in DIFTAB, and the number of points XTAB.
+!    input, integer ntab, the number of divided difference
+!    coefficients in diftab, and the number of points xtab.
 !
-!    Input, real XTAB(NTAB), the X values upon which the
+!    input, real xtab(ntab), the x values upon which the
 !    divided difference polynomial is based.
 !
-!    Input, real XVAL, a value of X at which the polynomial
+!    input, real xval, a value of x at which the polynomial
 !    is to be evaluated.
 !
-!    Output, real YVAL, the value of the polynomial at XVAL.
+!    output, real yval, the value of the polynomial at xval.
 !
   implicit none
 !
@@ -1369,42 +1369,42 @@ subroutine least_set ( ntab, xtab, ytab, ndeg, ptab, array, eps, ierror )
 !
 !*******************************************************************************
 !
-!! LEAST_SET constructs the least squares polynomial approximation to data.
+!! least_set constructs the least squares polynomial approximation to data.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The routine LEAST_EVAL must be used to evaluate the approximation at a
+!    the routine least_eval must be used to evaluate the approximation at a
 !    point.
 !
-!  Modified:
+!  modified:
 !
-!    20 November 2000
+!    20 november 2000
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NTAB, the number of data points.
+!    input, integer ntab, the number of data points.
 !
-!    Input, real XTAB(NTAB), the X data.  The values in XTAB
+!    input, real xtab(ntab), the x data.  the values in xtab
 !    should be distinct, and in increasing order.
 !
-!    Input, real YTAB(NTAB), the Y data values corresponding
-!    to the X data in XTAB.
+!    input, real ytab(ntab), the y data values corresponding
+!    to the x data in xtab.
 !
-!    Input, integer NDEG, the degree of the polynomial which the
-!    program is to use.  NDEG must be at least 1, and less than or 
-!    equal to NTAB-1.
+!    input, integer ndeg, the degree of the polynomial which the
+!    program is to use.  ndeg must be at least 1, and less than or 
+!    equal to ntab-1.
 !
-!    Output, real PTAB(NTAB).  PTAB(I) is the value of the
-!    least squares polynomial at the point XTAB(I).
+!    output, real ptab(ntab).  ptab(i) is the value of the
+!    least squares polynomial at the point xtab(i).
 !
-!    Output, real ARRAY(2*NTAB+3*NDEG), an array containing data about 
+!    output, real array(2*ntab+3*ndeg), an array containing data about 
 !    the polynomial.
 !
-!    Output, real EPS, the root-mean-square discrepancy of the
+!    output, real eps, the root-mean-square discrepancy of the
 !    polynomial fit.
 !
-!    Output, integer IERROR, error flag.
+!    output, integer ierror, error flag.
 !    zero, no error occurred;
 !    nonzero, an error occurred, and the polynomial could not be computed.
 !
@@ -1434,32 +1434,32 @@ subroutine least_set ( ntab, xtab, ytab, ndeg, ptab, array, eps, ierror )
 !
   ierror = 0
 !
-!  Check NDEG.
+!  check ndeg.
 !
   if ( ndeg < 1 ) then
     ierror = 1
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'LEAST_SET - Fatal error!'
-    write ( *, '(a)' ) '  NDEG < 1.'
+    write ( *, '(a)' ) 'least_set - fatal error!'
+    write ( *, '(a)' ) '  ndeg < 1.'
     return
   else if ( ndeg >= ntab ) then
     ierror = 1
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'LEAST_SET - Fatal error!'
-    write ( *, '(a)' ) '  NDEG >= NTAB.'
+    write ( *, '(a)' ) 'least_set - fatal error!'
+    write ( *, '(a)' ) '  ndeg >= ntab.'
     return
   end if
 !
-!  Check that the abscissas are strictly increasing.
+!  check that the abscissas are strictly increasing.
 !
   do i = 1, ntab-1
     if ( xtab(i) >= xtab(i+1) ) then
       ierror = 1
       write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) 'LEAST_SET - Fatal error!'
-      write ( *, '(a)' ) '  XTAB must be strictly increasing, but'
-      write ( *, '(a,i6,a,g14.6)' ) '  XTAB(', i, ') = ', xtab(i)
-      write ( *, '(a,i6,a,g14.6)' ) '  XTAB(', i+1, ') = ', xtab(i+1)
+      write ( *, '(a)' ) 'least_set - fatal error!'
+      write ( *, '(a)' ) '  xtab must be strictly increasing, but'
+      write ( *, '(a,i6,a,g14.6)' ) '  xtab(', i, ') = ', xtab(i)
+      write ( *, '(a,i6,a,g14.6)' ) '  xtab(', i+1, ') = ', xtab(i+1)
       return
     end if
   end do
@@ -1473,7 +1473,7 @@ subroutine least_set ( ntab, xtab, ytab, ndeg, ptab, array, eps, ierror )
 
   ptab(1:ntab) = y_sum / real ( ntab )
 
-  error = 0.0E+00
+  error = 0.0e+00
   do i = 1, ntab
     error = error + ( y_sum / real ( ntab ) - ytab(i) )**2
   end do
@@ -1485,8 +1485,8 @@ subroutine least_set ( ntab, xtab, ytab, ndeg, ptab, array, eps, ierror )
 
   array(1) = sum ( xtab ) / real ( ntab )
 
-  s = 0.0E+00
-  sum2 = 0.0E+00
+  s = 0.0e+00
+  sum2 = 0.0e+00
   do i = 1, ntab
     array(i1l1+i) = xtab(i) - array(1)
     s = s + array(i1l1+i)**2
@@ -1508,7 +1508,7 @@ subroutine least_set ( ntab, xtab, ytab, ndeg, ptab, array, eps, ierror )
   end if
 
   do i = 1, ntab
-    array(3*ndeg+i) = 1.0E+00
+    array(3*ndeg+i) = 1.0e+00
   end do
 
   mdeg = 2
@@ -1518,15 +1518,15 @@ subroutine least_set ( ntab, xtab, ytab, ndeg, ptab, array, eps, ierror )
 
     array(ndeg-1+k) = rn1 / rn0
 
-    sum2 = 0.0E+00
+    sum2 = 0.0e+00
     do i = 1, ntab
       sum2 = sum2 + xtab(i) * array(i1l1+i)**2
     end do
 
     array(k) = sum2 / rn1
 
-    s = 0.0E+00
-    sum2 = 0.0E+00
+    s = 0.0e+00
+    sum2 = 0.0e+00
     do i = 1, ntab
       array(i0l1+i) = ( xtab(i) - array(k) ) * array(i1l1+i) &
         - array(ndeg-1+k) * array(i0l1+i)
@@ -1564,25 +1564,25 @@ subroutine least_val ( x, ndeg, array, value )
 !
 !*******************************************************************************
 !
-!! LEAST_VAL evaluates a least squares polynomial defined by LEAST_SET.
+!! least_val evaluates a least squares polynomial defined by least_set.
 !
 !
-!  Modified:
+!  modified:
 !
-!    01 March 1999
+!    01 march 1999
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real X, the point at which the polynomial is to be evaluated.
+!    input, real x, the point at which the polynomial is to be evaluated.
 !
-!    Input, integer NDEG, the degree of the polynomial fit used.
-!    This is the value of NDEG as returned from LEAST_SET.
+!    input, integer ndeg, the degree of the polynomial fit used.
+!    this is the value of ndeg as returned from least_set.
 !
-!    Input, real ARRAY(*), an array of a certain dimension.
-!    See LEAST_SET for details on the size of ARRAY.
-!    ARRAY contains information about the polynomial, as set up by LEAST_SET.
+!    input, real array(*), an array of a certain dimension.
+!    see least_set for details on the size of array.
+!    array contains information about the polynomial, as set up by least_set.
 !
-!    Output, real VALUE, the value of the polynomial at X.
+!    output, real value, the value of the polynomial at x.
 !
   implicit none
 !
@@ -1631,48 +1631,48 @@ subroutine parabola_val2 ( ndim, ndata, tdata, ydata, left, tval, yval )
 !
 !*******************************************************************************
 !
-!! PARABOLA_VAL2 evaluates a parabolic interpolant through tabular data.
+!! parabola_val2 evaluates a parabolic interpolant through tabular data.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This routine is a utility routine used by OVERHAUSER_SPLINE_VAL.
-!    It constructs the parabolic interpolant through the data in
+!    this routine is a utility routine used by overhauser_spline_val.
+!    it constructs the parabolic interpolant through the data in
 !    3 consecutive entries of a table and evaluates this interpolant
 !    at a given abscissa value.
 !
-!  Modified:
+!  modified:
 !
-!    02 March 1999
+!    02 march 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDIM, the dimension of a single data point.
-!    NDIM must be at least 1.
+!    input, integer ndim, the dimension of a single data point.
+!    ndim must be at least 1.
 !
-!    Input, integer NDATA, the number of data points.
-!    NDATA must be at least 3.
+!    input, integer ndata, the number of data points.
+!    ndata must be at least 3.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data points.  The
-!    values in TDATA must be in strictly ascending order.
+!    input, real tdata(ndata), the abscissas of the data points.  the
+!    values in tdata must be in strictly ascending order.
 !
-!    Input, real YDATA(NDIM,NDATA), the data points corresponding to
+!    input, real ydata(ndim,ndata), the data points corresponding to
 !    the abscissas.
 !
-!    Input, integer LEFT, the location of the first of the three
+!    input, integer left, the location of the first of the three
 !    consecutive data points through which the parabolic interpolant
-!    must pass.  1 <= LEFT <= NDATA - 2.
+!    must pass.  1 <= left <= ndata - 2.
 !
-!    Input, real TVAL, the value of T at which the parabolic interpolant
-!    is to be evaluated.  Normally, TDATA(1) <= TVAL <= T(NDATA), and
-!    the data will be interpolated.  For TVAL outside this range,
+!    input, real tval, the value of t at which the parabolic interpolant
+!    is to be evaluated.  normally, tdata(1) <= tval <= t(ndata), and
+!    the data will be interpolated.  for tval outside this range,
 !    extrapolation will be used.
 !
-!    Output, real YVAL(NDIM), the value of the parabolic interpolant at TVAL.
+!    output, real yval(ndim), the value of the parabolic interpolant at tval.
 !
   implicit none
 !
@@ -1694,23 +1694,23 @@ subroutine parabola_val2 ( ndim, ndata, tdata, ydata, left, tval, yval )
   real y3
   real yval(ndim)
 !
-!  Check.
+!  check.
 !
   if ( left < 1 .or. left > ndata-2 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'PARABOLA_VAL2 - Fatal error!'
-    write ( *, '(a)' ) '  LEFT < 1 or LEFT > NDATA-2.'
+    write ( *, '(a)' ) 'parabola_val2 - fatal error!'
+    write ( *, '(a)' ) '  left < 1 or left > ndata-2.'
     stop
   end if
 
   if ( ndim < 1 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'PARABOLA_VAL2 - Fatal error!'
-    write ( *, '(a)' ) '  NDIM < 1.'
+    write ( *, '(a)' ) 'parabola_val2 - fatal error!'
+    write ( *, '(a)' ) '  ndim < 1.'
     stop
   end if
 !
-!  Copy out the three abscissas.
+!  copy out the three abscissas.
 !
   t1 = tdata(left)
   t2 = tdata(left+1)
@@ -1718,12 +1718,12 @@ subroutine parabola_val2 ( ndim, ndata, tdata, ydata, left, tval, yval )
 
   if ( t1 >= t2 .or. t2 >= t3 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'PARABOLA_VAL2 - Fatal error!'
-    write ( *, '(a)' ) '  T1 >= T2 or T2 >= T3.'
+    write ( *, '(a)' ) 'parabola_val2 - fatal error!'
+    write ( *, '(a)' ) '  t1 >= t2 or t2 >= t3.'
     stop
   end if
 !
-!  Construct and evaluate a parabolic interpolant for the data
+!  construct and evaluate a parabolic interpolant for the data
 !  in each dimension.
 !
   do i = 1, ndim
@@ -1746,22 +1746,22 @@ subroutine r_random ( rlo, rhi, r )
 !
 !*******************************************************************************
 !
-!! R_RANDOM returns a random real in a given range.
+!! r_random returns a random real in a given range.
 !
 !
-!  Modified:
+!  modified:
 !
-!    06 April 2001
+!    06 april 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real RLO, RHI, the minimum and maximum values.
+!    input, real rlo, rhi, the minimum and maximum values.
 !
-!    Output, real R, the randomly chosen value.
+!    output, real r, the randomly chosen value.
 !
   implicit none
 !
@@ -1770,13 +1770,13 @@ subroutine r_random ( rlo, rhi, r )
   real rlo
   real t
 !
-!  Pick T, a random number in (0,1).
+!  pick t, a random number in (0,1).
 !
   call random_number ( harvest = t )
 !
-!  Set R in ( RLO, RHI ).
+!  set r in ( rlo, rhi ).
 !
-  r = ( 1.0E+00 - t ) * rlo + t * rhi
+  r = ( 1.0e+00 - t ) * rlo + t * rhi
 
   return
 end
@@ -1784,21 +1784,21 @@ subroutine r_swap ( x, y )
 !
 !*******************************************************************************
 !
-!! R_SWAP swaps two real values.
+!! r_swap swaps two real values.
 !
 !
-!  Modified:
+!  modified:
 !
-!    01 May 2000
+!    01 may 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input/output, real X, Y.  On output, the values of X and
-!    Y have been interchanged.
+!    input/output, real x, y.  on output, the values of x and
+!    y have been interchanged.
 !
   implicit none
 !
@@ -1816,37 +1816,37 @@ subroutine rvec_bracket ( n, x, xval, left, right )
 !
 !*******************************************************************************
 !
-!! RVEC_BRACKET searches a sorted array for successive brackets of a value.
+!! rvec_bracket searches a sorted array for successive brackets of a value.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    If the values in the vector are thought of as defining intervals
+!    if the values in the vector are thought of as defining intervals
 !    on the real line, then this routine searches for the interval
 !    nearest to or containing the given value.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, length of input array.
+!    input, integer n, length of input array.
 !
-!    Input, real X(N), an array sorted into ascending order.
+!    input, real x(n), an array sorted into ascending order.
 !
-!    Input, real XVAL, a value to be bracketed.
+!    input, real xval, a value to be bracketed.
 !
-!    Output, integer LEFT, RIGHT, the results of the search.
-!    Either:
-!      XVAL < X(1), when LEFT = 1, RIGHT = 2;
-!      XVAL > X(N), when LEFT = N-1, RIGHT = N;
+!    output, integer left, right, the results of the search.
+!    either:
+!      xval < x(1), when left = 1, right = 2;
+!      xval > x(n), when left = n-1, right = n;
 !    or
-!      X(LEFT) <= XVAL <= X(RIGHT).
+!      x(left) <= xval <= x(right).
 !
   implicit none
 !
@@ -1877,49 +1877,49 @@ subroutine rvec_bracket3 ( n, t, tval, left )
 !
 !*******************************************************************************
 !
-!! RVEC_BRACKET3 finds the interval containing or nearest a given value.
+!! rvec_bracket3 finds the interval containing or nearest a given value.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The routine always returns the index LEFT of the sorted array
-!    T with the property that either
-!    *  T is contained in the interval [ T(LEFT), T(LEFT+1) ], or
-!    *  T < T(LEFT) = T(1), or
-!    *  T > T(LEFT+1) = T(N).
+!    the routine always returns the index left of the sorted array
+!    t with the property that either
+!    *  t is contained in the interval [ t(left), t(left+1) ], or
+!    *  t < t(left) = t(1), or
+!    *  t > t(left+1) = t(n).
 !
-!    The routine is useful for interpolation problems, where
+!    the routine is useful for interpolation problems, where
 !    the abscissa must be located within an interval of data
 !    abscissas for interpolation, or the "nearest" interval
 !    to the (extreme) abscissa must be found so that extrapolation
 !    can be carried out.
 !
-!  Modified:
+!  modified:
 !
-!    05 April 1999
+!    05 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, length of the input array.
+!    input, integer n, length of the input array.
 !
-!    Input, real T(N), an array sorted into ascending order.
+!    input, real t(n), an array sorted into ascending order.
 !
-!    Input, real TVAL, a value to be bracketed by entries of T.
+!    input, real tval, a value to be bracketed by entries of t.
 !
-!    Input/output, integer LEFT.
+!    input/output, integer left.
 !
-!    On input, if 1 <= LEFT <= N-1, LEFT is taken as a suggestion for the
-!    interval [ T(LEFT), T(LEFT+1) ] in which TVAL lies.  This interval
+!    on input, if 1 <= left <= n-1, left is taken as a suggestion for the
+!    interval [ t(left), t(left+1) ] in which tval lies.  this interval
 !    is searched first, followed by the appropriate interval to the left
-!    or right.  After that, a binary search is used.
+!    or right.  after that, a binary search is used.
 !
-!    On output, LEFT is set so that the interval [ T(LEFT), T(LEFT+1) ]
-!    is the closest to TVAL; it either contains TVAL, or else TVAL
-!    lies outside the interval [ T(1), T(N) ].
+!    on output, left is set so that the interval [ t(left), t(left+1) ]
+!    is the closest to tval; it either contains tval, or else tval
+!    lies outside the interval [ t(1), t(n) ].
 !
   implicit none
 !
@@ -1932,23 +1932,23 @@ subroutine rvec_bracket3 ( n, t, tval, left )
   real t(n)
   real tval
 !
-!  Check the input data.
+!  check the input data.
 !
   if ( n < 2 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'RVEC_BRACKET3 - Fatal error!'
-    write ( *, '(a)' ) '  N must be at least 2.'
+    write ( *, '(a)' ) 'rvec_bracket3 - fatal error!'
+    write ( *, '(a)' ) '  n must be at least 2.'
     stop
   end if
 !
-!  If LEFT is not between 1 and N-1, set it to the middle value.
+!  if left is not between 1 and n-1, set it to the middle value.
 !
   if ( left < 1 .or. left > n - 1 ) then
     left = ( n + 1 ) / 2
   end if
 !
-!  CASE 1: TVAL < T(LEFT):
-!  Search for TVAL in [T(I), T(I+1)] for intervals I = 1 to LEFT-1.
+!  case 1: tval < t(left):
+!  search for tval in [t(i), t(i+1)] for intervals i = 1 to left-1.
 !
   if ( tval < t(left) ) then
 
@@ -1965,7 +1965,7 @@ subroutine rvec_bracket3 ( n, t, tval, left )
       return
     end if
 !
-!  ...Binary search for TVAL in [T(I), T(I+1)] for intervals I = 2 to LEFT-2.
+!  ...binary search for tval in [t(i), t(i+1)] for intervals i = 2 to left-2.
 !
     low = 2
     high = left - 2
@@ -1987,8 +1987,8 @@ subroutine rvec_bracket3 ( n, t, tval, left )
 
     end do
 !
-!  CASE2: T(LEFT+1) < TVAL:
-!  Search for TVAL in {T(I),T(I+1)] for intervals I = LEFT+1 to N-1.
+!  case2: t(left+1) < tval:
+!  search for tval in {t(i),t(i+1)] for intervals i = left+1 to n-1.
 !
   else if ( tval > t(left+1) ) then
 
@@ -2005,7 +2005,7 @@ subroutine rvec_bracket3 ( n, t, tval, left )
       return
     end if
 !
-!  ...Binary search for TVAL in [T(I), T(I+1)] for intervals I = LEFT+2 to N-2.
+!  ...binary search for tval in [t(i), t(i+1)] for intervals i = left+2 to n-2.
 !
     low = left + 2
     high = n - 2
@@ -2027,8 +2027,8 @@ subroutine rvec_bracket3 ( n, t, tval, left )
 
     end do
 !
-!  CASE3: T(LEFT) <= TVAL <= T(LEFT+1):
-!  T is in [T(LEFT), T(LEFT+1)], as the user said it might be.
+!  case3: t(left) <= tval <= t(left+1):
+!  t is in [t(left), t(left+1)], as the user said it might be.
 !
   else
 
@@ -2040,24 +2040,24 @@ function rvec_distinct ( n, x )
 !
 !*******************************************************************************
 !
-!! RVEC_DISTINCT is true if the entries in a real vector are distinct.
+!! rvec_distinct is true if the entries in a real vector are distinct.
 !
 !
-!  Modified:
+!  modified:
 !
-!    16 September 1999
+!    16 september 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of entries in the vector.
+!    input, integer n, the number of entries in the vector.
 !
-!    Input, real X(N), the vector to be checked.
+!    input, real x(n), the vector to be checked.
 !
-!    Output, logical RVEC_DISTINCT is .TRUE. if all N elements of X 
+!    output, logical rvec_distinct is .true. if all n elements of x 
 !    are distinct.
 !
   implicit none
@@ -2087,26 +2087,26 @@ subroutine rvec_even ( alo, ahi, n, a )
 !
 !*******************************************************************************
 !
-!! RVEC_EVEN returns N real values, evenly spaced between ALO and AHI.
+!! rvec_even returns n real values, evenly spaced between alo and ahi.
 !
 !
-!  Modified:
+!  modified:
 !
-!    31 October 2000
+!    31 october 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real ALO, AHI, the low and high values.
+!    input, real alo, ahi, the low and high values.
 !
-!    Input, integer N, the number of values.
+!    input, integer n, the number of values.
 !
-!    Output, real A(N), N evenly spaced values.
-!    Normally, A(1) = ALO and A(N) = AHI.
-!    However, if N = 1, then A(1) = 0.5*(ALO+AHI).
+!    output, real a(n), n evenly spaced values.
+!    normally, a(1) = alo and a(n) = ahi.
+!    however, if n = 1, then a(1) = 0.5*(alo+ahi).
 !
   implicit none
 !
@@ -2119,7 +2119,7 @@ subroutine rvec_even ( alo, ahi, n, a )
 !
   if ( n == 1 ) then
 
-    a(1) = 0.5E+00 * ( alo + ahi )
+    a(1) = 0.5e+00 * ( alo + ahi )
 
   else
 
@@ -2135,24 +2135,24 @@ subroutine rvec_order_type ( n, a, order )
 !
 !*******************************************************************************
 !
-!! RVEC_ORDER_TYPE determines if a real array is (non)strictly ascending/descending.
+!! rvec_order_type determines if a real array is (non)strictly ascending/descending.
 !
 !
-!  Modified:
+!  modified:
 !
-!    20 July 2000
+!    20 july 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of entries of the array.
+!    input, integer n, the number of entries of the array.
 !
-!    Input, real A(N), the array to be checked.
+!    input, real a(n), the array to be checked.
 !
-!    Output, integer ORDER, order indicator:
+!    output, integer order, order indicator:
 !    -1, no discernable order;
 !    0, all entries are equal;
 !    1, ascending order;
@@ -2168,7 +2168,7 @@ subroutine rvec_order_type ( n, a, order )
   integer i
   integer order
 !
-!  Search for the first value not equal to A(1).
+!  search for the first value not equal to a(1).
 !
   i = 1
 
@@ -2205,7 +2205,7 @@ subroutine rvec_order_type ( n, a, order )
 
   end do
 !
-!  Now we have a "direction".  Examine subsequent entries.
+!  now we have a "direction".  examine subsequent entries.
 !
   do
 
@@ -2256,25 +2256,25 @@ subroutine rvec_print ( n, a, title )
 !
 !*******************************************************************************
 !
-!! RVEC_PRINT prints a real vector.
+!! rvec_print prints a real vector.
 !
 !
-!  Modified:
+!  modified:
 !
-!    16 December 1999
+!    16 december 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of components of the vector.
+!    input, integer n, the number of components of the vector.
 !
-!    Input, real A(N), the vector to be printed.
+!    input, real a(n), the vector to be printed.
 !
-!    Input, character ( len = * ) TITLE, a title to be printed first.
-!    TITLE may be blank.
+!    input, character ( len = * ) title, a title to be printed first.
+!    title may be blank.
 !
   implicit none
 !
@@ -2300,24 +2300,24 @@ subroutine rvec_random ( alo, ahi, n, a )
 !
 !*******************************************************************************
 !
-!! RVEC_RANDOM returns a random real vector in a given range.
+!! rvec_random returns a random real vector in a given range.
 !
 !
-!  Modified:
+!  modified:
 !
-!    04 February 2001
+!    04 february 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real ALO, AHI, the range allowed for the entries.
+!    input, real alo, ahi, the range allowed for the entries.
 !
-!    Input, integer N, the number of entries in the vector.
+!    input, integer n, the number of entries in the vector.
 !
-!    Output, real A(N), the vector of randomly chosen values.
+!    output, real a(n), the vector of randomly chosen values.
 !
   implicit none
 !
@@ -2338,29 +2338,29 @@ subroutine rvec_sort_bubble_a ( n, a )
 !
 !*******************************************************************************
 !
-!! RVEC_SORT_BUBBLE_A ascending sorts a real array using bubble sort.
+!! rvec_sort_bubble_a ascending sorts a real array using bubble sort.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    Bubble sort is simple to program, but inefficient.  It should not
+!    bubble sort is simple to program, but inefficient.  it should not
 !    be used for large arrays.
 !
-!  Modified:
+!  modified:
 !
-!    01 February 2001
+!    01 february 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of entries in the array.
+!    input, integer n, the number of entries in the array.
 !
-!    Input/output, real A(N).
-!    On input, an unsorted array.
-!    On output, the array has been sorted.
+!    input/output, real a(n).
+!    on input, an unsorted array.
+!    on output, the array has been sorted.
 !
   implicit none
 !
@@ -2384,35 +2384,35 @@ subroutine s3_fs ( a1, a2, a3, n, b, x )
 !
 !*******************************************************************************
 !
-!! S3_FS factors and solves a tridiagonal linear system.
+!! s3_fs factors and solves a tridiagonal linear system.
 !
 !
-!  Note:
+!  note:
 !
-!    This algorithm requires that each diagonal entry be nonzero.
+!    this algorithm requires that each diagonal entry be nonzero.
 !
-!  Modified:
+!  modified:
 !
-!    05 December 1998
+!    05 december 1998
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input/output, real A1(2:N), A2(1:N), A3(1:N-1).
-!    On input, the nonzero diagonals of the linear system.
-!    On output, the data in these vectors has been overwritten
+!    input/output, real a1(2:n), a2(1:n), a3(1:n-1).
+!    on input, the nonzero diagonals of the linear system.
+!    on output, the data in these vectors has been overwritten
 !    by factorization information.
 !
-!    Input, integer N, the order of the linear system.
+!    input, integer n, the order of the linear system.
 !
-!    Input/output, real B(N).
-!    On input, B contains the right hand side of the linear system.
-!    On output, B has been overwritten by factorization information.
+!    input/output, real b(n).
+!    on input, b contains the right hand side of the linear system.
+!    on output, b has been overwritten by factorization information.
 !
-!    Output, real X(N), the solution of the linear system.
+!    output, real x(n), the solution of the linear system.
 !
   implicit none
 !
@@ -2426,13 +2426,13 @@ subroutine s3_fs ( a1, a2, a3, n, b, x )
   real x(n)
   real xmult
 !
-!  The diagonal entries can't be zero.
+!  the diagonal entries can't be zero.
 !
   do i = 1, n
-    if ( a2(i) == 0.0E+00 ) then
+    if ( a2(i) == 0.0e+00 ) then
       write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) 'S3_FS - Fatal error!'
-      write ( *, '(a,i6,a)' ) '  A2(', i, ') = 0.'
+      write ( *, '(a)' ) 's3_fs - fatal error!'
+      write ( *, '(a,i6,a)' ) '  a2(', i, ') = 0.'
       return
     end if
   end do
@@ -2460,41 +2460,41 @@ subroutine sgtsl ( n, c, d, e, b, info )
 !
 !*******************************************************************************
 !
-!! SGTSL solves a general tridiagonal linear system.
+!! sgtsl solves a general tridiagonal linear system.
 !
 !
-!  Reference:
+!  reference:
 !
-!    Dongarra, Moler, Bunch and Stewart,
-!    LINPACK User's Guide,
-!    SIAM, (Society for Industrial and Applied Mathematics),
-!    3600 University City Science Center,
-!    Philadelphia, PA, 19104-2688.
-!    ISBN 0-89871-172-X
+!    dongarra, moler, bunch and stewart,
+!    linpack user's guide,
+!    siam, (society for industrial and applied mathematics),
+!    3600 university city science center,
+!    philadelphia, pa, 19104-2688.
+!    isbn 0-89871-172-x
 !
-!  Modified:
+!  modified:
 !
-!    31 October 2001
+!    31 october 2001
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the order of the tridiagonal matrix.
+!    input, integer n, the order of the tridiagonal matrix.
 !
-!    Input/output, real C(N), contains the subdiagonal of the tridiagonal
-!    matrix in entries C(2:N).  On output, C is destroyed.
+!    input/output, real c(n), contains the subdiagonal of the tridiagonal
+!    matrix in entries c(2:n).  on output, c is destroyed.
 !
-!    Input/output, real D(N).  On input, the diagonal of the matrix.
-!    On output, D is destroyed.
+!    input/output, real d(n).  on input, the diagonal of the matrix.
+!    on output, d is destroyed.
 !
-!    Input/output, real E(N), contains the superdiagonal of the tridiagonal
-!    matrix in entries E(1:N-1).  On output E is destroyed.
+!    input/output, real e(n), contains the superdiagonal of the tridiagonal
+!    matrix in entries e(1:n-1).  on output e is destroyed.
 !
-!    Input/output, real B(N).  On input, the right hand side.  On output,
+!    input/output, real b(n).  on input, the right hand side.  on output,
 !    the solution.
 !
-!    Output, integer INFO, error flag.
+!    output, integer info, error flag.
 !    0, normal value.
-!    K, the K-th element of the diagonal becomes exactly zero.  The
+!    k, the k-th element of the diagonal becomes exactly zero.  the
 !       subroutine returns if this error condition is detected.
 !
   implicit none
@@ -2515,12 +2515,12 @@ subroutine sgtsl ( n, c, d, e, b, info )
   if ( n >= 2 ) then
 
     d(1) = e(1)
-    e(1) = 0.0E+00
-    e(n) = 0.0E+00
+    e(1) = 0.0e+00
+    e(n) = 0.0e+00
 
     do k = 1, n - 1
 !
-!  Find the larger of the two rows, and interchange if necessary.
+!  find the larger of the two rows, and interchange if necessary.
 !
       if ( abs ( c(k+1) ) >= abs ( c(k) ) ) then
         call r_swap ( c(k), c(k+1) )
@@ -2529,31 +2529,31 @@ subroutine sgtsl ( n, c, d, e, b, info )
         call r_swap ( b(k), b(k+1) )
       end if
 !
-!  Fail if no nonzero pivot could be found.
+!  fail if no nonzero pivot could be found.
 !
-      if ( c(k) == 0.0E+00 ) then
+      if ( c(k) == 0.0e+00 ) then
         info = k
         return
       end if
 !
-!  Zero elements.
+!  zero elements.
 !
       t = -c(k+1) / c(k)
       c(k+1) = d(k+1) + t * d(k)
       d(k+1) = e(k+1) + t * e(k)
-      e(k+1) = 0.0E+00
+      e(k+1) = 0.0e+00
       b(k+1) = b(k+1) + t * b(k)
 
     end do
 
   end if
 
-  if ( c(n) == 0.0E+00 ) then
+  if ( c(n) == 0.0e+00 ) then
     info = n
     return
   end if
 !
-!  Back solve.
+!  back solve.
 !
   b(n) = b(n) / c(n)
 
@@ -2573,36 +2573,36 @@ subroutine spline_b_val ( ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! SPLINE_B_VAL evaluates a cubic B spline approximant.
+!! spline_b_val evaluates a cubic b spline approximant.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The cubic B spline will approximate the data, but is not 
+!    the cubic b spline will approximate the data, but is not 
 !    designed to interpolate it.
 !
-!    In effect, two "phantom" data values are appended to the data,
+!    in effect, two "phantom" data values are appended to the data,
 !    so that the spline will interpolate the first and last data values.
 !
-!  Modified:
+!  modified:
 !
-!    07 April 1999
+!    07 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data values.
+!    input, integer ndata, the number of data values.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data.
+!    input, real tdata(ndata), the abscissas of the data.
 !
-!    Input, real YDATA(NDATA), the data values.
+!    input, real ydata(ndata), the data values.
 !
-!    Input, real TVAL, a point at which the spline is to be evaluated.
+!    input, real tval, a point at which the spline is to be evaluated.
 !
-!    Output, real YVAL, the value of the function at TVAL.
+!    output, real yval, the value of the function at tval.
 !
   implicit none
 !
@@ -2617,46 +2617,46 @@ subroutine spline_b_val ( ndata, tdata, ydata, tval, yval )
   real ydata(ndata)
   real yval
 !
-!  Find the nearest interval [ TDATA(LEFT), TDATA(RIGHT) ] to TVAL.
+!  find the nearest interval [ tdata(left), tdata(right) ] to tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Evaluate the 5 nonzero B spline basis functions in the interval,
+!  evaluate the 5 nonzero b spline basis functions in the interval,
 !  weighted by their corresponding data values.
 !
   u = ( tval - tdata(left) ) / ( tdata(right) - tdata(left) )
-  yval = 0.0E+00
+  yval = 0.0e+00
 !
-!  B function associated with node LEFT - 1, (or "phantom node"),
+!  b function associated with node left - 1, (or "phantom node"),
 !  evaluated in its 4th interval.
 !
-  bval = ( 1.0E+00 - 3.0E+00 * u + 3.0E+00 * u**2 - u**3 ) / 6.0E+00
+  bval = ( 1.0e+00 - 3.0e+00 * u + 3.0e+00 * u**2 - u**3 ) / 6.0e+00
   if ( left-1 > 0 ) then
     yval = yval + ydata(left-1) * bval
   else
-    yval = yval + ( 2.0E+00 * ydata(1) - ydata(2) ) * bval
+    yval = yval + ( 2.0e+00 * ydata(1) - ydata(2) ) * bval
   end if
 !
-!  B function associated with node LEFT,
+!  b function associated with node left,
 !  evaluated in its third interval.
 !
-  bval = ( 4.0E+00 - 6.0E+00 * u**2 + 3.0E+00 * u**3 ) / 6.0E+00
+  bval = ( 4.0e+00 - 6.0e+00 * u**2 + 3.0e+00 * u**3 ) / 6.0e+00
   yval = yval + ydata(left) * bval
 !
-!  B function associated with node RIGHT,
+!  b function associated with node right,
 !  evaluated in its second interval.
 !
-  bval = ( 1.0E+00 + 3.0E+00 * u + 3.0E+00 * u**2 - 3.0E+00 * u**3 ) / 6.0E+00
+  bval = ( 1.0e+00 + 3.0e+00 * u + 3.0e+00 * u**2 - 3.0e+00 * u**3 ) / 6.0e+00
   yval = yval + ydata(right) * bval
 !
-!  B function associated with node RIGHT+1, (or "phantom node"),
+!  b function associated with node right+1, (or "phantom node"),
 !  evaluated in its first interval.
 !
-  bval = u**3 / 6.0E+00
+  bval = u**3 / 6.0e+00
   if ( right+1 <= ndata ) then
     yval = yval + ydata(right+1) * bval
   else
-    yval = yval + ( 2.0E+00 * ydata(ndata) - ydata(ndata-1) ) * bval
+    yval = yval + ( 2.0e+00 * ydata(ndata) - ydata(ndata-1) ) * bval
   end if
 
   return
@@ -2665,48 +2665,48 @@ subroutine spline_beta_val ( beta1, beta2, ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! SPLINE_BETA_VAL evaluates a cubic beta spline approximant.
+!! spline_beta_val evaluates a cubic beta spline approximant.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The cubic beta spline will approximate the data, but is not 
+!    the cubic beta spline will approximate the data, but is not 
 !    designed to interpolate it.
 !
-!    If BETA1 = 1 and BETA2 = 0, the cubic beta spline will be the
-!    same as the cubic B spline approximant.
+!    if beta1 = 1 and beta2 = 0, the cubic beta spline will be the
+!    same as the cubic b spline approximant.
 !
-!    With BETA1 = 1 and BETA2 large, the beta spline becomes more like
+!    with beta1 = 1 and beta2 large, the beta spline becomes more like
 !    a linear spline.
 !
-!    In effect, two "phantom" data values are appended to the data,
+!    in effect, two "phantom" data values are appended to the data,
 !    so that the spline will interpolate the first and last data values.
 !
-!  Modified:
+!  modified:
 !
-!    12 April 1999
+!    12 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real BETA1, the skew or bias parameter.
-!    BETA1 = 1 for no skew or bias.
+!    input, real beta1, the skew or bias parameter.
+!    beta1 = 1 for no skew or bias.
 !
-!    Input, real BETA2, the tension parameter.
-!    BETA2 = 0 for no tension.
+!    input, real beta2, the tension parameter.
+!    beta2 = 0 for no tension.
 !
-!    Input, integer NDATA, the number of data values.
+!    input, integer ndata, the number of data values.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data.
+!    input, real tdata(ndata), the abscissas of the data.
 !
-!    Input, real YDATA(NDATA), the data values.
+!    input, real ydata(ndata), the data values.
 !
-!    Input, real TVAL, a point at which the spline is to be evaluated.
+!    input, real tval, a point at which the spline is to be evaluated.
 !
-!    Output, real YVAL, the value of the function at TVAL.
+!    output, real yval, the value of the function at tval.
 !
   implicit none
 !
@@ -2728,70 +2728,70 @@ subroutine spline_beta_val ( beta1, beta2, ndata, tdata, ydata, tval, yval )
   real ydata(ndata)
   real yval
 !
-!  Find the nearest interval [ TDATA(LEFT), TDATA(RIGHT) ] to TVAL.
+!  find the nearest interval [ tdata(left), tdata(right) ] to tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Evaluate the 5 nonzero beta spline basis functions in the interval,
+!  evaluate the 5 nonzero beta spline basis functions in the interval,
 !  weighted by their corresponding data values.
 !
   u = ( tval - tdata(left) ) / ( tdata(right) - tdata(left) )
 
-  delta = 2.0E+00 + beta2 + 4.0E+00 * beta1 + 4.0E+00 * beta1**2 &
-    + 2.0E+00 * beta1**3
+  delta = 2.0e+00 + beta2 + 4.0e+00 * beta1 + 4.0e+00 * beta1**2 &
+    + 2.0e+00 * beta1**3
 
-  yval = 0.0E+00
+  yval = 0.0e+00
 !
-!  Beta function associated with node LEFT - 1, (or "phantom node"),
+!  beta function associated with node left - 1, (or "phantom node"),
 !  evaluated in its 4th interval.
 !
-  bval = ( 2.0E+00 * beta1**3 * ( 1.0E+00 - u )**3 ) / delta
+  bval = ( 2.0e+00 * beta1**3 * ( 1.0e+00 - u )**3 ) / delta
 
   if ( left-1 > 0 ) then
     yval = yval + ydata(left-1) * bval
   else
-    yval = yval + ( 2.0E+00 * ydata(1) - ydata(2) ) * bval
+    yval = yval + ( 2.0e+00 * ydata(1) - ydata(2) ) * bval
   end if
 !
-!  Beta function associated with node LEFT,
+!  beta function associated with node left,
 !  evaluated in its third interval.
 !
-  a = beta2 + 4.0E+00 * beta1 + 4.0E+00 * beta1**2
+  a = beta2 + 4.0e+00 * beta1 + 4.0e+00 * beta1**2
 
-  b = - 6.0E+00 * beta1 * ( 1.0E+00 - beta1 ) * ( 1.0E+00 + beta1 )
+  b = - 6.0e+00 * beta1 * ( 1.0e+00 - beta1 ) * ( 1.0e+00 + beta1 )
 
-  c = - 3.0E+00 * ( beta2 + 2.0E+00 * beta1**2 + 2.0E+00 * beta1**3 )
+  c = - 3.0e+00 * ( beta2 + 2.0e+00 * beta1**2 + 2.0e+00 * beta1**3 )
 
-  d = 2.0E+00 * ( beta2 + beta1 + beta1**2 + beta1**3 )
+  d = 2.0e+00 * ( beta2 + beta1 + beta1**2 + beta1**3 )
 
   bval = ( a + u * ( b + u * ( c + u * d ) ) ) / delta
 
   yval = yval + ydata(left) * bval
 !
-!  Beta function associated with node RIGHT,
+!  beta function associated with node right,
 !  evaluated in its second interval.
 !
-  a = 2.0E+00
+  a = 2.0e+00
 
-  b = 6.0E+00 * beta1
+  b = 6.0e+00 * beta1
 
-  c = 3.0E+00 * beta2 + 6.0E+00 * beta1**2
+  c = 3.0e+00 * beta2 + 6.0e+00 * beta1**2
 
-  d = - 2.0E+00 * ( 1.0E+00 + beta2 + beta1 + beta1**2 )
+  d = - 2.0e+00 * ( 1.0e+00 + beta2 + beta1 + beta1**2 )
 
   bval = ( a + u * ( b + u * ( c + u * d ) ) ) / delta
 
   yval = yval + ydata(right) * bval
 !
-!  Beta function associated with node RIGHT+1, (or "phantom node"),
+!  beta function associated with node right+1, (or "phantom node"),
 !  evaluated in its first interval.
 !
-  bval = 2.0E+00 * u**3 / delta
+  bval = 2.0e+00 * u**3 / delta
 
   if ( right+1 <= ndata ) then
     yval = yval + ydata(right+1) * bval
   else
-    yval = yval + ( 2.0E+00 * ydata(ndata) - ydata(ndata-1) ) * bval
+    yval = yval + ( 2.0e+00 * ydata(ndata) - ydata(ndata-1) ) * bval
   end if
 
   return
@@ -2800,37 +2800,37 @@ subroutine spline_constant_val ( ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! SPLINE_CONSTANT_VAL evaluates a piecewise constant spline at a point.
+!! spline_constant_val evaluates a piecewise constant spline at a point.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    NDATA-1 points TDATA define NDATA intervals, with the first
+!    ndata-1 points tdata define ndata intervals, with the first
 !    and last being semi-infinite.
 !
-!    The value of the spline anywhere in interval I is YDATA(I).
+!    the value of the spline anywhere in interval i is ydata(i).
 !
-!  Modified:
+!  modified:
 !
-!    16 November 2001
+!    16 november 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points defining the spline.
+!    input, integer ndata, the number of data points defining the spline.
 !
-!    Input, real TDATA(NDATA-1), the breakpoints.  The values of TDATA should
+!    input, real tdata(ndata-1), the breakpoints.  the values of tdata should
 !    be distinct and increasing.
 !
-!    Input, YDATA(NDATA), the values of the spline in the intervals
+!    input, ydata(ndata), the values of the spline in the intervals
 !    defined by the breakpoints.
 !
-!    Input, real TVAL, the point at which the spline is to be evaluated.
+!    input, real tval, the point at which the spline is to be evaluated.
 !
-!    Output, real YVAL, the value of the spline at TVAL.  
+!    output, real yval, the value of the spline at tval.  
 !
   implicit none
 !
@@ -2857,109 +2857,109 @@ subroutine spline_cubic_set ( n, t, y, ibcbeg, ybcbeg, ibcend, ybcend, ypp )
 !
 !*******************************************************************************
 !
-!! SPLINE_CUBIC_SET computes the second derivatives of a cubic spline.
+!! spline_cubic_set computes the second derivatives of a cubic spline.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    For data interpolation, the user must call SPLINE_CUBIC_SET to 
+!    for data interpolation, the user must call spline_cubic_set to 
 !    determine the second derivative data, passing in the data to be 
 !    interpolated, and the desired boundary conditions.
 !
-!    The data to be interpolated, plus the SPLINE_CUBIC_SET output, 
-!    defines the spline.  The user may then call SPLINE_CUBIC_VAL to 
+!    the data to be interpolated, plus the spline_cubic_set output, 
+!    defines the spline.  the user may then call spline_cubic_val to 
 !    evaluate the spline at any point.
 !
-!    The cubic spline is a piecewise cubic polynomial.  The intervals
+!    the cubic spline is a piecewise cubic polynomial.  the intervals
 !    are determined by the "knots" or abscissas of the data to be
-!    interpolated.  The cubic spline has continous first and second
+!    interpolated.  the cubic spline has continous first and second
 !    derivatives over the entire interval of interpolation.  
 !
-!    For any point T in the interval T(IVAL), T(IVAL+1), the form of
+!    for any point t in the interval t(ival), t(ival+1), the form of
 !    the spline is
 !
-!      SPL(T) = A(IVAL)
-!             + B(IVAL) * ( T - T(IVAL) ) 
-!             + C(IVAL) * ( T - T(IVAL) )**2
-!             + D(IVAL) * ( T - T(IVAL) )**3
+!      spl(t) = a(ival)
+!             + b(ival) * ( t - t(ival) ) 
+!             + c(ival) * ( t - t(ival) )**2
+!             + d(ival) * ( t - t(ival) )**3
 !
-!    If we assume that we know the values Y(*) and YPP(*), which represent
+!    if we assume that we know the values y(*) and ypp(*), which represent
 !    the values and second derivatives of the spline at each knot, then
 !    the coefficients can be computed as:
 !
-!      A(IVAL) = Y(IVAL)
-!      B(IVAL) = ( Y(IVAL+1) - Y(IVAL) ) / ( T(IVAL+1) - T(IVAL) )
-!        - ( YPP(IVAL+1) + 2 * YPP(IVAL) ) * ( T(IVAL+1) - T(IVAL) ) / 6
-!      C(IVAL) = YPP(IVAL) / 2
-!      D(IVAL) = ( YPP(IVAL+1) - YPP(IVAL) ) / ( 6 * ( T(IVAL+1) - T(IVAL) ) )
+!      a(ival) = y(ival)
+!      b(ival) = ( y(ival+1) - y(ival) ) / ( t(ival+1) - t(ival) )
+!        - ( ypp(ival+1) + 2 * ypp(ival) ) * ( t(ival+1) - t(ival) ) / 6
+!      c(ival) = ypp(ival) / 2
+!      d(ival) = ( ypp(ival+1) - ypp(ival) ) / ( 6 * ( t(ival+1) - t(ival) ) )
 !
-!    Since the first derivative of the spline is
+!    since the first derivative of the spline is
 !
-!      SPL'(T) =     B(IVAL)
-!              + 2 * C(IVAL) * ( T - T(IVAL) )
-!              + 3 * D(IVAL) * ( T - T(IVAL) )**2,
+!      spl'(t) =     b(ival)
+!              + 2 * c(ival) * ( t - t(ival) )
+!              + 3 * d(ival) * ( t - t(ival) )**2,
 !
 !    the requirement that the first derivative be continuous at interior
-!    knot I results in a total of N-2 equations, of the form:
+!    knot i results in a total of n-2 equations, of the form:
 !
-!      B(IVAL-1) + 2 C(IVAL-1) * (T(IVAL)-T(IVAL-1)) 
-!      + 3 * D(IVAL-1) * (T(IVAL) - T(IVAL-1))**2 = B(IVAL)
+!      b(ival-1) + 2 c(ival-1) * (t(ival)-t(ival-1)) 
+!      + 3 * d(ival-1) * (t(ival) - t(ival-1))**2 = b(ival)
 !
-!    or, setting H(IVAL) = T(IVAL+1) - T(IVAL)
+!    or, setting h(ival) = t(ival+1) - t(ival)
 !
-!      ( Y(IVAL) - Y(IVAL-1) ) / H(IVAL-1)
-!      - ( YPP(IVAL) + 2 * YPP(IVAL-1) ) * H(IVAL-1) / 6
-!      + YPP(IVAL-1) * H(IVAL-1)
-!      + ( YPP(IVAL) - YPP(IVAL-1) ) * H(IVAL-1) / 2
+!      ( y(ival) - y(ival-1) ) / h(ival-1)
+!      - ( ypp(ival) + 2 * ypp(ival-1) ) * h(ival-1) / 6
+!      + ypp(ival-1) * h(ival-1)
+!      + ( ypp(ival) - ypp(ival-1) ) * h(ival-1) / 2
 !      = 
-!      ( Y(IVAL+1) - Y(IVAL) ) / H(IVAL)
-!      - ( YPP(IVAL+1) + 2 * YPP(IVAL) ) * H(IVAL) / 6
+!      ( y(ival+1) - y(ival) ) / h(ival)
+!      - ( ypp(ival+1) + 2 * ypp(ival) ) * h(ival) / 6
 !
 !    or
 !
-!      YPP(IVAL-1) * H(IVAL-1) + 2 * YPP(IVAL) * ( H(IVAL-1) + H(IVAL) )
-!      + YPP(IVAL) * H(IVAL) 
+!      ypp(ival-1) * h(ival-1) + 2 * ypp(ival) * ( h(ival-1) + h(ival) )
+!      + ypp(ival) * h(ival) 
 !      =
-!      6 * ( Y(IVAL+1) - Y(IVAL) ) / H(IVAL)
-!      - 6 * ( Y(IVAL) - Y(IVAL-1) ) / H(IVAL-1)    
+!      6 * ( y(ival+1) - y(ival) ) / h(ival)
+!      - 6 * ( y(ival) - y(ival-1) ) / h(ival-1)    
 !
-!    Boundary conditions must be applied at the first and last knots.  
-!    The resulting tridiagonal system can be solved for the YPP values.
+!    boundary conditions must be applied at the first and last knots.  
+!    the resulting tridiagonal system can be solved for the ypp values.
 !
-!  Modified:
+!  modified:
 !
-!    20 November 2000
+!    20 november 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of data points; N must be at least 2. 
+!    input, integer n, the number of data points; n must be at least 2. 
 !
-!    Input, real T(N), the points where data is specified.  
-!    The values should be distinct, and increasing.
+!    input, real t(n), the points where data is specified.  
+!    the values should be distinct, and increasing.
 !
-!    Input, real Y(N), the data values to be interpolated.
+!    input, real y(n), the data values to be interpolated.
 !
-!    Input, integer IBCBEG, the left boundary condition flag:
+!    input, integer ibcbeg, the left boundary condition flag:
 !
 !      0: the spline should be a quadratic over the first interval;
-!      1: the first derivative at the left endpoint should be YBCBEG;
-!      2: the second derivative at the left endpoint should be YBCBEG.
+!      1: the first derivative at the left endpoint should be ybcbeg;
+!      2: the second derivative at the left endpoint should be ybcbeg.
 !
-!    Input, real YBCBEG, the left boundary value, if needed.
+!    input, real ybcbeg, the left boundary value, if needed.
 !
-!    Input, integer IBCEND, the right boundary condition flag:
+!    input, integer ibcend, the right boundary condition flag:
 !
 !      0: the spline should be a quadratic over the last interval;
-!      1: the first derivative at the right endpoint should be YBCEND;
-!      2: the second derivative at the right endpoint should be YBCEND.
+!      1: the first derivative at the right endpoint should be ybcend;
+!      2: the second derivative at the right endpoint should be ybcend.
 !
-!    Input, real YBCEND, the right boundary value, if needed.
+!    input, real ybcend, the right boundary value, if needed.
 !
-!    Output, real YPP(N), the second derivatives of the cubic spline.
+!    output, real ypp(n), the second derivatives of the cubic spline.
 !
   implicit none
 !
@@ -2977,90 +2977,90 @@ subroutine spline_cubic_set ( n, t, y, ibcbeg, ybcbeg, ibcend, ybcend, ypp )
   real ybcend
   real ypp(n)
 !
-!  Check.
+!  check.
 !
   if ( n <= 1 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_CUBIC_SET - Fatal error!'
-    write ( *, '(a)' ) '  The number of knots must be at least 2.'
-    write ( *, '(a,i6)' ) '  The input value of N = ', n
+    write ( *, '(a)' ) 'spline_cubic_set - fatal error!'
+    write ( *, '(a)' ) '  the number of knots must be at least 2.'
+    write ( *, '(a,i6)' ) '  the input value of n = ', n
     stop
   end if
 
   do i = 1, n-1
     if ( t(i) >= t(i+1) ) then
       write ( *, '(a)' ) ' '
-      write ( *, '(a)' ) 'SPLINE_CUBIC_SET - Fatal error!'
-      write ( *, '(a)' ) '  The knots must be strictly increasing, but'
-      write ( *, '(a,i6,a,g14.6)' ) '  T(',  i,') = ', t(i)
-      write ( *, '(a,i6,a,g14.6)' ) '  T(',i+1,') = ', t(i+1)
+      write ( *, '(a)' ) 'spline_cubic_set - fatal error!'
+      write ( *, '(a)' ) '  the knots must be strictly increasing, but'
+      write ( *, '(a,i6,a,g14.6)' ) '  t(',  i,') = ', t(i)
+      write ( *, '(a,i6,a,g14.6)' ) '  t(',i+1,') = ', t(i+1)
       stop
     end if
   end do
 !
-!  Set the first equation.
+!  set the first equation.
 !
   if ( ibcbeg == 0 ) then
-    ypp(1) = 0.0E+00
-    diag(1) = 1.0E+00
-    sup(1) = -1.0E+00
+    ypp(1) = 0.0e+00
+    diag(1) = 1.0e+00
+    sup(1) = -1.0e+00
   else if ( ibcbeg == 1 ) then
     ypp(1) = ( y(2) - y(1) ) / ( t(2) - t(1) ) - ybcbeg
-    diag(1) = ( t(2) - t(1) ) / 3.0E+00 
-    sup(1) = ( t(2) - t(1) ) / 6.0E+00
+    diag(1) = ( t(2) - t(1) ) / 3.0e+00 
+    sup(1) = ( t(2) - t(1) ) / 6.0e+00
   else if ( ibcbeg == 2 ) then
     ypp(1) = ybcbeg
-    diag(1) = 1.0E+00
-    sup(1) = 0.0E+00
+    diag(1) = 1.0e+00
+    sup(1) = 0.0e+00
   else
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_CUBIC_SET - Fatal error!'
-    write ( *, '(a)' ) '  The boundary flag IBCBEG must be 0, 1 or 2.'
-    write ( *, '(a,i6)' ) '  The input value is IBCBEG = ', ibcbeg
+    write ( *, '(a)' ) 'spline_cubic_set - fatal error!'
+    write ( *, '(a)' ) '  the boundary flag ibcbeg must be 0, 1 or 2.'
+    write ( *, '(a,i6)' ) '  the input value is ibcbeg = ', ibcbeg
     stop
   end if
 !
-!  Set the intermediate equations.
+!  set the intermediate equations.
 !
   do i = 2, n-1
     ypp(i) = ( y(i+1) - y(i) ) / ( t(i+1) - t(i) ) &
            - ( y(i) - y(i-1) ) / ( t(i) - t(i-1) )
-    sub(i) = ( t(i) - t(i-1) ) / 6.0E+00
-    diag(i) = ( t(i+1) - t(i-1) ) / 3.0E+00
-    sup(i) = ( t(i+1) - t(i) ) / 6.0E+00
+    sub(i) = ( t(i) - t(i-1) ) / 6.0e+00
+    diag(i) = ( t(i+1) - t(i-1) ) / 3.0e+00
+    sup(i) = ( t(i+1) - t(i) ) / 6.0e+00
   end do
 !
-!  Set the last equation.
+!  set the last equation.
 !
   if ( ibcend == 0 ) then
-    ypp(n) = 0.0E+00
-    sub(n) = -1.0E+00
-    diag(n) = 1.0E+00
+    ypp(n) = 0.0e+00
+    sub(n) = -1.0e+00
+    diag(n) = 1.0e+00
   else if ( ibcend == 1 ) then
     ypp(n) = ybcend - ( y(n) - y(n-1) ) / ( t(n) - t(n-1) )
-    sub(n) = ( t(n) - t(n-1) ) / 6.0E+00
-    diag(n) = ( t(n) - t(n-1) ) / 3.0E+00
+    sub(n) = ( t(n) - t(n-1) ) / 6.0e+00
+    diag(n) = ( t(n) - t(n-1) ) / 3.0e+00
   else if ( ibcend == 2 ) then
     ypp(n) = ybcend
-    sub(n) = 0.0E+00
-    diag(n) = 1.0E+00
+    sub(n) = 0.0e+00
+    diag(n) = 1.0e+00
   else
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_CUBIC_SET - Fatal error!'
-    write ( *, '(a)' ) '  The boundary flag IBCEND must be 0, 1 or 2.'
-    write ( *, '(a,i6)' ) '  The input value is IBCEND = ', ibcend
+    write ( *, '(a)' ) 'spline_cubic_set - fatal error!'
+    write ( *, '(a)' ) '  the boundary flag ibcend must be 0, 1 or 2.'
+    write ( *, '(a,i6)' ) '  the input value is ibcend = ', ibcend
     stop
   end if
 !
-!  Special case:
-!    N = 2, IBCBEG = IBCEND = 0.
+!  special case:
+!    n = 2, ibcbeg = ibcend = 0.
 !
   if ( n == 2 .and. ibcbeg == 0 .and. ibcend == 0 ) then
 
-    ypp(1) = 0.0E+00
-    ypp(2) = 0.0E+00
+    ypp(1) = 0.0e+00
+    ypp(2) = 0.0e+00
 !
-!  Solve the linear system.
+!  solve the linear system.
 !
   else
 
@@ -3074,53 +3074,53 @@ subroutine spline_cubic_val ( n, t, y, ypp, tval, yval, ypval, yppval )
 !
 !*******************************************************************************
 !
-!! SPLINE_CUBIC_VAL evaluates a cubic spline at a specific point.
+!! spline_cubic_val evaluates a cubic spline at a specific point.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    SPLINE_CUBIC_SET must have already been called to define the 
-!    values of YPP.
+!    spline_cubic_set must have already been called to define the 
+!    values of ypp.
 !
-!    For any point T in the interval T(IVAL), T(IVAL+1), the form of
+!    for any point t in the interval t(ival), t(ival+1), the form of
 !    the spline is
 !
-!      SPL(T) = A 
-!             + B * ( T - T(IVAL) ) 
-!             + C * ( T - T(IVAL) )**2
-!             + D * ( T - T(IVAL) )**3
+!      spl(t) = a 
+!             + b * ( t - t(ival) ) 
+!             + c * ( t - t(ival) )**2
+!             + d * ( t - t(ival) )**3
 !
-!    Here:
-!      A = Y(IVAL)
-!      B = ( Y(IVAL+1) - Y(IVAL) ) / ( T(IVAL+1) - T(IVAL) )
-!        - ( YPP(IVAL+1) + 2 * YPP(IVAL) ) * ( T(IVAL+1) - T(IVAL) ) / 6
-!      C = YPP(IVAL) / 2
-!      D = ( YPP(IVAL+1) - YPP(IVAL) ) / ( 6 * ( T(IVAL+1) - T(IVAL) ) )
+!    here:
+!      a = y(ival)
+!      b = ( y(ival+1) - y(ival) ) / ( t(ival+1) - t(ival) )
+!        - ( ypp(ival+1) + 2 * ypp(ival) ) * ( t(ival+1) - t(ival) ) / 6
+!      c = ypp(ival) / 2
+!      d = ( ypp(ival+1) - ypp(ival) ) / ( 6 * ( t(ival+1) - t(ival) ) )
 !
-!  Modified:
+!  modified:
 !
-!    20 November 2000
+!    20 november 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of data values.
+!    input, integer n, the number of data values.
 !
-!    Input, real T(N), the knot values.
+!    input, real t(n), the knot values.
 !
-!    Input, real Y(N), the data values at the knots.
+!    input, real y(n), the data values at the knots.
 !
-!    Input, real YPP(N), the second derivatives of the spline at the knots.
+!    input, real ypp(n), the second derivatives of the spline at the knots.
 !
-!    Input, real TVAL, a point, typically between T(1) and T(N), at 
-!    which the spline is to be evalulated.  If TVAL lies outside 
+!    input, real tval, a point, typically between t(1) and t(n), at 
+!    which the spline is to be evalulated.  if tval lies outside 
 !    this range, extrapolation is used.
 !
-!    Output, real YVAL, YPVAL, YPPVAL, the value of the spline, and
-!    its first two derivatives at TVAL.
+!    output, real yval, ypval, yppval, the value of the spline, and
+!    its first two derivatives at tval.
 !
   implicit none
 !
@@ -3138,26 +3138,26 @@ subroutine spline_cubic_val ( n, t, y, ypp, tval, yval, ypval, yppval )
   real ypval
   real yval
 !
-!  Determine the interval [T(LEFT), T(RIGHT)] that contains TVAL.
-!  Values below T(1) or above T(N) use extrapolation.
+!  determine the interval [t(left), t(right)] that contains tval.
+!  values below t(1) or above t(n) use extrapolation.
 !
   call rvec_bracket ( n, t, tval, left, right )
 !
-!  Evaluate the polynomial.
+!  evaluate the polynomial.
 !
   dt = tval - t(left)
   h = t(right) - t(left)
 
   yval = y(left) &
        + dt * ( ( y(right) - y(left) ) / h &
-              - ( ypp(right) / 6.0E+00 + ypp(left) / 3.0E+00 ) * h &
-       + dt * ( 0.5E+00 * ypp(left) &
-       + dt * ( ( ypp(right) - ypp(left) ) / ( 6.0E+00 * h ) ) ) )
+              - ( ypp(right) / 6.0e+00 + ypp(left) / 3.0e+00 ) * h &
+       + dt * ( 0.5e+00 * ypp(left) &
+       + dt * ( ( ypp(right) - ypp(left) ) / ( 6.0e+00 * h ) ) ) )
 
   ypval = ( y(right) - y(left) ) / h &
-       - ( ypp(right) / 6.0E+00 + ypp(left) / 3.0E+00 ) * h &
+       - ( ypp(right) / 6.0e+00 + ypp(left) / 3.0e+00 ) * h &
        + dt * ( ypp(left) &
-       + dt * ( 0.5E+00 * ( ypp(right) - ypp(left) ) / h ) )
+       + dt * ( 0.5e+00 * ( ypp(right) - ypp(left) ) / h ) )
 
   yppval = ypp(left) + dt * ( ypp(right) - ypp(left) ) / h 
 
@@ -3167,63 +3167,63 @@ subroutine spline_cubic_val2 ( n, t, y, ypp, left, tval, yval, ypval, yppval )
 !
 !*******************************************************************************
 !
-!! SPLINE_CUBIC_VAL2 evaluates a cubic spline at a specific point.
+!! spline_cubic_val2 evaluates a cubic spline at a specific point.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    This routine is a modification of SPLINE_CUBIC_VAL; it allows the
-!    user to speed up the code by suggesting the appropriate T interval
+!    this routine is a modification of spline_cubic_val; it allows the
+!    user to speed up the code by suggesting the appropriate t interval
 !    to search first.
 !
-!    SPLINE_CUBIC_SET must have already been called to define the
-!    values of YPP.
+!    spline_cubic_set must have already been called to define the
+!    values of ypp.
 !
-!    In the LEFT interval, let RIGHT = LEFT+1.  The form of the spline is
+!    in the left interval, let right = left+1.  the form of the spline is
 !
-!      SPL(T) = 
-!          A
-!        + B * ( T - T(LEFT) )
-!        + C * ( T - T(LEFT) )**2
-!        + D * ( T - T(LEFT) )**3
+!      spl(t) = 
+!          a
+!        + b * ( t - t(left) )
+!        + c * ( t - t(left) )**2
+!        + d * ( t - t(left) )**3
 !
-!    Here:
-!      A = Y(LEFT)
-!      B = ( Y(RIGHT) - Y(LEFT) ) / ( T(RIGHT) - T(LEFT) )
-!        - ( YPP(RIGHT) + 2 * YPP(LEFT) ) * ( T(RIGHT) - T(LEFT) ) / 6
-!      C = YPP(LEFT) / 2
-!      D = ( YPP(RIGHT) - YPP(LEFT) ) / ( 6 * ( T(RIGHT) - T(LEFT) ) )
+!    here:
+!      a = y(left)
+!      b = ( y(right) - y(left) ) / ( t(right) - t(left) )
+!        - ( ypp(right) + 2 * ypp(left) ) * ( t(right) - t(left) ) / 6
+!      c = ypp(left) / 2
+!      d = ( ypp(right) - ypp(left) ) / ( 6 * ( t(right) - t(left) ) )
 !
-!  Modified:
+!  modified:
 !
-!    20 November 2000
+!    20 november 2000
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer N, the number of knots.
+!    input, integer n, the number of knots.
 !
-!    Input, real T(N), the knot values.
+!    input, real t(n), the knot values.
 !
-!    Input, real Y(N), the data values at the knots.
+!    input, real y(n), the data values at the knots.
 !
-!    Input, real YPP(N), the second derivatives of the spline at
+!    input, real ypp(n), the second derivatives of the spline at
 !    the knots.
 !
-!    Input/output, integer LEFT, the suggested T interval to search.
-!    LEFT should be between 1 and N-1.  If LEFT is not in this range,
-!    then its value will be ignored.  On output, LEFT is set to the
-!    actual interval in which TVAL lies.
+!    input/output, integer left, the suggested t interval to search.
+!    left should be between 1 and n-1.  if left is not in this range,
+!    then its value will be ignored.  on output, left is set to the
+!    actual interval in which tval lies.
 !
-!    Input, real TVAL, a point, typically between T(1) and T(N), at
-!    which the spline is to be evalulated.  If TVAL lies outside
+!    input, real tval, a point, typically between t(1) and t(n), at
+!    which the spline is to be evalulated.  if tval lies outside
 !    this range, extrapolation is used.
 !
-!    Output, real YVAL, YPVAL, YPPVAL, the value of the spline, and
-!    its first two derivatives at TVAL.
+!    output, real yval, ypval, yppval, the value of the spline, and
+!    its first two derivatives at tval.
 !
   implicit none
 !
@@ -3241,30 +3241,30 @@ subroutine spline_cubic_val2 ( n, t, y, ypp, left, tval, yval, ypval, yppval )
   real ypval
   real yval
 !
-!  Determine the interval [T(LEFT), T(RIGHT)] that contains TVAL.
+!  determine the interval [t(left), t(right)] that contains tval.
 !  
-!  What you want from RVEC_BRACKET3 is that TVAL is to be computed
-!  by the data in interval {T(LEFT), T(RIGHT)].
+!  what you want from rvec_bracket3 is that tval is to be computed
+!  by the data in interval {t(left), t(right)].
 !
   left = 0
   call rvec_bracket3 ( n, t, tval, left )
   right = left + 1
 !
-!  In the interval LEFT, the polynomial is in terms of a normalized
-!  coordinate  ( DT / H ) between 0 and 1.
+!  in the interval left, the polynomial is in terms of a normalized
+!  coordinate  ( dt / h ) between 0 and 1.
 !
   dt = tval - t(left)
   h = t(right) - t(left)
 
   yval = y(left) + dt * ( ( y(right) - y(left) ) / h &
-              - ( ypp(right) / 6.0E+00 + ypp(left) / 3.0E+00 ) * h &
-       + dt * ( 0.5E+00 * ypp(left) &
-       + dt * ( ( ypp(right) - ypp(left) ) / ( 6.0E+00 * h ) ) ) )
+              - ( ypp(right) / 6.0e+00 + ypp(left) / 3.0e+00 ) * h &
+       + dt * ( 0.5e+00 * ypp(left) &
+       + dt * ( ( ypp(right) - ypp(left) ) / ( 6.0e+00 * h ) ) ) )
 
   ypval = ( y(right) - y(left) ) / h &
-      - ( ypp(right) / 6.0E+00 + ypp(left) / 3.0E+00 ) * h &
+      - ( ypp(right) / 6.0e+00 + ypp(left) / 3.0e+00 ) * h &
       + dt * ( ypp(left) &
-      + dt * ( 0.5E+00 * ( ypp(right) - ypp(left) ) / h ) )
+      + dt * ( 0.5e+00 * ( ypp(right) - ypp(left) ) / h ) )
 
   yppval = ypp(left) + dt * ( ypp(right) - ypp(left) ) / h
 
@@ -3274,46 +3274,46 @@ subroutine spline_hermite_set ( ndata, tdata, c )
 !
 !*************************************************************************
 !
-!! SPLINE_HERMITE_SET sets up a piecewise cubic Hermite interpolant.
+!! spline_hermite_set sets up a piecewise cubic hermite interpolant.
 !
 !
-!  Reference:
+!  reference:
 !
-!    Conte and de Boor,
-!    Algorithm CALCCF,
-!    Elementary Numerical Analysis,
+!    conte and de boor,
+!    algorithm calccf,
+!    elementary numerical analysis,
 !    1973, page 235.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points.
-!    NDATA must be at least 2.
+!    input, integer ndata, the number of data points.
+!    ndata must be at least 2.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data points.
-!    The entries of TDATA are assumed to be strictly increasing.
+!    input, real tdata(ndata), the abscissas of the data points.
+!    the entries of tdata are assumed to be strictly increasing.
 !
-!    Input/output, real C(4,NDATA).
+!    input/output, real c(4,ndata).
 !
-!    On input, C(1,I) and C(2,I) should contain the value of the
-!    function and its derivative at TDATA(I), for I = 1 to NDATA.
-!    These values will not be changed by this routine.
+!    on input, c(1,i) and c(2,i) should contain the value of the
+!    function and its derivative at tdata(i), for i = 1 to ndata.
+!    these values will not be changed by this routine.
 !
-!    On output, C(3,I) and C(4,I) contain the quadratic
-!    and cubic coefficients of the Hermite polynomial
-!    in the interval (TDATA(I), TDATA(I+1)), for I=1 to NDATA-1.
-!    C(3,NDATA) and C(4,NDATA) are set to 0.
+!    on output, c(3,i) and c(4,i) contain the quadratic
+!    and cubic coefficients of the hermite polynomial
+!    in the interval (tdata(i), tdata(i+1)), for i=1 to ndata-1.
+!    c(3,ndata) and c(4,ndata) are set to 0.
 !
-!    In the interval (TDATA(I), TDATA(I+1)), the interpolating Hermite
+!    in the interval (tdata(i), tdata(i+1)), the interpolating hermite
 !    polynomial is given by
 !
-!    SVAL(TVAL) =                 C(1,I)
-!       + ( TVAL - TDATA(I) ) * ( C(2,I)
-!       + ( TVAL - TDATA(I) ) * ( C(3,I)
-!       + ( TVAL - TDATA(I) ) *   C(4,I) ) )
+!    sval(tval) =                 c(1,i)
+!       + ( tval - tdata(i) ) * ( c(2,i)
+!       + ( tval - tdata(i) ) * ( c(3,i)
+!       + ( tval - tdata(i) ) *   c(4,i) ) )
 !
   implicit none
 !
@@ -3329,13 +3329,13 @@ subroutine spline_hermite_set ( ndata, tdata, c )
   do i = 1, ndata-1
     dt = tdata(i+1) - tdata(i)
     divdif1 = ( c(1,i+1) - c(1,i) ) / dt
-    divdif3 = c(2,i) + c(2,i+1) - 2.0E+00 * divdif1
+    divdif3 = c(2,i) + c(2,i+1) - 2.0e+00 * divdif1
     c(3,i) = ( divdif1 - c(2,i) - divdif3 ) / dt
     c(4,i) = divdif3 / dt**2
   end do
 
-  c(3,ndata) = 0.0E+00
-  c(4,ndata) = 0.0E+00
+  c(3,ndata) = 0.0e+00
+  c(4,ndata) = 0.0e+00
 
   return
 end
@@ -3343,40 +3343,40 @@ subroutine spline_hermite_val ( ndata, tdata, c, tval, sval )
 !
 !*************************************************************************
 !
-!! SPLINE_HERMITE_VAL evaluates a piecewise cubic Hermite interpolant.
+!! spline_hermite_val evaluates a piecewise cubic hermite interpolant.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    SPLINE_HERMITE_SET must be called first, to set up the
+!    spline_hermite_set must be called first, to set up the
 !    spline data from the raw function and derivative data.
 !
-!  Reference:
+!  reference:
 !
-!    Conte and de Boor,
-!    Algorithm PCUBIC,
-!    Elementary Numerical Analysis,
+!    conte and de boor,
+!    algorithm pcubic,
+!    elementary numerical analysis,
 !    1973, page 234.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points.
-!    NDATA is assumed to be at least 2.
+!    input, integer ndata, the number of data points.
+!    ndata is assumed to be at least 2.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data points.
-!    The entries of TDATA are assumed to be strictly increasing.
+!    input, real tdata(ndata), the abscissas of the data points.
+!    the entries of tdata are assumed to be strictly increasing.
 !
-!    Input, real C(4,NDATA), contains the data computed by
-!    SPLINE_HERMITE_SET.
+!    input, real c(4,ndata), contains the data computed by
+!    spline_hermite_set.
 !
-!    Input, real TVAL, the point where the interpolant is to
+!    input, real tval, the point where the interpolant is to
 !    be evaluated.
 !
-!    Output, real SVAL, the value of the interpolant at TVAL.
+!    output, real sval, the value of the interpolant at tval.
 !
   implicit none
 !
@@ -3390,12 +3390,12 @@ subroutine spline_hermite_val ( ndata, tdata, c, tval, sval )
   real tdata(ndata)
   real tval
 !
-!  Find the interval [ TDATA(LEFT), TDATA(RIGHT) ] that contains
-!  or is nearest to TVAL.
+!  find the interval [ tdata(left), tdata(right) ] that contains
+!  or is nearest to tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Evaluate the cubic polynomial.
+!  evaluate the cubic polynomial.
 !
   dt = tval - tdata(left)
 
@@ -3407,28 +3407,28 @@ subroutine spline_linear_int ( ndata, tdata, ydata, a, b, int_val )
 !
 !*******************************************************************************
 !
-!! SPLINE_LINEAR_INT evaluates the integral of a linear spline.
+!! spline_linear_int evaluates the integral of a linear spline.
 !
 !
-!  Modified:
+!  modified:
 !
-!    01 November 2001
+!    01 november 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points defining the spline.
+!    input, integer ndata, the number of data points defining the spline.
 !
-!    Input, real TDATA(NDATA), YDATA(NDATA), the values of the independent
-!    and dependent variables at the data points.  The values of TDATA should
+!    input, real tdata(ndata), ydata(ndata), the values of the independent
+!    and dependent variables at the data points.  the values of tdata should
 !    be distinct and increasing.
 !
-!    Input, real A, B, the interval over which the integral is desired.
+!    input, real a, b, the interval over which the integral is desired.
 !
-!    Output, real INT_VAL, the value of the integral.
+!    output, real int_val, the value of the integral.
 !
   implicit none
 !
@@ -3450,7 +3450,7 @@ subroutine spline_linear_int ( ndata, tdata, ydata, a, b, int_val )
   real yp
   real yval
 !
-  int_val = 0.0E+00 
+  int_val = 0.0e+00 
 
   if ( a == b ) then
     return
@@ -3459,21 +3459,21 @@ subroutine spline_linear_int ( ndata, tdata, ydata, a, b, int_val )
   a_copy = min ( a, b )
   b_copy = max ( a, b )
 !
-!  Find the interval [ TDATA(A_LEFT), TDATA(A_RIGHT) ] that contains, or is
-!  nearest to, A.
+!  find the interval [ tdata(a_left), tdata(a_right) ] that contains, or is
+!  nearest to, a.
 !
   call rvec_bracket ( ndata, tdata, a_copy, a_left, a_right )
 !
-!  Find the interval [ TDATA(B_LEFT), TDATA(B_RIGHT) ] that contains, or is
-!  nearest to, B.
+!  find the interval [ tdata(b_left), tdata(b_right) ] that contains, or is
+!  nearest to, b.
 !
   call rvec_bracket ( ndata, tdata, b_copy, b_left, b_right )
 !
-!  If A and B are in the same interval...
+!  if a and b are in the same interval...
 !
   if ( a_left == b_left ) then
 
-    tval = ( a_copy + b_copy ) / 2.0E+00
+    tval = ( a_copy + b_copy ) / 2.0e+00
 
     yp = ( ydata(a_right) - ydata(a_left) ) / &
          ( tdata(a_right) - tdata(a_left) )
@@ -3485,17 +3485,17 @@ subroutine spline_linear_int ( ndata, tdata, ydata, a, b, int_val )
     return
   end if
 !
-!  Otherwise, integrate from:
+!  otherwise, integrate from:
 !
-!  A               to TDATA(A_RIGHT),
-!  TDATA(A_RIGHT)  to TDATA(A_RIGHT+1),...
-!  TDATA(B_LEFT-1) to TDATA(B_LEFT),
-!  TDATA(B_LEFT)   to B.
+!  a               to tdata(a_right),
+!  tdata(a_right)  to tdata(a_right+1),...
+!  tdata(b_left-1) to tdata(b_left),
+!  tdata(b_left)   to b.
 !
-!  Use the fact that the integral of a linear function is the
+!  use the fact that the integral of a linear function is the
 !  value of the function at the midpoint times the width of the interval.
 !
-  tval = ( a_copy + tdata(a_right) ) / 2.0E+00
+  tval = ( a_copy + tdata(a_right) ) / 2.0e+00
 
   yp = ( ydata(a_right) - ydata(a_left) ) / &
        ( tdata(a_right) - tdata(a_left) )
@@ -3506,7 +3506,7 @@ subroutine spline_linear_int ( ndata, tdata, ydata, a, b, int_val )
 
   do i_left = a_right, b_left - 1
 
-    tval = ( tdata(i_left+1) + tdata(i_left) ) / 2.0E+00
+    tval = ( tdata(i_left+1) + tdata(i_left) ) / 2.0e+00
 
     yp = ( ydata(i_left+1) - ydata(i_left) ) / &
          ( tdata(i_left+1) - tdata(i_left) )
@@ -3517,7 +3517,7 @@ subroutine spline_linear_int ( ndata, tdata, ydata, a, b, int_val )
 
   end do
 
-  tval = ( tdata(b_left) + b_copy ) / 2.0E+00
+  tval = ( tdata(b_left) + b_copy ) / 2.0e+00
 
   yp = ( ydata(b_right) - ydata(b_left) ) / &
        ( tdata(b_right) - tdata(b_left) )
@@ -3536,47 +3536,47 @@ subroutine spline_linear_intset ( int_n, int_x, int_v, data_n, data_x, data_y )
 !
 !*******************************************************************************
 !
-!! SPLINE_LINEAR_INTSET sets a linear spline with given integral properties.
+!! spline_linear_intset sets a linear spline with given integral properties.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The user has in mind an interval, divided by INT_N+1 points into
-!    INT_N intervals.  A linear spline is to be constructed,
+!    the user has in mind an interval, divided by int_n+1 points into
+!    int_n intervals.  a linear spline is to be constructed,
 !    with breakpoints at the centers of each interval, and extending
 !    continuously to the left of the first and right of the last
-!    breakpoints.  The constraint on the linear spline is that it is
+!    breakpoints.  the constraint on the linear spline is that it is
 !    required that it have a given integral value over each interval.
 !
-!    A tridiagonal linear system of equations is solved for the
+!    a tridiagonal linear system of equations is solved for the
 !    values of the spline at the breakpoints.
 !
-!  Modified:
+!  modified:
 !
-!    02 November 2001
+!    02 november 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer INT_N, the number of intervals.
+!    input, integer int_n, the number of intervals.
 !
-!    Input, real INT_X(INT_N+1), the points that define the intervals.
-!    Interval I lies between INT_X(I) and INT_X(I+1).
+!    input, real int_x(int_n+1), the points that define the intervals.
+!    interval i lies between int_x(i) and int_x(i+1).
 !
-!    Input, real INT_V(INT_N), the desired value of the integral of the
+!    input, real int_v(int_n), the desired value of the integral of the
 !    linear spline over each interval.
 !
-!    Output, integer DATA_N, the number of data points defining the spline.
-!    (This is the same as INT_N).
+!    output, integer data_n, the number of data points defining the spline.
+!    (this is the same as int_n).
 !
-!    Output, real DATA_X(DATA_N), DATA_Y(DATA_N), the values of the independent
-!    and dependent variables at the data points.  The values of DATA_X are
-!    the interval midpoints.  The values of DATA_Y are determined in such
-!    a way that the exact integral of the linear spline over interval I
-!    is equal to INT_V(I).
+!    output, real data_x(data_n), data_y(data_n), the values of the independent
+!    and dependent variables at the data points.  the values of data_x are
+!    the interval midpoints.  the values of data_y are determined in such
+!    a way that the exact integral of the linear spline over interval i
+!    is equal to int_v(i).
 !
   implicit none
 !
@@ -3592,19 +3592,19 @@ subroutine spline_linear_intset ( int_n, int_x, int_v, data_n, data_x, data_y )
   real int_v(int_n)
   real int_x(int_n+1)
 !
-!  Set up the easy stuff.
+!  set up the easy stuff.
 !
   data_n = int_n
-  data_x(1:data_n) = 0.5E+00 * ( int_x(1:data_n) + int_x(2:data_n+1) )
+  data_x(1:data_n) = 0.5e+00 * ( int_x(1:data_n) + int_x(2:data_n+1) )
 !
-!  Set up C, D, E, the coefficients of the linear system.
+!  set up c, d, e, the coefficients of the linear system.
 !
-  c(1) = 0.0E+00
+  c(1) = 0.0e+00
   c(2:data_n-1) = 1.0 &
     - ( 0.5 * ( data_x(2:data_n-1) + int_x(2:data_n-1) ) &
     - data_x(1:data_n-2) ) &
     / ( data_x(2:data_n-1) - data_x(1:data_n-2) )
-  c(data_n) = 0.0E+00
+  c(data_n) = 0.0e+00
 
   d(1) = int_x(2) - int_x(1)
 
@@ -3617,28 +3617,28 @@ subroutine spline_linear_intset ( int_n, int_x, int_v, data_n, data_x, data_y )
 
   d(data_n) = int_x(data_n+1) - int_x(data_n)
 
-  e(1) = 0.0E+00
+  e(1) = 0.0e+00
 
   e(2:data_n-1) = ( 0.5 * ( data_x(2:data_n-1) + int_x(3:data_n) ) &
     - data_x(2:data_n-1) ) / ( data_x(3:data_n) - data_x(2:data_n-1) )
 
-  e(data_n) = 0.0E+00
+  e(data_n) = 0.0e+00
 !
-!  Set up DATA_Y, which begins as the right hand side of the linear system.
+!  set up data_y, which begins as the right hand side of the linear system.
 !
   data_y(1) = int_v(1)
-  data_y(2:data_n-1) = 2.0E+00 * int_v(2:data_n-1) &
+  data_y(2:data_n-1) = 2.0e+00 * int_v(2:data_n-1) &
     / ( int_x(3:int_n) - int_x(2:int_n-1) )
   data_y(data_n) = int_v(data_n)
 !
-!  Solve the linear system.
+!  solve the linear system.
 !
   call sgtsl ( data_n, c, d, e, data_y, info )
 
   if ( info /= 0 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_LINEAR_INTSET - Fatal error!'
-    write ( *, '(a)' ) '  The linear system is singular.'
+    write ( *, '(a)' ) 'spline_linear_intset - fatal error!'
+    write ( *, '(a)' ) '  the linear system is singular.'
     stop
   end if
 
@@ -3648,37 +3648,37 @@ subroutine spline_linear_val ( ndata, tdata, ydata, tval, yval, ypval )
 !
 !*******************************************************************************
 !
-!! SPLINE_LINEAR_VAL evaluates a linear spline at a specific point.
+!! spline_linear_val evaluates a linear spline at a specific point.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    Because of the extremely simple form of the linear spline,
-!    the raw data points ( TDATA(I), YDATA(I)) can be used directly to
-!    evaluate the spline at any point.  No processing of the data
+!    because of the extremely simple form of the linear spline,
+!    the raw data points ( tdata(i), ydata(i)) can be used directly to
+!    evaluate the spline at any point.  no processing of the data
 !    is required.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points defining the spline.
+!    input, integer ndata, the number of data points defining the spline.
 !
-!    Input, real TDATA(NDATA), YDATA(NDATA), the values of the independent
-!    and dependent variables at the data points.  The values of TDATA should
+!    input, real tdata(ndata), ydata(ndata), the values of the independent
+!    and dependent variables at the data points.  the values of tdata should
 !    be distinct and increasing.
 !
-!    Input, real TVAL, the point at which the spline is to be evaluated.
+!    input, real tval, the point at which the spline is to be evaluated.
 !
-!    Output, real YVAL, YPVAL, the value of the spline and its first
-!    derivative dYdT at TVAL.  YPVAL is not reliable if TVAL is exactly
-!    equal to TDATA(I) for some I.
+!    output, real yval, ypval, the value of the spline and its first
+!    derivative dydt at tval.  ypval is not reliable if tval is exactly
+!    equal to tdata(i) for some i.
 !
   implicit none
 !
@@ -3692,12 +3692,12 @@ subroutine spline_linear_val ( ndata, tdata, ydata, tval, yval, ypval )
   real ypval
   real yval
 !
-!  Find the interval [ TDATA(LEFT), TDATA(RIGHT) ] that contains, or is
-!  nearest to, TVAL.
+!  find the interval [ tdata(left), tdata(right) ] that contains, or is
+!  nearest to, tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Now evaluate the piecewise linear function.
+!  now evaluate the piecewise linear function.
 !
   ypval = ( ydata(right) - ydata(left) ) / ( tdata(right) - tdata(left) )
 
@@ -3709,41 +3709,41 @@ subroutine spline_overhauser_nonuni_val ( ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! SPLINE_OVERHAUSER_NONUNI_VAL evaluates the nonuniform Overhauser spline.
+!! spline_overhauser_nonuni_val evaluates the nonuniform overhauser spline.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    The nonuniformity refers to the fact that the abscissas values
+!    the nonuniformity refers to the fact that the abscissas values
 !    need not be uniformly spaced.
 !
-!  Diagnostics:
+!  diagnostics:
 !
-!    The values of ALPHA and BETA have to be properly assigned.
-!    The basis matrices for the first and last interval have to
+!    the values of alpha and beta have to be properly assigned.
+!    the basis matrices for the first and last interval have to
 !    be computed.
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points.
+!    input, integer ndata, the number of data points.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data points.
-!    The values of TDATA are assumed to be distinct and increasing.
+!    input, real tdata(ndata), the abscissas of the data points.
+!    the values of tdata are assumed to be distinct and increasing.
 !
-!    Input, real YDATA(NDATA), the data values.
+!    input, real ydata(ndata), the data values.
 !
-!    Input, real TVAL, the value where the spline is to
+!    input, real tval, the value where the spline is to
 !    be evaluated.
 !
-!    Output, real YVAL, the value of the spline at TVAL.
+!    output, real yval, the value of the spline at tval.
 !
   implicit none
 !
@@ -3761,30 +3761,30 @@ subroutine spline_overhauser_nonuni_val ( ndata, tdata, ydata, tval, yval )
   real ydata(ndata)
   real yval
 !
-!  Find the nearest interval [ TDATA(LEFT), TDATA(RIGHT) ] to TVAL.
+!  find the nearest interval [ tdata(left), tdata(right) ] to tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Evaluate the spline in the given interval.
+!  evaluate the spline in the given interval.
 !
   if ( left == 1 ) then
 
-    alpha = 1.0E+00
+    alpha = 1.0e+00
     call basis_matrix_overhauser_nul ( alpha, mbasis_l )
 
     call basis_matrix_tmp ( 1, 3, mbasis_l, ndata, tdata, ydata, tval, yval )
 
   else if ( left < ndata-1 ) then
 
-    alpha = 1.0E+00
-    beta = 1.0E+00
+    alpha = 1.0e+00
+    beta = 1.0e+00
     call basis_matrix_overhauser_nonuni ( alpha, beta, mbasis )
 
     call basis_matrix_tmp ( left, 4, mbasis, ndata, tdata, ydata, tval, yval )
 
   else if ( left == ndata-1 ) then
 
-    beta = 1.0E+00
+    beta = 1.0e+00
     call basis_matrix_overhauser_nur ( beta, mbasis_r )
 
     call basis_matrix_tmp ( left, 3, mbasis_r, ndata, tdata, ydata, tval, yval )
@@ -3797,32 +3797,32 @@ subroutine spline_overhauser_uni_val ( ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! SPLINE_OVERHAUSER_UNI_VAL evaluates the uniform Overhauser spline.
+!! spline_overhauser_uni_val evaluates the uniform overhauser spline.
 !
 !
-!  Modified:
+!  modified:
 !
-!    06 April 1999
+!    06 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points.
+!    input, integer ndata, the number of data points.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data points.
-!    The values of TDATA are assumed to be distinct and increasing.
-!    This routine also assumes that the values of TDATA are uniformly
-!    spaced; for instance, TDATA(1) = 10, TDATA(2) = 11, TDATA(3) = 12...
+!    input, real tdata(ndata), the abscissas of the data points.
+!    the values of tdata are assumed to be distinct and increasing.
+!    this routine also assumes that the values of tdata are uniformly
+!    spaced; for instance, tdata(1) = 10, tdata(2) = 11, tdata(3) = 12...
 !
-!    Input, real YDATA(NDATA), the data values.
+!    input, real ydata(ndata), the data values.
 !
-!    Input, real TVAL, the value where the spline is to
+!    input, real tval, the value where the spline is to
 !    be evaluated.
 !
-!    Output, real YVAL, the value of the spline at TVAL.
+!    output, real yval, the value of the spline at tval.
 !
   implicit none
 !
@@ -3838,11 +3838,11 @@ subroutine spline_overhauser_uni_val ( ndata, tdata, ydata, tval, yval )
   real ydata(ndata)
   real yval
 !
-!  Find the nearest interval [ TDATA(LEFT), TDATA(RIGHT) ] to TVAL.
+!  find the nearest interval [ tdata(left), tdata(right) ] to tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Evaluate the spline in the given interval.
+!  evaluate the spline in the given interval.
 !
   if ( left == 1 ) then
 
@@ -3870,64 +3870,64 @@ subroutine spline_overhauser_val ( ndim, ndata, tdata, ydata, tval, yval )
 !
 !*******************************************************************************
 !
-!! SPLINE_OVERHAUSER_VAL evaluates an Overhauser spline.
+!! spline_overhauser_val evaluates an overhauser spline.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    Over the first and last intervals, the Overhauser spline is a 
-!    quadratic.  In the intermediate intervals, it is a piecewise cubic.
-!    The Overhauser spline is also known as the Catmull-Rom spline.
+!    over the first and last intervals, the overhauser spline is a 
+!    quadratic.  in the intermediate intervals, it is a piecewise cubic.
+!    the overhauser spline is also known as the catmull-rom spline.
 !
-!  Reference:
+!  reference:
 !
-!    H Brewer and D Anderson,
-!    Visual Interaction with Overhauser Curves and Surfaces,
-!    SIGGRAPH 77, pages 132-137.
+!    h brewer and d anderson,
+!    visual interaction with overhauser curves and surfaces,
+!    siggraph 77, pages 132-137.
 !
-!    E Catmull and R Rom,
-!    A Class of Local Interpolating Splines,
-!    in Computer Aided Geometric Design,
-!    edited by R Barnhill and R Reisenfeld,
-!    Academic Press, 1974, pages 317-326.
+!    e catmull and r rom,
+!    a class of local interpolating splines,
+!    in computer aided geometric design,
+!    edited by r barnhill and r reisenfeld,
+!    academic press, 1974, pages 317-326.
 !
-!    David Rogers and Alan Adams,
-!    Mathematical Elements of Computer Graphics,
-!    McGraw Hill, 1990, Second Edition, pages 278-289.
+!    david rogers and alan adams,
+!    mathematical elements of computer graphics,
+!    mcgraw hill, 1990, second edition, pages 278-289.
 !
-!  Modified:
+!  modified:
 !
-!   08 April 1999
+!   08 april 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDIM, the dimension of a single data point.
-!    NDIM must be at least 1.  There is an internal limit on NDIM,
-!    called MAXDIM, which is presently set to 5.
+!    input, integer ndim, the dimension of a single data point.
+!    ndim must be at least 1.  there is an internal limit on ndim,
+!    called maxdim, which is presently set to 5.
 !
-!    Input, integer NDATA, the number of data points.
-!    NDATA must be at least 3.
+!    input, integer ndata, the number of data points.
+!    ndata must be at least 3.
 !
-!    Input, real TDATA(NDATA), the abscissas of the data points.  The
-!    values in TDATA must be in strictly ascending order.
+!    input, real tdata(ndata), the abscissas of the data points.  the
+!    values in tdata must be in strictly ascending order.
 !
-!    Input, real YDATA(NDIM,NDATA), the data points corresponding to
+!    input, real ydata(ndim,ndata), the data points corresponding to
 !    the abscissas.
 !
-!    Input, real TVAL, the abscissa value at which the spline
-!    is to be evaluated.  Normally, TDATA(1) <= TVAL <= T(NDATA), and 
-!    the data will be interpolated.  For TVAL outside this range, 
+!    input, real tval, the abscissa value at which the spline
+!    is to be evaluated.  normally, tdata(1) <= tval <= t(ndata), and 
+!    the data will be interpolated.  for tval outside this range, 
 !    extrapolation will be used.
 !
-!    Output, real YVAL(NDIM), the value of the spline at TVAL.
+!    output, real yval(ndim), the value of the spline at tval.
 !
   implicit none
 !
-  integer, parameter :: MAXDIM = 5
+  integer, parameter :: maxdim = 5
   integer ndata
   integer ndim
 !
@@ -3938,60 +3938,60 @@ subroutine spline_overhauser_val ( ndim, ndata, tdata, ydata, tval, yval )
   real tdata(ndata)
   real tval
   real ydata(ndim,ndata)
-  real yl(MAXDIM)
-  real yr(MAXDIM)
+  real yl(maxdim)
+  real yr(maxdim)
   real yval(ndim)
 !
-!  Check.
+!  check.
 !
   call rvec_order_type ( ndata, tdata, order )
 
   if ( order /= 2 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_OVERHAUSER_VAL - Fatal error!'
-    write ( *, '(a)' ) '  The data abscissas are not strictly ascending.'
+    write ( *, '(a)' ) 'spline_overhauser_val - fatal error!'
+    write ( *, '(a)' ) '  the data abscissas are not strictly ascending.'
     stop
   end if
 
   if ( ndata < 3 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_OVERHAUSER_VAL - Fatal error!'
-    write ( *, '(a)' ) '  NDATA < 3.'
+    write ( *, '(a)' ) 'spline_overhauser_val - fatal error!'
+    write ( *, '(a)' ) '  ndata < 3.'
     stop
   end if
 
   if ( ndim < 1 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_OVERHAUSER_VAL - Fatal error!'
-    write ( *, '(a)' ) '  NDIM < 1.'
+    write ( *, '(a)' ) 'spline_overhauser_val - fatal error!'
+    write ( *, '(a)' ) '  ndim < 1.'
     stop
   end if
 
   if ( ndim > maxdim ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_OVERHAUSER_VAL - Fatal error!'
-    write ( *, '(a)' ) '  NDIM > MAXDIM.'
+    write ( *, '(a)' ) 'spline_overhauser_val - fatal error!'
+    write ( *, '(a)' ) '  ndim > maxdim.'
     stop
   end if
 !
-!  Locate the abscissa interval T(LEFT), T(LEFT+1) nearest to or 
-!  containing TVAL.
+!  locate the abscissa interval t(left), t(left+1) nearest to or 
+!  containing tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Evaluate the "left hand" quadratic defined at T(LEFT-1), T(LEFT), T(RIGHT).
+!  evaluate the "left hand" quadratic defined at t(left-1), t(left), t(right).
 !
   if ( left-1 > 0 ) then
     call parabola_val2 ( ndim, ndata, tdata, ydata, left-1, tval, yl )
   end if
 !
-!  Evaluate the "right hand" quadratic defined at T(LEFT), T(RIGHT), T(RIGHT+1).
+!  evaluate the "right hand" quadratic defined at t(left), t(right), t(right+1).
 !
   if ( right+1 <= ndata ) then
     call parabola_val2 ( ndim, ndata, tdata, ydata, left, tval, yr )
   end if
 !
-!  Average the quadratics.
+!  average the quadratics.
 !
   if ( left == 1 ) then
 
@@ -4014,38 +4014,38 @@ subroutine spline_quadratic_val ( ndata, tdata, ydata, tval, yval, ypval )
 !
 !*******************************************************************************
 !
-!! SPLINE_QUADRATIC_VAL evaluates a quadratic spline at a specific point.
+!! spline_quadratic_val evaluates a quadratic spline at a specific point.
 !
 !
-!  Discussion:
+!  discussion:
 !
-!    Because of the simple form of a piecewise quadratic spline,
-!    the raw data points ( TDATA(I), YDATA(I)) can be used directly to
-!    evaluate the spline at any point.  No processing of the data
+!    because of the simple form of a piecewise quadratic spline,
+!    the raw data points ( tdata(i), ydata(i)) can be used directly to
+!    evaluate the spline at any point.  no processing of the data
 !    is required.
 !
-!  Modified:
+!  modified:
 !
-!    24 October 1999
+!    24 october 1999
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, integer NDATA, the number of data points defining the spline.
-!    NDATA should be odd.
+!    input, integer ndata, the number of data points defining the spline.
+!    ndata should be odd.
 !
-!    Input, real TDATA(NDATA), YDATA(NDATA), the values of the independent
-!    and dependent variables at the data points.  The values of TDATA should
+!    input, real tdata(ndata), ydata(ndata), the values of the independent
+!    and dependent variables at the data points.  the values of tdata should
 !    be distinct and increasing.
 !
-!    Input, real TVAL, the point at which the spline is to be evaluated.
+!    input, real tval, the point at which the spline is to be evaluated.
 !
-!    Output, real YVAL, YPVAL, the value of the spline and its first
-!    derivative dYdT at TVAL.  YPVAL is not reliable if TVAL is exactly
-!    equal to TDATA(I) for some I.
+!    output, real yval, ypval, the value of the spline and its first
+!    derivative dydt at tval.  ypval is not reliable if tval is exactly
+!    equal to tdata(i) for some i.
 !
   implicit none
 !
@@ -4069,23 +4069,23 @@ subroutine spline_quadratic_val ( ndata, tdata, ydata, tval, yval, ypval )
 !
   if ( mod ( ndata, 3 ) == 0 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_QUADRATIC_VAL - Fatal error!'
-    write ( *, '(a)' ) '  NDATA must be odd.'
+    write ( *, '(a)' ) 'spline_quadratic_val - fatal error!'
+    write ( *, '(a)' ) '  ndata must be odd.'
     stop
   end if
 !
-!  Find the interval [ TDATA(LEFT), TDATA(RIGHT) ] that contains, or is
-!  nearest to, TVAL.
+!  find the interval [ tdata(left), tdata(right) ] that contains, or is
+!  nearest to, tval.
 !
   call rvec_bracket ( ndata, tdata, tval, left, right )
 !
-!  Force LEFT to be odd.
+!  force left to be odd.
 !
   if ( mod ( left, 2 ) == 0 ) then
     left = left - 1
   end if
 !
-!  Copy out the three abscissas.
+!  copy out the three abscissas.
 !
   t1 = tdata(left)
   t2 = tdata(left+1)
@@ -4093,12 +4093,12 @@ subroutine spline_quadratic_val ( ndata, tdata, ydata, tval, yval, ypval )
 
   if ( t1 >= t2 .or. t2 >= t3 ) then
     write ( *, '(a)' ) ' '
-    write ( *, '(a)' ) 'SPLINE_QUADRATIC_VAL - Fatal error!'
-    write ( *, '(a)' ) '  T1 >= T2 or T2 >= T3.'
+    write ( *, '(a)' ) 'spline_quadratic_val - fatal error!'
+    write ( *, '(a)' ) '  t1 >= t2 or t2 >= t3.'
     stop
   end if
 !
-!  Construct and evaluate a parabolic interpolant for the data
+!  construct and evaluate a parabolic interpolant for the data
 !  in each dimension.
 !
   y1 = ydata(left)
@@ -4111,7 +4111,7 @@ subroutine spline_quadratic_val ( ndata, tdata, ydata, tval, yval, ypval )
        - ( y2 - y1 ) / ( t2 - t1 ) ) / ( t3 - t2 )
 
   yval = y1 + ( tval - t1 ) * ( dif1 + ( tval - t2 ) * dif2 )
-  ypval = dif1 + dif2 * ( 2.0E+00 * tval - t1 - t2 )
+  ypval = dif1 + dif2 * ( 2.0e+00 * tval - t1 - t2 )
 
   return
 end
@@ -4119,24 +4119,24 @@ subroutine timestamp ( )
 !
 !*******************************************************************************
 !
-!! TIMESTAMP prints the current YMDHMS date as a time stamp.
+!! timestamp prints the current ymdhms date as a time stamp.
 !
 !
-!  Example:
+!  example:
 !
-!    May 31 2001   9:45:54.872 AM
+!    may 31 2001   9:45:54.872 am
 !
-!  Modified:
+!  modified:
 !
-!    31 May 2001
+!    31 may 2001
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Parameters:
+!  parameters:
 !
-!    None
+!    none
 !
   implicit none
 !
@@ -4147,9 +4147,9 @@ subroutine timestamp ( )
   integer m
   integer mm
   character ( len = 9 ), parameter, dimension(12) :: month = (/ &
-    'January  ', 'February ', 'March    ', 'April    ', &
-    'May      ', 'June     ', 'July     ', 'August   ', &
-    'September', 'October  ', 'November ', 'December ' /)
+    'january  ', 'february ', 'march    ', 'april    ', &
+    'may      ', 'june     ', 'july     ', 'august   ', &
+    'september', 'october  ', 'november ', 'december ' /)
   integer n
   integer s
   character ( len = 10 )  time
@@ -4168,22 +4168,22 @@ subroutine timestamp ( )
   mm = values(8)
 
   if ( h < 12 ) then
-    ampm = 'AM'
+    ampm = 'am'
   else if ( h == 12 ) then
     if ( n == 0 .and. s == 0 ) then
-      ampm = 'Noon'
+      ampm = 'noon'
     else
-      ampm = 'PM'
+      ampm = 'pm'
     end if
   else
     h = h - 12
     if ( h < 12 ) then
-      ampm = 'PM'
+      ampm = 'pm'
     else if ( h == 12 ) then
       if ( n == 0 .and. s == 0 ) then
-        ampm = 'Midnight'
+        ampm = 'midnight'
       else
-        ampm = 'AM'
+        ampm = 'am'
       end if
     end if
   end if

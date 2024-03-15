@@ -1,520 +1,517 @@
 !dis
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
 !dis
-!dis    This software is distributed under the Open Source Definition,
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
 !dis
-!dis    In particular, redistribution and use in source and binary forms,
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
 !dis
-!dis    - Redistributions of source code must retain this notice, this
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
 !dis
-!dis    - Redistributions in binary form must provide access to this
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
 !dis
-!dis    - All modifications to this software must be clearly documented,
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
 !dis
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
 !dis
 !dis
 
-MODULE wfo_models
+module wfo_models
 
-  ! Module that contains routines and variable pertaining to the setup
-  ! of the background model grid being processed by sbnprep.
+   ! module that contains routines and variable pertaining to the setup
+   ! of the background model grid being processed by sbnprep.
 
-  USE map_utils
-  IMPLICIT NONE
-  INCLUDE 'netcdf.inc'
-  INTEGER                :: nfstatus
-  INTEGER                :: maxlevels = 100
-  INTEGER                :: maxtimes  = 100 
-  
-  PUBLIC open_wfofile, close_wfofile,get_wfomodel_var_levels, &
-         get_wfomodel_fcsttimes, get_wfomodel_proj,get_wfomodel_var_inv,&
-         read_wfomodel_data,get_wfomodel_topo
-CONTAINS
+   use map_utils
+   implicit none
+   include 'netcdf.inc'
+   integer                :: nfstatus
+   integer                :: maxlevels = 100
+   integer                :: maxtimes = 100
+
+   public open_wfofile, close_wfofile, get_wfomodel_var_levels, &
+      get_wfomodel_fcsttimes, get_wfomodel_proj, get_wfomodel_var_inv, &
+      read_wfomodel_data, get_wfomodel_topo
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE open_wfofile(nfname,nfid,istatus)
+   subroutine open_wfofile(nfname, nfid, istatus)
 
-    ! Given a netCDF file name, this routine opens it and returns the
-    ! integer netCDF file handle.
+      ! given a netcdf file name, this routine opens it and returns the
+      ! integer netcdf file handle.
 
-    IMPLICIT NONE
-    CHARACTER(LEN=256), INTENT(IN)  :: nfname  ! Input file name
-    INTEGER,INTENT(OUT)             :: nfid    ! Output unit number
-    INTEGER,INTENT(OUT)             :: istatus ! Status flag (1=succes)
-    
-    istatus = 1
-    nfstatus = NF_OPEN(nfname, NF_NOWRITE, nfid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem with netCDF file:',TRIM(nfname)
-      PRINT *, 'NetCDF Error = ', nfstatus
-      istatus = 0
-    ENDIF        
-    RETURN 
-  END SUBROUTINE open_wfofile  
+      implicit none
+      character(len=256), intent(in)  :: nfname  ! input file name
+      integer, intent(out)             :: nfid    ! output unit number
+      integer, intent(out)             :: istatus ! status flag (1=succes)
+
+      istatus = 1
+      nfstatus = nf_open(nfname, nf_nowrite, nfid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem with netcdf file:', trim(nfname)
+         print *, 'netcdf error = ', nfstatus
+         istatus = 0
+      end if
+      return
+   end subroutine open_wfofile
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE close_wfofile(nfid,istatus)
+   subroutine close_wfofile(nfid, istatus)
 
-    ! Closes an open NetCDF file given the integer netCDF file handle.
+      ! closes an open netcdf file given the integer netcdf file handle.
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)            :: nfid
-    INTEGER, INTENT(OUT)           :: istatus
-    
-    istatus = 1
-    nfstatus = NF_CLOSE(nfid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem closing netCDF file.'
-      PRINT *, 'NetCDF Error = ', nfstatus
-      istatus = 0
-    ENDIF
-    RETURN
-  END SUBROUTINE close_wfofile    
+      implicit none
+      integer, intent(in)            :: nfid
+      integer, intent(out)           :: istatus
+
+      istatus = 1
+      nfstatus = nf_close(nfid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem closing netcdf file.'
+         print *, 'netcdf error = ', nfstatus
+         istatus = 0
+      end if
+      return
+   end subroutine close_wfofile
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wfomodel_proj(nfid,mname,proj,istatus)
-   
-    ! Populates a projection information data structure defined
-    ! by module_map_utils.F for an already open WFO netCDF model
-    ! file.  Use open_wfofile to open the file before calling this
-    ! routine.  Getting projection info is a bit tricky, because the AWIPS
-    ! model files have often been clipped and do not give the grid spacing
-    ! at the actual true latitude of the projection.  Hence, the model name, 
-    ! which corresponds to the last two elements of the directory the model
-    ! file is located in (e.g., "CONUS212/MesoEta"), is used to make some
-    ! educated guesses. 
+   subroutine get_wfomodel_proj(nfid, mname, proj, istatus)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)           :: nfid
-    CHARACTER(LEN=132),INTENT(IN) :: mname
-    TYPE(proj_info),INTENT(OUT)  :: proj  ! Declared via "USE map_utils" 
-    INTEGER, INTENT(OUT)          :: istatus
+      ! populates a projection information data structure defined
+      ! by module_map_utils.f for an already open wfo netcdf model
+      ! file.  use open_wfofile to open the file before calling this
+      ! routine.  getting projection info is a bit tricky, because the awips
+      ! model files have often been clipped and do not give the grid spacing
+      ! at the actual true latitude of the projection.  hence, the model name,
+      ! which corresponds to the last two elements of the directory the model
+      ! file is located in (e.g., "conus212/mesoeta"), is used to make some
+      ! educated guesses.
 
-    INTEGER                       :: nx,ny
-    INTEGER                       :: vid,attnum,attid
-    REAL                          :: truelat1,truelat2
-    REAL                          :: stdlon
-    REAL                          :: latsw,lonsw
-    REAL                          :: latne,lonne
-    REAL                          :: latne_c,lonne_c
-    REAL                          :: difflat, difflon
-    REAL                          :: dx,dy
-    REAL                          :: truedx
-    REAL                          :: latdxdy,londxdy
-    CHARACTER(LEN=132)            :: gproj
-    
+      implicit none
+      integer, intent(in)           :: nfid
+      character(len=132), intent(in) :: mname
+      type(proj_info), intent(out)  :: proj  ! declared via "use map_utils"
+      integer, intent(out)          :: istatus
 
-    istatus = 1
-    gproj(1:132) = ' ' 
-    ! Get the horizontal dimensions
-    nfstatus = NF_INQ_DIMID(nfid, 'x', vid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem getting x dimension ID'
-      istatus = 0
-      RETURN
-    ENDIF
+      integer                       :: nx, ny
+      integer                       :: vid, attnum, attid
+      real                          :: truelat1, truelat2
+      real                          :: stdlon
+      real                          :: latsw, lonsw
+      real                          :: latne, lonne
+      real                          :: latne_c, lonne_c
+      real                          :: difflat, difflon
+      real                          :: dx, dy
+      real                          :: truedx
+      real                          :: latdxdy, londxdy
+      character(len=132)            :: gproj
 
-    nfstatus = NF_INQ_DIMLEN(nfid, vid, nx)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem getting x dimension'
-      istatus = 0
-      RETURN
-    ENDIF
+      istatus = 1
+      gproj(1:132) = ' '
+      ! get the horizontal dimensions
+      nfstatus = nf_inq_dimid(nfid, 'x', vid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem getting x dimension id'
+         istatus = 0
+         return
+      end if
 
-    nfstatus = NF_INQ_DIMID(nfid, 'y', vid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem getting y dimension ID'
-      istatus = 0
-      RETURN
-    ENDIF
+      nfstatus = nf_inq_dimlen(nfid, vid, nx)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem getting x dimension'
+         istatus = 0
+         return
+      end if
 
-    nfstatus = NF_INQ_DIMLEN(nfid,vid,ny)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem getting y dimension'
-      istatus = 0
-      RETURN
-    ENDIF                                           
+      nfstatus = nf_inq_dimid(nfid, 'y', vid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem getting y dimension id'
+         istatus = 0
+         return
+      end if
 
-    ! Get Projection Info
-    nfstatus = NF_INQ_ATTID(nfid,attid,'projName',attnum)
-    nfstatus = NF_GET_ATT_TEXT(nfid,attid,'projName',gproj)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'centralLat',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'centralLat',truelat1)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'centralLon',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'centralLon',stdlon)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'rotation',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'rotation',truelat2)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'lat00',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'lat00',latsw)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'lon00',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'lon00',lonsw)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'latNxNy',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'latNxNy',latne)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'lonNxNy',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'lonNxNy',lonne)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'dxKm',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'dxKm',dx)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'dyKm',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'dyKm',dy)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'latDxDy',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'latDxDy',latdxdy)
-    nfstatus = NF_INQ_ATTID(nfid,attid,'lonDxDy',attnum)
-    nfstatus = NF_GET_ATT_REAL(nfid,attid,'lonDxDy',londxdy)               
+      nfstatus = nf_inq_dimlen(nfid, vid, ny)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem getting y dimension'
+         istatus = 0
+         return
+      end if
 
-    ! Determine grid spacing at true latitude.  We have to do some
-    ! level of hard coding for efficiency here, because the SBN data feed
-    ! does not provide grid spacing at the true latitude.  Rather, it provides
-    ! a "self-computed" grid spacing at the approximate center of the domain.  So,
-    ! we will make a guess at the true dx, then use the mapping routines to
-    ! verify that we get the correct coordinate conversion when using the "guessed"
-    ! value. Down the road, we could put in some iterative method to do this using
-    ! the provided dx/dy values as a starting point.
+      ! get projection info
+      nfstatus = nf_inq_attid(nfid, attid, 'projname', attnum)
+      nfstatus = nf_get_att_text(nfid, attid, 'projname', gproj)
+      nfstatus = nf_inq_attid(nfid, attid, 'centrallat', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'centrallat', truelat1)
+      nfstatus = nf_inq_attid(nfid, attid, 'centrallon', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'centrallon', stdlon)
+      nfstatus = nf_inq_attid(nfid, attid, 'rotation', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'rotation', truelat2)
+      nfstatus = nf_inq_attid(nfid, attid, 'lat00', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'lat00', latsw)
+      nfstatus = nf_inq_attid(nfid, attid, 'lon00', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'lon00', lonsw)
+      nfstatus = nf_inq_attid(nfid, attid, 'latnxny', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'latnxny', latne)
+      nfstatus = nf_inq_attid(nfid, attid, 'lonnxny', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'lonnxny', lonne)
+      nfstatus = nf_inq_attid(nfid, attid, 'dxkm', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'dxkm', dx)
+      nfstatus = nf_inq_attid(nfid, attid, 'dykm', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'dykm', dy)
+      nfstatus = nf_inq_attid(nfid, attid, 'latdxdy', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'latdxdy', latdxdy)
+      nfstatus = nf_inq_attid(nfid, attid, 'londxdy', attnum)
+      nfstatus = nf_get_att_real(nfid, attid, 'londxdy', londxdy)
 
+      ! determine grid spacing at true latitude.  we have to do some
+      ! level of hard coding for efficiency here, because the sbn data feed
+      ! does not provide grid spacing at the true latitude.  rather, it provides
+      ! a "self-computed" grid spacing at the approximate center of the domain.  so,
+      ! we will make a guess at the true dx, then use the mapping routines to
+      ! verify that we get the correct coordinate conversion when using the "guessed"
+      ! value. down the road, we could put in some iterative method to do this using
+      ! the provided dx/dy values as a starting point.
 
-    IF (mname(1:8).EQ.'CONUS211') THEN
-      !  This is the NCEP 211 grid, which is not really 48km
-      truedx = 81270.50  ! meters at 25.0 N
-      CALL map_set(PROJ_LC,latsw,lonsw,truedx,stdlon,truelat1,truelat2, &
-                   nx,ny,proj)
-    ELSE IF (mname(1:8).EQ.'CONUS212') THEN
-      truedx = 40635.25
-      CALL map_set(PROJ_LC,latsw,lonsw,truedx,stdlon,truelat1,truelat2, &
-                   nx,ny,proj)
-    ELSE IF (mname(1:8).EQ.'CONUS215') THEN
-      truedx = 20317.625
-      CALL map_set(PROJ_LC,latsw,lonsw,truedx,stdlon,truelat1,truelat2, &
-                   nx,ny,proj)
-    ELSE IF (mname(1:6).EQ.'LATLON') THEN
-      ! True dx for this grid is in lat/lon increment
-      truedx = 1.25  ! degrees
-      ! For LATLON projections, the latitude increment is stored in truelat1 and
-      ! the longitudinal increment is put into stdlon.  For the AVN data on SBN,
-      ! The origin in this data set is listed as the NW corner, but the
-      ! array is actually set up with the origin at the southwest.
-      CALL map_set(PROJ_LATLON,latsw,lonsw,0.,truedx,truedx,0.,nx,ny,proj)
-    ELSE
-      PRINT *, 'Model type not yet supported: ', TRIM(mname)
-      istatus = 0      
-      RETURN
-    ENDIF
+      if (mname(1:8) .eq. 'conus211') then
+         !  this is the ncep 211 grid, which is not really 48km
+         truedx = 81270.50  ! meters at 25.0 n
+         call map_set(proj_lc, latsw, lonsw, truedx, stdlon, truelat1, truelat2, &
+                      nx, ny, proj)
+      else if (mname(1:8) .eq. 'conus212') then
+         truedx = 40635.25
+         call map_set(proj_lc, latsw, lonsw, truedx, stdlon, truelat1, truelat2, &
+                      nx, ny, proj)
+      else if (mname(1:8) .eq. 'conus215') then
+         truedx = 20317.625
+         call map_set(proj_lc, latsw, lonsw, truedx, stdlon, truelat1, truelat2, &
+                      nx, ny, proj)
+      else if (mname(1:6) .eq. 'latlon') then
+         ! true dx for this grid is in lat/lon increment
+         truedx = 1.25  ! degrees
+         ! for latlon projections, the latitude increment is stored in truelat1 and
+         ! the longitudinal increment is put into stdlon.  for the avn data on sbn,
+         ! the origin in this data set is listed as the nw corner, but the
+         ! array is actually set up with the origin at the southwest.
+         call map_set(proj_latlon, latsw, lonsw, 0., truedx, truedx, 0., nx, ny, proj)
+      else
+         print *, 'model type not yet supported: ', trim(mname)
+         istatus = 0
+         return
+      end if
 
-    ! Verify that the computed upper-right corner matches the specified upper right
-    ! corner
-    CALL ij_to_latlon(proj, FLOAT(nx),FLOAT(ny),latne_c,lonne_c)
-    print *, 'Comp latne/lonne = ', latne_c,lonne_c
-    print *, 'Spec latne/lonne = ', latne,lonne
-    difflat = ABS(latne_c - latne)
-    difflon = ABS(lonne_c - lonne)
-    IF ((difflat .GT. 0.001).OR.(difflon .GT.0.001)) THEN
-      PRINT *, 'Problem with projection information:'
-      PRINT *, 'Specified lat/lon at nx/ny = ', latne, lonne 
-      PRINT *, 'Computed lat/lon at nx/ny  = ', latne_c, lonne_c
-      istatus = 0
-      RETURN
-    ENDIF                                                                        
+      ! verify that the computed upper-right corner matches the specified upper right
+      ! corner
+      call ij_to_latlon(proj, float(nx), float(ny), latne_c, lonne_c)
+      print *, 'comp latne/lonne = ', latne_c, lonne_c
+      print *, 'spec latne/lonne = ', latne, lonne
+      difflat = abs(latne_c - latne)
+      difflon = abs(lonne_c - lonne)
+      if ((difflat .gt. 0.001) .or. (difflon .gt. 0.001)) then
+         print *, 'problem with projection information:'
+         print *, 'specified lat/lon at nx/ny = ', latne, lonne
+         print *, 'computed lat/lon at nx/ny  = ', latne_c, lonne_c
+         istatus = 0
+         return
+      end if
 
-    ! If we made it this far, print out some diagnostic information.
-    PRINT *, 'WFO model map projection info for ', TRIM(mname)
-    PRINT *, '------------------------------------------------------------'
-    PRINT *, 'Projection Type:              ', TRIM(gproj)
-    PRINT *, 'Southwest Lat/Lon:            ', proj%lat1, proj%lon1
-    PRINT *, 'dLat/dLon (LATLON Proj only): ', proj%dlat,proj%dlon
-    PRINT *, 'Standard Lon:                 ', proj%stdlon
-    PRINT *, 'Truelat1/Truelat2:            ', proj%truelat1,proj%truelat2
-    PRINT *, 'Hemi (1 for NH, -1 for SH):   ', proj%hemi
-    PRINT *, 'Cone factor:                  ', proj%cone
-    PRINT *, 'Pole point (i/j):             ', proj%polei,proj%polej
-    RETURN 
-  END SUBROUTINE get_wfomodel_proj
+      ! if we made it this far, print out some diagnostic information.
+      print *, 'wfo model map projection info for ', trim(mname)
+      print *, '------------------------------------------------------------'
+      print *, 'projection type:              ', trim(gproj)
+      print *, 'southwest lat/lon:            ', proj%lat1, proj%lon1
+      print *, 'dlat/dlon (latlon proj only): ', proj%dlat, proj%dlon
+      print *, 'standard lon:                 ', proj%stdlon
+      print *, 'truelat1/truelat2:            ', proj%truelat1, proj%truelat2
+      print *, 'hemi (1 for nh, -1 for sh):   ', proj%hemi
+      print *, 'cone factor:                  ', proj%cone
+      print *, 'pole point (i/j):             ', proj%polei, proj%polej
+      return
+   end subroutine get_wfomodel_proj
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wfomodel_var_levels(nfid,varname,varid,n_levels,levels_c, &
-                                   n_plevels,plevels_r,pbot_ind, ptop_ind, &
-                                   havesfc, sfc_ind, &
-                                   istatus)
-    
-    ! Given a file handle for a previously opened netCDF WFO
-    ! AWIPS-format model file and a character variable name,
-    ! this routine will return various pieces of information
-    ! about the variable, including number of total levels,
-    ! an array of level IDs, number of pressure levels, array
-    ! of pressure levels in Pa, and a flag as to whether or
-    ! not there is a surface value.  It also returns the netCDF
-    ! integer variable ID.
+   subroutine get_wfomodel_var_levels(nfid, varname, varid, n_levels, levels_c, &
+                                      n_plevels, plevels_r, pbot_ind, ptop_ind, &
+                                      havesfc, sfc_ind, &
+                                      istatus)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)            :: nfid
-    CHARACTER(LEN=10),INTENT(IN)   :: varname
-    INTEGER, INTENT(OUT)           :: varid
-    INTEGER, INTENT(OUT)           :: n_levels
-    CHARACTER(LEN=10),INTENT(OUT)  :: levels_c(maxlevels)
-    INTEGER, INTENT(OUT)           :: n_plevels
-    REAL, INTENT(OUT)              :: plevels_r(maxlevels)
-    INTEGER, INTENT(OUT)           :: ptop_ind
-    INTEGER, INTENT(OUT)           :: pbot_ind
-    INTEGER, INTENT(OUT)           :: sfc_ind
-    LOGICAL, INTENT(OUT)           :: havesfc
-    INTEGER, INTENT(OUT)           :: istatus
+      ! given a file handle for a previously opened netcdf wfo
+      ! awips-format model file and a character variable name,
+      ! this routine will return various pieces of information
+      ! about the variable, including number of total levels,
+      ! an array of level ids, number of pressure levels, array
+      ! of pressure levels in pa, and a flag as to whether or
+      ! not there is a surface value.  it also returns the netcdf
+      ! integer variable id.
 
-    CHARACTER(LEN=32)              :: levname
-    INTEGER                        :: levid
-    INTEGER                        :: dimid(4)
-    CHARACTER(LEN=10)              :: sfc_level
-    CHARACTER(LEN=10)              :: level_txt
-    INTEGER                        :: k,kp
-    REAL                           :: press_mb
-    CHARACTER(len=2)               :: dummy2
-    istatus = 1
-    n_levels = 0
-    n_plevels = 0
-    havesfc = .false.
-    varid = -1
-    pbot_ind = -1
-    ptop_ind = -1
-    sfc_ind = -1
+      implicit none
+      integer, intent(in)            :: nfid
+      character(len=10), intent(in)   :: varname
+      integer, intent(out)           :: varid
+      integer, intent(out)           :: n_levels
+      character(len=10), intent(out)  :: levels_c(maxlevels)
+      integer, intent(out)           :: n_plevels
+      real, intent(out)              :: plevels_r(maxlevels)
+      integer, intent(out)           :: ptop_ind
+      integer, intent(out)           :: pbot_ind
+      integer, intent(out)           :: sfc_ind
+      logical, intent(out)           :: havesfc
+      integer, intent(out)           :: istatus
 
-    IF ( (TRIM(varname).EQ.'t').OR. &
-        ( TRIM(varname).EQ.'rh')) THEN
-       sfc_level = 'FHAG 2    '
-    ELSE IF ((TRIM(varname).EQ.'uw').OR. &
-             (TRIM(varname).EQ.'vw'))THEN
-       sfc_level = 'FHAG 10   '
-    ELSE IF ((TRIM(varname).EQ.'emsp').OR.&
-             (TRIM(varname).EQ.'pmsl').OR.&
-             (TRIM(varname).EQ.'mmsp'))THEN
-       sfc_level = 'MSL       '
-    ELSE
-       sfc_level = 'UNKNOWN   '
-    ENDIF
+      character(len=32)              :: levname
+      integer                        :: levid
+      integer                        :: dimid(4)
+      character(len=10)              :: sfc_level
+      character(len=10)              :: level_txt
+      integer                        :: k, kp
+      real                           :: press_mb
+      character(len=2)               :: dummy2
+      istatus = 1
+      n_levels = 0
+      n_plevels = 0
+      havesfc = .false.
+      varid = -1
+      pbot_ind = -1
+      ptop_ind = -1
+      sfc_ind = -1
 
-    ! Get the variable ID for the variable requested
-    nfstatus = NF_INQ_VARID(nfid,varname,varid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Variable not found: ', varname
-      istatus = 0
-      RETURN
-    ENDIF
+      if ((trim(varname) .eq. 't') .or. &
+          (trim(varname) .eq. 'rh')) then
+         sfc_level = 'fhag 2    '
+      else if ((trim(varname) .eq. 'uw') .or. &
+               (trim(varname) .eq. 'vw')) then
+         sfc_level = 'fhag 10   '
+      else if ((trim(varname) .eq. 'emsp') .or. &
+               (trim(varname) .eq. 'pmsl') .or. &
+               (trim(varname) .eq. 'mmsp')) then
+         sfc_level = 'msl       '
+      else
+         sfc_level = 'unknown   '
+      end if
 
-    ! Build the name of the level variable   
-    levname = TRIM(varname) //'Levels'
-    nfstatus = NF_INQ_VARID(nfid,levname,levid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'No Levels variable found for ',TRIM(levname)
-      istatus = 0
-      RETURN
-    ENDIF
-    nfstatus = NF_INQ_VARDIMID(nfid,levid,dimid)
-    nfstatus = NF_INQ_DIMLEN(nfid,dimid(2),n_levels)
-    IF (n_levels .GT. 0) THEN
-      nfstatus = NF_GET_VAR_TEXT(nfid,levid,levels_c)
-      ! Scan for number of levels on pressure surfaces
-      DO k = 1, n_levels
-        level_txt = levels_c(k)
-        IF (level_txt(1:2) .EQ. 'MB') THEN
-          n_plevels = n_plevels + 1
+      ! get the variable id for the variable requested
+      nfstatus = nf_inq_varid(nfid, varname, varid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'variable not found: ', varname
+         istatus = 0
+         return
+      end if
 
-          ! Assume the pressure level data is contiguous from
-          ! the lower atmosphere upward in the array 
-          IF (pbot_ind .LE. 0) pbot_ind = k
-        ELSE IF (level_txt .EQ. sfc_level)THEN
-            havesfc = .true.
-            IF (sfc_ind .LE. 0) sfc_ind = k
-        ENDIF
-      ENDDO
-      IF (n_plevels .GT. 0) THEN
-        ptop_ind = pbot_ind + n_plevels-1
-        kp = 1
-        DO k=1,n_levels
-          level_txt = levels_c(k)
-          IF (level_txt(1:2).EQ.'MB')THEN
-            READ(level_txt,'(A2,1x,F7.0)') dummy2, press_mb
-            plevels_r(kp) = press_mb * 100.
-            kp = kp + 1
-          ENDIF
-        ENDDO
-      ENDIF
-    ENDIF  
-    PRINT *, 'Level info for variable ', TRIM(varname)
-    PRINT *, '-------------------------------------------------'
-    PRINT *, 'Num Total Levels:        ', n_levels
-    PRINT *, 'Level IDs: ', levels_c(1:n_levels)
-    PRINT *, 'Num Pressure Levels:     ', n_plevels
-    PRINT *, 'Pressure levels (Pa):', plevels_r(1:n_plevels)
-    PRINT *, 'Found surface value:     ', havesfc
-    PRINT *, 'KBOTP/KTOPP/KSFC:   ', pbot_ind,ptop_ind,sfc_ind
-    RETURN
-  END SUBROUTINE get_wfomodel_var_levels
+      ! build the name of the level variable
+      levname = trim(varname)//'levels'
+      nfstatus = nf_inq_varid(nfid, levname, levid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'no levels variable found for ', trim(levname)
+         istatus = 0
+         return
+      end if
+      nfstatus = nf_inq_vardimid(nfid, levid, dimid)
+      nfstatus = nf_inq_dimlen(nfid, dimid(2), n_levels)
+      if (n_levels .gt. 0) then
+         nfstatus = nf_get_var_text(nfid, levid, levels_c)
+         ! scan for number of levels on pressure surfaces
+         do k = 1, n_levels
+            level_txt = levels_c(k)
+            if (level_txt(1:2) .eq. 'mb') then
+               n_plevels = n_plevels + 1
+
+               ! assume the pressure level data is contiguous from
+               ! the lower atmosphere upward in the array
+               if (pbot_ind .le. 0) pbot_ind = k
+            else if (level_txt .eq. sfc_level) then
+               havesfc = .true.
+               if (sfc_ind .le. 0) sfc_ind = k
+            end if
+         end do
+         if (n_plevels .gt. 0) then
+            ptop_ind = pbot_ind + n_plevels - 1
+            kp = 1
+            do k = 1, n_levels
+               level_txt = levels_c(k)
+               if (level_txt(1:2) .eq. 'mb') then
+                  read (level_txt, '(a2,1x,f7.0)') dummy2, press_mb
+                  plevels_r(kp) = press_mb*100.
+                  kp = kp + 1
+               end if
+            end do
+         end if
+      end if
+      print *, 'level info for variable ', trim(varname)
+      print *, '-------------------------------------------------'
+      print *, 'num total levels:        ', n_levels
+      print *, 'level ids: ', levels_c(1:n_levels)
+      print *, 'num pressure levels:     ', n_plevels
+      print *, 'pressure levels (pa):', plevels_r(1:n_plevels)
+      print *, 'found surface value:     ', havesfc
+      print *, 'kbotp/ktopp/ksfc:   ', pbot_ind, ptop_ind, sfc_ind
+      return
+   end subroutine get_wfomodel_var_levels
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wfomodel_fcsttimes(nfid,ntimes,fcstsec,istatus)
-  
-    ! Given the integer file handle of a previously opened
-    ! AWIPS netCDF model file, this routine returns the  number 
-    ! of output forecast times and each valtime-reftime in seconds.
+   subroutine get_wfomodel_fcsttimes(nfid, ntimes, fcstsec, istatus)
 
-    IMPLICIT NONE
-    
-    INTEGER, INTENT(IN)                :: nfid
-    INTEGER, INTENT(OUT)               :: ntimes
-    INTEGER, INTENT(OUT)               :: fcstsec(maxtimes)
-    INTEGER, INTENT(OUT)               :: istatus
+      ! given the integer file handle of a previously opened
+      ! awips netcdf model file, this routine returns the  number
+      ! of output forecast times and each valtime-reftime in seconds.
 
-    INTEGER                            :: timeid
-    istatus = 1
+      implicit none
 
-    nfstatus = NF_INQ_DIMID(nfid,'n_valtimes',timeid)
-    IF (nfstatus .NE. NF_NOERR)  THEN
-      PRINT *, 'Could not obtain n_valtimes variable ID'
-      istatus = 0
-      RETURN
-    ENDIF
-    nfstatus = NF_INQ_DIMLEN(nfid,timeid,ntimes)
-    nfstatus = NF_INQ_VARID(nfid,'valtimeMINUSreftime',timeid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Could not obtain valtimeMINUSreftime'
-      istatus = 0
-      RETURN
-    ENDIF
-    nfstatus = NF_GET_VARA_INT(nfid,timeid,1,ntimes,fcstsec(1:ntimes))
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem obtaining the valid times'
-      istatus = 0 
-    ENDIF 
-    PRINT *, 'Forecast hours found: ', fcstsec(1:ntimes)/3600
-    RETURN
-  END SUBROUTINE get_wfomodel_fcsttimes
+      integer, intent(in)                :: nfid
+      integer, intent(out)               :: ntimes
+      integer, intent(out)               :: fcstsec(maxtimes)
+      integer, intent(out)               :: istatus
+
+      integer                            :: timeid
+      istatus = 1
+
+      nfstatus = nf_inq_dimid(nfid, 'n_valtimes', timeid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'could not obtain n_valtimes variable id'
+         istatus = 0
+         return
+      end if
+      nfstatus = nf_inq_dimlen(nfid, timeid, ntimes)
+      nfstatus = nf_inq_varid(nfid, 'valtimeminusreftime', timeid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'could not obtain valtimeminusreftime'
+         istatus = 0
+         return
+      end if
+      nfstatus = nf_get_vara_int(nfid, timeid, 1, ntimes, fcstsec(1:ntimes))
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem obtaining the valid times'
+         istatus = 0
+      end if
+      print *, 'forecast hours found: ', fcstsec(1:ntimes)/3600
+      return
+   end subroutine get_wfomodel_fcsttimes
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE read_wfomodel_data(nfid,vid,proj,time_ind, &
-            start_lev,stop_lev,data,istatus)
+   subroutine read_wfomodel_data(nfid, vid, proj, time_ind, &
+                                 start_lev, stop_lev, data, istatus)
 
-    ! Subroutine to read a specific variable (given by integer
-    ! variable ID) from a specific file (given by integer file ID)
-    ! from the start/stop values for each dimension of the array.   The
-    ! routine presumes you have already called open_wfofile and 
-    ! get_wfomodel_var_levels for the variable you want to obtain.
+      ! subroutine to read a specific variable (given by integer
+      ! variable id) from a specific file (given by integer file id)
+      ! from the start/stop values for each dimension of the array.   the
+      ! routine presumes you have already called open_wfofile and
+      ! get_wfomodel_var_levels for the variable you want to obtain.
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)                   :: nfid
-    INTEGER, INTENT(IN)                   :: vid
-    TYPE(proj_info),INTENT(IN)            :: proj
-    INTEGER,INTENT(IN)                    :: time_ind
-    INTEGER,INTENT(IN)                    :: start_lev
-    INTEGER,INTENT(IN)                    :: stop_lev
-    REAL,INTENT(OUT)                      :: data(proj%nx,proj%ny, &
-                                              stop_lev-start_lev+1)
-    INTEGER, INTENT(OUT)                  :: istatus
+      implicit none
+      integer, intent(in)                   :: nfid
+      integer, intent(in)                   :: vid
+      type(proj_info), intent(in)            :: proj
+      integer, intent(in)                    :: time_ind
+      integer, intent(in)                    :: start_lev
+      integer, intent(in)                    :: stop_lev
+      real, intent(out)                      :: data(proj%nx, proj%ny, &
+                                                     stop_lev - start_lev + 1)
+      integer, intent(out)                  :: istatus
 
-    INTEGER                               :: start_ind(4)
-    INTEGER                               :: count_ind(4)
+      integer                               :: start_ind(4)
+      integer                               :: count_ind(4)
 
-    istatus = 1
-    start_ind(4) = time_ind
-    count_ind(4) = 1
-    start_ind(3) = start_lev
-    count_ind(3) = stop_lev - start_lev + 1
-    start_ind(2) = 1
-    count_ind(2) = proj%ny
-    start_ind(1) = 1
-    count_ind(1) = proj%nx
+      istatus = 1
+      start_ind(4) = time_ind
+      count_ind(4) = 1
+      start_ind(3) = start_lev
+      count_ind(3) = stop_lev - start_lev + 1
+      start_ind(2) = 1
+      count_ind(2) = proj%ny
+      start_ind(1) = 1
+      count_ind(1) = proj%nx
 
-    nfstatus = NF_GET_VARA_REAL(nfid,vid,start_ind,count_ind,data)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem obtaining variable for VID = ', vid
-      istatus = 0
-    ENDIF
-    RETURN
-  END SUBROUTINE read_wfomodel_data 
+      nfstatus = nf_get_vara_real(nfid, vid, start_ind, count_ind, data)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem obtaining variable for vid = ', vid
+         istatus = 0
+      end if
+      return
+   end subroutine read_wfomodel_data
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wfomodel_topo(nfid,proj,topo,istatus)
-  
-    ! This routine will obtain the topography data from
-    ! an AWIPS model file.  It assumes you have already opened
-    ! the file to get nfid and called the get_wfomodel_proj routine
-    ! to get the proj structure and that topo is already allocated
+   subroutine get_wfomodel_topo(nfid, proj, topo, istatus)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)           :: nfid
-    TYPE(proj_info),INTENT(IN)    :: proj
-    REAL, INTENT(OUT)             :: topo(proj%nx,proj%ny)
-    INTEGER, INTENT(OUT)          :: istatus
-    INTEGER                       :: topoid 
-    istatus = 1
+      ! this routine will obtain the topography data from
+      ! an awips model file.  it assumes you have already opened
+      ! the file to get nfid and called the get_wfomodel_proj routine
+      ! to get the proj structure and that topo is already allocated
 
-    nfstatus = NF_INQ_VARID(nfid,'staticTopo',topoid)
-    IF(nfstatus.ne.NF_NOERR) then
-      print *, NF_STRERROR(nfstatus)
-      print *,'NF_INQ_VARID staticTopo'
-      istatus = 0
-      RETURN                  
-    ENDIF
+      implicit none
+      integer, intent(in)           :: nfid
+      type(proj_info), intent(in)    :: proj
+      real, intent(out)             :: topo(proj%nx, proj%ny)
+      integer, intent(out)          :: istatus
+      integer                       :: topoid
+      istatus = 1
 
-    nfstatus = NF_GET_VAR_REAL(nfid,topoid,topo)
-        IF(nfstatus.ne.NF_NOERR) then
-      print *, NF_STRERROR(nfstatus)
-      print *,'NF_GET_VAR_REAL staticTopo'
-      istatus = 0
-      RETURN
-    ENDIF                   
+      nfstatus = nf_inq_varid(nfid, 'statictopo', topoid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, nf_strerror(nfstatus)
+         print *, 'nf_inq_varid statictopo'
+         istatus = 0
+         return
+      end if
 
-    RETURN
-  END SUBROUTINE get_wfomodel_topo
+      nfstatus = nf_get_var_real(nfid, topoid, topo)
+      if (nfstatus .ne. nf_noerr) then
+         print *, nf_strerror(nfstatus)
+         print *, 'nf_get_var_real statictopo'
+         istatus = 0
+         return
+      end if
+
+      return
+   end subroutine get_wfomodel_topo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wfomodel_var_inv(nfid,varname,nlevs,ntimes,inv,istatus)
-  
-    ! Subroutine to return the inventory of a specific variable
-    ! from an AWIPS netCDF model bigfile.  The inventory is returned
-    ! as a 2D array of logical flags dimensioned (n_levels,ntimes)
+   subroutine get_wfomodel_var_inv(nfid, varname, nlevs, ntimes, inv, istatus)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)              :: nfid
-    CHARACTER(LEN=10),INTENT(IN)     :: varname
-    INTEGER,INTENT(IN)               :: nlevs
-    INTEGER,INTENT(IN)               :: ntimes
-    LOGICAL,INTENT(OUT)              :: inv(nlevs,ntimes)
-    INTEGER,INTENT(OUT)              :: istatus
+      ! subroutine to return the inventory of a specific variable
+      ! from an awips netcdf model bigfile.  the inventory is returned
+      ! as a 2d array of logical flags dimensioned (n_levels,ntimes)
 
-    CHARACTER(LEN=1),ALLOCATABLE     :: invchar(:,:)
-    CHARACTER(LEN=16)                :: invname
-    INTEGER                          :: invid
+      implicit none
+      integer, intent(in)              :: nfid
+      character(len=10), intent(in)     :: varname
+      integer, intent(in)               :: nlevs
+      integer, intent(in)               :: ntimes
+      logical, intent(out)              :: inv(nlevs, ntimes)
+      integer, intent(out)              :: istatus
 
-    istatus = 1
-    invname = TRIM(varname) //'Inventory'
-    nfstatus = NF_INQ_VARID(nfid,invname,invid)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'No variable found: ', TRIM(invname)
-      istatus = 0
-      RETURN
-    ENDIF
-  
-    ALLOCATE(invchar(nlevs,ntimes)) 
-    nfstatus = NF_GET_VAR_TEXT(nfid,invid,invchar)
-    IF (nfstatus .NE. NF_NOERR) THEN
-      PRINT *, 'Problem getting inventory.'
-      istatus = 0
-      RETURN
-    ENDIF
+      character(len=1), allocatable     :: invchar(:, :)
+      character(len=16)                :: invname
+      integer                          :: invid
 
-    inv(:,:) = .false.
-    WHERE (invchar .EQ. '1') inv = .true.
-    DEALLOCATE(invchar)
-    RETURN
-  END SUBROUTINE get_wfomodel_var_inv
+      istatus = 1
+      invname = trim(varname)//'inventory'
+      nfstatus = nf_inq_varid(nfid, invname, invid)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'no variable found: ', trim(invname)
+         istatus = 0
+         return
+      end if
+
+      allocate (invchar(nlevs, ntimes))
+      nfstatus = nf_get_var_text(nfid, invid, invchar)
+      if (nfstatus .ne. nf_noerr) then
+         print *, 'problem getting inventory.'
+         istatus = 0
+         return
+      end if
+
+      inv(:, :) = .false.
+      where (invchar .eq. '1') inv = .true.
+      deallocate (invchar)
+      return
+   end subroutine get_wfomodel_var_inv
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-END MODULE wfo_models
+end module wfo_models
 
-                                                                      

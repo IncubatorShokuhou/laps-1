@@ -1,28 +1,28 @@
       subroutine rdieee(rieee,a,num)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    rdieee 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-09
+! subprogram:    rdieee 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-09
 !
-! ABSTRACT: This subroutine reads a list of real values in 
-!   32-bit IEEE floating point format.
+! abstract: this subroutine reads a list of real values in 
+!   32-bit ieee floating point format.
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-09  Gilbert
+! program history log:
+! 2000-05-09  gilbert
 !
-! USAGE:    CALL rdieee(rieee,a,num)
-!   INPUT ARGUMENT LIST:
-!     rieee    - Input array of floating point values in 32-bit IEEE format.
-!     num      - Number of floating point values to convert.
+! usage:    call rdieee(rieee,a,num)
+!   input argument list:
+!     rieee    - input array of floating point values in 32-bit ieee format.
+!     num      - number of floating point values to convert.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     a        - Output array of real values.
+!   output argument list:      
+!     a        - output array of real values.
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -36,7 +36,7 @@
       real,save :: two126
       integer,save :: once=0
 
-      if ( once .EQ. 0 ) then
+      if ( once .eq. 0 ) then
          once=1
          two23=scale(1.0,-23)
          two126=scale(1.0,-126)
@@ -44,11 +44,11 @@
 
       do j=1,num
 !
-!  Transfer IEEE bit string to integer variable
+!  transfer ieee bit string to integer variable
 !
         ieee=transfer(rieee(j),ieee)
 !
-!  Extract sign bit, exponent, and mantissa
+!  extract sign bit, exponent, and mantissa
 !
         isign=ibits(ieee,31,1)
         iexp=ibits(ieee,23,8)

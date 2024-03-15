@@ -1,276 +1,275 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
-  SUBROUTINE WINTPREC (TSIG, ZSIG, ZPRS, PSFC, TSFC, &
-                       TERRAIN, PRCPINC, IMAX, JMAX, &
-                       KSIG, KPRS, K700, K850, &
-                       K1000, PRCPCONV, PRECIPTYPE)         
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
+  subroutine wintprec(tsig, zsig, zprs, psfc, tsfc, &
+                      terrain, prcpinc, imax, jmax, &
+                      ksig, kprs, k700, k850, &
+                      k1000, prcpconv, preciptype)
 
-!-----------------------------------------------------------------------  
-!--   (WINTER) PRECIPITATION ALGORITHM
+!-----------------------------------------------------------------------
+!--   (winter) precipitation algorithm
 !--
-!--   PURPOSE:  This product identifies areas of precipitation and the
-!--   type expected, based on MM5 data.  The process is essentially two-
-!--   fold.  First, areas of precipitation are identified when the MM5 
-!--   precipitation array (PRCPINC) exceeds 0.01 inch. 
+!--   purpose:  this product identifies areas of precipitation and the
+!--   type expected, based on mm5 data.  the process is essentially two-
+!--   fold.  first, areas of precipitation are identified when the mm5
+!--   precipitation array (prcpinc) exceeds 0.01 inch.
 !--
-!--   Second, thickness thresholds are used at the gridpoints for which 
-!--   it has been determined that precipitation is occurring and the    
-!--   surface pressure is greater than 850mb (i.e., non-mountainous    
-!--   regions).  The thickness thresholds utilized are based on         
+!--   second, thickness thresholds are used at the gridpoints for which
+!--   it has been determined that precipitation is occurring and the
+!--   surface pressure is greater than 850mb (i.e., non-mountainous
+!--   regions).  the thickness thresholds utilized are based on
 !--   meteorological research from the pertinent sources
-!--   (e.g., MWR, W&F), and are as follows: 
+!--   (e.g., mwr, w&f), and are as follows:
 !--
-!--                               (THICK1)     (THICK2)   
-!--                             1000mb-850mb  850mb-700mb  <--THICKNESS
+!--                               (thick1)     (thick2)
+!--                             1000mb-850mb  850mb-700mb  <--thickness
 !--
-!--   PRECIPITATION TYPE:   RAIN   GT 1310      GT 1540 
+!--   precipitation type:   rain   gt 1310      gt 1540
 !--
-!--                FREEZING RAIN   GT 1310      GT 1540 [sig1 T < 0Co]
+!--                freezing rain   gt 1310      gt 1540 [sig1 t < 0co]
 !--
-!--                    ICE/MIXED   LE 1310      GT 1540 
+!--                    ice/mixed   le 1310      gt 1540
 !--
-!--                         SNOW   LE 1310      LE 1540. 
+!--                         snow   le 1310      le 1540.
 !--
-!--   Over mountainous terrain, precipitation type is limited to either 
-!--   rain or snow.  This is consistent with climatic data presented in 
-!--   "A Regional Climatology of Freezing Precipitation for the        
-!--   Contiguous United States" (10th Conf. on Applied Climatology, 20-
-!--   24 Oct 97).  Where a precipitation occurrence has been determined, 
-!--   the temperatures in the lowest 1500 m are checked.  If all are 
-!--   below freezing, SNOW is forecasted; otherwise RAIN is predicted.
+!--   over mountainous terrain, precipitation type is limited to either
+!--   rain or snow.  this is consistent with climatic data presented in
+!--   "a regional climatology of freezing precipitation for the
+!--   contiguous united states" (10th conf. on applied climatology, 20-
+!--   24 oct 97).  where a precipitation occurrence has been determined,
+!--   the temperatures in the lowest 1500 m are checked.  if all are
+!--   below freezing, snow is forecasted; otherwise rain is predicted.
 !--
-!--   MODIFICATION:  Added ability to predict regions where thunderstorm
-!--   activity may occur.  Prior to exiting the main loop, a check is 
-!--   made:  where rain is predicted AND the convective component of the
-!--   precip exceeds 0.01", forecast for thunderstorms.  
+!--   modification:  added ability to predict regions where thunderstorm
+!--   activity may occur.  prior to exiting the main loop, a check is
+!--   made:  where rain is predicted and the convective component of the
+!--   precip exceeds 0.01", forecast for thunderstorms.
 !--
-!--   UPDATES
+!--   updates
 !--   =======
-!--   JAN 2001 1998  INITIAL VERSION, ADAPTED FROM USAF WEATHER AGENCY
-!--       Brent Shaw, NOAA/Forecast Systems Lab
+!--   jan 2001 1998  initial version, adapted from usaf weather agency
+!--       brent shaw, noaa/forecast systems lab
 !
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
 
+     use constants
+     implicit none
 
-      USE constants
-      IMPLICIT NONE
+     integer                        :: i
+     integer, intent(in)        :: imax
+     integer                        :: j
+     integer, intent(in)        :: jmax
+     integer                        :: k
+     integer, intent(in)        :: k700
+     integer, intent(in)        :: k850
+     integer, intent(in)        :: k1000
+     integer                        :: kprs
+     integer                        :: ksig
+     integer                        :: k1500
+     real, intent(in)        :: prcpconv(imax, jmax)
+     real, intent(in)        :: prcpinc(imax, jmax)
+     integer, intent(out)       :: preciptype(imax, jmax)
+     real, intent(in)        :: psfc(imax, jmax)
+     real, intent(in)        :: terrain(imax, jmax)
+     real, intent(in)        :: tsfc(imax, jmax)
+     real                           :: tsfcf
+     real, intent(in)        :: tsig(imax, jmax, ksig)
+     real                           :: thickhigh
+     real                           :: thicklow
+     real                           :: tsig1, tsig2, tsig3
+     real, intent(in)        :: zprs(imax, jmax, kprs)
+     real, intent(in)        :: zsig(imax, jmax, ksig)
+     real, external          :: fahren
 
-      INTEGER                        :: I
-      INTEGER,     INTENT(IN)        :: IMAX
-      INTEGER                        :: J
-      INTEGER,     INTENT(IN)        :: JMAX
-      INTEGER                        :: K
-      INTEGER,     INTENT(IN)        :: K700
-      INTEGER,     INTENT(IN)        :: K850
-      INTEGER,     INTENT(IN)        :: K1000
-      INTEGER                        :: KPRS
-      INTEGER                        :: KSIG
-      INTEGER                        :: K1500
-      REAL,        INTENT(IN)        :: PRCPCONV    ( imax , jmax )
-      REAL,        INTENT(IN)        :: PRCPINC     ( imax , jmax )
-      INTEGER,     INTENT(OUT)       :: PRECIPTYPE  ( imax , jmax ) 
-      REAL,        INTENT(IN)        :: PSFC        ( imax , jmax )
-      REAL,        INTENT(IN)        :: TERRAIN     ( imax , jmax )
-      REAL,        INTENT(IN)        :: TSFC        ( imax , jmax )
-      REAL                           :: TSFCF    
-      REAL,        INTENT(IN)        :: TSIG        ( imax , jmax , ksig )
-      REAL                           :: THICKHIGH
-      REAL                           :: THICKLOW
-      REAL                           :: TSIG1, TSIG2, TSIG3
-      REAL,        INTENT(IN)        :: ZPRS        ( imax , jmax , kprs )
-      REAL,        INTENT(IN)        :: ZSIG        ( imax , jmax , ksig )
-      REAL,        EXTERNAL          :: fahren
-
-      DO J = 1, JMAX
-        DO I = 1, IMAX
-
-!-----------------------------------------------------------------------
-!--       THE THRESHOLD FOR CALCULATING PRECIP TYPE IS 0.0001 meter
-!--       PER TIME PERIOD.
-!-----------------------------------------------------------------------
-
-          IF ( PRCPINC(I,J) .LE. 0.0001) THEN
-
-            PRECIPTYPE(I,J) = 0
-
-          ELSE
+     do j = 1, jmax
+        do i = 1, imax
 
 !-----------------------------------------------------------------------
-!--         CHECK THE SURFACE PRESSURE TO DETERMINE WHETHER
-!--         HIGH OR LOW-ELEVATION LOGIC IS USED. 850 MB IS
-!--         THE CUTOFF.
+!--       the threshold for calculating precip type is 0.0001 meter
+!--       per time period.
+!-----------------------------------------------------------------------
+
+           if (prcpinc(i, j) .le. 0.0001) then
+
+              preciptype(i, j) = 0
+
+           else
+
+!-----------------------------------------------------------------------
+!--         check the surface pressure to determine whether
+!--         high or low-elevation logic is used. 850 mb is
+!--         the cutoff.
 !-----------------------------------------------------------------------
 
 !-----------------------------------------------------------------------
-!--         LOW ELEVATION GRID POINT.
+!--         low elevation grid point.
 !-----------------------------------------------------------------------
 
-            IF (PSFC(I,J) .GT. 85000.0 ) THEN
+              if (psfc(i, j) .gt. 85000.0) then
 
 !-----------------------------------------------------------------------
-!--           CALCULATE THICKNESSES THAT WILL BE USED TO DETERMINE
-!--           PRECIP TYPE.
+!--           calculate thicknesses that will be used to determine
+!--           precip type.
 !-----------------------------------------------------------------------
 
-              THICKLOW   = ZPRS(I,J,K850) - ZPRS(I,J,K1000)
+                 thicklow = zprs(i, j, k850) - zprs(i, j, k1000)
 
-              THICKHIGH  = ZPRS(I,J,K700) - ZPRS(I,J,K850)
-
-!-----------------------------------------------------------------------
-!--           RAIN, OR IF SURFACE TEMPERATURE IS BELOW FREEZING,
-!--           FREEZING RAIN.  
-!-----------------------------------------------------------------------
-
-              IF ((THICKLOW .GT. 1310.0) .AND. (THICKHIGH .GT. 1540.0)) THEN
-
-                IF (TSFC(I,J) .GE. T0) THEN  
-                  PRECIPTYPE(I,J) = 1  
-                ELSE
-                  PRECIPTYPE(I,J) = 3  
-                ENDIF
+                 thickhigh = zprs(i, j, k700) - zprs(i, j, k850)
 
 !-----------------------------------------------------------------------
-!--           ICE/MIXED.
+!--           rain, or if surface temperature is below freezing,
+!--           freezing rain.
 !-----------------------------------------------------------------------
 
-              ELSEIF ((THICKLOW .LE. 1310.0) .AND. &
-                      (THICKHIGH .GT. 1540.0)) THEN
+                 if ((thicklow .gt. 1310.0) .and. (thickhigh .gt. 1540.0)) then
 
-                PRECIPTYPE(I,J) = 4  
-
-!-----------------------------------------------------------------------
-!--           RAIN OR SNOW.
-!-----------------------------------------------------------------------
-
-              ELSEIF ((THICKLOW .LE. 1310.0) .AND. & 
-                      (THICKHIGH .LE. 1540.0)) THEN
-
-                TSFCF = fahren(tsfc(i,j)-t0) 
-
-                IF (TSFCF .GE. 37.0) THEN
-                  PRECIPTYPE(I,J) = 1    
-                ELSE                                  
-                  PRECIPTYPE(I,J) = 5   
-                ENDIF
+                    if (tsfc(i, j) .ge. t0) then
+                       preciptype(i, j) = 1
+                    else
+                       preciptype(i, j) = 3
+                    end if
 
 !-----------------------------------------------------------------------
-!--           RAIN.
+!--           ice/mixed.
 !-----------------------------------------------------------------------
 
-              ELSE
+                 elseif ((thicklow .le. 1310.0) .and. &
+                         (thickhigh .gt. 1540.0)) then
 
-                PRECIPTYPE(I,J) = 1
-
-              ENDIF 
-
-!-----------------------------------------------------------------------
-!--         HIGH TERRAIN GRID POINT.
-!-----------------------------------------------------------------------
-
-            ELSE
+                    preciptype(i, j) = 4
 
 !-----------------------------------------------------------------------
-!--           FIND TOP OF 1500 M AGL LAYER.
-!-----------------------------------------------------------------------
-              
-              DO K = 1, KSIG
-
-                IF ( (ZSIG(I,J,K) - TERRAIN(I,J)) .GE. 1500.0 ) THEN 
- 
-                  K1500 = K
-                  EXIT
- 
-                END IF
- 
-              END DO    
-!-----------------------------------------------------------------------
-!--           IF THE MODEL TOP IS EVER LOWERED, THE ABOVE CODE
-!--           COULD FAIL ON THE TOP OF A HIGH MOUNTAIN.
+!--           rain or snow.
 !-----------------------------------------------------------------------
 
-              K1500 = MAX (K1500, 1)
+                 elseif ((thicklow .le. 1310.0) .and. &
+                         (thickhigh .le. 1540.0)) then
+
+                    tsfcf = fahren(tsfc(i, j) - t0)
+
+                    if (tsfcf .ge. 37.0) then
+                       preciptype(i, j) = 1
+                    else
+                       preciptype(i, j) = 5
+                    end if
 
 !-----------------------------------------------------------------------
-!--           FIND TEMPERATURE AT THE BOTTOM, TOP AND MIDDLE OF
-!--           1500 M AGL LAYER.  FOR MIDDLE LAYER, RECYCLE VARIABLE
-!--           K1500.
+!--           rain.
 !-----------------------------------------------------------------------
 
-              TSIG1 = TSIG(I,J,1)
+                 else
 
-              TSIG3 = TSIG(I,J,K1500)
+                    preciptype(i, j) = 1
 
-              K1500 = MAX (1, NINT(FLOAT(K1500)/2.0))
+                 end if
 
-              TSIG2 = TSIG(I,J,K1500)
+!-----------------------------------------------------------------------
+!--         high terrain grid point.
+!-----------------------------------------------------------------------
+
+              else
+
+!-----------------------------------------------------------------------
+!--           find top of 1500 m agl layer.
+!-----------------------------------------------------------------------
+
+                 do k = 1, ksig
+
+                    if ((zsig(i, j, k) - terrain(i, j)) .ge. 1500.0) then
+
+                       k1500 = k
+                       exit
+
+                    end if
+
+                 end do
+!-----------------------------------------------------------------------
+!--           if the model top is ever lowered, the above code
+!--           could fail on the top of a high mountain.
+!-----------------------------------------------------------------------
+
+                 k1500 = max(k1500, 1)
+
+!-----------------------------------------------------------------------
+!--           find temperature at the bottom, top and middle of
+!--           1500 m agl layer.  for middle layer, recycle variable
+!--           k1500.
+!-----------------------------------------------------------------------
+
+                 tsig1 = tsig(i, j, 1)
+
+                 tsig3 = tsig(i, j, k1500)
+
+                 k1500 = max(1, nint(float(k1500)/2.0))
+
+                 tsig2 = tsig(i, j, k1500)
 
 !----------------------------------------------------------------------
-!--           SNOW.
+!--           snow.
 !-----------------------------------------------------------------------
 
-              IF ( (TSIG1 .LT. T0) .AND. &
-                   (TSIG2 .LT. T0) .AND. &
-                   (TSIG3 .LT. T0) ) THEN 
+                 if ((tsig1 .lt. t0) .and. &
+                     (tsig2 .lt. t0) .and. &
+                     (tsig3 .lt. t0)) then
 
-                PRECIPTYPE(I,J) = 5  
+                    preciptype(i, j) = 5
 
 !-----------------------------------------------------------------------
-!--           RAIN & CHECK FOR THUNDERSTORMS.
+!--           rain & check for thunderstorms.
 !-----------------------------------------------------------------------
 
-              ELSE
+                 else
 
-                PRECIPTYPE(I,J) = 1    
+                    preciptype(i, j) = 1
 
-              ENDIF 
- 
-            ENDIF
-       
-          END IF
+                 end if
 
-          IF ( (PRECIPTYPE(I,J) .EQ. 1) .AND. & 
-               (PRCPCONV(I,J) .GE. 0.001) ) THEN
+              end if
 
-             PRECIPTYPE(I,J) = 2         ! Thunderstorm
+           end if
 
-          END IF 
+           if ((preciptype(i, j) .eq. 1) .and. &
+               (prcpconv(i, j) .ge. 0.001)) then
 
-        END DO
-      END DO
-      RETURN
-  END SUBROUTINE WINTPREC 
+              preciptype(i, j) = 2         ! thunderstorm
+
+           end if
+
+        end do
+     end do
+     return
+  end subroutine wintprec
 

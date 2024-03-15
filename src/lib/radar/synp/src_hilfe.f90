@@ -42,20 +42,20 @@
             function cadfunc(cang,cdtyp,calow,caupp,caavr,cadev)
 !***********************************************************************
 !-----------------------------------------------------------------------
-!     This routine defines the functional forms of commonly used canting
+!     this routine defines the functional forms of commonly used canting
 !     angle distributions.
 !-----------------------------------------------------------------------
 include 'variablen.incf'
       integer idtyp
       real ::  ca, cadfunc, tmp1, cang
 
-!===> Check canting angle distribution type.
+!===> check canting angle distribution type.
 
       idtyp=cdtyp+0.01
 
       goto (10,20,30) idtyp
 !
-!===> Uniform orientation probability:
+!===> uniform orientation probability:
 !
  10   cadfunc = 1.0
       goto 100
@@ -64,12 +64,12 @@ include 'variablen.incf'
 
 
 !      
-!===> Gaussian distribution:
+!===> gaussian distribution:
 !
  20   cadfunc = exp( -0.5*((cang-caavr)/cadev)**2 )
       goto 100
 !
-!===> Simple harmonic oscillator orientation probability:
+!===> simple harmonic oscillator orientation probability:
 !
  30   tmp1=2*(cang-caavr)/(caupp-calow) !double-sided
       if(abs(caavr-calow).lt.1.e-8) tmp1=tmp1/2 !single-sided
@@ -113,8 +113,8 @@ include 'variablen.incf'
 
 
        subroutine gser(gamser,a,x,gln)
-!     returns the incomplete gamma function P(a,x) evaluated by its series
-!     representationas GAMSER
+!     returns the incomplete gamma function p(a,x) evaluated by its series
+!     representationas gamser
       integer n
       real x,ap,a,sum,del,gamser,gln
       integer, parameter ::itmax=100
@@ -134,14 +134,14 @@ include 'variablen.incf'
          sum=sum+del
          if(abs(del) .lt. abs(sum)*eps)goto 1
  11      continue
-      print*, 'A too large, itmax too small'
+      print*, 'a too large, itmax too small'
  1    gamser=sum*exp(-x+a*log(x)-gln)
       return
       end subroutine
 
       subroutine gcf(gammcf,a,x,gln)
-!     returns the incomplete gamma function Q(a,x) evaluated by its 
-!     continued fraction representation as GAMMCF
+!     returns the incomplete gamma function q(a,x) evaluated by its 
+!     continued fraction representation as gammcf
       real gold,a0,a1,b0,b1,fac,an,ana,anf,gammcf,a,x,gln,g
       integer, parameter :: itmax=100
       real, parameter :: eps=3e-7
@@ -154,7 +154,7 @@ include 'variablen.incf'
       b1=1.
       fac=1.
       do 11 n=1,itmax
-         an=REAL(n)
+         an=real(n)
          ana=an-a
          a0=(a1+a0*ana)*fac
          b0=(b1+b0*ana)*fac
@@ -168,7 +168,7 @@ include 'variablen.incf'
             gold=g
          endif
  11      continue
-         print*, 'A too large, ITMAX too small'
+         print*, 'a too large, itmax too small'
  1       gammcf=exp(-x+a*alog(x)-gln)*g
          return
          end subroutine
@@ -176,7 +176,7 @@ include 'variablen.incf'
 
             function fdb(x)
 !
-!===> Function fbd changes varible x into dB scale.
+!===> function fbd changes varible x into db scale.
 !
         
         real :: fdb, x
@@ -188,16 +188,16 @@ include 'variablen.incf'
 !***************************************************************************
 implicit none
 
-INCLUDE 'parameter.incf'
+include 'parameter.incf'
 include 'fields.incf'
 
 !
 !-----------------------------------------------------------------------
-!     This routine calculates the complex relative dielectric constant
+!     this routine calculates the complex relative dielectric constant
 !     of liquid and ice phase water using an empirical model developed
-!     by P. S. Ray, 1972, Applied Optics, 11(8):1836-1844
-!     Applicable range: wvln: 1 to 600 mm;  freq: 0.5 to 300 GHz
-!     Temperarure (Celsius degree):  ice: -20 to 0, water: -20 to 50
+!     by p. s. ray, 1972, applied optics, 11(8):1836-1844
+!     applicable range: wvln: 1 to 600 mm;  freq: 0.5 to 300 ghz
+!     temperarure (celsius degree):  ice: -20 to 0, water: -20 to 50
 !     exp(+jwt) convention
 !-----------------------------------------------------------------------
 !
@@ -205,18 +205,18 @@ include 'fields.incf'
 
 !***********************************************************************
 
-COMPLEX, INTENT(OUT) :: epswtr, epsice
+complex, intent(out) :: epswtr, epsice
 
-!Locale Variablen
+!locale variablen
 real*4 :: temp, tt, tempx
 real :: x, wvln
-REAL*8 :: y, sigma2, freqx, xx1, yy1 
-REAL   :: einf, einf1, alpha, alpha1, estamf, estamf1
+real*8 :: y, sigma2, freqx, xx1, yy1 
+real   :: einf, einf1, alpha, alpha1, estamf, estamf1
 real :: ewu, ew0, tptw, xx, yy, tptwfq
-REAL*8, Parameter  :: sigma1=12.5664e8
+real*8, parameter  :: sigma1=12.5664e8
 real           :: ri_real(2), ri_im(2), f, m_real, b_real, m_im, b_im
-real           :: T_grid(4), lam_grid(21), lam_low, lam_high, lam
-real           :: ri_real_final, ri_im_final, T_high, T_low, testre, testtt, wo1, testim
+real           :: t_grid(4), lam_grid(21), lam_low, lam_high, lam
+real           :: ri_real_final, ri_im_final, t_high, t_low, testre, testtt, wo1, testim
 complex        :: ri(4,21)
 integer :: kk
 character*255 :: static_dir
@@ -235,7 +235,7 @@ wvln =1000.* vlght/freqx
 
 
 !***********************************************************************
-!Berechnung der dielectrischen Konstanten für Wasser      
+!berechnung der dielectrischen konstanten für wasser      
 !***********************************************************************
 
 einf1=5.27137+(0.0216474-0.131198e-2*temp)*temp      !(7a)
@@ -255,16 +255,16 @@ yy1=1.0+2.0*xx1*sin(alpha1*pi/2.0)+xx1*xx1
 epswtr=cmplx(estamf1*(1.0+xx1*sin(alpha1*pi/2.0))/yy1+einf1, -estamf1*xx1*cos(alpha1*pi/2.0)/yy1+sigma1*wvln/18.8496e10)
 
 !**************************************************************************
-!Berechnung der dielectrischen Konstanten für Eis
+!berechnung der dielectrischen konstanten für eis
 !**************************************************************************
 
 tempx = temp
 if (temp .gt. -1.) tempx = -1.5
 call get_directory('static',static_dir,len_dir)
 open(unit=88, file=static_dir(1:len_dir)//'/warren84.tab', status='old')
- read(88,*) T_grid
- T_grid = T_grid 
-!print*, T_grid
+ read(88,*) t_grid
+ t_grid = t_grid 
+!print*, t_grid
  read(88,*) lam_grid
 ! print*, lam_grid
  read(88,*) ri
@@ -272,7 +272,7 @@ open(unit=88, file=static_dir(1:len_dir)//'/warren84.tab', status='old')
 !print*, temp, 'temp'
 !stop
 
- if (tempx.lt.T_grid(4).or.tempx.gt.T_grid(1)) then
+ if (tempx.lt.t_grid(4).or.tempx.gt.t_grid(1)) then
 !  print*,'temperature out of range'
   tempx = tempx+10.
  ! stop
@@ -283,31 +283,31 @@ open(unit=88, file=static_dir(1:len_dir)//'/warren84.tab', status='old')
   stop
  endif
 
-!interpoliere in T & lam
+!interpoliere in t & lam
 
  do i = 1, 3
-  if (tempx.lt.T_grid(i).and.tempx.ge.T_grid(i+1)) then
+  if (tempx.lt.t_grid(i).and.tempx.ge.t_grid(i+1)) then
    do k = 1, 2
     kk = i+k-1
     do j = 1, 20
      if (lam.ge.lam_grid(j).and.lam.lt.lam_grid(j+1)) then
       lam_low = lam_grid(j)
       lam_high = lam_grid(j+1)
-      m_real = (REAL(ri(kk,j+1))-REAL(ri(kk,j)))/(LOG(lam_high)-LOG(lam_low))
-      b_real = REAL(ri(kk,j))-m_real*LOG(lam_low)
-      m_im = (IMAG(ri(kk,j+1))-IMAG(ri(kk,j)))/(LOG(lam_high)-LOG(lam_low))
-      b_im = IMAG(ri(kk,j))-m_im*LOG(lam_low)
-      ri_real(k) = m_real*LOG(lam) + b_real
-      ri_im(k) = m_im*LOG(lam) + b_im
+      m_real = (real(ri(kk,j+1))-real(ri(kk,j)))/(log(lam_high)-log(lam_low))
+      b_real = real(ri(kk,j))-m_real*log(lam_low)
+      m_im = (imag(ri(kk,j+1))-imag(ri(kk,j)))/(log(lam_high)-log(lam_low))
+      b_im = imag(ri(kk,j))-m_im*log(lam_low)
+      ri_real(k) = m_real*log(lam) + b_real
+      ri_im(k) = m_im*log(lam) + b_im
      endif
     enddo   
    enddo
-   T_low = T_grid(i+1)
-   T_high = T_grid(i)
-   m_real = (ri_real(1)-ri_real(2))/(T_high-T_low)
-   b_real = ri_real(2)-m_real*T_low
-   m_im = (ri_im(1)-ri_im(2))/(T_high-T_low)
-   b_im = ri_im(2)-m_im*T_low
+   t_low = t_grid(i+1)
+   t_high = t_grid(i)
+   m_real = (ri_real(1)-ri_real(2))/(t_high-t_low)
+   b_real = ri_real(2)-m_real*t_low
+   m_im = (ri_im(1)-ri_im(2))/(t_high-t_low)
+   b_im = ri_im(2)-m_im*t_low
    ri_real_final = m_real*tempx + b_real
    ri_im_final = m_im*tempx + b_im
   endif
@@ -323,7 +323,7 @@ epsice=cmplx(testre, testim)
 close(88)
 
 
-End subroutine watereps
+end subroutine watereps
 
 !
 !=======================================================================
@@ -331,12 +331,12 @@ End subroutine watereps
       subroutine refeffect(refre,refim,scmix,epsmat,epsinc)
 
 
-!vorsicht noch nicht getestet, weil die Übergabe von Tmatrix mit 6 variablen
+!vorsicht noch nicht getestet, weil die Übergabe von tmatrix mit 6 variablen
 ! nicht funktioniert!
 !
 !-----------------------------------------------------------------------
-!     This routine computes the effective refractive index following the
-!     from Maxwell-Garnet.
+!     this routine computes the effective refractive index following the
+!     from maxwell-garnet.
 !
 !     epsmat : dielectric constant of the matrix material
 !     epsinc : dielectric constant of spherical inclusions
@@ -344,7 +344,7 @@ End subroutine watereps
 !-----------------------------------------------------------------------
 !
 include 'variablen.incf'
-!Lokale Parameter: 
+!lokale parameter: 
 complex    :: alpha,beta
 real       :: refre, refim, scmix
      
@@ -370,8 +370,8 @@ end subroutine refeffect
       subroutine gauslegquads(x,w,x1,x2,mn,n)
 !
 !-----------------------------------------------------------------------
-!     calculates the abscissas (x) and weights (w) for n-point Gaussian-
-!     Legendre quadrature over an integration interval of (x1,x2).
+!     calculates the abscissas (x) and weights (w) for n-point gaussian-
+!     legendre quadrature over an integration interval of (x1,x2).
 !-----------------------------------------------------------------------
 !
       real  w(mn),x(mn),x1,x2, m
@@ -423,7 +423,7 @@ end subroutine refeffect
       subroutine drvcubspln(x,y,nmax,n,yp1,ypn,y2)
 !
 !-----------------------------------------------------------------------
-!     Given array x and y of length n containing a tabulated function,
+!     given array x and y of length n containing a tabulated function,
 !     i.e. y(i)=f(x(i)), with x(1)<x(2)<...<x(n), and given values yp1
 !     and ypn for the first derivative at point 1 and n, respectively,
 !     this routine returns an array y2 of length n which contains the
@@ -469,7 +469,7 @@ end subroutine refeffect
  20   continue
       return
  30   write(6,40)
- 40   format(' Subroutine DRVCUBSPLN can not handle array with size'/'larger than 99, change u(99) into a larger array')
+ 40   format(' subroutine drvcubspln can not handle array with size'/'larger than 99, change u(99) into a larger array')
       return
  50   y2(1)=0.0
 
@@ -482,8 +482,8 @@ end subroutine refeffect
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
     
 
@@ -496,7 +496,7 @@ end subroutine refeffect
       real*8  safb(4),sabb(4)
       equivalence (safb,sfb)
 !
-!===> Scattering amplitudes.
+!===> scattering amplitudes.
 !
 !      write(*,*) 'rayleigh', thinc
 !      write(*,*) pvz, phy
@@ -508,7 +508,7 @@ end subroutine refeffect
       sabb(3)=-safb(3)
       sabb(4)=-safb(4)
 !
-!===> Elements in extinction and backscattering Mueller matrices.
+!===> elements in extinction and backscattering mueller matrices.
 !
       sem(1)=-safb(2)-safb(4)
       sem(2)=-safb(2)+safb(4)
@@ -528,8 +528,8 @@ end subroutine refeffect
     
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 !
@@ -550,7 +550,7 @@ end subroutine refeffect
       equivalence (safb,sfb),(sabb,sbb)
       data degrad/1.745329251994329d-2/
 !
-!===> Initialize scattering amplitudes to zero to accumulate with mode.
+!===> initialize scattering amplitudes to zero to accumulate with mode.
 !
 !      write(*,*) wvnm, 'muh'
 !stop
@@ -560,7 +560,7 @@ end subroutine refeffect
       sbb(1)=0.0
       sbb(2)=0.0
 !
-!===> Loop for each azimuthal (phi) mode mdp=0, 1, 2, ... ,nrank-1).
+!===> loop for each azimuthal (phi) mode mdp=0, 1, 2, ... ,nrank-1).
 !     set shifting indix (nshft) for matrix compression when n<m, m!=0.
 !
 !      write(*,*) '1', n2mode
@@ -573,7 +573,7 @@ end subroutine refeffect
       if(nshft.lt.0) nshft=0
       nsnsft=n2rank-nshft
 !
-!===> normalization factor (=(-)^n*Dmn/wvnm) for each mode.
+!===> normalization factor (=(-)^n*dmn/wvnm) for each mode.
 !
       n1=2*nshft+2
       dnrm(1)=4*(-1)**(nshft+1)*float(n1+1)/float(n1*(nshft+2))/wvnm
@@ -585,12 +585,12 @@ end subroutine refeffect
       dnrm(i)=-dnrm(i-1)*((2*j+1)*(j-1)*(j-mdp))/((j+1)*(j+mdp)*(2*j-1))
  20   continue
 !
-!===> Calculate the incident and scattering field coefficients
+!===> calculate the incident and scattering field coefficients
 !
-!-->  evaluate the associated Legendre functions for the incident wave,
+!-->  evaluate the associated legendre functions for the incident wave,
 !     evaluate incident field coefficients [abi], and compute scattering
-!     field coefficients fgv and fgh (=-[T] times [abi]).
-!     Here fgv and fgh include normalization factor: (-)^n*Dmn/wvnm.
+!     field coefficients fgv and fgh (=-[t] times [abi]).
+!     here fgv and fgh include normalization factor: (-)^n*dmn/wvnm.
 !
       uu=cos(thinc)
       vv=sin(thinc)
@@ -644,7 +644,7 @@ end subroutine refeffect
 
  70   continue
 !
-!===> Independent elements in the extinction and backscattering Mueller
+!===> independent elements in the extinction and backscattering mueller
 !     matrices.
 !
       sem(1)=-safb(2)-safb(4)
@@ -665,16 +665,16 @@ end subroutine refeffect
 
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 
 !
 !-----------------------------------------------------------------------
-!     This routine generates associated Legendre functions (argument u=
+!     this routine generates associated legendre functions (argument u=
 !     cos(theta)) of the order from 0 to n divided by v=sin(theta) for a
-!     given azimuthal mode m.  Element pnmllg(i)=(i-1)th order function.
+!     given azimuthal mode m.  element pnmllg(i)=(i-1)th order function.
 !-----------------------------------------------------------------------
 !
 
@@ -687,7 +687,7 @@ end subroutine refeffect
       n1=nn+1
     
 !
-!===> Cawrite(*,*) npnt, n0rankse A): abs(u)=1 or v=0 (theta = 0 or 180 degrees) and m != 1
+!===> cawrite(*,*) npnt, n0rankse a): abs(u)=1 or v=0 (theta = 0 or 180 degrees) and m != 1
 !     all functions are zero, where those of m=0 are forced to be zero.
 !
 !      write(*,*) abs(u), m
@@ -702,7 +702,7 @@ end subroutine refeffect
  !     write(*,*) pnmllg
  !     stop
 !
-!===> Case B): abs(u)=1 or v=0 (theta = 0 or 180 degrees) and m=1
+!===> case b): abs(u)=1 or v=0 (theta = 0 or 180 degrees) and m=1
 !     starts with order 0,1,2
 !
       if(abs(u).eq.1.0 .and. m.eq.1) then
@@ -715,7 +715,7 @@ end subroutine refeffect
       goto 30
       endif
 !
-!===> Case C): general case, i.e., abs(u)<1 or v!=0
+!===> case c): general case, i.e., abs(u)<1 or v!=0
 !     starts with nn=m since pnmllg(nn<m)=0
 !
       cnn=1.0
@@ -730,7 +730,7 @@ end subroutine refeffect
       pnmllg(m+2)=plb
       ibeg=m+3
 !
-!===> Recur upward to obtain all remaining orders of nn<m
+!===> recur upward to obtain all remaining orders of nn<m
 !
  30   if(ibeg.gt.n1) return
       j1=2*ibeg-3
@@ -758,94 +758,94 @@ end subroutine refeffect
       end module src_hilfe
 
 
- MODULE MODI_GAMMA !5
+ module modi_gamma !5
 !########################
 !
-INTERFACE
+interface
 !
 
-FUNCTION GAMMA(PX)  RESULT(PGAMMA) !10
-REAL, INTENT(IN)                                  :: PX
-REAL                                              :: PGAMMA
-END FUNCTION GAMMA
+function gamma(px)  result(pgamma) !10
+real, intent(in)                                  :: px
+real                                              :: pgamma
+end function gamma
 !
-END INTERFACE
+end interface
 !
-END MODULE MODI_GAMMA
+end module modi_gamma
 !     ##################################
 
-      FUNCTION GAMMA(PX)  RESULT(PGAMMA) !10
+      function gamma(px)  result(pgamma) !10
 !     ##################################
 !     
 !
-!!****  *GAMMA * -  Gamma  function  
+!!****  *gamma * -  gamma  function  
 !!                   
 !!
-!!    PURPOSE
+!!    purpose
 !!    -------
-!       The purpose of this function is to compute the Generalized gamma
+!       the purpose of this function is to compute the generalized gamma
 !    function of its argument.
 !    
 !
-!!**  METHOD
+!!**  method
 !!    ------
 !!
-!!    EXTERNAL
+!!    external
 !!    --------
-!!      NONE
+!!      none
 !!
-!!    IMPLICIT ARGUMENTS
+!!    implicit arguments
 !!    ------------------
-!!      None
+!!      none
 !!
-!!    REFERENCE
+!!    reference
 !!    ---------
-!!      Press, Teukolsky, Vetterling and Flannery: Numerical Recipes, 206-207
+!!      press, teukolsky, vetterling and flannery: numerical recipes, 206-207
 !!
 !!
-!!    AUTHOR
+!!    author
 !!    ------
-!!        Jean-Pierre Pinty *LA/OMP*
+!!        jean-pierre pinty *la/omp*
 !!
-!!    MODIFICATIONS
+!!    modifications
 !!    -------------
-!!      Original     7/11/95
+!!      original     7/11/95
 !
-!*       0. DECLARATIONS
+!*       0. declarations
 !           ------------
 !
-IMPLICIT NONE
+implicit none
 !
 !*       0.1 declarations of arguments and result
 !
-REAL, INTENT(IN)                     :: PX
-REAL                                 :: PGAMMA
+real, intent(in)                     :: px
+real                                 :: pgamma
 !
 !*       0.2 declarations of local variables
 !
-INTEGER                              :: JJ ! Loop index
-REAL                                 :: ZSER,ZSTP,ZTMP,ZX,ZY,ZCOEF(6)
+integer                              :: jj ! loop index
+real                                 :: zser,zstp,ztmp,zx,zy,zcoef(6)
 !
-ZCOEF(1) = 76.18009172947146
-ZCOEF(2) =-86.50532032941677
-ZCOEF(3) = 24.01409824083091
-ZCOEF(4) = -1.231739572450155
-ZCOEF(5) =  0.1208650973866179E-2
-ZCOEF(6) = -0.5395239384953E-5
-ZSTP     =  2.5066282746310005
+zcoef(1) = 76.18009172947146
+zcoef(2) =-86.50532032941677
+zcoef(3) = 24.01409824083091
+zcoef(4) = -1.231739572450155
+zcoef(5) =  0.1208650973866179e-2
+zcoef(6) = -0.5395239384953e-5
+zstp     =  2.5066282746310005
 !
-ZX = PX
-ZY = ZX
-ZTMP =  ZX + 5.5
-ZTMP = (ZX + 0.5)*ALOG(ZTMP) - ZTMP
-ZSER = 1.000000000190015
+zx = px
+zy = zx
+ztmp =  zx + 5.5
+ztmp = (zx + 0.5)*alog(ztmp) - ztmp
+zser = 1.000000000190015
 !
-DO JJ = 1 , 6
-  ZY = ZY + 1.0
-  ZSER = ZSER + ZCOEF(JJ)/ZY
-END DO
+do jj = 1 , 6
+  zy = zy + 1.0
+  zser = zser + zcoef(jj)/zy
+end do
 !
-PGAMMA = EXP( ZTMP + ALOG( ZSTP*ZSER/ZX ) )
-RETURN
+pgamma = exp( ztmp + alog( zstp*zser/zx ) )
+return
 !
-END FUNCTION GAMMA
+end function gamma

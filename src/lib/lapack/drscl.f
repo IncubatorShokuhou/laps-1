@@ -1,115 +1,115 @@
-      SUBROUTINE DRSCL( N, SA, SX, INCX )
+      subroutine drscl( n, sa, sx, incx )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     September 30, 1994
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     september 30, 1994
 *
-*     .. Scalar Arguments ..
-      INTEGER            INCX, N
-      DOUBLE PRECISION   SA
+*     .. scalar arguments ..
+      integer            incx, n
+      double precision   sa
 *     ..
-*     .. Array Arguments ..
-      DOUBLE PRECISION   SX( * )
+*     .. array arguments ..
+      double precision   sx( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DRSCL multiplies an n-element real vector x by the real scalar 1/a.
-*  This is done without overflow or underflow as long as
+*  drscl multiplies an n-element real vector x by the real scalar 1/a.
+*  this is done without overflow or underflow as long as
 *  the final result x/a does not overflow or underflow.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  N       (input) INTEGER
-*          The number of components of the vector x.
+*  n       (input) integer
+*          the number of components of the vector x.
 *
-*  SA      (input) DOUBLE PRECISION
-*          The scalar a which is used to divide each component of x.
-*          SA must be >= 0, or the subroutine will divide by zero.
+*  sa      (input) double precision
+*          the scalar a which is used to divide each component of x.
+*          sa must be >= 0, or the subroutine will divide by zero.
 *
-*  SX      (input/output) DOUBLE PRECISION array, dimension
-*                         (1+(N-1)*abs(INCX))
-*          The n-element vector x.
+*  sx      (input/output) double precision array, dimension
+*                         (1+(n-1)*abs(incx))
+*          the n-element vector x.
 *
-*  INCX    (input) INTEGER
-*          The increment between successive values of the vector SX.
-*          > 0:  SX(1) = X(1) and SX(1+(i-1)*INCX) = x(i),     1< i<= n
+*  incx    (input) integer
+*          the increment between successive values of the vector sx.
+*          > 0:  sx(1) = x(1) and sx(1+(i-1)*incx) = x(i),     1< i<= n
 *
 * =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE, ZERO
-      PARAMETER          ( ONE = 1.0D+0, ZERO = 0.0D+0 )
+*     .. parameters ..
+      double precision   one, zero
+      parameter          ( one = 1.0d+0, zero = 0.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      LOGICAL            DONE
-      DOUBLE PRECISION   BIGNUM, CDEN, CDEN1, CNUM, CNUM1, MUL, SMLNUM
+*     .. local scalars ..
+      logical            done
+      double precision   bignum, cden, cden1, cnum, cnum1, mul, smlnum
 *     ..
-*     .. External Functions ..
-      DOUBLE PRECISION   DLAMCH
-      EXTERNAL           DLAMCH
+*     .. external functions ..
+      double precision   dlamch
+      external           dlamch
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DLABAD, DSCAL
+*     .. external subroutines ..
+      external           dlabad, dscal
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          ABS
+*     .. intrinsic functions ..
+      intrinsic          abs
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Quick return if possible
+*     quick return if possible
 *
-      IF( N.LE.0 )
-     $   RETURN
+      if( n.le.0 )
+     $   return
 *
-*     Get machine parameters
+*     get machine parameters
 *
-      SMLNUM = DLAMCH( 'S' )
-      BIGNUM = ONE / SMLNUM
-      CALL DLABAD( SMLNUM, BIGNUM )
+      smlnum = dlamch( 's' )
+      bignum = one / smlnum
+      call dlabad( smlnum, bignum )
 *
-*     Initialize the denominator to SA and the numerator to 1.
+*     initialize the denominator to sa and the numerator to 1.
 *
-      CDEN = SA
-      CNUM = ONE
+      cden = sa
+      cnum = one
 *
-   10 CONTINUE
-      CDEN1 = CDEN*SMLNUM
-      CNUM1 = CNUM / BIGNUM
-      IF( ABS( CDEN1 ).GT.ABS( CNUM ) .AND. CNUM.NE.ZERO ) THEN
+   10 continue
+      cden1 = cden*smlnum
+      cnum1 = cnum / bignum
+      if( abs( cden1 ).gt.abs( cnum ) .and. cnum.ne.zero ) then
 *
-*        Pre-multiply X by SMLNUM if CDEN is large compared to CNUM.
+*        pre-multiply x by smlnum if cden is large compared to cnum.
 *
-         MUL = SMLNUM
-         DONE = .FALSE.
-         CDEN = CDEN1
-      ELSE IF( ABS( CNUM1 ).GT.ABS( CDEN ) ) THEN
+         mul = smlnum
+         done = .false.
+         cden = cden1
+      else if( abs( cnum1 ).gt.abs( cden ) ) then
 *
-*        Pre-multiply X by BIGNUM if CDEN is small compared to CNUM.
+*        pre-multiply x by bignum if cden is small compared to cnum.
 *
-         MUL = BIGNUM
-         DONE = .FALSE.
-         CNUM = CNUM1
-      ELSE
+         mul = bignum
+         done = .false.
+         cnum = cnum1
+      else
 *
-*        Multiply X by CNUM / CDEN and return.
+*        multiply x by cnum / cden and return.
 *
-         MUL = CNUM / CDEN
-         DONE = .TRUE.
-      END IF
+         mul = cnum / cden
+         done = .true.
+      end if
 *
-*     Scale the vector X by MUL
+*     scale the vector x by mul
 *
-      CALL DSCAL( N, MUL, SX, INCX )
+      call dscal( n, mul, sx, incx )
 *
-      IF( .NOT.DONE )
-     $   GO TO 10
+      if( .not.done )
+     $   go to 10
 *
-      RETURN
+      return
 *
-*     End of DRSCL
+*     end of drscl
 *
-      END
+      end

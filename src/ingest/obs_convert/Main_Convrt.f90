@@ -1,61 +1,61 @@
-PROGRAM OBS_CONVERT
+program obs_convert
 
 !==========================================================
-!doc  THIS PROGRAM READS OBSERVATION DATA THROUGH LAPS INGEST
-!doc  AND CONVERTS THE DATA INTO REQUESTED FORMAT, E.G., BUFR
+!doc  this program reads observation data through laps ingest
+!doc  and converts the data into requested format, e.g., bufr
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE	MAY 2007
+!doc  history:
+!doc	creation:	yuanfu xie	may 2007
 !==========================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: SUFFIX*14,WTFILE*201,RDFILE*201
-  INTEGER   :: LENGTH(2),IBFMSG(10000)
+  ! local variables:
+  character :: suffix*14,wtfile*201,rdfile*201
+  integer   :: length(2),ibfmsg(10000)
   
-  ! LAPS CONFIGURATION:
-  CALL LAPS_CONFIG
+  ! laps configuration:
+  call laps_config
 
-  ! OPEN FILE TO WRITE:
-  IF (FORMAT_REQUEST .EQ. 'BUFR') THEN
-    SUFFIX = 'bufr'
-    CALL GET_DIRECTORY(SUFFIX,WTFILE,LENGTH(1))
-    ! OPEN BUFR TABLE:
-    CALL GET_DIRECTORY('static',RDFILE,LENGTH(2))
-    RDFILE(LENGTH(2)+1:LENGTH(2)+22) = 'prepobs_prep.bufrtable'
-    OPEN(UNIT=BFRTBL_CHANNEL,FILE=RDFILE(1:LENGTH(2)+22),STATUS='OLD')
+  ! open file to write:
+  if (format_request .eq. 'bufr') then
+    suffix = 'bufr'
+    call get_directory(suffix,wtfile,length(1))
+    ! open bufr table:
+    call get_directory('static',rdfile,length(2))
+    rdfile(length(2)+1:length(2)+22) = 'prepobs_prep.bufrtable'
+    open(unit=bfrtbl_channel,file=rdfile(1:length(2)+22),status='old')
 
-    WRITE(WTFILE(LENGTH(1)+1:LENGTH(1)+14),1) SYSTEM_ASCTIME,'.bufr'
-1   FORMAT(A9,A5)
-    LENGTH = LENGTH(1)+14
+    write(wtfile(length(1)+1:length(1)+14),1) system_asctime,'.bufr'
+1   format(a9,a5)
+    length = length(1)+14
 
-    OPEN(UNIT=OUTPUT_CHANNEL,FILE=WTFILE(1:LENGTH(1)),FORM='UNFORMATTED')
-    CALL OPENBF(OUTPUT_CHANNEL,'OUT',BFRTBL_CHANNEL)
-  ELSE IF (FORMAT_REQUEST .EQ. 'WRF') THEN
-    SUFFIX = 'wrf'
-    CALL GET_DIRECTORY(SUFFIX,WTFILE,LENGTH(1))
-    WRITE(WTFILE(LENGTH(1)+1:LENGTH(1)+13),2) SYSTEM_ASCTIME,'.wrf'
-2   FORMAT(A9,A4)
-    LENGTH = LENGTH(1)+13
+    open(unit=output_channel,file=wtfile(1:length(1)),form='unformatted')
+    call openbf(output_channel,'out',bfrtbl_channel)
+  else if (format_request .eq. 'wrf') then
+    suffix = 'wrf'
+    call get_directory(suffix,wtfile,length(1))
+    write(wtfile(length(1)+1:length(1)+13),2) system_asctime,'.wrf'
+2   format(a9,a4)
+    length = length(1)+13
 
-    OPEN(UNIT=OUTPUT_CHANNEL,FILE=WTFILE(1:LENGTH(1)),FORM='FORMATTED')
-  ELSE
-    WRITE(6,*) 'MAIN: Unknown data format'
-    STOP
-  ENDIF
+    open(unit=output_channel,file=wtfile(1:length(1)),form='formatted')
+  else
+    write(6,*) 'main: unknown data format'
+    stop
+  endif
 
-  ! LAPS OBSERVATION DATA INGEST:
-  CALL LAPS_INGEST
+  ! laps observation data ingest:
+  call laps_ingest
 
-  ! CLOSE FILE:
-  IF (FORMAT_REQUEST .EQ. 'BUFR') THEN
-    CLOSE(BFRTBL_CHANNEL)
-    ! FORCE FLUSH THE LAST BUFR MESSAGE:
-    CALL WRITSA(-OUTPUT_CHANNEL,IBFMSG,LENGTH(1))
-  ENDIF
-  CLOSE(OUTPUT_CHANNEL)
+  ! close file:
+  if (format_request .eq. 'bufr') then
+    close(bfrtbl_channel)
+    ! force flush the last bufr message:
+    call writsa(-output_channel,ibfmsg,length(1))
+  endif
+  close(output_channel)
 
-END PROGRAM OBS_CONVERT
+end program obs_convert

@@ -1,35 +1,35 @@
       subroutine gf_unpack2(cgrib,lcgrib,iofst,lencsec2,csec2,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_unpack2 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2002-04-09
+! subprogram:    gf_unpack2 
+!   prgmmr: gilbert         org: w/np11    date: 2002-04-09
 !
-! ABSTRACT: This subroutine unpacks Section 2 (Local Use Section)
-!           as defined in GRIB Edition 2.
+! abstract: this subroutine unpacks section 2 (local use section)
+!           as defined in grib edition 2.
 !
-! PROGRAM HISTORY LOG:
-! 2002-04-09  Gilbert
+! program history log:
+! 2002-04-09  gilbert
 !
-! USAGE:    CALL gf_unpack2(cgrib,lcgrib,iofst,lencsec2,csec2,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array containing Section 2 of the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     iofst    - Bit offset of the beginning of Section 2.
+! usage:    call gf_unpack2(cgrib,lcgrib,iofst,lencsec2,csec2,ierr)
+!   input argument list:
+!     cgrib    - character array containing section 2 of the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     iofst    - bit offset of the beginning of section 2.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     iofst    - Bit offset at the end of Section 2, returned.
-!     lencsec2 - Length (in octets) of Local Use data
-!     csec2()  - Pointer to a character*1 array containing local use data
-!     ierr     - Error return code.
+!   output argument list:      
+!     iofst    - bit offset at the end of section 2, returned.
+!     lencsec2 - length (in octets) of local use data
+!     csec2()  - pointer to a character*1 array containing local use data
+!     ierr     - error return code.
 !                0 = no error
-!                2 = Array passed is not section 2
+!                2 = array passed is not section 2
 !                6 = memory allocation error
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -44,16 +44,16 @@
       lencsec2=0
       nullify(csec2)
 
-      call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+      call gbyte(cgrib,lensec,iofst,32)        ! get length of section
       iofst=iofst+32    
       lencsec2=lensec-5
-      call gbyte(cgrib,isecnum,iofst,8)         ! Get Section Number
+      call gbyte(cgrib,isecnum,iofst,8)         ! get section number
       iofst=iofst+8     
       ipos=(iofst/8)+1
 
       if ( isecnum.ne.2 ) then
          ierr=6
-         print *,'gf_unpack2: Not Section 2 data. '
+         print *,'gf_unpack2: not section 2 data. '
          return
       endif
 
@@ -67,6 +67,6 @@
       csec2(1:lencsec2)=cgrib(ipos:ipos+lencsec2-1)
       iofst=iofst+(lencsec2*8)
 
-      return    ! End of Section 2 processing
+      return    ! end of section 2 processing
       end
 

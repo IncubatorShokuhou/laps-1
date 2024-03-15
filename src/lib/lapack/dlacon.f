@@ -1,204 +1,204 @@
-      SUBROUTINE DLACON( N, V, X, ISGN, EST, KASE )
+      subroutine dlacon( n, v, x, isgn, est, kase )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     February 29, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     february 29, 1992
 *
-*     .. Scalar Arguments ..
-      INTEGER            KASE, N
-      DOUBLE PRECISION   EST
+*     .. scalar arguments ..
+      integer            kase, n
+      double precision   est
 *     ..
-*     .. Array Arguments ..
-      INTEGER            ISGN( * )
-      DOUBLE PRECISION   V( * ), X( * )
+*     .. array arguments ..
+      integer            isgn( * )
+      double precision   v( * ), x( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLACON estimates the 1-norm of a square, real matrix A.
-*  Reverse communication is used for evaluating matrix-vector products.
+*  dlacon estimates the 1-norm of a square, real matrix a.
+*  reverse communication is used for evaluating matrix-vector products.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  N      (input) INTEGER
-*         The order of the matrix.  N >= 1.
+*  n      (input) integer
+*         the order of the matrix.  n >= 1.
 *
-*  V      (workspace) DOUBLE PRECISION array, dimension (N)
-*         On the final return, V = A*W,  where  EST = norm(V)/norm(W)
-*         (W is not returned).
+*  v      (workspace) double precision array, dimension (n)
+*         on the final return, v = a*w,  where  est = norm(v)/norm(w)
+*         (w is not returned).
 *
-*  X      (input/output) DOUBLE PRECISION array, dimension (N)
-*         On an intermediate return, X should be overwritten by
-*               A * X,   if KASE=1,
-*               A' * X,  if KASE=2,
-*         and DLACON must be re-called with all the other parameters
+*  x      (input/output) double precision array, dimension (n)
+*         on an intermediate return, x should be overwritten by
+*               a * x,   if kase=1,
+*               a' * x,  if kase=2,
+*         and dlacon must be re-called with all the other parameters
 *         unchanged.
 *
-*  ISGN   (workspace) INTEGER array, dimension (N)
+*  isgn   (workspace) integer array, dimension (n)
 *
-*  EST    (output) DOUBLE PRECISION
-*         An estimate (a lower bound) for norm(A).
+*  est    (output) double precision
+*         an estimate (a lower bound) for norm(a).
 *
-*  KASE   (input/output) INTEGER
-*         On the initial call to DLACON, KASE should be 0.
-*         On an intermediate return, KASE will be 1 or 2, indicating
-*         whether X should be overwritten by A * X  or A' * X.
-*         On the final return from DLACON, KASE will again be 0.
+*  kase   (input/output) integer
+*         on the initial call to dlacon, kase should be 0.
+*         on an intermediate return, kase will be 1 or 2, indicating
+*         whether x should be overwritten by a * x  or a' * x.
+*         on the final return from dlacon, kase will again be 0.
 *
-*  Further Details
+*  further details
 *  ======= =======
 *
-*  Contributed by Nick Higham, University of Manchester.
-*  Originally named SONEST, dated March 16, 1988.
+*  contributed by nick higham, university of manchester.
+*  originally named sonest, dated march 16, 1988.
 *
-*  Reference: N.J. Higham, "FORTRAN codes for estimating the one-norm of
+*  reference: n.j. higham, "fortran codes for estimating the one-norm of
 *  a real or complex matrix, with applications to condition estimation",
-*  ACM Trans. Math. Soft., vol. 14, no. 4, pp. 381-396, December 1988.
+*  acm trans. math. soft., vol. 14, no. 4, pp. 381-396, december 1988.
 *
 *  =====================================================================
 *
-*     .. Parameters ..
-      INTEGER            ITMAX
-      PARAMETER          ( ITMAX = 5 )
-      DOUBLE PRECISION   ZERO, ONE, TWO
-      PARAMETER          ( ZERO = 0.0D+0, ONE = 1.0D+0, TWO = 2.0D+0 )
+*     .. parameters ..
+      integer            itmax
+      parameter          ( itmax = 5 )
+      double precision   zero, one, two
+      parameter          ( zero = 0.0d+0, one = 1.0d+0, two = 2.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      INTEGER            I, ITER, J, JLAST, JUMP
-      DOUBLE PRECISION   ALTSGN, ESTOLD, TEMP
+*     .. local scalars ..
+      integer            i, iter, j, jlast, jump
+      double precision   altsgn, estold, temp
 *     ..
-*     .. External Functions ..
-      INTEGER            IDAMAX
-      DOUBLE PRECISION   DASUM
-      EXTERNAL           IDAMAX, DASUM
+*     .. external functions ..
+      integer            idamax
+      double precision   dasum
+      external           idamax, dasum
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DCOPY
+*     .. external subroutines ..
+      external           dcopy
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          ABS, DBLE, NINT, SIGN
+*     .. intrinsic functions ..
+      intrinsic          abs, dble, nint, sign
 *     ..
-*     .. Save statement ..
-      SAVE
+*     .. save statement ..
+      save
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      IF( KASE.EQ.0 ) THEN
-         DO 10 I = 1, N
-            X( I ) = ONE / DBLE( N )
-   10    CONTINUE
-         KASE = 1
-         JUMP = 1
-         RETURN
-      END IF
+      if( kase.eq.0 ) then
+         do 10 i = 1, n
+            x( i ) = one / dble( n )
+   10    continue
+         kase = 1
+         jump = 1
+         return
+      end if
 *
-      GO TO ( 20, 40, 70, 110, 140 )JUMP
+      go to ( 20, 40, 70, 110, 140 )jump
 *
-*     ................ ENTRY   (JUMP = 1)
-*     FIRST ITERATION.  X HAS BEEN OVERWRITTEN BY A*X.
+*     ................ entry   (jump = 1)
+*     first iteration.  x has been overwritten by a*x.
 *
-   20 CONTINUE
-      IF( N.EQ.1 ) THEN
-         V( 1 ) = X( 1 )
-         EST = ABS( V( 1 ) )
-*        ... QUIT
-         GO TO 150
-      END IF
-      EST = DASUM( N, X, 1 )
+   20 continue
+      if( n.eq.1 ) then
+         v( 1 ) = x( 1 )
+         est = abs( v( 1 ) )
+*        ... quit
+         go to 150
+      end if
+      est = dasum( n, x, 1 )
 *
-      DO 30 I = 1, N
-         X( I ) = SIGN( ONE, X( I ) )
-         ISGN( I ) = NINT( X( I ) )
-   30 CONTINUE
-      KASE = 2
-      JUMP = 2
-      RETURN
+      do 30 i = 1, n
+         x( i ) = sign( one, x( i ) )
+         isgn( i ) = nint( x( i ) )
+   30 continue
+      kase = 2
+      jump = 2
+      return
 *
-*     ................ ENTRY   (JUMP = 2)
-*     FIRST ITERATION.  X HAS BEEN OVERWRITTEN BY TRANDPOSE(A)*X.
+*     ................ entry   (jump = 2)
+*     first iteration.  x has been overwritten by trandpose(a)*x.
 *
-   40 CONTINUE
-      J = IDAMAX( N, X, 1 )
-      ITER = 2
+   40 continue
+      j = idamax( n, x, 1 )
+      iter = 2
 *
-*     MAIN LOOP - ITERATIONS 2,3,...,ITMAX.
+*     main loop - iterations 2,3,...,itmax.
 *
-   50 CONTINUE
-      DO 60 I = 1, N
-         X( I ) = ZERO
-   60 CONTINUE
-      X( J ) = ONE
-      KASE = 1
-      JUMP = 3
-      RETURN
+   50 continue
+      do 60 i = 1, n
+         x( i ) = zero
+   60 continue
+      x( j ) = one
+      kase = 1
+      jump = 3
+      return
 *
-*     ................ ENTRY   (JUMP = 3)
-*     X HAS BEEN OVERWRITTEN BY A*X.
+*     ................ entry   (jump = 3)
+*     x has been overwritten by a*x.
 *
-   70 CONTINUE
-      CALL DCOPY( N, X, 1, V, 1 )
-      ESTOLD = EST
-      EST = DASUM( N, V, 1 )
-      DO 80 I = 1, N
-         IF( NINT( SIGN( ONE, X( I ) ) ).NE.ISGN( I ) )
-     $      GO TO 90
-   80 CONTINUE
-*     REPEATED SIGN VECTOR DETECTED, HENCE ALGORITHM HAS CONVERGED.
-      GO TO 120
+   70 continue
+      call dcopy( n, x, 1, v, 1 )
+      estold = est
+      est = dasum( n, v, 1 )
+      do 80 i = 1, n
+         if( nint( sign( one, x( i ) ) ).ne.isgn( i ) )
+     $      go to 90
+   80 continue
+*     repeated sign vector detected, hence algorithm has converged.
+      go to 120
 *
-   90 CONTINUE
-*     TEST FOR CYCLING.
-      IF( EST.LE.ESTOLD )
-     $   GO TO 120
+   90 continue
+*     test for cycling.
+      if( est.le.estold )
+     $   go to 120
 *
-      DO 100 I = 1, N
-         X( I ) = SIGN( ONE, X( I ) )
-         ISGN( I ) = NINT( X( I ) )
-  100 CONTINUE
-      KASE = 2
-      JUMP = 4
-      RETURN
+      do 100 i = 1, n
+         x( i ) = sign( one, x( i ) )
+         isgn( i ) = nint( x( i ) )
+  100 continue
+      kase = 2
+      jump = 4
+      return
 *
-*     ................ ENTRY   (JUMP = 4)
-*     X HAS BEEN OVERWRITTEN BY TRANDPOSE(A)*X.
+*     ................ entry   (jump = 4)
+*     x has been overwritten by trandpose(a)*x.
 *
-  110 CONTINUE
-      JLAST = J
-      J = IDAMAX( N, X, 1 )
-      IF( ( X( JLAST ).NE.ABS( X( J ) ) ) .AND. ( ITER.LT.ITMAX ) ) THEN
-         ITER = ITER + 1
-         GO TO 50
-      END IF
+  110 continue
+      jlast = j
+      j = idamax( n, x, 1 )
+      if( ( x( jlast ).ne.abs( x( j ) ) ) .and. ( iter.lt.itmax ) ) then
+         iter = iter + 1
+         go to 50
+      end if
 *
-*     ITERATION COMPLETE.  FINAL STAGE.
+*     iteration complete.  final stage.
 *
-  120 CONTINUE
-      ALTSGN = ONE
-      DO 130 I = 1, N
-         X( I ) = ALTSGN*( ONE+DBLE( I-1 ) / DBLE( N-1 ) )
-         ALTSGN = -ALTSGN
-  130 CONTINUE
-      KASE = 1
-      JUMP = 5
-      RETURN
+  120 continue
+      altsgn = one
+      do 130 i = 1, n
+         x( i ) = altsgn*( one+dble( i-1 ) / dble( n-1 ) )
+         altsgn = -altsgn
+  130 continue
+      kase = 1
+      jump = 5
+      return
 *
-*     ................ ENTRY   (JUMP = 5)
-*     X HAS BEEN OVERWRITTEN BY A*X.
+*     ................ entry   (jump = 5)
+*     x has been overwritten by a*x.
 *
-  140 CONTINUE
-      TEMP = TWO*( DASUM( N, X, 1 ) / DBLE( 3*N ) )
-      IF( TEMP.GT.EST ) THEN
-         CALL DCOPY( N, X, 1, V, 1 )
-         EST = TEMP
-      END IF
+  140 continue
+      temp = two*( dasum( n, x, 1 ) / dble( 3*n ) )
+      if( temp.gt.est ) then
+         call dcopy( n, x, 1, v, 1 )
+         est = temp
+      end if
 *
-  150 CONTINUE
-      KASE = 0
-      RETURN
+  150 continue
+      kase = 0
+      return
 *
-*     End of DLACON
+*     end of dlacon
 *
-      END
+      end

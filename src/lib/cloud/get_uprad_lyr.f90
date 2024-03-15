@@ -1,8 +1,8 @@
 
         subroutine get_uprad_lyr(ni,nj,gnd_radc,ht,uprad_3d,xcos,ycos)
 
-        use mem_namelist, ONLY: r_missing_data,earth_radius,grid_spacing_m 
-        use mem_allsky, ONLY: nc
+        use mem_namelist, only: r_missing_data,earth_radius,grid_spacing_m 
+        use mem_allsky, only: nc
 
         include 'trigd.inc'
         include 'rad_nodata.inc'
@@ -30,7 +30,7 @@
         allocate(disti_a(-iradius:+iradius,-iradius:+iradius))
         allocate(distj_a(-iradius:+iradius,-iradius:+iradius))
 
-!       Determine radiation weighting function array
+!       determine radiation weighting function array
         do ii = -iradius,+iradius
         do jj = -iradius,+iradius
             disti = float(ii) * grid_spacing_m
@@ -75,17 +75,17 @@
 
         if(.false.)then
 
-!        Loop through each gridpoint on the layer array
+!        loop through each gridpoint on the layer array
          do i = 1,ni,iskip
          do j = 1,nj,iskip
 
-!         Index limits of layer array
+!         index limits of layer array
           imin = max(i-iradius,1)
           imax = min(i+iradius,ni)
           jmin = max(j-iradius,1)
           jmax = min(j+iradius,nj)
 
-!         Index limits on the weighting array
+!         index limits on the weighting array
           iimin = imin-i
           iimax = imax-i
           jjmin = jmin-j
@@ -142,10 +142,10 @@
          enddo ! j
          enddo ! i
 
-!        Interpolate to fill in the horizontal
-!        Note that the integrated radiance over the hemisphere gives
-!        irradiance. We can multiply that by the extinction
-!        coefficient to obtain the emission density "S", equivalent to
+!        interpolate to fill in the horizontal
+!        note that the integrated radiance over the hemisphere gives
+!        irradiance. we can multiply that by the extinction
+!        coefficient to obtain the emission density "s", equivalent to
 !        radiant flux per unit volume.
          do ic = 1,nc
            write(6,*)' fill horizontal layer to yield uprad (wm2nm) for color',ic
@@ -156,9 +156,9 @@
          call bilinear_fill(xcos(:,:),ni,nj,iskip,r_missing_data)
          call bilinear_fill(ycos(:,:),ni,nj,iskip,r_missing_data)
 
-        else ! alternate looping strategy (UNDER CONSTRUCTION)
+        else ! alternate looping strategy (under construction)
 
-!        Loop through each gridpoint on the layer array
+!        loop through each gridpoint on the layer array
          radius_max = 0.
          do i = 1,ni
          do j = 1,nj
@@ -172,7 +172,7 @@
              jmin = max(j-iradius,1)
              jmax = min(j+iradius,nj)
 
-!            Surrounding area loop of layer array
+!            surrounding area loop of layer array
              do ii = imin,imax
              do jj = jmin,jmax
                idif = ii-i

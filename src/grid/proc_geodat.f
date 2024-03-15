@@ -3,14 +3,14 @@
      1,geodat,istatus)
 !    1,cat_pct)
 !
-! J. Smart (NOAA/FSL) : 2002            original version
-! T. Hume/T. Simmers Meteorological Service of New Zealand
+! j. smart (noaa/fsl) : 2002            original version
+! t. hume/t. simmers meteorological service of new zealand
 !                     : 2002
-!                    Corrected problems with crossing the dateline
+!                    corrected problems with crossing the dateline
 !                    and constrained albedo to one tile.
-! J. Smart (NOAA/FSL) : 2003
-!                    Further refined processing of tiles to accomodate
-!                    dateline, Greenwich mean, and Poles. Added smoothing
+! j. smart (noaa/fsl) : 2003
+!                    further refined processing of tiles to accomodate
+!                    dateline, greenwich mean, and poles. added smoothing
 !                    of temp field (subroutine one_two_one).
 
       use horiz_interp
@@ -27,7 +27,7 @@
       integer iblksizo
       integer isbego,iwbego
       integer no
-      integer icurNS,icurEW
+      integer icurns,icurew
       integer itile
       integer itilex
       integer itiley
@@ -59,7 +59,7 @@
       real    grx(nx_dom,ny_dom)
       real    gry(nx_dom,ny_dom)
 
-!Define Array to keep count of number of raw tile data points found for each
+!define array to keep count of number of raw tile data points found for each
 !model grid point
 
 !     real    cat_pct(nx_dom,ny_dom,ncat)
@@ -105,7 +105,7 @@
       character*255 cfname
       character(len=8),allocatable:: ctile_name_list(:)
       character*8   ctilename
-      character*1   curNS,curEW
+      character*1   curns,curew
       character*1   ctiletype
 
       character*1   cgrddef
@@ -113,9 +113,9 @@
       real    lat0,lon0,dlat,dlon
       common /llgrid/nxst,nyst,nz,lat0,lon0,dlat,dlon,cgrddef
 
-c original create from Brent Shaw pseudocode
+c original create from brent shaw pseudocode
 
-      print*,'Start proc_geodat'
+      print*,'start proc_geodat'
 
       if(.not. allocated(dom_lats))then
           allocate(dom_lats(nx_dom,ny_dom),dom_lons(nx_dom,ny_dom))
@@ -123,101 +123,101 @@ c original create from Brent Shaw pseudocode
       dom_lats=dom_lats_in
       dom_lons=dom_lons_in
 
-! TH: 8 Aug 2002 Now we may need to adjust the longitude values in
+! th: 8 aug 2002 now we may need to adjust the longitude values in
 ! dom_lons so that they are always monotonically increasing, even if
 ! we have the bad fortune to cross the date line.
-      DO jj=1,ny_dom-1
-         DO ii=1,nx_dom
-            IF ((dom_lons(ii,jj+1) - dom_lons(ii,jj)) < -180.) THEN
+      do jj=1,ny_dom-1
+         do ii=1,nx_dom
+            if ((dom_lons(ii,jj+1) - dom_lons(ii,jj)) < -180.) then
                dom_lons(ii,jj+1) = dom_lons(ii,jj+1) + 360.
-            ELSE IF ((dom_lons(ii,jj+1) - dom_lons(ii,jj)) > 180.) THEN
+            else if ((dom_lons(ii,jj+1) - dom_lons(ii,jj)) > 180.) then
                dom_lons(ii,jj+1) = dom_lons(ii,jj+1) - 360.
-            END IF
-         END DO
-      END DO
-! TH: 8 Aug 2002 We also have to cope with spastic grids that have
+            end if
+         end do
+      end do
+! th: 8 aug 2002 we also have to cope with spastic grids that have
 ! "horizontal" date lines (where we might cross the date line by
 ! moving up and down the grid rather than left and right).
-      DO jj=1,ny_dom
-         DO ii=1,nx_dom-1
-            IF ((dom_lons(ii+1,jj) - dom_lons(ii,jj)) < -180.) THEN
+      do jj=1,ny_dom
+         do ii=1,nx_dom-1
+            if ((dom_lons(ii+1,jj) - dom_lons(ii,jj)) < -180.) then
                dom_lons(ii+1,jj) = dom_lons(ii+1,jj) + 360.
-            ELSE IF ((dom_lons(ii+1,jj) - dom_lons(ii,jj)) > 180.) THEN
+            else if ((dom_lons(ii+1,jj) - dom_lons(ii,jj)) > 180.) then
                dom_lons(ii+1,jj) = dom_lons(ii+1,jj) - 360.
-            END IF
-         END DO
-      END DO
-! TH: 8 Aug 2002 Now we want to make sure our longitudes don't fall
+            end if
+         end do
+      end do
+! th: 8 aug 2002 now we want to make sure our longitudes don't fall
 ! outside the range (-360,360).
-      IF (MAXVAL(dom_lons(:,:)) > 360.) dom_lons(:,:) = dom_lons(:,:)
+      if (maxval(dom_lons(:,:)) > 360.) dom_lons(:,:) = dom_lons(:,:)
      1   - 360
-      max_lat = MAXVAL(dom_lats)
-      IF (MINVAL(dom_lons(:,:)) < -360.) dom_lons(:,:) = dom_lons(:,:)
+      max_lat = maxval(dom_lats)
+      if (minval(dom_lons(:,:)) < -360.) dom_lons(:,:) = dom_lons(:,:)
      1   + 360
 
-! nx_dom = number of East-West points in anal/model domain   I
-! ny_dom = number of North-south points      "               I
-! dom_lats(nx_dom,ny_dom)  ! Latitude array                  I
-! dom_lons(nx_dom,ny_dom)  ! Longitude array                 I
+! nx_dom = number of east-west points in anal/model domain   i
+! ny_dom = number of north-south points      "               i
+! dom_lats(nx_dom,ny_dom)  ! latitude array                  i
+! dom_lons(nx_dom,ny_dom)  ! longitude array                 i
 
       call s_len(path_to_tile_data,lenp)
       ctiletype=path_to_tile_data(lenp:lenp)
-      if(ctiletype.eq.'T'.or.
-     1   ctiletype.eq.'A'.or.
-     1   ctiletype.eq.'G'.or.
-     1   ctiletype.eq.'U'.or.
-     1   ctiletype.eq.'M' )then
+      if(ctiletype.eq.'t'.or.
+     1   ctiletype.eq.'a'.or.
+     1   ctiletype.eq.'g'.or.
+     1   ctiletype.eq.'u'.or.
+     1   ctiletype.eq.'m' )then
          print*,'tile type to process = ',ctiletype
       else
-         print*,'Unknown tile type in proc_geodat_tiles'
+         print*,'unknown tile type in proc_geodat_tiles'
          print*,'path_to_tile_data: ',path_to_tile_data(1:lenp)
          stop
       endif
 
       bgmodel=6
 
-      TITLE=path_to_tile_data(1:lenp)//'HEADER'
-      lentd=INDEX(TITLE,' ')-1
-      CALL JCLGET(29,TITLE(1:lentd),'FORMATTED',1,istatus)
+      title=path_to_tile_data(1:lenp)//'header'
+      lentd=index(title,' ')-1
+      call jclget(29,title(1:lentd),'formatted',1,istatus)
       if(istatus .ne. 1)then
-         write(6,*)'Warning: proc_geodat_tiles opening HEADER: check'
-     1            ,'geog paths and HEADER file'
+         write(6,*)'warning: proc_geodat_tiles opening header: check'
+     1            ,'geog paths and header file'
          return
       endif
 
-      READ(29,*)IBLKSIZO,NO,ISBEGO,IWBEGO,RWOFF,RSOFF
+      read(29,*)iblksizo,no,isbego,iwbego,rwoff,rsoff
       print *,'title=',title(1:lentd)
-      print *,'RWOFF,RSOFF = ',RWOFF,RSOFF
+      print *,'rwoff,rsoff = ',rwoff,rsoff
       print *,'isbego,iwbego=',isbego,iwbego
       print *,'iblksizo,no=',iblksizo,no
-      CLOSE(29)
+      close(29)
 
-      if(ctiletype.eq.'T'.and.iblksizo.eq.10)then
+      if(ctiletype.eq.'t'.and.iblksizo.eq.10)then
        print*
-       print*,'Error: ****************************************'
-       print*,'Error: ********** TERMINATING *****************'
-       print*,'Error: Old Soil Temp database!!!'
-       print*,'Error: You need to update these'
-       print*,'Error: data: ',TRIM(path_to_tile_data)
-       print*,'Error: by downloading new soil temp data'
-       print*,'Error: ********** TERMINATING *****************'
-       print*,'Error: ****************************************'
+       print*,'error: ****************************************'
+       print*,'error: ********** terminating *****************'
+       print*,'error: old soil temp database!!!'
+       print*,'error: you need to update these'
+       print*,'error: data: ',trim(path_to_tile_data)
+       print*,'error: by downloading new soil temp data'
+       print*,'error: ********** terminating *****************'
+       print*,'error: ****************************************'
        print*
       endif
 
       maxtiles=(360/iblksizo)*(180/iblksizo)
-      print*,'Maxtiles = ',maxtiles
+      print*,'maxtiles = ',maxtiles
 
-      if(NO .GT. 0)then
-         DELTALLO=FLOAT(IBLKSIZO)/FLOAT(NO)
+      if(no .gt. 0)then
+         deltallo=float(iblksizo)/float(no)
       else
-         print *,'ERROR:  NO <= 0 ... '
+         print *,'error:  no <= 0 ... '
          stop
       endif
 
       itilesize_d = iblksizo
 
-! Define number of points in a raw tile and what the lat/lon increment
+! define number of points in a raw tile and what the lat/lon increment
 ! between the points in a tile are
 
       nx_tile=no
@@ -225,31 +225,31 @@ c original create from Brent Shaw pseudocode
       dlat_tile=deltallo
       dlon_tile=dlat_tile
 
-! ncat ! Number of categories (1 for topo, 24 for veg, etc.)
-!Define Array to keep count of number of raw tile data points found for each
+! ncat ! number of categories (1 for topo, 24 for veg, etc.)
+!define array to keep count of number of raw tile data points found for each
 !model grid point
 
-! Find min/max atitude and longitude so we can compute which tiles to
+! find min/max atitude and longitude so we can compute which tiles to
 ! read
 
-      minlat = MINVAL(dom_lats)
-      maxlat = MAXVAL(dom_lats)
-      minlon = MINVAL(dom_lons)
-      maxlon = MAXVAL(dom_lons)
+      minlat = minval(dom_lats)
+      maxlat = maxval(dom_lats)
+      minlon = minval(dom_lons)
+      maxlon = maxval(dom_lons)
 
 ! no offsets needed here since these are the tiles, not the points
-! in the tiles. However, since domains may need data from tiles with
+! in the tiles. however, since domains may need data from tiles with
 ! offset considered, add it in.
       min_lat = max(-89.9999, min(89.9999, minlat - abs(rsoff)))
       max_lat = max(-89.9999, min(89.9999, maxlat + abs(rsoff)))
       min_lon = max(-359.9999,min(359.9999,minlon - abs(rwoff)))
       max_lon = max(-359.9999,min(359.9999,maxlon + abs(rwoff)))
 
-c     if(ctiletype .eq. 'G'.or.ctiletype.eq.'A')then
+c     if(ctiletype .eq. 'g'.or.ctiletype.eq.'a')then
 c        if(min_lon.lt.-180)min_lon=360.+min_lon
 c     endif
 
-      if(ctiletype.eq.'A')then
+      if(ctiletype.eq.'a')then
          min_lon = max(min_lon,-179.9999)
          max_lon = min(max_lon,+179.9999)
       endif
@@ -259,7 +259,7 @@ c     endif
 
       deallocate(dom_lats,dom_lons)
 
-!  Compute a list of tiles needed to fulfill lat/lon range just computed
+!  compute a list of tiles needed to fulfill lat/lon range just computed
 
       print*,'allocate ctile_name_list lat/lon arrays'
       print*,'with maxtiles = ',maxtiles
@@ -272,7 +272,7 @@ c     endif
      1,tile_s_lat,tile_n_lat,istatus)
 
       if(istatus.ne.1)then
-         print*,'ERROR:  returned from get_tile_list'
+         print*,'error:  returned from get_tile_list'
          return
       endif
 
@@ -280,26 +280,26 @@ c     endif
       allocate (itile_lat(ntn))
       allocate (itile_lon(ntn))
 
-!     ALLOCATE(num_raw_points_total(nx_dom,ny_dom))
-!     ALLOCATE(num_raw_points_cat(nx_dom,ny_dom,ncat))
+!     allocate(num_raw_points_total(nx_dom,ny_dom))
+!     allocate(num_raw_points_cat(nx_dom,ny_dom,ncat))
 !     num_raw_points_total(:,:)=0
 !     num_raw_points_cat(:,:,:)=0
 
       do itile=1,ntn
          read(ctile_name_list(itile)(1:2),'(i2.2)')itile_lat(itile)
          read(ctile_name_list(itile)(4:6),'(i3.3)')itile_lon(itile)
-         if(ctile_name_list(itile)(7:7).eq.'W')then
+         if(ctile_name_list(itile)(7:7).eq.'w')then
             if(itile_lon(itile).lt.180)then
                itile_lon(itile)=360-itile_lon(itile)
             endif
          endif
-         if(ctile_name_list(itile)(3:3).eq.'S')then
+         if(ctile_name_list(itile)(3:3).eq.'s')then
             itile_lat(itile)=-1.0*itile_lat(itile)
          endif
       enddo
 
-      print*,'S/N tile lat points = ',tile_s_lat,tile_n_lat
-      print*,'W/E tile lon points = ',tile_w_lon,tile_e_lon
+      print*,'s/n tile lat points = ',tile_s_lat,tile_n_lat
+      print*,'w/e tile lon points = ',tile_w_lon,tile_e_lon
 
 c determine the x/y size dimensions and allocate/initialize the super tile
 
@@ -307,9 +307,9 @@ c determine the x/y size dimensions and allocate/initialize the super tile
       itx=nx_tile*nint((rlondif+itilesize_d)/float(itilesize_d))
       ity=ny_tile*nint((abs(tile_n_lat-tile_s_lat)+itilesize_d)
      ./float(itilesize_d))
-      if(ctiletype.eq.'T' .or. ctiletype.eq.'M' .and.
+      if(ctiletype.eq.'t' .or. ctiletype.eq.'m' .and.
      &itx.gt.360)itx=360
-      if(ctiletype.eq.'G' .or. ctiletype.eq.'A' .and.
+      if(ctiletype.eq.'g' .or. ctiletype.eq.'a' .and.
      &itx.gt.2500)itx=2500
       print*,'allocate data_proc: nx/ny/ncat ',itx,ity,ncat
       allocate(data_proc(itx,ity,ncat))
@@ -317,7 +317,7 @@ c determine the x/y size dimensions and allocate/initialize the super tile
       data_proc = r_missing_data
 
 c for the supertile lat-lon "grid" definition:
-c the LL setup must consider the offsets since this
+c the ll setup must consider the offsets since this
 c is relevant to the actual data points within the tile.
       nxst=itx
       nyst=ity
@@ -335,84 +335,84 @@ c is relevant to the actual data points within the tile.
       sw(2)=lon0
       ne(1)=tile_n_lat+itilesize_d+rsoff
       ne(2)=tile_e_lon+itilesize_d+rwoff
-      cgrddef='S'
+      cgrddef='s'
 
       print*,'generate supertile for domain'
       print*,'number of small tiles needed= ',ntn
       print*
 
-      DO itile = 1, ntn  !number of tiles needed
+      do itile = 1, ntn  !number of tiles needed
 
        ctilename=ctile_name_list(itile)
        cfname = path_to_tile_data(1:lenp)//ctilename(1:3)
-       read(ctilename(4:6),'(i3.3)')icurEW
-       read(ctilename(7:7),'(a1)')curEW
-       IF (icurEW > 180)THEN    ! .and. icurEW < 360) THEN
-          icurEW = 360 - icurEW
-       ENDIF
-       IF (icurEW == 180.and.curEW.ne.'W') THEN
-          curEW = 'W'
-       END IF
+       read(ctilename(4:6),'(i3.3)')icurew
+       read(ctilename(7:7),'(a1)')curew
+       if (icurew > 180)then    ! .and. icurew < 360) then
+          icurew = 360 - icurew
+       endif
+       if (icurew == 180.and.curew.ne.'w') then
+          curew = 'w'
+       end if
 
-       write(cfname(lenp+4:lenp+6),'(i3.3)')icurEW
-       write(cfname(lenp+7:lenp+7),'(a1)')curEW
+       write(cfname(lenp+4:lenp+6),'(i3.3)')icurew
+       write(cfname(lenp+7:lenp+7),'(a1)')curew
 
        call s_len(cfname,lenf)
        print*,'processing tile: ',cfname(1:lenf)
 
        inquire(file=cfname,exist=lexist,opened=lopen)
        if(.not.lexist)then
-          print*,'Error: file does not exist: ',cfname(1:lenp)
+          print*,'error: file does not exist: ',cfname(1:lenp)
           goto 1000
        endif
        if(lopen)then
-          print*,'Error: file already open: ',cfname(1:lenp)
+          print*,'error: file already open: ',cfname(1:lenp)
           goto 1000
        endif
 
 
-! Open the tile and read the points
-       if( (ctiletype.eq.'U').and.(no.eq.1200) )then
-           CALL READ_DEM(29,cfname,no,no,2,2,raw_data,istat) ! world topo_30s
+! open the tile and read the points
+       if( (ctiletype.eq.'u').and.(no.eq.1200) )then
+           call read_dem(29,cfname,no,no,2,2,raw_data,istat) ! world topo_30s
            dem_data=.true.
-       elseif( ctiletype.eq.'O' )then      ! soiltype top and bot layer
-           CALL READ_DEM(29,cfname,no,no,1,4,raw_data,istat)
+       elseif( ctiletype.eq.'o' )then      ! soiltype top and bot layer
+           call read_dem(29,cfname,no,no,1,4,raw_data,istat)
            dem_data=.true.
-       elseif( ctiletype.eq.'V' )then      ! world USGS 30s landuse
-           CALL READ_DEM(29,cfname,no,no,1,4,raw_data,istat)
+       elseif( ctiletype.eq.'v' )then      ! world usgs 30s landuse
+           call read_dem(29,cfname,no,no,1,4,raw_data,istat)
            dem_data=.true.
-       elseif( (ctiletype.eq.'G')
-     1     .or.(ctiletype.eq.'A')
-     1     .or.(ctiletype.eq.'M') )then      ! greenfrac/albedo/maxsnowalb
-           CALL READ_DEM_G(29,cfname,no,no,1,ncat,1,1,4,raw_data,istat)
+       elseif( (ctiletype.eq.'g')
+     1     .or.(ctiletype.eq.'a')
+     1     .or.(ctiletype.eq.'m') )then      ! greenfrac/albedo/maxsnowalb
+           call read_dem_g(29,cfname,no,no,1,ncat,1,1,4,raw_data,istat)
            dem_data=.true.
-       elseif( ctiletype.eq.'T')then ! .or. ctiletype.eq.'M')then      ! soiltemp
-           CALL READ_DEM(29,cfname,no,no,2,2,raw_data,istat)
+       elseif( ctiletype.eq.'t')then ! .or. ctiletype.eq.'m')then      ! soiltemp
+           call read_dem(29,cfname,no,no,2,2,raw_data,istat)
            dem_data=.true.
        else                                ! other  like albedo
-           CALL JCLGET(29,cfname,'FORMATTED',0,istatus)
-           CALL VFIREC(29,raw_data,no*no,'LIN')
-           if ((ctiletype.eq.'U').and.(no.eq.121)) then
+           call jclget(29,cfname,'formatted',0,istatus)
+           call vfirec(29,raw_data,no*no,'lin')
+           if ((ctiletype.eq.'u').and.(no.eq.121)) then
                 dem_data=.false.           ! topo_30s
            endif
        endif
 
        if(istat.ne.0)then
-          print*,'Error returned: proc_geodat: READ_DEM'
+          print*,'error returned: proc_geodat: read_dem'
           istatus=0
           return
        endif
 c
 c make "super tile" from all smaller tiles
 c
-       read(ctilename(1:2),'(i2.2)')icurNS
-       read(ctilename(3:3),'(a1)')curNS
-       read(ctilename(4:6),'(i3.3)')icurEW
-       read(ctilename(7:7),'(a1)')curEW
+       read(ctilename(1:2),'(i2.2)')icurns
+       read(ctilename(3:3),'(a1)')curns
+       read(ctilename(4:6),'(i3.3)')icurew
+       read(ctilename(7:7),'(a1)')curew
 
 c      print*,'compute itiley/itilex'
-       if(curNS .eq. 'S') icurNS=-1.0*icurNS
-       itiley=nint(1.0+(float(icurNS)-tile_s_lat)/float(itilesize_d))
+       if(curns .eq. 's') icurns=-1.0*icurns
+       itiley=nint(1.0+(float(icurns)-tile_s_lat)/float(itilesize_d))
 c
        rlondif=float(itile_lon(itile))-tile_w_lon
        if(rlondif.lt.0)then
@@ -439,7 +439,7 @@ c
           enddo
        enddo
 
-      ENDDO
+      enddo
 
       deallocate (raw_data,itile_lat,itile_lon,ctile_name_list)
 
@@ -452,22 +452,22 @@ c
       print*,'lat0= ',lat0
       print*,'lon0= ',lon0
 
-      call init_hinterp(nxst,nyst,nx_dom,ny_dom,'LL',
+      call init_hinterp(nxst,nyst,nx_dom,ny_dom,'ll',
      .dom_lats_in,dom_lons_in,grx,gry,bgmodel,'     ',.true.)
 
       print*,'grid rx/ry computed'
-      print*,'SW: grx/gry    1,1: ',grx(1,1),gry(1,1)
-      print*,'SE: grx/gry   nx,1: ',grx(nx_dom,1),gry(nx_dom,1)
-      print*,'NW: grx/gry   1,ny: ',grx(1,ny_dom),gry(1,ny_dom)
-      print*,'NE: grx/gry  nx,ny: ',grx(nx_dom,ny_dom)
+      print*,'sw: grx/gry    1,1: ',grx(1,1),gry(1,1)
+      print*,'se: grx/gry   nx,1: ',grx(nx_dom,1),gry(nx_dom,1)
+      print*,'nw: grx/gry   1,ny: ',grx(1,ny_dom),gry(1,ny_dom)
+      print*,'ne: grx/gry  nx,ny: ',grx(nx_dom,ny_dom)
      .,gry(nx_dom,ny_dom)
 
 c compute mean value to use as def_value
 
-      is=nint(MINVAL(grx))
-      ie=nint(MAXVAL(grx))
-      js=nint(MINVAL(gry))
-      je=nint(MAXVAL(gry))
+      is=nint(minval(grx))
+      ie=nint(maxval(grx))
+      js=nint(minval(gry))
+      je=nint(maxval(gry))
 
       print*,'is/ie/js/je ',is,ie,js,je
 
@@ -494,28 +494,28 @@ c compute mean value to use as def_value
       val_mask = 1
       nt=1
 
-      if(ctiletype.eq.'T')then
+      if(ctiletype.eq.'t')then
 
          min_val = 239.73
          max_val = 305.09
          method  = 1
          geodat(:,:,:)=r_missing_data
 
-      elseif(ctiletype.eq.'A')then
+      elseif(ctiletype.eq.'a')then
 
          min_val = 2.0
          max_val = 100.
          method  = 2
          where(amean .eq. r_missing_data)amean=18.
 
-      elseif(ctiletype.eq.'G')then
+      elseif(ctiletype.eq.'g')then
 
          min_val = 1.0
          max_val = 100.
          method  = 2
          where(amean .eq. r_missing_data)amean=65.
 
-      elseif(ctiletype.eq.'M')then
+      elseif(ctiletype.eq.'m')then
 
          min_val = 1.0
          max_val = 100.
@@ -533,12 +533,12 @@ c compute mean value to use as def_value
      ., geodat(1,1,ii), grx, gry, make_srcmask, min_val, max_val
      ., def_val, val_mask, method)
 
-         if(ctiletype.eq.'A'.or.ctiletype.eq.'M')then
+         if(ctiletype.eq.'a'.or.ctiletype.eq.'m')then
             geodat(:,:,ii)=geodat(:,:,ii)/100.
          endif
 
-         if(ctiletype.eq.'T')then  !.or.ctiletype.eq.'M')then
-            print*,'Filering Deep Soil Temp with 1-2-1'
+         if(ctiletype.eq.'t')then  !.or.ctiletype.eq.'m')then
+            print*,'filering deep soil temp with 1-2-1'
             call one_two_one(nx_dom,ny_dom,nt,geodat(1,1,ii))
          endif
 
@@ -551,27 +551,27 @@ c compute mean value to use as def_value
 ! ---- landuse or soil type, so this section is commented
 ! ---- for now.
 ! --------------------------------------------------------
-! Loop over the raw data points in the tile
+! loop over the raw data points in the tile
 
-!       DO jt = 1, ny_tile
-!       DO it = 1, nx_tile
+!       do jt = 1, ny_tile
+!       do it = 1, nx_tile
 
-! Compute lat/lon of this raw data point using lat/lon from
+! compute lat/lon of this raw data point using lat/lon from
 ! file name, the offset of the data, and the increment
 
-!        raw_lat = float(ilat) + RSOFF + (jt-1)*dlat_tile
-!        raw_lon = float(ilon) + RWOFF + (it-1)*dlon_tile
+!        raw_lat = float(ilat) + rsoff + (jt-1)*dlat_tile
+!        raw_lon = float(ilon) + rwoff + (it-1)*dlon_tile
 
-! Use lat/lon to ij to find wheter this tile point is in our domain
+! use lat/lon to ij to find wheter this tile point is in our domain
 
 !        call latlon_to_rlapsgrid(raw_lat,raw_lon,dom_lats_in
 !    &                ,dom_lons_in,nx_dom,ny_dom,ri,rj,istatus)
-!        dom_i = NINT(ri)
-!        dom_j = NINT(rj)
-!        IF( (dom_i .GE. 1).AND.(dom_i .LE. nx_dom).AND.
-!    &   (dom_j .GE. 1).AND.(dom_j .LE. ny_dom) ) THEN
+!        dom_i = nint(ri)
+!        dom_j = nint(rj)
+!        if( (dom_i .ge. 1).and.(dom_i .le. nx_dom).and.
+!    &   (dom_j .ge. 1).and.(dom_j .le. ny_dom) ) then
 
-!         if(ctiletype.eq.'V')then
+!         if(ctiletype.eq.'v')then
 
 !            point_value=int(raw_data(it,jt,1))
 !            num_raw_points_cat(dom_i,dom_j,point_value) =
@@ -580,7 +580,7 @@ c compute mean value to use as def_value
 !            num_raw_points_total(dom_i, dom_j) =
 !    &       num_raw_points_total(dom_i, dom_j)+ 1
 
-!         elseif(ctiletype.eq.'T')then
+!         elseif(ctiletype.eq.'t')then
 
 !            num_raw_points_cat(dom_i,dom_j,1) =
 !    &       num_raw_points_cat(dom_i,dom_j,1)+1
@@ -590,25 +590,25 @@ c compute mean value to use as def_value
 
 !         endif
 
-!         ! The point is in our domain, so increment the counters.  The
-          ! value of the raw data point is equal to the category ID for
-          ! things like veg-type and soil-type.  For topography, we would
+!         ! the point is in our domain, so increment the counters.  the
+          ! value of the raw data point is equal to the category id for
+          ! things like veg-type and soil-type.  for topography, we would
           ! have to have additional arrays to keep the sum of the terrain
-          ! values to compute the average value at the end. This example
+          ! values to compute the average value at the end. this example
           ! code only does category data
 
-!        ENDIF
-!       ENDDO
-!       ENDDO
+!        endif
+!       enddo
+!       enddo
 
 
-! Now you can compute percentage of each category like so:
-!     if(ctiletype.eq.'V')then
-!        DO icat = 1, ncat
+! now you can compute percentage of each category like so:
+!     if(ctiletype.eq.'v')then
+!        do icat = 1, ncat
 !           cat_pct(:,:,icat)=num_raw_points_cat(:,:,icat) /
 !    &                         num_raw_points_total(:,:)
-!        ENDDO
-!     elseif(ctiletype.eq.'T')then
+!        enddo
+!     elseif(ctiletype.eq.'t')then
 !           cat_pct(:,:,1)= num_raw_points_total(:,:)/
 !    &                       num_raw_points_cat(:,:,1)
 !     endif

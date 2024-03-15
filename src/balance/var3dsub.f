@@ -1,7 +1,7 @@
 c     call var3d (u,v,d,t,up,vp,dp,smsng,dx,dt,dpht,distnf,p,ht
 c    &,errwnds,errdds,errmod,io,jo,nx,ny,nz,slat,slon,ter,a9_time)
 c
-c *** subroutine extracted from test var3d program 1-4-06 JRS.
+c *** subroutine extracted from test var3d program 1-4-06 jrs.
 c *** removed up,vp,dp from argument list as these are not needed
 c *** as return variables in calling routine.
 c
@@ -17,15 +17,15 @@ c    &p,ht,errwnds,errdds,errmod,io,jo,nx,ny,nz,slat,slon,ter)
      
 c this subroutine takes in fields of u,v, and density and estimates a
 c variance over the grid by determining a weighted difference between
-c each grid point and a central profile up,vp,dp. The weighting function is
+c each grid point and a central profile up,vp,dp. the weighting function is
 c a skewed gaussian based on the mean wind
 c input  variables
-c             u(nx,ny,nz) 3D grid of winds
+c             u(nx,ny,nz) 3d grid of winds
 c             v(nx,ny,nz)     "
-c             t(nx,ny,nz) 3D grid of potl temperatures
+c             t(nx,ny,nz) 3d grid of potl temperatures
 c             d(nx,ny,nz) density
-c             up(nz) U-wind profile at drop point
-c             vp(nz) V-wind profile
+c             up(nz) u-wind profile at drop point
+c             vp(nz) v-wind profile
 c             dp(nz) density   profile
 c output fields
 c             upv(nz) estimated profile variance
@@ -76,7 +76,7 @@ c             wt3(nx,ny,nz)
 
        data index /1,2,3,4,12,13,14,23,24,34,123,124,134,234,1234/
 
-       print*,'Module var3d'
+       print*,'module var3d'
        print*,'nx/ny/nz:      ',nx,ny,nz
        print*,'grid center:   ',io,jo
        print*,'nofly radius:  ',distnf
@@ -85,8 +85,8 @@ c             wt3(nx,ny,nz)
         
 c find kbot and ktop
 
-c Note: This assumes the grid center of the domain is the drop
-c       location for the PADS mission. Ie., drop location is specified
+c note: this assumes the grid center of the domain is the drop
+c       location for the pads mission. ie., drop location is specified
 c       by vars grid_cen_lat_cmn & grid_cen_lon_cmn in nest7grid.parms
 
        call get_grid_center(droplat,droplon,istatus)
@@ -111,8 +111,8 @@ c   compute kbot
        enddo
 
        if(kbot.gt.ktop)then
-          print*,'Error: kbot > ktop in var3dsub '
-          print*,'Terminating ', kbot,ktop
+          print*,'error: kbot > ktop in var3dsub '
+          print*,'terminating ', kbot,ktop
           stop
        endif
 
@@ -146,7 +146,7 @@ c profiles
        print*, 'ktop ', ktop
        print*, 'kbot ', kbot
        print*
-       print*, 'Height profile in drop layer'
+       print*, 'height profile in drop layer'
        do k=kbot,ktop
         print*,'k, ht(m) ',k,ht(k)
         up(k)=u(io,jo,k)
@@ -178,8 +178,8 @@ c profiles
 c compute weight function
        allocate (wt(nx,ny))
 c   alpha is the along flow weight tuning parameter based on expected model 
-c   phase error in meters (errdis), the grid distance dx (m).D=errdis/dx 
-c   alpha is 1/D**2 making the weight 1/e for distance D (in I,J space)
+c   phase error in meters (errdis), the grid distance dx (m).d=errdis/dx 
+c   alpha is 1/d**2 making the weight 1/e for distance d (in i,j space)
 c   beta is the cross flow fall off value and is set to 3*alpha  
 
        alph=(dx/errdis)**2     
@@ -314,8 +314,8 @@ c now add up all the weights below ktop
         enddo
        enddo
 c now find maximum wt for area
-c read PADS input of nofly area file and user sonde location information
-      call read_PADS_nofly_and_sonde(nx,ny
+c read pads input of nofly area file and user sonde location information
+      call read_pads_nofly_and_sonde(nx,ny
      1,nofly_area,user_sonde_loc,istatus)
 
       idist2=(6.0*dt/dx)**2
@@ -370,7 +370,7 @@ c sum over ktop levels
         sumu=sumu+uav(k)
         sumv=sumv+vav(k)
         sumd=sumd+dav(k)
-c       write(6,1002) 'Anvar sen,u,v,tot,den ',index(l),uav(k),
+c       write(6,1002) 'anvar sen,u,v,tot,den ',index(l),uav(k),
 c    &                 vav(k),tav(k),dav(k)
 
  1002   format(1x,a22,i6,4f9.5)
@@ -484,7 +484,7 @@ c
       if(alt.eq.0)then
          cfname_out=cfname_out(1:lend)//'air/'//a9_time//'.air'
 c        call s_len(cfname_out,lend)
-         print*,'Airdrop output filename: ',cfname_out(1:lend)
+         print*,'airdrop output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -492,7 +492,7 @@ c        call s_len(cfname_out,lend)
       elseif(alt.eq.1)then
          cfname_out=cfname_out(1:lend)//'air/'//a9_time//'.airp1'
 c        call s_len(cfname_out,lend)
-         print*,'Airdrop output filename: ',cfname_out(1:lend)
+         print*,'airdrop output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -500,7 +500,7 @@ c        call s_len(cfname_out,lend)
       elseif(alt.eq.2)then
          cfname_out=cfname_out(1:lend)//'air/'//a9_time//'.airp2'
 c        call s_len(cfname_out,lend)
-         print*,'Airdrop output filename: ',cfname_out(1:lend)
+         print*,'airdrop output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -517,7 +517,7 @@ c        call s_len(cfname_out,lend)
          call s_len(cfname_out,lend)
          cfname_out=cfname_out(1:lend)//'pln/'//a9_time//
      +'.pln'//cindx(li:4)
-c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
+c        print*,'airdrop planning output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -534,19 +534,19 @@ c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
       else
          write(lun,1050)
       endif
- 1011 format(6x,'************AIRDROP OUTPUT**************')
- 1050 format(6x,'*******AIRDROP PLANNING OUTPUT**********')
+ 1011 format(6x,'************airdrop output**************')
+ 1050 format(6x,'*******airdrop planning output**********')
       if(alt.ne.99)then
          write(lun,1012)
       else
          write(lun,1052)
       endif 
- 1012 format(6x,'AIRDROP PROFILES FROM LAPS ANALYSIS')
- 1052 format(6x,'PLANNING PROFILES FROM LAPS ANALYSIS')
+ 1012 format(6x,'airdrop profiles from laps analysis')
+ 1052 format(6x,'planning profiles from laps analysis')
       write(lun,1013)
- 1013 format(4x,'P',6x,'HT',6x,'U',8x,'V',8x,'W',8x,'T',7x,'Den')
+ 1013 format(4x,'p',6x,'ht',6x,'u',8x,'v',8x,'w',8x,'t',7x,'den')
       write(lun,1014)
- 1014 format(3x,'mb',7x,'m',5x,'m/sec',4x,'m/sec',4x,'m/sec',6x,'K'
+ 1014 format(3x,'mb',7x,'m',5x,'m/sec',4x,'m/sec',4x,'m/sec',6x,'k'
      +,6x,'kg/m3')
        ii=io     
        jj=jo    
@@ -558,13 +558,13 @@ c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
       enddo
       write(lun,1015) 
        write(lun,1022)
- 1022 format(6x,'DROPSONDE AND BACKGROUND WIND PROFILES  ')
+ 1022 format(6x,'dropsonde and background wind profiles  ')
       write(lun,1023)
- 1023 format(4x,'P',6x,'HT',6x,'UD',7x,'VD',7x,'UB',7x,'VB'
-     & ,7x,'TD',7x,'TB')
+ 1023 format(4x,'p',6x,'ht',6x,'ud',7x,'vd',7x,'ub',7x,'vb'
+     & ,7x,'td',7x,'tb')
       write(lun,1024)
  1024 format(3x,'mb',7x,'m',5x,'m/sec',4x,'m/sec',4x,'m/sec',4x,'m/sec'
-     +,6x,'K',6x,'K')
+     +,6x,'k',6x,'k')
      
        ii=io    
        jj=jo    
@@ -577,7 +577,7 @@ c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
       write(lun,1015) 
  1015 format(/)
       write(lun,1016)
- 1016 format(8x, 'BIAS ERROR ESTIMATES')
+ 1016 format(8x, 'bias error estimates')
       write(lun,1082)
       write(lun,1083)
       write(lun,1084)
@@ -591,7 +591,7 @@ c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
       write(lun,1015)
       write(lun,1016)
       write(lun,1017)
- 1017 format(1x,'P LVL  HT LVL ')
+ 1017 format(1x,'p lvl  ht lvl ')
       write(lun,1009)
       write(lun,1010)
       do k=1,nz
@@ -603,12 +603,12 @@ c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
    
       write(lun,1015)
       write(lun,1028)
- 1028 format(10x,'TOTAL COLUMN WIND BIAS')
+ 1028 format(10x,'total column wind bias')
       write(lun,1029) ubtot,vbtot                  
- 1029 format(1x,'U BIAS ',f7.2,' V BIAS ',f7.2)
+ 1029 format(1x,'u bias ',f7.2,' v bias ',f7.2)
       write(lun,1015)
       write(lun,1018)
- 1018 format(10x,'VARIANCE ESTIMATES')
+ 1018 format(10x,'variance estimates')
       write(lun,1002)
       write(lun,1003)
       write(lun,1004)
@@ -625,15 +625,15 @@ c        print*,'Airdrop planning output filename: ',cfname_out(1:lend)
 
       write(lun,1015)
       write(lun,1019)
- 1019 format(3x,'TOTAL VARIANCE ESTIMATES')
+ 1019 format(3x,'total variance estimates')
       write(lun,1020)
- 1020 format( '  P     HT     Analysis + Turbulence ')
+ 1020 format( '  p     ht     analysis + turbulence ')
       write(lun,1021)
  1021 format( '                    (m2/sec2)  ' )
       write(lun,1007)
- 1007 format(19x,'U',8x,'V',9x,'W',6x,'Den',7x,'P',9x,'HT') 
- 1009 format(19x,'P',8x,'HT',8x,'Density')
- 1010 format(19x,'mb',8x,'m',8x,'Back',4x,'Anal')
+ 1007 format(19x,'u',8x,'v',9x,'w',6x,'den',7x,'p',9x,'ht') 
+ 1009 format(19x,'p',8x,'ht',8x,'density')
+ 1010 format(19x,'mb',8x,'m',8x,'back',4x,'anal')
 
       do k=1,nz
        ii=rri(k)
@@ -654,25 +654,25 @@ c combined variance formula - err(3,2,k) contains covariance
  1000 format(1x,f5.0,f8.0,2(f5.1,f5.1,f5.3),3f5.2,2f8.6)
  1006 format(1x,f5.0,f8.0,2(f5.1,f5.1,f5.3),3f5.2,2f7.4)
  1086 format(1x,f5.0,f8.0,2(f7.1,f7.1,f7.3),3f7.2)
- 1002 format(18x,'Background',5x,'Analysis',7x,'Turbulence',5x,
-     1'Density')
- 1082 format(18x,'Background',12x,'Analysis',12x,'Turbulence')
+ 1002 format(18x,'background',5x,'analysis',7x,'turbulence',5x,
+     1'density')
+ 1082 format(18x,'background',12x,'analysis',12x,'turbulence')
  1083 format(20x,3('(m/sec)',13x))
  1003 format(20x,3('(m2/sec2)',5x),'(kg2/m6)')
- 1004 format(3x,'P',7x,'HT  ',3('  U    V    W  '),'  Bgnd     Anal')
- 1084 format(3x,'P',7x,'HT  ',3('   U      V      W    '))
+ 1004 format(3x,'p',7x,'ht  ',3('  u    v    w  '),'  bgnd     anal')
+ 1084 format(3x,'p',7x,'ht  ',3('   u      v      w    '))
  1001 format(1x,f5.0,f8.0,3f9.3,2f9.6,f9.2)
  1005 format(1x,f5.0,f8.0,5f9.3)
  1025 format(1x,f5.0,f8.0,6f9.3)
  1008 format(1x,f5.0,f8.0,4f9.3)
 
-  909 print*,'Error opening airdrop output file'
+  909 print*,'error opening airdrop output file'
       return
       end
-C
-C -----------
-C
-      subroutine read_PADS_nofly_and_sonde(nx,ny
+c
+c -----------
+c
+      subroutine read_pads_nofly_and_sonde(nx,ny
      1,nofly_area,user_sonde_loc,istatus)
 
       implicit none
@@ -686,65 +686,65 @@ C
       integer     nofly_area(nx,ny)  !output
       integer     user_sonde_loc(2)  !output
       integer     istatus
-      logical       L1
+      logical       l1
 
       istatus = 0
 c first is no-fly-area file
       call get_directory('static',directory,len_dir)
       cfilespec=directory(1:len_dir)//'/'//'no-fly-area.txt'
       call s_len(cfilespec,len_cfspec)
-      inquire(file=cfilespec(1:len_cfspec),EXIST=L1)
-      if(.not.L1)then   !the file does not exist
+      inquire(file=cfilespec(1:len_cfspec),exist=l1)
+      if(.not.l1)then   !the file does not exist
 
-         print*,"User file no-fly-area.txt does not exist"
+         print*,"user file no-fly-area.txt does not exist"
          print*,"file spec: ",cfilespec(1:len_cfspec)
-         nofly_area=1       !No restricted fly zones anywhere in domain
+         nofly_area=1       !no restricted fly zones anywhere in domain
 
       else
 
-         print*,"Reading user provided file no-fly-area.txt"
-         open(10,FILE=cfilespec(1:len_cfspec),STATUS="old",ERR=90)
-         read(10,*)        !    50   50   : nRows nCols (1,1 = SW corner)
-         read(10,*)        !    Row   Col : 1=Fly, 0=No Fly
+         print*,"reading user provided file no-fly-area.txt"
+         open(10,file=cfilespec(1:len_cfspec),status="old",err=90)
+         read(10,*)        !    50   50   : nrows ncols (1,1 = sw corner)
+         read(10,*)        !    row   col : 1=fly, 0=no fly
          do i=1,nx
           do j=1,ny
             read(10,*,err=91,end=92)idum,jdum,nofly_area(i,j)
           enddo
          enddo
          goto 95
-92       print*,"!! Warning: End-of-file. ",cfilespec(1:len_cfspec)
+92       print*,"!! warning: end-of-file. ",cfilespec(1:len_cfspec)
 95       close(10)
 
       endif
 c second is user provided sonde location file
       cfilespec=directory(1:len_dir)//'/'//'sonde_location.txt'
       call s_len(cfilespec,len_cfspec)
-      inquire(file=cfilespec(1:len_cfspec),EXIST=L1)
+      inquire(file=cfilespec(1:len_cfspec),exist=l1)
       user_sonde_loc(1)=-99
       user_sonde_loc(2)=-99
-      if(.not.L1)then   !the file does not exist
+      if(.not.l1)then   !the file does not exist
 
-         print*,"User file sonde_location.txt does not exist"
+         print*,"user file sonde_location.txt does not exist"
          print*,"file spec: ",cfilespec(1:len_cfspec)
-         print*,"Return missing data (-99) for sonde location"
+         print*,"return missing data (-99) for sonde location"
 
       else
 
-         print*,"Reading user provided file sonde_location.txt"
-         open(11,FILE=cfilespec(1:len_cfspec)
-     1,STATUS="old",ERR=90)
+         print*,"reading user provided file sonde_location.txt"
+         open(11,file=cfilespec(1:len_cfspec)
+     1,status="old",err=90)
          read(11,*,err=91,end=93)user_sonde_loc(1),user_sonde_loc(2)
          goto 96
-93       print*,"!! Warning: End-of-file. ",cfilespec(1:len_cfspec)
+93       print*,"!! warning: end-of-file. ",cfilespec(1:len_cfspec)
 96       close(11)
 
       endif
       istatus = 1
       return
 
- 90   print*,"Error opening existing file: "
+ 90   print*,"error opening existing file: "
       print*,"  filename: ",cfilespec(1:len_cfspec)
       return
- 91   print*,"Error reading file: ",cfilespec(1:len_cfspec)
+ 91   print*,"error reading file: ",cfilespec(1:len_cfspec)
       return
       end

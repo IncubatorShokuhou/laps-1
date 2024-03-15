@@ -35,7 +35,7 @@ c
       cpath=cpath(1:lend)//'lvd/'
       lend=index(cpath,' ')-1
 
-c JS: 8-31-06. No longer reading a mapping look-up-table (lut).
+c js: 8-31-06. no longer reading a mapping look-up-table (lut).
 c  
       do i=1,maxch
          lgot_lut(i)=.true.   !!!.false.
@@ -62,7 +62,7 @@ c              file=file(1:lenf)//ct(1:n)//'-'//csat_typ//'.lut'
 c              n=index(file,' ')-1
 c              open(12,file=file,
 c    &form='unformatted',status='old',err=101)
-c              write(6,*)'Reading ',file(1:n)
+c              write(6,*)'reading ',file(1:n)
 c              read(12,err=23,end=23) rdummy
 c              read(12,err=23,end=23) rdummy
 c              read(12,err=23,end=23) ri_in
@@ -71,8 +71,8 @@ c              close (12)
 c              call move(ri_in,ri(1,1,ispec),nx,ny)
 c              call move(rj_in,rj(1,1,ispec),nx,ny)
 c           else
-c              print*,'Not reading mapping look-up-table'
-c              print*,'Return without ri/rj values'
+c              print*,'not reading mapping look-up-table'
+c              print*,'return without ri/rj values'
 c           endif
 
          endif
@@ -81,11 +81,11 @@ c           endif
       istatus = 0
       goto 1000
 
-23    write(6,*)'Error reading or eof ll/ij lookup table'
+23    write(6,*)'error reading or eof ll/ij lookup table'
       close(12)
       goto 1000
 
-101   write(6,*)'Error opening file ',file(1:n)
+101   write(6,*)'error opening file ',file(1:n)
 
 1000  return
       end
@@ -97,8 +97,8 @@ c
 c
 c most applications will relocalize which will delete any
 c existing lut's and new ones are automatically generated.
-c For WFO and AFWA, the satellite data files can possibly
-c change. This is particularly true of AFWA satellite data.
+c for wfo and afwa, the satellite data files can possibly
+c change. this is particularly true of afwa satellite data.
 c
       implicit none
 
@@ -184,7 +184,7 @@ c
 c check if namelist parameters are current
 
 c
-c --- WFO --- 
+c --- wfo --- 
 c
       if(c_sat_types(jtype,isat).eq.'wfo')then 
 
@@ -222,8 +222,8 @@ c
 
       elseif(c_sat_types(jtype,isat).eq.'gwc')then
 c
-c --- AFWA ---
-c for GOES data only
+c --- afwa ---
+c for goes data only
          cname=c_afwa_fname(c_sat_id(isat),chtype(i))
          call s_len(cname,il)
          lenf=index(path_to_raw_sat(ispec,jtype,isat),' ')-1
@@ -247,7 +247,7 @@ c for GOES data only
                endif
             endif
 c
-c NOTE: nw_line and nw_pix are hardwired by src/include/satdata_lvd.f
+c note: nw_line and nw_pix are hardwired by src/include/satdata_lvd.f
 c       however, gen_lut_gvar.f uses the new values for these variables.
 c       this will always trip the lut regeneration unless nw_line/pix match.
 c
@@ -258,7 +258,7 @@ c
             endif
 
          else
-            print*,'gwc header not read. No lut update'
+            print*,'gwc header not read. no lut update'
          endif
 
       elseif(c_sat_types(jtype,isat).eq.'gvr')then
@@ -275,17 +275,17 @@ c
       enddo
 c
 c this check is for gvar type data only. once a day using
-c a current O&A block.
+c a current o&a block.
 c
       if(cfname_cur(6:8).eq.'000'.and.
      &   (c_sat_types(jtype,isat).eq.'gvr'   .or.
      &    c_sat_types(jtype,isat).eq.'gwc')       )then
          l_lut_flag=.true.
-c        write(6,*)'Auto-update the gvar navigation'
+c        write(6,*)'auto-update the gvar navigation'
       endif
 
-c 8-31-06: JS. forces an a-ok return and no regeneration of
-c mapping. All mapping now done on the fly.
+c 8-31-06: js. forces an a-ok return and no regeneration of
+c mapping. all mapping now done on the fly.
 
       l_lut_flag=.false.
 

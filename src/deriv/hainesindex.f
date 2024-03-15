@@ -2,7 +2,7 @@
       subroutine hainesindex(prs,tmk,tdk,haines,miy,mjx,mkzh,prsb,prst)
       include 'comconst'
 
-!     Note that this version differs from the Seattle version to account
+!     note that this version differs from the seattle version to account
 !     for flipped vertical coordinates
 
       dimension tmk(miy,mjx,mkzh), tdk(miy,mjx,mkzh), prs(miy,mjx,mkzh),
@@ -16,8 +16,8 @@
          else
             do k = 2, mkzh
 
-              kk  = mkzh+1 - k     ! Account for flipped vertical coordinates
-              km1 = kk + 1         ! Account for flipped vertical coordinates
+              kk  = mkzh+1 - k     ! account for flipped vertical coordinates
+              km1 = kk + 1         ! account for flipped vertical coordinates
 
               if( prs(i,j,kk).gt.prst .and. prs(i,j,km1).le.prst ) then       
                  tmkt = tmk(i,j,km1) + (tmk(i,j,kk)-tmk(i,j,km1)) *
@@ -75,10 +75,10 @@
 
             haines(i,j) = factor1 + factor2
 
-C            if( mod(i,10) .eq. 0 .and. mod(j,10) .eq. 0 ) then
-C               print *, j, i, tmkb, tmkt, deltat
-C               print *, tmkb, tdkb, dpdep
-C            endif
+c            if( mod(i,10) .eq. 0 .and. mod(j,10) .eq. 0 ) then
+c               print *, j, i, tmkb, tmkt, deltat
+c               print *, tmkb, tdkb, dpdep
+c            endif
 
          endif
 

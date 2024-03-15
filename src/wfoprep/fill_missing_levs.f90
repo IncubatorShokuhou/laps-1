@@ -1,60 +1,60 @@
-SUBROUTINE fill_missing_levs(nx,ny,nz,plevs,data,missval,method)
+subroutine fill_missing_levs(nx, ny, nz, plevs, data, missval, method)
 
-! Subroutine to fill in missing values in a 3D data array on
-! pressure levels.  This routine assumes you have valid data
+! subroutine to fill in missing values in a 3d data array on
+! pressure levels.  this routine assumes you have valid data
 ! on the top most and bottom most levels.
 
-  IMPLICIT NONE
-  INTEGER, INTENT(IN)                 :: nx
-  INTEGER, INTENT(IN)                 :: ny
-  INTEGER, INTENT(IN)                 :: nz
-  REAL, INTENT(IN)                    :: plevs(75)  ! Press in Pa
-  REAL, INTENT(INOUT)                 :: data(nx,ny,nz)
-  REAL, INTENT(IN)                    :: missval
-  INTEGER, INTENT(IN)                 :: method
+   implicit none
+   integer, intent(in)                 :: nx
+   integer, intent(in)                 :: ny
+   integer, intent(in)                 :: nz
+   real, intent(in)                    :: plevs(75)  ! press in pa
+   real, intent(inout)                 :: data(nx, ny, nz)
+   real, intent(in)                    :: missval
+   integer, intent(in)                 :: method
 
-  INTEGER, PARAMETER                  :: METHOD_LIN = 1
-  INTEGER, PARAMETER                  :: METHOD_LOG = 2
+   integer, parameter                  :: method_lin = 1
+   integer, parameter                  :: method_log = 2
 
-  INTEGER                             :: k,kbot,ktop
-  REAL                                :: weight_top, weight_bot
-  LOGICAL                             :: goodlev(nz) 
+   integer                             :: k, kbot, ktop
+   real                                :: weight_top, weight_bot
+   logical                             :: goodlev(nz)
 
-  goodlev(:) = .false.
-  checklevs: DO k = 1,nz
-    IF (MAXVAL(data(:,:,k)) .NE. missval) THEN
-       goodlev(k) = .true.
-    ENDIF
-  ENDDO checklevs
+   goodlev(:) = .false.
+   checklevs: do k = 1, nz
+      if (maxval(data(:, :, k)) .ne. missval) then
+         goodlev(k) = .true.
+      end if
+   end do checklevs
 
-  fixlevs: DO k = 1, nz
-    IF (goodlev(k)) CYCLE fixlevs
-    
-    ! Else:
+   fixlevs: do k = 1, nz
+      if (goodlev(k)) cycle fixlevs
 
-    ! Find first level below that is "good"
-    find_kbot: DO kbot = k-1,1,-1
-      IF (goodlev(kbot)) EXIT find_kbot
-    ENDDO find_kbot
+      ! else:
 
-    ! Find first level above that is good
-    find_ktop: DO ktop = k+1,nz
-      IF (goodlev(ktop)) EXIT find_ktop
-    ENDDO find_ktop
+      ! find first level below that is "good"
+      find_kbot: do kbot = k - 1, 1, -1
+         if (goodlev(kbot)) exit find_kbot
+      end do find_kbot
 
-    ! Compute interp weights using plevs and method
-    IF (method .EQ. METHOD_LIN) THEN   
-      ! Linear interp in Pressure
-      weight_bot = (plevs(k)-plevs(ktop)) / &
-                   (plevs(kbot)-plevs(ktop))
-      weight_top = 1. - weight_bot
-    ELSE IF (method .EQ. METHOD_LOG) THEN
-      ! Linear in ln(P)
-      weight_bot = ( ALOG(plevs(k)/plevs(ktop)) ) / &
-                   ( ALOG(plevs(kbot)/plevs(ktop)) )
-      weight_top = 1. - weight_bot  
-    ENDIF
-    data(:,:,k) = weight_bot*data(:,:,kbot) + weight_top*data(:,:,ktop)
-  ENDDO fixlevs
-  RETURN
-END SUBROUTINE fill_missing_levs
+      ! find first level above that is good
+      find_ktop: do ktop = k + 1, nz
+         if (goodlev(ktop)) exit find_ktop
+      end do find_ktop
+
+      ! compute interp weights using plevs and method
+      if (method .eq. method_lin) then
+         ! linear interp in pressure
+         weight_bot = (plevs(k) - plevs(ktop))/ &
+                      (plevs(kbot) - plevs(ktop))
+         weight_top = 1.-weight_bot
+      else if (method .eq. method_log) then
+         ! linear in ln(p)
+         weight_bot = (alog(plevs(k)/plevs(ktop)))/ &
+                      (alog(plevs(kbot)/plevs(ktop)))
+         weight_top = 1.-weight_bot
+      end if
+      data(:, :, k) = weight_bot*data(:, :, kbot) + weight_top*data(:, :, ktop)
+   end do fixlevs
+   return
+end subroutine fill_missing_levs

@@ -1,929 +1,929 @@
-SUBROUTINE BUFR_PROFLR(NUMPROFLR,NUMLEVELS,STATIONID,I4OBSTIME, &
-                        LATITUDES,LONGITUDE,ELEVATION,OBSVNTYPE, &
-                        MAXPROFLR,HEIGHTOBS,UUWINDOBS,VVWINDOBS, &
-                        WNDRMSERR,PRSSFCOBS,TMPSFCOBS,REHSFCOBS, &
-                        UWDSFCOBS,VWDSFCOBS)
+subroutine bufr_proflr(numproflr,numlevels,stationid,i4obstime, &
+                        latitudes,longitude,elevation,obsvntype, &
+                        maxproflr,heightobs,uuwindobs,vvwindobs, &
+                        wndrmserr,prssfcobs,tmpsfcobs,rehsfcobs, &
+                        uwdsfcobs,vwdsfcobs)
 
 !==============================================================================
-!doc  THIS ROUTINE CONVERTS LAPS PROFILER DATA INTO PREPBUFR FORMAT.
+!doc  this routine converts laps profiler data into prepbufr format.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE/SHIOW-MING DENG	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie/shiow-ming deng	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER, INTENT(IN) :: STATIONID(*)*5		! STATION ID
-  CHARACTER, INTENT(IN) :: OBSVNTYPE(*)*8		! OBS TYPE
-  INTEGER,   INTENT(IN) :: NUMPROFLR,NUMLEVELS(*)	! NUMBER OF PROFILERS/LEVELS
-  INTEGER,   INTENT(IN) :: MAXPROFLR			! MAXIMUM NUMBER PROFILRS
-                                                	! INSTEAD OF MAXNUM_PROFLRS
-                                                	! AVOID CONFUSION ON MEMORY.
-  INTEGER,   INTENT(IN) :: I4OBSTIME(*)			! I4 OBS TIMES
+  character, intent(in) :: stationid(*)*5		! station id
+  character, intent(in) :: obsvntype(*)*8		! obs type
+  integer,   intent(in) :: numproflr,numlevels(*)	! number of profilers/levels
+  integer,   intent(in) :: maxproflr			! maximum number profilrs
+                                                	! instead of maxnum_proflrs
+                                                	! avoid confusion on memory.
+  integer,   intent(in) :: i4obstime(*)			! i4 obs times
 
-  ! OBSERVATIONS:
-  REAL,      INTENT(IN) :: LATITUDES(*),LONGITUDE(*),ELEVATION(*)
-  REAL,      INTENT(IN) :: HEIGHTOBS(MAXPROFLR,*), &	! UPAIR (M)
-                           UUWINDOBS(MAXPROFLR,*), &	! UPAIR (M/S)
-                           VVWINDOBS(MAXPROFLR,*), &	! UPAIR (M/S)
-                           WNDRMSERR(MAXPROFLR,*)	! WIND RMS ERROR (M/S)
-  REAL,      INTENT(IN) :: PRSSFCOBS(*),TMPSFCOBS(*), &	! SURFACE
-                           REHSFCOBS(*), &		! SURFACE
-                           UWDSFCOBS(*),VWDSFCOBS(*)	! SURFACE
+  ! observations:
+  real,      intent(in) :: latitudes(*),longitude(*),elevation(*)
+  real,      intent(in) :: heightobs(maxproflr,*), &	! upair (m)
+                           uuwindobs(maxproflr,*), &	! upair (m/s)
+                           vvwindobs(maxproflr,*), &	! upair (m/s)
+                           wndrmserr(maxproflr,*)	! wind rms error (m/s)
+  real,      intent(in) :: prssfcobs(*),tmpsfcobs(*), &	! surface
+                           rehsfcobs(*), &		! surface
+                           uwdsfcobs(*),vwdsfcobs(*)	! surface
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: STTNID*8,SUBSET*8
-  INTEGER   :: I,J,K,INDATE,ZEROCH,STATUS
-  REAL      :: RI,RJ,RK,DI,SP,HEIGHT_TO_PRESSURE	! OBS GRIDPOINT LOCATIOIN
-  REAL      :: MAKE_SSH					! LAPS ROUTINE FROM RH TO SH
-  REAL*8    :: HEADER(HEADER_NUMITEM),OBSDAT(OBSDAT_NUMITEM,225)
-  REAL*8    :: OBSERR(OBSERR_NUMITEM,225),OBSQMS(OBSQMS_NUMITEM,225)
-  EQUIVALENCE(STTNID,HEADER(1))
+  ! local variables:
+  character :: sttnid*8,subset*8
+  integer   :: i,j,k,indate,zeroch,status
+  real      :: ri,rj,rk,di,sp,height_to_pressure	! obs gridpoint locatioin
+  real      :: make_ssh					! laps routine from rh to sh
+  real*8    :: header(header_numitem),obsdat(obsdat_numitem,225)
+  real*8    :: obserr(obserr_numitem,225),obsqms(obsqms_numitem,225)
+  equivalence(sttnid,header(1))
 
-  PRINT*,'Number of Pofilers: ',NUMPROFLR,NUMLEVELS(1:NUMPROFLR)
+  print*,'number of pofilers: ',numproflr,numlevels(1:numproflr)
 
-  ! OBS DATE: YEAR/MONTH/DAY
-  ZEROCH = ICHAR('0')
-  INDATE = YYYYMM_DDHHMIN(1)*1000000+YYYYMM_DDHHMIN(2)*10000+ &
-           YYYYMM_DDHHMIN(3)*100+YYYYMM_DDHHMIN(4)
+  ! obs date: year/month/day
+  zeroch = ichar('0')
+  indate = yyyymm_ddhhmin(1)*1000000+yyyymm_ddhhmin(2)*10000+ &
+           yyyymm_ddhhmin(3)*100+yyyymm_ddhhmin(4)
 
-  ! WRITE DATA:
-  DO I=1,NUMPROFLR
+  ! write data:
+  do i=1,numproflr
 
-    ! STATION ID:
-    STTNID = STATIONID(I)
+    ! station id:
+    sttnid = stationid(i)
 
-    ! DATA TYPE:
-    IF (OBSVNTYPE(I) .EQ. 'PROFILER') THEN
-      SUBSET = 'PROFLR'
-      HEADER(2) = 223		! PROFILER CODE
-      HEADER(3) = 71		! INPUT REPORT TYPE
-    ELSE IF (OBSVNTYPE(I) .EQ. 'VAD') THEN
-      SUBSET = 'VADWND'
-      HEADER(2) = 224		! PROFILER CODE
-      HEADER(3) = 72		! INPUT REPORT TYPE
-    ELSE
-      PRINT*,'BUFR_PROFLR: ERROR: Unknown profiler data type!'
-      STOP
-    ENDIF
+    ! data type:
+    if (obsvntype(i) .eq. 'profiler') then
+      subset = 'proflr'
+      header(2) = 223		! profiler code
+      header(3) = 71		! input report type
+    else if (obsvntype(i) .eq. 'vad') then
+      subset = 'vadwnd'
+      header(2) = 224		! profiler code
+      header(3) = 72		! input report type
+    else
+      print*,'bufr_proflr: error: unknown profiler data type!'
+      stop
+    endif
 
-    ! TIME:
-    IF (ABS(I4OBSTIME(I)-SYSTEM_IN4TIME) .GT. LENGTH_ANATIME) CYCLE	! OUT OF TIME
+    ! time:
+    if (abs(i4obstime(i)-system_in4time) .gt. length_anatime) cycle	! out of time
 
-    ! LAPS cycle time:
-    HEADER(4) = YYYYMM_DDHHMIN(4)
-    ! DHR: obs time different from the cycle time:
-    HEADER(5) = (I4OBSTIME(I)-SYSTEM_IN4TIME)/3600.0+YYYYMM_DDHHMIN(5)/60.0
+    ! laps cycle time:
+    header(4) = yyyymm_ddhhmin(4)
+    ! dhr: obs time different from the cycle time:
+    header(5) = (i4obstime(i)-system_in4time)/3600.0+yyyymm_ddhhmin(5)/60.0
 
-    ! LAT/LON/ELEVATION:
-    HEADER(6) = LATITUDES(I)
-    HEADER(7) = LONGITUDE(I)
-    HEADER(8) = ELEVATION(I)
+    ! lat/lon/elevation:
+    header(6) = latitudes(i)
+    header(7) = longitude(i)
+    header(8) = elevation(i)
 
-    ! IGNORE OBS OUTSIDE THE ANALYSIS DOMAIN:
-    CALL LATLON_TO_RLAPSGRID(LATITUDES(I),LONGITUDE(I), &
-                              DOMAIN_LATITDE,DOMAIN_LONGITD, &
-                              NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                              RI,RJ,STATUS)
-    IF (RI .LT. 1 .OR. RI .GT. NUMBER_GRIDPTS(1) .OR. &
-        RJ .LT. 1 .OR. RJ .GT. NUMBER_GRIDPTS(2) .OR. &
-        STATUS .NE. 1) CYCLE
+    ! ignore obs outside the analysis domain:
+    call latlon_to_rlapsgrid(latitudes(i),longitude(i), &
+                              domain_latitde,domain_longitd, &
+                              number_gridpts(1),number_gridpts(2), &
+                              ri,rj,status)
+    if (ri .lt. 1 .or. ri .gt. number_gridpts(1) .or. &
+        rj .lt. 1 .or. rj .gt. number_gridpts(2) .or. &
+        status .ne. 1) cycle
 
-    HEADER(9) = 99			! INSTRUMENT TYPE: COMMON CODE TABLE C-2
-    HEADER(10) = I			! REPORT SEQUENCE NUMBER
-    HEADER(11) = 0			! MPI PROCESS NUMBER
+    header(9) = 99			! instrument type: common code table c-2
+    header(10) = i			! report sequence number
+    header(11) = 0			! mpi process number
 
-    ! UPAIR OBSERVATIONS:
-    ! MISSING DATA CONVERSION:
-    OBSDAT = MISSNG_PREBUFR
-    OBSERR = MISSNG_PREBUFR
-    OBSQMS = MISSNG_PREBUFR
+    ! upair observations:
+    ! missing data conversion:
+    obsdat = missng_prebufr
+    obserr = missng_prebufr
+    obsqms = missng_prebufr
 
-    DO J=1,NUMLEVELS(I)
-      IF (HEIGHTOBS(I,J) .NE. RVALUE_MISSING .AND. &
-          (UUWINDOBS(I,J) .NE. RVALUE_MISSING) .AND. &
-          (VVWINDOBS(I,J) .NE. RVALUE_MISSING)) THEN
+    do j=1,numlevels(i)
+      if (heightobs(i,j) .ne. rvalue_missing .and. &
+          (uuwindobs(i,j) .ne. rvalue_missing) .and. &
+          (vvwindobs(i,j) .ne. rvalue_missing)) then
 
-        OBSDAT(1,J) = HEIGHTOBS(I,J)
-        OBSDAT(4,J) = UUWINDOBS(I,J)
-        OBSDAT(5,J) = VVWINDOBS(I,J)
-        ! ASSUMING 1 M/S ERROR AS DEFAULT:
-        OBSERR(4,J) = 1.0
-        IF (WNDRMSERR(I,J) .NE. RVALUE_MISSING) &
-          OBSERR(4,J) = WNDRMSERR(I,J)
+        obsdat(1,j) = heightobs(i,j)
+        obsdat(4,j) = uuwindobs(i,j)
+        obsdat(5,j) = vvwindobs(i,j)
+        ! assuming 1 m/s error as default:
+        obserr(4,j) = 1.0
+        if (wndrmserr(i,j) .ne. rvalue_missing) &
+          obserr(4,j) = wndrmserr(i,j)
 
-        ! SAVE DATA INTO PRG:
-        RK = HEIGHT_TO_PRESSURE(HEIGHTOBS(I,J),HEIGHT_GRID3DM,PRESSR_GRID1DM, &
-                       NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3), &
-                       NINT(RI),NINT(RJ))
+        ! save data into prg:
+        rk = height_to_pressure(heightobs(i,j),height_grid3dm,pressr_grid1dm, &
+                       number_gridpts(1),number_gridpts(2),number_gridpts(3), &
+                       nint(ri),nint(rj))
 
-        ! FIND THE GRID LEVEL FOR THIS PRESSURE VALUE:
-        DO K=1,NUMBER_GRIDPTS(3)
-          IF (RK .GE. PRESSR_GRID1DM(K)) EXIT
-        ENDDO
-        IF (K .GT. NUMBER_GRIDPTS(3)) THEN
-          RK = NUMBER_GRIDPTS(3)+1			! OUT OF HEIGHT
-        ELSEIF (K .LE. 1) THEN
-          RK = 1
-          IF (RK .GT. PRESSR_GRID1DM(1)) RK = 0	! OUT OF HEIGHT
-        ELSE
-          RK = K-(RK-PRESSR_GRID1DM(K))/(PRESSR_GRID1DM(K-1)-PRESSR_GRID1DM(K))
-        ENDIF
+        ! find the grid level for this pressure value:
+        do k=1,number_gridpts(3)
+          if (rk .ge. pressr_grid1dm(k)) exit
+        enddo
+        if (k .gt. number_gridpts(3)) then
+          rk = number_gridpts(3)+1			! out of height
+        elseif (k .le. 1) then
+          rk = 1
+          if (rk .gt. pressr_grid1dm(1)) rk = 0	! out of height
+        else
+          rk = k-(rk-pressr_grid1dm(k))/(pressr_grid1dm(k-1)-pressr_grid1dm(k))
+        endif
 
-        ! CONVERT TO DI AND SP:
-        CALL UV_TO_DISP(UUWINDOBS(I,J),VVWINDOBS(I,J),DI,SP)
+        ! convert to di and sp:
+        call uv_to_disp(uuwindobs(i,j),vvwindobs(i,j),di,sp)
 
-        WRITE(PRGOUT_CHANNEL,11) RI,RJ,RK,DI,SP,OBSVNTYPE(I)
-11	FORMAT(3f8.1,2f10.3,3x,a8)
+        write(prgout_channel,11) ri,rj,rk,di,sp,obsvntype(i)
+11	format(3f8.1,2f10.3,3x,a8)
 
-      ENDIF
-    ENDDO
-    OBSERR(1,1:NUMLEVELS(I)) = 10.0	! ASSUME 10 METER ERROR FOR HEIGHT
-    OBSQMS(1,1:NUMLEVELS(I)) = 0	! QUALITY MARK - BUFR CODE TABLE: 
-    OBSQMS(4,1:NUMLEVELS(I)) = 0	! 0 always assimilated
+      endif
+    enddo
+    obserr(1,1:numlevels(i)) = 10.0	! assume 10 meter error for height
+    obsqms(1,1:numlevels(i)) = 0	! quality mark - bufr code table: 
+    obsqms(4,1:numlevels(i)) = 0	! 0 always assimilated
 
-    ! WRITE TO BUFR FILE:
-    CALL OPENMB(OUTPUT_CHANNEL,SUBSET,INDATE)
-    CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,STATUS,HEADER_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSDAT,OBSDAT_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSDAT_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSERR,OBSERR_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSERR_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSQMS,OBSQMS_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSQMS_PREBUFR)
-    CALL WRITSB(OUTPUT_CHANNEL)
+    ! write to bufr file:
+    call openmb(output_channel,subset,indate)
+    call ufbint(output_channel,header,header_numitem,1,status,header_prebufr)
+    call ufbint(output_channel,obsdat,obsdat_numitem, &
+                 numlevels(i),status,obsdat_prebufr)
+    call ufbint(output_channel,obserr,obserr_numitem, &
+                 numlevels(i),status,obserr_prebufr)
+    call ufbint(output_channel,obsqms,obsqms_numitem, &
+                 numlevels(i),status,obsqms_prebufr)
+    call writsb(output_channel)
 
-    ! WRITE SURFACE DATA: FUTURE DEVELOPMENT DEBUG NEEDED
-    ! SFCDAT(1) = PRSSFCOBS(I)
-    ! SFCDAT(2) = MISSNG_PREBUFR
-    ! SFCDAT(3) = TMPSFCOBS(I)
-    ! SFCDAT(4) = MISSNG_PREBUFR
-    ! USE -132 AS TEMP_REFERENCE:
-    ! TEMPERATURE >= TEMP_REFERENCE: RH IS WATER RH;
-    ! TEMPERATURE <  TEMP_REFERENCE: RH IS ICE RH;
-    ! ASSUME THE SURFACE OBS OF RH IS WATER RH HERE:
-    ! SFCDAT(5) = MAKE_SSH(PRSSFCOBS(I),TMPSFCOBS(I),REHSFCOBS(I)/100.0,&
-    !              TEMPTR_REFEREN)*0.001 ! KG/KG
-    ! CALL OPENMB(OUTPUT_CHANNEL,'ADPSFC',INDATE)
-    ! HEADER IS NEEDED TO REFLECT THE OBSERVATION CODE!!!
-    ! CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,1,HEADER_PREBUFR)
-    ! CALL UFBINT(OUTPUT_CHANNEL,SFCDAT,SURFAC_NUMITEM,1,1,SURFAC_PREBUFR)
-    ! CALL UFBINT(OUTPUT_CHANNEL,SFCQMS,SFCQMS_NUMITEM,1,1,SURFAC_PREBUFR)
-    ! CALL WRITSB(OUTPUT_CHANNEL)
+    ! write surface data: future development debug needed
+    ! sfcdat(1) = prssfcobs(i)
+    ! sfcdat(2) = missng_prebufr
+    ! sfcdat(3) = tmpsfcobs(i)
+    ! sfcdat(4) = missng_prebufr
+    ! use -132 as temp_reference:
+    ! temperature >= temp_reference: rh is water rh;
+    ! temperature <  temp_reference: rh is ice rh;
+    ! assume the surface obs of rh is water rh here:
+    ! sfcdat(5) = make_ssh(prssfcobs(i),tmpsfcobs(i),rehsfcobs(i)/100.0,&
+    !              temptr_referen)*0.001 ! kg/kg
+    ! call openmb(output_channel,'adpsfc',indate)
+    ! header is needed to reflect the observation code!!!
+    ! call ufbint(output_channel,header,header_numitem,1,1,header_prebufr)
+    ! call ufbint(output_channel,sfcdat,surfac_numitem,1,1,surfac_prebufr)
+    ! call ufbint(output_channel,sfcqms,sfcqms_numitem,1,1,surfac_prebufr)
+    ! call writsb(output_channel)
 
-  ENDDO
+  enddo
 
-END SUBROUTINE BUFR_PROFLR
+end subroutine bufr_proflr
 
-SUBROUTINE BUFR_RASS(NUMPROFLR,NUMLEVELS,STATIONID,I4OBSTIME, &
-                        LATITUDES,LONGITUDE,ELEVATION,OBSVNTYPE, &
-                        MAXPROFLR,HEIGHTOBS,TEMPTROBS,TEMPTRERR)
+subroutine bufr_rass(numproflr,numlevels,stationid,i4obstime, &
+                        latitudes,longitude,elevation,obsvntype, &
+                        maxproflr,heightobs,temptrobs,temptrerr)
 
 !==============================================================================
-!doc  THIS ROUTINE CONVERTS LAPS PROFILER DATA INTO PREPBUFR FORMAT.
+!doc  this routine converts laps profiler data into prepbufr format.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE/SHIOW-MING DENG	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie/shiow-ming deng	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER, INTENT(IN) :: STATIONID(*)*5		! STATION ID
-  CHARACTER, INTENT(IN) :: OBSVNTYPE(*)*8		! OBS TYPE
-  INTEGER,   INTENT(IN) :: NUMPROFLR,NUMLEVELS(*)	! NUMBER OF PROFILERS/LEVELS
-  INTEGER,   INTENT(IN) :: MAXPROFLR			! MAXIMUM NUMBER PROFILRS
-                                                	! INSTEAD OF MAXNUM_PROFLRS
-                                                	! AVOID CONFUSION ON MEMORY.
-  INTEGER,   INTENT(IN) :: I4OBSTIME(*)			! I4 OBS TIMES
+  character, intent(in) :: stationid(*)*5		! station id
+  character, intent(in) :: obsvntype(*)*8		! obs type
+  integer,   intent(in) :: numproflr,numlevels(*)	! number of profilers/levels
+  integer,   intent(in) :: maxproflr			! maximum number profilrs
+                                                	! instead of maxnum_proflrs
+                                                	! avoid confusion on memory.
+  integer,   intent(in) :: i4obstime(*)			! i4 obs times
 
-  ! OBSERVATIONS:
-  REAL,      INTENT(IN) :: LATITUDES(*),LONGITUDE(*),ELEVATION(*)
-  REAL,      INTENT(IN) :: HEIGHTOBS(MAXPROFLR,*), &	! UPAIR (M)
-                           TEMPTROBS(MAXPROFLR,*), &	! UPAIR (C)
-                           TEMPTRERR(MAXPROFLR)		! TEMPERATURE ERROR (C)
+  ! observations:
+  real,      intent(in) :: latitudes(*),longitude(*),elevation(*)
+  real,      intent(in) :: heightobs(maxproflr,*), &	! upair (m)
+                           temptrobs(maxproflr,*), &	! upair (c)
+                           temptrerr(maxproflr)		! temperature error (c)
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: STTNID*8,SUBSET*8
-  INTEGER   :: I,J,K,INDATE,ZEROCH,STATUS
-  REAL      :: RI,RJ,RK,DI,SP,HEIGHT_TO_PRESSURE	! OBS GRIDPOINT LOCATIOIN
-  REAL      :: MAKE_SSH					! LAPS ROUTINE FROM RH TO SH
-  REAL*8    :: HEADER(HEADER_NUMITEM),OBSDAT(OBSDAT_NUMITEM,225)
-  REAL*8    :: OBSERR(OBSERR_NUMITEM,225),OBSQMS(OBSQMS_NUMITEM,225)
-  EQUIVALENCE(STTNID,HEADER(1))
+  ! local variables:
+  character :: sttnid*8,subset*8
+  integer   :: i,j,k,indate,zeroch,status
+  real      :: ri,rj,rk,di,sp,height_to_pressure	! obs gridpoint locatioin
+  real      :: make_ssh					! laps routine from rh to sh
+  real*8    :: header(header_numitem),obsdat(obsdat_numitem,225)
+  real*8    :: obserr(obserr_numitem,225),obsqms(obsqms_numitem,225)
+  equivalence(sttnid,header(1))
 
-  PRINT*,'Number of Pofilers: ',NUMPROFLR,NUMLEVELS(1:NUMPROFLR)
+  print*,'number of pofilers: ',numproflr,numlevels(1:numproflr)
 
-  ! OBS DATE: YEAR/MONTH/DAY
-  ZEROCH = ICHAR('0')
-  INDATE = YYYYMM_DDHHMIN(1)*1000000+YYYYMM_DDHHMIN(2)*10000+ &
-           YYYYMM_DDHHMIN(3)*100+YYYYMM_DDHHMIN(4)
+  ! obs date: year/month/day
+  zeroch = ichar('0')
+  indate = yyyymm_ddhhmin(1)*1000000+yyyymm_ddhhmin(2)*10000+ &
+           yyyymm_ddhhmin(3)*100+yyyymm_ddhhmin(4)
 
-  ! WRITE DATA:
-  DO I=1,NUMPROFLR
+  ! write data:
+  do i=1,numproflr
 
-    ! STATION ID:
-    STTNID = STATIONID(I)
+    ! station id:
+    sttnid = stationid(i)
 
-    ! DATA TYPE:
-    SUBSET = 'ADPUPA'
-    HEADER(2) = 120		! PROFILER CODE
-    HEADER(3) = 77		! INPUT REPORT TYPE
+    ! data type:
+    subset = 'adpupa'
+    header(2) = 120		! profiler code
+    header(3) = 77		! input report type
 
-    ! TIME:
-    IF (ABS(I4OBSTIME(I)-SYSTEM_IN4TIME) .GT. LENGTH_ANATIME) CYCLE	! OUT OF TIME
+    ! time:
+    if (abs(i4obstime(i)-system_in4time) .gt. length_anatime) cycle	! out of time
 
-    ! LAPS cycle time:
-    HEADER(4) = YYYYMM_DDHHMIN(4)
-    ! DHR: obs time different from the cycle time:
-    HEADER(5) = (I4OBSTIME(I)-SYSTEM_IN4TIME)/3600.0+YYYYMM_DDHHMIN(5)/60.0
+    ! laps cycle time:
+    header(4) = yyyymm_ddhhmin(4)
+    ! dhr: obs time different from the cycle time:
+    header(5) = (i4obstime(i)-system_in4time)/3600.0+yyyymm_ddhhmin(5)/60.0
 
-    ! LAT/LON/ELEVATION:
-    HEADER(6) = LATITUDES(I)
-    HEADER(7) = LONGITUDE(I)
-    HEADER(8) = ELEVATION(I)
+    ! lat/lon/elevation:
+    header(6) = latitudes(i)
+    header(7) = longitude(i)
+    header(8) = elevation(i)
 
-    ! IGNORE OBS OUTSIDE THE ANALYSIS DOMAIN:
-    CALL LATLON_TO_RLAPSGRID(LATITUDES(I),LONGITUDE(I), &
-                              DOMAIN_LATITDE,DOMAIN_LONGITD, &
-                              NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                              RI,RJ,STATUS)
-    IF (RI .LT. 1 .OR. RI .GT. NUMBER_GRIDPTS(1) .OR. &
-        RJ .LT. 1 .OR. RJ .GT. NUMBER_GRIDPTS(2) .OR. &
-        STATUS .NE. 1) CYCLE
+    ! ignore obs outside the analysis domain:
+    call latlon_to_rlapsgrid(latitudes(i),longitude(i), &
+                              domain_latitde,domain_longitd, &
+                              number_gridpts(1),number_gridpts(2), &
+                              ri,rj,status)
+    if (ri .lt. 1 .or. ri .gt. number_gridpts(1) .or. &
+        rj .lt. 1 .or. rj .gt. number_gridpts(2) .or. &
+        status .ne. 1) cycle
 
-    HEADER(9) = 99			! INSTRUMENT TYPE: COMMON CODE TABLE C-2
-    HEADER(10) = I			! REPORT SEQUENCE NUMBER
-    HEADER(11) = 0			! MPI PROCESS NUMBER
+    header(9) = 99			! instrument type: common code table c-2
+    header(10) = i			! report sequence number
+    header(11) = 0			! mpi process number
 
-    ! UPAIR OBSERVATIONS:
-    ! MISSING DATA CONVERSION:
-    OBSDAT = MISSNG_PREBUFR
-    OBSERR = MISSNG_PREBUFR
-    OBSQMS = MISSNG_PREBUFR
+    ! upair observations:
+    ! missing data conversion:
+    obsdat = missng_prebufr
+    obserr = missng_prebufr
+    obsqms = missng_prebufr
 
-    DO J=1,NUMLEVELS(I)
-      IF (HEIGHTOBS(I,J) .NE. RVALUE_MISSING .AND. &
-          (TEMPTROBS(I,J) .NE. RVALUE_MISSING) ) THEN
+    do j=1,numlevels(i)
+      if (heightobs(i,j) .ne. rvalue_missing .and. &
+          (temptrobs(i,j) .ne. rvalue_missing) ) then
 
-        OBSDAT(1,J) = HEIGHTOBS(I,J)
-        OBSDAT(3,J) = TEMPTROBS(I,J)
-        ! ASSUMING 1 DEGREE ERROR AS DEFAULT:
-        OBSERR(3,J) = 1.0
-        IF (TEMPTRERR(I) .NE. RVALUE_MISSING) &
-          OBSERR(3,J) = TEMPTRERR(I)
+        obsdat(1,j) = heightobs(i,j)
+        obsdat(3,j) = temptrobs(i,j)
+        ! assuming 1 degree error as default:
+        obserr(3,j) = 1.0
+        if (temptrerr(i) .ne. rvalue_missing) &
+          obserr(3,j) = temptrerr(i)
 
-        ! SAVE DATA INTO TMG:
-        RK = HEIGHT_TO_PRESSURE(HEIGHTOBS(I,J),HEIGHT_GRID3DM,PRESSR_GRID1DM, &
-                       NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2),NUMBER_GRIDPTS(3), &
-                       NINT(RI),NINT(RJ))
-        ! FIND THE GRID LEVEL FOR THIS PRESSURE VALUE:
-        DO K=1,NUMBER_GRIDPTS(3)
-          IF (RK .GE. PRESSR_GRID1DM(K)) EXIT
-        ENDDO
-        IF (K .GT. NUMBER_GRIDPTS(3)) THEN
-          RK = NUMBER_GRIDPTS(3)+1			! OUT OF HEIGHT
-        ELSEIF (K .LE. 1) THEN
-          RK = 1
-          IF (RK .GT. PRESSR_GRID1DM(1)) RK = 0	! OUT OF HEIGHT
-        ELSE
-          RK = K-(RK-PRESSR_GRID1DM(K))/(PRESSR_GRID1DM(K-1)-PRESSR_GRID1DM(K))
-        ENDIF
+        ! save data into tmg:
+        rk = height_to_pressure(heightobs(i,j),height_grid3dm,pressr_grid1dm, &
+                       number_gridpts(1),number_gridpts(2),number_gridpts(3), &
+                       nint(ri),nint(rj))
+        ! find the grid level for this pressure value:
+        do k=1,number_gridpts(3)
+          if (rk .ge. pressr_grid1dm(k)) exit
+        enddo
+        if (k .gt. number_gridpts(3)) then
+          rk = number_gridpts(3)+1			! out of height
+        elseif (k .le. 1) then
+          rk = 1
+          if (rk .gt. pressr_grid1dm(1)) rk = 0	! out of height
+        else
+          rk = k-(rk-pressr_grid1dm(k))/(pressr_grid1dm(k-1)-pressr_grid1dm(k))
+        endif
 
-        WRITE(TMGOUT_CHANNEL,11) RI,RJ,RK,TEMPTROBS(I,J)+237.15,OBSVNTYPE(I)
-11	FORMAT(3f10.4,f10.3,3x,a8)
+        write(tmgout_channel,11) ri,rj,rk,temptrobs(i,j)+237.15,obsvntype(i)
+11	format(3f10.4,f10.3,3x,a8)
 
-      ENDIF
-    ENDDO
-    OBSERR(1,1:NUMLEVELS(I)) = 10.0	! ASSUME 10 METER ERROR FOR HEIGHT
-    OBSQMS(1,1:NUMLEVELS(I)) = 0	! QUALITY MARK - BUFR CODE TABLE: 
-    OBSQMS(4,1:NUMLEVELS(I)) = 0	! 0 always assimilated
+      endif
+    enddo
+    obserr(1,1:numlevels(i)) = 10.0	! assume 10 meter error for height
+    obsqms(1,1:numlevels(i)) = 0	! quality mark - bufr code table: 
+    obsqms(4,1:numlevels(i)) = 0	! 0 always assimilated
 
-    ! WRITE TO BUFR FILE:
-    CALL OPENMB(OUTPUT_CHANNEL,SUBSET,INDATE)
-    CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,STATUS,HEADER_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSDAT,OBSDAT_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSDAT_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSERR,OBSERR_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSERR_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSQMS,OBSQMS_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSQMS_PREBUFR)
-    CALL WRITSB(OUTPUT_CHANNEL)
+    ! write to bufr file:
+    call openmb(output_channel,subset,indate)
+    call ufbint(output_channel,header,header_numitem,1,status,header_prebufr)
+    call ufbint(output_channel,obsdat,obsdat_numitem, &
+                 numlevels(i),status,obsdat_prebufr)
+    call ufbint(output_channel,obserr,obserr_numitem, &
+                 numlevels(i),status,obserr_prebufr)
+    call ufbint(output_channel,obsqms,obsqms_numitem, &
+                 numlevels(i),status,obsqms_prebufr)
+    call writsb(output_channel)
 
-    ! WRITE SURFACE DATA: FUTURE DEVELOPMENT DEBUG NEEDED
-    ! SFCDAT(1) = PRSSFCOBS(I)
-    ! SFCDAT(2) = MISSNG_PREBUFR
-    ! SFCDAT(3) = TMPSFCOBS(I)
-    ! SFCDAT(4) = MISSNG_PREBUFR
-    ! USE -132 AS TEMP_REFERENCE:
-    ! TEMPERATURE >= TEMP_REFERENCE: RH IS WATER RH;
-    ! TEMPERATURE <  TEMP_REFERENCE: RH IS ICE RH;
-    ! ASSUME THE SURFACE OBS OF RH IS WATER RH HERE:
-    ! SFCDAT(5) = MAKE_SSH(PRSSFCOBS(I),TMPSFCOBS(I),REHSFCOBS(I)/100.0,&
-    !              TEMPTR_REFEREN)*0.001 ! KG/KG
-    ! CALL OPENMB(OUTPUT_CHANNEL,'ADPSFC',INDATE)
-    ! HEADER IS NEEDED TO REFLECT THE OBSERVATION CODE!!!
-    ! CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,1,HEADER_PREBUFR)
-    ! CALL UFBINT(OUTPUT_CHANNEL,SFCDAT,SURFAC_NUMITEM,1,1,SURFAC_PREBUFR)
-    ! CALL UFBINT(OUTPUT_CHANNEL,SFCQMS,SFCQMS_NUMITEM,1,1,SURFAC_PREBUFR)
-    ! CALL WRITSB(OUTPUT_CHANNEL)
+    ! write surface data: future development debug needed
+    ! sfcdat(1) = prssfcobs(i)
+    ! sfcdat(2) = missng_prebufr
+    ! sfcdat(3) = tmpsfcobs(i)
+    ! sfcdat(4) = missng_prebufr
+    ! use -132 as temp_reference:
+    ! temperature >= temp_reference: rh is water rh;
+    ! temperature <  temp_reference: rh is ice rh;
+    ! assume the surface obs of rh is water rh here:
+    ! sfcdat(5) = make_ssh(prssfcobs(i),tmpsfcobs(i),rehsfcobs(i)/100.0,&
+    !              temptr_referen)*0.001 ! kg/kg
+    ! call openmb(output_channel,'adpsfc',indate)
+    ! header is needed to reflect the observation code!!!
+    ! call ufbint(output_channel,header,header_numitem,1,1,header_prebufr)
+    ! call ufbint(output_channel,sfcdat,surfac_numitem,1,1,surfac_prebufr)
+    ! call ufbint(output_channel,sfcqms,sfcqms_numitem,1,1,surfac_prebufr)
+    ! call writsb(output_channel)
 
-  ENDDO
+  enddo
 
-END SUBROUTINE BUFR_RASS
+end subroutine bufr_rass
 
-SUBROUTINE BUFR_SONDES(NUMSONDES,NUMLEVELS,STATIONID,I4OBSTIME, &
-                         LATITUDES,LONGITUDE,ELEVATION,OBSVNTYPE,HEIGHTOBS, &
-                         PRESSROBS,TEMPTROBS,DEWPNTOBS,UUWINDOBS,VVWINDOBS)
+subroutine bufr_sondes(numsondes,numlevels,stationid,i4obstime, &
+                         latitudes,longitude,elevation,obsvntype,heightobs, &
+                         pressrobs,temptrobs,dewpntobs,uuwindobs,vvwindobs)
 
 !==============================================================================
-!doc  THIS ROUTINE CONVERTS LAPS SONDE DATA INTO PREPBUFR FORMAT.
+!doc  this routine converts laps sonde data into prepbufr format.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE/SHIOW-MING DENG	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie/shiow-ming deng	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER, INTENT(IN) :: STATIONID(*)*5		! STATION ID
-  CHARACTER, INTENT(IN) :: OBSVNTYPE(*)*8		! OBS TYPE
-  INTEGER,   INTENT(IN) :: NUMSONDES                    ! NUMBER OF PROFILERS
-  INTEGER               :: NUMLEVELS(*)			! NUMBER OF LEVELS
-  INTEGER,   INTENT(IN) :: I4OBSTIME(*)			! I4 OBS TIMES
+  character, intent(in) :: stationid(*)*5		! station id
+  character, intent(in) :: obsvntype(*)*8		! obs type
+  integer,   intent(in) :: numsondes                    ! number of profilers
+  integer               :: numlevels(*)			! number of levels
+  integer,   intent(in) :: i4obstime(*)			! i4 obs times
 
-  ! OBSERVATIONS:
-  REAL,      INTENT(IN) :: LATITUDES(*),LONGITUDE(*),ELEVATION(*)
-  REAL            :: HEIGHTOBS(MAXNUM_SONDES,*), &	! UPAIR (M)
-                           PRESSROBS(MAXNUM_SONDES,*), &	! UPAIR (MB)
-                           TEMPTROBS(MAXNUM_SONDES,*), &	! UPAIR (C)
-                           DEWPNTOBS(MAXNUM_SONDES,*), &	! UPAIR (C)
-                           UUWINDOBS(MAXNUM_SONDES,*), &	! UPAIR (M/S)
-                           VVWINDOBS(MAXNUM_SONDES,*)		! UPAIR (M/S)
+  ! observations:
+  real,      intent(in) :: latitudes(*),longitude(*),elevation(*)
+  real            :: heightobs(maxnum_sondes,*), &	! upair (m)
+                           pressrobs(maxnum_sondes,*), &	! upair (mb)
+                           temptrobs(maxnum_sondes,*), &	! upair (c)
+                           dewpntobs(maxnum_sondes,*), &	! upair (c)
+                           uuwindobs(maxnum_sondes,*), &	! upair (m/s)
+                           vvwindobs(maxnum_sondes,*)		! upair (m/s)
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: STTNID*8,SUBSET*8
-  INTEGER   :: I,J,K,INDATE,ZEROCH,STATUS
-  REAL      :: SSH2,RI,RJ,RK,DI,SP,P,HEIGHT_TO_PRESSURE	! LAPS FUNCTION FOR SPECIFIC HUMIDITY
-  REAL*8    :: HEADER(HEADER_NUMITEM),OBSDAT(OBSDAT_NUMITEM,225)
-  REAL*8    :: OBSERR(OBSERR_NUMITEM,225),OBSQMS(OBSQMS_NUMITEM,225)
-  EQUIVALENCE(STTNID,HEADER(1))
+  ! local variables:
+  character :: sttnid*8,subset*8
+  integer   :: i,j,k,indate,zeroch,status
+  real      :: ssh2,ri,rj,rk,di,sp,p,height_to_pressure	! laps function for specific humidity
+  real*8    :: header(header_numitem),obsdat(obsdat_numitem,225)
+  real*8    :: obserr(obserr_numitem,225),obsqms(obsqms_numitem,225)
+  equivalence(sttnid,header(1))
 
-  ! OBS DATE: YEAR/MONTH/DAY
-  ZEROCH = ICHAR('0')
-  INDATE = YYYYMM_DDHHMIN(1)*1000000+YYYYMM_DDHHMIN(2)*10000+ &
-           YYYYMM_DDHHMIN(3)*100+YYYYMM_DDHHMIN(4)
+  ! obs date: year/month/day
+  zeroch = ichar('0')
+  indate = yyyymm_ddhhmin(1)*1000000+yyyymm_ddhhmin(2)*10000+ &
+           yyyymm_ddhhmin(3)*100+yyyymm_ddhhmin(4)
 
-  ! WRITE DATA:
-  DO I=1,NUMSONDES
+  ! write data:
+  do i=1,numsondes
 
-    ! NO VALID LEVEL DATA: IN AUG. 2010, YUANFU ADDED 150 UPPER LIMIT
-    IF (NUMLEVELS(I) .LE. 0) CYCLE
+    ! no valid level data: in aug. 2010, yuanfu added 150 upper limit
+    if (numlevels(i) .le. 0) cycle
 
-    ! SET MAXIMUM VERTICAL LEVELS LIMIT OF 150: BURF HAS PROBLEM FOR TOO MANY LEVELS (YUANFU)
-    IF (NUMLEVELS(I) .GT. 150) NUMLEVELS(I) = 150
+    ! set maximum vertical levels limit of 150: burf has problem for too many levels (yuanfu)
+    if (numlevels(i) .gt. 150) numlevels(i) = 150
 
-    ! STATION ID:
-    STTNID = STATIONID(I)
+    ! station id:
+    sttnid = stationid(i)
 
-    ! DATA TYPE:
-    SUBSET = 'ADPUPA'
-    SELECT CASE (OBSVNTYPE(I))
-    CASE ('RADIOMTR')
-      HEADER(2) = 120		! PREPBUFR REPORT TYPE: TABLE 2
-      HEADER(3) = 11		! INPUT REPORT TYPE: TABLE 6
-      OBSERR(1,1:NUMLEVELS(I)) = 0.0	! ZERO ERROR FOR HEIGHT
-      OBSERR(3,1:NUMLEVELS(I)) = 2.0	! ASSUME 2 DEG ERROR
-      OBSERR(4,1:NUMLEVELS(I)) = 0.5	! ASSUME 0.5 M/S ERROR
-      OBSERR(6,1:NUMLEVELS(I)) = 2.0	! ASSUME 2 MM ERROR
-    CASE ('RAOB','TOWER')
-      HEADER(2) = 120           ! PREPBUFR REPORT TYPE: TABLE 2
-      HEADER(3) = 11            ! INPUT REPORT TYPE: TABLE 6
-      OBSERR(1,1:NUMLEVELS(I)) = 0.0    ! ZERO ERROR FOR HEIGHT
-      OBSERR(3,1:NUMLEVELS(I)) = 2.0    ! ASSUME 2 DEG ERROR
-      OBSERR(4,1:NUMLEVELS(I)) = 0.5    ! ASSUME 0.5 M/S ERROR
-      OBSERR(6,1:NUMLEVELS(I)) = 2.0    ! ASSUME 2 MM ERROR
+    ! data type:
+    subset = 'adpupa'
+    select case (obsvntype(i))
+    case ('radiomtr')
+      header(2) = 120		! prepbufr report type: table 2
+      header(3) = 11		! input report type: table 6
+      obserr(1,1:numlevels(i)) = 0.0	! zero error for height
+      obserr(3,1:numlevels(i)) = 2.0	! assume 2 deg error
+      obserr(4,1:numlevels(i)) = 0.5	! assume 0.5 m/s error
+      obserr(6,1:numlevels(i)) = 2.0	! assume 2 mm error
+    case ('raob','tower')
+      header(2) = 120           ! prepbufr report type: table 2
+      header(3) = 11            ! input report type: table 6
+      obserr(1,1:numlevels(i)) = 0.0    ! zero error for height
+      obserr(3,1:numlevels(i)) = 2.0    ! assume 2 deg error
+      obserr(4,1:numlevels(i)) = 0.5    ! assume 0.5 m/s error
+      obserr(6,1:numlevels(i)) = 2.0    ! assume 2 mm error
 
-      ! Test setting RAOB height obs off:
-      HEIGHTOBS(I,2:NUMLEVELS(I)) = RVALUE_MISSING	! ASSUME NO ACTUAL HEIGHT OBS ABOVE GROUND
-    CASE ('POESSND')
-      HEADER(2) = 257		! PREPBUFR REPORT TYPE: TABLE 2
-      HEADER(3) = 63		! INPUT REPORT TYPE: TABLE 6: SATELLITE-DERIVED WIND
-      OBSERR(1,1:NUMLEVELS(I)) = 0.0	! ZERO ERROR FOR HEIGHT
-      OBSERR(3,1:NUMLEVELS(I)) = 2.0	! ASSUME 2 DEG ERROR
-      OBSERR(4,1:NUMLEVELS(I)) = 1.0	! 2 M/S ERROR ASSUMED FOR SATWIND
-      OBSERR(6,1:NUMLEVELS(I)) = 2.0	! ASSUME 2 MM ERROR
-    CASE ('GOES11','GOES12','GOES13')
-      HEADER(2) = 151		! PREPBUFR REPORT TYPE: TABLE 2
-      HEADER(3) = 63		! INPUT REPORT TYPE: TABLE 6: SATELLITE-DERIVED WIND
-      OBSERR(1,1:NUMLEVELS(I)) = 0.0	! ZERO ERROR FOR HEIGHT
-      OBSERR(3,1:NUMLEVELS(I)) = 2.0	! ASSUME 2 DEG ERROR
-      OBSERR(4,1:NUMLEVELS(I)) = 1.0	! 2 M/S ERROR ASSUMED FOR SATWIND
-      OBSERR(6,1:NUMLEVELS(I)) = 2.0	! ASSUME 2 MM ERROR
-    CASE ('DROPSND')
-      HEADER(2) = 132           ! PREPBUFR REPORT TYPE: TABLE 2
-      HEADER(3) = 31            ! INPUT REPORT TYPE: TABLE 6: DROPSONDE
-      OBSERR(1,1:NUMLEVELS(I)) = 0.0    ! ZERO ERROR FOR HEIGHT
-      OBSERR(3,1:NUMLEVELS(I)) = 2.0    ! ASSUME 2 DEG ERROR
-      OBSERR(4,1:NUMLEVELS(I)) = 1.0    ! 2 M/S ERROR ASSUMED FOR SATWIND
-      OBSERR(6,1:NUMLEVELS(I)) = 2.0    ! ASSUME 2 MM ERROR
-    CASE DEFAULT
-      PRINT*,'BUFR_SONDES: UNKNOWN OBSERVATION DATA TYPE! ',OBSVNTYPE(I),I
-      STOP
-    END SELECT
+      ! test setting raob height obs off:
+      heightobs(i,2:numlevels(i)) = rvalue_missing	! assume no actual height obs above ground
+    case ('poessnd')
+      header(2) = 257		! prepbufr report type: table 2
+      header(3) = 63		! input report type: table 6: satellite-derived wind
+      obserr(1,1:numlevels(i)) = 0.0	! zero error for height
+      obserr(3,1:numlevels(i)) = 2.0	! assume 2 deg error
+      obserr(4,1:numlevels(i)) = 1.0	! 2 m/s error assumed for satwind
+      obserr(6,1:numlevels(i)) = 2.0	! assume 2 mm error
+    case ('goes11','goes12','goes13')
+      header(2) = 151		! prepbufr report type: table 2
+      header(3) = 63		! input report type: table 6: satellite-derived wind
+      obserr(1,1:numlevels(i)) = 0.0	! zero error for height
+      obserr(3,1:numlevels(i)) = 2.0	! assume 2 deg error
+      obserr(4,1:numlevels(i)) = 1.0	! 2 m/s error assumed for satwind
+      obserr(6,1:numlevels(i)) = 2.0	! assume 2 mm error
+    case ('dropsnd')
+      header(2) = 132           ! prepbufr report type: table 2
+      header(3) = 31            ! input report type: table 6: dropsonde
+      obserr(1,1:numlevels(i)) = 0.0    ! zero error for height
+      obserr(3,1:numlevels(i)) = 2.0    ! assume 2 deg error
+      obserr(4,1:numlevels(i)) = 1.0    ! 2 m/s error assumed for satwind
+      obserr(6,1:numlevels(i)) = 2.0    ! assume 2 mm error
+    case default
+      print*,'bufr_sondes: unknown observation data type! ',obsvntype(i),i
+      stop
+    end select
 
-    ! TIME:
-    IF (ABS(I4OBSTIME(I)-SYSTEM_IN4TIME) .GT. LENGTH_ANATIME) CYCLE	! OUT OF TIME
+    ! time:
+    if (abs(i4obstime(i)-system_in4time) .gt. length_anatime) cycle	! out of time
 
-    HEADER(4) = YYYYMM_DDHHMIN(4)
-    HEADER(5) = (I4OBSTIME(I)-SYSTEM_IN4TIME)/3600.0+YYYYMM_DDHHMIN(5)/60.0
+    header(4) = yyyymm_ddhhmin(4)
+    header(5) = (i4obstime(i)-system_in4time)/3600.0+yyyymm_ddhhmin(5)/60.0
 
-    ! LAT/LON/ELEVATION:
-    HEADER(6) = LATITUDES(I)
-    HEADER(7) = LONGITUDE(I)
-    HEADER(8) = ELEVATION(I)
+    ! lat/lon/elevation:
+    header(6) = latitudes(i)
+    header(7) = longitude(i)
+    header(8) = elevation(i)
 
-    ! IGNORE OBS OUTSIDE THE ANALYSIS DOMAIN:
-    CALL LATLON_TO_RLAPSGRID(LATITUDES(I),LONGITUDE(I), &
-                              DOMAIN_LATITDE,DOMAIN_LONGITD, &
-                              NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                              RI,RJ,STATUS)
-    IF (RI .LT. 1 .OR. RI .GT. NUMBER_GRIDPTS(1) .OR. &
-        RJ .LT. 1 .OR. RJ .GT. NUMBER_GRIDPTS(2) .OR. &
-        STATUS .NE. 1) CYCLE
+    ! ignore obs outside the analysis domain:
+    call latlon_to_rlapsgrid(latitudes(i),longitude(i), &
+                              domain_latitde,domain_longitd, &
+                              number_gridpts(1),number_gridpts(2), &
+                              ri,rj,status)
+    if (ri .lt. 1 .or. ri .gt. number_gridpts(1) .or. &
+        rj .lt. 1 .or. rj .gt. number_gridpts(2) .or. &
+        status .ne. 1) cycle
 
-    HEADER(9) = 90			! INSTRUMENT TYPE: COMMON CODE TABLE C-2
-    HEADER(10) = I			! REPORT SEQUENCE NUMBER
-    HEADER(11) = 0			! MPI PROCESS NUMBER
+    header(9) = 90			! instrument type: common code table c-2
+    header(10) = i			! report sequence number
+    header(11) = 0			! mpi process number
 
-    ! UPAIR OBSERVATIONS:
-    ! MISSING DATA CONVERSION:
-    OBSDAT = MISSNG_PREBUFR
-    OBSQMS = MISSNG_PREBUFR
-    DO J=1,NUMLEVELS(I)
+    ! upair observations:
+    ! missing data conversion:
+    obsdat = missng_prebufr
+    obsqms = missng_prebufr
+    do j=1,numlevels(i)
 
-      ! NO HEIGHT OR PRESSURE INFO:
-      P = PRESSROBS(I,J)*100	! PASCAL WHEN FINDING GRID LEVEL
-      IF (HEIGHTOBS(I,J) .GE. RVALUE_MISSING .AND. &
-           PRESSROBS(I,J) .GE. RVALUE_MISSING) CYCLE	! INVALID DATA
+      ! no height or pressure info:
+      p = pressrobs(i,j)*100	! pascal when finding grid level
+      if (heightobs(i,j) .ge. rvalue_missing .and. &
+           pressrobs(i,j) .ge. rvalue_missing) cycle	! invalid data
 
-      IF (HEIGHTOBS(I,J) .NE. RVALUE_MISSING) THEN
-	OBSDAT(1,J) = HEIGHTOBS(I,J)
-        ! WHEN PRESSURE IS MISSING, USE HEIGHT TO CONVERT PRESSURE
-        IF (P .GE. RVALUE_MISSING) &
-          P = HEIGHT_TO_PRESSURE(HEIGHTOBS(I,J),HEIGHT_GRID3DM, &
-                         PRESSR_GRID1DM,NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                         NUMBER_GRIDPTS(3),NINT(RI),NINT(RJ))
-        OBSERR(1,J) = 10.0	! 10 METER ERROR FOR HEIGHT OBS
-      ENDIF
+      if (heightobs(i,j) .ne. rvalue_missing) then
+	obsdat(1,j) = heightobs(i,j)
+        ! when pressure is missing, use height to convert pressure
+        if (p .ge. rvalue_missing) &
+          p = height_to_pressure(heightobs(i,j),height_grid3dm, &
+                         pressr_grid1dm,number_gridpts(1),number_gridpts(2), &
+                         number_gridpts(3),nint(ri),nint(rj))
+        obserr(1,j) = 10.0	! 10 meter error for height obs
+      endif
 
-      ! FIND THE GRID LEVEL FOR THIS PRESSURE VALUE:
-      DO K=1,NUMBER_GRIDPTS(3)
-        IF (P .GE. PRESSR_GRID1DM(K)) EXIT
-      ENDDO
-      IF (K .GT. NUMBER_GRIDPTS(3)) THEN
-        RK = NUMBER_GRIDPTS(3)+1		! OUT OF HEIGHT
-      ELSEIF (K .LE. 1) THEN
-        RK = 1
-        IF (P .GT. PRESSR_GRID1DM(1)) RK = 0	! OUT OF HEIGHT
-      ELSE
-        RK = K-(P-PRESSR_GRID1DM(K))/(PRESSR_GRID1DM(K-1)-PRESSR_GRID1DM(K))
-      ENDIF
+      ! find the grid level for this pressure value:
+      do k=1,number_gridpts(3)
+        if (p .ge. pressr_grid1dm(k)) exit
+      enddo
+      if (k .gt. number_gridpts(3)) then
+        rk = number_gridpts(3)+1		! out of height
+      elseif (k .le. 1) then
+        rk = 1
+        if (p .gt. pressr_grid1dm(1)) rk = 0	! out of height
+      else
+        rk = k-(p-pressr_grid1dm(k))/(pressr_grid1dm(k-1)-pressr_grid1dm(k))
+      endif
 
-      ! OTHER OBS:
-      OBSDAT(2,J) = P/100.0	! BUFR PRESSURE IN MB
-      OBSERR(2,J) = 10.0
+      ! other obs:
+      obsdat(2,j) = p/100.0	! bufr pressure in mb
+      obserr(2,j) = 10.0
 
-      IF (TEMPTROBS(I,J) .NE. RVALUE_MISSING) THEN
-	OBSDAT(3,J) = TEMPTROBS(I,J)
-	OBSERR(3,J) = 1.0	! 1 DEGREE ERROR FOR TEMPERATURE
+      if (temptrobs(i,j) .ne. rvalue_missing) then
+	obsdat(3,j) = temptrobs(i,j)
+	obserr(3,j) = 1.0	! 1 degree error for temperature
 
-        ! SAVE TEMPERATURE DATA INTO TMG FILE:
-        WRITE(TMGOUT_CHANNEL,11) RI,RJ,RK,TEMPTROBS(I,J)+273.15,OBSVNTYPE(I)
-11      FORMAT(3f10.4,f10.3,3x,a8)
-      ENDIF
-      IF (UUWINDOBS(I,J) .NE. RVALUE_MISSING .AND. &
-           VVWINDOBS(I,J) .NE. RVALUE_MISSING) THEN
-        OBSDAT(4,J) = UUWINDOBS(I,J)
-        OBSDAT(5,J) = VVWINDOBS(I,J)
-        OBSERR(4,J) = 0.1
+        ! save temperature data into tmg file:
+        write(tmgout_channel,11) ri,rj,rk,temptrobs(i,j)+273.15,obsvntype(i)
+11      format(3f10.4,f10.3,3x,a8)
+      endif
+      if (uuwindobs(i,j) .ne. rvalue_missing .and. &
+           vvwindobs(i,j) .ne. rvalue_missing) then
+        obsdat(4,j) = uuwindobs(i,j)
+        obsdat(5,j) = vvwindobs(i,j)
+        obserr(4,j) = 0.1
 
-        ! SAVE WIND OBS INTO PRG FILE:
-        CALL UV_TO_DISP(UUWINDOBS(I,J),VVWINDOBS(I,J),DI,SP)
+        ! save wind obs into prg file:
+        call uv_to_disp(uuwindobs(i,j),vvwindobs(i,j),di,sp)
 
-        WRITE(PRGOUT_CHANNEL,12) RI,RJ,RK,DI,SP,OBSVNTYPE(I)
-12	FORMAT(3f8.1,2f10.3,3x,a8)
-      ENDIF
+        write(prgout_channel,12) ri,rj,rk,di,sp,obsvntype(i)
+12	format(3f8.1,2f10.3,3x,a8)
+      endif
 
-      ! SPECIFIC HUMIDITY:
-      IF ((DEWPNTOBS(I,J) .NE. RVALUE_MISSING) .AND. &
-          (TEMPTROBS(I,J) .NE. RVALUE_MISSING) .AND. &
-           DEWPNTOBS(I,J) .LE. TEMPTROBS(I,J)) THEN
-        OBSDAT(6,J) = SSH2(P/100.0,TEMPTROBS(I,J), &
-                          DEWPNTOBS(I,J),TEMPTR_REFEREN)*1000.0 !MG/KG
-print*,'SH: ',p/100.0,obsdat(6,j)/1000.0,2.0*10.0**(-24.0/log10(p/100.0)+9.0), &
-        0.5*SSH2(P/100.0,TEMPTROBS(I,J),TEMPTROBS(I,J),TEMPTR_REFEREN),j,numlevels(i)
-        OBSERR(5,J) = 1.0	! ASSUME 1MG/KG ERROR BY YUANFU
-      ENDIF
-    ENDDO
-    OBSQMS(1:6,1:NUMLEVELS(I)) = 1	! QUALITY MARK - BUFR CODE TABLE: 
-					! GOOD ASSUMED.
+      ! specific humidity:
+      if ((dewpntobs(i,j) .ne. rvalue_missing) .and. &
+          (temptrobs(i,j) .ne. rvalue_missing) .and. &
+           dewpntobs(i,j) .le. temptrobs(i,j)) then
+        obsdat(6,j) = ssh2(p/100.0,temptrobs(i,j), &
+                          dewpntobs(i,j),temptr_referen)*1000.0 !mg/kg
+print*,'sh: ',p/100.0,obsdat(6,j)/1000.0,2.0*10.0**(-24.0/log10(p/100.0)+9.0), &
+        0.5*ssh2(p/100.0,temptrobs(i,j),temptrobs(i,j),temptr_referen),j,numlevels(i)
+        obserr(5,j) = 1.0	! assume 1mg/kg error by yuanfu
+      endif
+    enddo
+    obsqms(1:6,1:numlevels(i)) = 1	! quality mark - bufr code table: 
+					! good assumed.
 
-    ! WRITE TO BUFR FILE:
-    CALL OPENMB(OUTPUT_CHANNEL,SUBSET,INDATE)
-    CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,STATUS,HEADER_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSDAT,OBSDAT_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSDAT_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSERR,OBSERR_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSERR_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSQMS,OBSQMS_NUMITEM, &
-                 NUMLEVELS(I),STATUS,OBSQMS_PREBUFR)
-    CALL WRITSB(OUTPUT_CHANNEL)
+    ! write to bufr file:
+    call openmb(output_channel,subset,indate)
+    call ufbint(output_channel,header,header_numitem,1,status,header_prebufr)
+    call ufbint(output_channel,obsdat,obsdat_numitem, &
+                 numlevels(i),status,obsdat_prebufr)
+    call ufbint(output_channel,obserr,obserr_numitem, &
+                 numlevels(i),status,obserr_prebufr)
+    call ufbint(output_channel,obsqms,obsqms_numitem, &
+                 numlevels(i),status,obsqms_prebufr)
+    call writsb(output_channel)
 
-  ENDDO
+  enddo
 
-END SUBROUTINE BUFR_SONDES
+end subroutine bufr_sondes
 
-SUBROUTINE BUFR_SFCOBS(NUMBEROBS,HHMINTIME,LATITUDES,LONGITUDE,STATIONID, &
-                         OBSVNTYPE,PROVIDERS,ELEVATION,MSLPRSOBS,MSLPRSERR, &
-                         STNPRSOBS,STNPRSERR,TEMPTROBS,TEMPTRERR,WIND2DOBS, &
-                         WIND2DERR,RELHUMOBS,RELHUMERR,SFCPRSOBS,PRECP1OBS, &
-                         PRECP1ERR)
+subroutine bufr_sfcobs(numberobs,hhmintime,latitudes,longitude,stationid, &
+                         obsvntype,providers,elevation,mslprsobs,mslprserr, &
+                         stnprsobs,stnprserr,temptrobs,temptrerr,wind2dobs, &
+                         wind2derr,relhumobs,relhumerr,sfcprsobs,precp1obs, &
+                         precp1err)
 
 
 !==============================================================================
-!doc  THIS ROUTINE CONVERTS LAPS SONDE DATA INTO PREPBUFR FORMAT.
+!doc  this routine converts laps sonde data into prepbufr format.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE/SHIOW-MING DENG	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie/shiow-ming deng	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  CHARACTER, INTENT(IN) :: STATIONID(*)*20		! STATION ID
-  CHARACTER, INTENT(IN) :: PROVIDERS(*)*11		! PROVIDER'S NAME
-  CHARACTER, INTENT(IN) :: OBSVNTYPE(*)*6		! OBS TYPE
-  INTEGER,   INTENT(IN) :: NUMBEROBS                    ! NUMBER OF PROFILERS
-  INTEGER,   INTENT(IN) :: HHMINTIME(*)			! I4 OBS TIMES
+  character, intent(in) :: stationid(*)*20		! station id
+  character, intent(in) :: providers(*)*11		! provider's name
+  character, intent(in) :: obsvntype(*)*6		! obs type
+  integer,   intent(in) :: numberobs                    ! number of profilers
+  integer,   intent(in) :: hhmintime(*)			! i4 obs times
 
-  ! OBSERVATIONS:
-  REAL,      INTENT(IN) :: LATITUDES(*),LONGITUDE(*),ELEVATION(*)
-  ! PRESSURE IN MB, TEMP IN C, WIND IN M/S
-  REAL,      INTENT(IN) :: MSLPRSOBS(*), &		! MEAN SEA LEVEL PRESSURE
-                           MSLPRSERR(*), &		! ERROR
-                           STNPRSOBS(*), &		! STATION PRESSURE
-                           STNPRSERR(*), &		! STATION PRESSURE ERROR
-                           TEMPTROBS(*), &		! TEMPERATURE
-                           TEMPTRERR(*), &		! TEMPERATURE ERROR
-                           WIND2DOBS(2,*), &  		! 2D WIND OBS
-                           WIND2DERR(2,*), &  		! 2D WINDOBS ERRKR
-                           RELHUMOBS(*), &  		! RELATIVE HUMIDITY
-                           RELHUMERR(*), &  		! HUMIDITY ERROR
-                           SFCPRSOBS(*), &     		! SURFACE PRESSURE
-                           PRECP1OBS(*), &   		! PRECIPITATION
-                           PRECP1ERR(*)			! PRECIPITATION ERROR
+  ! observations:
+  real,      intent(in) :: latitudes(*),longitude(*),elevation(*)
+  ! pressure in mb, temp in c, wind in m/s
+  real,      intent(in) :: mslprsobs(*), &		! mean sea level pressure
+                           mslprserr(*), &		! error
+                           stnprsobs(*), &		! station pressure
+                           stnprserr(*), &		! station pressure error
+                           temptrobs(*), &		! temperature
+                           temptrerr(*), &		! temperature error
+                           wind2dobs(2,*), &  		! 2d wind obs
+                           wind2derr(2,*), &  		! 2d windobs errkr
+                           relhumobs(*), &  		! relative humidity
+                           relhumerr(*), &  		! humidity error
+                           sfcprsobs(*), &     		! surface pressure
+                           precp1obs(*), &   		! precipitation
+                           precp1err(*)			! precipitation error
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: STTNID*8,SUBSET*8
-  INTEGER   :: I,K,INDATE,ZEROCH,STATUS
-  INTEGER   :: I4TIME
-  REAL      :: MAKE_SSH		! LAPS FUNCTION FOR SPECIFIC HUMIDITY FROM RH
-  REAL      :: RI,RJ,RK,DI,SP,HEIGHT_TO_PRESSURE
-  REAL*8    :: HEADER(HEADER_NUMITEM),OBSDAT(OBSDAT_NUMITEM)
-  REAL*8    :: OBSERR(OBSERR_NUMITEM),OBSQMS(OBSQMS_NUMITEM)
-  EQUIVALENCE(STTNID,HEADER(1))
+  ! local variables:
+  character :: sttnid*8,subset*8
+  integer   :: i,k,indate,zeroch,status
+  integer   :: i4time
+  real      :: make_ssh		! laps function for specific humidity from rh
+  real      :: ri,rj,rk,di,sp,height_to_pressure
+  real*8    :: header(header_numitem),obsdat(obsdat_numitem)
+  real*8    :: obserr(obserr_numitem),obsqms(obsqms_numitem)
+  equivalence(sttnid,header(1))
 
-  PRINT*,'Number of surface obs: ',NUMBEROBS
+  print*,'number of surface obs: ',numberobs
 
-  ! OBS DATE: YEAR/MONTH/DAY
-  ZEROCH = ICHAR('0')
-  INDATE = YYYYMM_DDHHMIN(1)*1000000+YYYYMM_DDHHMIN(2)*10000+ &
-           YYYYMM_DDHHMIN(3)*100+YYYYMM_DDHHMIN(4)
+  ! obs date: year/month/day
+  zeroch = ichar('0')
+  indate = yyyymm_ddhhmin(1)*1000000+yyyymm_ddhhmin(2)*10000+ &
+           yyyymm_ddhhmin(3)*100+yyyymm_ddhhmin(4)
 
-  ! WRITE DATA:
-  DO I=1,NUMBEROBS
+  ! write data:
+  do i=1,numberobs
 
-    ! STATION ID:
-    STTNID = STATIONID(I)
+    ! station id:
+    sttnid = stationid(i)
 
-    ! DATA TYPE:
-    SUBSET = 'ADPSFC'
-    SELECT CASE (OBSVNTYPE(I))
-    CASE ('MARTIM','SYNOP')	! MARINE AND SYNOP
-      HEADER(2) = 281		! BUFR REPORT TYPE:  TABLE 2
-      HEADER(3) = 511		! INPUT REPORT TYPE: TABLE 6
-    CASE ('METAR','SPECI','LDAD') ! SPECI: SPECIAL METAR DATA
-      HEADER(2) = 181		! BUFR REPORT TYPE:  TABLE 2
-      HEADER(3) = 512		! INPUT REPORT TYPE: TABLE 6
-    CASE ('DROPSN')
-      HEADER(2) = 132           ! PREPBUFR REPORT TYPE: TABLE 2
-      HEADER(3) = 31            ! INPUT REPORT TYPE: TABLE 6: DROPSONDE
-    CASE DEFAULT
-      PRINT*,'BUFR_SFCOBS: UNKOWN OBSERVATION DATA TYPE! ',OBSVNTYPE(I),' SKIP ',I
-      CYCLE
-      ! CLOSE(OUTPUT_CHANNEL)
-      ! STOP
-    END SELECT
+    ! data type:
+    subset = 'adpsfc'
+    select case (obsvntype(i))
+    case ('martim','synop')	! marine and synop
+      header(2) = 281		! bufr report type:  table 2
+      header(3) = 511		! input report type: table 6
+    case ('metar','speci','ldad') ! speci: special metar data
+      header(2) = 181		! bufr report type:  table 2
+      header(3) = 512		! input report type: table 6
+    case ('dropsn')
+      header(2) = 132           ! prepbufr report type: table 2
+      header(3) = 31            ! input report type: table 6: dropsonde
+    case default
+      print*,'bufr_sfcobs: unkown observation data type! ',obsvntype(i),' skip ',i
+      cycle
+      ! close(output_channel)
+      ! stop
+    end select
 
-    ! TIME:
-    CALL GET_SFC_OBTIME(HHMINTIME(I),SYSTEM_IN4TIME,I4TIME,STATUS)
-    IF (ABS(I4TIME-SYSTEM_IN4TIME) .GT. LENGTH_ANATIME) CYCLE	! OUT OF TIME
+    ! time:
+    call get_sfc_obtime(hhmintime(i),system_in4time,i4time,status)
+    if (abs(i4time-system_in4time) .gt. length_anatime) cycle	! out of time
 
-    HEADER(4) = YYYYMM_DDHHMIN(4)
-    HEADER(5) = (I4TIME-SYSTEM_IN4TIME)/3600.0+YYYYMM_DDHHMIN(5)/60.0
+    header(4) = yyyymm_ddhhmin(4)
+    header(5) = (i4time-system_in4time)/3600.0+yyyymm_ddhhmin(5)/60.0
 
-    ! LAT/LON/ELEVATION:
-    HEADER(6) = LATITUDES(I)
-    HEADER(7) = LONGITUDE(I)
-    HEADER(8) = ELEVATION(I)
+    ! lat/lon/elevation:
+    header(6) = latitudes(i)
+    header(7) = longitude(i)
+    header(8) = elevation(i)
 
-    ! IGNORE OBS OUTSIDE THE ANALYSIS DOMAIN:
-    CALL LATLON_TO_RLAPSGRID(LATITUDES(I),LONGITUDE(I), &
-                              DOMAIN_LATITDE,DOMAIN_LONGITD, &
-                              NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                              RI,RJ,STATUS)
-    IF (RI .LT. 1 .OR. RI .GT. NUMBER_GRIDPTS(1) .OR. &
-        RJ .LT. 1 .OR. RJ .GT. NUMBER_GRIDPTS(2) .OR. &
-        STATUS .NE. 1) CYCLE
+    ! ignore obs outside the analysis domain:
+    call latlon_to_rlapsgrid(latitudes(i),longitude(i), &
+                              domain_latitde,domain_longitd, &
+                              number_gridpts(1),number_gridpts(2), &
+                              ri,rj,status)
+    if (ri .lt. 1 .or. ri .gt. number_gridpts(1) .or. &
+        rj .lt. 1 .or. rj .gt. number_gridpts(2) .or. &
+        status .ne. 1) cycle
 
-    HEADER(9) = 90			! INSTRUMENT TYPE: COMMON CODE TABLE C-2
-    HEADER(10) = I			! REPORT SEQUENCE NUMBER
-    HEADER(11) = 0			! MPI PROCESS NUMBER
+    header(9) = 90			! instrument type: common code table c-2
+    header(10) = i			! report sequence number
+    header(11) = 0			! mpi process number
 
-    ! UPAIR OBSERVATIONS:
-    ! MISSING DATA CONVERSION:
-    OBSDAT = MISSNG_PREBUFR
-    OBSERR = MISSNG_PREBUFR
-    OBSQMS = MISSNG_PREBUFR
+    ! upair observations:
+    ! missing data conversion:
+    obsdat = missng_prebufr
+    obserr = missng_prebufr
+    obsqms = missng_prebufr
 
-    ! SURFACE OBS: ZOB IS THE ELEVATION HEIGHT:
-    OBSDAT(1) = ELEVATION(I)
-    OBSERR(1) = 10.0		! 10 METER ERROR ASSUMED
+    ! surface obs: zob is the elevation height:
+    obsdat(1) = elevation(i)
+    obserr(1) = 10.0		! 10 meter error assumed
 
-    ! GET PRESSURE FROM HEIGHT FIRST:
-    RK = HEIGHT_TO_PRESSURE(ELEVATION(I),HEIGHT_GRID3DM, &
-                         PRESSR_GRID1DM,NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                         NUMBER_GRIDPTS(3),NINT(RI),NINT(RJ))
+    ! get pressure from height first:
+    rk = height_to_pressure(elevation(i),height_grid3dm, &
+                         pressr_grid1dm,number_gridpts(1),number_gridpts(2), &
+                         number_gridpts(3),nint(ri),nint(rj))
 
-    ! SURFACE PRESSURE:
-    IF ((STNPRSOBS(I) .NE. RVALUE_MISSING) .AND. &
-        (STNPRSOBS(I) .NE. SFCOBS_INVALID)) THEN
-      OBSDAT(2) = STNPRSOBS(I)
-      RK = STNPRSOBS(I)*100	! USE PASCAL TO FIND GRID LEVEL
-    ENDIF
+    ! surface pressure:
+    if ((stnprsobs(i) .ne. rvalue_missing) .and. &
+        (stnprsobs(i) .ne. sfcobs_invalid)) then
+      obsdat(2) = stnprsobs(i)
+      rk = stnprsobs(i)*100	! use pascal to find grid level
+    endif
 
-    ! FIND THE GRID LEVEL FOR THIS PRESSURE VALUE:
-    DO K=1,NUMBER_GRIDPTS(3)
-      IF (RK .GE. PRESSR_GRID1DM(K)) EXIT
-    ENDDO
-    IF (K .GT. NUMBER_GRIDPTS(3)) THEN
-      RK = NUMBER_GRIDPTS(3)+1			! OUT OF HEIGHT
-    ELSEIF (K .LE. 1) THEN
-      RK = 1
-      IF (RK .GT. PRESSR_GRID1DM(1)) RK = 0	! OUT OF HEIGHT
-    ELSE
-      RK = K-(RK-PRESSR_GRID1DM(K))/(PRESSR_GRID1DM(K-1)-PRESSR_GRID1DM(K))
-    ENDIF
+    ! find the grid level for this pressure value:
+    do k=1,number_gridpts(3)
+      if (rk .ge. pressr_grid1dm(k)) exit
+    enddo
+    if (k .gt. number_gridpts(3)) then
+      rk = number_gridpts(3)+1			! out of height
+    elseif (k .le. 1) then
+      rk = 1
+      if (rk .gt. pressr_grid1dm(1)) rk = 0	! out of height
+    else
+      rk = k-(rk-pressr_grid1dm(k))/(pressr_grid1dm(k-1)-pressr_grid1dm(k))
+    endif
 
-    ! OTHER PRESSURE OBS:
-    IF ((MSLPRSOBS(I) .NE. RVALUE_MISSING) .AND. &
-        (MSLPRSOBS(I) .NE. SFCOBS_INVALID)) OBSDAT(7) = MSLPRSOBS(I)
-    IF ((SFCPRSOBS(I) .NE. RVALUE_MISSING) .AND. &
-        (SFCPRSOBS(I) .NE. SFCOBS_INVALID)) OBSDAT(8) = SFCPRSOBS(I)
+    ! other pressure obs:
+    if ((mslprsobs(i) .ne. rvalue_missing) .and. &
+        (mslprsobs(i) .ne. sfcobs_invalid)) obsdat(7) = mslprsobs(i)
+    if ((sfcprsobs(i) .ne. rvalue_missing) .and. &
+        (sfcprsobs(i) .ne. sfcobs_invalid)) obsdat(8) = sfcprsobs(i)
 
-    ! TEMPERATURE OBS:
-    IF ((TEMPTROBS(I) .NE. RVALUE_MISSING) .AND. &
-        (TEMPTROBS(I) .NE. SFCOBS_INVALID)) THEN
-	OBSDAT(3) = TEMPTROBS(I)
+    ! temperature obs:
+    if ((temptrobs(i) .ne. rvalue_missing) .and. &
+        (temptrobs(i) .ne. sfcobs_invalid)) then
+	obsdat(3) = temptrobs(i)
 
-        ! TEMP ERROR:
-        OBSERR(3) = 1.0		! ASSUME 1 DEGREE DEFAULT ERROR
-        IF ((TEMPTRERR(I) .NE. RVALUE_MISSING) .AND. &
-            (TEMPTRERR(I) .NE. SFCOBS_INVALID)) OBSERR(3) = TEMPTRERR(I)
+        ! temp error:
+        obserr(3) = 1.0		! assume 1 degree default error
+        if ((temptrerr(i) .ne. rvalue_missing) .and. &
+            (temptrerr(i) .ne. sfcobs_invalid)) obserr(3) = temptrerr(i)
 
-        ! SAVE TEMPERATURE INTO TMG FILE:
-        WRITE(TMGOUT_CHANNEL,11) RI,RJ,RK,OBSDAT(3)+273.15,OBSVNTYPE(I)
-11	FORMAT(3f10.4,f10.3,3x,a8)
-    ENDIF
+        ! save temperature into tmg file:
+        write(tmgout_channel,11) ri,rj,rk,obsdat(3)+273.15,obsvntype(i)
+11	format(3f10.4,f10.3,3x,a8)
+    endif
 
-    ! WIND OBS:
-    IF ((WIND2DOBS(1,I) .NE. RVALUE_MISSING) .AND. &
-         (WIND2DOBS(1,I) .NE. SFCOBS_INVALID) .AND. &
-         (WIND2DOBS(2,I) .NE. RVALUE_MISSING) .AND. &
-         (WIND2DOBS(2,I) .NE. SFCOBS_INVALID)) THEN
-      OBSDAT(4) = WIND2DOBS(1,I)
-      OBSDAT(5) = WIND2DOBS(2,I)
+    ! wind obs:
+    if ((wind2dobs(1,i) .ne. rvalue_missing) .and. &
+         (wind2dobs(1,i) .ne. sfcobs_invalid) .and. &
+         (wind2dobs(2,i) .ne. rvalue_missing) .and. &
+         (wind2dobs(2,i) .ne. sfcobs_invalid)) then
+      obsdat(4) = wind2dobs(1,i)
+      obsdat(5) = wind2dobs(2,i)
 
-      ! SAVE WIND OBS INTO PRG FILE:
-       CALL UV_TO_DISP(WIND2DOBS(1,I),WIND2DOBS(2,I),DI,SP)
+      ! save wind obs into prg file:
+       call uv_to_disp(wind2dobs(1,i),wind2dobs(2,i),di,sp)
 
-       WRITE(PRGOUT_CHANNEL,12) RI,RJ,RK,DI,SP,OBSVNTYPE(I)
-12     FORMAT(3f8.1,2f10.3,3x,a8)
-    ENDIF
+       write(prgout_channel,12) ri,rj,rk,di,sp,obsvntype(i)
+12     format(3f8.1,2f10.3,3x,a8)
+    endif
 
-    OBSERR(4) = 0.1	! ASSUME 0.1 M/S WIND ERROR AS DEFAULT
-    IF ((WIND2DERR(1,I) .NE. RVALUE_MISSING) .AND. &
-        (WIND2DERR(1,I) .NE. SFCOBS_INVALID) .AND. &
-        (WIND2DERR(2,I) .NE. RVALUE_MISSING) .AND. &
-        (WIND2DERR(2,I) .NE. SFCOBS_INVALID)) &
-	OBSERR(4) = SQRT(WIND2DERR(1,I)**2+WIND2DERR(2,I)**2)
-    ! SPECIFIC HUMIDITY:
-    IF ((SFCPRSOBS(I) .NE. RVALUE_MISSING) .AND. &
-        (SFCPRSOBS(I) .NE. SFCOBS_INVALID) .AND. &
-        (TEMPTROBS(I) .NE. RVALUE_MISSING) .AND. &
-        (TEMPTROBS(I) .NE. SFCOBS_INVALID) .AND. &
-        (RELHUMOBS(I) .NE. RVALUE_MISSING) .AND. &
-        (RELHUMOBS(I) .NE. SFCOBS_INVALID)) THEN
-      OBSDAT(6) = MAKE_SSH(SFCPRSOBS(I),TEMPTROBS(I),RELHUMOBS(I)/100.0,&
-                           TEMPTR_REFEREN)*1000.0 ! MG/KG
-      OBSERR(5) = 1.0	! ASSUME 1MG/KG ERROR BY YUANFU
-      !IF ((STNPRSERR(I) .NE. RVALUE_MISSING) .AND. &
-      !  (STNPRSERR(I) .NE. SFCOBS_INVALID) .AND. &
-      !  (TEMPTRERR(I) .NE. RVALUE_MISSING) .AND. &
-      !  (TEMPTRERR(I) .NE. SFCOBS_INVALID) .AND. &
-      !  (RELHUMERR(I) .NE. RVALUE_MISSING) .AND. &
-      !  (RELHUMERR(I) .NE. SFCOBS_INVALID)) &
-      !OBSERR(5) = MAKE_SSH(STNPRSERR(I),OBSERR(3),RELHUMERR(I)/100.0,&
-      !                     TEMPTR_REFEREN)*1000.0 ! MG/KG
-    ENDIF
-    IF ((PRECP1OBS(I) .NE. RVALUE_MISSING) .AND. &
-        (PRECP1OBS(I) .NE. SFCOBS_INVALID)) OBSDAT(9) = PRECP1OBS(I)*INCHES_CONV2MM
-    IF ((PRECP1ERR(I) .NE. RVALUE_MISSING) .AND. &
-        (PRECP1ERR(I) .NE. SFCOBS_INVALID)) OBSERR(6) = PRECP1ERR(I)
-    OBSQMS(1:5) = 0	! QUALITY MARK - BUFR CODE TABLE: 
+    obserr(4) = 0.1	! assume 0.1 m/s wind error as default
+    if ((wind2derr(1,i) .ne. rvalue_missing) .and. &
+        (wind2derr(1,i) .ne. sfcobs_invalid) .and. &
+        (wind2derr(2,i) .ne. rvalue_missing) .and. &
+        (wind2derr(2,i) .ne. sfcobs_invalid)) &
+	obserr(4) = sqrt(wind2derr(1,i)**2+wind2derr(2,i)**2)
+    ! specific humidity:
+    if ((sfcprsobs(i) .ne. rvalue_missing) .and. &
+        (sfcprsobs(i) .ne. sfcobs_invalid) .and. &
+        (temptrobs(i) .ne. rvalue_missing) .and. &
+        (temptrobs(i) .ne. sfcobs_invalid) .and. &
+        (relhumobs(i) .ne. rvalue_missing) .and. &
+        (relhumobs(i) .ne. sfcobs_invalid)) then
+      obsdat(6) = make_ssh(sfcprsobs(i),temptrobs(i),relhumobs(i)/100.0,&
+                           temptr_referen)*1000.0 ! mg/kg
+      obserr(5) = 1.0	! assume 1mg/kg error by yuanfu
+      !if ((stnprserr(i) .ne. rvalue_missing) .and. &
+      !  (stnprserr(i) .ne. sfcobs_invalid) .and. &
+      !  (temptrerr(i) .ne. rvalue_missing) .and. &
+      !  (temptrerr(i) .ne. sfcobs_invalid) .and. &
+      !  (relhumerr(i) .ne. rvalue_missing) .and. &
+      !  (relhumerr(i) .ne. sfcobs_invalid)) &
+      !obserr(5) = make_ssh(stnprserr(i),obserr(3),relhumerr(i)/100.0,&
+      !                     temptr_referen)*1000.0 ! mg/kg
+    endif
+    if ((precp1obs(i) .ne. rvalue_missing) .and. &
+        (precp1obs(i) .ne. sfcobs_invalid)) obsdat(9) = precp1obs(i)*inches_conv2mm
+    if ((precp1err(i) .ne. rvalue_missing) .and. &
+        (precp1err(i) .ne. sfcobs_invalid)) obserr(6) = precp1err(i)
+    obsqms(1:5) = 0	! quality mark - bufr code table: 
 			! 0 always assimilated.
 
-    ! WRITE TO BUFR FILE:
-    CALL OPENMB(OUTPUT_CHANNEL,SUBSET,INDATE)
-    CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,STATUS,HEADER_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSDAT,OBSDAT_NUMITEM,1,STATUS,OBSDAT_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSERR,OBSERR_NUMITEM,1,STATUS,OBSERR_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSQMS,OBSQMS_NUMITEM,1,STATUS,OBSQMS_PREBUFR)
-    CALL WRITSB(OUTPUT_CHANNEL)
+    ! write to bufr file:
+    call openmb(output_channel,subset,indate)
+    call ufbint(output_channel,header,header_numitem,1,status,header_prebufr)
+    call ufbint(output_channel,obsdat,obsdat_numitem,1,status,obsdat_prebufr)
+    call ufbint(output_channel,obserr,obserr_numitem,1,status,obserr_prebufr)
+    call ufbint(output_channel,obsqms,obsqms_numitem,1,status,obsqms_prebufr)
+    call writsb(output_channel)
 
-  ENDDO
+  enddo
 
-END SUBROUTINE BUFR_SFCOBS
+end subroutine bufr_sfcobs
 
-SUBROUTINE BUFR_CDWACA(NUMBEROBS,OBSVARRAY,OBI4ARRAY)
+subroutine bufr_cdwaca(numberobs,obsvarray,obi4array)
 
 !==============================================================================
-!doc  THIS ROUTINE CONVERTS LAPS CLOUD DRIFT WIND AND ACARS DATA INTO PREPBUFR
-!doc  FORMAT.
+!doc  this routine converts laps cloud drift wind and acars data into prepbufr
+!doc  format.
 !doc
-!doc  HISTORY:
-!doc	CREATION:	YUANFU XIE/SHIOW-MING DENG	JUN 2007
+!doc  history:
+!doc	creation:	yuanfu xie/shiow-ming deng	jun 2007
 !==============================================================================
 
-  USE LAPS_PARAMS
+  use laps_params
 
-  IMPLICIT NONE
+  implicit none
 
-  INTEGER, INTENT(IN) :: NUMBEROBS,OBI4ARRAY(3,*)
-  REAL*8,  INTENT(IN) :: OBSVARRAY(7,*)
+  integer, intent(in) :: numberobs,obi4array(3,*)
+  real*8,  intent(in) :: obsvarray(7,*)
 
-  ! LOCAL VARIABLES:
-  CHARACTER :: STTNID*8,SUBSET*8,PIGNAME*8
-  INTEGER   :: I,K,INDATE,ZEROCH,STATUS
-  REAL      :: RI,RJ,RK,U,V,DI,SP,HEIGHT_TO_PRESSURE
-  REAL*8    :: HEADER(HEADER_NUMITEM),OBSDAT(OBSDAT_NUMITEM)
-  REAL*8    :: OBSERR(OBSERR_NUMITEM),OBSQMS(OBSQMS_NUMITEM)
-  EQUIVALENCE(STTNID,HEADER(1))
+  ! local variables:
+  character :: sttnid*8,subset*8,pigname*8
+  integer   :: i,k,indate,zeroch,status
+  real      :: ri,rj,rk,u,v,di,sp,height_to_pressure
+  real*8    :: header(header_numitem),obsdat(obsdat_numitem)
+  real*8    :: obserr(obserr_numitem),obsqms(obsqms_numitem)
+  equivalence(sttnid,header(1))
 
-  PRINT*,'Number of cloud drift wind and ACAR obs: ',NUMBEROBS
+  print*,'number of cloud drift wind and acar obs: ',numberobs
 
-  ! OBS DATE: YEAR/MONTH/DAY
-  ZEROCH = ICHAR('0')
-  INDATE = YYYYMM_DDHHMIN(1)*1000000+YYYYMM_DDHHMIN(2)*10000+ &
-           YYYYMM_DDHHMIN(3)*100+YYYYMM_DDHHMIN(4)
+  ! obs date: year/month/day
+  zeroch = ichar('0')
+  indate = yyyymm_ddhhmin(1)*1000000+yyyymm_ddhhmin(2)*10000+ &
+           yyyymm_ddhhmin(3)*100+yyyymm_ddhhmin(4)
 
-  ! WRITE DATA:
-  DO I=1,NUMBEROBS
+  ! write data:
+  do i=1,numberobs
 
-    HEADER(2:3) = OBI4ARRAY(1:2,I)	! CODE AND REPORT TYPE
-    SELECT CASE (OBI4ARRAY(2,I))
-    CASE (241)
-      ! STATION ID:
-      STTNID = 'CDW'
-      PIGNAME = 'cdw'
-      ! DATA TYPE:
-      SUBSET = 'SATWND'
-    CASE (130,230,666)	! TEMPORARILY USE 666 FOR WISDOM DATA
-      ! STATION ID:
-      STTNID = 'ACAR'
-      PIGNAME = 'pin'
-      IF (OBI4ARRAY(2,I) .EQ. 666) PIGNAME = 'wis'
-      ! DATA TYPE:
-      SUBSET = 'AIRCAR'
-    CASE DEFAULT
-      PRINT*,'BUFR_CDWACA: UNKNOWN OBSERVATION DATA TYPE! ',OBI4ARRAY(2,I)
-      STOP
-    END SELECT
+    header(2:3) = obi4array(1:2,i)	! code and report type
+    select case (obi4array(2,i))
+    case (241)
+      ! station id:
+      sttnid = 'cdw'
+      pigname = 'cdw'
+      ! data type:
+      subset = 'satwnd'
+    case (130,230,666)	! temporarily use 666 for wisdom data
+      ! station id:
+      sttnid = 'acar'
+      pigname = 'pin'
+      if (obi4array(2,i) .eq. 666) pigname = 'wis'
+      ! data type:
+      subset = 'aircar'
+    case default
+      print*,'bufr_cdwaca: unknown observation data type! ',obi4array(2,i)
+      stop
+    end select
 
-    ! TIME:
-    IF (ABS(OBI4ARRAY(3,I)-SYSTEM_IN4TIME) .GT. LENGTH_ANATIME) CYCLE	! OUT OF TIME
+    ! time:
+    if (abs(obi4array(3,i)-system_in4time) .gt. length_anatime) cycle	! out of time
 
-    HEADER(4) = YYYYMM_DDHHMIN(4)
-    HEADER(5) = (OBI4ARRAY(3,I)-SYSTEM_IN4TIME)/3600.0+YYYYMM_DDHHMIN(5)/60.0
+    header(4) = yyyymm_ddhhmin(4)
+    header(5) = (obi4array(3,i)-system_in4time)/3600.0+yyyymm_ddhhmin(5)/60.0
 
-    ! LAT/LON/ELEVATION:
-    HEADER(6) = OBSVARRAY(1,I)
-    HEADER(7) = OBSVARRAY(2,I)
-    HEADER(8) = OBSVARRAY(3,I)
+    ! lat/lon/elevation:
+    header(6) = obsvarray(1,i)
+    header(7) = obsvarray(2,i)
+    header(8) = obsvarray(3,i)
 
-    ! IGNORE OBS OUTSIDE THE ANALYSIS DOMAIN:
-    DI = OBSVARRAY(1,I)		! FROM REAL*8 TO REAL
-    SP = OBSVARRAY(2,I)
-    CALL LATLON_TO_RLAPSGRID(DI,SP, &
-                              DOMAIN_LATITDE,DOMAIN_LONGITD, &
-                              NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                              RI,RJ,STATUS)
-    IF (RI .LT. 1 .OR. RI .GT. NUMBER_GRIDPTS(1) .OR. &
-        RJ .LT. 1 .OR. RJ .GT. NUMBER_GRIDPTS(2) .OR. &
-        STATUS .NE. 1) CYCLE
+    ! ignore obs outside the analysis domain:
+    di = obsvarray(1,i)		! from real*8 to real
+    sp = obsvarray(2,i)
+    call latlon_to_rlapsgrid(di,sp, &
+                              domain_latitde,domain_longitd, &
+                              number_gridpts(1),number_gridpts(2), &
+                              ri,rj,status)
+    if (ri .lt. 1 .or. ri .gt. number_gridpts(1) .or. &
+        rj .lt. 1 .or. rj .gt. number_gridpts(2) .or. &
+        status .ne. 1) cycle
 
-    HEADER(9) = 90			! INSTRUMENT TYPE: COMMON CODE TABLE C-2
-					! CANNOT FIND CODE TABLE FOR ACARS INSTRUMENT
-    HEADER(10) = I			! REPORT SEQUENCE NUMBER
-    HEADER(11) = 0			! MPI PROCESS NUMBER
+    header(9) = 90			! instrument type: common code table c-2
+					! cannot find code table for acars instrument
+    header(10) = i			! report sequence number
+    header(11) = 0			! mpi process number
 
-    ! UPAIR OBSERVATIONS:
-    ! MISSING DATA CONVERSION:
-    OBSDAT = MISSNG_PREBUFR
-    OBSERR = MISSNG_PREBUFR
-    OBSQMS = MISSNG_PREBUFR
+    ! upair observations:
+    ! missing data conversion:
+    obsdat = missng_prebufr
+    obserr = missng_prebufr
+    obsqms = missng_prebufr
 
-    ! HEIGHT OBS:
-    IF (OBSVARRAY(3,I) .NE. RVALUE_MISSING) THEN
-      OBSDAT(1) = OBSVARRAY(3,I)	! HEIGHT
-      ! GET PRESSURE FROM HEIGHT FIRST:
-      DI = OBSVARRAY(3,I)		! REAL*8 TO REAL
-      RK = HEIGHT_TO_PRESSURE(DI,HEIGHT_GRID3DM, &
-                         PRESSR_GRID1DM,NUMBER_GRIDPTS(1),NUMBER_GRIDPTS(2), &
-                         NUMBER_GRIDPTS(3),NINT(RI),NINT(RJ))
-    ENDIF
+    ! height obs:
+    if (obsvarray(3,i) .ne. rvalue_missing) then
+      obsdat(1) = obsvarray(3,i)	! height
+      ! get pressure from height first:
+      di = obsvarray(3,i)		! real*8 to real
+      rk = height_to_pressure(di,height_grid3dm, &
+                         pressr_grid1dm,number_gridpts(1),number_gridpts(2), &
+                         number_gridpts(3),nint(ri),nint(rj))
+    endif
 
-    ! PRESSURE OBS:
-    IF (OBSVARRAY(4,I) .NE. RVALUE_MISSING) THEN
-      OBSDAT(2) = OBSVARRAY(4,I)	! PRESSURE IN MB
-      RK = OBSVARRAY(4,I)*100.0		! PASCAL
-    ENDIF
-    ! FIND THE GRID LEVEL FOR THIS PRESSURE VALUE:
-    DO K=1,NUMBER_GRIDPTS(3)
-      IF (RK .GE. PRESSR_GRID1DM(K)) EXIT
-    ENDDO
-    IF (K .GT. NUMBER_GRIDPTS(3)) THEN
-      RK = NUMBER_GRIDPTS(3)+1			! OUT OF HEIGHT
-    ELSEIF (K .LE. 1) THEN
-      RK = 1
-      IF (RK .GT. PRESSR_GRID1DM(1)) RK = 0	! OUT OF HEIGHT
-    ELSE
-      RK = K-(RK-PRESSR_GRID1DM(K))/(PRESSR_GRID1DM(K-1)-PRESSR_GRID1DM(K))
-    ENDIF
+    ! pressure obs:
+    if (obsvarray(4,i) .ne. rvalue_missing) then
+      obsdat(2) = obsvarray(4,i)	! pressure in mb
+      rk = obsvarray(4,i)*100.0		! pascal
+    endif
+    ! find the grid level for this pressure value:
+    do k=1,number_gridpts(3)
+      if (rk .ge. pressr_grid1dm(k)) exit
+    enddo
+    if (k .gt. number_gridpts(3)) then
+      rk = number_gridpts(3)+1			! out of height
+    elseif (k .le. 1) then
+      rk = 1
+      if (rk .gt. pressr_grid1dm(1)) rk = 0	! out of height
+    else
+      rk = k-(rk-pressr_grid1dm(k))/(pressr_grid1dm(k-1)-pressr_grid1dm(k))
+    endif
 
-    ! TEMPERATURE OBS:
-    IF (OBSVARRAY(7,I) .NE. RVALUE_MISSING) THEN
-      OBSDAT(3) = OBSVARRAY(7,I)	! LAPS_Ingest(C) uses READ_ACARS_OB (F)
+    ! temperature obs:
+    if (obsvarray(7,i) .ne. rvalue_missing) then
+      obsdat(3) = obsvarray(7,i)	! laps_ingest(c) uses read_acars_ob (f)
 
-      ! SAVE TEMPERATURE OBS INTO TMG FILE:
-      WRITE(TMGOUT_CHANNEL,11) RI,RJ,RK,OBSVARRAY(7,I)+273.15,STTNID
-11    FORMAT(3f10.4,f10.3,3x,a8)
-    ENDIF
+      ! save temperature obs into tmg file:
+      write(tmgout_channel,11) ri,rj,rk,obsvarray(7,i)+273.15,sttnid
+11    format(3f10.4,f10.3,3x,a8)
+    endif
 
-    ! WIND OBS:
-    IF (OBSVARRAY(5,I) .NE. RVALUE_MISSING .AND. &
-         OBSVARRAY(6,I) .NE. RVALUE_MISSING) THEN
-      OBSDAT(4) = OBSVARRAY(5,I)	! U
-      OBSDAT(5) = OBSVARRAY(6,I)	! V
+    ! wind obs:
+    if (obsvarray(5,i) .ne. rvalue_missing .and. &
+         obsvarray(6,i) .ne. rvalue_missing) then
+      obsdat(4) = obsvarray(5,i)	! u
+      obsdat(5) = obsvarray(6,i)	! v
 
-      ! SAVE WIND OBS INTO PRG FILE:
-      U = OBSVARRAY(5,I)	! CONVERT TO REAL FROM REAL*8
-      V = OBSVARRAY(6,I)
-      CALL UV_TO_DISP(U,V,DI,SP)
+      ! save wind obs into prg file:
+      u = obsvarray(5,i)	! convert to real from real*8
+      v = obsvarray(6,i)
+      call uv_to_disp(u,v,di,sp)
 
-      WRITE(PIGOUT_CHANNEL,12) RI,RJ,RK,DI,SP,PIGNAME(1:3)
-12    FORMAT(1x,3f8.1,2f8.1,x,a3)
-    ENDIF
+      write(pigout_channel,12) ri,rj,rk,di,sp,pigname(1:3)
+12    format(1x,3f8.1,2f8.1,x,a3)
+    endif
 
-    OBSERR(1) = 0.0	! ZERO ERROR FOR HEIGHT
-    OBSERR(3) = 0.0	! ASSUME 0 DEG ERROR
-    OBSERR(4) = 0.0	! ASSUME 0 M/S ERROR
-    OBSQMS(1:6) = 1	! QUALITY MARK - BUFR CODE TABLE: 
-					! GOOD ASSUMED.
+    obserr(1) = 0.0	! zero error for height
+    obserr(3) = 0.0	! assume 0 deg error
+    obserr(4) = 0.0	! assume 0 m/s error
+    obsqms(1:6) = 1	! quality mark - bufr code table: 
+					! good assumed.
 
-    ! WRITE TO BUFR FILE:
-    CALL OPENMB(OUTPUT_CHANNEL,SUBSET,INDATE)
-    CALL UFBINT(OUTPUT_CHANNEL,HEADER,HEADER_NUMITEM,1,STATUS,HEADER_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSDAT,OBSDAT_NUMITEM,1,STATUS,OBSDAT_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSERR,OBSERR_NUMITEM,1,STATUS,OBSERR_PREBUFR)
-    CALL UFBINT(OUTPUT_CHANNEL,OBSQMS,OBSQMS_NUMITEM,1,STATUS,OBSQMS_PREBUFR)
-    CALL WRITSB(OUTPUT_CHANNEL)
-  ENDDO
+    ! write to bufr file:
+    call openmb(output_channel,subset,indate)
+    call ufbint(output_channel,header,header_numitem,1,status,header_prebufr)
+    call ufbint(output_channel,obsdat,obsdat_numitem,1,status,obsdat_prebufr)
+    call ufbint(output_channel,obserr,obserr_numitem,1,status,obserr_prebufr)
+    call ufbint(output_channel,obsqms,obsqms_numitem,1,status,obsqms_prebufr)
+    call writsb(output_channel)
+  enddo
 
-END SUBROUTINE BUFR_CDWACA
+end subroutine bufr_cdwaca

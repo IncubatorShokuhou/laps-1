@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -39,22 +39,22 @@ cdis
 
 
 
-        subroutine ingest_blppro(i4time_sys,NX_L,NY_L,lun_out,istatus)       
+        subroutine ingest_blppro(i4time_sys,nx_l,ny_l,lun_out,istatus)       
 
-C       Michael Barth           12-Aug-1993
-C       Steve Albers               Nov-1993         Reworked for LAPS ingest
-C                                  Oct-1994         Improve QC
-C       Steve Albers                   1996         BL Profilers
-!       Ken Dritz                3-Jul-1997  Added NX_L, NY_L as dummy
+c       michael barth           12-aug-1993
+c       steve albers               nov-1993         reworked for laps ingest
+c                                  oct-1994         improve qc
+c       steve albers                   1996         bl profilers
+!       ken dritz                3-jul-1997  added nx_l, ny_l as dummy
 !                                            arguments.
-!       Ken Dritz                3-Jul-1997  Changed include of lapsparms.for
+!       ken dritz                3-jul-1997  changed include of lapsparms.for
 !                                            to laps_static_parameters.inc.
-!       Ken Dritz                3-Jul-1997  Added call to get_r_missing_data.
-C
-C       This file shows examples of how the use PROF_CDF subroutines to read
-C       WPDN 60-minute RASS data in netCDF files.
-C
-C       NOTE: Profiler winds are written out in KNOTS
+!       ken dritz                3-jul-1997  added call to get_r_missing_data.
+c
+c       this file shows examples of how the use prof_cdf subroutines to read
+c       wpdn 60-minute rass data in netcdf files.
+c
+c       note: profiler winds are written out in knots
 
         integer cdfid,status,i,j,max_levels_out,n_profilers,file_n_prof       
         parameter (n_profilers = 1000)
@@ -84,13 +84,13 @@ C       NOTE: Profiler winds are written out in KNOTS
         real di_out(max_levels_out)
         real sp_out(max_levels_out)
 
-        integer good,bad,missing, start(2), count(2), staNamLen
+        integer good,bad,missing, start(2), count(2), stanamlen
         integer start_time(1), count_time(1)
         parameter (good = 0)
         parameter (bad = 12)
         parameter (missing = -1)
         character*1 qc_char(3)
-        data qc_char/'G','B','M'/
+        data qc_char/'g','b','m'/
         integer byte_to_i4
 
         character*200 fnam_in
@@ -105,19 +105,19 @@ C       NOTE: Profiler winds are written out in KNOTS
 
         integer varid
         include 'netcdf.inc'
-        character*(MAXNCNAM) dimname 
-C
-C       Set error handling mode.  Note that you don't have to do this, if this
-C       call isn't made, default error processing will occur:
-C
-C       ERROR_CODE              Meaning
-C
-C       0                       Return status codes -- THIS IS THE DEFAULT.
-C       1                       Return status codes and write an error message
-C                               to standard output (SYS$OUTPUT on VMS).
-C       2                       Write an error message to standard output and
-C                               exit the program.
-C
+        character*(maxncnam) dimname 
+c
+c       set error handling mode.  note that you don't have to do this, if this
+c       call isn't made, default error processing will occur:
+c
+c       error_code              meaning
+c
+c       0                       return status codes -- this is the default.
+c       1                       return status codes and write an error message
+c                               to standard output (sys$output on vms).
+c       2                       write an error message to standard output and
+c                               exit the program.
+c
 
         character*13 filename13,outfile
         character*9 asc9_tim,a9time_ob
@@ -129,56 +129,56 @@ C
         character*180 c_values_req
 
         character*6 prof_name(n_profilers)
-        character*9 a9_timeObs
-        integer timeObs
+        character*9 a9_timeobs
+        integer timeobs
 
-        real lat(NX_L,NY_L),lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
+        real lat(nx_l,ny_l),lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
 
         call get_r_missing_data(r_missing_data,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting r_missing_data'
+           write (6,*) 'error getting r_missing_data'
            return
         endif
  
         r_mspkt = .518
 
-        call get_latlon_perimeter(NX_L,NY_L,1.0
+        call get_latlon_perimeter(nx_l,ny_l,1.0
      1                           ,lat,lon,topo
      1                           ,rnorth,south,east,west,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS perimeter'
+            write(6,*)' error reading laps perimeter'
             return
         endif
 
-        CALL PROF_CDF_SET_ERROR(error_code,status)
+        call prof_cdf_set_error(error_code,status)
         if(status.ne.0)then
-            write(6,*)' Warning: bad set_error ',status
+            write(6,*)' warning: bad set_error ',status
             return
         endif
 
         outfile = filename13(i4time_sys,'pro')
         asc9_tim = outfile(1:9)
-C
-C       Open a 60-minute RASS netCDF file for 20:00:00.00 on Julian date 217,
-C       1993.  Both 6-minute and 60-minute files have the same filename
-C       convention (you're supposed to use different directories to hold the
-C       different resolutions).
-C
-C       YYJJJHHMMhhmmO
-C
-C       YY   = last 2 digits of year
-C       JJJ  = Julian date
-C       HHMM = hour, minute (UTC) of the data
-C       hhmm = hour, minute (UTC) of the data
-C              (One of these is supposed to be observation time, one receipt
-C               time, but both are identical for RASS files created from
-C               Demonstration Division tapes.)
-C       O    = ASCII "Oh" character, not "zero" -- stands for observation.
-C
-C       For VMS systems, you must explicitly put in a period after the oh if
-C       you don't want a file extension, thus the string used in the open call.
-C
+c
+c       open a 60-minute rass netcdf file for 20:00:00.00 on julian date 217,
+c       1993.  both 6-minute and 60-minute files have the same filename
+c       convention (you're supposed to use different directories to hold the
+c       different resolutions).
+c
+c       yyjjjhhmmhhmmo
+c
+c       yy   = last 2 digits of year
+c       jjj  = julian date
+c       hhmm = hour, minute (utc) of the data
+c       hhmm = hour, minute (utc) of the data
+c              (one of these is supposed to be observation time, one receipt
+c               time, but both are identical for rass files created from
+c               demonstration division tapes.)
+c       o    = ascii "oh" character, not "zero" -- stands for observation.
+c
+c       for vms systems, you must explicitly put in a period after the oh if
+c       you don't want a file extension, thus the string used in the open call.
+c
 
 !       dir_in = path_to_raw_blpprofiler
 
@@ -188,14 +188,14 @@ C
             write(6,*)c_vars_req(1:30),' = ',c_values_req
             dir_in = c_values_req
         else
-            write(6,*)' Error getting ',c_vars_req
+            write(6,*)' error getting ',c_vars_req
             return
         endif
 
 
         call s_len(dir_in,len_dir_in)
 
-C       Wait for the data
+c       wait for the data
 
 !       c_filespec = dir_in(1:len_dir_in)//'*0100o'
         c_filespec = dir_in(1:len_dir_in)//'*0??0o'
@@ -217,39 +217,39 @@ C       Wait for the data
         if(minutes_now .ge. 19 .and. minutes_now .lt. 26)then
             call wait_for_data(c_filespec,i4time_desired
      1               ,i4_check_interval,i4_total_wait
-     1               ,i4_thresh_age       ! Only loop through the waiting
+     1               ,i4_thresh_age       ! only loop through the waiting
                                           ! if data is younger than this
                                           ! threshold
      1               ,istatus)
 
             if(istatus .ne. 1)then
-                write(6,*)' No recent data'
+                write(6,*)' no recent data'
                 return
             endif
         endif ! minutes_now
 
-C       READ IN THE RAW PROFILER DATA
+c       read in the raw profiler data
 
         fnam_in = dir_in(1:len_dir_in)//asc9_tim//'0100o'
 !       fnam_in = dir_in(1:len_dir_in)//asc9_tim//'0??0o'
         call s_len(fnam_in,len_fnam_in)
         write(6,*)fnam_in(1:len_fnam_in)
-        CALL PROF_CDF_OPEN(fnam_in(1:len_fnam_in),cdfid,status)
-C
-C       Status of 0 means success.  Positive status codes and -1 are returned
-C       from netCDF routines.  Any netCDF errors encountered will cause an
-C       error message to be written to standard output (SYS$OUTPUT in VMS).
-C       Errors -2 through -6 are from PROF_CDF routines and are explained in
-C       the documentation for each PROF_CDF routine.
-C
+        call prof_cdf_open(fnam_in(1:len_fnam_in),cdfid,status)
+c
+c       status of 0 means success.  positive status codes and -1 are returned
+c       from netcdf routines.  any netcdf errors encountered will cause an
+c       error message to be written to standard output (sys$output in vms).
+c       errors -2 through -6 are from prof_cdf routines and are explained in
+c       the documentation for each prof_cdf routine.
+c
         if(status.ne.0)then
-            write(6,*)' Warning: bad open ',status
+            write(6,*)' warning: bad open ',status
             return
         endif
 
         call prof_i4_avg_wdw(i4_avg_wdw_sec,cdfid,istatus)
-!       This is hard-wired until 'prof_i4_avg_wdw' can be made more
-!       general for BLP profilers.
+!       this is hard-wired until 'prof_i4_avg_wdw' can be made more
+!       general for blp profilers.
             
 !       istatus = 1
 !       i4_avg_wdw_sec = 3600
@@ -258,59 +258,59 @@ C
             lag_time = i4_avg_wdw_sec/2
         else
             write(6,*)' ingest_sub_blppro: '
-     1                   ,'Error obtaining i4_avg_wdw_sec'
+     1                   ,'error obtaining i4_avg_wdw_sec'
             return
         endif
 
-!       Get the number of profilers from the NetCDF file
-        status = NF_INQ_DIMID(cdfid,'recNum',varid)
-        status = NF_INQ_DIM(cdfid,varid,dimname,file_n_prof)
+!       get the number of profilers from the netcdf file
+        status = nf_inq_dimid(cdfid,'recnum',varid)
+        status = nf_inq_dim(cdfid,varid,dimname,file_n_prof)
         write(6,*)' # of profilers = ',file_n_prof
         if (file_n_prof .gt. n_profilers) then
-          write(6,*)' Error: too many profilers to process'
+          write(6,*)' error: too many profilers to process'
           istatus = 0
           return
         endif
 
-!	Get the number of characters in the station name
-        status = NF_INQ_DIMID(cdfid,'staNamLen',varid)
-        status = NF_INQ_DIM(cdfid,varid,dimname,staNamLen)
+!	get the number of characters in the station name
+        status = nf_inq_dimid(cdfid,'stanamlen',varid)
+        status = nf_inq_dim(cdfid,varid,dimname,stanamlen)
 
         start(1) = 1
         count(2) = 1
-        count(1) = staNamLen
+        count(1) = stanamlen
 
 !       do ista = 1,n_profilers
 
         do ista = 1,file_n_prof
 
 !       fill profiler name into prof_name(ista)
-          status = NF_INQ_VARID(cdfid,'staName',varid)
+          status = nf_inq_varid(cdfid,'staname',varid)
           start(2) = ista
-          status = NF_GET_VARA_TEXT(cdfid, varid, start, count,
+          status = nf_get_vara_text(cdfid, varid, start, count,
      1                prof_name(ista))
           prof_name(ista)(6:6) = ' '
           
 
           write(6,*)
-          write(6,*)' Looping for profiler ',prof_name(ista)
-C
+          write(6,*)' looping for profiler ',prof_name(ista)
+c
           if(.false.)then
               nmodes = 0
-	      CALL PROF_CDF_READ(cdfid,prof_name(ista),0
-     1                          ,'numModesUsed',0,nmodes_short,
+	      call prof_cdf_read(cdfid,prof_name(ista),0
+     1                          ,'nummodesused',0,nmodes_short,
      $			         status)
 
               if(status .ne. 0)then
                   write(6,*)prof_name(ista)
-     1             ,'  Warning: bad status reading numModesUsed',status       
+     1             ,'  warning: bad status reading nummodesused',status       
                   go to 900
               else
-                  write(6,*)'numModesused =',nmodes
+                  write(6,*)'nummodesused =',nmodes
               endif
 
-	      CALL PROF_CDF_READ(cdfid,prof_name(ista),0
-     1                          ,'numLevelsUsed',0,ngates_short,status)       
+	      call prof_cdf_read(cdfid,prof_name(ista),0
+     1                          ,'numlevelsused',0,ngates_short,status)       
 	      do i = 1, max_modes
                   ngates(i) = 0
                   do j=1,2
@@ -318,24 +318,24 @@ C
                   enddo
 	      enddo
 
-          else ! This may help for Big/Little Endian conversions
+          else ! this may help for big/little endian conversions
               nmodes = 0
-	      CALL PROF_CDF_READ(cdfid,prof_name(ista),0
-     1                          ,'numModesUsed',0,nmodes,
+	      call prof_cdf_read(cdfid,prof_name(ista),0
+     1                          ,'nummodesused',0,nmodes,
      $			         status)
 
 !             call short_to_i4(nmodes_short,nmodes)
 
               if(status .ne. 0)then
                   write(6,*)prof_name(ista)
-     1             ,'  Warning: bad status reading numModesUsed',status       
+     1             ,'  warning: bad status reading nummodesused',status       
                   go to 900
               else
-                  write(6,*)'numModesused =',nmodes
+                  write(6,*)'nummodesused =',nmodes
               endif
 
-	      CALL PROF_CDF_READ(cdfid,prof_name(ista),0
-     1                          ,'numLevelsUsed',0,ngates,status)       
+	      call prof_cdf_read(cdfid,prof_name(ista),0
+     1                          ,'numlevelsused',0,ngates,status)       
 !             do i = 1, max_modes
 !                 ngates(i) = 0
 !                 call short_to_i4(ngates_short(i),ngates(i))
@@ -344,74 +344,74 @@ C
           endif
 
           if(status .ne. 0)then
-            write(6,*)' Warning: bad status reading numLevelsUsed'
+            write(6,*)' warning: bad status reading numlevelsused'
             go to 900
           else
             write(6,*)' ngates array = ',ngates
           endif
 
-C
-C       Get the surface pressure.  This time we'll use the
-C       5-character site name (plus a terminating blank) to select the station.
-C
-          CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'pressure',2,prs
+c
+c       get the surface pressure.  this time we'll use the
+c       5-character site name (plus a terminating blank) to select the station.
+c
+          call prof_cdf_read(cdfid,prof_name(ista),0,'pressure',2,prs
      1                      ,status)
           if(status.ne.0)then
             if(status .eq. -3)then
                 write(6,*)prof_name(ista),' not found'
                 goto 900
             else
-                write(6,*)' Warning: bad pressure read ',status
+                write(6,*)' warning: bad pressure read ',status
                 return
             endif
           endif
           write(6,*)
           write(6,*)prof_name(ista),' pressure ',prs
 
-!         Get the latitude
-          CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'staLat',2,rlat
+!         get the latitude
+          call prof_cdf_read(cdfid,prof_name(ista),0,'stalat',2,rlat
      1                      ,status)
           if(status.ne.0)then
-                write(6,*)' Warning: bad lat read ',status
+                write(6,*)' warning: bad lat read ',status
                 return
           endif
           write(6,*)
-          write(6,*)prof_name(ista),' Lat ',rlat
+          write(6,*)prof_name(ista),' lat ',rlat
 
-!         Get the longitude
-          CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'staLon',2,rlon
+!         get the longitude
+          call prof_cdf_read(cdfid,prof_name(ista),0,'stalon',2,rlon
      1                      ,status)
           if(status.ne.0)then
-                write(6,*)' Warning: bad lon read ',status
+                write(6,*)' warning: bad lon read ',status
                 return
           endif
           write(6,*)
-          write(6,*)prof_name(ista),' Lon ',rlon
+          write(6,*)prof_name(ista),' lon ',rlon
 
-!         Get the observation time
-          status = NF_INQ_VARID(cdfid,'timeObs',varid)
+!         get the observation time
+          status = nf_inq_varid(cdfid,'timeobs',varid)
           start_time(1) = ista
           count_time(1) = 1
-          status = NF_GET_VARA_INT(cdfid, varid, start_time,
-     1                             count_time,timeObs)
-          if(status.ne.NF_NOERR)then
-              write(6,*)' Warning: bad timeObs read ',status,timeObs
+          status = nf_get_vara_int(cdfid, varid, start_time,
+     1                             count_time,timeobs)
+          if(status.ne.nf_noerr)then
+              write(6,*)' warning: bad timeobs read ',status,timeobs
 
-          elseif(abs(timeObs) .gt. 3d9)then
-              write(6,*)' Warning: Bad observation time',timeObs
+          elseif(abs(timeobs) .gt. 3d9)then
+              write(6,*)' warning: bad observation time',timeobs
 
           else
-              call c_time2fname(timeObs,a9_timeObs)
+              call c_time2fname(timeobs,a9_timeobs)
 
               write(6,*)
-              write(6,*)' timeObs ',a9_timeObs
+              write(6,*)' timeobs ',a9_timeobs
 
-              call cv_asc_i4time(a9_timeObs,i4_timeObs)
-              i4_resid = abs(i4_timeObs - i4time_sys)
+              call cv_asc_i4time(a9_timeobs,i4_timeobs)
+              i4_resid = abs(i4_timeobs - i4time_sys)
 !             if(i4_resid .gt. (ilaps_cycle_time / 2) )then ! outside time window
               if(i4_resid .gt. 0)then
-                  write(6,*)' Warning, time is suspect '
-     1                     ,a9_timeObs,i4_resid       
+                  write(6,*)' warning, time is suspect '
+     1                     ,a9_timeobs,i4_resid       
               endif
 
           endif
@@ -421,19 +421,19 @@ C
 
             write(6,*)prof_name(ista),' is in box'
 
-            CALL PROF_CDF_READ
-     1          (cdfid,prof_name(ista),0,'staElev',2,elev,status)
+            call prof_cdf_read
+     1          (cdfid,prof_name(ista),0,'staelev',2,elev,status)
             if(status.ne.0)then
-                write(6,*)' Warning: bad elev read ',status
+                write(6,*)' warning: bad elev read ',status
                 return
             endif
             write(6,*)
             write(6,*)prof_name(ista),' elev ',elev
 
-            CALL PROF_CDF_READ(cdfid,prof_name(ista),0
-     1                         ,'windSpeedSfc',2,sp_sfc,istatus1)
-            CALL PROF_CDF_READ(cdfid,prof_name(ista),0
-     1                         ,'windDirSfc',2,di_sfc,istatus2)
+            call prof_cdf_read(cdfid,prof_name(ista),0
+     1                         ,'windspeedsfc',2,sp_sfc,istatus1)
+            call prof_cdf_read(cdfid,prof_name(ista),0
+     1                         ,'winddirsfc',2,di_sfc,istatus2)
 
             if(abs(sp_sfc) .gt. 500.)istatus1 = 1
             if(abs(di_sfc) .gt. 500.)istatus2 = 1
@@ -444,43 +444,43 @@ C
                 n_good_sfc = 0
             endif
 
-C
-C           Get the array of profiler winds for the profiler station
-C           at Platteville.  For this call, we'll use the WMO
-C           identifier to tell the subroutine what station we want.
-C
-            CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'uComponent',2,
+c
+c           get the array of profiler winds for the profiler station
+c           at platteville.  for this call, we'll use the wmo
+c           identifier to tell the subroutine what station we want.
+c
+            call prof_cdf_read(cdfid,prof_name(ista),0,'ucomponent',2,
      1                                             u,status)
             if(status.ne.0)then
-                write(6,*)' Warning: bad uComponent read ',status
+                write(6,*)' warning: bad ucomponent read ',status
                 return
             endif
 
-            CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'vComponent',2,
+            call prof_cdf_read(cdfid,prof_name(ista),0,'vcomponent',2,
      1                              v,status)
             if(status.ne.0)then
-                write(6,*)' Warning: bad vComponent read ',status
+                write(6,*)' warning: bad vcomponent read ',status
                 return
             endif
-C
-C           Get the associated quality control flags.
-C
-            CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'uvQualityCode'
+c
+c           get the associated quality control flags.
+c
+            call prof_cdf_read(cdfid,prof_name(ista),0,'uvqualitycode'
      $                     ,0,qc_flag,status)
             if(status.ne.0)then
-                write(6,*)' Warning: bad qualityCode read ',status
+                write(6,*)' warning: bad qualitycode read ',status
                 return
             endif
-C
-C           Get the associated levels for this profiler
-C
-            CALL PROF_CDF_READ(cdfid,prof_name(ista),0,'levels',2,
+c
+c           get the associated levels for this profiler
+c
+            call prof_cdf_read(cdfid,prof_name(ista),0,'levels',2,
      $                     level,status)
             if(status.ne.0)then
-                write(6,*)' Warning: bad level read ',status
+                write(6,*)' warning: bad level read ',status
                 return
             endif
-C
+c
             write(6,*)prof_name(ista)
 
             n_good_levels = 0
@@ -489,13 +489,13 @@ C
             do im = 2,1,-1
 
               write(6,*)
-              write(6,*)' Checking mode ',im,' for ',prof_name(ista)
+              write(6,*)' checking mode ',im,' for ',prof_name(ista)
 
               nlevels = ngates(im)
 
-!             Check for used levels exceeding levels as stated in NetCDF file
+!             check for used levels exceeding levels as stated in netcdf file
               if(nlevels .gt. max_levels)then
-                  write(6,*)' Warning: too many levels in blp-profiler'
+                  write(6,*)' warning: too many levels in blp-profiler'
      1                     ,nlevels,max_levels
                   nlevels = max_levels
               endif
@@ -506,25 +506,25 @@ C
                 if(iqc_flag.eq.good)then
                         j = 1
                         iqc = 1
-                        c4_qc = 'Good'
+                        c4_qc = 'good'
                 else if(iqc_flag.eq.bad)then
                         j = 2
                         iqc = 0
-                        c4_qc = 'Bad'
+                        c4_qc = 'bad'
                 else if(iqc_flag.eq.missing)then
                         j = 3
                         iqc = 0
-                        c4_qc = 'Msg'
+                        c4_qc = 'msg'
                 else
                         iqc = 0
-                        c4_qc = 'QCd'
+                        c4_qc = 'qcd'
                 endif
 
                 height_msl = level(im,i) + elev
 
                 mode_flag = 1
 
-!               Use mode 1 (100 m) only if it's above the highest good level 
+!               use mode 1 (100 m) only if it's above the highest good level 
 !               from mode 2
                 if(n_good_levels .ge. 1 .and. im .eq. 1)then
                     if(height_msl .le. ht_out(n_good_levels))then
@@ -556,27 +556,27 @@ C
 
             write(6,*)
 
-            i4time_ob = i4_timeObs - lag_time ! i4time_sys - lag_time
+            i4time_ob = i4_timeobs - lag_time ! i4time_sys - lag_time
 
             call make_fnam_lp(i4time_ob,a9time_ob,istatus)
-C
-C           Open an output file.
-C
+c
+c           open an output file.
+c
             ext = 'pro'
 
             call s_len(ext,len_ext)
             call open_ext(lun_out,i4time_sys,ext(1:len_ext),istatus)
             if(istatus .ne. 1)then
-                write(6,*)' Error opening product file',ext(1:len_ext)
+                write(6,*)' error opening product file',ext(1:len_ext)
                 return
             else
                 write(6,*)' opened/reopened extension ',ext(1:len_ext)       
             endif
 
             write(*,401)wsmr_wmo_id,n_good_levels+n_good_sfc,rlat
-     1                 ,rlon,elev,prof_name(ista),a9time_ob,'PROFILER'
+     1                 ,rlon,elev,prof_name(ista),a9time_ob,'profiler'
             write(1,401)wsmr_wmo_id,n_good_levels+n_good_sfc,rlat
-     1                 ,rlon,elev,prof_name(ista),a9time_ob,'PROFILER'
+     1                 ,rlon,elev,prof_name(ista),a9time_ob,'profiler'
 401         format(i12,i12,f11.3,f15.3,f15.0,5x,a6,3x,a9,1x,a8)
 
             rms = 1.0
@@ -604,15 +604,15 @@ C
 
 900     enddo ! ista
 
-C       Close the netCDF file.  This isn't necessary, but here's a sample of
-C       the call.  A program could have up to 4 profiler netCDF files open at
-C       a time.  The CDFID's are what indicate which file is which.
-C
-        CALL PROF_CDF_CLOSE(cdfid,status)
+c       close the netcdf file.  this isn't necessary, but here's a sample of
+c       the call.  a program could have up to 4 profiler netcdf files open at
+c       a time.  the cdfid's are what indicate which file is which.
+c
+        call prof_cdf_close(cdfid,status)
         if(status.ne.0)then
-                write(6,*)' Warning: bad close ',status
+                write(6,*)' warning: bad close ',status
         endif
-C
+c
         return
         end
 

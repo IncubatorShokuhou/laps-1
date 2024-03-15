@@ -1,27 +1,27 @@
 cdis
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -30,481 +30,481 @@ cdis
 cdis
 cdis
 cdis
-C       PROF_CDF_CLOSE.FOR              Michael Barth           11-Aug-1993
-C
-C       This subroutine is used to close a netCDF file of profiler data.
-C
-C INPUT:
-C
-C       CDFID           INTEGER:  The netCDF id of the file to be closed.  It
-C                       must previously have been opened by PROF_CDF_OPEN.
-C
-C       STATUS          INTEGER:  Returned status:  0 is good, -1 and +n are
-C                       errors returned by netCDF.  The definitions of these can
-C                       be found in NETCDF.INC.  In addition, these error
-C                       returns are from PROF_CDF_CLOSE:
-C
-C                       -5      NetCDF file not open.
-C
-C
-C Modifications:
-C       28-Nov-1995/LAB Put prof_cdf_common in it's own include file.
-C       07-Aug-2000/LSW modified to netCDF version 3.4
+c       prof_cdf_close.for              michael barth           11-aug-1993
+c
+c       this subroutine is used to close a netcdf file of profiler data.
+c
+c input:
+c
+c       cdfid           integer:  the netcdf id of the file to be closed.  it
+c                       must previously have been opened by prof_cdf_open.
+c
+c       status          integer:  returned status:  0 is good, -1 and +n are
+c                       errors returned by netcdf.  the definitions of these can
+c                       be found in netcdf.inc.  in addition, these error
+c                       returns are from prof_cdf_close:
+c
+c                       -5      netcdf file not open.
+c
+c
+c modifications:
+c       28-nov-1995/lab put prof_cdf_common in it's own include file.
+c       07-aug-2000/lsw modified to netcdf version 3.4
 
-C
-        subroutine PROF_CDF_CLOSE(cdfid,status)
-C
+c
+        subroutine prof_cdf_close(cdfid,status)
+c
         implicit none
-C
+c
         integer cdfid,status
-C
-C       Internal PROF_CDF information:
-C
-C       OPEN_LIST       Logical flags indicating which of the four file slots
-C                       are in use.
-C
-C       CDFID_LIST      NetCDF id's for the close files.
-C
-C       STANAM_LIST     Station names for the records in the close files.
-C
-C       WMOID_LIST      WMO id's for the records in the close files.
-C
-C       NREC_LIST       Number of records (stations) in each close file.
-C
-C       ERROR_FLAG      Error handling flag.
-C
+c
+c       internal prof_cdf information:
+c
+c       open_list       logical flags indicating which of the four file slots
+c                       are in use.
+c
+c       cdfid_list      netcdf id's for the close files.
+c
+c       stanam_list     station names for the records in the close files.
+c
+c       wmoid_list      wmo id's for the records in the close files.
+c
+c       nrec_list       number of records (stations) in each close file.
+c
+c       error_flag      error handling flag.
+c
         integer max_profilers
         parameter (max_profilers = 200)
-C
+c
         include 'prof_cdf_common.inc'
         include 'netcdf.inc'
-C
+c
         integer i
-C
+c
         do i = 1, 4
-C
-C       Find the user's CDFID in our internal list.
-C
+c
+c       find the user's cdfid in our internal list.
+c
            if(cdfid_list(i).eq.cdfid.and.open_list(i))then
-C
-                status = NF_CLOSE(cdfid_list(i))
-C
-                open_list(i) = .false.                  ! Indicate internally.
+c
+                status = nf_close(cdfid_list(i))
+c
+                open_list(i) = .false.                  ! indicate internally.
                 go to 900
            endif
         enddo
-C
-        status = -5                                     ! File not found.
-C
-C       Use the non-default error handling for PROF_CDF errors.
-C
+c
+        status = -5                                     ! file not found.
+c
+c       use the non-default error handling for prof_cdf errors.
+c
         if(error_flag.ne.0)then
-                write(*,*)'PROF_CDF_CLOSE:  NetCDF file not open.'
+                write(*,*)'prof_cdf_close:  netcdf file not open.'
                 if(error_flag.eq.2)stop
         endif
-C
+c
 900     return
         end
 
-C   PROF_CDF_OPEN.FOR           Michael Barth           11-Aug-1993
-C
-C       This subroutine is used to open a netCDF file holding profiler data.
-C       It will also read in the station names and WMO ID's for later use when 
-C       read routines attempt to locate data.
-C
-C       A user of the PROF_CDF routines is allowed to have up to 4 open
-C       netCDF files at a time.
-C
-C INPUT:
-C
-C       FILE            Character string giving the name (including any path
-C                       information) of the netCDF file to be opened.
-C
-C OUTPUT:
-C
-C       CDFID           INTEGER:  The netCDF id for the open file.
-C
-C       STATUS          INTEGER:  Returned status:  0 is good, -1 and +n are
-C                       errors returned by netCDF.  The definitions of these can
-C                       be found in NETCDF.INC.  In addition, these error
-C                       returns are from PROF_CDF_OPEN:
-C
-C                       -2      Attempt to open more than 4 files.
-C
-C MODIFICATIONS:
-C
-C       28-Nov-1995/LAB Put prof_cdf_common in it's own include file.
-C
-C       07-Mar-1996/MFB Added the use of RECDIM_LIST to determine if a
-C                       one-dimensional variable's dimension is the record
-C                       dimension or not -- the hyperslab COUNT
-C                       depends on this distinction. ***** Note that the
-C                       RECDIM_LIST calculation is currently set to
-C                       compensate for a bug in the old VMS netCDF library
-C                       in use.  See below where RECDIM_LIST is calculated
-C                       when porting this routine to Unix (or in changing
-C                       netCDF library versions).
-C
-C       21-Mar-1996/MFB Finally went out and got the latest version of
-C                       netCDF (2.4.1) and installed on my cluster.  This
-C                       eliminated the need to compensate for the netCDF
-C                       bug described in the 3/7/96 modification note.
-C                       Also removed declarations that duplicate those in new
-C                       netcdf.inc.
-C
-C       01-May-1996/MFB Went back to the old version of the netCDF library
-C                       due to performance problems with the new one.  Thus
-C                       the bug in NCINQ mentioned in the 3/7/96 mod note
-C                       again has to be accommodated.  See the code below
-C                       for more explanation.
-C
-C       26-Feb-1997/MFB Fixed a bug that was exposed if an existing file
-C                       is opened, but it has no records in it.  This should
-C                       be legal, and now that I've tried it and found the
-C                       bug, it is legal...
-C
-C       28-Feb-1997/LAB Removed a forgotten write statement
-C
-C       17-Mar-1997/MFB Removed the RECDIM fix for VMS's old netCDF library.
-C                       This should fix problems currently encountered with
-C                       single dimensional variables.
-C
-C       16-Apr-1997/MFB Removed duplicate definitions of netCDF functions
-C                       that are contained in netcdf.inc.
-C
-C       27-May-1997/MFB Renamed "ncopts" common and variable so it doesn't
-C                       conflict with symbols used in C netCDF interface.
-C
-C       07-Aug-2000/LSW modified to netCDF version 3.4
-C
-        subroutine PROF_CDF_OPEN(file,cdfid,status)
-C
+c   prof_cdf_open.for           michael barth           11-aug-1993
+c
+c       this subroutine is used to open a netcdf file holding profiler data.
+c       it will also read in the station names and wmo id's for later use when 
+c       read routines attempt to locate data.
+c
+c       a user of the prof_cdf routines is allowed to have up to 4 open
+c       netcdf files at a time.
+c
+c input:
+c
+c       file            character string giving the name (including any path
+c                       information) of the netcdf file to be opened.
+c
+c output:
+c
+c       cdfid           integer:  the netcdf id for the open file.
+c
+c       status          integer:  returned status:  0 is good, -1 and +n are
+c                       errors returned by netcdf.  the definitions of these can
+c                       be found in netcdf.inc.  in addition, these error
+c                       returns are from prof_cdf_open:
+c
+c                       -2      attempt to open more than 4 files.
+c
+c modifications:
+c
+c       28-nov-1995/lab put prof_cdf_common in it's own include file.
+c
+c       07-mar-1996/mfb added the use of recdim_list to determine if a
+c                       one-dimensional variable's dimension is the record
+c                       dimension or not -- the hyperslab count
+c                       depends on this distinction. ***** note that the
+c                       recdim_list calculation is currently set to
+c                       compensate for a bug in the old vms netcdf library
+c                       in use.  see below where recdim_list is calculated
+c                       when porting this routine to unix (or in changing
+c                       netcdf library versions).
+c
+c       21-mar-1996/mfb finally went out and got the latest version of
+c                       netcdf (2.4.1) and installed on my cluster.  this
+c                       eliminated the need to compensate for the netcdf
+c                       bug described in the 3/7/96 modification note.
+c                       also removed declarations that duplicate those in new
+c                       netcdf.inc.
+c
+c       01-may-1996/mfb went back to the old version of the netcdf library
+c                       due to performance problems with the new one.  thus
+c                       the bug in ncinq mentioned in the 3/7/96 mod note
+c                       again has to be accommodated.  see the code below
+c                       for more explanation.
+c
+c       26-feb-1997/mfb fixed a bug that was exposed if an existing file
+c                       is opened, but it has no records in it.  this should
+c                       be legal, and now that i've tried it and found the
+c                       bug, it is legal...
+c
+c       28-feb-1997/lab removed a forgotten write statement
+c
+c       17-mar-1997/mfb removed the recdim fix for vms's old netcdf library.
+c                       this should fix problems currently encountered with
+c                       single dimensional variables.
+c
+c       16-apr-1997/mfb removed duplicate definitions of netcdf functions
+c                       that are contained in netcdf.inc.
+c
+c       27-may-1997/mfb renamed "ncopts" common and variable so it doesn't
+c                       conflict with symbols used in c netcdf interface.
+c
+c       07-aug-2000/lsw modified to netcdf version 3.4
+c
+        subroutine prof_cdf_open(file,cdfid,status)
+c
         implicit none
-C
+c
         character*(*) file
         integer cdfid,status
-C
-C       Internal PROF_CDF information:
-C
-C       OPEN_LIST       Logical flags indicating which of the four file slots
-C                       are in use.
-C
-C       CDFID_LIST      NetCDF id's for the open files.
-C
-C       STANAME_LIST    Station names for the records in the open files.
-C
-C       WMOID_LIST      WMO id's for the records in the open files.
-C
-C       NREC_LIST       Number of records (stations) in each open file.
-C
-C       RECDIM_LIST     Record dimension ID's for each file.
-C
-C       ERROR_FLAG      Error handling flag.
-C
+c
+c       internal prof_cdf information:
+c
+c       open_list       logical flags indicating which of the four file slots
+c                       are in use.
+c
+c       cdfid_list      netcdf id's for the open files.
+c
+c       staname_list    station names for the records in the open files.
+c
+c       wmoid_list      wmo id's for the records in the open files.
+c
+c       nrec_list       number of records (stations) in each open file.
+c
+c       recdim_list     record dimension id's for each file.
+c
+c       error_flag      error handling flag.
+c
         integer max_profilers
         parameter (max_profilers = 200)
-C
+c
         include 'prof_cdf_common.inc'
         include 'netcdf.inc'
-        character*128 dimname                   ! Must match NETCDF.INC's
-C                                               ! MAXNCNAM parameter.
+        character*128 dimname                   ! must match netcdf.inc's
+c                                               ! maxncnam parameter.
         integer ncopts_val
-        common/ncopts_cmn/ncopts_val            ! NetCDF error handling flag.
-C
+        common/ncopts_cmn/ncopts_val            ! netcdf error handling flag.
+c
         integer i,j,varid,start(2),count(2)
         integer ndims,nvars,ngatts,recdim
 
         logical l_exist
 
-        write(6,*)' Subroutine PROF_CDF_OPEN'
+        write(6,*)' subroutine prof_cdf_open'
 
         inquire(file=file,exist=l_exist)
         if(.not. l_exist)then
-            write(6,*)' Warning in PROF_CDF_OPEN, file does not exist: '
+            write(6,*)' warning in prof_cdf_open, file does not exist: '
      1               ,file 
             status=-7
             return
         endif ! l_exist
-C
-C       Unless non-default error handling has been set by a call to
-C       PROF_CDF_SET_ERROR set the default error handling.
-C
-C
+c
+c       unless non-default error handling has been set by a call to
+c       prof_cdf_set_error set the default error handling.
+c
+c
         do i = 1, 4
-C
-C       Find an open slot.
-C
+c
+c       find an open slot.
+c
            if(.not.open_list(i))then
-C
-C       Open the file.
-C
-              status = NF_OPEN(file,NF_NOWRITE,cdfid)
-              if(status.eq.NF_NOERR)then
-C
-C       Clear out the data structures for this slot.
-C
+c
+c       open the file.
+c
+              status = nf_open(file,nf_nowrite,cdfid)
+              if(status.eq.nf_noerr)then
+c
+c       clear out the data structures for this slot.
+c
                  do j = 1, max_profilers
                     staname_list(j,i) = '      '
                     wmoid_list(j,i) = 0
                  enddo
                  nrec_list(i) = 0
-C
-C       Get the number of records (stations) in the file.
-C
-                 status = NF_INQ_DIMID(cdfid, 'recNum',varid)
-                 if (status.eq.NF_NOERR)then
-                   status = NF_INQ_DIMLEN(cdfid,varid,nrec_list(i))
+c
+c       get the number of records (stations) in the file.
+c
+                 status = nf_inq_dimid(cdfid, 'recnum',varid)
+                 if (status.eq.nf_noerr)then
+                   status = nf_inq_dimlen(cdfid,varid,nrec_list(i))
 
                  
                    if(nrec_list(i) .gt. max_profilers)then
-                     write(6,*)' Too many profilers in PROF_CDF_OPEN '       
+                     write(6,*)' too many profilers in prof_cdf_open '       
      1                        ,nrec_list(i),max_profilers
                      status=-7
                      return
                    endif
                  endif
 
-                 if(status.eq.NF_NOERR.and.nrec_list(i).gt.0)then
-C
-C       Get the station names.  (Have to do this in a loop as I can't get
-C       NCVGTC to work on one call for the whole enchilada.)
-C
-                    status = NF_INQ_VARID(cdfid,'staName',varid)
+                 if(status.eq.nf_noerr.and.nrec_list(i).gt.0)then
+c
+c       get the station names.  (have to do this in a loop as i can't get
+c       ncvgtc to work on one call for the whole enchilada.)
+c
+                    status = nf_inq_varid(cdfid,'staname',varid)
 
                     start(1) = 1
                     count(1) = 6 ! 6 characters
                     count(2) = 1 ! 1 record at a time
                     do j = 1, nrec_list(i)
                        start(2) = j
-                       status = NF_GET_VARA_TEXT(cdfid,varid,start,
+                       status = nf_get_vara_text(cdfid,varid,start,
      $                                           count,
      $                                           staname_list(j,i))
                     enddo
                     if(status.eq.0)then
-C
-C       Get the WMO id's.
-C
-                       start(1) = 1 ! Start at the beginning
+c
+c       get the wmo id's.
+c
+                       start(1) = 1 ! start at the beginning
                        start(2) = 1
                        count(1) = nrec_list(i) ! and get all records.
-                       status = NF_INQ_VARID(cdfid,'wmoStaNum',varid)
-                       status = NF_GET_VARA_INT(cdfid,varid,start,count,
+                       status = nf_inq_varid(cdfid,'wmostanum',varid)
+                       status = nf_get_vara_int(cdfid,varid,start,count,
      $                                          wmoid_list(1,i))
-                       if(status.ne.NF_NOERR)go to 900
+                       if(status.ne.nf_noerr)go to 900
                     endif
                  endif
-C
-C       Get the dimension id of the record dimension into the list where it
-C       can be used by PROF_CDF_READ.  Note the +1 --> in the old netCDF
-C       bug-riddled library NCINQ returns 0-(NDIMS-1) but the FORTRAN interface
-C       requires 1-NDIM.  Note that in the current version of the netCDF
-C       library (4/96) this bug has been fixed, but other problems exist.  Thus
-C       we're sticking with the old version until porting this to Unix.
-C
-C       3/17/97: Have ported to Unix, and have removed the +1.  If this rears
-C       it's head again the OLD code was: recdim_list(i) = recdim + 1
-C
-                status = NF_INQ(cdfid,ndims,nvars,ngatts,recdim)
-                if(status.eq.NF_NOERR)recdim_list(i) = recdim
-C
+c
+c       get the dimension id of the record dimension into the list where it
+c       can be used by prof_cdf_read.  note the +1 --> in the old netcdf
+c       bug-riddled library ncinq returns 0-(ndims-1) but the fortran interface
+c       requires 1-ndim.  note that in the current version of the netcdf
+c       library (4/96) this bug has been fixed, but other problems exist.  thus
+c       we're sticking with the old version until porting this to unix.
+c
+c       3/17/97: have ported to unix, and have removed the +1.  if this rears
+c       it's head again the old code was: recdim_list(i) = recdim + 1
+c
+                status = nf_inq(cdfid,ndims,nvars,ngatts,recdim)
+                if(status.eq.nf_noerr)recdim_list(i) = recdim
+c
               endif
-              go to 900                 ! Done processing with the open slot.
+              go to 900                 ! done processing with the open slot.
            endif
         enddo
-C
-        status = -2                     ! No open slots.
-C
+c
+        status = -2                     ! no open slots.
+c
 900     if(status.eq.0)then
-C
+c
            open_list(i) = .true.
            cdfid_list(i) = cdfid
-C
+c
         else
-C
+c
            cdfid = 0
-C
+c
            if(error_flag.gt.0.and.status.eq.-2)then
-C
-              write(*,*)'PROF_CDF_OPEN:  Attempt to open more than 4'
+c
+              write(*,*)'prof_cdf_open:  attempt to open more than 4'
      $                  //' files.'
-C
+c
            endif
-C
+c
  
            if(error_flag.eq.2)stop
  
-C
+c
         endif
-C
+c
         return
         end
-C       PROF_CDF_READ.FOR               Michael Barth           11-Aug-1993
-C
-C       This subroutine is used to read all of one variable for one station
-C       from a netCDF file holding profiler data.
-C
-C       The user must have previously opened the file via PROF_CDF_OPEN.
-C
-C INPUT:
-C
-C       CDFID           INTEGER:  The netCDF id for the file.
-C
-C       STANAME         CHARACTER*6:  The name of the station (e.g., 'PLTC2 ' --
-C                       note the trailing blank).  This is the primary way the
-C                       user can request a station.  If this is all blanks,
-C                       the second method, WMOID, will be used.
-C
-C                       ***** Note that the station name must be all capital
-C                       letters (and a number).
-C
-C       WMOID           INTEGER:  The WMO block and station number (e.g.,
-C                       74533).  This is the alternative method of selecting
-C                       the station.
-C
-C                       ***** Note that if STANAME is not all blank, WMOID
-C                       will be ignored.
-C
-C       VARNAME         CHARACTER*(*):  A character string giving the name of
-C                       the desired variable (use the names in the netCDL
-C                       file describing the dataset in use).  This is
-C                       case-sensitive so the exact string must be used.
-C
-C       DTYPE           INTEGER:  0 - The variable is numeric data.
-C                                   1 - The variable is character data.
-C
-C OUTPUT:
-C
-C       ARRAY           Array of data returned to the caller.  The data type
-C                       and dimensions are not used in this routine, or
-C                       validated.  The caller must use the appropriate type
-C                       (see the netCDL file) and know the expected amount
-C                       of data.
-C
-C       STATUS          INTEGER:  Returned status:  0 is good, -1 and +n
-C                       are errors returned by netCDF.  The definitions of
-C                       these can be found in NETCDF.INC.  In addition, these
-C                       error returns are from PROF_CDF_READ:
-C
-C                       -3      Station not found.
-C                       -4      Invalid DTYPE.
-C                       -5      NetCDF file not open.
-C                       -9      Too many dimensions in variable (16 maximum).
-C
-C MODIFICATIONS:
-C
-C       15-Sep-1994/MFB Fixed a really stupid oversight:  the routine didn't
-C                       work with 2-dimensional arrays for a single record
-C                       (e.g., moments - rec_num, level, beam).  Part of this
-C                       fix was to remove the NARRAY argument into this
-C                       routine.  That was the size of the expected array.
-C                       As the fix included the need to determine that on a
-C                       dimension-by-dimension basis, NARRAY became redundant.
-C
-C       11-Sep-1995/MFB Change the dimensions of START & COUNT to use maximum
-C                       number of allowable netCDF dimensions.  Also changed
-C                       how character data are read to fix a bug revealed by
-C                       the new BLP CDL.
-C
-C       28-Nov-1995/LAB Put prof_cdf_common in it's own include file.
-C
-C       29-Feb-1996/MFB Changed declaration of ARRAY from BYTE to INTEGER to
-C                       make the code more portable.
-C
-C       05-Mar-1996/MFB Limited the check of STANAME to the first five
-C                       characters.  This was done to make the code compatible
-C                       with all known profiler-based data formats in FSL.
-C                       (Some have a blank in the 6th character, some have a
-C                       zero.)
-C
-C       07-Mar-1996/MFB Added the use of RECDIM_LIST to determine if a
-C                       one-dimensional variable's dimension is the record
-C                       dimension or not -- the hyperslab COUNT
-C                       depends on this distinction.
-C
-C       21-Mar-1996/MFB Removed declarations that duplicate those in new
-C                       netcdf.inc.
-C
-C       07-Aug-2000/LSW modified to netCDF version 3.4
-C
-        subroutine PROF_CDF_READ(cdfid,staname,wmoid,varname,dtype,
+c       prof_cdf_read.for               michael barth           11-aug-1993
+c
+c       this subroutine is used to read all of one variable for one station
+c       from a netcdf file holding profiler data.
+c
+c       the user must have previously opened the file via prof_cdf_open.
+c
+c input:
+c
+c       cdfid           integer:  the netcdf id for the file.
+c
+c       staname         character*6:  the name of the station (e.g., 'pltc2 ' --
+c                       note the trailing blank).  this is the primary way the
+c                       user can request a station.  if this is all blanks,
+c                       the second method, wmoid, will be used.
+c
+c                       ***** note that the station name must be all capital
+c                       letters (and a number).
+c
+c       wmoid           integer:  the wmo block and station number (e.g.,
+c                       74533).  this is the alternative method of selecting
+c                       the station.
+c
+c                       ***** note that if staname is not all blank, wmoid
+c                       will be ignored.
+c
+c       varname         character*(*):  a character string giving the name of
+c                       the desired variable (use the names in the netcdl
+c                       file describing the dataset in use).  this is
+c                       case-sensitive so the exact string must be used.
+c
+c       dtype           integer:  0 - the variable is numeric data.
+c                                   1 - the variable is character data.
+c
+c output:
+c
+c       array           array of data returned to the caller.  the data type
+c                       and dimensions are not used in this routine, or
+c                       validated.  the caller must use the appropriate type
+c                       (see the netcdl file) and know the expected amount
+c                       of data.
+c
+c       status          integer:  returned status:  0 is good, -1 and +n
+c                       are errors returned by netcdf.  the definitions of
+c                       these can be found in netcdf.inc.  in addition, these
+c                       error returns are from prof_cdf_read:
+c
+c                       -3      station not found.
+c                       -4      invalid dtype.
+c                       -5      netcdf file not open.
+c                       -9      too many dimensions in variable (16 maximum).
+c
+c modifications:
+c
+c       15-sep-1994/mfb fixed a really stupid oversight:  the routine didn't
+c                       work with 2-dimensional arrays for a single record
+c                       (e.g., moments - rec_num, level, beam).  part of this
+c                       fix was to remove the narray argument into this
+c                       routine.  that was the size of the expected array.
+c                       as the fix included the need to determine that on a
+c                       dimension-by-dimension basis, narray became redundant.
+c
+c       11-sep-1995/mfb change the dimensions of start & count to use maximum
+c                       number of allowable netcdf dimensions.  also changed
+c                       how character data are read to fix a bug revealed by
+c                       the new blp cdl.
+c
+c       28-nov-1995/lab put prof_cdf_common in it's own include file.
+c
+c       29-feb-1996/mfb changed declaration of array from byte to integer to
+c                       make the code more portable.
+c
+c       05-mar-1996/mfb limited the check of staname to the first five
+c                       characters.  this was done to make the code compatible
+c                       with all known profiler-based data formats in fsl.
+c                       (some have a blank in the 6th character, some have a
+c                       zero.)
+c
+c       07-mar-1996/mfb added the use of recdim_list to determine if a
+c                       one-dimensional variable's dimension is the record
+c                       dimension or not -- the hyperslab count
+c                       depends on this distinction.
+c
+c       21-mar-1996/mfb removed declarations that duplicate those in new
+c                       netcdf.inc.
+c
+c       07-aug-2000/lsw modified to netcdf version 3.4
+c
+        subroutine prof_cdf_read(cdfid,staname,wmoid,varname,dtype,
      $                           array,status)
-C
+c
         implicit none
-C
+c
         integer cdfid,wmoid,dtype,status
         character*6 staname
         character*(*) varname
         integer array(*)
-C
-C       Internal PROF_CDF information:
-C
-C       OPEN_LIST       Logical flags indicating which of the four file slots
-C                       are in use.
-C
-C       CDFID_LIST      NetCDF id's for the read files.
-C
-C       STANAME_LIST    Station names for the records in the read files.
-C
-C       WMOID_LIST      WMO id's for the records in the read files.
-C
-C       NREC_LIST       Number of records (stations) in each read file.
-C
-C       RECDIM_LIST     Record dimension ID's for each file.
-C
-C       ERROR_FLAG      Error handling flag.
-C
+c
+c       internal prof_cdf information:
+c
+c       open_list       logical flags indicating which of the four file slots
+c                       are in use.
+c
+c       cdfid_list      netcdf id's for the read files.
+c
+c       staname_list    station names for the records in the read files.
+c
+c       wmoid_list      wmo id's for the records in the read files.
+c
+c       nrec_list       number of records (stations) in each read file.
+c
+c       recdim_list     record dimension id's for each file.
+c
+c       error_flag      error handling flag.
+c
         integer max_profilers
         parameter (max_profilers = 200)
  
         include 'prof_cdf_common.inc'
         include 'netcdf.inc'
-C
+c
         character*21 error_text(3)
-        data error_text/'Station not found.   ',
-     $                  'Invalid DTYPE.       ',
-     $                  'NetCDF file not open.'/
+        data error_text/'station not found.   ',
+     $                  'invalid dtype.       ',
+     $                  'netcdf file not open.'/
         character*(maxncnam) name
         integer vartyp,nvdims,vdims(maxvdims),nvatts,dimsiz
         integer i,j,k,varid,start(maxvdims),count(maxvdims)
         integer count_total
         character*5 c5_1,c5_2
-C
+c
         do i = 1, 4
-C
-C       Find the user's CDFID in our internal list.
-C
+c
+c       find the user's cdfid in our internal list.
+c
            if(cdfid_list(i).eq.cdfid.and.open_list(i))then
-C
-C       Locate the station.
-C
+c
+c       locate the station.
+c
               do j = 1, nrec_list(i)
-C
+c
                  c5_1 = staname_list(j,i)(1:5)
                  c5_2 = staname(1:5)
-C
+c
                  if((staname.ne.'      '.and.c5_1.eq.c5_2).or.
      $              (staname.eq.'      '.and.
      $               wmoid_list(j,i).eq.wmoid))then
-C
-C       Get the variable id.
-C
-                    status = NF_INQ_VARID(cdfid,varname,varid)
-                    if(status.ne.NF_NOERR)go to 900
-C
-C       Find out how many dimensions are in the variable.
-C
-                    status = NF_INQ_VAR(cdfid,varid,name,vartyp,
+c
+c       get the variable id.
+c
+                    status = nf_inq_varid(cdfid,varname,varid)
+                    if(status.ne.nf_noerr)go to 900
+c
+c       find out how many dimensions are in the variable.
+c
+                    status = nf_inq_var(cdfid,varid,name,vartyp,
      $                                  nvdims,vdims,nvatts)
-                    if(status.ne.NF_NOERR)go to 900
-C
-C       Use this information to, one dimension at a time, fill in the
-C       dimensions of the hyperslab to be obtained.
-C
-                    count_total = 1     ! Must calculate product of COUNT
-C                                       ! vector for character data type.
+                    if(status.ne.nf_noerr)go to 900
+c
+c       use this information to, one dimension at a time, fill in the
+c       dimensions of the hyperslab to be obtained.
+c
+                    count_total = 1     ! must calculate product of count
+c                                       ! vector for character data type.
                     do k = 1, nvdims
-                       status = NF_INQ_DIM(cdfid,vdims(k),name,dimsiz)
-                       if(status.ne.NF_NOERR)go to 900
+                       status = nf_inq_dim(cdfid,vdims(k),name,dimsiz)
+                       if(status.ne.nf_noerr)go to 900
                        if(k.lt.nvdims.or.
      $                    (nvdims.eq.1.and.vdims(k).ne.
      $                     recdim_list(i)))then
@@ -512,251 +512,251 @@ C                                       ! vector for character data type.
                                 count(k) = dimsiz
                                 count_total = count_total * dimsiz
                        else
-                                start(k) = j    ! REC_NUM dimension
+                                start(k) = j    ! rec_num dimension
                                 count(k) = 1
                        endif
                     enddo
-C
-C       Call the appropriate routine to get the variable.
-C
+c
+c       call the appropriate routine to get the variable.
+c
                     if(dtype.eq.0)then  !reading an integer
-C
-                      status = NF_GET_VARA_INT(cdfid,varid,start,count,
+c
+                      status = nf_get_vara_int(cdfid,varid,start,count,
      $                                         array)
-C
+c
                     else if(dtype.eq.1)then   !reading text
-C
-                      status = NF_GET_VARA_TEXT(cdfid,varid,start,count,
+c
+                      status = nf_get_vara_text(cdfid,varid,start,count,
      $                                          array)
-C
+c
                     else if(dtype.eq.2)then   !reading real/float
-C
-                      status = NF_GET_VARA_REAL(cdfid,varid,start,count,
+c
+                      status = nf_get_vara_real(cdfid,varid,start,count,
      $                                          array)
                     else
-C
-                             status = -4                ! Invalid DTYPE.
-C
+c
+                             status = -4                ! invalid dtype.
+c
                     endif
-                    if (status.ne.NF_NOERR) print *, NF_STRERROR(status)
-C
-                    go to 900                   ! End of found station.
-C
+                    if (status.ne.nf_noerr) print *, nf_strerror(status)
+c
+                    go to 900                   ! end of found station.
+c
                  endif
               enddo
-C
-              status = -3                       ! Station not found.
+c
+              status = -3                       ! station not found.
               go to 900
-C
-           endif                                ! End of found open file.
-C
+c
+           endif                                ! end of found open file.
+c
         enddo
-C
-        status = -5                             ! File not found.
-C
+c
+        status = -5                             ! file not found.
+c
 900     if(status.lt.-1.and.error_flag.ne.0)then
-C
-C       Use the non-default error handling for PROF_CDF errors.
-C
+c
+c       use the non-default error handling for prof_cdf errors.
+c
            
-                write(*,*)'PROF_CDF_READ:  '//
+                write(*,*)'prof_cdf_read:  '//
      $                    error_text(abs(status)-2)
                 if(error_flag.eq.2)stop
         endif
-C
+c
         return
         end
-C       PROF_CDF_SET_ERROR.FOR          Michael Barth           12-Aug-1993
-C
-C       This subroutine is used to set error handling for PROF_CDF routines.
-C       The caller doesn't have to use this feature, if no call is made the
-C       default error handling will be performed.
-C
-C INPUT:
-C
-C       ERROR_CODE      0       Return status codes -- THIS IS THE DEFAULT.
-C                       1       Return status codes and write an error message
-C                               to standard output (SYS$OUTPUT on VMS).
-C                       2       Write an error message to standard output and
-C                               exit the program.
-C
-C OUTPUT:
-C
-C       STATUS          INTEGER:  Returned status:  0 is good, -1 and +n are
-C                       errors returned by netCDF.  The definitions of these can
-C                       be found in NETCDF.INC.  In addition, these error
-C                       returns are from PROF_CDF_SET_ERROR:
-C
-C                       -6      Invalid ERROR_CODE.
-C
-C MODIFICATIONS:
-C
-C       28-Nov-1995/LAB Put prof_cdf_common in it's own include file.
-C
-C       27-May-1997/MFB Renamed "ncopts" common and variable so it doesn't
-C                       conflict with symbols used in C netCDF interface.
-C
-C       07-Aug-2000/LSW modified to netCDF version 3.4 NCPOPT is no longer
-C                       supported, and as such is no longer called.  
-C
-        subroutine PROF_CDF_SET_ERROR(error_code,status)
-C
+c       prof_cdf_set_error.for          michael barth           12-aug-1993
+c
+c       this subroutine is used to set error handling for prof_cdf routines.
+c       the caller doesn't have to use this feature, if no call is made the
+c       default error handling will be performed.
+c
+c input:
+c
+c       error_code      0       return status codes -- this is the default.
+c                       1       return status codes and write an error message
+c                               to standard output (sys$output on vms).
+c                       2       write an error message to standard output and
+c                               exit the program.
+c
+c output:
+c
+c       status          integer:  returned status:  0 is good, -1 and +n are
+c                       errors returned by netcdf.  the definitions of these can
+c                       be found in netcdf.inc.  in addition, these error
+c                       returns are from prof_cdf_set_error:
+c
+c                       -6      invalid error_code.
+c
+c modifications:
+c
+c       28-nov-1995/lab put prof_cdf_common in it's own include file.
+c
+c       27-may-1997/mfb renamed "ncopts" common and variable so it doesn't
+c                       conflict with symbols used in c netcdf interface.
+c
+c       07-aug-2000/lsw modified to netcdf version 3.4 ncpopt is no longer
+c                       supported, and as such is no longer called.  
+c
+        subroutine prof_cdf_set_error(error_code,status)
+c
         implicit none
-C
+c
         integer error_code,status
-C
-C       Internal PROF_CDF information:
-C
-C       OPEN_LIST       Logical flags indicating which of the four file slots
-C                       are in use.
-C
-C       CDFID_LIST      NetCDF id's for the open files.
-C
-C       STANAM_LIST     Station names for the records in the open files.
-C
-C       WMOID_LIST      WMO id's for the records in the open files.
-C
-C       NREC_LIST       Number of records (stations) in each open file.
-C
-C       ERROR_FLAG      Error handling flag.
-C
+c
+c       internal prof_cdf information:
+c
+c       open_list       logical flags indicating which of the four file slots
+c                       are in use.
+c
+c       cdfid_list      netcdf id's for the open files.
+c
+c       stanam_list     station names for the records in the open files.
+c
+c       wmoid_list      wmo id's for the records in the open files.
+c
+c       nrec_list       number of records (stations) in each open file.
+c
+c       error_flag      error handling flag.
+c
         integer max_profilers
         parameter (max_profilers = 200)
-C
+c
         include 'prof_cdf_common.inc'
         include 'netcdf.inc'
-C
+c
         integer ncopts_val
-        common/ncopts_cmn/ncopts_val            ! NetCDF error handling flag.
-C
-C       Validate the ERROR_CODE and then save it in the PROF_CDF common.  Then
-C       set the netCDF version (NCOPTS_VAL) accordingly.
-C
-        status = 0                              ! Assume success.
-C
+        common/ncopts_cmn/ncopts_val            ! netcdf error handling flag.
+c
+c       validate the error_code and then save it in the prof_cdf common.  then
+c       set the netcdf version (ncopts_val) accordingly.
+c
+        status = 0                              ! assume success.
+c
         if(error_code.eq.0)then
-C
+c
                 error_flag = 0
  
-C
+c
         else if(error_code.eq.1)then
-C
+c
                 error_flag = 1
-C
+c
         else if(error_code.eq.2)then
-C
+c
                 error_flag = 2
         else
-                status = -6                     ! Invalid ERROR_CODE.
+                status = -6                     ! invalid error_code.
         endif
-C
+c
         return
         end
-C       PROF_CDF_GET_STATIONS.FOR       Michael Barth           19-Oct-1995
-C
-C       This subroutine is used to get a list of stations from a netCDF file
-C       holding profiler data.
-C
-C       The user must have previously opened the file via PROF_CDF_OPEN.
-C
-C INPUT:
-C
-C       CDFID           INTEGER:  The netCDF id for the file.
-C
-C OUTPUT:
-C
-C       N_STATIONS      Number of stations currently in the file.
-C
-C       STANAME         CHARACTER*6 array:  The names of the stations (e.g.,
-C                       'PLTC2 ').
-C
-C       WMOID           INTEGER array :  The WMO block and station numbers
-C                       (e.g., 74533).
-C
-C       STATUS          INTEGER:  Returned status:  0 is good.  No netCDF
-C                       calls are performed, so no errors are returned by
-C                       netCDF.  In addition, these error returns are from
-C                       PROF_CDF_GET_STATIONS:
-C
-C                       -5      NetCDF file not open.
-C
-C MODFICATIONS:
-C       28-Nov-1995/LAB Put prof_cdf_common in it's own include file.
-C
-C       07-Aug-2000/LSW modified to netCDF version 3.4
-C
-        subroutine PROF_CDF_GET_STATIONS(cdfid,n_stations,staname,
+c       prof_cdf_get_stations.for       michael barth           19-oct-1995
+c
+c       this subroutine is used to get a list of stations from a netcdf file
+c       holding profiler data.
+c
+c       the user must have previously opened the file via prof_cdf_open.
+c
+c input:
+c
+c       cdfid           integer:  the netcdf id for the file.
+c
+c output:
+c
+c       n_stations      number of stations currently in the file.
+c
+c       staname         character*6 array:  the names of the stations (e.g.,
+c                       'pltc2 ').
+c
+c       wmoid           integer array :  the wmo block and station numbers
+c                       (e.g., 74533).
+c
+c       status          integer:  returned status:  0 is good.  no netcdf
+c                       calls are performed, so no errors are returned by
+c                       netcdf.  in addition, these error returns are from
+c                       prof_cdf_get_stations:
+c
+c                       -5      netcdf file not open.
+c
+c modfications:
+c       28-nov-1995/lab put prof_cdf_common in it's own include file.
+c
+c       07-aug-2000/lsw modified to netcdf version 3.4
+c
+        subroutine prof_cdf_get_stations(cdfid,n_stations,staname,
      $                                   wmoid,status)
-C
+c
         implicit none
-C
+c
         integer cdfid,n_stations,wmoid(*),status
         character*6 staname(*)
-C
-C       Internal PROF_CDF information:
-C
-C       OPEN_LIST       Logical flags indicating which of the four file slots
-C                       are in use.
-C
-C       CDFID_LIST      NetCDF id's for the read files.
-C
-C       STANAM_LIST     Station names for the records in the read files.
-C
-C       WMOID_LIST      WMO id's for the records in the read files.
-C
-C       NREC_LIST       Number of records (stations) in each read file.
-C
-C       ERROR_FLAG      Error handling flag.
-C
+c
+c       internal prof_cdf information:
+c
+c       open_list       logical flags indicating which of the four file slots
+c                       are in use.
+c
+c       cdfid_list      netcdf id's for the read files.
+c
+c       stanam_list     station names for the records in the read files.
+c
+c       wmoid_list      wmo id's for the records in the read files.
+c
+c       nrec_list       number of records (stations) in each read file.
+c
+c       error_flag      error handling flag.
+c
         integer max_profilers
         parameter (max_profilers = 200)
  
         include 'prof_cdf_common.inc'
  
-C
+c
         character*21 error_text
-        data error_text/'NetCDF file not open.'/
+        data error_text/'netcdf file not open.'/
         integer i,j
-C
+c
         do i = 1, 4
-C
-C       Find the user's CDFID in our internal list.
-C
+c
+c       find the user's cdfid in our internal list.
+c
            if(cdfid_list(i).eq.cdfid.and.open_list(i))then
-C
+c
               status = 0
               n_stations = nrec_list(i)
               if(n_stations.ne.0)then
-C
+c
                  do j = 1, nrec_list(i)
                     staname(j) = staname_list(j,i)
                     wmoid(j) = wmoid_list(j,i)
                  enddo
-C
+c
               endif
-C
+c
               go to 900
-C
-           endif                                ! End of found open file.
-C
+c
+           endif                                ! end of found open file.
+c
         enddo
-C
-        status = -5                             ! File not found.
-C
+c
+        status = -5                             ! file not found.
+c
 900     if(status.ne.0.and.error_flag.ne.0)then
-C
-C       Use the non-default error handling for PROF_CDF errors.
-C
-                write(*,*)'PROF_CDF_GET_STATIONS:  '//error_text
+c
+c       use the non-default error handling for prof_cdf errors.
+c
+                write(*,*)'prof_cdf_get_stations:  '//error_text
                 if(error_flag.eq.2)stop
         endif
-C
+c
         return
         end
 
 
         subroutine prof_i4_avg_wdw(i4_avg_wdw_sec, cdfid, istatus)
-!  modified to pass in cdfid, and actually read file for data LW 8-27-98
+!  modified to pass in cdfid, and actually read file for data lw 8-27-98
 
         integer cdfid
 	character*20 timestr
@@ -766,49 +766,49 @@ C
 
         include 'netcdf.inc'
 
-C       netCDF file is opened, and accessed via cdfid
-C	read "avgTimePeriod" global attribute into timestr 
+c       netcdf file is opened, and accessed via cdfid
+c	read "avgtimeperiod" global attribute into timestr 
 
         lenstr = len(timestr)  
-        attname = 'avgTimePeriod'
+        attname = 'avgtimeperiod'
 
-C determine type of attribute 'avgTimePeriod'
-        istatus = NF_INQ_ATTTYPE(cdfid,NF_GLOBAL,'avgTimePeriod',ttype)
-        if (istatus .ne. NF_NOERR) then  !error retrieving info about avgTimePeriod
+c determine type of attribute 'avgtimeperiod'
+        istatus = nf_inq_atttype(cdfid,nf_global,'avgtimeperiod',ttype)
+        if (istatus .ne. nf_noerr) then  !error retrieving info about avgtimeperiod
           istatus = 0
           return
         endif
 
-        if (ttype .ne. NCCHAR) then   !read avgTimePeriod as an integer
+        if (ttype .ne. ncchar) then   !read avgtimeperiod as an integer
 
-          istatus = NF_GET_ATT_INT(cdfid,NF_GLOBAL,'avgTimePeriod',
+          istatus = nf_get_att_int(cdfid,nf_global,'avgtimeperiod',
      $                             itime)
-	  if (istatus .ne. NF_NOERR) then   !error retrieving avgTimePeriod from file
+	  if (istatus .ne. nf_noerr) then   !error retrieving avgtimeperiod from file
             istatus = 0
             return
           endif
 	  
-C  units assumed to be minutes
+c  units assumed to be minutes
 	  to_seconds = 60
 
         else  !looking for a character string
 
-C	  format of avgTimeString should be a number followed by a space and
-C           then a lower case string of units, ie. "60 minutes" or "6 minutes"
-C	    Verify that the units are minutes, seconds or hour, and convert
-C	    the number string into an integer.  Return value is via i4_avg_wdw_sec
-C  	    and is in seconds 
+c	  format of avgtimestring should be a number followed by a space and
+c           then a lower case string of units, ie. "60 minutes" or "6 minutes"
+c	    verify that the units are minutes, seconds or hour, and convert
+c	    the number string into an integer.  return value is via i4_avg_wdw_sec
+c  	    and is in seconds 
 
-          istatus = NF_GET_ATT_TEXT(cdfid,NF_GLOBAL,'avgTimePeriod',
+          istatus = nf_get_att_text(cdfid,nf_global,'avgtimeperiod',
      $                              timestr)
-	  if (istatus .ne. NF_NOERR) then   !error retrieving avgTimePeriod from file
+	  if (istatus .ne. nf_noerr) then   !error retrieving avgtimeperiod from file
             istatus = 0
             return
           endif
 
 	  sp_loc = index(timestr,' ')  !everything to the left should be number
 	
-C	  convert numerical string to number
+c	  convert numerical string to number
 101	  format(i1)
 102	  format(i2)
 103	  format(i3)
@@ -833,13 +833,13 @@ C	  convert numerical string to number
 
 	  if (itime .eq. -1) then   ! couldn't convert timestr to itime, return error
             write(6,*)
-     1       ' Error: couldnt convert avgTimePeriod string to integer: '  
+     1       ' error: couldnt convert avgtimeperiod string to integer: '  
      1       , timestr     
 	    istatus = 0
             return
 	  endif
 
-C	  determine units in timestr
+c	  determine units in timestr
           to_seconds = 0 !will check after looking for units to see if set
    	  units_loc = index(timestr,'minute')
           if (units_loc .gt. 0) to_seconds = 60
@@ -854,7 +854,7 @@ C	  determine units in timestr
 
 	if (to_seconds .eq. 0) then   ! couldn't identify units, return error
           write(6,*)
-     1      ' Error: couldnt decode avgTimePeriod from file ', timestr       
+     1      ' error: couldnt decode avgtimeperiod from file ', timestr       
 	  istatus = 0
           return
         else

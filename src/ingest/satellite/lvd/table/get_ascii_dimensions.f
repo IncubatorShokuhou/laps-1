@@ -1,31 +1,31 @@
       subroutine get_ascii_dimensions(cdatapath,
      &c_channel_type,nelems,nlines,istatus)
 c
-      Implicit None
+      implicit none
 
-      Integer     nlines,nelems
+      integer     nlines,nelems
 
-      Integer     i,j,k
-      Integer     iprev
-      Integer     n,nc
+      integer     i,j,k
+      integer     iprev
+      integer     n,nc
 
-      Real        itb
-      Real        img_lin
-      Real        img_lin_prev
-      Real        img_ele
+      real        itb
+      real        img_lin
+      real        img_lin_prev
+      real        img_ele
 
-      Integer     istatus
+      integer     istatus
 
-      Logical       eof
+      logical       eof
 
-      Real        xlat,xlon
+      real        xlat,xlon
 
-      Character     c_date*5
-      Character     c_time*4
-      Character     c_filetime*9
-      Character     c_filename*255
-      Character     c_channel_type*3
-      Character     cdatapath*(*)
+      character     c_date*5
+      character     c_time*4
+      character     c_filetime*9
+      character     c_filename*255
+      character     c_channel_type*3
+      character     cdatapath*(*)
 
       istatus=1
 c
@@ -73,15 +73,15 @@ c
 c
       goto 995
 
-900   write(6,*)'Error opening data file',c_filename
+900   write(6,*)'error opening data file',c_filename
       istatus=-1
       goto 1000
 
-901   write(6,*)'Error - initial read data file ',c_filename
+901   write(6,*)'error - initial read data file ',c_filename
       istatus=-1
       goto 1000
 
-995   write(6,*)'Finished. nelem/nlines: ',i,j
+995   write(6,*)'finished. nelem/nlines: ',i,j
       write(6,*)
 
       nelems=i

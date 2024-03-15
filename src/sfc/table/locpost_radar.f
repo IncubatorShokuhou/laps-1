@@ -13,11 +13,11 @@
         real lat(ni,nj),lon(ni,nj)
         real topo(ni,nj),ldf(ni,nj)
 
-        write(6,*)' Subroutine locpost_radar...'
+        write(6,*)' subroutine locpost_radar...'
 
         ie = 0
 
-!       Get actual grid spacing valid at the gridpoint nearest the center
+!       get actual grid spacing valid at the gridpoint nearest the center
         icen = ni/2 + 1
         jcen = nj/2 + 1
         call get_grid_spacing_actual_xy(lat(icen,jcen),lon(icen,jcen)       
@@ -25,7 +25,7 @@
      1                        ,grid_spacing_actual_my
      1                        ,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error return from get_grid_spacing_actual_xy'       
+            write(6,*)' error return from get_grid_spacing_actual_xy'       
             stop
         endif
 
@@ -34,19 +34,19 @@
 
         call get_directory('static',static_dir,len_dir)
 
-!       Open NexradSite.cfg for reading
-!       cfg_fname = static_dir(1:len_dir)//'/NexradSite.cfg'
-        cfg_fname = static_dir(1:len_dir)//'/NexradSite.sorted'
+!       open nexradsite.cfg for reading
+!       cfg_fname = static_dir(1:len_dir)//'/nexradsite.cfg'
+        cfg_fname = static_dir(1:len_dir)//'/nexradsite.sorted'
         call s_len(cfg_fname,len_fname)
         open(lun,file=cfg_fname(1:len_fname),status='old',err=998)
 
-!       Open radarlist.dat for output
+!       open radarlist.dat for output
         radars_fn = static_dir(1:len_dir)//'/radarlist.dat'
         call s_len(radars_fn,len_rname)
         open(lun_out,file=radars_fn(1:len_rname),status='unknown'
      1                                          ,err=998)
 
-!       Open widebandlist_radars.txt for output
+!       open widebandlist_radars.txt for output
         lun_wideband = 41
         out_fn = static_dir(1:len_dir)//'/widebandlist_radars.txt'
         call s_len(out_fn,len_name)
@@ -85,7 +85,7 @@
                         c7_chars = line(ic+1:ic+7)
                         read(c7_chars,13)id,im,is
  13			format(i3,i2,i2)
-                        rlon = -float(id) - float(im) / 60. ! Terms are all negative for west longitude
+                        rlon = -float(id) - float(im) / 60. ! terms are all negative for west longitude
      1                        - float(is)/3600.
                     endif
                 endif
@@ -118,7 +118,7 @@
             write(6,*)line
             write(6,*)c4_name,rlat,rlon,ri,rj,dist_outside_km
 
-!           Find nearest ocean to radar site
+!           find nearest ocean to radar site
             grid_dist_min = 9999.
             do ii = 1,ni
             do jj = 1,nj
@@ -137,13 +137,13 @@
      1                          ,nint(ri),nint(rj)
  21		format(1x,a4,f9.2,2x,f9.1,2i7)
 
-!               Write to string for widebandlist
+!               write to string for widebandlist
                 is = (icount-1) * 5 + 1
                 ie = is + 4
                 c_wideband(is:ie) = c4_name//' '
                 write(6,*)' c_wideband section: ',c_wideband(is:ie)
 
-!               Save string into array for later use
+!               save string into array for later use
                 c4_name_a(icount) = c4_name
 
             endif
@@ -152,28 +152,28 @@
 
         go to 999
 
- 998	write(6,*)' Error in locpost_radar'
+ 998	write(6,*)' error in locpost_radar'
         istatus = 0
 
  999	continue
 
         if(ie .eq. 0)goto 9999
 
-!       Open remap_radars.nl for output
+!       open remap_radars.nl for output
         lun_remap = 51
         out_fn = static_dir(1:len_dir)//'/remap_radars.nl'           
         call s_len(out_fn,len_name)
         open(lun_remap,file=out_fn(1:len_name),status='unknown'
      1                                        ,err=998)
 
-!       Write widebandlist to file
+!       write widebandlist to file
         write(6,*)                               
-        write(6,*)' Full wideband string...'
+        write(6,*)' full wideband string...'
         write(6,101)c_wideband(1:ie-1)
         write(lun_wideband,101)c_wideband(1:ie-1)
 101     format(a)
 
-!       Write to remap_radars.nl (n_radars_remap)    
+!       write to remap_radars.nl (n_radars_remap)    
         if(icount .le. 9)then
             write(lun_remap,102)icount
 102         format(' n_radars_remap=',i1,',')
@@ -185,7 +185,7 @@
 104         format(' n_radars_remap=',i3,',')
         endif
 
-!       Write to remap_radars.nl (upper case section)
+!       write to remap_radars.nl (upper case section)
         write(lun_remap,*)        
         write(lun_remap,*)'path_to_radar_uc_a='
         do i = 1,icount ! upper case section
@@ -194,7 +194,7 @@
             write(lun_remap,*)trim(c_remap)
         enddo ! i
 
-!       Write to remap_radars.nl (lower case section)
+!       write to remap_radars.nl (lower case section)
         write(lun_remap,*)
         write(lun_remap,*)'path_to_radar_lc_a='
         do i = 1,icount ! upper case section
@@ -203,7 +203,7 @@
             write(lun_remap,*)trim(c_remap)
         enddo ! i
 
-!       Write to remap_radars.nl (vxx section)
+!       write to remap_radars.nl (vxx section)
         write(lun_remap,*)
         write(lun_remap,*)'laps_radar_ext_a='
         do i = 1,icount ! upper case section

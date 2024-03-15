@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -29,79 +29,79 @@ cdis
 cdis
 cdis
 cdis
-        Subroutine RAzm_Lat_Lon_GM(r4_SLat,r4_SLon,r4_Range,
-     1          r4_Azimuth,r4_TLat,r4_TLon,Status)
+        subroutine razm_lat_lon_gm(r4_slat,r4_slon,r4_range,
+     1          r4_azimuth,r4_tlat,r4_tlon,status)
         include 'trigd.inc'
-C***Given a range and azimuth from some site, calculate the latitude and
-C   longitude. Range is considered to be a great circle arc length.
+c***given a range and azimuth from some site, calculate the latitude and
+c   longitude. range is considered to be a great circle arc length.
 
-C       J. Wakefield    25 Apr 86       Original version.
-C       S. Albers       8  May 90       Calculations done in Double Precision
-C                                       This prevents 'singularity' at 0 AZ.
-C       S. Albers      24  Aug 92       Change Status from .true. to 1
+c       j. wakefield    25 apr 86       original version.
+c       s. albers       8  may 90       calculations done in double precision
+c                                       this prevents 'singularity' at 0 az.
+c       s. albers      24  aug 92       change status from .true. to 1
 
-C Argument      I/O     Type                    Description
-C --------      ---     ----    -----------------------------------------------
-C SLat,SLon      I      R*4     Site location (deg).
-C Range          I      R*4     Target range in km from the site.
-C Azimuth        I      R*4     Target azimuth in degrees.
-C TLat,TLon      O      R*4     Location of target (deg).
-C Status         O      I*4     Standard system status.
+c argument      i/o     type                    description
+c --------      ---     ----    -----------------------------------------------
+c slat,slon      i      r*4     site location (deg).
+c range          i      r*4     target range in km from the site.
+c azimuth        i      r*4     target azimuth in degrees.
+c tlat,tlon      o      r*4     location of target (deg).
+c status         o      i*4     standard system status.
 
 
-!       Assumed earth radius is 6370000m
-        real*8          km_per_Deg
-        Parameter      (km_per_Deg=111.17747d0) ! km per degree of latitude
+!       assumed earth radius is 6370000m
+        real*8          km_per_deg
+        parameter      (km_per_deg=111.17747d0) ! km per degree of latitude
 
-C***Parameter list variables
-        Real          r4_SLat,r4_SLon,r4_Range,r4_Azimuth,r4_TLat,r4_T
-     1Lon
-        Real*8          SLat,SLon,Range,Azimuth,TLat,TLon
-        Integer       Status
+c***parameter list variables
+        real          r4_slat,r4_slon,r4_range,r4_azimuth,r4_tlat,r4_t
+     1lon
+        real*8          slat,slon,range,azimuth,tlat,tlon
+        integer       status
 
-C***Local variables
-        Real*8          Dist,CosDLon,DLon
+c***local variables
+        real*8          dist,cosdlon,dlon
 
-C***Library symbols
-!       EXTERNAL SS$_NORMAL, EDF__IVARG
-!       Logical*4       LTest_Diag_GG
+c***library symbols
+!       external ss$_normal, edf__ivarg
+!       logical*4       ltest_diag_gg
 
-C***Begin RAzm_Lat_Lon_GM ------------------------------------------------------
+c***begin razm_lat_lon_gm ------------------------------------------------------
 
-C***Check input arguments
-        If(Abs(r4_SLat).gt.90. .or. Abs(r4_SLon).gt.180. .or.
-     1   r4_Range.lt..0   .or.
-     1   r4_Azimuth.lt..0 .or. r4_Azimuth.gt.360.)Then
-         Status=0
-!        If(LTest_Diag_GG())Call Output_Diag_GG('RAzm_Lat_Lon_GM',Status)
-         Return
-        Else
-         Status=1
-        EndIf
+c***check input arguments
+        if(abs(r4_slat).gt.90. .or. abs(r4_slon).gt.180. .or.
+     1   r4_range.lt..0   .or.
+     1   r4_azimuth.lt..0 .or. r4_azimuth.gt.360.)then
+         status=0
+!        if(ltest_diag_gg())call output_diag_gg('razm_lat_lon_gm',status)
+         return
+        else
+         status=1
+        endif
 
         azimuth = r4_azimuth
         range = r4_range
         slat = r4_slat
         slon = r4_slon
 
-C***Do it.  Note that calculations are done in degrees.
-        Dist=Range/km_per_Deg
+c***do it.  note that calculations are done in degrees.
+        dist=range/km_per_deg
 
-        TLat=dASinD(dCosD(Azimuth)*dSinD(Dist)*dCosD(SLat) 
-     1           + dSinD(SLat)*dCosD(Dist))
+        tlat=dasind(dcosd(azimuth)*dsind(dist)*dcosd(slat) 
+     1           + dsind(slat)*dcosd(dist))
 
-        CosDLon=(dCosD(Dist) - dSinD(SLat)*dSinD(TLat)) 
-     1            / (dCosD(SLat)*dCosD(TLat))
-        If(Abs(CosDLon).gt.1.)CosDLon=Sign(1.d0,CosDLon)
-        DLon=dACosD(CosDLon)
-        If(Azimuth.ge..0.and.Azimuth.le.180.)Then
-         TLon=SLon+DLon
-        Else
-         TLon=SLon-DLon
-        EndIf
+        cosdlon=(dcosd(dist) - dsind(slat)*dsind(tlat)) 
+     1            / (dcosd(slat)*dcosd(tlat))
+        if(abs(cosdlon).gt.1.)cosdlon=sign(1.d0,cosdlon)
+        dlon=dacosd(cosdlon)
+        if(azimuth.ge..0.and.azimuth.le.180.)then
+         tlon=slon+dlon
+        else
+         tlon=slon-dlon
+        endif
 
         r4_tlat = tlat
         r4_tlon = tlon
 
-        Return
-        End
+        return
+        end

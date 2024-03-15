@@ -1,70 +1,69 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
 
-MODULE constants
+module constants
 
-  ! Constants used by mm5post
+   ! constants used by mm5post
 
-      REAL,       PARAMETER        :: CM2INCH  =   1.0 / 2.54
-      REAL,       PARAMETER        :: CP       =   1005.7
-      REAL,       PARAMETER        :: GRAV     =      9.81
-      INTEGER,    PARAMETER        :: IMISS    = -99999
-      INTEGER,    PARAMETER        :: ISMTH    =      0
-      INTEGER,    PARAMETER        :: JSMTH    =      0
-      REAL,       PARAMETER        :: LAPSE    =      6.5E-03
-      REAL,       PARAMETER        :: LV       =      2.5E+06
-      REAL,       PARAMETER        :: M2FEET   =      3.281
-      REAL,       PARAMETER        :: MPS2KNTS =      1.944
-      REAL,       PARAMETER        :: MPS2MPH  =      2.237
-      REAL,       PARAMETER        :: PI       =      3.1415927
-      REAL,       PARAMETER        :: P0       =   100000.0
-      REAL,       PARAMETER        :: R        =    287.04
-      REAL,       PARAMETER        :: RV       =    461.5
-      REAL,       PARAMETER        :: T0       =    273.15
-      REAL,       PARAMETER        :: XMISS    = -99999.9
-      REAL,       PARAMETER        :: CPOG     = CP / GRAV
-      REAL,       PARAMETER        :: CPOR     = CP / R
-      REAL,       PARAMETER        :: DEG2RAD  = PI / 180.0
-      REAL,       PARAMETER        :: E        = R / RV
-      REAL,       PARAMETER        :: GOR      = GRAV / R
-      REAL,       PARAMETER        :: KAPPA    = R / CP
-      REAL,       PARAMETER        :: RAD2DEG  = 180.0 / PI
-      REAL,       PARAMETER        :: ROG      = R / GRAV
-      REAL,       PARAMETER        :: RVOLV    = RV / LV
+   real, parameter        :: cm2inch = 1.0/2.54
+   real, parameter        :: cp = 1005.7
+   real, parameter        :: grav = 9.81
+   integer, parameter        :: imiss = -99999
+   integer, parameter        :: ismth = 0
+   integer, parameter        :: jsmth = 0
+   real, parameter        :: lapse = 6.5e-03
+   real, parameter        :: lv = 2.5e+06
+   real, parameter        :: m2feet = 3.281
+   real, parameter        :: mps2knts = 1.944
+   real, parameter        :: mps2mph = 2.237
+   real, parameter        :: pi = 3.1415927
+   real, parameter        :: p0 = 100000.0
+   real, parameter        :: r = 287.04
+   real, parameter        :: rv = 461.5
+   real, parameter        :: t0 = 273.15
+   real, parameter        :: xmiss = -99999.9
+   real, parameter        :: cpog = cp/grav
+   real, parameter        :: cpor = cp/r
+   real, parameter        :: deg2rad = pi/180.0
+   real, parameter        :: e = r/rv
+   real, parameter        :: gor = grav/r
+   real, parameter        :: kappa = r/cp
+   real, parameter        :: rad2deg = 180.0/pi
+   real, parameter        :: rog = r/grav
+   real, parameter        :: rvolv = rv/lv
 
-END MODULE constants
-
+end module constants
 

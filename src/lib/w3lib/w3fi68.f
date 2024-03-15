@@ -1,178 +1,178 @@
-      SUBROUTINE W3FI68 (ID, PDS)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    W3FI68      CONVERT 25 WORD ARRAY TO GRIB PDS
-C   PRGMMR: R.E.JONES        ORG: W/NMC42    DATE: 91-05-14
-C
-C ABSTRACT: CONVERTS AN ARRAY OF 25, OR 27 INTEGER WORDS INTO A
-C   GRIB PRODUCT DEFINITION SECTION (PDS) OF 28 BYTES , OR 30 BYTES.
-C   IF PDS BYTES > 30, THEY ARE SET TO ZERO.
-C
-C PROGRAM HISTORY LOG:
-C   91-05-08  R.E.JONES
-C   92-09-25  R.E.JONES   CHANGE TO 25 WORDS OF INPUT, LEVEL
-C                         CAN BE IN TWO WORDS. (10,11)
-C   93-01-08  R.E.JONES   CHANGE FOR TIME RANGE INDICATOR IF 10,
-C                         STORE TIME P1 IN PDS BYTES 19-20.
-C   93-01-26  R.E.JONES   CORRECTION FOR FIXED HEIGHT ABOVE
-C                         GROUND LEVEL
-C   93-03-29  R.E.JONES   ADD SAVE STATEMENT
-C   93-06-24  CAVANOUGH   MODIFIED PROGRAM TO ALLOW FOR GENERATION
-C                         OF PDS GREATER THAN 28 BYTES (THE DESIRED
-C                         PDS SIZE IS IN ID(1).
-C   93-09-30  FARLEY      CHANGE TO ALLOW FOR SUBCENTER ID; PUT
-C                         ID(24) INTO PDS(26).
-C   93-10-12  R.E.JONES   CHANGES FOR ON388 REV. OCT 9,1993, NEW
-C                         LEVELS 125, 200, 201.
-C   94-02-23  R.E.JONES   TAKE OUT SBYTES, REPLACE WITH DO LOOP
-C   94-04-14  R.E.JONES   CHANGES FOR ON388 REV. MAR 24,1994, NEW
-C                         LEVELS 115,116.
-C   94-12-04  R.E.JONES   CHANGE TO ADD ID WORDS 26, 27 FOR PDS
-C                         BYTES 29 AND 30.
-C   95-09-07  R.E.JONES   CHANGE FOR NEW LEVEL 117, 119.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C 2003-02-25  IREDELL     RECOGNIZE LEVEL TYPE 126
-C 2005-05-06  D.C.STOKES  RECOGNIZE LEVEL TYPES 235, 237, 238
-C
-C USAGE:    CALL W3FI68 (ID, PDS)
-C   INPUT ARGUMENT LIST:
-C     ID       - 25, 27 WORD INTEGER ARRAY
-C   OUTPUT ARGUMENT LIST:
-C     PDS      - 28 30,  OR GREATER CHARACTER PDS FOR EDITION 1
-C
-C REMARKS: LAYOUT OF 'ID' ARRAY:
-C     ID(1)  = NUMBER OF BYTES IN PRODUCT DEFINITION SECTION (PDS)
-C     ID(2)  = PARAMETER TABLE VERSION NUMBER
-C     ID(3)  = IDENTIFICATION OF ORIGINATING CENTER
-C     ID(4)  = MODEL IDENTIFICATION (ALLOCATED BY ORIGINATING CENTER)
-C     ID(5)  = GRID IDENTIFICATION
-C     ID(6)  = 0 IF NO GDS SECTION, 1 IF GDS SECTION IS INCLUDED
-C     ID(7)  = 0 IF NO BMS SECTION, 1 IF BMS SECTION IS INCLUDED
-C     ID(8)  = INDICATOR OF PARAMETER AND UNITS (TABLE 2)
-C     ID(9)  = INDICATOR OF TYPE OF LEVEL       (TABLE 3)
-C     ID(10) = VALUE 1 OF LEVEL  (0 FOR 1-100,102,103,105,107
-C              109,111,113,115,117,119,125,126,160,200,201,
-C              235,237,238 
-C              LEVEL IS IN ID WORD 11)
-C     ID(11) = VALUE 2 OF LEVEL
-C     ID(12) = YEAR OF CENTURY
-C     ID(13) = MONTH OF YEAR
-C     ID(14) = DAY OF MONTH
-C     ID(15) = HOUR OF DAY
-C     ID(16) = MINUTE OF HOUR   (IN MOST CASES SET TO 0)
-C     ID(17) = FCST TIME UNIT
-C     ID(18) = P1 PERIOD OF TIME
-C     ID(19) = P2 PERIOD OF TIME
-C     ID(20) = TIME RANGE INDICATOR
-C     ID(21) = NUMBER INCLUDED IN AVERAGE
-C     ID(22) = NUMBER MISSING FROM AVERAGES
-C     ID(23) = CENTURY  (20, CHANGE TO 21 ON JAN. 1, 2001)
-C     ID(24) = SUBCENTER IDENTIFICATION
-C     ID(25) = SCALING POWER OF 10
-C     ID(26) = FLAG BYTE, 8 ON/OFF FLAGS
-C              BIT NUMBER  VALUE  ID(26)   DEFINITION
-C              1           0      0      FULL FCST FIELD
-C                          1      128    FCST ERROR FIELD
-C              2           0      0      ORIGINAL FCST FIELD
-C                          1      64     BIAS CORRECTED FCST FIELD
-C              3           0      0      ORIGINAL RESOLUTION RETAINED
-C                          1      32     SMOOTHED FIELD
-C              NOTE: ID(26) CAN BE THE SUM OF BITS 1, 2, 3.
-C              BITS 4-8 NOT USED, SET TO ZERO
-C              IF ID(1) IS 28, YOU DO NOT NEED ID(26) AND ID(27).
-C     ID(27) = UNUSED, SET TO 0 SO PDS BYTE 30 IS SET TO ZERO.
-C
-C   SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: SiliconGraphics 3.5 FORTRAN 77
-C   MACHINE:  SiliconGraphics IRIS-4D/25, 35, INDIGO, Indy
-C   LANGUAGE: CRAY CFT77 FORTRAN
-C   MACHINE:  CRAY C916/256, J916/2048
-C
-C$$$
-C
-      INTEGER        ID(*)
-C
-      CHARACTER * 1  PDS(*)
-C
-        PDS(1)  = CHAR(MOD(ID(1)/65536,256))
-        PDS(2)  = CHAR(MOD(ID(1)/256,256))
-        PDS(3)  = CHAR(MOD(ID(1),256))
-        PDS(4)  = CHAR(ID(2))
-        PDS(5)  = CHAR(ID(3))
-        PDS(6)  = CHAR(ID(4))
-        PDS(7)  = CHAR(ID(5))
-        PDS(8)  = CHAR(IOR(ISHFT(ID(6),7),
-     &                      ISHFT(ID(7),6)))
-        PDS(9)  = CHAR(ID(8))
-        PDS(10) = CHAR(ID(9))
-        I9      = ID(9)
-C
-C       TEST TYPE OF LEVEL TO SEE IF LEVEL IS IN TWO
-C       WORDS OR ONE
-C
-        IF ((I9.GE.1.AND.I9.LE.100).OR.I9.EQ.102.OR.
-     &       I9.EQ.103.OR.I9.EQ.105.OR.I9.EQ.107.OR.
-     &       I9.EQ.109.OR.I9.EQ.111.OR.I9.EQ.113.OR.
-     &       I9.EQ.115.OR.I9.EQ.117.OR.I9.EQ.119.OR.
-     &       I9.EQ.125.OR.I9.EQ.126.OR.I9.EQ.160.OR.
-     &       I9.EQ.200.OR.I9.EQ.201.OR.I9.EQ.235.OR.
-     &       I9.EQ.237.OR.I9.EQ.238) THEN
-          LEVEL   = ID(11)
-          IF (LEVEL.LT.0) THEN
-            LEVEL = - LEVEL
-            LEVEL = IOR(LEVEL,32768)
-          END IF
-          PDS(11) = CHAR(MOD(LEVEL/256,256))
-          PDS(12) = CHAR(MOD(LEVEL,256))
-        ELSE
-          PDS(11) = CHAR(ID(10))
-          PDS(12) = CHAR(ID(11))
-        END IF
-        PDS(13) = CHAR(ID(12))
-        PDS(14) = CHAR(ID(13))
-        PDS(15) = CHAR(ID(14))
-        PDS(16) = CHAR(ID(15))
-        PDS(17) = CHAR(ID(16))
-        PDS(18) = CHAR(ID(17))
-C
-C       TEST TIME RANGE INDICATOR (PDS BYTE 21) FOR 10
-C       IF SO PUT TIME P1 IN PDS BYTES 19-20.
-C
-        IF (ID(20).EQ.10) THEN
-          PDS(19) = CHAR(MOD(ID(18)/256,256))
-          PDS(20) = CHAR(MOD(ID(18),256))
-        ELSE
-          PDS(19) = CHAR(ID(18))
-          PDS(20) = CHAR(ID(19))
-        END IF
-        PDS(21) = CHAR(ID(20))
-        PDS(22) = CHAR(MOD(ID(21)/256,256))
-        PDS(23) = CHAR(MOD(ID(21),256))
-        PDS(24) = CHAR(ID(22))
-        PDS(25) = CHAR(ID(23))
-        PDS(26) = CHAR(ID(24))
-        ISCALE  = ID(25)
-        IF (ISCALE.LT.0) THEN
-          ISCALE = -ISCALE
-          ISCALE =  IOR(ISCALE,32768)
-        END IF
-        PDS(27) = CHAR(MOD(ISCALE/256,256))
-        PDS(28) = CHAR(MOD(ISCALE    ,256))
-        IF (ID(1).GT.28) THEN
-          PDS(29) = CHAR(ID(26))
-          PDS(30) = CHAR(ID(27))
-        END IF
-C
-C       SET PDS 31-?? TO ZERO
-C
-        IF (ID(1).GT.30) THEN
-          K = ID(1)
-          DO I = 31,K
-            PDS(I) = CHAR(00)
-          END DO
-        END IF
-C
-      RETURN
-      END
+      subroutine w3fi68 (id, pds)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    w3fi68      convert 25 word array to grib pds
+c   prgmmr: r.e.jones        org: w/nmc42    date: 91-05-14
+c
+c abstract: converts an array of 25, or 27 integer words into a
+c   grib product definition section (pds) of 28 bytes , or 30 bytes.
+c   if pds bytes > 30, they are set to zero.
+c
+c program history log:
+c   91-05-08  r.e.jones
+c   92-09-25  r.e.jones   change to 25 words of input, level
+c                         can be in two words. (10,11)
+c   93-01-08  r.e.jones   change for time range indicator if 10,
+c                         store time p1 in pds bytes 19-20.
+c   93-01-26  r.e.jones   correction for fixed height above
+c                         ground level
+c   93-03-29  r.e.jones   add save statement
+c   93-06-24  cavanough   modified program to allow for generation
+c                         of pds greater than 28 bytes (the desired
+c                         pds size is in id(1).
+c   93-09-30  farley      change to allow for subcenter id; put
+c                         id(24) into pds(26).
+c   93-10-12  r.e.jones   changes for on388 rev. oct 9,1993, new
+c                         levels 125, 200, 201.
+c   94-02-23  r.e.jones   take out sbytes, replace with do loop
+c   94-04-14  r.e.jones   changes for on388 rev. mar 24,1994, new
+c                         levels 115,116.
+c   94-12-04  r.e.jones   change to add id words 26, 27 for pds
+c                         bytes 29 and 30.
+c   95-09-07  r.e.jones   change for new level 117, 119.
+c   95-10-31  iredell     removed saves and prints
+c 2003-02-25  iredell     recognize level type 126
+c 2005-05-06  d.c.stokes  recognize level types 235, 237, 238
+c
+c usage:    call w3fi68 (id, pds)
+c   input argument list:
+c     id       - 25, 27 word integer array
+c   output argument list:
+c     pds      - 28 30,  or greater character pds for edition 1
+c
+c remarks: layout of 'id' array:
+c     id(1)  = number of bytes in product definition section (pds)
+c     id(2)  = parameter table version number
+c     id(3)  = identification of originating center
+c     id(4)  = model identification (allocated by originating center)
+c     id(5)  = grid identification
+c     id(6)  = 0 if no gds section, 1 if gds section is included
+c     id(7)  = 0 if no bms section, 1 if bms section is included
+c     id(8)  = indicator of parameter and units (table 2)
+c     id(9)  = indicator of type of level       (table 3)
+c     id(10) = value 1 of level  (0 for 1-100,102,103,105,107
+c              109,111,113,115,117,119,125,126,160,200,201,
+c              235,237,238 
+c              level is in id word 11)
+c     id(11) = value 2 of level
+c     id(12) = year of century
+c     id(13) = month of year
+c     id(14) = day of month
+c     id(15) = hour of day
+c     id(16) = minute of hour   (in most cases set to 0)
+c     id(17) = fcst time unit
+c     id(18) = p1 period of time
+c     id(19) = p2 period of time
+c     id(20) = time range indicator
+c     id(21) = number included in average
+c     id(22) = number missing from averages
+c     id(23) = century  (20, change to 21 on jan. 1, 2001)
+c     id(24) = subcenter identification
+c     id(25) = scaling power of 10
+c     id(26) = flag byte, 8 on/off flags
+c              bit number  value  id(26)   definition
+c              1           0      0      full fcst field
+c                          1      128    fcst error field
+c              2           0      0      original fcst field
+c                          1      64     bias corrected fcst field
+c              3           0      0      original resolution retained
+c                          1      32     smoothed field
+c              note: id(26) can be the sum of bits 1, 2, 3.
+c              bits 4-8 not used, set to zero
+c              if id(1) is 28, you do not need id(26) and id(27).
+c     id(27) = unused, set to 0 so pds byte 30 is set to zero.
+c
+c   subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: silicongraphics 3.5 fortran 77
+c   machine:  silicongraphics iris-4d/25, 35, indigo, indy
+c   language: cray cft77 fortran
+c   machine:  cray c916/256, j916/2048
+c
+c$$$
+c
+      integer        id(*)
+c
+      character * 1  pds(*)
+c
+        pds(1)  = char(mod(id(1)/65536,256))
+        pds(2)  = char(mod(id(1)/256,256))
+        pds(3)  = char(mod(id(1),256))
+        pds(4)  = char(id(2))
+        pds(5)  = char(id(3))
+        pds(6)  = char(id(4))
+        pds(7)  = char(id(5))
+        pds(8)  = char(ior(ishft(id(6),7),
+     &                      ishft(id(7),6)))
+        pds(9)  = char(id(8))
+        pds(10) = char(id(9))
+        i9      = id(9)
+c
+c       test type of level to see if level is in two
+c       words or one
+c
+        if ((i9.ge.1.and.i9.le.100).or.i9.eq.102.or.
+     &       i9.eq.103.or.i9.eq.105.or.i9.eq.107.or.
+     &       i9.eq.109.or.i9.eq.111.or.i9.eq.113.or.
+     &       i9.eq.115.or.i9.eq.117.or.i9.eq.119.or.
+     &       i9.eq.125.or.i9.eq.126.or.i9.eq.160.or.
+     &       i9.eq.200.or.i9.eq.201.or.i9.eq.235.or.
+     &       i9.eq.237.or.i9.eq.238) then
+          level   = id(11)
+          if (level.lt.0) then
+            level = - level
+            level = ior(level,32768)
+          end if
+          pds(11) = char(mod(level/256,256))
+          pds(12) = char(mod(level,256))
+        else
+          pds(11) = char(id(10))
+          pds(12) = char(id(11))
+        end if
+        pds(13) = char(id(12))
+        pds(14) = char(id(13))
+        pds(15) = char(id(14))
+        pds(16) = char(id(15))
+        pds(17) = char(id(16))
+        pds(18) = char(id(17))
+c
+c       test time range indicator (pds byte 21) for 10
+c       if so put time p1 in pds bytes 19-20.
+c
+        if (id(20).eq.10) then
+          pds(19) = char(mod(id(18)/256,256))
+          pds(20) = char(mod(id(18),256))
+        else
+          pds(19) = char(id(18))
+          pds(20) = char(id(19))
+        end if
+        pds(21) = char(id(20))
+        pds(22) = char(mod(id(21)/256,256))
+        pds(23) = char(mod(id(21),256))
+        pds(24) = char(id(22))
+        pds(25) = char(id(23))
+        pds(26) = char(id(24))
+        iscale  = id(25)
+        if (iscale.lt.0) then
+          iscale = -iscale
+          iscale =  ior(iscale,32768)
+        end if
+        pds(27) = char(mod(iscale/256,256))
+        pds(28) = char(mod(iscale    ,256))
+        if (id(1).gt.28) then
+          pds(29) = char(id(26))
+          pds(30) = char(id(27))
+        end if
+c
+c       set pds 31-?? to zero
+c
+        if (id(1).gt.30) then
+          k = id(1)
+          do i = 31,k
+            pds(i) = char(00)
+          end do
+        end if
+c
+      return
+      end

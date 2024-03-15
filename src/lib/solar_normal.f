@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -34,30 +34,30 @@ c
 	subroutine solar_normal(ni,nj,topo,dx,dy,lat,lon
      1                         ,sol_alt,sol_azi,alt_norm)
 
-c       Compute solar altitude normal to the terrain
+c       compute solar altitude normal to the terrain
 
         include 'trigd.inc'
 
         angleunitvectors(a1,a2,a3,b1,b2,b3) = acosd(a1*b1+a2*b2+a3*b3)
 
-	real topo(ni,nj)                 ! I Terrain elevation (m)
-        real lat(ni,nj)                  ! I Lat (deg)
-        real lon(ni,nj)                  ! I Lon (deg)
-        real sol_alt(ni,nj)              ! I Solar Altitude (deg)
-        real sol_azi(ni,nj)              ! I Solar Azimuth (deg)
-        real alt_norm(ni,nj)             ! O Solar Alt w.r.t. terrain normal
+	real topo(ni,nj)                 ! i terrain elevation (m)
+        real lat(ni,nj)                  ! i lat (deg)
+        real lon(ni,nj)                  ! i lon (deg)
+        real sol_alt(ni,nj)              ! i solar altitude (deg)
+        real sol_azi(ni,nj)              ! i solar azimuth (deg)
+        real alt_norm(ni,nj)             ! o solar alt w.r.t. terrain normal
 
-	real dx(ni,nj)                   ! I Grid spacing in X direction (m)
-	real dy(ni,nj)                   ! I Grid spacing in Y direction (m)
+	real dx(ni,nj)                   ! i grid spacing in x direction (m)
+	real dy(ni,nj)                   ! i grid spacing in y direction (m)
 
-        real rot(ni,nj)                  ! L Rotation Angle (deg)
+        real rot(ni,nj)                  ! l rotation angle (deg)
         real*8 vecx(3),vecy(3),vecz(3),vecn(3),maga
     
-        write(6,*)' Subroutine solar_normal'
+        write(6,*)' subroutine solar_normal'
 
 !       call get_grid_spacing_array(lat,lon,ni,nj,dx,dy)
 
-!       Default value
+!       default value
         alt_norm = sol_alt
 
         call projrot_latlon_2d(lat,lon,ni,nj,rot,istatus)
@@ -67,7 +67,7 @@ c       Compute solar altitude normal to the terrain
 	do j=2,nj-1
 	do i=2,ni-1
 
-!           Determine centered terrain slope
+!           determine centered terrain slope
             dterdx = (topo(i+1,j  )-topo(i-1,j  )) / (2. * dx(i,j))
             dterdy = (topo(i  ,j+1)-topo(i  ,j-1)) / (2. * dy(i,j))
 
@@ -75,10 +75,10 @@ c       Compute solar altitude normal to the terrain
 
             if(terrain_slope .gt. .001)then ! machine/terrain epsilon threshold
 
-!             See http://www.web-formulas.com/Math_Formulas/Trigonometry_Conversion_of_Trigonometric_Functions.aspx	       
-!             Vecx = 1,0,dterdx
-!             Vecy = 0,1,dterdy
-!             Vecn = Vecx x Vecy
+!             see http://www.web-formulas.com/math_formulas/trigonometry_conversion_of_trigonometric_functions.aspx	       
+!             vecx = 1,0,dterdx
+!             vecy = 0,1,dterdy
+!             vecn = vecx x vecy
 
 	      vecx(1) = 1.
 	      vecx(2) = 0.
@@ -92,7 +92,7 @@ c       Compute solar altitude normal to the terrain
      1                 ,vecy(1),vecy(2),vecy(3),vecz(1),vecz(2),vecz(3))
               call normalize(vecz(1),vecz(2),vecz(3),maga)
 
-!             Direction cosines of terrain normal
+!             direction cosines of terrain normal
 !             dircos_tx = -dterdx / (sqrt(dterdx**2 + 1.))
 !             dircos_ty = -dterdy / (sqrt(dterdy**2 + 1.))
 !             dircos_tz = 1.0 / sqrt(1.0 + terrain_slope**2)
@@ -104,12 +104,12 @@ c       Compute solar altitude normal to the terrain
 
               sol_azi_grid = sol_azi(i,j) - rot(i,j) 
 
-!             Direction cosines of sun
+!             direction cosines of sun
               dircos_sx = cosd(sol_alt(i,j)) * sind(sol_azi_grid)
               dircos_sy = cosd(sol_alt(i,j)) * cosd(sol_azi_grid)
               dircos_sz = sind(sol_alt(i,j))
 
-!             Angle between terrain normal and sun
+!             angle between terrain normal and sun
 !             result = angleunitvectors(dircos_tx,dircos_ty,dircos_tz
 !    1                                 ,dircos_sx,dircos_sy,dircos_sz)	      
 
@@ -158,10 +158,10 @@ c       Compute solar altitude normal to the terrain
 	enddo !i
 	enddo !j
 
-        write(6,*)' Range of alt_norm is ',minval(alt_norm)
+        write(6,*)' range of alt_norm is ',minval(alt_norm)
      1                                    ,maxval(alt_norm)	
 
-	write(6,*)' Max terrain slope is '
+	write(6,*)' max terrain slope is '
      1            ,dircos_tx_min,dircos_ty_min,dircos_tz_min
      1            ,acosd(dircos_tz_min)
      1            ,dterdx_min,dterdy_min

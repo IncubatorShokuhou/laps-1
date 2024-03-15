@@ -1,184 +1,184 @@
-      SUBROUTINE DGETRI( N, A, LDA, IPIV, WORK, LWORK, INFO )
+      subroutine dgetri( n, a, lda, ipiv, work, lwork, info )
 *
-*  -- LAPACK routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     September 30, 1994
+*  -- lapack routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     september 30, 1994
 *
-*     .. Scalar Arguments ..
-      INTEGER            INFO, LDA, LWORK, N
+*     .. scalar arguments ..
+      integer            info, lda, lwork, n
 *     ..
-*     .. Array Arguments ..
-      INTEGER            IPIV( * )
-      DOUBLE PRECISION   A( LDA, * ), WORK( LWORK )
+*     .. array arguments ..
+      integer            ipiv( * )
+      double precision   a( lda, * ), work( lwork )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DGETRI computes the inverse of a matrix using the LU factorization
-*  computed by DGETRF.
+*  dgetri computes the inverse of a matrix using the lu factorization
+*  computed by dgetrf.
 *
-*  This method inverts U and then computes inv(A) by solving the system
-*  inv(A)*L = inv(U) for inv(A).
+*  this method inverts u and then computes inv(a) by solving the system
+*  inv(a)*l = inv(u) for inv(a).
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  N       (input) INTEGER
-*          The order of the matrix A.  N >= 0.
+*  n       (input) integer
+*          the order of the matrix a.  n >= 0.
 *
-*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-*          On entry, the factors L and U from the factorization
-*          A = P*L*U as computed by DGETRF.
-*          On exit, if INFO = 0, the inverse of the original matrix A.
+*  a       (input/output) double precision array, dimension (lda,n)
+*          on entry, the factors l and u from the factorization
+*          a = p*l*u as computed by dgetrf.
+*          on exit, if info = 0, the inverse of the original matrix a.
 *
-*  LDA     (input) INTEGER
-*          The leading dimension of the array A.  LDA >= max(1,N).
+*  lda     (input) integer
+*          the leading dimension of the array a.  lda >= max(1,n).
 *
-*  IPIV    (input) INTEGER array, dimension (N)
-*          The pivot indices from DGETRF; for 1<=i<=N, row i of the
-*          matrix was interchanged with row IPIV(i).
+*  ipiv    (input) integer array, dimension (n)
+*          the pivot indices from dgetrf; for 1<=i<=n, row i of the
+*          matrix was interchanged with row ipiv(i).
 *
-*  WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
-*          On exit, if INFO=0, then WORK(1) returns the optimal LWORK.
+*  work    (workspace/output) double precision array, dimension (lwork)
+*          on exit, if info=0, then work(1) returns the optimal lwork.
 *
-*  LWORK   (input) INTEGER
-*          The dimension of the array WORK.  LWORK >= max(1,N).
-*          For optimal performance LWORK >= N*NB, where NB is
-*          the optimal blocksize returned by ILAENV.
+*  lwork   (input) integer
+*          the dimension of the array work.  lwork >= max(1,n).
+*          for optimal performance lwork >= n*nb, where nb is
+*          the optimal blocksize returned by ilaenv.
 *
-*  INFO    (output) INTEGER
+*  info    (output) integer
 *          = 0:  successful exit
-*          < 0:  if INFO = -i, the i-th argument had an illegal value
-*          > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is
+*          < 0:  if info = -i, the i-th argument had an illegal value
+*          > 0:  if info = i, u(i,i) is exactly zero; the matrix is
 *                singular and its inverse could not be computed.
 *
 *  =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ZERO, ONE
-      PARAMETER          ( ZERO = 0.0D+0, ONE = 1.0D+0 )
+*     .. parameters ..
+      double precision   zero, one
+      parameter          ( zero = 0.0d+0, one = 1.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      INTEGER            I, IWS, J, JB, JJ, JP, LDWORK, NB, NBMIN, NN
+*     .. local scalars ..
+      integer            i, iws, j, jb, jj, jp, ldwork, nb, nbmin, nn
 *     ..
-*     .. External Functions ..
-      INTEGER            ILAENV
-      EXTERNAL           ILAENV
+*     .. external functions ..
+      integer            ilaenv
+      external           ilaenv
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DGEMM, DGEMV, DSWAP, DTRSM, DTRTRI, XERBLA
+*     .. external subroutines ..
+      external           dgemm, dgemv, dswap, dtrsm, dtrtri, xerbla
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX, MIN
+*     .. intrinsic functions ..
+      intrinsic          max, min
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      WORK( 1 ) = MAX( N, 1 )
-      IF( N.LT.0 ) THEN
-         INFO = -1
-      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
-         INFO = -3
-      ELSE IF( LWORK.LT.MAX( 1, N ) ) THEN
-         INFO = -6
-      END IF
-      IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DGETRI', -INFO )
-         RETURN
-      END IF
+      info = 0
+      work( 1 ) = max( n, 1 )
+      if( n.lt.0 ) then
+         info = -1
+      else if( lda.lt.max( 1, n ) ) then
+         info = -3
+      else if( lwork.lt.max( 1, n ) ) then
+         info = -6
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'dgetri', -info )
+         return
+      end if
 *
-*     Quick return if possible
+*     quick return if possible
 *
-      IF( N.EQ.0 )
-     $   RETURN
+      if( n.eq.0 )
+     $   return
 *
-*     Form inv(U).  If INFO > 0 from DTRTRI, then U is singular,
+*     form inv(u).  if info > 0 from dtrtri, then u is singular,
 *     and the inverse is not computed.
 *
-      CALL DTRTRI( 'Upper', 'Non-unit', N, A, LDA, INFO )
-      IF( INFO.GT.0 )
-     $   RETURN
+      call dtrtri( 'upper', 'non-unit', n, a, lda, info )
+      if( info.gt.0 )
+     $   return
 *
-*     Determine the block size for this environment.
+*     determine the block size for this environment.
 *
-      NB = ILAENV( 1, 'DGETRI', ' ', N, -1, -1, -1 )
-      NBMIN = 2
-      LDWORK = N
-      IF( NB.GT.1 .AND. NB.LT.N ) THEN
-         IWS = MAX( LDWORK*NB, 1 )
-         IF( LWORK.LT.IWS ) THEN
-            NB = LWORK / LDWORK
-            NBMIN = MAX( 2, ILAENV( 2, 'DGETRI', ' ', N, -1, -1, -1 ) )
-         END IF
-      ELSE
-         IWS = N
-      END IF
+      nb = ilaenv( 1, 'dgetri', ' ', n, -1, -1, -1 )
+      nbmin = 2
+      ldwork = n
+      if( nb.gt.1 .and. nb.lt.n ) then
+         iws = max( ldwork*nb, 1 )
+         if( lwork.lt.iws ) then
+            nb = lwork / ldwork
+            nbmin = max( 2, ilaenv( 2, 'dgetri', ' ', n, -1, -1, -1 ) )
+         end if
+      else
+         iws = n
+      end if
 *
-*     Solve the equation inv(A)*L = inv(U) for inv(A).
+*     solve the equation inv(a)*l = inv(u) for inv(a).
 *
-      IF( NB.LT.NBMIN .OR. NB.GE.N ) THEN
+      if( nb.lt.nbmin .or. nb.ge.n ) then
 *
-*        Use unblocked code.
+*        use unblocked code.
 *
-         DO 20 J = N, 1, -1
+         do 20 j = n, 1, -1
 *
-*           Copy current column of L to WORK and replace with zeros.
+*           copy current column of l to work and replace with zeros.
 *
-            DO 10 I = J + 1, N
-               WORK( I ) = A( I, J )
-               A( I, J ) = ZERO
-   10       CONTINUE
+            do 10 i = j + 1, n
+               work( i ) = a( i, j )
+               a( i, j ) = zero
+   10       continue
 *
-*           Compute current column of inv(A).
+*           compute current column of inv(a).
 *
-            IF( J.LT.N )
-     $         CALL DGEMV( 'No transpose', N, N-J, -ONE, A( 1, J+1 ),
-     $                     LDA, WORK( J+1 ), 1, ONE, A( 1, J ), 1 )
-   20    CONTINUE
-      ELSE
+            if( j.lt.n )
+     $         call dgemv( 'no transpose', n, n-j, -one, a( 1, j+1 ),
+     $                     lda, work( j+1 ), 1, one, a( 1, j ), 1 )
+   20    continue
+      else
 *
-*        Use blocked code.
+*        use blocked code.
 *
-         NN = ( ( N-1 ) / NB )*NB + 1
-         DO 50 J = NN, 1, -NB
-            JB = MIN( NB, N-J+1 )
+         nn = ( ( n-1 ) / nb )*nb + 1
+         do 50 j = nn, 1, -nb
+            jb = min( nb, n-j+1 )
 *
-*           Copy current block column of L to WORK and replace with
+*           copy current block column of l to work and replace with
 *           zeros.
 *
-            DO 40 JJ = J, J + JB - 1
-               DO 30 I = JJ + 1, N
-                  WORK( I+( JJ-J )*LDWORK ) = A( I, JJ )
-                  A( I, JJ ) = ZERO
-   30          CONTINUE
-   40       CONTINUE
+            do 40 jj = j, j + jb - 1
+               do 30 i = jj + 1, n
+                  work( i+( jj-j )*ldwork ) = a( i, jj )
+                  a( i, jj ) = zero
+   30          continue
+   40       continue
 *
-*           Compute current block column of inv(A).
+*           compute current block column of inv(a).
 *
-            IF( J+JB.LE.N )
-     $         CALL DGEMM( 'No transpose', 'No transpose', N, JB,
-     $                     N-J-JB+1, -ONE, A( 1, J+JB ), LDA,
-     $                     WORK( J+JB ), LDWORK, ONE, A( 1, J ), LDA )
-            CALL DTRSM( 'Right', 'Lower', 'No transpose', 'Unit', N, JB,
-     $                  ONE, WORK( J ), LDWORK, A( 1, J ), LDA )
-   50    CONTINUE
-      END IF
+            if( j+jb.le.n )
+     $         call dgemm( 'no transpose', 'no transpose', n, jb,
+     $                     n-j-jb+1, -one, a( 1, j+jb ), lda,
+     $                     work( j+jb ), ldwork, one, a( 1, j ), lda )
+            call dtrsm( 'right', 'lower', 'no transpose', 'unit', n, jb,
+     $                  one, work( j ), ldwork, a( 1, j ), lda )
+   50    continue
+      end if
 *
-*     Apply column interchanges.
+*     apply column interchanges.
 *
-      DO 60 J = N - 1, 1, -1
-         JP = IPIV( J )
-         IF( JP.NE.J )
-     $      CALL DSWAP( N, A( 1, J ), 1, A( 1, JP ), 1 )
-   60 CONTINUE
+      do 60 j = n - 1, 1, -1
+         jp = ipiv( j )
+         if( jp.ne.j )
+     $      call dswap( n, a( 1, j ), 1, a( 1, jp ), 1 )
+   60 continue
 *
-      WORK( 1 ) = IWS
-      RETURN
+      work( 1 ) = iws
+      return
 *
-*     End of DGETRI
+*     end of dgetri
 *
-      END
+      end

@@ -1,60 +1,59 @@
-  SUBROUTINE ice2vapor(ice,sh,t,p,thresh,ice_m,sh_m,rh_m)
+  subroutine ice2vapor(ice, sh, t, p, thresh, ice_m, sh_m, rh_m)
 
-  ! Subroutine to convert cloud ice to vapor up to a saturation
-  ! threshold (wrt ice)
+     ! subroutine to convert cloud ice to vapor up to a saturation
+     ! threshold (wrt ice)
 
-    IMPLICIT NONE
+     implicit none
 
-    ! Inputs:
+     ! inputs:
 
-    REAL, INTENT(IN)    :: ice    ! Cloud ice mixing ratio (kg/kg)
-    REAL, INTENT(IN)    :: sh     ! Specific humidity (kg/kg)   
-    REAL, INTENT(IN)    :: t      ! Temperature (K)
-    REAL, INTENT(IN)    :: p      ! Pressure (Pa)
-    REAL, INTENT(IN)    :: thresh ! Saturation factor    
-              ! Set thresh to 1.0 to convert cloud ice up to
-              ! ice saturation
+     real, intent(in)    :: ice    ! cloud ice mixing ratio (kg/kg)
+     real, intent(in)    :: sh     ! specific humidity (kg/kg)
+     real, intent(in)    :: t      ! temperature (k)
+     real, intent(in)    :: p      ! pressure (pa)
+     real, intent(in)    :: thresh ! saturation factor
+     ! set thresh to 1.0 to convert cloud ice up to
+     ! ice saturation
 
-    ! Outputs:
-   
-    REAL, INTENT(OUT)   :: ice_m  ! Adjusted lwc
-    REAL, INTENT(OUT)   :: sh_m   ! Adjusted specific humidity
-    REAL, INTENT(OUT)   :: rh_m   ! Adjusted RH (%)
+     ! outputs:
 
-    ! Locals
+     real, intent(out)   :: ice_m  ! adjusted lwc
+     real, intent(out)   :: sh_m   ! adjusted specific humidity
+     real, intent(out)   :: rh_m   ! adjusted rh (%)
 
-    REAL :: shsat,mr,mrsat,mr_m,mrmax,tc
-    REAL, EXTERNAL :: ssh2,make_rh
+     ! locals
 
-    
-    ! Set saturation specific humidity for ice for this point         
-    tc = t-273.15
-    shsat = ssh2(p,tc,tc,0.)*0.001
-   
-    ! Convert specific humidity to mixing ratio 
-    mrsat = shsat/(1.-shsat)
-    mr = sh/(1.-sh)
-    mrmax = mrsat*thresh
+     real :: shsat, mr, mrsat, mr_m, mrmax, tc
+     real, external :: ssh2, make_rh
 
-    ! Create modified mr (mr_m) by adding cloud ice   
+     ! set saturation specific humidity for ice for this point
+     tc = t - 273.15
+     shsat = ssh2(p, tc, tc, 0.)*0.001
 
-    mr_m = mr + ice
+     ! convert specific humidity to mixing ratio
+     mrsat = shsat/(1.-shsat)
+     mr = sh/(1.-sh)
+     mrmax = mrsat*thresh
 
-    ! Zero out the modified cloud ice  
+     ! create modified mr (mr_m) by adding cloud ice
 
-    ice_m = 0.
+     mr_m = mr + ice
 
-    ! If mr_m exceeds mrmax, convert the excess amount 
-    ! back to cloud ice   
+     ! zero out the modified cloud ice
 
-    IF (mr_m .GT. mrmax) THEN
-      ice_m = mr_m - mrmax
-      mr_m = mrmax
-    ENDIF
+     ice_m = 0.
 
-    rh_m = (mr_m/mrsat)*100.
+     ! if mr_m exceeds mrmax, convert the excess amount
+     ! back to cloud ice
 
-    ! Convert mr_m to sh_m
-    sh_m = mr_m/(1.+mr_m) 
-    RETURN
-  END SUBROUTINE ice2vapor
+     if (mr_m .gt. mrmax) then
+        ice_m = mr_m - mrmax
+        mr_m = mrmax
+     end if
+
+     rh_m = (mr_m/mrsat)*100.
+
+     ! convert mr_m to sh_m
+     sh_m = mr_m/(1.+mr_m)
+     return
+  end subroutine ice2vapor

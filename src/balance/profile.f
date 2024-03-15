@@ -6,7 +6,7 @@ c  this routine takes the measured fit between the obs and background
 c  and constructs analysis error estimates based on an estimated
 c  observation error, a projected truth based on gaussian random error.
 c  arrays erru errv errw errt are the output error estimates  
-c  variables are stored in each. Here is the key for each k profile:
+c  variables are stored in each. here is the key for each k profile:
 c
 c  erru(1,1,k) background u bias; (2,1,k) backgound variance; (1,5,k) u profile
 c  (1,6,k) turb u comp; (1,2,k) anal bias; (2,2,k) anal var;
@@ -18,7 +18,7 @@ c  errw(1,1,k) background w bias; (2,1,k) backgound variance; (1,5,k) w profile
 c  (1,6,k) turb w comp; (1,2,k) anal bias; (2,2,k) anal var;
 c
 c  errt(1,1,k) background den bias; (2,1,k) backgound variance; (1,5,k)  phi profile
-c  (1,6,k) T profile; (1,7,k) density profile               
+c  (1,6,k) t profile; (1,7,k) density profile               
 c  (1,2,k) anal bias; (2,2,k) anal var; 
 c  (1,3,k) press anal bias; (2,3,k) press anal var
 c  (1,9,k) dropsonde profile;(1,10,k) background profiles
@@ -40,15 +40,15 @@ c
       real ffz,rm,slastu,slastv,slastt,cor
       character*9 dum,a9_time
 
-c  variables: udrop vdrop tdrop are the u,v,T from the dropsonde
-c             u,v are the LAPS analyzed velocities
+c  variables: udrop vdrop tdrop are the u,v,t from the dropsonde
+c             u,v are the laps analyzed velocities
 c             ub,vb are the background grids
 c             us,vs,oms are the turbulent velocity components
 c  create a "truth " profile using nongaussian distribution of 
 c dropsonde and model error in combined pdf
-c We now save each truth profile so arrays are 2D
+c we now save each truth profile so arrays are 2d
 
-      real ut(nz,nx),vt(nz,nx),Tt(nz,nx),wt(nz,nx),pht(nz)
+      real ut(nz,nx),vt(nz,nx),tt(nz,nx),wt(nz,nx),pht(nz)
       logical lfndref,l_interp
       integer alt
 
@@ -68,7 +68,7 @@ c We now save each truth profile so arrays are 2D
 
 c we need to use non guassian distributions for truth estimates
 c this routine creates two functions for the rejection method: one
-c gaussian, one non gaussian. This sets up function rm
+c gaussian, one non gaussian. this sets up function rm
 c recover variable profiles and put them in the error arrays 
 
       do alt=0,2
@@ -84,11 +84,11 @@ c recover variable profiles and put them in the error arrays
            jj=nint(rrj(k))
            if(ii.ge.nx)then
               ii=nx-1
-              print*,'Warning: dropsonde point on S edge of domain'
+              print*,'warning: dropsonde point on s edge of domain'
            endif
            if(jj.ge.ny)then
               jj=ny-1
-              print*,'Warning: dropsonde point on N edge of domain'
+              print*,'warning: dropsonde point on n edge of domain'
            endif
            aa=rri(k)-float(ii)
            bb=rrj(k)-float(jj)
@@ -177,15 +177,15 @@ c --------------------------------------------------------------------
 c ---------------- now create truth profiles -------------------------
 c --------------------------------------------------------------------
 c
-c Alternative 2 is based on use of the mean truth profile. Thus, set
+c alternative 2 is based on use of the mean truth profile. thus, set
 c the analysis err arrays equal to the mean truth.
 
        if(alt.eq.2)then
 c        do k=1,nz
             erru(1,5,:)=ut(:,1)
             errv(1,5,:)=vt(:,1)
-            errt(1,6,:)=Tt(:,1)
-            errw(1,5,:)=Wt(:,1) 
+            errt(1,6,:)=tt(:,1)
+            errw(1,5,:)=wt(:,1) 
 c        enddo
        endif
 
@@ -197,7 +197,7 @@ c set up rejection method non-gaussian variable function
         mmg = 2
         mg=10
         do k=1,nz
-c        print*,'K ',k
+c        print*,'k ',k
          sm(1)=udrop(k)
          sm(2)=erru(1,10,k)   !ub(ii,jj,k)
          st(1)=oberu
@@ -212,8 +212,8 @@ c        print*,'K ',k
          sm(2)=errt(1,10,k)   !tb(ii,jj,k)
          st(1)=obert
          st(2)=modert
-         if(tdrop(k).ne.smsng)Tt(k,n)=rm(sm,st,mg,mmg,iii)      
-         Wt(k,n)=oberw*ffz(iii,20,cor,0.)
+         if(tdrop(k).ne.smsng)tt(k,n)=rm(sm,st,mg,mmg,iii)      
+         wt(k,n)=oberw*ffz(iii,20,cor,0.)
 
 c for each truth profile compute error and store in the err arrays by
 c height level (k) and truth number (n)
@@ -223,7 +223,7 @@ c height level (k) and truth number (n)
          berrt=errt(1,10,k)  !tb(ii,jj,k)*(1.-aa)*(1.-bb)+tb(ii+1,jj,k)*aa*(1.-bb)+
 c                         1   tb(ii,jj+1,k)*bb*(1.-aa)+tb(ii+1,jj+1,k)*aa*bb
          errw(n,1,k)=errw(1,10,k)-wt(k,n)
-         berrt=p(k)/r*(1./berrt-1./Tt(k,n))
+         berrt=p(k)/r*(1./berrt-1./tt(k,n))
          erru(n,1,k)=berru
          errv(n,1,k)=berrv
          errt(n,1,k)=berrt
@@ -235,7 +235,7 @@ c ----------------------------------------------------------------
        do n=4,nx
         do k=1,nz
 c create truth profiles using non-guassian random numbers
-c        print*,'K ',k
+c        print*,'k ',k
          sm(1)=udrop(k)
          sm(2)=erru(1,5,k)  !ub(ii,jj,k)
          st(1)=oberu
@@ -250,11 +250,11 @@ c        print*,'K ',k
          sm(2)=errt(1,6,k)  !errt(1,5,k)  !tb(ii,jj,k)
          st(1)=obert
          st(2)=modert  
-         if(tdrop(k).ne.smsng)Tt(k,n)=rm(sm,st,mg,mmg,iii)      
-         Wt(k,n)=oberw*ffz(iii,20,cor,0.)
+         if(tdrop(k).ne.smsng)tt(k,n)=rm(sm,st,mg,mmg,iii)      
+         wt(k,n)=oberw*ffz(iii,20,cor,0.)
 c integrate hypsometric eqn to recover heights
          if(zter.lt.errt(1,5,k)) then! begin to integrate truth ht
-          tave=.5*(Tt(k,n)+errt(1,8,k)/6.+Tt(k-1,n)+errt(1,8,k)/6.)! virt temp
+          tave=.5*(tt(k,n)+errt(1,8,k)/6.+tt(k-1,n)+errt(1,8,k)/6.)! virt temp
           pht(k)=pht(k-1)+r*tave/g*alog(p(k-1)/p(k))
          else
           kstart=k+1
@@ -273,7 +273,7 @@ c    1   +om(ii+1,jj,k)*aa*(1.-bb)+
 c    1   om(ii,jj+1,k)*bb*(1.-aa)+om(ii+1,jj+1,k)*aa*bb)-wt(k)
 
          errw(n,2,k)=errw(1,5,k)-wt(k,n)
-         aerrt=p(k)/r*(1./aerrtt-1./Tt(k,n))!density err
+         aerrt=p(k)/r*(1./aerrtt-1./tt(k,n))!density err
          erru(n,2,k)=aerru
          errv(n,2,k)=aerrv
          errt(n,2,k)=aerrt
@@ -303,8 +303,8 @@ c now compute bias error by summing over all nx-4 scenarios
         sumph=0.
         sumut=0.
         sumvt=0.
-        sumTt=0.
-        sumWt=0.
+        sumtt=0.
+        sumwt=0.
         if(alt.eq.0.or.alt.eq.2)then  !original method (alt=0: non-zero mean bias)
                                       !mean truth method (alt=2: zero mean bias).
            do n=4,nx
@@ -322,8 +322,8 @@ c now compute bias error by summing over all nx-4 scenarios
              if(alt.eq.0)then
                 sumut=ut(k,n)+sumut
                 sumvt=vt(k,n)+sumvt
-                sumTt=Tt(k,n)+sumTt
-                sumWt=Wt(k,n)+sumWt
+                sumtt=tt(k,n)+sumtt
+                sumwt=wt(k,n)+sumwt
              endif
           enddo ! on n
 
@@ -346,8 +346,8 @@ c     bias estimates and mean truth profile
           if(alt.eq.0)then
              ut(k,1)=sumut/cnt  !save mean profiles in element (*,1)
              vt(k,1)=sumvt/cnt
-             Tt(k,1)=sumTt/cnt
-             Wt(k,1)=sumWt/cnt
+             tt(k,1)=sumtt/cnt
+             wt(k,1)=sumwt/cnt
           endif
         endif
         if(k.le.nsave.and.k.ge.kstart) then !sum from kstart to nsave            
@@ -356,9 +356,9 @@ c     bias estimates and mean truth profile
           sumbiasv=errv(1,2,k)+sumbiasv
         endif
        enddo ! on k
-       print*, 'Total u,v bias ', sumbiasu, sumbiasv
+       print*, 'total u,v bias ', sumbiasu, sumbiasv
        if(cntt.gt.0)then
-          print*, 'Layer u,v bias ',sumbiasu/cntt, sumbiasv/cntt
+          print*, 'layer u,v bias ',sumbiasu/cntt, sumbiasv/cntt
        endif
 c these are mean bias errors for column
        erru(1,11,1)=sumbiasu
@@ -429,7 +429,7 @@ c   variance estimates
 c
 c------------------------------------------------
 c
-      Subroutine write_errors(a9_time,p,erru,errv,errw,errt
+      subroutine write_errors(a9_time,p,erru,errv,errw,errt
      1,nx,ny,nz,rri,rrj,zter,alt)
 c this routine writes an ascii file to the output log summarizing errors
       integer lun
@@ -448,7 +448,7 @@ c
       if(alt==0)then
          cfname_out=cfname_out(1:lend)//'air/'//a9_time//'.air'
          call s_len(cfname_out,lend)
-         print*,'Airdrop output filename: ',cfname_out(1:lend)
+         print*,'airdrop output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -456,7 +456,7 @@ c
       elseif(alt==1)then
          cfname_out=cfname_out(1:lend)//'air/'//a9_time//'.airp1'
          call s_len(cfname_out,lend)
-         print*,'Airdrop output filename: ',cfname_out(1:lend)
+         print*,'airdrop output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -464,7 +464,7 @@ c
       elseif(alt==2)then
          cfname_out=cfname_out(1:lend)//'air/'//a9_time//'.airp2'
          call s_len(cfname_out,lend)
-         print*,'Airdrop output filename: ',cfname_out(1:lend)
+         print*,'airdrop output filename: ',cfname_out(1:lend)
          lun = 20
          open(lun,file=cfname_out,form='formatted',status='unknown'
      +,err=909)
@@ -477,13 +477,13 @@ c
       sum2=0
 
       write(lun,1011)
- 1011 format(6x,'************AIRDROP OUTPUT**************')
+ 1011 format(6x,'************airdrop output**************')
       write(lun,1012)
- 1012 format(6x,'AIRDROP PROFILES FROM LAPS ANALYSIS')
+ 1012 format(6x,'airdrop profiles from laps analysis')
       write(lun,1013)
- 1013 format(4x,'P',6x,'HT',6x,'U',8x,'V',8x,'W',8x,'T',7x,'Den')
+ 1013 format(4x,'p',6x,'ht',6x,'u',8x,'v',8x,'w',8x,'t',7x,'den')
       write(lun,1014)
- 1014 format(3x,'mb',7x,'m',5x,'m/sec',4x,'m/sec',4x,'m/sec',6x,'K'
+ 1014 format(3x,'mb',7x,'m',5x,'m/sec',4x,'m/sec',4x,'m/sec',6x,'k'
      +,6x,'kg/m3')
       do k=1,nz
        ii=rri(k)
@@ -495,13 +495,13 @@ c
       enddo
       write(lun,1015) 
        write(lun,1022)
- 1022 format(6x,'DROPSONDE AND BACKGROUND WIND PROFILES  ')
+ 1022 format(6x,'dropsonde and background wind profiles  ')
       write(lun,1023)
- 1023 format(4x,'P',6x,'HT',6x,'UD',7x,'VD',7x,'UB',7x,'VB'
-     & ,7x,'TD',7x,'TB')
+ 1023 format(4x,'p',6x,'ht',6x,'ud',7x,'vd',7x,'ub',7x,'vb'
+     & ,7x,'td',7x,'tb')
       write(lun,1024)
  1024 format(3x,'mb',7x,'m',5x,'m/sec',4x,'m/sec',4x,'m/sec',4x,'m/sec'
-     +,6x,'K',6x,'K')
+     +,6x,'k',6x,'k')
      
       do k=1,nz
        ii=rri(k)
@@ -514,7 +514,7 @@ c
       write(lun,1015) 
  1015 format(/)
       write(lun,1016)
- 1016 format(8x, 'BIAS ERROR ESTIMATES')
+ 1016 format(8x, 'bias error estimates')
       write(lun,1082)
       write(lun,1083)
       write(lun,1084)
@@ -528,7 +528,7 @@ c
       write(lun,1015)
       write(lun,1016)
       write(lun,1017)
- 1017 format(1x,'P LVL  HT LVL ')
+ 1017 format(1x,'p lvl  ht lvl ')
       write(lun,1009)
       write(lun,1010)
       do k=1,nz
@@ -541,12 +541,12 @@ c
    
       write(lun,1015)
       write(lun,1028)
- 1028 format(10x,'TOTAL COLUMN WIND BIAS')
+ 1028 format(10x,'total column wind bias')
       write(lun,1029) erru(1,11,1), errv(1,11,1)
- 1029 format(1x,'U BIAS ',f7.2,' V BIAS ',f7.2)
+ 1029 format(1x,'u bias ',f7.2,' v bias ',f7.2)
       write(lun,1015)
       write(lun,1018)
- 1018 format(10x,'VARIANCE ESTIMATES')
+ 1018 format(10x,'variance estimates')
       write(lun,1002)
       write(lun,1003)
       write(lun,1004)
@@ -565,15 +565,15 @@ c
 
       write(lun,1015)
       write(lun,1019)
- 1019 format(3x,'TOTAL VARIANCE ESTIMATES')
+ 1019 format(3x,'total variance estimates')
       write(lun,1020)
- 1020 format( '  P     HT     Analysis + Turbulence ')
+ 1020 format( '  p     ht     analysis + turbulence ')
       write(lun,1021)
  1021 format( '                    (m2/sec2)  ' )
       write(lun,1007)
- 1007 format(19x,'U',8x,'V',9x,'W',6x,'Den',7x,'P',9x,'HT') 
- 1009 format(19x,'P',8x,'HT',8x,'Density')
- 1010 format(19x,'mb',8x,'m',8x,'Back',4x,'Anal')
+ 1007 format(19x,'u',8x,'v',9x,'w',6x,'den',7x,'p',9x,'ht') 
+ 1009 format(19x,'p',8x,'ht',8x,'density')
+ 1010 format(19x,'mb',8x,'m',8x,'back',4x,'anal')
 
       do k=1,nz
        ii=rri(k)
@@ -596,18 +596,18 @@ c combined variance formula - err(3,2,k) contains covariance
  1000 format(1x,f5.0,f8.0,2(f5.1,f5.1,f5.3),3f5.2,2f8.6)
  1006 format(1x,f5.0,f8.0,2(f5.1,f5.1,f5.3),3f5.2,2f7.4)
  1086 format(1x,f5.0,f8.0,2(f7.1,f7.1,f7.3),3f7.2)
- 1002 format(18x,'Background',5x,'Analysis',7x,'Turbulence',5x,
-     1'Density')
- 1082 format(18x,'Background',12x,'Analysis',12x,'Turbulence')
+ 1002 format(18x,'background',5x,'analysis',7x,'turbulence',5x,
+     1'density')
+ 1082 format(18x,'background',12x,'analysis',12x,'turbulence')
  1083 format(20x,3('(m/sec)',13x))
  1003 format(20x,3('(m2/sec2)',5x),'(kg2/m6)')
- 1004 format(3x,'P',7x,'HT  ',3('  U    V    W  '),'  Bgnd     Anal')
- 1084 format(3x,'P',7x,'HT  ',3('   U      V      W    '))
+ 1004 format(3x,'p',7x,'ht  ',3('  u    v    w  '),'  bgnd     anal')
+ 1084 format(3x,'p',7x,'ht  ',3('   u      v      w    '))
  1001 format(1x,f5.0,f8.0,3f9.3,2f9.6,f9.2)
  1005 format(1x,f5.0,f8.0,5f9.3)
  1025 format(1x,f5.0,f8.0,6f9.3)
  1008 format(1x,f5.0,f8.0,4f9.3)
 
-  909 print*,'Error opening airdrop output file'
+  909 print*,'error opening airdrop output file'
       return
       end

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -31,7 +31,7 @@ cdis
 cdis 
         function i4_to_byte(i4_in)
 
-cdoc    Converts an integer to a byte (character) variable
+cdoc    converts an integer to a byte (character) variable
 
         character i4_to_byte
 
@@ -49,7 +49,7 @@ cdoc    Converts an integer to a byte (character) variable
 
         function byte_to_i4(b_in)
 
-cdoc    Converts a byte (character) to an integer variable
+cdoc    converts a byte (character) to an integer variable
 
         integer i4,byte_to_i4
         character b_in
@@ -71,7 +71,7 @@ cdoc    Converts a byte (character) to an integer variable
         return
         end
 
-#ifdef USE_TRIGD
+#ifdef use_trigd
       module trigd
          public
          private pi_180
@@ -187,14 +187,14 @@ cdoc    Converts a byte (character) to an integer variable
             end function datan2d
       end module
 
-cdoc  The above functions operate with the USE_TRIGD compiler directive.
-cdoc  This is normally set by configure via 'trigd.inc' and supplies degree 
+cdoc  the above functions operate with the use_trigd compiler directive.
+cdoc  this is normally set by configure via 'trigd.inc' and supplies degree 
 cdoc  based trig functions if they are not intrinsic.
 
 #endif
       subroutine open_append(lun,file,status,istat)
 
-cdoc  Opens a file for appending (or a new file if non-existent)
+cdoc  opens a file for appending (or a new file if non-existent)
 
       integer istat
       character*(*) file,status
@@ -202,10 +202,10 @@ cdoc  Opens a file for appending (or a new file if non-existent)
 
       istat=1
 
-#if defined(hpux) && !defined(F90)
-      open(lun,file=file,status=status,ACCESS='APPEND',err=998)
-#elif defined(IRIX) && !defined(F90)
-      open(lun,file=file,status=status,ACCESS='APPEND',err=998)
+#if defined(hpux) && !defined(f90)
+      open(lun,file=file,status=status,access='append',err=998)
+#elif defined(irix) && !defined(f90)
+      open(lun,file=file,status=status,access='append',err=998)
 #else
       inquire(file=file, exist=exist)
       if (exist) then
@@ -221,46 +221,46 @@ cdoc  Opens a file for appending (or a new file if non-existent)
       return
       end
 
-#if defined(hpux) && !defined(F90)
+#if defined(hpux) && !defined(f90)
       real function transfer(in,out)
       integer in
       real out
-      print*, 'TRANSFER is not supported by this compiler'
-      print*, 'Please report this error to laps_bugs@fsl.noaa.gov'
+      print*, 'transfer is not supported by this compiler'
+      print*, 'please report this error to laps_bugs@fsl.noaa.gov'
       stop
       transfer=0
       return
       end
 #endif
 
-cdoc Below are some Taiwan FGGE routines
+cdoc below are some taiwan fgge routines
 
-cdoc  Below are dummy routines for other platforms
+cdoc  below are dummy routines for other platforms
 
-      subroutine read_fa(lun,filename                   ! I
-     .               ,nx,ny,nz                          ! I
-     .               ,r_missing_data                    ! I
-     .               ,pressures_pa                      ! O
-     .               ,ht,tp,rh,uw,vw                    ! O
-     .               ,mslp                              ! O
-     .               ,istatus)                          ! O
-      write(6,*)' WARNING: routine read_fa not supported '
+      subroutine read_fa(lun,filename                   ! i
+     .               ,nx,ny,nz                          ! i
+     .               ,r_missing_data                    ! i
+     .               ,pressures_pa                      ! o
+     .               ,ht,tp,rh,uw,vw                    ! o
+     .               ,mslp                              ! o
+     .               ,istatus)                          ! o
+      write(6,*)' warning: routine read_fa not supported '
      1         ,'on this platform'
-      istatus = 1 ! Failure
-      RETURN
-      END
+      istatus = 1 ! failure
+      return
+      end
 
-      subroutine read_fa_nf ( lun, filename,                   ! I
-     .                        nx, ny, nz,                      ! I
-     .                        r_missing_data,                  ! I
-     .                        pressures_pa,                    ! O
-     .                        ht, tp, rh, uw, vw, ww,          ! O
-     .                        pss, tps, rhs, uws, vws,         ! O
-     .                        mslp,                            ! O
-     .                        istatus )                        ! O
-      write(6,*)' WARNING: routine read_fa_nf not supported '
+      subroutine read_fa_nf ( lun, filename,                   ! i
+     .                        nx, ny, nz,                      ! i
+     .                        r_missing_data,                  ! i
+     .                        pressures_pa,                    ! o
+     .                        ht, tp, rh, uw, vw, ww,          ! o
+     .                        pss, tps, rhs, uws, vws,         ! o
+     .                        mslp,                            ! o
+     .                        istatus )                        ! o
+      write(6,*)' warning: routine read_fa_nf not supported '
      1         ,'on this platform'
-      istatus = 1 ! Failure
-      RETURN
-      END
+      istatus = 1 ! failure
+      return
+      end
 

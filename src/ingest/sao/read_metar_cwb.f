@@ -1,60 +1,60 @@
       subroutine read_metar_cwb(
-     &     filename, maxSkyCover, recNum, altimeter,
-     &     autoStationType, dewpoint, dpFromTenths, elevation,
-     &     latitude, longitude, maxTemp24Hour, minTemp24Hour,
-     &     precip1Hour, precip24Hour, precip3Hour, precip6Hour,
-     &     presWeather, pressChange3Hour, pressChangeChar,
-     &     reportType, seaLevelPress, skyCover, skyLayerBase,
-     &     snowCover, stationName, tempFromTenths, temperature,
-     &     timeObs, visibility, windDir, windGust, windSpeed, wmoId,
+     &     filename, maxskycover, recnum, altimeter,
+     &     autostationtype, dewpoint, dpfromtenths, elevation,
+     &     latitude, longitude, maxtemp24hour, mintemp24hour,
+     &     precip1hour, precip24hour, precip3hour, precip6hour,
+     &     presweather, presschange3hour, presschangechar,
+     &     reporttype, sealevelpress, skycover, skylayerbase,
+     &     snowcover, stationname, tempfromtenths, temperature,
+     &     timeobs, visibility, winddir, windgust, windspeed, wmoid,
      &     badflag, n, istatus )
 
       implicit none
 
-      integer  maxSkyCover, recNum
+      integer  maxskycover, recnum
 
-      character*6   autoStationType(recNum), reportType(recNum)
-      character*8   dmyCover(10,recNum), skyCover( maxSkyCover, recNum)
-      character*25  presWeather(recNum)
-      character*5   stationName(recNum)
+      character*6   autostationtype(recnum), reporttype(recnum)
+      character*8   dmycover(10,recnum), skycover( maxskycover, recnum)
+      character*25  presweather(recnum)
+      character*5   stationname(recnum)
 
-      integer  pressChangeChar(recNum), wmoId(recNum)
+      integer  presschangechar(recnum), wmoid(recnum)
       integer  istatus
 
-      double precision  timeObs(recNum)
+      double precision  timeobs(recnum)
 
-      real  altimeter(recNum), dewpoint(recNum), dpFromTenths(recNum)
-      real  elevation(recNum), latitude(recNum), longitude(recNum)
-      real  maxTemp24Hour(recNum), minTemp24Hour(recNum)
-      real  precip1Hour(recNum), precip24Hour(recNum)
-      real  precip3Hour(recNum), precip6Hour(recNum)
-      real  pressChange3Hour(recNum), seaLevelPress(recNum)
-      real  skyLayerBase( maxSkyCover, recNum), snowCover(recNum)
-      real  tempFromTenths(recNum), temperature(recNum)
-      real  visibility(recNum), windDir(recNum), windGust(recNum)
-      real  windSpeed(recNum)
+      real  altimeter(recnum), dewpoint(recnum), dpfromtenths(recnum)
+      real  elevation(recnum), latitude(recnum), longitude(recnum)
+      real  maxtemp24hour(recnum), mintemp24hour(recnum)
+      real  precip1hour(recnum), precip24hour(recnum)
+      real  precip3hour(recnum), precip6hour(recnum)
+      real  presschange3hour(recnum), sealevelpress(recnum)
+      real  skylayerbase( maxskycover, recnum), snowcover(recnum)
+      real  tempfromtenths(recnum), temperature(recnum)
+      real  visibility(recnum), winddir(recnum), windgust(recnum)
+      real  windspeed(recnum)
       real  badflag
 
       character*(*) filename
-      character*2   yy(recNum), m1(recNum), dd(recNum)
-      character*2   hh(recNum), m2(recNum)
-      character*10  time(recNum)
+      character*2   yy(recnum), m1(recnum), dd(recnum)
+      character*2   hh(recnum), m2(recnum)
+      character*10  time(recnum)
       character*9   a10_to_a9
 
-      integer windQua(recNum), windGustQua(recNum)
-      integer temperatureQua(recNum), dewpointQua(recNum)
-      integer altimeterQua(recNum)
+      integer windqua(recnum), windgustqua(recnum)
+      integer temperaturequa(recnum), dewpointqua(recnum)
+      integer altimeterqua(recnum)
       integer i, j, n, i4time
 
-      real  dmyLayerBase(10,recNum)
+      real  dmylayerbase(10,recnum)
 
-      integer    stnNum, len_dir
-      parameter  ( stnNum=4503 )
+      integer    stnnum, len_dir
+      parameter  ( stnnum=4503 )
 
       character*100  stn_directory, stn_filename
-      character*4    stn(stnNum)
+      character*4    stn(stnnum)
 
-      real         stnElevation(stnNum)
+      real         stnelevation(stnnum)
 
       istatus= 0
       n= 0
@@ -66,18 +66,18 @@
 
       istatus= 1
 
-      do j= 1,recNum
+      do j= 1,recnum
          read ( 1, 10, end=99, err=999 )
-     *   hh(j), m2(j), stationName(j), latitude(j),
-     *   longitude(j), windDir(j), windSpeed(j), windQua(j),
-     *   windGust(j), windGustQua(j), visibility(j), presWeather(j),
-     *   ( dmyCover(i,j), dmyLayerBase(i,j), i=1,7 ), seaLevelPress(j),
-     *   temperature(j), temperatureQua(j), dewpoint(j), dewpointQua(j),
-     *   altimeter(j), altimeterQua(j), precip1Hour(j), yy(j), m1(j),
+     *   hh(j), m2(j), stationname(j), latitude(j),
+     *   longitude(j), winddir(j), windspeed(j), windqua(j),
+     *   windgust(j), windgustqua(j), visibility(j), presweather(j),
+     *   ( dmycover(i,j), dmylayerbase(i,j), i=1,7 ), sealevelpress(j),
+     *   temperature(j), temperaturequa(j), dewpoint(j), dewpointqua(j),
+     *   altimeter(j), altimeterqua(j), precip1hour(j), yy(j), m1(j),
      *   dd(j)
          n= n+1
       enddo
-!HJ: W>=D=3. 10/14/2013
+!hj: w>=d=3. 10/14/2013
 10    format( 2a2, a4, 2f5.2, 2f5.0, i1, f5.0, i1, 2x, f5.0, 5x, a2,
      *        7(a3,f5.0), 3x, f5.1, 16x, 3(f5.0,i1), 10x, f6.3, 12x, 
      *        3a2 )
@@ -85,37 +85,37 @@
 c         -------       read the elevations of all stations      -------
 99    read (2,*)
       read (2,*)
-      read (2,'(a4,11x,f4.0)') ( stn(j), stnElevation(j), j=1,stnNum )
+      read (2,'(a4,11x,f4.0)') ( stn(j), stnelevation(j), j=1,stnnum )
 
       do 20 j= 1,n
-      do 20 i= 1,stnNum
-20       if ( stationName(j) .eq. stn(i) )  elevation(j)=stnElevation(i)
+      do 20 i= 1,stnnum
+20       if ( stationname(j) .eq. stn(i) )  elevation(j)=stnelevation(i)
 
 c      ----------       examing data quality and changing units       ---------
       do j= 1,n
 
-         if ( windQua(j) .ne. 1 )  then
-            windDir(j)= badflag
-            windSpeed(j)= badflag
+         if ( windqua(j) .ne. 1 )  then
+            winddir(j)= badflag
+            windspeed(j)= badflag
          endif
-         if ( windGustQua(j) .ne. 1 )  windGust(j)= badflag
+         if ( windgustqua(j) .ne. 1 )  windgust(j)= badflag
          if ( visibility(j) .eq. -9999. )  visibility(j)= badflag
-         if ( precip1Hour(j) .eq. -9.999 )  precip1Hour(j)= badflag
-         if ( presWeather(j) .eq. '-9' )  presWeather(j)= '  '
+         if ( precip1hour(j) .eq. -9.999 )  precip1hour(j)= badflag
+         if ( presweather(j) .eq. '-9' )  presweather(j)= '  '
 
-         if ( temperatureQua(j) .eq. 1 )  then
-               temperature(j)= temperature(j) +273.15  ! degC -> degK
+         if ( temperaturequa(j) .eq. 1 )  then
+               temperature(j)= temperature(j) +273.15  ! degc -> degk
             else
                temperature(j)= badflag
          endif
 
-         if ( dewpointQua(j) .eq. 1 )  then
-               dewpoint(j)= dewpoint(j) +273.15        ! degC -> degK
+         if ( dewpointqua(j) .eq. 1 )  then
+               dewpoint(j)= dewpoint(j) +273.15        ! degc -> degk
             else
                dewpoint(j)= badflag
          endif
 
-         if ( altimeterQua(j) .eq. 1 )  then
+         if ( altimeterqua(j) .eq. 1 )  then
                altimeter(j)= altimeter(j) *100         ! mb -> pascal
             else
                altimeter(j)= badflag
@@ -126,67 +126,67 @@ c      ----------       examing data quality and changing units       ---------
          if ( dd(j)(1:1) .eq. ' ' )  dd(j)= '0'//dd(j)(2:2)
          time(j)= yy(j)//m1(j)//dd(j)//hh(j)//m2(j)
          call cv_asc_i4time( a10_to_a9(time(j),istatus), i4time )
-         timeObs(j)= dble( i4time )                    ! seconds since 1960
+         timeobs(j)= dble( i4time )                    ! seconds since 1960
 
       enddo
 
       do 30 j= 1,n
-      do 30 i= 1,maxSkyCover
-         skyCover(i,j)= dmyCover(i,j)
-         skyLayerBase(i,j)= dmyLayerBase(i,j)
+      do 30 i= 1,maxskycover
+         skycover(i,j)= dmycover(i,j)
+         skylayerbase(i,j)= dmylayerbase(i,j)
 
-         if ( skyCover(i,j) .eq. '-99' )  skyCover(i,j)= '   '
+         if ( skycover(i,j) .eq. '-99' )  skycover(i,j)= '   '
 
-         if ( skyLayerBase(i,j) .eq. -9999. )  then
-               skyLayerBase(i,j)= badflag
-	       skyCover(i,j)= '   '
-         elseif ( skyLayerBase(i,j) .eq. 0. )  then
-               skyLayerBase(i,j)= 15.
-         elseif ( skyLayerBase(i,j) .eq. 999. )  then
-               skyLayerBase(i,j)= 30000.
+         if ( skylayerbase(i,j) .eq. -9999. )  then
+               skylayerbase(i,j)= badflag
+	       skycover(i,j)= '   '
+         elseif ( skylayerbase(i,j) .eq. 0. )  then
+               skylayerbase(i,j)= 15.
+         elseif ( skylayerbase(i,j) .eq. 999. )  then
+               skylayerbase(i,j)= 30000.
          else
-               skyLayerBase(i,j)= skyLayerBase(i,j) *30.        ! unit: m
+               skylayerbase(i,j)= skylayerbase(i,j) *30.        ! unit: m
          endif
 30    continue
 
 c               -------      dealing with lacking of data      -------
       do j= 1,n
-         autoStationType(j)= "UNK"
-         reportType(j)= "METAR"
+         autostationtype(j)= "unk"
+         reporttype(j)= "metar"
 
-         pressChangeChar(j)= int(badflag)
-         wmoId(j)= int(badflag)
+         presschangechar(j)= int(badflag)
+         wmoid(j)= int(badflag)
 
-         dpFromTenths(j)= badflag
-         maxTemp24Hour(j)= badflag
-         minTemp24Hour(j)= badflag
-         precip24Hour(j)= badflag
-         precip3Hour(j)= badflag
-         precip6Hour(j)= badflag
-         pressChange3Hour(j)= badflag
-         seaLevelPress(j)= badflag
-         snowCover(j)= badflag
-         tempFromTenths(j)= badflag
+         dpfromtenths(j)= badflag
+         maxtemp24hour(j)= badflag
+         mintemp24hour(j)= badflag
+         precip24hour(j)= badflag
+         precip3hour(j)= badflag
+         precip6hour(j)= badflag
+         presschange3hour(j)= badflag
+         sealevelpress(j)= badflag
+         snowcover(j)= badflag
+         tempfromtenths(j)= badflag
       enddo
 
       go to 1000
 
 999   do j= 1,n
          write(6,*)
-     *   hh(j), m2(j), stationName(j), latitude(j), longitude(j),
-     *   windDir(j), windSpeed(j), windQua(j),
-     *   windGust(j), windGustQua(j), visibility(j), presWeather(j),
-     *   ( dmyCover(i,j), dmyLayerBase(i,j), i=1,10), temperature(j),
-     *   temperatureQua(j), dewpoint(j), dewpointQua(j), altimeter(j),
-     *   altimeterQua(j), precip1Hour(j), yy(j), m1(j), dd(j), hh(j),
-     *   m2(j), time(j), timeObs(j), elevation(j)
+     *   hh(j), m2(j), stationname(j), latitude(j), longitude(j),
+     *   winddir(j), windspeed(j), windqua(j),
+     *   windgust(j), windgustqua(j), visibility(j), presweather(j),
+     *   ( dmycover(i,j), dmylayerbase(i,j), i=1,10), temperature(j),
+     *   temperaturequa(j), dewpoint(j), dewpointqua(j), altimeter(j),
+     *   altimeterqua(j), precip1hour(j), yy(j), m1(j), dd(j), hh(j),
+     *   m2(j), time(j), timeobs(j), elevation(j)
       enddo
       write(6,*)
-     *      autoStationType, reportType,
-     *      pressChangeChar, wmoId,
-     *      dpFromTenths, maxTemp24Hour, minTemp24Hour,
-     *      precip24Hour, precip3Hour, precip6Hour, pressChange3Hour,
-     *      seaLevelPress, snowCover, tempFromTenths, wmoId
+     *      autostationtype, reporttype,
+     *      presschangechar, wmoid,
+     *      dpfromtenths, maxtemp24hour, mintemp24hour,
+     *      precip24hour, precip3hour, precip6hour, presschange3hour,
+     *      sealevelpress, snowcover, tempfromtenths, wmoid
 
 1000  return
       end

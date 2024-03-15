@@ -1,60 +1,60 @@
       subroutine jpcpack(fld,width,height,idrstmpl,cpack,lcpack)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    jpcpack
-!   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-12-17
+! subprogram:    jpcpack
+!   prgmmr: gilbert          org: w/np11    date: 2002-12-17
 !
-! ABSTRACT: This subroutine packs up a data field into a JPEG2000 code stream.
-!   After the data field is scaled, and the reference value is subtracted out,
-!   it is treated as a grayscale image and passed to a JPEG2000 encoder.
-!   It also fills in GRIB2 Data Representation Template 5.40 or 5.40000 with the
+! abstract: this subroutine packs up a data field into a jpeg2000 code stream.
+!   after the data field is scaled, and the reference value is subtracted out,
+!   it is treated as a grayscale image and passed to a jpeg2000 encoder.
+!   it also fills in grib2 data representation template 5.40 or 5.40000 with the
 !   appropriate values.
 !
-! PROGRAM HISTORY LOG:
-! 2002-12-17  Gilbert
-! 2004-07-19  Gilbert - Added check on whether the jpeg2000 encoding was
-!                       successful.  If not, try again with different encoder
+! program history log:
+! 2002-12-17  gilbert
+! 2004-07-19  gilbert - added check on whether the jpeg2000 encoding was
+!                       successful.  if not, try again with different encoder
 !                       options.
 !
-! USAGE:    CALL jpcpack(fld,width,height,idrstmpl,cpack,lcpack)
-!   INPUT ARGUMENT LIST:
-!     fld()    - Contains the data values to pack
+! usage:    call jpcpack(fld,width,height,idrstmpl,cpack,lcpack)
+!   input argument list:
+!     fld()    - contains the data values to pack
 !     width    - number of points in the x direction
 !     height   - number of points in the y direction
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.40 or 5.40000
-!                (1) = Reference value - ignored on input
-!                (2) = Binary Scale Factor
-!                (3) = Decimal Scale Factor
+!     idrstmpl - contains the array of values for data representation
+!                template 5.40 or 5.40000
+!                (1) = reference value - ignored on input
+!                (2) = binary scale factor
+!                (3) = decimal scale factor
 !                (4) = number of bits for each data value - ignored on input
-!                (5) = Original field type - currently ignored on input
-!                      Data values assumed to be reals.
+!                (5) = original field type - currently ignored on input
+!                      data values assumed to be reals.
 !                (6) = 0 - use lossless compression
 !                    = 1 - use lossy compression
-!                (7) = Desired compression ratio, if idrstmpl(6)=1.
-!                      Set to 255, if idrstmpl(6)=0.
+!                (7) = desired compression ratio, if idrstmpl(6)=1.
+!                      set to 255, if idrstmpl(6)=0.
 !     lcpack   - size of array cpack().
 !
-!   OUTPUT ARGUMENT LIST: 
-!     idrstmpl - Contains the array of values for Data Representation
-!                Template 5.0
-!                (1) = Reference value - set by jpcpack routine.
-!                (2) = Binary Scale Factor - unchanged from input
-!                (3) = Decimal Scale Factor - unchanged from input
-!                (4) = Number of bits containing each grayscale pixel value
-!                (5) = Original field type - currently set = 0 on output.
-!                      Data values assumed to be reals.
+!   output argument list: 
+!     idrstmpl - contains the array of values for data representation
+!                template 5.0
+!                (1) = reference value - set by jpcpack routine.
+!                (2) = binary scale factor - unchanged from input
+!                (3) = decimal scale factor - unchanged from input
+!                (4) = number of bits containing each grayscale pixel value
+!                (5) = original field type - currently set = 0 on output.
+!                      data values assumed to be reals.
 !                (6) = 0 - use lossless compression
 !                    = 1 - use lossy compression
-!                (7) = Desired compression ratio, if idrstmpl(6)=1
-!     cpack    - The packed data field (character*1 array)
+!                (7) = desired compression ratio, if idrstmpl(6)=1
+!     cpack    - the packed data field (character*1 array)
 !     lcpack   - length of packed field in cpack().
 !
-! REMARKS: None
+! remarks: none
 !
-! ATTRIBUTES:
-!   LANGUAGE: XL Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: xl fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -70,13 +70,13 @@
       integer,parameter :: zero=0
       integer :: enc_jpeg2000
       character(len=1),allocatable :: ctemp(:)
-#ifdef USE_JPEG2000
+#ifdef use_jpeg2000
       
       ndpts=width*height
       bscale=2.0**real(-idrstmpl(2))
       dscale=10.0**real(idrstmpl(3))
 !
-!  Find max and min values in the data
+!  find max and min values in the data
 !
       rmax=fld(1)
       rmin=fld(1)
@@ -90,19 +90,19 @@
          maxdif=nint((rmax-rmin)*dscale*bscale)
       endif
 !
-!  If max and min values are not equal, pack up field.
-!  If they are equal, we have a constant field, and the reference
+!  if max and min values are not equal, pack up field.
+!  if they are equal, we have a constant field, and the reference
 !  value (rmin) is the value for each point in the field and
 !  set nbits to 0.
 !
-      if (rmin.ne.rmax .AND. maxdif.ne.0) then
+      if (rmin.ne.rmax .and. maxdif.ne.0) then
         !
-        !  Determine which algorithm to use based on user-supplied 
+        !  determine which algorithm to use based on user-supplied 
         !  binary scale factor and number of bits.
         !
         if (idrstmpl(2).eq.0) then
            !
-           !  No binary scaling and calculate minimum number of 
+           !  no binary scaling and calculate minimum number of 
            !  bits in which the data will fit.
            !
            imin=nint(rmin*dscale)
@@ -117,7 +117,7 @@
            enddo
         else
            !
-           !  Use binary scaling factor and calculate minimum number of 
+           !  use binary scaling factor and calculate minimum number of 
            !  bits in which the data will fit.
            !
            rmin=rmin*dscale
@@ -131,7 +131,7 @@
            enddo
         endif
         !
-        !  Pack data into full octets, then do JPEG2000 encode.
+        !  pack data into full octets, then do jpeg2000 encode.
         !  and calculate the length of the packed data in bytes
         !
         retry=0
@@ -142,16 +142,16 @@
         lcpack=enc_jpeg2000(ctemp,width,height,nbits,idrstmpl(6),
      &                      idrstmpl(7),retry,cpack,nsize)
         if (lcpack.le.0) then
-           print *,'jpcpack: ERROR Packing JPC=',lcpack
+           print *,'jpcpack: error packing jpc=',lcpack
            if (lcpack.eq.-3) then
               retry=1
-              print *,'jpcpack: Retrying....'
+              print *,'jpcpack: retrying....'
               lcpack=enc_jpeg2000(ctemp,width,height,nbits,idrstmpl(6),
      &                         idrstmpl(7),retry,cpack,nsize)
               if (lcpack.le.0) then
-                 print *,'jpcpack: Retry Failed.'
+                 print *,'jpcpack: retry failed.'
               else
-                 print *,'jpcpack: Retry Successful.'
+                 print *,'jpcpack: retry successful.'
               endif
            endif
         endif
@@ -163,9 +163,9 @@
       endif
 
 !
-!  Fill in ref value and number of bits in Template 5.0
+!  fill in ref value and number of bits in template 5.0
 !
-      call mkieee(rmin,ref,1)   ! ensure reference value is IEEE format
+      call mkieee(rmin,ref,1)   ! ensure reference value is ieee format
 !      call gbyte(ref,idrstmpl(1),0,32)
       iref=transfer(ref,iref)
       idrstmpl(1)=iref
@@ -173,6 +173,6 @@
       idrstmpl(5)=0         ! original data were reals
       if (idrstmpl(6).eq.0) idrstmpl(7)=255       ! lossy not used
 
-#endif /* USE_JPEG2000 */
+#endif /* use_jpeg2000 */
       return
       end

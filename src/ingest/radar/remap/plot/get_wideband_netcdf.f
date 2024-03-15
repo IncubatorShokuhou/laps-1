@@ -1,69 +1,69 @@
 
-      subroutine get_wideband_netcdf(FILENAME
-     &          ,rad_dim,Z_dim,V_dim
-     &          ,image_Z,image_V,image_W
-     &          ,Azim_ang, Elev_ang, resolV
-     &          ,ISTAT)
+      subroutine get_wideband_netcdf(filename
+     &          ,rad_dim,z_dim,v_dim
+     &          ,image_z,image_v,image_w
+     &          ,azim_ang, elev_ang, resolv
+     &          ,istat)
 c
-c * A subroutine to read wideband level II data
-c   00 Nov 2001  Dongsoo Kim    Original
+c * a subroutine to read wideband level ii data
+c   00 nov 2001  dongsoo kim    original
 c 
       integer rad_max, ang_max
       parameter (rad_max = 999, ang_max = 999)
-      integer rad_dim, Z_dim, V_dim
-      byte  Z(Z_dim,rad_dim),W(V_dim,rad_dim)
-     &     ,V(V_dim,rad_dim)
+      integer rad_dim, z_dim, v_dim
+      byte  z(z_dim,rad_dim),w(v_dim,rad_dim)
+     &     ,v(v_dim,rad_dim)
 c
 c * output
 c
-      real  Azim_ang(rad_dim), Elev_ang(rad_dim), resolV
-      integer*2  image_Z(460,rad_max)
-     &     ,image_V(920,rad_max)
-     &     ,image_W(920,rad_max)
+      real  azim_ang(rad_dim), elev_ang(rad_dim), resolv
+      integer*2  image_z(460,rad_max)
+     &     ,image_v(920,rad_max)
+     &     ,image_w(920,rad_max)
 c
 c *************************************
 c
-      CHARACTER FILENAME*72
+      character filename*72
 c
       include 'netcdf.inc'
 c
-      STATUS=NF_OPEN(FILENAME,NF_NOWRITE,NCID)
-      if (STATUS .ne. NF_NOERR) then
-           ISTAT = -1
-           print *, FILENAME,' is not avail'
+      status=nf_open(filename,nf_nowrite,ncid)
+      if (status .ne. nf_noerr) then
+           istat = -1
+           print *, filename,' is not avail'
            return
       endif
 c
 c  statements to fill image                          
 c
-      nf_status = NF_INQ_VARID(NCID,'Z',nf_vid)
-      nf_status = NF_GET_VAR_INT1(NCID,nf_vid,Z)
-      nf_status = NF_INQ_VARID(NCID,'V',nf_vid)
-      nf_status = NF_GET_VAR_INT1(NCID,nf_vid,V)
-      nf_status = NF_INQ_VARID(NCID,'W',nf_vid)
-      nf_status = NF_GET_VAR_INT1(NCID,nf_vid,W)
+      nf_status = nf_inq_varid(ncid,'z',nf_vid)
+      nf_status = nf_get_var_int1(ncid,nf_vid,z)
+      nf_status = nf_inq_varid(ncid,'v',nf_vid)
+      nf_status = nf_get_var_int1(ncid,nf_vid,v)
+      nf_status = nf_inq_varid(ncid,'w',nf_vid)
+      nf_status = nf_get_var_int1(ncid,nf_vid,w)
 c
-      nf_status = NF_INQ_VARID(NCID,'radialAzim',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,Azim_ang)
-      nf_status = NF_INQ_VARID(NCID,'radialElev',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,Elev_ang)
-      nf_status = NF_INQ_VARID(NCID,'resolutionV',nf_vid)
-      nf_status = NF_GET_VAR_REAL(NCID,nf_vid,resolV)
+      nf_status = nf_inq_varid(ncid,'radialazim',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,azim_ang)
+      nf_status = nf_inq_varid(ncid,'radialelev',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,elev_ang)
+      nf_status = nf_inq_varid(ncid,'resolutionv',nf_vid)
+      nf_status = nf_get_var_real(ncid,nf_vid,resolv)
 
-      nf_status = NF_CLOSE(NCID)
+      nf_status = nf_close(ncid)
 c
       do j=1,rad_dim
-      do i=1,Z_dim
-         image_Z(i,j) = iand(Z(i,j),255)
+      do i=1,z_dim
+         image_z(i,j) = iand(z(i,j),255)
       enddo
       enddo
 c
       do j=1,rad_dim
-      do i=1,V_dim
-         image_V(i,j) = iand(V(i,j),255)
-         image_W(i,j) = iand(W(i,j),255)
+      do i=1,v_dim
+         image_v(i,j) = iand(v(i,j),255)
+         image_w(i,j) = iand(w(i,j),255)
       enddo
       enddo
 c
-      RETURN
-      END
+      return
+      end

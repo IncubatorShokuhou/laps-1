@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,121 +29,121 @@ cdis
 cdis 
 cdis 
 cdis 
-      Program LSM5
+      program lsm5
 
       implicit none
 
       integer    istatus
       integer    nx_l,ny_l
        
-      call get_grid_dim_xy(NX_L,NY_L,istatus)
+      call get_grid_dim_xy(nx_l,ny_l,istatus)
       if(istatus.eq.1)then
-        write(6,*)'LAPS Parameters obtained'
+        write(6,*)'laps parameters obtained'
       else
-        write(6,*)'IStatus = ',IStatus,'Error - Get_LAPS_Config'
-        write(6,*)'Terminating LAPS-LSM5. Soil Moisture'
+        write(6,*)'istatus = ',istatus,'error - get_laps_config'
+        write(6,*)'terminating laps-lsm5. soil moisture'
         stop
       end if
-      call lsm5_sub(NX_L,NY_L)
+      call lsm5_sub(nx_l,ny_l)
       stop
       end
 
 c
 c ************************************************************************** 
 c
-      subroutine LSM5_sub(imax,jmax)
+      subroutine lsm5_sub(imax,jmax)
 
-C     Program LAPS SoilMoisture Analysis
-C     Changed to enable gridded analysis and real time
-C     Chandran Subramaniam
-C     2/8/93
+c     program laps soilmoisture analysis
+c     changed to enable gridded analysis and real time
+c     chandran subramaniam
+c     2/8/93
       
-C     John Smart 12/1/93: Adapting to run in real time on the
-C     			  UNIX platform.  Set up LAPS standard I/O.
-C                         Enhanced modularity.
-C     J Smart    9/22/97  Adapt for dynamic array memory allocation
-C
+c     john smart 12/1/93: adapting to run in real time on the
+c     			  unix platform.  set up laps standard i/o.
+c                         enhanced modularity.
+c     j smart    9/22/97  adapt for dynamic array memory allocation
+c
       integer   imax,jmax
 
-      Include 'soilm.inc'
-C
-C**** MODEL12 is a Soil Moisture Content model developed in June l986, and
-C     based upon the Remote Sensing Based Watershed Model developed at
-C     the University of Maryland from 1982 to 1985.  This is Version 12.4,
-C     as submitted to Water Resources Bulletin in January 1989.
-C     Created by Groves.
+      include 'soilm.inc'
+c
+c**** model12 is a soil moisture content model developed in june l986, and
+c     based upon the remote sensing based watershed model developed at
+c     the university of maryland from 1982 to 1985.  this is version 12.4,
+c     as submitted to water resources bulletin in january 1989.
+c     created by groves.
 
-      REAL 	KSAT,LAMDA,IN
-      DATA 	DAY,SUMR,IN,OLDWEA/4*0./
-      Integer   IStatus, i, j, ii
-      Integer   Istatus_precip, istatus_m
-      Integer   Istatus_w,Istatus_n,Istatus_e
-      Integer   SoilType(Imax,Jmax)
-      REAL      Laps_u(Imax,Jmax)     !u-component
-      REAL      Laps_v(Imax,Jmax)     !v-component
-      REAL      Laps_T(Imax,Jmax)     !Temperature
-      REAL      Laps_TD(Imax,Jmax)    !Dewpoint Temperature
-      REAL      Laps_IN(Imax,Jmax)    !Infiltration
-      REAL      Laps_Wx(Imax,Jmax)    !Weather data; grid pt wet or dry.
-      REAL      Laps_WFZ(Imax,Jmax)   !Wetting Front Depth, z
-      REAL      Laps_MWF(Imax,Jmax)   !Wetting Front Moisture Content
-      REAL      Laps_MWF_pre(Imax,Jmax)!Previous Wetting Front Moist Content.
-      REAL      Laps_Evap(Imax,Jmax)  !Evaporation
-      REAL      Laps_Rain(Imax, Jmax) !Radar-estimated 1hr liq. precip
-      REAL      Laps_SC(Imax,Jmax)    !Snow Cover; fractional  0.0 to 1.0.
-      REAL      Laps_SC_pre(Imax,Jmax)!Previous Hour Snow Cover   " .
-c     REAL      Laps_SM(Imax,Jmax)    !Snow Melt, undefined currently
-      REAL      Laps_SMC_3D(Imax,Jmax,3)!Three layer Soil Moisture Content
-      REAL      soilm_field_cap(Imax,Jmax)!Field cap soil moistr (m**3/m**3)
-      REAL      soilm_sat(Imax,Jmax) !Saturated soil moistr (m**3/m**3)
-      REAL      data(Imax,Jmax,7)    !Holds LM2 output data - current time.
-      REAL      data_s(Imax,Jmax,4)  !Holds LSX input data - current time
+      real 	ksat,lamda,in
+      data 	day,sumr,in,oldwea/4*0./
+      integer   istatus, i, j, ii
+      integer   istatus_precip, istatus_m
+      integer   istatus_w,istatus_n,istatus_e
+      integer   soiltype(imax,jmax)
+      real      laps_u(imax,jmax)     !u-component
+      real      laps_v(imax,jmax)     !v-component
+      real      laps_t(imax,jmax)     !temperature
+      real      laps_td(imax,jmax)    !dewpoint temperature
+      real      laps_in(imax,jmax)    !infiltration
+      real      laps_wx(imax,jmax)    !weather data; grid pt wet or dry.
+      real      laps_wfz(imax,jmax)   !wetting front depth, z
+      real      laps_mwf(imax,jmax)   !wetting front moisture content
+      real      laps_mwf_pre(imax,jmax)!previous wetting front moist content.
+      real      laps_evap(imax,jmax)  !evaporation
+      real      laps_rain(imax, jmax) !radar-estimated 1hr liq. precip
+      real      laps_sc(imax,jmax)    !snow cover; fractional  0.0 to 1.0.
+      real      laps_sc_pre(imax,jmax)!previous hour snow cover   " .
+c     real      laps_sm(imax,jmax)    !snow melt, undefined currently
+      real      laps_smc_3d(imax,jmax,3)!three layer soil moisture content
+      real      soilm_field_cap(imax,jmax)!field cap soil moistr (m**3/m**3)
+      real      soilm_sat(imax,jmax) !saturated soil moistr (m**3/m**3)
+      real      data(imax,jmax,7)    !holds lm2 output data - current time.
+      real      data_s(imax,jmax,4)  !holds lsx input data - current time
 
-      Logical   Griddry,Filefound
-      Integer   loop_bound
-      Integer   i4time_smcur, i4time_smpre(25),
+      logical   griddry,filefound
+      integer   loop_bound
+      integer   i4time_smcur, i4time_smpre(25),
      &          lvl_s(4),lvl_1(3),lvl_2(7),lvl_l
-      Character ftime_smcur*9
+      character ftime_smcur*9
 c laps precip
-      Character ext_l*31, dir_l*150, var_l*3, lvl_coord_l*4,
+      character ext_l*31, dir_l*150, var_l*3, lvl_coord_l*4,
      &          units_l*10, comment_l*125
 c laps surface
-      Character ext_s*31, dir_s*150, var_s(4)*3, lvl_coord_s(4)*4,
+      character ext_s*31, dir_s*150, var_s(4)*3, lvl_coord_s(4)*4,
      &          units_s(4)*10, comment_s(4)*125
 c background
-      Character var_bkg(4)*3
+      character var_bkg(4)*3
 c laps lm1...3-layer % soil saturation
-      Character dir_1*150, ext1*31, var_1(3)*3, lvl_coord1(3)*4,
+      character dir_1*150, ext1*31, var_1(3)*3, lvl_coord1(3)*4,
      &          units1(3)*10, comment1(3)*125
 c laps lm2...variety of soil characteristic variables
-      Character dir_2*150, ext2*31, var_2(7)*3, lvl_coord2(7)*4, 
+      character dir_2*150, ext2*31, var_2(7)*3, lvl_coord2(7)*4, 
      &          units2(7)*10, comment2(7)*125
-      Character atime_smpre(25)*24
-      Character fname*200
+      character atime_smpre(25)*24
+      character fname*200
 
-      DATA	ext_s/'lsx'/
-      DATA	ext_l/'l1s'/
-      DATA	ext1/'lm1'/
-      DATA	ext2/'lm2'/
-      DATA      var_s/'U  ','V  ','T  ','TD '/
-      DATA      var_bkg/'USF','VSF','TSF','DSF'/
-      DATA      var_l/'R01'/
-      DATA      var_1/'LSM', 'LSM', 'LSM'/
-      DATA      var_2/'CIV', 'DWF', 'MWF', 'WX ', 'EVP', 'SC ', 'SM'/
-      DATA      units1/'%','%','%'/
-      DATA      units2/'m**3','m','m**3/m**3',' ','m/s','%',' '/
-      DATA      comment1/
+      data	ext_s/'lsx'/
+      data	ext_l/'l1s'/
+      data	ext1/'lm1'/
+      data	ext2/'lm2'/
+      data      var_s/'u  ','v  ','t  ','td '/
+      data      var_bkg/'usf','vsf','tsf','dsf'/
+      data      var_l/'r01'/
+      data      var_1/'lsm', 'lsm', 'lsm'/
+      data      var_2/'civ', 'dwf', 'mwf', 'wx ', 'evp', 'sc ', 'sm'/
+      data      units1/'%','%','%'/
+      data      units2/'m**3','m','m**3/m**3',' ','m/s','%',' '/
+      data      comment1/
      &          'layer 1 (0-6in [0-0.152m]) % soil saturation',
      &          'layer 2 (6-12in [.152-.305m]) % soil saturation',
      &          'layer 3 (12-36in [.305-0.914m]) % soil saturation'/
-      DATA comment2(1)/'Cumulative Infiltration Volume (m)'/
-      DATA comment2(2)/'Depth of Wetting Front (m)'/
-      DATA comment2(3)/'Moisture content of wetting front (m**3/m**3)'/
-      DATA comment2(4)/'Weather indicator - pos = wet, neg = dry'/
-      DATA comment2(5)/'Evaporation (m/s)'/
-      DATA comment2(6)/'Snow Cover Value (fractional, 0 to 1.0)'/
-      DATA comment2(7)/'Snow Melt Value, (gm/s)'/
-      DATA	Lvl_1/-1,-2,-3/
+      data comment2(1)/'cumulative infiltration volume (m)'/
+      data comment2(2)/'depth of wetting front (m)'/
+      data comment2(3)/'moisture content of wetting front (m**3/m**3)'/
+      data comment2(4)/'weather indicator - pos = wet, neg = dry'/
+      data comment2(5)/'evaporation (m/s)'/
+      data comment2(6)/'snow cover value (fractional, 0 to 1.0)'/
+      data comment2(7)/'snow melt value, (gm/s)'/
+      data	lvl_1/-1,-2,-3/
 c 
 c first read in current time
 c
@@ -157,21 +157,21 @@ c
 c -------------------------
       print*,'systime: ',ftime_smcur,' i4time: ',i4time_smcur
 
-C**** Read soil description and simulation time step 
+c**** read soil description and simulation time step 
 
       call get_directory('lm1',dir_1,len)
 
-      Call Soil_In5(imax,jmax,SoilType,IStatus)   	! Get soil texture group
-      if(IStatus.ne.1)then
-         write(6,*)'Soil Textures Obtained'
-         write(6,*)'Soil type = ',SoilType(1,1)
+      call soil_in5(imax,jmax,soiltype,istatus)   	! get soil texture group
+      if(istatus.ne.1)then
+         write(6,*)'soil textures obtained'
+         write(6,*)'soil type = ',soiltype(1,1)
       else
-         write(6,*)'Soil Textures Not Obtained - Terminating'
+         write(6,*)'soil textures not obtained - terminating'
          stop
       end if
 c
-c  Get the current and previous i4time and ascii times. Allow for 4 previous
-c  times for the previous soil moisture product.  Mandatory to have 1 previous
+c  get the current and previous i4time and ascii times. allow for 4 previous
+c  times for the previous soil moisture product.  mandatory to have 1 previous
 c  time so if the 4th previous time is the current time then the 5th is prev.
 
       loop_bound=5
@@ -179,88 +179,88 @@ c  time so if the 4th previous time is the current time then the 5th is prev.
       do i=1,loop_bound
          i4time_smpre(i) = i4time_smcur - 3600*icnt
          call cv_i4tim_asc_lp(i4time_smpre(i),
-     &                        atime_smpre(i),IStatus)
+     &                        atime_smpre(i),istatus)
          icnt = icnt + 1
       end do
       print*,'current time: ',atime_smpre(1)
 
-c  Get current surface data: LAPS LSX; u- v-component, temp and dew point.
+c  get current surface data: laps lsx; u- v-component, temp and dew point.
        call get_directory('lsx',dir_s,len)
        do i=1,4
           lvl_s(i)=0
        end do
 
-       Filefound = .false.
+       filefound = .false.
        ii = 0
-       do while (.not.Filefound)
+       do while (.not.filefound)
           ii = ii + 1
-          Call Read_Laps_Data(i4time_smpre(ii), dir_s, ext_s,
-     &              Imax, Jmax, 4, 4, var_s, lvl_s, lvl_coord_s, 
-     &              units_s, comment_s, data_s, IStatus)
+          call read_laps_data(i4time_smpre(ii), dir_s, ext_s,
+     &              imax, jmax, 4, 4, var_s, lvl_s, lvl_coord_s, 
+     &              units_s, comment_s, data_s, istatus)
 
-         if(IStatus.eq.1)then
-            Write(6,*)'LAPS Surface data retrieved'
-            write(6,*)'Sfc Directory [dir_s] = ',dir_s
+         if(istatus.eq.1)then
+            write(6,*)'laps surface data retrieved'
+            write(6,*)'sfc directory [dir_s] = ',dir_s
             write(6,*)'time retrieved:',atime_smpre(ii)
-            Filefound = .true.
+            filefound = .true.
 
-            Laps_u=data_s(:,:,1)
-            Laps_v=data_s(:,:,2)
-            Laps_T=data_s(:,:,3)
-            Laps_TD=data_s(:,:,4)
+            laps_u=data_s(:,:,1)
+            laps_v=data_s(:,:,2)
+            laps_t=data_s(:,:,3)
+            laps_td=data_s(:,:,4)
 
          elseif(ii .ge. loop_bound)then
-            Filefound = .true.
-            Write(6,*)'LAPS Surface data not available'
-            print*,'Lets try model bkg for surface u/v/T/Td'
+            filefound = .true.
+            write(6,*)'laps surface data not available'
+            print*,'lets try model bkg for surface u/v/t/td'
             call get_modelfg_2d(i4time_smcur,var_bkg(1)
-     1,imax,jmax,Laps_u,istatus)
+     1,imax,jmax,laps_u,istatus)
             if(istatus.ne.1)goto 59
             call get_modelfg_2d(i4time_smcur,var_bkg(2)
-     1,imax,jmax,Laps_v,istatus)
+     1,imax,jmax,laps_v,istatus)
             if(istatus.ne.1)goto 59
             call get_modelfg_2d(i4time_smcur,var_bkg(3)
-     1,imax,jmax,Laps_T,istatus)
+     1,imax,jmax,laps_t,istatus)
             if(istatus.ne.1)goto 59
             call get_modelfg_2d(i4time_smcur,var_bkg(4)
-     1,imax,jmax,Laps_Td,istatus)
+     1,imax,jmax,laps_td,istatus)
 
 59          if(istatus.ne.1)then
-               print*,'Failed to get background in get_modelfg_2d'
-               print*,'Terminating LAPS Soil Moisture'
+               print*,'failed to get background in get_modelfg_2d'
+               print*,'terminating laps soil moisture'
                return
             endif
          end if
        end do
 c
-c Get LAPS snow cover
+c get laps snow cover
 c -------------------
-       write(6,*)'Compute snow cover'
+       write(6,*)'compute snow cover'
        write(6,*)
 
-       Call readcsc(i4time_smcur
+       call readcsc(i4time_smcur
      &              ,imax,jmax
-     &              ,LAPS_SC)
+     &              ,laps_sc)
 
-       write(6,*)'Snow cover computed'
-       Write(6,*)'***************************************'
-       Write(6,*)'Getting Field Cap and Saturated Soil Moisture'
+       write(6,*)'snow cover computed'
+       write(6,*)'***************************************'
+       write(6,*)'getting field cap and saturated soil moisture'
 
-       Do J = 1, Jmax
-          Do I = 1, Imax
-             ISOIL = SoilType(I,J)
-C   Get default soil hydraulic parameters and initial soil moisture
-             CALL SOILS(ISOIL,KSAT,THS,THR,PSIF,PSIAE,LAMDA)
-             CALL AMC(Th_field_cap,ISOIL,THS)
-             soilm_sat(i,j) = THS
-             soilm_field_cap(i,j) = Th_field_cap
-          Enddo
-       Enddo
+       do j = 1, jmax
+          do i = 1, imax
+             isoil = soiltype(i,j)
+c   get default soil hydraulic parameters and initial soil moisture
+             call soils(isoil,ksat,ths,thr,psif,psiae,lamda)
+             call amc(th_field_cap,isoil,ths)
+             soilm_sat(i,j) = ths
+             soilm_field_cap(i,j) = th_field_cap
+          enddo
+       enddo
 c
-c Get previous soil moisture data: LAPS LM2; infiltration, depth of wetting
-c front (WF), previous weather (ie, wet or dry), and moisture content of WF.
+c get previous soil moisture data: laps lm2; infiltration, depth of wetting
+c front (wf), previous weather (ie, wet or dry), and moisture content of wf.
 c
-       Write(6,*) 'Obtaining Soil Moisture data'
+       write(6,*) 'obtaining soil moisture data'
 
        call get_directory('lm2',dir_2,len)
 c       dir_2 = '../lapsprd/lm2/'
@@ -272,43 +272,43 @@ c
        ii=2
        do while(.not.filefound)
 c
-          call Read_Laps_Data(i4time_smpre(ii), dir_2, ext2,
-     &       Imax, Jmax, 7, 7, var_2, lvl_2, lvl_coord2,
+          call read_laps_data(i4time_smpre(ii), dir_2, ext2,
+     &       imax, jmax, 7, 7, var_2, lvl_2, lvl_coord2,
      &       units2, comment2, data, istatus)
 c
-          if(IStatus.eq.1)then
-            Write(6,*)'LAPS lm2 data retrieved'
-            write(6,*)'lm2 Directory [dir_2] = ',dir_2
+          if(istatus.eq.1)then
+            write(6,*)'laps lm2 data retrieved'
+            write(6,*)'lm2 directory [dir_2] = ',dir_2
             write(6,*)'time retrieved:',i4time_smpre(ii)
              do j = 1,jmax
              do i = 1,imax
-                Laps_in(i,j) = data(i,j,1)
-                Laps_wfz(i,j) = data(i,j,2)
-                Laps_mwf(i,j) = data(i,j,3)
-                Laps_wx(i,j) = data(i,j,4)
-                Laps_Evap(i,j) = data(i,j,5)
-                Laps_SC_pre(i,j) = data(i,j,6)
-                Laps_mwf_pre(i,j) = data(i,j,7)
+                laps_in(i,j) = data(i,j,1)
+                laps_wfz(i,j) = data(i,j,2)
+                laps_mwf(i,j) = data(i,j,3)
+                laps_wx(i,j) = data(i,j,4)
+                laps_evap(i,j) = data(i,j,5)
+                laps_sc_pre(i,j) = data(i,j,6)
+                laps_mwf_pre(i,j) = data(i,j,7)
              end do
              end do
              filefound = .true.
 c
-c             Write(6,*)'Current Soil Moisture Product Retrieved'
+c             write(6,*)'current soil moisture product retrieved'
 c
           else
 c
              if(ii.gt.14)then
 c
-c   Use Initial SM from Field Cap
+c   use initial sm from field cap
 c
-             Write(6,*) '***************************************'
-             Write(6,*) 'Using Default (Field Cap) Soil Moisture'
-             Do J = 1, Jmax
-             Do I = 1, Imax
-                Laps_MWF(I,J) = soilm_field_cap(i,j)
-                Laps_MWF_pre(I,J) = soilm_field_cap(i,j)
-             Enddo
-             Enddo
+             write(6,*) '***************************************'
+             write(6,*) 'using default (field cap) soil moisture'
+             do j = 1, jmax
+             do i = 1, imax
+                laps_mwf(i,j) = soilm_field_cap(i,j)
+                laps_mwf_pre(i,j) = soilm_field_cap(i,j)
+             enddo
+             enddo
              filefound = .true.
 c
              end if
@@ -318,54 +318,54 @@ c
           end if
        end do
 c
-c   Get Radar Estimated Precipitation.  LAPS L1S. Use "data_s" to hold.
+c   get radar estimated precipitation.  laps l1s. use "data_s" to hold.
 c
-       write(6,*)'Get LAPS precip and snow total'
+       write(6,*)'get laps precip and snow total'
        call get_directory('l1s',dir_l,len)
 c       dir_l = '../lapsprd/l1s/'
        lvl_l = 0
-       Call Read_Laps_Data(i4time_smcur, dir_l, ext_l,
-     &           Imax, Jmax, 1, 1, var_l, lvl_l, lvl_coord_l, 
-     &           units_l, comment_l, laps_rain, IStatus_precip)
-       if(IStatus_precip.eq.1)then
+       call read_laps_data(i4time_smcur, dir_l, ext_l,
+     &           imax, jmax, 1, 1, var_l, lvl_l, lvl_coord_l, 
+     &           units_l, comment_l, laps_rain, istatus_precip)
+       if(istatus_precip.eq.1)then
 c
-          Write(6,*)
-          Write(6,*)'Retrieved LAPS Rain data'
-          write(6,*)'l1s Directory [dir_l] = ',dir_l
+          write(6,*)
+          write(6,*)'retrieved laps rain data'
+          write(6,*)'l1s directory [dir_l] = ',dir_l
           write(6,*)'time retrieved:',i4time_smcur
           do j = 1,jmax
              do i = 1,imax
                 laps_rain(i,j)=laps_rain(i,j)*100.    !cm/hr
              end do
           end do
-          GridDry = .FALSE.
+          griddry = .false.
 c
        else
 c
-          Write(6,*)'LAPS precip not available - assume dry'
-          write(6,*)'l1s Directory [dir_l] = ',dir_l
+          write(6,*)'laps precip not available - assume dry'
+          write(6,*)'l1s directory [dir_l] = ',dir_l
           write(6,*)'time attempted:',i4time_smcur
-          GridDry = .TRUE.
+          griddry = .true.
 
        end if
 c
-c This concludes getting the initial data for the soil moisture model
+c this concludes getting the initial data for the soil moisture model
 c ****************************************************************************
-c ********************** Soil Moisture Subroutine ****************************
+c ********************** soil moisture subroutine ****************************
 c
-       Call Soil_Moisture(imax,jmax,Laps_u,Laps_v,
-     &      Laps_T,Laps_TD,Laps_Rain,Laps_sc,
-     &      Laps_IN,Laps_WFZ,Laps_MWF,Laps_MWF_pre,
-     &      Laps_Wx,SoilType,GridDry,Laps_Evap,Laps_SMC_3D,
-     &                  IStatus)
+       call soil_moisture(imax,jmax,laps_u,laps_v,
+     &      laps_t,laps_td,laps_rain,laps_sc,
+     &      laps_in,laps_wfz,laps_mwf,laps_mwf_pre,
+     &      laps_wx,soiltype,griddry,laps_evap,laps_smc_3d,
+     &                  istatus)
 c
-c Arrays Laps_IN, _WFZ, _MWF, _Wx return the new values of IN, WFZ, MWF and Wx
-c from the above subroutine, thus they are both input and output.  Laps_SMC_3D
+c arrays laps_in, _wfz, _mwf, _wx return the new values of in, wfz, mwf and wx
+c from the above subroutine, thus they are both input and output.  laps_smc_3d
 c is returned with current three layer soil moisture content.
 c
-       If(Istatus.eq.1)then
-          Write(6,*)' Soil Moisture Computation complete'
-          Write(6,*)' Check results for bad values'
+       if(istatus.eq.1)then
+          write(6,*)' soil moisture computation complete'
+          write(6,*)' check results for bad values'
 c
           bad_lower_bndry = 0.0
           bad_upper_bndry = 100.0
@@ -412,57 +412,57 @@ c
 c
           if(istatus_3d .lt. 0) write(6,914) istatus_3d
 c
-910       format(' +++ WARNING.  MWF:  istatus_m = ',i8,'+++')
-911       format(' +++ WARNING.  WFZ:  istatus_w = ',i8,'+++')
-912       format(' +++ WARNING.  CIV:  istatus_n = ',i8,'+++')
-913       format(' +++ WARNING.  EVAP:  istatus_e = ',i8,'+++')
-914       format(' +++ WARNING.  SMC-3D:  istatus_3d = ',i8,'+++')
+910       format(' +++ warning.  mwf:  istatus_m = ',i8,'+++')
+911       format(' +++ warning.  wfz:  istatus_w = ',i8,'+++')
+912       format(' +++ warning.  civ:  istatus_n = ',i8,'+++')
+913       format(' +++ warning.  evap:  istatus_e = ',i8,'+++')
+914       format(' +++ warning.  smc-3d:  istatus_3d = ',i8,'+++')
 c
-          Write(6,*)' Writing current hour Soil Moisture for grid'
+          write(6,*)' writing current hour soil moisture for grid'
           do j=1,jmax
           do i=1,imax
-             data(i,j,1)=Laps_IN(i,j)
-             data(i,j,2)=Laps_WFZ(i,j)
-             data(i,j,3)=Laps_MWF(i,j)
-             data(i,j,4)=Laps_Wx(i,j)
-             data(i,j,5)=Laps_Evap(i,j)
-             data(i,j,6)=Laps_SC(i,j)
-             data(i,j,7)=Laps_mwf_pre(i,j)
+             data(i,j,1)=laps_in(i,j)
+             data(i,j,2)=laps_wfz(i,j)
+             data(i,j,3)=laps_mwf(i,j)
+             data(i,j,4)=laps_wx(i,j)
+             data(i,j,5)=laps_evap(i,j)
+             data(i,j,6)=laps_sc(i,j)
+             data(i,j,7)=laps_mwf_pre(i,j)
           end do
           end do
 c
-          Call Write_Laps_Data(i4Time_smcur, dir_1, ext1,
-     &             Imax, Jmax,3, 3, var_1, lvl_1, lvl_coord1,
-     &             units1, comment1, Laps_SMC_3D, IStatus)
-          if(IStatus.eq.1)then
-             write(6,*)'3D Soil Moisture Successfully Written'
+          call write_laps_data(i4time_smcur, dir_1, ext1,
+     &             imax, jmax,3, 3, var_1, lvl_1, lvl_coord1,
+     &             units1, comment1, laps_smc_3d, istatus)
+          if(istatus.eq.1)then
+             write(6,*)'3d soil moisture successfully written'
           else
-             write(6,*)'Error Writing 3D Soil Moisture - Laps_SMC_3D'
+             write(6,*)'error writing 3d soil moisture - laps_smc_3d'
           end if
 c
-          Call Write_Laps_Data(I4Time_smcur, dir_2, ext2,
-     &             Imax, Jmax,7, 7, var_2, lvl_2, lvl_coord2,
-     &             units2, comment2, data, IStatus)
+          call write_laps_data(i4time_smcur, dir_2, ext2,
+     &             imax, jmax,7, 7, var_2, lvl_2, lvl_coord2,
+     &             units2, comment2, data, istatus)
 c
-          if(IStatus.eq.1)then
-             write(6,*)'2D Soil Moisture Fields Successfully Written'
+          if(istatus.eq.1)then
+             write(6,*)'2d soil moisture fields successfully written'
           else
-             write(6,*)'Error Writing 2D Soil Moisture Fields'
+             write(6,*)'error writing 2d soil moisture fields'
           end if
 c
        else
 c
-          write(6,*)'Error during soil moisture computation'
+          write(6,*)'error during soil moisture computation'
 c
        end if
        goto 100
 c
- 999   Write(6,*)'Error reading SYSTIME.DAT file'
+ 999   write(6,*)'error reading systime.dat file'
        go to 100
  998   write(6,*)'error opening log file at:',ftime_smcur
 c
-100    WRITE(6,*)'End of Soil Moisture Simulation'
+100    write(6,*)'end of soil moisture simulation'
        close(6)
 c
-       STOP
-       END
+       stop
+       end

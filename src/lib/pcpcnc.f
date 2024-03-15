@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -32,15 +32,15 @@ cdis
 
 
         subroutine cpt_pcp_cnc(ref_3d,temp_3d
-     1                                  ,rh_3d_pct    ! Input
-     1                                  ,cldpcp_type_3d  ! Input
-     1                                  ,ni,nj,nk     ! Input
-     1                                  ,c_z2m        ! Input
-     1                                  ,pres_3d      ! Input
-     1                                  ,pcp_cnc_3d   ! Output (kg/m^3)
-     1                                  ,rai_cnc_3d   ! Output (rain)
-     1                                  ,sno_cnc_3d   ! Output (snow)
-     1                                  ,pic_cnc_3d)  ! Output (precip ice)
+     1                                  ,rh_3d_pct    ! input
+     1                                  ,cldpcp_type_3d  ! input
+     1                                  ,ni,nj,nk     ! input
+     1                                  ,c_z2m        ! input
+     1                                  ,pres_3d      ! input
+     1                                  ,pcp_cnc_3d   ! output (kg/m^3)
+     1                                  ,rai_cnc_3d   ! output (rain)
+     1                                  ,sno_cnc_3d   ! output (snow)
+     1                                  ,pic_cnc_3d)  ! output (precip ice)
 
 
         include 'constants.inc'
@@ -52,7 +52,7 @@ cdis
 
         character*20 c_z2m
 
-        real pres_3d(ni,nj,nk)    ! Pa
+        real pres_3d(ni,nj,nk)    ! pa
         real pcp_cnc_3d(ni,nj,nk) ! kg/m^3
         real rai_cnc_3d(ni,nj,nk) ! kg/m^3
         real sno_cnc_3d(ni,nj,nk) ! kg/m^3
@@ -62,7 +62,7 @@ cdis
 
         npcp = 0
 
-!       Get 3D precip rates one layer at a time with ZR routine
+!       get 3d precip rates one layer at a time with zr routine
         do k = 1,nk
             call zr(ref_3d(1,1,k),ni,nj,rate_3d(1,1,k))
         enddo ! k
@@ -75,12 +75,12 @@ cdis
           do k = 1,nk
             pressure = pressure_of_level(k)
 
-            ipcp_type = cldpcp_type_3d(i,j,k) / 16   ! Pull out precip type
+            ipcp_type = cldpcp_type_3d(i,j,k) / 16   ! pull out precip type
 
             if(ipcp_type .ne. 0)then
 !                call cpt_fall_velocity(ipcp_type,pressure,temp_3d(i,j,k)
 !     1                                                  ,fall_velocity)
-! Adan add
+! adan add
                 call cpt_fall_velocity(ipcp_type,pressure,temp_3d(i,j,k)
      1                                 ,ref_3d(i,j,k),fall_velocity)
                 call cpt_concentration(rate_3d(i,j,k),fall_velocity
@@ -98,7 +98,7 @@ cdis
                     sno_cnc_3d(i,j,k) = pcp_cnc_3d(i,j,k)
                     pic_cnc_3d(i,j,k) = 0.
 
-                elseif(ipcp_type .eq. 4 .or. ipcp_type .eq. 5)then ! IP or Hail
+                elseif(ipcp_type .eq. 4 .or. ipcp_type .eq. 5)then ! ip or hail
                     rai_cnc_3d(i,j,k) = 0.
                     sno_cnc_3d(i,j,k) = 0.
                     pic_cnc_3d(i,j,k) = pcp_cnc_3d(i,j,k)
@@ -122,16 +122,16 @@ cdis
           do i = 1,ni
           do k = 1,nk
 
-            ipcp_type = cldpcp_type_3d(i,j,k) / 16   ! Pull out precip type
+            ipcp_type = cldpcp_type_3d(i,j,k) / 16   ! pull out precip type
 
-!           Compute the basic reflectivity 
+!           compute the basic reflectivity 
 !           w=264083.11*(rainmr(i,j,k)  &
 !               +0.2*(icemr(i,j,k)+snowmr(i,j,k))  &
 !               +2.0*graupelmr(i,j,k))
 !           w=max(1.,w)
 !           refl(i,j,k)=17.8*alog10(w)
 
-!           Consider mixed graupel/rain/snow between +5 and -15C?
+!           consider mixed graupel/rain/snow between +5 and -15c?
 
             if(ipcp_type .ne. 0)then
                 npcp = npcp + 1
@@ -148,10 +148,10 @@ cdis
 
                 elseif(ipcp_type .eq. 2)then                       ! snow (or mixed)
 
-!                   Calculate wet bulb temperature
+!                   calculate wet bulb temperature
                     zero_c = 273.15
                     t_c         = temp_3d(i,j,k) - zero_c
-                    td_c        = DWPT(t_c,rh_3d_pct(i,j,k))
+                    td_c        = dwpt(t_c,rh_3d_pct(i,j,k))
                     pressure_mb = pres_3d(i,j,k) / 100.
                     t_wb_c = twet_fast(t_c,td_c,pressure_mb)
 
@@ -167,7 +167,7 @@ cdis
                     pcp_cnc_3d(i,j,k) = snowmr * rho               ! kg_m^3
                     sno_cnc_3d(i,j,k) = snowmr * rho               ! kg_m^3
 
-                elseif(ipcp_type .eq. 4 .or. ipcp_type .eq. 5)then ! IP or Hail
+                elseif(ipcp_type .eq. 4 .or. ipcp_type .eq. 5)then ! ip or hail
                     rainfrac = 0.0
                     snowfrac = 0.0
                     icefrac = 1.0
@@ -209,17 +209,17 @@ cdis
           do i = 1,ni
           do k = 1,nk
 
-            ipcp_type = cldpcp_type_3d(i,j,k) / 16   ! Pull out precip type
+            ipcp_type = cldpcp_type_3d(i,j,k) / 16   ! pull out precip type
 
-!           Compute the basic reflectivity 
+!           compute the basic reflectivity 
 !           refl(i,j,k) =17300.0 * &
 !                 (rho(i,j,k) * 1000.0 * &
-!                  MAX(0.0,rainmr(i,j,k)))**svnfrth
+!                  max(0.0,rainmr(i,j,k)))**svnfrth
 
-!           Add the ice component
+!           add the ice component
 !           refl(i,j,k)=refl(i,j,k) + &
 !                 38000.0*(rho(i,j,k) * 1000.0 * &
-!                 MAX(0.0,icemr(i,j,k)+snowmr(i,j,k)+graupelmr(i,j,k)))**2.2
+!                 max(0.0,icemr(i,j,k)+snowmr(i,j,k)+graupelmr(i,j,k)))**2.2
 
             if(ipcp_type .ne. 0)then
                 npcp = npcp + 1
@@ -237,7 +237,7 @@ cdis
                     pcp_cnc_3d(i,j,k) = rho_q / 1000.              ! kg_m^3
                     sno_cnc_3d(i,j,k) = rho_q / 1000.              ! kg_m^3
 
-                elseif(ipcp_type .eq. 4 .or. ipcp_type .eq. 5)then ! IP or Hail
+                elseif(ipcp_type .eq. 4 .or. ipcp_type .eq. 5)then ! ip or hail
                     b = 38000.
                     z = 10.**(ref_3d(i,j,k)/10.)
                     rho_q = (z/b)**(1./2.2)                        ! g/m^3
@@ -259,7 +259,7 @@ cdis
           enddo ! j
 
         else
-          write(6,*)' Error - unknown value of c_z2m in pcpcnc ',c_z2m
+          write(6,*)' error - unknown value of c_z2m in pcpcnc ',c_z2m
 
         endif
 
@@ -271,21 +271,21 @@ cdis
         subroutine cpt_fall_velocity(ipcp_type,p,t,dbz,fall_velocity)
 
         dbz_eff = max(dbz,1.0)
-        vvmax = 4.32*dbz_eff**0.0714286      ! Adan add
+        vvmax = 4.32*dbz_eff**0.0714286      ! adan add
 
-        if(ipcp_type .eq. 1)then ! Rain
+        if(ipcp_type .eq. 1)then ! rain
 !            fall_velocity = 5.0
-            fall_velocity = vvmax    ! Adan add
-        elseif(ipcp_type .eq. 2)then ! Snow
+            fall_velocity = vvmax    ! adan add
+        elseif(ipcp_type .eq. 2)then ! snow
             fall_velocity = 1.
-!            fall_velocity = vvmax*0.2      ! Adan change
-        elseif(ipcp_type .eq. 3)then ! Freezing Rain
+!            fall_velocity = vvmax*0.2      ! adan change
+        elseif(ipcp_type .eq. 3)then ! freezing rain
 !            fall_velocity = 5.0
-            fall_velocity = vvmax    ! Adan add
-        elseif(ipcp_type .eq. 4)then ! Sleet
+            fall_velocity = vvmax    ! adan add
+        elseif(ipcp_type .eq. 4)then ! sleet
 !            fall_velocity = 5.0
-            fall_velocity = vvmax    ! Adan add
-        elseif(ipcp_type .eq. 5)then ! Hail
+            fall_velocity = vvmax    ! adan add
+        elseif(ipcp_type .eq. 5)then ! hail
             fall_velocity = 10.0
         endif
 
@@ -304,12 +304,12 @@ cdis
 
         subroutine cpt_concentration(rate,fall_velocity,concentration)
 
-!       This gets m**3 of water per m**3 of volume (non-dimensional)
+!       this gets m**3 of water per m**3 of volume (non-dimensional)
 
-C LSW   STOP if fall_velocity = 0
+c lsw   stop if fall_velocity = 0
         if (fall_velocity.eq.0) then
           write(6,*) 'fall_velocity=',fall_velocity
-          write(6,*)' Error src/lib/pcpcnc.f, cpt_concentration, STOP'
+          write(6,*)' error src/lib/pcpcnc.f, cpt_concentration, stop'
           stop
         else
           concentration = rate / fall_velocity

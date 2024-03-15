@@ -1,23 +1,23 @@
 
-        subroutine get_airglow(alt_a,ni,nj,nc,obs_glow_zen,i4time & ! I
-                              ,patm,htmsl,horz_dep &                ! I
-                              ,airmass_2_topo,frac_lp &             ! I
-                              ,airglow_zen_nl_c &                   ! O
-                              ,clear_rad_c_nt)                      ! O
+        subroutine get_airglow(alt_a,ni,nj,nc,obs_glow_zen,i4time & ! i
+                              ,patm,htmsl,horz_dep &                ! i
+                              ,airmass_2_topo,frac_lp &             ! i
+                              ,airglow_zen_nl_c &                   ! o
+                              ,clear_rad_c_nt)                      ! o
 
-!       Calculate sky glow due to airglow. This takes into
+!       calculate sky glow due to airglow. this takes into
 !       account the limb when determining airglow. 
 
-!       http://adsbit.harvard.edu//full/1997PASP..109.1181K/0001184.000.html
+!       http://adsbit.harvard.edu//full/1997pasp..109.1181k/0001184.000.html
 
-        use mem_namelist, ONLY: earth_radius
+        use mem_namelist, only: earth_radius
         include 'trigd.inc'
         include 'rad_nodata.inc'
 
         real alt_a(ni,nj) 
         real clear_rad_c_nt(nc,ni,nj) ! night sky brightness
-                                      ! 3 color radiance (Nanolamberts)
-        real airglow_zen_nl_c(nc)     ! airglow spectral radiance at zenith (nL)
+                                      ! 3 color radiance (nanolamberts)
+        real airglow_zen_nl_c(nc)     ! airglow spectral radiance at zenith (nl)
 
         parameter (nlyr = 2)
 
@@ -25,28 +25,28 @@
         double precision jd
 !       real ht_lyr,thk_lyr,bot_lyr,top_lyr,flyr_abv,flyr_blw
 
-!       Compute Astronomical Julian Date
+!       compute astronomical julian date
         call i4time_to_jd(i4time,jd,istatus)
 
-!       Compute Besselian Year
+!       compute besselian year
         by = 1900.0 + (jd - 2415020.31352) / 365.242198781
 
-!       Sunspot Cycle Phase (minimum = 0 degrees)
+!       sunspot cycle phase (minimum = 0 degrees)
         sunspot_cycle_deg = modulo(((by - 2019.0) / 11.0) * 360.,360.)
         airglow_zen_nl_log = log10(23.334) - log10(49.5/23.334) * cosd(sunspot_cycle_deg)
         airglow_zen_nl = 10. ** airglow_zen_nl_log ! ranges from 11.0-49.5 with solar cycle
 !       airglow_zen_nl = 0.1 ! test
 
-        write(6,*)' get_airglow: Besselian Year is      ',by,i4time
+        write(6,*)' get_airglow: besselian year is      ',by,i4time
         write(6,*)' get_airglow: sunspot cycle (deg) is ',sunspot_cycle_deg
-        write(6,*)' get_airglow: airglow_zen_nl (nL) is ',airglow_zen_nl
+        write(6,*)' get_airglow: airglow_zen_nl (nl) is ',airglow_zen_nl
 
-!       Convert from nl to sprad, then to spirrad
+!       convert from nl to sprad, then to spirrad
         airglow_zen_nl_c(1) = airglow_zen_nl * 1.667
         airglow_zen_nl_c(2) = airglow_zen_nl * 1.000
         airglow_zen_nl_c(3) = airglow_zen_nl * 0.467
 
-        do ialt = 1,ni ! Process all azimuths at once for this altitude
+        do ialt = 1,ni ! process all azimuths at once for this altitude
 
           alt = alt_a(ialt,1)
 
@@ -55,14 +55,14 @@
 
           do ilyr = 1,nlyr
 
-            if(ilyr .eq. 1)then     ! Molecular Oxygen + Sodium
+            if(ilyr .eq. 1)then     ! molecular oxygen + sodium
               airglow_zen(1) = airglow_zen_nl 
               airglow_zen(2) = airglow_zen_nl 
               airglow_zen(3) = airglow_zen_nl * .467
               ht_lyr = 85000.
               thk_lyr = 10000.
-            else                    ! Atomic Oxygen
-              airglow_zen(1) = airglow_zen_nl * .667 ! nL 
+            else                    ! atomic oxygen
+              airglow_zen(1) = airglow_zen_nl * .667 ! nl 
               airglow_zen(2) = 0. 
               airglow_zen(3) = 0. 
               ht_lyr = 225000.
@@ -86,10 +86,10 @@
 
           enddo ! ilyr
 
-!         Fill output array for airglow                         
+!         fill output array for airglow                         
           do jazi = 1,nj                 
-            glow_alt(:) = airglow_sum(:)                           ! (nL)
-            clear_rad_c_nt(:,ialt,jazi) = glow_alt(:)              ! (nL)
+            glow_alt(:) = airglow_sum(:)                           ! (nl)
+            clear_rad_c_nt(:,ialt,jazi) = glow_alt(:)              ! (nl)
           enddo ! jazi
 
 !         if(ialt .eq. ni)then
@@ -113,7 +113,7 @@
 
         subroutine get_airglow_lyr(htmsl,alt,airglow_zen,nc,ht_lyr,thk_lyr,bot_lyr,top_lyr,flyr_blw,flyr_abv,airglow)
 
-        use mem_namelist, ONLY: earth_radius
+        use mem_namelist, only: earth_radius
         include 'trigd.inc'
         include 'rad_nodata.inc'
 
@@ -126,13 +126,13 @@
             h = ht_lyr - htmsl
             thickness = thk_lyr
 
-!           Case when shell is entirely higher than observer,
+!           case when shell is entirely higher than observer,
 !           looking above or below horizon
 !           am1 = am_thsh(z,h,earth_radius)
  
             h1 = h - thickness/2.
             h2 = h + thickness/2.
-            if(h1 .ne. 0. .OR. z .ne. 90.)then
+            if(h1 .ne. 0. .or. z .ne. 90.)then
               am2 = (1./thickness) * am_thsh_defint(z,h1,h2,earth_radius)
             else ! indefint at h1 is near zero or can blow up
               am2 = (1./thickness) * am_thsh_indefint(z,h2,earth_radius)
@@ -151,13 +151,13 @@
 
               erad_eff = earth_radius + htmin_ray
 
-!             Case when shell is entirely higher than observer,
+!             case when shell is entirely higher than observer,
 !             looking above or below horizon
 !             am1 = am_thsh(z,h,earth_radius)
  
               h1 = h - thickness/2.
               h2 = h + thickness/2.
-              if(h1 .ne. 0. .OR. z .ne. 90.)then
+              if(h1 .ne. 0. .or. z .ne. 90.)then
                 am2 = (1./thickness) * am_thsh_defint(z,h1,h2,erad_eff)
               else ! indefint at h1 is near zero or can blow up
                 am2 = (1./thickness) * am_thsh_indefint(z,h2,erad_eff)
@@ -182,30 +182,30 @@
         return
         end
 
-        subroutine get_aurora(alt_a,ni,nj,nc,obs_glow_zen & ! I
-                             ,patm,htmsl,horz_dep &         ! I
-                             ,airmass_2_topo,frac_lp &      ! I
-                             ,clear_rad_c_nt)               ! O
+        subroutine get_aurora(alt_a,ni,nj,nc,obs_glow_zen & ! i
+                             ,patm,htmsl,horz_dep &         ! i
+                             ,airmass_2_topo,frac_lp &      ! i
+                             ,clear_rad_c_nt)               ! o
 
         parameter (nsfc = 2)
         parameter (nseg = 2)
 
-        real alt                      ! I elevation angle
-        real htmsl                    ! I observer height MSL
-        real htsfc                    ! I sfc (or layer) height 
-        real earth_radius             ! I earth radius (meters)
-        real r_missing_data           ! I
-        real alt_norm(nseg,nsfc)      ! O elevation angle rel to sfc normal
-        real dist_to_sfc(nseg,nsfc)   ! O distance to sfc (meters)
+        real alt                      ! i elevation angle
+        real htmsl                    ! i observer height msl
+        real htsfc                    ! i sfc (or layer) height 
+        real earth_radius             ! i earth radius (meters)
+        real r_missing_data           ! i
+        real alt_norm(nseg,nsfc)      ! o elevation angle rel to sfc normal
+        real dist_to_sfc(nseg,nsfc)   ! o distance to sfc (meters)
         real segl(nseg),segh(nseg)
 
-!       Calculate 
+!       calculate 
 
-!       Aurora intensity a function of magnetic latitude, longitude, Kp, alt
+!       aurora intensity a function of magnetic latitude, longitude, kp, alt
 
-!       Trace line of sight through sphere at 10000m intervals through region
-!       between 100km and 400km altitude. Determine bounds of ray between
-!       these altitudes (1st/last interection of 400km altitude). There can          
+!       trace line of sight through sphere at 10000m intervals through region
+!       between 100km and 400km altitude. determine bounds of ray between
+!       these altitudes (1st/last interection of 400km altitude). there can          
 !       be up to two ray segments through this layer.
 
         do ialt = -10,-10,-20
@@ -235,13 +235,13 @@
         parameter (nsfc = 2)
         parameter (nseg = 2)
 
-        real alt                      ! I elevation angle
-        real htmsl                    ! I observer height MSL
-        real htsfc                    ! I sfc (or layer) height 
-        real earth_radius             ! I earth radius (meters)
-        real r_missing_data           ! I
-        real alt_norm(nseg,nsfc)      ! O elevation angle rel to sfc normal
-        real dist_to_sfc(nseg,nsfc)   ! O distance to sfc (meters)
+        real alt                      ! i elevation angle
+        real htmsl                    ! i observer height msl
+        real htsfc                    ! i sfc (or layer) height 
+        real earth_radius             ! i earth radius (meters)
+        real r_missing_data           ! i
+        real alt_norm(nseg,nsfc)      ! o elevation angle rel to sfc normal
+        real dist_to_sfc(nseg,nsfc)   ! o distance to sfc (meters)
         real segl(nseg),segh(nseg)
 
         horz_depf(htmsl,erad) = acosd(erad/(erad+max(htmsl,0.)))
@@ -260,7 +260,7 @@
               inlayer = 0
             endif
 
-!           Determine horz_dep
+!           determine horz_dep
             horz_dep = horz_depf(htmsl,earth_radius)
              
             if(iverbose .eq. 1)write(6,*)
@@ -275,7 +275,7 @@
             segl(:) = r_missing_data
             segh(:) = r_missing_data
 
-!           Test for condition with ground
+!           test for condition with ground
             if(htmsl .gt. htgnd .and. alt .le. 0.)then
                 call get_ray_info(alt,htmsl,htgnd,earth_radius,alt_norm &
                                  ,r_missing_data,dist_to_gnd)
@@ -293,7 +293,7 @@
               dist_to_sfc(:,isfc) = 0.
               alt_norm(:,isfc) = r_missing_data
 
-!             Test for condition with surface
+!             test for condition with surface
 !             rlarge means the surface isn't intersected, zero means ray starts at that surface
               if(htmsl .gt. htsfc .and. alt .le. 0.)then
                   call get_ray_info2(alt,htmsl,htsfc,earth_radius,alt_norm(:,isfc) &
@@ -307,7 +307,7 @@
 1             format(i8,f10.3,i8,4x,2f13.0,2x,f13.0,2x,2f8.3,2x,f13.0)
            enddo        
 
-!          Segment applies before or after the htmin value for downward rays, or segment 1 for upward
+!          segment applies before or after the htmin value for downward rays, or segment 1 for upward
            do iseg = 1,nseg_pot_ray
               if(iverbose .eq. 1)write(6,*)' potential segment ',iseg,inlayer,dist_to_sfc(iseg,:)
               if(htmsl .gt. htsfch .and. iseg .eq. 1)then                  ! above upper layer
@@ -352,15 +352,15 @@
 
         include 'trigd.inc'
 
-        real alt                  ! I elevation angle
-        real htmsl                ! I observer height MSL
-        real htsfc                ! I sfc (or layer) height 
-        real earth_radius         ! I earth radius (meters)
-        real r_missing_data       ! I
-        real alt_norm(2)          ! O elevation angle rel to sfc normal
-        real dist_to_sfc(2)       ! O distance to sfc (meters)
+        real alt                  ! i elevation angle
+        real htmsl                ! i observer height msl
+        real htsfc                ! i sfc (or layer) height 
+        real earth_radius         ! i earth radius (meters)
+        real r_missing_data       ! i
+        real alt_norm(2)          ! o elevation angle rel to sfc normal
+        real dist_to_sfc(2)       ! o distance to sfc (meters)
 
-!       Altitude relative to surface normal (emission angle)
+!       altitude relative to surface normal (emission angle)
         if(alt .ne. 0.)then
           slope = tand(90. + alt)
           htrad = (earth_radius+htmsl) / (earth_radius+htsfc)

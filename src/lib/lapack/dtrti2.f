@@ -1,147 +1,147 @@
-      SUBROUTINE DTRTI2( UPLO, DIAG, N, A, LDA, INFO )
+      subroutine dtrti2( uplo, diag, n, a, lda, info )
 *
-*  -- LAPACK routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     February 29, 1992
+*  -- lapack routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     february 29, 1992
 *
-*     .. Scalar Arguments ..
-      CHARACTER          DIAG, UPLO
-      INTEGER            INFO, LDA, N
+*     .. scalar arguments ..
+      character          diag, uplo
+      integer            info, lda, n
 *     ..
-*     .. Array Arguments ..
-      DOUBLE PRECISION   A( LDA, * )
+*     .. array arguments ..
+      double precision   a( lda, * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DTRTI2 computes the inverse of a real upper or lower triangular
+*  dtrti2 computes the inverse of a real upper or lower triangular
 *  matrix.
 *
-*  This is the Level 2 BLAS version of the algorithm.
+*  this is the level 2 blas version of the algorithm.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  UPLO    (input) CHARACTER*1
-*          Specifies whether the matrix A is upper or lower triangular.
-*          = 'U':  Upper triangular
-*          = 'L':  Lower triangular
+*  uplo    (input) character*1
+*          specifies whether the matrix a is upper or lower triangular.
+*          = 'u':  upper triangular
+*          = 'l':  lower triangular
 *
-*  DIAG    (input) CHARACTER*1
-*          Specifies whether or not the matrix A is unit triangular.
-*          = 'N':  Non-unit triangular
-*          = 'U':  Unit triangular
+*  diag    (input) character*1
+*          specifies whether or not the matrix a is unit triangular.
+*          = 'n':  non-unit triangular
+*          = 'u':  unit triangular
 *
-*  N       (input) INTEGER
-*          The order of the matrix A.  N >= 0.
+*  n       (input) integer
+*          the order of the matrix a.  n >= 0.
 *
-*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-*          On entry, the triangular matrix A.  If UPLO = 'U', the
-*          leading n by n upper triangular part of the array A contains
+*  a       (input/output) double precision array, dimension (lda,n)
+*          on entry, the triangular matrix a.  if uplo = 'u', the
+*          leading n by n upper triangular part of the array a contains
 *          the upper triangular matrix, and the strictly lower
-*          triangular part of A is not referenced.  If UPLO = 'L', the
-*          leading n by n lower triangular part of the array A contains
+*          triangular part of a is not referenced.  if uplo = 'l', the
+*          leading n by n lower triangular part of the array a contains
 *          the lower triangular matrix, and the strictly upper
-*          triangular part of A is not referenced.  If DIAG = 'U', the
-*          diagonal elements of A are also not referenced and are
+*          triangular part of a is not referenced.  if diag = 'u', the
+*          diagonal elements of a are also not referenced and are
 *          assumed to be 1.
 *
-*          On exit, the (triangular) inverse of the original matrix, in
+*          on exit, the (triangular) inverse of the original matrix, in
 *          the same storage format.
 *
-*  LDA     (input) INTEGER
-*          The leading dimension of the array A.  LDA >= max(1,N).
+*  lda     (input) integer
+*          the leading dimension of the array a.  lda >= max(1,n).
 *
-*  INFO    (output) INTEGER
+*  info    (output) integer
 *          = 0: successful exit
-*          < 0: if INFO = -k, the k-th argument had an illegal value
+*          < 0: if info = -k, the k-th argument had an illegal value
 *
 *  =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ONE
-      PARAMETER          ( ONE = 1.0D+0 )
+*     .. parameters ..
+      double precision   one
+      parameter          ( one = 1.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      LOGICAL            NOUNIT, UPPER
-      INTEGER            J
-      DOUBLE PRECISION   AJJ
+*     .. local scalars ..
+      logical            nounit, upper
+      integer            j
+      double precision   ajj
 *     ..
-*     .. External Functions ..
-      LOGICAL            LSAME
-      EXTERNAL           LSAME
+*     .. external functions ..
+      logical            lsame
+      external           lsame
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DSCAL, DTRMV, XERBLA
+*     .. external subroutines ..
+      external           dscal, dtrmv, xerbla
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          MAX
+*     .. intrinsic functions ..
+      intrinsic          max
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Test the input parameters.
+*     test the input parameters.
 *
-      INFO = 0
-      UPPER = LSAME( UPLO, 'U' )
-      NOUNIT = LSAME( DIAG, 'N' )
-      IF( .NOT.UPPER .AND. .NOT.LSAME( UPLO, 'L' ) ) THEN
-         INFO = -1
-      ELSE IF( .NOT.NOUNIT .AND. .NOT.LSAME( DIAG, 'U' ) ) THEN
-         INFO = -2
-      ELSE IF( N.LT.0 ) THEN
-         INFO = -3
-      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
-         INFO = -5
-      END IF
-      IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DTRTI2', -INFO )
-         RETURN
-      END IF
+      info = 0
+      upper = lsame( uplo, 'u' )
+      nounit = lsame( diag, 'n' )
+      if( .not.upper .and. .not.lsame( uplo, 'l' ) ) then
+         info = -1
+      else if( .not.nounit .and. .not.lsame( diag, 'u' ) ) then
+         info = -2
+      else if( n.lt.0 ) then
+         info = -3
+      else if( lda.lt.max( 1, n ) ) then
+         info = -5
+      end if
+      if( info.ne.0 ) then
+         call xerbla( 'dtrti2', -info )
+         return
+      end if
 *
-      IF( UPPER ) THEN
+      if( upper ) then
 *
-*        Compute inverse of upper triangular matrix.
+*        compute inverse of upper triangular matrix.
 *
-         DO 10 J = 1, N
-            IF( NOUNIT ) THEN
-               A( J, J ) = ONE / A( J, J )
-               AJJ = -A( J, J )
-            ELSE
-               AJJ = -ONE
-            END IF
+         do 10 j = 1, n
+            if( nounit ) then
+               a( j, j ) = one / a( j, j )
+               ajj = -a( j, j )
+            else
+               ajj = -one
+            end if
 *
-*           Compute elements 1:j-1 of j-th column.
+*           compute elements 1:j-1 of j-th column.
 *
-            CALL DTRMV( 'Upper', 'No transpose', DIAG, J-1, A, LDA,
-     $                  A( 1, J ), 1 )
-            CALL DSCAL( J-1, AJJ, A( 1, J ), 1 )
-   10    CONTINUE
-      ELSE
+            call dtrmv( 'upper', 'no transpose', diag, j-1, a, lda,
+     $                  a( 1, j ), 1 )
+            call dscal( j-1, ajj, a( 1, j ), 1 )
+   10    continue
+      else
 *
-*        Compute inverse of lower triangular matrix.
+*        compute inverse of lower triangular matrix.
 *
-         DO 20 J = N, 1, -1
-            IF( NOUNIT ) THEN
-               A( J, J ) = ONE / A( J, J )
-               AJJ = -A( J, J )
-            ELSE
-               AJJ = -ONE
-            END IF
-            IF( J.LT.N ) THEN
+         do 20 j = n, 1, -1
+            if( nounit ) then
+               a( j, j ) = one / a( j, j )
+               ajj = -a( j, j )
+            else
+               ajj = -one
+            end if
+            if( j.lt.n ) then
 *
-*              Compute elements j+1:n of j-th column.
+*              compute elements j+1:n of j-th column.
 *
-               CALL DTRMV( 'Lower', 'No transpose', DIAG, N-J,
-     $                     A( J+1, J+1 ), LDA, A( J+1, J ), 1 )
-               CALL DSCAL( N-J, AJJ, A( J+1, J ), 1 )
-            END IF
-   20    CONTINUE
-      END IF
+               call dtrmv( 'lower', 'no transpose', diag, n-j,
+     $                     a( j+1, j+1 ), lda, a( j+1, j ), 1 )
+               call dscal( n-j, ajj, a( j+1, j ), 1 )
+            end if
+   20    continue
+      end if
 *
-      RETURN
+      return
 *
-*     End of DTRTI2
+*     end of dtrti2
 *
-      END
+      end

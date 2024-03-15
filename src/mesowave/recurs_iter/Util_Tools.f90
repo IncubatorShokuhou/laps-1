@@ -1,14 +1,14 @@
-MODULE Util_Tools
+module util_tools
 
 !*************************************************
-!  This module builds several tools commonly used
+!  this module builds several tools commonly used
 !  in data analysis.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !*************************************************
 
-CONTAINS
+contains
 
-  INCLUDE 'Intplt3d.f90'
+  include 'intplt3d.f90'
 
-END MODULE Util_Tools
+end module util_tools

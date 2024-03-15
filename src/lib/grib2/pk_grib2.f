@@ -1,622 +1,622 @@
-      SUBROUTINE PK_GRIB2(KFILDO,AIN,IAIN,NX,NY,IDAT,NIDAT,RDAT,NRDAT,
-     1                    IS0,NS0,IS1,NS1,IS3,NS3,IS4,NS4,IS5,
-     2                    NS5,IS6,NS6,IS7,NS7,IB,IBITMAP,IPACK,ND5,
-     3                    MISSP,XMISSP,MISSS,XMISSS,NEW,MINPK,ICLEAN,
-     4                    L3264B,JER,NDJER,KJER)
-C
-C        AUGUST   1999   GLAHN/LAWRENCE  GSC/TDL     ORIGINAL CODING
-C        FEBRUARY 2001   LAWRENCE    UPDATED THIS ROUTINE'S 
-C                                    PROLOGUE.
-C        NOVEMBER 2001   GLAHN       ADDED OPTIONAL WRITING OF MESSAGE
-C                                    LENGTH TO KFILDO
-C        FEBRUARY 2002   GLAHN       ADDED IS6( ), NS6( ) TO CALL TO 
-C                                    PK_SECT7; CHANGED CALL METHOD AND
-C                                    SEQUENCE FOR PK_SECT3
-C
-C        PURPOSE
-C           THIS UTILITY PACKS A GRIDDED DATA FIELD ACCORDING TO THE
-C           RULES AND STRUCTURE PUT FORTH IN THE GRIB VERSION 2 
-C           (GRIB2) DOCUMENTATION.  GRIB2 IS A DATA REPRESENTATION
-C           FORM FOR GENERAL REGULARLY DISTRIBUTED INFORMATION
-C           IN BINARY.  IT PROVIDES A MEANS OF COMPRESSING AND
-C           ENCRYPTING DATA SO AS TO MAKE ITS TRANSMISSION MORE
-C           EFFICIENT.  IT IS RECOMMENDED THAT THE USER OF THIS
-C           ROUTINE REVIEW THE EXTERNAL DOCUMENTATION THAT 
-C           EXPLAINS WHAT GRIB2 IS AND HOW TO USE IT.
-C
-C           THERE ARE EIGHT MANDATORY AND ONE OPTIONAL SECTIONS
-C           CONTAINED WITHIN A GRIB2 MESSAGE.  THESE SECTIONS ARE
-C
-C              SECTION 0 - THE INDICATOR SECTION
-C              SECTION 1 - THE IDENTIFICATION SECTION
-C              SECTION 2 - THE LOCAL USE SECTION (OPTIONAL)
-C              SECTION 3 - THE GRID DEFINITION SECTION
-C              SECTION 4 - THE PRODUCT DEFINITION SECTION
-C              SECTION 5 - THE DATA REPRESENTATION SECTION
-C              SECTION 6 - THE BIT-MAP SECTION
-C              SECTION 7 - THE DATA SECTION
-C              SECTION 8 - THE END SECTION
-C
-C           SECTION 0, THE INDICATOR SECTION, CONTAINS GRIB2
-C           DISCIPLINE, EDITION, AND MESSAGE LENGTH INFORMATION.
-C
-C           SECTION 1, THE IDENTIFICATION SECTION, CONTAINS DATA
-C           THAT DESCRIBES CHARACTERISTICS THAT APPLY TO ALL OF THE
-C           PROCESSED DATA IN THE GRIB2 MESSAGE.
-C
-C           SECTION 2, THE LOCAL USE SECTION, CONTAINS SUPPLEMENTAL
-C           INFORMATION FOR LOCAL USE BY THE ORIGINATING CENTERS.
-C           THIS SECTION IS OPTIONAL; IT DOES NOT NEED TO BE INCLUDED
-C           IN THE GRIB2 MESSAGE.
-C
-C           SECTION 3, THE GRID DEFINITION SECTION, DESCRIBES THE
-C           GEOMETRY OF THE VALUES WITHIN A PLANE DESCRIBED BY
-C           TWO FIXED COORDINATES.
-C
-C           SECTION 4, THE PRODUCT DEFINITION SECTION, PROVIDES A
-C           DESCRIPTION OF THE DATA PACKED WITHIN SECTION 7.
-C
-C           SECTION 5, THE DATA REPRESENTATION SECTION, DESCRIBES
-C           WHAT METHOD IS USED TO COMPRESS THE DATA IN SECTION 7.
-C
-C           SECTION 6, THE BIT-MAP SECTION, CONTAINS A BIT-MAP WHICH
-C           INDICATES THE PRESENCE OR ABSENCE OF DATA AT EACH GRID
-C           POINT.  A BIT-MAP IS ONLY APPLICABLE TO THE SIMPLE
-C           AND COMPLEX PACKING METHODS.  A BIT-MAP DOES NOT
-C           APPLY TO COMPLEX PACKING WITH SPATIAL DIFFERENCES.
-C
-C           SECTION 7, THE DATA SECTION, CONTAINS THE PACKED DATA
-C           VALUES.
-C
-C           SECTION 8, THE END SECTION, CONTAINS THE STRING "7777"
-C           INDICATING THE END OF THE GRIB2 MESSAGE.
-C
-C           SECTIONS 3, 4, 5, AND 7 PROVIDE A VARIETY OF TEMPLATES
-C           THAT DESCRIBE AND DEFINE THE GRIDDED PRODUCT
-C           CONTAINED WITHIN THE GRIB2 MESSAGE.  THIS GRIB2 PACKER
-C           DOES NOT SUPPORT ALL OF THE TEMPLATES PROVIDED IN GRIB2.
-C           THE MORE COMMONLY USED TEMPLATES ARE SUPPORTED, AND
-C           THIS SOFTWARE CAN BE EASILY EXTENDED IN THE FUTURE TO
-C           ACCOMMODATE ADDITIONAL TEMPLATES AS THE NEED ARISES.
-C
-C           THE SECTION 3 GRID DEFINITION TEMPLATES CURRENTLY
-C           RECOGNIZED BY THIS PACKER ARE:
-C              TEMPLATE 3.0   EQUIDISTANT CYLINDRICAL LATITUDE/
-C                             LONGITUDE
-C              TEMPLATE 3.10  MERCATOR
-C              TEMPLATE 3.20  POLAR STEREOGRAPHIC
-C              TEMPLATE 3.30  LAMBERT
-C              TEMPLATE 3.90  ORTHOGRAPHIC SPACE VIEW
-C              TEMPLATE 3.110 EQUATORIAL AZIMUTHAL EQUIDISTANT
-C              TEMPLATE 3.120 AZIMUTH-RANGE (RADAR)
-C
-C           THE SECTION 4 PRODUCT DEFINITION TEMPLATES CURRENTLY
-C           RECOGNIZED BY THIS PACKER ARE:
-C              TEMPLATE 4.0  ANALYSIS OR FORECAST AT A LEVEL AND POINT
-C              TEMPLATE 4.1  INDIVIDUAL EMSEMBLE
-C              TEMPLATE 4.2  DERIVED FORECAST BASED ON ENSEMBLES
-C              TEMPLATE 4.8  AVERAGE, ACCUMULATION, EXTREMES
-C              TEMPLATE 4.20 RADAR
-C              TEMPLATE 4.30 SATELLITE
-C
-C           THE SECTION 5 DATA REPRESENTATION TEMPLATES CURRENTLY
-C           RECOGNIZED BY THIS PACKER ARE:
-C              TEMPLATE 5.0  SIMPLE PACKING
-C              TEMPLATE 5.2  COMPLEX PACKING
-C              TEMPLATE 5.3  COMPLEX PACKING WITH SPATIAL DIFFERENCING
-C
-C           THE SECTION 7 DATA TEMPLATES CURRENTLY RECOGNIZED BY THIS
-C           PACKER ARE:
-C              TEMPLATE 7.0  SIMPLE PACKING
-C              TEMPLATE 7.2  COMPLEX PACKING
-C              TEMPLATE 7.3  COMPLEX PACKING AND SPATIAL DIFFERENCING
-C
-C           THE USER SUPPLIES THE DATA FOR THE SECTIONS OF THE GRIB2
-C           MESSAGE THROUGH ARRAYS IS0( ), IS1( ), IS3( ),
-C           IS4( ), IS5( ), IS6( ), AND IS7( ) WHICH CORRESPOND 
-C           TO SECTIONS 0, 1, 2, 3, 4, 5, 6, AND 7, RESPECTIVELY.
-C           THE USER SHOULD REFER TO THE EXTERNAL DOCUMENTATION
-C           THAT ACCOMPANIES THIS ROUTINE TO DETERMINE WHICH VALUES
-C           HE NEEDS TO SUPPLY IN EACH OF THESE ARRAYS.
-C
-C           THE GRID OF DATA IS PASSED INTO THE PACKER USING EITHER THE
-C           AIN( ) OR THE IAIN( ) ARRAYS.  THE DATA IS PASSED INTO THIS 
-C           ROUTINE USING AIN( ) IF THE DATA IN THE GRID ARE FLOATING
-C           POINT VALUES.  IF THE DATA IN THE GRID CONTAINS INTEGER  
-C           VALUES, THEN THE DATA MUST BE PASSED INTO THIS ROUTINE
-C           USING THE IAIN( ) ARRAY.
-C
-C           THE REPRESENTATION OF MISSING VALUES IN THE DATA FIELD
-C           PLAYS AN INTEGRAL ROLE IN HOW THE DATA IS PACKED INTO
-C           THE GRIB2 MESSAGE.  THE HANDLING OF MISSING VALUES IN 
-C           GRIB2 DEPENDS UPON THE PACKING METHOD USED TO COMPRESS
-C           THE DATA INTO SECTION 7 OF THE GRIB2 MESSAGE.
-C         
-C           WHEN USING THE SIMPLE PACKING METHOD, A BIT-MAP MUST BE
-C           USED TO INDICATE THE LOCATIONS OF MISSING VALUES IN 
-C           THE DATA FIELD.  THIS BIT-MAP IS ULTIMATELY PACKED INTO
-C           SECTION 6 OF THE GRIB2 MESSAGE.  THE CORRESPONDING DATA
-C           FIELD IS PACKED INTO SECTION 7 OF THE MESSAGE WITH THE
-C           MISSING VALUES REMOVED.  WHEN USING THE SIMPLE PACKING
-C           METHOD, THE CALLER OF THIS ROUTINE IS THE GIVEN THE 
-C           OPTION OF SUPPLYING A BIT-MAP ALONG WITH THE DATA FIELD
-C           WITH THE MISSING VALUES REMOVED FROM IT.  THE CALLER 
-C           MAY ALSO SUPPLY THE DATA FIELD WITH THE MISSING VALUES
-C           IN IT AND REQUEST THAT THE GRIB2 PACKER GENERATE A 
-C           BIT-MAP FROM IT.  IF THE USER HAS A DATA FIELD THAT HAS NO
-C           MISSING DATA IN IT, THEN A BIT-MAP IS NOT NEEDED AND
-C           SHOULD NOT BE PACKED INTO SECTION 6 OF THE GRIB2 MESSAGE.  
-C
-C           THE COMPLEX AND COMPLEX WITH SPATIAL DIFFERENCING
-C           PACKING METHODS ALLOW FOR THE USE OF PRIMARY
-C           AND SECONDARY MISSING VALUES.  THESE PACKING METHODS
-C           UTILIZE AN EFFICIENT TECHNIQUE OF PACKING THE MISSING
-C           VALUES ALONG WITH THE DATA FIELD INTO SECTION 7 OF THE
-C           GRIB2 MESSAGE WHICH ELIMINATES THE NEED FOR A BIT-MAP
-C           IN SECTION 6.  THE MISSING VALUES ARE LEFT IN THE DATA 
-C           FIELD AS IT IS PACKED.  IN ORDER FOR THIS TO WORK, THE
-C           USER MUST SPECIFY THE MISSING VALUE MANAGEMENT VALUE
-C           IN IS5(23).  A VALUE OF "0" INDICATES THAT THERE ARE NO
-C           MISSING VALUES IN THE DATA FIELD.  A VALUE OF "1" INDICATES
-C           THAT THERE MAY BE PRIMARY MISSING VALUES.  A VALUE OF "2"
-C           INDICATES THAT THERE MAY BE BOTH PRIMARY AND SECONDARY
-C           MISSING VALUES.  THE MISSP AND MISSS (SEE BELOW)
-C           CALLING ARGUMENTS REPRESENT THE PRIMARY AND SECONDARY
-C           MISSING VALUES, RESPECTIVELY, WHEN PACKING AN INTEGER 
-C           DATA FIELD.  THE XMISSP AND XMISSS (SEE BELOW) CALLING
-C           ARGUMENTS REPRESENT THE PRIMARY AND SECONDARY MISSING
-C           VALUES WHEN PACKING A FLOATING POINT DATA FIELD.
-C           LIKE THE SIMPLE PACKING METHOD, THE USER HAS THE OPTION
-C           TO PROVIDE A BIT-MAP AND A DATA FIELD WITH ALL OF THE
-C           PRIMARY MISSING VALUES REMOVED.  HOWEVER, INSTEAD OF
-C           PACKING THIS BIT-MAP INTO SECTION 6 OF THE GRIB2 MESSAGE,
-C           THIS PACKER WILL USE THE BIT-MAP TO PLACE THE PRIMARY
-C           MISSING VALUES BACK INTO THE DATA FIELD BEFORE PACKING
-C           IT.
-C
-C           A GRIB2 MESSAGE MAY CONTAIN ONE OR MORE GRIDDED DATA
-C           FIELDS.  WHEN PACKING MULTIPLE GRIDS INTO A GRIB2 MESSAGE
-C           THE FIRST GRID MUST PROVIDE INFORMATION FOR SECTIONS 0
-C           THROUGH 7 (WITH, OF COURSE, SECTION 2 BEING OPTIONAL).
-C           SUBSEQUENT GRIDS SHOULD NOT PROVIDE DATA FOR SECTIONS
-C           0 AND 1.  THEY NEED ONLY PROVIDE DATA FOR SECTIONS
-C           2, 3, 4, 5, 6, 7, OR 3, 4, 5, 6, 7, OR 4, 5, 6, 7.
-C           THE FINAL DATA GRID PACKED INTO THE GRIB2 MESSAGE
-C           MUST BE FOLLOWED BY A SECTION 8 INDICATING THE END
-C           OF THE GRIB2 MESSAGE.  THIS ROUTINE MUST BE CALLED
-C           ONCE FOR EACH GRID PACKED IN THE GRIB2 MESSAGE.  THE
-C           "NEW" CALLING ARGUMENT (SEE BELOW) IS USED WHEN
-C           UNPACKING GRIB2 MESSAGES CONTAINING MULTIPLE
-C           DATA GRIDS.
-C
-C           THERE ARE A NUMBER OF DIFFERENT ERROR CONDITIONS THAT
-C           THAT CAN BE GENERATED WHILE PACKING A GRIB2 MESSAGE.
-C           ERROR TRACKING IS HANDLED BY THE JER( , ) ARRAY (SEE BELOW).
-C           EACH ROW OF THIS ARRAY CAN CONTAIN AN ERROR CODE FOLLOWED
-C           BY ITS SEVERITY LEVEL.  THE SEVERITY LEVELS ARE
-C           "0" FOR "OK", "1" FOR "WARNING", AND "2" FOR "FATAL".
-C           THE PACKER WILL IMMEDIATELY ABORT EXECUTION WHEN
-C           IT ENCOUNTERS A FATAL ERROR.  HOWEVER, EXECUTION IS NOT
-C           IMPEDED BY A STATUS CODE OF "OK" OR "WARNING".  SEE THE
-C           ARGUMENT LIST BELOW FOR A COMPLETE LIST OF THE ERROR
-C           CODES THAT CAN BE RETURNED BY THIS ROUTINE.  UNLESS 
-C           OTHERWISE STATED, ALL OF THE ERROR CODES ARE FATAL.
-C
-C        DATA SET USE
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (OUTPUT)
-C
-C        VARIABLES
-C              KFILDO = UNIT NUMBER OF THE OUTPUT (PRINT) FILE.
-C                       (INPUT)
-C          AIN(IX,JY) = ARRAY USED TO PASS THE GRID OF DATA INTO THE 
-C                       PACKER WHEN PACKING A FIELD CONSISTING OF
-C                       FLOATING POINT VALUES (IX=1,NX) (JY=1,NY).
-C                       (INPUT)
-C         IAIN(IX,JY) = ARRAY USED TO PASS THE GRID OF DATA INTO THE
-C                       PACKER WHEN PACKING A FIELD CONSISTING OF
-C                       INTEGER VALUES (IX=1,NX) (JY=1,NY).  (INPUT)
-C               NX,NY = SIZE OF AIN( , ), IAIN( , ), IB( , ).  (INPUT) 
-C             IDAT(J) = THE ARRAY CONTAINING THE LOCAL USE GROUPS
-C                       CONSISTING OF INTEGER DATA UNPACKED FROM
-C                       SECTION 2 (J=1,NIDAT).  (INPUT)
-C               NIDAT = THE DIMENSION OF THE IDAT( ) ARRAY.  (INPUT)
-C             RDAT(J) = THE ARRAY CONTAINING THE LOCAL USE GROUPS
-C                       CONSISTING OF FLOATING POINT DATA UNPACKED
-C                       FROM SECTION 2 (J=1,NRDAT).  (INPUT)
-C               NRDAT = THE DIMENSION OF THE RDAT( ) ARRAY.  (INPUT)
-C              IS0(L) = HOLDS THE VALUES FOR THE GRIB INDICATOR
-C                       SECTION, SECTION 0 (L=1,NS0). (INPUT/OUTPUT)
-C                 NS0 = SIZE OF IS0( ).  (INPUT)
-C              IS1(L) = HOLDS THE VALUES FOR THE GRIB IDENTIFICATION
-C                       SECTION, SECTION 1 (L=1,NS1).  (INPUT/OUTPUT)
-C                 NS1 = SIZE OF IS1( ).  (INPUT)
-C              IS3(L) = HOLDS THE VALUES FOR THE GRIB GRID DEFINITION
-C                       SECTION, SECTION 3 (L=1,NS3).  (INPUT/OUTPUT)
-C                 NS3 = SIZE OF IS3( ).  (INPUT)
-C              IS4(L) = HOLDS THE VALUES FOR THE GRIB PRODUCT 
-C                       DEFINITION SECTION, SECTION 4 (L=1,NS4).
-C                       (INPUT/OUTPUT)
-C                 NS4 = SIZE OF IS4( ).  (INPUT)
-C              IS5(L) = HOLDS THE VALUES FOR THE GRIB DATA 
-C                       REPRESENTATION SECTION, SECTION 5 (L=1,NS5).
-C                       (INPUT/OUTPUT)
-C                 NS5 = SIZE OF IS5( ).  (INPUT)
-C              IS6(L) = HOLDS THE VALUES FOR THE BIT-MAP SECTION,
-C                       SECTION 6. (THIS IS OPTIONAL).
-C                       (L=1,NS6). (INPUT/OUTPUT)
-C                 NS6 = SIZE OF IS6( ). MUST BE NX*NY + 6 IF A
-C                       BIT-MAP IS TO BE USED. (INPUT)
-C              IS7(L) = HOLDS THE VALUES FOR THE DATA SECTION,
-C                       SECTION 7 (L=1,NS7).  (INPUT/OUTPUT)
-C                 NS7 = SIZE OF IS7( ).  (INPUT)
-C           IB(IX,JY) = CONTAINS THE PRIMARY BIT-MAP.  THE BIT-MAP
-C                       IS USED TO REPRESENT THE LOCATIONS OF MISSING
-C                       VALUES IN THE DATA FIELD BEING PACKED INTO THE
-C                       GRIB2 MESSAGE.  IT HAS A ONE-TO-ONE
-C                       CORRESPONDENCE WITH THE DATA POINTS IN THE
-C                       DATA GRID.   A VALUE OF "1" IN THE BIT-MAP
-C                       INDICATES THAT THE CORRESPONDING VALUE IN THE
-C                       DATA GRID IS VALID.  A VALUE OF "0" IN THE
-C                       BIT-MAP INDICATES THAT THE CORRESPONDING VALUE
-C                       IN THE DATA GRID IS MISSING.
-C
-C                       A BIT-MAP ACCOMPANIED BY A DATA FIELD WITH 
-C                       THE PRIMARY MISSING VALUES REMOVED FROM IT
-C                       MAY BE SUPPLIED TO THIS PACKER WHEN USING
-C                       EITHER THE SIMPLE OR COMPLEX PACKING METHODS.
-C                       HOWEVER, THE BIT-MAP IS HANDLED DIFFERENTLY
-C                       DEPENDING ON WHICH PACKING METHOD IS BEING 
-C                       USED.  FOR THE SIMPLE PACKING METHOD, 
-C                       THE BIT-MAP IS PACKED INTO SECTION 6 OF THE
-C                       GRIB2 MESSAGE.  FOR THE COMPLEX PACKING 
-C                       METHOD, THE BIT-MAP IS USED TO INSERT THE
-C                       MISSING VALUES INTO THE DATA FIELD WHICH IS
-C                       THEN PACKED.  WHEN USING THIS PACKING METHOD
-C                       THE BIT-MAP IS NOT PACKED INTO SECTION 6 OF
-C                       THE GRIB2 MESSAGE.
-C
-C                       WITH THE SIMPLE PACKING METHOD, THE USER 
-C                       ALSO HAS THE OPTION OF PASSING IN A DATA FIELD
-C                       WITH MISSING VALUES EMBEDDED IN IT AND HAVING
-C                       THE PACKER CREATE THE BIT-MAP.  CARE MUST
-C                       BE EXERCISED IN SETTING THE IBITMAP AND 
-C                       ICLEAN CALLING ARGUMENTS (SEE BELOW) AS 
-C                       THESE CALLING ARGUMENTS INFORM THE PACKER AS
-C                       TO WHETHER OR NOT THE USER IS SUPPLYING A 
-C                       BIT-MAP AND WHETHER OR NOT THE DATA IN
-C                       THE GRIDDED FIELD CONTAINS MISSING VALUES. 
-C
-C                       NOTE THAT IF A DATA FIELD HAS NO MISSING VALUES
-C                       IN IT, THEN A BIT-MAP DOES NOT NEED TO BE
-C                       PACKED INTO SECTION 6 OF THE GRIB2 MESSAGE
-C                       WHEN USING THE SIMPLE PACKING METHOD. 
-C                       (INPUT/OUTPUT)
-C             IBITMAP = FLAG INDICATING WHETHER OR NOT A BIT-MAP
-C                       IS BEING PASSED INTO THIS PACKER.  IF
-C                       A BIT-MAP IS BEING PASSED INTO THIS 
-C                       ROUTINE, THEN THIS ARGUMENT SHOULD BE SET TO
-C                       "1".  IF A BIT-MAP IS NOT BEING PASSED
-C                       INTO THIS ROUTINE, THEN THIS ARGUMENT SHOULD
-C                       BE SET TO "0".  THE USER MUST TAKE CARE
-C                       TO SET IS6(6), THE BIT-MAP INDICATOR,
-C                       TO THE PROPER VALUE.  IT IS RECOMMENDED THAT
-C                       IF THE USER IS PASSING IN A BIT-MAP THEN 
-C                       HE SHOULD REMOVE THE MISSING VALUES FROM THE
-C                       DATA FIELD AND SET THE ICLEAN FLAG TO "1".
-C                       IF THE USER IS USING THE SIMPLE PACKING 
-C                       METHOD AND WANTS THE PACKER TO GENERATE 
-C                       A BIT-MAP, THEN HE SHOULD PASS IN THE DATA
-C                       FIELD WITH THE MISSING VALUES EMBEDDED 
-C                       IN IT ALONG WITH THE IBITMAP AND ICLEAN FLAGS
-C                       SET TO "0",
-C            IPACK(J) = THE ARRAY HOLDING THE ACTUAL PACKED MESSAGE
-C                       (J=1,MAX OF ND5).  (OUTPUT)
-C                 ND5 = DIMENSION OF IPACK( ).  (INPUT)
-C               MISSP = PRIMARY MISSING VALUE, USED WHEN INTEGER
-C                       DATA IS BEING PACKED.  (INPUT)
-C              XMISSP = PRIMARY MISSING VALUE, USED WHEN FLOATING 
-C                       POINT DATA IS BEING PACKED.  (INPUT)
-C               MISSS = SECONDARY MISSING VALUE, USED WHEN INTEGER
-C                       DATA IS BEING PACKED.  (INPUT)
-C              XMISSS = SECONDARY MISSING VALUE, USED WHEN FLOATING 
-C                       POINT DATA IS BEING PACKED.  (INPUT)
-C                 NEW = FLAG INDICATING WHETHER OR NOT THIS IS THE 
-C                       FIRST DATA GRID TO BE PACKED INTO A 
-C                       GRIB2 MESSAGE.  A VALUE OF "1" INDICATES
-C                       THAT THIS IS THE FIRST GRID TO BE PACKED INTO
-C                       THE MESSAGE.  A VALUE OF "0" INDICATES THAT
-C                       THIS IS NOT THE FIRST DATA GRID TO BE 
-C                       PACKED INTO THE MESSAGE.  (INPUT)
-C               MINPK = THIS CALLING ARGUMENT APPLIES ONLY TO THE
-C                       COMPLEX PACKING METHOD.  IT DETERMINES
-C                       THE MINIMUM SIZE OF THE GROUPS OF VALUES THAT
-C                       THE DATA FIELD IS BROKEN DOWN INTO.  (INPUT)  
-C              ICLEAN = FLAG INDICATING WHETHER OR NOT THE
-C                       DATA FIELD (IN IAIN( , ) OR AIN( , )) CONTAINS
-C                       MISSING VALUES.  A VALUE OF "0" MEANS THAT
-C                       THE DATA FIELD DOES CONTAIN MISSING VALUES.
-C                       A VALUE OF "1" MEANS THAT THE DATA FIELD DOES
-C                       NOT CONTAIN ANY MISSING VALUES.  (INPUT)
-C              L3264B = INTEGER WORD LENGTH OF MACHINE BEING USED.
-C                       VALUES OF 32 AND 64 ARE ACCOMMODATED.  (INPUT)
-C            JER(J,K) = RETURN STATUS CODES AND SEVERITY LEVELS
-C                       (J=1,NDJER)(K=1,2). VALUES CAN COME FROM
-C                       SUBROUTINES; OTHERWISE: 0 = GOOD RETURN.
-C                       (OUTPUT)
-C               NDJER = THE MAXIMUM NUMBER OF ERROR CODES JER( , )
-C                       MAY CONTAIN. (INPUT)
-C                KJER = THE ACTUAL NUMBER OF ERROR MESSAGES CONTAINED
-C                       IN JER( , ). (OUTPUT)
-C
-C        LOCAL VARIABLES
-C            A(IX,JY) = GRID OF REAL VALUES TO BE PACKED (IX=1,NX)
-C                       (JY=1,NY).  (AUTOMATIC ARRAY)
-C              EXISTS = BOOLEAN FLAG INDICATING WHETHER OR NOT A
-C                       GRIB2 SECTION EXISTS (LOGICAL).
-C           IA(IX,JY) = GRID OF INTEGER VALUES TO BE PACKED (IX=1,NX)
-C                       (JY=1,NY).  (AUTOMATIC ARRAY)
-C                  ID = THE DECIMAL SCALING FACTOR.
-C                  IE = THE BINARY SCALING FACTOR.
-C            IEDITION = THE VERSION NUMBER OF THE GRIB2 ENCODER.
-C                 IER = RETURN CODE FROM MOST SUBROUTINES.  AN ERROR
-C                       WILL BE TRANSFERRED TO JER(KJER, ) UPON RETURN.
-C                        0 - GOOD RETURN
-C                      1-4 - ERROR CODES RETURNED FROM PKBG.
-C                      5,6 - ERROR CODES GENERATED BY THE LENGTH
-C                            FUNCTION.
-C                        8 - IS5(21) CONTAINS AN INVALID DATA TYPE
-C                            VALUE. 
-C                  101,102 - ERROR CODES GENERATED BY PK_SECT1.
-C              301-304,310 - ERROR CODES GENERATED BY PK_SECT3. 
-C                  401-403 - ERROR CODES GENERATED BY PK_SECT4. 
-C              501,502,508 - ERROR CODES GENERATED BY PK_SECT5.
-C                  601,602 - ERROR CODES GENERATED BY PK_SECT6.
-C          701-703,711-713 - ERROR CODES GENERATED BY PK_SECT7.
-C                      999 - ERROR CODES GENERATED BY PK_TRACE.
-C                     1002 - ERROR CODE RETURNED FROM PK_SECT0.
-C                 INC = NUMBER OF VALUES TO ADD TO THE GROUP TO BE
-C                       PACKED AT A TIME.  SET TO 1 IN DATA STATEMENT.
-C              IOCTET = THE LENGTH OF THE MESSAGE IN BYTES (OCTETS).
-C             IPOS0_9 = SAVES THE BEGINNING BIT POSITION IN IPACK( )
-C                       THAT THE TOTAL MESSAGE LENGTH WILL BE STORED
-C                       AT ONCE THE GRIB2 MESSAGE HAS BEEN COMPLETELY
-C                       PACKED. 
-C             ISEVERE = THE SEVERITY LEVEL OF THE ERROR. ACCEPTABLE
-C                       SEVERITY LEVELS ARE:
-C                          0 = NOT A PROBLEM ... JUST A DIAGNOSTIC
-C                          1 = A WARNING ... SOMETHING THE USER SHOULD
-C                              KNOW ABOUT
-C                          2 = A FATAL ERROR
-C            LOCN0_9  = SAVES THE BEGINNING WORD POSITION IN IPACK( ) 
-C                       THAT THE TOTAL MESSAGE LENGTH WILL BE STORED
-C                       AT ONCE THE GRIB2 MESSAGE HAS BEEN COMPLETELY
-C                       PACKED.
-C                MINA = THE REFERENCE VALUE WHEN THE ORIGINAL DATA
-C                       ARE INTEGER.
-C               XMINA = THE REFERENCE VALUE WHEN THE ORIGINAL DATA
-C                       ARE FLOATING POINT.
-C        1         2         3         4         5         6         7 X
-C
-C        NON-SYSTEM SUBROUTINES CALLED
-C           PK_SECT0, PK_SECT1, PK_SECT2, PK_SECT3, PK_SECT4,
-C           PK_SECT5, PK_SECT6, PK_SECT7, PK_SECT8, PK_TRACE, PKBG,
-C           PREPR
-C
-      LOGICAL EXISTS
-C
-      DIMENSION A(NX,NY)
-      DIMENSION IA(NX,NY)
-      DIMENSION AIN(NX,NY)
-      DIMENSION IAIN(NX,NY)
-      DIMENSION IB(NX,NY)
-      DIMENSION IPACK(ND5)
-      DIMENSION IS0(NS0),IS1(NS1),IS3(NS3),
-     1          IS4(NS4),IS5(NS5),IS6(NS6),IS7(NS7)
-      DIMENSION JER(NDJER,2)
-      DIMENSION IDAT(NIDAT),RDAT(NRDAT)
-C
-      DATA EXISTS/.FALSE./
-      DATA IEDITION/2/
-      DATA INC/1/
-C
-      SAVE LOCN, IPOS,
-     1     LOCN0_9, IPOS0_9
-C
-      IER=0
-      ISEVERE=2
-      KJER=0
-C
-C        INITIALIZE JER( , ).
-C
-      DO K=1,NDJER
-         JER(K,1)=0
-         JER(K,2)=0
-      ENDDO
-C
-C        DETERMINE WHAT TYPE OF DATA THE USER IS PACKING.
-C        IT IS NECESSARY TO MAKE LOCAL COPIES OF IAIN( , ) FOR
-C        INTEGER DATA OR AIN( , ) FOR FLOATING POINT DATA TO
-C        PREVENT THE USER-SUPPLIED DATA IN THESE ARRAYS FROM
-C        GETTING ALTERED BY THE PACKING ROUTINES.
-C
-      IF(IS5(21).EQ.0)THEN
-C
-         DO 20 IY=1,NY
-            DO 10 IX=1,NX
-               A(IX,IY)=AIN(IX,IY)
-  10        CONTINUE
-  20     CONTINUE
-C
-      ELSE IF(IS5(21).EQ.1)THEN
-C
-         DO 40 IY=1,NY
-            DO 30 IX=1,NX
-               IA(IX,IY)=IAIN(IX,IY)
-  30        CONTINUE
-  40     CONTINUE
-C
-      ELSE
-C
-C           INVALID OPTION IN IS5(21).
-         IER=8
-         GOTO 900
-      ENDIF
-C
-C        *************************************
-C
-C        PACK SECTION 0 OF THE MESSAGE INTO IPACK( ).
-C
-C        *************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,0,0)
-      CALL PK_SECT0(KFILDO,IPACK,ND5,IS0,NS0,L3264B,NEW,LOCN,IPOS,
-     1              IEDITION,LOCN0_9,IPOS0_9,IER,ISEVERE,*900)
-C
-C        *************************************
-C
-C        PACK SECTION 1, IDENTIFICATION.
-C
-C        *************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,100,0)
-      CALL PK_SECT1(KFILDO,IPACK,ND5,IS1,NS1,NEW,L3264B,LOCN,IPOS,
-     1              IER,ISEVERE,*900)
-C
-C        ********************************************************
-C
-C        PACK SECTION 2, THE LOCAL USE SECTION, IF IT IS PRESENT.
-C
-C        ********************************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,200,0)
-      CALL PK_SECT2(KFILDO,IPACK,ND5,RDAT,NRDAT,IDAT,NIDAT,
-     1              L3264B,LOCN,IPOS,EXISTS,IER,ISEVERE,*900)
-C
-C        *************************************
-C
-C        PREPARE IA( ) FOR PACKING AND IB( ) IF NECESSARY.
-C        MAKE DECISIONS ABOUT PACKING, ETC. SINCE THESE
-C        DECISIONS AFFECT SECTION 3 AND SECTION 5, THE
-C        PREPR ROUTINE IS CALLED BEFORE EITHER OF THOSE
-C        SECTIONS ARE PROCESSED.
-C
-C        *************************************
-C
-      ID=IS5(18)
-      IE=IS5(16)
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,900,0)
-      CALL PREPR(KFILDO,A,IA,IB,NX,NY,NVAL,ICLEAN,IBITMAP,
-     1           IS5,NS5,IS6,NS6,IS7,NS7,ID,IE,MINA,XMINA,
-     2           MISSP,MISSS,XMISSP,XMISSS,MINPK,IPKOPT,IER,JER,
-     3           NDJER,KJER,*900)
-C
-C        *************************************
-C
-C        PACK SECTION 3, GRID DEFINITION.
-C
-C        *************************************
-C
-C        IF THIS GRID IS BEING PACKED INTO AN EXISTING MESSAGE,
-C        CHECK TO SEE IF THERE IS A SECTION 3 ... NOTE THAT THERE
-C        MUST BE A SECTION 3 IF THERE WAS A SECTION 2.
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,300,0)
-C
-      IF(IS3(5).NE.3)THEN
-         IF(EXISTS)THEN
-            IER=305
-            ISEVERE=2
-            GO TO 900
-         ENDIF
-C
-      ENDIF
-         CALL PK_SECT3(KFILDO,IPACK,ND5,IS3,NS3,IPKOPT,L3264B,
-     1                 LOCN,IPOS,IER,ISEVERE,*900)
-C 
-C        *************************************
-C
-C        PACK SECTION 4, PRODUCT DEFINITION.
-C
-C        *************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,400,0)
-      CALL PK_SECT4(KFILDO,IPACK,ND5,IS4,NS4,L3264B,LOCN,IPOS,
-     1              IER,ISEVERE,*900)
-C
-C        *********************************************
-C
-C        PACK SECTION 5, DATA REPRESENTATION.
-C
-C        *********************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,500,0)
-      CALL PK_SECT5(KFILDO,IPACK,ND5,IS5,NS5,MINA,XMINA,
-     1              MISSP,XMISSP,MISSS,XMISSS,L3264B,
-     2              LOCN,IPOS,LOCN5_20,IPOS5_20,LOCN5_32,IPOS5_32,
-     3              IER,ISEVERE,*900)
-C     CALL TIMPR(KFILDO,KFILDO,'END SECTION 5        ')
-C
-C        *******************************************
-C
-C        PACK SECTION 6, BIT MAP.
-C
-C        *******************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,600,0)
-      CALL PK_SECT6(KFILDO,IB,NX*NY,IPACK,ND5,LOCN,IPOS,
-     1              IS6,NS6,IPKOPT,L3264B,IER,ISEVERE,*900)
-C     CALL TIMPR(KFILDO,KFILDO,'END SECTION 6        ')
-C
-C        ***********************************************
-C
-C        PACK SECTION 7, BINARY DATA.
-C
-C        ***********************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,700,0)
-      CALL PK_SECT7(KFILDO,IA,NX*NY,IPACK,ND5,LOCN,IPOS,
-     1              IS5,NS5,IS6,NS6,IS7,NS7,INC,MINPK,MISSP,MISSS,
-     2              IPKOPT,LOCN5_20,IPOS5_20,
-     3              LOCN5_32,IPOS5_32,L3264B,IER,ISEVERE,*900)
-C     
-      IF(IER.NE.0)THEN
-         CALL PK_TRACE(KFILDO,JER,NDJER,KJER,IER,1)
-C           THIS CALL TO TRACE IS FOR NON FATAL ERRORS THAT
-C           CAN BE CARRIED BACK.  FATAL ERRORS ARE RETURNED
-C           TO *900.
-      ENDIF
-C     CALL TIMPR(KFILDO,KFILDO,'END SECTION 7        ')
-C
-C        *************************************
-C
-C        PACK SECTION 8, END OF MESSAGE.
-C
-C        *************************************
-C
-      CALL PK_TRACE(KFILDO,JER,NDJER,KJER,800,0)
-      CALL PK_SECT8(KFILDO,IPACK,ND5,LOCN,IPOS,L3264B,IER,
-     1              ISEVERE,*900)
-C
-C        FILL BYTES 9-12 WITH THE TOTAL MESSAGE LENGTH IN BYTES.
-      IOCTET=LOCN*L3264B/8-(L3264B+1-IPOS)/8
-      IS0(9)=IOCTET
-C
-      CALL PKBG(KFILDO,IPACK,ND5,LOCN0_9+1,IPOS0_9,IS0(9),32,L3264B,
-     1          IER,*900)
-C        THIS TOTAL LENGTH IS LIMITED TO A 4-BYTE WORD.  THE LENGTH IS
-C        PUT INTO IS0(9), BUT IS PACKED INTO OCTETS 13-16, WHICH IS THE
-C        RIGHT HALF OF A 64-BIT WORD.
-C
-C        WRITE THE TOTAL MESSAGE LENGTH.
-C
-C     WRITE(KFILDO,800)IOCTET
-C800  FORMAT(/' TOTAL MESSAGE LENGTH IN BYTES =',I12)
-C
-      RETURN
-C
-C        ERROR RETURN SECTION.
-C
- 900  CALL PK_TRACE(KFILDO,JER,NDJER,KJER,IER,ISEVERE)
-C
- 901  RETURN
-      END
+      subroutine pk_grib2(kfildo,ain,iain,nx,ny,idat,nidat,rdat,nrdat,
+     1                    is0,ns0,is1,ns1,is3,ns3,is4,ns4,is5,
+     2                    ns5,is6,ns6,is7,ns7,ib,ibitmap,ipack,nd5,
+     3                    missp,xmissp,misss,xmisss,new,minpk,iclean,
+     4                    l3264b,jer,ndjer,kjer)
+c
+c        august   1999   glahn/lawrence  gsc/tdl     original coding
+c        february 2001   lawrence    updated this routine's 
+c                                    prologue.
+c        november 2001   glahn       added optional writing of message
+c                                    length to kfildo
+c        february 2002   glahn       added is6( ), ns6( ) to call to 
+c                                    pk_sect7; changed call method and
+c                                    sequence for pk_sect3
+c
+c        purpose
+c           this utility packs a gridded data field according to the
+c           rules and structure put forth in the grib version 2 
+c           (grib2) documentation.  grib2 is a data representation
+c           form for general regularly distributed information
+c           in binary.  it provides a means of compressing and
+c           encrypting data so as to make its transmission more
+c           efficient.  it is recommended that the user of this
+c           routine review the external documentation that 
+c           explains what grib2 is and how to use it.
+c
+c           there are eight mandatory and one optional sections
+c           contained within a grib2 message.  these sections are
+c
+c              section 0 - the indicator section
+c              section 1 - the identification section
+c              section 2 - the local use section (optional)
+c              section 3 - the grid definition section
+c              section 4 - the product definition section
+c              section 5 - the data representation section
+c              section 6 - the bit-map section
+c              section 7 - the data section
+c              section 8 - the end section
+c
+c           section 0, the indicator section, contains grib2
+c           discipline, edition, and message length information.
+c
+c           section 1, the identification section, contains data
+c           that describes characteristics that apply to all of the
+c           processed data in the grib2 message.
+c
+c           section 2, the local use section, contains supplemental
+c           information for local use by the originating centers.
+c           this section is optional; it does not need to be included
+c           in the grib2 message.
+c
+c           section 3, the grid definition section, describes the
+c           geometry of the values within a plane described by
+c           two fixed coordinates.
+c
+c           section 4, the product definition section, provides a
+c           description of the data packed within section 7.
+c
+c           section 5, the data representation section, describes
+c           what method is used to compress the data in section 7.
+c
+c           section 6, the bit-map section, contains a bit-map which
+c           indicates the presence or absence of data at each grid
+c           point.  a bit-map is only applicable to the simple
+c           and complex packing methods.  a bit-map does not
+c           apply to complex packing with spatial differences.
+c
+c           section 7, the data section, contains the packed data
+c           values.
+c
+c           section 8, the end section, contains the string "7777"
+c           indicating the end of the grib2 message.
+c
+c           sections 3, 4, 5, and 7 provide a variety of templates
+c           that describe and define the gridded product
+c           contained within the grib2 message.  this grib2 packer
+c           does not support all of the templates provided in grib2.
+c           the more commonly used templates are supported, and
+c           this software can be easily extended in the future to
+c           accommodate additional templates as the need arises.
+c
+c           the section 3 grid definition templates currently
+c           recognized by this packer are:
+c              template 3.0   equidistant cylindrical latitude/
+c                             longitude
+c              template 3.10  mercator
+c              template 3.20  polar stereographic
+c              template 3.30  lambert
+c              template 3.90  orthographic space view
+c              template 3.110 equatorial azimuthal equidistant
+c              template 3.120 azimuth-range (radar)
+c
+c           the section 4 product definition templates currently
+c           recognized by this packer are:
+c              template 4.0  analysis or forecast at a level and point
+c              template 4.1  individual emsemble
+c              template 4.2  derived forecast based on ensembles
+c              template 4.8  average, accumulation, extremes
+c              template 4.20 radar
+c              template 4.30 satellite
+c
+c           the section 5 data representation templates currently
+c           recognized by this packer are:
+c              template 5.0  simple packing
+c              template 5.2  complex packing
+c              template 5.3  complex packing with spatial differencing
+c
+c           the section 7 data templates currently recognized by this
+c           packer are:
+c              template 7.0  simple packing
+c              template 7.2  complex packing
+c              template 7.3  complex packing and spatial differencing
+c
+c           the user supplies the data for the sections of the grib2
+c           message through arrays is0( ), is1( ), is3( ),
+c           is4( ), is5( ), is6( ), and is7( ) which correspond 
+c           to sections 0, 1, 2, 3, 4, 5, 6, and 7, respectively.
+c           the user should refer to the external documentation
+c           that accompanies this routine to determine which values
+c           he needs to supply in each of these arrays.
+c
+c           the grid of data is passed into the packer using either the
+c           ain( ) or the iain( ) arrays.  the data is passed into this 
+c           routine using ain( ) if the data in the grid are floating
+c           point values.  if the data in the grid contains integer  
+c           values, then the data must be passed into this routine
+c           using the iain( ) array.
+c
+c           the representation of missing values in the data field
+c           plays an integral role in how the data is packed into
+c           the grib2 message.  the handling of missing values in 
+c           grib2 depends upon the packing method used to compress
+c           the data into section 7 of the grib2 message.
+c         
+c           when using the simple packing method, a bit-map must be
+c           used to indicate the locations of missing values in 
+c           the data field.  this bit-map is ultimately packed into
+c           section 6 of the grib2 message.  the corresponding data
+c           field is packed into section 7 of the message with the
+c           missing values removed.  when using the simple packing
+c           method, the caller of this routine is the given the 
+c           option of supplying a bit-map along with the data field
+c           with the missing values removed from it.  the caller 
+c           may also supply the data field with the missing values
+c           in it and request that the grib2 packer generate a 
+c           bit-map from it.  if the user has a data field that has no
+c           missing data in it, then a bit-map is not needed and
+c           should not be packed into section 6 of the grib2 message.  
+c
+c           the complex and complex with spatial differencing
+c           packing methods allow for the use of primary
+c           and secondary missing values.  these packing methods
+c           utilize an efficient technique of packing the missing
+c           values along with the data field into section 7 of the
+c           grib2 message which eliminates the need for a bit-map
+c           in section 6.  the missing values are left in the data 
+c           field as it is packed.  in order for this to work, the
+c           user must specify the missing value management value
+c           in is5(23).  a value of "0" indicates that there are no
+c           missing values in the data field.  a value of "1" indicates
+c           that there may be primary missing values.  a value of "2"
+c           indicates that there may be both primary and secondary
+c           missing values.  the missp and misss (see below)
+c           calling arguments represent the primary and secondary
+c           missing values, respectively, when packing an integer 
+c           data field.  the xmissp and xmisss (see below) calling
+c           arguments represent the primary and secondary missing
+c           values when packing a floating point data field.
+c           like the simple packing method, the user has the option
+c           to provide a bit-map and a data field with all of the
+c           primary missing values removed.  however, instead of
+c           packing this bit-map into section 6 of the grib2 message,
+c           this packer will use the bit-map to place the primary
+c           missing values back into the data field before packing
+c           it.
+c
+c           a grib2 message may contain one or more gridded data
+c           fields.  when packing multiple grids into a grib2 message
+c           the first grid must provide information for sections 0
+c           through 7 (with, of course, section 2 being optional).
+c           subsequent grids should not provide data for sections
+c           0 and 1.  they need only provide data for sections
+c           2, 3, 4, 5, 6, 7, or 3, 4, 5, 6, 7, or 4, 5, 6, 7.
+c           the final data grid packed into the grib2 message
+c           must be followed by a section 8 indicating the end
+c           of the grib2 message.  this routine must be called
+c           once for each grid packed in the grib2 message.  the
+c           "new" calling argument (see below) is used when
+c           unpacking grib2 messages containing multiple
+c           data grids.
+c
+c           there are a number of different error conditions that
+c           that can be generated while packing a grib2 message.
+c           error tracking is handled by the jer( , ) array (see below).
+c           each row of this array can contain an error code followed
+c           by its severity level.  the severity levels are
+c           "0" for "ok", "1" for "warning", and "2" for "fatal".
+c           the packer will immediately abort execution when
+c           it encounters a fatal error.  however, execution is not
+c           impeded by a status code of "ok" or "warning".  see the
+c           argument list below for a complete list of the error
+c           codes that can be returned by this routine.  unless 
+c           otherwise stated, all of the error codes are fatal.
+c
+c        data set use
+c           kfildo - unit number for output (print) file.  (output)
+c
+c        variables
+c              kfildo = unit number of the output (print) file.
+c                       (input)
+c          ain(ix,jy) = array used to pass the grid of data into the 
+c                       packer when packing a field consisting of
+c                       floating point values (ix=1,nx) (jy=1,ny).
+c                       (input)
+c         iain(ix,jy) = array used to pass the grid of data into the
+c                       packer when packing a field consisting of
+c                       integer values (ix=1,nx) (jy=1,ny).  (input)
+c               nx,ny = size of ain( , ), iain( , ), ib( , ).  (input) 
+c             idat(j) = the array containing the local use groups
+c                       consisting of integer data unpacked from
+c                       section 2 (j=1,nidat).  (input)
+c               nidat = the dimension of the idat( ) array.  (input)
+c             rdat(j) = the array containing the local use groups
+c                       consisting of floating point data unpacked
+c                       from section 2 (j=1,nrdat).  (input)
+c               nrdat = the dimension of the rdat( ) array.  (input)
+c              is0(l) = holds the values for the grib indicator
+c                       section, section 0 (l=1,ns0). (input/output)
+c                 ns0 = size of is0( ).  (input)
+c              is1(l) = holds the values for the grib identification
+c                       section, section 1 (l=1,ns1).  (input/output)
+c                 ns1 = size of is1( ).  (input)
+c              is3(l) = holds the values for the grib grid definition
+c                       section, section 3 (l=1,ns3).  (input/output)
+c                 ns3 = size of is3( ).  (input)
+c              is4(l) = holds the values for the grib product 
+c                       definition section, section 4 (l=1,ns4).
+c                       (input/output)
+c                 ns4 = size of is4( ).  (input)
+c              is5(l) = holds the values for the grib data 
+c                       representation section, section 5 (l=1,ns5).
+c                       (input/output)
+c                 ns5 = size of is5( ).  (input)
+c              is6(l) = holds the values for the bit-map section,
+c                       section 6. (this is optional).
+c                       (l=1,ns6). (input/output)
+c                 ns6 = size of is6( ). must be nx*ny + 6 if a
+c                       bit-map is to be used. (input)
+c              is7(l) = holds the values for the data section,
+c                       section 7 (l=1,ns7).  (input/output)
+c                 ns7 = size of is7( ).  (input)
+c           ib(ix,jy) = contains the primary bit-map.  the bit-map
+c                       is used to represent the locations of missing
+c                       values in the data field being packed into the
+c                       grib2 message.  it has a one-to-one
+c                       correspondence with the data points in the
+c                       data grid.   a value of "1" in the bit-map
+c                       indicates that the corresponding value in the
+c                       data grid is valid.  a value of "0" in the
+c                       bit-map indicates that the corresponding value
+c                       in the data grid is missing.
+c
+c                       a bit-map accompanied by a data field with 
+c                       the primary missing values removed from it
+c                       may be supplied to this packer when using
+c                       either the simple or complex packing methods.
+c                       however, the bit-map is handled differently
+c                       depending on which packing method is being 
+c                       used.  for the simple packing method, 
+c                       the bit-map is packed into section 6 of the
+c                       grib2 message.  for the complex packing 
+c                       method, the bit-map is used to insert the
+c                       missing values into the data field which is
+c                       then packed.  when using this packing method
+c                       the bit-map is not packed into section 6 of
+c                       the grib2 message.
+c
+c                       with the simple packing method, the user 
+c                       also has the option of passing in a data field
+c                       with missing values embedded in it and having
+c                       the packer create the bit-map.  care must
+c                       be exercised in setting the ibitmap and 
+c                       iclean calling arguments (see below) as 
+c                       these calling arguments inform the packer as
+c                       to whether or not the user is supplying a 
+c                       bit-map and whether or not the data in
+c                       the gridded field contains missing values. 
+c
+c                       note that if a data field has no missing values
+c                       in it, then a bit-map does not need to be
+c                       packed into section 6 of the grib2 message
+c                       when using the simple packing method. 
+c                       (input/output)
+c             ibitmap = flag indicating whether or not a bit-map
+c                       is being passed into this packer.  if
+c                       a bit-map is being passed into this 
+c                       routine, then this argument should be set to
+c                       "1".  if a bit-map is not being passed
+c                       into this routine, then this argument should
+c                       be set to "0".  the user must take care
+c                       to set is6(6), the bit-map indicator,
+c                       to the proper value.  it is recommended that
+c                       if the user is passing in a bit-map then 
+c                       he should remove the missing values from the
+c                       data field and set the iclean flag to "1".
+c                       if the user is using the simple packing 
+c                       method and wants the packer to generate 
+c                       a bit-map, then he should pass in the data
+c                       field with the missing values embedded 
+c                       in it along with the ibitmap and iclean flags
+c                       set to "0",
+c            ipack(j) = the array holding the actual packed message
+c                       (j=1,max of nd5).  (output)
+c                 nd5 = dimension of ipack( ).  (input)
+c               missp = primary missing value, used when integer
+c                       data is being packed.  (input)
+c              xmissp = primary missing value, used when floating 
+c                       point data is being packed.  (input)
+c               misss = secondary missing value, used when integer
+c                       data is being packed.  (input)
+c              xmisss = secondary missing value, used when floating 
+c                       point data is being packed.  (input)
+c                 new = flag indicating whether or not this is the 
+c                       first data grid to be packed into a 
+c                       grib2 message.  a value of "1" indicates
+c                       that this is the first grid to be packed into
+c                       the message.  a value of "0" indicates that
+c                       this is not the first data grid to be 
+c                       packed into the message.  (input)
+c               minpk = this calling argument applies only to the
+c                       complex packing method.  it determines
+c                       the minimum size of the groups of values that
+c                       the data field is broken down into.  (input)  
+c              iclean = flag indicating whether or not the
+c                       data field (in iain( , ) or ain( , )) contains
+c                       missing values.  a value of "0" means that
+c                       the data field does contain missing values.
+c                       a value of "1" means that the data field does
+c                       not contain any missing values.  (input)
+c              l3264b = integer word length of machine being used.
+c                       values of 32 and 64 are accommodated.  (input)
+c            jer(j,k) = return status codes and severity levels
+c                       (j=1,ndjer)(k=1,2). values can come from
+c                       subroutines; otherwise: 0 = good return.
+c                       (output)
+c               ndjer = the maximum number of error codes jer( , )
+c                       may contain. (input)
+c                kjer = the actual number of error messages contained
+c                       in jer( , ). (output)
+c
+c        local variables
+c            a(ix,jy) = grid of real values to be packed (ix=1,nx)
+c                       (jy=1,ny).  (automatic array)
+c              exists = boolean flag indicating whether or not a
+c                       grib2 section exists (logical).
+c           ia(ix,jy) = grid of integer values to be packed (ix=1,nx)
+c                       (jy=1,ny).  (automatic array)
+c                  id = the decimal scaling factor.
+c                  ie = the binary scaling factor.
+c            iedition = the version number of the grib2 encoder.
+c                 ier = return code from most subroutines.  an error
+c                       will be transferred to jer(kjer, ) upon return.
+c                        0 - good return
+c                      1-4 - error codes returned from pkbg.
+c                      5,6 - error codes generated by the length
+c                            function.
+c                        8 - is5(21) contains an invalid data type
+c                            value. 
+c                  101,102 - error codes generated by pk_sect1.
+c              301-304,310 - error codes generated by pk_sect3. 
+c                  401-403 - error codes generated by pk_sect4. 
+c              501,502,508 - error codes generated by pk_sect5.
+c                  601,602 - error codes generated by pk_sect6.
+c          701-703,711-713 - error codes generated by pk_sect7.
+c                      999 - error codes generated by pk_trace.
+c                     1002 - error code returned from pk_sect0.
+c                 inc = number of values to add to the group to be
+c                       packed at a time.  set to 1 in data statement.
+c              ioctet = the length of the message in bytes (octets).
+c             ipos0_9 = saves the beginning bit position in ipack( )
+c                       that the total message length will be stored
+c                       at once the grib2 message has been completely
+c                       packed. 
+c             isevere = the severity level of the error. acceptable
+c                       severity levels are:
+c                          0 = not a problem ... just a diagnostic
+c                          1 = a warning ... something the user should
+c                              know about
+c                          2 = a fatal error
+c            locn0_9  = saves the beginning word position in ipack( ) 
+c                       that the total message length will be stored
+c                       at once the grib2 message has been completely
+c                       packed.
+c                mina = the reference value when the original data
+c                       are integer.
+c               xmina = the reference value when the original data
+c                       are floating point.
+c        1         2         3         4         5         6         7 x
+c
+c        non-system subroutines called
+c           pk_sect0, pk_sect1, pk_sect2, pk_sect3, pk_sect4,
+c           pk_sect5, pk_sect6, pk_sect7, pk_sect8, pk_trace, pkbg,
+c           prepr
+c
+      logical exists
+c
+      dimension a(nx,ny)
+      dimension ia(nx,ny)
+      dimension ain(nx,ny)
+      dimension iain(nx,ny)
+      dimension ib(nx,ny)
+      dimension ipack(nd5)
+      dimension is0(ns0),is1(ns1),is3(ns3),
+     1          is4(ns4),is5(ns5),is6(ns6),is7(ns7)
+      dimension jer(ndjer,2)
+      dimension idat(nidat),rdat(nrdat)
+c
+      data exists/.false./
+      data iedition/2/
+      data inc/1/
+c
+      save locn, ipos,
+     1     locn0_9, ipos0_9
+c
+      ier=0
+      isevere=2
+      kjer=0
+c
+c        initialize jer( , ).
+c
+      do k=1,ndjer
+         jer(k,1)=0
+         jer(k,2)=0
+      enddo
+c
+c        determine what type of data the user is packing.
+c        it is necessary to make local copies of iain( , ) for
+c        integer data or ain( , ) for floating point data to
+c        prevent the user-supplied data in these arrays from
+c        getting altered by the packing routines.
+c
+      if(is5(21).eq.0)then
+c
+         do 20 iy=1,ny
+            do 10 ix=1,nx
+               a(ix,iy)=ain(ix,iy)
+  10        continue
+  20     continue
+c
+      else if(is5(21).eq.1)then
+c
+         do 40 iy=1,ny
+            do 30 ix=1,nx
+               ia(ix,iy)=iain(ix,iy)
+  30        continue
+  40     continue
+c
+      else
+c
+c           invalid option in is5(21).
+         ier=8
+         goto 900
+      endif
+c
+c        *************************************
+c
+c        pack section 0 of the message into ipack( ).
+c
+c        *************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,0,0)
+      call pk_sect0(kfildo,ipack,nd5,is0,ns0,l3264b,new,locn,ipos,
+     1              iedition,locn0_9,ipos0_9,ier,isevere,*900)
+c
+c        *************************************
+c
+c        pack section 1, identification.
+c
+c        *************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,100,0)
+      call pk_sect1(kfildo,ipack,nd5,is1,ns1,new,l3264b,locn,ipos,
+     1              ier,isevere,*900)
+c
+c        ********************************************************
+c
+c        pack section 2, the local use section, if it is present.
+c
+c        ********************************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,200,0)
+      call pk_sect2(kfildo,ipack,nd5,rdat,nrdat,idat,nidat,
+     1              l3264b,locn,ipos,exists,ier,isevere,*900)
+c
+c        *************************************
+c
+c        prepare ia( ) for packing and ib( ) if necessary.
+c        make decisions about packing, etc. since these
+c        decisions affect section 3 and section 5, the
+c        prepr routine is called before either of those
+c        sections are processed.
+c
+c        *************************************
+c
+      id=is5(18)
+      ie=is5(16)
+      call pk_trace(kfildo,jer,ndjer,kjer,900,0)
+      call prepr(kfildo,a,ia,ib,nx,ny,nval,iclean,ibitmap,
+     1           is5,ns5,is6,ns6,is7,ns7,id,ie,mina,xmina,
+     2           missp,misss,xmissp,xmisss,minpk,ipkopt,ier,jer,
+     3           ndjer,kjer,*900)
+c
+c        *************************************
+c
+c        pack section 3, grid definition.
+c
+c        *************************************
+c
+c        if this grid is being packed into an existing message,
+c        check to see if there is a section 3 ... note that there
+c        must be a section 3 if there was a section 2.
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,300,0)
+c
+      if(is3(5).ne.3)then
+         if(exists)then
+            ier=305
+            isevere=2
+            go to 900
+         endif
+c
+      endif
+         call pk_sect3(kfildo,ipack,nd5,is3,ns3,ipkopt,l3264b,
+     1                 locn,ipos,ier,isevere,*900)
+c 
+c        *************************************
+c
+c        pack section 4, product definition.
+c
+c        *************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,400,0)
+      call pk_sect4(kfildo,ipack,nd5,is4,ns4,l3264b,locn,ipos,
+     1              ier,isevere,*900)
+c
+c        *********************************************
+c
+c        pack section 5, data representation.
+c
+c        *********************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,500,0)
+      call pk_sect5(kfildo,ipack,nd5,is5,ns5,mina,xmina,
+     1              missp,xmissp,misss,xmisss,l3264b,
+     2              locn,ipos,locn5_20,ipos5_20,locn5_32,ipos5_32,
+     3              ier,isevere,*900)
+c     call timpr(kfildo,kfildo,'end section 5        ')
+c
+c        *******************************************
+c
+c        pack section 6, bit map.
+c
+c        *******************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,600,0)
+      call pk_sect6(kfildo,ib,nx*ny,ipack,nd5,locn,ipos,
+     1              is6,ns6,ipkopt,l3264b,ier,isevere,*900)
+c     call timpr(kfildo,kfildo,'end section 6        ')
+c
+c        ***********************************************
+c
+c        pack section 7, binary data.
+c
+c        ***********************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,700,0)
+      call pk_sect7(kfildo,ia,nx*ny,ipack,nd5,locn,ipos,
+     1              is5,ns5,is6,ns6,is7,ns7,inc,minpk,missp,misss,
+     2              ipkopt,locn5_20,ipos5_20,
+     3              locn5_32,ipos5_32,l3264b,ier,isevere,*900)
+c     
+      if(ier.ne.0)then
+         call pk_trace(kfildo,jer,ndjer,kjer,ier,1)
+c           this call to trace is for non fatal errors that
+c           can be carried back.  fatal errors are returned
+c           to *900.
+      endif
+c     call timpr(kfildo,kfildo,'end section 7        ')
+c
+c        *************************************
+c
+c        pack section 8, end of message.
+c
+c        *************************************
+c
+      call pk_trace(kfildo,jer,ndjer,kjer,800,0)
+      call pk_sect8(kfildo,ipack,nd5,locn,ipos,l3264b,ier,
+     1              isevere,*900)
+c
+c        fill bytes 9-12 with the total message length in bytes.
+      ioctet=locn*l3264b/8-(l3264b+1-ipos)/8
+      is0(9)=ioctet
+c
+      call pkbg(kfildo,ipack,nd5,locn0_9+1,ipos0_9,is0(9),32,l3264b,
+     1          ier,*900)
+c        this total length is limited to a 4-byte word.  the length is
+c        put into is0(9), but is packed into octets 13-16, which is the
+c        right half of a 64-bit word.
+c
+c        write the total message length.
+c
+c     write(kfildo,800)ioctet
+c800  format(/' total message length in bytes =',i12)
+c
+      return
+c
+c        error return section.
+c
+ 900  call pk_trace(kfildo,jer,ndjer,kjer,ier,isevere)
+c
+ 901  return
+      end

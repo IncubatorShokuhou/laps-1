@@ -6,25 +6,25 @@
      &                         istatus)
 c
 c subroutine determines if goes8/9 satellite sounder data are available
-c in FSL's /public data base. These are raw GVAR satellite sounder
+c in fsl's /public data base. these are raw gvar satellite sounder
 c files, 16 bit, 8 km resolution.
-c It is then determined which sat files have not yet been processed
+c it is then determined which sat files have not yet been processed
 c for laps and returns these files for further mapping/navigation.
-c It turns out that only the goes9 eastern sector covers the ROC-laps
+c it turns out that only the goes9 eastern sector covers the roc-laps
 c domain.
 c 
-c Any port of this software to another location, or perhaps a larger
-c size than ROC-laps will require adjustments (software) to determine
+c any port of this software to another location, or perhaps a larger
+c size than roc-laps will require adjustments (software) to determine
 c which sector properly maps into the domain.
 c
-c There is no preliminary installation step ATM to make this sector
+c there is no preliminary installation step atm to make this sector
 c determination.
 c
-c J. Smart   2/96     Original Version
-c J. Smart   10/97    Modify for newlaps structure;
-c                     Modify for dynamic memory;
-c                     Modify to accept both goes8 and goes9.
-c J. Smart   02/02    Add allocate statement for raw sounder data array
+c j. smart   2/96     original version
+c j. smart   10/97    modify for newlaps structure;
+c                     modify for dynamic memory;
+c                     modify to accept both goes8 and goes9.
+c j. smart   02/02    add allocate statement for raw sounder data array
 c                     allowing dynamic adjustment depending on file for
 c                     given satellites.
       implicit none
@@ -56,7 +56,7 @@ c                     given satellites.
       integer     lend
       integer     laps_cycle_time
       integer     ndimx,ndimy,ndimch
-      integer     imcI4
+      integer     imci4
       integer     itstatus
       integer     init_timer
       integer     ishow_timer
@@ -70,13 +70,13 @@ c                     given satellites.
       integer     i4time_sys
 
 c
-      Character*1   imc(4)
+      character*1   imc(4)
 c
-c ----------------------------- START --------------------------------------
+c ----------------------------- start --------------------------------------
 c
       istatus = 1
 c
-c Find files for GOES-8 sounding data sector over Colorado. This is
+c find files for goes-8 sounding data sector over colorado. this is
 c the _sdr file at ~ 45 or 46 past the hour..
 c
       call get_systime(i4time_sys,a9_time_sys,istatus)
@@ -85,7 +85,7 @@ c
 c this is designed to allow archive data runs!
       call get_laps_cycle_time(laps_cycle_time,istatus)
       if(i4time_proc-i4time_sys .gt. 2*laps_cycle_time)then
-         print*,'Set i4time to contents of systime.dat'
+         print*,'set i4time to contents of systime.dat'
          i4time_proc=i4time_sys
       endif
 
@@ -126,7 +126,7 @@ c                 i4time_latest = i4time
 c              endif
 c           endif
 c        else
-c           write(6,*)'Unknown Satellite Type - returning to main'
+c           write(6,*)'unknown satellite type - returning to main'
 c           goto 1000
 c        endif
 c     enddo
@@ -135,16 +135,16 @@ c     enddo
 c
 c put in wait for data here
 c
-         write(6,*)'Data is old'
-         write(6,*)'Returning to main without new sounder data'
+         write(6,*)'data is old'
+         write(6,*)'returning to main without new sounder data'
          istatus = -1
          goto 1000
       else
          print*,'i4time age difference = ',i4time_proc-i4time_latest
       endif
 c
-c We have "current" data. Determine if it has already been processed.
-c Get latest lsr file (ie., in lapsprd/lsr)
+c we have "current" data. determine if it has already been processed.
+c get latest lsr file (ie., in lapsprd/lsr)
 c
       call make_fnam_lp(i4time_latest,c_filetime_sat
      +,mstatus)
@@ -155,44 +155,44 @@ c
 
       if(i4time_latest-i4time_nearest_lsr.eq.0)then
          write(6,*)'lsr has already processed this sounder data.'
-         write(6,*)'Return to main without new data.'
+         write(6,*)'return to main without new data.'
          istatus = -1
          goto 1000
       endif
 
       call make_fnam_lp (i4time_nearest_lsr, c_filetime_lsr, mstatus)
 c
-c Get the times for the current sounding data
+c get the times for the current sounding data
 c
       n=index(c_filename_lsr,' ')
-      write(6,*)'Filetime lsr: ',c_filetime_lsr
+      write(6,*)'filetime lsr: ',c_filetime_lsr
       n=index(c_filename_sat,' ')
-      write(6,*)'Filetime Sat: ',c_filetime_sat
+      write(6,*)'filetime sat: ',c_filetime_sat
 c
 c----------------------------------------------
 c !for sounder data the image motion compensation is off (ie.,=1)
 c
-      imcI4 = 1
+      imci4 = 1
 
       call get_line_elem_sounder_cdf(c_filename_sat
      &,ndimx,ndimy,ndimch,istatus)
       if(istatus.eq.0)then
-         print*,'Error getting sounder file line/elem dims'
-         print*,'Terminating'
+         print*,'error getting sounder file line/elem dims'
+         print*,'terminating'
          stop
       endif
 
       if(istatus.ne.1)then
-         write(6,*)'Error occurred reading sounding db'
-         write(6,*)'Getlsrdata.f'
+         write(6,*)'error occurred reading sounding db'
+         write(6,*)'getlsrdata.f'
          return
       endif
 
-      write(6,*)'Attributes for sounding data obtained'
+      write(6,*)'attributes for sounding data obtained'
 
       goto 1000
 
-996   write(6,*)'Error'
+996   write(6,*)'error'
 
 1000  return
       end

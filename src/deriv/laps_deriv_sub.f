@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -38,9 +38,9 @@ cdis
 cdis
 
         subroutine laps_deriv_sub(i4time,
-     1                        NX_L,NY_L,
-     1                        NZ_L,
-     1                        N_PIREP,
+     1                        nx_l,ny_l,
+     1                        nz_l,
+     1                        n_pirep,
      1                        maxstns,
      1                        max_snd_grid,max_snd_levels,
      1                        n_prods,
@@ -50,14 +50,14 @@ cdis
      1                        rh_3d_pct,
      1                        pres_sfc_pa,
      1                        t_sfc_k,
-     1                        dbz_max_2d,istatus_lps,    ! O
-     1                        twet_snow,l_cloud_only,    ! O
+     1                        dbz_max_2d,istatus_lps,    ! o
+     1                        twet_snow,l_cloud_only,    ! o
      1                        j_status,istatus)
 
-        use cloud_rad ! Cloud Radiation and Microphysics Parameters
-        use constants_laps, ONLY: R
+        use cloud_rad ! cloud radiation and microphysics parameters
+        use constants_laps, only: r
 
-        ESL(X) = 6.1121*exp(17.67*X/(X+243.5))
+        esl(x) = 6.1121*exp(17.67*x/(x+243.5))
 
         integer       ss_normal,sys_bad_prod,sys_no_data,
      1                  sys_abort_prod
@@ -67,58 +67,58 @@ cdis
      1             sys_no_data    =3, ! no data
      1             sys_abort_prod =4) ! failed to make a prod
 
-!       1991     Steve Albers - Original Version
-!       1993 Mar Steve Albers - Add LMT product
-!       1995 Jul Steve Albers - Fix coverage threshold on cloud base
-!                               Added cloud ceiling
-!                               Added sfc or 2-D cloud type.
-!       1995 Nov 1  S. Albers - Add diagnostic output of cloud ceiling
+!       1991     steve albers - original version
+!       1993 mar steve albers - add lmt product
+!       1995 jul steve albers - fix coverage threshold on cloud base
+!                               added cloud ceiling
+!                               added sfc or 2-d cloud type.
+!       1995 nov 1  s. albers - add diagnostic output of cloud ceiling
 !                               in precip type comparisons
-!       1995 Nov 2  S. Albers - Use SAO's to add drizzle in sfc "thresholded"
-!                               precip type calculation (lct-PTT)
-!       1995 Nov 10 S. Albers - Better handling of cloud tops at top of domain
+!       1995 nov 2  s. albers - use sao's to add drizzle in sfc "thresholded"
+!                               precip type calculation (lct-ptt)
+!       1995 nov 10 s. albers - better handling of cloud tops at top of domain
 !                               when "three-dimensionalizing" radar data
-!       1995 Nov 29 S. Albers - Improve use of SAO's to add snow in PTT field.
-!                               Cloud ceiling threshold replaced with
+!       1995 nov 29 s. albers - improve use of sao's to add snow in ptt field.
+!                               cloud ceiling threshold replaced with
 !                               thresholds on cloud cover and sfc dewpoint
 !                               depression.
-!       1995 Dec 4  S. Albers - Use SAO's to add rain in sfc "thresholded"
-!                               precip type calculation (lct-PTT)
-!       1995 Dec 13 S. Albers - Now calls get_radar_ref
-!       1996 Aug 22 S. Albers - Now calls read_radar_3dref
-!       1996 Oct 10 S. Albers - Max SAO cloud cover is now 1.00 + some other
+!       1995 dec 4  s. albers - use sao's to add rain in sfc "thresholded"
+!                               precip type calculation (lct-ptt)
+!       1995 dec 13 s. albers - now calls get_radar_ref
+!       1996 aug 22 s. albers - now calls read_radar_3dref
+!       1996 oct 10 s. albers - max sao cloud cover is now 1.00 + some other
 !                               misc cleanup.
-!       1997 Jul 31 K. Dritz  - Removed include of lapsparms.for.
-!       1997 Jul 31 K. Dritz  - Added call to get_i_perimeter.
-!       1997 Jul 31 K. Dritz  - Removed PARAMETER statements for IX_LOW,
-!                               IX_HIGH, IY_LOW, and IY_HIGH, and instead
+!       1997 jul 31 k. dritz  - removed include of lapsparms.for.
+!       1997 jul 31 k. dritz  - added call to get_i_perimeter.
+!       1997 jul 31 k. dritz  - removed parameter statements for ix_low,
+!                               ix_high, iy_low, and iy_high, and instead
 !                               compute them dynamically (they are not used
 !                               as array bounds, only passed in a call).
-!       1997 Jul 31 K. Dritz  - Added NX_L, NY_L as dummy arguments.
-!       1997 Jul 31 K. Dritz  - Added call to get_r_missing_data.
-!       1997 Jul 31 K. Dritz  - Removed PARAMETER statements for default_base,
+!       1997 jul 31 k. dritz  - added nx_l, ny_l as dummy arguments.
+!       1997 jul 31 k. dritz  - added call to get_r_missing_data.
+!       1997 jul 31 k. dritz  - removed parameter statements for default_base,
 !                               default_top, and default_ceiling, and instead
 !                               compute them dynamically.
-!       1997 Jul 31 K. Dritz  - Removed PARAMETER statement for Nhor.  Now
+!       1997 jul 31 k. dritz  - removed parameter statement for nhor.  now
 !                               initialize c1_name_array dynamically instead
-!                               of with a DATA statement.
-!       1997 Jul 31 K. Dritz  - Added NZ_L as dummy argument.
-!       1997 Jul 31 K. Dritz  - Added call to get_ref_base.
-!       1997 Aug 01 K. Dritz  - Added maxstns, IX_LOW, IX_HIGH, IY_LOW, and
-!                               IY_HIGH as arguments in call to insert_sao.
-!       1997 Aug 01 K. Dritz  - Also now pass r_missing_data to barnes_r5.
-!       1997 Aug 01 K. Dritz  - Pass r_missing_data to insert_sat.
-!       1997 Aug 01 K. Dritz  - Pass ref_base to rfill_evap.
+!                               of with a data statement.
+!       1997 jul 31 k. dritz  - added nz_l as dummy argument.
+!       1997 jul 31 k. dritz  - added call to get_ref_base.
+!       1997 aug 01 k. dritz  - added maxstns, ix_low, ix_high, iy_low, and
+!                               iy_high as arguments in call to insert_sao.
+!       1997 aug 01 k. dritz  - also now pass r_missing_data to barnes_r5.
+!       1997 aug 01 k. dritz  - pass r_missing_data to insert_sat.
+!       1997 aug 01 k. dritz  - pass ref_base to rfill_evap.
 
-!       Prevents clearing out using satellite (hence letting SAOs dominate)
-!       below this altitude (M AGL)
+!       prevents clearing out using satellite (hence letting saos dominate)
+!       below this altitude (m agl)
         real surface_sao_buffer
         parameter (surface_sao_buffer = 800.)
 
         real thresh_cvr,default_top,default_base,default_clear_cover
      1                   ,default_ceiling
 
-        parameter       (thresh_cvr = 0.65) ! Used to "binaryize" cloud cover
+        parameter       (thresh_cvr = 0.65) ! used to "binaryize" cloud cover
 
         parameter       (default_clear_cover = .01)
 
@@ -127,18 +127,18 @@ cdis
         parameter (thresh_cvr_top  = 0.1)
         parameter (thresh_cvr_ceiling = thresh_cvr)
 
-        real thresh_thin_lwc_ice     ! Threshold cover for thin cloud LWC/ICE
+        real thresh_thin_lwc_ice     ! threshold cover for thin cloud lwc/ice
         parameter (thresh_thin_lwc_ice = 0.050) ! .020
 
         real vis_radar_thresh_cvr,vis_radar_thresh_dbz
         parameter (vis_radar_thresh_cvr = 0.2)  ! 0.2, 0.0
         parameter (vis_radar_thresh_dbz = 10.)  ! 5. , -99.
 
-        real lat(NX_L,NY_L),lon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
-        real rlaps_land_frac(NX_L,NY_L)
-        real solar_alt(NX_L,NY_L)
-        real solar_ha(NX_L,NY_L)
+        real lat(nx_l,ny_l),lon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
+        real rlaps_land_frac(nx_l,ny_l)
+        real solar_alt(nx_l,ny_l)
+        real solar_ha(nx_l,ny_l)
 
         real k_to_c
 
@@ -158,15 +158,15 @@ cdis
         logical l_parse
 
         logical l_sao_lso
-        data l_sao_lso /.true./ ! Do things the new way?
+        data l_sao_lso /.true./ ! do things the new way?
 
         logical l_perimeter
-        data l_perimeter /.true./ ! Use SAOs just outside domain?
+        data l_perimeter /.true./ ! use saos just outside domain?
 
         include 'laps_cloud.inc'
 
-!       Nominal cloud heights. Actual ones used are fitted to the terrain.
-        real cld_hts_new(KCLOUD)
+!       nominal cloud heights. actual ones used are fitted to the terrain.
+        real cld_hts_new(kcloud)
 
         data cld_hts_new/1200.,1300.,1400.,1500.,1600.,1700.,1800.,
      11900.,2000.,2100.,2200.,2400.,2600.,2800.,3000.,3200.,
@@ -178,140 +178,140 @@ cdis
 
         equivalence (cld_hts,cld_hts_new)
 
-        real clouds_3d(NX_L,NY_L,KCLOUD)
+        real clouds_3d(nx_l,ny_l,kcloud)
 
         integer ihist_alb(-10:20)
 
-        real cloud_top(NX_L,NY_L)
-        real cloud_base(NX_L,NY_L)
-        real cloud_ceiling(NX_L,NY_L)
+        real cloud_top(nx_l,ny_l)
+        real cloud_base(nx_l,ny_l)
+        real cloud_ceiling(nx_l,ny_l)
 
-        real cldtop_m(NX_L,NY_L)
-        real cldtop_m_co2(NX_L,NY_L)
-        real cldtop_m_tb8(NX_L,NY_L)
+        real cldtop_m(nx_l,ny_l)
+        real cldtop_m_co2(nx_l,ny_l)
+        real cldtop_m_tb8(nx_l,ny_l)
 
-        real cld_pres_1d(KCLOUD)
-        real pres_3d(NX_L,NY_L,NZ_L)
-        real clouds_3d_pres(NX_L,NY_L,NZ_L)
+        real cld_pres_1d(kcloud)
+        real pres_3d(nx_l,ny_l,nz_l)
+        real clouds_3d_pres(nx_l,ny_l,nz_l)
 
-        real CVHZ(NX_L,NY_L)
-        real CVHZ1(NX_L,NY_L),CVEW1(NX_L,KCLOUD)
-        real cvr_max(NX_L,NY_L),CVEW2(NX_L,KCLOUD)
-        real cvr_sao_max(NX_L,NY_L)
-        real cvr_snow_cycle(NX_L,NY_L)
-        real cvr_water_temp(NX_L,NY_L)
-        real cvr_snow(NX_L,NY_L)
-        real band8_mask(NX_L,NY_L)
+        real cvhz(nx_l,ny_l)
+        real cvhz1(nx_l,ny_l),cvew1(nx_l,kcloud)
+        real cvr_max(nx_l,ny_l),cvew2(nx_l,kcloud)
+        real cvr_sao_max(nx_l,ny_l)
+        real cvr_snow_cycle(nx_l,ny_l)
+        real cvr_water_temp(nx_l,ny_l)
+        real cvr_snow(nx_l,ny_l)
+        real band8_mask(nx_l,ny_l)
 
         character*4 radar_name
         character*31 radarext_3d_cloud
-        real radar_ref_3d(NX_L,NY_L,NZ_L)
-        real heights_3d(NX_L,NY_L,NZ_L)
+        real radar_ref_3d(nx_l,ny_l,nz_l)
+        real heights_3d(nx_l,ny_l,nz_l)
 
-        Real vv_to_height_ratio_Cu
-        Real vv_to_height_ratio_Sc
-        Real vv_for_St
+        real vv_to_height_ratio_cu
+        real vv_to_height_ratio_sc
+        real vv_for_st
 
-        real mvd_3d(NX_L,NY_L,NZ_L)
-!       real lwc_res_3d(NX_L,NY_L,NZ_L)
-        real w_3d(NX_L,NY_L,NZ_L)
+        real mvd_3d(nx_l,ny_l,nz_l)
+!       real lwc_res_3d(nx_l,ny_l,nz_l)
+        real w_3d(nx_l,ny_l,nz_l)
 
-        integer icing_index_3d(NX_L,NY_L,NZ_L)
+        integer icing_index_3d(nx_l,ny_l,nz_l)
 
-        integer cldpcp_type_3d(NX_L,NY_L,NZ_L) ! Also contains 3D precip type
+        integer cldpcp_type_3d(nx_l,ny_l,nz_l) ! also contains 3d precip type
 
-!       Output array declarations
-        real out_array_3d(NX_L,NY_L,NZ_L)
+!       output array declarations
+        real out_array_3d(nx_l,ny_l,nz_l)
 
         real, allocatable, dimension(:,:,:) :: slwc
         real, allocatable, dimension(:,:,:) :: cice
-        real slwc_int(NX_L,NY_L)
-        real cice_int(NX_L,NY_L)
-        real rain_int(NX_L,NY_L)
-        real snow_int(NX_L,NY_L)
-        real pice_int(NX_L,NY_L)
+        real slwc_int(nx_l,ny_l)
+        real cice_int(nx_l,ny_l)
+        real rain_int(nx_l,ny_l)
+        real snow_int(nx_l,ny_l)
+        real pice_int(nx_l,ny_l)
 
-        real pcpcnc(NX_L,NY_L,NZ_L)
-        real raicnc(NX_L,NY_L,NZ_L)
-        real snocnc(NX_L,NY_L,NZ_L)
-        real piccnc(NX_L,NY_L,NZ_L)
+        real pcpcnc(nx_l,ny_l,nz_l)
+        real raicnc(nx_l,ny_l,nz_l)
+        real snocnc(nx_l,ny_l,nz_l)
+        real piccnc(nx_l,ny_l,nz_l)
 
-        real cldamt(NX_L,NY_L)
-        real cldalb_in(NX_L,NY_L)
-        real cldalb_out(NX_L,NY_L)
-        real cldod_out(NX_L,NY_L)
-        real cldod_out_l(NX_L,NY_L)
-        real cldod_out_i(NX_L,NY_L)
-        real odint_l(NX_L,NY_L)
-        real odint_i(NX_L,NY_L)
-        real odint(NX_L,NY_L)
-        real visibility(NX_L,NY_L)
-        real simvis(NX_L,NY_L)
-        real static_albedo(NX_L,NY_L)
-        real sfc_albedo(NX_L,NY_L)
+        real cldamt(nx_l,ny_l)
+        real cldalb_in(nx_l,ny_l)
+        real cldalb_out(nx_l,ny_l)
+        real cldod_out(nx_l,ny_l)
+        real cldod_out_l(nx_l,ny_l)
+        real cldod_out_i(nx_l,ny_l)
+        real odint_l(nx_l,ny_l)
+        real odint_i(nx_l,ny_l)
+        real odint(nx_l,ny_l)
+        real visibility(nx_l,ny_l)
+        real simvis(nx_l,ny_l)
+        real static_albedo(nx_l,ny_l)
+        real sfc_albedo(nx_l,ny_l)
 
-!       real snow_2d(NX_L,NY_L)
+!       real snow_2d(nx_l,ny_l)
 
         character*2 c2_precip_types(0:10)
 
         character*20 c_z2m
 
         data c2_precip_types
-     1  /'  ','Rn','Sn','Zr','Sl','Ha','L ','ZL','  ','  ','  '/
+     1  /'  ','rn','sn','zr','sl','ha','l ','zl','  ','  ','  '/
 
         character*3 c3_pt_flag
         character*1 c1_r,c1_s
         character*8 c8_project
 
-        integer i2_pcp_type_2d(NX_L,NY_L)
-        real r_pcp_type_2d(NX_L,NY_L)
+        integer i2_pcp_type_2d(nx_l,ny_l)
+        real r_pcp_type_2d(nx_l,ny_l)
 
-        real dum1_array(NX_L,NY_L)
-        real dum2_array(NX_L,NY_L)
-        real dum3_array(NX_L,NY_L)
-        real dum4_array(NX_L,NY_L)
+        real dum1_array(nx_l,ny_l)
+        real dum2_array(nx_l,ny_l)
+        real dum3_array(nx_l,ny_l)
+        real dum4_array(nx_l,ny_l)
 
-      ! Used for "Potential" Precip Type
-        logical l_mask_pcptype(NX_L,NY_L)
-        integer ibase_array(NX_L,NY_L)
-        integer itop_array(NX_L,NY_L)
+      ! used for "potential" precip type
+        logical l_mask_pcptype(nx_l,ny_l)
+        integer ibase_array(nx_l,ny_l)
+        integer itop_array(nx_l,ny_l)
 
-        logical l_unresolved(NX_L,NY_L)
+        logical l_unresolved(nx_l,ny_l)
 
-        character*1 c1_name_array(NX_L,NY_L)
+        character*1 c1_name_array(nx_l,ny_l)
         character*9 filename
 
-        character*35 TIME
+        character*35 time
         character*13 filename13
 
-        integer MAX_FIELDS
-        parameter (MAX_FIELDS = 10)
+        integer max_fields
+        parameter (max_fields = 10)
 
         character*255 c_filespec
         character var*3,comment*125,directory*150,ext*31,units*10
         character*3 exts(20)
-        character*3 var_a(MAX_FIELDS)
-        character*125 comment_a(MAX_FIELDS)
-        character*10  units_a(MAX_FIELDS)
+        character*3 var_a(max_fields)
+        character*125 comment_a(max_fields)
+        character*10  units_a(max_fields)
 
-!       Arrays used to read in satellite data
-        real tb8_k(NX_L,NY_L)
-        real tb8_cold_k(NX_L,NY_L)
-        real albedo(NX_L,NY_L)
-        real cloud_frac_vis_a(NX_L,NY_L)
-        real cloud_frac_co2_a(NX_L,NY_L)
+!       arrays used to read in satellite data
+        real tb8_k(nx_l,ny_l)
+        real tb8_cold_k(nx_l,ny_l)
+        real albedo(nx_l,ny_l)
+        real cloud_frac_vis_a(nx_l,ny_l)
+        real cloud_frac_co2_a(nx_l,ny_l)
 
-        real temp_3d(NX_L,NY_L,NZ_L)
-        real rh_3d_pct(NX_L,NY_L,NZ_L)
-        real model_3d(NX_L,NY_L,NZ_L)
+        real temp_3d(nx_l,ny_l,nz_l)
+        real rh_3d_pct(nx_l,ny_l,nz_l)
+        real model_3d(nx_l,ny_l,nz_l)
 
-        real t_sfc_k(NX_L,NY_L)
-        real t_gnd_k(NX_L,NY_L)
-        real sst_k(NX_L,NY_L)
-        real td_sfc_k(NX_L,NY_L)
-        real pres_sfc_pa(NX_L,NY_L)
+        real t_sfc_k(nx_l,ny_l)
+        real t_gnd_k(nx_l,ny_l)
+        real sst_k(nx_l,ny_l)
+        real td_sfc_k(nx_l,ny_l)
+        real pres_sfc_pa(nx_l,ny_l)
 
-!       Declarations for LSO file stuff
+!       declarations for lso file stuff
         real lat_s(maxstns), lon_s(maxstns), elev_s(maxstns)
         real cover_s(maxstns)
         real t_s(maxstns), td_s(maxstns), pr_s(maxstns), sr_s(maxstns)
@@ -326,25 +326,25 @@ cdis
         character wx_s(maxstns)*8, obstype(maxstns)*8
         character atime*24, infile*256
 
-        integer STATION_NAME_LEN
-        parameter (STATION_NAME_LEN = 3)                   
-        character c_stations(maxstns)*(STATION_NAME_LEN)    
+        integer station_name_len
+        parameter (station_name_len = 3)                   
+        character c_stations(maxstns)*(station_name_len)    
 
         character asc_tim_9*9
 
         real ri_s(maxstns), rj_s(maxstns)
 
-!       Product # notification declarations
+!       product # notification declarations
         integer j_status(20),iprod_number(20)
 
-!       Stuff for 2d fields
-        real ref_mt_2d(NX_L,NY_L)
-        real dbz_low_2d(NX_L,NY_L)
-        real dbz_max_2d(NX_L,NY_L)
+!       stuff for 2d fields
+        real ref_mt_2d(nx_l,ny_l)
+        real dbz_low_2d(nx_l,ny_l)
+        real dbz_max_2d(nx_l,ny_l)
 
-!       SFC precip and cloud type (LCT file)
-        real r_pcp_type_thresh_2d(NX_L,NY_L)
-        real r_cld_type_2d(NX_L,NY_L)
+!       sfc precip and cloud type (lct file)
+        real r_pcp_type_thresh_2d(nx_l,ny_l)
+        real r_cld_type_2d(nx_l,ny_l)
 
         character*40 c_vars_req
         character*180 c_values_req
@@ -352,53 +352,53 @@ cdis
         character*3 lso_ext
         data lso_ext /'lso'/
 
-        ISTAT = INIT_TIMER()
+        istat = init_timer()
 
-        write(6,*)' Welcome to the laps_deriv_sub (derived cloud prods)'
+        write(6,*)' welcome to the laps_deriv_sub (derived cloud prods)'
 
-        idb = (NX_L/2) + 1
-        jdb = (NY_L/2) + 1
+        idb = (nx_l/2) + 1
+        jdb = (ny_l/2) + 1
 
-        call get_static_field_interp('albedo',i4time,NX_L,NY_L 
+        call get_static_field_interp('albedo',i4time,nx_l,ny_l 
      1                              ,static_albedo,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' ERROR in obtaining static albedo'
+            write(6,*)' error in obtaining static albedo'
             return
         endif
         sfc_albedo = static_albedo
 
-        allocate( slwc(NX_L,NY_L,NZ_L), STAT=istat_alloc )
+        allocate( slwc(nx_l,ny_l,nz_l), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate slwc'
+            write(6,*)' error: could not allocate slwc'
             stop
         endif
 
-        allocate( cice(NX_L,NY_L,NZ_L), STAT=istat_alloc )
+        allocate( cice(nx_l,ny_l,nz_l), stat=istat_alloc )
         if(istat_alloc .ne. 0)then
-            write(6,*)' ERROR: Could not allocate cice'
+            write(6,*)' error: could not allocate cice'
             stop
         endif
 
         call get_r_missing_data(r_missing_data,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error calling get_r_missing_data'
+           write (6,*) 'error calling get_r_missing_data'
            stop
         endif
 
-        call get_deriv_parms(mode_evap,l_bogus_radar_w,              ! O
-     1                       l_deep_vv,l_cloud_only,                 ! O
-     1                       vv_to_height_ratio_Cu,                  ! O
-     1                       vv_to_height_ratio_Sc,                  ! O
-     1                       vv_for_St,                              ! O
-     1                       c_z2m,                                  ! O
-     1                       thresh_cvr_cty_vv,thresh_cvr_lwc,       ! O
-     1                       twet_snow,                              ! O
-     1                       hydrometeor_scale_cldliq,               ! O
-     1                       hydrometeor_scale_cldice,               ! O
-     1                       hydrometeor_scale_pcp,                  ! O
-     1                       istatus)                                ! O
+        call get_deriv_parms(mode_evap,l_bogus_radar_w,              ! o
+     1                       l_deep_vv,l_cloud_only,                 ! o
+     1                       vv_to_height_ratio_cu,                  ! o
+     1                       vv_to_height_ratio_sc,                  ! o
+     1                       vv_for_st,                              ! o
+     1                       c_z2m,                                  ! o
+     1                       thresh_cvr_cty_vv,thresh_cvr_lwc,       ! o
+     1                       twet_snow,                              ! o
+     1                       hydrometeor_scale_cldliq,               ! o
+     1                       hydrometeor_scale_cldice,               ! o
+     1                       hydrometeor_scale_pcp,                  ! o
+     1                       istatus)                                ! o
         if (istatus .ne. 1) then
-           write (6,*) 'Error calling get_deriv_parms'
+           write (6,*) 'error calling get_deriv_parms'
            stop
         endif
 
@@ -408,19 +408,19 @@ cdis
         default_top      = r_missing_data
         default_ceiling  = r_missing_data
 
-        do j = 1,NY_L
-           do i = 1,NX_L
+        do j = 1,ny_l
+           do i = 1,nx_l
               c1_name_array(i,j) = ' '
            enddo
         enddo
 
         call get_ref_base(ref_base,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting ref_base'
+           write (6,*) 'error getting ref_base'
            stop
         endif
 
-c Determine the source of the radar data
+c determine the source of the radar data
         c_vars_req = 'radarext_3d'
 
         call get_static_info(c_vars_req,c_values_req,1,istatus)
@@ -428,7 +428,7 @@ c Determine the source of the radar data
         if(istatus .eq. 1)then
             radarext_3d_cloud = c_values_req(1:3)
         else
-            write(6,*)' Error getting radarext_3d'
+            write(6,*)' error getting radarext_3d'
             goto 9999
         endif
 
@@ -438,10 +438,10 @@ c Determine the source of the radar data
         write(6,*)' radarext_3d_cloud = ',radarext_3d_cloud
 
 c read in laps lat/lon and topo
-        call get_laps_domain_95(NX_L,NY_L,lat,lon,topo
+        call get_laps_domain_95(nx_l,ny_l,lat,lon,topo
      1           ,rlaps_land_frac,grid_spacing_cen_m,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error getting LAPS domain'
+            write(6,*)' error getting laps domain'
             goto 9999
         endif
 
@@ -449,11 +449,11 @@ c read in laps lat/lon and topo
         if(istatus .eq. 1)then
             write(6,*)' ilaps_cycle_time = ',ilaps_cycle_time
         else
-            write(6,*)' Error getting laps_cycle_time'
+            write(6,*)' error getting laps_cycle_time'
             goto 9999
         endif
 
-        call get_pres_3d(i4time,NX_L,NY_L,NZ_L,pres_3d,istatus)
+        call get_pres_3d(i4time,nx_l,ny_l,nz_l,pres_3d,istatus)
         if(istatus .ne. 1)goto 9999
 
         n_lc3 = 1
@@ -492,34 +492,34 @@ c read in laps lat/lon and topo
         iprod_start = 5
         iprod_end = 13
 
-        if(.true.)then                    ! Read data, then calc derived fields
-            I4_elapsed = ishow_timer()
+        if(.true.)then                    ! read data, then calc derived fields
+            i4_elapsed = ishow_timer()
 
             write(6,*)
-            write(6,*)'Reading lc3,lt1,lps,lsx,lcv,lcb '
+            write(6,*)'reading lc3,lt1,lps,lsx,lcv,lcb '
      1               ,'to calculate derived fields'
 
-!           Read in data (lc3 - clouds_3d)
+!           read in data (lc3 - clouds_3d)
             ext = 'lc3'
             call get_clouds_3dgrid(i4time,i4time_lc3
-     1                         ,NX_L,NY_L,KCLOUD,ext
+     1                         ,nx_l,ny_l,kcloud,ext
      1                         ,clouds_3d,cld_hts,cld_pres_1d,istatus)
             if(istatus .ne. 1 .or. i4time .ne. i4time_lc3)then
-                write(6,*)' Error reading 3D Clouds'
+                write(6,*)' error reading 3d clouds'
                 goto 999
             endif
 
-!           Read in data (lps - radar_ref_3d)
-            var = 'REF'
+!           read in data (lps - radar_ref_3d)
+            var = 'ref'
             ext = 'lps'
-            call get_laps_3d(i4time,NX_L,NY_L,NZ_L
+            call get_laps_3d(i4time,nx_l,ny_l,nz_l
      1       ,ext,var,units,comment,radar_ref_3d,istatus_lps)
 
             if(istatus_lps .ne. 1)then
-                write(6,*)' Warning: could not read lps 3d ref, filling'
+                write(6,*)' warning: could not read lps 3d ref, filling'
      1                   ,' array with r_missing_data'
                 call constant_3d(radar_ref_3d,r_missing_data
-     1                          ,NX_L,NY_L,NZ_L)           
+     1                          ,nx_l,ny_l,nz_l)           
                 istat_radar_2dref = 0
                 istat_radar_3dref = 0
                 istat_radar_3dref_orig = 0
@@ -529,82 +529,82 @@ c read in laps lat/lon and topo
      1                          ,istat_radar_3dref_orig
  510            format(23x,3i3)
 
-!               Obtain column max ref
-                call get_max_reflect(radar_ref_3d,NX_L,NY_L,NZ_L
+!               obtain column max ref
+                call get_max_reflect(radar_ref_3d,nx_l,ny_l,nz_l
      1                              ,ref_base,dbz_max_2d)
 
             endif ! istatus_lps
 
             write(6,*)' istatus_lps = ',istatus_lps
 
-            var = 'LCV'
+            var = 'lcv'
             ext = 'lcv'
             call get_laps_2d(i4time,ext,var,units,comment
-     1                  ,NX_L,NY_L,cvr_max,istatus)
+     1                  ,nx_l,ny_l,cvr_max,istatus)
 
-            if(istatus .ne. 1)THEN
-                write(6,*)' Error Reading Cvr_max Analysis - abort'
+            if(istatus .ne. 1)then
+                write(6,*)' error reading cvr_max analysis - abort'
                 goto999
             endif
 
-            var = 'CLA'
+            var = 'cla'
             ext = 'lcv'
             call get_laps_2d(i4time,ext,var,units,comment
-     1                  ,NX_L,NY_L,cldalb_in,istatus)
+     1                  ,nx_l,ny_l,cldalb_in,istatus)
 
-            if(istatus .ne. 1 .and. istatus .ne. -1)THEN
-                write(6,*)' Error Reading Cloud Albedo Analysis - abort'
+            if(istatus .ne. 1 .and. istatus .ne. -1)then
+                write(6,*)' error reading cloud albedo analysis - abort'
                 goto999
             endif
 
-            var = 'CCE'
+            var = 'cce'
             ext = 'lcb'
             call get_laps_2d(i4time,ext,var,units,comment
-     1                   ,NX_L,NY_L,cloud_ceiling,istatus)
-            if(istatus .ne. 1 .and. istatus .ne. -1)THEN
-                write(6,*)' Error Reading cld_ceiling Analysis - abort'       
+     1                   ,nx_l,ny_l,cloud_ceiling,istatus)
+            if(istatus .ne. 1 .and. istatus .ne. -1)then
+                write(6,*)' error reading cld_ceiling analysis - abort'       
                 goto999
             endif
 
-            var = 'LCB'
+            var = 'lcb'
             ext = 'lcb'
             call get_laps_2d(i4time,ext,var,units,comment
-     1                   ,NX_L,NY_L,cloud_base,istatus)
-            if(istatus .ne. 1 .and. istatus .ne. -1)THEN
-                write(6,*)' Error Reading cld_base Analysis - abort'       
+     1                   ,nx_l,ny_l,cloud_base,istatus)
+            if(istatus .ne. 1 .and. istatus .ne. -1)then
+                write(6,*)' error reading cld_base analysis - abort'       
                 goto999
             endif
 
-!           Access SAO data from LSO files
+!           access sao data from lso files
             ext = 'lso'
-            call get_directory(ext,directory,len_dir) ! Returns directory
+            call get_directory(ext,directory,len_dir) ! returns directory
             infile = directory(1:len_dir)//filename13(i4time,ext(1:3))
             call read_surface_old(infile,maxstns,atime,n_meso_g,
      1           n_meso_pos,
      1           n_sao_g,n_sao_pos_g,n_sao_b,n_sao_pos_b,n_obs_g,
      1           n_obs_pos_g,n_obs_b,
-     1           n_obs_pos_b,                   ! We use this as an obs count
+     1           n_obs_pos_b,                   ! we use this as an obs count
      1           c_stations,obstype,        
      1           lat_s,lon_s,elev_s,wx_s,t_s,td_s,dd_s,ff_s,ddg_s,
      1           ffg_s,pstn_s,pmsl_s,alt_s,kloud,ceil,lowcld,cover_a,
      1           rad_s,idp3,store_emv,
      1           store_amt,store_hgt,vis_s,obstime,istat_sfc)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
             call get_c8_project(c8_project,istatus)
             if(istatus .ne. 1)goto 999
 
             do i = 1,n_obs_pos_b 
 
-!               Does this station not report precip?
-                if(obstype(i)(1:4) .eq. 'MESO'     .OR.
-     1             obstype(i)(1:4) .eq. 'CDOT'     .OR.
-     1             obstype(i)(7:8) .eq. '1A'       .OR.
-     1             wx_s(i)(1:7)    .eq. 'UNKNOWN'  .OR.       ! Already in LSO
-     1             l_parse(c8_project,'AFGWC')     .OR.
-     1             l_parse(c8_project,'AFWA')             )then
-                    wx_s(i) = 'UNKNOWN'
+!               does this station not report precip?
+                if(obstype(i)(1:4) .eq. 'meso'     .or.
+     1             obstype(i)(1:4) .eq. 'cdot'     .or.
+     1             obstype(i)(7:8) .eq. '1a'       .or.
+     1             wx_s(i)(1:7)    .eq. 'unknown'  .or.       ! already in lso
+     1             l_parse(c8_project,'afgwc')     .or.
+     1             l_parse(c8_project,'afwa')             )then
+                    wx_s(i) = 'unknown'
 
                 endif
 
@@ -612,51 +612,51 @@ c read in laps lat/lon and topo
 
         endif
 
-!       Calculate derived fields
+!       calculate derived fields
         write(6,*)
-        write(6,*)' Calculating Derived Fields'
+        write(6,*)' calculating derived fields'
 
-!       Write out cloud grid in pressure coordinates
-        write(6,*)' Writing out grid in pressure coordinates'
+!       write out cloud grid in pressure coordinates
+        write(6,*)' writing out grid in pressure coordinates'
 
-        do k = KCLOUD,1,-1
+        do k = kcloud,1,-1
           write(6,601)k,clouds_3d(idb,jdb,k)
-601       format('  clouds_3d      CTR (LC3)',i4,f9.3)      
+601       format('  clouds_3d      ctr (lc3)',i4,f9.3)      
         enddo ! k
 
-        call interp_height_pres_fast(NX_L,NY_L,NZ_L,kcloud
+        call interp_height_pres_fast(nx_l,ny_l,nz_l,kcloud
      1  ,clouds_3d_pres,clouds_3d,heights_3d,cld_hts,istatus)
 
-        do k = NZ_L,1,-1
+        do k = nz_l,1,-1
           write(6,621)k,clouds_3d_pres(idb,jdb,k),heights_3d(idb,jdb,k)
-621       format('  clouds_3d_pres CTR (LCP)',i4,f9.3,f10.1)      
+621       format('  clouds_3d_pres ctr (lcp)',i4,f9.3,f10.1)      
         enddo ! k
 
-        var = 'LCP'
+        var = 'lcp'
         ext = 'lcp'
-        units = 'Fractional'
-        comment = 'LAPS Cloud Cover'
+        units = 'fractional'
+        comment = 'laps cloud cover'
         call put_laps_3d(i4time,ext,var,units,comment,clouds_3d_pres
-     1                                          ,NX_L,NY_L,NZ_L)
+     1                                          ,nx_l,ny_l,nz_l)
         j_status(n_lcp) = ss_normal
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
 
-!       Calculate and write out LWC, MVD, and Icing Index
+!       calculate and write out lwc, mvd, and icing index
         write(6,*)
-        write(6,*)' Calling LWC etc. routine (get_cloud_deriv)'
-        iflag_slwc = 13 ! New SMF LWC
+        write(6,*)' calling lwc etc. routine (get_cloud_deriv)'
+        iflag_slwc = 13 ! new smf lwc
         l_flag_mvd = .true.
         l_flag_cloud_type = .true.
         l_flag_icing_index = .true.
         l_flag_bogus_w = .true.
         l_flag_pcp_type = .true.
 
-!       if(.not. l_flag_cloud_type)then ! Read in instead
+!       if(.not. l_flag_cloud_type)then ! read in instead
 !       endif
 
         call get_cloud_deriv(
-     1                NX_L,NY_L,NZ_L,clouds_3d,cld_hts,
+     1                nx_l,ny_l,nz_l,clouds_3d,cld_hts,
      1                temp_3d,rh_3d_pct,heights_3d,pres_3d,
      1                istat_radar_3dref,radar_ref_3d,grid_spacing_cen_m,       
      1                l_mask_pcptype,ibase_array,itop_array,
@@ -665,67 +665,67 @@ c read in laps lat/lon and topo
      1                l_flag_cloud_type,cldpcp_type_3d,
      1                l_flag_mvd,mvd_3d,
      1                l_flag_icing_index,icing_index_3d,
-     1                vv_to_height_ratio_Cu,                               ! I
-     1                vv_to_height_ratio_Sc,                               ! I
-     1                vv_for_St,                                           ! I
-     1                l_flag_bogus_w,w_3d,l_bogus_radar_w,                 ! I
-     1                l_deep_vv,                                           ! I
-     1                twet_snow,                                           ! I
-     1                l_flag_pcp_type,                                     ! I
-     1                istatus)                                             ! O
+     1                vv_to_height_ratio_cu,                               ! i
+     1                vv_to_height_ratio_sc,                               ! i
+     1                vv_for_st,                                           ! i
+     1                l_flag_bogus_w,w_3d,l_bogus_radar_w,                 ! i
+     1                l_deep_vv,                                           ! i
+     1                twet_snow,                                           ! i
+     1                l_flag_pcp_type,                                     ! i
+     1                istatus)                                             ! o
         if(istatus .ne. 1)then
-            write(6,*)' Bad status return from get_cloud_deriv'
+            write(6,*)' bad status return from get_cloud_deriv'
             goto 999
         else
-            write(6,*)' Good status return from get_cloud_deriv'
+            write(6,*)' good status return from get_cloud_deriv'
         endif
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         if(l_flag_cloud_type)then
 
-!           Write 3D Cloud Type
+!           write 3d cloud type
 !           4 most significant bits are precip type, other 4 are cloud type
-            do k = 1,NZ_L
-            do j = 1,NY_L
-            do i = 1,NX_L
+            do k = 1,nz_l
+            do j = 1,ny_l
+            do i = 1,nx_l
                 iarg = cldpcp_type_3d(i,j,k)
-                out_array_3d(i,j,k) = iarg - iarg/16*16         ! 'CTY'
+                out_array_3d(i,j,k) = iarg - iarg/16*16         ! 'cty'
             enddo
             enddo
             enddo
 
             ext = 'cty'
-            var = 'CTY'
-            units = 'NONE'
+            var = 'cty'
+            units = 'none'
             comment = 
-     1         'Cloud Type: (1-10) - St,Sc,Cu,Ns,Ac,As,Cs,Ci,Cc,Cb'
+     1         'cloud type: (1-10) - st,sc,cu,ns,ac,as,cs,ci,cc,cb'
             call put_laps_3d(i4time,ext,var,units
      1                      ,comment,out_array_3d             
-     1                      ,NX_L,NY_L,NZ_L)
+     1                      ,nx_l,ny_l,nz_l)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
         endif ! l_flag_cloud_type
 
-!       Calculate "SFC" cloud type
-!       Now this is simply the cloud type of the lowest significant
-!       (> 0.65 cvr) layer present. If a CB is present, it is used instead.
-        write(6,*)' Calculate SFC cloud type'
-        do i = 1,NX_L
-        do j = 1,NY_L
+!       calculate "sfc" cloud type
+!       now this is simply the cloud type of the lowest significant
+!       (> 0.65 cvr) layer present. if a cb is present, it is used instead.
+        write(6,*)' calculate sfc cloud type'
+        do i = 1,nx_l
+        do j = 1,ny_l
             r_cld_type_2d(i,j) = 0
 
-!           Pick lowest "significant" layer
-            do k = NZ_L,1,-1
+!           pick lowest "significant" layer
+            do k = nz_l,1,-1
                 cld_type_3d = out_array_3d(i,j,k)
                 if(cld_type_3d .gt. 0)then
                     r_cld_type_2d(i,j) = cld_type_3d
                 endif
             enddo ! k
 
-!           Pick a CB if present
-            do k = NZ_L,1,-1
+!           pick a cb if present
+            do k = nz_l,1,-1
                 cld_type_3d = out_array_3d(i,j,k)
                 if(cld_type_3d .eq. 10)then
                     r_cld_type_2d(i,j) = cld_type_3d
@@ -736,7 +736,7 @@ c read in laps lat/lon and topo
         enddo ! i
 
 
-!       Convert SLWC and CICE by applying scale factor to parcel method values
+!       convert slwc and cice by applying scale factor to parcel method values
         if(hydrometeor_scale_cldliq .ge. 0.)then
             ratio_cldliq =  hydrometeor_scale_cldliq
         else
@@ -753,9 +753,9 @@ c read in laps lat/lon and topo
 
         cld_ice_ub_gpm3 = .03
 
-        do k = 1,NZ_L
-        do j = 1,NY_L
-        do i = 1,NX_L
+        do k = 1,nz_l
+        do j = 1,ny_l
+        do i = 1,nx_l
             if(slwc(i,j,k) .ne. r_missing_data)then
                 slwc(i,j,k) = (slwc(i,j,k) * ratio_cldliq)
             endif
@@ -769,38 +769,38 @@ c read in laps lat/lon and topo
         enddo
 
         write(6,*)
-        write(6,*)' Inserting thin clouds into LWC/ICE fields'
+        write(6,*)' inserting thin clouds into lwc/ice fields'
         call insert_thin_lwc_ice(clouds_3d,clouds_3d_pres,heights_3d
-     1       ,temp_3d,cldalb_in,cld_hts,NX_L,NY_L,NZ_L,KCLOUD,idb,jdb
+     1       ,temp_3d,cldalb_in,cld_hts,nx_l,ny_l,nz_l,kcloud,idb,jdb
      1       ,thresh_thin_lwc_ice       
      1       ,pres_3d,slwc,cice,istatus)
 
         if(istatus .ne. 1)then
-            write(6,*)' Bad status return from insert_thin_lwc_ice'
+            write(6,*)' bad status return from insert_thin_lwc_ice'
             goto 999
         endif
 
-!       Note these bounds can introduce artifacts related to METAR influence.
-!       It would be better to design 'insert_thin_lwc_ice' to put more of        
+!       note these bounds can introduce artifacts related to metar influence.
+!       it would be better to design 'insert_thin_lwc_ice' to put more of        
 !       the hydrometeors at lower levels upstream so limits set here would
 !       have less effect.
         if(.false.)then
 
-!         Apply temperature dependent upper bound to cloud ice
-          do k = 1,NZ_L
-          do j = 1,NY_L
-          do i = 1,NX_L
-!           Temperature dependent threshold, we can consider basing this
-!           from saturation vapor density (SVD * .025) = (ES/RT) * .10
+!         apply temperature dependent upper bound to cloud ice
+          do k = 1,nz_l
+          do j = 1,ny_l
+          do i = 1,nx_l
+!           temperature dependent threshold, we can consider basing this
+!           from saturation vapor density (svd * .025) = (es/rt) * .10
 !           where .10 means 10% of water saturation
-            es_pa = ESL(temp_3d(i,j,k) - 273.15) * 100.
-            cld_ice_ub_gpm3 = 1e3 * .10 * es_pa / (R * temp_3d(i,j,k))
+            es_pa = esl(temp_3d(i,j,k) - 273.15) * 100.
+            cld_ice_ub_gpm3 = 1e3 * .10 * es_pa / (r * temp_3d(i,j,k))
 !           if(temp_3d(i,j,k) .gt. 243.15)then
 !               cld_ice_ub_gpm3 = 0.1
 !           else
 !               cld_ice_ub_gpm3 = 0.03
 !           endif
-            if(cice(i,j,k) .ne. r_missing_data .AND.
+            if(cice(i,j,k) .ne. r_missing_data .and.
      1         cice(i,j,k) .gt. cld_ice_ub_gpm3      )then
                cice(i,j,k) = cld_ice_ub_gpm3
             endif         
@@ -814,51 +814,51 @@ c read in laps lat/lon and topo
           enddo
           enddo
 
-          I4_elapsed = ishow_timer()
+          i4_elapsed = ishow_timer()
 
-!         Apply upper bound of 0.35 g/m**3
+!         apply upper bound of 0.35 g/m**3
           slwc = min(slwc,0.35)
           cice = min(cice,0.35)
 
         endif ! apply bounds
 
-!       Calculate and Write Integrated LWC
-!       Note slwc/cice is here in g/m**3
+!       calculate and write integrated lwc
+!       note slwc/cice is here in g/m**3
         write(6,*)
-        write(6,*)' Calculating Integrated LWC and CICE'
+        write(6,*)' calculating integrated lwc and cice'
 
-!       This routine can also return OD using 'reff_clwc_f' and 'reff_cice_f'
+!       this routine can also return od using 'reff_clwc_f' and 'reff_cice_f'
         if(.false.)then
-          call integrate_slwc(slwc,heights_3d,NX_L,NY_L,NZ_L,slwc_int)
-          call integrate_slwc(cice,heights_3d,NX_L,NY_L,NZ_L,cice_int)
+          call integrate_slwc(slwc,heights_3d,nx_l,ny_l,nz_l,slwc_int)
+          call integrate_slwc(cice,heights_3d,nx_l,ny_l,nz_l,cice_int)
 
-        else ! integrate slwc and check OD
+        else ! integrate slwc and check od
           ihtype = 1
-          call integrate_slwc_od(slwc,heights_3d,temp_3d      ! I
-     1                               ,NX_L,NY_L,NZ_L,ihtype   ! I
-     1                               ,slwc_int,odint_l)       ! O
+          call integrate_slwc_od(slwc,heights_3d,temp_3d      ! i
+     1                               ,nx_l,ny_l,nz_l,ihtype   ! i
+     1                               ,slwc_int,odint_l)       ! o
           ihtype = 2
-          call integrate_slwc_od(cice,heights_3d,temp_3d      ! I
-     1                               ,NX_L,NY_L,NZ_L,ihtype   ! I
-     1                               ,cice_int,odint_i)       ! O
+          call integrate_slwc_od(cice,heights_3d,temp_3d      ! i
+     1                               ,nx_l,ny_l,nz_l,ihtype   ! i
+     1                               ,cice_int,odint_i)       ! o
           odint = odint_l + odint_i
           write(6,801)odint(idb,jdb),cldalb_in(idb,jdb)
-801       format(' CTR odint/cldalb_in:',2f9.4)
+801       format(' ctr odint/cldalb_in:',2f9.4)
 
         endif
 
-!       1e6 factor converts from metric tons/m**2 to g/m**2 (LWP)
-        write(6,*)' Integrated slwc range (g/m**2) is '
+!       1e6 factor converts from metric tons/m**2 to g/m**2 (lwp)
+        write(6,*)' integrated slwc range (g/m**2) is '
      1                       ,minval(slwc_int)*1e6,maxval(slwc_int)*1e6
 
-        write(6,*)' Integrated cice range (g/m**2) is '
+        write(6,*)' integrated cice range (g/m**2) is '
      1                       ,minval(cice_int)*1e6,maxval(cice_int)*1e6
 
-!       Calculate cloud optical depth and cloud albedo
-!       Constants are Mass Extinction Efficiency (MEE) and Mass Backscatter
-!       Efficiency (MBE).
-!       Note the 1e3 term converts 'slwc_int' or 'clwc_int' units from Mg/m**2
-!       to kg/m**2 (SI units)
+!       calculate cloud optical depth and cloud albedo
+!       constants are mass extinction efficiency (mee) and mass backscatter
+!       efficiency (mbe).
+!       note the 1e3 term converts 'slwc_int' or 'clwc_int' units from mg/m**2
+!       to kg/m**2 (si units)
 
         const_lwp = (1.5 * 1e3) / (rholiq     * reff_clwc)
         const_lwp_bks = const_lwp * bksct_eff_clwc
@@ -875,104 +875,104 @@ c read in laps lat/lon and topo
         const_gwp = (1.5 * 1e3) / (rhograupel * reff_graupel)
         const_gwp_bks = const_gwp * bksct_eff_graupel
 
-!       Note that TAU = OD = MEE times LWP
+!       note that tau = od = mee times lwp
 
-!       Cloud amount is opacity of cloud liquid and cloud ice hydrometeors
-        do j = 1,NY_L
-        do i = 1,NX_L
+!       cloud amount is opacity of cloud liquid and cloud ice hydrometeors
+        do j = 1,ny_l
+        do i = 1,nx_l
             cldamt(i,j) = 1. - (exp( -(const_lwp * slwc_int(i,j) 
      1                               + const_iwp * cice_int(i,j))) ) 
         enddo ! i
         enddo ! j
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       DERIVED RADAR/PRECIP STUFF
-        if(istat_radar_3dref .eq. 1)then ! LMT
+!       derived radar/precip stuff
+        if(istat_radar_3dref .eq. 1)then ! lmt
 
             if(l_evap_radar)then 
 
-                write(6,*)' Calling rfill_evap: mode_evap = ',mode_evap       
+                write(6,*)' calling rfill_evap: mode_evap = ',mode_evap       
 
-!               Use LPS reflectivity field
+!               use lps reflectivity field
 
-!               Use Cloud Base field
+!               use cloud base field
 
-                I4_elapsed = ishow_timer()
+                i4_elapsed = ishow_timer()
 
-!               Apply evaporation subroutine
-                call rfill_evap(radar_ref_3d,NX_L,NY_L,NZ_L
+!               apply evaporation subroutine
+                call rfill_evap(radar_ref_3d,nx_l,ny_l,nz_l
      1          ,cloud_base,lat,lon,topo,mode_evap
      1          ,temp_3d,rh_3d_pct,cldpcp_type_3d,heights_3d,istatus
      1          ,ref_base)
 
-                I4_elapsed = ishow_timer()
+                i4_elapsed = ishow_timer()
 
             endif ! l_evap_radar, etc.
 
-          ! Do Max Tops
+          ! do max tops
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-            write(6,*)' Getting Max Tops'
+            write(6,*)' getting max tops'
 
-            call get_maxtops(radar_ref_3d,heights_3d,NX_L,NY_L,NZ_L
+            call get_maxtops(radar_ref_3d,heights_3d,nx_l,ny_l,nz_l
      1                      ,ref_mt_2d)
 
-!           Get LAPS reflectivities at the surface (or immediately above it)
-            write(6,*)' Getting Low Level Reflectivity'
-            call get_low_ref(radar_ref_3d,pres_sfc_pa,NX_L,NY_L,NZ_L
+!           get laps reflectivities at the surface (or immediately above it)
+            write(6,*)' getting low level reflectivity'
+            call get_low_ref(radar_ref_3d,pres_sfc_pa,nx_l,ny_l,nz_l
      1                      ,dbz_low_2d)
 
             istat_pty = 0
 
-!           Do SFC precip type
-            var = 'TD'
+!           do sfc precip type
+            var = 'td'
             ext = 'lsx'
             call get_laps_2d(i4time,ext,var,units,comment
-     1                  ,NX_L,NY_L,td_sfc_k,istatus)
+     1                  ,nx_l,ny_l,td_sfc_k,istatus)
             if(istatus .ne. 1)then
                 write(6,*)
-     1          ' Error reading SFC TD - SFC Precip Type not computed'       
+     1          ' error reading sfc td - sfc precip type not computed'       
                 goto700
             endif
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Note that pres_sfc_pa was already read in above
+!           note that pres_sfc_pa was already read in above
             call get_sfc_preciptype(pres_sfc_pa,t_sfc_k,td_sfc_k
      1                             ,cldpcp_type_3d,twet_snow
      1                             ,dbz_low_2d,i2_pcp_type_2d
-     1                             ,NX_L,NY_L,NZ_L)
+     1                             ,nx_l,ny_l,nz_l)
 
-!           Compute thresholded precip type
-            do i = 1,NX_L
-            do j = 1,NY_L
+!           compute thresholded precip type
+            do i = 1,nx_l
+            do j = 1,ny_l
                 iarg = i2_pcp_type_2d(i,j)
                 r_pcp_type_2d(i,j) = iarg/16
 
-!               Apply a threshold to the sfc precip type that depends
+!               apply a threshold to the sfc precip type that depends
 !               on both the low level reflectivity and the "potential"
 !               sfc precip type.
 
-                if(r_pcp_type_2d(i,j) .eq. 1.0        ! Rain
-     1        .or. r_pcp_type_2d(i,j) .eq. 3.0        ! ZR
-     1        .or. r_pcp_type_2d(i,j) .eq. 4.0        ! IP
-     1        .or. r_pcp_type_2d(i,j) .eq. 5.0        ! Hail
+                if(r_pcp_type_2d(i,j) .eq. 1.0        ! rain
+     1        .or. r_pcp_type_2d(i,j) .eq. 3.0        ! zr
+     1        .or. r_pcp_type_2d(i,j) .eq. 4.0        ! ip
+     1        .or. r_pcp_type_2d(i,j) .eq. 5.0        ! hail
      1                                                      )then
 
                     r_pcp_type_thresh_2d(i,j) = r_pcp_type_2d(i,j)
 
                     if(dbz_low_2d(i,j) .lt. 13.0)then
-                        r_pcp_type_thresh_2d(i,j) = 0. ! No Precip
+                        r_pcp_type_thresh_2d(i,j) = 0. ! no precip
                     endif
-                else ! Apply dry threshold to snow
+                else ! apply dry threshold to snow
 
-                    call nowrad_virga_correction(r_pcp_type_2d(i,j), ! I
-     1                                    r_pcp_type_thresh_2d(i,j), ! O
-     1                                    t_sfc_k(i,j),              ! I
-     1                                    td_sfc_k(i,j),             ! I
-     1                                    istat_radar_3dref_orig)    ! I
+                    call nowrad_virga_correction(r_pcp_type_2d(i,j), ! i
+     1                                    r_pcp_type_thresh_2d(i,j), ! o
+     1                                    t_sfc_k(i,j),              ! i
+     1                                    td_sfc_k(i,j),             ! i
+     1                                    istat_radar_3dref_orig)    ! i
 
                     if(.true.)then ! testcode
                         if(r_pcp_type_2d(i,j) .eq. 2.0 .and.
@@ -986,104 +986,104 @@ c read in laps lat/lon and topo
             enddo
             enddo
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Add SAO Drizzle to the thresh sfc precip type (if applicable out
+!           add sao drizzle to the thresh sfc precip type (if applicable out
 !           of radar range)
-            call sao_drizzle_correction(r_pcp_type_thresh_2d,NX_L,NY_L
+            call sao_drizzle_correction(r_pcp_type_thresh_2d,nx_l,ny_l
      1              ,n_obs_pos_b,obstype,wx_s,lat_s,lon_s,maxstns
      1              ,ri_s,rj_s,lat,lon
      1              ,t_sfc_k
      1              ,cloud_ceiling,r_missing_data)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Add SAO Rain to the thresh sfc precip type (if applicable out
+!           add sao rain to the thresh sfc precip type (if applicable out
 !           of radar range)
-            call sao_rain_correction(r_pcp_type_thresh_2d,NX_L,NY_L
+            call sao_rain_correction(r_pcp_type_thresh_2d,nx_l,ny_l
      1              ,n_obs_pos_b,obstype,wx_s,lat_s,lon_s,maxstns
      1              ,ri_s,rj_s,lat,lon
      1              ,t_sfc_k,td_sfc_k,twet_snow
      1              ,dbz_low_2d
      1              ,cvr_max,r_missing_data)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Add SAO Snow to the thresh sfc precip type (if applicable out
+!           add sao snow to the thresh sfc precip type (if applicable out
 !           of radar range)
-            call sao_snow_correction(r_pcp_type_thresh_2d,NX_L,NY_L
+            call sao_snow_correction(r_pcp_type_thresh_2d,nx_l,ny_l
      1              ,n_obs_pos_b,obstype,wx_s,lat_s,lon_s,maxstns
      1              ,ri_s,rj_s,lat,lon
      1              ,t_sfc_k,td_sfc_k,twet_snow
      1              ,dbz_low_2d
      1              ,cvr_max,r_missing_data)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Increase radar reflectivity threshold for precip in those areas
-!           where the radar has echo, but the SAO says no precip.
-            call sao_precip_correction(r_pcp_type_thresh_2d,NX_L,NY_L
+!           increase radar reflectivity threshold for precip in those areas
+!           where the radar has echo, but the sao says no precip.
+            call sao_precip_correction(r_pcp_type_thresh_2d,nx_l,ny_l
      1              ,n_obs_pos_b,obstype,wx_s,lat_s,lon_s,maxstns
      1              ,ri_s,rj_s,lat,lon
      1              ,t_sfc_k,td_sfc_k
      1              ,dbz_low_2d
      1              ,cvr_max,r_missing_data)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Write LMT/LLR
-!           Note that these arrays start off with 1 as the first index
-            var_a(1) = 'LMT'
-            var_a(2) = 'LLR'
+!           write lmt/llr
+!           note that these arrays start off with 1 as the first index
+            var_a(1) = 'lmt'
+            var_a(2) = 'llr'
             ext = 'lmt'
-            units_a(1) = 'M'
-            units_a(2) = 'DBZ'
-            comment_a(1) = 'LAPS Maximum Tops'
-            comment_a(2) = 'LAPS Low Level Reflectivity'
+            units_a(1) = 'm'
+            units_a(2) = 'dbz'
+            comment_a(1) = 'laps maximum tops'
+            comment_a(2) = 'laps low level reflectivity'
 
-            call move(ref_mt_2d, out_array_3d(1,1,1),NX_L,NY_L)
-            call move(dbz_low_2d,out_array_3d(1,1,2),NX_L,NY_L)
+            call move(ref_mt_2d, out_array_3d(1,1,1),nx_l,ny_l)
+            call move(dbz_low_2d,out_array_3d(1,1,2),nx_l,ny_l)
 
             call put_laps_multi_2d(i4time,ext,var_a,units_a,
-     1          comment_a,out_array_3d,NX_L,NY_L,2,istatus)
+     1          comment_a,out_array_3d,nx_l,ny_l,2,istatus)
 
             if(istatus .eq. 1)then
                 j_status(n_lmt) = ss_normal
-                write(6,*)' Success in writing out LMT'
+                write(6,*)' success in writing out lmt'
             else
-                write(6,*)' Error detected writing out LMT'
+                write(6,*)' error detected writing out lmt'
             endif
 
 
-!           Compare precip type to the obs
+!           compare precip type to the obs
             iarg = 0
             if(istat_radar_3dref .eq. 1 .and. istat_sfc .eq. 1)then
               call make_fnam_lp(i4time,asc_tim_9,istatus)
               write(6,*)' ',asc_tim_9,' __'
-              write(6,*)' Comparing precip type to the obs:',n_obs_pos_b
-              write(6,*)' Sta PTY PTT dbz   T(anl)  Td(anl)'//
-     1                  '  T(ob)  Td(ob)  PTY(ob)'//
-     1                  '        Tw(anl) Tw(ob) Elev(ob) Celg'
+              write(6,*)' comparing precip type to the obs:',n_obs_pos_b
+              write(6,*)' sta pty ptt dbz   t(anl)  td(anl)'//
+     1                  '  t(ob)  td(ob)  pty(ob)'//
+     1                  '        tw(anl) tw(ob) elev(ob) celg'
               do i = 1,n_obs_pos_b
                 call latlon_to_rlapsgrid(lat_s(i),lon_s(i),lat,lon
-     1                     ,NX_L,NY_L,ri,rj,istatus)
+     1                     ,nx_l,ny_l,ri,rj,istatus)
 
                 i_i = nint(ri)
                 i_j = nint(rj)
 
-                if(i_i .ge. 1 .and. i_i .le. NX_L .and.
-     1             i_j .ge. 1 .and. i_j .le. NY_L            )then
+                if(i_i .ge. 1 .and. i_i .le. nx_l .and.
+     1             i_j .ge. 1 .and. i_j .le. ny_l            )then
                     i_pty = i2_pcp_type_2d(i_i,i_j) / 16
                     i_ptt = r_pcp_type_thresh_2d(i_i,i_j)
 
-!                   Does LAPS analyze or does the SAO report wx here
+!                   does laps analyze or does the sao report wx here
                     if(  (i_pty .gt. 0 .or. wx_s(i) .ne. '        ')
 
-!                        and is this an SAO station that reports precip?
-!    1                  .AND.  obstype(i)(1:4) .ne. 'MESO'
-!    1                  .AND.  obstype(i)(1:4) .ne. 'CDOT'
-!    1                  .AND.  obstype(i)(7:8) .ne. '1A'
-     1                  .AND.  wx_s(i)(1:7)    .ne. 'UNKNOWN'
+!                        and is this an sao station that reports precip?
+!    1                  .and.  obstype(i)(1:4) .ne. 'meso'
+!    1                  .and.  obstype(i)(1:4) .ne. 'cdot'
+!    1                  .and.  obstype(i)(7:8) .ne. '1a'
+     1                  .and.  wx_s(i)(1:7)    .ne. 'unknown'
      1                                                         )then
                         c3_pt_flag = ' __'
                     else
@@ -1112,18 +1112,18 @@ c read in laps lat/lon and topo
                         iceil = 99999
                     endif
 
-!                   SNOW
-                    call parse_wx_pcp(wx_s(i),'S',ipresent,istatus)       
+!                   snow
+                    call parse_wx_pcp(wx_s(i),'s',ipresent,istatus)       
                     if(ipresent .eq. 1)then
-                        c1_s = 'S'
+                        c1_s = 's'
                     else
                         c1_s = ' '
                     endif
 
-!                   RAIN
-                    call parse_wx_pcp(wx_s(i),'R',ipresent,istatus)       
+!                   rain
+                    call parse_wx_pcp(wx_s(i),'r',ipresent,istatus)       
                     if(ipresent .eq. 1)then
-                        c1_r = 'R'
+                        c1_r = 'r'
                     else
                         c1_r = ' '
                     endif
@@ -1155,11 +1155,11 @@ c read in laps lat/lon and topo
 
             istat_pty = 1
 
-        else ! set SFC preciptype to missing
+        else ! set sfc preciptype to missing
             write(6,*)
-     1      ' No SFC preciptype calculated due to lack of radar data'       
-            do i = 1,NX_L
-            do j = 1,NY_L
+     1      ' no sfc preciptype calculated due to lack of radar data'       
+            do i = 1,nx_l
+            do j = 1,ny_l
                 r_pcp_type_thresh_2d(i,j) = r_missing_data
                 r_pcp_type_2d(i,j) = r_missing_data
             enddo ! j
@@ -1170,66 +1170,66 @@ c read in laps lat/lon and topo
  700    continue
 
         if(istat_radar_3dref .eq. 1)then
-            if(l_flag_bogus_w .and. l_bogus_radar_w) then    ! Adan add
-!             Re-calculate cloud bogus omega within radar echo area
-!             Add by Adan
-              call get_radar_deriv(NX_L,NY_L,NZ_L,grid_spacing_cen_m,       
+            if(l_flag_bogus_w .and. l_bogus_radar_w) then    ! adan add
+!             re-calculate cloud bogus omega within radar echo area
+!             add by adan
+              call get_radar_deriv(nx_l,ny_l,nz_l,grid_spacing_cen_m,       
      1                           r_missing_data,
      1                           radar_ref_3d,clouds_3d,cld_hts,
      1                           temp_3d,heights_3d,pres_3d,
      1                           ibase_array,itop_array,thresh_cvr,
-     1                           vv_to_height_ratio_Cu,                 ! I
+     1                           vv_to_height_ratio_cu,                 ! i
      1                           cldpcp_type_3d,w_3d,istat_radar_deriv)       
               if(istat_radar_deriv .ne. 1)then
-                write(6,*)' Bad status return from get_radar_deriv'
+                write(6,*)' bad status return from get_radar_deriv'
               endif
-            endif                           ! l_flag_bogus_w (Adan add)
+            endif                           ! l_flag_bogus_w (adan add)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-            write(6,*)' Computing Precip Concentration'
+            write(6,*)' computing precip concentration'
 
-!           Calculate 3D Precip Concentration in kg/m**3
-            call cpt_pcp_cnc(radar_ref_3d,temp_3d           ! Input
-     1                                  ,rh_3d_pct          ! Input
-     1                                  ,cldpcp_type_3d     ! Input
-     1                                  ,NX_L,NY_L,NZ_L     ! Input
-     1                                  ,c_z2m              ! Input
-     1                                  ,pres_3d            ! Input
-     1                                  ,pcpcnc             ! Output
-     1                                  ,raicnc             ! Output
-     1                                  ,snocnc             ! Output
-     1                                  ,piccnc)            ! Output
+!           calculate 3d precip concentration in kg/m**3
+            call cpt_pcp_cnc(radar_ref_3d,temp_3d           ! input
+     1                                  ,rh_3d_pct          ! input
+     1                                  ,cldpcp_type_3d     ! input
+     1                                  ,nx_l,ny_l,nz_l     ! input
+     1                                  ,c_z2m              ! input
+     1                                  ,pres_3d            ! input
+     1                                  ,pcpcnc             ! output
+     1                                  ,raicnc             ! output
+     1                                  ,snocnc             ! output
+     1                                  ,piccnc)            ! output
 
-!           Calculate Integrated Rainwater
+!           calculate integrated rainwater
             write(6,*)
-            write(6,*)' Calculating Integrated Rainwater'
-            call integrate_slwc(raicnc,heights_3d,NX_L,NY_L,NZ_L
+            write(6,*)' calculating integrated rainwater'
+            call integrate_slwc(raicnc,heights_3d,nx_l,ny_l,nz_l
      1                                                     ,rain_int)
-            write(6,*)' Integrated rain range is ',minval(rain_int)
+            write(6,*)' integrated rain range is ',minval(rain_int)
      1                                            ,maxval(rain_int)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Calculate Integrated Snow
+!           calculate integrated snow
             write(6,*)
-            write(6,*)' Calculating Integrated Snow'
-            call integrate_slwc(snocnc,heights_3d,NX_L,NY_L,NZ_L
+            write(6,*)' calculating integrated snow'
+            call integrate_slwc(snocnc,heights_3d,nx_l,ny_l,nz_l
      1                                                     ,snow_int)
-            write(6,*)' Integrated snow range is ',minval(snow_int)
+            write(6,*)' integrated snow range is ',minval(snow_int)
      1                                            ,maxval(snow_int)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Calculate Integrated Precipitating Ice
+!           calculate integrated precipitating ice
             write(6,*)
-            write(6,*)' Calculating Integrated Precip. Ice'
-            call integrate_slwc(piccnc,heights_3d,NX_L,NY_L,NZ_L
+            write(6,*)' calculating integrated precip. ice'
+            call integrate_slwc(piccnc,heights_3d,nx_l,ny_l,nz_l
      1                                                     ,pice_int)
-            write(6,*)' Integrated pice range is ',minval(pice_int)
+            write(6,*)' integrated pice range is ',minval(pice_int)
      1                                            ,maxval(pice_int)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
             nf = 6
 
@@ -1238,10 +1238,10 @@ c read in laps lat/lon and topo
 
         endif
 
-!       Rain, Snow, and Graupel are added for the cldalb & simvis computation
-        do j = 1,NY_L
-        do i = 1,NX_L
-!           Albedo = (b * tau) / (1. + b * tau)
+!       rain, snow, and graupel are added for the cldalb & simvis computation
+        do j = 1,ny_l
+        do i = 1,nx_l
+!           albedo = (b * tau) / (1. + b * tau)
             btau = (const_lwp_bks * slwc_int(i,j) + 
      1              const_iwp_bks * cice_int(i,j) + 
      1              const_rwp_bks * rain_int(i,j) + 
@@ -1265,25 +1265,25 @@ c read in laps lat/lon and topo
             simvis(i,j) = cldalb_out(i,j) + (1.-cldalb_out(i,j))**2 
      1          * (sfc_albedo(i,j)/(1.-cldalb_out(i,j)*sfc_albedo(i,j)))
 
-            if(i .eq. idb .AND. j .eq. jdb)then
+            if(i .eq. idb .and. j .eq. jdb)then
                 cvrmax = maxval(clouds_3d(i,j,:))
                 write(6,1201)cldod_out(i,j),cldod_out_l(i,j)
      1                      ,cldod_out_i(i,j)
- 1201           format(' CTR cloud od/l/i',3f9.3)
+ 1201           format(' ctr cloud od/l/i',3f9.3)
                 write(6,1202)cvrmax,cldod_out(i,j),cldalb_in(i,j)
      1                      ,cldalb_out(i,j),sfc_albedo(i,j),simvis(i,j)
- 1202           format(' CTR cloud cvr/od/albi-o/sfcalb/smv:',6f9.3)
+ 1202           format(' ctr cloud cvr/od/albi-o/sfcalb/smv:',6f9.3)
                 write(6,1203)slwc_int(i,j),cice_int(i,j)
- 1203           format(' CTR slwc_int/cice_int (Mg/m**2)',2f10.6)
+ 1203           format(' ctr slwc_int/cice_int (mg/m**2)',2f10.6)
             endif
 
         enddo ! i
         enddo ! j
 
-!       Convert SLWC and CICE from g/m**3 to kg/m**3
-        do k = 1,NZ_L
-        do j = 1,NY_L
-        do i = 1,NX_L
+!       convert slwc and cice from g/m**3 to kg/m**3
+        do k = 1,nz_l
+        do j = 1,ny_l
+        do i = 1,nx_l
             if(slwc(i,j,k) .ne. r_missing_data)then
                 slwc(i,j,k) = (slwc(i,j,k) * 1.0) / 1e3
             endif
@@ -1294,8 +1294,8 @@ c read in laps lat/lon and topo
         enddo
         enddo
 
-!       Calculate low level hydrometeor fields and visibility
-!       These constants can be derived from microphysical constants
+!       calculate low level hydrometeor fields and visibility
+!       these constants can be derived from microphysical constants
         clwc2alpha = 1.5 / (rholiq  * reff_clwc)
         cice2alpha = 1.5 / (rholiq  * reff_cice)
         rain2alpha = 1.5 / (rholiq  * reff_rain)
@@ -1310,8 +1310,8 @@ c read in laps lat/lon and topo
       
         iwrite = 0
 
-        do j = 1,NY_L
-        do i = 1,NX_L
+        do j = 1,ny_l
+        do i = 1,nx_l
             k_topo = int(zcoord_of_pressure(pres_sfc_pa(i,j)))
             slwc_low = slwc(i,j,k_topo+1)
             cice_low = cice(i,j,k_topo+1)
@@ -1321,7 +1321,7 @@ c read in laps lat/lon and topo
             alpha = a1 * slwc_low + b1 * cice_low + c1 * rain_low 
      1            + d1 * snow_low + e1 * pice_low
             visibility(i,j) = 2.8 / max(alpha,.00004) 
-            if(alpha .gt. 0.0002 .AND. iwrite .le. 5 .OR.
+            if(alpha .gt. 0.0002 .and. iwrite .le. 5 .or.
      1             i .eq. idb .and. j .eq. jdb      )then
                 write(6,*)'visibility terms at',i,j,k_topo
                 write(6,*)slwc_low,cice_low,rain_low,snow_low,pice_low
@@ -1331,46 +1331,46 @@ c read in laps lat/lon and topo
         enddo ! i
         enddo ! j
       
-!       Write LIL file
-!       Note that these arrays start off with 1 as the first index
+!       write lil file
+!       note that these arrays start off with 1 as the first index
         ext = 'lil'
-        var_a(1) = 'LIL'
-        var_a(2) = 'LIC'
-        var_a(3) = 'COD'
-        var_a(4) = 'CLA'
-        var_a(5) = 'VIS'
-        var_a(6) = 'SMV'
-        units_a(1) = 'M'
-        units_a(2) = 'M'
+        var_a(1) = 'lil'
+        var_a(2) = 'lic'
+        var_a(3) = 'cod'
+        var_a(4) = 'cla'
+        var_a(5) = 'vis'
+        var_a(6) = 'smv'
+        units_a(1) = 'm'
+        units_a(2) = 'm'
         units_a(3) = ' '
         units_a(4) = ' '
-        units_a(5) = 'M'
+        units_a(5) = 'm'
         units_a(6) = ' '
-        comment_a(1) = 'Integrated Cloud Liquid'
-        comment_a(2) = 'Integrated Cloud Ice'
-        comment_a(3) = 'Cloud Optical Depth'
-        comment_a(4) = 'Cloud Albedo'
-        comment_a(5) = 'Visibility'
-        comment_a(6) = 'Visible Albedo'
+        comment_a(1) = 'integrated cloud liquid'
+        comment_a(2) = 'integrated cloud ice'
+        comment_a(3) = 'cloud optical depth'
+        comment_a(4) = 'cloud albedo'
+        comment_a(5) = 'visibility'
+        comment_a(6) = 'visible albedo'
 
-        call move(slwc_int,  out_array_3d(1,1,1),NX_L,NY_L)
-        call move(cice_int,  out_array_3d(1,1,2),NX_L,NY_L)
-        call move(cldod_out, out_array_3d(1,1,3),NX_L,NY_L)
-        call move(cldalb_out,out_array_3d(1,1,4),NX_L,NY_L)
-        call move(visibility,out_array_3d(1,1,5),NX_L,NY_L)
-        call move(simvis    ,out_array_3d(1,1,6),NX_L,NY_L)
+        call move(slwc_int,  out_array_3d(1,1,1),nx_l,ny_l)
+        call move(cice_int,  out_array_3d(1,1,2),nx_l,ny_l)
+        call move(cldod_out, out_array_3d(1,1,3),nx_l,ny_l)
+        call move(cldalb_out,out_array_3d(1,1,4),nx_l,ny_l)
+        call move(visibility,out_array_3d(1,1,5),nx_l,ny_l)
+        call move(simvis    ,out_array_3d(1,1,6),nx_l,ny_l)
 
         call put_laps_multi_2d(i4time,ext,var_a,units_a,
-     1      comment_a,out_array_3d,NX_L,NY_L,6,istatus)
+     1      comment_a,out_array_3d,nx_l,ny_l,6,istatus)
 
         if(istatus .eq. 1)then
             j_status(n_lil) = ss_normal
-            write(6,*)' Success in writing out LIL'
+            write(6,*)' success in writing out lil'
         else
-            write(6,*)' Error detected writing out LIL'
+            write(6,*)' error detected writing out lil'
         endif
 
-!       Apply hydrometeor scale to precip
+!       apply hydrometeor scale to precip
         if(hydrometeor_scale_pcp .ge. 0.)then
             ratio_pcp =  hydrometeor_scale_pcp
         else
@@ -1383,29 +1383,29 @@ c read in laps lat/lon and topo
         snocnc = snocnc * ratio_pcp
         piccnc = piccnc * ratio_pcp
 
-!       Write out Cloud Liquid Water, Cloud Ice and Precip Content Fields
-        var_a(1) = 'LWC'
-        var_a(2) = 'ICE'
-        var_a(3) = 'PCN'
-        var_a(4) = 'RAI'
-        var_a(5) = 'SNO'
-        var_a(6) = 'PIC'
+!       write out cloud liquid water, cloud ice and precip content fields
+        var_a(1) = 'lwc'
+        var_a(2) = 'ice'
+        var_a(3) = 'pcn'
+        var_a(4) = 'rai'
+        var_a(5) = 'sno'
+        var_a(6) = 'pic'
 
         ext = 'lwc'
 
-        units_a(1) = 'KG/M**3'
-        units_a(2) = 'KG/M**3'
-        units_a(3) = 'KG/M**3'
-        units_a(4) = 'KG/M**3'
-        units_a(5) = 'KG/M**3'
-        units_a(6) = 'KG/M**3'
+        units_a(1) = 'kg/m**3'
+        units_a(2) = 'kg/m**3'
+        units_a(3) = 'kg/m**3'
+        units_a(4) = 'kg/m**3'
+        units_a(5) = 'kg/m**3'
+        units_a(6) = 'kg/m**3'
 
-        comment_a(1) = 'Cloud Liquid Water Content - LAPS Smith Feddes'       
-        comment_a(2) = 'Cloud Ice Content - LAPS Smith Feddes'
-        comment_a(3) = 'Precipitate Content'
-        comment_a(4) = 'Rain Content'
-        comment_a(5) = 'Snow Content'
-        comment_a(6) = 'Precipitating Ice Content'
+        comment_a(1) = 'cloud liquid water content - laps smith feddes'       
+        comment_a(2) = 'cloud ice content - laps smith feddes'
+        comment_a(3) = 'precipitate content'
+        comment_a(4) = 'rain content'
+        comment_a(5) = 'snow content'
+        comment_a(6) = 'precipitating ice content'
 
         slwc_max = maxval(slwc)
         cice_max = maxval(cice)
@@ -1414,138 +1414,138 @@ c read in laps lat/lon and topo
         snocnc_max = maxval(snocnc)
         piccnc_max = maxval(piccnc)
 
-        write(6,*)' Max range (g/m**3) slwc = ',slwc_max*1e3
-        write(6,*)' Max range (g/m**3) cice = ',cice_max*1e3
-        write(6,*)' Max range (g/m**3) pcpcnc = ',pcpcnc_max*1e3
-        write(6,*)' Max range (g/m**3) raicnc = ',raicnc_max*1e3
-        write(6,*)' Max range (g/m**3) snocnc = ',snocnc_max*1e3
-        write(6,*)' Max range (g/m**3) piccnc = ',piccnc_max*1e3
+        write(6,*)' max range (g/m**3) slwc = ',slwc_max*1e3
+        write(6,*)' max range (g/m**3) cice = ',cice_max*1e3
+        write(6,*)' max range (g/m**3) pcpcnc = ',pcpcnc_max*1e3
+        write(6,*)' max range (g/m**3) raicnc = ',raicnc_max*1e3
+        write(6,*)' max range (g/m**3) snocnc = ',snocnc_max*1e3
+        write(6,*)' max range (g/m**3) piccnc = ',piccnc_max*1e3
 
-        if(slwc_max   .le. 1e6 .AND. cice_max   .le. 1e6 .AND.
-     1     pcpcnc_max .le. 1e6 .AND. raicnc_max .le. 1e6 .AND.
-     1     snocnc_max .le. 1e6 .AND. piccnc_max .le. 1e6       )then
+        if(slwc_max   .le. 1e6 .and. cice_max   .le. 1e6 .and.
+     1     pcpcnc_max .le. 1e6 .and. raicnc_max .le. 1e6 .and.
+     1     snocnc_max .le. 1e6 .and. piccnc_max .le. 1e6       )then
 
             call put_laps_3d_multi(i4time,ext,var_a,units_a,comment_a
      1                        ,slwc,cice
      1                        ,pcpcnc,raicnc
      1                        ,snocnc,piccnc
-     1                        ,NX_L,NY_L,NZ_L
-     1                        ,NX_L,NY_L,NZ_L
-     1                        ,NX_L,NY_L,NZ_L
-     1                        ,NX_L,NY_L,NZ_L
-     1                        ,NX_L,NY_L,NZ_L
-     1                        ,NX_L,NY_L,NZ_L
+     1                        ,nx_l,ny_l,nz_l
+     1                        ,nx_l,ny_l,nz_l
+     1                        ,nx_l,ny_l,nz_l
+     1                        ,nx_l,ny_l,nz_l
+     1                        ,nx_l,ny_l,nz_l
+     1                        ,nx_l,ny_l,nz_l
      1                        ,nf,istatus)
             if(istatus .eq. 1)j_status(n_lwc) = ss_normal
         else
-            write(6,*)' ERROR: large hydrometeor values LWC not written'
+            write(6,*)' error: large hydrometeor values lwc not written'
         endif
 
-!       Write out Mean Volume Diameter field (Potentially compressible)
+!       write out mean volume diameter field (potentially compressible)
         ext = 'lmd'
-        var = 'LMD'
-        units = 'M'
-        comment = 'Mean Volume Diameter of Cloud Droplets'
+        var = 'lmd'
+        units = 'm'
+        comment = 'mean volume diameter of cloud droplets'
         call put_laps_3d(i4time,ext,var,units,comment,mvd_3d
-     1                                           ,NX_L,NY_L,NZ_L)
+     1                                           ,nx_l,ny_l,nz_l)
         j_status(n_lmd) = ss_normal
 
-!       Write out Icing Index field  (Potentially compressible)
+!       write out icing index field  (potentially compressible)
         ext = 'lrp'
-        do k = 1,NZ_L
-        do j = 1,NY_L
-        do i = 1,NX_L
+        do k = 1,nz_l
+        do j = 1,ny_l
+        do i = 1,nx_l
             out_array_3d(i,j,k) = icing_index_3d(i,j,k)
         enddo
         enddo
         enddo
 
-        var = 'LRP'
-        units = 'NONE'
-        comment = 'Icing Severity Index '//
-     1  '1-LtCnt,2-MdCnt,3-HvCnt,4-LtInt,5-MdInt,6-HvInt'
+        var = 'lrp'
+        units = 'none'
+        comment = 'icing severity index '//
+     1  '1-ltcnt,2-mdcnt,3-hvcnt,4-ltint,5-mdint,6-hvint'
         call put_laps_3d(i4time,ext,var,units,comment,out_array_3d
-     1                                  ,NX_L,NY_L,NZ_L)
+     1                                  ,nx_l,ny_l,nz_l)
 
         j_status(n_lrp) = ss_normal
 
-!       Write 3D Precip Type
+!       write 3d precip type
 !       4 most significant bits are precip type, other 4 are cloud type
-        do k = 1,NZ_L
-        do j = 1,NY_L
-        do i = 1,NX_L
+        do k = 1,nz_l
+        do j = 1,ny_l
+        do i = 1,nx_l
             iarg = cldpcp_type_3d(i,j,k)
-            out_array_3d(i,j,k) = iarg/16                   ! 'PTY'
+            out_array_3d(i,j,k) = iarg/16                   ! 'pty'
         enddo
         enddo
         enddo
 
         ext = 'pty'
-        var = 'PTY'
-        units = 'NONE'
-        comment = 'Precip Type: 0-None,1-Rain,2-Snow,3-ZR,4-IP,5-Hail'
+        var = 'pty'
+        units = 'none'
+        comment = 'precip type: 0-none,1-rain,2-snow,3-zr,4-ip,5-hail'
         call put_laps_3d(i4time,ext,var,units
      1                  ,comment,out_array_3d(1,1,1)
-     1                  ,NX_L,NY_L,NZ_L)
+     1                  ,nx_l,ny_l,nz_l)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Write sfc precip and cloud type
-        var_a(1) = 'PTY'
-        var_a(2) = 'PTT'
-        var_a(3) = 'SCT'
+!       write sfc precip and cloud type
+        var_a(1) = 'pty'
+        var_a(2) = 'ptt'
+        var_a(3) = 'sct'
         ext = 'lct'
-        units_a(1) = 'UNDIM'
-        units_a(2) = 'UNDIM'
-        units_a(3) = 'UNDIM'
-        comment_a(1) = 'LAPS Precip Type (Unthresholded): '//
-     1                 '0:Np 1:Rn 2:Sn 3:Zr 4:Sl 5:Ha 6:L  7:ZL'
-        comment_a(2) = 'LAPS Precip Type (Refl Threshold): '//
-     1                 '0:Np 1:Rn 2:Sn 3:Zr 4:Sl 5:Ha 6:L  7:ZL'
-        comment_a(3) = 'LAPS Cloud Type '//
-     1                 '0:Clr 1:St 2:Sc 3:Cu 4:Ns 5:Ac '//
-     1                 '6:As 7:Cs 8:Ci 9:Cc 10: Cb'
+        units_a(1) = 'undim'
+        units_a(2) = 'undim'
+        units_a(3) = 'undim'
+        comment_a(1) = 'laps precip type (unthresholded): '//
+     1                 '0:np 1:rn 2:sn 3:zr 4:sl 5:ha 6:l  7:zl'
+        comment_a(2) = 'laps precip type (refl threshold): '//
+     1                 '0:np 1:rn 2:sn 3:zr 4:sl 5:ha 6:l  7:zl'
+        comment_a(3) = 'laps cloud type '//
+     1                 '0:clr 1:st 2:sc 3:cu 4:ns 5:ac '//
+     1                 '6:as 7:cs 8:ci 9:cc 10: cb'
 
-        call move(r_pcp_type_2d,       out_array_3d(1,1,1),NX_L,NY_L)
-        call move(r_pcp_type_thresh_2d,out_array_3d(1,1,2),NX_L,NY_L)
-        call move(r_cld_type_2d,       out_array_3d(1,1,3),NX_L,NY_L)        
+        call move(r_pcp_type_2d,       out_array_3d(1,1,1),nx_l,ny_l)
+        call move(r_pcp_type_thresh_2d,out_array_3d(1,1,2),nx_l,ny_l)
+        call move(r_cld_type_2d,       out_array_3d(1,1,3),nx_l,ny_l)        
 
         call put_laps_multi_2d(i4time,ext,var_a,units_a,
-     1                 comment_a,out_array_3d,NX_L,NY_L,3,istatus)
+     1                 comment_a,out_array_3d,nx_l,ny_l,3,istatus)
 
         if(istatus .eq. 1)j_status(n_lct) = ss_normal
 
-!       Write out Cloud derived Omega field
-        var = 'COM'
+!       write out cloud derived omega field
+        var = 'com'
         ext = 'lco'
-        units = 'PA/S'
-        comment = 'LAPS Cloud Derived Omega'
+        units = 'pa/s'
+        comment = 'laps cloud derived omega'
         call put_laps_3d(i4time,ext,var,units,comment,w_3d
-     1                  ,NX_L,NY_L,NZ_L)
+     1                  ,nx_l,ny_l,nz_l)
         j_status(n_lco) = ss_normal
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         istatus = 1
 
-!       Read sounding metadata to get integrated cloud liquid obs
+!       read sounding metadata to get integrated cloud liquid obs
 !       lun = 89
 !       ext = 'snd'
-!       call read_snd_metadata(lun,i4time,ext                         ! I
-!    1                        ,MAX_SND_GRID,MAX_SND_LEVELS            ! I
-!    1                        ,lat,lon,imax,jmax                      ! I
-!    1                        ,n_profiles                             ! O
-!    1                        ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr   ! O
-!    1                        ,c5_name,i4time_ob_pr,obstype           ! O
-!    1                        ,cloud_base_temp,cloud_liquid           ! O
-!    1                        ,istatus)                               ! O
+!       call read_snd_metadata(lun,i4time,ext                         ! i
+!    1                        ,max_snd_grid,max_snd_levels            ! i
+!    1                        ,lat,lon,imax,jmax                      ! i
+!    1                        ,n_profiles                             ! o
+!    1                        ,nlevels_obs_pr,lat_pr,lon_pr,elev_pr   ! o
+!    1                        ,c5_name,i4time_ob_pr,obstype           ! o
+!    1                        ,cloud_base_temp,cloud_liquid           ! o
+!    1                        ,istatus)                               ! o
 
 !       write(6,*)' back from read_snd_metadata, # soundings = '
 !    1            ,n_profiles
 
 999     continue
 
-        write(6,*)' Notifications'
+        write(6,*)' notifications'
         do i = iprod_start,iprod_end
             write(6,*)' ',exts(i),' ',j_status(i),' ',i
         enddo ! i
@@ -1553,7 +1553,7 @@ c read in laps lat/lon and topo
 9999    deallocate( slwc )
         deallocate( cice )
 
-        write(6,*)' End of laps_deriv_sub'
+        write(6,*)' end of laps_deriv_sub'
 
         return
         end

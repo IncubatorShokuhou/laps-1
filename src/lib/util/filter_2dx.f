@@ -1,34 +1,34 @@
       subroutine filter_2dx(field,ix,iy,iz,smth)
 c
-c *** Subprogram:  smooth - Smooth a meteorological field.
-c     Author:  Stan Benjamin 
-c     Date  :  90-06-15
+c *** subprogram:  smooth - smooth a meteorological field.
+c     author:  stan benjamin 
+c     date  :  90-06-15
 c
-c *** Abstract:  Shapiro smoother. 
+c *** abstract:  shapiro smoother. 
 c 
-c *** Program history log: 
-c        85-12-09  S. Benjamin - Original version
-c        96-06-16  J. Snook    - Modified to do 3d RAMS fields
+c *** program history log: 
+c        85-12-09  s. benjamin - original version
+c        96-06-16  j. snook    - modified to do 3d rams fields
 c                              - hold array is dynamically allocated
 c 
-c *** Usage:  call smooth(field,ix,iy,iz,smth) 
+c *** usage:  call smooth(field,ix,iy,iz,smth) 
 c
-c *** Input argument list: 
+c *** input argument list: 
 c        field    - real array  field(ix,iy,iz)
-c                               Meteorological field
+c                               meteorological field
 c        ix       - integer     x coordinates of field
 c        iy       - integer     y coordinates of field
 c        iz       - integer     z coordinates of field
 c        smth     - real      
 c
-c *** Output argument list:   
+c *** output argument list:   
 c        field    - real array  field(ix,iy,iz)
-c                               Smoothed meteorological field
+c                               smoothed meteorological field
 c 
-c *** Remarks:  Reference:  Shapiro, 1970: "Smoothing, filtering, and
-c        boundary effects", Rev. Geophys. Sp. Phys., 359-387.
+c *** remarks:  reference:  shapiro, 1970: "smoothing, filtering, and
+c        boundary effects", rev. geophys. sp. phys., 359-387.
 c
-c     This filter is of the type 
+c     this filter is of the type 
 c        z(i) = (1-s)z(i) + s(z(i+1)+z(i-1))/2
 c     for a filter which is supposed to damp 2dx waves completely
 c     but leave 4dx and longer with little damping,

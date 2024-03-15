@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -36,30 +36,30 @@ c
 c
 c*******************************************************************************
 c
-c       Routine to calculate regression coefficients from y/x data
+c       routine to calculate regression coefficients from y/x data
 c       (formerly t and elev data).
 
-c       Values returned are the coefficients for the regression equations
+c       values returned are the coefficients for the regression equations
 c       as well as mean of each array, bias, rms   
 c
-c       Changes:
-c               P.A. Stamus     12-01-88        Original (from J. McGinley)
+c       changes:
+c               p.a. stamus     12-01-88        original (from j. mcginley)
 c
-c       Inputs/Outputs:
+c       inputs/outputs:
 c
-c          Variable     Var Type    I/O   Description
+c          variable     var type    i/o   description
 c         ----------   ----------  ----- -------------
-c          num_sfc         I         I    Number of surface stations.
-c          x               RA        I    
-c          y               RA        I    
-c          b_t             R         O    intercept (y = ax + b)
-c          a_t             R         O    slope
-c          xbar            R         O    Mean value of the stations.
-c          ybar            R         O    Mean value of the gridded field
+c          num_sfc         i         i    number of surface stations.
+c          x               ra        i    
+c          y               ra        i    
+c          b_t             r         o    intercept (y = ax + b)
+c          a_t             r         o    slope
+c          xbar            r         o    mean value of the stations.
+c          ybar            r         o    mean value of the gridded field
 c
-c       User Notes:
+c       user notes:
 c
-c       1. Units are not changed in this routine.
+c       1. units are not changed in this routine.
 c
 c*******************************************************************************
 c
@@ -69,7 +69,7 @@ c
 
 c
 c
-c.....  Set up storage variables.
+c.....  set up storage variables.
 c
         cnt = 0.
         sumxy = 0.
@@ -78,11 +78,11 @@ c
         sumx2 = 0.
         sumy2 = 0.
 c
-c.....  Gather sums and then calculate the 'a' and 'b' for the regression
-c.....  equation y = az + b, for both the temperature and dew point.  The
+c.....  gather sums and then calculate the 'a' and 'b' for the regression
+c.....  equation y = az + b, for both the temperature and dew point.  the
 c.....  'b' is the intercept with sea level, and the 'a' is the lapse rate.
 c.....  'y' represents the y value and 'z' is x/analyzed
-c.....  Also calculate the mean elevation of the stations.
+c.....  also calculate the mean elevation of the stations.
 c
         istatus = 0
 
@@ -109,7 +109,7 @@ c
             return
         endif
 
-!       Slope    
+!       slope    
         denominator = (cnt*sumx2 - sumx*sumx)
         if(denominator .ne. 0.)then
             a_t = (cnt*sumxy - sumx*sumy) / denominator                
@@ -118,7 +118,7 @@ c
             istatus = 0
         endif
 
-!       Intercept
+!       intercept
         b_t = (sumy - a_t * sumx) / cnt
 c
         xbar = sumx / cnt
@@ -129,7 +129,7 @@ c
 
         write(6,*)' xbar,ybar = ',xbar,ybar
 
-!       Calculate rms (stdev) of the ob-background differences
+!       calculate rms (stdev) of the ob-background differences
         cnt = 0
         sumsq = 0.
         do i = 1,num_sfc
@@ -147,14 +147,14 @@ c
 
         bias = ybar - xbar
 
-!       if(a_t .lt. 0.1 .OR. a_t .gt. 10.)then
-!          write(6,*)' Warning, slope is ill conditioned'
+!       if(a_t .lt. 0.1 .or. a_t .gt. 10.)then
+!          write(6,*)' warning, slope is ill conditioned'
 !          istatus = 0
 !       endif
 c
-c.....  End of routine
+c.....  end of routine
 c
-!       Compute correlation coefficient
+!       compute correlation coefficient
         sum1 = 0.
         sum2 = 0.
         sum3 = 0.
@@ -176,7 +176,7 @@ c
         write(6,*)' regression sums = ',sum1,sum2,sum3
 
         write(6,900)title,int(cnt),bias,std,r
-900     format(/,2x,a,' N/bias/rms/r = ',i7,2f9.2,f9.3)
+900     format(/,2x,a,' n/bias/rms/r = ',i7,2f9.2,f9.3)
 
         return
         end
@@ -188,29 +188,29 @@ c
 c
 c*******************************************************************************
 c
-c       Routine to calculate regression coefficients from y/x data
+c       routine to calculate regression coefficients from y/x data
 c       (similar to above stats_1d routine so far)
 
-c       Values returned are the coefficients for the regression equations
+c       values returned are the coefficients for the regression equations
 c       as well as mean of each array, bias, rms   
 c
-c       Changes:
-c               P.A. Stamus     12-01-88        Original (from J. McGinley)
+c       changes:
+c               p.a. stamus     12-01-88        original (from j. mcginley)
 c
-c       Inputs/Outputs:
+c       inputs/outputs:
 c
-c          Variable     Var Type    I/O   Description
+c          variable     var type    i/o   description
 c         ----------   ----------  ----- -------------
-c          num_pts         I         I    Number of surface stations.
-c          x               RA        I    
-c          y               RA        I    
-c          b_t             R         O    intercept (y = ax + b)
-c          a_t             R         O    slope
-c          xbar            R         O    Mean elevation of the stations.
+c          num_pts         i         i    number of surface stations.
+c          x               ra        i    
+c          y               ra        i    
+c          b_t             r         o    intercept (y = ax + b)
+c          a_t             r         o    slope
+c          xbar            r         o    mean elevation of the stations.
 c
-c       User Notes:
+c       user notes:
 c
-c       1. Units are not changed in this routine.
+c       1. units are not changed in this routine.
 c
 c*******************************************************************************
 c
@@ -220,7 +220,7 @@ c
 
 c
 c
-c.....  Set up storage variables.
+c.....  set up storage variables.
 c
         cnt = 0.
         sumxy = 0.
@@ -229,11 +229,11 @@ c
         sumx2 = 0.
         sumy2 = 0.
 c
-c.....  Gather sums and then calculate the 'a' and 'b' for the regression
-c.....  equation y = az + b, for both the temperature and dew point.  The
+c.....  gather sums and then calculate the 'a' and 'b' for the regression
+c.....  equation y = az + b, for both the temperature and dew point.  the
 c.....  'b' is the intercept with sea level, and the 'a' is the lapse rate.
 c.....  'y' represents the y value and 'z' is x/analyzed
-c.....  Also calculate the mean elevation of the stations.
+c.....  also calculate the mean elevation of the stations.
 c
         istatus = 0
 
@@ -259,7 +259,7 @@ c
             return
         endif
 
-!       Slope    
+!       slope    
         denominator = (cnt*sumx2 - sumx*sumx)
         if(denominator .ne. 0.)then
             a_t = (cnt*sumxy - sumx*sumy) / denominator                
@@ -268,7 +268,7 @@ c
             istatus = 0
         endif
 
-!       Intercept
+!       intercept
         b_t = (sumy - a_t * sumx) / cnt
 c
         xbar = sumx / cnt
@@ -279,7 +279,7 @@ c
 
         write(6,*)' xbar,ybar = ',xbar,ybar
 
-!       Calculate rms (stdev) of the ob-background differences
+!       calculate rms (stdev) of the ob-background differences
         cnt = 0
         sumsq = 0.
         do i = 1,num_pts
@@ -297,14 +297,14 @@ c
 
         bias = ybar - xbar
 
-!       if(a_t .lt. 0.1 .OR. a_t .gt. 10.)then
-!          write(6,*)' Warning, slope is ill conditioned'
+!       if(a_t .lt. 0.1 .or. a_t .gt. 10.)then
+!          write(6,*)' warning, slope is ill conditioned'
 !          istatus = 0
 !       endif
 c
-c.....  End of routine
+c.....  end of routine
 c
-!       Compute correlation coefficient
+!       compute correlation coefficient
         sum1 = 0.
         sum2 = 0.
         sum3 = 0.
@@ -326,7 +326,7 @@ c
         write(6,*)' regression sums = ',sum1,sum2,sum3
 
         write(6,900)title,int(cnt),bias,std,r
-900     format(/,2x,a,' N/bias/rms/r = ',i5,2f9.2,f9.3)
+900     format(/,2x,a,' n/bias/rms/r = ',i5,2f9.2,f9.3)
 
         return
         end

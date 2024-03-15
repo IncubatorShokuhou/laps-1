@@ -1,223 +1,223 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETGB2P(LUGB,LUGI,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,
-     &                   EXTRACT,K,GRIBM,LENG,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETGB2P        FINDS AND EXTRACTS A GRIB MESSAGE
-C   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 94-04-01
-C
-C ABSTRACT: FIND AND EXTRACTS A GRIB MESSAGE FROM A FILE.
-C   READ A GRIB INDEX FILE (OR OPTIONALLY THE GRIB FILE ITSELF)
-C   TO GET THE INDEX BUFFER (I.E. TABLE OF CONTENTS) FOR THE GRIB FILE.
-C   FIND IN THE INDEX BUFFER A REFERENCE TO THE GRIB FIELD REQUESTED.
-C   THE GRIB FIELD REQUEST SPECIFIES THE NUMBER OF FIELDS TO SKIP
-C   AND THE UNPACKED IDENTIFICATION SECTION, GRID DEFINITION TEMPLATE AND
-C   PRODUCT DEFINTION SECTION PARAMETERS.  (A REQUESTED PARAMETER
-C   OF -9999 MEANS TO ALLOW ANY VALUE OF THIS PARAMETER TO BE FOUND.)
-C   IF THE REQUESTED GRIB FIELD IS FOUND, THEN IT IS READ FROM THE
-C   GRIB FILE AND RETURNED. 
-C   IF THE GRIB FIELD IS NOT FOUND, THEN THE RETURN CODE WILL BE NONZERO.
-C
-C PROGRAM HISTORY LOG:
-C   94-04-01  IREDELL
-C   95-10-31  IREDELL     MODULARIZED PORTIONS OF CODE INTO SUBPROGRAMS
-C                         AND ALLOWED FOR UNSPECIFIED INDEX FILE
-C 2002-01-11  GILBERT     MODIFIED FROM GETGB AND GETGBM TO WORK WITH GRIB2
-C 2003-12-17  GILBERT     MODIFIED FROM GETGB2 TO RETURN PACKED GRIB2 MESSAGE.
-C
-C USAGE:    CALL GETGB2P(LUGB,LUGI,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,
-C    &                  EXTRACT,K,GRIBM,LENG,IRET)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB DATA FILE.
-C                  FILE MUST BE OPENED WITH BAOPEN OR BAOPENR BEFORE CALLING 
-C                  THIS ROUTINE.
-C     LUGI         INTEGER UNIT OF THE UNBLOCKED GRIB INDEX FILE.
-C                  IF NONZERO, FILE MUST BE OPENED WITH BAOPEN BAOPENR BEFORE 
-C                  CALLING THIS ROUTINE.
-C                  (=0 TO GET INDEX BUFFER FROM THE GRIB FILE)
-C     J            INTEGER NUMBER OF FIELDS TO SKIP
-C                  (=0 TO SEARCH FROM BEGINNING)
-C     JDISC        GRIB2 DISCIPLINE NUMBER OF REQUESTED FIELD
-C                  ( IF = -1, ACCEPT ANY DISCIPLINE)
-C                  ( SEE CODE TABLE 0.0 )
-C                  0 - Meteorological products
-C                  1 - Hydrological products
-C                  2 - Land surface products
-C                  3 - Space products
-C                  10 - Oceanographic products
-C     JIDS()       INTEGER ARRAY OF VALUES IN THE IDENTIFICATION SECTION
-C                  (=-9999 FOR WILDCARD)
-C            JIDS(1)   = IDENTIFICATION OF ORIGINATING CENTRE
-C                         ( SEE COMMON CODE TABLE C-1 )
-C            JIDS(2)   = IDENTIFICATION OF ORIGINATING SUB-CENTRE
-C            JIDS(3)   = GRIB MASTER TABLES VERSION NUMBER
-C                         ( SEE CODE TABLE 1.0 )
-C                       0 - Experimental
-C                       1 - Initial operational version number
-C            JIDS(4)   = GRIB LOCAL TABLES VERSION NUMBER
-C                         ( SEE CODE TABLE 1.1 )
-C                       0     - Local tables not used
-C                       1-254 - Number of local tables version used
-C            JIDS(5)   = SIGNIFICANCE OF REFERENCE TIME (CODE TABLE 1.2)
-C                       0 - Analysis
-C                       1 - Start of forecast
-C                       2 - Verifying time of forecast
-C                       3 - Observation time
-C            JIDS(6)   = YEAR ( 4 DIGITS )
-C            JIDS(7)   = MONTH
-C            JIDS(8)   = DAY
-C            JIDS(9)   = HOUR
-C            JIDS(10)  = MINUTE
-C            JIDS(11)  = SECOND
-C            JIDS(12)  = PRODUCTION STATUS OF PROCESSED DATA
-C                         ( SEE CODE TABLE 1.3 )
-C                       0 - Operational products
-C                       1 - Operational test products
-C                       2 - Research products
-C                       3 - Re-analysis products
-C            JIDS(13)  = TYPE OF PROCESSED DATA ( SEE CODE TABLE 1.4 )
-C                       0  - Analysis products
-C                       1  - Forecast products
-C                       2  - Analysis and forecast products
-C                       3  - Control forecast products
-C                       4  - Perturbed forecast products
-C                       5  - Control and perturbed forecast products
-C                       6  - Processed satellite observations
-C                       7  - Processed radar observations
-C     JPDTN        INTEGER PRODUCT DEFINITION TEMPLATE NUMBER (N)
-C                  ( IF = -1, DON'T BOTHER MATCHING PDT - ACCEPT ANY )
-C     JPDT()       INTEGER ARRAY OF VALUES DEFINING THE PRODUCT DEFINITION
-C                  TEMPLATE 4.N OF THE FIELD FOR WHICH TO SEARCH
-C                  (=-9999 FOR WILDCARD)
-C     JGDTN        INTEGER GRID DEFINITION TEMPLATE NUMBER (M)
-C                  ( IF = -1, DON'T BOTHER MATCHING GDT - ACCEPT ANY )
-C     JGDT()       INTEGER ARRAY OF VALUES DEFINING THE GRID DEFINITION
-C                  TEMPLATE 3.M OF THE FIELD FOR WHICH TO SEARCH
-C                  (=-9999 FOR WILDCARD)
-C     EXTRACT       LOGICAL VALUE INDICATING WHETHER TO RETURN A GRIB2 
-C                   MESSAGE WITH JUST THE REQUESTED FIELD, OR THE ENTIRE
-C                   GRIB2 MESSAGE CONTAINING THE REQUESTED FIELD.
-C                  .TRUE. = RETURN GRIB2 MESSAGE CONTAINING ONLY THE REQUESTED
-C                           FIELD.
-C                  .FALSE. = RETURN ENTIRE GRIB2 MESSAGE CONTAINING THE
-C                            REQUESTED FIELD.
-C
-C   OUTPUT ARGUMENTS:
-C     K            INTEGER FIELD NUMBER RETURNED.
-C     GRIBM         RETURNED GRIB MESSAGE.
-C     LENG         LENGTH OF RETURNED GRIB MESSAGE IN BYTES.
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    96     ERROR READING INDEX FILE
-C                    97     ERROR READING GRIB FILE
-C                    99     REQUEST NOT FOUND
-C
-C SUBPROGRAMS CALLED:
-C   GETG2I          READ INDEX FILE
-C   GETG2IR         READ INDEX BUFFER FROM GRIB FILE
-C   GETGB2S        SEARCH INDEX RECORDS
-C   GETGB2RP        READ A PACKED GRIB RECORD
-C   GF_FREE        FREES MEMORY USED BY GFLD  ( SEE REMARKS )
-C
-C REMARKS: SPECIFY AN INDEX FILE IF FEASIBLE TO INCREASE SPEED.
-C   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C
-C   Note that derived type gribfield contains pointers to many
-C   arrays of data.  The memory for these arrays is allocated
-C   when the values in the arrays are set, to help minimize
-C   problems with array overloading.  Because of this users
-C   are encouraged to free up this memory, when it is no longer
-C   needed, by an explicit call to subroutine gf_free.
-C   ( i.e.   CALL GF_FREE(GFLD) )
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C
-C$$$
-      USE GRIB_MOD
+c-----------------------------------------------------------------------
+      subroutine getgb2p(lugb,lugi,j,jdisc,jids,jpdtn,jpdt,jgdtn,jgdt,
+     &                   extract,k,gribm,leng,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getgb2p        finds and extracts a grib message
+c   prgmmr: iredell          org: w/nmc23     date: 94-04-01
+c
+c abstract: find and extracts a grib message from a file.
+c   read a grib index file (or optionally the grib file itself)
+c   to get the index buffer (i.e. table of contents) for the grib file.
+c   find in the index buffer a reference to the grib field requested.
+c   the grib field request specifies the number of fields to skip
+c   and the unpacked identification section, grid definition template and
+c   product defintion section parameters.  (a requested parameter
+c   of -9999 means to allow any value of this parameter to be found.)
+c   if the requested grib field is found, then it is read from the
+c   grib file and returned. 
+c   if the grib field is not found, then the return code will be nonzero.
+c
+c program history log:
+c   94-04-01  iredell
+c   95-10-31  iredell     modularized portions of code into subprograms
+c                         and allowed for unspecified index file
+c 2002-01-11  gilbert     modified from getgb and getgbm to work with grib2
+c 2003-12-17  gilbert     modified from getgb2 to return packed grib2 message.
+c
+c usage:    call getgb2p(lugb,lugi,j,jdisc,jids,jpdtn,jpdt,jgdtn,jgdt,
+c    &                  extract,k,gribm,leng,iret)
+c   input arguments:
+c     lugb         integer unit of the unblocked grib data file.
+c                  file must be opened with baopen or baopenr before calling 
+c                  this routine.
+c     lugi         integer unit of the unblocked grib index file.
+c                  if nonzero, file must be opened with baopen baopenr before 
+c                  calling this routine.
+c                  (=0 to get index buffer from the grib file)
+c     j            integer number of fields to skip
+c                  (=0 to search from beginning)
+c     jdisc        grib2 discipline number of requested field
+c                  ( if = -1, accept any discipline)
+c                  ( see code table 0.0 )
+c                  0 - meteorological products
+c                  1 - hydrological products
+c                  2 - land surface products
+c                  3 - space products
+c                  10 - oceanographic products
+c     jids()       integer array of values in the identification section
+c                  (=-9999 for wildcard)
+c            jids(1)   = identification of originating centre
+c                         ( see common code table c-1 )
+c            jids(2)   = identification of originating sub-centre
+c            jids(3)   = grib master tables version number
+c                         ( see code table 1.0 )
+c                       0 - experimental
+c                       1 - initial operational version number
+c            jids(4)   = grib local tables version number
+c                         ( see code table 1.1 )
+c                       0     - local tables not used
+c                       1-254 - number of local tables version used
+c            jids(5)   = significance of reference time (code table 1.2)
+c                       0 - analysis
+c                       1 - start of forecast
+c                       2 - verifying time of forecast
+c                       3 - observation time
+c            jids(6)   = year ( 4 digits )
+c            jids(7)   = month
+c            jids(8)   = day
+c            jids(9)   = hour
+c            jids(10)  = minute
+c            jids(11)  = second
+c            jids(12)  = production status of processed data
+c                         ( see code table 1.3 )
+c                       0 - operational products
+c                       1 - operational test products
+c                       2 - research products
+c                       3 - re-analysis products
+c            jids(13)  = type of processed data ( see code table 1.4 )
+c                       0  - analysis products
+c                       1  - forecast products
+c                       2  - analysis and forecast products
+c                       3  - control forecast products
+c                       4  - perturbed forecast products
+c                       5  - control and perturbed forecast products
+c                       6  - processed satellite observations
+c                       7  - processed radar observations
+c     jpdtn        integer product definition template number (n)
+c                  ( if = -1, don't bother matching pdt - accept any )
+c     jpdt()       integer array of values defining the product definition
+c                  template 4.n of the field for which to search
+c                  (=-9999 for wildcard)
+c     jgdtn        integer grid definition template number (m)
+c                  ( if = -1, don't bother matching gdt - accept any )
+c     jgdt()       integer array of values defining the grid definition
+c                  template 3.m of the field for which to search
+c                  (=-9999 for wildcard)
+c     extract       logical value indicating whether to return a grib2 
+c                   message with just the requested field, or the entire
+c                   grib2 message containing the requested field.
+c                  .true. = return grib2 message containing only the requested
+c                           field.
+c                  .false. = return entire grib2 message containing the
+c                            requested field.
+c
+c   output arguments:
+c     k            integer field number returned.
+c     gribm         returned grib message.
+c     leng         length of returned grib message in bytes.
+c     iret         integer return code
+c                    0      all ok
+c                    96     error reading index file
+c                    97     error reading grib file
+c                    99     request not found
+c
+c subprograms called:
+c   getg2i          read index file
+c   getg2ir         read index buffer from grib file
+c   getgb2s        search index records
+c   getgb2rp        read a packed grib record
+c   gf_free        frees memory used by gfld  ( see remarks )
+c
+c remarks: specify an index file if feasible to increase speed.
+c   do not engage the same logical unit from more than one processor.
+c
+c   note that derived type gribfield contains pointers to many
+c   arrays of data.  the memory for these arrays is allocated
+c   when the values in the arrays are set, to help minimize
+c   problems with array overloading.  because of this users
+c   are encouraged to free up this memory, when it is no longer
+c   needed, by an explicit call to subroutine gf_free.
+c   ( i.e.   call gf_free(gfld) )
+c
+c attributes:
+c   language: fortran 90
+c
+c$$$
+      use grib_mod
 
-      INTEGER,INTENT(IN) :: LUGB,LUGI,J,JDISC,JPDTN,JGDTN
-      INTEGER,DIMENSION(:) :: JIDS(*),JPDT(*),JGDT(*)
-      LOGICAL,INTENT(IN) :: EXTRACT
-      INTEGER,INTENT(OUT) :: K,IRET,LENG
-      CHARACTER(LEN=1),POINTER,DIMENSION(:) :: GRIBM
+      integer,intent(in) :: lugb,lugi,j,jdisc,jpdtn,jgdtn
+      integer,dimension(:) :: jids(*),jpdt(*),jgdt(*)
+      logical,intent(in) :: extract
+      integer,intent(out) :: k,iret,leng
+      character(len=1),pointer,dimension(:) :: gribm
 
-      TYPE(GRIBFIELD) :: GFLD
+      type(gribfield) :: gfld
 
-      CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-      PARAMETER(MSK1=32000,MSK2=4000)
+      character(len=1),pointer,dimension(:) :: cbuf
+      parameter(msk1=32000,msk2=4000)
 
-      SAVE CBUF,NLEN,NNUM
-      DATA LUX/0/
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  DECLARE INTERFACES (REQUIRED FOR CBUF POINTER)
-      INTERFACE
-         SUBROUTINE GETG2I(LUGI,CBUF,NLEN,NNUM,IRET)
-            CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-            INTEGER,INTENT(IN) :: LUGI
-            INTEGER,INTENT(OUT) :: NLEN,NNUM,IRET
-         END SUBROUTINE GETG2I
-         SUBROUTINE GETG2IR(LUGB,MSK1,MSK2,MNUM,CBUF,NLEN,NNUM,
-     &                      NMESS,IRET)
-            CHARACTER(LEN=1),POINTER,DIMENSION(:) :: CBUF
-            INTEGER,INTENT(IN) :: LUGB,MSK1,MSK2,MNUM
-            INTEGER,INTENT(OUT) :: NLEN,NNUM,NMESS,IRET
-         END SUBROUTINE GETG2IR
-         SUBROUTINE GETGB2RP(LUGB,CINDEX,EXTRACT,GRIBM,LENG,IRET)
-            INTEGER,INTENT(IN) :: LUGB
-            CHARACTER(LEN=1),INTENT(IN) :: CINDEX(*)
-            LOGICAL,INTENT(IN) :: EXTRACT
-            INTEGER,INTENT(OUT) :: LENG,IRET
-            CHARACTER(LEN=1),POINTER,DIMENSION(:) :: GRIBM
-         END SUBROUTINE GETGB2RP
-      END INTERFACE
+      save cbuf,nlen,nnum
+      data lux/0/
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  declare interfaces (required for cbuf pointer)
+      interface
+         subroutine getg2i(lugi,cbuf,nlen,nnum,iret)
+            character(len=1),pointer,dimension(:) :: cbuf
+            integer,intent(in) :: lugi
+            integer,intent(out) :: nlen,nnum,iret
+         end subroutine getg2i
+         subroutine getg2ir(lugb,msk1,msk2,mnum,cbuf,nlen,nnum,
+     &                      nmess,iret)
+            character(len=1),pointer,dimension(:) :: cbuf
+            integer,intent(in) :: lugb,msk1,msk2,mnum
+            integer,intent(out) :: nlen,nnum,nmess,iret
+         end subroutine getg2ir
+         subroutine getgb2rp(lugb,cindex,extract,gribm,leng,iret)
+            integer,intent(in) :: lugb
+            character(len=1),intent(in) :: cindex(*)
+            logical,intent(in) :: extract
+            integer,intent(out) :: leng,iret
+            character(len=1),pointer,dimension(:) :: gribm
+         end subroutine getgb2rp
+      end interface
 
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  DETERMINE WHETHER INDEX BUFFER NEEDS TO BE INITIALIZED
-      IRGI=0
-      IF(LUGI.GT.0.AND.LUGI.NE.LUX) THEN
-        CALL GETG2I(LUGI,CBUF,NLEN,NNUM,IRGI)
-        LUX=LUGI
-      ELSEIF(LUGI.LE.0.AND.LUGB.NE.LUX) THEN
-        MSKP=0
-        CALL GETG2IR(LUGB,MSK1,MSK2,MSKP,CBUF,NLEN,NNUM,NMESS,IRGI)
-        LUX=LUGB
-      ENDIF
-      IF(IRGI.GT.1) THEN
-        IRET=96
-        LUX=0
-        RETURN
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  SEARCH INDEX BUFFER
-      CALL GETGB2S(CBUF,NLEN,NNUM,J,JDISC,JIDS,JPDTN,JPDT,JGDTN,JGDT,
-     &             JK,GFLD,LPOS,IRGS)
-      IF(IRGS.NE.0) THEN
-        IRET=99
-        CALL GF_FREE(GFLD)
-        RETURN
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  EXTRACT GRIB MESSAGE FROM FILE
-      CALL GETGB2RP(LUGB,CBUF(LPOS:),EXTRACT,GRIBM,LENG,IRET)
-!      IF ( EXTRACT ) THEN
-!         PRINT *,'NOT SUPPOSED TO BE HERE.'
-!      ELSE
-!         IPOS=(LPOS+3)*8
-!         CALL GBYTE(CBUF,ISKIP,IPOS,32)     ! BYTES TO SKIP IN FILE
-!         IPOS=IPOS+(32*8)
-!         CALL GBYTE(CBUF,LENG,IPOS,32)      ! LENGTH OF GRIB MESSAGE
-!         IF (.NOT. ASSOCIATED(GRIBM)) ALLOCATE(GRIBM(LENG))
-!         CALL BAREAD(LUGB,ISKIP,LENG,LREAD,GRIBM)
-!         IF ( LENG .NE. LREAD ) THEN
-!            IRET=97
-!            CALL GF_FREE(GFLD)
-!            RETURN
-!         ENDIF
-!      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      K=JK
-      CALL GF_FREE(GFLD)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  determine whether index buffer needs to be initialized
+      irgi=0
+      if(lugi.gt.0.and.lugi.ne.lux) then
+        call getg2i(lugi,cbuf,nlen,nnum,irgi)
+        lux=lugi
+      elseif(lugi.le.0.and.lugb.ne.lux) then
+        mskp=0
+        call getg2ir(lugb,msk1,msk2,mskp,cbuf,nlen,nnum,nmess,irgi)
+        lux=lugb
+      endif
+      if(irgi.gt.1) then
+        iret=96
+        lux=0
+        return
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  search index buffer
+      call getgb2s(cbuf,nlen,nnum,j,jdisc,jids,jpdtn,jpdt,jgdtn,jgdt,
+     &             jk,gfld,lpos,irgs)
+      if(irgs.ne.0) then
+        iret=99
+        call gf_free(gfld)
+        return
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  extract grib message from file
+      call getgb2rp(lugb,cbuf(lpos:),extract,gribm,leng,iret)
+!      if ( extract ) then
+!         print *,'not supposed to be here.'
+!      else
+!         ipos=(lpos+3)*8
+!         call gbyte(cbuf,iskip,ipos,32)     ! bytes to skip in file
+!         ipos=ipos+(32*8)
+!         call gbyte(cbuf,leng,ipos,32)      ! length of grib message
+!         if (.not. associated(gribm)) allocate(gribm(leng))
+!         call baread(lugb,iskip,leng,lread,gribm)
+!         if ( leng .ne. lread ) then
+!            iret=97
+!            call gf_free(gfld)
+!            return
+!         endif
+!      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      k=jk
+      call gf_free(gfld)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

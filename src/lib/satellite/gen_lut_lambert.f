@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -33,7 +33,7 @@ cdis
      &nx_l,ny_l,lat,lon,ri_laps,rj_laps,jstatus)
 c
 c
-c     Returns satellite pixel locations for each point on model (LAPS) domain
+c     returns satellite pixel locations for each point on model (laps) domain
 c
       implicit none
 
@@ -45,7 +45,7 @@ c
       real    xlat(nx_l+2,ny_l+2)
       real    xlon(nx_l+2,ny_l+2) !expanded domain lats/lons
  
-      real    dx,dy  !both in km from /public and /WFO SBN
+      real    dx,dy  !both in km from /public and /wfo sbn
       real    du,dv
       real    u_orig,v_orig,sioffset,sjoffset
       real    reflat,reflon,refi,refj,refu,refv
@@ -69,8 +69,8 @@ c
       real    rj(nx_l+2,ny_l+2)
       real    rel_ri(nx_l+2,ny_l+2)
       real    rel_rj(nx_l+2,ny_l+2)
-      real    ri_laps(nx_l,ny_l)          ! Output
-      real    rj_laps(nx_l,ny_l)          ! Output
+      real    ri_laps(nx_l,ny_l)          ! output
+      real    rj_laps(nx_l,ny_l)          ! output
       real    u,v,u0,v0,uscale,vscale
       real    usmin,usmax,vsmin,vsmax
       real    usat,vsat
@@ -114,7 +114,7 @@ c     character*6   csatid  !satellite data identifier {goes08, goes09, meteos, 
 c
 c ===========================================================
 c the following include file contains static navigation parameters for
-c all possible satellites.  It contains fortran logic that uses csatid,
+c all possible satellites.  it contains fortran logic that uses csatid,
 c and csattyp to set the appropriate navigation parameters.
 c
       include 'satellite_dims_lvd.inc'
@@ -155,7 +155,7 @@ c
 
          if(istatus_wp.eq.1)then
 
-            print*,'WARNING:, using namelist values for wfo mapping'
+            print*,'warning:, using namelist values for wfo mapping'
             print*,'because new wfo nav parameters were not obtained'
             rla100 = r_la1(jtype,isat)
             rlo100 = r_lo1(jtype,isat)
@@ -196,7 +196,7 @@ c             endif
          elseif(istatus_wp.eq.0)then
 
 c --- experimental: set rlap/rlov for all satellite types.
-c     Note: types 2, 4, and 5 should all be the same lambert projections.
+c     note: types 2, 4, and 5 should all be the same lambert projections.
 c           if(indx.eq.2.or.indx.eq.4.or.indx.eq.5)then
 c           if(.not.lfirst(jtype,isat))then
 c               lfirst(jtype,isat)=.true.
@@ -210,7 +210,7 @@ c           endif
             rlov=centerlon ! assume standard lon = central lon
 
          else
-            print*,'Error returned from get_wfo_nav_parms'
+            print*,'error returned from get_wfo_nav_parms'
             goto 1000
          endif
 
@@ -257,7 +257,7 @@ c not wfo data type
 
          elseif(indx.eq.2.or.indx.eq.4.or.indx.eq.5)then
 
-c See experimental comment above.
+c see experimental comment above.
 c           if(.not.lfirst(jtype,isat))then
 
                dx = r_resolution_x_ir(jtype,isat)
@@ -288,7 +288,7 @@ c           endif
          fname=path_to_raw_sat(kchl,jtype,isat)(1:np)
          fname=fname(1:np)//cftime9//'_'//ct
          call  rdcdfhead(fname, nx3mx, ny3mx, center_id, 
-     +     process_id, wmo_sat_id, Dx, Dy, rla100, rLatin, rlo100, 
+     +     process_id, wmo_sat_id, dx, dy, rla100, rlatin, rlo100, 
      +     rlov, reftime, valtime, earth_shape, grid_name, grid_type, 
      +     origin_name, process_name, wavelength, x_dim, y_dim)
 
@@ -314,18 +314,18 @@ c           endif
 
       endif
 
-      write(6,*)'Satellite Nav Parameters (gen_lut_lambert) ',ct
+      write(6,*)'satellite nav parameters (gen_lut_lambert) ',ct
       write(6,*)'dx (km)',dx
       write(6,*)'dy (km)',dy
       write(6,*)'nx3    ',nx3
       write(6,*)'ny3    ',ny3
       write(6,*)'nx3mx  ',nx3mx
       write(6,*)'ny3mx  ',ny3mx
-      write(6,*)'rla100 ',rla100   ! Lower left latitude
-      write(6,*)'rlo100 ',rlo100   ! Lower left longitude
+      write(6,*)'rla100 ',rla100   ! lower left latitude
+      write(6,*)'rlo100 ',rlo100   ! lower left longitude
       write(6,*)'rlatin ',rlatin
-      write(6,*)'rlov   ',rlov     ! Standard longitude
-      write(6,*)'rlap   ',rlap     ! Standard latitude
+      write(6,*)'rlov   ',rlov     ! standard longitude
+      write(6,*)'rlap   ',rlap     ! standard latitude
 c
 c expand domain lats/lons: extra row and column "laps domain" used
 c to build the domain relative look up table
@@ -338,8 +338,8 @@ c
      &istatus)
 c
 c new code to compute lambert projected satellite data for
-c laps domain as specified in laps lat/lon arrays. Follows
-c method in lib/latlon_to_rlaps.f by Albers.
+c laps domain as specified in laps lat/lon arrays. follows
+c method in lib/latlon_to_rlaps.f by albers.
 c
       if(cdtype.eq.'wfo')then
 
@@ -366,7 +366,7 @@ c
 
       elseif(cdtype.eq.'cdf')then
 
-c use original lambert software for fsl-conus in FSL's /public
+c use original lambert software for fsl-conus in fsl's /public
          write(6,*)' calling getdudv_lam'
 
          call getdudv_lam(rlov,rlap,dx,dy,
@@ -385,13 +385,13 @@ c use original lambert software for fsl-conus in FSL's /public
 
       elseif(cdtype.eq.'gnp')then
 
-c use original lambert software for fsl-conus in FSL's /public
+c use original lambert software for fsl-conus in fsl's /public
          if(indx.eq.1)then                               ! vis
             reflat = 42.09345
             reflon = -106.13704
             reflat = 44.41494
             reflon = -104.94388
-            refi = 512.5 + 1024. ! center of center tile on upper row (PBB)
+            refi = 512.5 + 1024. ! center of center tile on upper row (pbb)
             refj = 512.5 + 1024. 
          elseif(indx.eq.2.or.indx.eq.4.or.indx.eq.5)then ! ir
 !           reflat = 45.693
@@ -408,13 +408,13 @@ c use original lambert software for fsl-conus in FSL's /public
          lovterm=(rlov*pi)/180.
 
          if(.false.)then ! use center point
-!          Initial calculation of 'u_orig' and 'v_orig' for center
+!          initial calculation of 'u_orig' and 'v_orig' for center
            call getdudv_lam(rlov,rlap,dx,dy,
      &                      centerlat,centerlon,du,dv,u_orig,v_orig)
 
            write(6,*)' u_orig/v_orig at center ',u_orig,v_orig
 
-!          Recalculate 'u_orig' and 'v_orig' for LL sat corner
+!          recalculate 'u_orig' and 'v_orig' for ll sat corner
            sioffset = float(nx3mx-1) / 2.
            sjoffset = float(ny3mx-1) / 2.
            u_orig = u_orig - du * sioffset 
@@ -426,7 +426,7 @@ c use original lambert software for fsl-conus in FSL's /public
 
            write(6,*)' refu/refv at reference point ',refu,refv
            
-!          Recalculate 'u_orig' and 'v_orig' for LL sat corner
+!          recalculate 'u_orig' and 'v_orig' for ll sat corner
            sioffset = refi - 1.
            sjoffset = refj - 1.
            u_orig = refu - du * sioffset 
@@ -452,7 +452,7 @@ c use original lambert software for fsl-conus in FSL's /public
          call uv_to_latlon_lc(u2,v2,rlap,rlap,rlov,rlats,rlons)
          write(6,*)' lat/lon at ur sat corner ',rlats,rlons
 
-!        For each model grid point obtain the satellite pixel         
+!        for each model grid point obtain the satellite pixel         
          do j = 1, ny
          do i = 1, nx
             latterm=(xlat(i,j)*pi)/180.
@@ -469,11 +469,11 @@ c use original lambert software for fsl-conus in FSL's /public
 
       endif ! cdtype
 
-      write(6,*)'Sat ri/rj for corners of expanded model domain'
-      write(6,*)'ri1/rj1 (SW) ',ri(1,1),rj(1,1)
-      write(6,*)'ri2/rj2 (SE) ',ri(nx,1),rj(nx,1)
-      write(6,*)'ri3/rj3 (NW) ',ri(1,ny),rj(1,ny)
-      write(6,*)'ri4/rj4 (NE) ',ri(nx,ny),rj(nx,ny)
+      write(6,*)'sat ri/rj for corners of expanded model domain'
+      write(6,*)'ri1/rj1 (sw) ',ri(1,1),rj(1,1)
+      write(6,*)'ri2/rj2 (se) ',ri(nx,1),rj(nx,1)
+      write(6,*)'ri3/rj3 (nw) ',ri(1,ny),rj(1,ny)
+      write(6,*)'ri4/rj4 (ne) ',ri(nx,ny),rj(nx,ny)
 c
 c get new i/j start/end values for this domain
 c
@@ -482,7 +482,7 @@ c
      &rls,rle,res,ree,istatus)
 
       if(istatus.ne.1)then
-         write(6,*)'WARNING: Laps domain outside sat data cover!'
+         write(6,*)'warning: laps domain outside sat data cover!'
       endif
 c
 c compute ri, rj relative look up table for the block of data surrounding
@@ -490,7 +490,7 @@ c the laps domain.
 c
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data'
+         print*,'error getting r_missing_data'
          return
       endif
 
@@ -514,7 +514,7 @@ c
       enddo
 
       if(nijout.gt.0)then
-         print*,'Found ',nijout,' points outside domain'
+         print*,'found ',nijout,' points outside domain'
       endif
 c
 c put the expanded domain ri/rj's into the original laps domain
@@ -552,12 +552,12 @@ c     cname=path(1:n1)//c_sat_id(isat)//'-llij-'//ct(1:nt)
 c     n1=index(cname,' ')-1
 c     table_path = cname(1:n1)//'-'//cdtype//'.lut'
 c     n1=index(table_path,' ')
-c     write(6,*)'Write lat/lon to i/j look up table'
+c     write(6,*)'write lat/lon to i/j look up table'
 c     write(6,*)table_path(1:n1)
 c     call write_table (table_path,nx_l,ny_l,xlat,xlon,
 c    &ri_laps,rj_laps,istatus)
 c     if(istatus .ne. 1)then
-c        write(6,*)'Error writing look-up table'
+c        write(6,*)'error writing look-up table'
 c        goto 1000
 c     endif
 

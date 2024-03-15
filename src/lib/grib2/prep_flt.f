@@ -1,326 +1,326 @@
-      SUBROUTINE PREP_FLT(A,IA,NXY,NVAL,ICLEAN,ID,IE,
-     1                    XMINA,JMISSP,JMISSS,XMISSP,XMISSS,IER,*)
-C
-C        MAY     2000   LAWRENCE   ORIGINAL CODING
-C        JANUARY 2001   GLAHN      COMMENTS; XMISSP CHANGED TO
-C                                  XMISSS IN DO 130 LOOP;  ELIMINATED
-C                                  UNUSED IS5( ) AND NS5 FROM CALL
-C        JANAURY 2001   LAWRENCE   CHANGED E=2.**IE TO E=2.**(-IE)
-C                                  AND NOW MULTIPLY THE VALUES IN
-C                                  A( ) BY E INSTEAD OF DIVIDING
-C                                  BY IT.
-C        JANUARY 2002   GLAHN      CHANAGED INT( ) TO NINT( ); ADDED
-C                                  IER AND ALTERNATE RETURN WHEN A( )
-C                                  GT MALLOW = 2**30  
-C
-C        PURPOSE
-C            FINDS THE REFERENCE VALUE AND SUBTRACTS IT FROM THE
-C            DATA VALUES WHEN THE ORIGINAL DATA FIELD IS FLOATING
-C            POINT. THE DATA ARE SCALED BY THE DECIMAL AND BINARY
-C            SCALE FACTORS AS WELL.  BOTH PRIMARY AND SECONDARY
-C            MISSING VALUES ARE TAKEN INTO ACCOUNT.
-C
-C            IF A DATA FIELD COMPOSED OF ALL MISSING VALUES IS
-C            ENCOUNTERED, THEN THE DATA FIELD WILL BE PACKED
-C            USING THE SIMPLE PACKING METHOD IF THAT IS WHAT
-C            THE USER SPECIFIED. IF THE SIMPLE METHOD WAS NOT
-C            SPECIFIED, THEN THE COMPLEX PACKING METHOD IS USED.
-C
-C            OPERATIONS WITHIN LOOPS ARE KEPT TO A MINIMUM AT THE
-C            EXPENSE OF MORE CODE FOR EFFICIENCY.
-C
-C        DATA SET USE
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT)
-C
-C        VARIABLES
-C                A(K) = CONTAINS THE FLOATING POINT DATA FIELD.
-C                       (K=1,NVAL).  IT IS MODIFIED BY SCALING
-C                       AND SUBTRACTING THE MINIMUM VALUE.  (INPUT)
-C               IA(K) = ONCE THE FLOATING POINT DATA VALUES ARE
-C                       SCALED AND THE REFERENCE VALUE HAS BEEN 
-C                       REMOVED THEY ARE TRUNCATED TO INTEGERS
-C                       AND RETURNED TO THE CALLING ROUTINE VIA
-C                       THIS ARRAY.  (OUTPUT)
-C                 NXY = DIMENSION OF A( ).  (INPUT)
-C                NVAL = THE NUMBER OF VALUES IN A( ).  (INPUT)
-C              ICLEAN = 1 WHEN THERE ARE NO MISSING VALUES IN A( ).
-C                       0 OTHERWISE.
-C                  ID = THE DECIMAL SCALING EXPONENT.  (INPUT)
-C                  IE = THE BINARY SCALING EXPONENT.  (INPUT)
-C               XMINA = THE FIELD MINIMUM VALUE WHEN THE ORIGINAL DATA
-C                       ARE FLOATING POINT.  (OUTPUT)
-C              JMISSS = .TRUE. IF THERE IS A SECONDARY MISSING
-C                       VALUE IN THE DATA FIELD.  .FALSE. OTHERWISE.
-C                       (LOGICAL)  (INPUT)
-C              JMISSP = .TRUE. IF THERE IS A PRIMARY MISSING VALUE
-C                       IN THE DATA FIELD.  .FALSE. OTHERWISE.
-C                       (LOGICAL)  (INPUT)
-C              XMISSP = WHEN MISSING POINTS CAN BE PRESENT IN THE DATA,
-C                       THEY WILL HAVE THE VALUE XMISSP OR XMISSS WHEN
-C                       THE DATA ARE FLOATING POINT.  XMISSP
-C                       IS THE PRIMARY MISSING VALUE.  (INPUT)
-C              XMISSS = SECONDARY MISSING VALUE INDICATOR WHEN THE DATA
-C                       ARE FLOATING POINT.  (INPUT)
-C                 IER = ERROR RETURN
-C                         0 = GOOD RETURN
-C                       920 = VALUE TOO LARGE TO BE PACKED IN 30 BITS.
-C                       (OUTPUT)
-C
-C        LOCAL VARIABLES
-C                   D = THE DECIMAL SCALING FACTOR.
-C                   E = THE BINARY SCALING FACTOR.
-C                IPOS = THE POSITION IN THE ARRAY OF THE FIRST 
-C                       NON-MISSING VALUE WHEN THERE ARE MISSING 
-C                       VALUES.  (INTERNAL)
-C                   K = A LOOP INDEX VARIABLE.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           NONE.
-C
-      PARAMETER (MALLOW=2**30)
+      subroutine prep_flt(a,ia,nxy,nval,iclean,id,ie,
+     1                    xmina,jmissp,jmisss,xmissp,xmisss,ier,*)
 c
-      LOGICAL JMISSS,JMISSP
-C
-      DIMENSION A(NXY),IA(NXY)
-C
-      IER=0
-C
-      IF(ICLEAN.EQ.1)THEN
-C
-C           THERE ARE NO MISSING VALUES IN THE ARRAY.
-C           THIS IS THE SIMPLEST CASE.
-C           PROCESS THE DATA STRAIGHTAWAY.
-C
-         IF(ID.NE.0)THEN
-            D=10.**ID
-C
-            DO 10 K=1,NVAL
-               A(K)=A(K)*D
- 10         CONTINUE
-C
-         ENDIF
-C
-         XMINA=A(1)
-C
-         DO 20 K=1,NVAL
-            IF(A(K).LT.XMINA)XMINA=A(K)
- 20      CONTINUE
-C
-         IF(XMINA.NE.0)THEN
-C
-            DO 30 K=1,NVAL
-               A(K)=A(K)-XMINA
-               IF(A(K).GT.MALLOW)GO TO 901
-C                 A(K) SHOULD NOT EXCEED 2**30.  THIS IS CAUSED BY TOO LARGE
-C                 A RANGE OF VALUES.
- 30         CONTINUE
-C
-         ENDIF
-C
-         IF(IE.NE.0)THEN
-            E=2.**(-IE)
-C
-            DO 40 K=1,NVAL
-               A(K)=A(K)*E
-               IA(K)=NINT(A(K)) 
- 40         CONTINUE
-C
-         ELSE 
-C
-            DO 45 K=1,NVAL
-               IA(K)=NINT(A(K))
- 45         CONTINUE
-C
-         ENDIF
-C
-      ELSE IF(JMISSP.AND..NOT.JMISSS)THEN
-C
-C           THERE ARE PRIMARY MISSING VALUES IN THIS FIELD. 
-         IF(ID.NE.0)THEN
-            D=10.**ID
-C
-            DO 50 K=1,NVAL
-               IF(A(K).EQ.XMISSP)CYCLE
-               A(K)=A(K)*D
- 50         CONTINUE
-C
-         ENDIF
-C
-C           FIND THE FIRST NON-MISSING VALUE AND SET XMINA TO THAT 
-C           VALUE.  IPOS WILL END UP CONTAINING THE POSITION
-C           OF THE FIRST NON-MISSING VALUE.
-         IPOS=1
-C
-         DO 55 K=1,NVAL
-            IF(A(K).NE.XMISSP)EXIT
-            IPOS=IPOS+1
- 55      CONTINUE
+c        may     2000   lawrence   original coding
+c        january 2001   glahn      comments; xmissp changed to
+c                                  xmisss in do 130 loop;  eliminated
+c                                  unused is5( ) and ns5 from call
+c        janaury 2001   lawrence   changed e=2.**ie to e=2.**(-ie)
+c                                  and now multiply the values in
+c                                  a( ) by e instead of dividing
+c                                  by it.
+c        january 2002   glahn      chanaged int( ) to nint( ); added
+c                                  ier and alternate return when a( )
+c                                  gt mallow = 2**30  
+c
+c        purpose
+c            finds the reference value and subtracts it from the
+c            data values when the original data field is floating
+c            point. the data are scaled by the decimal and binary
+c            scale factors as well.  both primary and secondary
+c            missing values are taken into account.
+c
+c            if a data field composed of all missing values is
+c            encountered, then the data field will be packed
+c            using the simple packing method if that is what
+c            the user specified. if the simple method was not
+c            specified, then the complex packing method is used.
+c
+c            operations within loops are kept to a minimum at the
+c            expense of more code for efficiency.
+c
+c        data set use
+c           kfildo - unit number for output (print) file. (output)
+c
+c        variables
+c                a(k) = contains the floating point data field.
+c                       (k=1,nval).  it is modified by scaling
+c                       and subtracting the minimum value.  (input)
+c               ia(k) = once the floating point data values are
+c                       scaled and the reference value has been 
+c                       removed they are truncated to integers
+c                       and returned to the calling routine via
+c                       this array.  (output)
+c                 nxy = dimension of a( ).  (input)
+c                nval = the number of values in a( ).  (input)
+c              iclean = 1 when there are no missing values in a( ).
+c                       0 otherwise.
+c                  id = the decimal scaling exponent.  (input)
+c                  ie = the binary scaling exponent.  (input)
+c               xmina = the field minimum value when the original data
+c                       are floating point.  (output)
+c              jmisss = .true. if there is a secondary missing
+c                       value in the data field.  .false. otherwise.
+c                       (logical)  (input)
+c              jmissp = .true. if there is a primary missing value
+c                       in the data field.  .false. otherwise.
+c                       (logical)  (input)
+c              xmissp = when missing points can be present in the data,
+c                       they will have the value xmissp or xmisss when
+c                       the data are floating point.  xmissp
+c                       is the primary missing value.  (input)
+c              xmisss = secondary missing value indicator when the data
+c                       are floating point.  (input)
+c                 ier = error return
+c                         0 = good return
+c                       920 = value too large to be packed in 30 bits.
+c                       (output)
+c
+c        local variables
+c                   d = the decimal scaling factor.
+c                   e = the binary scaling factor.
+c                ipos = the position in the array of the first 
+c                       non-missing value when there are missing 
+c                       values.  (internal)
+c                   k = a loop index variable.
+c
+c        non system subroutines called
+c           none.
+c
+      parameter (mallow=2**30)
+c
+      logical jmisss,jmissp
+c
+      dimension a(nxy),ia(nxy)
+c
+      ier=0
+c
+      if(iclean.eq.1)then
+c
+c           there are no missing values in the array.
+c           this is the simplest case.
+c           process the data straightaway.
+c
+         if(id.ne.0)then
+            d=10.**id
+c
+            do 10 k=1,nval
+               a(k)=a(k)*d
+ 10         continue
+c
+         endif
+c
+         xmina=a(1)
+c
+         do 20 k=1,nval
+            if(a(k).lt.xmina)xmina=a(k)
+ 20      continue
+c
+         if(xmina.ne.0)then
+c
+            do 30 k=1,nval
+               a(k)=a(k)-xmina
+               if(a(k).gt.mallow)go to 901
+c                 a(k) should not exceed 2**30.  this is caused by too large
+c                 a range of values.
+ 30         continue
+c
+         endif
+c
+         if(ie.ne.0)then
+            e=2.**(-ie)
+c
+            do 40 k=1,nval
+               a(k)=a(k)*e
+               ia(k)=nint(a(k)) 
+ 40         continue
+c
+         else 
+c
+            do 45 k=1,nval
+               ia(k)=nint(a(k))
+ 45         continue
+c
+         endif
+c
+      else if(jmissp.and..not.jmisss)then
+c
+c           there are primary missing values in this field. 
+         if(id.ne.0)then
+            d=10.**id
+c
+            do 50 k=1,nval
+               if(a(k).eq.xmissp)cycle
+               a(k)=a(k)*d
+ 50         continue
+c
+         endif
+c
+c           find the first non-missing value and set xmina to that 
+c           value.  ipos will end up containing the position
+c           of the first non-missing value.
+         ipos=1
+c
+         do 55 k=1,nval
+            if(a(k).ne.xmissp)exit
+            ipos=ipos+1
+ 55      continue
             
-         XMINA=A(IPOS)
-C
-         DO 60 K=IPOS+1,NVAL
-            IF(A(K).EQ.XMISSP)CYCLE
-            IF(A(K).LT.XMINA)XMINA=A(K)
- 60      CONTINUE
-C
-         IF(XMINA.NE.0.)THEN
-C
-            DO 70 K=1,NVAL
-               IF(A(K).EQ.XMISSP)CYCLE
-               A(K)=A(K)-XMINA
-               IF(A(K).GT.MALLOW)GO TO 901
-C                 A(K) SHOULD NOT EXCEED 2**30.  THIS IS CAUSED BY TOO LARGE
-C                 A RANGE OF VALUES.
- 70         CONTINUE
-C
-         ENDIF
-C
-         IF(IE.NE.0)THEN
-            E=2.**(-IE)
-C
-            DO 80 K=1,NVAL
-               IF(A(K).NE.XMISSP)A(K)=A(K)*E
-               IA(K)=NINT(A(K)) 
- 80         CONTINUE
-C
-         ELSE
-C
-            DO 85 K=1,NVAL
-               IA(K)=NINT(A(K))
- 85         CONTINUE
+         xmina=a(ipos)
+c
+         do 60 k=ipos+1,nval
+            if(a(k).eq.xmissp)cycle
+            if(a(k).lt.xmina)xmina=a(k)
+ 60      continue
+c
+         if(xmina.ne.0.)then
+c
+            do 70 k=1,nval
+               if(a(k).eq.xmissp)cycle
+               a(k)=a(k)-xmina
+               if(a(k).gt.mallow)go to 901
+c                 a(k) should not exceed 2**30.  this is caused by too large
+c                 a range of values.
+ 70         continue
+c
+         endif
+c
+         if(ie.ne.0)then
+            e=2.**(-ie)
+c
+            do 80 k=1,nval
+               if(a(k).ne.xmissp)a(k)=a(k)*e
+               ia(k)=nint(a(k)) 
+ 80         continue
+c
+         else
+c
+            do 85 k=1,nval
+               ia(k)=nint(a(k))
+ 85         continue
 
-         ENDIF
-C
-      ELSEIF(JMISSS.AND.JMISSP)THEN
-C
-C           THERE ARE BOTH PRIMARY AND SECONDARY
-C           MISSING VALUES.
-C
-         IF(ID.NE.0)THEN
-            D=10.**ID
-C
-            DO 90 K=1,NVAL
-               IF((A(K).EQ.XMISSP).OR.(A(K).EQ.XMISSS))CYCLE
-               A(K)=A(K)*D
- 90         CONTINUE
-C
-         ENDIF
-C
-C           FIND THE FIRST NON-MISSING VALUE
-C           AND SET XMINA EQUAL TO THAT VALUE.  IPOS
-C           WILL END UP CONTAINING THE POSITION
-C           OF THE FIRST NON-MISSING VALUE.
-         IPOS=1
-C
-         DO 95 K=1,NVAL
-            IF((A(K).NE.XMISSP).AND.(A(K).NE.XMISSS))EXIT
-            IPOS=IPOS+1
- 95      CONTINUE
+         endif
+c
+      elseif(jmisss.and.jmissp)then
+c
+c           there are both primary and secondary
+c           missing values.
+c
+         if(id.ne.0)then
+            d=10.**id
+c
+            do 90 k=1,nval
+               if((a(k).eq.xmissp).or.(a(k).eq.xmisss))cycle
+               a(k)=a(k)*d
+ 90         continue
+c
+         endif
+c
+c           find the first non-missing value
+c           and set xmina equal to that value.  ipos
+c           will end up containing the position
+c           of the first non-missing value.
+         ipos=1
+c
+         do 95 k=1,nval
+            if((a(k).ne.xmissp).and.(a(k).ne.xmisss))exit
+            ipos=ipos+1
+ 95      continue
             
-         XMINA=A(IPOS)
-C
-         DO 100 K=IPOS+1,NVAL
-            IF((A(K).EQ.XMISSP).OR.(A(K).EQ.XMISSS))CYCLE
-            IF(A(K).LT.XMINA)XMINA=A(K)
- 100     CONTINUE
-C
-         IF(XMINA.NE.0.)THEN
-C
-            DO 110 K=1,NVAL
-               IF((A(K).EQ.XMISSP).OR.(A(K).EQ.XMISSS))CYCLE
-               A(K)=A(K)-XMINA
-               IF(A(K).GT.MALLOW)GO TO 901
-C                 A(K) SHOULD NOT EXCEED 2**30.  THIS IS CAUSED BY TOO LARGE
-C                 A RANGE OF VALUES.
- 110        CONTINUE
-C
-         ENDIF
-C
-         IF(IE.NE.0)THEN
-            E=2.**(-IE)
-C
-            DO 120 K=1,NVAL
-               IF((A(K).NE.XMISSP).AND.(A(K).NE.XMISSS))A(K)=A(K)*E
-               IA(K)=NINT(A(K))
- 120        CONTINUE
-C
-         ELSE
-C
-            DO 125 K=1,NVAL
-               IA(K)=NINT(A(K))
- 125        CONTINUE
-C
-         ENDIF
-C
-      ELSEIF(JMISSS.AND..NOT.JMISSP)THEN
-C
-C           THERE ARE ONLY SECONDARY MISSING VALUES.
-         IF(ID.NE.0)THEN
-            D=10.**ID
-C
-            DO 130 K=1,NVAL
-               IF(A(K).EQ.XMISSS)CYCLE
-               A(K)=A(K)*D
- 130        CONTINUE
-C
-         ENDIF
-C
-C
-C           FIND THE FIRST NON-MISSING VALUE
-C           AND SET XMINA TO THAT VALUE.  IPOS
-C           WILL END UP CONTAINING THE POSITION
-C           OF THE FIRST NON-MISSING VALUE.
-         IPOS=1
-C
-         DO 135 K=1,NVAL
-            IF(A(K).NE.XMISSS)EXIT
-            IPOS=IPOS+1
- 135     CONTINUE
+         xmina=a(ipos)
+c
+         do 100 k=ipos+1,nval
+            if((a(k).eq.xmissp).or.(a(k).eq.xmisss))cycle
+            if(a(k).lt.xmina)xmina=a(k)
+ 100     continue
+c
+         if(xmina.ne.0.)then
+c
+            do 110 k=1,nval
+               if((a(k).eq.xmissp).or.(a(k).eq.xmisss))cycle
+               a(k)=a(k)-xmina
+               if(a(k).gt.mallow)go to 901
+c                 a(k) should not exceed 2**30.  this is caused by too large
+c                 a range of values.
+ 110        continue
+c
+         endif
+c
+         if(ie.ne.0)then
+            e=2.**(-ie)
+c
+            do 120 k=1,nval
+               if((a(k).ne.xmissp).and.(a(k).ne.xmisss))a(k)=a(k)*e
+               ia(k)=nint(a(k))
+ 120        continue
+c
+         else
+c
+            do 125 k=1,nval
+               ia(k)=nint(a(k))
+ 125        continue
+c
+         endif
+c
+      elseif(jmisss.and..not.jmissp)then
+c
+c           there are only secondary missing values.
+         if(id.ne.0)then
+            d=10.**id
+c
+            do 130 k=1,nval
+               if(a(k).eq.xmisss)cycle
+               a(k)=a(k)*d
+ 130        continue
+c
+         endif
+c
+c
+c           find the first non-missing value
+c           and set xmina to that value.  ipos
+c           will end up containing the position
+c           of the first non-missing value.
+         ipos=1
+c
+         do 135 k=1,nval
+            if(a(k).ne.xmisss)exit
+            ipos=ipos+1
+ 135     continue
             
-         XMINA=A(IPOS)
-C
-         DO 140 K=IPOS+1,NVAL
-            IF(A(K).EQ.XMISSS)CYCLE
-            IF(A(K).LT.XMINA)XMINA=A(K)
- 140     CONTINUE
-C
-         IF(XMINA.NE.0.)THEN
-C
-            DO 150 K=1,NVAL
-               IF(A(K).EQ.XMISSS)CYCLE
-               A(K)=A(K)-XMINA
-               IF(A(K).GT.MALLOW)GO TO 901
-C                 A(K) SHOULD NOT EXCEED 2**30.  THIS IS CAUSED BY TOO LARGE
-C                 A RANGE OF VALUES.
- 150        CONTINUE
-C
-         ENDIF
-C
-         IF(IE.NE.0)THEN
-            E=2.**(-IE)
-C
-            DO 160 K=1,NVAL
-               IF(A(K).NE.XMISSS)A(K)=A(K)*E
-               IA(K)=NINT(A(K))
- 160        CONTINUE
-C
-         ELSE
-C
-            DO 165 K=1,NVAL
-               IA(K)=NINT(A(K))
- 165        CONTINUE
-C
-         ENDIF
-C
-      ENDIF
-C
- 900  RETURN
-C
-C        ALTERNATE RETURN SECTION.
-C
- 901  IER=920
-C     WRITE(12,902)K,A(K),XMINA
-C902  FORMAT(' TOO LARGE A RANGE OF VALUES TO PACK IN PREP_FLT.',
-C    1       'K, A(K), XMINA ARE',I12,2F12.1)
-      RETURN1
-      END
+         xmina=a(ipos)
+c
+         do 140 k=ipos+1,nval
+            if(a(k).eq.xmisss)cycle
+            if(a(k).lt.xmina)xmina=a(k)
+ 140     continue
+c
+         if(xmina.ne.0.)then
+c
+            do 150 k=1,nval
+               if(a(k).eq.xmisss)cycle
+               a(k)=a(k)-xmina
+               if(a(k).gt.mallow)go to 901
+c                 a(k) should not exceed 2**30.  this is caused by too large
+c                 a range of values.
+ 150        continue
+c
+         endif
+c
+         if(ie.ne.0)then
+            e=2.**(-ie)
+c
+            do 160 k=1,nval
+               if(a(k).ne.xmisss)a(k)=a(k)*e
+               ia(k)=nint(a(k))
+ 160        continue
+c
+         else
+c
+            do 165 k=1,nval
+               ia(k)=nint(a(k))
+ 165        continue
+c
+         endif
+c
+      endif
+c
+ 900  return
+c
+c        alternate return section.
+c
+ 901  ier=920
+c     write(12,902)k,a(k),xmina
+c902  format(' too large a range of values to pack in prep_flt.',
+c    1       'k, a(k), xmina are',i12,2f12.1)
+      return1
+      end

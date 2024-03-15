@@ -1,744 +1,744 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
-      SUBROUTINE SUPMAP_local 
-     +                (JPROJ,POLAT,POLON,RROT,PL1,PL2,PL3,PL4,JJLTS,
-     +                   JGRID,JUS,JDOT,IER)
-C   SupMap is used to plot map outlines according to one of nine projections.
-C The origin and orientation of the projection are selected by the user.
-C Points on the Earth defined by latitude and longitude are transformed to
-C points in the u,v plane, the plane of projection.  The u and v axes are
-C respectively parallel to the x and y axes of the plotter.  A rectangular
-C frame parallel to the u and v axes is chosen and only material within the
-C frame is plotted.
-C   Continental and U.S. state and county outlines are available for plotting.
-C In addition, a western U.S. subset of the counties has been extracted, and
-C up to three user files may be read.
+      subroutine supmap_local 
+     +                (jproj,polat,polon,rrot,pl1,pl2,pl3,pl4,jjlts,
+     +                   jgrid,jus,jdot,ier)
+c   supmap is used to plot map outlines according to one of nine projections.
+c the origin and orientation of the projection are selected by the user.
+c points on the earth defined by latitude and longitude are transformed to
+c points in the u,v plane, the plane of projection.  the u and v axes are
+c respectively parallel to the x and y axes of the plotter.  a rectangular
+c frame parallel to the u and v axes is chosen and only material within the
+c frame is plotted.
+c   continental and u.s. state and county outlines are available for plotting.
+c in addition, a western u.s. subset of the counties has been extracted, and
+c up to three user files may be read.
 
-C            Name          Date                 Description
-C       --------------  -----------     ---------------------------------------
-C       ?? (NCAR)          JAN 69       "Revised"
-C                          MAY 71       "Revised"
-C                          OCT 73       "Standardized"
-C                          JUL 74       "Revised"
-C                          AUG 76       "Revised"
-C       M. Cairns       27 Jan 81       Added MapCol common for intensities
-C       J. Wakefield    19 Jun 81       Added MapDas common for dash patterns
-C                       29 Jun 81       Removed trailing blanks and modified
-C                                       to read unformatted files.
-C                       28 Sep 81       Added common block SupMpB.
-C                       23 Mar 82       Added negative JDot function, to allow
-C                                       suppression of SupMap call printing if
-C                                       JUS=0.  See comments below.
-C                       16 Feb 83       Added SysDisk to data file names and
-C                                       added error code for open failure.
-C                       10 Apr 84       Added user files option.
-C                       14 Jan 85       Fixed bug in Part < 0 option.
-C       J. Ramer        13 Nov 85       Added common blocks necessary for using
-C                                       MapInv_GC with all projections and for
-C                                       recreating a map from the contents of
-C                                       the common blocks.  Added subroutine
-C                                       RESUP which recreates the map.
-C       J. Wakefield    19 Nov 86       Chgd SysDisk to Lib_Dev for files.
+c            name          date                 description
+c       --------------  -----------     ---------------------------------------
+c       ?? (ncar)          jan 69       "revised"
+c                          may 71       "revised"
+c                          oct 73       "standardized"
+c                          jul 74       "revised"
+c                          aug 76       "revised"
+c       m. cairns       27 jan 81       added mapcol common for intensities
+c       j. wakefield    19 jun 81       added mapdas common for dash patterns
+c                       29 jun 81       removed trailing blanks and modified
+c                                       to read unformatted files.
+c                       28 sep 81       added common block supmpb.
+c                       23 mar 82       added negative jdot function, to allow
+c                                       suppression of supmap call printing if
+c                                       jus=0.  see comments below.
+c                       16 feb 83       added sysdisk to data file names and
+c                                       added error code for open failure.
+c                       10 apr 84       added user files option.
+c                       14 jan 85       fixed bug in part < 0 option.
+c       j. ramer        13 nov 85       added common blocks necessary for using
+c                                       mapinv_gc with all projections and for
+c                                       recreating a map from the contents of
+c                                       the common blocks.  added subroutine
+c                                       resup which recreates the map.
+c       j. wakefield    19 nov 86       chgd sysdisk to lib_dev for files.
 c
-c       P. McDonald     17 Aug 93       Fixed things up to run on Stardent
-c                                       and (hopefully) other UNIX machines.
+c       p. mcdonald     17 aug 93       fixed things up to run on stardent
+c                                       and (hopefully) other unix machines.
 
-C       Usage
-C                       Call SupMap (JProj,PoLat,PoLong,RRot,PL1,PL2,PL3,PL4,
-C                                    JJLTS,JGrid,JUS,JDot,IER)
+c       usage
+c                       call supmap (jproj,polat,polong,rrot,pl1,pl2,pl3,pl4,
+c                                    jjlts,jgrid,jus,jdot,ier)
 
-C       Dimension of    PL1(2),PL2(2),PL3(2),PL4(2)
-C       arguments
+c       dimension of    pl1(2),pl2(2),pl3(2),pl4(2)
+c       arguments
 
-C       On input        JProj
-C       for SupMap        |JProj| defines the projection type
-C                         according to the following code:
-C                               1  Stereographic
-C                               2  Orthographic
-C                               3  Lambert Conformal Conic with two standard
-C                                  parallels
-C                               4  Lambert Equal Area
-C                               5  Gnomonic
-C                               6  Azimuthal Equidistant
-C                               7  Dummy -- this code is not used
-C                               8  Cylindrical Equidistant
-C                               9  Mercator
-C                              10  Mollweide type
-C                         If JProj < 0, the map and grid lines are omitted.
+c       on input        jproj
+c       for supmap        |jproj| defines the projection type
+c                         according to the following code:
+c                               1  stereographic
+c                               2  orthographic
+c                               3  lambert conformal conic with two standard
+c                                  parallels
+c                               4  lambert equal area
+c                               5  gnomonic
+c                               6  azimuthal equidistant
+c                               7  dummy -- this code is not used
+c                               8  cylindrical equidistant
+c                               9  mercator
+c                              10  mollweide type
+c                         if jproj < 0, the map and grid lines are omitted.
 
-C                       PoLat,PoLong,RRot
-C                         If (|JProj|.ne.3)
-C                         . PoLat and PoLong define in degrees the latitude and
-C                           longitude of the point on the globe which is to
-C                           transform to the origin of the u,v plane.
-C                               -90 .le. PoLat .le. 90
-C                              -180 .le. PoLong .le. 180
-C                           degrees of latitude north of the Equator and
-C                           degrees of longitude east of the Greenwich Meridian
-C                           are positive.  If the origin is at the North Pole,
-C                           "north" is considered to be in the direction of
-C                           (PoLong+180.). If the origin is at the South Pole,
-C                           "north" is in the direction of PoLong.
-C                         . RRot is the angle between the v axis and north at
-C                           the origin.  It is measured in degrees and is taken
-C                           to be positive if the angular movement from north
-C                           to the v axis is counter-clockwise.  For the
-C                           cylindrical projections (8,9,10), the axis of the
-C                           projection is parallel to the v axis.
-C                         If (|JProj|.eq.3) (Lambert Conformal Conic)
-C                         . PoLong = central meridian of projection in degrees.
-C                         . PoLat,RRot are the two standard parallels in deg.
+c                       polat,polong,rrot
+c                         if (|jproj|.ne.3)
+c                         . polat and polong define in degrees the latitude and
+c                           longitude of the point on the globe which is to
+c                           transform to the origin of the u,v plane.
+c                               -90 .le. polat .le. 90
+c                              -180 .le. polong .le. 180
+c                           degrees of latitude north of the equator and
+c                           degrees of longitude east of the greenwich meridian
+c                           are positive.  if the origin is at the north pole,
+c                           "north" is considered to be in the direction of
+c                           (polong+180.). if the origin is at the south pole,
+c                           "north" is in the direction of polong.
+c                         . rrot is the angle between the v axis and north at
+c                           the origin.  it is measured in degrees and is taken
+c                           to be positive if the angular movement from north
+c                           to the v axis is counter-clockwise.  for the
+c                           cylindrical projections (8,9,10), the axis of the
+c                           projection is parallel to the v axis.
+c                         if (|jproj|.eq.3) (lambert conformal conic)
+c                         . polong = central meridian of projection in degrees.
+c                         . polat,rrot are the two standard parallels in deg.
 
-C                       JJLTS,PL1,PL2,PL3,PL4
-C                         |JJLTS| can take the values 1 through 5 and specifies
-C                         one of five options on the way in which the limits of
-C                         the rectangular map are defined by the parameters
-C                         PL1, PL2, PL3, and PL4.
+c                       jjlts,pl1,pl2,pl3,pl4
+c                         |jjlts| can take the values 1 through 5 and specifies
+c                         one of five options on the way in which the limits of
+c                         the rectangular map are defined by the parameters
+c                         pl1, pl2, pl3, and pl4.
 
-C                         |JJLTS| = 1
-C                           The maximum useful area produced by the projection
-C                           is plotted.  PL1, PL2, PL3, and PL4 are not used
-C                           and may be set to zero.
+c                         |jjlts| = 1
+c                           the maximum useful area produced by the projection
+c                           is plotted.  pl1, pl2, pl3, and pl4 are not used
+c                           and may be set to zero.
 
-C                         |JJLTS| = 2
-C                           In this case (PL1,PL2) and (PL3,PL4) are the
-C                           latitudes and longitudes in degrees of two points
-C                           which are to be at opposite corners of the map
-C                           (upper right and lower left, respectively).
-C                           Care must be taken when using cylindrical
-C                           projections and this option.
+c                         |jjlts| = 2
+c                           in this case (pl1,pl2) and (pl3,pl4) are the
+c                           latitudes and longitudes in degrees of two points
+c                           which are to be at opposite corners of the map
+c                           (upper right and lower left, respectively).
+c                           care must be taken when using cylindrical
+c                           projections and this option.
 
-C                         |JJLTS| = 3
-C                           The minimum and maximum values of u and v are
-C                           specified by PL1 through PL4.  PL1 = UMin,
-C                           PL2 = UMax, PL3 = VMin, PL4 = VMax.  Knowledge of
-C                           the transformation equations is necessary for this
-C                           option to be used (see below).
+c                         |jjlts| = 3
+c                           the minimum and maximum values of u and v are
+c                           specified by pl1 through pl4.  pl1 = umin,
+c                           pl2 = umax, pl3 = vmin, pl4 = vmax.  knowledge of
+c                           the transformation equations is necessary for this
+c                           option to be used (see below).
 
-C                         |JJLTS| = 4
-C                           Here PL1 = AUMin, PL2 = AUMax, PL3 = AVMin,
-C                           PL4 = AVMax, where
-C                              AUMin = Angular distance from origin to left
-C                                      frame of map.
-C                              AUMax = Angular distance from origin to right
-C                                      frame of map.
-C                              AVMin = Angular distance from origin to lower
-C                                      frame.
-C                              AVMax = Angular distance from origin to upper
-C                                      frame.
-C                           AUMin, AUMax, AVMin, AVMax must be positive and the
-C                           origin must be within the rectangular limits of the
-C                           map.  This option is useful for polar projections.
-C                           It is not appropriate for the Lambert Conformal
-C                           with two standard parallels.  An error message is
-C                           printed if an attempt is made to use JJLTS = 4 when
-C                           JProj = 3, (see below).
+c                         |jjlts| = 4
+c                           here pl1 = aumin, pl2 = aumax, pl3 = avmin,
+c                           pl4 = avmax, where
+c                              aumin = angular distance from origin to left
+c                                      frame of map.
+c                              aumax = angular distance from origin to right
+c                                      frame of map.
+c                              avmin = angular distance from origin to lower
+c                                      frame.
+c                              avmax = angular distance from origin to upper
+c                                      frame.
+c                           aumin, aumax, avmin, avmax must be positive and the
+c                           origin must be within the rectangular limits of the
+c                           map.  this option is useful for polar projections.
+c                           it is not appropriate for the lambert conformal
+c                           with two standard parallels.  an error message is
+c                           printed if an attempt is made to use jjlts = 4 when
+c                           jproj = 3, (see below).
 
-C                         |JJLTS| = 5
-C                           PL1 through PL4 are two element arrays giving the
-C                           latitudes and longitudes of four points which are
-C                           to be on the four sides of the rectangular frame.
-C                           PL1(1), PL1(2) are respectively the latitude and
-C                           longitude of a point on the left frame.  Similarly,
-C                           PL2 lies on the right frame, PL3 lies on the lower
-C                           frame and PL4 lies on the upper frame.  Note that
-C                           in the calling program PL1 through PL4 will be
-C                           dimensioned:
-C                               Real  PL1(2),PL2(2),PL3(2),PL4(2)
+c                         |jjlts| = 5
+c                           pl1 through pl4 are two element arrays giving the
+c                           latitudes and longitudes of four points which are
+c                           to be on the four sides of the rectangular frame.
+c                           pl1(1), pl1(2) are respectively the latitude and
+c                           longitude of a point on the left frame.  similarly,
+c                           pl2 lies on the right frame, pl3 lies on the lower
+c                           frame and pl4 lies on the upper frame.  note that
+c                           in the calling program pl1 through pl4 will be
+c                           dimensioned:
+c                               real  pl1(2),pl2(2),pl3(2),pl4(2)
 
-C                          .If JJLTS is positive, the SupMap call is plotted
-C                           below the map.  This is omitted if JJLTS is < 0.
+c                          .if jjlts is positive, the supmap call is plotted
+c                           below the map.  this is omitted if jjlts is < 0.
 
-C                       JGrid
-C                         |JGrid| gives in degrees the interval at which lines
-C                         of latitude and longitude are to be plotted.  A value
-C                         in the range 1 through 10 will usually be appropriate
-C                         but higher values are acceptable.
-C                         If JGrid < 0 the border around the map is omitted.
-C                         If JGrid = 0 no grid lines are plotted.
+c                       jgrid
+c                         |jgrid| gives in degrees the interval at which lines
+c                         of latitude and longitude are to be plotted.  a value
+c                         in the range 1 through 10 will usually be appropriate
+c                         but higher values are acceptable.
+c                         if jgrid < 0 the border around the map is omitted.
+c                         if jgrid = 0 no grid lines are plotted.
 
-C                       JUS
-C                         |JUS|
-C                         1  World outlines
-C                         2  U.S. state outlines
-C                         4  U.S. counties and states
-C                         8  PROFS-region counties and states (western U.S.)
-C                  16,32,64  SupMap user file(s) 1,2,3
-C                         To access a combination of datasets, use the sum of
-C                         their values (e.g. 10 = U.S. + PROFS area counties).
-C                         .If JUS is positive, the SupMap call and values of
-C                          of UMin, UMax, VMin, VMax are printed as an aid to
-C                          debugging.  This is omitted if JUS is negative.
+c                       jus
+c                         |jus|
+c                         1  world outlines
+c                         2  u.s. state outlines
+c                         4  u.s. counties and states
+c                         8  profs-region counties and states (western u.s.)
+c                  16,32,64  supmap user file(s) 1,2,3
+c                         to access a combination of datasets, use the sum of
+c                         their values (e.g. 10 = u.s. + profs area counties).
+c                         .if jus is positive, the supmap call and values of
+c                          of umin, umax, vmin, vmax are printed as an aid to
+c                          debugging.  this is omitted if jus is negative.
 
-C                       JDot
-C                         |JDot|
-C                         0  for continuous outlines.
-C                         1  for dotted outlines.
-C                         .If JDot is negative, the SupMap call is neither
-C                          printed nor plotted.
+c                       jdot
+c                         |jdot|
+c                         0  for continuous outlines.
+c                         1  for dotted outlines.
+c                         .if jdot is negative, the supmap call is neither
+c                          printed nor plotted.
 
-C       On output       All arguments except IER are unchanged.
-C       for SupMap
+c       on output       all arguments except ier are unchanged.
+c       for supmap
 
-C                       IER
-C                         Error flag with the following meanings:
-C                         If IER =
-C                          0  Map successfully plotted.
-C                         29  Error opening data file.
-C                         33  Attempt to use non-existent projection.
-C                         34  Map limits inappropriate.
-C                         35  Angular limits too great.
-C                         36  Map has zero area.
+c                       ier
+c                         error flag with the following meanings:
+c                         if ier =
+c                          0  map successfully plotted.
+c                         29  error opening data file.
+c                         33  attempt to use non-existent projection.
+c                         34  map limits inappropriate.
+c                         35  angular limits too great.
+c                         36  map has zero area.
 
-C       Entry points    MaPlot, SupCon, SupFst, SupMap, SupTrp, SupVec, QCon,
-C                       QVec, VecPlt, ReSup
+c       entry points    maplot, supcon, supfst, supmap, suptrp, supvec, qcon,
+c                       qvec, vecplt, resup
 
-C                       MaPlot
-C                         Actually draws the map.
+c                       maplot
+c                         actually draws the map.
 
-C                       SupCon
-C                         Once the transformation has been set up by an initial
-C                         call to SupMap, the subroutine SupCon may be called
-C                         to transform a point, (latitude, longitude) to the
-C                         corresponding point, (u, v) on the plane.  Contours
-C                         may thus be readily drawn against the map background.
-C                         (See SupFst and SupVec below).
+c                       supcon
+c                         once the transformation has been set up by an initial
+c                         call to supmap, the subroutine supcon may be called
+c                         to transform a point, (latitude, longitude) to the
+c                         corresponding point, (u, v) on the plane.  contours
+c                         may thus be readily drawn against the map background.
+c                         (see supfst and supvec below).
 
-C                            Call SupCon(RLat,RLon,U,V)
+c                            call supcon(rlat,rlon,u,v)
 
-C                         On input:
-C                           RLat,RLon are the latitude and longitude of a point
-C                           to be transformed to the u,v plane.
-C                            -90. .le. RLat .le.  90.
-C                           -180. .le. RLon .le. 180.
+c                         on input:
+c                           rlat,rlon are the latitude and longitude of a point
+c                           to be transformed to the u,v plane.
+c                            -90. .le. rlat .le.  90.
+c                           -180. .le. rlon .le. 180.
 
-C                         On output:
-C                           RLat,RLon are unchanged.
-C                           U,V are the transformed coordinates of the point.
+c                         on output:
+c                           rlat,rlon are unchanged.
+c                           u,v are the transformed coordinates of the point.
 
-C                       QCon
-C                         Actually performs the above mentioned transformation.
+c                       qcon
+c                         actually performs the above mentioned transformation.
 
-C                       SupFst
-C                       SupVec
-C                         To facilitate drawing lines on the map these routines
-C                         which act like the plotting routines FrstPt and
-C                         Vector are included.  They are subject to the same
-C                         restrictions as SupCon above.
+c                       supfst
+c                       supvec
+c                         to facilitate drawing lines on the map these routines
+c                         which act like the plotting routines frstpt and
+c                         vector are included.  they are subject to the same
+c                         restrictions as supcon above.
 
-C                            Call SupFst (RLat,RLon)
-C                            Call SupVec (RLat,RLon)
+c                            call supfst (rlat,rlon)
+c                            call supvec (rlat,rlon)
 
-C                       QVec
-C                         Decides what lines are to be drawn and where.
+c                       qvec
+c                         decides what lines are to be drawn and where.
 
-C                       SupTrp
-C                         Performs interpolation to the edges of the frame.
+c                       suptrp
+c                         performs interpolation to the edges of the frame.
 
-C                       VecPlt
-C                         Called by QVec to draw (dot) lines on the plotter.
+c                       vecplt
+c                         called by qvec to draw (dot) lines on the plotter.
 
-C       Common blocks    Name   Length
-C                       SupMp1  9 FP
-C                       SupMp2  1 Int + 204 FP
-C                       SupMp3  2 Int + 5 FP
-C                       SupMp4  5 Int + 2 FP
-C                       SupMp5  1 Int + 5 FP
-C                       SupMp6  6 FP
-C                       SupMp7  3 Int + 2 FP
-C                       SupMp8  6 FP
-C                       SupMp9  3 FP
-C                       SupMpA  1 Int
-C                       SupMpB  4 FP
-C                       SupMpC  4 Int + 1 FP
-C                       SupMpD  9 FP
-C                       MapCol  4 Int
-C                       MapDas  4 Int
+c       common blocks    name   length
+c                       supmp1  9 fp
+c                       supmp2  1 int + 204 fp
+c                       supmp3  2 int + 5 fp
+c                       supmp4  5 int + 2 fp
+c                       supmp5  1 int + 5 fp
+c                       supmp6  6 fp
+c                       supmp7  3 int + 2 fp
+c                       supmp8  6 fp
+c                       supmp9  3 fp
+c                       supmpa  1 int
+c                       supmpb  4 fp
+c                       supmpc  4 int + 1 fp
+c                       supmpd  9 fp
+c                       mapcol  4 int
+c                       mapdas  4 int
 
-C       I/O             Map plotted.  Outline data is read from any of several
-C                       disk files.  SupMap call printed.
+c       i/o             map plotted.  outline data is read from any of several
+c                       disk files.  supmap call printed.
 
-C       Precision       Single
+c       precision       single
 
-C       Language        FORTRAN
+c       language        fortran
 
-C       Algorithm       The latitudes and longitudes of successive outline
-C                       points are transformed to coordinates in the plane of
-C                       projection and joined by a vector.
+c       algorithm       the latitudes and longitudes of successive outline
+c                       points are transformed to coordinates in the plane of
+c                       projection and joined by a vector.
 
-C       References      Hershey, A. V., The plotting of maps on a CRT printer.
-C                         NWL Report No. 1844, 1963.
-C                       Lee, Tso-Hwa, Students Summary Reports, Work-study
-C                         program in scientific computing.  NCAR 1968.
-C                       Parker, R. L., UCSD SuperMap:  World Plotting Package.
-C                       Steers, J.A., An Introduction to the Study of Map
-C                         Projections.  Univ. of London Press, 1962.
+c       references      hershey, a. v., the plotting of maps on a crt printer.
+c                         nwl report no. 1844, 1963.
+c                       lee, tso-hwa, students summary reports, work-study
+c                         program in scientific computing.  ncar 1968.
+c                       parker, r. l., ucsd supermap:  world plotting package.
+c                       steers, j.a., an introduction to the study of map
+c                         projections.  univ. of london press, 1962.
 
-C       Accuracy        The definition of the map produced is limited by the
-C                       fact that the resolution of the virtual plotter space
-C                       is 1024 units in the x and y directions.
+c       accuracy        the definition of the map produced is limited by the
+c                       fact that the resolution of the virtual plotter space
+c                       is 1024 units in the x and y directions.
 
-C       Plotting routines       PWRT, FrstPt, Vector, Point, DashLn, Perim, Set
-C       used
+c       plotting routines       pwrt, frstpt, vector, point, dashln, perim, set
+c       used
 
-C       Required resident       ATan, Tan, Sin, Cos, ALog, SqRt, ATan2, ACos
-C       routines
+c       required resident       atan, tan, sin, cos, alog, sqrt, atan2, acos
+c       routines
 
-        COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-        COMMON/SUPMP5/PHIOC,SINO,COSO,SINR,COSR,IPROJ
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP7/PHIO,PHIA,IGRID,IDOT,ILTS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
-        COMMON/SUPMP9/DS,DI,DSRDI
-        COMMON/SUPMPA/IIER
-        COMMON/SUPMPB/X1,Y1,X2,Y2
-        COMMON/SUPMPC/LPROJ,ROT,JLTS,LGRID,IUS
-        COMMON/SUPMPD/AAA,BBB,CCC,DDD,EEE,FFF,GGG,HHH,III
+        common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+        common/supmp5/phioc,sino,coso,sinr,cosr,iproj
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp7/phio,phia,igrid,idot,ilts
+        common/supmp8/u,v,u1,v1,u2,v2
+        common/supmp9/ds,di,dsrdi
+        common/supmpa/iier
+        common/supmpb/x1,y1,x2,y2
+        common/supmpc/lproj,rot,jlts,lgrid,ius
+        common/supmpd/aaa,bbb,ccc,ddd,eee,fff,ggg,hhh,iii
 
-      DIMENSION PL1(2),PL2(2),PL3(2),PL4(2),LABA(20),LABB(18)
+      dimension pl1(2),pl2(2),pl3(2),pl4(2),laba(20),labb(18)
 
-      REAL LAT1,LAT2,AAA,BBB,CCC,DDD,EEE,FFF,GGG,HHH,III
+      real lat1,lat2,aaa,bbb,ccc,ddd,eee,fff,ggg,hhh,iii
 
-      EQUIVALENCE (PLA1,AUMIN),(PLA2,AUMAX),(PLA3,AVMIN),(PLA4,AVMAX),
-     1            (PHIA,LAT1),(ROT,LAT2)
+      equivalence (pla1,aumin),(pla2,aumax),(pla3,avmin),(pla4,avmax),
+     1            (phia,lat1),(rot,lat2)
 
-      DATA PLTRES,RESLIM/ 1024.,10./
+      data pltres,reslim/ 1024.,10./
 
-!     EXTERNAL SUPMBD
+!     external supmbd
 
-      SQU(X) = X*X
+      squ(x) = x*x
 c
-c       SUPMBD subroutine changed to BLOCK DATA
-c     IGDFLT = %LOC(SUPMBD)             !FORCE LOAD OF BLOCK DATA from library
+c       supmbd subroutine changed to block data
+c     igdflt = %loc(supmbd)             !force load of block data from library
 
-      write(6,*)' Subroutine supmap...',jproj
+      write(6,*)' subroutine supmap...',jproj
 
-      ROT = RROT
-      ILTS = IABS(JJLTS)
-      JLTS = JJLTS
-      LGRID = JGRID
-      IGRID = IABS(LGRID)
-c     JGR = ISIGN(1,LGRID)
-      JGR = LGRID
-      IUS = JUS
-      IUSGN = ISIGN(1,IUS)
-      PLA1 = PL1(1)
-      PLA2 = PL2(1)
-      PLA3 = PL3(1)
-      PLA4 = PL4(1)
-      LABL = 77
-      IDOT = IABS(JDOT)
+      rot = rrot
+      ilts = iabs(jjlts)
+      jlts = jjlts
+      lgrid = jgrid
+      igrid = iabs(lgrid)
+c     jgr = isign(1,lgrid)
+      jgr = lgrid
+      ius = jus
+      iusgn = isign(1,ius)
+      pla1 = pl1(1)
+      pla2 = pl2(1)
+      pla3 = pl3(1)
+      pla4 = pl4(1)
+      labl = 77
+      idot = iabs(jdot)
 
-C INITIALIZATION
-      LPROJ = JPROJ
-      IPROJ = IABS(LPROJ)
-      JPR = ISIGN(1,LPROJ)
-C     JGR=JPR
-      IOUT = ABS(IUS)           !USE IOUT FOR CHOOSING DATA FILE(S)
-      PHIA = POLAT
-      POLONG = POLON
-      PHIO = POLON
-      PHIOC = 540.-PHIO
-      ICROSS = 0
-      IIER = 0
-      ILF = 0
+c initialization
+      lproj = jproj
+      iproj = iabs(lproj)
+      jpr = isign(1,lproj)
+c     jgr=jpr
+      iout = abs(ius)           !use iout for choosing data file(s)
+      phia = polat
+      polong = polon
+      phio = polon
+      phioc = 540.-phio
+      icross = 0
+      iier = 0
+      ilf = 0
 
-C COMPUTE CONSTANTS APPROPRIATE TO EACH PROJECTION
-      IF (IPROJ .NE. 3) GO TO 30
+c compute constants appropriate to each projection
+      if (iproj .ne. 3) go to 30
 
-C LAMBERT CONFORMAL CONIC
-      SGN = SIGN(1.,0.5*(LAT1+LAT2))
-      CHI1 = (90.-SGN*LAT1)*DTR
-      IF (LAT1 .EQ. LAT2) GO TO 20
-      CHI2 = (90.-SGN*LAT2)*DTR
-      CONE = ALOG(SIN(CHI1)/SIN(CHI2))/ALOG(TAN(0.5*CHI1)/TAN(0.5*CHI2))
-      GO TO 60
-   20 CONE = COS(CHI1)
-      GO TO 60
+c lambert conformal conic
+      sgn = sign(1.,0.5*(lat1+lat2))
+      chi1 = (90.-sgn*lat1)*dtr
+      if (lat1 .eq. lat2) go to 20
+      chi2 = (90.-sgn*lat2)*dtr
+      cone = alog(sin(chi1)/sin(chi2))/alog(tan(0.5*chi1)/tan(0.5*chi2))
+      go to 60
+   20 cone = cos(chi1)
+      go to 60
 
-C THE OTHERS
-   30 XT = ROT*DTR
-      SINR = SIN(XT)
-      COSR = COS(XT)
-      XT = PHIA*DTR
-      SINO = SIN(XT)
-      COSO = COS(XT)
+c the others
+   30 xt = rot*dtr
+      sinr = sin(xt)
+      cosr = cos(xt)
+      xt = phia*dtr
+      sino = sin(xt)
+      coso = cos(xt)
 
-C  CALCULATE COEFFICIENTS NECESSARY TO CONVERT DISPLACEMENT VECTOR ON EARTH'S
-C  SURFACE FROM CARTESIAN SYSTEM WITH ORIGIN AT CENTER OF EARTH, UNIT VECTOR K
-C  K AT THE PROJECTION CENTER, AND UNIT VECTOR J IN THE POSITIVE U DIRECTION TO
-C  A SYSTEM WITH UNIT VECTOR K AT NORTH POLE AND UNIT VECTOR I AT INTERSECTION
-C  OF EQUATOR AND GREENWICH MERIDIAN.  NEEDED LATER FOR MAPINV_GC.
-      AAA=COS(ROT*DTR)*COS(POLONG*DTR)*SIN(PHIA*DTR)-
-     &    SIN(ROT*DTR)*SIN(POLONG*DTR)
-      BBB=COS(ROT*DTR)*SIN(POLONG*DTR)*SIN(PHIA*DTR)+
-     &    SIN(ROT*DTR)*COS(POLONG*DTR)
-      CCC=-COS(ROT*DTR)*COS(PHIA*DTR)
-      DDD=-SIN(ROT*DTR)*COS(POLONG*DTR)*SIN(PHIA*DTR)-
-     &    COS(ROT*DTR)*SIN(POLONG*DTR)
-      EEE=-SIN(ROT*DTR)*SIN(POLONG*DTR)*SIN(PHIA*DTR)+
-     &    COS(ROT*DTR)*COS(POLONG*DTR)
-      FFF=SIN(ROT*DTR)*COS(PHIA*DTR)
-      GGG=COS(POLONG*DTR)*COS(PHIA*DTR)
-      HHH=SIN(POLONG*DTR)*COS(PHIA*DTR)
-      III=SIN(PHIA*DTR)
+c  calculate coefficients necessary to convert displacement vector on earth's
+c  surface from cartesian system with origin at center of earth, unit vector k
+c  k at the projection center, and unit vector j in the positive u direction to
+c  a system with unit vector k at north pole and unit vector i at intersection
+c  of equator and greenwich meridian.  needed later for mapinv_gc.
+      aaa=cos(rot*dtr)*cos(polong*dtr)*sin(phia*dtr)-
+     &    sin(rot*dtr)*sin(polong*dtr)
+      bbb=cos(rot*dtr)*sin(polong*dtr)*sin(phia*dtr)+
+     &    sin(rot*dtr)*cos(polong*dtr)
+      ccc=-cos(rot*dtr)*cos(phia*dtr)
+      ddd=-sin(rot*dtr)*cos(polong*dtr)*sin(phia*dtr)-
+     &    cos(rot*dtr)*sin(polong*dtr)
+      eee=-sin(rot*dtr)*sin(polong*dtr)*sin(phia*dtr)+
+     &    cos(rot*dtr)*cos(polong*dtr)
+      fff=sin(rot*dtr)*cos(phia*dtr)
+      ggg=cos(polong*dtr)*cos(phia*dtr)
+      hhh=sin(polong*dtr)*cos(phia*dtr)
+      iii=sin(phia*dtr)
 
-      IF (IPROJ-7) 60,67,40
+      if (iproj-7) 60,67,40
 
-C CYLINDRICAL PROJECTIONS               [8,9,10]
-   40 IF (PHIA .NE. 0.0) GO TO 42
-      IF (ROT .EQ. 0.0) GO TO 45
-      IF (ABS(ROT) .EQ. 180.) GO TO 50
-   42 SINO1 = COSO*COSR
-      COSO1 = SQRT(CON1-SINO1*SINO1)
-      OVC1 = 1./COSO1
-      PHIO = PHIO-ATAN2(SINR*OVC1,-COSR*SINO*OVC1)*RTD
-      PHIOC = 540.-PHIO
-      SINR = SINR*COSO*OVC1
-      COSR = -SINO*OVC1
-      SINO = SINO1
-      COSO = COSO1
-      GO TO 60
+c cylindrical projections               [8,9,10]
+   40 if (phia .ne. 0.0) go to 42
+      if (rot .eq. 0.0) go to 45
+      if (abs(rot) .eq. 180.) go to 50
+   42 sino1 = coso*cosr
+      coso1 = sqrt(con1-sino1*sino1)
+      ovc1 = 1./coso1
+      phio = phio-atan2(sinr*ovc1,-cosr*sino*ovc1)*rtd
+      phioc = 540.-phio
+      sinr = sinr*coso*ovc1
+      cosr = -sino*ovc1
+      sino = sino1
+      coso = coso1
+      go to 60
 
-C USE SIMPLE TRANSFORMS FOR CYLINDRICAL PROJECTIONS IF ROT = POLAT = .0
-C   I.E. IPROJ = 11, 12, 13
-   45 SINO = 1.0
-      IPROJ = IPROJ+3
-      GO TO 55
+c use simple transforms for cylindrical projections if rot = polat = .0
+c   i.e. iproj = 11, 12, 13
+   45 sino = 1.0
+      iproj = iproj+3
+      go to 55
 
-   50 SINO = -1.0
-      PHIO = PHIO+180.
-      PHIOC = PHIOC+180.
-   55 COSO = 0.0
-      SINR = 0.0
-      COSR = 1.0
-      ILF = 1
+   50 sino = -1.0
+      phio = phio+180.
+      phioc = phioc+180.
+   55 coso = 0.0
+      sinr = 0.0
+      cosr = 1.0
+      ilf = 1
 
-C ILTS = 1         THE MAXIMUM USEFUL AREA IS PLOTTED.
-C ---------
-   60 GO TO (61 ,62 ,62 ,61 ,61 ,66 ,67 ,68 ,66 ,70 ,
-     1       68 ,66 ,70 ),IPROJ
+c ilts = 1         the maximum useful area is plotted.
+c ---------
+   60 go to (61 ,62 ,62 ,61 ,61 ,66 ,67 ,68 ,66 ,70 ,
+     1       68 ,66 ,70 ),iproj
 
-C STEREOGRAPHIC                         [1]
-C LAMBERT EQUAL AREA                    [4]
-C GNOMONIC                              [5]
-   61 UMIN = -2.0
-      VMIN = -2.0
-      UMAX = 2.0
-      VMAX = 2.0
-      GO TO 80
+c stereographic                         [1]
+c lambert equal area                    [4]
+c gnomonic                              [5]
+   61 umin = -2.0
+      vmin = -2.0
+      umax = 2.0
+      vmax = 2.0
+      go to 80
 
-C ORTHOGRAPHIC                          [2]
-C LAMBERT CONFORMAL CONIC               [3]
-   62 UMIN = -1.0
-      VMIN = -1.0
-      UMAX = 1.0
-      VMAX = 1.0
-      GO TO 80
+c orthographic                          [2]
+c lambert conformal conic               [3]
+   62 umin = -1.0
+      vmin = -1.0
+      umax = 1.0
+      vmax = 1.0
+      go to 80
 
-C AZIMUTHAL EQUIDISTANT                 [6]
-C MERCATOR WITH ARBITRARY POLE          [9]
-C MERCATOR                              [12]
-   66 UMAX = PI
-      VMAX = PI
-      UMIN = -PI
-      VMIN = -PI
-      GO TO 80
+c azimuthal equidistant                 [6]
+c mercator with arbitrary pole          [9]
+c mercator                              [12]
+   66 umax = pi
+      vmax = pi
+      umin = -pi
+      vmin = -pi
+      go to 80
 
-C DUMMY  --  ERROR EXIT                 [7]
-   67 IIER = 33
-      CALL ULIBER2 (IIER
-     1           ,' SUPMAP-ATTEMPT TO USE NON-EXISTENT PROJECTION')     
-      GO TO 700
+c dummy  --  error exit                 [7]
+   67 iier = 33
+      call uliber2 (iier
+     1           ,' supmap-attempt to use non-existent projection')     
+      go to 700
 
-C CYLINDRICAL EQUIDISTANT               [8,11]
-   68 UMAX = 180.
-      UMIN = -180.
-      VMAX = 90.
-      VMIN = -90.
-      GO TO 80
+c cylindrical equidistant               [8,11]
+   68 umax = 180.
+      umin = -180.
+      vmax = 90.
+      vmin = -90.
+      go to 80
 
-C MOLLWEIDE TYPE                        [10,13]
-   70 UMAX = 2.0
-      UMIN = -2.0
-      VMAX = 1.0
-      VMIN = -1.0
+c mollweide type                        [10,13]
+   70 umax = 2.0
+      umin = -2.0
+      vmax = 1.0
+      vmin = -1.0
 
-   80 UEPS = 0.5*(UMAX-UMIN)
-      VEPS = 0.5*(VMAX-VMIN)
-      IF (IPROJ .EQ. 3) UEPS = 180.
+   80 ueps = 0.5*(umax-umin)
+      veps = 0.5*(vmax-vmin)
+      if (iproj .eq. 3) ueps = 180.
 
-C COMPUTE THE APPROPRIATE MAP BOUNDARIES.
-      GO TO (600,200,300,400,500),ILTS
+c compute the appropriate map boundaries.
+      go to (600,200,300,400,500),ilts
 
-C ILTS = 2         POINT (PL1,PL2) IN UPPER RIGHT CORNER , (PL3,PL4) IN
-C ---------        LOWER LEFT CORNER OF PLOT.
-  200 RLAT = PLA1
-      RLON = PLA2
-      CALL QCON
-      U1 = U
-      V1 = V
-      RLAT = PLA3
-      RLON = PLA4
-      CALL QCON
-      UMAX = AMAX1(U1,U)
-      UMIN = AMIN1(U1,U)
-      VMAX = AMAX1(V1,V)
-      VMIN = AMIN1(V1,V)
-      GO TO 600
+c ilts = 2         point (pl1,pl2) in upper right corner , (pl3,pl4) in
+c ---------        lower left corner of plot.
+  200 rlat = pla1
+      rlon = pla2
+      call qcon
+      u1 = u
+      v1 = v
+      rlat = pla3
+      rlon = pla4
+      call qcon
+      umax = amax1(u1,u)
+      umin = amin1(u1,u)
+      vmax = amax1(v1,v)
+      vmin = amin1(v1,v)
+      go to 600
 
-C ILTS = 3         SET PLOT LIMITS DIRECTLY.
-C ----------
-  300 UMAX = PLA2
-      UMIN = PLA1
-      VMAX = PLA4
-      VMIN = PLA3
-      GO TO 600
+c ilts = 3         set plot limits directly.
+c ----------
+  300 umax = pla2
+      umin = pla1
+      vmax = pla4
+      vmin = pla3
+      go to 600
 
-C ILTS = 4         USE ANGULAR DISTANCES TO SET PLOT LIMITS.
-C ----------
-  400 COSUMI = COS(AUMIN*DTR)
-      SINUMI = SQRT(CON1-COSUMI*COSUMI)
-      COSUMA = COS(AUMAX*DTR)
-      SINUMA = SQRT(CON1-COSUMA*COSUMA)
-      COSVMI = COS(AVMIN*DTR)
-      SINVMI = SQRT(CON1-COSVMI*COSVMI)
-      COSVMA = COS(AVMAX*DTR)
-      SINVMA = SQRT(CON1-COSVMA*COSVMA)
+c ilts = 4         use angular distances to set plot limits.
+c ----------
+  400 cosumi = cos(aumin*dtr)
+      sinumi = sqrt(con1-cosumi*cosumi)
+      cosuma = cos(aumax*dtr)
+      sinuma = sqrt(con1-cosuma*cosuma)
+      cosvmi = cos(avmin*dtr)
+      sinvmi = sqrt(con1-cosvmi*cosvmi)
+      cosvma = cos(avmax*dtr)
+      sinvma = sqrt(con1-cosvma*cosvma)
 
-      GO TO (401,402,403,404,405,406,407,408,409,410,
-     1       408,409,410),IPROJ
+      go to (401,402,403,404,405,406,407,408,409,410,
+     1       408,409,410),iproj
 
-C STEREOGRAPHIC                         [1]
-  401 UMAX = (1.-COSUMA)/SINUMA
-      UMIN = -(1.-COSUMI)/SINUMI
-      VMAX = (1.-COSVMA)/SINVMA
-      VMIN = -(1.-COSVMI)/SINVMI
-      GO TO 600
+c stereographic                         [1]
+  401 umax = (1.-cosuma)/sinuma
+      umin = -(1.-cosumi)/sinumi
+      vmax = (1.-cosvma)/sinvma
+      vmin = -(1.-cosvmi)/sinvmi
+      go to 600
 
-C ORTHOGRAPHIC                          [2]
-  402 IF (AMAX1(AUMIN,AUMAX,AVMIN,AVMAX) .GT. 90.) GO TO 900
-      UMAX = SINUMA
-      UMIN = -SINUMI
-      VMAX = SINVMA
-      VMIN = -SINVMI
-      GO TO 600
+c orthographic                          [2]
+  402 if (amax1(aumin,aumax,avmin,avmax) .gt. 90.) go to 900
+      umax = sinuma
+      umin = -sinumi
+      vmax = sinvma
+      vmin = -sinvmi
+      go to 600
 
-C LAMBERT CONFORMAL CONIC               [3]
-  403 IIER = 34
-      CALL ULIBER2 (IIER,' SUPMAP-MAP LIMITS INAPPROPRIATE')
-      GO TO 700
+c lambert conformal conic               [3]
+  403 iier = 34
+      call uliber2 (iier,' supmap-map limits inappropriate')
+      go to 700
 
-C LAMBERT EQUAL AREA                    [4]
-  404 UMAX = (1.+COSUMA)/SINUMA
-      UMIN = (1.+COSUMI)/SINUMI
-      VMAX = (1.+COSVMA)/SINVMA
-      VMIN = (1.+COSVMI)/SINVMI
-      UMAX = 2./SQRT(1.+UMAX*UMAX)
-      UMIN = -2./SQRT(1.+UMIN*UMIN)
-      VMAX = 2./SQRT(1.+VMAX*VMAX)
-      VMIN = -2./SQRT(1.+VMIN*VMIN)
-      GO TO 600
+c lambert equal area                    [4]
+  404 umax = (1.+cosuma)/sinuma
+      umin = (1.+cosumi)/sinumi
+      vmax = (1.+cosvma)/sinvma
+      vmin = (1.+cosvmi)/sinvmi
+      umax = 2./sqrt(1.+umax*umax)
+      umin = -2./sqrt(1.+umin*umin)
+      vmax = 2./sqrt(1.+vmax*vmax)
+      vmin = -2./sqrt(1.+vmin*vmin)
+      go to 600
 
-C GNOMONIC                              [5]
-  405 IF (AMAX1(AUMIN,AUMAX,AVMIN,AVMAX) .GE. 90.) GO TO 900
-      UMAX = SINUMA/COSUMA
-      UMIN = -SINUMI/COSUMI
-      VMAX = SINVMA/COSVMA
-      VMIN = -SINVMI/COSVMI
-      GO TO 600
+c gnomonic                              [5]
+  405 if (amax1(aumin,aumax,avmin,avmax) .ge. 90.) go to 900
+      umax = sinuma/cosuma
+      umin = -sinumi/cosumi
+      vmax = sinvma/cosvma
+      vmin = -sinvmi/cosvmi
+      go to 600
 
-C AZIMUTHAL EQUIDISTANT                 [6]
-  406 UMAX = AUMAX*DTR
-      UMIN = -AUMIN*DTR
-      VMAX = AVMAX*DTR
-      VMIN = -AVMIN*DTR
-      GO TO 600
+c azimuthal equidistant                 [6]
+  406 umax = aumax*dtr
+      umin = -aumin*dtr
+      vmax = avmax*dtr
+      vmin = -avmin*dtr
+      go to 600
 
-C DUMMY  --  ERROR EXIT                 [7]
-  407 GO TO 67
+c dummy  --  error exit                 [7]
+  407 go to 67
 
-C CYLINDRICAL EQUIDISTANT               [8,11]
-  408 UMAX = AUMAX
-      UMIN = -AUMIN
-      VMAX = AVMAX
-      VMIN = -AVMIN
-      GO TO 600
+c cylindrical equidistant               [8,11]
+  408 umax = aumax
+      umin = -aumin
+      vmax = avmax
+      vmin = -avmin
+      go to 600
 
-C MERCATOR                              [9,12]
-  409 IF (AMAX1(AVMIN,AVMAX) .GE. 90.) GO TO 900
-      UMAX = AUMAX*DTR
-      UMIN = -AUMIN*DTR
-      VMAX = ALOG((1.+SINVMA)/COSVMA)
-      VMIN = -ALOG((1.+SINVMI)/COSVMI)
-      GO TO 600
+c mercator                              [9,12]
+  409 if (amax1(avmin,avmax) .ge. 90.) go to 900
+      umax = aumax*dtr
+      umin = -aumin*dtr
+      vmax = alog((1.+sinvma)/cosvma)
+      vmin = -alog((1.+sinvmi)/cosvmi)
+      go to 600
 
-C MOLLWEIDE TYPE                        [10,13]
-  410 UMAX = AUMAX*OV90
-      UMIN = -AUMIN*OV90
-      VMAX = SINVMA
-      VMIN = -SINVMI
-      GO TO 600
+c mollweide type                        [10,13]
+  410 umax = aumax*ov90
+      umin = -aumin*ov90
+      vmax = sinvma
+      vmin = -sinvmi
+      go to 600
 
-C ILTS = 5         USE FOUR EDGE POINTS TO SET LIMITS.
-C ----------
-  500 PLB1 = PL1(2)
-      RLAT = PLA1
-      RLON = PLB1+EPS
-      CALL QCON
-      UMIN = U
-      PLB2 = PL2(2)
-      RLAT = PLA2
-      RLON = PLB2-EPS
-      CALL QCON
-      UMAX = U
-      PLB3 = PL3(2)
-      RLAT = PLA3
-      RLON = PLB3
-      CALL QCON
-      VMIN = V
-      PLB4 = PL4(2)
-      RLAT = PLA4
-      RLON = PLB4
-      CALL QCON
-      VMAX = V
+c ilts = 5         use four edge points to set limits.
+c ----------
+  500 plb1 = pl1(2)
+      rlat = pla1
+      rlon = plb1+eps
+      call qcon
+      umin = u
+      plb2 = pl2(2)
+      rlat = pla2
+      rlon = plb2-eps
+      call qcon
+      umax = u
+      plb3 = pl3(2)
+      rlat = pla3
+      rlon = plb3
+      call qcon
+      vmin = v
+      plb4 = pl4(2)
+      rlat = pla4
+      rlon = plb4
+      call qcon
+      vmax = v
 
-C COMPUTE MAP LIMITS FOR PLOT
-  600 DU = UMAX-UMIN
-      DV = VMAX-VMIN
+c compute map limits for plot
+  600 du = umax-umin
+      dv = vmax-vmin
 
-C ERROR IF MAP HAS ZERO AREA
-      IF (DU.EQ.0.0 .OR. DV.EQ.0.0) GO TO 905
-        IF(PART.LE..0)GOTO 620          !USER-SUPPLIED X1,Y1,X2,Y2
-      IF (DU .GT. DV) GO TO 610
-      Y1 = 0.5*(1.-PART)
-      Y2 = 1.-Y1
-      X1 = 0.5*(1.-PART*DU/DV)
-      X2 = 1.-X1
-      GO TO 620
+c error if map has zero area
+      if (du.eq.0.0 .or. dv.eq.0.0) go to 905
+        if(part.le..0)goto 620          !user-supplied x1,y1,x2,y2
+      if (du .gt. dv) go to 610
+      y1 = 0.5*(1.-part)
+      y2 = 1.-y1
+      x1 = 0.5*(1.-part*du/dv)
+      x2 = 1.-x1
+      go to 620
 
-  610 X1 = 0.5*(1.-PART)
-      X2 = 1.-X1
-      Y1 = 0.5*(1.-PART*DV/DU)
-      Y2 = 1.-Y1
+  610 x1 = 0.5*(1.-part)
+      x2 = 1.-x1
+      y1 = 0.5*(1.-part*dv/du)
+      y2 = 1.-y1
 
-C ERROR IF MAP HAS ESSENTIALLY ZERO AREA
-  620 IF (AMIN1(X2-X1,Y2-Y1)*PLTRES .LT. RESLIM) GO TO 905
-      CALL SET (X1,X2,Y1,Y2,UMIN,UMAX,VMIN,VMAX,1)
+c error if map has essentially zero area
+  620 if (amin1(x2-x1,y2-y1)*pltres .lt. reslim) go to 905
+      call set (x1,x2,y1,y2,umin,umax,vmin,vmax,1)
       call line(umin,vmin,umin,vmax)
       call line(umin,vmax,umax,vmax)
       call line(umax,vmax,umax,vmin)
       call line(umax,vmin,umin,vmin)
-      DS = SQU(((X2-X1)*PLTRES)/DU)
-      DSRDI = SQRT(DS/DI)
-      write(6,*)' DSRDI = ',DSRDI
+      ds = squ(((x2-x1)*pltres)/du)
+      dsrdi = sqrt(ds/di)
+      write(6,*)' dsrdi = ',dsrdi
 
-C DO WE WRITE ANYTHING?
-      IF (JLTS.LT.0 .AND. IUSGN.LT.0) GO TO 640
-        IF(JDOT.LT.0)GOTO 640
+c do we write anything?
+      if (jlts.lt.0 .and. iusgn.lt.0) go to 640
+        if(jdot.lt.0)goto 640
 
-C CREATE THE LABEL
-c     ENCODE (LABL,7000,LABA(1)) LPROJ,PHIA,POLONG,ROT,PLA1,PLA2,PLA3,
-c    1                           PLA4,JLTS,LGRID,IUS,IDOT
-c7000 FORMAT (8H SUPMAP(,I3,7(1H,,F6.1),4(1H,,I3),1H))
+c create the label
+c     encode (labl,7000,laba(1)) lproj,phia,polong,rot,pla1,pla2,pla3,
+c    1                           pla4,jlts,lgrid,ius,idot
+c7000 format (8h supmap(,i3,7(1h,,f6.1),4(1h,,i3),1h))
 
-c     IF (ILTS .EQ. 5) ENCODE (61,7010,LABB(1)) PLB1,PLB2,PLB3,PLB4
-c7010 FORMAT (7X,1H(,24X,4(1H,,F6.1),1H))
+c     if (ilts .eq. 5) encode (61,7010,labb(1)) plb1,plb2,plb3,plb4
+c7010 format (7x,1h(,24x,4(1h,,f6.1),1h))
 
-      IF (JLTS .LT. 0) GO TO 630
+      if (jlts .lt. 0) go to 630
 
-C WRITE SUPMAP CALL BENEATH THE MAP
-      CALL PWRT (240,17,LABA(1),LABL,0,0)
-      IF (ILTS .EQ. 5) CALL PWRT (240,1,LABB(1),61,0,0)
+c write supmap call beneath the map
+      call pwrt (240,17,laba(1),labl,0,0)
+      if (ilts .eq. 5) call pwrt (240,1,labb(1),61,0,0)
 
-  630 IF (IUSGN .LT. 0) GO TO 640
+  630 if (iusgn .lt. 0) go to 640
 
-C PRINT OUT THE CALL ET AL.
-      K = (LABL+3)/4
-      WRITE (6,6000) (LABA(I),I=1,K)
- 6000 FORMAT (30A4)
-      IF (ILTS .EQ. 5) WRITE (6,6000) (LABB(I),I=1,18)
-      WRITE (6,6010) UMIN,UMAX,VMIN,VMAX
- 6010 FORMAT (8H UMIN = ,F11.6,9H  UMAX = ,F11.6,9H  VMIN = ,
-     +        F11.6,9H  VMAX = ,F11.6)
+c print out the call et al.
+      k = (labl+3)/4
+      write (6,6000) (laba(i),i=1,k)
+ 6000 format (30a4)
+      if (ilts .eq. 5) write (6,6000) (labb(i),i=1,18)
+      write (6,6010) umin,umax,vmin,vmax
+ 6010 format (8h umin = ,f11.6,9h  umax = ,f11.6,9h  vmin = ,
+     +        f11.6,9h  vmax = ,f11.6)
 
-C DRAW THE MAP
-  640 IF (IOUT.NE.0 .OR. IGRID.NE.0 .OR. JGR.GE.0) CALL MAPLOT_local
-      IDOT = 0
+c draw the map
+  640 if (iout.ne.0 .or. igrid.ne.0 .or. jgr.ge.0) call maplot_local
+      idot = 0
 
-C RETURN IER
-  700 IER = IIER
-      RETURN
+c return ier
+  700 ier = iier
+      return
 
-C ERROR RETURNS
-  900 IIER = 35
-      CALL ULIBER2 (IIER,' SUPMAP-ANGULAR LIMITS TOO GREAT')
-      GO TO 700
-  905 IIER = 36
-      CALL ULIBER2 (IIER,' SUPMAP-MAP HAS ZERO AREA')
-      GO TO 700
+c error returns
+  900 iier = 35
+      call uliber2 (iier,' supmap-angular limits too great')
+      go to 700
+  905 iier = 36
+      call uliber2 (iier,' supmap-map has zero area')
+      go to 700
 
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE MAPLOT_local
-C THIS SUBROUTINE PLOTS THE CONTINENTAL AND U.S. STATE OUTLINES,
-C MERIDIANS, PARALLELS, LIMBS WHERE APPROPRIATE. IT LABELS KEY MERIDIANS
-C AND POLES, AND IT DRAWS A BORDER.
+      end
+c-------------------------------------------------------------------------------
+      subroutine maplot_local
+c this subroutine plots the continental and u.s. state outlines,
+c meridians, parallels, limbs where appropriate. it labels key meridians
+c and poles, and it draws a border.
 
-        COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-        COMMON/SUPMP2/NPTS,MAXLAT,MINLAT,MAXLON,MINLON,PTS(1200000)
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-        COMMON/SUPMP5/PHIOC,SINO,COSO,SINR,COSR,IPROJ
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP7/PHIO,PHIA,IGRID,IDOT,ILTS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
-        COMMON/SUPMPA/IIER
-        COMMON/MAPCOL/MPCOL1,MPCOL2,MPCOL3,MPCOL4
-        COMMON/MAPDAS/LDASH1,LDASH2,LDASH3,LDASH4
-c       DATA                    !Default line intensities and dash patterns
-c    1          MPCOL1,LDash1   /255,'1777'O/,  !Map lines
-c    2          MPCOL2,LDash2   /128,'1756'O/,  !Grid lines
-c    3          MPCOL3,LDash3   /192,'1777'O/,  !Limb lines
-c    4          MPCOL4,LDash4   /255,'1777'O/   !Perimeter
+        common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+        common/supmp2/npts,maxlat,minlat,maxlon,minlon,pts(1200000)
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+        common/supmp5/phioc,sino,coso,sinr,cosr,iproj
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp7/phio,phia,igrid,idot,ilts
+        common/supmp8/u,v,u1,v1,u2,v2
+        common/supmpa/iier
+        common/mapcol/mpcol1,mpcol2,mpcol3,mpcol4
+        common/mapdas/ldash1,ldash2,ldash3,ldash4
+c       data                    !default line intensities and dash patterns
+c    1          mpcol1,ldash1   /255,'1777'o/,  !map lines
+c    2          mpcol2,ldash2   /128,'1756'o/,  !grid lines
+c    3          mpcol3,ldash3   /192,'1777'o/,  !limb lines
+c    4          mpcol4,ldash4   /255,'1777'o/   !perimeter
 
         character       supmap_dir*150
         integer       lsdir
@@ -747,14 +747,14 @@ c    4          MPCOL4,LDash4   /255,'1777'O/   !Perimeter
 
         character*1000 c_line
 
-      DIMENSION SPLAT(2)
-      REAL MAXLAT,MINLAT,MAXLON,MINLON,MIDLAT,MIDLON
-      CHARACTER*180 NAMFIL
-      DATA   SINLMB,COSLMB /0.017452406, 0.99984765/
-      DATA FLOORC / 10000. /
+      dimension splat(2)
+      real maxlat,minlat,maxlon,minlon,midlat,midlon
+      character*180 namfil
+      data   sinlmb,coslmb /0.017452406, 0.99984765/
+      data floorc / 10000. /
 
-      FLOOR(X) = AINT(X+FLOORC)-FLOORC
-      CLING(X) = FLOOR(X)+1.
+      floor(x) = aint(x+floorc)-floorc
+      cling(x) = floor(x)+1.
 
 
       call get_directory('static',supmap_dir,lsdir)
@@ -763,23 +763,23 @@ c    4          MPCOL4,LDash4   /255,'1777'O/   !Perimeter
 c        supmap_dir = '../static/ncarg/'
       lsdir = index (supmap_dir, ' ') - 1
 
-      CALL DASHLN(LDASH1)
-        CALL OPTN(2HIN,MPCOL1)
-      GO TO (10,10,10,5,10,5,905,5,5,5,5,5,5),IPROJ
-    5 ICF=1
-   10 IF(IOUT.EQ.0)GOTO 100
+      call dashln(ldash1)
+        call optn(2hin,mpcol1)
+      go to (10,10,10,5,10,5,905,5,5,5,5,5,5),iproj
+    5 icf=1
+   10 if(iout.eq.0)goto 100
 
-C***Select appropriate file(s) according to bits set in IOut
-        IBS=1                           !START WITH 1ST BIT
-        MASK=1
-   11   DO 12 IBIT=IBS,16               !CHECK LOWER 16 BITS
-         IBS=IBS+1
-c        IF((IOUT.AND.MASK).NE.0)GOTO 13        !EXIT LOOP
-         IF(iand(IOUT,MASK).NE.0)GOTO 13        !EXIT LOOP
-         MASK=MASK*2
-   12   CONTINUE
-        GO TO 100                       !FELL OUT OF LOOP SO DONE
-   13   MASK=MASK*2
+c***select appropriate file(s) according to bits set in iout
+        ibs=1                           !start with 1st bit
+        mask=1
+   11   do 12 ibit=ibs,16               !check lower 16 bits
+         ibs=ibs+1
+c        if((iout.and.mask).ne.0)goto 13        !exit loop
+         if(iand(iout,mask).ne.0)goto 13        !exit loop
+         mask=mask*2
+   12   continue
+        go to 100                       !fell out of loop so done
+   13   mask=mask*2
 
         if(ibit .eq. 1)goto14
         if(ibit .eq. 2)goto15
@@ -788,296 +788,296 @@ c        IF((IOUT.AND.MASK).NE.0)GOTO 13        !EXIT LOOP
         if(ibit .eq. 5)goto18
         if(ibit .eq. 6)goto19
         if(ibit .eq. 7)goto20
-        GO TO 100                       !OUT OF RANGE -- RETURN
+        go to 100                       !out of range -- return
 
-c  14   IF((IOUT.AND.2).NE.0)THEN       ! STATES WITH CONTINENTS?
-   14   IF(iand(IOUT,2).NE.0)THEN       ! STATES WITH CONTINENTS?
-         IBS=IBS+1      !SKIP BIT LATER
-         MASK=MASK*2
-c        NAMFIL='Lib_Dev:[GUDAT]CONANDSTA.DAT'  !3 (SPECIAL CASE)
+c  14   if((iout.and.2).ne.0)then       ! states with continents?
+   14   if(iand(iout,2).ne.0)then       ! states with continents?
+         ibs=ibs+1      !skip bit later
+         mask=mask*2
+c        namfil='lib_dev:[gudat]conandsta.dat'  !3 (special case)
 c       namfil = '/home/star1/b/mcdonald/data/supmap/conandsta.dat'
         namfil = supmap_dir (1:lsdir) // 'conandsta.dat'
-        ELSE
-c        NAMFIL='Lib_Dev:[GUDAT]CONTINENT.DAT'  !1
+        else
+c        namfil='lib_dev:[gudat]continent.dat'  !1
 c       namfil = '/home/star1/b/mcdonald/data/supmap/continent.dat'
         namfil = supmap_dir (1:lsdir) // 'continent_minus_us.dat'
-        ENDIF
-        GO TO 25
-c  15   NAMFIL='Lib_Dev:[GUDAT]STATE.DAT'       !2
+        endif
+        go to 25
+c  15   namfil='lib_dev:[gudat]state.dat'       !2
 c  15 namfil = '/home/star1/b/mcdonald/data/supmap/state.dat'
    15   namfil = supmap_dir (1:lsdir) // 'state.dat'
-        GO TO 25
-c  16   NAMFIL='Lib_Dev:[GUDAT]USCOUNTY.DAT'    !4
+        go to 25
+c  16   namfil='lib_dev:[gudat]uscounty.dat'    !4
 c  16 namfil = '/home/star1/b/mcdonald/data/supmap/uscounty.dat'
    16   namfil = supmap_dir (1:lsdir) // 'uscounty.dat'
-        GO TO 25
-c  17   NAMFIL='Lib_Dev:[GUDAT]COUNTY.DAT'      !8
+        go to 25
+c  17   namfil='lib_dev:[gudat]county.dat'      !8
 c  17 namfil = '/home/star1/b/mcdonald/data/supmap/county.dat'
    17   namfil = supmap_dir (1:lsdir) // 'state_from_counties.dat'
-        GO TO 25
-c  18   NamFil='SupMap_UserFile1'               !16
+        go to 25
+c  18   namfil='supmap_userfile1'               !16
    18   namfil = supmap_dir (1:lsdir) // 'userfile1.dat'
-        GoTo 25
-c  19   NamFil='SupMap_UserFile2'               !32
+        goto 25
+c  19   namfil='supmap_userfile2'               !32
    19   namfil = supmap_dir (1:lsdir) // 'userfile2.dat'
-        GoTo 25
-c  20   NamFil='SupMap_UserFile3'               !64
+        goto 25
+c  20   namfil='supmap_userfile3'               !64
    20   namfil = supmap_dir (1:lsdir) // 'userfile3.dat'
-        GoTo 25
+        goto 25
 
-C***Open file
-c  25   Open(3,Name=NamFil,Type='Old',Form='UnFormatted',ReadOnly,Err=26)
+c***open file
+c  25   open(3,name=namfil,type='old',form='unformatted',readonly,err=26)
    25   continue
-        write(6,*)Namfil(1:60)
-        Open(3,file=NamFil,status='Old',Form='UnFormatted',err=26)
-        GoTo 30
+        write(6,*)namfil(1:60)
+        open(3,file=namfil,status='old',form='unformatted',err=26)
+        goto 30
 
-C***Error opening file -- return
-   26   IIER=29
-        write(6,*)'Supmap - Error opening: ',NamFil
-        Return
+c***error opening file -- return
+   26   iier=29
+        write(6,*)'supmap - error opening: ',namfil
+        return
 
-C***Read next line
+c***read next line
    30   continue
 
         if(.true.)then
             if(iwrite .eq. 0)
-     1        write(6,*)' Using simple read to read binary map info...'
-            Read(3,End=99)NPts,MaxLat,MinLat,MaxLon,MinLon
-     1                   ,(Pts(M),M=1,NPts)
+     1        write(6,*)' using simple read to read binary map info...'
+            read(3,end=99)npts,maxlat,minlat,maxlon,minlon
+     1                   ,(pts(m),m=1,npts)
 
-        else ! This may be needed for DEC Alpha but will not work on LINUX
+        else ! this may be needed for dec alpha but will not work on linux
             if(iwrite .eq. 0)
-     1        write(6,*)' Using cio.c to read binary map info...'
-            Read(3,End=99,err=41)NPts,MaxLat,MinLat,MaxLon,MinLon
-     1                   ,(Pts(M),M=1,200)
+     1        write(6,*)' using cio.c to read binary map info...'
+            read(3,end=99,err=41)npts,maxlat,minlat,maxlon,minlon
+     1                   ,(pts(m),m=1,200)
  41         continue
 
-!           Convert between Bigendian and Littleendian (under construction)
-            call in_to_im(4,4,NPts,1)
-            call in_to_im(4,4,Pts,NPts)
-            call in_to_im(4,4,MaxLat,1)
-            call in_to_im(4,4,MinLat,1)
-            call in_to_im(4,4,MaxLon,1)
-            call in_to_im(4,4,MinLon,1)
+!           convert between bigendian and littleendian (under construction)
+            call in_to_im(4,4,npts,1)
+            call in_to_im(4,4,pts,npts)
+            call in_to_im(4,4,maxlat,1)
+            call in_to_im(4,4,minlat,1)
+            call in_to_im(4,4,maxlon,1)
+            call in_to_im(4,4,minlon,1)
 
         endif
 
         iwrite = iwrite + 1
 
-   99   NPts=NPts/2
-      IF (NPTS .EQ. 0)THEN
-        CLOSE(3)
-        GOTO 11                 !CHECK NEXT BIT
-      ENDIF
-      IF (NPTS .LE. 16) GO TO 70
-      IF (ICF .NE. 0) GO TO 70
+   99   npts=npts/2
+      if (npts .eq. 0)then
+        close(3)
+        goto 11                 !check next bit
+      endif
+      if (npts .le. 16) go to 70
+      if (icf .ne. 0) go to 70
 
-C DOES THIS LINE INTERSECT THE SCREEN?
-C       1  2  3
-C       4     5
-C       6  7  8
-      MIDLAT = (MAXLAT+MINLAT)*0.5
-      MIDLON = (MAXLON+MINLON)*0.5
-      RLAT = MAXLAT
-      RLON = MAXLON
-      CALL QCON
-      X3 = U
-      Y3 = V
-      RLON = MIDLON
-      CALL QCON
-      X2 = U
-      Y2 = V
-      RLON = MINLON
-      CALL QCON
-      X1 = U
-      Y1 = V
-      RLAT = MIDLAT
-      CALL QCON
-      X4 = U
-      Y4 = V
-      RLON = MAXLON
-      CALL QCON
-      X5 = U
-      Y5 = V
-      RLAT = MINLAT
-      CALL QCON
-      X8 = U
-      Y8 = V
-      RLON = MIDLON
-      CALL QCON
-      X7 = U
-      Y7 = V
-      RLON = MINLON
-      CALL QCON
-      X6 = U
-      Y6 = V
-      XMN = AMIN1(X1,X2,X3,X4,X5,X6,X7,X8)
-      XMX = AMAX1(X1,X2,X3,X4,X5,X6,X7,X8)
-      YMN = AMIN1(Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8)
-      YMX = AMAX1(Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8)
+c does this line intersect the screen?
+c       1  2  3
+c       4     5
+c       6  7  8
+      midlat = (maxlat+minlat)*0.5
+      midlon = (maxlon+minlon)*0.5
+      rlat = maxlat
+      rlon = maxlon
+      call qcon
+      x3 = u
+      y3 = v
+      rlon = midlon
+      call qcon
+      x2 = u
+      y2 = v
+      rlon = minlon
+      call qcon
+      x1 = u
+      y1 = v
+      rlat = midlat
+      call qcon
+      x4 = u
+      y4 = v
+      rlon = maxlon
+      call qcon
+      x5 = u
+      y5 = v
+      rlat = minlat
+      call qcon
+      x8 = u
+      y8 = v
+      rlon = midlon
+      call qcon
+      x7 = u
+      y7 = v
+      rlon = minlon
+      call qcon
+      x6 = u
+      y6 = v
+      xmn = amin1(x1,x2,x3,x4,x5,x6,x7,x8)
+      xmx = amax1(x1,x2,x3,x4,x5,x6,x7,x8)
+      ymn = amin1(y1,y2,y3,y4,y5,y6,y7,y8)
+      ymx = amax1(y1,y2,y3,y4,y5,y6,y7,y8)
 
-      DX = AMIN1(XMX-XMN,180.)
-      DY = AMIN1(YMX-YMN,180.)
-      XMX = XMX+0.01*DX
-      XMN = XMN-0.01*DX
-      YMX = YMX+0.01*DY
-      YMN = YMN-0.01*DY
+      dx = amin1(xmx-xmn,180.)
+      dy = amin1(ymx-ymn,180.)
+      xmx = xmx+0.01*dx
+      xmn = xmn-0.01*dx
+      ymx = ymx+0.01*dy
+      ymn = ymn-0.01*dy
 
-      IF (XMN.GT.UMAX .OR. XMX.LT.UMIN .OR. YMN.GT.VMAX .OR.
-     1    YMX.LT.VMIN) GO TO 30
+      if (xmn.gt.umax .or. xmx.lt.umin .or. ymn.gt.vmax .or.
+     1    ymx.lt.vmin) go to 30
 
-   70 RLAT = PTS(1)
-      RLON = PTS(2)
-      IFST = 1
-      IGO = 0
-      CALL QVEC
-      DO 75 J=2,NPTS
-         RLAT = PTS(2*J-1)
-         RLON = PTS(2*J)
-         CALL QVEC
-   75 CONTINUE
+   70 rlat = pts(1)
+      rlon = pts(2)
+      ifst = 1
+      igo = 0
+      call qvec
+      do 75 j=2,npts
+         rlat = pts(2*j-1)
+         rlon = pts(2*j)
+         call qvec
+   75 continue
 
-      GO TO 30
+      go to 30
 
-C***DONE PLOTTING -- DRAW AND LABEL GRID, IF DESIRED
-  100 SPLAT(2) = 90.
-      SPLAT(1) = -90.
-      IF (IGRID .EQ. 0) GO TO 300
-      IDOTS = IDOT
-      IDOT = 0
+c***done plotting -- draw and label grid, if desired
+  100 splat(2) = 90.
+      splat(1) = -90.
+      if (igrid .eq. 0) go to 300
+      idots = idot
+      idot = 0
 
 c     if (idot .eq. 0) go to 200
 
-C LETTER KEY MERIDIANS AND POLES
+c letter key meridians and poles
 
-C       SOUTH POLE
-      ISPF = 0
-      RLAT = -90.
-      RLON = 0.0
-      CALL QCON
-      IF ((U .GT. UMAX) .OR. (U .LT. UMIN) .OR. (V .GT. VMAX) .OR.
-     1    (V .LT. VMIN)) GO TO 110
-      USP = U
-      VSP = V
-      ISPF = 1
-      IPF = 1
-      If (phia .LT. 0) CALL PWRT (U,V,2HSP,2,1,0)
+c       south pole
+      ispf = 0
+      rlat = -90.
+      rlon = 0.0
+      call qcon
+      if ((u .gt. umax) .or. (u .lt. umin) .or. (v .gt. vmax) .or.
+     1    (v .lt. vmin)) go to 110
+      usp = u
+      vsp = v
+      ispf = 1
+      ipf = 1
+      if (phia .lt. 0) call pwrt (u,v,2hsp,2,1,0)
 
-C       NORTH POLE
-110   INPF = 0
-      IPF = 0
-      RLAT = 90.
-      CALL QCON
-      IF ((U .GT. UMAX) .OR. (U .LT. UMIN) .OR. (V .GT. VMAX) .OR.
-     1    (V .LT. VMIN)) GO TO 120
-      UNP = U
-      VNP = V
-      INPF = 1
-      IPF = 1
-      If (phia .GT. 0) CALL PWRT (U,V,2HNP,2,1,0)
+c       north pole
+110   inpf = 0
+      ipf = 0
+      rlat = 90.
+      call qcon
+      if ((u .gt. umax) .or. (u .lt. umin) .or. (v .gt. vmax) .or.
+     1    (v .lt. vmin)) go to 120
+      unp = u
+      vnp = v
+      inpf = 1
+      ipf = 1
+      if (phia .gt. 0) call pwrt (u,v,2hnp,2,1,0)
 
-C       EQUATOR
-  120 RLON = PHIO-10.
-      RLAT = 0.0
-      DO 125 I=1,36
-         RLON = RLON+10.
-         CALL QCON
-         IF (U.LE.UMAX .AND. U.GE.UMIN .AND. V.LE.VMAX .AND. V.GE.VMIN)
-     1       GO TO 130
-  125 CONTINUE
-      GO TO 140
+c       equator
+  120 rlon = phio-10.
+      rlat = 0.0
+      do 125 i=1,36
+         rlon = rlon+10.
+         call qcon
+         if (u.le.umax .and. u.ge.umin .and. v.le.vmax .and. v.ge.vmin)
+     1       go to 130
+  125 continue
+      go to 140
 
-  130 CALL PWRT (U,V,2HEQ,2,1,0)
+  130 call pwrt (u,v,2heq,2,1,0)
 
-C       GREENWICH MERIDIAN
-  140 RLAT = 85.
-      RLON = 0.0
-      DO 145 I=1,16
-         RLAT = RLAT-10.
-         CALL QCON
-         IF (U.LE.UMAX .AND. U.GE.UMIN .AND. V.LE.VMAX .AND. V.GE.VMIN)
-     1       GO TO 150
-  145 CONTINUE
-      GO TO 160
+c       greenwich meridian
+  140 rlat = 85.
+      rlon = 0.0
+      do 145 i=1,16
+         rlat = rlat-10.
+         call qcon
+         if (u.le.umax .and. u.ge.umin .and. v.le.vmax .and. v.ge.vmin)
+     1       go to 150
+  145 continue
+      go to 160
 
-  150 CALL PWRT (U,V,2HGM,2,1,0)
+  150 call pwrt (u,v,2hgm,2,1,0)
 
-C       DATE LINE
-  160 RLAT = 85.
-      RLON = 180.
-      DO 165 I=1,16
-         RLAT = RLAT-10.
-         CALL QCON
-         IF (U.LE.UMAX .AND. U.GE.UMIN .AND. V.LE.VMAX .AND. V.GE.VMIN)
-     1       GO TO 170
-  165 CONTINUE
-      GO TO 200
+c       date line
+  160 rlat = 85.
+      rlon = 180.
+      do 165 i=1,16
+         rlat = rlat-10.
+         call qcon
+         if (u.le.umax .and. u.ge.umin .and. v.le.vmax .and. v.ge.vmin)
+     1       go to 170
+  165 continue
+      go to 200
 
-  170 CALL PWRT (U,V,1HI,1,1,0)
+  170 call pwrt (u,v,1hi,1,1,0)
 
-  200 RGRID = IGRID
-c      CALL DASHLN (LDASH2)
-c       CALL OPTN(2HIN,MPCOL2)
+  200 rgrid = igrid
+c      call dashln (ldash2)
+c       call optn(2hin,mpcol2)
 
-C SHOULD WE BOTHER LIMITING GRID POINTS TRANSFORMED?
-      IF (ICF .NE. 0) GO TO 270
-      IF (IPROJ.GE.8 .AND. IPROJ.LE.10) GO TO 270
+c should we bother limiting grid points transformed?
+      if (icf .ne. 0) go to 270
+      if (iproj.ge.8 .and. iproj.le.10) go to 270
 
-C SET UP TO FIND EXTREMA
-      DLON = RGRID
-      STLON = FLOOR(POLONG/RGRID)*RGRID
-      IF (ISPF.NE.0 .AND. INPF.EQ.0) STLON = STLON+180.
-      RLON = STLON-DLON
-      SPLON = STLON+360.
-      J = 0
-      PSIGN = 1.
+c set up to find extrema
+      dlon = rgrid
+      stlon = floor(polong/rgrid)*rgrid
+      if (ispf.ne.0 .and. inpf.eq.0) stlon = stlon+180.
+      rlon = stlon-dlon
+      splon = stlon+360.
+      j = 0
+      psign = 1.
 
-C CHECK FOR SOUTH POLE
-      IF (ISPF .NE. 0) PSIGN = -1.
+c check for south pole
+      if (ispf .ne. 0) psign = -1.
 
-C DO WE GRID POLES SPECIALLY?
-      SPLAT(2) = 90.*PSIGN
-      SPLAT(1) = SPLAT(2)
+c do we grid poles specially?
+      splat(2) = 90.*psign
+      splat(1) = splat(2)
 
-C IF BOTH POLES WITHIN FRAME JUMP.
-      IF (INPF.NE.0 .AND. ISPF.NE.0) GO TO 270
+c if both poles within frame jump.
+      if (inpf.ne.0 .and. ispf.ne.0) go to 270
 
-C IF EITHER IN FRAME USE AS BASE
-      IF (INPF.NE.0 .OR. ISPF.NE.0) GO TO 230
+c if either in frame use as base
+      if (inpf.ne.0 .or. ispf.ne.0) go to 230
 
-C NO POLE IS CLOSE TO THE WINDOW
-      J = -1
-      SPLAT(2) = FLOOR(PHIA/RGRID)*RGRID
-      IF (ABS(SPLAT(2)) .EQ. 90.) SPLAT(2) = 0.0
+c no pole is close to the window
+      j = -1
+      splat(2) = floor(phia/rgrid)*rgrid
+      if (abs(splat(2)) .eq. 90.) splat(2) = 0.0
 
-C SEARCH FOR FIRST POINT WITHIN FRAME.
-  210 RLON = RLON+DLON
-      DLAT = RGRID
-      RLAT = SPLAT(2)-DLAT
-  215 RLAT = RLAT+DLAT
-      CALL QCON
-      IF ((U .LE. UMAX) .AND. (U .GE. UMIN) .AND. (V .LE. VMAX) .AND.
-     1    (V .GE. VMIN)) GO TO 225
-      IF (ABS(RLAT) .LT. 90.) GO TO 215
-      IF (DLAT .LT. 0.0) GO TO 220
+c search for first point within frame.
+  210 rlon = rlon+dlon
+      dlat = rgrid
+      rlat = splat(2)-dlat
+  215 rlat = rlat+dlat
+      call qcon
+      if ((u .le. umax) .and. (u .ge. umin) .and. (v .le. vmax) .and.
+     1    (v .ge. vmin)) go to 225
+      if (abs(rlat) .lt. 90.) go to 215
+      if (dlat .lt. 0.0) go to 220
 
-C REVERSE LATITUDE SEARCH DIRECTION
-      RLAT = SPLAT(2)+DLAT
-      DLAT = -DLAT
-      GO TO 215
+c reverse latitude search direction
+      rlat = splat(2)+dlat
+      dlat = -dlat
+      go to 215
 
-C UPDATE LONGITUDE ! QUIT.
-  220 J = 0
-      IF (RLON-SPLON) 210,300,300
+c update longitude ! quit.
+  220 j = 0
+      if (rlon-splon) 210,300,300
 
-C SET UP FOR LIMIT SEARCH
-  225 J = J+1
-      STLON = RLON
-      RLON = STLON-DLON
-      IF (RLAT .EQ. 0.0) RLAT = SIGN(RLAT,-PSIGN)
-      SPLAT(2) = RLAT
-      SPLAT(1) = SPLAT(2)
+c set up for limit search
+  225 j = j+1
+      stlon = rlon
+      rlon = stlon-dlon
+      if (rlat .eq. 0.0) rlat = sign(rlat,-psign)
+      splat(2) = rlat
+      splat(1) = splat(2)
 
       splat(1) = 90.0
       splat(2) = -90.0
@@ -1106,240 +1106,240 @@ C SET UP FOR LIMIT SEARCH
       endif
       if (dlon .ne. 0.0) go to 285
 
-C LONGITUDE LOOP
-C       IGF     FLAG TO SIGNAL NO POINTS WITHIN WINDOW.
-C       IPF     FLAG SIGNALS WHETHER A POLE LIES WITHIN THE FRAME.
-C       ILF     FLAG SIGNALS WHETHER TO PLOT COMPLETE LONGITUDES
-C               (I.E. TO POLE FOR ALL LATITUDES.)
-  230 RLON = RLON+DLON
-      IF (RLON.GE.SPLON .OR. RLON.LT.STLON) GO TO 285
-      I1 = IPF
-      I2 = MOD(I1+1,2)
-      TSA = PSIGN
-      DLAT = -PSIGN
-      DX = AMOD(90.,RGRID)
-      IF (DX .EQ. 0.0) DX = RGRID
-      XLAT = 90.-DX
-      IF (ILF.NE.0 .OR. AMOD(RLON,90.).EQ.0.0) XLAT = 90.
-      OLAT = SIGN(AMIN1(ABS(SPLAT(I2+1)),XLAT),SPLAT(I2+1))
-      IGF = 0
-  235 IFST = 1
-      IGO = 0
-      RLAT = OLAT
-      CALL QVEC
+c longitude loop
+c       igf     flag to signal no points within window.
+c       ipf     flag signals whether a pole lies within the frame.
+c       ilf     flag signals whether to plot complete longitudes
+c               (i.e. to pole for all latitudes.)
+  230 rlon = rlon+dlon
+      if (rlon.ge.splon .or. rlon.lt.stlon) go to 285
+      i1 = ipf
+      i2 = mod(i1+1,2)
+      tsa = psign
+      dlat = -psign
+      dx = amod(90.,rgrid)
+      if (dx .eq. 0.0) dx = rgrid
+      xlat = 90.-dx
+      if (ilf.ne.0 .or. amod(rlon,90.).eq.0.0) xlat = 90.
+      olat = sign(amin1(abs(splat(i2+1)),xlat),splat(i2+1))
+      igf = 0
+  235 ifst = 1
+      igo = 0
+      rlat = olat
+      call qvec
 
-C LATITUDE LOOP.
-  240 RLAT = RLAT+DLAT
-      IGF = MAX0(IGO,IGF)
-      CALL QVEC
-      IF (IGO .NE. 0) GO TO 245
+c latitude loop.
+  240 rlat = rlat+dlat
+      igf = max0(igo,igf)
+      call qvec
+      if (igo .ne. 0) go to 245
 
-C THIS POINT OUTSIDE THE FRAME
-      IF (RLAT*TSA .LE. SPLAT(I1+1)*TSA) GO TO 250
-  245 IF (ABS(RLAT) .LT. XLAT) GO TO 240
-      RLAT = SIGN(AMAX1(ABS(SPLAT(I1+1)),XLAT),SPLAT(I1+1))
+c this point outside the frame
+      if (rlat*tsa .le. splat(i1+1)*tsa) go to 250
+  245 if (abs(rlat) .lt. xlat) go to 240
+      rlat = sign(amax1(abs(splat(i1+1)),xlat),splat(i1+1))
 
-C POSSIBLE NEW LATITUDE EXTREME.
-  250 SPLAT(I1+1) = RLAT
+c possible new latitude extreme.
+  250 splat(i1+1) = rlat
 
-C REVERSE LATITUDE SEARCH DIRECTION
-      I1 = I2
-      I2 = MOD(I1+1,2)
-      TSA = -PSIGN
-      DLAT = PSIGN
-      IF (I1 .NE. 0) GO TO 235
+c reverse latitude search direction
+      i1 = i2
+      i2 = mod(i1+1,2)
+      tsa = -psign
+      dlat = psign
+      if (i1 .ne. 0) go to 235
 
-C LATITUDE LOOP FINISHED.
-      IF (ABS(SPLAT(I2+1)) .LT. 90.) GO TO 255
-      IPF = 1
-      PSIGN = SIGN(1.,SPLAT(I2+1))
-      SPLAT(I2+1) = SPLAT(I1+1)
-      SPLAT(I1+1) = 90.*PSIGN
-  255 IF (IGF .NE. 0) GO TO 230
+c latitude loop finished.
+      if (abs(splat(i2+1)) .lt. 90.) go to 255
+      ipf = 1
+      psign = sign(1.,splat(i2+1))
+      splat(i2+1) = splat(i1+1)
+      splat(i1+1) = 90.*psign
+  255 if (igf .ne. 0) go to 230
 
-C LONGITUDE EXTREME REACHED.
-      IF (J .NE. 0) GO TO 260
+c longitude extreme reached.
+      if (j .ne. 0) go to 260
 
-C CHANGE LONGITUDE DIRECTION.
-      J = 1
-      SPLON = RLON
-      RLON = STLON
-      DLON = -DLON
-      STLON = SPLON-360.
-      GO TO 230
+c change longitude direction.
+      j = 1
+      splon = rlon
+      rlon = stlon
+      dlon = -dlon
+      stlon = splon-360.
+      go to 230
 
-C SET UP LAST LONGITUDE EXTREME
-  260 IF (DLON .LT. 0.0) GO TO 265
-      SPLON = RLON
-      GO TO 285
-  265 STLON = RLON
-      GO TO 285
+c set up last longitude extreme
+  260 if (dlon .lt. 0.0) go to 265
+      splon = rlon
+      go to 285
+  265 stlon = rlon
+      go to 285
 
-C DRAW ALL MERIDIANS.
-  270 DLON = RGRID
-      STLON = 0.0
-      SPLON = 360.
-      RLON = 0.0
-      SPLAT(2) = 90.
-      SPLAT(1) = -90.
-      DX = AMOD(90.,RGRID)
-      IF (DX .EQ. 0.0) DX = RGRID
-      OLAT = 90.-DX
+c draw all meridians.
+  270 dlon = rgrid
+      stlon = 0.0
+      splon = 360.
+      rlon = 0.0
+      splat(2) = 90.
+      splat(1) = -90.
+      dx = amod(90.,rgrid)
+      if (dx .eq. 0.0) dx = rgrid
+      olat = 90.-dx
 
-  275 RLON = RLON+DLON
-      IGO = 0
-      IFST = 1
-      XLAT = OLAT
+  275 rlon = rlon+dlon
+      igo = 0
+      ifst = 1
+      xlat = olat
 
-      IF (ILF.NE.0 .OR. AMOD(RLON,90.).EQ.0.0) then
-         If (phia.LT.0) then
+      if (ilf.ne.0 .or. amod(rlon,90.).eq.0.0) then
+         if (phia.lt.0) then
             rlat = 0.0
             xlat = 90.0
 
-         Else if (phia.GE.0) then
+         else if (phia.ge.0) then
             rlat = 90.0
             xlat = 0.0
 
-         End if
+         end if
 
-      Else
+      else
          rlat = xlat
 
-      End if
+      end if
 
-      CALL QVEC
-  280 RLAT = RLAT-1.
-      CALL QVEC
-      IF (RLAT .GT. -XLAT) GO TO 280
-      IF (RLON .LT. SPLON) GO TO 275
+      call qvec
+  280 rlat = rlat-1.
+      call qvec
+      if (rlat .gt. -xlat) go to 280
+      if (rlon .lt. splon) go to 275
 
-C DRAW PARALLELS
-  285 DLAT = RGRID
-      RLAT = AMIN1(SPLAT(2),SPLAT(1))
-      OLAT = AMAX1(SPLAT(2),SPLAT(1))
-      SPLAT(2) = FLOOR(RLAT/RGRID)*RGRID
-      SPLAT(1) = AMIN1(CLING(OLAT/RGRID)*RGRID,90.)
-      RLAT = AMAX1(DLAT-90.,SPLAT(2))-DLAT
-      OLAT = AMIN1(90.-DLAT,SPLAT(1))
+c draw parallels
+  285 dlat = rgrid
+      rlat = amin1(splat(2),splat(1))
+      olat = amax1(splat(2),splat(1))
+      splat(2) = floor(rlat/rgrid)*rgrid
+      splat(1) = amin1(cling(olat/rgrid)*rgrid,90.)
+      rlat = amax1(dlat-90.,splat(2))-dlat
+      olat = amin1(90.-dlat,splat(1))
 c      if (dlon .gt. 0.0) then
 c          stlon = stlon - dlon
 c      else
 c          stlon = stlon + dlon
 c      endif
-      DLON = 1.
-      IF (ILF .NE. 0) IPF = 0
+      dlon = 1.
+      if (ilf .ne. 0) ipf = 0
 
-  290 RLAT = RLAT+DLAT
-      IF (IPF .NE. 0) DLON = 1./COS(DTR*RLAT)
-      IGO = 0
-      IFST = 1
-      RLON = STLON
-      CALL QVEC
+  290 rlat = rlat+dlat
+      if (ipf .ne. 0) dlon = 1./cos(dtr*rlat)
+      igo = 0
+      ifst = 1
+      rlon = stlon
+      call qvec
 
-  295 RLON = RLON+DLON
-      CALL QVEC
-      IF (RLON .LE. SPLON) GO TO 295
-      IF (RLAT .LT. OLAT) GO TO 290
+  295 rlon = rlon+dlon
+      call qvec
+      if (rlon .le. splon) go to 295
+      if (rlat .lt. olat) go to 290
 
-      IDOT = IDOTS
-c      CALL DASHLN (LDASH3)
-c       CALL OPTN(2HIN,MPCOL3)
+      idot = idots
+c      call dashln (ldash3)
+c       call optn(2hin,mpcol3)
 
-C DRAW LIMB LINES
-  300 IDOTS = IDOT
-      IDOT = 0
-      GO TO (400,330,305,335,400,340,400,400,400,345,
-     1       400,400,345),IPROJ
+c draw limb lines
+  300 idots = idot
+      idot = 0
+      go to (400,330,305,335,400,340,400,400,400,345,
+     1       400,400,345),iproj
 
-C LAMBERT CONFORMAL CONIC           [3]
+c lambert conformal conic           [3]
   305 continue
       go to 400 ! test to eliminate spurious line
-      DLAT = 1.
-      RLON = PHIO+CON2
-      OLAT = AMAX1(-90.,SPLAT(2)-DLAT)
-      K = CLING(SPLAT(1)-SPLAT(2))
-      DO 320 I=1,2
-         IGO = 0
-         IFST = 1
-         RLAT = OLAT
-         CALL QVEC
-         DO 310 J=1,K
-            RLAT = RLAT+DLAT
-            CALL QVEC
-  310    CONTINUE
-         RLON = PHIO-CON2
-  320 CONTINUE
-      GO TO 400
+      dlat = 1.
+      rlon = phio+con2
+      olat = amax1(-90.,splat(2)-dlat)
+      k = cling(splat(1)-splat(2))
+      do 320 i=1,2
+         igo = 0
+         ifst = 1
+         rlat = olat
+         call qvec
+         do 310 j=1,k
+            rlat = rlat+dlat
+            call qvec
+  310    continue
+         rlon = phio-con2
+  320 continue
+      go to 400
 
-C ORTHOGRAPHIC                  [2]
-  330 RADIUS = 1.
-      AXIS = 1.
-      GO TO 350
+c orthographic                  [2]
+  330 radius = 1.
+      axis = 1.
+      go to 350
 
-C LAMBERT EQUAL AREA            [4]
-  335 RADIUS = 2.
-      AXIS = 1.
-      GO TO 350
+c lambert equal area            [4]
+  335 radius = 2.
+      axis = 1.
+      go to 350
 
-C AZIMUTHAL EQUDISTANT          [6]
-  340 RADIUS = PI
-      AXIS = 1.
-      GO TO 350
+c azimuthal equdistant          [6]
+  340 radius = pi
+      axis = 1.
+      go to 350
 
-C MOLLWEIDE                     [10,13]
-  345 RADIUS = 2.
-      AXIS = 0.5
+c mollweide                     [10,13]
+  345 radius = 2.
+      axis = 0.5
 
-  350 U = RADIUS
-      V = 0.0
-      W = 0.0
-      IGO = 0
-      IFST = 1
-      DO 370 I=1,361
-         V = AXIS*V
-         IF (U.LE.UMAX .AND. U.GE.UMIN .AND. V.LE.VMAX .AND. V.GE.VMIN)
-     1       GO TO 355
-         IGO = 0
-         GO TO 365
-  355    IF (IGO .NE. 0) GO TO 360
-         CALL FRSTPT (U,V)
-         IGO = 1
-         GO TO 365
+  350 u = radius
+      v = 0.0
+      w = 0.0
+      igo = 0
+      ifst = 1
+      do 370 i=1,361
+         v = axis*v
+         if (u.le.umax .and. u.ge.umin .and. v.le.vmax .and. v.ge.vmin)
+     1       go to 355
+         igo = 0
+         go to 365
+  355    if (igo .ne. 0) go to 360
+         call frstpt (u,v)
+         igo = 1
+         go to 365
 
-  360    CALL VECTOR (U,V)
-  365    V = U*SINLMB+W*COSLMB
-         U = U*COSLMB-W*SINLMB
-         W = V
-  370 CONTINUE
+  360    call vector (u,v)
+  365    v = u*sinlmb+w*coslmb
+         u = u*coslmb-w*sinlmb
+         w = v
+  370 continue
 
-C DRAW BORDER
-  400 IF (JGR .GT. 0)THEN
-c       CALL DASHLN(LDASH4)
-c       CALL OPTN(2HIN,MPCOL4)
-c       CALL PERIM(1,1,1,1)
+c draw border
+  400 if (jgr .gt. 0)then
+c       call dashln(ldash4)
+c       call optn(2hin,mpcol4)
+c       call perim(1,1,1,1)
 c        call frstpt (umin,vmin)
 c        call vector (umax,vmin)
 c        call vector (umax,vmax)
 c        call vector (umin,vmax)
 c        call vector (umin,vmin)
-      ENDIF
-      IDOT = IDOTS
-      RETURN
+      endif
+      idot = idots
+      return
 
-  905 RETURN
-      END
+  905 return
+      end
 
-C-------------------------------------------------------------------------------
-      SUBROUTINE QCON
-C THIS SUBROUTINE TRANSFORMS THE POINT (RLAT,RLON), IN DEGREES,
-C TO (U,V) ON THE MAP PLANE DEPENDENT UPON THE PROJECTION, IPROJ.
+c-------------------------------------------------------------------------------
+      subroutine qcon
+c this subroutine transforms the point (rlat,rlon), in degrees,
+c to (u,v) on the map plane dependent upon the projection, iproj.
 
-        COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP5/PHIOC,SINO,COSO,SINR,COSR,IPROJ
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
-        COMMON/SUPMPA/IIER
+        common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp5/phioc,sino,coso,sinr,cosr,iproj
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp8/u,v,u1,v1,u2,v2
+        common/supmpa/iier
 c
 c
       common /supmp7/   phio,phia,igrid,idot,ilts
@@ -1347,36 +1347,36 @@ c
       data      resl    / 2.9765625 /
 c
 c
-      DATA OLDU,OLDV / 0.,0./
+      data oldu,oldv / 0.,0./
 
-      U = AMOD(RLON+PHIOC,360.)-180.
+      u = amod(rlon+phioc,360.)-180.
 
-      GO TO (50 ,50 ,130,50 ,50 ,50 ,170,50 ,50 ,50 ,
-     1       210,220,230),IPROJ
+      go to (50 ,50 ,130,50 ,50 ,50 ,170,50 ,50 ,50 ,
+     1       210,220,230),iproj
 
-   50 T1 = U*DTR
-      T2 = RLAT*DTR
-      SINPH = SIN(T1)
-      SINLA = SIN(T2)
-      COSPH = COS(T1)
-      COSLA = SQRT(1.-SINLA*SINLA)
-      TCOS = COSLA*COSPH
-      COSA = SINLA*SINO+TCOS*COSO
-      SINA = SQRT(CON1-COSA*COSA)
+   50 t1 = u*dtr
+      t2 = rlat*dtr
+      sinph = sin(t1)
+      sinla = sin(t2)
+      cosph = cos(t1)
+      cosla = sqrt(1.-sinla*sinla)
+      tcos = cosla*cosph
+      cosa = sinla*sino+tcos*coso
+      sina = sqrt(con1-cosa*cosa)
 
-C PATCH TO AVOID DIVIDE BY ZERO
-      OVSINA = 1.E12
-      IF(SINA.NE.0.0)OVSINA = 1./SINA
-C END PATCH
+c patch to avoid divide by zero
+      ovsina = 1.e12
+      if(sina.ne.0.0)ovsina = 1./sina
+c end patch
 
-      SINB = COSLA*SINPH*OVSINA
-      COSB = (SINLA*COSO-TCOS*SINO)*OVSINA
+      sinb = cosla*sinph*ovsina
+      cosb = (sinla*coso-tcos*sino)*ovsina
 
-C PERFORM TRANSFORMATION APPROPRIATE TO THE PROJECTION
-      GO TO (110,120,130,140,150,160,170,180,190,200),IPROJ
+c perform transformation appropriate to the projection
+      go to (110,120,130,140,150,160,170,180,190,200),iproj
 
-C STEREOGRAPHIC                         [1]
-  110 R = (1.-COSA)*OVSINA
+c stereographic                         [1]
+  110 r = (1.-cosa)*ovsina
         a = atan2 (sina, cosa) * 0.5
         r = tan (a)
       go to 300
@@ -1386,440 +1386,440 @@ c     call maproj_poster (rlat, rlon, u, v, resl, polong, ihemi, 1)
 c     v     = 8193 - v
 c     go to 305
 
-C ORTHOGRAPHIC                          [2]
-  120 R = SINA
-      IF (COSA) 320,320,300
+c orthographic                          [2]
+  120 r = sina
+      if (cosa) 320,320,300
 
-C LAMBERT CONFORMAL CONIC               [3]
-  130 UDIF = ABS(U-OLDU)
-      OLDU = U
-      CHI = 90.-SGN*RLAT
-      IF (CHI .GE. CON2) GO TO 320
-      R = TAN(0.5*DTR*CHI)**CONE
-      U = U*CONE*DTR
-      V = -R*SGN*COS(U)
-      U = R*SIN(U)
-      GO TO 310
+c lambert conformal conic               [3]
+  130 udif = abs(u-oldu)
+      oldu = u
+      chi = 90.-sgn*rlat
+      if (chi .ge. con2) go to 320
+      r = tan(0.5*dtr*chi)**cone
+      u = u*cone*dtr
+      v = -r*sgn*cos(u)
+      u = r*sin(u)
+      go to 310
 
-C LAMBERT EQUAL AREA                    [4]
-  140 IF (ABS(COSA+1.) .LT. 1.E-6) GO TO 320
-      R = (1.+COSA)*OVSINA
-      R = 2./SQRT(1.+R*R)
-      GO TO 300
+c lambert equal area                    [4]
+  140 if (abs(cosa+1.) .lt. 1.e-6) go to 320
+      r = (1.+cosa)*ovsina
+      r = 2./sqrt(1.+r*r)
+      go to 300
 
-C GNOMONIC                              [5]
-  150 IF (COSA .LE. 0.0) GO TO 320
-      R = SINA/COSA
-      GO TO 300
+c gnomonic                              [5]
+  150 if (cosa .le. 0.0) go to 320
+      r = sina/cosa
+      go to 300
 
-C AZIMUTHAL EQUIDIDSANT                 [6]
-  160 IF (ABS(COSA+1.) .LT. 1.E-6) GO TO 320
-      R = ACOS(COSA)
-      GO TO 300
+c azimuthal equididsant                 [6]
+  160 if (abs(cosa+1.) .lt. 1.e-6) go to 320
+      r = acos(cosa)
+      go to 300
 
-C DUMMY   --  ERROR                     [7]
-  170 IIER = 33
-      CALL ULIBER2 (IIER,
-     1             ' SUPMAP-ATTEMPT TO USE NON-EXISTENT PROJECTION')
-      GO TO 320
+c dummy   --  error                     [7]
+  170 iier = 33
+      call uliber2 (iier,
+     1             ' supmap-attempt to use non-existent projection')
+      go to 320
 
-C CYLINDRICAL EQUIDISTANT,  ARBITRARY POLE AND ORIENTATION.
-  180 IF (ABS(1.-COSA*COSA) .LT. 1.E-4) GO TO 320
-      U = ATAN2(SINB*COSR+COSB*SINR,SINB*SINR-COSB*COSR)*RTD
-      V = 90.-ACOS(COSA)*RTD
-      GO TO 305
+c cylindrical equidistant,  arbitrary pole and orientation.
+  180 if (abs(1.-cosa*cosa) .lt. 1.e-4) go to 320
+      u = atan2(sinb*cosr+cosb*sinr,sinb*sinr-cosb*cosr)*rtd
+      v = 90.-acos(cosa)*rtd
+      go to 305
 
-C MERCATOR, ARBITRARY POLE AND ORIENTATION.
-  190 IF ((1.-COSA*COSA) .LT. 2.E-6) GO TO 320
-      U = ATAN2(SINB*COSR+COSB*SINR,SINB*SINR-COSB*COSR)
-      V = ALOG((1.+COSA)*OVSINA)
-      GO TO 305
+c mercator, arbitrary pole and orientation.
+  190 if ((1.-cosa*cosa) .lt. 2.e-6) go to 320
+      u = atan2(sinb*cosr+cosb*sinr,sinb*sinr-cosb*cosr)
+      v = alog((1.+cosa)*ovsina)
+      go to 305
 
-C MOLLWEIDE, ARBITRARY POLE AND ORIENTATION.
-  200 IF (ABS(1.-COSA*COSA) .LT. 2.E-6) GO TO 320
-      U = ATAN2(SINB*COSR+COSB*SINR,SINB*SINR-COSB*COSR)*TOVPI
-      UDIF = ABS(U-OLDU)
-      OLDU = U
-      V = COSA
-C     U = U*SQRT(1.-V*V)
-      U = U*SQRT(ABS(1.-V*V))
-      GO TO 310
+c mollweide, arbitrary pole and orientation.
+  200 if (abs(1.-cosa*cosa) .lt. 2.e-6) go to 320
+      u = atan2(sinb*cosr+cosb*sinr,sinb*sinr-cosb*cosr)*tovpi
+      udif = abs(u-oldu)
+      oldu = u
+      v = cosa
+c     u = u*sqrt(1.-v*v)
+      u = u*sqrt(abs(1.-v*v))
+      go to 310
 
-C CYLINDRICAL EQUIDISTANT FOR POLAT = ROT = 0.  [11]
-  210 V = RLAT
-      GO TO 305
+c cylindrical equidistant for polat = rot = 0.  [11]
+  210 v = rlat
+      go to 305
 
-C MERCATOR                              [12]
-  220 U = U*DTR
-      V = ALOG(TAN(0.00872664*(RLAT+90.0001)))
-      GO TO 305
+c mercator                              [12]
+  220 u = u*dtr
+      v = alog(tan(0.00872664*(rlat+90.0001)))
+      go to 305
 
-C MOLLWEIDE                             [13]
-  230 U = U*OV90
-      V = SIN(RLAT*DTR)
-      UDIF = ABS(U-OLDU)
-      OLDU = U
-      U = U*SQRT(1.-V*V)
-      GO TO 310
+c mollweide                             [13]
+  230 u = u*ov90
+      v = sin(rlat*dtr)
+      udif = abs(u-oldu)
+      oldu = u
+      u = u*sqrt(1.-v*v)
+      go to 310
 
-C TERMINAL PHASE    [1,2,4,5,6]
-  300 U = R*(SINB*COSR+COSB*SINR)
-      V = R*(COSB*COSR-SINB*SINR)
+c terminal phase    [1,2,4,5,6]
+  300 u = r*(sinb*cosr+cosb*sinr)
+      v = r*(cosb*cosr-sinb*sinr)
 
-C CHECK FOR CROSSOVER
-  305 UDIF = ABS(U-OLDU)
-      OLDU = U
-  310 VDIF = ABS(V-OLDV)
-      OLDV = V
-      ICROSS = 0
-      IF (UDIF.GT.UEPS .OR. VDIF.GT.VEPS) ICROSS = 1
-      RETURN
+c check for crossover
+  305 udif = abs(u-oldu)
+      oldu = u
+  310 vdif = abs(v-oldv)
+      oldv = v
+      icross = 0
+      if (udif.gt.ueps .or. vdif.gt.veps) icross = 1
+      return
 
-C DISPENSE WITH UNDEFINED POINTS
-  320 U = 1.E12
-      ICROSS = 0
-      IF (ABS(U-OLDU) .GT. UEPS) ICROSS = 1
-      OLDU = U
-      RETURN
+c dispense with undefined points
+  320 u = 1.e12
+      icross = 0
+      if (abs(u-oldu) .gt. ueps) icross = 1
+      oldu = u
+      return
 
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE QVEC
-C THIS SUBROUTINE TRANSFORMS AND PLOTS LINE SEGMENTS FOR SUPMAP AND OTHERS
+      end
+c-------------------------------------------------------------------------------
+      subroutine qvec
+c this subroutine transforms and plots line segments for supmap and others
 
-C INPUTS (PASSED THROUGH COMMON.)
+c inputs (passed through common.)
 
-C  (RLAT,RLON)  NEXT POINT TO BE PLOTTED
-C  IFST         A FLAG USED TO SIGNAL THE FIRST POINT OF A LINE SEGMENT
-C               = 0  -  START A NEW LINE
-C               = 1  -  CONTINUATION OF A LINE
+c  (rlat,rlon)  next point to be plotted
+c  ifst         a flag used to signal the first point of a line segment
+c               = 0  -  start a new line
+c               = 1  -  continuation of a line
 
-C OTHER VARIABLES
+c other variables
 
-C  (U,V)        NEXT POINT TRANSFORMED TO THE VIRTUAL SCREEN BY SUPCONQ
-C  ICROSS       A FLAG RETURNED BY SUPCONQ FOR CYLINDRICAL PROJECTIONS
-C  IGO          = 0  -  LAST POINT NOT PLOTTED
-C               = 1  -  LAST POINT WAS PLOTTED.
-C  (U1,V1),(U2,V2)  PARAMETERS PASSED TO SUPTRP.
+c  (u,v)        next point transformed to the virtual screen by supconq
+c  icross       a flag returned by supconq for cylindrical projections
+c  igo          = 0  -  last point not plotted
+c               = 1  -  last point was plotted.
+c  (u1,v1),(u2,v2)  parameters passed to suptrp.
 
-        COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
-        COMMON/SUPMP9/DS,DI,DSRDI
+        common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp8/u,v,u1,v1,u2,v2
+        common/supmp9/ds,di,dsrdi
 
-c     SQU(X) = (X)*(X)
+c     squ(x) = (x)*(x)
 
-C TRANSFORM THE POINT
-      CALL QCON
+c transform the point
+      call qcon
 
-C HAVE WE FLIPPED TO OTHER SIDE OF FRAME?
-      IF (ICROSS .NE. 0) IGO = 0
+c have we flipped to other side of frame?
+      if (icross .ne. 0) igo = 0
 
-C ARE WE WITHIN THE FRAME?
-      IF (U.GT.UMAX .OR. U.LT.UMIN .OR. V.GT.VMAX .OR. V.LT.VMIN)
-     1    GO TO 20
-      IF (IGO .EQ. 0) GO TO 30
+c are we within the frame?
+      if (u.gt.umax .or. u.lt.umin .or. v.gt.vmax .or. v.lt.vmin)
+     1    go to 20
+      if (igo .eq. 0) go to 30
 
-C CONTINUE LINE
-C CHECK PROXIMITY TO PREVIOUS POINT.
-c   5 IF ((SQU(U-UOLD)+SQU(V-VOLD))*DS .LE. DI) RETURN
+c continue line
+c check proximity to previous point.
+c   5 if ((squ(u-uold)+squ(v-vold))*ds .le. di) return
     5 continue
-      CALL VECPLT
-   10 UOLD = U
-      VOLD = V
-      IGOLD = IGO
-      RETURN
+      call vecplt
+   10 uold = u
+      vold = v
+      igold = igo
+      return
 
-C THIS POINT LIES OUTSIDE THE FRAME
-   20 IGO = 0
-      IF (IFST .NE. 0) GO TO 65
+c this point lies outside the frame
+   20 igo = 0
+      if (ifst .ne. 0) go to 65
 
-      IF (IGOLD .EQ. 0) GO TO 10
+      if (igold .eq. 0) go to 10
 
-C IT WAS INSIDE - INTERPOLATE TO EDGE OF FRAME
-C STATUS OF LAST POINT.   IF NOT INSIDE FRAME, GO ON
+c it was inside - interpolate to edge of frame
+c status of last point.   if not inside frame, go on
 
-C IF UNINTERPOLATABLE
-      IF (ICROSS .NE. 0) GO TO 70
+c if uninterpolatable
+      if (icross .ne. 0) go to 70
 
-      U1 = UOLD
-      V1 = VOLD
-      U2 = U
-      V2 = V
-      CALL SUPTRP
+      u1 = uold
+      v1 = vold
+      u2 = u
+      v2 = v
+      call suptrp
 
-C CHECK PROXIMITY TO PREVIOUS POINT.
-c     IF ((SQU(U-UOLD)+SQU(V-VOLD))*DS .LE. DI) GO TO 25
-      CALL VECPLT
-   25 UOLD = U2
-      VOLD = V2
-      IGOLD = 0
-      RETURN
+c check proximity to previous point.
+c     if ((squ(u-uold)+squ(v-vold))*ds .le. di) go to 25
+      call vecplt
+   25 uold = u2
+      vold = v2
+      igold = 0
+      return
 
-C THIS POINT IS WITHIN THE FRAME
+c this point is within the frame
 
-C IS IT THE FIRST POINT OF A LINE?
-   30 IF (IFST .NE. 0) GO TO 60
-      IF (IGOLD .EQ. 0) GO TO 50
+c is it the first point of a line?
+   30 if (ifst .ne. 0) go to 60
+      if (igold .eq. 0) go to 50
 
-C THE PREVIOUS POINT WAS INSIDE THE FRAME ON THE OTHER SIDE.
-C START A NEW LINE
-   40 CALL FRSTPT (U,V)
-      IGO = 1
-      GO TO 10
+c the previous point was inside the frame on the other side.
+c start a new line
+   40 call frstpt (u,v)
+      igo = 1
+      go to 10
 
-C LAST POINT NOT IN FRAME - THIS ONE IS
-   50 IF (ICROSS .NE. 0) GO TO 40
+c last point not in frame - this one is
+   50 if (icross .ne. 0) go to 40
 
-C INTERPOLATE BACK TO EDGE
-      U1 = U
-      V1 = V
-      U2 = UOLD
-      V2 = VOLD
-      CALL SUPTRP
-      CALL FRSTPT (U,V)
-      IGO = 1
-      IGOLD = 1
-      UOLD = U
-      VOLD = V
-      U = U1
-      V = V1
-      GO TO 5
+c interpolate back to edge
+      u1 = u
+      v1 = v
+      u2 = uold
+      v2 = vold
+      call suptrp
+      call frstpt (u,v)
+      igo = 1
+      igold = 1
+      uold = u
+      vold = v
+      u = u1
+      v = v1
+      go to 5
 
-C FIRST POINT ON LINE SEGMENT  -  CHECK FOR DUPLICATION OF END POINT
-   60 IF (U.NE.UOLD .OR. V.NE.VOLD) CALL FRSTPT (U,V)
-      IGO = 1
-   65 IFST = 0
-      GO TO 10
+c first point on line segment  -  check for duplication of end point
+   60 if (u.ne.uold .or. v.ne.vold) call frstpt (u,v)
+      igo = 1
+   65 ifst = 0
+      go to 10
 
-C IGNORE UNDEFINED POINT
-   70 IFST = 1
-      GO TO 10
+c ignore undefined point
+   70 ifst = 1
+      go to 10
 
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE SUPTRP
-C THE INTERPOLATION ROUTINE.  FINDS (U,V) ON THE EDGE OF THE FRAME NEAREST
-C (U1,V1).  (U1,V1) MUST LIE WITHIN THE FRAME, (U2,V2) WITHOUT.
+      end
+c-------------------------------------------------------------------------------
+      subroutine suptrp
+c the interpolation routine.  finds (u,v) on the edge of the frame nearest
+c (u1,v1).  (u1,v1) must lie within the frame, (u2,v2) without.
 
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp8/u,v,u1,v1,u2,v2
 
-      F(V) = (V-V2)*DU/DV+U2
-      G(U) = (U-U2)*DV/DU+V2
+      f(v) = (v-v2)*du/dv+u2
+      g(u) = (u-u2)*dv/du+v2
 
-C FIND INDEX TO (U2,V2)
-C       5 | 4 | 6
-C       --+---+--
-C       2 | 1 | 3
-C       --+---+--
-C       8 | 7 | 9
-      I = 1
-      DU = U1-U2
-      DV = V1-V2
-      A = U2-UMIN
-      B = U2-UMAX
-      C = V2-VMIN
-      D = V2-VMAX
-      IF (A) 110,140,120
-  110 I = I+1
-      GO TO 140
-  120 IF (B) 140,140,130
-  130 I = I+2
-  140 IF (C) 150,200,160
-  150 I = I+6
-      GO TO 200
-  160 IF (D) 200,200,170
-  170 I = I+3
+c find index to (u2,v2)
+c       5 | 4 | 6
+c       --+---+--
+c       2 | 1 | 3
+c       --+---+--
+c       8 | 7 | 9
+      i = 1
+      du = u1-u2
+      dv = v1-v2
+      a = u2-umin
+      b = u2-umax
+      c = v2-vmin
+      d = v2-vmax
+      if (a) 110,140,120
+  110 i = i+1
+      go to 140
+  120 if (b) 140,140,130
+  130 i = i+2
+  140 if (c) 150,200,160
+  150 i = i+6
+      go to 200
+  160 if (d) 200,200,170
+  170 i = i+3
 
-  200 GO TO (900,210,220,230,240,250,260,270,280),I
+  200 go to (900,210,220,230,240,250,260,270,280),i
 
-  210 U = UMIN
-      GO TO 300
-  220 U = UMAX
-      GO TO 300
-  230 V = VMAX
-      GO TO 350
-  240 IF (F(VMAX)-UMIN) 210,230,230
-  250 IF (F(VMAX)-UMAX) 230,230,220
-  260 V = VMIN
-      GO TO 350
-  270 IF (F(VMIN)-UMIN) 210,260,260
-  280 IF (F(VMIN)-UMAX) 260,260,220
+  210 u = umin
+      go to 300
+  220 u = umax
+      go to 300
+  230 v = vmax
+      go to 350
+  240 if (f(vmax)-umin) 210,230,230
+  250 if (f(vmax)-umax) 230,230,220
+  260 v = vmin
+      go to 350
+  270 if (f(vmin)-umin) 210,260,260
+  280 if (f(vmin)-umax) 260,260,220
 
-C INTERPOLATE
-  300 V = G(U)
-      RETURN
-  350 U = F(V)
-      RETURN
+c interpolate
+  300 v = g(u)
+      return
+  350 u = f(v)
+      return
 
-C ERROR EXIT
-  900 U = U2
-      V = V2
-      RETURN
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE VECPLT
-C PLOTS THE LINE SEGMENT FROM (UOLD,VOLD) TO (U,V)
-C INPUTS (PASSED THROUGH COMMON)
-C  (UOLD,VOLD)  THE LAST POINT PLOTTED
-C  (U,V)        THE NEXT POINT
-C  IDOT         CONTROL FLAG  [ DOT VS PLOT ]
+c error exit
+  900 u = u2
+      v = v2
+      return
+      end
+c-------------------------------------------------------------------------------
+      subroutine vecplt
+c plots the line segment from (uold,vold) to (u,v)
+c inputs (passed through common)
+c  (uold,vold)  the last point plotted
+c  (u,v)        the next point
+c  idot         control flag  [ dot vs plot ]
 
-        COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-        COMMON/SUPMP7/PHIO,PHIA,IGRID,IDOT,ILTS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
-        COMMON/SUPMP9/DS,DI,DSRDI
+        common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+        common/supmp7/phio,phia,igrid,idot,ilts
+        common/supmp8/u,v,u1,v1,u2,v2
+        common/supmp9/ds,di,dsrdi
 
-C DO WE DOT OR PLOT?
-      IF (IDOT .NE. 0) GO TO 10
+c do we dot or plot?
+      if (idot .ne. 0) go to 10
 
-C PLOT
-      CALL VECTOR (U,V)
-      RETURN
+c plot
+      call vector (u,v)
+      return
 
-C DOT
-   10 DU = U-UOLD
-      DV = V-VOLD
+c dot
+   10 du = u-uold
+      dv = v-vold
 
-      call line(UOLD,VOLD,U,V)
-      RETURN
+      call line(uold,vold,u,v)
+      return
 
-      I = (ABS(DU)+ABS(DV))*DSRDI
-      IF (I .LE. 1) GO TO 30
-      A = 1./FLOAT(I)
-      I = I-1
-      DU = DU*A
-      DV = DV*A
-      UO = U
-      VO = V
-      U = UOLD
-      V = VOLD
-      DO 20 K=1,I
-         U = U+DU
-         V = V+DV
-         CALL POINT (U,V)
-   20 CONTINUE
-      U = UO
-      V = VO
-   30 CALL POINT (U,V)
-      RETURN
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE SUPVEC (XLAT,XLON)
-C THIS SUBROUTINE ALLOWS THE USER TO DRAW LINES ON THE VIRTUAL SCREEN SET UP BY
-C SUPMAP, UNENCUMBERED BY DECISIONS AS TO WHETHER IT WILL BE VISIBLE THROUGH
-C THE WINDOW.
-C USE SUPFST AND SUPVEC IN EXACTLY THE SAME MANNER AS FRSTPT AND VECTOR.
+      i = (abs(du)+abs(dv))*dsrdi
+      if (i .le. 1) go to 30
+      a = 1./float(i)
+      i = i-1
+      du = du*a
+      dv = dv*a
+      uo = u
+      vo = v
+      u = uold
+      v = vold
+      do 20 k=1,i
+         u = u+du
+         v = v+dv
+         call point (u,v)
+   20 continue
+      u = uo
+      v = vo
+   30 call point (u,v)
+      return
+      end
+c-------------------------------------------------------------------------------
+      subroutine supvec (xlat,xlon)
+c this subroutine allows the user to draw lines on the virtual screen set up by
+c supmap, unencumbered by decisions as to whether it will be visible through
+c the window.
+c use supfst and supvec in exactly the same manner as frstpt and vector.
 
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
 
-      RLAT = XLAT
-      RLON = XLON
-      CALL QVEC
-      RETURN
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE SUPFST (XLAT,XLON)
+      rlat = xlat
+      rlon = xlon
+      call qvec
+      return
+      end
+c-------------------------------------------------------------------------------
+      subroutine supfst (xlat,xlon)
 
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp4/ifst,igo,igold,icross,iout,uold,vold
 
-      IGO = 0
-      IFST = 1
-      RLAT = XLAT
-      RLON = XLON
-      CALL QVEC
-      RETURN
+      igo = 0
+      ifst = 1
+      rlat = xlat
+      rlon = xlon
+      call qvec
+      return
 
-      END
-C-------------------------------------------------------------------------------
-      SUBROUTINE SUPCON (XLAT,XLON,XU,XV)
-C THIS SUBROUTINE IS PROVIDED TO RETAIN COMPATIBILITY WITH USER'S PROGRAMS.
+      end
+c-------------------------------------------------------------------------------
+      subroutine supcon (xlat,xlon,xu,xv)
+c this subroutine is provided to retain compatibility with user's programs.
 
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp8/u,v,u1,v1,u2,v2
 
-      RLAT = XLAT
-      RLON = XLON
-      CALL QCON
-      XU = U
-      XV = V
+      rlat = xlat
+      rlon = xlon
+      call qcon
+      xu = u
+      xv = v
 
-      RETURN
-      END
-C-------------------------------------------------------------------------------
-!       Moved to LAPS library (Steve Albers 1997)
-!       BLOCK DATA
-c     SUBROUTINE SUPMBD
-C FORCE-LOAD BLOCK DATA
-!       COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-!       COMMON/SUPMP2/NPTS,MAXLAT,MINLAT,MAXLON,MINLON,PTS(1000)
-!       COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-!       COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-!       COMMON/SUPMP5/PHIOC,SINO,COSO,SINR,COSR,IPROJ
-!       COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-!       COMMON/SUPMP7/PHIO,PHIA,IGRID,IDOT,ILTS
-!       COMMON/SUPMP8/U,V,U1,V1,U2,V2
-!       COMMON/SUPMPA/IIER
-!       COMMON/MAPCOL/MPCOL1,MPCOL2,MPCOL3,MPCOL4
-!       COMMON/MAPDAS/LDASH1,LDASH2,LDASH3,LDASH4
-!       DATA                    !Default line intensities and dash patterns
-!    1          MPCOL1,LDash1   /255,'1777'O/,  !Map lines
-!    2          MPCOL2,LDash2   /128,'1756'O/,  !Grid lines
-!    3          MPCOL3,LDash3   /192,'1777'O/,  !Limb lines
-!    4          MPCOL4,LDash4   /255,'1777'O/   !Perimeter
+      return
+      end
+c-------------------------------------------------------------------------------
+!       moved to laps library (steve albers 1997)
+!       block data
+c     subroutine supmbd
+c force-load block data
+!       common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+!       common/supmp2/npts,maxlat,minlat,maxlon,minlon,pts(1000)
+!       common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+!       common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+!       common/supmp5/phioc,sino,coso,sinr,cosr,iproj
+!       common/supmp6/umin,umax,vmin,vmax,ueps,veps
+!       common/supmp7/phio,phia,igrid,idot,ilts
+!       common/supmp8/u,v,u1,v1,u2,v2
+!       common/supmpa/iier
+!       common/mapcol/mpcol1,mpcol2,mpcol3,mpcol4
+!       common/mapdas/ldash1,ldash2,ldash3,ldash4
+!       data                    !default line intensities and dash patterns
+!    1          mpcol1,ldash1   /255,'1777'o/,  !map lines
+!    2          mpcol2,ldash2   /128,'1756'o/,  !grid lines
+!    3          mpcol3,ldash3   /192,'1777'o/,  !limb lines
+!    4          mpcol4,ldash4   /255,'1777'o/   !perimeter
 
 
-c       COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-c       COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-!       COMMON/SUPMP9/DS,DI,DSRDI
+c       common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+c       common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+!       common/supmp9/ds,di,dsrdi
 
-!     DATA   CON1 / 1.00001/
-!     DATA   CON2 / 179.99999/
-!     DATA     DI / 16./
-!     DATA    DTR / 1.7453292519943E-2/
-!     DATA    EPS / 1.E-6/
-!     DATA   OV90 / 1.11111111111111E-2/
-!     DATA     PI / 3.1415926535898/
-!     DATA    RTD / 57.295779513082/
-!     DATA  TOVPI / 0.63661977236758/
-!     DATA   UOLD / 0.0 /
-!     DATA   VOLD / 0.0 /
-!     DATA PART/1.0/          !SIZE OF PICTURE (90% OF SCREEN)
+!     data   con1 / 1.00001/
+!     data   con2 / 179.99999/
+!     data     di / 16./
+!     data    dtr / 1.7453292519943e-2/
+!     data    eps / 1.e-6/
+!     data   ov90 / 1.11111111111111e-2/
+!     data     pi / 3.1415926535898/
+!     data    rtd / 57.295779513082/
+!     data  tovpi / 0.63661977236758/
+!     data   uold / 0.0 /
+!     data   vold / 0.0 /
+!     data part/1.0/          !size of picture (90% of screen)
 
-c       RETURN
-!     END
-C-------------------------------------------------------------------------------
-        SUBROUTINE RESUP(IER)
-C RECALL SUPMAP USING CONTENTS OF COMMON BLOCKS.
+c       return
+!     end
+c-------------------------------------------------------------------------------
+        subroutine resup(ier)
+c recall supmap using contents of common blocks.
 
-        COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP7/PHIO,PHIA,IGRID,IDOT,ILTS
-        COMMON/SUPMPB/X1,Y1,X2,Y2
-        COMMON/SUPMPC/LPROJ,ROT,JLTS,LGRID,IUS
+        common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp7/phio,phia,igrid,idot,ilts
+        common/supmpb/x1,y1,x2,y2
+        common/supmpc/lproj,rot,jlts,lgrid,ius
 
-        LPRJ=LPROJ
-        PHA=PHIA
-        PLONG=POLONG
-        RT=ROT
-        UMN=UMIN
-        UMX=UMAX
-        VMN=VMIN
-        VMX=VMAX
-        LGRD=LGRID
-        IU=IUS
-        IDT=IDOT
-        PART=AMAX1(X2-X1,Y2-Y1)
+        lprj=lproj
+        pha=phia
+        plong=polong
+        rt=rot
+        umn=umin
+        umx=umax
+        vmn=vmin
+        vmx=vmax
+        lgrd=lgrid
+        iu=ius
+        idt=idot
+        part=amax1(x2-x1,y2-y1)
 
-        CALL SUPMAP(LPRJ,PHA,PLONG,RT,UMN,UMX,VMN,VMX,-3,LGRD,IU,IDT,IER
+        call supmap(lprj,pha,plong,rt,umn,umx,vmn,vmx,-3,lgrd,iu,idt,ier
      1)
 
-        RETURN
+        return
 
-        END
+        end
 c
 c
 c
@@ -1841,8 +1841,8 @@ c
 c!!!!!!
 c*******************************************************************************
 c
-c       The following routines are replacements for NCAR Graphics routines
-c       that are called by SUPMAP.  They are included to supercede the
+c       the following routines are replacements for ncar graphics routines
+c       that are called by supmap.  they are included to supercede the
 c       original routines.
 c
 c*******************************************************************************
@@ -1946,7 +1946,7 @@ c       end
 
         character       chars*(*)
 
-        write(6,*)' Supmap error: ',ier,chars
+        write(6,*)' supmap error: ',ier,chars
 
         return
         end
@@ -1956,51 +1956,51 @@ c       end
 
 c     routine supmap.f
 
-        COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-        COMMON/SUPMP2/NPTS,MAXLAT,MINLAT,MAXLON,MINLON,PTS(1200000)
-        COMMON/SUPMP3/POLONG,CONE,RLAT,RLON,JGR,ILF,SGN
-        COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-        COMMON/SUPMP5/PHIOC,SINO,COSO,SINR,COSR,IPROJ
-        COMMON/SUPMP6/UMIN,UMAX,VMIN,VMAX,UEPS,VEPS
-        COMMON/SUPMP7/PHIO,PHIA,IGRID,IDOT,ILTS
-        COMMON/SUPMP8/U,V,U1,V1,U2,V2
-        COMMON/SUPMPA/IIER
-        COMMON/MAPCOL/MPCOL1,MPCOL2,MPCOL3,MPCOL4
-        COMMON/MAPDAS/LDASH1,LDASH2,LDASH3,LDASH4
+        common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+        common/supmp2/npts,maxlat,minlat,maxlon,minlon,pts(1200000)
+        common/supmp3/polong,cone,rlat,rlon,jgr,ilf,sgn
+        common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+        common/supmp5/phioc,sino,coso,sinr,cosr,iproj
+        common/supmp6/umin,umax,vmin,vmax,ueps,veps
+        common/supmp7/phio,phia,igrid,idot,ilts
+        common/supmp8/u,v,u1,v1,u2,v2
+        common/supmpa/iier
+        common/mapcol/mpcol1,mpcol2,mpcol3,mpcol4
+        common/mapdas/ldash1,ldash2,ldash3,ldash4
 
-!       DATA                    !Default line intensities and dash patterns
-!    1          MPCOL1,LDash1   /255,1023/,  !Map lines
-!    2          MPCOL2,LDash2   /128,1006/,  !Grid lines
-!    3          MPCOL3,LDash3   /192,1023/,  !Limb lines
-!    4          MPCOL4,LDash4   /255,1023/   !Perimeter
+!       data                    !default line intensities and dash patterns
+!    1          mpcol1,ldash1   /255,1023/,  !map lines
+!    2          mpcol2,ldash2   /128,1006/,  !grid lines
+!    3          mpcol3,ldash3   /192,1023/,  !limb lines
+!    4          mpcol4,ldash4   /255,1023/   !perimeter
 
 
-c       COMMON/SUPMP1/PI,TOVPI,DTR,RTD,EPS,OV90,CON1,CON2,PART
-c       COMMON/SUPMP4/IFST,IGO,IGOLD,ICROSS,IOUT,UOLD,VOLD
-        COMMON/SUPMP9/DS,DI,DSRDI
+c       common/supmp1/pi,tovpi,dtr,rtd,eps,ov90,con1,con2,part
+c       common/supmp4/ifst,igo,igold,icross,iout,uold,vold
+        common/supmp9/ds,di,dsrdi
 
-        MPCOL1 = 255
-        MPCOL2 = 128
-        MPCOL3 = 192
-        MPCOL4 = 255
+        mpcol1 = 255
+        mpcol2 = 128
+        mpcol3 = 192
+        mpcol4 = 255
 
-        LDash1 = 1023 
-        LDash2 = 1006
-        LDash3 = 1023
-        LDash4 = 1023
+        ldash1 = 1023 
+        ldash2 = 1006
+        ldash3 = 1023
+        ldash4 = 1023
 
-        CON1 = 1.00001
-        CON2 = 179.99999
-        DI = 16.
-        DTR = 1.7453292519943E-2
-        EPS = 1.E-6
-        OV90 = 1.11111111111111E-2
-        PI = 3.1415926535898
-        RTD = 57.295779513082
-        TOVPI = 0.63661977236758
-        UOLD = 0.0 
-        VOLD = 0.0 
-        PART   = 1.0           !SIZE OF PICTURE (90% OF SCREEN)
+        con1 = 1.00001
+        con2 = 179.99999
+        di = 16.
+        dtr = 1.7453292519943e-2
+        eps = 1.e-6
+        ov90 = 1.11111111111111e-2
+        pi = 3.1415926535898
+        rtd = 57.295779513082
+        tovpi = 0.63661977236758
+        uold = 0.0 
+        vold = 0.0 
+        part   = 1.0           !size of picture (90% of screen)
   
 
         return

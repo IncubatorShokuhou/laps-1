@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -30,34 +30,34 @@ cdis
 cdis
 cdis
 
-C
+c
         subroutine get_directory_length(c_fname,lenf)
-C
-C********************************************************************
-C
-cdoc    This routine takes as input a full path filename and returns an
+c
+c********************************************************************
+c
+cdoc    this routine takes as input a full path filename and returns an
 cdoc    index that points at the end of the directory portion of the pathname.
-C       Simple-minded algorithm just searches backwards for the first
-C       occurance of a `/' (for UNIX) or a `]' (for VMS).
-C
-C       Input/Output:
-C
-C       Name            Type    I/O     Description
-C       ----            ---     --      -----------
-C       c_fnames        char    I       file name.
-C       lenf            I       O       index to end of directory
-C
-C********************************************************************
-C
+c       simple-minded algorithm just searches backwards for the first
+c       occurance of a `/' (for unix) or a `]' (for vms).
+c
+c       input/output:
+c
+c       name            type    i/o     description
+c       ----            ---     --      -----------
+c       c_fnames        char    i       file name.
+c       lenf            i       o       index to end of directory
+c
+c********************************************************************
+c
         character c_fname*(*)
         integer lenf
-C
+c
         integer i, strlen
-C
-C****************************
-C
+c
+c****************************
+c
         strlen = len(c_fname)
-C
+c
         i = strlen
         do while (i .gt. 0)
         if( (c_fname(i:i) .ne. ']')
@@ -67,40 +67,40 @@ C
            goto 100
         endif
         enddo
-C
+c
 100     lenf = i
-C
+c
         return
         end
 
-C
+c
         subroutine get_time_length(c_fname,lenf)
-C
-C********************************************************************
-C
-cdoc    This routine takes as input a full path filename and returns an
+c
+c********************************************************************
+c
+cdoc    this routine takes as input a full path filename and returns an
 cdoc    index that points at the end of the filetime portion of the pathname.
-C       Simple-minded algorithm just searches backwards for the first
-C       occurance of a `.'.
-C
-C       Input/Output:
-C
-C       Name            Type    I/O     Description
-C       ----            ---     --      -----------
-C       c_fnames        char    I       file name.
-C       lenf            I       O       index to end of filetime
-C
-C********************************************************************
-C
+c       simple-minded algorithm just searches backwards for the first
+c       occurance of a `.'.
+c
+c       input/output:
+c
+c       name            type    i/o     description
+c       ----            ---     --      -----------
+c       c_fnames        char    i       file name.
+c       lenf            i       o       index to end of filetime
+c
+c********************************************************************
+c
         character c_fname*(*)
         integer lenf
-C
+c
         integer i, strlen
-C
-C****************************
-C
+c
+c****************************
+c
         call s_len(c_fname,strlen)
-C
+c
         i = strlen
         do while (i .gt. 0)
         if (c_fname(i:i) .ne. '.')then
@@ -109,31 +109,31 @@ C
            goto 100
         endif
         enddo
-C
+c
 100     lenf = i - 1
-C
+c
         return
         end
 
-C
-C#####################################################
-C
+c
+c#####################################################
+c
         subroutine s_len(string,s_length)
 
-C*********************************************************************
-C
-cdoc    This routine receives a fortran string, and
+c*********************************************************************
+c
+cdoc    this routine receives a fortran string, and
 cdoc    returns the number of characters in the string
 cdoc    before the first "space" is encountered.  
-C       It considers ascii characters 33 to 126 to be valid
-C       characters, and ascii 0 to 32, and 127 to be "space"
-C       characters.
-C
-C       Name            Type      I/O     Description
-C       ----            ---       --      -----------
-C       string          char       I       string
-C       s_length        integer  O       valid number characters
-C                                            in string
+c       it considers ascii characters 33 to 126 to be valid
+c       characters, and ascii 0 to 32, and 127 to be "space"
+c       characters.
+c
+c       name            type      i/o     description
+c       ----            ---       --      -----------
+c       string          char       i       string
+c       s_length        integer  o       valid number characters
+c                                            in string
 
         implicit none
 
@@ -158,37 +158,37 @@ C                                            in string
         return
         end
 
-C####################################################################
-C
+c####################################################################
+c
         subroutine get_fname_length(c_fname,lenf)
-C
-C********************************************************************
-C
-cdoc    This routine takes as input a full path filename and returns
+c
+c********************************************************************
+c
+cdoc    this routine takes as input a full path filename and returns
 cdoc    the length of the filename portion of the path.
-C       Simple-minded algorithm just searches backwards for the first
-C       occurance of a `/'. The number of characters searched up to
-C       that point indicates the filename length.
-C
-C       Input/Output:
-C
-C       Name            Type    I/O     Description
-C       ----            ---     --      -----------
-C       c_fnames        char    I       file name.
-C       lenf            I       O       length of filename part of c_fnames
-C
-C********************************************************************
-C
+c       simple-minded algorithm just searches backwards for the first
+c       occurance of a `/'. the number of characters searched up to
+c       that point indicates the filename length.
+c
+c       input/output:
+c
+c       name            type    i/o     description
+c       ----            ---     --      -----------
+c       c_fnames        char    i       file name.
+c       lenf            i       o       length of filename part of c_fnames
+c
+c********************************************************************
+c
         character c_fname*(*)
         integer lenf
-C
+c
         integer i, strlen, i_char_len
-C
-C****************************
-C
+c
+c****************************
+c
         i_char_len = len(c_fname)
         call s_len(c_fname,strlen)
-C
+c
         i = i_char_len
         do while (i .gt. 0)
         if(c_fname(i:i) .ne. '/')then
@@ -197,24 +197,24 @@ C
            goto 100
         endif
         enddo
-C
+c
 100     lenf = strlen - i
-C
+c
         return
         end
-C
-C#####################################################################
-C
+c
+c#####################################################################
+c
         subroutine get_filetime_length(c_fname,lent)
-C
-C*********************************************************************
-C
-cdoc    This routine takes as input a full path filename and returns
+c
+c*********************************************************************
+c
+cdoc    this routine takes as input a full path filename and returns
 cdoc    the length of the file time length portion of the path.
-C       Simple-minded algorithm uses other simple minded algorithms
-C       found in this file to determine the length of the time portion
-C       of the character string.
-C
+c       simple-minded algorithm uses other simple minded algorithms
+c       found in this file to determine the length of the time portion
+c       of the character string.
+c
 
         character*(*) c_fname
         integer lend,lent,lenf
@@ -235,34 +235,34 @@ C
 
         endif
 
-c       write(6,*)'Time portion of string = ',c_fname(lend+1:lend+lent)       
+c       write(6,*)'time portion of string = ',c_fname(lend+1:lend+lent)       
 
         return
         end
 
-C
-C#####################################################################
-C
+c
+c#####################################################################
+c
         subroutine get_filetime_type(c_fname,c20_type,leni,lent)
-C
-C*********************************************************************
-C
-cdoc    This routine takes as input a full path filename and returns
+c
+c*********************************************************************
+c
+cdoc    this routine takes as input a full path filename and returns
 cdoc    the length and type of the file time length portion of the path.
-C       Simple-minded algorithm uses other simple minded algorithms
-C       found in this file to determine the length and type of the time portion
-C       of the character string.
-C
-C       1998          Steve Albers
+c       simple-minded algorithm uses other simple minded algorithms
+c       found in this file to determine the length and type of the time portion
+c       of the character string.
+c
+c       1998          steve albers
 
         character*(*) c_fname
         character*20 c20_type
 
-        integer lend ! Directory length including the last 'slash'. 
-        integer lenf ! Length of the filename excluding the path.
-        integer lent ! Length of the filetime portion.
-        integer leni ! Length of the initial non-filetime portion.
-                       ! This is often but not always the directory length.
+        integer lend ! directory length including the last 'slash'. 
+        integer lenf ! length of the filename excluding the path.
+        integer lent ! length of the filetime portion.
+        integer leni ! length of the initial non-filetime portion.
+                       ! this is often but not always the directory length.
 
         call filter_non_numeric_fnames(c_fname,1,num_out,1
      1                                    ,istatus)
@@ -278,7 +278,7 @@ c initialize
 
            if(lenf .eq. 20)then
             if(c_fname(lend+14:lend+14) .eq. '_')then
-               c20_type = 'yyyyjjjhhmmss'                         ! RSA radar type
+               c20_type = 'yyyyjjjhhmmss'                         ! rsa radar type
                leni = lend
                lent=13
                return
@@ -287,14 +287,14 @@ c initialize
 
            if(lenf .eq. 13)then
             if(c_fname(lend+1:lend+5) .eq. 'raob.')then
-               c20_type = 'yymmddhh'                              ! AFWA raob
+               c20_type = 'yymmddhh'                              ! afwa raob
                leni = lend+5
                lent=8
                return
 c
-c - repositioned to "lenf .ge. 13" switch below. J.Smart 3-20-00 
+c - repositioned to "lenf .ge. 13" switch below. j.smart 3-20-00 
 c           elseif(c_fname(lend+1:lend+2) .eq. 'nf'  )            !.or.
-c     +             c_fname(lend+1:lend+2) .eq. 're' )then         ! Taiwan FA model
+c     +             c_fname(lend+1:lend+2) .eq. 're' )then         ! taiwan fa model
 c              c20_type = 'ymmddhh'
 c              leni = lend+2
 c              lent = 7
@@ -305,7 +305,7 @@ c              return
 
            if(lenf .ge. 13)then
             if(c_fname(lend+9:lend+9) .eq. '_')then
-               c20_type = 'yyyymmdd_hhmm'                         ! WFO type
+               c20_type = 'yyyymmdd_hhmm'                         ! wfo type
                leni = lend
                lent=13
                return
@@ -314,7 +314,7 @@ c              return
      +             c_fname(lend+1:lend+2) .eq. 'gb'.or.
      +             c_fname(lend+1:lend+2) .eq. 'sb'.or.
      +             c_fname(lend+1:lend+2) .eq. 'gs')then
-               c20_type = 'yyyymmddhh'                            !Taiwan/CWB nfs, gfs, or sb (tropical cyclone) model
+               c20_type = 'yyyymmddhh'                            !taiwan/cwb nfs, gfs, or sb (tropical cyclone) model
                leni = lend+2
                lent = 10
                return
@@ -323,7 +323,7 @@ c              return
 
            if(lenf .eq. 16)then
             if(c_fname(lend+1:lend+4) .eq. 'temp')then
-               c20_type = 'yymmddhh'                              ! CWB raob
+               c20_type = 'yymmddhh'                              ! cwb raob
                leni = lend+4
                lent=8
                return
@@ -331,7 +331,7 @@ c              return
            endif
 
            if(lenf .ge. 9)then ! assume 9 chars for time portion of filename
-              c20_type = 'yyjjjhhmm'                             ! NIMBUS/LAPS
+              c20_type = 'yyjjjhhmm'                             ! nimbus/laps
               leni = lend
               lent=9
               return
@@ -343,27 +343,27 @@ c              return
 
         endif
 
-!       write(6,*)'Time portion of string = ',c20_type
+!       write(6,*)'time portion of string = ',c20_type
 !    1                                       ,c_fname(leni+1:leni+lent)
         
         return
         end
-C
-C#####################################################
-C
+c
+c#####################################################
+c
         subroutine filter_string(string)
 
-C       It considers ascii characters 33 to 126 to be valid
-C       characters, and ascii 0 to 32, and 127 to be "space"
-C       characters.
+c       it considers ascii characters 33 to 126 to be valid
+c       characters, and ascii 0 to 32, and 127 to be "space"
+c       characters.
 
-C*********************************************************************
-C
-cdoc    This routine filters a fortran string of unprintable characters
-C
-C       Name            Type      I/O     Description
-C       ----            ---       --      -----------
-C       string          char       I       string
+c*********************************************************************
+c
+cdoc    this routine filters a fortran string of unprintable characters
+c
+c       name            type      i/o     description
+c       ----            ---       --      -----------
+c       string          char       i       string
 
         implicit none
 
@@ -388,8 +388,8 @@ C       string          char       I       string
 
         function l_string_contains(string,substring,istatus)
 
-cdoc    Returns boolean on whether 'string' contains 'substring'
-cdoc    The 'string' and 'substring' should be free of blanks.
+cdoc    returns boolean on whether 'string' contains 'substring'
+cdoc    the 'string' and 'substring' should be free of blanks.
 
         logical l_string_contains
 
@@ -425,8 +425,8 @@ cdoc    The 'string' and 'substring' should be free of blanks.
 
         function l_parse(string1,string2)
 
-cdoc    Returns boolean on whether 'string1' contains 'string2'
-cdoc    Similar to 'l_string_contains' except that blanks are allowed
+cdoc    returns boolean on whether 'string1' contains 'string2'
+cdoc    similar to 'l_string_contains' except that blanks are allowed
 
         logical l_parse
 
@@ -458,7 +458,7 @@ cdoc    Similar to 'l_string_contains' except that blanks are allowed
 
         subroutine s_len2(string,len_string)
 
-cdoc    This routine finds the length of the string counting intermediate
+cdoc    this routine finds the length of the string counting intermediate
 cdoc    blanks
 
         character*(*) string

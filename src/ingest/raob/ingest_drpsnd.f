@@ -1,10 +1,10 @@
 
       subroutine ingest_drpsnd(path_to_raw_drpsnd,c8_drpsnd_format
-     1                        ,l_fill_ht,lun_out)                  ! I       
+     1                        ,l_fill_ht,lun_out)                  ! i       
 
-!     Steve Albers FSL   2003     Original Version
+!     steve albers fsl   2003     original version
 
-!     Input file 
+!     input file 
       character*200 filename_in
 !     character*200 dropsonde_in
       character*9 a9_time
@@ -18,7 +18,7 @@
       character*8 a8_time,a8_time_orig(max_files)
       character*8 c8_drpsnd_format
 
-!     Output file
+!     output file
       character*13 filename13, cvt_i4time_wfo_fname13
       character*31    ext
       integer       len_dir
@@ -28,13 +28,13 @@
 
       logical l_parse, l_fill_ht
 
-!     Define interval to be used (between timestamps) for creation of SND files
+!     define interval to be used (between timestamps) for creation of snd files
       integer i4_snd_interval
       parameter (i4_snd_interval = 3600)
 
       iopen = 0
 
-      call GETENV('LAPS_A9TIME',a9_time)
+      call getenv('laps_a9time',a9_time)
       call s_len(a9_time,ilen)
 
       if(ilen .eq. 9)then
@@ -47,17 +47,17 @@
       endif
 
 
-!     i4time_sys = (i4time_sys/i4_snd_interval) * i4_snd_interval ! For testing only
+!     i4time_sys = (i4time_sys/i4_snd_interval) * i4_snd_interval ! for testing only
 
-      call get_grid_dim_xy(NX_L,NY_L,istatus)
+      call get_grid_dim_xy(nx_l,ny_l,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting horizontal domain dimensions'
+          write (6,*) 'error getting horizontal domain dimensions'
           go to 999
       endif
 
-      call get_laps_dimensions(NZ_L,istatus)
+      call get_laps_dimensions(nz_l,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting vertical domain dimension'
+          write (6,*) 'error getting vertical domain dimension'
           go to 999
       endif
 
@@ -65,7 +65,7 @@
       if(istatus .eq. 1)then
           write(6,*)' ilaps_cycle_time = ',ilaps_cycle_time
       else
-          write(6,*)' Error getting laps_cycle_time'
+          write(6,*)' error getting laps_cycle_time'
           go to 999
       endif
 
@@ -73,32 +73,32 @@
 
       call s_len(dir_in,len_dir_in)
 
-      if(c8_drpsnd_format(1:6) .eq. 'NIMBUS')then
+      if(c8_drpsnd_format(1:6) .eq. 'nimbus')then
           c_filespec = dir_in(1:len_dir_in)//'/*0300o'
           call get_file_times(c_filespec,max_files,c_fnames
      1                       ,i4times,i_nbr_files_ret,istatus)
 
-!tt -- copy and paste of the previous. I'll change the file names of the
-!tt    AVAPS dropsondes to follow the NIMBUS/RAOB convention.
+!tt -- copy and paste of the previous. i'll change the file names of the
+!tt    avaps dropsondes to follow the nimbus/raob convention.
 
-      elseif(c8_drpsnd_format(1:5) .eq. 'AVAPS')then
+      elseif(c8_drpsnd_format(1:5) .eq. 'avaps')then
           c_filespec = dir_in(1:len_dir_in)//'/*0300o'
           call get_file_times(c_filespec,max_files,c_fnames
      1                       ,i4times,i_nbr_files_ret,istatus)
 
-      elseif(c8_drpsnd_format(1:3) .eq. 'WFO' .or.
-     1       c8_drpsnd_format(1:3) .eq. 'RSA' .or.
-     1       c8_drpsnd_format(1:3) .eq. 'SND'      )then
+      elseif(c8_drpsnd_format(1:3) .eq. 'wfo' .or.
+     1       c8_drpsnd_format(1:3) .eq. 'rsa' .or.
+     1       c8_drpsnd_format(1:3) .eq. 'snd'      )then
           c_filespec = dir_in(1:len_dir_in)
           call get_file_times(c_filespec,max_files,c_fnames
      1                       ,i4times,i_nbr_files_ret,istatus)
 
-      elseif(c8_drpsnd_format(1:3) .eq. 'CWB')then
+      elseif(c8_drpsnd_format(1:3) .eq. 'cwb')then
           c_filespec = dir_in(1:len_dir_in)//'/drpsnd*'
           call get_file_names(c_filespec,i_nbr_files_ret,c_fnames
      1                      ,max_files,istatus)
 
-!         Obtain file times from file names
+!         obtain file times from file names
           do i = 1,i_nbr_files_ret
               call s_len(c_fnames(i),len_fname)
               call get_directory_length(c_fnames(i),len_dir)
@@ -111,68 +111,68 @@
           enddo ! i
 
       else
-          write(6,*)' Error - Invalid c8_drpsnd_format '
+          write(6,*)' error - invalid c8_drpsnd_format '
      1             ,c8_drpsnd_format      
           istatus = 0
           goto 999
 
       endif
 
-!     Get DROPSONDE Time Window
-      call get_windob_time_window('RAOB',i4_wind_ob,istatus)
+!     get dropsonde time window
+      call get_windob_time_window('raob',i4_wind_ob,istatus)
       if(istatus .ne. 1)goto 997
 
-      call get_tempob_time_window('RAOB',i4_temp_ob,istatus)
+      call get_tempob_time_window('raob',i4_temp_ob,istatus)
       if(istatus .ne. 1)goto 997
 
       i4_drpsnd_window = max(i4_wind_ob,i4_temp_ob)
       isnd_staname = 0
 
-!     Loop through dropsonde files and choose ones in time window
+!     loop through dropsonde files and choose ones in time window
       write(6,*)' # of files using filename format ',c8_drpsnd_format      
      1                                        ,' = ',i_nbr_files_ret
       do i = 1,i_nbr_files_ret
           call make_fnam_lp(i4times(i),a9_time,istatus)
 
-          if(c8_drpsnd_format(1:6) .eq. 'NIMBUS')then
+          if(c8_drpsnd_format(1:6) .eq. 'nimbus')then
               filename_in = dir_in(1:len_dir_in)//'/'//a9_time//'0300o'       
-!             i4_drpsnd_window = 60000  ! Temporary for testing
+!             i4_drpsnd_window = 60000  ! temporary for testing
               i4_contains_early = 7200
               i4_contains_late  = 3600
 
-          elseif(c8_drpsnd_format(1:5) .eq. 'AVAPS')then
+          elseif(c8_drpsnd_format(1:5) .eq. 'avaps')then
               filename_in = dir_in(1:len_dir_in)//'/'//a9_time//'0300o'       
               i4_contains_early = 0
               i4_contains_late  = 10800
 
-          elseif(c8_drpsnd_format(1:5) .eq. 'SND')then
+          elseif(c8_drpsnd_format(1:5) .eq. 'snd')then
               filename_in = dir_in(1:len_dir_in)//'/'//a9_time//'.snd'       
               i4_contains_early = 3600
               i4_contains_late  = 3600
 
-          elseif(c8_drpsnd_format(1:3) .eq. 'WFO')then
+          elseif(c8_drpsnd_format(1:3) .eq. 'wfo')then
               filename13 = cvt_i4time_wfo_fname13(i4times(i))
               filename_in = dir_in(1:len_dir_in)//'/'//filename13      
               i4_contains_early = 43200
               i4_contains_late  = 0
 
-          elseif(c8_drpsnd_format(1:3) .eq. 'RSA')then
+          elseif(c8_drpsnd_format(1:3) .eq. 'rsa')then
               filename13 = cvt_i4time_wfo_fname13(i4times(i))
               filename_in = dir_in(1:len_dir_in)//'/'//filename13      
               i4_contains_early = 43200
               i4_contains_late  = 0
 
-          elseif(c8_drpsnd_format(1:3) .eq. 'CWB')then 
+          elseif(c8_drpsnd_format(1:3) .eq. 'cwb')then 
 !             filename_in = dir_in(1:len_dir_in)//'/temp'//
 !    1                      a8_time_orig(i)//'.dat'
-!             This may need to be adjusted
+!             this may need to be adjusted
               filename_in = dir_in(1:len_dir_in)//'/drpsnd'//
      1                       a8_time_orig(i)//'.dat'
               i4_contains_early = 19800         
               i4_contains_late  = 23400       
 
           else
-              write(6,*)' Error - Invalid c8_drpsnd_format '
+              write(6,*)' error - invalid c8_drpsnd_format '
      1                 ,c8_drpsnd_format    
               istatus = 0
               goto 999
@@ -181,11 +181,11 @@
 
 !         filename_in = 'test.nc                                 '
 
-!         Define limits of DROPSONDE data times we are interested in
+!         define limits of dropsonde data times we are interested in
           i4time_drpsnd_latest =   i4time_sys + i4_drpsnd_window 
           i4time_drpsnd_earliest = i4time_sys - i4_drpsnd_window 
 
-!         Define limits of file times we are interested in. 
+!         define limits of file times we are interested in. 
           i4_filetime_latest =   i4time_drpsnd_latest+i4_contains_early
           i4_filetime_earliest = i4time_drpsnd_earliest-i4_contains_late     
           
@@ -199,44 +199,44 @@
           endif
 
           if(i4times(i) .lt. i4_filetime_earliest)then
-              write(6,*)' File is too early ',a9_time,i
+              write(6,*)' file is too early ',a9_time,i
 
           elseif(i4times(i) .gt. i4_filetime_latest)then
-              write(6,*)' File is too late ',a9_time,i
+              write(6,*)' file is too late ',a9_time,i
 
           else
               write(6,*)
-              write(6,*)' File is in time window ',a9_time,i
-              write(6,*)' Input file ',filename_in
+              write(6,*)' file is in time window ',a9_time,i
+              write(6,*)' input file ',filename_in
               write(6,*)
 
-!             Read from the raw file and write to the opened SND file
-              if(c8_drpsnd_format(1:6) .eq. 'NIMBUS' .or.
-     1           c8_drpsnd_format(1:3) .eq. 'WFO'         )then
+!             read from the raw file and write to the opened snd file
+              if(c8_drpsnd_format(1:6) .eq. 'nimbus' .or.
+     1           c8_drpsnd_format(1:3) .eq. 'wfo'         )then
 
                   write(6,*)' calling get_drpsnd_data...'
 
                   call get_drpsnd_data(i4time_sys,ilaps_cycle_time
-     1                ,NX_L,NY_L
+     1                ,nx_l,ny_l
      1                ,i4time_drpsnd_earliest,i4time_drpsnd_latest
      1                ,filename_in,isnd_staname,lun_out,l_fill_ht
      1                ,istatus)
 
-              elseif(c8_drpsnd_format(1:5) .eq. 'AVAPS')then
+              elseif(c8_drpsnd_format(1:5) .eq. 'avaps')then
                   call avapsread_sub(filename_in, lun_out
      1                          ,i4time_drpsnd_earliest
      1                          ,i4time_drpsnd_latest,istatus)
 
-              elseif(c8_drpsnd_format(1:3) .eq. 'RSA')then
+              elseif(c8_drpsnd_format(1:3) .eq. 'rsa')then
 
                   write(6,*)' dropsonde access routine not yet set up'       
 
 !                 call get_raob_data   (i4time_sys,ilaps_cycle_time
-!    1                ,NX_L,NY_L
+!    1                ,nx_l,ny_l
 !    1                ,i4time_drpsnd_earliest,i4time_drpsnd_latest
 !    1                ,filename_in,istatus)
 
-              elseif(c8_drpsnd_format(1:3) .eq. 'SND')then
+              elseif(c8_drpsnd_format(1:3) .eq. 'snd')then
 
                   write(6,*)' calling combine_snd_file...'       
 
@@ -244,17 +244,17 @@
      1                                 ,i4time_drpsnd_earliest
      1                                 ,i4time_drpsnd_latest
      1                                 ,filename_in
-     1                                 ,NX_L,NY_L,NZ_L
+     1                                 ,nx_l,ny_l,nz_l
      1                                 ,lun_out,istatus)
 
-              elseif(c8_drpsnd_format(1:3) .eq. 'CWB')then
+              elseif(c8_drpsnd_format(1:3) .eq. 'cwb')then
                   call get_drpsnd_data_cwb(i4time_sys, ilaps_cycle_time,       
-     ~                 NX_L, NY_L, 
+     ~                 nx_l, ny_l, 
      ~                 i4time_drpsnd_earliest,i4time_drpsnd_latest,
      ~                 a9_time, filename_in, lun_out, istatus)
 
               else
-                  write(6,*)' Error - Invalid c8_drpsnd_format '
+                  write(6,*)' error - invalid c8_drpsnd_format '
      1                     ,c8_drpsnd_format
                   istatus = 0
                   goto 999
@@ -267,15 +267,15 @@
 
       go to 999
 
- 997  write(6,*)' Error in DROPSONDE ingest (ob time windows)'
+ 997  write(6,*)' error in dropsonde ingest (ob time windows)'
 
       go to 999
 
- 998  write(6,*)' Error opening output sounding file: '
+ 998  write(6,*)' error opening output sounding file: '
 
  999  continue
 
-      write(6,*)' End of dropsonde ingest routine'
+      write(6,*)' end of dropsonde ingest routine'
 
       return
       end
@@ -286,37 +286,37 @@
      1                           ,filename_in,ni,nj,nk
      1                           ,lun_out,istatus)       
 
-      use mem_grid, ONLY: topo
+      use mem_grid, only: topo
 
-      integer MAX_PR, MAX_PR_LEVELS
-      parameter (MAX_PR=100)
-      parameter (MAX_PR_LEVELS=1000)
+      integer max_pr, max_pr_levels
+      parameter (max_pr=100)
+      parameter (max_pr_levels=1000)
 
-      integer nlevels_obs_pr(MAX_PR)
-      integer i4time_ob_pr(MAX_PR)
-      integer i4time_ob_pr_lvl(MAX_PR,MAX_PR_LEVELS)
-      integer iwmostanum(MAX_PR)
+      integer nlevels_obs_pr(max_pr)
+      integer i4time_ob_pr(max_pr)
+      integer i4time_ob_pr_lvl(max_pr,max_pr_levels)
+      integer iwmostanum(max_pr)
 
-      real stalat(MAX_PR),stalat_lvl(MAX_PR,MAX_PR_LEVELS)
-      real stalon(MAX_PR),stalon_lvl(MAX_PR,MAX_PR_LEVELS)
-      real staelev(MAX_PR)
+      real stalat(max_pr),stalat_lvl(max_pr,max_pr_levels)
+      real stalon(max_pr),stalon_lvl(max_pr,max_pr_levels)
+      real staelev(max_pr)
 
-      real height_m(MAX_PR,MAX_PR_LEVELS)
-      real pressure_mb(MAX_PR,MAX_PR_LEVELS)
-      real ob_pr_u_obs(MAX_PR,MAX_PR_LEVELS)
-      real ob_pr_v_obs(MAX_PR,MAX_PR_LEVELS)
-      real dir_deg(MAX_PR,MAX_PR_LEVELS)
-      real spd_mps(MAX_PR,MAX_PR_LEVELS)
-      real temp_c(MAX_PR,MAX_PR_LEVELS)
-      real dewpoint_c(MAX_PR,MAX_PR_LEVELS)
+      real height_m(max_pr,max_pr_levels)
+      real pressure_mb(max_pr,max_pr_levels)
+      real ob_pr_u_obs(max_pr,max_pr_levels)
+      real ob_pr_v_obs(max_pr,max_pr_levels)
+      real dir_deg(max_pr,max_pr_levels)
+      real spd_mps(max_pr,max_pr_levels)
+      real temp_c(max_pr,max_pr_levels)
+      real dewpoint_c(max_pr,max_pr_levels)
 
       real heights_3d(ni,nj,nk)
       real lat(ni,nj)
       real lon(ni,nj)
 
-      character*5 c5_name(MAX_PR)
-      character*8 c8_obstype(MAX_PR)
-      character*9 a9time_ob(MAX_PR),a9time_ob_lvl(MAX_PR,MAX_PR_LEVELS)       
+      character*5 c5_name(max_pr)
+      character*8 c8_obstype(max_pr)
+      character*9 a9time_ob(max_pr),a9time_ob_lvl(max_pr,max_pr_levels)       
 
       character*(*) filename_in
 
@@ -329,7 +329,7 @@
       n_profiles = 0
 
       l_fill_ht = .false. ! decide whether to fill in heights that are read in
-                          ! from the SND file 
+                          ! from the snd file 
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus .ne. 1)return
@@ -337,44 +337,44 @@
       lat = r_missing_data
       lon = r_missing_data
 
-      staelev = -999. ! missing value for Dropsondes
+      staelev = -999. ! missing value for dropsondes
 
-      write(6,*)' Call read_snd_data for ',filename_in
+      write(6,*)' call read_snd_data for ',filename_in
 
       if(.not. l_snd2)then
-!         Call Read Routine for input SND file
-          call read_snd_data(lun_in,i4time_file,filename_in            ! I
-     1                         ,MAX_PR,MAX_PR_LEVELS                   ! I
-     1                         ,lat,lon,topo,imax,jmax,kmax            ! I
-     1                         ,heights_3d,l_fill_ht                   ! I
-     1                         ,mode                                   ! I
-     1                         ,n_profiles                             ! I/O
-     1                         ,nlevels_obs_pr,stalat,stalon,staelev   ! O
-     1                         ,c5_name,i4time_ob_pr,c8_obstype        ! O
-     1                         ,height_m,pressure_mb                   ! O
-     1                         ,ob_pr_u_obs,ob_pr_v_obs                ! O
-     1                         ,temp_c,dewpoint_c                      ! O
-     1                         ,istatus)                               ! O
+!         call read routine for input snd file
+          call read_snd_data(lun_in,i4time_file,filename_in            ! i
+     1                         ,max_pr,max_pr_levels                   ! i
+     1                         ,lat,lon,topo,imax,jmax,kmax            ! i
+     1                         ,heights_3d,l_fill_ht                   ! i
+     1                         ,mode                                   ! i
+     1                         ,n_profiles                             ! i/o
+     1                         ,nlevels_obs_pr,stalat,stalon,staelev   ! o
+     1                         ,c5_name,i4time_ob_pr,c8_obstype        ! o
+     1                         ,height_m,pressure_mb                   ! o
+     1                         ,ob_pr_u_obs,ob_pr_v_obs                ! o
+     1                         ,temp_c,dewpoint_c                      ! o
+     1                         ,istatus)                               ! o
 
       else
-          call read_snd_data2(lun_in,i4time_file,filename_in           ! I
-     1                         ,MAX_PR,MAX_PR_LEVELS                   ! I
-     1                         ,lat,lon,topo,imax,jmax,kmax            ! I
-     1                         ,heights_3d,l_fill_ht                   ! I
-     1                         ,mode                                   ! I
-     1                         ,n_profiles                             ! I/O
-     1                         ,staelev                                ! O
-     1                         ,nlevels_obs_pr                         ! O
-     1                         ,c5_name,c8_obstype                     ! O
-     1                         ,height_m,pressure_mb                   ! O
-     1                         ,ob_pr_u_obs,ob_pr_v_obs                ! O
-     1                         ,temp_c,dewpoint_c                      ! O
-     1                         ,stalat_lvl,stalon_lvl,i4time_ob_pr_lvl ! O
-     1                         ,istatus)                               ! O
+          call read_snd_data2(lun_in,i4time_file,filename_in           ! i
+     1                         ,max_pr,max_pr_levels                   ! i
+     1                         ,lat,lon,topo,imax,jmax,kmax            ! i
+     1                         ,heights_3d,l_fill_ht                   ! i
+     1                         ,mode                                   ! i
+     1                         ,n_profiles                             ! i/o
+     1                         ,staelev                                ! o
+     1                         ,nlevels_obs_pr                         ! o
+     1                         ,c5_name,c8_obstype                     ! o
+     1                         ,height_m,pressure_mb                   ! o
+     1                         ,ob_pr_u_obs,ob_pr_v_obs                ! o
+     1                         ,temp_c,dewpoint_c                      ! o
+     1                         ,stalat_lvl,stalon_lvl,i4time_ob_pr_lvl ! o
+     1                         ,istatus)                               ! o
       endif ! l_snd2
 
       if(istatus .ne. 1)then
-          write(6,*)' WARNING: Bad istatus from read_snd_data, '
+          write(6,*)' warning: bad istatus from read_snd_data, '
      1             ,'abort execution of combine_snd'
           return
       endif
@@ -414,7 +414,7 @@
 
           enddo ! j
 
-!         Determine effective sounding time (closest level to systime)
+!         determine effective sounding time (closest level to systime)
           call get_closest_a9time(i4time_sys,a9time_ob_lvl(i,:)
      1                           ,i4time_closest,nlevels_obs_pr(i)
      1                           ,istatus)
@@ -427,29 +427,29 @@
               write(6,*)' i/i4time_diff = ',i,i4time_diff
      1                 ,' inside time bounds'
 
-!             Call Write Routine to append this sounding to output SND file
+!             call write routine to append this sounding to output snd file
               call open_ext(lun_out,i4time_sys,'snd',istatus)
               if(istatus .ne. 1)then
                   write(6,*)
-     1                 ' Could not open output SND file with open_ext'   
+     1                 ' could not open output snd file with open_ext'   
                   return
               endif
 
-              call write_snd(lun_out                        ! I
-     1                    ,1,MAX_PR_LEVELS,1                ! I
-     1                    ,iwmostanum(i)                    ! I
-     1                    ,stalat_lvl(i,:),stalon_lvl(i,:)  ! I
-     1                    ,staelev(i)                       ! I
-     1                    ,c5_name(i),a9time_ob_lvl(i,:)    ! I
-     1                    ,c8_obstype(i)                    ! I
-     1                    ,nlevels_obs_pr(i)                ! I
-     1                    ,height_m(i,:)                    ! I
-     1                    ,pressure_mb(i,:)                 ! I
-     1                    ,temp_c(i,:)                      ! I
-     1                    ,dewpoint_c(i,:)                  ! I
-     1                    ,dir_deg(i,:)                     ! I
-     1                    ,spd_mps(i,:)                     ! I
-     1                    ,istatus)                         ! O
+              call write_snd(lun_out                        ! i
+     1                    ,1,max_pr_levels,1                ! i
+     1                    ,iwmostanum(i)                    ! i
+     1                    ,stalat_lvl(i,:),stalon_lvl(i,:)  ! i
+     1                    ,staelev(i)                       ! i
+     1                    ,c5_name(i),a9time_ob_lvl(i,:)    ! i
+     1                    ,c8_obstype(i)                    ! i
+     1                    ,nlevels_obs_pr(i)                ! i
+     1                    ,height_m(i,:)                    ! i
+     1                    ,pressure_mb(i,:)                 ! i
+     1                    ,temp_c(i,:)                      ! i
+     1                    ,dewpoint_c(i,:)                  ! i
+     1                    ,dir_deg(i,:)                     ! i
+     1                    ,spd_mps(i,:)                     ! i
+     1                    ,istatus)                         ! o
 
           else
               write(6,*)' i/i4time_diff = ',i,i4time_diff

@@ -1,22 +1,22 @@
-       Subroutine gen_gvrsndr_lut_lsr(c_filename_sat,nlines,nelems,
+       subroutine gen_gvrsndr_lut_lsr(c_filename_sat,nlines,nelems,
      &wavelength,resolution_x,resolution_y,rsndr_res_km,start_pix,
-     &start_line,end_pix,end_line,ewCycles,ewIncs,nsCycles,nsIncs,
-     &f_time,orbAt,nch,nxl,nyl,lat,lon,rpix,rline,pct_req_lsr,
+     &start_line,end_pix,end_line,ewcycles,ewincs,nscycles,nsincs,
+     &f_time,orbat,nch,nxl,nyl,lat,lon,rpix,rline,pct_req_lsr,
      &istatus)
 c
 c
 c
       implicit none
  
-      Include       'instco.inc'
+      include       'instco.inc'
 
-      Integer     nlines,nelems
-      Integer     nxl,nyl
-      Integer     nch
+      integer     nlines,nelems
+      integer     nxl,nyl
+      integer     nch
 c
       real*8        wavelength(nch)
-      real        scalingBias(nlines,nch)
-      real        scalingGain(nlines,nch)
+      real        scalingbias(nlines,nch)
+      real        scalinggain(nlines,nch)
       real        lat(nxl,nyl)
       real        lon(nxl,nyl)
       real        rline(nxl,nyl)
@@ -33,56 +33,56 @@ c
 
       real*8        r8lat(2),r8lon(2)
       real*8        r8sl,r8sp,r8el,r8ep
-      real*8        ELEV,SCAN
-      real*8        RL
-      real*8        RP
-      Real*8        orbAt(336)
-      Real*8        t50_8
-      Real*8        t
-      Real*8        f_time
-      Real*8        SatSubLAT,SatSubLON
-      Real*8        EVLN,SCPX
+      real*8        elev,scan
+      real*8        rl
+      real*8        rp
+      real*8        orbat(336)
+      real*8        t50_8
+      real*8        t
+      real*8        f_time
+      real*8        satsublat,satsublon
+      real*8        evln,scpx
       real*8        rl_div
       real*8        rp_div
 c
-      Integer     ewCycles,ewIncs
-      Integer     nsCycles,nsIncs
-      Integer     start_line
-      Integer     start_pix
-      Integer     end_line
-      Integer     end_pix
-      Integer     resolution_x
-      Integer     resolution_y
+      integer     ewcycles,ewincs
+      integer     nscycles,nsincs
+      integer     start_line
+      integer     start_pix
+      integer     end_line
+      integer     end_pix
+      integer     resolution_x
+      integer     resolution_y
 
-      Integer     i1,j1
-      Integer     cstatus
-      Integer     istatus
-      Integer     mstatus
-      Integer     nstatus
-      Integer     wstatus
-      Integer     IERR
-      Integer     INSTR
-      Integer     i,j,k,n
-      Integer     n2,nn
-      Integer     time_spec(2)
-      Integer     imc
-      Integer     npoints_out
-      Integer     i4time_nearest_sat
-      Integer     isat
-      Integer     nrl,nrp
+      integer     i1,j1
+      integer     cstatus
+      integer     istatus
+      integer     mstatus
+      integer     nstatus
+      integer     wstatus
+      integer     ierr
+      integer     instr
+      integer     i,j,k,n
+      integer     n2,nn
+      integer     time_spec(2)
+      integer     imc
+      integer     npoints_out
+      integer     i4time_nearest_sat
+      integer     isat
+      integer     nrl,nrp
 
-      Character     filename_parm*255
-      Character     c_filename_sat*255
-      Character*255 c_sounding_path
-      Character     table_path*200
-      Character*9   c_ftimesat
-      Character     ctype*4
-      Character     c_imc*4
+      character     filename_parm*255
+      character     c_filename_sat*255
+      character*255 c_sounding_path
+      character     table_path*200
+      character*9   c_ftimesat
+      character     ctype*4
+      character     c_imc*4
 c ---------------------------------------------------------
 c read static information for gvarimage navigation
 c
 c     if(istatus.ne.1)then
-c        print*,'Error returned get_r_missing_data'
+c        print*,'error returned get_r_missing_data'
 c        return
 c     endif
 
@@ -103,54 +103,54 @@ c111   format(i3)
 c     if(imc.ne.0)imc=1
 
       imc=1
-      INSTR=2          !1=Imager, 2=Sounder
+      instr=2          !1=imager, 2=sounder
       pi=3.141592653589793
       rd2dg=180.0/pi
 
-      call bcd_to_int(orbAt(12),time_spec)
+      call bcd_to_int(orbat(12),time_spec)
       time_50 = time50(time_spec)
       t50_8=time_50
       t = f_time /60. + 7305. * 24. * 60.
 
-      call SETCON(INSTR,nsCycles,nsIncs,ewCycles,ewIncs)
-      call LMODEL(t,t50_8,OrbAt,imc,SatSubLAT,SatSubLON)
+      call setcon(instr,nscycles,nsincs,ewcycles,ewincs)
+      call lmodel(t,t50_8,orbat,imc,satsublat,satsublon)
 
-      write(6,*)'Sat Subpoint lat (deg) ',SatSubLAT*rd2dg
-      write(6,*)'Sat Subpoint lon (deg) ',SatSubLON*rd2dg
+      write(6,*)'sat subpoint lat (deg) ',satsublat*rd2dg
+      write(6,*)'sat subpoint lon (deg) ',satsublon*rd2dg
       print*,'-------------------------------------------'
       print*
-      print*,'This satellite sector lat/lon corner points'
+      print*,'this satellite sector lat/lon corner points'
       print*,'-------------------------------------------'
       r8sl=float(start_line)
       r8el=float(end_line)
       r8sp=float(start_pix)
       r8ep=float(end_pix)
-      ELEV = EVLN(INSTR,r8sl)
-      SCAN = SCPX(INSTR,r8sp)
-      call LPOINT(ELEV,SCAN,r8lat(1),r8lon(1),IERR)
-      ELEV = EVLN(INSTR,r8sl)
-      SCAN = SCPX(INSTR,r8ep)
-      call LPOINT(ELEV,SCAN,r8lat(2),r8lon(2),IERR)
+      elev = evln(instr,r8sl)
+      scan = scpx(instr,r8sp)
+      call lpoint(elev,scan,r8lat(1),r8lon(1),ierr)
+      elev = evln(instr,r8sl)
+      scan = scpx(instr,r8ep)
+      call lpoint(elev,scan,r8lat(2),r8lon(2),ierr)
 
       r8lat(1)=r8lat(1)*rd2dg
       r8lon(1)=r8lon(1)*rd2dg
       r8lat(2)=r8lat(2)*rd2dg
       r8lon(2)=r8lon(2)*rd2dg
-      print*,'      NW                  NE'
+      print*,'      nw                  ne'
       write(6,101)r8lat(1),r8lon(1),r8lat(2),r8lon(2)
 101   format(5x,2(f8.2),2(f9.2))
 
-      ELEV = EVLN(INSTR,r8el)
-      SCAN = SCPX(INSTR,r8sp)
-      call LPOINT(ELEV,SCAN,r8lat(1),r8lon(1),IERR)
-      ELEV = EVLN(INSTR,r8el)
-      SCAN = SCPX(INSTR,r8ep)
-      call LPOINT(ELEV,SCAN,r8lat(2),r8lon(2),IERR)
+      elev = evln(instr,r8el)
+      scan = scpx(instr,r8sp)
+      call lpoint(elev,scan,r8lat(1),r8lon(1),ierr)
+      elev = evln(instr,r8el)
+      scan = scpx(instr,r8ep)
+      call lpoint(elev,scan,r8lat(2),r8lon(2),ierr)
       r8lat(1)=r8lat(1)*rd2dg
       r8lon(1)=r8lon(1)*rd2dg
       r8lat(2)=r8lat(2)*rd2dg
       r8lon(2)=r8lon(2)*rd2dg
-      print*,'      SW                  SE'
+      print*,'      sw                  se'
       write(6,101)r8lat(1),r8lon(1),r8lat(2),r8lon(2)
 
       cstatus = 0
@@ -161,17 +161,17 @@ c     if(imc.ne.0)imc=1
          r8lat(1)=lat(k,j)*pi/180.d0
          r8lon(1)=lon(k,j)*pi/180.d0
 
-         call GPOINT(r8lat(1),r8lon(1),ELEV,SCAN,IERR)
+         call gpoint(r8lat(1),r8lon(1),elev,scan,ierr)
 
-         if(IERR.ne.0)then
-c           write(6,*)'Error computing Elev/Scan in GPOINT from'
-c           write(6,*)'Lat/Lon ', lat(k,j),lon(k,j)
+         if(ierr.ne.0)then
+c           write(6,*)'error computing elev/scan in gpoint from'
+c           write(6,*)'lat/lon ', lat(k,j),lon(k,j)
             rline(k,j)=-2.
             rpix(k,j)=-2.
             cstatus=cstatus-1
          else
 
-            call EVSC2L(INSTR,ELEV,SCAN,RL,RP)
+            call evsc2l(instr,elev,scan,rl,rp)
 
             nrl=nint(rl)
             nrp=nint(rp)
@@ -179,8 +179,8 @@ c           write(6,*)'Lat/Lon ', lat(k,j),lon(k,j)
      &          (nrl.ge.start_line.and.nrp.ge.start_pix).and.
      &          (nrl.le.end_line.and.nrp.le.end_pix) )then
 
-               rline(k,j)=(RL-start_line+rl_div)*rl_div
-               rpix(k,j)= (RP-start_pix+rp_div )*rp_div
+               rline(k,j)=(rl-start_line+rl_div)*rl_div
+               rpix(k,j)= (rp-start_pix+rp_div )*rp_div
                i1=k
                j1=j
             else
@@ -198,8 +198,8 @@ c           write(6,*)'Lat/Lon ', lat(k,j),lon(k,j)
 
       if(cstatus.lt.0)then
 
-        write(6,*)'WARNING! Some rl/rp values not computed '
-        write(6,*)'For LUT ',ctype,' status = ',cstatus
+        write(6,*)'warning! some rl/rp values not computed '
+        write(6,*)'for lut ',ctype,' status = ',cstatus
 
       endif
 
@@ -208,17 +208,17 @@ c           write(6,*)'Lat/Lon ', lat(k,j),lon(k,j)
          rnx=float(nxl)
          rny=float(nyl)
          rnp=float(npoints_out)
-         write(6,*)'WARNING! Some rl/rp values out of domain'
+         write(6,*)'warning! some rl/rp values out of domain'
          pct_covered=((rnx*rny)-rnp)/(rnx*rny)
          if(pct_covered.lt.pct_req_lsr)then
-            print*,'Exceeded domain cover namelist parameter',
+            print*,'exceeded domain cover namelist parameter',
      +' pct_req_lsr: % req/% covered:',pct_req_lsr,'/',pct_covered
             return
          else
-            write(6,*)'Percent of domain covered = ',pct_covered
+            write(6,*)'percent of domain covered = ',pct_covered
          endif
       else
-         write(6,*)'100% Percent of domain covered '
+         write(6,*)'100% percent of domain covered '
       endif
 c
       if(.false.)then

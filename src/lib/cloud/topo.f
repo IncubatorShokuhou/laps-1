@@ -1,30 +1,30 @@
 
-      SUBROUTINE TOPO(PHI,LON,ut1,TX,TY,TZ)
-      IMPLICIT REAL*8(A,B,C,D,E,F,G,H,O,P,Q,R,S,T,U,V,W,X,Y,Z)
-      REAL*8 LST,LON,JD
+      subroutine topo(phi,lon,ut1,tx,ty,tz)
+      implicit real*8(a,b,c,d,e,f,g,h,o,p,q,r,s,t,u,v,w,x,y,z)
+      real*8 lst,lon,jd
 
       include '../../include/astparms.for'
 
-      parameter (R_E_AU = R_E_KM / KM_PER_AU)
+      parameter (r_e_au = r_e_km / km_per_au)
 
-!       All arguments are Real * 8
-!       Input PHI = latitude in radians
-!             LON = longitude in degrees (W is negative)
-!             UT1 = Julian Date
-!       Output TX,TY,TZ = Equatorial coordinates of point on surface of earth
+!       all arguments are real * 8
+!       input phi = latitude in radians
+!             lon = longitude in degrees (w is negative)
+!             ut1 = julian date
+!       output tx,ty,tz = equatorial coordinates of point on surface of earth
 
-c     write(6,*)R_E_AU
+c     write(6,*)r_e_au
 
-      FF=(1.D0-1.D0/298.257D0)**2
-      CC=1./DSQRT(DCOS(PHI)**2+FF*DSIN(PHI)**2)
-      XYG=R_E_AU*CC*DCOS(PHI)
+      ff=(1.d0-1.d0/298.257d0)**2
+      cc=1./dsqrt(dcos(phi)**2+ff*dsin(phi)**2)
+      xyg=r_e_au*cc*dcos(phi)
 
       call sidereal_time(ut1,lon,lst)
 
-      TX=DCOS(LST)*XYG
-      TY=DSIN(LST)*XYG
-      TZ=R_E_AU*CC*DSIN(PHI)*FF
+      tx=dcos(lst)*xyg
+      ty=dsin(lst)*xyg
+      tz=r_e_au*cc*dsin(phi)*ff
 
-      RETURN
-      END
+      return
+      end
 

@@ -36,17 +36,17 @@
      1                       ,i_sno_sto_colorbar
      1                       ,montage
 
-!      Set defaults
+!      set defaults
        latlon_int = 0
        continent_line_width = 1.0
        country_line_width = 1.0
        state_line_width = 1.0
        county_line_width = 1.0
-       c3_time_zone = 'UTC'
+       c3_time_zone = 'utc'
        time_zone = 0.0
-       c_institution = 'NOAA/FSL LAPS'
-       c_vnt_units = 'M**2/S'
-       c_tpw_units = 'CM'
+       c_institution = 'noaa/fsl laps'
+       c_vnt_units = 'm**2/s'
+       c_tpw_units = 'cm'
        mode_supmap = 3
        iraster = 0
        l_sphere = .false.
@@ -58,7 +58,7 @@
        chigh_cape = 7000.
        chigh_tpw = 7.
        power_tpw = 0.7
-       scale_omega = 100. ! relative to Pa/S
+       scale_omega = 100. ! relative to pa/s
        c_ob_color = 'default'
        i_background_color = 2
        btemp_colortable = 'linear'
@@ -75,7 +75,7 @@
        print*,'success reading lapsplot_nl in ',filename
        write(*,lapsplot_nl)
 
-!      Set namelist structure
+!      set namelist structure
        namelist_parms%latlon_int = latlon_int
        namelist_parms%continent_line_width = continent_line_width
        namelist_parms%country_line_width   = country_line_width

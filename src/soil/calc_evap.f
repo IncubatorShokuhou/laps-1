@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,49 +29,49 @@ cdis
 cdis 
 cdis 
 cdis 
-       Subroutine Calc_Evap(imax,jmax,
-     &                       Laps_u,
-     &                       Laps_v,
-     &                       Laps_T,
-     &                       Laps_TD,
-     &                       Laps_Evap,
-     &                       IStatus)
+       subroutine calc_evap(imax,jmax,
+     &                       laps_u,
+     &                       laps_v,
+     &                       laps_t,
+     &                       laps_td,
+     &                       laps_evap,
+     &                       istatus)
 
-C       Subroutine to calculate the pan evaporation rates for the 
-C       Laps Grid. 10 km every Hour
-C       Uses the Assumption of Non Radiation Limiting as In pg 166
-C       Hydrology for Engineers  by Linsley, Kohler and Paulhus
-C       2/5/93
-C
+c       subroutine to calculate the pan evaporation rates for the 
+c       laps grid. 10 km every hour
+c       uses the assumption of non radiation limiting as in pg 166
+c       hydrology for engineers  by linsley, kohler and paulhus
+c       2/5/93
+c
 
 
       integer*4 imax,jmax
-      Include 'soilm.inc'
+      include 'soilm.inc'
 
-      Real    Laps_u(Imax,Jmax)
-      Real    Laps_v(Imax,Jmax)
-      Real    Laps_T(Imax,Jmax)
-      Real    Laps_TD(Imax,Jmax)
-      Real    Laps_Evap(Imax,Jmax)
-      Real    Val1, Val2, Val3
-      Real    WindSpeed, TempDegF, DewPoint_DegF
-      Integer*4 IStatus
+      real    laps_u(imax,jmax)
+      real    laps_v(imax,jmax)
+      real    laps_t(imax,jmax)
+      real    laps_td(imax,jmax)
+      real    laps_evap(imax,jmax)
+      real    val1, val2, val3
+      real    windspeed, tempdegf, dewpoint_degf
+      integer*4 istatus
 
-      Do J = 1, Jmax
-        Do I = 1, Imax
-           WindSpeed = (Laps_u(I,J)**2 + Laps_v(I,J)**2)**0.5 !m/s
-           WindSpeed = WindSpeed * 53.6979     ! miles per day
-           TempDegF = 1.8 * (Laps_T(I,J) - 273.15) + 32.0  !Deg F
-           DewPoint_DegF = 1.8 * (Laps_TD(I,J) - 273.15) + 32.0
-           Val1 = ( 0.0041 * TempDegF + 0.676) ** 8
-           Val2 = ( 0.0041 * DewPoint_DegF + 0.676) ** 8
-           Val3 = (0.37 + 0.0041 * WindSpeed)
+      do j = 1, jmax
+        do i = 1, imax
+           windspeed = (laps_u(i,j)**2 + laps_v(i,j)**2)**0.5 !m/s
+           windspeed = windspeed * 53.6979     ! miles per day
+           tempdegf = 1.8 * (laps_t(i,j) - 273.15) + 32.0  !deg f
+           dewpoint_degf = 1.8 * (laps_td(i,j) - 273.15) + 32.0
+           val1 = ( 0.0041 * tempdegf + 0.676) ** 8
+           val2 = ( 0.0041 * dewpoint_degf + 0.676) ** 8
+           val3 = (0.37 + 0.0041 * windspeed)
 
-           Laps_Evap(I,J) = (Val1 -Val2)**0.88 * Val3
-        Enddo
-      Enddo
-      IStatus = 1
-c     Write(6,*) 'Completed Evaporation Calc'
+           laps_evap(i,j) = (val1 -val2)**0.88 * val3
+        enddo
+      enddo
+      istatus = 1
+c     write(6,*) 'completed evaporation calc'
 
-      Return
-      End
+      return
+      end

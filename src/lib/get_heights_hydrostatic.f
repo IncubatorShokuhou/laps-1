@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -31,21 +31,21 @@ cdis
 cdis
 
         subroutine get_heights_hydrostatic
-     1              (temp_3d_k          ! Input (3d temp K)
-     1              ,pres_sfc_pa        ! Input (surface pressure pa)
-     1              ,pres_3d            ! Input (3d pressure pa)
-     1              ,sh_3d              ! Input (3d specific humidity)
-     1              ,topo               ! Input (terrain m)
-     1              ,ni,nj,nk           ! Input (Dimensions)
-     1              ,heights_3d         ! Output (m)
-     1              ,istatus)           ! Output
+     1              (temp_3d_k          ! input (3d temp k)
+     1              ,pres_sfc_pa        ! input (surface pressure pa)
+     1              ,pres_3d            ! input (3d pressure pa)
+     1              ,sh_3d              ! input (3d specific humidity)
+     1              ,topo               ! input (terrain m)
+     1              ,ni,nj,nk           ! input (dimensions)
+     1              ,heights_3d         ! output (m)
+     1              ,istatus)           ! output
 
-!           1991        Steve Albers
-!       Nov 1991        Steve Albers    Change to Sfc P Input + Terrain
-!           1996        Steve Albers    Expanded 'esat_lut' array from -100C
+!           1991        steve albers
+!       nov 1991        steve albers    change to sfc p input + terrain
+!           1996        steve albers    expanded 'esat_lut' array from -100c
 !                                       to the colder value of -120
 !
-!       For each horizontal gridpoint, the 'pres_sfc_pa' at the lowest level 
+!       for each horizontal gridpoint, the 'pres_sfc_pa' at the lowest level 
 !       must be greater than or equal to the reference (surface) pressure.
 
         real esat_lut(-120:+100)
@@ -63,23 +63,23 @@ cdis
 
         real pres_3d(ni,nj,nk)                    
 
-        real pres_3d_mb(ni,nj,nk)               ! Local
-        real p_1d_mb(nk)                        ! Local
-        real alog_array(ni,nj,nk)               ! Local
+        real pres_3d_mb(ni,nj,nk)               ! local
+        real p_1d_mb(nk)                        ! local
+        real alog_array(ni,nj,nk)               ! local
 
         real make_td, k_to_c
 
         include 'constants.inc'
-        real C1
-        PARAMETER (C1 = EP_1) 
+        real c1
+        parameter (c1 = ep_1) 
 
-        real C2
-        PARAMETER (C2 = r_d / (2. * grav) )
+        real c2
+        parameter (c2 = r_d / (2. * grav) )
 
-cdoc    Generate heights of grid points using laps data and hydrostatic equation
-        write(6,*)' Generating 3D height grid'
-        write(6,*)' Integrating hydrostatic equation over the LAPS grid'
-c       write(6,*)' Initialize and calculate first level'
+cdoc    generate heights of grid points using laps data and hydrostatic equation
+        write(6,*)' generating 3d height grid'
+        write(6,*)' integrating hydrostatic equation over the laps grid'
+c       write(6,*)' initialize and calculate first level'
 
         do it = -120,+100
             esat_lut(it) = esat(float(it))
@@ -109,26 +109,26 @@ c       write(6,*)' Initialize and calculate first level'
             t_2d_c_below = k_to_c(temp_3d_k(i,j,1))
             sh_below = sh_3d(i,j,1)
             w_below = sh_below / (1. - sh_below)
-            A_below(i,j)= temp_3d_k(i,j,1) * (1. + C1 * w_below)
+            a_below(i,j)= temp_3d_k(i,j,1) * (1. + c1 * w_below)
         enddo ! i
         enddo ! j
 
-        do k = 2,nk ! Integrate upward one level at a time.
+        do k = 2,nk ! integrate upward one level at a time.
 
-cCCCCCCCCCCCCCCCCCC                         ISTAT = LIB$SHOW_TIMER(,,,)
+ccccccccccccccccccc                         istat = lib$show_timer(,,,)
 
             do j = 1,nj
             do i = 1,ni
                 sh_value = sh_3d(i,j,k)
                 w_value = sh_value / (1. - sh_value)
 
-                A1= temp_3d_k(i,j,k) * (1. + C1 * w_value)
+                a1= temp_3d_k(i,j,k) * (1. + c1 * w_value)
 
-                Z_add = C2 * (A1+A_below(i,j)) * (alog_array(i,j,k-1))       
+                z_add = c2 * (a1+a_below(i,j)) * (alog_array(i,j,k-1))       
 
                 heights_3d(i,j,k) = heights_below(i,j) + z_add
 
-!               Test whether this layer contains the surface
+!               test whether this layer contains the surface
                 if(pres_3d_mb(i,j,k  ) .le. pres_sfc_mb(i,j) .and.
      1             pres_3d_mb(i,j,k-1) .ge. pres_sfc_mb(i,j)      )then       
 
@@ -152,29 +152,29 @@ cCCCCCCCCCCCCCCCCCC                         ISTAT = LIB$SHOW_TIMER(,,,)
             enddo ! i
             enddo ! j
 
-c           write(6,*)' Completed level',k
+c           write(6,*)' completed level',k
 
         enddo ! k
 
-cCCCCCCCCCCCCCCCCCC                         ISTAT = LIB$SHOW_TIMER(,,,)
+ccccccccccccccccccc                         istat = lib$show_timer(,,,)
 
         ndiffp = 0
         diffp_max = -abs(r_missing_data)
         diffp_min = +abs(r_missing_data)
         iwrite = 0
 
-      ! Apply Constant of Integration to the heights
+      ! apply constant of integration to the heights
         do j = 1,nj
         do i = 1,ni
             z_correction_orig = z_correction(i,j)
             if(z_correction(i,j) .eq. r_missing_data)then
-                z_correction(i,j) = 0. ! Level 1 becomes the reference height
+                z_correction(i,j) = 0. ! level 1 becomes the reference height
                 ndiffp = ndiffp + 1
             endif
 
             heights_3d(i,j,1) = z_correction(i,j)
 
-!           Obtain diffp information
+!           obtain diffp information
             diffp = pres_sfc_mb(i,j) - pres_3d_mb(i,j,1) 
             diffp_max = max(diffp,diffp_max)
             diffp_min = min(diffp,diffp_min)
@@ -195,27 +195,27 @@ cCCCCCCCCCCCCCCCCCC                         ISTAT = LIB$SHOW_TIMER(,,,)
             enddo ! i
         enddo ! k
 
-c       write(6,*)' Added in constant of integration to the heights'
-cCCCCCCCCCCCCCCCCCC                         ISTAT = LIB$SHOW_TIMER(,,,)
+c       write(6,*)' added in constant of integration to the heights'
+ccccccccccccccccccc                         istat = lib$show_timer(,,,)
 
-        write(6,*)' Range of diffp ( Psfc - P[1] ) = ',diffp_min
+        write(6,*)' range of diffp ( psfc - p[1] ) = ',diffp_min
      1                                                ,diffp_max,'mb'
 
-!       Return with diagnostic information
+!       return with diagnostic information
         ngrid = ni*nj
         if(ndiffp .eq. ngrid)then
-            write(6,*)' WARNING: surface extends outside '
-     1                ,'3D grid at all grid points'    
-            write(6,*)' Output heights are relative to level 1'
+            write(6,*)' warning: surface extends outside '
+     1                ,'3d grid at all grid points'    
+            write(6,*)' output heights are relative to level 1'
             istatus = -1
             return
         elseif(ndiffp .gt. 0)then
-            write(6,*)' ERROR: surface extends outside '
-     1                ,'3D grid at some grid points',ndiffp    
+            write(6,*)' error: surface extends outside '
+     1                ,'3d grid at some grid points',ndiffp    
             istatus = 0
             return
         else
-            write(6,*)' Success in get_heights_hydrostatic'
+            write(6,*)' success in get_heights_hydrostatic'
             istatus = 1
             return
         endif
@@ -223,107 +223,107 @@ cCCCCCCCCCCCCCCCCCC                         ISTAT = LIB$SHOW_TIMER(,,,)
         end
 
 
-        FUNCTION Z_thk(PT,P,T,TD,alog_array,esat_lut,N)
-C
-cdoc    THIS FUNCTION RETURNS THE THICKNESS OF A LAYER BOUNDED BY PRESSURE
-cdoc    P(1) AT THE BOTTOM AND PRESSURE PT AT THE TOP.
-C
-C       BAKER,SCHLATTER 17-MAY-1982     Original version
-C       Albers                 1990     Restructured
-C       Albers                 1996     Expanded 'esat_lut' array from
-C                                       -100C to the colder value of -120
-C
-C   ON INPUT:
-C       P = PRESSURE (MB).  NOTE THAT P(I).GT.P(I+1).
-C       T = TEMPERATURE (CELSIUS)
-C       TD = DEW POINT (CELSIUS)
-C       N = NUMBER OF LEVELS IN THE SOUNDING AND THE DIMENSION OF
-C           P, T AND TD
-C   ON OUTPUT:
-C       Z = GEOMETRIC THICKNESS OF THE LAYER (M)
-C
-C   THE ALGORITHM INVOLVES NUMERICAL INTEGRATION OF THE HYDROSTATIC
-C   EQUATION FROM P(1) TO PT. IT IS DESCRIBED ON P.15 OF STIPANUK
-C   (1973).
-C
-        DIMENSION T(N),P(N),TD(N),TK(100),alog_array(N)
-C       C1 = .001*(1./EPS-1.) WHERE EPS = .62197 IS THE RATIO OF THE
-C                             MOLECULAR WEIGHT OF WATER TO THAT OF
-C                             DRY AIR. THE FACTOR 1000. CONVERTS THE
-C                             MIXING RATIO W FROM G/KG TO A DIMENSION-
-C                             LESS RATIO.
-C       C2 = R/(2.*G) WHERE R IS THE GAS CONSTANT FOR DRY AIR
-C                     (287 KG/JOULE/DEG K) AND G IS THE ACCELERATION
-C                     DUE TO THE EARTH'S GRAVITY (9.8 M/S**2). THE
-C                     FACTOR OF 2 IS USED IN AVERAGING TWO VIRTUAL
-C                     TEMPERATURES.
+        function z_thk(pt,p,t,td,alog_array,esat_lut,n)
+c
+cdoc    this function returns the thickness of a layer bounded by pressure
+cdoc    p(1) at the bottom and pressure pt at the top.
+c
+c       baker,schlatter 17-may-1982     original version
+c       albers                 1990     restructured
+c       albers                 1996     expanded 'esat_lut' array from
+c                                       -100c to the colder value of -120
+c
+c   on input:
+c       p = pressure (mb).  note that p(i).gt.p(i+1).
+c       t = temperature (celsius)
+c       td = dew point (celsius)
+c       n = number of levels in the sounding and the dimension of
+c           p, t and td
+c   on output:
+c       z = geometric thickness of the layer (m)
+c
+c   the algorithm involves numerical integration of the hydrostatic
+c   equation from p(1) to pt. it is described on p.15 of stipanuk
+c   (1973).
+c
+        dimension t(n),p(n),td(n),tk(100),alog_array(n)
+c       c1 = .001*(1./eps-1.) where eps = .62197 is the ratio of the
+c                             molecular weight of water to that of
+c                             dry air. the factor 1000. converts the
+c                             mixing ratio w from g/kg to a dimension-
+c                             less ratio.
+c       c2 = r/(2.*g) where r is the gas constant for dry air
+c                     (287 kg/joule/deg k) and g is the acceleration
+c                     due to the earth's gravity (9.8 m/s**2). the
+c                     factor of 2 is used in averaging two virtual
+c                     temperatures.
         real esat_lut(-120:+100)
 
         include 'constants.inc' 
-        real C1,C2
-        PARAMETER (C1 = .001 * EP_1)
-        PARAMETER (C2 = r_d / (2. * grav) )
+        real c1,c2
+        parameter (c1 = .001 * ep_1)
+        parameter (c2 = r_d / (2. * grav) )
 
-        DO 5 I= 1,N
-           TK(I)= c_to_k(T(I))
-    5   CONTINUE
+        do 5 i= 1,n
+           tk(i)= c_to_k(t(i))
+    5   continue
 
-        do i = 1,N-1
-            j = I + 1
+        do i = 1,n-1
+            j = i + 1
 
-            IF (P(J) .gt. PT)then             ! We are still in complete layers
-                A1= TK(J)*(C2 + W_laps(TD(J),P(J),esat_lut))
-                A2= TK(I)*(C2 + W_laps(TD(I),P(I),esat_lut))
-                Z_thk = Z_thk + (A1+A2)*(alog_array(i))
+            if (p(j) .gt. pt)then             ! we are still in complete layers
+                a1= tk(j)*(c2 + w_laps(td(j),p(j),esat_lut))
+                a2= tk(i)*(c2 + w_laps(td(i),p(i),esat_lut))
+                z_thk = z_thk + (a1+a2)*(alog_array(i))
 
-            elseif(P(J) .eq. PT)then          ! Finish up on Complete Layer
-                A1= TK(J)*(C2 + W_laps(TD(J),P(J),esat_lut))
-                A2= TK(I)*(C2 + W_laps(TD(I),P(I),esat_lut))
-                Z_thk = Z_thk + (A1+A2)*(alog_array(i))
+            elseif(p(j) .eq. pt)then          ! finish up on complete layer
+                a1= tk(j)*(c2 + w_laps(td(j),p(j),esat_lut))
+                a2= tk(i)*(c2 + w_laps(td(i),p(i),esat_lut))
+                z_thk = z_thk + (a1+a2)*(alog_array(i))
                 return
 
-            else ! P(J) .lt. PT               ! Finish up on partial layer
-                A1= TK(J)*(C2 + W_laps(TD(J),P(J),esat_lut))
-                A2= TK(I)*(C2 + W_laps(TD(I),P(I),esat_lut))
-                Z_thk = Z_thk + (A1+A2)*(ALOG(P(I)/PT))
-                RETURN
+            else ! p(j) .lt. pt               ! finish up on partial layer
+                a1= tk(j)*(c2 + w_laps(td(j),p(j),esat_lut))
+                a2= tk(i)*(c2 + w_laps(td(i),p(i),esat_lut))
+                z_thk = z_thk + (a1+a2)*(alog(p(i)/pt))
+                return
 
             endif
 
         enddo ! i
 
 
-        write(6,*)' Error, PT out of bounds in Z_THK'
-        Z_thk = -1.0
+        write(6,*)' error, pt out of bounds in z_thk'
+        z_thk = -1.0
 
-        RETURN
-        END
+        return
+        end
 
 
-        FUNCTION W_laps(T,P,esat_lut)
+        function w_laps(t,p,esat_lut)
 
-cdoc    Convert T(C) and P to W. This is a fast approximate routine.
-cdoc    Output W_laps is dimensionless mixing ratio
+cdoc    convert t(c) and p to w. this is a fast approximate routine.
+cdoc    output w_laps is dimensionless mixing ratio
 
-!       This function really only works when T > -50C but the efficiency will
-!       outweigh the error when T < -50C in this application
+!       this function really only works when t > -50c but the efficiency will
+!       outweigh the error when t < -50c in this application
 
         real esat_lut(-120:+100)
 
         include 'constants.inc'
-        real C1,C2,const
-        PARAMETER (C1 = .001 * EP_1)
-        PARAMETER (C2 = r_d / (2. * grav) )
+        real c1,c2,const
+        parameter (c1 = .001 * ep_1)
+        parameter (c2 = r_d / (2. * grav) )
 
         parameter (const = 622. * c1 * c2)
 
-C       ES(X)=6.1078+X*(.443652+X*(.014289+X*(2.65065E-4+X*
-C    1 (3.03124E-6+X*(2.034081E-8+X*(6.13682E-11))))))
-C
-C
-        X= esat_lut(nint(T))
-        W_laps= const*X/(P-X)
-        RETURN
-        END
+c       es(x)=6.1078+x*(.443652+x*(.014289+x*(2.65065e-4+x*
+c    1 (3.03124e-6+x*(2.034081e-8+x*(6.13682e-11))))))
+c
+c
+        x= esat_lut(nint(t))
+        w_laps= const*x/(p-x)
+        return
+        end
 
 

@@ -8,32 +8,32 @@ c_______________________________________________________________________________
 c
       call get_grid_dim_xy(nx,ny,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting horizontal domain dimensions'
+          write (6,*) 'error getting horizontal domain dimensions'
           go to 999
       endif
       call get_laps_dimensions(nz,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting vertical domain dimension'
+          write (6,*) 'error getting vertical domain dimension'
           go to 999
       endif
 
       call qbalpe_stag(nx,ny,nz)
 c
 
-999   print*,'Done'
+999   print*,'done'
 
 1000  end
 c
 c===============================================================================
 c
       subroutine qbalpe_stag(nx,ny,nz)
-c  This subroutine reinstates the staggering in the 
-c balance package.  This is critical for maximum 
+c  this subroutine reinstates the staggering in the 
+c balance package.  this is critical for maximum 
 c accuracy and adjustment potential
 c
 c*********************
-      use mem_namelist, ONLY: read_namelist_laps
-      use mem_namelist, ONLY: max_pr
+      use mem_namelist, only: read_namelist_laps
+      use mem_namelist, only: max_pr
 c*********************************edtoll
       include 'trigd.inc'
       implicit none
@@ -106,7 +106,7 @@ c    .      ,wb(nx,ny,nz)
       real rstats(7)
       real phi3dvar(nz)
 
-c made 2d 2-20-01 JS.
+c made 2d 2-20-01 js.
       real  tau(nx,ny)
       real  ro(nx,ny)
       real,   allocatable,dimension (:,:) :: terscl
@@ -162,14 +162,14 @@ c     character*255 generic_data_root
       character*8   c8_project
       character*3   cpads_type
 
-c    Added by B. Shaw, 4 Sep 01, modified by Steve Albers
+c    added by b. shaw, 4 sep 01, modified by steve albers
       real, allocatable :: lapsrh(:,:,:)
       real, external :: ssh, make_rh
       real shsat, lapsrh_orig
       real ubias,vbias,urms,vrms,oberr
       logical l_preserve_rh /.true./
 
-c    Arrays for Airdrop application
+c    arrays for airdrop application
       real, allocatable, dimension(:,:) :: udrop,vdrop,tdrop,rri,rrj,
      &    rrk,rrit,rrjt,rrkt,rrii,rrjj
       real, allocatable, dimension (:) :: udropc,vdropc,tdropc,rric,rrjc
@@ -177,7 +177,7 @@ c    Arrays for Airdrop application
       real  erf
 c_______________________________________________________________________________
 c
-!     Initialize in case not in namelist
+!     initialize in case not in namelist
       erf=.01
       itmax=200  !max iterations for relaxation
 
@@ -196,12 +196,12 @@ c
 c switch to run balance package or not
 c
       if(.not.lrunbal)then
-         print*,'Namelist value lrunbal = false '
-         print*,'Balance Package not running '
+         print*,'namelist value lrunbal = false '
+         print*,'balance package not running '
          goto 999
       endif
 c
-c *** Get times of mass, wind and surface data.
+c *** get times of mass, wind and surface data.
 c
       call get_systime(i4time_sys,a9_time,istatus)
       if(istatus .ne. 1)go to 999
@@ -215,14 +215,14 @@ c
       call get_vertical_grid(vertical_grid,istatus)
 
       call s_len(vertical_grid,lenvg)
-      if(vertical_grid(1:lenvg).eq.'PRESSURE')THEN!Pressure in pa
+      if(vertical_grid(1:lenvg).eq.'pressure')then!pressure in pa
          do i=2,nz
           dp(i)=p(i-1)-p(i)
           pstag(i-1)=p(i-1)-dp(i)*0.5
          enddo
 c        print*,(p(i),dp(i),i=1,nz)
       else
-         print*,'vertical grid is not PRESSURE ',vertical_grid
+         print*,'vertical grid is not pressure ',vertical_grid
          goto 999
       endif
 
@@ -241,7 +241,7 @@ c        print*,(p(i),dp(i),i=1,nz)
      1                    ,grid_spacing_cen_m,istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting laps lat, lons.'
+         print *,'error getting laps lat, lons.'
          stop
       endif
 c
@@ -255,24 +255,24 @@ c
       enddo
       enddo
 c
-c *** Get background grids
+c *** get background grids
 c
       allocate(phib(nx,ny,nz),tb(nx,ny,nz),shb(nx,ny,nz)
      .,ub(nx,ny,nz),vb(nx,ny,nz),omb(nx,ny,nz))
 
-      call get_modelfg_3d(i4time_sys,'U3 ',nx,ny,nz,ub,istatus)
-      call get_modelfg_3d(i4time_sys,'V3 ',nx,ny,nz,vb,istatus)
-      call get_modelfg_3d(i4time_sys,'T3 ',nx,ny,nz,tb,istatus)
-      call get_modelfg_3d(i4time_sys,'HT ',nx,ny,nz,phib,istatus)
-      call get_modelfg_3d(i4time_sys,'SH ',nx,ny,nz,shb,istatus)
-      call get_modelfg_3d(i4time_sys,'OM ',nx,ny,nz,omb,istatus)
+      call get_modelfg_3d(i4time_sys,'u3 ',nx,ny,nz,ub,istatus)
+      call get_modelfg_3d(i4time_sys,'v3 ',nx,ny,nz,vb,istatus)
+      call get_modelfg_3d(i4time_sys,'t3 ',nx,ny,nz,tb,istatus)
+      call get_modelfg_3d(i4time_sys,'ht ',nx,ny,nz,phib,istatus)
+      call get_modelfg_3d(i4time_sys,'sh ',nx,ny,nz,shb,istatus)
+      call get_modelfg_3d(i4time_sys,'om ',nx,ny,nz,omb,istatus)
 
       if(istatus.ne.1)then
          print*,'background model frst guess not obtained'
          return
       endif
 
-      call get_modelfg_2d(i4time_sys,'PSF',nx,ny,psb,istatus)
+      call get_modelfg_2d(i4time_sys,'psf',nx,ny,psb,istatus)
 
       if(istatus.ne.1)then
          print*,'background model frst guess not obtained'
@@ -282,7 +282,7 @@ c
 c     check to see that omb is not missing
       where(abs(omb) .gt. 100.) omb=0.
 c
-c *** Get LAPS 3D analysis grids.
+c *** get laps 3d analysis grids.
 c
       allocate (lapsu(nx,ny,nz),lapsv(nx,ny,nz)   !t=t0
      .         ,lapssh(nx,ny,nz)
@@ -297,7 +297,7 @@ c
         call get_laps_3d_analysis_data_isi(i4time_sys,nx,ny,nz
      +,lapsphi,lapstemp,lapsu,lapsv,lapssh,omo,istatus)
         if (istatus .ne. 1) then
-         print *,'Error in get_laps_3d_analysis_data_isi...Abort.'
+         print *,'error in get_laps_3d_analysis_data_isi...abort.'
          stop
         endif
 
@@ -307,11 +307,11 @@ c
      +,lapsphi,lapstemp,lapsu,lapsv,lapssh,omo,istatus)
 c omo is the cloud vertical motion from lco
         if (istatus .ne. 1) then
-         print *,'Error getting LAPS analysis data...Abort.'
+         print *,'error getting laps analysis data...abort.'
          stop
         endif
 
-!       Smooth the cloud omega data
+!       smooth the cloud omega data
         if (comega_smooth .ne. 0.) then
           if (comega_smooth .eq.-1.) then
             if(grid_spacing_cen_m .le. 4000.)then
@@ -323,48 +323,48 @@ c omo is the cloud vertical motion from lco
             idist = nint(comega_smooth)
           endif
 
-          write(6,*)' Smoothing cloud omega ',comega_smooth,idist
+          write(6,*)' smoothing cloud omega ',comega_smooth,idist
           do k = 1,nz
             where(omo .eq. smsng)omo=0.
             call smooth2 (nx,ny,idist,omo(:,:,k))
             where(omo .eq. 0.)omo = smsng                     
           enddo ! k
         else
-            write(6,*)' Skip smoothing cloud omega ',comega_smooth
+            write(6,*)' skip smoothing cloud omega ',comega_smooth
         endif
 
       endif
 
-      write(6,*)' Sample Height Column (lapsphi)'
+      write(6,*)' sample height column (lapsphi)'
       do k = 1,nz
         write(6,*)k,lapsphi(1,1,k)
       enddo ! k
 c
-c *** Get LAPS 2D surface pressure.
+c *** get laps 2d surface pressure.
 c
-      call get_laps_2d(i4time_sys,sfcext,'PS ',units,
+      call get_laps_2d(i4time_sys,sfcext,'ps ',units,
      1                  comment,nx,ny,ps,istatus)
 c
-c *** For Airdrop-LAPS project we want to advance
+c *** for airdrop-laps project we want to advance
 c *** analyses to the time of payload release as specified
-c *** by namelist variable adv_anal_by_t_min. Subr 'advance_grids'
+c *** by namelist variable adv_anal_by_t_min. subr 'advance_grids'
 c *** acquires backgrounds at i4time_airdrop and uses them to
 c *** advance the "laps" analysis arrays forward in time to
-c *** i4time_airdrop. Background arrays are filled with data
+c *** i4time_airdrop. background arrays are filled with data
 c *** at i4time_airdrop.
 c *** 
 c
       call get_c8_project(c8_project,istatus)
       call upcase(c8_project,c8_project)
 
-      if(c8_project .eq. 'AIRDROP')then
+      if(c8_project .eq. 'airdrop')then
 
          print*
          print*,' ************************'
-         print*,' ******* Airdrop  *******'
+         print*,' ******* airdrop  *******'
          print*,' ************************'
          print*
-         print*,' Advance systime by ',
+         print*,' advance systime by ',
      +adv_anal_by_t_min*60, ' seconds '
 
          i4time_airdrop=i4time_sys+adv_anal_by_t_min*60
@@ -373,7 +373,7 @@ c
      .,nx,ny,nz,ub,vb,tb,phib,shb,omb,psb
      .,lapsphi,lapstemp,lapsu,lapsv,lapssh,omo,ps,istatus)
          if(istatus.ne.1)then
-            print*,'Error returned: advance_grids '
+            print*,'error returned: advance_grids '
             return
          endif
 
@@ -381,14 +381,14 @@ c
 
       endif
 
-c *** Not considering non-linear terms for now, so no need to read t0-dt. 
+c *** not considering non-linear terms for now, so no need to read t0-dt. 
 c     call get_laps_wind(winddir,windtime,windext,nx,ny,nz
 c    .                  ,lapsuo,lapsvo,istatus)
 
       if(lrotate)then
 
-         write(6,*)' Rotate u/v to grid north. Input winds are true N'
-         write(6,*)' Convert input and background ht to GPM   '
+         write(6,*)' rotate u/v to grid north. input winds are true n'
+         write(6,*)' convert input and background ht to gpm   '
 
          do k = 1, nz
          do j = 1, ny
@@ -414,7 +414,7 @@ c    .                  ,lapsuo,lapsvo,istatus)
 
       else
 
-         write(6,*)' Convert input and background ht to GPM   '
+         write(6,*)' convert input and background ht to gpm   '
          do k = 1, nz
          do j = 1, ny
          do i = 1, nx
@@ -426,26 +426,26 @@ c    .                  ,lapsuo,lapsvo,istatus)
 
       endif
 
-c *** Get laps surface pressure.
+c *** get laps surface pressure.
 c
-c     call get_laps_2d(i4time_sys,sfcext,'PS ',units,
+c     call get_laps_2d(i4time_sys,sfcext,'ps ',units,
 c    1                  comment,nx,ny,ps,istatus)
 c
 c all pressure is in pascals
 c set dynamic weight del using lat and surface pressure
 c some comments about analysis constants delo and tau
-c delo is 100 x the inverse square of the expected balance residual. This is
+c delo is 100 x the inverse square of the expected balance residual. this is
 c a specified parameter that is constant over the grid
 c tau controls the mass distribution of any continuity adjustments.
-c See paper mcGinley 1984, Contibutions to AtmosPhysicsvol 57 p527-535
+c see paper mcginley 1984, contibutions to atmosphysicsvol 57 p527-535
 c if tau is large mass adjustment occurs over shallow layers
-c tau is based on scaling = griddist**2 Brunt-Vaisala Freq**4*atmheight scale**4
+c tau is based on scaling = griddist**2 brunt-vaisala freq**4*atmheight scale**4
 c / ( pressureheight of mtn**2 mean velocity **2 f**2)
 c a steep slope will reduce tau so that appropriate terrain induced vertical
-c motions will result. The height scale of the atm and brunt vaisala freq
+c motions will result. the height scale of the atm and brunt vaisala freq
 c will control how quickly
 c the terrain induced vertical motion will vertically penetrate.
-c For the current application we will use the background omega to determine
+c for the current application we will use the background omega to determine
 c an appropriate tau value.
       sumdt=0.
       sumdz=0.
@@ -457,7 +457,7 @@ c an appropriate tau value.
       sumv2=0.
 
 c set the resolvable scale based on a wavelength for scaling 
-c purposes. We will use a wavelength 
+c purposes. we will use a wavelength 
 c resolvable by the grid (4*grid spacing) 
 c and a data resolving wavelength based on
 c the nyquist interval (4 * data spacing)
@@ -521,7 +521,7 @@ c        terscl(i,j)=terscl(1,1)   !make it constant over domain for now.
            sumv2=sumv2+(lapsu(i,j,k)**2+lapsv(i,j,k)**2)
          enddo
 c error terms are the inverse sq error; right now with no
-c horizontal stucture. Only vertical error allowed for now.
+c horizontal stucture. only vertical error allowed for now.
          do k=1,nz
 !           erru(i,j,k)=(0.1*(1.+float(k-1)*.10))**(-2)
 !           errub(i,j,k)=(1.5*(1.+float(k-1)*.3))**(-2)
@@ -534,7 +534,7 @@ c horizontal stucture. Only vertical error allowed for now.
             errphib(i,j,k)=(c_errphib*(1.+float(k-1)*.1)*g)**(-2)
 c
 c vertical motions in clear areas come in as the missing data parameter.
-c replace missing cloud vv's with background vv's. Unless there is cloud
+c replace missing cloud vv's with background vv's. unless there is cloud
 c we seek to replicate the background vertical motions
             if(abs(omb(i,j,k)).gt.100.)omb(i,j,k)=0. ! check for missing omb
             if(abs(omo(i,j,k)).gt.100.)omo(i,j,k)=omb(i,j,k)
@@ -552,7 +552,7 @@ c we seek to replicate the background vertical motions
       den=den/snxny/sk
       sumom2=sumom2/snxny/sk
       sumr=sqrt(g*sumdt/sumt/sumdz)
-c     delo is scaled as 10% of expected eqn of motion residual ro*U**2/L
+c     delo is scaled as 10% of expected eqn of motion residual ro*u**2/l
       rod=sqrt(sumv2)/(sumf*sldata)
       rog=sqrt(sumv2)/(sumf*sl)
       if(rog.gt.1.) rog=1.
@@ -566,8 +566,8 @@ c     delo is scaled as 10% of expected eqn of motion residual ro*U**2/L
          ksij=ks(i,j)
          dpp=p(ksij)-p(kfij)
 c scale tau as of 1/(omega)**2 where omega is the background rms omega              
-c if background is missing sumom2 will be 0. In that case scale a 
-c vertical motion based on a scaled dynamic omega. Utilze the maximum 
+c if background is missing sumom2 will be 0. in that case scale a 
+c vertical motion based on a scaled dynamic omega. utilze the maximum 
 c estimated omega for setting the flow blocking parameter tau
         if(sumom2.ne.0.) then
         omsubs=sumom2
@@ -582,25 +582,25 @@ c estimated omega for setting the flow blocking parameter tau
       deallocate(ks,kf,terscl)
 
 c
-c if this is for AIRDROP there is no need to run the balance package, only 
-c continuity. set delo=0. In balcon this will skip the balance sequence.
+c if this is for airdrop there is no need to run the balance package, only 
+c continuity. set delo=0. in balcon this will skip the balance sequence.
 c
-      if(c8_project .eq. 'AIRDROP'.or.setdelo0)then
+      if(c8_project .eq. 'airdrop'.or.setdelo0)then
          delo=0.
       endif
 c
 c print these arrays now.
       print*,'length scales(m): mean wavelength, data wavelength ',sl,
      &sldata 
-      print*,'/dthet/thet/dz/den/N/V/f/delo/tau:' 
+      print*,'/dthet/thet/dz/den/n/v/f/delo/tau:' 
      &,sumdt,sumt,sumdz,den,sumr,sqrt(sumv2),sumf,delo,tau(1,1)
-      print*,'Omegab,Omegadyn,Froude Num ',
-     &'DataRossby Num,GrdRosby,aspectP/X:',sqrt(sumom2),sqrt(sumomt2),
+      print*,'omegab,omegadyn,froude num ',
+     &'datarossby num,grdrosby,aspectp/x:',sqrt(sumom2),sqrt(sumomt2),
      &    (sumr*sumdz/sqrt(sumv2)),rod,rog ,(dpp/dx(nx/2,ny/2))
       
 c
-c *** Compute non-linear terms (nu,nv) and execute mass/wind balance.
-c *** Do for lmax iterations.
+c *** compute non-linear terms (nu,nv) and execute mass/wind balance.
+c *** do for lmax iterations.
 c
       lmax=1 
 
@@ -615,18 +615,18 @@ c put lapsphi into phi, lapsu into u, etc
 c
       if(larray_diag)then
          print*
-         print*,'Before balstagger - analysis u/v'
+         print*,'before balstagger - analysis u/v'
          print*
          do k=1,nz
             print*
-            print*,'Calling array diagnosis: ',k,' ',p(k)
+            print*,'calling array diagnosis: ',k,' ',p(k)
             print*,'---------------------------------------'
             call array_diagnosis(u(1,1,k),nx,ny,'u-comp    ')
             call array_diagnosis(v(1,1,k),nx,ny,'v-comp    ')
          enddo
       endif
 c
-c stagger the LAPS grids to prepare for balancing
+c stagger the laps grids to prepare for balancing
 c
 c laps analysis grids first.
       allocate (phis(nx,ny,nz),ts(nx,ny,nz),shs(nx,ny,nz)
@@ -637,11 +637,11 @@ c laps analysis grids first.
 
       if(larray_diag)then
          print*
-         print*,'After balstagger - analysis u/v'
+         print*,'after balstagger - analysis u/v'
          print*
          do k=1,nz
             print*
-            print*,'Calling array diagnosis: ',k,' ',p(k)
+            print*,'calling array diagnosis: ',k,' ',p(k)
             print*,'---------------------------------------'
             call array_diagnosis(us(1,1,k),nx,ny,'u-comp    ')
             call array_diagnosis(vs(1,1,k),nx,ny,'v-comp    ')
@@ -671,8 +671,8 @@ c     call zero3d(ombs,nx,ny,nz)
 c     call zero3d(oms,nx,ny,nz)
 
 c
-c ****** Execute mass/wind balance.
-c  set maximum relaxation correction for phi in GPM
+c ****** execute mass/wind balance.
+c  set maximum relaxation correction for phi in gpm
       err=1.0
 c returns staggered grids of full fields u,v,phi
 
@@ -683,65 +683,65 @@ c    . ,nu,nv,fu,fv
 
       if(larray_diag)then
          print*
-         print*,'After balcon'
+         print*,'after balcon'
          print*
          do k=1,nz
             print*
-            print*,'Calling array diagnosis: ',k,p(k)
+            print*,'calling array diagnosis: ',k,p(k)
             print*,'-------------------------------'
             call array_diagnosis(u(1,1,k),nx,ny,' u-comp   ')
             call array_diagnosis(v(1,1,k),nx,ny,' v-comp   ')
          enddo
       endif
-c ******** 10/08 ***** Ed Tollerud
-c     call put_sfc_bal(i4time,t_bal,ht_bal,u_bal,v_bal         ! Input
-c    1                       ,topo,ni,nj,nk                           ! Input
-c    1                       ,istatus                              )  ! Output
-c     call put_sfc_bal(i4time,tbs,phibs,ubs,vbs,               ! Input
-c    1                       ,ter,nx,ny,nz                           ! Input
-c    1                       ,istatus                              )  ! Output
-c Question: no balancing on ts? is tbs 
+c ******** 10/08 ***** ed tollerud
+c     call put_sfc_bal(i4time,t_bal,ht_bal,u_bal,v_bal         ! input
+c    1                       ,topo,ni,nj,nk                           ! input
+c    1                       ,istatus                              )  ! output
+c     call put_sfc_bal(i4time,tbs,phibs,ubs,vbs,               ! input
+c    1                       ,ter,nx,ny,nz                           ! input
+c    1                       ,istatus                              )  ! output
+c question: no balancing on ts? is tbs 
 
 c
 c
-c *** destagger and Write out new laps fields.
+c *** destagger and write out new laps fields.
 c
 c the non-staggered grids must be input with intact boundaries from background 
 c  the bs arrays are used as dummy arrays to go from stagger to non staggered
-      print*,'Destaggering grids back to LAPS A grid' 
+      print*,'destaggering grids back to laps a grid' 
       call balstagger(ubs,vbs,phibs,tbs,
      & shbs,ombs,u,v,phi,t,sh,om,nx,ny,nz,p,ps,-1) 
-c   Prior to applying boundary subroutine put non-staggered grids back into
+c   prior to applying boundary subroutine put non-staggered grids back into
 c   u,v,om,t,sh,phi.
 
 c      do k=1,nz/2
-c      call diagnose(u,nx,ny,nz,nx/2,ny/2,k,7,'staggered U')
-c      call diagnose(v,nx,ny,nz,nx/2,ny/2,k,7,'staggered V')
-c      call diagnose(ubs,nx,ny,nz,nx/2,ny/2,k,7,'unstaggd U ')
-c      call diagnose(vbs,nx,ny,nz,nx/2,ny/2,k,7,'unstaggd V ')
-c      call diagnose(lapsu,nx,ny,nz,nx/2,ny/2,k,7,'original U ')
-c      call diagnose(lapsv,nx,ny,nz,nx/2,ny/2,k,7,'original V ')
+c      call diagnose(u,nx,ny,nz,nx/2,ny/2,k,7,'staggered u')
+c      call diagnose(v,nx,ny,nz,nx/2,ny/2,k,7,'staggered v')
+c      call diagnose(ubs,nx,ny,nz,nx/2,ny/2,k,7,'unstaggd u ')
+c      call diagnose(vbs,nx,ny,nz,nx/2,ny/2,k,7,'unstaggd v ')
+c      call diagnose(lapsu,nx,ny,nz,nx/2,ny/2,k,7,'original u ')
+c      call diagnose(lapsv,nx,ny,nz,nx/2,ny/2,k,7,'original v ')
 c      enddo
 
       if(.true.)then
 
 c     write out input laps vs balanced laps at center grid point
-      print*,'Output u and Input u and diff after balance and destagger'
+      print*,'output u and input u and diff after balance and destagger'
       do k=1,nz
        write (6,1111) ubs(nx/2,ny/2,k),lapsu(nx/2,ny/2,k)
      &        ,ubs(nx/2,ny/2,k)-lapsu(nx/2,ny/2,k)
       enddo
-      print*,' Output v and Input v after balance and destagger '
+      print*,' output v and input v after balance and destagger '
       do k=1,nz
        write (6,1111) vbs(nx/2,ny/2,k),lapsv(nx/2,ny/2,k)
      &        ,vbs(nx/2,ny/2,k)-lapsv(nx/2,ny/2,k)
       enddo
-      print*,' Output T and Input T after balance and destagger '
+      print*,' output t and input t after balance and destagger '
       do k=1,nz
        write (6,1111) tbs(nx/2,ny/2,k),lapstemp(nx/2,ny/2,k)
      &        ,tbs(nx/2,ny/2,k)-lapstemp(nx/2,ny/2,k)
       enddo
-      print*,' Output phi and Input phi after balance and destagger '
+      print*,' output phi and input phi after balance and destagger '
       do k=1,nz
        write (6,1111) phibs(nx/2,ny/2,k),lapsphi(nx/2,ny/2,k)
      &        ,phibs(nx/2,ny/2,k)-lapsphi(nx/2,ny/2,k)
@@ -750,7 +750,7 @@ c     write out input laps vs balanced laps at center grid point
 
       endif
       deallocate(lapsphi,lapsu,lapsv,omo)
-c temporary revision, ed Tollerud, set npass to work on 64 bit machines, 0709********
+c temporary revision, ed tollerud, set npass to work on 64 bit machines, 0709********
       npass=0
 c end temporary revision, 0709*********
 c adjust surface temps to account for poor phi estimates below ground 
@@ -765,19 +765,19 @@ c adjust surface temps to account for poor phi estimates below ground
 
       deallocate (phibs,ubs,vbs,tbs,ombs,shbs)
 
-!     write(6,*)' Sample Height Column (phi)'
+!     write(6,*)' sample height column (phi)'
 !     do k = 1,nz
 !       write(6,*)k,phi(1,1,k)
 !     enddo ! k
 
-c JS> commented 8-21-02.  unsure of need for ps at this point?
-c     call get_laps_2d(i4time_sys,sfcext,'PS ',units,
+c js> commented 8-21-02.  unsure of need for ps at this point?
+c     call get_laps_2d(i4time_sys,sfcext,'ps ',units,
 c    1                  comment,nx,ny,ps,istatus)
 
       if(lrotate)then
 
          print*,'rotate u/v analysis and backgrnd to true north'
-         print*,'Put geopotential hgt back to m'
+         print*,'put geopotential hgt back to m'
          do k = 1, nz
             do j = 1, ny
             do i = 1, nx
@@ -795,7 +795,7 @@ c    1                  comment,nx,ny,ps,istatus)
 
       else
 
-         print*,'Put geopotential hgt back to m'
+         print*,'put geopotential hgt back to m'
          do k = 1, nz
             do j = 1, ny
             do i = 1, nx
@@ -806,45 +806,45 @@ c    1                  comment,nx,ny,ps,istatus)
 
       endif
 c
-c  The (dry) dynamic balancing makes small adjustments to the temp
+c  the (dry) dynamic balancing makes small adjustments to the temp
 c  field, which changes the saturation vapor pressure, which means
 c  rh may not be exactly 100% where there is cloud liquid present.
-c  That would cause erroneous evaporation of production of cloud
+c  that would cause erroneous evaporation of production of cloud
 c  liquid (and associated heating/cooling) in the very first time 
-c  step.  No good.
+c  step.  no good.
 
 
-c  This section updates a previous section to adjust the moisture
+c  this section updates a previous section to adjust the moisture
 c  using specific humidity so moisture between the unbalanced and
-c  balance analysis is better conserved.  B. Shaw, Sep 01
+c  balance analysis is better conserved.  b. shaw, sep 01
 
       allocate (lapsrh(nx,ny,nz))
       do k = 1, nz
       do j = 1, ny
       do i = 1, nx
 c         
-c       Compute the saturation specific humidity
+c       compute the saturation specific humidity
 
         shsat = ssh(p(k)*0.01,t(i,j,k)-273.15)*0.001
 
         if(.not. l_preserve_rh)then
-c           Ensure the specfic humidity does not exceed
+c           ensure the specfic humidity does not exceed
 c           the saturation value for this temperature
 
-            lapssh(i,j,k) = MIN(shsat,lapssh(i,j,k))
+            lapssh(i,j,k) = min(shsat,lapssh(i,j,k))
 c
-c           Finally, rediagnose RH wrt liquid from the 
+c           finally, rediagnose rh wrt liquid from the 
 c           modified sh field
 
             lapsrh(i,j,k) = make_rh(p(k)*0.01,t(i,j,k)-273.15
      .                    ,lapssh(i,j,k)*1000.,-132.)*100.         
-            lapsrh(i,j,k) = MAX(lapsrh(i,j,k),1.0)
+            lapsrh(i,j,k) = max(lapsrh(i,j,k),1.0)
 
-        else ! Keep the RH the same as it was prior to balancing (while
-             ! modifying SH)
+        else ! keep the rh the same as it was prior to balancing (while
+             ! modifying sh)
             lapsrh_orig = make_rh(p(k)*0.01,lapstemp(i,j,k)-273.15  
      .                          ,lapssh(i,j,k)*1000.,-132.)*100.         
-            lapsrh(i,j,k) = MAX(lapsrh_orig,1.0)
+            lapsrh(i,j,k) = max(lapsrh_orig,1.0)
    
             lapssh(i,j,k) = (lapsrh_orig/100.) * shsat
 
@@ -856,38 +856,38 @@ c           modified sh field
 
       deallocate(lapstemp)
 c
-c     New section added by to replicate the values of u/v at 
+c     new section added by to replicate the values of u/v at 
 c     from the lowest p-level still above ground to all levels
-c     below ground  (B. Shaw, 12 Apr 02) 
+c     below ground  (b. shaw, 12 apr 02) 
 
 c     do j = 1,ny
 c       do i = 1, nx
 c         findsfclev:  do k = 1,nz
-c           IF (phi(i,j,k) .GT. ter(i,j)) EXIT findsfclev
+c           if (phi(i,j,k) .gt. ter(i,j)) exit findsfclev
 c         enddo findsfclev
-c         IF (k .gt. 1) THEN
+c         if (k .gt. 1) then
 c           u(i,j,1:k-1) = u(i,j,k)
 c           v(i,j,1:k-1) = v(i,j,k)
-c         ENDIF
+c         endif
 c       enddo
 c     enddo
 c
 c produce surface balance fields by interpolation to terrain height
-c ******** 10/08 ***** Ed Tollerud
-c     call put_sfc_bal(i4time,t_bal,ht_bal,u_bal,v_bal         ! Input
-c    1                       ,topo,ni,nj,nk                           ! Input
-c    1                       ,istatus                              )  ! Output
+c ******** 10/08 ***** ed tollerud
+c     call put_sfc_bal(i4time,t_bal,ht_bal,u_bal,v_bal         ! input
+c    1                       ,topo,ni,nj,nk                           ! input
+c    1                       ,istatus                              )  ! output
 
-      call put_sfc_bal(i4time_sys,t,phi,u,v               ! Input
-     1                       ,ter,nx,ny,nz                           ! Input
-     1                       ,istatus                              )  ! Output
+      call put_sfc_bal(i4time_sys,t,phi,u,v               ! input
+     1                       ,ter,nx,ny,nz                           ! input
+     1                       ,istatus                              )  ! output
       istatus = ishow_timer()
 c
 c
-c Write balance output (balance/lt1 and balance/lw3).
+c write balance output (balance/lt1 and balance/lw3).
 c ---------------------------------------------------
 c
-      if(c8_project .eq. 'AIRDROP')then
+      if(c8_project .eq. 'airdrop')then
          i4time_sys = i4time_airdrop
       endif
 
@@ -898,18 +898,18 @@ c
          return
       endif
 
-      if(c8_project .eq. 'AIRDROP')then
+      if(c8_project .eq. 'airdrop')then
 
 c ----------------------------------------------------------------
-c -----------    AIRDROP ANALYSIS ERROR SECTION ------------------
-c Output required: turbulent compontents of u, v, and w;
+c -----------    airdrop analysis error section ------------------
+c output required: turbulent compontents of u, v, and w;
 c analysis error of u,v,wc t, rh
 c compute dropsone wind difference from background
 c simple solution is to read from .pig and tmg files, then create a
 c truth profile and compute an average analysis error
 
-         write(6,*)' Rotate u/v analysis and background
-     1    to true north for AIRDROP analysis'
+         write(6,*)' rotate u/v analysis and background
+     1    to true north for airdrop analysis'
 
          do k = 1, nz
             do j = 1, ny
@@ -941,7 +941,7 @@ c
 c ---------------------------------------------------------------------------
 c nsnd = the max number of profiles (soundings); used for array dimensioning
 c        purposes.
-c n_snd= the number of soundings found in the ingest files. For "pin", this
+c n_snd= the number of soundings found in the ingest files. for "pin", this
 c        is always one while for "snd" 1 <= n_snd <= max_pr, and n_snd is 
 c        returned from routine readprg.
 c ---------------------------------------------------------------------------
@@ -975,7 +975,7 @@ c
          elseif(cpads_type.eq.'pln')then
 
             print*,'*********************************************'
-            print*,'LAPS PLANNING run for PADS Airdrop mission'
+            print*,'laps planning run for pads airdrop mission'
             print*,'*********************************************'
             print*
 c
@@ -1001,7 +1001,7 @@ c
             errmod=3. ! model wind error (m/sec)
             errdis=100000. ! model error displacement in m
 c -------------------------------------------------------------------------
-CC #### PADS Planning tool variance estimator ####
+cc #### pads planning tool variance estimator ####
 c -------------------------------------------
             call var3d (u,v,db,t ,smsng,grid_spacing_cen_m
      &,dt,dpht,distnf,p,phi3dvar,errwnds,errdds,errmod,errdis,io,jo
@@ -1012,23 +1012,23 @@ c -------------------------------------------
          else
 
             print*,'********************************************'
-            print*,'   !!! Error: No PADS type indicated !!!'
-            print*,'Check static/balance.nl; variable cpads_type'
+            print*,'   !!! error: no pads type indicated !!!'
+            print*,'check static/balance.nl; variable cpads_type'
             print*,'********************************************'
             return
 
          endif
 
          if(istatus.eq.-3)then
-         print*,'Warning status: ',cpads_type,' istatus=',istatus
-            print*,'Dropsonde data not available; using default '
+         print*,'warning status: ',cpads_type,' istatus=',istatus
+            print*,'dropsonde data not available; using default '
      1    ,'dropsonde (profile in center of grid)'
             go to 99
          elseif(istatus.eq.-1)then
-            print*,'Only tmg exists: generate u/v drop profiles
+            print*,'only tmg exists: generate u/v drop profiles
      1 from analysis with gaussian error'
          elseif(istatus.eq.-2)then
-             print*,'Only prg exists: generate T drop profile
+             print*,'only prg exists: generate t drop profile
      1 from analysis with gaussian error'
          endif
 c routine to create drop and rr arrays when either prg or tmg
@@ -1069,11 +1069,11 @@ c do not exist
             enddo
          endif
 c
-c this routine checks all levels for u,v, and t. If missing (either
+c this routine checks all levels for u,v, and t. if missing (either
 c no dropsonde or for levels above dropsonde, dropsonde variables 
 c will be proxied by the analysis at either the dropsonde points
 c (if they exist) otherwise, the center of the grid and
-c gaussian noise will be applied: 3 m/s for wind, 1C for temp
+c gaussian noise will be applied: 3 m/s for wind, 1c for temp
 c this will allow a variance to be provided above dropsonde levels
 c
 99    slastu=0
@@ -1185,12 +1185,12 @@ c here we assume the following for dropsonde error: wind 1m/s, temp .5deg
 c and model error
       call read_wind3d_wgi(rstats,istatus)
       if(istatus .ne. 1)then
-         print*,'Using u/v model errors from climo estimates:'
+         print*,'using u/v model errors from climo estimates:'
          moderu=3.
          moderv=3.
          modert=1.0
       else
-         print*,'Using u/v model errors from wind analysis:'
+         print*,'using u/v model errors from wind analysis:'
          moderu=rstats(6)
          moderv=rstats(7)
          modert=1.0
@@ -1200,13 +1200,13 @@ c and model error
       obert=.5
       oberw=.05
 
-c  compute TKE
+c  compute tke
 c  the s arrays are used to hold the turbulent components of u,v, and w
 
       call turb(u,v,om,t,phi,p,us,vs,oms,ts,ter,nx,ny,nz)
 
       print*
-      print*,'Calling subroutine profile. '
+      print*,'calling subroutine profile. '
       print*
 
       call profile(udropc,vdropc,tdropc,rric,rrjc,oberu,oberw
@@ -1228,10 +1228,10 @@ c    1 nx,ny,nz,rri,rrj,zter,alt)
 c routine is designed to correct surface temperatures which have been computed 
 c employing the hyposometric equation using geopotential heights of pressure 
 c surfaces below ground. 'to' is the laps lt1 which uses surface data near the 
-c ground. We want these estimates to be in the 3-D fields rather than  fictional
-c hydrostatic estimates from phi. Above the ground balanced temps are good.
-c Both the temp mmediately above and below ground are given the lt1. 
-c There is a super-adiabatic check in the vertical and adjustments made if 
+c ground. we want these estimates to be in the 3-d fields rather than  fictional
+c hydrostatic estimates from phi. above the ground balanced temps are good.
+c both the temp mmediately above and below ground are given the lt1. 
+c there is a super-adiabatic check in the vertical and adjustments made if 
 c necessary.
 
       integer nx,ny,nz
@@ -1286,9 +1286,9 @@ c run smoother on temps below ground
        enddo
    2  enddo ! on i
       enddo ! on j
-      print*, 'LT1 Temp Adjust Summary '
-      print*, 'Bias ',sum/cnt, ' RMS ',sqrt(sum2/cnt) 
-c     print*, cnt2 , ' Temps had to be adj for sup-adi lapse rates'
+      print*, 'lt1 temp adjust summary '
+      print*, 'bias ',sum/cnt, ' rms ',sqrt(sum2/cnt) 
+c     print*, cnt2 , ' temps had to be adj for sup-adi lapse rates'
       return
       end 
 
@@ -1299,8 +1299,8 @@ c
       subroutine momres(u,v,phi,nu,nv,fu,fv,wa,delo
      .                 ,nx,ny,nz,lat,dx,dy,ps,p)
 c
-c *** Momres computes momentum residual for whole domain for the staggered
-c grid. Each momentum residual (u component, v component) is computed on the 
+c *** momres computes momentum residual for whole domain for the staggered
+c grid. each momentum residual (u component, v component) is computed on the 
 c  u and v grids respectively
 c
       implicit none
@@ -1380,12 +1380,12 @@ c                                 on the non-vert staggered std grid
 
       deallocate (wb,wc)
 
-c commented JS 01-16-01
+c commented js 01-16-01
 c     write(2) wa,delo
       
       errms=sqrt(sum/cnt)
       write(6,1000) errms,delo
-1000  format(1x,'BEFORE/AFTER BALCON...MOMENTUM RESIDUAL FOR DOMAIN'
+1000  format(1x,'before/after balcon...momentum residual for domain'
      &     ,e12.4,' delo= ',e12.4)
       return
       end
@@ -1427,33 +1427,33 @@ c
 c    .,nu,nv,fu,fv
      .,nx,ny,nz,lat,dx,dy,ps,p,dp,lmax,erf_in)
 c
-c *** Balcon executes the mass/wind balance computations as described
-c        mcginley (Meteor and Atmos Phys, 1987) except that
+c *** balcon executes the mass/wind balance computations as described
+c        mcginley (meteor and atmos phys, 1987) except that
 c        this scheme operates on perturbations from background "b"
-c        fields. The dynamic constraint is formulated from this 
-c        perturbation field. The constraint equation is
+c        fields. the dynamic constraint is formulated from this 
+c        perturbation field. the constraint equation is
 c        partial  du'/dt= -ro*nonlin'-d phi'/dx +fv' + friction' 
 c        delo determines the magnitude of the residual and is based on
-c        scaled non linear term U**2/length* rossby number
-c        Both o and b fields arrive staggered .  A perturbation is 
-c        computed prior to the dynamic balance.  A new
-c        geopotential(t) is computed using relaxation on eqn. (2).  New
+c        scaled non linear term u**2/length* rossby number
+c        both o and b fields arrive staggered .  a perturbation is 
+c        computed prior to the dynamic balance.  a new
+c        geopotential(t) is computed using relaxation on eqn. (2).  new
 c        u, v and omega winds are computed using eqns. (4), (5) and (6)
 c        with the new geopotential and neglecting the lagrange multiplier
-c        term.  Next the        
+c        term.  next the        
 c        lagrange multiplier is computed using 3-d relaxation on eqn. (3).
-c        U, v and omega are adjusted by adding the lagrange multiplier
+c        u, v and omega are adjusted by adding the lagrange multiplier
 c        term with the new lagrange multiplier.
 c        the u,v,t are the balanced output arrays
-c        The unique aspect of this analysis is that background model error is
+c        the unique aspect of this analysis is that background model error is
 c        specified explicitly over the entire grid as determined from 
-c        verification stats. The observed error is an array that takes into
+c        verification stats. the observed error is an array that takes into
 c        account both observation error and interpolation error.
 c        omo is the cloud consistent vertical motion
-c        Change added 2/23/07 to perform mass continity initially with 
-c        no terrain (terbnd is not applied) then balance. The final
+c        change added 2/23/07 to perform mass continity initially with 
+c        no terrain (terbnd is not applied) then balance. the final
 c        continuity application then zeros out winds on terrain faces
-c        so the final adjustment accounts for terrain. This change was
+c        so the final adjustment accounts for terrain. this change was
 c        applied owing to spurious mass adjustments owing to large shear
 c        on terrain faces and large adjustments to phi and thus temperature.
 c
@@ -1494,7 +1494,7 @@ c    .,nu(nx,ny,nz),nv(nx,ny,nz),fu(nx,ny,nz),fv(nx,ny,nz)
      .      ,eueub,fob,foax,foay
      .      ,fu2,fv2,fuangu,fvangv,dt
 
-c 2d array now (JS 2-20-01)
+c 2d array now (js 2-20-01)
       real tau(nx,ny)
 
 c these are used for diagnostics
@@ -1597,9 +1597,9 @@ c owing to an artifact of coding the t array is phi
 
        itstatus=ishow_timer()
 
-       write(6,*) '|||||||||BALCON ITERATION NUMBER ',l,' ||||||||||'
+       write(6,*) '|||||||||balcon iteration number ',l,' ||||||||||'
        print*,'-----------------------------------------------------'
-c      write(9,*) '|||||||||BALCON ITERATION NUMBER ',l,' ||||||||||'
+c      write(9,*) '|||||||||balcon iteration number ',l,' ||||||||||'
 c  set convergence error for relaxation of lamda...set erf to desired 
 c  accuracy of wind
        erf=erf_in     
@@ -1610,11 +1610,11 @@ c apply continuity to input winds over complete domain with no terrain
      . omo,om,omb,l,lmax)
 c
       do k=1,nz/2    
-      print*, 'After continuitlevel ',k
-      call diagnose(uo,nx,ny,nz,268,87,k,7,'OBSERVED U ')
-      call diagnose(vo,nx,ny,nz,268,87,k,7,'OBSERVED V ')
-      call diagnose(u,nx,ny,nz,268,87,k,7,'CONTINTY U ')
-      call diagnose(v,nx,ny,nz,268,87,k,7,'CONTINTY V ')
+      print*, 'after continuitlevel ',k
+      call diagnose(uo,nx,ny,nz,268,87,k,7,'observed u ')
+      call diagnose(vo,nx,ny,nz,268,87,k,7,'observed v ')
+      call diagnose(u,nx,ny,nz,268,87,k,7,'continty u ')
+      call diagnose(v,nx,ny,nz,268,87,k,7,'continty v ')
       enddo
 
       itstatus=ishow_timer()
@@ -1628,7 +1628,7 @@ c convert input observed fields to perturbations
        do j=1,ny
         do i=1,nx
          do k=1,nz
-          to(i,j,k)=to(i,j,k)-tb(i,j,k)!background and obs are in GPM
+          to(i,j,k)=to(i,j,k)-tb(i,j,k)!background and obs are in gpm
           t(i,j,k)=0. !put background grid in solution grid to establish
 c                      boundary values(zero perturbation)
           if(ub(i,j,k).ne.bnd)then
@@ -1650,12 +1650,12 @@ c                      boundary values(zero perturbation)
       call nonlin(nu,nv,uo,vo,ub,vb,om,omb
      .           ,nx,ny,nz,dx,dy,dp,dt,bnd,rod)
        do k=1,nz/2
-       print*, 'Nonlinear terms at lvl ',k, ' at center of  Dennis' 
-       call diagnose(nu,nx,ny,nz,nx/2,ny/2,k,7,'Nonlinear U terms')
-       call diagnose(nv,nx,ny,nz,nx/2,ny/2,k,7,'Nonlinear V terms')
+       print*, 'nonlinear terms at lvl ',k, ' at center of  dennis' 
+       call diagnose(nu,nx,ny,nz,nx/2,ny/2,k,7,'nonlinear u terms')
+       call diagnose(nv,nx,ny,nz,nx/2,ny/2,k,7,'nonlinear v terms')
        enddo
 
-c *** Compute new phi (t array) using relaxation on eqn. (2).
+c *** compute new phi (t array) using relaxation on eqn. (2).
 c        beta*dldx term is dropped to eliminate coupling with lambda eqn.
 c
        itstatus=ishow_timer()
@@ -1745,7 +1745,7 @@ c        write(6,1000) it,cotmax,ovr,cotma1
          ittr=ittr+1
          cotm5=cotmax
 c
-c ****** Recompute over-relaxation factor every fifth iteration.
+c ****** recompute over-relaxation factor every fifth iteration.
 c
          if (ittr .ne. 5) goto 15
          ittr=0
@@ -1755,7 +1755,7 @@ c
 15       if (cotmax .lt. err) goto 12
          if (it .ne. 1) goto 1
          cotm0=cotm5
-1000     format(1x,'PHI SOLVER: it = ',i4,' max correction '
+1000     format(1x,'phi solver: it = ',i4,' max correction '
      &          ,' = ',e12.3
      .         ,'ovr =  ',e12.4/1x
      .         ,'first iteration max correction was ',e12.4)
@@ -1765,7 +1765,7 @@ c
 
        itstatus=ishow_timer()
        print*,' ---------------------------------------------'
-       print*,'Elapsed time after itmax loop (sec): ',itstatus
+       print*,'elapsed time after itmax loop (sec): ',itstatus
        print*,' ---------------------------------------------'
 12     write(6,1000) it,cotmax,ovr,cotma1
        print*, 'forcing function max '
@@ -1776,7 +1776,7 @@ c
 c     write(9,1000) it,cotmax,ovr,cotma1
 c     erf=0.
 c
-c *** Compute new u, v, omega using eqns. (4), (5), (6) with new phi and
+c *** compute new u, v, omega using eqns. (4), (5), (6) with new phi and
 c        without the lagrange multiplier terms.
 c
        call initmxmn(nf,nz
@@ -1847,7 +1847,7 @@ c   don't change wind on west (u) or south (v) bndry
           enddo
         if(larray_diag)then
            print*
-           print*,'Calling array diagnosis: ',k,p(k)
+           print*,'calling array diagnosis: ',k,p(k)
            print*,'-------------------------------'
            call array_diagnosis(u(1,1,k),nx,ny,' u-comp   ')
            call array_diagnosis(v(1,1,k),nx,ny,' v-comp   ')
@@ -1867,7 +1867,7 @@ c
        if(larray_diag)then
         do k=1,nz
           print*
-          print*,'Calling perturb  array diagnosis: ',k,p(k)
+          print*,'calling perturb  array diagnosis: ',k,p(k)
           print*,'-------------------------------'
           call array_diagnosis(u(1,1,k),nx,ny,' u-comp   ')
           call array_diagnosis(v(1,1,k),nx,ny,' v-comp   ')
@@ -1879,7 +1879,7 @@ c          call array_diagnosis(uo(1,1,k),nx,ny,' uo comp  ')
        endif
 
 
-c Restore full winds and heights by adding back in background
+c restore full winds and heights by adding back in background
        do k=1,nz
           do j=1,ny
           do i=1,nx
@@ -1895,18 +1895,18 @@ c Restore full winds and heights by adding back in background
 
 
        do k=1,nz/2    
-       print*, 'After balance ',k
-       call diagnose(uo,nx,ny,nz,268,87,k,7,'OBSERVED U ')
-       call diagnose(vo,nx,ny,nz,268,87,k,7,'OBSERVED V ')
-       call diagnose(u,nx,ny,nz,268,87,k,7,'BALANCED U ')
-       call diagnose(v,nx,ny,nz,268,87,k,7,'BALANCED V ')
-       call diagnose(to,nx,ny,nz,268,87,k,7,'OBSV HEIGHT')
-       call diagnose(t,nx,ny,nz,268,87,k,7,'ADJUSTED HT')
+       print*, 'after balance ',k
+       call diagnose(uo,nx,ny,nz,268,87,k,7,'observed u ')
+       call diagnose(vo,nx,ny,nz,268,87,k,7,'observed v ')
+       call diagnose(u,nx,ny,nz,268,87,k,7,'balanced u ')
+       call diagnose(v,nx,ny,nz,268,87,k,7,'balanced v ')
+       call diagnose(to,nx,ny,nz,268,87,k,7,'obsv height')
+       call diagnose(t,nx,ny,nz,268,87,k,7,'adjusted ht')
        enddo
 
        itstatus=ishow_timer()
        print*,'------------------------------------------'
-       print*,'Elapsed time (after leib_sub) sec: ',itstatus
+       print*,'elapsed time (after leib_sub) sec: ',itstatus
        print*,'------------------------------------------'
 
 
@@ -1931,7 +1931,7 @@ c move adjusted fields (ub,vb,omb) to solution fields
        call move_3d(omb,om,nx,ny,nz)
  111  print*,'------------------------------------------------'
       itstatus=ishow_timer()
-      print*,'Elapsed time end of balcon loop (sec): ',itstatus
+      print*,'elapsed time end of balcon loop (sec): ',itstatus
       print*,'------------------------------------------------'
 
       deallocate (aaa,bbb,fu,fv,nu,nv)
@@ -1971,7 +1971,7 @@ c
       bnd=1.e-30
 
 c
-c *** Compute lagrange multiplier (slam) using 3-d relaxtion on eqn. (3).
+c *** compute lagrange multiplier (slam) using 3-d relaxtion on eqn. (3).
 c
       nxm1=nx-1
       nym1=ny-1
@@ -1983,14 +1983,14 @@ c
       call zero3d(slam,nx+1,ny+1,nz+1)
       call zero3d(h,nx+1,ny+1,nz+1)
 c
-c ****** Compute a/tau (h) term and rhs terms in eqn. (3)
+c ****** compute a/tau (h) term and rhs terms in eqn. (3)
 c
       call fthree(f3,uo,vo,omo,omb,h,erru,tau,
      .   nx,ny,nz,lat,dx,dy,dp)
 
       itstatus=ishow_timer()
 c
-c ****** Perform 3-d relaxation.
+c ****** perform 3-d relaxation.
 c
       itstatus=ishow_timer()
 
@@ -1999,7 +1999,7 @@ c
  
       itstatus=ishow_timer()
 c
-c ****** Compute new u, v, omega by adding the lagrange multiplier terms.
+c ****** compute new u, v, omega by adding the lagrange multiplier terms.
 c 
       sum=0
       sum1=0
@@ -2041,9 +2041,9 @@ c
       enddo
       enddo
 c   print out rms vector adjustment
-      print*, 'RMS Vector(m/s) adjustment after continuity applied ' 
+      print*, 'rms vector(m/s) adjustment after continuity applied ' 
       print*, sqrt(sum/cnt)
-      print*, 'RMS omega (Pa/s)adjustment after continuity applied ' 
+      print*, 'rms omega (pa/s)adjustment after continuity applied ' 
       print*, sqrt(sum1/cnt)
 
       deallocate (slam,f3,h)
@@ -2057,7 +2057,7 @@ c
      .               delo,tau ,nx,ny,nz,lat,dx,dy,ps,p,dp,l,lmax)
 c
 c     analzo is a diagnostic routine that looks at geostrophic residual
-c     maxima, continuity residual maxs.  It computes the rms terms in the 
+c     maxima, continuity residual maxs.  it computes the rms terms in the 
 c     variational formalism
 
       implicit none
@@ -2088,8 +2088,8 @@ c
 
 c_______________________________________________________________________________
 c
-c     write(9,*) '******ANALZ OUTPUT BY LAPS LAYER***********'
-      write(6,*) '******ANALZ OUTPUT BY LAPS LAYER***********'
+c     write(9,*) '******analz output by laps layer***********'
+      write(6,*) '******analz output by laps layer***********'
 
       nzm1=nz-1
       nxm2=nx-2
@@ -2101,7 +2101,7 @@ c     write(9,*) '******ANALZ OUTPUT BY LAPS LAYER***********'
       do k=2,nzm1
          write(6,4000) k,p(k+1)/100.
 c        write(9,4000) k,p(k+1)/100.
-4000     format(1x,'----------Level ',i4,'   ',f5.0,' mb---------')
+4000     format(1x,'----------level ',i4,'   ',f5.0,' mb---------')
          conmax=0
          sumom=0
          cont=0
@@ -2204,7 +2204,7 @@ c        write(9,1002) sumww
 1002     format(1x,' rms wind speed:',e12.4)
          if (sumww .ne. 0.) sumww=sqrt(thermu**2+thermv**2)/sumww
 
-c took tau out of this write 2-20-01 (JS)
+c took tau out of this write 2-20-01 (js)
          write(6,1001) sumt,delo,sumu,sumv,
      .             sumom,tau(1,1),cont,thermu,thermv,sumww,resu,resv,
      .             sumf,sumn
@@ -2226,24 +2226,24 @@ c    .             sumom,tau(1,1),cont,thermu,thermv,sumww,resu,resv
      . /1x,' momentum resids-u and v eqn:',2e12.4
      . /1x,' rms friction vector        :', e12.4 
      . /1x,' rms nonlinear term value   :', e12.4)
-c Write out sample vertical profiles of u, uo, v, vo, phi phio
+c write out sample vertical profiles of u, uo, v, vo, phi phio
 c in center of grid
       if(.false.)then
-      Print*, ' U component in middle of grid: adjusted, non adjusted'
+      print*, ' u component in middle of grid: adjusted, non adjusted'
      &          ,' dif output - input'
-      Do k=1,nz
+      do k=1,nz
        write(6,1111) u(50,16,k), uo(50,16,k)
      &     ,u(50,16,k)-uo(50,16,k)
       enddo
-      Print*, ' V component in middle of grid: adjusted, non adjusted'
+      print*, ' v component in middle of grid: adjusted, non adjusted'
      &          ,' dif output - input'
-      Do k=1,nz
+      do k=1,nz
        write(6,1111) v(50,16,k), vo(50,16,k)
      &     ,v(50,16,k)-vo(50,16,k)
       enddo
-      Print*, ' Geopotentialin middle of grid: adjusted, non adjusted'
+      print*, ' geopotentialin middle of grid: adjusted, non adjusted'
      &          ,' dif output - input'
-      Do k=1,nz
+      do k=1,nz
        write(6,1111) t(nx/2,ny/2,k), to(nx/2,ny/2,k)
      &     ,t(nx/2,ny/2,k)-to(nx/2,ny/2,k)
       enddo 
@@ -2259,7 +2259,7 @@ c===============================================================================
      .               delo,tau ,nx,ny,nz,lat,dx,dy,ps,p,dp,l,lmax)
 c
 c     analz is a diagnostic routine that looks at geostrophic residual
-c     maxima, continuity residual maxs.  It computes the rms terms in the 
+c     maxima, continuity residual maxs.  it computes the rms terms in the 
 c     variational formalism
 
       implicit none
@@ -2291,8 +2291,8 @@ c
 
 c_______________________________________________________________________________
 c
-c     write(9,*) '******ANALZ OUTPUT BY LAPS LAYER***********'
-      write(6,*) '******ANALZ OUTPUT BY LAPS LAYER***********'
+c     write(9,*) '******analz output by laps layer***********'
+      write(6,*) '******analz output by laps layer***********'
 
       nzm1=nz-1
       nxm2=nx-2
@@ -2304,7 +2304,7 @@ c     write(9,*) '******ANALZ OUTPUT BY LAPS LAYER***********'
       do k=2,nzm1
          write(6,4000) k,p(k+1)/100.
 c        write(9,4000) k,p(k+1)/100.
-4000     format(1x,'----------Level ',i4,'   ',f5.0,' mb---------')
+4000     format(1x,'----------level ',i4,'   ',f5.0,' mb---------')
          conmax=0
          sumom=0
          cont=0
@@ -2399,7 +2399,7 @@ c        write(9,1002) sumww
 1002     format(1x,' rms wind speed:',e12.4)
          if (sumww .ne. 0.) sumww=sqrt(thermu**2+thermv**2)/sumww
 
-c took tau out of this write 2-20-01 (JS)
+c took tau out of this write 2-20-01 (js)
          write(6,1001) sumt,delo,sumu,sumv,
      .             sumom,tau(1,1),cont,thermu,thermv,sumww,resu,resv
 
@@ -2442,7 +2442,7 @@ c
       subroutine terbnd(u,v,om,nx,ny,nz,ps,p,bnd)
 c  terrain boundary sets velocity component to 1.e-30 on terrain 
 c  faces and in the interior of terrain.  
-c  The input variables are on the staggered (mcginley1987) grid
+c  the input variables are on the staggered (mcginley1987) grid
 
       implicit none
 c
@@ -2500,10 +2500,10 @@ c
       subroutine frict(fu,fv,ub,vb,u,v,p,ps,t
      .                 ,nx,ny,nz,dx,dy,dp,dt,bnd)
 c
-c *** Frict computes frictional acceleration in the first layer
+c *** frict computes frictional acceleration in the first layer
 c     near the terrain surface
-c     using the parameterization from Haltner Ch. 10.
-c     Frict is computed from the perturbed u, v grids
+c     using the parameterization from haltner ch. 10.
+c     frict is computed from the perturbed u, v grids
 c
       implicit none
 c
@@ -2538,7 +2538,7 @@ c
 c
       print *,'frictn'
 c compute difference in frictional component between rawcomponent and 
-c background. Fu-Fub, Fv-Fvb
+c background. fu-fub, fv-fvb
 c constnts
       grav=9.808!m/sec2
       r=287.04!gas const
@@ -2584,7 +2584,7 @@ c     hzdf=50000.!m2/sec ! this value in haltiner is suspected to be too large
           if(ps(i,j).gt.p(k+1).and.(ps(i,j)-p(k+1)).le.dp(k))then! we're near sfc
            den=p(k+1)/r/t(i,j,k+1)
 c          surface friction term is always scaled for a contact layer of 
-c          5000. pascals. Smaller dps will give values too high, 
+c          5000. pascals. smaller dps will give values too high, 
            dps=5000.
            gdtudp=den*cd*grav*abs(u(i,j,k))*u(i,j,k)/dps         
            gdtudp_save(i,j)=gdtudp
@@ -2637,7 +2637,7 @@ c
      &rmn2d,imn,jmn
 
       if(rmx2d.gt. 1.0)then
-         print*,'WARNING: max gdtupd > 1.0'
+         print*,'warning: max gdtupd > 1.0'
       endif
 
       call get_mxmn_2d(nx,ny,gdtvdp_save,rmx2d,rmn2d
@@ -2646,7 +2646,7 @@ c
      &rmn2d,imn,jmn
 
       if(rmx2d .gt. 1.0)then
-         print*,'WARNING: max gdtvpd > 1.0'
+         print*,'warning: max gdtvpd > 1.0'
       endif
 
 
@@ -2658,11 +2658,11 @@ c
       subroutine nonlin(nu,nv,u,v,ub,vb,om,omb
      .                 ,nx,ny,nz,dx,dy,dp,dt,bnd,rod)
 c
-c *** Nonlin computes the non-linear terms (nu,nv) from staggered input.
-c     The non linear terms are linearized with a background/perturbation
-c     combination. The eularian time terms are assumed to be zero.
-c     The non-linear terms nu,nv, are computed on the 
-c     u, v grids, respectively. The nonlin term is scaled by the rossby number
+c *** nonlin computes the non-linear terms (nu,nv) from staggered input.
+c     the non linear terms are linearized with a background/perturbation
+c     combination. the eularian time terms are assumed to be zero.
+c     the non-linear terms nu,nv, are computed on the 
+c     u, v grids, respectively. the nonlin term is scaled by the rossby number
 c     rod - the length scale is that defined by data resolvability 
 c
       implicit none
@@ -2763,7 +2763,7 @@ c
       subroutine fthree(f3,u,v,om,omb,h,erru,tau
      .,nx,ny,nz,lat,dx,dy,dp)
 c
-c *** Fthree computes a/tau (h) and rhs terms in eqn. (3).
+c *** fthree computes a/tau (h) and rhs terms in eqn. (3).
 c
       implicit none
 c
@@ -2801,7 +2801,7 @@ c
          enddo
          enddo
       enddo
-      print*, 'f3: Maximum forcing function for lamda ',formax
+      print*, 'f3: maximum forcing function for lamda ',formax
       print*, 'at ',is,js,ks                                  
 c
       return
@@ -2812,7 +2812,7 @@ c
       subroutine leibp3(sol,force,itmax,erf,h
      .                 ,nx,ny,nz,dx,dy,ps,p,dp)
 c
-c *** Leibp3 performs 3-d relaxation.
+c *** leibp3 performs 3-d relaxation.
 c
       implicit none
 c
@@ -2835,12 +2835,12 @@ c
       logical ltest_3d(nx,ny,nz)
 c_______________________________________________________________________________
 c
-c *** Relaxer solver...eqn must be.......                                 
+c *** relaxer solver...eqn must be.......                                 
 c        sxx+syy+h*szz-force=0   
 c
       print *,'start subroutine leibp3'
 
-!     Setup ltest_3d array to help minimize if testing within do loops
+!     setup ltest_3d array to help minimize if testing within do loops
       ltest_3d = .false.
       do k=2,nz
         do j=2,ny
@@ -2868,7 +2868,7 @@ c
       sj=1.
       sk=1.
 c
-c *** First guess here.
+c *** first guess here.
 c
       nxm1=nx-1
       nym1=ny-1
@@ -2945,7 +2945,7 @@ c         write(6,1001) it,reslm,corlm,corlmm,erb
       write(6,1002) ovr
 c     write(9,1001) it,reslm,corlm,corlmm,erb
 c     write(9,1002) ovr
-1002       format(1x,'LEIBP3:ovr rlxtn const at fnl ittr = ',e10.4)
+1002       format(1x,'leibp3:ovr rlxtn const at fnl ittr = ',e10.4)
 1001       format(1x,'iterations= ',i4,' max residual= ',e10.3,
      .    ' max correction= ',e10.3, ' first iter max cor= ',e10.3,
      .    ' max bndry error= ',e10.3)
@@ -2958,7 +2958,7 @@ c
       subroutine leib(sol,force,itmax,erf,nx,ny,nz
      .               ,ps,p,a,b,c,d,e,dx,dy,dz,lpress)
 c
-c *** Leib performs 2-d relaxation.
+c *** leib performs 2-d relaxation.
 c
       implicit none
 c
@@ -2982,7 +2982,7 @@ c
       reslmm=0.
       erb=0.
 c
-c *** First guess here. 
+c *** first guess here. 
 c
       do 6 k=1,nz
       do 6 j=1,ny
@@ -3059,17 +3059,17 @@ c
 c
 c===============================================================================
 c
-      Subroutine balstagger(u,v,phi,t,sh,om,
+      subroutine balstagger(u,v,phi,t,sh,om,
      &  us,vs,phis,ts,shs,oms,
      &nx,ny,nz,p,ps,idstag)
 c
-c  This routine takes a standard LAPS field with all variables at
-c  each grid point and produces the E-stagger appropriate for applying
+c  this routine takes a standard laps field with all variables at
+c  each grid point and produces the e-stagger appropriate for applying
 c  the dynamic balancing in qbalpe.f   or vice versa
-c  idstag > 0 staggers (LAPS -> stagger)
-c  idstag < 0 destaggers (stagger -> LAPS). For this latter process
+c  idstag > 0 staggers (laps -> stagger)
+c  idstag < 0 destaggers (stagger -> laps). for this latter process
 c  the non staggered input grids must be the original gridded laps fields
-c  to ensure that the boundaries are consistent with lga backgrounds.  The 
+c  to ensure that the boundaries are consistent with lga backgrounds.  the 
 c  destaggering will only process interior grid points on the laps mesh
 
       real u(nx,ny,nz),v(nx,ny,nz),om(nx,ny,nz),t(nx,ny,nz),  
@@ -3078,7 +3078,7 @@ c  destaggering will only process interior grid points on the laps mesh
      &,p(nz),phis(nx,ny,nz),
      &shs(nx,ny,nz),sh(nx,ny,nz)
 
-      real w   ! Mixing ratio, added by B. Shaw, Sep 01
+      real w   ! mixing ratio, added by b. shaw, sep 01
       real, allocatable, dimension(:,:,:,:) :: wr
 
 c wind on terrain face
@@ -3096,7 +3096,7 @@ c  gravity
         allocate (wr(nx+1,ny+1,nz,6))
 
 c set vertical stagger first
-c first wind level for balcon is second level in LAPS
+c first wind level for balcon is second level in laps
 c omega is shifted one-half in vertical
 c t is shifted likewise
 c phi is shifted upward one level like winds
@@ -3160,8 +3160,8 @@ c omega is already on the staggered horizontal mesh
 c horizontal destagger
 c re compute hydrostatic virtual t from staggered adjusted phis 
 c use a third-order scheme. use local dlnp as a constant for
-c scheme for each layer. This avoids precision errors for 
-c terms with dlnp**3. Also 2nd deriv terms vanish
+c scheme for each layer. this avoids precision errors for 
+c terms with dlnp**3. also 2nd deriv terms vanish
        nxx=nx/2
        nyy=ny/2
        do k=2,nz-1
@@ -3213,9 +3213,9 @@ c put background values in stagged temp arrays at top and btm.
      &               ts(i-1,j,k)+ts(i,j,k))*.125
 c  devirtualize temperature
 
-c  New method simply inverts the conventional virtual
-c  temperature formula (Tv=T*(1.+0.61w), where
-c  w is the mixing ratio) to get T from Tv
+c  new method simply inverts the conventional virtual
+c  temperature formula (tv=t*(1.+0.61w), where
+c  w is the mixing ratio) to get t from tv
 c  using the specific humidity.
 
           w = sh(i,j,k)/(1.-sh(i,j,k))
@@ -3587,10 +3587,10 @@ c--------------------------------------------------
          print*,'-------------------------'
      &,'-------------------------------------'
      &,'-------------------------------------'
-         print*,'              Maxima'
+         print*,'              maxima'
          print*,'              ======'
          write(6,10)(fldmax(i,k),i=1,n)
-         print*,'              Minima'
+         print*,'              minima'
          print*,'              ======'
          write(6,10)(fldmin(i,k),i=1,n)
       enddo
@@ -3605,7 +3605,7 @@ cc
      &,udrop,vdrop,tdrop,ri,rj,rk,rit,rjt,rkt,nsnd,istatus)
 
 c this subroutine reads the .prg and .tmg files to recover observed  
-c u, v, bnd T profiles, the decimal i,j locations at the nz LAPS levels 
+c u, v, bnd t profiles, the decimal i,j locations at the nz laps levels 
 
       real udrop(max_pr,nz)
       real vdrop(max_pr,nz)
@@ -3619,16 +3619,16 @@ c u, v, bnd T profiles, the decimal i,j locations at the nz LAPS levels
       real dum2
 
 c variables output:
-c     udrop, vdrop tdrop: dropsonde u,v T obs at the nz laps levels
+c     udrop, vdrop tdrop: dropsonde u,v t obs at the nz laps levels
 c     ri, rj: real grid coordinates of dropsone position in grid space
 c     rit,rjt: real position of temperature sonde in grid space
 c
-c Note: arrays udrop, vdrop, tdrop
+c note: arrays udrop, vdrop, tdrop
 c       must be 2d to allow more than 1.
 c
-      Character*180 dum
-      Character*9 a9_time
-      Character*255 dum1
+      character*180 dum
+      character*9 a9_time
+      character*255 dum1
       integer len,istatus,nstar,nblank,ncnt,iflag,ngood
       logical lexist
       real, allocatable, dimension(:,:) :: dd,ff
@@ -3643,7 +3643,7 @@ c     integer max_pr
 
       call get_r_missing_data(smsng,istatus)
       if(istatus.ne.1)then
-         print*,'Error: returned from get_r_missing_data'
+         print*,'error: returned from get_r_missing_data'
          return
       endif
 
@@ -3727,14 +3727,14 @@ c                                                     missing levels within exis
 1       if(ngoodlevs(nsnd).eq.0)nsnd=nsnd-1
 
         if(nsnd.lt.1)then
-           print*,'No wind data in prg file'
+           print*,'no wind data in prg file'
            istatus=-1
            goto 7
         else
-           print*,'Found ',nsnd,' Soundings'
+           print*,'found ',nsnd,' soundings'
            print*,'------------------------'
            do i=1,nsnd
-             print*,' Snd#: ',i,' Number of Good Levels = ',ngoodlevs(i)
+             print*,' snd#: ',i,' number of good levels = ',ngoodlevs(i)
            enddo
         endif
 
@@ -3753,7 +3753,7 @@ c          call flip_sonde(mxz,ncnt ,uu,vv,ri,rj,rk)
 c       endif
    44   close(11)
       else !on lexist
-       print*,'No prg file at this time'
+       print*,'no prg file at this time'
        istatus=-1
       endif
 
@@ -3766,11 +3766,11 @@ c     inquire(file=dum,exist=lexist)
 c     if(lexist)then
 c      continue
 c      open (11, file=dum,form='formatted',status='old',err=50) 
-c      Do n=1,mxz
+c      do n=1,mxz
 c       nn=nn+1
 c       read(11,*,end=2) aa,bb,cc,ee, dum1           
 c       if(dum1.eq.'  ')  go to 2
-c       if(dum1.eq.'ACA') then    
+c       if(dum1.eq.'aca') then    
 c        rit(nn)=aa
 c        rjt(nn)=bb
 c        rkt(nn)=cc
@@ -3818,7 +3818,7 @@ c      endif
 c  4   enddo
 c     close 11
 c     else ! on lexist
-       print*,'No tmg file for this time'
+       print*,'no tmg file for this time'
        istatus=istatus-2
 c     endif
 
@@ -3828,10 +3828,10 @@ c     endif
 
       return
 
-c49    print*,'No temp data in tmg file'
+c49    print*,'no temp data in tmg file'
 c     return
 
-50    print*,'Error opening file: ',dum(1:len+13)
+50    print*,'error opening file: ',dum(1:len+13)
       return
       end
 c-------------------------------------------------------------------
@@ -3839,19 +3839,19 @@ c-------------------------------------------------------------------
      &,udrop,vdrop,tdrop,rri,rrj,rrit,rrjt,istatus)
 
 c this subroutine reads the .pig and .tmg files to recover observed  
-c u, v, bnd T profiles, the decimal i,j locations at the nz LAPS levels 
+c u, v, bnd t profiles, the decimal i,j locations at the nz laps levels 
       real udrop(nz),vdrop(nz),tdrop(nz),rri(nz),rrj(nz), 
      & rrit(nz),rrjt(nz),dum2
 c variables output:
-c     udrop, vdrop tdrop: dropsonde u,v T obs at the nz laps levels
+c     udrop, vdrop tdrop: dropsonde u,v t obs at the nz laps levels
 c     rri, rrj: real grid coordinates of dropsone position in grid space 
 c
-c Note: only one profile is allowed atm. arrays udrop, vdrop, tdrop
+c note: only one profile is allowed atm. arrays udrop, vdrop, tdrop
 c       must be 2d to allow more than 1.
 c
-      Character*180 dum
-      Character*9 a9_time
-      Character*3 dum1
+      character*180 dum
+      character*9 a9_time
+      character*3 dum1
       integer len,istatus
       logical lexist
       real, allocatable, dimension(:) :: ri,rj,rk,dd,ff
@@ -3867,7 +3867,7 @@ c
 
       call get_r_missing_data(smsng,istatus)
       if(istatus.ne.1)then
-         print*,'Error: returned from get_r_missing_data'
+         print*,'error: returned from get_r_missing_data'
          return
       endif
 
@@ -3886,7 +3886,7 @@ c preset all dropsonde output to missing
       inquire(file=dum,exist=lexist)
       if(lexist)then
         open (11, file=dum,form='formatted',status='old',err=50) 
-        Do n=1,mxz
+        do n=1,mxz
          read(11,*,end=1) ri(n),rj(n),rk(n),dd(n),ff(n),dum1
 c change from (0,0,0) origin to (1,1,1) grid origin system.
          ri(n)=ri(n)+1
@@ -3894,13 +3894,13 @@ c change from (0,0,0) origin to (1,1,1) grid origin system.
          rk(n)=rk(n)+1
          if(dum1.eq.'  ') go to 1
         enddo
-        print*, 'Suspect read in the pig file'
+        print*, 'suspect read in the pig file'
         istatus=-1
         goto 7
 
 1       nsave=n-1 
         if(nsave.lt.1)then
-           print*,'No wind data in pig file'
+           print*,'no wind data in pig file'
            istatus=-1
            goto 7
         endif
@@ -3956,7 +3956,7 @@ c first clear out drop winds, make assignment and then close file
    3    enddo ! on k
    44   close(11)
       else
-        print*,'No pig file at this time'
+        print*,'no pig file at this time'
         istatus=-1
       endif
 
@@ -3968,11 +3968,11 @@ c now read the tmg file to get the dropsonde temps
       if(lexist)then
 
        open (11, file=dum,form='formatted',status='old',err=50) 
-       Do n=1,mxz
+       do n=1,mxz
         nn=nn+1
        read(11,*,end=2) aa,bb,cc,ee, dum1           
        if(dum1.eq.'  ')  go to 2
-       if(dum1.eq.'ACA') then    
+       if(dum1.eq.'aca') then    
         ri(nn)=aa
         rj(nn)=bb
         rk(nn)=cc
@@ -4021,7 +4021,7 @@ c now interpolate to the laps levels in rk space
    4   enddo
 
       else
-       print*,'No tmg file for this time'
+       print*,'no tmg file for this time'
        istatus=istatus-2
        return
       endif
@@ -4032,9 +4032,9 @@ c now interpolate to the laps levels in rk space
       deallocate (uu,vv,tt)
       return
 
-49    print*,'No temp data in tmg file'
+49    print*,'no temp data in tmg file'
       return
-50    print*,'Error opening file: ',dum(1:len+13)
+50    print*,'error opening file: ',dum(1:len+13)
       return
       end
 c-------------------------------------------------------------------
@@ -4067,21 +4067,21 @@ c-------------------------------------------------------------------
 c
 c*********************************************************************
 c
-c     Pulls out a random value from a unit normal distribution with standard 
-c     deviation = 1.  Input is
+c     pulls out a random value from a unit normal distribution with standard 
+c     deviation = 1.  input is
 c     an integer seed 'ii' and an interation number 'n'. 'n' should
 c     be >20 for best results.
 c     if iswitch is on (1) then value seed is added to the returned 
 c     gaussian number in order to correlate error
 c     
-c  Original: John McGinley, NOAA/FSL  Spring 1998
-c     Changes:
-c       21 Aug 1998  Peter Stamus, NOAA/FSL
-c          Make code dynamic, housekeeping changes, for use in LAPS.
-c       07 Oct 1998  Peter Stamus, NOAA/FSL
-c          Change 'ran' to 'ran1' function for portability.
+c  original: john mcginley, noaa/fsl  spring 1998
+c     changes:
+c       21 aug 1998  peter stamus, noaa/fsl
+c          make code dynamic, housekeeping changes, for use in laps.
+c       07 oct 1998  peter stamus, noaa/fsl
+c          change 'ran' to 'ran1' function for portability.
 c
-c     Notes:
+c     notes:
 c
 c*********************************************************************
 c
@@ -4104,7 +4104,7 @@ c
 c
       function rm(sm,st,mg,mmg,iii)
 c this fuction is set up to create a joint pdf for a series of 
-c gaussian pdfs. Means are passed thru sm(mg); std dev thru st(mg)
+c gaussian pdfs. means are passed thru sm(mg); std dev thru st(mg)
 c mmg is actual number of combined distributions. rm is a 
 c nonguassian random number times an error
       real sm(mg),st(mg),xo,sum,sum1
@@ -4157,11 +4157,11 @@ c      print*,'xo,ep,ep1,rat,cat,iii', icnt+1,xo,ep,ep1,rat,cat,iii
        icnt=icnt+1
        if(cat.lt.rat) then
         rm=xo+sm(mmg+1)
-c       print*,'Normal run rejection method. cnt= ',icnt
+c       print*,'normal run rejection method. cnt= ',icnt
         return
        else
         if(icnt.eq.100) then
-c        print*,'Problem run rejection method: set to mean. cnt= ',icnt
+c        print*,'problem run rejection method: set to mean. cnt= ',icnt
          rm=sm(mmg+1)
          return
         endif
@@ -4172,14 +4172,14 @@ c        print*,'Problem run rejection method: set to mean. cnt= ',icnt
 c ********************************************************************
       function ran1(idum)              
 c
-c     Function to generate a random number.  Use this instead of a
+c     function to generate a random number.  use this instead of a
 c     machine dependent one. idum must be a negative integer
 c     
-c     Original: Peter Stamus, NOAA/FSL  07 Oct 1998
-c     Changes:  John McGinley, NOAA/FSL 20 Apr 00 - changed to ran2
+c     original: peter stamus, noaa/fsl  07 oct 1998
+c     changes:  john mcginley, noaa/fsl 20 apr 00 - changed to ran2
 c
-c     Notes:
-c        From "Numerical Recipes in Fortran", page 272.  There named ran2.
+c     notes:
+c        from "numerical recipes in fortran", page 272.  there named ran2.
 c
 c*********************************************************************
 c
@@ -4204,7 +4204,7 @@ c
         save iv, iy,idum2
         data idum2/123456789/,iv/ntab * 0/, iy/0/
 c
-c.....  Start here.
+c.....  start here.
 c
         if(idum.gt.0) idum=-idum
         if(idum.le.0 ) then  !initialize
@@ -4259,12 +4259,12 @@ c            us,vs,ws are the output turbulent components
 c prepare input columns for dtf3
         
 c$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-C This is the beginning TKE computation
+c this is the beginning tke computation
 c
 c subus called: vertirreg
-c functions used: rf, RfKondo
-C
-      factr = 1.0  ! calibration factor for RUC-20 and RUC-10
+c functions used: rf, rfkondo
+c
+      factr = 1.0  ! calibration factor for ruc-20 and ruc-10
 
       do i=1,nx
       do j=1,ny
@@ -4278,11 +4278,11 @@ C
       zter=ter(i,j)
       enddo
 c
-c Error: arguments differ from those in subroutine
+c error: arguments differ from those in subroutine
       call compute_dtf3(p1d,t1d,u1d,v1d,z1d,zter,dtf,nz)
-C
-C The result of the tke computation goes into array tke_3d
-C from that we assume isotropy and recover the 3 turbulent components
+c
+c the result of the tke computation goes into array tke_3d
+c from that we assume isotropy and recover the 3 turbulent components
 c in u,v,w
 c
 
@@ -4304,59 +4304,59 @@ c
 c
 c________________________________________________________________________
 
-      subroutine compute_dtf3(p,t,u,v,z,zter,tke_KH,nz)
+      subroutine compute_dtf3(p,t,u,v,z,zter,tke_kh,nz)
 
 c
-c Adrian Marroquin FSL
-c version modified for ITFA
+c adrian marroquin fsl
+c version modified for itfa
 c 11/09/98
 c
-c Km parameter calibrated to optimize PODn and
-c PODy, Km = 75.0 m^2/s
-c The following is a table of POD's (PODn = PODy) and
-c thresholds for each one of the months from Nov 97
-c to June 1998.
+c km parameter calibrated to optimize podn and
+c pody, km = 75.0 m^2/s
+c the following is a table of pod's (podn = pody) and
+c thresholds for each one of the months from nov 97
+c to june 1998.
 c
 c
-c Nov   Dec   Jan   Feb   Mar   Apr   May   Jun
+c nov   dec   jan   feb   mar   apr   may   jun
 c
-c  66.   66.   61.   62.   68.   65.   64.   60.  GA (I>1, >20kft) all w
-c  .58   .71   .72   .86   .73   .73   .42   .47  Thresholds
-c  67.   66.   64.   63.   67.   64.   62.   59.  HA (I>1, >w120, >20kft)
-c  .65   .67   .63   .71   .70   .68   .4    .4   Thresholds
-c  63.   82.   72.   68.   76.   70.   60.   68.  GA (I>4, >20kft) all w
-c  .55  1.105  .85   .8    .975  .76   .39   .5   Thresholds
-c  62.   82.   72.   66.   75.   68.   59.   67.  HA (I>4, >w120, >20kft)
-c  .6    1.15  .95   .91   .93   .78   .39   .55  Thresholds
+c  66.   66.   61.   62.   68.   65.   64.   60.  ga (i>1, >20kft) all w
+c  .58   .71   .72   .86   .73   .73   .42   .47  thresholds
+c  67.   66.   64.   63.   67.   64.   62.   59.  ha (i>1, >w120, >20kft)
+c  .65   .67   .63   .71   .70   .68   .4    .4   thresholds
+c  63.   82.   72.   68.   76.   70.   60.   68.  ga (i>4, >20kft) all w
+c  .55  1.105  .85   .8    .975  .76   .39   .5   thresholds
+c  62.   82.   72.   66.   75.   68.   59.   67.  ha (i>4, >w120, >20kft)
+c  .6    1.15  .95   .91   .93   .78   .39   .55  thresholds
 c
-c In the above table GA means General Aviation,
-c HA heavy aircraft (commercial)
-c I>1 turbulence intensities light or greater,
+c in the above table ga means general aviation,
+c ha heavy aircraft (commercial)
+c i>1 turbulence intensities light or greater,
 c >20kft aircraft flying above 20,000 ft,
 c >w120 aircraft heavier than 120,000 lbs,
-c and I>4 turbulence intensities moderate-to-severe or greater.
+c and i>4 turbulence intensities moderate-to-severe or greater.
 c
-c WARNING: The above table was generated with TKE from DTF3 verified
-c with PIREPs. The model output was from RUC2 (40-km), 40 isentropi
-c levels. PIREPs from turbulence related to convection were not
-c removed. DTF3 formulation is only applicable to turbulence from
+c warning: the above table was generated with tke from dtf3 verified
+c with pireps. the model output was from ruc2 (40-km), 40 isentropi
+c levels. pireps from turbulence related to convection were not
+c removed. dtf3 formulation is only applicable to turbulence from
 c shear intabilities (clear-air turbulence) specially found in
 c upper fronts.
 c-------------------------------------------------------------------------
-c DTF3 has been tested with 12-15 December 97 case study. In this case
-c convective activity was at a minimum in the first half of December 97.
-c During 12-15 Dec 97 a quasi-steady front moved across the US accompanied
-c with a severe turbulence outbreak. For this case PODy = 93.6% and PODn =
-c 76.1% obtained using thresholds for the month of December (see table
-c above, PODn = PODy = 82% for December). The difference in PODy's is
-c attributed to the inclusion of PIREPs from convection during the second
-c half of December 97.
+c dtf3 has been tested with 12-15 december 97 case study. in this case
+c convective activity was at a minimum in the first half of december 97.
+c during 12-15 dec 97 a quasi-steady front moved across the us accompanied
+c with a severe turbulence outbreak. for this case pody = 93.6% and podn =
+c 76.1% obtained using thresholds for the month of december (see table
+c above, podn = pody = 82% for december). the difference in pody's is
+c attributed to the inclusion of pireps from convection during the second
+c half of december 97.
 c
-c DTF3 works well for moderate-to-severe turbulence or greater
+c dtf3 works well for moderate-to-severe turbulence or greater
 c that affect heavy (commercial aircraft).
 c
 c-------------------------------------------------------------------------
-c Constants from Stull (1988), page 219
+c constants from stull (1988), page 219
 c
       parameter(c1=1.44,c2=1.0,c3=1.92,
      *          c13 = c1/c3, c23 = c2/c3, ce = 0.19)
@@ -4368,7 +4368,7 @@ c
 c
 c pass p, t, u, v, and z
 c
-        real        p(nz),                     ! pressure in Pa
+        real        p(nz),                     ! pressure in pa
      1              t(nz),
      1              u(nz),
      1              v(nz),
@@ -4377,7 +4377,7 @@ c
       real, allocatable, dimension(:):: brnt,shr,ri
      1,epsilon
 
-      real tke_KH(nz)
+      real tke_kh(nz)
       real tke
 c
       data iepn3/0/
@@ -4388,7 +4388,7 @@ c compute ri, brnt, and shr
 c
       data r/287.04/,rocp/0.286/,g/9.8/
 c
-c Constants from Stull (1988), page 219
+c constants from stull (1988), page 219
 c
       data prands/2.5/
 c
@@ -4448,37 +4448,37 @@ c
       ztop = zter+3000.
       zsfc = zter
 c
-      DO K=1,klev
+      do k=1,klev
 c
       zlev = z(k)
         if(ri(k).gt.0.01) then
-        Rff = RfKondo(ri(k))
+        rff = rfkondo(ri(k))
         else
-        Rff = rf(ri(k))
+        rff = rf(ri(k))
         endif
-      epsilon(k) = akm*shr(k)*(c13-c23*Rff)
+      epsilon(k) = akm*shr(k)*(c13-c23*rff)
       if(epsilon(k).lt.0.) epsilon(k) = 0.
-c      tke_KH(k) = epsilon(k)
+c      tke_kh(k) = epsilon(k)
       if(iepn3.eq.0) then                 ! if iepn3 = 1, only epn
       if(brnt(k).le.0.) then
-          tke_KH(k) = 0.
+          tke_kh(k) = 0.
       else
          br = sqrt(brnt(k))
-         tke_KH(k) = 0.7*epsilon(k)/(ce*br)
+         tke_kh(k) = 0.7*epsilon(k)/(ce*br)
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          if(zsfc.le.zlev.and.zlev.le.ztop) then                     !
          dz = zlev - zsfc                                           !
          alb = alinf*akarm*dz/(akarm*dz+alinf)                      !
-         als = cr*sqrt(tke_KH(k))/br                                !
+         als = cr*sqrt(tke_kh(k))/br                                !
          all = amin1(alb,als)                                       !
-         tke_KH(k) = (all*epsilon(k))**.666666                      !
+         tke_kh(k) = (all*epsilon(k))**.666666                      !
          endif      
 
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       endif
       endif
 c
-      ENDDO    ! end of K-loop (klev)
+      enddo    ! end of k-loop (klev)
 c
       return
       end
@@ -4516,7 +4516,7 @@ c
 
       call get_r_missing_data(r_missing_data,istatus)
       if (istatus .ne. 1) then
-         print *,'Error getting r_missing_data...Abort.'
+         print *,'error getting r_missing_data...abort.'
          return
       endif
 
@@ -4536,81 +4536,81 @@ c
      1  ,tempext,'ht ',units,comment,phi,istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS height data...Abort.'
+         print *,'error getting laps height data...abort.'
          return
       endif
 c
-c *** Get laps temps
+c *** get laps temps
 c
       call get_laps_3d(i4time,nx,ny,nz
      1  ,tempext,'t3 ',units,comment,t,istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS temp data...Abort.'
+         print *,'error getting laps temp data...abort.'
          return
       endif
 c
-c *** Get laps spec humidity
+c *** get laps spec humidity
 c
       call get_laps_3d(i4time,nx,ny,nz
      1  ,shext,'sh ',units,comment,sh,istatus)
 
       if(istatus .ne. 1)then
-         print*,'Error getting LAPS sh  data ... Abort.'
+         print*,'error getting laps sh  data ... abort.'
          return
       endif
-C    The specific humidity field uses the missing value
+c    the specific humidity field uses the missing value
 c    for below ground points, so we need to fill those in by
 c    replicating the lowest valid value downward (upward in array
 c    space).
 
-      DO j = 1, ny
-        DO i = 1, nx
+      do j = 1, ny
+        do i = 1, nx
           k = 1
           found_lowest = .false.
 
-          DO WHILE (.NOT. found_lowest)
-            IF (sh(i,j,k) .lt. 1.e37) THEN
+          do while (.not. found_lowest)
+            if (sh(i,j,k) .lt. 1.e37) then
               found_lowest = .true.
               sh(i,j,1:k) = sh(i,j,k)
-            ELSE
+            else
               k = k + 1
-              IF (k .ge. nz) THEN
-                PRINT *, 'No valid SH found in column!'
-                PRINT *, 'I/J = ', i,j
-                STOP
-              ENDIF
-            ENDIF
-          ENDDO
-        ENDDO
-      ENDDO
+              if (k .ge. nz) then
+                print *, 'no valid sh found in column!'
+                print *, 'i/j = ', i,j
+                stop
+              endif
+            endif
+          enddo
+        enddo
+      enddo
 
-c    Make sure we got it right!
-c      print *, 'Min/Max/Center values of SH:'
-c      DO k = 1, nz
+c    make sure we got it right!
+c      print *, 'min/max/center values of sh:'
+c      do k = 1, nz
 c        print *, minval(sh(:,:,k)),maxval(sh(:,:,k)),
 c     +           sh(nx/2,ny/2,k)
-c      ENDDO
+c      enddo
 c
-c *** Get laps cloud omega
+c *** get laps cloud omega
 c
 
 
          istatus=0.
       if(istatus .ne. 1)then
          print*,'we are in the _isi version of get_laps_3d' 
-         print*,'No LAPS Cld Omega data ....'
-         print*,'Initializing omo array with zero'
+         print*,'no laps cld omega data ....'
+         print*,'initializing omo array with zero'
          call zero3d(omo,nx,ny,nz)
       endif
 c
-c *** Get laps wind data.
+c *** get laps wind data.
 c
       call get_laps_3d(i4time,nx,ny,nz
      1  ,windext,'u3 ',units,comment,u,istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS time 0 u3 data...Abort.'
+         print *,'error getting laps time 0 u3 data...abort.'
          return
       endif
 
@@ -4618,7 +4618,7 @@ c
      1  ,windext,'v3 ',units,comment,v,istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS time 0 v3 data...Abort.'
+         print *,'error getting laps time 0 v3 data...abort.'
          return
       endif
 
@@ -4628,10 +4628,10 @@ c
      1  ,windext,'om ',units,comment,om,istatus)
 
       if (istatus .ne. 1) then
-         print *,'Error getting LAPS time 0 v3 data...Abort.'
+         print *,'error getting laps time 0 v3 data...abort.'
          return
       endif
-      ! BLS commented this out as a test on 11/19/02
+      ! bls commented this out as a test on 11/19/02
       !where(omo .eq. r_missing_data)omo=om
 
       deallocate(om)
@@ -4639,23 +4639,23 @@ c
       end
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c---------------------------------------------------------------------
-      function RfKondo(ri)
+      function rfkondo(ri)
 c
       parameter(c0=6.873,c1=7.)
 c
-c Rfc (critical flux Ri) = 0.143
+c rfc (critical flux ri) = 0.143
 c
       if(ri.gt.1.) then
-      RfKondo = 1./c1
+      rfkondo = 1./c1
       else
       if(0.01.lt.ri.and.ri.le.1.) then
       d1 = 1.+c0*ri
       ahm = 1./(c0*ri+1./d1)
-      RfKondo = ri*ahm
+      rfkondo = ri*ahm
       endif
       endif
 c
-c for Ri < 0.01 use Rf (Yamada form)
+c for ri < 0.01 use rf (yamada form)
 c
       return
       end
@@ -4694,7 +4694,7 @@ c________________________________________________________________________-
       vertirreg = ((f3-f2)*rat1+(f2-f1)*rat2)*sdx
       return
       end
-C_____________________________________________________________
+c_____________________________________________________________
       function prand(ri)
       data b/3.0/, a/6.873/
 c

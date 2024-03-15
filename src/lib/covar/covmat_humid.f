@@ -4,10 +4,10 @@ c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-c c History:
-c Date         Name          Action
+c c history:
+c date         name          action
 c --------     -----------   -------------------------------------------
-c 03/02/2007   Ok-Yeon Kim   Created. 
+c 03/02/2007   ok-yeon kim   created. 
 c ----------------------------------------------------------------------
 
 
@@ -82,21 +82,21 @@ c      real              dx,dy
       real            gh_sfc(ix,iy,nrec)
       real            gh(ix,iy,iz,nrec)
 
-      real            rh_2mFH(ix,iy,nrec)
+      real            rh_2mfh(ix,iy,nrec)
       real            rh(ix,iy,iz,nrec)
       real            rh_lbis(ix,iy,iblev,nrec)
 
-      real            t_2mFH(ix,iy,nrec)
+      real            t_2mfh(ix,iy,nrec)
       real            t(ix,iy,iz,nrec)
       real            t_lbis(ix,iy,iblev,nrec)
 
-      real            uw_10mFH(ix,iy,nrec)
+      real            uw_10mfh(ix,iy,nrec)
       real            uw(ix,iy,iz,nrec)
       real            uw_lbis(ix,iy,iblev,nrec)
 
       real            vw(ix,iy,iz,nrec)
       real            vw_lbis(ix,iy,iblev,nrec)
-      real            vw_10mFH(ix,iy,nrec)
+      real            vw_10mfh(ix,iy,nrec)
 
       real            av(ix,iy,iz,nrec)
       real            pvv(ix,iy,iz,nrec)
@@ -109,12 +109,12 @@ c      real              dx,dy
       real            bli_lbis(ix,iy,nrec)
       real            pli_lbis(ix,iy,nrec)
       real            pw(ix,iy,nrec)
-      real            emspMSL(ix,iy,nrec)
-      real            prMSL(ix,iy,nrec)
+      real            emspmsl(ix,iy,nrec)
+      real            prmsl(ix,iy,nrec)
       real            cp_sfc(ix,iy,nrec)
       real            tp_sfc(ix,iy,nrec)
-      integer         isoLevel(iz)
-      integer         boundryLevel(iblev)
+      integer         isolevel(iz)
+      integer         boundrylevel(iblev)
       real*8            valtime(nrec)
       real*8            reftime(nrec)
       character*1       origin(namelen)
@@ -123,17 +123,17 @@ c      real              dx,dy
       character*1       j_dim(namelen,nrec)
       character*1       i_dim(namelen,nrec)
       integer*2         version
-      integer*2         Ni(nav)
-      integer*2         Nj(nav)
-      real            La1(nav)
-      real            La2(nav)
-      real            Lo1(nav)
-      real            Lo2(nav)
-      real            Di(nav)
-      real            Dj(nav)
-      real            IntLat1(nav)
-      real            IntLat2(nav)
-      real            Lon0(nav)
+      integer*2         ni(nav)
+      integer*2         nj(nav)
+      real            la1(nav)
+      real            la2(nav)
+      real            lo1(nav)
+      real            lo2(nav)
+      real            di(nav)
+      real            dj(nav)
+      real            intlat1(nav)
+      real            intlat2(nav)
+      real            lon0(nav)
       integer         start(ndims)            ! hyperslab starting index
       integer         count(ndims)            ! hyperslab count from start
       integer           vdims(ndims)            ! max # of var dims
@@ -177,24 +177,24 @@ cc-- namelist --cc
      +                              jlength
 
 
-c--------------- End of Diclaration -----------------------------------
+c--------------- end of diclaration -----------------------------------
 
 
       write (6,*) '                                    '
       write (6,*) '++++++++++++++++++++++++++++++++++++'
-      write (6,*) 'Start of Background Error Covariance'
+      write (6,*) 'start of background error covariance'
       write (6,*) '++++++++++++++++++++++++++++++++++++'
       write (6,*) '                                    '
 
 c
-c Read analysis time
+c read analysis time
 c
 
-      write (6,*) 'Read analysis time:  ',i4time
+      write (6,*) 'read analysis time:  ',i4time
 
 
 c ----------------------------------------------------------------------
-c Read time lagged ensemble membesr (background)
+c read time lagged ensemble membesr (background)
 c ----------------------------------------------------------------------
 
 
@@ -282,7 +282,7 @@ c
       enddo
 
 c ----------------------------------------------------------------------
-c Accept time-phased ensemble members
+c accept time-phased ensemble members
 c ----------------------------------------------------------------------
       
 
@@ -291,12 +291,12 @@ c ----------------------------------------------------------------------
          ifnames_ens(n)=bkgd_ens(indx_best_init-n)
      +                //fcst_ens(indx_best_init,indx_best_fcst+n)
  
-         write (6,*) 'Ensemble member(',n,')', TRIM(ifnames_ens(n))
+         write (6,*) 'ensemble member(',n,')', trim(ifnames_ens(n))
 
       enddo 
 
 c ----------------------------------------------------------------------
-c Read NAM (NetCDF) file
+c read nam (netcdf) file
 c ----------------------------------------------------------------------
 
       do 300 n=1,num_of_ens 
@@ -309,15 +309,15 @@ c ----------------------------------------------------------------------
          ncid=ncopn(iname(n),ncnowrit,rcode)
 
          call readnet_nam(ncid,ix,iy,iz,iblev,
-     +                    gh_sfc,gh,rh_2mFH,rh,rh_lbis,t_2mFH,
-     +                    t,t_lbis,uw_10mFH,uw,uw_lbis,vw,
-     +                    vw_lbis,vw_10mFH,av,pvv,p_sfc,heli,
+     +                    gh_sfc,gh,rh_2mfh,rh,rh_lbis,t_2mfh,
+     +                    t,t_lbis,uw_10mfh,uw,uw_lbis,vw,
+     +                    vw_lbis,vw_10mfh,av,pvv,p_sfc,heli,
      +                    cape_sfc,cape_lbis,cin_sfc,cin,
-     +                    bli_lbis,pli_lbis,pw,emspMSL,prMSL,
-     +                    cp_sfc,tp_sfc,isoLevel,boundryLevel,
+     +                    bli_lbis,pli_lbis,pw,emspmsl,prmsl,
+     +                    cp_sfc,tp_sfc,isolevel,boundrylevel,
      +                    valtime,reftime,origin,model,grid_type,
-     +                    j_dim,i_dim,Ni,Nj,La1,La2,Lo1,Lo2,
-     +                    Di,Dj,IntLat1,IntLat2,Lon0,start,
+     +                    j_dim,i_dim,ni,nj,la1,la2,lo1,lo2,
+     +                    di,dj,intlat1,intlat2,lon0,start,
      +                    count,vdims,strbuf,num_of_ens)
 
          do m=1,nrec      ! rh (relative humidity)
@@ -344,7 +344,7 @@ c ----------------------------------------------------------------------
 
 
 c ----------------------------------------------------------------------
-c Convert relative humidity to specific humidity
+c convert relative humidity to specific humidity
 c ----------------------------------------------------------------------
 
       es0=6.11         ! constant for conversion from rh to sh
@@ -360,7 +360,7 @@ c ----------------------------------------------------------------------
               es(i,j,k,n)=es0*exp(lv/rv*(1/t0-1/t_con(i,j,k,n)))
               e(i,j,k,n)=(rh_con(i,j,k,n)/100)*es(i,j,k,n)
               rho(i,j,k,n)=ratio*(e(i,j,k,n)
-     +                     /(isoLevel(k)+(e(i,j,k,n)*(ratio-1))))
+     +                     /(isolevel(k)+(e(i,j,k,n)*(ratio-1))))
               q_con(i,j,k,n)=rho(i,j,k,n)
             enddo
           enddo
@@ -369,7 +369,7 @@ c ----------------------------------------------------------------------
 
 
 c ----------------------------------------------------------------------
-c Compute Ensemble Mean / Innovation
+c compute ensemble mean / innovation
 c ----------------------------------------------------------------------
 
       do k=1,iz ; do j=1,iy ; do i=1,ix
@@ -412,14 +412,14 @@ c ----------------------------------------------------------------------
 
 
       write (6,*)  '                                    '
-      write (6,*)  'Compute ensemble mean and innovation'
+      write (6,*)  'compute ensemble mean and innovation'
       write (6,*)  '                                    '
 
       iens=num_of_ens-1
 
   
 c ----------------------------------------------------------------------
-c Full Error Covariance Matrix 
+c full error covariance matrix 
 c ----------------------------------------------------------------------
 
       do n=1,num_of_ens ; inum=0
@@ -474,20 +474,20 @@ c ----------------------------------------------------------------------
 
 
       write (6,*) '                                                 '
-      write (6,*) 'Compute full error covariance matrix for humidity'
+      write (6,*) 'compute full error covariance matrix for humidity'
       write (6,*) '                                                 '
 
 
 c ----------------------------------------------------------------------
-c Localization of covariances from lagged ensemble forecasts 
+c localization of covariances from lagged ensemble forecasts 
 c ----------------------------------------------------------------------
 c
-c Step 1 : Covariance (covhor) in the averaged Horizontal Length (ilength,jlength)
+c step 1 : covariance (covhor) in the averaged horizontal length (ilength,jlength)
 c
 
       call hor_cov(i4time,q_inno
      +                   ,num_of_ens
-     +                   ,ix,iy,iz,isoLevel
+     +                   ,ix,iy,iz,isolevel
      +                   ,dx,dy
      +                   ,ilength,jlength
      +                   ,qcovhor)
@@ -513,17 +513,17 @@ c      write(ofile,'(a,a,a)') './',a9,'.horcov.bin'
 
 
       write (6,*) '                                                '
-      write (6,*) 'Covariance in the horizontal length for humidity'
+      write (6,*) 'covariance in the horizontal length for humidity'
       write (6,*) '                                                '
 
 
 c
-c Step 2 : Covariance (covert) in the vertical direction
+c step 2 : covariance (covert) in the vertical direction
 c
 
       call vert_cov(i4time,q_inno
      +                    ,num_of_ens
-     +                    ,ix,iy,iz,isoLevel
+     +                    ,ix,iy,iz,isolevel
      +                    ,qcovert)
 
       istatus=1
@@ -547,19 +547,19 @@ c      write(ofile,'(a,a,a)') './',a9,'.vertcov.bin'
 
 
       write (6,*)  '                                    '
-      write (6,*)  'Covariance in the vertical direction'
+      write (6,*)  'covariance in the vertical direction'
       write (6,*)  '                                    '
 
 
 c ----------------------------------------------------------------------
-c Call for double check ...
+c call for double check ...
 c ----------------------------------------------------------------------
 
  
       call recheck(i4time,qcovert,qcovhor,ix,iy,iz)    
 
       write (6,*)  '                                             '
-      write (6,*)  'Done for covariance estimate and double check'
+      write (6,*)  'done for covariance estimate and double check'
       write (6,*)  '                                             '
  
 

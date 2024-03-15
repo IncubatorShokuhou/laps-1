@@ -1,7 +1,7 @@
 c                                                                                      
-c  L-BFGS-B is released under the “New BSD License” (aka “Modified BSD License”        
+c  l-bfgs-b is released under the “new bsd license” (aka “modified bsd license”        
 c  or “3-clause license”)                                                              
-c  Please read attached file License.txt                                               
+c  please read attached file license.txt                                               
 c                                        
 
       real function dnrm2(n,x,incx)
@@ -9,12 +9,12 @@ c
       real x(n)
 c     **********
 c
-c     Function dnrm2
+c     function dnrm2
 c
-c     Given a vector x of length n, this function calculates the
-c     Euclidean norm of x with stride incx.
+c     given a vector x of length n, this function calculates the
+c     euclidean norm of x with stride incx.
 c
-c     The function statement is
+c     the function statement is
 c
 c       real function dnrm2(n,x,incx)
 c
@@ -27,13 +27,13 @@ c
 c       incx is a positive integer variable that specifies the 
 c         stride of the vector.
 c
-c     Subprograms called
+c     subprograms called
 c
-c       FORTRAN-supplied ... abs, max, sqrt
+c       fortran-supplied ... abs, max, sqrt
 c
-c     MINPACK-2 Project. February 1991.
-c     Argonne National Laboratory.
-c     Brett M. Averick.
+c     minpack-2 project. february 1991.
+c     argonne national laboratory.
+c     brett m. averick.
 c
 c     **********
       integer i
@@ -59,7 +59,7 @@ c     **********
 
       end
       
-c====================== The end of dnrm2 ===============================
+c====================== the end of dnrm2 ===============================
 
       subroutine daxpy(n,da,dx,incx,dy,incy)
 c
@@ -109,7 +109,7 @@ c
       return
       end
       
-c====================== The end of daxpy ===============================
+c====================== the end of daxpy ===============================
 
       subroutine dcopy(n,dx,incx,dy,incy)
 c
@@ -161,7 +161,7 @@ c
       return
       end
       
-c====================== The end of dcopy ===============================
+c====================== the end of dcopy ===============================
 
       real function ddot(n,dx,incx,dy,incy)
 c
@@ -212,7 +212,7 @@ c
       return
       end
       
-c====================== The end of ddot ================================
+c====================== the end of ddot ================================
 
       subroutine  dscal(n,da,dx,incx)
 c
@@ -257,5 +257,5 @@ c
       return
       end
       
-c====================== The end of dscal ===============================
+c====================== the end of dscal ===============================
 

@@ -1,324 +1,324 @@
-      SUBROUTINE FI7501 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-     *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7501      BDS SECOND ORDER PACKING
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-08-06
-C
-C ABSTRACT: PERFORM SECONDARY PACKING ON GRID POINT DATA,
-C   GENERATING ALL BDS INFORMATION.
-C
-C PROGRAM HISTORY LOG:
-C   93-08-06  CAVANAUGH
-C   93-12-15  CAVANAUGH   CORRECTED LOCATION OF START OF FIRST ORDER
-C                         VALUES AND START OF SECOND ORDER VALUES TO
-C                         REFLECT A BYTE LOCATION IN THE BDS INSTEAD
-C                         OF AN OFFSET.
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7501 (IWORK,IPFLD,NPTS,IBDSFL,BDS11,
-C    *           LEN,LENBDS,PDS,REFNCE,ISCAL2,KWIDE)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - INTEGER SOURCE ARRAY
-C     NPTS     - NUMBER OF POINTS IN IWORK
-C     IBDSFL   - FLAGS
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     IPFLD    - CONTAINS BDS FROM BYTE 12 ON
-C     BDS11    - CONTAINS FIRST 11 BYTES FOR BDS
-C     LEN      - NUMBER OF BYTES FROM 12 ON
-C     LENBDS   - TOTAL LENGTH OF BDS
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-      CHARACTER*1     BDS11(*),PDS(*)
-C
-      REAL            REFNCE
-C
-      INTEGER         ISCAL2,KWIDE
-      INTEGER         LENBDS
-      INTEGER         IPFLD(*)
-      INTEGER         LEN,KBDS(22)
-      INTEGER         IWORK(*)
-C                        OCTET NUMBER IN SECTION, FIRST ORDER PACKING
-C     INTEGER         KBDS(12)
-C                        FLAGS
-      INTEGER         IBDSFL(*)
-C                        EXTENDED FLAGS
-C     INTEGER         KBDS(14)
-C                        OCTET NUMBER FOR SECOND ORDER PACKING
-C     INTEGER         KBDS(15)
-C                        NUMBER OF FIRST ORDER VALUES
-C     INTEGER         KBDS(17)
-C                        NUMBER OF SECOND ORDER PACKED VALUES
-C     INTEGER         KBDS(19)
-C                        WIDTH OF SECOND ORDER PACKING
-      INTEGER         ISOWID(50000)
-C                        SECONDARY BIT MAP
-      INTEGER         ISOBMP(8200)
-C                        FIRST ORDER PACKED VALUES
-      INTEGER         IFOVAL(50000)
-C                        SECOND ORDER PACKED VALUES
-      INTEGER         ISOVAL(100000)
-C
-C     INTEGER         KBDS(11)
-C                        BIT WIDTH TABLE
-      INTEGER         IBITS(31)
-C
-      DATA            IBITS/1,3,7,15,31,63,127,255,511,1023,
+      subroutine fi7501 (iwork,ipfld,npts,ibdsfl,bds11,
+     *           len,lenbds,pds,refnce,iscal2,kwide)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    fi7501      bds second order packing
+c   prgmmr: cavanaugh        org: w/nmc42    date: 93-08-06
+c
+c abstract: perform secondary packing on grid point data,
+c   generating all bds information.
+c
+c program history log:
+c   93-08-06  cavanaugh
+c   93-12-15  cavanaugh   corrected location of start of first order
+c                         values and start of second order values to
+c                         reflect a byte location in the bds instead
+c                         of an offset.
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call fi7501 (iwork,ipfld,npts,ibdsfl,bds11,
+c    *           len,lenbds,pds,refnce,iscal2,kwide)
+c   input argument list:
+c     iwork    - integer source array
+c     npts     - number of points in iwork
+c     ibdsfl   - flags
+c
+c   output argument list:      (including work arrays)
+c     ipfld    - contains bds from byte 12 on
+c     bds11    - contains first 11 bytes for bds
+c     len      - number of bytes from 12 on
+c     lenbds   - total length of bds
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+      character*1     bds11(*),pds(*)
+c
+      real            refnce
+c
+      integer         iscal2,kwide
+      integer         lenbds
+      integer         ipfld(*)
+      integer         len,kbds(22)
+      integer         iwork(*)
+c                        octet number in section, first order packing
+c     integer         kbds(12)
+c                        flags
+      integer         ibdsfl(*)
+c                        extended flags
+c     integer         kbds(14)
+c                        octet number for second order packing
+c     integer         kbds(15)
+c                        number of first order values
+c     integer         kbds(17)
+c                        number of second order packed values
+c     integer         kbds(19)
+c                        width of second order packing
+      integer         isowid(50000)
+c                        secondary bit map
+      integer         isobmp(8200)
+c                        first order packed values
+      integer         ifoval(50000)
+c                        second order packed values
+      integer         isoval(100000)
+c
+c     integer         kbds(11)
+c                        bit width table
+      integer         ibits(31)
+c
+      data            ibits/1,3,7,15,31,63,127,255,511,1023,
      *                      2047,4095,8191,16383,32767,65535,131072,
      *                      262143,524287,1048575,2097151,4194303,
      *                      8388607,16777215,33554431,67108863,
      *                      134217727,268435455,536870911,
      *                      1073741823,2147483647/
-C  ----------------------------------
-C                       INITIALIZE ARRAYS
-      DO 100 I = 1, 50000
-          ISOWID(I)  = 0
-          IFOVAL(I)  = 0
-  100 CONTINUE
-C
-      DO 101 I = 1, 8200
-          ISOBMP(I)  = 0
-  101 CONTINUE
-      DO 102 I = 1, 100000
-          ISOVAL(I)  = 0
-  102 CONTINUE
-C                      INITIALIZE POINTERS
-C                            SECONDARY BIT WIDTH POINTER
-      IWDPTR  = 0
-C                            SECONDARY BIT MAP POINTER
-      IBMP2P  = 0
-C                            FIRST ORDER VALUE POINTER
-      IFOPTR  = 0
-C                            BYTE POINTER TO START OF 1ST ORDER VALUES
-      KBDS(12)  = 0
-C                            BYTE POINTER TO START OF 2ND ORDER VALUES
-      KBDS(15)  = 0
-C                            TO CONTAIN NUMBER OF FIRST ORDER VALUES
-      KBDS(17)  = 0
-C                            TO CONTAIN NUMBER OF SECOND ORDER VALUES
-      KBDS(19)  = 0
-C                            SECOND ORDER PACKED VALUE POINTER
-      ISOPTR  = 0
-C  =======================================================
-C
-C                         DATA IS IN IWORK
-C
-      KBDS(11)  = KWIDE
-C
-C       DATA PACKING
-C
-      ITER    = 0
-      INEXT   = 1
-      ISTART  = 1
-C  -----------------------------------------------------------
-      KOUNT = 0
-C     DO 1 I = 1, NPTS, 10
-C         PRINT *,I,(IWORK(K),K=I, I+9)
-C   1 CONTINUE
- 2000 CONTINUE
-      ITER  = ITER + 1
-C     PRINT *,'NEXT ITERATION STARTS AT',ISTART
-       IF (ISTART.GT.NPTS) THEN
-           GO TO 4000
-       ELSE IF (ISTART.EQ.NPTS) THEN
-           KPTS    = 1
-           MXDIFF  = 0
-           GO TO 2200
-       END IF
-C
-C                     LOOK FOR REPITITIONS OF A SINGLE VALUE
-       CALL FI7502 (IWORK,ISTART,NPTS,ISAME)
-       IF (ISAME.GE.15) THEN
-           KOUNT = KOUNT + 1
-C          PRINT *,'FI7501 - FOUND IDENTICAL SET OF ',ISAME
-           MXDIFF  = 0
-           KPTS    = ISAME
-       ELSE
-C
-C                     LOOK FOR SETS OF VALUES IN TREND SELECTED RANGE
-           CALL FI7513 (IWORK,ISTART,NPTS,NMAX,NMIN,INRNGE)
-C          PRINT *,'ISTART  ',ISTART,' INRNGE',INRNGE,NMAX,NMIN
-           IEND  = ISTART + INRNGE - 1
-C          DO 2199 NM = ISTART, IEND, 10
-C              PRINT *,'  ',(IWORK(NM+JK),JK=0,9)
-C2199      CONTINUE
-           MXDIFF  = NMAX - NMIN
-           KPTS    = INRNGE
-       END IF
- 2200 CONTINUE
-C     PRINT *,'                 RANGE ',MXDIFF,' MAX',NMAX,' MIN',NMIN
-C                 INCREMENT NUMBER OF FIRST ORDER VALUES
-      KBDS(17)  = KBDS(17) + 1
-C                 ENTER FIRST ORDER VALUE
-      IF (MXDIFF.GT.0) THEN
-          DO 2220 LK = 0, KPTS-1
-              IWORK(ISTART+LK)  = IWORK(ISTART+LK) - NMIN
- 2220     CONTINUE
-          CALL SBYTE (IFOVAL,NMIN,IFOPTR,KBDS(11))
-      ELSE
-          CALL SBYTE (IFOVAL,IWORK(ISTART),IFOPTR,KBDS(11))
-      END IF
-      IFOPTR  = IFOPTR + KBDS(11)
-C                  PROCESS SECOND ORDER BIT WIDTH
-      IF (MXDIFF.GT.0) THEN
-          DO 2330 KWIDE = 1, 31
-              IF (MXDIFF.LE.IBITS(KWIDE)) THEN
-                  GO TO 2331
-              END IF
- 2330     CONTINUE
- 2331     CONTINUE
-      ELSE
-          KWIDE  = 0
-      END IF
-      CALL SBYTE (ISOWID,KWIDE,IWDPTR,8)
-      IWDPTR  = IWDPTR + 8
-C         PRINT *,KWIDE,' IFOVAL=',NMIN,IWORK(ISTART),KPTS
-C               IF KWIDE NE 0, SAVE SECOND ORDER VALUE
-      IF (KWIDE.GT.0) THEN
-          CALL SBYTES (ISOVAL,IWORK(ISTART),ISOPTR,KWIDE,0,KPTS)
-          ISOPTR  = ISOPTR + KPTS * KWIDE
-          KBDS(19)  = KBDS(19) + KPTS
-C         PRINT *,'            SECOND ORDER VALUES'
-C         PRINT *,(IWORK(ISTART+I),I=0,KPTS-1)
-      END IF
-C                 ADD TO SECOND ORDER BITMAP
-      CALL SBYTE (ISOBMP,1,IBMP2P,1)
-      IBMP2P  = IBMP2P + KPTS
-      ISTART  = ISTART + KPTS
-      GO TO 2000
-C  --------------------------------------------------------------
- 4000 CONTINUE
-C     PRINT *,'THERE WERE ',ITER,' SECOND ORDER GROUPS'
-C     PRINT *,'THERE WERE ',KOUNT,' STRINGS OF CONSTANTS'
-C                 CONCANTENATE ALL FIELDS FOR BDS
-C
-C                   REMAINDER GOES INTO IPFLD
-      IPTR  = 0
-C                               BYTES 12-13
-C                                          VALUE FOR N1
-C                                          LEAVE SPACE FOR THIS
-      IPTR   = IPTR + 16
-C                               BYTE 14
-C                                          EXTENDED FLAGS
-      CALL SBYTE (IPFLD,IBDSFL(5),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(6),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(7),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(8),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(9),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(10),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(11),IPTR,1)
-      IPTR  = IPTR + 1
-      CALL SBYTE (IPFLD,IBDSFL(12),IPTR,1)
-      IPTR  = IPTR + 1
-C                               BYTES 15-16
-C                 SKIP OVER VALUE  FOR N2
-      IPTR  = IPTR + 16
-C                               BYTES 17-18
-C                                     P1
-      CALL SBYTE (IPFLD,KBDS(17),IPTR,16)
-      IPTR  = IPTR + 16
-C                               BYTES 19-20
-C                                   P2
-      CALL SBYTE (IPFLD,KBDS(19),IPTR,16)
-      IPTR  = IPTR + 16
-C                               BYTE 21 - RESERVED LOCATION
-      CALL SBYTE (IPFLD,0,IPTR,8)
-      IPTR  = IPTR + 8
-C                               BYTES 22 - ?
-C                                      WIDTHS OF SECOND ORDER PACKING
-      IX    = (IWDPTR + 32) / 32
-      CALL SBYTES (IPFLD,ISOWID,IPTR,32,0,IX)
-      IPTR  = IPTR + IWDPTR
-C                                      SECONDARY BIT MAP
-      IJ    = (IBMP2P + 32) / 32
-      CALL SBYTES (IPFLD,ISOBMP,IPTR,32,0,IJ)
-      IPTR  = IPTR + IBMP2P
-      IF (MOD(IPTR,8).NE.0) THEN
-          IPTR  = IPTR + 8 - MOD(IPTR,8)
-      END IF
-C                                         DETERMINE LOCATION FOR START
-C                                         OF FIRST ORDER PACKED VALUES
-      KBDS(12)  = IPTR / 8 + 12
-C                                        STORE LOCATION
-      CALL SBYTE (IPFLD,KBDS(12),0,16)
-C                                     MOVE IN FIRST ORDER PACKED VALUES
-      IPASS   = (IFOPTR + 32) / 32
-      CALL SBYTES (IPFLD,IFOVAL,IPTR,32,0,IPASS)
-      IPTR  = IPTR + IFOPTR
-      IF (MOD(IPTR,8).NE.0) THEN
-          IPTR  = IPTR + 8 - MOD(IPTR,8)
-      END IF
-C     PRINT *,'IFOPTR =',IFOPTR,' ISOPTR =',ISOPTR
-C                DETERMINE LOCATION FOR START
-C                     OF SECOND ORDER VALUES
-      KBDS(15)  = IPTR / 8 + 12
-C                                   SAVE LOCATION OF SECOND ORDER VALUES
-      CALL SBYTE (IPFLD,KBDS(15),24,16)
-C                  MOVE IN SECOND ORDER PACKED VALUES
-      IX    = (ISOPTR + 32) / 32
-      CALL SBYTES (IPFLD,ISOVAL,IPTR,32,0,IX)
-      IPTR  = IPTR + ISOPTR
-      NLEFT  = MOD(IPTR+88,16)
-      IF (NLEFT.NE.0) THEN
-          NLEFT  = 16 - NLEFT
-          IPTR   = IPTR + NLEFT
-      END IF
-C                                COMPUTE LENGTH OF DATA PORTION
-      LEN     = IPTR / 8
-C                                    COMPUTE LENGTH OF BDS
-      LENBDS  = LEN + 11
-C  -----------------------------------
-C                               BYTES 1-3
-C                                   THIS FUNCTION COMPLETED BELOW
-C                                   WHEN LENGTH OF BDS IS KNOWN
-      CALL SBYTE (BDS11,LENBDS,0,24)
-C                               BYTE  4
-      CALL SBYTE (BDS11,IBDSFL(1),24,1)
-      CALL SBYTE (BDS11,IBDSFL(2),25,1)
-      CALL SBYTE (BDS11,IBDSFL(3),26,1)
-      CALL SBYTE (BDS11,IBDSFL(4),27,1)
-C                              ENTER NUMBER OF FILL BITS
-      CALL SBYTE (BDS11,NLEFT,28,4)
-C                               BYTE  5-6
-      IF (ISCAL2.LT.0) THEN
-          CALL SBYTE (BDS11,1,32,1)
-          ISCAL2 = - ISCAL2
-      ELSE
-          CALL SBYTE (BDS11,0,32,1)
-      END IF
-      CALL SBYTE (BDS11,ISCAL2,33,15)
-C
-C$  FILL OCTET 7-10 WITH THE REFERENCE VALUE
-C   CONVERT THE FLOATING POINT OF YOUR MACHINE TO IBM370 32 BIT
-C   FLOATING POINT NUMBER
-C                                        REFERENCE VALUE
-C                                          FIRST TEST TO SEE IF
-C                                          ON 32 OR 64 BIT COMPUTER
-          CALL W3FI01(LW)
-          IF (LW.EQ.4) THEN
-              CALL W3FI76 (REFNCE,IEXP,IMANT,32)
-          ELSE
-              CALL W3FI76 (REFNCE,IEXP,IMANT,64)
-          END IF
-          CALL SBYTE (BDS11,IEXP,48,8)
-          CALL SBYTE (BDS11,IMANT,56,24)
-C
-C                               BYTE  11
-C
-      CALL SBYTE (BDS11,KBDS(11),80,8)
-C
-      RETURN
-      END
+c  ----------------------------------
+c                       initialize arrays
+      do 100 i = 1, 50000
+          isowid(i)  = 0
+          ifoval(i)  = 0
+  100 continue
+c
+      do 101 i = 1, 8200
+          isobmp(i)  = 0
+  101 continue
+      do 102 i = 1, 100000
+          isoval(i)  = 0
+  102 continue
+c                      initialize pointers
+c                            secondary bit width pointer
+      iwdptr  = 0
+c                            secondary bit map pointer
+      ibmp2p  = 0
+c                            first order value pointer
+      ifoptr  = 0
+c                            byte pointer to start of 1st order values
+      kbds(12)  = 0
+c                            byte pointer to start of 2nd order values
+      kbds(15)  = 0
+c                            to contain number of first order values
+      kbds(17)  = 0
+c                            to contain number of second order values
+      kbds(19)  = 0
+c                            second order packed value pointer
+      isoptr  = 0
+c  =======================================================
+c
+c                         data is in iwork
+c
+      kbds(11)  = kwide
+c
+c       data packing
+c
+      iter    = 0
+      inext   = 1
+      istart  = 1
+c  -----------------------------------------------------------
+      kount = 0
+c     do 1 i = 1, npts, 10
+c         print *,i,(iwork(k),k=i, i+9)
+c   1 continue
+ 2000 continue
+      iter  = iter + 1
+c     print *,'next iteration starts at',istart
+       if (istart.gt.npts) then
+           go to 4000
+       else if (istart.eq.npts) then
+           kpts    = 1
+           mxdiff  = 0
+           go to 2200
+       end if
+c
+c                     look for repititions of a single value
+       call fi7502 (iwork,istart,npts,isame)
+       if (isame.ge.15) then
+           kount = kount + 1
+c          print *,'fi7501 - found identical set of ',isame
+           mxdiff  = 0
+           kpts    = isame
+       else
+c
+c                     look for sets of values in trend selected range
+           call fi7513 (iwork,istart,npts,nmax,nmin,inrnge)
+c          print *,'istart  ',istart,' inrnge',inrnge,nmax,nmin
+           iend  = istart + inrnge - 1
+c          do 2199 nm = istart, iend, 10
+c              print *,'  ',(iwork(nm+jk),jk=0,9)
+c2199      continue
+           mxdiff  = nmax - nmin
+           kpts    = inrnge
+       end if
+ 2200 continue
+c     print *,'                 range ',mxdiff,' max',nmax,' min',nmin
+c                 increment number of first order values
+      kbds(17)  = kbds(17) + 1
+c                 enter first order value
+      if (mxdiff.gt.0) then
+          do 2220 lk = 0, kpts-1
+              iwork(istart+lk)  = iwork(istart+lk) - nmin
+ 2220     continue
+          call sbyte (ifoval,nmin,ifoptr,kbds(11))
+      else
+          call sbyte (ifoval,iwork(istart),ifoptr,kbds(11))
+      end if
+      ifoptr  = ifoptr + kbds(11)
+c                  process second order bit width
+      if (mxdiff.gt.0) then
+          do 2330 kwide = 1, 31
+              if (mxdiff.le.ibits(kwide)) then
+                  go to 2331
+              end if
+ 2330     continue
+ 2331     continue
+      else
+          kwide  = 0
+      end if
+      call sbyte (isowid,kwide,iwdptr,8)
+      iwdptr  = iwdptr + 8
+c         print *,kwide,' ifoval=',nmin,iwork(istart),kpts
+c               if kwide ne 0, save second order value
+      if (kwide.gt.0) then
+          call sbytes (isoval,iwork(istart),isoptr,kwide,0,kpts)
+          isoptr  = isoptr + kpts * kwide
+          kbds(19)  = kbds(19) + kpts
+c         print *,'            second order values'
+c         print *,(iwork(istart+i),i=0,kpts-1)
+      end if
+c                 add to second order bitmap
+      call sbyte (isobmp,1,ibmp2p,1)
+      ibmp2p  = ibmp2p + kpts
+      istart  = istart + kpts
+      go to 2000
+c  --------------------------------------------------------------
+ 4000 continue
+c     print *,'there were ',iter,' second order groups'
+c     print *,'there were ',kount,' strings of constants'
+c                 concantenate all fields for bds
+c
+c                   remainder goes into ipfld
+      iptr  = 0
+c                               bytes 12-13
+c                                          value for n1
+c                                          leave space for this
+      iptr   = iptr + 16
+c                               byte 14
+c                                          extended flags
+      call sbyte (ipfld,ibdsfl(5),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(6),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(7),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(8),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(9),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(10),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(11),iptr,1)
+      iptr  = iptr + 1
+      call sbyte (ipfld,ibdsfl(12),iptr,1)
+      iptr  = iptr + 1
+c                               bytes 15-16
+c                 skip over value  for n2
+      iptr  = iptr + 16
+c                               bytes 17-18
+c                                     p1
+      call sbyte (ipfld,kbds(17),iptr,16)
+      iptr  = iptr + 16
+c                               bytes 19-20
+c                                   p2
+      call sbyte (ipfld,kbds(19),iptr,16)
+      iptr  = iptr + 16
+c                               byte 21 - reserved location
+      call sbyte (ipfld,0,iptr,8)
+      iptr  = iptr + 8
+c                               bytes 22 - ?
+c                                      widths of second order packing
+      ix    = (iwdptr + 32) / 32
+      call sbytes (ipfld,isowid,iptr,32,0,ix)
+      iptr  = iptr + iwdptr
+c                                      secondary bit map
+      ij    = (ibmp2p + 32) / 32
+      call sbytes (ipfld,isobmp,iptr,32,0,ij)
+      iptr  = iptr + ibmp2p
+      if (mod(iptr,8).ne.0) then
+          iptr  = iptr + 8 - mod(iptr,8)
+      end if
+c                                         determine location for start
+c                                         of first order packed values
+      kbds(12)  = iptr / 8 + 12
+c                                        store location
+      call sbyte (ipfld,kbds(12),0,16)
+c                                     move in first order packed values
+      ipass   = (ifoptr + 32) / 32
+      call sbytes (ipfld,ifoval,iptr,32,0,ipass)
+      iptr  = iptr + ifoptr
+      if (mod(iptr,8).ne.0) then
+          iptr  = iptr + 8 - mod(iptr,8)
+      end if
+c     print *,'ifoptr =',ifoptr,' isoptr =',isoptr
+c                determine location for start
+c                     of second order values
+      kbds(15)  = iptr / 8 + 12
+c                                   save location of second order values
+      call sbyte (ipfld,kbds(15),24,16)
+c                  move in second order packed values
+      ix    = (isoptr + 32) / 32
+      call sbytes (ipfld,isoval,iptr,32,0,ix)
+      iptr  = iptr + isoptr
+      nleft  = mod(iptr+88,16)
+      if (nleft.ne.0) then
+          nleft  = 16 - nleft
+          iptr   = iptr + nleft
+      end if
+c                                compute length of data portion
+      len     = iptr / 8
+c                                    compute length of bds
+      lenbds  = len + 11
+c  -----------------------------------
+c                               bytes 1-3
+c                                   this function completed below
+c                                   when length of bds is known
+      call sbyte (bds11,lenbds,0,24)
+c                               byte  4
+      call sbyte (bds11,ibdsfl(1),24,1)
+      call sbyte (bds11,ibdsfl(2),25,1)
+      call sbyte (bds11,ibdsfl(3),26,1)
+      call sbyte (bds11,ibdsfl(4),27,1)
+c                              enter number of fill bits
+      call sbyte (bds11,nleft,28,4)
+c                               byte  5-6
+      if (iscal2.lt.0) then
+          call sbyte (bds11,1,32,1)
+          iscal2 = - iscal2
+      else
+          call sbyte (bds11,0,32,1)
+      end if
+      call sbyte (bds11,iscal2,33,15)
+c
+c$  fill octet 7-10 with the reference value
+c   convert the floating point of your machine to ibm370 32 bit
+c   floating point number
+c                                        reference value
+c                                          first test to see if
+c                                          on 32 or 64 bit computer
+          call w3fi01(lw)
+          if (lw.eq.4) then
+              call w3fi76 (refnce,iexp,imant,32)
+          else
+              call w3fi76 (refnce,iexp,imant,64)
+          end if
+          call sbyte (bds11,iexp,48,8)
+          call sbyte (bds11,imant,56,24)
+c
+c                               byte  11
+c
+      call sbyte (bds11,kbds(11),80,8)
+c
+      return
+      end

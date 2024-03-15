@@ -1,8 +1,8 @@
-Module mem_grid
+module mem_grid
 
 real   , allocatable, dimension(:,:) :: lat, lon, topo, ldf
-integer, allocatable, dimension(:,:) :: IstartIend
+integer, allocatable, dimension(:,:) :: istartiend
 integer, allocatable, dimension(:)   :: recvcounts,displs
-integer                              :: nPEs,rank
+integer                              :: npes,rank
 
-end Module
+end module

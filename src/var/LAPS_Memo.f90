@@ -1,119 +1,118 @@
-!dis    Forecast Systems Laboratory
-!dis    NOAA/OAR/ERL/FSL
-!dis    325 Broadway
-!dis    Boulder, CO     80303
+!dis    forecast systems laboratory
+!dis    noaa/oar/erl/fsl
+!dis    325 broadway
+!dis    boulder, co     80303
 !dis
-!dis    Forecast Research Division
-!dis    Local Analysis and Prediction Branch
-!dis    LAPS
+!dis    forecast research division
+!dis    local analysis and prediction branch
+!dis    laps
 !dis
-!dis    This software and its documentation are in the public domain and
-!dis    are furnished "as is."  The United States government, its
+!dis    this software and its documentation are in the public domain and
+!dis    are furnished "as is."  the united states government, its
 !dis    instrumentalities, officers, employees, and agents make no
 !dis    warranty, express or implied, as to the usefulness of the software
-!dis    and documentation for any purpose.  They assume no responsibility
+!dis    and documentation for any purpose.  they assume no responsibility
 !dis    (1) for the use of the software and documentation; or (2) to provide
 !dis    technical support to users.
 !dis
-!dis    Permission to use, copy, modify, and distribute this software is
+!dis    permission to use, copy, modify, and distribute this software is
 !dis    hereby granted, provided that the entire disclaimer notice appears
-!dis    in all copies.  All modifications to this software must be clearly
+!dis    in all copies.  all modifications to this software must be clearly
 !dis    documented, and are solely the responsibility of the agent making
-!dis    the modifications.  If significant modifications or enhancements
-!dis    are made to this software, the FSL Software Policy Manager
+!dis    the modifications.  if significant modifications or enhancements
+!dis    are made to this software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
 
-SUBROUTINE LAPS_Allc
+subroutine laps_allc
 
 !==========================================================
-!  This routine allocates memory for LAPS dynamic arrays.
+!  this routine allocates memory for laps dynamic arrays.
 !
-!  HISTORY: 
-! 	Creation: YUANFU XIE	3-2006
+!  history:
+!         creation: yuanfu xie        3-2006
 !==========================================================
 
-  USE LAPS_Parm
-  USE MEM_NAMELIST
+   use laps_parm
+   use mem_namelist
 
-  IMPLICIT NONE
+   implicit none
 
-  INTEGER :: status
+   integer :: status
 
-  ! One dimension arrays:
-  ALLOCATE(pressr1d(n(3)),height1d(n(3)),STAT=status)
-  IF (status .NE. 0) THEN
-    WRITE(6,*) 'LAPS_Allc: error to allocate memory for one-D arrays'
+   ! one dimension arrays:
+   allocate (pressr1d(n(3)), height1d(n(3)), stat=status)
+   if (status .ne. 0) then
+      write (6, *) 'laps_allc: error to allocate memory for one-d arrays'
 
-    ! Deallocate all previously allocated arrays:
-    CALL LAPS_Remv
-    STOP
-  ENDIF
-  ALLOCATE(rlat_radar(max_radars),rlon_radar(max_radars), &
-	   rhgt_radar(max_radars),n_grid_vel(max_radars))
+      ! deallocate all previously allocated arrays:
+      call laps_remv
+      stop
+   end if
+   allocate (rlat_radar(max_radars), rlon_radar(max_radars), &
+             rhgt_radar(max_radars), n_grid_vel(max_radars))
 
-  ALLOCATE(grid_radar_vel(n(1),n(2),n(3),max_radars), STAT=status)
-  IF (status .NE. 0) THEN
-    WRITE(6,*) 'LAPS_Allc: error to allocate memory for 4-D arrays'
+   allocate (grid_radar_vel(n(1), n(2), n(3), max_radars), stat=status)
+   if (status .ne. 0) then
+      write (6, *) 'laps_allc: error to allocate memory for 4-d arrays'
 
-    ! Deallocate all previously allocated arrays:
-    CALL LAPS_Remv
-    STOP
-  ENDIF
+      ! deallocate all previously allocated arrays:
+      call laps_remv
+      stop
+   end if
 
-  ! Lat/lon and topography:
-  ALLOCATE(lat(n(1),n(2)),lon(n(1),n(2)),topo(n(1),n(2)), &
-	STAT=status)
-  IF (status .NE. 0) THEN
-    WRITE(6,*) 'LAPS_Allc: error to allocate memory for lat/lon/topo'
+   ! lat/lon and topography:
+   allocate (lat(n(1), n(2)), lon(n(1), n(2)), topo(n(1), n(2)), &
+             stat=status)
+   if (status .ne. 0) then
+      write (6, *) 'laps_allc: error to allocate memory for lat/lon/topo'
 
-    ! Deallocate all previously allocated arrays:
-    CALL LAPS_Remv
-    STOP
-  ENDIF
+      ! deallocate all previously allocated arrays:
+      call laps_remv
+      stop
+   end if
 
-  ! 3D variables:
-  ALLOCATE(height3d(n(1),n(2),n(3)),pressr3d(n(1),n(2),n(3)), &
-	   temptr3d(n(1),n(2),n(3)),sphumd3d(n(1),n(2),n(3)), &
-           u_wind3d(n(1),n(2),n(3)),v_wind3d(n(1),n(2),n(3)), &
-	STAT=status)
-  IF (status .NE. 0) THEN
-    WRITE(6,*) 'LAPS_Allc: error to allocate memory for 3D variables'
+   ! 3d variables:
+   allocate (height3d(n(1), n(2), n(3)), pressr3d(n(1), n(2), n(3)), &
+             temptr3d(n(1), n(2), n(3)), sphumd3d(n(1), n(2), n(3)), &
+             u_wind3d(n(1), n(2), n(3)), v_wind3d(n(1), n(2), n(3)), &
+             stat=status)
+   if (status .ne. 0) then
+      write (6, *) 'laps_allc: error to allocate memory for 3d variables'
 
-    ! Deallocate all previously allocated arrays:
-    CALL LAPS_Remv
-    STOP
-  ENDIF
+      ! deallocate all previously allocated arrays:
+      call laps_remv
+      stop
+   end if
 
-END SUBROUTINE LAPS_Allc
+end subroutine laps_allc
 
-
-SUBROUTINE LAPS_Remv
+subroutine laps_remv
 
 !==========================================================
-!  This routine deallocates memory for LAPS dynamic arrays.
+!  this routine deallocates memory for laps dynamic arrays.
 !
-!  HISTORY: 
-! 	Creation: YUANFU XIE	3-2006
+!  history:
+!         creation: yuanfu xie        3-2006
 !==========================================================
 
-  USE LAPS_Parm
+   use laps_parm
 
-  IMPLICIT NONE
+   implicit none
 
-  INTEGER :: status
+   integer :: status
 
-  ! One dimension arrays:
-  DEALLOCATE(pressr1d,height1d, STAT=status)
+   ! one dimension arrays:
+   deallocate (pressr1d, height1d, stat=status)
 
-  DEALLOCATE(rlat_radar,rlon_radar,rhgt_radar,n_grid_vel, &
-	     grid_radar_vel, STAT=status)
+   deallocate (rlat_radar, rlon_radar, rhgt_radar, n_grid_vel, &
+               grid_radar_vel, stat=status)
 
-  ! Lat/lon and topography:
-  DEALLOCATE(lat,lon,topo, STAT=status)
+   ! lat/lon and topography:
+   deallocate (lat, lon, topo, stat=status)
 
-  ! 3D variables:
-  DEALLOCATE(height3d,pressr3d,temptr3d,sphumd3d, &
-    	     u_wind3d,v_wind3d, STAT=status)
+   ! 3d variables:
+   deallocate (height3d, pressr3d, temptr3d, sphumd3d, &
+               u_wind3d, v_wind3d, stat=status)
 
-END SUBROUTINE LAPS_Remv
+end subroutine laps_remv

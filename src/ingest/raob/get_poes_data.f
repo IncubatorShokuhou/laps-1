@@ -1,5 +1,5 @@
       subroutine get_poes_data
-     +                   (i4time_sys,ilaps_cycle_time,NX_L,NY_L
+     +                   (i4time_sys,ilaps_cycle_time,nx_l,ny_l
      +                   ,i4time_earliest,i4time_latest
      +                   ,filename
      +                   ,lun_out
@@ -9,201 +9,201 @@
 
       character*(*) filename
 
-      integer maxLevels, maxStaticIds, nInventoryBins, recNum,nf_fid,
+      integer maxlevels, maxstaticids, ninventorybins, recnum,nf_fid,
      +     nf_vid, nf_status
-C
-C  Open netcdf File for reading
-C
-      nf_status=NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),filename
+c
+c  open netcdf file for reading
+c
+      nf_status=nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),filename
         istatus=0
         return
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of maxLevels
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'maxLevels',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxLevels'
+c
+c  fill all dimension values
+c
+c
+c get size of maxlevels
+c
+      nf_status=nf_inq_dimid(nf_fid,'maxlevels',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxlevels'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,maxLevels)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxLevels'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,maxlevels)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxlevels'
       endif
-C
-C Get size of maxStaticIds
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'maxStaticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxStaticIds'
+c
+c get size of maxstaticids
+c
+      nf_status=nf_inq_dimid(nf_fid,'maxstaticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxstaticids'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,maxStaticIds)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxStaticIds'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,maxstaticids)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxstaticids'
       endif
-C
-C Get size of nInventoryBins
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'nInventoryBins',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim nInventoryBins'
+c
+c get size of ninventorybins
+c
+      nf_status=nf_inq_dimid(nf_fid,'ninventorybins',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim ninventorybins'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,nInventoryBins)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim nInventoryBins'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,ninventorybins)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim ninventorybins'
       endif
-C
-C Get size of recNum
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+c
+c get size of recnum
+c
+      nf_status=nf_inq_dimid(nf_fid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,recnum)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
 
-      write(6,*)' get_poes_data: number of records is ',recNum
-      call read_poes_data(nf_fid, maxLevels, maxStaticIds,
-     +     nInventoryBins, recNum, i4time_sys, ilaps_cycle_time,
-     +     NX_L, NY_L, i4time_earliest, i4time_latest, lun_out,
+      write(6,*)' get_poes_data: number of records is ',recnum
+      call read_poes_data(nf_fid, maxlevels, maxstaticids,
+     +     ninventorybins, recnum, i4time_sys, ilaps_cycle_time,
+     +     nx_l, ny_l, i4time_earliest, i4time_latest, lun_out,
      +     istatus)
 
       return
       end
-C
-C
-      subroutine read_poes_data(nf_fid, maxLevels, maxStaticIds,
-     +     nInventoryBins, recNum, i4time_sys, ilaps_cycle_time,
-     +     NX_L, NY_L, i4time_earliest, i4time_latest, lun_out,
+c
+c
+      subroutine read_poes_data(nf_fid, maxlevels, maxstaticids,
+     +     ninventorybins, recnum, i4time_sys, ilaps_cycle_time,
+     +     nx_l, ny_l, i4time_earliest, i4time_latest, lun_out,
      +     istatus)
 
 
       include 'netcdf.inc'
-      integer maxLevels, maxStaticIds, nInventoryBins, recNum,nf_fid,
+      integer maxlevels, maxstaticids, ninventorybins, recnum,nf_fid,
      +     nf_vid, nf_status
-      integer cloudAmount(recNum), dayNight(recNum),
-     +     fieldOfViewNum(recNum), firstInBin(nInventoryBins),
-     +     firstOverflow, globalInventory, invTime(recNum),
-     +     inventory(maxStaticIds), isOverflow(recNum),
-     +     landSea(recNum), lastInBin(nInventoryBins),
-     +     lastRecord(maxStaticIds), mixingRatioQCA( maxLevels,
-     +     recNum), mixingRatioQCR( maxLevels, recNum), nStaticIds,
-     +     numLevels(recNum), prevRecord(recNum), satProc(recNum),
-     +     satelliteID(recNum), superAdiabatic(recNum),
-     +     temperatureQCA( maxLevels, recNum), temperatureQCR(
-     +     maxLevels, recNum), terrain(recNum)
-      real cloudTopPressure(recNum), cloudTopTemperature(recNum),
-     +     mixingRatio( maxLevels, recNum), precipWater(recNum),
-     +     pressure( maxLevels, recNum), skinTemp(recNum),
-     +     solarElev(recNum), staElev(recNum), staLat(recNum),
-     +     staLon(recNum), staPress(recNum), temperature( maxLevels,
-     +     recNum), zenithAngle(recNum)
-      double precision validTime(recNum)
-      character temperatureDD( maxLevels, recNum)
-      character*8 staticIds(maxStaticIds)
-      character*7 staName(recNum)
-      character mixingRatioDD( maxLevels, recNum)
+      integer cloudamount(recnum), daynight(recnum),
+     +     fieldofviewnum(recnum), firstinbin(ninventorybins),
+     +     firstoverflow, globalinventory, invtime(recnum),
+     +     inventory(maxstaticids), isoverflow(recnum),
+     +     landsea(recnum), lastinbin(ninventorybins),
+     +     lastrecord(maxstaticids), mixingratioqca( maxlevels,
+     +     recnum), mixingratioqcr( maxlevels, recnum), nstaticids,
+     +     numlevels(recnum), prevrecord(recnum), satproc(recnum),
+     +     satelliteid(recnum), superadiabatic(recnum),
+     +     temperatureqca( maxlevels, recnum), temperatureqcr(
+     +     maxlevels, recnum), terrain(recnum)
+      real cloudtoppressure(recnum), cloudtoptemperature(recnum),
+     +     mixingratio( maxlevels, recnum), precipwater(recnum),
+     +     pressure( maxlevels, recnum), skintemp(recnum),
+     +     solarelev(recnum), staelev(recnum), stalat(recnum),
+     +     stalon(recnum), stapress(recnum), temperature( maxlevels,
+     +     recnum), zenithangle(recnum)
+      double precision validtime(recnum)
+      character temperaturedd( maxlevels, recnum)
+      character*8 staticids(maxstaticids)
+      character*7 staname(recnum)
+      character mixingratiodd( maxlevels, recnum)
 
-!     Declarations for 'write_snd' call
-      integer iwmostanum(recNum)
-      real stalatl(maxLevels),stalonl(maxLevels)
-      character a9time_ob_r(recNum)*9,a9time_ob_l(maxLevels)*9
-      character staname_o(recNum)*5
+!     declarations for 'write_snd' call
+      integer iwmostanum(recnum)
+      real stalatl(maxlevels),stalonl(maxlevels)
+      character a9time_ob_r(recnum)*9,a9time_ob_l(maxlevels)*9
+      character staname_o(recnum)*5
       character c8_obstype*8
-      real height_m(maxLevels)
-      real pressure_mb(maxLevels)
-      real temp_c(maxLevels)
-      real dewpoint_c(maxLevels)
-      real dir_deg(maxLevels)
-      real spd_mps(maxLevels)
+      real height_m(maxlevels)
+      real pressure_mb(maxlevels)
+      real temp_c(maxlevels)
+      real dewpoint_c(maxlevels)
+      real dir_deg(maxlevels)
+      real spd_mps(maxlevels)
 
       integer iob_tot
       save iob_tot
       data iob_tot /0/
 
       logical l_closest_time, l_closest_time_i, l_in_domain
-      real lat_a(NX_L,NY_L)
-      real lon_a(NX_L,NY_L)
-      real topo_a(NX_L,NY_L)
+      real lat_a(nx_l,ny_l)
+      real lon_a(nx_l,ny_l)
+      real topo_a(nx_l,ny_l)
 
       call get_r_missing_data(r_missing_data,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting r_missing_data'
+          write (6,*) 'error getting r_missing_data'
           return
       endif
-      call get_domain_perimeter(NX_L,NY_L,'nest7grid',lat_a,lon_a,
+      call get_domain_perimeter(nx_l,ny_l,'nest7grid',lat_a,lon_a,
      1            topo_a,1.0,rnorth,south,east,west,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_domain_perimeter'
+          write(6,*)' error in get_domain_perimeter'
           return
       endif
 
-      call read_poes_netcdf(nf_fid, maxLevels, maxStaticIds, 
-     +     nInventoryBins, recNum, cloudAmount, dayNight, 
-     +     fieldOfViewNum, firstInBin, firstOverflow, 
-     +     globalInventory, invTime, inventory, isOverflow, landSea, 
-     +     lastInBin, lastRecord, mixingRatioQCA, mixingRatioQCR, 
-     +     nStaticIds, numLevels, prevRecord, satProc, satelliteID, 
-     +     superAdiabatic, temperatureQCA, temperatureQCR, terrain, 
-     +     cloudTopPressure, cloudTopTemperature, mixingRatio, 
-     +     precipWater, pressure, skinTemp, solarElev, staElev, 
-     +     staLat, staLon, staPress, temperature, zenithAngle, 
-     +     mixingRatioDD, staName, staticIds, temperatureDD, 
-     +     validTime)
-C
-C The netcdf variables are filled - your snd write call may go here
-C
-!     Initial loop through obs to get times and stanums
-      do iob = 1,recNum
+      call read_poes_netcdf(nf_fid, maxlevels, maxstaticids, 
+     +     ninventorybins, recnum, cloudamount, daynight, 
+     +     fieldofviewnum, firstinbin, firstoverflow, 
+     +     globalinventory, invtime, inventory, isoverflow, landsea, 
+     +     lastinbin, lastrecord, mixingratioqca, mixingratioqcr, 
+     +     nstaticids, numlevels, prevrecord, satproc, satelliteid, 
+     +     superadiabatic, temperatureqca, temperatureqcr, terrain, 
+     +     cloudtoppressure, cloudtoptemperature, mixingratio, 
+     +     precipwater, pressure, skintemp, solarelev, staelev, 
+     +     stalat, stalon, stapress, temperature, zenithangle, 
+     +     mixingratiodd, staname, staticids, temperaturedd, 
+     +     validtime)
+c
+c the netcdf variables are filled - your snd write call may go here
+c
+!     initial loop through obs to get times and stanums
+      do iob = 1,recnum
           iwmostanum(iob) = 0
-          if(abs(validTime(iob)) .le. 1e10)then
-              i4time_ob = idint(validTime(iob))+315619200
+          if(abs(validtime(iob)) .le. 1e10)then
+              i4time_ob = idint(validtime(iob))+315619200
               call make_fnam_lp(i4time_ob,a9time_ob_r(iob),istatus)
           endif
 
-!         Create station name from ob count (try hex later if more needed)
+!         create station name from ob count (try hex later if more needed)
           iob_tot = iob_tot + 1
           write(staname_o(iob),44) iob_tot
  44       format(i5.5)
 
       enddo ! iob
 
-      c8_obstype = 'POESSND '
+      c8_obstype = 'poessnd '
 
-      do iob = 1,recNum
+      do iob = 1,recnum
           height_m = r_missing_data
-          stalatl = staLat(iob)
-          stalonl = staLon(iob)
+          stalatl = stalat(iob)
+          stalonl = stalon(iob)
 
-!         Convert arrays for a single sounding
+!         convert arrays for a single sounding
           a9time_ob_l = a9time_ob_r(iob)
 
-          call convert_array(pressure(:,iob),pressure_mb,maxLevels
+          call convert_array(pressure(:,iob),pressure_mb,maxlevels
      1                      ,'pa_to_mb',r_missing_data,istatus)
 
-          call convert_array(temperature(:,iob),temp_c,maxLevels
+          call convert_array(temperature(:,iob),temp_c,maxlevels
      1                      ,'k_to_c',r_missing_data,istatus)
 
           dewpoint_c = r_missing_data
-          do ilvl = 1,maxLevels
-              if(        mixingRatio(ilvl,iob) .gt. 0.
-     1             .and. mixingRatio(ilvl,iob) .le. 1.)then
+          do ilvl = 1,maxlevels
+              if(        mixingratio(ilvl,iob) .gt. 0.
+     1             .and. mixingratio(ilvl,iob) .le. 1.)then
                   dewpoint_c(ilvl) =
-     1              tmr(mixingRatio(ilvl,iob)*1000.,pressure_mb(ilvl))
+     1              tmr(mixingratio(ilvl,iob)*1000.,pressure_mb(ilvl))
               endif
           enddo
 
@@ -213,7 +213,7 @@ C
 
 
           call get_nlevels_snd(pressure_mb,height_m,r_missing_data
-     +                        ,maxLevels,nlevels_snd)
+     +                        ,maxlevels,nlevels_snd)
 
           l_closest_time = .true.
 
@@ -233,8 +233,8 @@ C
               call write_snd(lun_out
      +                      ,1,nlevels_snd,1
      +                      ,iwmostanum
-     +                      ,stalatl,stalonl,staElev(iob)
-     +                      ,staName_o(iob)
+     +                      ,stalatl,stalonl,staelev(iob)
+     +                      ,staname_o(iob)
      +                      ,a9time_ob_l,c8_obstype
      +                      ,nlevels_snd
      +                      ,height_m
@@ -249,597 +249,597 @@ C
       enddo ! iob
       return
       end
-C
-C  Subroutine to read the file 
-C
-      subroutine read_poes_netcdf(nf_fid, maxLevels, maxStaticIds, 
-     +     nInventoryBins, recNum, cloudAmount, dayNight, 
-     +     fieldOfViewNum, firstInBin, firstOverflow, 
-     +     globalInventory, invTime, inventory, isOverflow, landSea, 
-     +     lastInBin, lastRecord, mixingRatioQCA, mixingRatioQCR, 
-     +     nStaticIds, numLevels, prevRecord, satProc, satelliteID, 
-     +     superAdiabatic, temperatureQCA, temperatureQCR, terrain, 
-     +     cloudTopPressure, cloudTopTemperature, mixingRatio, 
-     +     precipWater, pressure, skinTemp, solarElev, staElev, 
-     +     staLat, staLon, staPress, temperature, zenithAngle, 
-     +     mixingRatioDD, staName, staticIds, temperatureDD, 
-     +     validTime)
-C
+c
+c  subroutine to read the file 
+c
+      subroutine read_poes_netcdf(nf_fid, maxlevels, maxstaticids, 
+     +     ninventorybins, recnum, cloudamount, daynight, 
+     +     fieldofviewnum, firstinbin, firstoverflow, 
+     +     globalinventory, invtime, inventory, isoverflow, landsea, 
+     +     lastinbin, lastrecord, mixingratioqca, mixingratioqcr, 
+     +     nstaticids, numlevels, prevrecord, satproc, satelliteid, 
+     +     superadiabatic, temperatureqca, temperatureqcr, terrain, 
+     +     cloudtoppressure, cloudtoptemperature, mixingratio, 
+     +     precipwater, pressure, skintemp, solarelev, staelev, 
+     +     stalat, stalon, stapress, temperature, zenithangle, 
+     +     mixingratiodd, staname, staticids, temperaturedd, 
+     +     validtime)
+c
       include 'netcdf.inc'
-      integer maxLevels, maxStaticIds, nInventoryBins, recNum,nf_fid, 
+      integer maxlevels, maxstaticids, ninventorybins, recnum,nf_fid, 
      +     nf_vid, nf_status
-      integer cloudAmount(recNum), dayNight(recNum),
-     +     fieldOfViewNum(recNum), firstInBin(nInventoryBins),
-     +     firstOverflow, globalInventory, invTime(recNum),
-     +     inventory(maxStaticIds), isOverflow(recNum),
-     +     landSea(recNum), lastInBin(nInventoryBins),
-     +     lastRecord(maxStaticIds), mixingRatioQCA( maxLevels,
-     +     recNum), mixingRatioQCR( maxLevels, recNum), nStaticIds,
-     +     numLevels(recNum), prevRecord(recNum), satProc(recNum),
-     +     satelliteID(recNum), superAdiabatic(recNum),
-     +     temperatureQCA( maxLevels, recNum), temperatureQCR(
-     +     maxLevels, recNum), terrain(recNum)
-      real cloudTopPressure(recNum), cloudTopTemperature(recNum),
-     +     mixingRatio( maxLevels, recNum), precipWater(recNum),
-     +     pressure( maxLevels, recNum), skinTemp(recNum),
-     +     solarElev(recNum), staElev(recNum), staLat(recNum),
-     +     staLon(recNum), staPress(recNum), temperature( maxLevels,
-     +     recNum), zenithAngle(recNum)
-      double precision validTime(recNum)
-      character temperatureDD( maxLevels, recNum)
-      character*8 staticIds(maxStaticIds)
-      character*7 staName(recNum)
-      character mixingRatioDD( maxLevels, recNum)
+      integer cloudamount(recnum), daynight(recnum),
+     +     fieldofviewnum(recnum), firstinbin(ninventorybins),
+     +     firstoverflow, globalinventory, invtime(recnum),
+     +     inventory(maxstaticids), isoverflow(recnum),
+     +     landsea(recnum), lastinbin(ninventorybins),
+     +     lastrecord(maxstaticids), mixingratioqca( maxlevels,
+     +     recnum), mixingratioqcr( maxlevels, recnum), nstaticids,
+     +     numlevels(recnum), prevrecord(recnum), satproc(recnum),
+     +     satelliteid(recnum), superadiabatic(recnum),
+     +     temperatureqca( maxlevels, recnum), temperatureqcr(
+     +     maxlevels, recnum), terrain(recnum)
+      real cloudtoppressure(recnum), cloudtoptemperature(recnum),
+     +     mixingratio( maxlevels, recnum), precipwater(recnum),
+     +     pressure( maxlevels, recnum), skintemp(recnum),
+     +     solarelev(recnum), staelev(recnum), stalat(recnum),
+     +     stalon(recnum), stapress(recnum), temperature( maxlevels,
+     +     recnum), zenithangle(recnum)
+      double precision validtime(recnum)
+      character temperaturedd( maxlevels, recnum)
+      character*8 staticids(maxstaticids)
+      character*7 staname(recnum)
+      character mixingratiodd( maxlevels, recnum)
 
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C     cloudTopPressure"Cloud Top Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'cloudTopPressure',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for cloudTopPressure'
+c   variables of type real
+c
+c     variable        netcdf long name
+c     cloudtoppressure"cloud top pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'cloudtoppressure',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for cloudtoppressure'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,cloudTopPressure)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for cloudTopPressure'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,cloudtoppressure)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for cloudtoppressure'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     cloudTopTemperature"Cloud Top Temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'cloudTopTemperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for cloudTopTemperature'
+c
+c     variable        netcdf long name
+c     cloudtoptemperature"cloud top temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'cloudtoptemperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for cloudtoptemperature'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,cloudTopTemperature)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for cloudTopTemperature'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,cloudtoptemperature)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for cloudtoptemperature'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     mixingRatio   "Mixing Ratio"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'mixingRatio',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for mixingRatio'
+c
+c     variable        netcdf long name
+c     mixingratio   "mixing ratio"
+c
+      nf_status=nf_inq_varid(nf_fid,'mixingratio',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for mixingratio'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,mixingRatio)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for mixingRatio'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,mixingratio)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for mixingratio'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     precipWater   "Total Precipitable Water"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'precipWater',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for precipWater'
+c
+c     variable        netcdf long name
+c     precipwater   "total precipitable water"
+c
+      nf_status=nf_inq_varid(nf_fid,'precipwater',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for precipwater'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,precipWater)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for precipWater'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,precipwater)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for precipwater'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     pressure      "Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'pressure',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for pressure'
+c
+c     variable        netcdf long name
+c     pressure      "pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'pressure',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for pressure'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,pressure)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for pressure'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,pressure)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for pressure'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     skinTemp      "Skin Temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'skinTemp',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for skinTemp'
+c
+c     variable        netcdf long name
+c     skintemp      "skin temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'skintemp',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for skintemp'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,skinTemp)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for skinTemp'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,skintemp)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for skintemp'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     solarElev     "Grid Point Solar Elevation"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'solarElev',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for solarElev'
+c
+c     variable        netcdf long name
+c     solarelev     "grid point solar elevation"
+c
+      nf_status=nf_inq_varid(nf_fid,'solarelev',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for solarelev'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,solarElev)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for solarElev'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,solarelev)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for solarelev'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     staElev       "Grid Point Elevation"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'staElev',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for staElev'
+c
+c     variable        netcdf long name
+c     staelev       "grid point elevation"
+c
+      nf_status=nf_inq_varid(nf_fid,'staelev',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for staelev'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,staElev)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for staElev'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,staelev)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for staelev'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     staLat        "Grid Point Latitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'staLat',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for staLat'
+c
+c     variable        netcdf long name
+c     stalat        "grid point latitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'stalat',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stalat'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,staLat)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for staLat'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,stalat)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stalat'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     staLon        "Grid Point Longitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'staLon',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for staLon'
+c
+c     variable        netcdf long name
+c     stalon        "grid point longitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'stalon',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stalon'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,staLon)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for staLon'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,stalon)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stalon'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     staPress      "Grid Point Pressure"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'staPress',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for staPress'
+c
+c     variable        netcdf long name
+c     stapress      "grid point pressure"
+c
+      nf_status=nf_inq_varid(nf_fid,'stapress',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for stapress'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,staPress)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for staPress'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,stapress)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for stapress'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     temperature   "Retrieved Temperature"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperature'
+c
+c     variable        netcdf long name
+c     temperature   "retrieved temperature"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperature'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,temperature)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperature'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,temperature)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperature'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     zenithAngle   "Satellite Zenith Angle"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'zenithAngle',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for zenithAngle'
+c
+c     variable        netcdf long name
+c     zenithangle   "satellite zenith angle"
+c
+      nf_status=nf_inq_varid(nf_fid,'zenithangle',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for zenithangle'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,zenithAngle)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for zenithAngle'
-       endif
-      endif
-
-C   Variables of type INT
-C
-C
-C     Variable        NETCDF Long Name
-C     cloudAmount   "Cloud Amount"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'cloudAmount',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for cloudAmount'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,cloudAmount)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for cloudAmount'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     dayNight      "Day/Night Qualifier"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'dayNight',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for dayNight'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,dayNight)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for dayNight'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     fieldOfViewNum"Field of View Number"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'fieldOfViewNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for fieldOfViewNum'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,fieldOfViewNum)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for fieldOfViewNum'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     firstInBin    
-C
-      nf_status=NF_INQ_VARID(nf_fid,'firstInBin',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for firstInBin'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,firstInBin)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for firstInBin'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     firstOverflow 
-C
-      nf_status=NF_INQ_VARID(nf_fid,'firstOverflow',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for firstOverflow'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,firstOverflow)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for firstOverflow'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     globalInventory
-C
-      nf_status=NF_INQ_VARID(nf_fid,'globalInventory',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for globalInventory'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,globalInventory)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for globalInventory'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     invTime       
-C
-      nf_status=NF_INQ_VARID(nf_fid,'invTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for invTime'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,invTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for invTime'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     inventory     
-C
-      nf_status=NF_INQ_VARID(nf_fid,'inventory',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for inventory'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,inventory)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for inventory'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     isOverflow    
-C
-      nf_status=NF_INQ_VARID(nf_fid,'isOverflow',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for isOverflow'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,isOverflow)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for isOverflow'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     landSea       "land/sea mask"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'landSea',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for landSea'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,landSea)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for landSea'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     lastInBin     
-C
-      nf_status=NF_INQ_VARID(nf_fid,'lastInBin',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for lastInBin'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,lastInBin)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for lastInBin'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     lastRecord    
-C
-      nf_status=NF_INQ_VARID(nf_fid,'lastRecord',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for lastRecord'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,lastRecord)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for lastRecord'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     mixingRatioQCA"mixingRatio QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'mixingRatioQCA',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for mixingRatioQCA'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,mixingRatioQCA)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for mixingRatioQCA'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     mixingRatioQCR"mixingRatio QC results word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'mixingRatioQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for mixingRatioQCR'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,mixingRatioQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for mixingRatioQCR'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     nStaticIds    
-C
-      nf_status=NF_INQ_VARID(nf_fid,'nStaticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for nStaticIds'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,nStaticIds)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for nStaticIds'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     numLevels     "Number of Sounding Levels"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'numLevels',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for numLevels'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,numLevels)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for numLevels'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     prevRecord    
-C
-      nf_status=NF_INQ_VARID(nf_fid,'prevRecord',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for prevRecord'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,prevRecord)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for prevRecord'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     satProc       "Satellite Processing Technique Used"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'satProc',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for satProc'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,satProc)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for satProc'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     satelliteID   "Satellite Identifier"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'satelliteID',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for satelliteID'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,satelliteID)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for satelliteID'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     superAdiabatic"Superadiabatic Indicator"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'superAdiabatic',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for superAdiabatic'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,superAdiabatic)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for superAdiabatic'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     temperatureQCA"temperature QC applied word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperatureQCA',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperatureQCA'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,temperatureQCA)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperatureQCA'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     temperatureQCR"temperature QC results word"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperatureQCR',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperatureQCR'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,temperatureQCR)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperatureQCR'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     terrain       "Terrain Type"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'terrain',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for terrain'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,terrain)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for terrain'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,zenithangle)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for zenithangle'
        endif
       endif
 
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C     validTime     "Sounding Valid Time"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'validTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for validTime'
+c   variables of type int
+c
+c
+c     variable        netcdf long name
+c     cloudamount   "cloud amount"
+c
+      nf_status=nf_inq_varid(nf_fid,'cloudamount',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for cloudamount'
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,validTime)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for validTime'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,cloudamount)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for cloudamount'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     daynight      "day/night qualifier"
+c
+      nf_status=nf_inq_varid(nf_fid,'daynight',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for daynight'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,daynight)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for daynight'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     fieldofviewnum"field of view number"
+c
+      nf_status=nf_inq_varid(nf_fid,'fieldofviewnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for fieldofviewnum'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,fieldofviewnum)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for fieldofviewnum'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     firstinbin    
+c
+      nf_status=nf_inq_varid(nf_fid,'firstinbin',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for firstinbin'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,firstinbin)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for firstinbin'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     firstoverflow 
+c
+      nf_status=nf_inq_varid(nf_fid,'firstoverflow',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for firstoverflow'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,firstoverflow)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for firstoverflow'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     globalinventory
+c
+      nf_status=nf_inq_varid(nf_fid,'globalinventory',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for globalinventory'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,globalinventory)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for globalinventory'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     invtime       
+c
+      nf_status=nf_inq_varid(nf_fid,'invtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for invtime'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,invtime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for invtime'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     inventory     
+c
+      nf_status=nf_inq_varid(nf_fid,'inventory',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for inventory'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,inventory)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for inventory'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     isoverflow    
+c
+      nf_status=nf_inq_varid(nf_fid,'isoverflow',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for isoverflow'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,isoverflow)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for isoverflow'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     landsea       "land/sea mask"
+c
+      nf_status=nf_inq_varid(nf_fid,'landsea',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for landsea'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,landsea)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for landsea'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     lastinbin     
+c
+      nf_status=nf_inq_varid(nf_fid,'lastinbin',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for lastinbin'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,lastinbin)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for lastinbin'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     lastrecord    
+c
+      nf_status=nf_inq_varid(nf_fid,'lastrecord',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for lastrecord'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,lastrecord)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for lastrecord'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     mixingratioqca"mixingratio qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'mixingratioqca',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for mixingratioqca'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,mixingratioqca)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for mixingratioqca'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     mixingratioqcr"mixingratio qc results word"
+c
+      nf_status=nf_inq_varid(nf_fid,'mixingratioqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for mixingratioqcr'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,mixingratioqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for mixingratioqcr'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     nstaticids    
+c
+      nf_status=nf_inq_varid(nf_fid,'nstaticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for nstaticids'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,nstaticids)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for nstaticids'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     numlevels     "number of sounding levels"
+c
+      nf_status=nf_inq_varid(nf_fid,'numlevels',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for numlevels'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,numlevels)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for numlevels'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     prevrecord    
+c
+      nf_status=nf_inq_varid(nf_fid,'prevrecord',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for prevrecord'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,prevrecord)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for prevrecord'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     satproc       "satellite processing technique used"
+c
+      nf_status=nf_inq_varid(nf_fid,'satproc',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for satproc'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,satproc)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for satproc'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     satelliteid   "satellite identifier"
+c
+      nf_status=nf_inq_varid(nf_fid,'satelliteid',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for satelliteid'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,satelliteid)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for satelliteid'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     superadiabatic"superadiabatic indicator"
+c
+      nf_status=nf_inq_varid(nf_fid,'superadiabatic',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for superadiabatic'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,superadiabatic)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for superadiabatic'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     temperatureqca"temperature qc applied word"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperatureqca',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperatureqca'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,temperatureqca)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperatureqca'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     temperatureqcr"temperature qc results word"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperatureqcr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperatureqcr'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,temperatureqcr)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperatureqcr'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     terrain       "terrain type"
+c
+      nf_status=nf_inq_varid(nf_fid,'terrain',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for terrain'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,terrain)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for terrain'
+       endif
+      endif
+
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c     validtime     "sounding valid time"
+c
+      nf_status=nf_inq_varid(nf_fid,'validtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for validtime'
+      else
+       nf_status=nf_get_var_double(nf_fid,nf_vid,validtime)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for validtime'
        endif
       endif
 
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C     mixingRatioDD "mixingRatio QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'mixingRatioDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for mixingRatioDD'
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c     mixingratiodd "mixingratio qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'mixingratiodd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for mixingratiodd'
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,mixingRatioDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for mixingRatioDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,mixingratiodd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for mixingratiodd'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     staName       "Grid Point Station Identifier"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'staName',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for staName'
+c
+c     variable        netcdf long name
+c     staname       "grid point station identifier"
+c
+      nf_status=nf_inq_varid(nf_fid,'staname',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for staname'
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,staName)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for staName'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,staname)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for staname'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     staticIds     
-C
-      nf_status=NF_INQ_VARID(nf_fid,'staticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for staticIds'
+c
+c     variable        netcdf long name
+c     staticids     
+c
+      nf_status=nf_inq_varid(nf_fid,'staticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for staticids'
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,staticIds)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for staticIds'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,staticids)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for staticids'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     temperatureDD "temperature QC summary value"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'temperatureDD',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for temperatureDD'
+c
+c     variable        netcdf long name
+c     temperaturedd "temperature qc summary value"
+c
+      nf_status=nf_inq_varid(nf_fid,'temperaturedd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for temperaturedd'
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,temperatureDD)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for temperatureDD'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,temperaturedd)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for temperaturedd'
        endif
       endif
 
       nf_status=nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

@@ -1,8 +1,8 @@
 
-        subroutine get_barnes_superobs(ni,nj,nk,r_missing_data           ! I
-     1                        ,n_var,i_var,max_obs,obs_barnes            ! I
-     1                        ,i_ratio,i4time_sys                        ! I
-     1                        ,superobs_barnes,ncnt_super)               ! O
+        subroutine get_barnes_superobs(ni,nj,nk,r_missing_data           ! i
+     1                        ,n_var,i_var,max_obs,obs_barnes            ! i
+     1                        ,i_ratio,i4time_sys                        ! i
+     1                        ,superobs_barnes,ncnt_super)               ! o
 
         include 'barnesob.inc'
         type (barnesob) :: obs_barnes(max_obs)
@@ -60,7 +60,7 @@
             sumo(i_cell,j_cell,k_cell,:) = sumo(i_cell,j_cell,k_cell,:) 
      1                                 + obs_barnes(n)%value(:)
 
-!           Note that time weight is being factored into the superob
+!           note that time weight is being factored into the superob
             call get_time_wt(i4time_sys,obs_barnes(n)%i4time
      1                                 ,time_wt,istatus)
 

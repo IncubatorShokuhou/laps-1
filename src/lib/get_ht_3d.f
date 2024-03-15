@@ -1,7 +1,7 @@
  
       subroutine get_ht_1d(nk,ht_1d_out,istatus)
 
-cdoc  Returns a 1-D grid of heights.
+cdoc  returns a 1-d grid of heights.
 
       include 'grid_fname.cmn'                          ! grid_fnam_common
 
@@ -44,7 +44,7 @@ cdoc  Returns a 1-D grid of heights.
         if(heights(k) .ne. int(heights(k)/1.) * 1.)goto903
       enddo                  ! k
 
-!     write(6,*)' Success in get_ht_1d'
+!     write(6,*)' success in get_ht_1d'
       istatus = 1
       return
 
@@ -72,10 +72,10 @@ cdoc  Returns a 1-D grid of heights.
 
       subroutine get_ht_3d(ni,nj,nk,topo,ht_3d,istatus)
 
-cdoc  Returns a 3-D grid of heights. This is useful if we have a non-uniform
+cdoc  returns a 3-d grid of heights. this is useful if we have a non-uniform
 cdoc  height grid or other type of arbitrary vertical grid.
 
-      use mem_namelist, ONLY: vertical_grid
+      use mem_namelist, only: vertical_grid
 
       integer ni,nj,nk       
       real ht_1d(nk)      
@@ -88,7 +88,7 @@ cdoc  height grid or other type of arbitrary vertical grid.
       sigma_hbot =     0.
 
       if(istatus .eq. 1)then
-         if(vertical_grid .eq. 'SIGMA_HT')then
+         if(vertical_grid .eq. 'sigma_ht')then
              
             do j = 1,nj
             do i = 1,ni
@@ -100,11 +100,11 @@ cdoc  height grid or other type of arbitrary vertical grid.
             enddo               ! i
             enddo               ! j
 
-            write(6,*)' Success in get_ht_3d'
+            write(6,*)' success in get_ht_3d'
             istatus = 1
             return
 
-         elseif(vertical_grid .eq. 'HEIGHT')then
+         elseif(vertical_grid .eq. 'height')then
             do k = 1,nk
                do j = 1,nj
                do i = 1,ni
@@ -113,24 +113,24 @@ cdoc  height grid or other type of arbitrary vertical grid.
                enddo               ! j
             enddo                  ! k
 
-            write(6,*)' Success in get_ht_3d'
+            write(6,*)' success in get_ht_3d'
             istatus = 1
             return
 
          else
-            write(6,*)' ERROR in get_ht_3d, invalid vertical grid '
+            write(6,*)' error in get_ht_3d, invalid vertical grid '
      1                ,vertical_grid
             istatus = 0
             return
 
          endif
 
-         write(6,*)' Success in get_ht_3d'
+         write(6,*)' success in get_ht_3d'
          istatus = 1
          return
 
       else
-         write(6,*)' No Success in get_ht_3d'
+         write(6,*)' no success in get_ht_3d'
          istatus = 0
          return
 
@@ -142,9 +142,9 @@ cdoc  height grid or other type of arbitrary vertical grid.
  
       subroutine get_sigma_1d(nk,sigma_1d_out,istatus)
 
-cdoc  Returns a 1-D grid of sigmas.
+cdoc  returns a 1-d grid of sigmas.
 
-      use mem_namelist, ONLY: vertical_grid
+      use mem_namelist, only: vertical_grid
 
       include 'grid_fname.cmn'                          ! grid_fnam_common
 
@@ -166,7 +166,7 @@ cdoc  Returns a 1-D grid of sigmas.
 
       character*150 static_dir,filename
 
-      if(vertical_grid .eq. 'SIGMA_HT')then ! get heights and convert to sigma
+      if(vertical_grid .eq. 'sigma_ht')then ! get heights and convert to sigma
           sigma_htop = 20000.
           sigma_hbot =     0.
 
@@ -196,12 +196,12 @@ cdoc  Returns a 1-D grid of sigmas.
         sigma_1d_out(k) = sigmas(k)
       enddo                  ! k
 
-!     QC check
+!     qc check
       do k = 2,nk
         if(sigmas(k) .ge. sigmas(k-1))goto902 
       enddo                  ! k
 
-!     write(6,*)' Success in get_sigma_1d'
+!     write(6,*)' success in get_sigma_1d'
       istatus = 1
       return
 

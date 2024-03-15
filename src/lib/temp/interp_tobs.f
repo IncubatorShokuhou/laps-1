@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -30,33 +30,33 @@ cdis
 cdis 
 cdis 
 
-        subroutine interp_tobs_to_laps(ob_pr_ht_obs,ob_pr_t_obs,        ! I
-     1                             ob_pr_pr_obs,                        ! I
-     1                             t_diff,temp_bkg_3d,                  ! I
-     1                             t_interp,                            ! O
-     1                             i_pr,iwrite,level,l_3d,              ! I
-     1                             nlevels_obs,                         ! I
-     1                             lat_pr,lon_pr,i_ob,j_ob,             ! I
-     1                             ni,nj,nk,                            ! I
-     1                             max_rs,max_rs_levels,r_missing_data, ! I
-     1                             pres_3d,                             ! I
-     1                             heights_3d)                          ! I
+        subroutine interp_tobs_to_laps(ob_pr_ht_obs,ob_pr_t_obs,        ! i
+     1                             ob_pr_pr_obs,                        ! i
+     1                             t_diff,temp_bkg_3d,                  ! i
+     1                             t_interp,                            ! o
+     1                             i_pr,iwrite,level,l_3d,              ! i
+     1                             nlevels_obs,                         ! i
+     1                             lat_pr,lon_pr,i_ob,j_ob,             ! i
+     1                             ni,nj,nk,                            ! i
+     1                             max_rs,max_rs_levels,r_missing_data, ! i
+     1                             pres_3d,                             ! i
+     1                             heights_3d)                          ! i
 
-!       Profiler Stuff
+!       profiler stuff
         real lat_pr(max_rs)
         real lon_pr(max_rs)
 
-!       Sounding Observations
+!       sounding observations
         integer nlevels_obs(max_rs)
         real ob_pr_ht_obs(max_rs,max_rs_levels)
         real ob_pr_pr_obs(max_rs,max_rs_levels) ! mb
         real ob_pr_t_obs(max_rs,max_rs_levels)
 
-        logical l_3d ! If true, we require obs to be near a vertical level
+        logical l_3d ! if true, we require obs to be near a vertical level
                      ! and single (or multiple) level obs are allowed
 
-                     ! If false, obs aren't required to be near a vertical
-                     ! level. Only multiple level obs are allowed.
+                     ! if false, obs aren't required to be near a vertical
+                     ! level. only multiple level obs are allowed.
 
         real heights_3d(ni,nj,nk)
         real pres_3d(ni,nj,nk)
@@ -68,7 +68,7 @@ cdis
 
         rk_delt_min = 1e10
 
-!  ***  Interpolate/map the tsnd observations to the input LAPS level *******
+!  ***  interpolate/map the tsnd observations to the input laps level *******
         if(l_3d)then
 
             do i_obs = 1,nlevels_obs(i_pr)
@@ -76,11 +76,11 @@ cdis
               height_ob = ob_pr_ht_obs(i_pr,i_obs)
               if(height_ob .eq. r_missing_data)then
                   write(6,*)
-     1                  ' ERROR: ob ht missing in interp_tobs_to_laps'    
+     1                  ' error: ob ht missing in interp_tobs_to_laps'    
                   stop
               endif
 
-!             Experimental use of observation pressure
+!             experimental use of observation pressure
               if(.false.)then
 !             if(ob_pr_pr_obs(i_pr,i_obs) .ne. r_missing_data)then
                 c2_obtype = 'pr'
@@ -98,14 +98,14 @@ cdis
 
               rk_delt = rk_ob - float(level)
 
-              if(abs(rk_delt) .le. 0.5 .and.        ! Ob is near grid point
-     1           abs(rk_delt) .lt. rk_delt_min)then ! Closest ob      
+              if(abs(rk_delt) .le. 0.5 .and.        ! ob is near grid point
+     1           abs(rk_delt) .lt. rk_delt_min)then ! closest ob      
 
                  rk_delt_min = abs(rk_delt)
 
                  k1 = level
 
-!                Determine 2nd level that will be used to bracket the ob
+!                determine 2nd level that will be used to bracket the ob
                  if(level .eq. 1)then
                      k2 = level + 1
                  elseif(level .eq. nk)then
@@ -118,7 +118,7 @@ cdis
 
                  if(   (float(level) - rk_ob) 
      1               * (float(k2)    - rk_ob) .gt. 0.)then
-                     write(6,*)' Error: k1/k2 does not bracket ob in '
+                     write(6,*)' error: k1/k2 does not bracket ob in '
      1                        ,'interp_tsnd_to_laps'
                      return
                  endif
@@ -134,9 +134,9 @@ cdis
                      height_ob_diff = height_ob 
      1                              - heights_3d(i_ob,j_ob,level)   
 
-!                    The temperature ob now has an "interpolated" or corrected
+!                    the temperature ob now has an "interpolated" or corrected
 !                    value by applying the model lapse rate between the ob and 
-!                    the laps grid level. The new value is the estimated 
+!                    the laps grid level. the new value is the estimated 
 !                    temperature at the laps grid point.
 
                      t_interp = temp_ob - height_ob_diff * t_lapse
@@ -158,9 +158,9 @@ cdis
                      pres_ob_diff = pres_ob_pa 
      1                              - pres_3d(i_ob,j_ob,level)   
 
-!                    The temperature ob now has an "interpolated" or corrected
+!                    the temperature ob now has an "interpolated" or corrected
 !                    value by applying the model lapse rate between the ob and 
-!                    the laps grid level. The new value is the estimated 
+!                    the laps grid level. the new value is the estimated 
 !                    temperature at the laps grid point.
 
                      t_interp = temp_ob - pres_ob_diff * t_lapse
@@ -174,19 +174,19 @@ cdis
 
                  endif
 
-!                Correct for the time lag
+!                correct for the time lag
                  t_interp = t_interp + t_diff
 
-               endif ! Ob is near to desired level
+               endif ! ob is near to desired level
 
             enddo ! level (iobs)
 
         else ! not l_3d
 
           if(nlevels_obs(i_pr) .eq. 1)then
-!           To avoid this warning set l_3d to TRUE or supply multiple levels
+!           to avoid this warning set l_3d to true or supply multiple levels
             write(6,*)
-     1        'WARNING in interp_tobs - ignoring single level profile'
+     1        'warning in interp_tobs - ignoring single level profile'
           endif
 
           do i_obs = 1,nlevels_obs(i_pr)
@@ -195,7 +195,7 @@ cdis
 
               if(ob_pr_ht_obs(i_pr,i_obs-1) .le. 
      1                                       heights_3d(i_ob,j_ob,level) 
-     1                                .AND.
+     1                                .and.
      1           ob_pr_ht_obs(i_pr,i_obs  )   .ge. 
      1                                       heights_3d(i_ob,j_ob,level)
      1                                                             )then
@@ -213,7 +213,7 @@ cdis
      1                    + ob_pr_t_obs(i_pr,i_obs-1) * fracl
 
 
-!                Correct for the time lag
+!                correct for the time lag
                  t_interp = t_interp + t_diff
 
                endif ! obs bracket laps level

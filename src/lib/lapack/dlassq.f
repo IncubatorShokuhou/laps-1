@@ -1,89 +1,89 @@
-      SUBROUTINE DLASSQ( N, X, INCX, SCALE, SUMSQ )
+      subroutine dlassq( n, x, incx, scale, sumsq )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      INTEGER            INCX, N
-      DOUBLE PRECISION   SCALE, SUMSQ
+*     .. scalar arguments ..
+      integer            incx, n
+      double precision   scale, sumsq
 *     ..
-*     .. Array Arguments ..
-      DOUBLE PRECISION   X( * )
+*     .. array arguments ..
+      double precision   x( * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLASSQ  returns the values  scl  and  smsq  such that
+*  dlassq  returns the values  scl  and  smsq  such that
 *
 *     ( scl**2 )*smsq = x( 1 )**2 +...+ x( n )**2 + ( scale**2 )*sumsq,
 *
-*  where  x( i ) = X( 1 + ( i - 1 )*INCX ). The value of  sumsq  is
+*  where  x( i ) = x( 1 + ( i - 1 )*incx ). the value of  sumsq  is
 *  assumed to be non-negative and  scl  returns the value
 *
 *     scl = max( scale, abs( x( i ) ) ).
 *
-*  scale and sumsq must be supplied in SCALE and SUMSQ and
-*  scl and smsq are overwritten on SCALE and SUMSQ respectively.
+*  scale and sumsq must be supplied in scale and sumsq and
+*  scl and smsq are overwritten on scale and sumsq respectively.
 *
-*  The routine makes only one pass through the vector x.
+*  the routine makes only one pass through the vector x.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  N       (input) INTEGER
-*          The number of elements to be used from the vector X.
+*  n       (input) integer
+*          the number of elements to be used from the vector x.
 *
-*  X       (input) DOUBLE PRECISION
-*          The vector for which a scaled sum of squares is computed.
-*             x( i )  = X( 1 + ( i - 1 )*INCX ), 1 <= i <= n.
+*  x       (input) double precision
+*          the vector for which a scaled sum of squares is computed.
+*             x( i )  = x( 1 + ( i - 1 )*incx ), 1 <= i <= n.
 *
-*  INCX    (input) INTEGER
-*          The increment between successive values of the vector X.
-*          INCX > 0.
+*  incx    (input) integer
+*          the increment between successive values of the vector x.
+*          incx > 0.
 *
-*  SCALE   (input/output) DOUBLE PRECISION
-*          On entry, the value  scale  in the equation above.
-*          On exit, SCALE is overwritten with  scl , the scaling factor
+*  scale   (input/output) double precision
+*          on entry, the value  scale  in the equation above.
+*          on exit, scale is overwritten with  scl , the scaling factor
 *          for the sum of squares.
 *
-*  SUMSQ   (input/output) DOUBLE PRECISION
-*          On entry, the value  sumsq  in the equation above.
-*          On exit, SUMSQ is overwritten with  smsq , the basic sum of
+*  sumsq   (input/output) double precision
+*          on entry, the value  sumsq  in the equation above.
+*          on exit, sumsq is overwritten with  smsq , the basic sum of
 *          squares from which  scl  has been factored out.
 *
 * =====================================================================
 *
-*     .. Parameters ..
-      DOUBLE PRECISION   ZERO
-      PARAMETER          ( ZERO = 0.0D+0 )
+*     .. parameters ..
+      double precision   zero
+      parameter          ( zero = 0.0d+0 )
 *     ..
-*     .. Local Scalars ..
-      INTEGER            IX
-      DOUBLE PRECISION   ABSXI
+*     .. local scalars ..
+      integer            ix
+      double precision   absxi
 *     ..
-*     .. Intrinsic Functions ..
-      INTRINSIC          ABS
+*     .. intrinsic functions ..
+      intrinsic          abs
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-      IF( N.GT.0 ) THEN
-         DO 10 IX = 1, 1 + ( N-1 )*INCX, INCX
-            IF( X( IX ).NE.ZERO ) THEN
-               ABSXI = ABS( X( IX ) )
-               IF( SCALE.LT.ABSXI ) THEN
-                  SUMSQ = 1 + SUMSQ*( SCALE / ABSXI )**2
-                  SCALE = ABSXI
-               ELSE
-                  SUMSQ = SUMSQ + ( ABSXI / SCALE )**2
-               END IF
-            END IF
-   10    CONTINUE
-      END IF
-      RETURN
+      if( n.gt.0 ) then
+         do 10 ix = 1, 1 + ( n-1 )*incx, incx
+            if( x( ix ).ne.zero ) then
+               absxi = abs( x( ix ) )
+               if( scale.lt.absxi ) then
+                  sumsq = 1 + sumsq*( scale / absxi )**2
+                  scale = absxi
+               else
+                  sumsq = sumsq + ( absxi / scale )**2
+               end if
+            end if
+   10    continue
+      end if
+      return
 *
-*     End of DLASSQ
+*     end of dlassq
 *
-      END
+      end

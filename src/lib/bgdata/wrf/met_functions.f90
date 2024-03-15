@@ -1,295 +1,295 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION esat2(t)
-    !Computes saturation vapor pressure (Pa) from temperature
-    ! NOTE: Computed with respect to liquid!!!
-    USE constants
-    REAL                       :: esat2
-    REAL, INTENT(IN)           :: t
+  function esat2(t)
+    !computes saturation vapor pressure (pa) from temperature
+    ! note: computed with respect to liquid!!!
+    use constants
+    real                       :: esat2
+    real, intent(in)           :: t
     
-    esat2 = 611.21 * EXP ( (17.502 * (t-t0)) / (t-32.18) )
-  END FUNCTION esat2 
+    esat2 = 611.21 * exp ( (17.502 * (t-t0)) / (t-32.18) )
+  end function esat2 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION mixsat(t,p)
-    ! Computes saturation vapor mixing ratio as function of Temp and Press
-    USE constants
-    IMPLICIT NONE
+  function mixsat(t,p)
+    ! computes saturation vapor mixing ratio as function of temp and press
+    use constants
+    implicit none
 
-     REAL,EXTERNAL             :: esat2
-     REAL                      :: mixsat
-     REAL, INTENT(IN)          :: p
-     REAL                      :: satvpr
-     REAL, INTENT(IN)          :: t
+     real,external             :: esat2
+     real                      :: mixsat
+     real, intent(in)          :: p
+     real                      :: satvpr
+     real, intent(in)          :: t
 
      satvpr = esat2(t)
      mixsat = (e*satvpr) / (p-satvpr)
    
-   END FUNCTION mixsat
+   end function mixsat
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION potential_temp(t,p)
+  function potential_temp(t,p)
 
-  ! Computes potential temperature from temp (K) and pressure (Pa)
+  ! computes potential temperature from temp (k) and pressure (pa)
 
-    USE constants
-    IMPLICIT NONE
-    REAL, INTENT(IN)           :: t
-    REAL, INTENT(IN)           :: p
-    REAL                       :: potential_temp
+    use constants
+    implicit none
+    real, intent(in)           :: t
+    real, intent(in)           :: p
+    real                       :: potential_temp
 
     potential_temp = t * (p0/p)**kappa
 
-  END FUNCTION potential_temp
+  end function potential_temp
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION eq_potential_temp(t,p,w,rh)
+  function eq_potential_temp(t,p,w,rh)
  
-    ! Calculates equivalent potential temperature given temperature, 
+    ! calculates equivalent potential temperature given temperature, 
     ! pressure, mixing ratio, and relative humidity via
-    ! Bolton's equation. (MWR 1980, P 1052, eq. 43)
+    ! bolton's equation. (mwr 1980, p 1052, eq. 43)
 
-    IMPLICIT NONE
+    implicit none
     
-    REAL, INTENT(IN)             :: t  ! temp in K
-    REAL, INTENT(IN)             :: p  ! pressure in Pa
-    REAL, INTENT(IN)             :: w  ! mixing ratio kg/kg
-    REAL, INTENT(IN)             :: rh ! relative humidity (fraction)
-    ! REAL, EXTERNAL               :: potential_temp  
-    REAL                         :: thtm
-    REAL, EXTERNAL               :: tlcl
-    REAL                         :: eq_potential_temp
+    real, intent(in)             :: t  ! temp in k
+    real, intent(in)             :: p  ! pressure in pa
+    real, intent(in)             :: w  ! mixing ratio kg/kg
+    real, intent(in)             :: rh ! relative humidity (fraction)
+    ! real, external               :: potential_temp  
+    real                         :: thtm
+    real, external               :: tlcl
+    real                         :: eq_potential_temp
 
     thtm = t * (100000./p) ** (2. / 7. * ( 1. - (0.28*w)))
     eq_potential_temp = thtm * &
-                        EXP ( ( 3.376 / tlcl(t,rh) - 0.00254) * &
+                        exp ( ( 3.376 / tlcl(t,rh) - 0.00254) * &
                         (w * 1000.0 * (1.0 + 0.81 * w) ) )
 
-  END FUNCTION eq_potential_temp
+  end function eq_potential_temp
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION tlcl(t,rh)
+  function tlcl(t,rh)
 
-    ! Computes the temperature of the Lifting Condensation Level
-    ! given surface t and RH using Bolton's equation (MWR 1980, p 1048, #22)
+    ! computes the temperature of the lifting condensation level
+    ! given surface t and rh using bolton's equation (mwr 1980, p 1048, #22)
 
-    IMPLICIT NONE
-    REAL                               :: denom
-    REAL, INTENT(IN)                   :: rh
-    REAL, INTENT(IN)                   :: t
-    REAL                               :: term1
-    REAL                               :: term2
-    REAL                               :: tlcl
+    implicit none
+    real                               :: denom
+    real, intent(in)                   :: rh
+    real, intent(in)                   :: t
+    real                               :: term1
+    real                               :: term2
+    real                               :: tlcl
 
     term1 = 1.0 / (t-55.0)
-    term2 = ALOG(rh/1.0)/2840.
+    term2 = alog(rh/1.0)/2840.
     denom = term1 - term2
     tlcl = (1.0/denom) + 55.0
 
-  END FUNCTION tlcl
+  end function tlcl
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION dewpt2(t,rh)
+  function dewpt2(t,rh)
  
-  ! Compute dew point from temperature (K) and RH (fraction)
-    USE constants
-    IMPLICIT NONE
+  ! compute dew point from temperature (k) and rh (fraction)
+    use constants
+    implicit none
     
-    REAL                :: dewpt2
-    REAL, INTENT(IN)    :: rh
-    REAL, INTENT(IN)    :: t
+    real                :: dewpt2
+    real, intent(in)    :: rh
+    real, intent(in)    :: t
 
-    dewpt2 = t / (( -rvolv * ALOG(MAX(rh,0.01)) * t) + 1.0 )
+    dewpt2 = t / (( -rvolv * alog(max(rh,0.01)) * t) + 1.0 )
 
-  END FUNCTION dewpt2
+  end function dewpt2
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION relhum(t,mixrat,p)
-    ! Computes relative humidity (fraction form)
-    IMPLICIT NONE
-    REAL, INTENT(IN)                 :: p ! Pressure in Pa
-    REAL, INTENT(IN)                 :: mixrat ! vapor mixing ratio
-    REAL, EXTERNAL                   :: mixsat ! Saturation vapor mix. ratio
-    REAL                             :: relhum  !(fraction)
-    REAL, INTENT(IN)                 :: t
+  function relhum(t,mixrat,p)
+    ! computes relative humidity (fraction form)
+    implicit none
+    real, intent(in)                 :: p ! pressure in pa
+    real, intent(in)                 :: mixrat ! vapor mixing ratio
+    real, external                   :: mixsat ! saturation vapor mix. ratio
+    real                             :: relhum  !(fraction)
+    real, intent(in)                 :: t
 
     relhum = mixrat/mixsat(t,p)
-  END FUNCTION relhum      
+  end function relhum      
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION fahren (t)
+  function fahren (t)
 
-    ! Converts from Celsius to fahrenheit
+    ! converts from celsius to fahrenheit
 
-    IMPLICIT NONE
+    implicit none
 
-    REAL, INTENT(IN)          :: t
-    REAL                      :: fahren
+    real, intent(in)          :: t
+    real                      :: fahren
 
     fahren = (1.8 * t) + 32.
-  END FUNCTION fahren
+  end function fahren
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION celsius(tf)
+  function celsius(tf)
 
-    IMPLICIT NONE
-    REAL, INTENT(IN)             :: tf
-    REAL                         :: celsius
-    ! Converts fahrenheit to celsius
+    implicit none
+    real, intent(in)             :: tf
+    real                         :: celsius
+    ! converts fahrenheit to celsius
 
     celsius = (5./9.) * (tf - 32.0)
 
-  END FUNCTION celsius
+  end function celsius
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION wdir(u,v,xlon,orient,conefact)
-    ! Computes wind direction from u/v components.  Converts the direction 
+  function wdir(u,v,xlon,orient,conefact)
+    ! computes wind direction from u/v components.  converts the direction 
     ! to true direction if conefactor != 0.
 
-    USE constants
-    IMPLICIT NONE
+    use constants
+    implicit none
 
-    REAL, INTENT(IN)               :: conefact
-    REAL                           :: diff
-    REAL, INTENT(IN)               :: orient
-    REAL, INTENT(IN)               :: u
-    REAL, INTENT(IN)               :: v
-    REAL                           :: wdir
-    REAL, INTENT(IN)               :: xlon
+    real, intent(in)               :: conefact
+    real                           :: diff
+    real, intent(in)               :: orient
+    real, intent(in)               :: u
+    real, intent(in)               :: v
+    real                           :: wdir
+    real, intent(in)               :: xlon
 
-    ! Handle case where u is very small to prevent divide by 0
+    ! handle case where u is very small to prevent divide by 0
     
-    IF (abs(u) .LT. 0.001) THEN
-      IF ( v .le. 0.0) THEN
+    if (abs(u) .lt. 0.001) then
+      if ( v .le. 0.0) then
          wdir = 0.0
-      ELSE
+      else
          wdir = 180.
-      ENDIF
+      endif
 
-    ! Otherwise, standard trig problem!
+    ! otherwise, standard trig problem!
 
-    ELSE
-      wdir = 270. - (ATAN2(v,u) * rad2deg)
+    else
+      wdir = 270. - (atan2(v,u) * rad2deg)
    
-      IF  (wdir .gt. 360.) THEN
+      if  (wdir .gt. 360.) then
         wdir = wdir - 360.
-      ENDIF
-    ENDIF
+      endif
+    endif
 
-    ! Change to earth relative
+    ! change to earth relative
 
     diff = (orient - xlon) * conefact
-    IF (diff .GT. 180.0) diff = diff - 360.
-    IF (diff .LT. -180.) diff = diff + 360.
+    if (diff .gt. 180.0) diff = diff - 360.
+    if (diff .lt. -180.) diff = diff + 360.
 
     wdir = wdir - diff
-    IF (wdir .gt. 360.0) wdir = wdir - 360.
-    IF (wdir .lt. 0.) wdir = wdir + 360.
+    if (wdir .gt. 360.0) wdir = wdir - 360.
+    if (wdir .lt. 0.) wdir = wdir + 360.
 
-  END FUNCTION wdir
+  end function wdir
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION wspd(u,v)
+  function wspd(u,v)
 
-    ! Computes wind velocity from u/v components
-    IMPLICIT NONE
-    REAL, INTENT(IN)        :: u
-    REAL, INTENT(IN)        :: v
-    REAL                    :: wspd
+    ! computes wind velocity from u/v components
+    implicit none
+    real, intent(in)        :: u
+    real, intent(in)        :: v
+    real                    :: wspd
 
-    wspd = SQRT ( (u*u) + (v*v) )
-  END FUNCTION wspd
+    wspd = sqrt ( (u*u) + (v*v) )
+  end function wspd
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION WOBF (T) 
+  function wobf (t) 
 
 !-----------------------------------------------------------------------
 !--   
-!--   NAME: WOBUF FUNCTION
+!--   name: wobuf function
 !--
-!--   THIS FUNCTION CALCULATES THE DIFFERENCE OF THE WET BULB POTENTIAL
-!--   TEMPERATURES FOR SATURATED AND DRY AIR GIVEN THE TEMPERATURE.
+!--   this function calculates the difference of the wet bulb potential
+!--   temperatures for saturated and dry air given the temperature.
 !--
-!--   IT WAS CREATED BY HERMAN WOBUS OF THE NAVY WEATHER RESEARCH
-!--   FACILITY FROM DATA IN THE SMITHSONIAN METEOROLOGICAL TABLES.
+!--   it was created by herman wobus of the navy weather research
+!--   facility from data in the smithsonian meteorological tables.
 !--
 !-- 
-!--   LET WBPTS = WET BULB POTENTIAL TEMPERATURE FOR SATURATED AIR
-!--               AT TEMPERATURE T IN CELSIUS
+!--   let wbpts = wet bulb potential temperature for saturated air
+!--               at temperature t in celsius
 !--
-!--   LET WBPTD = WET BULT POTENTIAL TEMPERATURE FOR DRY AIR AT
-!--               THE SAME TEMPERATURE.
+!--   let wbptd = wet bult potential temperature for dry air at
+!--               the same temperature.
 !--  
-!--   THE WOBUS FUNCTION WOBF (IN DEGREES CELSIUS) IS DEFINED BY:
+!--   the wobus function wobf (in degrees celsius) is defined by:
 !--
-!--               WOBF(T) = WBPTS - WBPTD
+!--               wobf(t) = wbpts - wbptd
 !--    
-!--   ALTHOUGH WBPTS AND WBPTD ARE FUNCTIONS OF BOTH PRESSURE AND
-!--   TEMPERATURE, THEIR DIFFERENCE IS A FUNCTION OF TEMPERATURE ONLY.
+!--   although wbpts and wbptd are functions of both pressure and
+!--   temperature, their difference is a function of temperature only.
 !--
-!--   THE WOBUS FUNCTION IS USEFUL FOR EVALUATING SEVERAL THERMODYNAMIC
-!--   QUANTITIES.
+!--   the wobus function is useful for evaluating several thermodynamic
+!--   quantities.
 !--
-!--   IF T IS AT 1000 MB, THEN T IS POTENTIAL TEMPERATURE PT AND
-!--   WBPTS = PT.  THUS,
+!--   if t is at 1000 mb, then t is potential temperature pt and
+!--   wbpts = pt.  thus,
 !--
-!--               WOBF(PT) = PT - WBPTD
+!--               wobf(pt) = pt - wbptd
 !--
-!--   IF T IS AT THE CONDENSATION LEVEL, THEN T IS THE CONDENSATION
-!--   TEMPERATURE TC AND WBPTS IS THE WET BULB POTENTIAL TEMPERATURE
-!--   WBPT.  THUS,
+!--   if t is at the condensation level, then t is the condensation
+!--   temperature tc and wbpts is the wet bulb potential temperature
+!--   wbpt.  thus,
 !--
-!--               WOBF(TC) = WBPT - WBPTD
+!--               wobf(tc) = wbpt - wbptd
 !--
-!--   MANIPULATING THE ABOVE EQUATIONS WE GET,                
+!--   manipulating the above equations we get,                
 !--
-!--               WBPT = PT - WOBF(PT) + WOBF(TC)   AND
+!--               wbpt = pt - wobf(pt) + wobf(tc)   and
 !--
-!--               WBPTS = PT - WOBF(PT) + WOBF(T)
+!--               wbpts = pt - wobf(pt) + wobf(t)
 !--
-!--   IF T IS EQUIVALENT POTENTIAL TEMPERATURE EPT (IMPLYING THAT
-!--   THE AIR AT 1000 MB IS COMPLETELY DRY), THEN 
+!--   if t is equivalent potential temperature ept (implying that
+!--   the air at 1000 mb is completely dry), then 
 !--
-!--               WBPTS = EPT AND WBPTD = WBPT, THUS,
+!--               wbpts = ept and wbptd = wbpt, thus,
 !--
-!--               WOBF(EPT) = EPT - WBPT
+!--               wobf(ept) = ept - wbpt
 !--
 !-----------------------------------------------------------------------
 
-      IMPLICIT NONE
+      implicit none
 
-      REAL                        :: POL
-      REAL,    INTENT(IN)         :: T
-      REAL                        :: WOBF
-      REAL                        :: X
+      real                        :: pol
+      real,    intent(in)         :: t
+      real                        :: wobf
+      real                        :: x
      
-      X = T - 20.0
+      x = t - 20.0
 
-      IF (X .LE. 0.0) THEN
+      if (x .le. 0.0) then
 
-        POL = 1.0                   + X * (-8.8416605E-03   &
-             + X * ( 1.4714143E-04  + X * (-9.6719890E-07   &
-             + X * (-3.2607217E-08  + X * (-3.8598073E-10)))))
+        pol = 1.0                   + x * (-8.8416605e-03   &
+             + x * ( 1.4714143e-04  + x * (-9.6719890e-07   &
+             + x * (-3.2607217e-08  + x * (-3.8598073e-10)))))
 
-        WOBF = 15.130 / (POL**4)
+        wobf = 15.130 / (pol**4)
 
-      ELSE
+      else
 
-        POL = 1.0                   + X * ( 3.6182989E-03   &
-             + X * (-1.3603273E-05  + X * ( 4.9618922E-07   &
-             + X * (-6.1059365E-09  + X * ( 3.9401551E-11   &
-             + X * (-1.2588129E-13  + X * ( 1.6688280E-16)))))))
+        pol = 1.0                   + x * ( 3.6182989e-03   &
+             + x * (-1.3603273e-05  + x * ( 4.9618922e-07   &
+             + x * (-6.1059365e-09  + x * ( 3.9401551e-11   &
+             + x * (-1.2588129e-13  + x * ( 1.6688280e-16)))))))
 
-        WOBF = (29.930 / (POL**4)) + (0.96 * X) - 14.8
+        wobf = (29.930 / (pol**4)) + (0.96 * x) - 14.8
 
-      END IF
+      end if
  
-      END FUNCTION WOBF
+      end function wobf
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  FUNCTION heatindex(temp_k, rh_pct)
+  function heatindex(temp_k, rh_pct)
 
-    ! Computes heat index from a temperature (K) and RH (%).
+    ! computes heat index from a temperature (k) and rh (%).
 
-    USE constants
-    IMPLICIT NONE
-    REAL, EXTERNAL                  :: celsius
-    REAL, EXTERNAL                  :: fahren
-    REAL                            :: heatindex
-    REAL, INTENT(IN)                :: rh_pct
-    REAL                            :: rh_pct_sqr
-    REAL                            :: tf
-    REAL                            :: tf_sqr
-    REAL, INTENT(IN)                :: temp_k
+    use constants
+    implicit none
+    real, external                  :: celsius
+    real, external                  :: fahren
+    real                            :: heatindex
+    real, intent(in)                :: rh_pct
+    real                            :: rh_pct_sqr
+    real                            :: tf
+    real                            :: tf_sqr
+    real, intent(in)                :: temp_k
 
     rh_pct_sqr = rh_pct*rh_pct
     tf = fahren(temp_k - t0)
@@ -298,51 +298,51 @@
     heatindex =  -42.379 + (2.04901523   * tf)  &
                          + (10.1433312   * rh_pct)  &
                          - (0.22475541   * tf * rh_pct)  &
-                         - (6.83783E-03  * tf_sqr)  &
-                         - (5.481717E-02 * rh_pct_sqr)   &
-                         + (1.22874E-03  * tf_sqr * rh_pct)  &
-                         + (8.52E-04     * rh_pct_sqr * tf)  &
-                         - (1.99E-06     * tf_sqr * rh_pct_sqr)
+                         - (6.83783e-03  * tf_sqr)  &
+                         - (5.481717e-02 * rh_pct_sqr)   &
+                         + (1.22874e-03  * tf_sqr * rh_pct)  &
+                         + (8.52e-04     * rh_pct_sqr * tf)  &
+                         - (1.99e-06     * tf_sqr * rh_pct_sqr)
  
     heatindex = celsius(heatindex) + t0
   
-  END FUNCTION heatindex
+  end function heatindex
 
-  FUNCTION tcvp(p,mr,z,rho,nz)
-    USE constants
-    IMPLICIT NONE
+  function tcvp(p,mr,z,rho,nz)
+    use constants
+    implicit none
 
-    REAL                          :: tcvp
-    INTEGER, INTENT(IN)           :: nz
-    REAL, INTENT(IN)              :: p(nz)
-    REAL, INTENT(IN)              :: mr(nz)
-    REAL, INTENT(IN)              :: z(nz)
-    REAL, INTENT(IN)              :: rho(nz)
+    real                          :: tcvp
+    integer, intent(in)           :: nz
+    real, intent(in)              :: p(nz)
+    real, intent(in)              :: mr(nz)
+    real, intent(in)              :: z(nz)
+    real, intent(in)              :: rho(nz)
 
-    INTEGER   :: k,kbot
-    REAL      :: pvapor(nz)
-    REAL      :: mrmean, dz
+    integer   :: k,kbot
+    real      :: pvapor(nz)
+    real      :: mrmean, dz
 
-   ! Set top vapor pressure to 0
+   ! set top vapor pressure to 0
    pvapor(nz) = 0.
 
-   ! Integrate moisture downward
+   ! integrate moisture downward
 
-   DO kbot = nz-1,1,-1
+   do kbot = nz-1,1,-1
    
      pvapor(kbot) = 0.
 
-     DO k = nz-1,kbot,-1
+     do k = nz-1,kbot,-1
        
-       ! Compute dz and mean Qv for this layer
+       ! compute dz and mean qv for this layer
        dz =z(k+1) - z(k)
        mrmean = (mr(k) + mr(k+1))*0.5
 
        pvapor(kbot) = pvapor(kbot) + grav*mrmean*rho(k)*dz/(1.+mrmean)
-     ENDDO
-   ENDDO
+     enddo
+   enddo
    tcvp = pvapor(1)
-   RETURN
- END FUNCTION tcvp
+   return
+ end function tcvp
 
     

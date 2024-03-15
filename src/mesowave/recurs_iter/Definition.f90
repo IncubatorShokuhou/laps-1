@@ -1,13 +1,13 @@
-MODULE Definition
+module definition
 
 !****************************************************
-!  This model defines all parameters needed in this
+!  this model defines all parameters needed in this
 !  assimilation.
 !
-!  HISTORY: JAN. 2004 by YUANFU XIE.
+!  history: jan. 2004 by yuanfu xie.
 !****************************************************
 
-  INCLUDE 'Constants.f90'
-  INCLUDE 'Variables.f90'
+  include 'constants.f90'
+  include 'variables.f90'
 
-END MODULE Definition
+end module definition

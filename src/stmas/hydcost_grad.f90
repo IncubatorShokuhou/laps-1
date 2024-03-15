@@ -1,334 +1,333 @@
-MODULE HYDCOST_GRAD
+module hydcost_grad
 !*************************************************
-! CALCULATE COST FUNCTION AND THE RELEVENT GRADIENTS 
-! OF HYDROSTATIC CONDITION PENALTY TERM.
-! HISTORY: CORDED BY ZHONGJIE HE, MAY 2008.
+! calculate cost function and the relevent gradients
+! of hydrostatic condition penalty term.
+! history: corded by zhongjie he, may 2008.
 !
-! MODIFIED BY YUANFU XIE FOR ADDING SCL TO HYDROGRAD 
-!          AND ADDING HYDROCAST_XIE AND HYDROGRAD 
-!          FOR DP/DZ+PG/(RT)
+! modified by yuanfu xie for adding scl to hydrograd
+!          and adding hydrocast_xie and hydrograd
+!          for dp/dz+pg/(rt)
 !*************************************************
 
-  USE PRMTRS_STMAS
+   use prmtrs_stmas
 
-  PUBLIC  HYDROCOST,HYDROGRAD,HYDROCOST_XIE,HYDROGRAD_XIE
-  PUBLIC  HYDROCOST_SHUYUAN,HYDROGRAD_SHUYUAN
+   public hydrocost, hydrograd, hydrocost_xie, hydrograd_xie
+   public hydrocost_shuyuan, hydrograd_shuyuan
 
-!  REAL , PARAMETER ::  R=287
-!  REAL , PARAMETER ::  GRAV=9.8
+!  real , parameter ::  r=287
+!  real , parameter ::  grav=9.8
 
 !***************************************************
-!!COMMENT:
-!   THIS MODULE IS USED BY THE MODULE OF STMAS4D_CORE TO CALCULATE THE COST FUNCTION AND GRADIENTS OF HYDROSTATIC CONDITION PENALTY TERMS.
-!   SUBROUTINES:
-!      HYDROCOST: COSTFUNCTION OF HYDROSTATIC CONDITION FOR PRESSURE COORDINATE.
-!      HYDROGRAD: CALCULATE GRADIENTS OF HYDROCOST.
-!      HYDROGRAD_XIE: 
-CONTAINS
+!!comment:
+!   this module is used by the module of stmas4d_core to calculate the cost function and gradients of hydrostatic condition penalty terms.
+!   subroutines:
+!      hydrocost: costfunction of hydrostatic condition for pressure coordinate.
+!      hydrograd: calculate gradients of hydrocost.
+!      hydrograd_xie:
+contains
 
-SUBROUTINE HYDROCOST
+   subroutine hydrocost
 !*************************************************
-! HYDROSTATIC CONDITION PENALTY TERM OF COST FUNCTION, FOR THE CASE OF PRESSURE COORDINATE.
-! HISTORY: MAY 2008, CODED by ZHONGJIE HE.
+! hydrostatic condition penalty term of cost function, for the case of pressure coordinate.
+! history: may 2008, coded by zhongjie he.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,TT,ZZ
-  REAL     :: HY
-  REAL     :: R,GRAV
-! --------------------
-
-  R=287
-  GRAV=9.8
-  TT=TEMPRTUR
-  ZZ=PRESSURE
-  IF(PNLT0HY.LT.1.0E-10) RETURN
-  IF(NUMGRID(3).GE.2) THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)-1
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      HY=GRAV*(GRDANALS(I,J,K+1,T,ZZ)-GRDANALS(I,J,K,T,ZZ)+GRDBKGND(I,J,K+1,T,ZZ)-GRDBKGND(I,J,K,T,ZZ))*SCL(ZZ)  &
-         +0.5*R*(GRDANALS(I,J,K+1,T,TT)+GRDANALS(I,J,K,T,TT)+GRDBKGND(I,J,K+1,T,TT)+GRDBKGND(I,J,K,T,TT))        &
-          *(LOG(PPP(K+1)*SCP(PSL)+ORIVTCL)-LOG(PPP(K)*SCP(PSL)+ORIVTCL))*SCL(TT) 
-      COSTFUN=COSTFUN+PNLT_HY*HY**2
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE HYDROCOST
-
-SUBROUTINE HYDROCOST_XIE
-!*************************************************
-! HYDROSTATIC CONDITION PENALTY TERM OF COST FUNCTION, FOR THE CASE OF PRESSURE COORDINATE.
-! HISTORY: MAY 2008, CODED by ZHONGJIE HE.
-!
-!          MODIFIED BY YUANFU XIE FOR PENALIZING
-!          DP/DZ+G*P/(RT).
-!*************************************************
-  IMPLICIT NONE
-! --------------------
-  INTEGER  :: I,J,K,T,TT,ZZ
-  REAL     :: HY,DP,DZ,PS,TM
-  REAL     :: R,GRAV
+      integer  :: i, j, k, t, tt, zz
+      real     :: hy
+      real     :: r, grav
 ! --------------------
 
-  R=287
-  GRAV=9.8
-  TT=TEMPRTUR
-  ZZ=PRESSURE
-  IF(PNLT0HY.LT.1.0E-10) RETURN
-  IF(NUMGRID(3).GE.2) THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)-1
-      DP = (PPP(K+1)-PPP(K))*SCP(PSL)
-      PS = 0.5*(PPP(K+1)+PPP(k))*SCP(PSL)+ORIVTCL
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
+      r = 287
+      grav = 9.8
+      tt = temprtur
+      zz = pressure
+      if (pnlt0hy .lt. 1.0e-10) return
+      if (numgrid(3) .ge. 2) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3) - 1
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            hy=grav*(grdanals(i,j,k+1,t,zz)-grdanals(i,j,k,t,zz)+grdbkgnd(i,j,k+1,t,zz)-grdbkgnd(i,j,k,t,zz))*scl(zz)  &
+       + 0.5*r*(grdanals(i, j, k + 1, t, tt) + grdanals(i, j, k, t, tt) + grdbkgnd(i, j, k + 1, t, tt) + grdbkgnd(i, j, k, t, tt)) &
+                *(log(ppp(k + 1)*scp(psl) + orivtcl) - log(ppp(k)*scp(psl) + orivtcl))*scl(tt)
+            costfun = costfun + pnlt_hy*hy**2
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine hydrocost
 
-        DZ = (GRDANALS(I,J,K+1,T,ZZ)-GRDANALS(I,J,K,T,ZZ)+ &
-              GRDBKGND(I,J,K+1,T,ZZ)-GRDBKGND(I,J,K,T,ZZ))*SCL(ZZ)
-        TM = 0.5*(GRDANALS(I,J,K+1,T,TT)+GRDANALS(I,J,K,T,TT)+ &
-                  GRDBKGND(I,J,K+1,T,TT)+GRDBKGND(I,J,K,T,TT))*SCL(TT)
-        HY = DP/DZ+GRAV*PS/(R*TM)
-
-        COSTFUN=COSTFUN+PNLT_HY*HY*HY	! DIVIDE WEIGHT BY YUANFU
-      ENDDO
-      ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE HYDROCOST_XIE
-
-SUBROUTINE HYDROGRAD
+   subroutine hydrocost_xie
 !*************************************************
-! GRADIENT OF HYDROSTATIC CONDITION, CORRESPONDING TO SUBROUTINE HYDROCOST.
-! HISTORY: MAY 2008, CODED by ZHONGJIE HE.
+! hydrostatic condition penalty term of cost function, for the case of pressure coordinate.
+! history: may 2008, coded by zhongjie he.
 !
-!          MODIFIED BY YUANFU XIE FOR CORRECTING
-!          GRADIENT COMPUTATION. THE CODE WAS MISSING
-!          A MULTIPLICATION OF SCLS
+!          modified by yuanfu xie for penalizing
+!          dp/dz+g*p/(rt).
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,TT,ZZ
-  REAL     :: HY
-  REAL     :: R,GRAV
+      integer  :: i, j, k, t, tt, zz
+      real     :: hy, dp, dz, ps, tm
+      real     :: r, grav
 ! --------------------
-  R=287
-  GRAV=9.8
 
-  TT=TEMPRTUR
-  ZZ=PRESSURE
-  IF(PNLT0HY.LT.1.0E-10) RETURN
-  IF(NUMGRID(3).GE.2)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)-1
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      HY=GRAV*(GRDANALS(I,J,K+1,T,ZZ)-GRDANALS(I,J,K,T,ZZ)+GRDBKGND(I,J,K+1,T,ZZ)-GRDBKGND(I,J,K,T,ZZ))*SCL(ZZ)  &
-         +0.5*R*(GRDANALS(I,J,K+1,T,TT)+GRDANALS(I,J,K,T,TT)+GRDBKGND(I,J,K+1,T,TT)+GRDBKGND(I,J,K,T,TT))        &
-          *(LOG(PPP(K+1)*SCP(PSL)+ORIVTCL)-LOG(PPP(K)*SCP(PSL)+ORIVTCL))*SCL(TT)
-!
-      GRADINT(I,J,K  ,T,TT) =GRADINT(I,J,K  ,T,TT) +2.0*PNLT_HY*HY*SCL(TT)	&
-                           *0.5*R*(LOG(PPP(K+1)*SCP(PSL)+ORIVTCL)-LOG(PPP(K)*SCP(PSL)+ORIVTCL))
-!
-      GRADINT(I,J,K+1,T,TT) =GRADINT(I,J,K+1,T,TT) +2.0*PNLT_HY*HY*SCL(TT)	&
-                           *0.5*R*(LOG(PPP(K+1)*SCP(PSL)+ORIVTCL)-LOG(PPP(K)*SCP(PSL)+ORIVTCL))
-!
-      GRADINT(I,J,K  ,T,ZZ) =GRADINT(I,J,K  ,T,ZZ) +2.0*PNLT_HY*HY*(-GRAV)*SCL(ZZ)
-!
-      GRADINT(I,J,K+1,T,ZZ) =GRADINT(I,J,K+1,T,ZZ) +2.0*PNLT_HY*HY*GRAV*SCL(ZZ)
-!
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE HYDROGRAD
+      r = 287
+      grav = 9.8
+      tt = temprtur
+      zz = pressure
+      if (pnlt0hy .lt. 1.0e-10) return
+      if (numgrid(3) .ge. 2) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3) - 1
+            dp = (ppp(k + 1) - ppp(k))*scp(psl)
+            ps = 0.5*(ppp(k + 1) + ppp(k))*scp(psl) + orivtcl
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
 
-SUBROUTINE HYDROGRAD_XIE
+               dz = (grdanals(i, j, k + 1, t, zz) - grdanals(i, j, k, t, zz) + &
+                     grdbkgnd(i, j, k + 1, t, zz) - grdbkgnd(i, j, k, t, zz))*scl(zz)
+               tm = 0.5*(grdanals(i, j, k + 1, t, tt) + grdanals(i, j, k, t, tt) + &
+                         grdbkgnd(i, j, k + 1, t, tt) + grdbkgnd(i, j, k, t, tt))*scl(tt)
+               hy = dp/dz + grav*ps/(r*tm)
+
+               costfun = costfun + pnlt_hy*hy*hy        ! divide weight by yuanfu
+            end do
+            end do
+         end do
+         end do
+      end if
+      return
+   end subroutine hydrocost_xie
+
+   subroutine hydrograd
 !*************************************************
-! GRADIENT OF HYDROSTATIC CONDITION, CORRESPONDING TO SUBROUTINE HYDROCOST.
-! HISTORY: MAY 2008, CODED by ZHONGJIE HE.
+! gradient of hydrostatic condition, corresponding to subroutine hydrocost.
+! history: may 2008, coded by zhongjie he.
 !
-!          MODIFIED BY YUANFU XIE FOR PENALIZING
-!          DP/DZ+G*P/(RT).
+!          modified by yuanfu xie for correcting
+!          gradient computation. the code was missing
+!          a multiplication of scls
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,TT,ZZ
-  REAL     :: HY,DP,DZ,PS,TM,D1
-  REAL     :: R,GRAV
+      integer  :: i, j, k, t, tt, zz
+      real     :: hy
+      real     :: r, grav
 ! --------------------
-  R=287
-  GRAV=9.8
-  TT=TEMPRTUR
-  ZZ=PRESSURE
-  IF(PNLT0HY.LT.1.0E-10) RETURN
-  IF(NUMGRID(3).GE.2)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)-1
-      DP = (PPP(K+1)-PPP(K))*SCP(PSL)
-      PS = 0.5*(PPP(K+1)+PPP(k))*SCP(PSL)+ORIVTCL
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
+      r = 287
+      grav = 9.8
 
-        DZ = (GRDANALS(I,J,K+1,T,ZZ)-GRDANALS(I,J,K,T,ZZ)+ &
-              GRDBKGND(I,J,K+1,T,ZZ)-GRDBKGND(I,J,K,T,ZZ))*SCL(ZZ)
-        TM = 0.5*(GRDANALS(I,J,K+1,T,TT)+GRDANALS(I,J,K,T,TT)+ &
-                  GRDBKGND(I,J,K+1,T,TT)+GRDBKGND(I,J,K,T,TT))*SCL(TT)
-        HY = DP/DZ+GRAV*PS/(R*TM)
+      tt = temprtur
+      zz = pressure
+      if (pnlt0hy .lt. 1.0e-10) return
+      if (numgrid(3) .ge. 2) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3) - 1
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            hy=grav*(grdanals(i,j,k+1,t,zz)-grdanals(i,j,k,t,zz)+grdbkgnd(i,j,k+1,t,zz)-grdbkgnd(i,j,k,t,zz))*scl(zz)  &
+       + 0.5*r*(grdanals(i, j, k + 1, t, tt) + grdanals(i, j, k, t, tt) + grdbkgnd(i, j, k + 1, t, tt) + grdbkgnd(i, j, k, t, tt)) &
+                *(log(ppp(k + 1)*scp(psl) + orivtcl) - log(ppp(k)*scp(psl) + orivtcl))*scl(tt)
+!
+            gradint(i, j, k, t, tt) = gradint(i, j, k, t, tt) + 2.0*pnlt_hy*hy*scl(tt) &
+                                      *0.5*r*(log(ppp(k + 1)*scp(psl) + orivtcl) - log(ppp(k)*scp(psl) + orivtcl))
+!
+            gradint(i, j, k + 1, t, tt) = gradint(i, j, k + 1, t, tt) + 2.0*pnlt_hy*hy*scl(tt) &
+                                          *0.5*r*(log(ppp(k + 1)*scp(psl) + orivtcl) - log(ppp(k)*scp(psl) + orivtcl))
+!
+            gradint(i, j, k, t, zz) = gradint(i, j, k, t, zz) + 2.0*pnlt_hy*hy*(-grav)*scl(zz)
+!
+            gradint(i, j, k + 1, t, zz) = gradint(i, j, k + 1, t, zz) + 2.0*pnlt_hy*hy*grav*scl(zz)
+!
+         end do
+         end do
+         end do
+         end do
+      end if
+      return
+   end subroutine hydrograd
 
-        D1 = -GRAV*PS/(R*TM*TM)
+   subroutine hydrograd_xie
+!*************************************************
+! gradient of hydrostatic condition, corresponding to subroutine hydrocost.
+! history: may 2008, coded by zhongjie he.
 !
-        GRADINT(I,J,K  ,T,TT) = GRADINT(I,J,K  ,T,TT)+2.0*PNLT_HY*HY*0.5*D1*SCL(TT)
-!
-        GRADINT(I,J,K+1,T,TT) = GRADINT(I,J,K+1,T,TT)+2.0*PNLT_HY*HY*0.5*D1*SCL(TT)
+!          modified by yuanfu xie for penalizing
+!          dp/dz+g*p/(rt).
+!*************************************************
+      implicit none
+! --------------------
+      integer  :: i, j, k, t, tt, zz
+      real     :: hy, dp, dz, ps, tm, d1
+      real     :: r, grav
+! --------------------
+      r = 287
+      grav = 9.8
+      tt = temprtur
+      zz = pressure
+      if (pnlt0hy .lt. 1.0e-10) return
+      if (numgrid(3) .ge. 2) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3) - 1
+            dp = (ppp(k + 1) - ppp(k))*scp(psl)
+            ps = 0.5*(ppp(k + 1) + ppp(k))*scp(psl) + orivtcl
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
 
-        D1 = -DP/(DZ*DZ)
-!
-        GRADINT(I,J,K  ,T,ZZ) = GRADINT(I,J,K  ,T,ZZ)-2.0*PNLT_HY*HY*D1*SCL(ZZ)
-!
-        GRADINT(I,J,K+1,T,ZZ) = GRADINT(I,J,K+1,T,ZZ)+2.0*PNLT_HY*HY*D1*SCL(ZZ)
-!
-      ENDDO
-      ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+               dz = (grdanals(i, j, k + 1, t, zz) - grdanals(i, j, k, t, zz) + &
+                     grdbkgnd(i, j, k + 1, t, zz) - grdbkgnd(i, j, k, t, zz))*scl(zz)
+               tm = 0.5*(grdanals(i, j, k + 1, t, tt) + grdanals(i, j, k, t, tt) + &
+                         grdbkgnd(i, j, k + 1, t, tt) + grdbkgnd(i, j, k, t, tt))*scl(tt)
+               hy = dp/dz + grav*ps/(r*tm)
 
-  RETURN
+               d1 = -grav*ps/(r*tm*tm)
+!
+               gradint(i, j, k, t, tt) = gradint(i, j, k, t, tt) + 2.0*pnlt_hy*hy*0.5*d1*scl(tt)
+!
+               gradint(i, j, k + 1, t, tt) = gradint(i, j, k + 1, t, tt) + 2.0*pnlt_hy*hy*0.5*d1*scl(tt)
 
-END SUBROUTINE HYDROGRAD_XIE
+               d1 = -dp/(dz*dz)
+!
+               gradint(i, j, k, t, zz) = gradint(i, j, k, t, zz) - 2.0*pnlt_hy*hy*d1*scl(zz)
+!
+               gradint(i, j, k + 1, t, zz) = gradint(i, j, k + 1, t, zz) + 2.0*pnlt_hy*hy*d1*scl(zz)
+!
+            end do
+            end do
+         end do
+         end do
+      end if
+
+      return
+
+   end subroutine hydrograd_xie
 !=================================================
-SUBROUTINE HYDROCOST_SHUYUAN
+   subroutine hydrocost_shuyuan
 !*************************************************
-! HYDROSTATIC CONDITION PENALTY TERM OF COST FUNCTION, FOR THE CASE OF PRESSURE COORDINATE.
-! HISTORY: MAY 2008, CODED by ZHONGJIE HE.
-!          MODIFIED BY YUANFU XIE FOR PENALIZING
-!          DP/DZ=G*P/(RT).
-!          MODIFIED BY SHUYUAN LIU FOR USING DENSITY 01-09-2010
-!          DP/DZ=G*DEN,DEN=DENV+DENR+DENS
+! hydrostatic condition penalty term of cost function, for the case of pressure coordinate.
+! history: may 2008, coded by zhongjie he.
+!          modified by yuanfu xie for penalizing
+!          dp/dz=g*p/(rt).
+!          modified by shuyuan liu for using density 01-09-2010
+!          dp/dz=g*den,den=denv+denr+dens
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,TT,ZZ,RR,RS
-  REAL     :: HY,DP,DZ,PS,TM
-  REAL     :: R,GRAV,tempr,temps,tempv
-  REAL     :: DEN ,DENV,DENS,DENR! air density
-   
+      integer  :: i, j, k, t, tt, zz, rr, rs
+      real     :: hy, dp, dz, ps, tm
+      real     :: r, grav, tempr, temps, tempv
+      real     :: den, denv, dens, denr! air density
+
 ! --------------------
-  
-  R=287
-  GRAV=9.8
-  TT=TEMPRTUR
-  ZZ=PRESSURE
-  RR=ROUR_CMPNNT
-  RS=ROUS_CMPNNT
 
-  IF(PNLT0HY.LT.1.0E-10) RETURN
+      r = 287
+      grav = 9.8
+      tt = temprtur
+      zz = pressure
+      rr = rour_cmpnnt
+      rs = rous_cmpnnt
 
-  IF(NUMGRID(3).GE.2) THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)-1
-      DP = (PPP(K+1)-PPP(K))*SCP(PSL)
-      PS = 0.5*(PPP(K+1)+PPP(k))*SCP(PSL)+ORIVTCL
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
+      if (pnlt0hy .lt. 1.0e-10) return
 
-        tempr=0.5*(GRDANALS(I,J,K,T,RR)+GRDBKGND(I,J,K,T,RR)+ &
-              GRDANALS(I,J,K+1,T,RR)+GRDBKGND(I,J,K+1,T,RR))*SCL(NUMSTAT+1)        
+      if (numgrid(3) .ge. 2) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3) - 1
+            dp = (ppp(k + 1) - ppp(k))*scp(psl)
+            ps = 0.5*(ppp(k + 1) + ppp(k))*scp(psl) + orivtcl
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
 
-        DZ = (GRDANALS(I,J,K+1,T,ZZ)-GRDANALS(I,J,K,T,ZZ)+ &
-              GRDBKGND(I,J,K+1,T,ZZ)-GRDBKGND(I,J,K,T,ZZ))*SCL(ZZ)
-        TM = 0.5*(GRDANALS(I,J,K+1,T,TT)+GRDANALS(I,J,K,T,TT)+ &
-                  GRDBKGND(I,J,K+1,T,TT)+GRDBKGND(I,J,K,T,TT))*SCL(TT)
-        HY = DP/DZ+GRAV*(tempr+PS/(R*TM))
+               tempr = 0.5*(grdanals(i, j, k, t, rr) + grdbkgnd(i, j, k, t, rr) + &
+                            grdanals(i, j, k + 1, t, rr) + grdbkgnd(i, j, k + 1, t, rr))*scl(numstat + 1)
 
-        COSTFUN=COSTFUN+0.5*PNLT_HY*HY*HY	! DIVIDE WEIGHT BY YUANFU
-      ENDDO
-      ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  RETURN
-END SUBROUTINE HYDROCOST_SHUYUAN
+               dz = (grdanals(i, j, k + 1, t, zz) - grdanals(i, j, k, t, zz) + &
+                     grdbkgnd(i, j, k + 1, t, zz) - grdbkgnd(i, j, k, t, zz))*scl(zz)
+               tm = 0.5*(grdanals(i, j, k + 1, t, tt) + grdanals(i, j, k, t, tt) + &
+                         grdbkgnd(i, j, k + 1, t, tt) + grdbkgnd(i, j, k, t, tt))*scl(tt)
+               hy = dp/dz + grav*(tempr + ps/(r*tm))
+
+               costfun = costfun + 0.5*pnlt_hy*hy*hy        ! divide weight by yuanfu
+            end do
+            end do
+         end do
+         end do
+      end if
+      return
+   end subroutine hydrocost_shuyuan
 !========================================
 !========================================
-SUBROUTINE HYDROGRAD_SHUYUAN
+   subroutine hydrograd_shuyuan
 !*************************************************
-! GRADIENT OF HYDROSTATIC CONDITION, CORRESPONDING TO SUBROUTINE HYDROCOST.
-! HISTORY: MAY 2008, CODED by ZHONGJIE HE.
+! gradient of hydrostatic condition, corresponding to subroutine hydrocost.
+! history: may 2008, coded by zhongjie he.
 !
-!          MODIFIED BY YUANFU XIE FOR PENALIZING
-!          DP/DZ+G*P/(RT).
-!          MODIFIED BY SHUYUAN LIU FOR ADDING THE RAIN WATER 2010/09
+!          modified by yuanfu xie for penalizing
+!          dp/dz+g*p/(rt).
+!          modified by shuyuan liu for adding the rain water 2010/09
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,TT,ZZ,RR,RS
-  REAL     :: HY,DP,DZ,PS,TM,D1
-  REAL     :: R,GRAV,tempr,temps,tempv
-  REAL     :: DEN,DENV,DENS,DENR! air density
+      integer  :: i, j, k, t, tt, zz, rr, rs
+      real     :: hy, dp, dz, ps, tm, d1
+      real     :: r, grav, tempr, temps, tempv
+      real     :: den, denv, dens, denr! air density
 ! --------------------
-  R=287
-  GRAV=9.8
-  TT=TEMPRTUR
-  ZZ=PRESSURE
-  RR=ROUR_CMPNNT
-  RS=ROUS_CMPNNT
+      r = 287
+      grav = 9.8
+      tt = temprtur
+      zz = pressure
+      rr = rour_cmpnnt
+      rs = rous_cmpnnt
 
-  IF(PNLT0HY.LT.1.0E-10) RETURN
+      if (pnlt0hy .lt. 1.0e-10) return
 
-  IF(NUMGRID(3).GE.2)THEN
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)-1
-      DP = (PPP(K+1)-PPP(K))*SCP(PSL)
-      PS = 0.5*(PPP(K+1)+PPP(k))*SCP(PSL)+ORIVTCL
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
-       tempr=0.5*(GRDANALS(I,J,K,T,RR)+GRDBKGND(I,J,K,T,RR)+ &
-              GRDANALS(I,J,K+1,T,RR)+GRDBKGND(I,J,K+1,T,RR))*SCL(NUMSTAT+1)    
+      if (numgrid(3) .ge. 2) then
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3) - 1
+            dp = (ppp(k + 1) - ppp(k))*scp(psl)
+            ps = 0.5*(ppp(k + 1) + ppp(k))*scp(psl) + orivtcl
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
+               tempr = 0.5*(grdanals(i, j, k, t, rr) + grdbkgnd(i, j, k, t, rr) + &
+                            grdanals(i, j, k + 1, t, rr) + grdbkgnd(i, j, k + 1, t, rr))*scl(numstat + 1)
 
-        DZ = (GRDANALS(I,J,K+1,T,ZZ)-GRDANALS(I,J,K,T,ZZ)+ &
-              GRDBKGND(I,J,K+1,T,ZZ)-GRDBKGND(I,J,K,T,ZZ))*SCL(ZZ)
-        TM = 0.5*(GRDANALS(I,J,K+1,T,TT)+GRDANALS(I,J,K,T,TT)+ &
-                  GRDBKGND(I,J,K+1,T,TT)+GRDBKGND(I,J,K,T,TT))*SCL(TT)
-        HY = DP/DZ+GRAV*(tempr+PS/(R*TM))
+               dz = (grdanals(i, j, k + 1, t, zz) - grdanals(i, j, k, t, zz) + &
+                     grdbkgnd(i, j, k + 1, t, zz) - grdbkgnd(i, j, k, t, zz))*scl(zz)
+               tm = 0.5*(grdanals(i, j, k + 1, t, tt) + grdanals(i, j, k, t, tt) + &
+                         grdbkgnd(i, j, k + 1, t, tt) + grdbkgnd(i, j, k, t, tt))*scl(tt)
+               hy = dp/dz + grav*(tempr + ps/(r*tm))
 
-        D1 = -GRAV*PS/(R*TM*TM)  !!TM
+               d1 = -grav*ps/(r*tm*tm)  !!tm
 !
-        GRADINT(I,J,K  ,T,TT) = GRADINT(I,J,K  ,T,TT)+PNLT_HY*HY*0.5*D1*SCL(TT)
+               gradint(i, j, k, t, tt) = gradint(i, j, k, t, tt) + pnlt_hy*hy*0.5*d1*scl(tt)
 !
-        GRADINT(I,J,K+1,T,TT) = GRADINT(I,J,K+1,T,TT)+PNLT_HY*HY*0.5*D1*SCL(TT)
+               gradint(i, j, k + 1, t, tt) = gradint(i, j, k + 1, t, tt) + pnlt_hy*hy*0.5*d1*scl(tt)
 
-        D1 = -DP/(DZ*DZ)  !!DZ
+               d1 = -dp/(dz*dz)  !!dz
 !
-        GRADINT(I,J,K  ,T,ZZ) = GRADINT(I,J,K  ,T,ZZ)-PNLT_HY*HY*D1*SCL(ZZ)
+               gradint(i, j, k, t, zz) = gradint(i, j, k, t, zz) - pnlt_hy*hy*d1*scl(zz)
 !
-        GRADINT(I,J,K+1,T,ZZ) = GRADINT(I,J,K+1,T,ZZ)+PNLT_HY*HY*D1*SCL(ZZ)
+               gradint(i, j, k + 1, t, zz) = gradint(i, j, k + 1, t, zz) + pnlt_hy*hy*d1*scl(zz)
 
-        D1 = GRAV   !!tempr
-        GRADINT(I,J,K  ,T,RR) = GRADINT(I,J,K  ,T,RR)+PNLT_HY*HY*0.5*D1*SCL(NUMSTAT+1)
+               d1 = grav   !!tempr
+               gradint(i, j, k, t, rr) = gradint(i, j, k, t, rr) + pnlt_hy*hy*0.5*d1*scl(numstat + 1)
 !
-        GRADINT(I,J,K+1,T,RR) = GRADINT(I,J,K+1,T,RR)+PNLT_HY*HY*0.5*D1*SCL(NUMSTAT+1)
+               gradint(i, j, k + 1, t, rr) = gradint(i, j, k + 1, t, rr) + pnlt_hy*hy*0.5*d1*scl(numstat + 1)
 !
-      ENDDO
-      ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+            end do
+            end do
+         end do
+         end do
+      end if
 
-  RETURN
+      return
 
-END SUBROUTINE HYDROGRAD_SHUYUAN
+   end subroutine hydrograd_shuyuan
 !============================================
 
-
-END MODULE HYDCOST_GRAD
+end module hydcost_grad
 

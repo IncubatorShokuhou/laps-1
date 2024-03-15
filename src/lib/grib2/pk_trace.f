@@ -1,53 +1,53 @@
-      SUBROUTINE PK_TRACE(KFILDO,JER,NDIER,KIER,NERR,ISEVERE)
-C
-C        JUNE    2000   LAWRENCE   ERROR POSTING AND TRACING FOR GRIB2
-C        JANUARY 2001   GLAHN      COMMENTS; ADDED KIER=KIER-1; 
-C                                  CHANGED IER TO JER
-C 
-C        PURPOSE 
-C            INSERTS AN ERROR CODE AND ITS SEVERITY INTO JER( , ).
-C            INSERTS 999 WHEN JER( , ) IS FULL.  IN THAT CASE,  
-C            TWO ERROR CODES ARE LOST.  SINCE THE PROGRAM PROCEEDS,
-C            MORE MAY BE LOST BEFORE PROGRAM COMPLETION.
-C
-C        DATA SET USE 
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT) 
-C
-C        VARIABLES 
-C             KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT)
-C           JER(J,K) = ARRAY OF ERRORS (J=1,NDIER) (K=1,2)
-C                      (INPUT/OUTPUT)
-C              NDIER = FIRST DIMENSION OF JER( , ). THE MAXIMUM NUMBER
-C                      OF ERRORS ALLOWED TO BE REPORTED IN JER( , ).
-C                      (INPUT)
-C               KIER = NUMBER OF VALUES IN JER( , ) UPON EXIT.
-C                      (INPUT/OUTPUT)
-C               NERR = VALUE TO INSERT INTO JER(KIER,1).  (INPUT)
-C            ISEVERE = THE SEVERITY LEVEL OF THE DIAGNOSTIC TO
-C                      INSERT INTO JER(KIER,2).  (INPUT)
-C                      VALID SEVERITY LEVELS ARE:
-C                      0 = NOT AN ERROR
-C                      1 = WARNING
-C                      2 = FATAL
-C
-C       LOCAL VARIABLES
-C               NONE
-C
-C        NON SYSTEM SUBROUTINES CALLED 
-C           NONE
-C
-      DIMENSION JER(NDIER,2)
-C
-      KIER=KIER+1
-C
-      IF(KIER.LE.NDIER)THEN
-         JER(KIER,1)=NERR
-         JER(KIER,2)=ISEVERE
-      ELSE
-         KIER=KIER-1
-         JER(KIER,1)=999
-         JER(KIER,2)=2
-      ENDIF
-C
-      RETURN
-      END
+      subroutine pk_trace(kfildo,jer,ndier,kier,nerr,isevere)
+c
+c        june    2000   lawrence   error posting and tracing for grib2
+c        january 2001   glahn      comments; added kier=kier-1; 
+c                                  changed ier to jer
+c 
+c        purpose 
+c            inserts an error code and its severity into jer( , ).
+c            inserts 999 when jer( , ) is full.  in that case,  
+c            two error codes are lost.  since the program proceeds,
+c            more may be lost before program completion.
+c
+c        data set use 
+c           kfildo - unit number for output (print) file. (output) 
+c
+c        variables 
+c             kfildo = unit number for output (print) file.  (input)
+c           jer(j,k) = array of errors (j=1,ndier) (k=1,2)
+c                      (input/output)
+c              ndier = first dimension of jer( , ). the maximum number
+c                      of errors allowed to be reported in jer( , ).
+c                      (input)
+c               kier = number of values in jer( , ) upon exit.
+c                      (input/output)
+c               nerr = value to insert into jer(kier,1).  (input)
+c            isevere = the severity level of the diagnostic to
+c                      insert into jer(kier,2).  (input)
+c                      valid severity levels are:
+c                      0 = not an error
+c                      1 = warning
+c                      2 = fatal
+c
+c       local variables
+c               none
+c
+c        non system subroutines called 
+c           none
+c
+      dimension jer(ndier,2)
+c
+      kier=kier+1
+c
+      if(kier.le.ndier)then
+         jer(kier,1)=nerr
+         jer(kier,2)=isevere
+      else
+         kier=kier-1
+         jer(kier,1)=999
+         jer(kier,2)=2
+      endif
+c
+      return
+      end

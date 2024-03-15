@@ -1,14 +1,14 @@
 
-      subroutine skill_scores(contable,lun_out           ! I
-     1                       ,frac_coverage              ! O (obs OR fcst)
-     1                       ,frac_obs                   ! O 
-     1                       ,frac_fcst                  ! O 
-     1                       ,bias,ets)                  ! O
+      subroutine skill_scores(contable,lun_out           ! i
+     1                       ,frac_coverage              ! o (obs or fcst)
+     1                       ,frac_obs                   ! o 
+     1                       ,frac_fcst                  ! o 
+     1                       ,bias,ets)                  ! o
 
       integer,parameter :: k12 = selected_int_kind(12)
 
-!     First index is observed, second index is forecast
-!     0 is Yes, 1 is No
+!     first index is observed, second index is forecast
+!     0 is yes, 1 is no
       integer (kind=k12) :: contable(0:1,0:1)
 
       integer (kind=k12) :: hits,misses,false_alarms,correct_negatives
@@ -22,7 +22,7 @@
       rmiss = -999.
 
       if(minval(contable) .lt. 0)then
-          write(6,*)' ERROR: skill_scores contable has negative values'
+          write(6,*)' error: skill_scores contable has negative values'
           frac_coverage = rmiss
           frac_obs = rmiss
           frac_fcst = rmiss
@@ -48,7 +48,7 @@
           frac_fcst = rmiss
           accuracy = rmiss
           if(lun_out .gt. 0)then
-              write(6,*)' WARNING: no data points in skill_scores'
+              write(6,*)' warning: no data points in skill_scores'
           endif
       endif
 
@@ -83,18 +83,18 @@
       endif
 
       if(lun_out .gt. 0)then
-          write(lun_out,*)' Hits = ',hits
-          write(lun_out,*)' Misses = ',misses
-          write(lun_out,*)' False Alarms = ',false_alarms
-          write(lun_out,*)' POD = ',pod
-          write(lun_out,*)' FAR = ',far
-          write(lun_out,*)' Correct Negatives = ',correct_negatives
-          write(lun_out,*)' Hits Random = ',hits_random
-          write(lun_out,*)' Total = ',total
+          write(lun_out,*)' hits = ',hits
+          write(lun_out,*)' misses = ',misses
+          write(lun_out,*)' false alarms = ',false_alarms
+          write(lun_out,*)' pod = ',pod
+          write(lun_out,*)' far = ',far
+          write(lun_out,*)' correct negatives = ',correct_negatives
+          write(lun_out,*)' hits random = ',hits_random
+          write(lun_out,*)' total = ',total
 
-          write(lun_out,*)' Accuracy = ',accuracy
-          write(lun_out,*)' Bias = ',bias
-          write(lun_out,*)' ETS = ',ets
+          write(lun_out,*)' accuracy = ',accuracy
+          write(lun_out,*)' bias = ',bias
+          write(lun_out,*)' ets = ',ets
       endif
 
       return

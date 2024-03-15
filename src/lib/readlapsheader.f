@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -29,121 +29,121 @@ cdis
 cdis
 cdis
 cdis
-      SUBROUTINE READ_LAPS_HEADER(I4TIME,DIR,EXT,IMAX,JMAX,KMAX,
-     1                         LAPS_DOM_FILE,ASCTIME,VERSION,
-     1                         MODEL,ORIGIN,VAR,LVL,NUM_VARIABLES,
-     1                         VAR_AVAIL,LAPS_VAR_AVAIL,NUM_LEVELS,
-     1                         LVL_AVAIL,LVL_COORD,UNITS,
-     1                         COMMENT,L_PACKED_DATA,ISTATUS)
-C
-C**********************************************************************
-C
-C      This file contains the following FORTRAN subroutines:
-C            readlapsheader
-C
-C      The readlapsheader subroutine reads the following FORTRAN
-C       subroutines from the readlapsdata.for file:
-C            cvt_fname_data
-C
-C      The readlapsheader subroutine reads the following C subroutines
-C      from the readwritelaps.c file:
-C            make_c_fname
-C            read_cdf_header
-C            cdf_retrieve_header
-C            itoa
-C
-C**********************************************************************
-C
-C      Subroutine READ_LAPS_HEADER
-C
-C      Author:    Steve Albers
-C      Modified:  To accept netCDF data files          1/93 Linda Wharton
-C                 To accept extended format filenames  2/96  Linda Wharton
-C                 Will not make correct filetimes with
-C                 extension lga
-C
-C      Creates filename using cvt_fname_data.
-C      Reads header variables IMAX, JMAX, KMAX, LAPS_DOM_FILE, ASCTIME,
-C      VERSION, MODEL, ORIGIN, and NUM_VARIABLES.
-C
-C**********************************************************************
-        IMPLICIT        NONE
+      subroutine read_laps_header(i4time,dir,ext,imax,jmax,kmax,
+     1                         laps_dom_file,asctime,version,
+     1                         model,origin,var,lvl,num_variables,
+     1                         var_avail,laps_var_avail,num_levels,
+     1                         lvl_avail,lvl_coord,units,
+     1                         comment,l_packed_data,istatus)
+c
+c**********************************************************************
+c
+c      this file contains the following fortran subroutines:
+c            readlapsheader
+c
+c      the readlapsheader subroutine reads the following fortran
+c       subroutines from the readlapsdata.for file:
+c            cvt_fname_data
+c
+c      the readlapsheader subroutine reads the following c subroutines
+c      from the readwritelaps.c file:
+c            make_c_fname
+c            read_cdf_header
+c            cdf_retrieve_header
+c            itoa
+c
+c**********************************************************************
+c
+c      subroutine read_laps_header
+c
+c      author:    steve albers
+c      modified:  to accept netcdf data files          1/93 linda wharton
+c                 to accept extended format filenames  2/96  linda wharton
+c                 will not make correct filetimes with
+c                 extension lga
+c
+c      creates filename using cvt_fname_data.
+c      reads header variables imax, jmax, kmax, laps_dom_file, asctime,
+c      version, model, origin, and num_variables.
+c
+c**********************************************************************
+        implicit        none
 
-        INTEGER         FN_LENGTH
-C
-        INTEGER       I4TIME,         ! Input I4time of data
-     1          FLAG,           ! Print flag (1 = off)
+        integer         fn_length
+c
+        integer       i4time,         ! input i4time of data
+     1          flag,           ! print flag (1 = off)
      1          no_laps_diag,   !if = 0, print diagnostic output
-     1          REC,
-     1          RCDL,
-     1          IMAX,JMAX,KMAX, ! Output dimensions/#fields from header
-     1          LVL(200),      ! Output levels from header
-     1          I,K,
-     1          ERROR(2),
+     1          rec,
+     1          rcdl,
+     1          imax,jmax,kmax, ! output dimensions/#fields from header
+     1          lvl(200),      ! output levels from header
+     1          i,k,
+     1          error(2),
      1                num_variables,
-     1                NUM_LEVELS,
-     1          ISTATUS
-C
-        REAL          MSG_FLAG
-C
-        CHARACTER*150   DIR             ! Input Directory to read data from
-        CHARACTER*31    EXT             ! Input File name ext (up to 31 chars)
-        CHARACTER*31    EXT_I           !INPUT input file name ext
-        CHARACTER*3     VAR(200)       ! Output Variables
-        CHARACTER*4     LVL_COORD(200) ! Output comments
-        CHARACTER*10    UNITS(200)     ! Output units
-        CHARACTER*125   COMMENT(200)   ! Output comments
-        CHARACTER*9     GTIME
-        CHARACTER*5     fcst_hh_mm
-        CHARACTER*91    FILE_NAME
-        CHARACTER*4     MARK
-        CHARACTER*4     CIMAX,CJMAX,CKMAX
-        CHARACTER*24    ASCTIME
+     1                num_levels,
+     1          istatus
+c
+        real          msg_flag
+c
+        character*150   dir             ! input directory to read data from
+        character*31    ext             ! input file name ext (up to 31 chars)
+        character*31    ext_i           !input input file name ext
+        character*3     var(200)       ! output variables
+        character*4     lvl_coord(200) ! output comments
+        character*10    units(200)     ! output units
+        character*125   comment(200)   ! output comments
+        character*9     gtime
+        character*5     fcst_hh_mm
+        character*91    file_name
+        character*4     mark
+        character*4     cimax,cjmax,ckmax
+        character*24    asctime
         character*18    asct
-        CHARACTER*4     VERSION
+        character*4     version
         character*5     vern
-        CHARACTER*131   MODEL           !Meteorological model in file
+        character*131   model           !meteorological model in file
         character*132   modl
-        CHARACTER*131   ORIGIN          !Location where file was created
+        character*131   origin          !location where file was created
         character*132   orign
-        CHARACTER*11    LAPS_DOM_FILE   !Name of domain file e.g. NEST7GRID
+        character*11    laps_dom_file   !name of domain file e.g. nest7grid
         character*12    ldf
-        CHARACTER*1     HMARK
-        CHARACTER*4     CLVL
-        CHARACTER*4     CSTART_REC
-        CHARACTER*3     LAPS_VAR_AVAIL(200)
+        character*1     hmark
+        character*4     clvl
+        character*4     cstart_rec
+        character*3     laps_var_avail(200)
         character*4     lvar_a(200)
-        CHARACTER*19    VAR_AVAIL(200)
+        character*19    var_avail(200)
         character*20    var_a(200)
-C
-        LOGICAL         l_packed_data
-C
-        INTEGER       LVL_AVAIL(200)
-C
-        DATA            MSG_FLAG/9.E30/
-C
-        COMMON          /PRT/FLAG
-        COMMON          /laps_diag/no_laps_diag
+c
+        logical         l_packed_data
+c
+        integer       lvl_avail(200)
+c
+        data            msg_flag/9.e30/
+c
+        common          /prt/flag
+        common          /laps_diag/no_laps_diag
 
-C
-C-------------------------------------------------------------------------------
-C
-        ERROR(1)=1
-        ERROR(2)=0
-C
-C ****  Create file name.
-C
-        CALL MAKE_FNAM_LP(I4TIME,GTIME,ISTATUS)
-        IF (ISTATUS .ne. 1) THEN
-                ISTATUS=ERROR(2)
-                RETURN
-        ENDIF
+c
+c-------------------------------------------------------------------------------
+c
+        error(1)=1
+        error(2)=0
+c
+c ****  create file name.
+c
+        call make_fnam_lp(i4time,gtime,istatus)
+        if (istatus .ne. 1) then
+                istatus=error(2)
+                return
+        endif
 
-C fcst_hh_mm: Hard wired as a place holder - will be used in filename 
-C   only if read_laps_header is called on lga, lgb, fua, fsf, ram, rsf
+c fcst_hh_mm: hard wired as a place holder - will be used in filename 
+c   only if read_laps_header is called on lga, lgb, fua, fsf, ram, rsf
         fcst_hh_mm = '0000'
 
-        CALL UPCASE(EXT,EXT_I)
+        call upcase(ext,ext_i)
 
         call cvt_fname_data(dir,gtime,fcst_hh_mm,ext_i,file_name,
      1                      fn_length,istatus)
@@ -151,7 +151,7 @@ C   only if read_laps_header is called on lga, lgb, fua, fsf, ram, rsf
         call read_cdf_header(file_name, fn_length,imax, jmax, kmax,
      1                 num_variables,ldf,asct,vern,modl,orign,
      1                 var_a,lvar_a,num_levels, lvl_avail,
-     1                 no_laps_diag,Istatus)
+     1                 no_laps_diag,istatus)
 
         if (istatus .eq. 1) then
           laps_dom_file = ldf
@@ -164,27 +164,27 @@ C   only if read_laps_header is called on lga, lgb, fua, fsf, ram, rsf
             var_avail(i) = var_a(i)
           enddo
 
-         ISTATUS=ERROR(1)
+         istatus=error(1)
          call setup_var_lvl(ext_i,num_levels,lvl_avail,
-     1                      num_variables,LAPS_var_avail,
+     1                      num_variables,laps_var_avail,
      1                      var,lvl,kmax,istatus)
          if (istatus .ne. 1) then
-            write (6,*) 'Error in setup_var_lvl'
-            ISTATUS=ERROR(2)
+            write (6,*) 'error in setup_var_lvl'
+            istatus=error(2)
          endif
          l_packed_data = .false.
          goto 999
         else
           if (istatus .eq. -2) goto 905
 
-!         if you get to here, istatus = -1 so file not netCDF
+!         if you get to here, istatus = -1 so file not netcdf
 
-c         IF (ext(1:3) .eq. 'LC3' .or. ext(1:3) .eq. 'SC3' .or.
-c    1    ext(1:3) .eq. 'LPS' .or. ext(1:3) .eq. 'SPS' .or.
-c    1    ext(1:3) .eq. 'LRP' .or. ext(1:3) .eq. 'SRP' .or.
-c    1    ext(1:3) .eq. 'LTY' .or. ext(1:3) .eq. 'STY' .or.
-c    1    ext(1:3) .eq. 'LH3' .or. ext(1:3) .eq. 'SH3' .or.
-c    1    ext(1:3) .eq. 'LMD' .or. ext(1:3) .eq. 'SMD'            )then
+c         if (ext(1:3) .eq. 'lc3' .or. ext(1:3) .eq. 'sc3' .or.
+c    1    ext(1:3) .eq. 'lps' .or. ext(1:3) .eq. 'sps' .or.
+c    1    ext(1:3) .eq. 'lrp' .or. ext(1:3) .eq. 'srp' .or.
+c    1    ext(1:3) .eq. 'lty' .or. ext(1:3) .eq. 'sty' .or.
+c    1    ext(1:3) .eq. 'lh3' .or. ext(1:3) .eq. 'sh3' .or.
+c    1    ext(1:3) .eq. 'lmd' .or. ext(1:3) .eq. 'smd'            )then
             l_packed_data = .false.
 c         else
 c           l_packed_data = .false.
@@ -192,163 +192,163 @@ c         endif
           if(l_packed_data)then
              goto 905
           endif
-C
-C ****  Open file and read first header record.
-C
-        OPEN(1,FILE=FILE_NAME,STATUS='OLD',ERR=940)
-        READ(1,890,ERR=895) MARK,CIMAX,CJMAX,CKMAX,ASCTIME,VERSION
-890     FORMAT(A4,3A4,A17,A4)
-        CLOSE(1)
-        IF (MARK(1:1) .NE. '*') THEN
+c
+c ****  open file and read first header record.
+c
+        open(1,file=file_name,status='old',err=940)
+        read(1,890,err=895) mark,cimax,cjmax,ckmax,asctime,version
+890     format(a4,3a4,a17,a4)
+        close(1)
+        if (mark(1:1) .ne. '*') then
           goto 895
-        ENDIF
-C
-C ****  Decode charater variables.
-C
-        read(CIMAX,900)  IMAX
-        read(CJMAX,900)  JMAX
-        read(CKMAX,900)  KMAX
-900     FORMAT(I4)
-C
-        IF(KMAX .GT. 200)GOTO 960
-C
-C ****  Open file for direct access.
-C
-        RCDL=IMAX+1
-        IF (RCDL .LT. 40) RCDL=40
-        OPEN(1,FILE=FILE_NAME,STATUS='OLD',
-     1     ACCESS='DIRECT',
-     1     RECL=RCDL,ERR=950)
-C
-C ****  Read header files for each field.
-C
-        REC=1
-        DO K=1,KMAX
-                REC=REC+1
-                READ(1,REC=REC,ERR=905) HMARK,VAR(K),CLVL,LVL_COORD(K),U
-     1NITS(K),
-     1              CSTART_REC,COMMENT(K)
-                IF (HMARK .NE. '*') THEN
+        endif
+c
+c ****  decode charater variables.
+c
+        read(cimax,900)  imax
+        read(cjmax,900)  jmax
+        read(ckmax,900)  kmax
+900     format(i4)
+c
+        if(kmax .gt. 200)goto 960
+c
+c ****  open file for direct access.
+c
+        rcdl=imax+1
+        if (rcdl .lt. 40) rcdl=40
+        open(1,file=file_name,status='old',
+     1     access='direct',
+     1     recl=rcdl,err=950)
+c
+c ****  read header files for each field.
+c
+        rec=1
+        do k=1,kmax
+                rec=rec+1
+                read(1,rec=rec,err=905) hmark,var(k),clvl,lvl_coord(k),u
+     1nits(k),
+     1              cstart_rec,comment(k)
+                if (hmark .ne. '*') then
                   goto 905
-                ENDIF
-                read(CLVL,900)  LVL(K)
-        ENDDO
-906     FORMAT(I3)
+                endif
+                read(clvl,900)  lvl(k)
+        enddo
+906     format(i3)
 
-910     FORMAT(1X,A3,I4,' field not found.')
+910     format(1x,a3,i4,' field not found.')
 
         endif  !if status .eq. 1
-C
-C ****  Return normally.
-C
+c
+c ****  return normally.
+c
         l_packed_data = .false.
-        ISTATUS=ERROR(1)
-998     CLOSE(1,ERR=999)
-999     RETURN
-C
-C ****  Error trapping.
-C
-895     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error reading main header...read aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 998
-C
-905     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error reading field header...read aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 998
-C
-940     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error opening file for given i4time...read aborte
+        istatus=error(1)
+998     close(1,err=999)
+999     return
+c
+c ****  error trapping.
+c
+895     if (flag .ne. 1)
+     1    write (6,*) 'error reading main header...read aborted.'
+        istatus=error(2)
+        goto 998
+c
+905     if (flag .ne. 1)
+     1    write (6,*) 'error reading field header...read aborted.'
+        istatus=error(2)
+        goto 998
+c
+940     if (flag .ne. 1)
+     1    write (6,*) 'error opening file for given i4time...read aborte
      1d.'
-        ISTATUS=ERROR(2)
-        GOTO 998
-C
-950     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error opening file as direct access...read aborte
+        istatus=error(2)
+        goto 998
+c
+950     if (flag .ne. 1)
+     1    write (6,*) 'error opening file as direct access...read aborte
      1d.'
-        ISTATUS=ERROR(2)
-        GOTO 998
-C
-960     IF (FLAG .NE. 1)
-     1    write (6,*) 'KMAX greater than 200...arrays to small'
-        ISTATUS=ERROR(2)
-        GOTO 998
-C
-        END
+        istatus=error(2)
+        goto 998
+c
+960     if (flag .ne. 1)
+     1    write (6,*) 'kmax greater than 200...arrays to small'
+        istatus=error(2)
+        goto 998
+c
+        end
 
-C########################################################################
+c########################################################################
       subroutine setup_var_lvl(ext_in,num_levels,lvl_avail,
-     1                         num_variables,LAPS_var_avail,
+     1                         num_variables,laps_var_avail,
      1                         var,lvl,kdim,istatus)
 
-C**********************************************************************
-C
-C      Subroutine SETUP_VAR_LVL
-C
-C      Author:    Linda Wharton
-C
-C      Takes data read in by READLAPSHEADER and fills VAR and LVL
-C      so READLAPSDATA may be called.  This subroutines is used only
-C      if the file is in netCDF format.
-C
-C**********************************************************************
-C
-      IMPLICIT  NONE
+c**********************************************************************
+c
+c      subroutine setup_var_lvl
+c
+c      author:    linda wharton
+c
+c      takes data read in by readlapsheader and fills var and lvl
+c      so readlapsdata may be called.  this subroutines is used only
+c      if the file is in netcdf format.
+c
+c**********************************************************************
+c
+      implicit  none
 
-      INTEGER LVL(*),
+      integer lvl(*),
      1          i, j,
-     1          KDIM,
-     1          NUM_LEVELS,
+     1          kdim,
+     1          num_levels,
      1          num_variables,
-     1          ERROR(3),
+     1          error(3),
      1          pos,
-     1          ISTATUS                     !OUTPUT
+     1          istatus                     !output
 
-      INTEGER  LVL_AVAIL(*)
+      integer  lvl_avail(*)
 
-      CHARACTER*3       LAPS_VAR_AVAIL(*)
-      CHARACTER*3       VAR(*)
-      CHARACTER*31      EXT_IN              !INPUT input file name ext
+      character*3       laps_var_avail(*)
+      character*3       var(*)
+      character*31      ext_in              !input input file name ext
 
-C
-C-------------------------------------------------------------------------------
-C
-      ERROR(1)=1
-      ERROR(2)=0
-      ERROR(3)=-2
+c
+c-------------------------------------------------------------------------------
+c
+      error(1)=1
+      error(2)=0
+      error(3)=-2
 
       istatus = error(1)
 
-      if (ext_in .eq. 'LMR') then
-         var(1) = 'R00'
-         var(2) = 'R06'
-         var(3) = 'R12'
+      if (ext_in .eq. 'lmr') then
+         var(1) = 'r00'
+         var(2) = 'r06'
+         var(3) = 'r12'
          lvl(1) = 0
          lvl(2) = 0
          lvl(3) = 0
          pos = 4
       else
-         if (ext_in .eq. 'LF1') then
-            var(1) = 'H00'
-            var(2) = 'H06'
-            var(3) = 'H12'
+         if (ext_in .eq. 'lf1') then
+            var(1) = 'h00'
+            var(2) = 'h06'
+            var(3) = 'h12'
             lvl(1) = 0
             lvl(2) = 0
             lvl(3) = 0
             pos = 4
           else
-           if (ext_in .eq. 'LHE') then
-              var(1) = 'LHE'
+           if (ext_in .eq. 'lhe') then
+              var(1) = 'lhe'
               lvl(1) = 0
               pos = 2
            else
               pos = 1
 
               do i = 1, num_variables
-                 if (LAPS_var_avail(i)(1:1) .ne. char(0)) then
+                 if (laps_var_avail(i)(1:1) .ne. char(0)) then
                     do j = 1, num_levels
-                       var(pos) = LAPS_var_avail(i)
+                       var(pos) = laps_var_avail(i)
                        lvl(pos) = lvl_avail(j)
                        pos = pos + 1
                     enddo
@@ -363,4 +363,4 @@ C
       return
       end
 
-C########################################################################
+c########################################################################

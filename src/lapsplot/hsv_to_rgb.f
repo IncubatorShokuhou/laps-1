@@ -3,48 +3,48 @@
 
 !*****************************************************************************80
 !
-!! HSV_TO_RGB converts HSV to RGB color coordinates.
+!! hsv_to_rgb converts hsv to rgb color coordinates.
 !
-!  Discussion:
+!  discussion:
 !
-!    The HSV color system describes a color based on the three qualities
-!    of hue, saturation, and value.  A given color will be represented
-!    by three numbers, (H,S,V).  H, the value of hue, is an angle 
-!    between 0 and 360 degrees, with 0 representing red.  S is the
-!    saturation, and is between 0 and 1.  Finally, V is the "value",
+!    the hsv color system describes a color based on the three qualities
+!    of hue, saturation, and value.  a given color will be represented
+!    by three numbers, (h,s,v).  h, the value of hue, is an angle 
+!    between 0 and 360 degrees, with 0 representing red.  s is the
+!    saturation, and is between 0 and 1.  finally, v is the "value",
 !    a measure of brightness, which goes from 0 for black, increasing 
-!    to a maximum of 1 for the brightest colors.  The HSV color system 
-!    is sometimes also called HSB, where the B stands for brightness.
+!    to a maximum of 1 for the brightest colors.  the hsv color system 
+!    is sometimes also called hsb, where the b stands for brightness.
 !
-!    The RGB color system describes a color based on the amounts of the 
-!    base colors red, green, and blue.  Thus, a particular color
-!    has three coordinates, (R,G,B).  Each coordinate must be between
+!    the rgb color system describes a color based on the amounts of the 
+!    base colors red, green, and blue.  thus, a particular color
+!    has three coordinates, (r,g,b).  each coordinate must be between
 !    0 and 1.  
 !
-!  Licensing:
+!  licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    this code is distributed under the gnu lgpl license. 
 !
-!  Modified:
+!  modified:
 !
-!    29 August 1998
+!    29 august 1998
 !
-!  Author:
+!  author:
 !
-!    John Burkardt
+!    john burkardt
 !
-!  Reference:
+!  reference:
 !
-!    James Foley, Andries van Dam, Steven Feiner, John Hughes,
-!    Computer Graphics, Principles and Practice,
-!    Addison Wesley, Second Edition, 1990.
+!    james foley, andries van dam, steven feiner, john hughes,
+!    computer graphics, principles and practice,
+!    addison wesley, second edition, 1990.
 !
-!  Parameters:
+!  parameters:
 !
-!    Input, real ( kind = 8 ) H, S, V, the HSV color coordinates to 
+!    input, real ( kind = 8 ) h, s, v, the hsv color coordinates to 
 !    be converted.
 !
-!    Output, real ( kind = 8 ) R, G, B, the corresponding RGB color coordinates.
+!    output, real ( kind = 8 ) r, g, b, the corresponding rgb color coordinates.
 !
       implicit none
 
@@ -61,7 +61,7 @@
       real t
       real v
 
-      if ( s == 0.0D+00 ) then
+      if ( s == 0.0d+00 ) then
 
           r = v
           g = v
@@ -69,7 +69,7 @@
 
       else
 !
-!     Make sure HUE lies between 0 and 360.0D+00
+!     make sure hue lies between 0 and 360.0d+00
 !
           hue = mod ( h, 360.0 )
 

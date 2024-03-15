@@ -21,13 +21,13 @@
       real t2k, t2f, ht, prs2, q, e, es, rh2, m, n, k_to_f
       logical debug
 
-C      debug = .true.   ! Debug mode
-      debug = .false.   ! Production mode
+c      debug = .true.   ! debug mode
+      debug = .false.   ! production mode
 
       do 200 j = 1, mjx ! -1
       do 100 i = 1, miy ! -1
 
-        if(.false.)then ! original Seattle code with sigma coordinate inputs
+        if(.false.)then ! original seattle code with sigma coordinate inputs
 
 !         if (nint(xlus(i,j)).eq.iwater) then
 !          fwi(i,j) = -3.
@@ -42,14 +42,14 @@ C      debug = .true.   ! Debug mode
 !         es = ezero * exp( eslcon1*(t2k-celkel)/(t2k-eslcon2) )
 !         rh2 = 100.*(e*(prs2-es))/(es*(prs2-e))
 
-        else ! new version to use sfc inputs from LAPS analysis
+        else ! new version to use sfc inputs from laps analysis
           rh2 = rh_sfc(i,j)
           prs2 = p_sfc_mb(i,j)
           t2f = k_to_f(t_sfc_k(i,j))
 
         endif
 
-C---------Use 2.237 to convert m/s to mph
+c---------use 2.237 to convert m/s to mph
         uuu10 = u10(i,j) * 2.237
         vvv10 = v10(i,j) * 2.237
         if( rh2 .le. 10.5 ) then

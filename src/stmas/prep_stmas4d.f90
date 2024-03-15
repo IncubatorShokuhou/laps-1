@@ -1,445 +1,444 @@
-MODULE PREP_STMAS4D
+module prep_stmas4d
 
-  USE PRMTRS_STMAS
+   use prmtrs_stmas
 
-  PRIVATE  GTSCALING
-  PUBLIC   PREPROCSS, GRDMEMALC, RDINITBGD, PHYSCPSTN
+   private gtscaling
+   public preprocss, grdmemalc, rdinitbgd, physcpstn
 
 !**************************************************
-!COMMENT:
-!   THIS MODULE IS USED BY stmas_core.f90 TO DO SOME PREPROCESS.
-!   SUBROUTINES:
-!      PREPROCSS: CALL SUBROUTINE OF GRDMEMALC TO ALLOCATE MEMORYS TO ANALYSIS FIELD AND CALL GTSCALING TO GET SCALES OF OBSERVATIONS.
-!      GRDMEMALC: MEMORY ALLOCATE FOR ANALYSIS FIELDS, BACKGROUND FIELDS AND THE COORDINATES. 
-!      GTSCALING: GET SCALES OF EACH OBSERVATION.
-!      RDINITBGD: GET BACKGROUND FILED ON THE CURRENT LEVEL GRID FROM THE INITIAL BACKGROUND (WITH MAX GRID NUMBER).
-!      PHYSCPSTN: CALCULATE PENALTY COEFFICENTS AND MAKE SOME SCALING OF CONTROL VARIABLES AND COORDINATES.
+!comment:
+!   this module is used by stmas_core.f90 to do some preprocess.
+!   subroutines:
+!      preprocss: call subroutine of grdmemalc to allocate memorys to analysis field and call gtscaling to get scales of observations.
+!      grdmemalc: memory allocate for analysis fields, background fields and the coordinates.
+!      gtscaling: get scales of each observation.
+!      rdinitbgd: get background filed on the current level grid from the initial background (with max grid number).
+!      physcpstn: calculate penalty coefficents and make some scaling of control variables and coordinates.
 !**************************************************
 
-CONTAINS
+contains
 
-SUBROUTINE PREPROCSS
+   subroutine preprocss
 !*************************************************
-! DATA PREPROCESS
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! data preprocess
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
-  CALL GRDMEMALC
-  CALL GTSCALING
-  RETURN
-END SUBROUTINE PREPROCSS
+      implicit none
+      call grdmemalc
+      call gtscaling
+      return
+   end subroutine preprocss
 
-SUBROUTINE GRDMEMALC
+   subroutine grdmemalc
 !*************************************************
-! MEMORY ALLOCATE FOR GRD ARRAY
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! memory allocate for grd array
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,ER
+      integer  :: i, j, k, t, s, er
 ! --------------------
-  ALLOCATE(WWW(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4)),STAT=ER)
-  IF(ER.NE.0)STOP 'WWW ALLOCATE WRONG'
-  ALLOCATE(COR(NUMGRID(1),NUMGRID(2)),STAT=ER)
-  IF(ER.NE.0)STOP 'COR ALLOCATE WRONG'
-  ALLOCATE(XXX(NUMGRID(1),NUMGRID(2)),STAT=ER)
-  IF(ER.NE.0)STOP 'XXX ALLOCATE WRONG'
-  ALLOCATE(YYY(NUMGRID(1),NUMGRID(2)),STAT=ER)
-  IF(ER.NE.0)STOP 'YYY ALLOCATE WRONG'
-  ALLOCATE(DEG(NUMGRID(1),NUMGRID(2)),STAT=ER)
-  IF(ER.NE.0)STOP 'DEG ALLOCATE WRONG'
-  ALLOCATE(DEN(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4)),STAT=ER)
-  IF(ER.NE.0)STOP 'DEN ALLOCATE WRONG'
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN
-    ALLOCATE(ZZZ(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4)),STAT=ER)
-    IF(ER.NE.0)STOP 'ZZZ ALLOCATE WRONG'
-  ELSEIF(IFPCDNT.EQ.1)THEN
-    ALLOCATE(PPP(NUMGRID(3)),STAT=ER)
-    IF(ER.NE.0)STOP 'PPP ALLOCATE WRONG'
-  ENDIF
+      allocate (www(numgrid(1), numgrid(2), numgrid(3), numgrid(4)), stat=er)
+      if (er .ne. 0) stop 'www allocate wrong'
+      allocate (cor(numgrid(1), numgrid(2)), stat=er)
+      if (er .ne. 0) stop 'cor allocate wrong'
+      allocate (xxx(numgrid(1), numgrid(2)), stat=er)
+      if (er .ne. 0) stop 'xxx allocate wrong'
+      allocate (yyy(numgrid(1), numgrid(2)), stat=er)
+      if (er .ne. 0) stop 'yyy allocate wrong'
+      allocate (deg(numgrid(1), numgrid(2)), stat=er)
+      if (er .ne. 0) stop 'deg allocate wrong'
+      allocate (den(numgrid(1), numgrid(2), numgrid(3), numgrid(4)), stat=er)
+      if (er .ne. 0) stop 'den allocate wrong'
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then
+         allocate (zzz(numgrid(1), numgrid(2), numgrid(3), numgrid(4)), stat=er)
+         if (er .ne. 0) stop 'zzz allocate wrong'
+      elseif (ifpcdnt .eq. 1) then
+         allocate (ppp(numgrid(3)), stat=er)
+         if (er .ne. 0) stop 'ppp allocate wrong'
+      end if
 
-! YUANFU ADD NUMSTAT+1 GRDBKGND ARRAY FOR SAVING RADAR REFLECTIVITY GENRERATED LOW BOUND AND UPPER BOUND:
-  ALLOCATE(GRDBKGND(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4),NUMSTAT+2),STAT=ER)
-  IF(ER.NE.0)STOP 'GRDBKGND ALLOCATE WRONG'
-  ALLOCATE(GRDANALS(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4),NUMSTAT),STAT=ER)
-  IF(ER.NE.0)STOP 'GRDANALS ALLOCATE WRONG'
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    DO S=1,NUMSTAT
-      GRDANALS(I,J,K,T,S)=0.0D0
-      GRDBKGND(I,J,K,T,S)=0.0D0
-    ENDDO   
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  NUMVARS=NUMGRID(1)*NUMGRID(2)*NUMGRID(3)*NUMGRID(4)*NUMSTAT
-  ALLOCATE(GRADINT(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4),NUMSTAT),STAT=ER)
-  IF(ER.NE.0)STOP 'GRADINT ALLOCATE WRONG'
-  RETURN
-END SUBROUTINE GRDMEMALC
+! yuanfu add numstat+1 grdbkgnd array for saving radar reflectivity genrerated low bound and upper bound:
+      allocate (grdbkgnd(numgrid(1), numgrid(2), numgrid(3), numgrid(4), numstat + 2), stat=er)
+      if (er .ne. 0) stop 'grdbkgnd allocate wrong'
+      allocate (grdanals(numgrid(1), numgrid(2), numgrid(3), numgrid(4), numstat), stat=er)
+      if (er .ne. 0) stop 'grdanals allocate wrong'
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         do s = 1, numstat
+            grdanals(i, j, k, t, s) = 0.0d0
+            grdbkgnd(i, j, k, t, s) = 0.0d0
+         end do
+      end do
+      end do
+      end do
+      end do
+      numvars = numgrid(1)*numgrid(2)*numgrid(3)*numgrid(4)*numstat
+      allocate (gradint(numgrid(1), numgrid(2), numgrid(3), numgrid(4), numstat), stat=er)
+      if (er .ne. 0) stop 'gradint allocate wrong'
+      return
+   end subroutine grdmemalc
 
-SUBROUTINE GTSCALING
+   subroutine gtscaling
 !*************************************************
-! ALLOCATE OBSERVATION MEMORY AND READ IN DATA AND SCALE
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! allocate observation memory and read in data and scale
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  REAL ,PARAMETER :: SM=1.0E-5
-  INTEGER  :: O,S,ER,UU,VV,WW,NO
-!added by shuyuan liu 20101028 for adding the OI OI=OBSERROR(O)**2  OI=1.0/OI
-  REAL    ::  OI
+      real, parameter :: sm = 1.0e-5
+      integer  :: o, s, er, uu, vv, ww, no
+!added by shuyuan liu 20101028 for adding the oi oi=obserror(o)**2  oi=1.0/oi
+      real    ::  oi
 ! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  WW=W_CMPNNT
-  
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      ww = w_cmpnnt
 
 !jhui
-!NUMSTAT+1
-  ALLOCATE(SCL(NUMSTAT+1),STAT=ER)
-  IF(ER.NE.0)STOP 'SCL ALLOCATE WRONG'
-  DO S=1,NUMSTAT+1
-    SCL(S)=0.0D0
-  ENDDO
+!numstat+1
+      allocate (scl(numstat + 1), stat=er)
+      if (er .ne. 0) stop 'scl allocate wrong'
+      do s = 1, numstat + 1
+         scl(s) = 0.0d0
+      end do
 
-  IF(NALLOBS.EQ.0) RETURN
+      if (nallobs .eq. 0) return
 !!!!!!!!!!!!!!!!!!!!
- O=0
-!  DO S=1,NUMSTAT
-!    DO NO=1,NOBSTAT(S)
- !     O=O+1
-!      SCL(S)=SCL(S)+OBSVALUE(O)*OBSVALUE(O)
-!    ENDDO
- ! ENDDO
- ! DO S=NUMSTAT+1,NUMSTAT+2
-!    DO NO=1,NOBSTAT(S)
-!      O=O+1
-!      SCL(UU)=SCL(UU)+OBSVALUE(O)*OBSVALUE(O)
-!      SCL(VV)=SCL(VV)+OBSVALUE(O)*OBSVALUE(O)
- !   ENDDO
-!  ENDDO
+      o = 0
+!  do s=1,numstat
+!    do no=1,nobstat(s)
+      !     o=o+1
+!      scl(s)=scl(s)+obsvalue(o)*obsvalue(o)
+!    enddo
+      ! enddo
+      ! do s=numstat+1,numstat+2
+!    do no=1,nobstat(s)
+!      o=o+1
+!      scl(uu)=scl(uu)+obsvalue(o)*obsvalue(o)
+!      scl(vv)=scl(vv)+obsvalue(o)*obsvalue(o)
+      !   enddo
+!  enddo
 !jhui
- ! DO S=NUMSTAT+3,NUMSTAT+3
- !   DO NO=1,NOBSTAT(S)
- !     O=O+1
- !     SCL(NUMSTAT+1)=SCL(NUMSTAT+1)+OBSVALUE(O)*OBSVALUE(O)
- !   ENDDO
- ! ENDDO
-! STATISTIC SCALES OF EACH STATE VARIABLE BASED ON OBSERVATIONS.
-!!!!!!!!!!adding the OI  modified by shuyuan liu 20101028
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OI=OBSERROR(O)*OBSERROR(O)
-      OI=1.0/OI
-      SCL(S)=SCL(S)+OBSVALUE(O)*OBSVALUE(O)*OI
-   ENDDO
-  ENDDO
-  DO S=NUMSTAT+1,NUMSTAT+2
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OI=OBSERROR(O)*OBSERROR(O)
-      OI=1.0/OI
-      SCL(UU)=SCL(UU)+OBSVALUE(O)*OBSVALUE(O)*OI
-      SCL(VV)=SCL(VV)+OBSVALUE(O)*OBSVALUE(O)*OI
-    ENDDO
-  ENDDO
-  DO S=NUMSTAT+3,NUMSTAT+3
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OI=OBSERROR(O)*OBSERROR(O)
-      OI=1.0/OI
-      SCL(NUMSTAT+1)=SCL(NUMSTAT+1)+OBSVALUE(O)*OBSVALUE(O)*OI
-    ENDDO
-  ENDDO
+      ! do s=numstat+3,numstat+3
+      !   do no=1,nobstat(s)
+      !     o=o+1
+      !     scl(numstat+1)=scl(numstat+1)+obsvalue(o)*obsvalue(o)
+      !   enddo
+      ! enddo
+! statistic scales of each state variable based on observations.
+!!!!!!!!!!adding the oi  modified by shuyuan liu 20101028
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            oi = obserror(o)*obserror(o)
+            oi = 1.0/oi
+            scl(s) = scl(s) + obsvalue(o)*obsvalue(o)*oi
+         end do
+      end do
+      do s = numstat + 1, numstat + 2
+         do no = 1, nobstat(s)
+            o = o + 1
+            oi = obserror(o)*obserror(o)
+            oi = 1.0/oi
+            scl(uu) = scl(uu) + obsvalue(o)*obsvalue(o)*oi
+            scl(vv) = scl(vv) + obsvalue(o)*obsvalue(o)*oi
+         end do
+      end do
+      do s = numstat + 3, numstat + 3
+         do no = 1, nobstat(s)
+            o = o + 1
+            oi = obserror(o)*obserror(o)
+            oi = 1.0/oi
+            scl(numstat + 1) = scl(numstat + 1) + obsvalue(o)*obsvalue(o)*oi
+         end do
+      end do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  DO S=1,NUMSTAT
-    IF(NOBSTAT(S).GT.0 .AND. SCL(S).GE.1E-5) THEN
-      IF(S.EQ.UU .OR. S.EQ.VV) THEN
-        SCL(S)=SQRT(SCL(S)/(NOBSTAT(S)+NOBSTAT(NUMSTAT+1)+NOBSTAT(NUMSTAT+2)))
-      ELSE
-        SCL(S)=SQRT(SCL(S)/NOBSTAT(S))
-      ENDIF
-    ELSEIF(NOBSTAT(S).EQ.0) THEN
-      SCL(S)=SL0(S)
-    ENDIF
-  ENDDO
-  IF(NUMDIMS.GE.2)SCL(UU)=MAX(SCL(UU),SCL(VV))
-  IF(NUMDIMS.GE.2)SCL(VV)=SCL(UU)
-  IF(WW.NE.0)SCL(WW)=SCL(UU)
+      do s = 1, numstat
+         if (nobstat(s) .gt. 0 .and. scl(s) .ge. 1e-5) then
+            if (s .eq. uu .or. s .eq. vv) then
+               scl(s) = sqrt(scl(s)/(nobstat(s) + nobstat(numstat + 1) + nobstat(numstat + 2)))
+            else
+               scl(s) = sqrt(scl(s)/nobstat(s))
+            end if
+         elseif (nobstat(s) .eq. 0) then
+            scl(s) = sl0(s)
+         end if
+      end do
+      if (numdims .ge. 2) scl(uu) = max(scl(uu), scl(vv))
+      if (numdims .ge. 2) scl(vv) = scl(uu)
+      if (ww .ne. 0) scl(ww) = scl(uu)
 !jhui
-  IF (NOBSTAT(NUMSTAT+3) .GT. 0) THEN  ! YUANFU: AVOID DIVISION OF ZERO
-    DO S=NUMSTAT+3,NUMSTAT+3
-        SCL(NUMSTAT+1)=SQRT(SCL(NUMSTAT+1)/NOBSTAT(S))
-    ENDDO
-  ENDIF
+      if (nobstat(numstat + 3) .gt. 0) then  ! yuanfu: avoid division of zero
+         do s = numstat + 3, numstat + 3
+            scl(numstat + 1) = sqrt(scl(numstat + 1)/nobstat(s))
+         end do
+      end if
 
-! SCALE THE OBSERVATIONS
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OBSVALUE(O)=OBSVALUE(O)/SCL(S)
-      OBSERROR(O)=OBSERROR(O)/SCL(S)
-    ENDDO
-  ENDDO
-  DO S=NUMSTAT+1,NUMSTAT+2
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OBSVALUE(O)=OBSVALUE(O)/SCL(UU)
-      OBSERROR(O)=OBSERROR(O)/SCL(UU)
-    ENDDO
-  ENDDO
+! scale the observations
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            obsvalue(o) = obsvalue(o)/scl(s)
+            obserror(o) = obserror(o)/scl(s)
+         end do
+      end do
+      do s = numstat + 1, numstat + 2
+         do no = 1, nobstat(s)
+            o = o + 1
+            obsvalue(o) = obsvalue(o)/scl(uu)
+            obserror(o) = obserror(o)/scl(uu)
+         end do
+      end do
 !jhui
-  !DO S=NUMSTAT+3,NUMSTAT+3  !changed by shuyuan 20100903
-    S=NUMSTAT+3
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OBSVALUE(O)=OBSVALUE(O)/SCL(NUMSTAT+1)
-      OBSERROR(O)=OBSERROR(O)/SCL(NUMSTAT+1)
-    ENDDO
-  !ENDDO
+      !do s=numstat+3,numstat+3  !changed by shuyuan 20100903
+      s = numstat + 3
+      do no = 1, nobstat(s)
+         o = o + 1
+         obsvalue(o) = obsvalue(o)/scl(numstat + 1)
+         obserror(o) = obserror(o)/scl(numstat + 1)
+      end do
+      !enddo
 
-  RETURN
-END SUBROUTINE GTSCALING
+      return
+   end subroutine gtscaling
 
-SUBROUTINE RDINITBGD
+   subroutine rdinitbgd
 !*************************************************
-! READ IN INITIAL BACKGROUND FIELDS
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! read in initial background fields
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,NX,NY,NZ,NT,I1,J1,K1,T1,TT
-  REAL     :: R
+      integer  :: i, j, k, t, s, nx, ny, nz, nt, i1, j1, k1, t1, tt
+      real     :: r
 ! --------------------
-  R=287
-  TT=TEMPRTUR
+      r = 287
+      tt = temprtur
 
-  IF(NUMGRID(1).GE.2)THEN
-    NX=(MAXGRID(1)-1)/(NUMGRID(1)-1)
-  ELSE
-    NX=1
-  ENDIF
-  IF(NUMGRID(2).GE.2)THEN
-    NY=(MAXGRID(2)-1)/(NUMGRID(2)-1)
-  ELSE
-    NY=1
-  ENDIF
-  IF(NUMGRID(3).GE.2)THEN
-    NZ=(MAXGRID(3)-1)/(NUMGRID(3)-1)
-  ELSE
-    NZ=1
-  ENDIF
-  IF(NUMGRID(4).GE.2)THEN
-    NT=(MAXGRID(4)-1)/(NUMGRID(4)-1)
-  ELSE
-    NT=1
-  ENDIF
-! INTERPLATE THE BACKGROUND FIELD ONTO THE CURRENT ANALYSIS GRID POINTS.
-  DO T=1,MAXGRID(4),NT
-  DO K=1,MAXGRID(3),NZ
-  DO J=1,MAXGRID(2),NY
-  DO I=1,MAXGRID(1),NX
-    I1=(I-1)/NX+1
-    J1=(J-1)/NY+1
-    K1=(K-1)/NZ+1
-    T1=(T-1)/NT+1
+      if (numgrid(1) .ge. 2) then
+         nx = (maxgrid(1) - 1)/(numgrid(1) - 1)
+      else
+         nx = 1
+      end if
+      if (numgrid(2) .ge. 2) then
+         ny = (maxgrid(2) - 1)/(numgrid(2) - 1)
+      else
+         ny = 1
+      end if
+      if (numgrid(3) .ge. 2) then
+         nz = (maxgrid(3) - 1)/(numgrid(3) - 1)
+      else
+         nz = 1
+      end if
+      if (numgrid(4) .ge. 2) then
+         nt = (maxgrid(4) - 1)/(numgrid(4) - 1)
+      else
+         nt = 1
+      end if
+! interplate the background field onto the current analysis grid points.
+      do t = 1, maxgrid(4), nt
+      do k = 1, maxgrid(3), nz
+      do j = 1, maxgrid(2), ny
+      do i = 1, maxgrid(1), nx
+         i1 = (i - 1)/nx + 1
+         j1 = (j - 1)/ny + 1
+         k1 = (k - 1)/nz + 1
+         t1 = (t - 1)/nt + 1
 !jhui
-    DO S=1,NUMSTAT
-      GRDBKGND(I1,J1,K1,T1,S)=GRDBKGD0(I,J,K,T,S)/SCL(S)
-    ENDDO
-    ! MAKE SURE SH BACKGROUND POSITIVE:
-    GRDBKGND(I1,J1,K1,T1,5) = MAX(0.0,GRDBKGND(I1,J1,K1,T1,5))
-    ! SH LOWER AND UPPER BOUND AT THE MULTIGRID LEVEL:
-    GRDBKGND(I1,J1,K1,T1,NUMSTAT+1)=GRDBKGD0(I,J,K,T,NUMSTAT+1)/SCL(HUMIDITY)
-    GRDBKGND(I1,J1,K1,T1,NUMSTAT+2)=GRDBKGD0(I,J,K,T,NUMSTAT+2)/SCL(HUMIDITY)
-     IF(IFPCDNT.NE.1) DEN(I1,J1,K1,T1)=DN0(I,J,K,T)     ! here the pressure is not aviable
-     IF(IFPCDNT.EQ.1) DEN(I1,J1,K1,T1)=(PPP(K1)*SCP(PSL)+ORIVTCL)/R/((GRDBKGND(I1,J1,K1,T1,TT)+GRDANALS(I1,J1,K1,T1,TT))*SCL(TT))
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+         do s = 1, numstat
+            grdbkgnd(i1, j1, k1, t1, s) = grdbkgd0(i, j, k, t, s)/scl(s)
+         end do
+         ! make sure sh background positive:
+         grdbkgnd(i1, j1, k1, t1, 5) = max(0.0, grdbkgnd(i1, j1, k1, t1, 5))
+         ! sh lower and upper bound at the multigrid level:
+         grdbkgnd(i1, j1, k1, t1, numstat + 1) = grdbkgd0(i, j, k, t, numstat + 1)/scl(humidity)
+         grdbkgnd(i1, j1, k1, t1, numstat + 2) = grdbkgd0(i, j, k, t, numstat + 2)/scl(humidity)
+         if (ifpcdnt .ne. 1) den(i1, j1, k1, t1) = dn0(i, j, k, t)     ! here the pressure is not aviable
+        if(ifpcdnt.eq.1) den(i1,j1,k1,t1)=(ppp(k1)*scp(psl)+orivtcl)/r/((grdbkgnd(i1,j1,k1,t1,tt)+grdanals(i1,j1,k1,t1,tt))*scl(tt))
+      end do
+      end do
+      end do
+      end do
 
-  RETURN
-END SUBROUTINE RDINITBGD
+      return
+   end subroutine rdinitbgd
 
-SUBROUTINE PHYSCPSTN
+   subroutine physcpstn
 !*************************************************
-! DEALING WITH PHYSICAL POSITION AND PENALTY COEFFICENT AND MAKING SOME SCALING
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! dealing with physical position and penalty coefficent and making some scaling
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,NX,NY,NZ,NT,I1,J1,K1,T1,UU,VV,PP
-  REAL     :: Z1,Z2
+      integer  :: i, j, k, t, s, nx, ny, nz, nt, i1, j1, k1, t1, uu, vv, pp
+      real     :: z1, z2
 ! --------------------
-  UU=U_CMPNNT
-  VV=V_CMPNNT
-  PP=PRESSURE
-! PHYSICAL POSITION AND CORIOLIS FREQUENCY
-  IF(NUMGRID(1).GE.2)THEN
-    NX=(MAXGRID(1)-1)/(NUMGRID(1)-1)
-  ELSE
-    NX=1
-  ENDIF
-  IF(NUMGRID(2).GE.2)THEN
-    NY=(MAXGRID(2)-1)/(NUMGRID(2)-1)
-  ELSE
-    NY=1
-  ENDIF
-  DO J=1,MAXGRID(2),NY
-  DO I=1,MAXGRID(1),NX
-    I1=(I-1)/NX+1
-    J1=(J-1)/NY+1
-    IF(NUMGRID(1).GE.2)XXX(I1,J1)=XX0(I,J)
-    IF(NUMGRID(2).GE.2)YYY(I1,J1)=YY0(I,J)
-    IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)COR(I1,J1)=CR0(I,J)
-    IF(NUMGRID(2).GE.2)DEG(I1,J1)=DG0(I,J)
-  ENDDO
-  ENDDO
+      uu = u_cmpnnt
+      vv = v_cmpnnt
+      pp = pressure
+! physical position and coriolis frequency
+      if (numgrid(1) .ge. 2) then
+         nx = (maxgrid(1) - 1)/(numgrid(1) - 1)
+      else
+         nx = 1
+      end if
+      if (numgrid(2) .ge. 2) then
+         ny = (maxgrid(2) - 1)/(numgrid(2) - 1)
+      else
+         ny = 1
+      end if
+      do j = 1, maxgrid(2), ny
+      do i = 1, maxgrid(1), nx
+         i1 = (i - 1)/nx + 1
+         j1 = (j - 1)/ny + 1
+         if (numgrid(1) .ge. 2) xxx(i1, j1) = xx0(i, j)
+         if (numgrid(2) .ge. 2) yyy(i1, j1) = yy0(i, j)
+         if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) cor(i1, j1) = cr0(i, j)
+         if (numgrid(2) .ge. 2) deg(i1, j1) = dg0(i, j)
+      end do
+      end do
 
-  IF(NUMGRID(3).GE.2)THEN
-    NZ=(MAXGRID(3)-1)/(NUMGRID(3)-1)
-  ELSE
-    NZ=1
-  ENDIF
-  IF(NUMGRID(4).GE.2)THEN
-    NT=(MAXGRID(4)-1)/(NUMGRID(4)-1)
-  ELSE
-    NT=1
-  ENDIF
+      if (numgrid(3) .ge. 2) then
+         nz = (maxgrid(3) - 1)/(numgrid(3) - 1)
+      else
+         nz = 1
+      end if
+      if (numgrid(4) .ge. 2) then
+         nt = (maxgrid(4) - 1)/(numgrid(4) - 1)
+      else
+         nt = 1
+      end if
 
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN          ! FOR SIGMA AND HEIGHTCOORDINATE
-    DO T=1,MAXGRID(4),NT
-    DO K=1,MAXGRID(3),NZ
-    DO J=1,MAXGRID(2),NY
-    DO I=1,MAXGRID(1),NX
-      I1=(I-1)/NX+1
-      J1=(J-1)/NY+1
-      K1=(K-1)/NZ+1
-      T1=(T-1)/NT+1
-      ZZZ(I1,J1,K1,T1)=ZZ0(I,J,K,T)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ELSEIF(IFPCDNT.EQ.1)THEN
-    DO K=1,MAXGRID(3),NZ
-      K1=(K-1)/NZ+1
-      PPP(K1)=PP0(K)
-    ENDDO
-  ENDIF
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then          ! for sigma and heightcoordinate
+         do t = 1, maxgrid(4), nt
+         do k = 1, maxgrid(3), nz
+         do j = 1, maxgrid(2), ny
+         do i = 1, maxgrid(1), nx
+            i1 = (i - 1)/nx + 1
+            j1 = (j - 1)/ny + 1
+            k1 = (k - 1)/nz + 1
+            t1 = (t - 1)/nt + 1
+            zzz(i1, j1, k1, t1) = zz0(i, j, k, t)
+         end do
+         end do
+         end do
+         end do
+      elseif (ifpcdnt .eq. 1) then
+         do k = 1, maxgrid(3), nz
+            k1 = (k - 1)/nz + 1
+            ppp(k1) = pp0(k)
+         end do
+      end if
 
-! PENALTY COEFFICENT
-  DO S=1,NUMSTAT
-    PENAL_X(S) = 0.0
-    PENAL_Y(S) = 0.0
-    PENAL_Z(S) = 0.0
-    PENAL_T(S) = 0.0
-    IF(NUMGRID(1).GE.3) PENAL_X(S)=PENAL0X(S)*((MAXGRID(1)-2)*MAXGRID(2)*MAXGRID(3)*MAXGRID(4))  &
-                                   /((NUMGRID(1)-2)*NUMGRID(2)*NUMGRID(3)*NUMGRID(4))
-    IF(NUMGRID(2).GE.3) PENAL_Y(S)=PENAL0Y(S)*((MAXGRID(2)-2)*MAXGRID(1)*MAXGRID(3)*MAXGRID(4))  &
-                                   /((NUMGRID(2)-2)*NUMGRID(1)*NUMGRID(3)*NUMGRID(4))
-    IF(NUMGRID(3).GE.3) PENAL_Z(S)=PENAL0Z(S)*((MAXGRID(3)-2)*MAXGRID(1)*MAXGRID(2)*MAXGRID(4))  &
-                                   /((NUMGRID(3)-2)*NUMGRID(1)*NUMGRID(2)*NUMGRID(4))
-    IF(NUMGRID(4).GE.3) PENAL_T(S)=PENAL0T(S)*((MAXGRID(4)-2)*MAXGRID(1)*MAXGRID(2)*MAXGRID(3))  &
-                                   /((NUMGRID(4)-2)*NUMGRID(1)*NUMGRID(2)*NUMGRID(3))
-  ENDDO
-  !  PENAL_X(NUMSTAT+1) = PENAL_X(1)
-  !  PENAL_Y(NUMSTAT+1) = PENAL_Y(1)
-  !  PENAL_Z(NUMSTAT+1) = PENAL_Z(1)
-  !  PENAL_T(NUMSTAT+1) = PENAL_T(1)
+! penalty coefficent
+      do s = 1, numstat
+         penal_x(s) = 0.0
+         penal_y(s) = 0.0
+         penal_z(s) = 0.0
+         penal_t(s) = 0.0
+         if (numgrid(1) .ge. 3) penal_x(s) = penal0x(s)*((maxgrid(1) - 2)*maxgrid(2)*maxgrid(3)*maxgrid(4)) &
+                                             /((numgrid(1) - 2)*numgrid(2)*numgrid(3)*numgrid(4))
+         if (numgrid(2) .ge. 3) penal_y(s) = penal0y(s)*((maxgrid(2) - 2)*maxgrid(1)*maxgrid(3)*maxgrid(4)) &
+                                             /((numgrid(2) - 2)*numgrid(1)*numgrid(3)*numgrid(4))
+         if (numgrid(3) .ge. 3) penal_z(s) = penal0z(s)*((maxgrid(3) - 2)*maxgrid(1)*maxgrid(2)*maxgrid(4)) &
+                                             /((numgrid(3) - 2)*numgrid(1)*numgrid(2)*numgrid(4))
+         if (numgrid(4) .ge. 3) penal_t(s) = penal0t(s)*((maxgrid(4) - 2)*maxgrid(1)*maxgrid(2)*maxgrid(3)) &
+                                             /((numgrid(4) - 2)*numgrid(1)*numgrid(2)*numgrid(3))
+      end do
+      !  penal_x(numstat+1) = penal_x(1)
+      !  penal_y(numstat+1) = penal_y(1)
+      !  penal_z(numstat+1) = penal_z(1)
+      !  penal_t(numstat+1) = penal_t(1)
 
-  PNLT_PU=PNLT0PU*SCL(UU)*SCL(UU)/(2**(GRDLEVL-1)) &
-              /(NUMGRID(1)*NUMGRID(2)*NUMGRID(3)*NUMGRID(4))
-  PNLT_PV=PNLT0PV*SCL(VV)*SCL(VV)/(2**(GRDLEVL-1)) &
-              /(NUMGRID(1)*NUMGRID(2)*NUMGRID(3)*NUMGRID(4))
-  IF(NALLOBS.NE.0) THEN
-    IF(NOBSTAT(UU).EQ.0.AND.NOBSTAT(PP).EQ.0)PNLT_PU=0.0D0
-    IF(NOBSTAT(VV).EQ.0.AND.NOBSTAT(PP).EQ.0)PNLT_PV=0.0D0
-  ENDIF
+      pnlt_pu = pnlt0pu*scl(uu)*scl(uu)/(2**(grdlevl - 1)) &
+                /(numgrid(1)*numgrid(2)*numgrid(3)*numgrid(4))
+      pnlt_pv = pnlt0pv*scl(vv)*scl(vv)/(2**(grdlevl - 1)) &
+                /(numgrid(1)*numgrid(2)*numgrid(3)*numgrid(4))
+      if (nallobs .ne. 0) then
+         if (nobstat(uu) .eq. 0 .and. nobstat(pp) .eq. 0) pnlt_pu = 0.0d0
+         if (nobstat(vv) .eq. 0 .and. nobstat(pp) .eq. 0) pnlt_pv = 0.0d0
+      end if
 
-  PNLT_HY=PNLT0HY*TAUL_HY**(GRDLEVL-1)  &
-              /(NUMGRID(1)*NUMGRID(2)*NUMGRID(3)*NUMGRID(4)) 
+      pnlt_hy = pnlt0hy*taul_hy**(grdlevl - 1) &
+                /(numgrid(1)*numgrid(2)*numgrid(3)*numgrid(4))
 
-! CALCULATE SCALE FOR PHYSICAL POSITION AND CORIOLIS FREQUENCY
-  SCP(XSL)=ABS((XXX(NUMGRID(1),NUMGRID(2))-XXX(1,1))/(NUMGRID(1)-1))
-  SCP(YSL)=ABS((YYY(NUMGRID(1),NUMGRID(2))-YYY(1,1))/(NUMGRID(2)-1))
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN         ! FOR SIGMA AND HEIGHTCOORDINATE
-    Z2=ZZZ(1,1,NUMGRID(3),1)
-    Z1=ZZZ(1,1,1,1)
-    DO I=1,NUMGRID(1)
-    DO J=1,NUMGRID(2)
-    DO T=1,NUMGRID(4)
-      Z2=MAX(Z2,ZZZ(I,J,NUMGRID(3),T))
-      Z1=MIN(Z1,ZZZ(I,J,1,T))
-    ENDDO
-    ENDDO
-    ENDDO
-    SCP(PSL)=ABS((Z2-Z1)/(NUMGRID(3)-1))
-  ELSEIF(IFPCDNT.EQ.1)THEN
-    SCP(PSL)=ABS((PPP(NUMGRID(3))-PPP(1))/(NUMGRID(3)-1))
-  ENDIF
-  IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)SCP(CSL)=ABS(COR(1,1))
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)SCP(CSL)=MAX(SCP(CSL),ABS(COR(I,J)))
-  ENDDO
-  ENDDO
-  IF (SCP(CSL) .LT. 1.0e-5) SCP(CSL) = 1.0 ! Temporarily turn off scaling Coroilis
-  IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)SCP(DSL)=ABS(DEN(1,1,1,1))
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)SCP(DSL)=MAX(SCP(DSL),ABS(DEN(I,J,K,T)))
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  IF (SCP(DSL) .LT. 1.0e-5) SCP(DSL) = 1.0 ! Temporarily turn off scaling Geostrophic with density
-! SCALE THE PHYSICAL POSITION AND CORIOLIS FREQUENCY
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(NUMGRID(1).GE.2)XXX(I,J)=(XXX(I,J)-ORIPSTN(1))/SCP(XSL)
-    IF(NUMGRID(2).GE.2)YYY(I,J)=(YYY(I,J)-ORIPSTN(2))/SCP(YSL)
-    IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)COR(I,J)=COR(I,J)/SCP(CSL)
-  ENDDO
-  ENDDO
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)DEN(I,J,K,T)=DEN(I,J,K,T)/SCP(DSL)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN         ! FOR SIGMA AND HEIGHT COORDINATE
-    ORIVTCL=ZZZ(1,1,1,1)
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      ZZZ(I,J,K,T)=(ZZZ(I,J,K,T)-ORIVTCL)/SCP(PSL)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ELSEIF(IFPCDNT.EQ.1)THEN                       ! FOR PRESSURE COORDINATE
-    ORIVTCL=PPP(1)
-    DO K=1,NUMGRID(3)
-      PPP(K)=(PPP(K)-ORIVTCL)/SCP(PSL)
-    ENDDO
-  ENDIF
+! calculate scale for physical position and coriolis frequency
+      scp(xsl) = abs((xxx(numgrid(1), numgrid(2)) - xxx(1, 1))/(numgrid(1) - 1))
+      scp(ysl) = abs((yyy(numgrid(1), numgrid(2)) - yyy(1, 1))/(numgrid(2) - 1))
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then         ! for sigma and heightcoordinate
+         z2 = zzz(1, 1, numgrid(3), 1)
+         z1 = zzz(1, 1, 1, 1)
+         do i = 1, numgrid(1)
+         do j = 1, numgrid(2)
+         do t = 1, numgrid(4)
+            z2 = max(z2, zzz(i, j, numgrid(3), t))
+            z1 = min(z1, zzz(i, j, 1, t))
+         end do
+         end do
+         end do
+         scp(psl) = abs((z2 - z1)/(numgrid(3) - 1))
+      elseif (ifpcdnt .eq. 1) then
+         scp(psl) = abs((ppp(numgrid(3)) - ppp(1))/(numgrid(3) - 1))
+      end if
+      if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) scp(csl) = abs(cor(1, 1))
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) scp(csl) = max(scp(csl), abs(cor(i, j)))
+      end do
+      end do
+      if (scp(csl) .lt. 1.0e-5) scp(csl) = 1.0 ! temporarily turn off scaling coroilis
+      if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) scp(dsl) = abs(den(1, 1, 1, 1))
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) scp(dsl) = max(scp(dsl), abs(den(i, j, k, t)))
+      end do
+      end do
+      end do
+      end do
+      if (scp(dsl) .lt. 1.0e-5) scp(dsl) = 1.0 ! temporarily turn off scaling geostrophic with density
+! scale the physical position and coriolis frequency
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (numgrid(1) .ge. 2) xxx(i, j) = (xxx(i, j) - oripstn(1))/scp(xsl)
+         if (numgrid(2) .ge. 2) yyy(i, j) = (yyy(i, j) - oripstn(2))/scp(ysl)
+         if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) cor(i, j) = cor(i, j)/scp(csl)
+      end do
+      end do
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) den(i, j, k, t) = den(i, j, k, t)/scp(dsl)
+      end do
+      end do
+      end do
+      end do
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then         ! for sigma and height coordinate
+         orivtcl = zzz(1, 1, 1, 1)
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            zzz(i, j, k, t) = (zzz(i, j, k, t) - orivtcl)/scp(psl)
+         end do
+         end do
+         end do
+         end do
+      elseif (ifpcdnt .eq. 1) then                       ! for pressure coordinate
+         orivtcl = ppp(1)
+         do k = 1, numgrid(3)
+            ppp(k) = (ppp(k) - orivtcl)/scp(psl)
+         end do
+      end if
 
-  RETURN
-END SUBROUTINE PHYSCPSTN
+      return
+   end subroutine physcpstn
 
-END MODULE PREP_STMAS4D
+end module prep_stmas4d

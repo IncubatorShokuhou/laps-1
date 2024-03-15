@@ -1,98 +1,98 @@
-      SUBROUTINE DLASWP( N, A, LDA, K1, K2, IPIV, INCX )
+      subroutine dlaswp( n, a, lda, k1, k2, ipiv, incx )
 *
-*  -- LAPACK auxiliary routine (version 2.0) --
-*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-*     Courant Institute, Argonne National Lab, and Rice University
-*     October 31, 1992
+*  -- lapack auxiliary routine (version 2.0) --
+*     univ. of tennessee, univ. of california berkeley, nag ltd.,
+*     courant institute, argonne national lab, and rice university
+*     october 31, 1992
 *
-*     .. Scalar Arguments ..
-      INTEGER            INCX, K1, K2, LDA, N
+*     .. scalar arguments ..
+      integer            incx, k1, k2, lda, n
 *     ..
-*     .. Array Arguments ..
-      INTEGER            IPIV( * )
-      DOUBLE PRECISION   A( LDA, * )
+*     .. array arguments ..
+      integer            ipiv( * )
+      double precision   a( lda, * )
 *     ..
 *
-*  Purpose
+*  purpose
 *  =======
 *
-*  DLASWP performs a series of row interchanges on the matrix A.
-*  One row interchange is initiated for each of rows K1 through K2 of A.
+*  dlaswp performs a series of row interchanges on the matrix a.
+*  one row interchange is initiated for each of rows k1 through k2 of a.
 *
-*  Arguments
+*  arguments
 *  =========
 *
-*  N       (input) INTEGER
-*          The number of columns of the matrix A.
+*  n       (input) integer
+*          the number of columns of the matrix a.
 *
-*  A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-*          On entry, the matrix of column dimension N to which the row
+*  a       (input/output) double precision array, dimension (lda,n)
+*          on entry, the matrix of column dimension n to which the row
 *          interchanges will be applied.
-*          On exit, the permuted matrix.
+*          on exit, the permuted matrix.
 *
-*  LDA     (input) INTEGER
-*          The leading dimension of the array A.
+*  lda     (input) integer
+*          the leading dimension of the array a.
 *
-*  K1      (input) INTEGER
-*          The first element of IPIV for which a row interchange will
+*  k1      (input) integer
+*          the first element of ipiv for which a row interchange will
 *          be done.
 *
-*  K2      (input) INTEGER
-*          The last element of IPIV for which a row interchange will
+*  k2      (input) integer
+*          the last element of ipiv for which a row interchange will
 *          be done.
 *
-*  IPIV    (input) INTEGER array, dimension (M*abs(INCX))
-*          The vector of pivot indices.  Only the elements in positions
-*          K1 through K2 of IPIV are accessed.
-*          IPIV(K) = L implies rows K and L are to be interchanged.
+*  ipiv    (input) integer array, dimension (m*abs(incx))
+*          the vector of pivot indices.  only the elements in positions
+*          k1 through k2 of ipiv are accessed.
+*          ipiv(k) = l implies rows k and l are to be interchanged.
 *
-*  INCX    (input) INTEGER
-*          The increment between successive values of IPIV.  If IPIV
+*  incx    (input) integer
+*          the increment between successive values of ipiv.  if ipiv
 *          is negative, the pivots are applied in reverse order.
 *
 * =====================================================================
 *
-*     .. Local Scalars ..
-      INTEGER            I, IP, IX
+*     .. local scalars ..
+      integer            i, ip, ix
 *     ..
-*     .. External Subroutines ..
-      EXTERNAL           DSWAP
+*     .. external subroutines ..
+      external           dswap
 *     ..
-*     .. Executable Statements ..
+*     .. executable statements ..
 *
-*     Interchange row I with row IPIV(I) for each of rows K1 through K2.
+*     interchange row i with row ipiv(i) for each of rows k1 through k2.
 *
-      IF( INCX.EQ.0 )
-     $   RETURN
-      IF( INCX.GT.0 ) THEN
-         IX = K1
-      ELSE
-         IX = 1 + ( 1-K2 )*INCX
-      END IF
-      IF( INCX.EQ.1 ) THEN
-         DO 10 I = K1, K2
-            IP = IPIV( I )
-            IF( IP.NE.I )
-     $         CALL DSWAP( N, A( I, 1 ), LDA, A( IP, 1 ), LDA )
-   10    CONTINUE
-      ELSE IF( INCX.GT.1 ) THEN
-         DO 20 I = K1, K2
-            IP = IPIV( IX )
-            IF( IP.NE.I )
-     $         CALL DSWAP( N, A( I, 1 ), LDA, A( IP, 1 ), LDA )
-            IX = IX + INCX
-   20    CONTINUE
-      ELSE IF( INCX.LT.0 ) THEN
-         DO 30 I = K2, K1, -1
-            IP = IPIV( IX )
-            IF( IP.NE.I )
-     $         CALL DSWAP( N, A( I, 1 ), LDA, A( IP, 1 ), LDA )
-            IX = IX + INCX
-   30    CONTINUE
-      END IF
+      if( incx.eq.0 )
+     $   return
+      if( incx.gt.0 ) then
+         ix = k1
+      else
+         ix = 1 + ( 1-k2 )*incx
+      end if
+      if( incx.eq.1 ) then
+         do 10 i = k1, k2
+            ip = ipiv( i )
+            if( ip.ne.i )
+     $         call dswap( n, a( i, 1 ), lda, a( ip, 1 ), lda )
+   10    continue
+      else if( incx.gt.1 ) then
+         do 20 i = k1, k2
+            ip = ipiv( ix )
+            if( ip.ne.i )
+     $         call dswap( n, a( i, 1 ), lda, a( ip, 1 ), lda )
+            ix = ix + incx
+   20    continue
+      else if( incx.lt.0 ) then
+         do 30 i = k2, k1, -1
+            ip = ipiv( ix )
+            if( ip.ne.i )
+     $         call dswap( n, a( i, 1 ), lda, a( ip, 1 ), lda )
+            ix = ix + incx
+   30    continue
+      end if
 *
-      RETURN
+      return
 *
-*     End of DLASWP
+*     end of dlaswp
 *
-      END
+      end

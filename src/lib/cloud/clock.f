@@ -1,26 +1,26 @@
 
-      SUBROUTINE CLOCK(H,c5_string)
-      REAL*8 H,RHOUR
-      CHARACTER*5 c5_string
-      INTEGER HOUR,MINUTE
+      subroutine clock(h,c5_string)
+      real*8 h,rhour
+      character*5 c5_string
+      integer hour,minute
 
-!     Hour is the input time in radians
+!     hour is the input time in radians
 
-      RHOUR=DMOD(H*3.819718634D0+48.D0,24.D0)
-      HOUR=IDINT(RHOUR)
+      rhour=dmod(h*3.819718634d0+48.d0,24.d0)
+      hour=idint(rhour)
 
-      MINUTE=NINT((RHOUR-HOUR)*60.D0)
+      minute=nint((rhour-hour)*60.d0)
 
       if(minute .eq. 60)then
           minute = 0
           hour = hour + 1
       endif
 
-      MIN1 = MINUTE/10
-      MIN2 = MINUTE - MIN1 * 10
+      min1 = minute/10
+      min2 = minute - min1 * 10
 
-      write(c5_string,1)HOUR,MIN1,MIN2
+      write(c5_string,1)hour,min1,min2
 1     format(i2,':',i1,i1)
 
-      RETURN
-      END
+      return
+      end

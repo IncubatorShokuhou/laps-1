@@ -1,29 +1,29 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE ERRMSG(CMSG)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: ERRMSG         WRITE A MESSAGE TO STDERR
-C   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
-C
-C ABSTRACT: WRITE A MESSAGE TO STDERR.
-C
-C PROGRAM HISTORY LOG:
-C   95-10-31  IREDELL
-C
-C USAGE:    CALL ERRMSG(CMSG)
-C   INPUT ARGUMENTS:
-C     CMSG         CHARACTER*(*) MESSAGE TO WRITE
-C
-C REMARKS: THIS IS A MACHINE-DEPENDENT SUBPROGRAM.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN
-C   MACHINE:  CRAY
-C
-C$$$
-      CHARACTER*(*) CMSG
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      WRITE(0,'(A)') CMSG
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+c-----------------------------------------------------------------------
+      subroutine errmsg(cmsg)
+c$$$  subprogram documentation block
+c
+c subprogram: errmsg         write a message to stderr
+c   prgmmr: iredell          org: w/nmc23     date: 95-10-31
+c
+c abstract: write a message to stderr.
+c
+c program history log:
+c   95-10-31  iredell
+c
+c usage:    call errmsg(cmsg)
+c   input arguments:
+c     cmsg         character*(*) message to write
+c
+c remarks: this is a machine-dependent subprogram.
+c
+c attributes:
+c   language: fortran
+c   machine:  cray
+c
+c$$$
+      character*(*) cmsg
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      write(0,'(a)') cmsg
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

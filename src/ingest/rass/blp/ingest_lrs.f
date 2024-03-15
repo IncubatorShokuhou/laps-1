@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -30,8 +30,8 @@ cdis
 cdis 
 cdis 
 
-!       1997 Jul      Ken Dritz     Added call to get_grid_dim_xy.
-!       1997 Jul      Ken Dritz     Pass NX_L, NY_L to ingest_blplrs.
+!       1997 jul      ken dritz     added call to get_grid_dim_xy.
+!       1997 jul      ken dritz     pass nx_l, ny_l to ingest_blplrs.
 
         character*9 a9_time
 
@@ -39,15 +39,15 @@ cdis
         if(istatus .ne. 1)go to 999
 
         if(i4time .eq. (i4time / 3600) * 3600)then
-            call get_grid_dim_xy(NX_L,NY_L,istatus)
+            call get_grid_dim_xy(nx_l,ny_l,istatus)
             if (istatus .ne. 1) then
-               write (6,*) 'Error getting horizontal domain dimensions'
+               write (6,*) 'error getting horizontal domain dimensions'
                go to 999
             endif
-!           call ingest_blplrs(i4time,NX_L,NY_L,j_status)
+!           call ingest_blplrs(i4time,nx_l,ny_l,j_status)
 
         else
-            write(6,*)' Not on the hour, no blp rass ingest run'
+            write(6,*)' not on the hour, no blp rass ingest run'
 
         endif
 

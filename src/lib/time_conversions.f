@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -29,151 +29,151 @@ cdis
 cdis
 cdis
 cdis
-C
-        SUBROUTINE make_fnam_lp (I4TIME, FILE_NAME, ISTATUS)
-C
-cdoc    make_fnam_lp CONSTRUCTS THE FILE NAME STRING 'yyjjjhhmm' FOR
-cdoc    THE TIME CORRESPONDING TO I4TIME (seconds since 1-1-1960).
-C
-C================================================================
-C
-        INTEGER I4TIME, ISTATUS
-        CHARACTER*9 FILE_NAME
-C
-        INTEGER NYEAR, NMONTH, NDAY, NHOUR, NMIN, NSEC, NJULIAN, I
-C
-        INTEGER NJUL_DAYS(12)
-        DATA NJUL_DAYS/0,31,59,90,120,151,181,212,243,273,304,334/
-C
-C================================================================
-C
-C Convert I4 time to string yyjjjhhmm.
-C
-        CALL CV_I4TIM_INT_LP (I4TIME, NYEAR, NMONTH, NDAY, NHOUR, NMIN,
-     1                      NSEC, ISTATUS)
-        IF (istatus .ne. 1) GO TO 100
+c
+        subroutine make_fnam_lp (i4time, file_name, istatus)
+c
+cdoc    make_fnam_lp constructs the file name string 'yyjjjhhmm' for
+cdoc    the time corresponding to i4time (seconds since 1-1-1960).
+c
+c================================================================
+c
+        integer i4time, istatus
+        character*9 file_name
+c
+        integer nyear, nmonth, nday, nhour, nmin, nsec, njulian, i
+c
+        integer njul_days(12)
+        data njul_days/0,31,59,90,120,151,181,212,243,273,304,334/
+c
+c================================================================
+c
+c convert i4 time to string yyjjjhhmm.
+c
+        call cv_i4tim_int_lp (i4time, nyear, nmonth, nday, nhour, nmin,
+     1                      nsec, istatus)
+        if (istatus .ne. 1) go to 100
 
-        NJULIAN = NJUL_DAYS(NMONTH) + NDAY
+        njulian = njul_days(nmonth) + nday
 
-        IF (NMONTH .GT. 2 .AND. MOD (NYEAR,4) .EQ. 0) NJULIAN=NJULIAN +
+        if (nmonth .gt. 2 .and. mod (nyear,4) .eq. 0) njulian=njulian +
      11
 
-        NYEAR = mod(NYEAR,100) ! Steve Albers 1997
+        nyear = mod(nyear,100) ! steve albers 1997
 
-        WRITE(FILE_NAME,1001,ERR=90) NYEAR, NJULIAN, NHOUR, NMIN
-1001    FORMAT (I2.2,I3.3,I2.2,I2.2)
+        write(file_name,1001,err=90) nyear, njulian, nhour, nmin
+1001    format (i2.2,i3.3,i2.2,i2.2)
 
-        DO I = 1, 9
-           IF (FILE_NAME(I:I) .EQ. ' ') FILE_NAME(I:I) = '0'
-        END DO
+        do i = 1, 9
+           if (file_name(i:i) .eq. ' ') file_name(i:i) = '0'
+        end do
 
-        ISTATUS = 1
-        RETURN
-C
-C Error in ENCODE.
-C
-90      ISTATUS = 0
-        WRITE( 6,* ) 'Error in make_fnam_lp: error in encode.'
-        RETURN
-C
-C Error in subroutine...
-C
-100     ISTATUS = 0
-        WRITE( 6,* ) 'Error in make_fnam_lp: error in subroutine.'
-        RETURN
-        END
-C
-        SUBROUTINE CV_I4TIM_INT_LP (I4TIME,NYEAR,NMONTH,NDAY,NHOUR,
-     1                     NMIN,NSEC,ISTATUS)
-C
-cdoc    CV_I4TIM_INT_LP CONVERTS I4TIME (seconds since 1-1-1960) TO SIX INTEGERS
-cdoc    Note that NYEAR is the number of years since 1900
-C
-C================================================================
-C
-C       INTEGER I4TIME, NYEAR, NMONTH, NDAY, NHOUR, NMIN, NSEC, ISTATUS
-C
-        INTEGER NSECMO(12), NSECYR, NSECDA, NSECHR, NSECMN
-        INTEGER IBASE, I, NN, LFTOVR, NDAYS
+        istatus = 1
+        return
+c
+c error in encode.
+c
+90      istatus = 0
+        write( 6,* ) 'error in make_fnam_lp: error in encode.'
+        return
+c
+c error in subroutine...
+c
+100     istatus = 0
+        write( 6,* ) 'error in make_fnam_lp: error in subroutine.'
+        return
+        end
+c
+        subroutine cv_i4tim_int_lp (i4time,nyear,nmonth,nday,nhour,
+     1                     nmin,nsec,istatus)
+c
+cdoc    cv_i4tim_int_lp converts i4time (seconds since 1-1-1960) to six integers
+cdoc    note that nyear is the number of years since 1900
+c
+c================================================================
+c
+c       integer i4time, nyear, nmonth, nday, nhour, nmin, nsec, istatus
+c
+        integer nsecmo(12), nsecyr, nsecda, nsechr, nsecmn
+        integer ibase, i, nn, lftovr, ndays
 
-        PARAMETER (IBASE=60)
+        parameter (ibase=60)
 
-        DATA NSECYR/31536000/NSECDA/86400/NSECHR/3600/NSECMN/60/
-        DATA NSECMO/2678400,0,2678400,2592000,2678400,
+        data nsecyr/31536000/nsecda/86400/nsechr/3600/nsecmn/60/
+        data nsecmo/2678400,0,2678400,2592000,2678400,
      1  2592000,2678400,2678400,2592000,2678400,2592000,2678400/
-C
-C================================================================
-C
-        ISTATUS = 1
-C
-C Verify input.
-C
-        IF (I4TIME .LT. 0) THEN
-           ISTATUS = 0
-           WRITE(6,*) 'Error in CV_I4TIM_INT_LP: negative time ', I4TIME
-           RETURN
-        END IF
+c
+c================================================================
+c
+        istatus = 1
+c
+c verify input.
+c
+        if (i4time .lt. 0) then
+           istatus = 0
+           write(6,*) 'error in cv_i4tim_int_lp: negative time ', i4time
+           return
+        end if
 
-C
-C Subtract out number of years.
-C
-        LFTOVR = I4TIME
-        NN = LFTOVR
-        DO I = 0, 70
-           IF (MOD(I,4) .EQ. 0) THEN
-              NN = NN - (NSECYR + NSECDA)
-           ELSE
-              NN = NN - NSECYR
-           END IF
-           IF (NN .LT. 0) GO TO 8
-           LFTOVR = NN
-        END DO
-8       NYEAR = IBASE + I
+c
+c subtract out number of years.
+c
+        lftovr = i4time
+        nn = lftovr
+        do i = 0, 70
+           if (mod(i,4) .eq. 0) then
+              nn = nn - (nsecyr + nsecda)
+           else
+              nn = nn - nsecyr
+           end if
+           if (nn .lt. 0) go to 8
+           lftovr = nn
+        end do
+8       nyear = ibase + i
 
-C
-C Subtract out number of months.
-C
-        NSECMO(2) = 2419200
-        IF (MOD(NYEAR,4) .NE. 0) GO TO 10
-           NSECMO(2) = 2505600
-10      NN=LFTOVR
-        DO I=1,12
-           NN = NN - NSECMO(I)
-           IF (NN .LT. 0) GO TO 30
-           LFTOVR = NN
-        END DO
-30      NMONTH = I
+c
+c subtract out number of months.
+c
+        nsecmo(2) = 2419200
+        if (mod(nyear,4) .ne. 0) go to 10
+           nsecmo(2) = 2505600
+10      nn=lftovr
+        do i=1,12
+           nn = nn - nsecmo(i)
+           if (nn .lt. 0) go to 30
+           lftovr = nn
+        end do
+30      nmonth = i
 
-C
-C Subtract out number of days.
-C
-        NDAYS = LFTOVR / NSECDA
-        LFTOVR = LFTOVR - (NDAYS * NSECDA)
-        NDAY = NDAYS + 1
+c
+c subtract out number of days.
+c
+        ndays = lftovr / nsecda
+        lftovr = lftovr - (ndays * nsecda)
+        nday = ndays + 1
 
-C
-C Subtract out number of hours.
-C
-        NHOUR = LFTOVR / NSECHR
-        LFTOVR = LFTOVR - (NHOUR * NSECHR)
+c
+c subtract out number of hours.
+c
+        nhour = lftovr / nsechr
+        lftovr = lftovr - (nhour * nsechr)
 
-C
-C Subtract out number of minutes.
-C
-        NMIN = LFTOVR / NSECMN
-        LFTOVR = LFTOVR - (NMIN * NSECMN)
+c
+c subtract out number of minutes.
+c
+        nmin = lftovr / nsecmn
+        lftovr = lftovr - (nmin * nsecmn)
 
-C
-C What's left over is number of seconds.
-C
-        NSEC = LFTOVR
-        RETURN
-        END
+c
+c what's left over is number of seconds.
+c
+        nsec = lftovr
+        return
+        end
 
       subroutine make_fnam13_lp(initial_i4time,forecast_time,filename,
      +     status)
 
-cdoc  Converts initial time and forecast time to a 13 character filename
+cdoc  converts initial time and forecast time to a 13 character filename
 
       integer initial_i4time, forecast_time, status
       character*13 filename
@@ -186,7 +186,7 @@ cdoc  Converts initial time and forecast time to a 13 character filename
 
       subroutine c_time2fname(utime,a9time)
 
-cdoc  Convert utime to a9time. Jacket routine that calls 'make_fnam_lp'.
+cdoc  convert utime to a9time. jacket routine that calls 'make_fnam_lp'.
 
       integer utime, i4time, istatus
       character*(*) a9time
@@ -198,21 +198,21 @@ cdoc  Convert utime to a9time. Jacket routine that calls 'make_fnam_lp'.
       end
 
 
-      subroutine afwa_julhr_i4time(I_A1JUL,I_A1MIN,i4time)
+      subroutine afwa_julhr_i4time(i_a1jul,i_a1min,i4time)
 
-cdoc  I_A1JUL is number of hours since Dec 31, 1967 at 00z
-cdoc  This is converted to i4time, number of sec since Jan 1, 1960 at 00z
-      i4time_hr  = I_A1JUL * 3600 + (8*365 - 1 + 2) * 86400
-      i4time_min = I_A1MIN*60
+cdoc  i_a1jul is number of hours since dec 31, 1967 at 00z
+cdoc  this is converted to i4time, number of sec since jan 1, 1960 at 00z
+      i4time_hr  = i_a1jul * 3600 + (8*365 - 1 + 2) * 86400
+      i4time_min = i_a1min*60
       i4time     = i4time_hr + i4time_min
 
       return
       end
 
 
-        subroutine cv_asc_i4time(ascii_time,I4time)
+        subroutine cv_asc_i4time(ascii_time,i4time)
 
-cdoc    Converts 9 character ascii time into i4time (seconds since 1-1-1960)
+cdoc    converts 9 character ascii time into i4time (seconds since 1-1-1960)
 
         character*9 ascii_time
         integer i4time ! seconds since 1-1-1960
@@ -225,7 +225,7 @@ cdoc    Converts 9 character ascii time into i4time (seconds since 1-1-1960)
 2       format(i2)
 3       format(i3)
 
-!       Valid for years 1960-2060
+!       valid for years 1960-2060
         if(iyear .lt. 60)iyear = iyear + 100
 
         lp = (iyear + 3 - 60) / 4
@@ -239,27 +239,27 @@ cdoc    Converts 9 character ascii time into i4time (seconds since 1-1-1960)
 
         return
 
-!       Error return
-900     write(6,*)' Error in cv_asc_i4time: ascii_time = ',ascii_time
+!       error return
+900     write(6,*)' error in cv_asc_i4time: ascii_time = ',ascii_time
 
         return
 
         end
 
-C
+c
         subroutine      cv_i4tim_asc_lp(i4time,atime,istatus)
-C
-cdoc  Takes in an i4time and returns the time as an ASCII string
-cdoc  (e.g. 27-MAR-1990 12:30:00.00 ).  The i4time is assumed to
+c
+cdoc  takes in an i4time and returns the time as an ascii string
+cdoc  (e.g. 27-mar-1990 12:30:00.00 ).  the i4time is assumed to
 cdoc  be a 1960-relative time, although the starting year is easily
 cdoc  changed in the code.
-C
-C     IMPORTS - i4time ! seconds since 1-1-1960
-C
-C     EXPORTS - atime, istatus
-C
-C================================================================
-C
+c
+c     imports - i4time ! seconds since 1-1-1960
+c
+c     exports - atime, istatus
+c
+c================================================================
+c
 
         implicit        none
 
@@ -287,16 +287,16 @@ C
      1                   2678400,2592000,2678400,2678400,
      1                   2592000,2678400,2592000,2678400/
 
-        data            amonth/'JAN','FEB','MAR','APR','MAY','JUN',
-     1                 'JUL','AUG','SEP','OCT','NOV','DEC'/
+        data            amonth/'jan','feb','mar','apr','may','jun',
+     1                 'jul','aug','sep','oct','nov','dec'/
 
-C
-C================================================================
-C
+c
+c================================================================
+c
 
         if (i4time .lt. 0) then
            istatus=0
-           write (6,*) 'Error in input to cv_i4tim_asc_lp: negative time
+           write (6,*) 'error in input to cv_i4tim_asc_lp: negative time
      1'
            return
         endif
@@ -368,9 +368,9 @@ C
       double precision jd, jd_1960
       integer i4time ! seconds since 1-1-1960
 
-cdoc  Converts Julian Day (Number of days since Jan 1 4713BCE to i4time)
+cdoc  converts julian day (number of days since jan 1 4713bce to i4time)
 
-!     Author: Steve Albers 2005
+!     author: steve albers 2005
 
       jd_1960 = 2436934.5
 
@@ -388,13 +388,13 @@ cdoc  Converts Julian Day (Number of days since Jan 1 4713BCE to i4time)
       double precision jd, jd_1960, days_since_1960
       integer i4time,istatus ! seconds since 1-1-1960
 
-cdoc  Converts i4time to Julian Day (Number of days since Jan 1 4713BCE)
+cdoc  converts i4time to julian day (number of days since jan 1 4713bce)
 
-!     Author: Steve Albers 2013
+!     author: steve albers 2013
 
       jd_1960 = 2436934.5
 
-      days_since_1960 = dble(i4time) / 86400.D0
+      days_since_1960 = dble(i4time) / 86400.d0
 
 !     write(6,*)' days since 1960 is ',days_since_1960
 

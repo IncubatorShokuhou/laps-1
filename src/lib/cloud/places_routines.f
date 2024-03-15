@@ -1,7 +1,7 @@
 
       function v_to_b(v)
 
-!     Convert visual magnitude per square second (v) to brightness in 
+!     convert visual magnitude per square second (v) to brightness in 
 !     nanolamberts (b)
 
       v_to_b = 34.08 * exp(20.7233 - 0.92104 * v)
@@ -12,7 +12,7 @@
 
       function b_to_v(b)
 
-!     Convert brightness in nanolamberts (b) to visual magnitude per square 
+!     convert brightness in nanolamberts (b) to visual magnitude per square 
 !     second (v) 
 
       b_to_v = (log(b/34.08) - 20.7233) / (- 0.92104) 
@@ -22,9 +22,9 @@
 
       function b_to_maglim(b)
 
-!     Convert brightness in nanolamberts (b) to visual magnitude limit.
-!     This starts with Weavers formula (1947). Also Eq. 20 of Garstang (1986).
-!     Then, a Schaaf - Albers correction of +0.23 magnitude is applied.
+!     convert brightness in nanolamberts (b) to visual magnitude limit.
+!     this starts with weavers formula (1947). also eq. 20 of garstang (1986).
+!     then, a schaaf - albers correction of +0.23 magnitude is applied.
 
       if(b .le. 1479.)then
           b_to_maglim = 7.930 - 2.171 * log(1. + .1122   * sqrt(b))       
@@ -43,9 +43,9 @@
 
       function b_to_maglim_hecht(b)
 
-!     Convert brightness in nanolamberts (b) to visual magnitude limit.
-!     This starts with Hecht's formula (1947) as quoted in Schaefer using
-!     Schaefer's Equations. 
+!     convert brightness in nanolamberts (b) to visual magnitude limit.
+!     this starts with hecht's formula (1947) as quoted in schaefer using
+!     schaefer's equations. 
 
 
       real*4 k
@@ -60,9 +60,9 @@
           k = 10. ** (-1.90)
       endif
 
-      rith = c * (1. + sqrt(k * b)) ** 2       ! Eq 34
-      rmag_v = -16.57 - 2.5 * alog10(rith)     ! Eq 10
-      b_to_maglim_hecht = rmag_v - 0.3         ! Eq 9,48
+      rith = c * (1. + sqrt(k * b)) ** 2       ! eq 34
+      rmag_v = -16.57 - 2.5 * alog10(rith)     ! eq 10
+      b_to_maglim_hecht = rmag_v - 0.3         ! eq 9,48
 
 !     write(22,*)b,c,k,rith,rmag_v,b_to_maglim_hecht
 

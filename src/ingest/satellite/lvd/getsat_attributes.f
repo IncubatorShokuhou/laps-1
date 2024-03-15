@@ -59,7 +59,7 @@
       enddo 
 
       if(min(istart,iend,jstart,jend).le.0)then
-         write(6,*)'Error in getsat_attributes'
+         write(6,*)'error in getsat_attributes'
          write(6,*)'istart, iend, jstart, or jend = 0'
          return
       else

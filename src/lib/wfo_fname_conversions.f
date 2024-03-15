@@ -2,10 +2,10 @@ c
 c
       function wfo_fname13_to_fname9(wfo_fname13)
 c
-cdoc  Routine converts wfo filename 'yyyymmdd_hhmm' to 'yyjjjhhmm' filename.
+cdoc  routine converts wfo filename 'yyyymmdd_hhmm' to 'yyjjjhhmm' filename.
 c
-c  JSmart   8-96  Stole this from JSmart who previously stole it from
-c                 PStamus and modified to generate the wfo filename time.
+c  jsmart   8-96  stole this from jsmart who previously stole it from
+c                 pstamus and modified to generate the wfo filename time.
 c
       character*2 cyr
       character*3 cjjj
@@ -13,14 +13,14 @@ c
       integer imon_a(12), imon(12)
       data imon_a/0,31,59,90,120,151,181,212,243,273,304,334/
 c
-c..... First, read the LAPS time and get julian days.
+c..... first, read the laps time and get julian days.
 c
       read(wfo_fname13(3:4),11,err=990) iyr
       read(wfo_fname13(5:6),11,err=990) imm
       read(wfo_fname13(7:8),11,err=990) idy
  11   format(i2)
 c
-c..... Check for leap year.
+c..... check for leap year.
 c
       do i=1,12
          imon(i) = imon_a(i)
@@ -31,11 +31,11 @@ c
          enddo !i
       endif
 c
-c..... Convert month, day to julian day.
+c..... convert month, day to julian day.
 c
       jjj = imon(imm) + idy
 c
-c..... Now write out the time.
+c..... now write out the time.
 c
       write(cyr,12) iyr
  12   format(i2.2)
@@ -53,7 +53,7 @@ c
       return
 
 990   write(6,*)
-     1  ' Error in wfo_fname13_to_fname9, invalid string input: '
+     1  ' error in wfo_fname13_to_fname9, invalid string input: '
      1  ,wfo_fname13
 
       return
@@ -67,9 +67,9 @@ c
 
       include 'lapsparms.for'
 c
-cdoc  Routine to convert LAPS 'yyjjjhhmm' time to 'yyyymmdd_hhmm' time.
+cdoc  routine to convert laps 'yyjjjhhmm' time to 'yyyymmdd_hhmm' time.
 c
-c  JSmart   8-96  Stole this from PStamus and modified to generate the
+c  jsmart   8-96  stole this from pstamus and modified to generate the
 c                 wfo filename time.
 c
       character*2 cyr,cmm,cdy,chh,cmin
@@ -82,12 +82,12 @@ c
 
       a9_time = a9_time_in
 c
-c..... First, read the LAPS time and get julian days.
+c..... first, read the laps time and get julian days.
 c
       read(a9_time,11) iyr, jjj, ihh, imin
  11   format(i2,i3,2i2)
 c
-c..... Check for leap year.
+c..... check for leap year.
 c
       do i=1,12
          imon(i) = imon_a(i)
@@ -98,7 +98,7 @@ c
          enddo !i
       endif
 c
-c..... Convert julian day to month, day.
+c..... convert julian day to month, day.
 c
       do i=12,1,-1
          kk = jjj - imon(i)
@@ -117,7 +117,7 @@ c
 c
  200  continue
 c
-c..... Now write out the time.
+c..... now write out the time.
 c
       write(cyr,12) iyr
       write(cmm,12) imm
@@ -158,10 +158,10 @@ c
        character*9  fname9
        integer    cvt_wfo_fname13_i4time
        integer    i4time
-C      INTEGER INT_FILE(9), I, NYEAR, JDAY, NHOUR, MIN, MONTH, NDAY
-C      INTEGER I4TIME_INT_LP
+c      integer int_file(9), i, nyear, jday, nhour, min, month, nday
+c      integer i4time_int_lp
 
-cdoc   Convert wfo filename*13 to i4time
+cdoc   convert wfo filename*13 to i4time
 
 c
 c first convert wfo filename*13 to filename 'yyjjjhhmm'
@@ -172,16 +172,16 @@ c convert fname9 to i4time
 c
        call i4time_fname_lp (fname9, i4time, istatus)
        if(istatus.ne.1)then
-          write(6,*)'Error converting fname9 to i4time: ',fname9
-          write(6,*)'Conversion incomplete in cvt_wfo_fname13_i4time'
+          write(6,*)'error converting fname9 to i4time: ',fname9
+          write(6,*)'conversion incomplete in cvt_wfo_fname13_i4time'
        endif
 
        cvt_wfo_fname13_i4time = i4time
-C
-C      Successful return
-C
-       ISTATUS = 1
-       RETURN
+c
+c      successful return
+c
+       istatus = 1
+       return
        end
 c
 c ---------------------------------------------------------------
@@ -194,7 +194,7 @@ c
        integer    i4time
        integer    i4time_temp
 
-cdoc   Convert i4time to wfo filename*13 yyyymmdd_hhmm
+cdoc   convert i4time to wfo filename*13 yyyymmdd_hhmm
 
 c
 c first convert i4time to ascii filename *9
@@ -202,8 +202,8 @@ c
        i4time_temp=i4time
        call make_fnam_lp (i4time_temp, fname9, istatus)
        if(istatus.ne.1)then
-          write(6,*)'Error converting i4time to fname9: ', i4time_temp       
-          write(6,*)'Conversion incomplete in cvt_i4time_wfo_fname13'
+          write(6,*)'error converting i4time to fname9: ', i4time_temp       
+          write(6,*)'conversion incomplete in cvt_i4time_wfo_fname13'
        endif
 c
 c convert fname9 to wfo_fname13
@@ -216,7 +216,7 @@ c
       function cvt_fname13_to_wfo_fname13(fname13)
 c
 c function converts filename yyjjjhhmmffff to yyyymmdd_hhmm
-c Note: does not use ffff
+c note: does not use ffff
       character*13  fname13
       character*13  cvt_fname13_to_wfo_fname13
       character*13  fname9_to_wfo_fname13

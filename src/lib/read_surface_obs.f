@@ -10,14 +10,14 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the newer LAPS LSO surface data file with the expanded 
-cdoc    variable list. The data is passed back to the calling routine in 1-d 
+cdoc    routine to read the newer laps lso surface data file with the expanded 
+cdoc    variable list. the data is passed back to the calling routine in 1-d 
 cdoc    arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
-c                          05-01-98  Added soil moisture variables.
-c               J. Edwards 09-16-98  moved all format definitions to 
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
+c                          05-01-98  added soil moisture variables.
+c               j. edwards 09-16-98  moved all format definitions to 
 c                                    src/include/lso_formats.inc
 c                                    changed 909 definition to allow for 
 c                                    missing data
@@ -48,7 +48,7 @@ c
 	character wx(maxsta)*25, store_cldamt(maxsta,5)*4
 c
 c
-c.....  Blank out the character arrays.
+c.....  blank out the character arrays.
 c
 	jstatus = 0
 	do i=1,maxsta
@@ -62,7 +62,7 @@ c
 	   enddo !j
 	enddo !i
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -70,13 +70,13 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
         if(n_obs_b.eq.0) then
          print*, 'no obs in file ',infile,' returning'
@@ -86,18 +86,18 @@ c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),            !station id
-     &                   wmoid(k),               !WMO id number
+     &                   wmoid(k),               !wmo id number
      &                   provider(k),            !data provider
-     &                   lat(k), lon(k), elev(k),!lat/lon (deg), elev (meters MSL)
+     &                   lat(k), lon(k), elev(k),!lat/lon (deg), elev (meters msl)
      &                   time(k)		 !obs time
 c
 	  read(11,903)   reptype(k),             !station report type
      &                   autostntype(k),         !station type (manual/auto)
      &                   wx(k)                   !present weather
 c
-	  read(11,905)   t(k), t_ea(k),          !temp, temp expected accuracy (Deg F)
-     &                   td(k), td_ea(k),        !dew point, dew point exp. accuracy (Deg F)
-     &                   rh(k), rh_ea(k)         !Rel hum, rh expected accuracy (%)
+	  read(11,905)   t(k), t_ea(k),          !temp, temp expected accuracy (deg f)
+     &                   td(k), td_ea(k),        !dew point, dew point exp. accuracy (deg f)
+     &                   rh(k), rh_ea(k)         !rel hum, rh expected accuracy (%)
 c
 	  read(11,907)   dd(k), ff(k),           !wind dir (deg), wind speed (knots)
      &                   ddg(k), ffg(k),         !wind gust dir (deg), wind gust speed (knots)
@@ -105,14 +105,14 @@ c
 c
 	  read(11,909)   alt(k),                 !altimeter (mb)
      &                   stnp(k),                !station pressure (mb)
-     &                   mslp(k),                !MSL pressure (mb)
-     &                   delpch(k),              !3-h press change character (FMH-1 Manual, Sec 12.7.2)
+     &                   mslp(k),                !msl pressure (mb)
+     &                   delpch(k),              !3-h press change character (fmh-1 manual, sec 12.7.2)
      &                   delp(k),                !3-h pressure change (mb)
      &                   p_ea(k), alt_ea(k)      !pressure exp accuracy, alt exp accuracy
 c
 	  read(11,911)   vis(k), vis_ea(k),      !visibility, vis exp accuracy (miles)
      &                   solar(k), solar_ea(k),  !solar, solar exp accuracy (watts/meter**2)
-     &                   sfct(k), sfct_ea(k),    !soil/water temp, soil/water temp exp accuracy (Deg F)
+     &                   sfct(k), sfct_ea(k),    !soil/water temp, soil/water temp exp accuracy (deg f)
      &                   sfcm(k), sfcm_ea(k)     !soil moist, soil moist temp exp accuracy (%)
 c
 	  read(11,913)   pcp1(k),                !1-h precipitation (inches)
@@ -123,15 +123,15 @@ c
      &                   pcp_ea(k), snow_ea(k)   !precip and snow exp accuracy (inches)
 c
 	  read(11,915)  kkk_s(k),                !num cld layers 
-     &                  max24t(k),               !24-h max temperature (Deg F)
-     &                  min24t(k)                !24-h min temperature (Deg F)
+     &                  max24t(k),               !24-h max temperature (deg f)
+     &                  min24t(k)                !24-h min temperature (deg f)
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s(k) .gt. 0) then
 	    do ii=1,kkk_s(k)
   	      read(11,917) store_cldamt(k,ii), store_cldht(k,ii) ! layer cloud amount and height
-                                                                 ! (meters MSL)
+                                                                 ! (meters msl)
 	    enddo !ii
 	  endif
 c
@@ -140,13 +140,13 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-        print *,'Could not open file: ',infile
-	print *,' ++ ERROR opening LSO file in READ_SURFACE_DATA ++'
+        print *,'could not open file: ',infile
+	print *,' ++ error opening lso file in read_surface_data ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'
@@ -159,21 +159,21 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO surface data file and return the station
-cdoc    metadata.   The data is passed back to the calling routine in 1-d 
+cdoc    routine to read the laps lso surface data file and return the station
+cdoc    metadata.   the data is passed back to the calling routine in 1-d 
 cdoc    arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
 c      
-c               S. Albers  2000      Expanded for OSSE use
+c               s. albers  2000      expanded for osse use
 c
 c*****************************************************************************
 c
 	real lat(maxsta), lon(maxsta), elev(maxsta)
 c
 	integer i4time, wmoid(maxsta), jstatus
-        integer time(maxsta)                 ! integer representation of HHMM
+        integer time(maxsta)                 ! integer representation of hhmm
 c
 	character filetime*9, infile*256, btime*24
 	character stations(maxsta)*20, provider(maxsta)*11
@@ -182,7 +182,7 @@ c
 c
 	jstatus = 0
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -190,18 +190,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   wmoid(k),                 !WMO id number
+     &                   wmoid(k),                 !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   time(k)                   !obs time
@@ -223,7 +223,7 @@ c
      &                  dummy,                     !24-h max temperature
      &                  dummy                      !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -236,12 +236,12 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-	print *,' ++ ERROR opening LSO file in READ_SFC_METADATA ++'
+	print *,' ++ error opening lso file in read_sfc_metadata ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'
@@ -254,13 +254,13 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO surface data file and return the state
-cdoc    variables (wind, temp, dewpt, altimeter & pressure).   The data is 
+cdoc    routine to read the laps lso surface data file and return the state
+cdoc    variables (wind, temp, dewpt, altimeter & pressure).   the data is 
 cdoc    passed back to the calling routine in 1-d arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
-c               J. Edwards 09-16-98  moved all format definitions to 
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
+c               j. edwards 09-16-98  moved all format definitions to 
 c                                    src/include/lso_formats.inc
 c                                    changed 909 definition to allow for 
 c                                    missing data
@@ -285,7 +285,7 @@ c
 c
 	jstatus = 0
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -294,18 +294,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   idummy,                   !WMO id number
+     &                   idummy,                   !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   idummy                    !obs time
@@ -314,7 +314,7 @@ c
 c
 	  read(11,905)   t(k), dummy,              !temp, temp expected accuracy
      &                   td(k), dummy,             !dew point, dew point exp. accuracy
-     &                   rh(k), dummy              !Rel hum, rh expected accuracy
+     &                   rh(k), dummy              !rel hum, rh expected accuracy
 c
 	  read(11,907)   dd(k), ff(k),             !wind dir, wind speed
      &                   dummy, dummy,             !wind gust dir, wind gust speed
@@ -322,7 +322,7 @@ c
 c
 	  read(11,909)   alt(k),                   !altimeter
      &                   stnp(k),                  !station pressure
-     &                   mslp(k),                  !MSL pressure
+     &                   mslp(k),                  !msl pressure
      &                   idummy,                   !3-h press change character
      &                   dummy,                    !3-h pressure change
      &                   dummy, dummy              !pressure exp accuracy, alt exp accuracy
@@ -335,7 +335,7 @@ c
      &                  dummy,                     !24-h max temperature
      &                  dummy                      !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -348,13 +348,13 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-	print *,' ++ ERROR opening ',ext(1:len_ext),
-     1          ' file in READ_SFC_STATE ++'
+	print *,' ++ error opening ',ext(1:len_ext),
+     1          ' file in read_sfc_state ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'
@@ -366,12 +366,12 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO surface data file and return the
-cdoc    temperature.   The data is passed back to the calling routine in 
+cdoc    routine to read the laps lso surface data file and return the
+cdoc    temperature.   the data is passed back to the calling routine in 
 cdoc    1-d arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
 c
 c*****************************************************************************
 c
@@ -387,7 +387,7 @@ c
 c
 	jstatus = 0
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -395,18 +395,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   idummy,                   !WMO id number
+     &                   idummy,                   !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   idummy                    !obs time
@@ -415,7 +415,7 @@ c
 c
 	  read(11,905)   t(k), dummy,              !temp, temp expected accuracy
      &                   dummy, dummy,             !dew point, dew point exp. accuracy
-     &                   dummy, dummy              !Rel hum, rh expected accuracy
+     &                   dummy, dummy              !rel hum, rh expected accuracy
 c
 	  read(11,919) dum
 c
@@ -429,7 +429,7 @@ c
      &                  dummy,                     !24-h max temperature
      &                  dummy                      !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -442,12 +442,12 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-	print *,' ++ ERROR opening LSO file in READ_SFC_TEMP ++'
+	print *,' ++ error opening lso file in read_sfc_temp ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'
@@ -460,11 +460,11 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO surface data file and return wind data. 
-cdoc    The data is passed back to the calling routine in 1-d arrays.
+cdoc    routine to read the laps lso surface data file and return wind data. 
+cdoc    the data is passed back to the calling routine in 1-d arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
 c
 c*****************************************************************************
 c
@@ -484,7 +484,7 @@ c
 c
 	jstatus = 0
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -492,18 +492,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   idummy,                   !WMO id number
+     &                   idummy,                   !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   obstime(k)                !obs time
@@ -526,7 +526,7 @@ c
      &                  dummy,                     !24-h max temperature
      &                  dummy                      !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -539,12 +539,12 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-	print *,' ++ ERROR opening LSO file in READ_SFC_WIND ++'
+	print *,' ++ error opening lso file in read_sfc_wind ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'
@@ -556,12 +556,12 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO surface data file and return pressure
-cdoc    data.   The data is passed back to the calling routine in 1-d arrays.
+cdoc    routine to read the laps lso surface data file and return pressure
+cdoc    data.   the data is passed back to the calling routine in 1-d arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
-c               J. Edwards 09-16-98  moved all format definitions to 
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
+c               j. edwards 09-16-98  moved all format definitions to 
 c                                    src/include/lso_formats.inc
 c                                    changed 909 definition to allow for 
 c                                    missing data
@@ -580,7 +580,7 @@ c
 c
 	jstatus = 0
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -588,18 +588,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   idummy,                   !WMO id number
+     &                   idummy,                   !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   idummy                    !obs time
@@ -612,7 +612,7 @@ c
 c
 	  read(11,909)   alt(k),                   !altimeter
      &                   stnp(k),                  !station pressure
-     &                   mslp(k),                  !MSL pressure
+     &                   mslp(k),                  !msl pressure
      &                   idummy,                   !3-h press change character
      &                   dummy,                    !3-h pressure change
      &                   dummy, dummy              !pressure exp accuracy, alt exp accuracy
@@ -625,7 +625,7 @@ c
      &                  dummy,                     !24-h max temperature
      &                  dummy                      !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -638,12 +638,12 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-	print *,' ++ ERROR opening LSO file in READ_SFC_PRESS ++'
+	print *,' ++ error opening lso file in read_sfc_press ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'
@@ -656,12 +656,12 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO surface data file and return precipitation
-cdoc    data.   The data is passed back to the calling routine in 1-d arrays.
+cdoc    routine to read the laps lso surface data file and return precipitation
+cdoc    data.   the data is passed back to the calling routine in 1-d arrays.
 c
-c	Changes:
-c		P. Stamus  04-13-98  Original version (from write_surface_LS2).
-c               J. Edwards 09-16-98  moved all format definitions to 
+c	changes:
+c		p. stamus  04-13-98  original version (from write_surface_ls2).
+c               j. edwards 09-16-98  moved all format definitions to 
 c                                    src/include/lso_formats.inc
 c                                    changed 909 definition to allow for 
 c                                    missing data
@@ -682,7 +682,7 @@ c
         n_obs_g = 0
         n_obs_b = 0
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -690,18 +690,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   idummy,                   !WMO id number
+     &                   idummy,                   !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   idummy                    !obs time
@@ -727,7 +727,7 @@ c
      &                  dummy,                     !24-h max temperature
      &                  dummy                      !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s .gt. 0) then
 	    do ii=1,kkk_s
@@ -740,12 +740,12 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
  999    continue
-	print *,' ++ ERROR opening LSO file in READ_SFC_PRECIP ++'
+	print *,' ++ error opening lso file in read_sfc_precip ++'
         jstatus 	= -1
 	return
         include 'lso_formats.inc'
@@ -762,12 +762,12 @@ c
 c
 c*****************************************************************************
 c
-cdoc    Routine to read the LAPS LSO_QC surface data file with the expanded 
-cdoc    variable list. The data is passed back to the calling routine in 1-d 
+cdoc    routine to read the laps lso_qc surface data file with the expanded 
+cdoc    variable list. the data is passed back to the calling routine in 1-d 
 cdoc    arrays.
 c
-c	Changes:
-c		P. Stamus  12-17-98  Original version (from read_surface_data).
+c	changes:
+c		p. stamus  12-17-98  original version (from read_surface_data).
 c
 c*****************************************************************************
 c
@@ -795,7 +795,7 @@ c
 	character wx(maxsta)*25, store_cldamt(maxsta,5)*4
 c
 c
-c.....  Blank out the character arrays.
+c.....  blank out the character arrays.
 c
 	jstatus = 0
 	do i=1,maxsta
@@ -809,7 +809,7 @@ c
 	   enddo !j
 	enddo !i
 c
-c.....	Get the file.
+c.....	get the file.
 c
 	call make_fnam_lp(i4time, filetime, istatus)
 	call get_directory('lso', infile, len)
@@ -817,18 +817,18 @@ c
 c
 	open(11,file=infile,status='old',form='formatted',err=999)
 c
-c.....	Read the header.
+c.....	read the header.
 c
 	read(11,900) btime,		! time
      &               n_obs_g,		! # of obs in the laps grid
      &               n_obs_b		! # of obs in the box
 c
-c.....	Read the station data.
+c.....	read the station data.
 c
 	do k=1,n_obs_b
 c
 	   read(11,901)  stations(k),              !station id
-     &                   wmoid(k),                 !WMO id number
+     &                   wmoid(k),                 !wmo id number
      &                   provider(k),              !data provider
      &                   lat(k), lon(k), elev(k),  !lat, lon, elev
      &                   time(k)		   !obs time
@@ -839,7 +839,7 @@ c
 c
 	  read(11,905)   t(k), t_ea(k),            !temp, temp expected accuracy
      &                   td(k), td_ea(k),          !dew point, dew point exp. accuracy
-     &                   rh(k), rh_ea(k)           !Rel hum, rh expected accuracy
+     &                   rh(k), rh_ea(k)           !rel hum, rh expected accuracy
 c
 	  read(11,907)   dd(k), ff(k),             !wind dir, wind speed
      &                   ddg(k), ffg(k),           !wind gust dir, wind gust speed
@@ -847,7 +847,7 @@ c
 c
 	  read(11,909)   alt(k),                   !altimeter
      &                   stnp(k),                  !station pressure
-     &                   mslp(k),                  !MSL pressure
+     &                   mslp(k),                  !msl pressure
      &                   delpch(k),                !3-h press change character
      &                   delp(k),                  !3-h pressure change
      &                   p_ea(k), alt_ea(k)        !pressure exp accuracy, alt exp accuracy
@@ -868,12 +868,12 @@ c
      &                  max24t(k),                 !24-h max temperature
      &                  min24t(k)                  !24-h min temperature
 c
-c.....	Read the cloud data if we have any.
+c.....	read the cloud data if we have any.
 c
 	  if(kkk_s(k) .gt. 0) then
 	    do ii=1,kkk_s(k)
   	      read(11,917) store_cldamt(k,ii), store_cldht(k,ii) ! layer cloud amount and height
-                                                                 ! (meters MSL)
+                                                                 ! (meters msl)
 	    enddo !ii
 	  endif
 c
@@ -882,13 +882,13 @@ c
 !       endfile(11)
 	close(11)	
 c
-c..... End of data reading.  Let's go home...
+c..... end of data reading.  let's go home...
 c
 	jstatus = 1
 	return
 999     continue
-        print *,'Could not open file: ',infile
-	print *,' ++ ERROR opening LSO_QC file in READ_SURFACE_DATAQC ++'
+        print *,'could not open file: ',infile
+	print *,' ++ error opening lso_qc file in read_surface_dataqc ++'
         jstatus = -1
 	return
         include 'lso_formats.inc'

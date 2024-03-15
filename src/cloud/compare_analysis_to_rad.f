@@ -1,15 +1,15 @@
 
-        subroutine compare_analysis_to_rad(i4time,ni,nj          ! I
-     1  ,cvr_sao_max,solar_alt,cvr_snow,cloud_albedo,idb,jdb     ! I
+        subroutine compare_analysis_to_rad(i4time,ni,nj          ! i
+     1  ,cvr_sao_max,solar_alt,cvr_snow,cloud_albedo,idb,jdb     ! i
      1  ,cloud_frac_vis_a,tb8_k,t_gnd_k,td_sfc_k,cvr_max,r_missing_data
-     1  ,dbz_max_2d,cld_snd,ista_snd,max_cld_snd,cld_hts,KCLOUD
+     1  ,dbz_max_2d,cld_snd,ista_snd,max_cld_snd,cld_hts,kcloud
      1  ,rad_s,n_cld_snd,c_stations,lat_s,lon_s,elev_s,maxstns
      1  ,n_obs_b
-     1  ,swi_2d)                                                 ! O
+     1  ,swi_2d)                                                 ! o
 
         include 'trigd.inc'
 
-        difftwi(altf) = ! W/m**2                      
+        difftwi(altf) = ! w/m**2                      
      1         4. * exp(0.50 * altf - 0.108 * altf**2 - .0044 * altf**3)
 
         real cloud_frac_vis_a(ni,nj),tb8_k(ni,nj),t_gnd_k(ni,nj)
@@ -17,7 +17,7 @@
      1        ,dbz_max_2d(ni,nj),solar_alt(ni,nj),swi_2d(ni,nj)
      1        ,cvr_snow(ni,nj),cloud_albedo(ni,nj)
 
-!       How much the solar radiation varies with changes in cloud fraction
+!       how much the solar radiation varies with changes in cloud fraction
         real cvr_scl_a(ni,nj) 
         real cvr_rad(ni,nj) 
 
@@ -29,9 +29,9 @@
 
         real dum_2d(ni,nj)
 
-        real cld_snd(max_cld_snd,KCLOUD)
+        real cld_snd(max_cld_snd,kcloud)
         integer ista_snd(max_cld_snd)
-        real cld_hts(KCLOUD)
+        real cld_hts(kcloud)
 
         character c_stations(maxstns)*(*)
         character stn(maxstns)*20
@@ -56,7 +56,7 @@
         character*1 c1_c
         character title*60, ver_file*256, filename*9
 
-        write(6,*)' Comparing cloud/sat/sfc data to solar radiation'
+        write(6,*)' comparing cloud/sat/sfc data to solar radiation'
 
         do j = 1,nj
         do i = 1,ni
@@ -75,7 +75,7 @@
         resid_s = r_missing_data
         call make_fnam_lp(i4time,filename,istatus)
 
-!       Get zenithal solar radiation
+!       get zenithal solar radiation
         read(filename(3:5),*)doy
         rad_dist_factor = radnorm(doy)
         write(6,*)' distance rad_factor = ',rad_dist_factor
@@ -88,36 +88,36 @@
         if(model .eq. 1)then
             rad_zenith_clr = solar_irradiance * transmittance
             write(6,*)' rad_zenith_clr = ',rad_zenith_clr  
-        elseif(model .eq. 2)then ! Laue formula
+        elseif(model .eq. 2)then ! laue formula
             a = 0.14
             h = 1600. / 1000. ! elevation in km
 !           direct = solar_irradiance
 !    1             * ( (1. - a*h) * 0.7**(airmass_2d**0.678) + a*h )
 !           global = 1.1 * direct
-        elseif(model .eq. 3)then ! Drexel model
+        elseif(model .eq. 3)then ! drexel model
             pw_2d = 1.0 ! cm
             trans_h2o_2d = 1.0 - 0.077 * (pw_2d * airmass_2d)**0.3
         endif
 
-!       Calculate solar radiation field
-!       Some type of regression to the solar radiation obs can be considered later
-!       Note that 'cvr_rad' is used instead of 'cvr_max'. Perhaps the criteria here
+!       calculate solar radiation field
+!       some type of regression to the solar radiation obs can be considered later
+!       note that 'cvr_rad' is used instead of 'cvr_max'. perhaps the criteria here
 !       can be used upstream to improve 'cvr_max', so that the visible satellite can
 !       be used to increase cloud fraction.
         do j = 1,nj
         do i = 1,ni
-!           Set how much solar radiation varies with changes in cloud fraction
+!           set how much solar radiation varies with changes in cloud fraction
             if(cloud_frac_vis_a(i,j) .ne. r_missing_data)then
-                if(cvr_snow(i,j) .eq. r_missing_data .OR. 
+                if(cvr_snow(i,j) .eq. r_missing_data .or. 
      1             cvr_snow(i,j) .le. 0.50                )then 
-                    cvr_scl_a(i,j) = 1.0 ! scaling where we have VIS data
+                    cvr_scl_a(i,j) = 1.0 ! scaling where we have vis data
                     if(cloud_albedo(i,j) .ne. r_missing_data)then
                         cvr_rad(i,j) = cloud_albedo(i,j)
                     else
                         cvr_rad(i,j) = cvr_max(i,j) ! cloud_frac_vis_a(i,j)
                     endif
                 else
-                    cvr_scl_a(i,j) = 1.0 ! scaling where we have VIS data & snow cover
+                    cvr_scl_a(i,j) = 1.0 ! scaling where we have vis data & snow cover
                     if(cloud_albedo(i,j) .ne. r_missing_data)then
                         cvr_rad(i,j) = cloud_albedo(i,j)
                     else
@@ -125,7 +125,7 @@
                     endif
                 endif
             else
-                cvr_scl_a(i,j) = 0.7 ! scaling without VIS data (just IR)
+                cvr_scl_a(i,j) = 0.7 ! scaling without vis data (just ir)
                 if(cloud_albedo(i,j) .ne. r_missing_data)then
                     cvr_rad(i,j) = cloud_albedo(i,j)
                 else
@@ -143,7 +143,7 @@
                 rad_clr(i,j) = max(rad_zenith_clr * altfunc 
      1                           * trans_h2o_2d(i,j),0.)
 
-!               Add term when sun is near or below the horizon
+!               add term when sun is near or below the horizon
                 if(x .gt. 0.)then
                     ghi_twiterm = 4. * exp(-((x/5.)**2))
                 elseif(x .gt. -18.)then ! twilight
@@ -154,7 +154,7 @@
 
                 rad_clr(i,j) = rad_clr(i,j) + ghi_twiterm
 
-            elseif(model .eq. 2)then ! start to using Laue formula 
+            elseif(model .eq. 2)then ! start to using laue formula 
                                      ! (normal to sun's rays)
                 a = 0.14
                 h = 1600. / 1000. ! elevation in km
@@ -172,13 +172,13 @@
         enddo ! i
         enddo ! j
 
-        write(6,*)' solar_alt CTR = ',solar_alt(idb,jdb)
-        write(6,*)' cloud_alb CTR = ',cloud_albedo(idb,jdb)
-        write(6,*)' rad_clr   CTR = ',rad_clr(idb,jdb)
-        write(6,*)' cvr_scl_a CTR = ',cvr_scl_a(idb,jdb)
-        write(6,'("  cvr_max   CTR =",g12.4)')cvr_max(idb,jdb)
-        write(6,*)' cvr_rad   CTR = ',cvr_rad(idb,jdb)
-        write(6,*)' swi_2d    CTR = ',swi_2d(idb,jdb)
+        write(6,*)' solar_alt ctr = ',solar_alt(idb,jdb)
+        write(6,*)' cloud_alb ctr = ',cloud_albedo(idb,jdb)
+        write(6,*)' rad_clr   ctr = ',rad_clr(idb,jdb)
+        write(6,*)' cvr_scl_a ctr = ',cvr_scl_a(idb,jdb)
+        write(6,'("  cvr_max   ctr =",g12.4)')cvr_max(idb,jdb)
+        write(6,*)' cvr_rad   ctr = ',cvr_rad(idb,jdb)
+        write(6,*)' swi_2d    ctr = ',swi_2d(idb,jdb)
 
         if(.true.)then
             iwrite = 0
@@ -230,13 +230,13 @@
 
                     if(iwrite .eq. iwrite/20*20)then
                         write(6,*)'sv '
-                        write(6,*)'sv Sta   i    j   VIS frac tb8_k  '
+                        write(6,*)'sv sta   i    j   vis frac tb8_k  '
      1                  //'t_gnd_k transmt cv_s_mx cvr_mx '
      1                  //'solalt cv_r rad_an '
      1                  //'rad_ob rad_th ratio cv_sol  df'
                     endif
 
-!                   Calculate 9pt cover
+!                   calculate 9pt cover
                     cvr_9pt = 0.
                     do ii = -1,1
                     do jj = -1,1
@@ -245,7 +245,7 @@
                     enddo ! ii
                     cvr_9pt = cvr_9pt / 9.
 
-!                   Calculate 25pt cover
+!                   calculate 25pt cover
                     cvr_25pt = 0.
                     do ii = -2,2
                     do jj = -2,2
@@ -266,7 +266,7 @@
                                                            ! solar radiation
                         cv_diff = cv_solar - cvr_rad(i_i,i_j)
 
-!                       Determine residual of clear sky vs observed radiation
+!                       determine residual of clear sky vs observed radiation
                         resid_s(ista) = 1.0 - rad_ratio
 
                     else
@@ -286,27 +286,27 @@
                         radob_ratio = 1.0
                     endif
 
-!                   QC checks
+!                   qc checks
                     if(radob_ratio .lt. 0.5      .and.
      1                 rad_s(ista) .ge. 100.           )then
-                        c1_c = '+' ! Suspected high analysis
+                        c1_c = '+' ! suspected high analysis
                     endif
 
                     if(radob_ratio .gt. 2.0      .and.      
      1                 rad_s(ista) .ge. 100.           )then
-                        c1_c = '-' ! Suspected low analysis
+                        c1_c = '-' ! suspected low analysis
                     endif
 
                     if(radob_ratio .lt. 0.1 .and. 
      1                 swi_s(ista) .ge. 100.      )then
-                        c1_c = '*' ! QC'd out
+                        c1_c = '*' ! qc'd out
                         rad2_s(ista) = r_missing_data
                     endif
 
                     if(rad_s(ista) - rad_clr(i_i,i_j) .gt. 500.)then
                        if(rad_clr(i_i,i_j) .gt. 100.)then
                           if(rad_s(ista)/rad_clr(i_i,i_j) .gt. 2.5)then
-                             c1_c = '*' ! QC'd out
+                             c1_c = '*' ! qc'd out
                              rad2_s(ista) = r_missing_data
                           endif
                        endif
@@ -317,7 +317,7 @@
      1                              ,rad_clr(i_i,i_j))      
 
                     if(iqc .ne. 0)then
-                       c1_c = '*' ! QC'd out
+                       c1_c = '*' ! qc'd out
                        rad2_s(ista) = r_missing_data
                     endif
 
@@ -359,24 +359,24 @@
             enddo ! isnd
 
             write(6,*)
-            write(6,*)' Generic stats:'
+            write(6,*)' generic stats:'
             call stats_1d(maxstns,swi_s,rad2_s
-     1                   ,'Solar Radiation (QCed): '
+     1                   ,'solar radiation (qced): '
      1                   ,a_t,b_t,xbar,ybar
      1                   ,bias,std,r_missing_data,istatus)
 
-!           Write out line of stats for gnuplot (if data are valid)
+!           write out line of stats for gnuplot (if data are valid)
             call cv_i4tim_asc_lp(i4time,a24time,istatus)
             if(cnt .gt. 0)then
                 write(6,710)a24time,xbar,ybar,std,sumclr/cnt
             else
-                write(6,*)' Write missing data due to zero count'
+                write(6,*)' write missing data due to zero count'
                 pmsg = -99.9
                 write(6,710)a24time,pmsg,pmsg,pmsg,pmsg       
             endif
 710         format(1x,a24,4f10.3,' gnuplot')
 
-!           Calculate other stats
+!           calculate other stats
             if(cnt .gt. 0.)then
                 write(6,*)' sw radiation comparison stats'
                 if(sumanl .gt. 0.)then
@@ -398,13 +398,13 @@
             endif
 
             write(6,*)
-            write(6,*)' Do regression on residuals vs cloud fraction'
+            write(6,*)' do regression on residuals vs cloud fraction'
             call regression(maxstns,cvr_s,resid_s
-     1                   ,'Residuals vs cloud fraction: '
+     1                   ,'residuals vs cloud fraction: '
      1                   ,a_t,b_t,xbar,ybar
      1                   ,bias,std,r_missing_data,istatus)
 
-!           Open file and call verification routine
+!           open file and call verification routine
             iunit = 11
             call get_directory('log', ver_file, len)
             ver_file = ver_file(1:len)//'qc/laps_sol.ver.'
@@ -412,7 +412,7 @@
             call s_len(ver_file, len)
             open(iunit,file=ver_file(1:len),status='replace',err=990)
 
-            title = 'Solar Radiation (before qc): '
+            title = 'solar radiation (before qc): '
 
             call verify(swi_2d,rad_s,stn,maxstns,title,iunit 
      &                 ,ni,nj,maxstns,dum_s,dum_s,dum_2d

@@ -1,78 +1,78 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE SKGB(LUGB,ISEEK,MSEEK,LSKIP,LGRIB)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: SKGB           SEARCH FOR NEXT GRIB MESSAGE
-C   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 93-11-22
-C
-C ABSTRACT: THIS SUBPROGRAM SEARCHES A FILE FOR THE NEXT GRIB 1 MESSAGE.
-C   A GRIB 1 MESSAGE IS IDENTIFIED BY ITS INDICATOR SECTION, I.E.
-C   AN 8-BYTE SEQUENCE WITH 'GRIB' IN BYTES 1-4 AND 1 IN BYTE 8.
-C   IF FOUND, THE LENGTH OF THE MESSAGE IS DECODED FROM BYTES 5-7.
-C   THE SEARCH IS DONE OVER A GIVEN SECTION OF THE FILE.
-C   THE SEARCH IS TERMINATED IF AN EOF OR I/O ERROR IS ENCOUNTERED.
-C
-C PROGRAM HISTORY LOG:
-C   93-11-22  IREDELL
-C   95-10-31  IREDELL   ADD CALL TO BAREAD 
-C   97-03-14  IREDELL   CHECK FOR '7777'
-C 2001-12-05  GILBERT   MODIFIED TO ALSO LOOK FOR GRIB2 MESSAGES
-C
-C USAGE:    CALL SKGB(LUGB,ISEEK,MSEEK,LSKIP,LGRIB)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER LOGICAL UNIT OF INPUT GRIB FILE
-C     ISEEK        INTEGER NUMBER OF BYTES TO SKIP BEFORE SEARCH
-C     MSEEK        INTEGER MAXIMUM NUMBER OF BYTES TO SEARCH
-C   OUTPUT ARGUMENTS:
-C     LSKIP        INTEGER NUMBER OF BYTES TO SKIP BEFORE MESSAGE
-C     LGRIB        INTEGER NUMBER OF BYTES IN MESSAGE (0 IF NOT FOUND)
-C
-C SUBPROGRAMS CALLED:
-C   BAREAD       BYTE-ADDRESSABLE READ
-C   GBYTE         GET INTEGER DATA FROM BYTES
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN
-C
-C$$$
-      PARAMETER(LSEEK=128)
-      CHARACTER Z(LSEEK)
-      CHARACTER Z4(4)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      LGRIB=0
-      KS=ISEEK
-      KN=MIN(LSEEK,MSEEK)
-      KZ=LSEEK
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  LOOP UNTIL GRIB MESSAGE IS FOUND
-      DOWHILE(LGRIB.EQ.0.AND.KN.GE.8.AND.KZ.EQ.LSEEK)
-C  READ PARTIAL SECTION
-        CALL BAREAD(LUGB,KS,KN,KZ,Z)
-        KM=KZ-8+1
-        K=0
-C  LOOK FOR 'GRIB...1' IN PARTIAL SECTION
-        DOWHILE(LGRIB.EQ.0.AND.K.LT.KM)
-          CALL GBYTE(Z,I4,(K+0)*8,4*8)
-          CALL GBYTE(Z,I1,(K+7)*8,1*8)
-          IF(I4.EQ.1196575042.AND.(I1.EQ.1.OR.I1.EQ.2)) THEN
-C  LOOK FOR '7777' AT END OF GRIB MESSAGE
-            IF (I1.EQ.1) CALL GBYTE(Z,KG,(K+4)*8,3*8)
-            IF (I1.EQ.2) CALL GBYTE(Z,KG,(K+12)*8,4*8)
-            CALL BAREAD(LUGB,KS+K+KG-4,4,K4,Z4)
-            IF(K4.EQ.4) THEN
-              CALL GBYTE(Z4,I4,0,4*8)
-              IF(I4.EQ.926365495) THEN
-C  GRIB MESSAGE FOUND
-                LSKIP=KS+K
-                LGRIB=KG
-              ENDIF
-            ENDIF
-          ENDIF
-          K=K+1
-        ENDDO
-        KS=KS+KM
-        KN=MIN(LSEEK,ISEEK+MSEEK-KS)
-      ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+c-----------------------------------------------------------------------
+      subroutine skgb(lugb,iseek,mseek,lskip,lgrib)
+c$$$  subprogram documentation block
+c
+c subprogram: skgb           search for next grib message
+c   prgmmr: iredell          org: w/nmc23     date: 93-11-22
+c
+c abstract: this subprogram searches a file for the next grib 1 message.
+c   a grib 1 message is identified by its indicator section, i.e.
+c   an 8-byte sequence with 'grib' in bytes 1-4 and 1 in byte 8.
+c   if found, the length of the message is decoded from bytes 5-7.
+c   the search is done over a given section of the file.
+c   the search is terminated if an eof or i/o error is encountered.
+c
+c program history log:
+c   93-11-22  iredell
+c   95-10-31  iredell   add call to baread 
+c   97-03-14  iredell   check for '7777'
+c 2001-12-05  gilbert   modified to also look for grib2 messages
+c
+c usage:    call skgb(lugb,iseek,mseek,lskip,lgrib)
+c   input arguments:
+c     lugb         integer logical unit of input grib file
+c     iseek        integer number of bytes to skip before search
+c     mseek        integer maximum number of bytes to search
+c   output arguments:
+c     lskip        integer number of bytes to skip before message
+c     lgrib        integer number of bytes in message (0 if not found)
+c
+c subprograms called:
+c   baread       byte-addressable read
+c   gbyte         get integer data from bytes
+c
+c attributes:
+c   language: fortran
+c
+c$$$
+      parameter(lseek=128)
+      character z(lseek)
+      character z4(4)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      lgrib=0
+      ks=iseek
+      kn=min(lseek,mseek)
+      kz=lseek
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  loop until grib message is found
+      dowhile(lgrib.eq.0.and.kn.ge.8.and.kz.eq.lseek)
+c  read partial section
+        call baread(lugb,ks,kn,kz,z)
+        km=kz-8+1
+        k=0
+c  look for 'grib...1' in partial section
+        dowhile(lgrib.eq.0.and.k.lt.km)
+          call gbyte(z,i4,(k+0)*8,4*8)
+          call gbyte(z,i1,(k+7)*8,1*8)
+          if(i4.eq.1196575042.and.(i1.eq.1.or.i1.eq.2)) then
+c  look for '7777' at end of grib message
+            if (i1.eq.1) call gbyte(z,kg,(k+4)*8,3*8)
+            if (i1.eq.2) call gbyte(z,kg,(k+12)*8,4*8)
+            call baread(lugb,ks+k+kg-4,4,k4,z4)
+            if(k4.eq.4) then
+              call gbyte(z4,i4,0,4*8)
+              if(i4.eq.926365495) then
+c  grib message found
+                lskip=ks+k
+                lgrib=kg
+              endif
+            endif
+          endif
+          k=k+1
+        enddo
+        ks=ks+km
+        kn=min(lseek,iseek+mseek-ks)
+      enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

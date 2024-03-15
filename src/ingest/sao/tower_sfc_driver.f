@@ -1,18 +1,18 @@
 
-        subroutine tower_sfc_driver(maxsta,i4time_sys                     ! I
-     1                             ,path_to_tower_data                    ! I
-     1                             ,lat,lon,ni,nj,grid_spacing            ! I
-     1                             ,laps_cycle_time                       ! I
-     1                             ,itime_before,itime_after              ! I
-     1                             ,nn,n_local_g,n_local_b,stations       ! I/O
-     1                             ,store_1,store_2,store_2ea             ! O
-     1                             ,store_3,store_3ea,store_4,store_4ea   ! O    
-     1                             ,store_5,store_5ea,store_6,store_6ea   ! O
-     1                             ,store_7,store_cldht,store_cldamt      ! O
-     1                             ,provider,istatus)                     ! O
+        subroutine tower_sfc_driver(maxsta,i4time_sys                     ! i
+     1                             ,path_to_tower_data                    ! i
+     1                             ,lat,lon,ni,nj,grid_spacing            ! i
+     1                             ,laps_cycle_time                       ! i
+     1                             ,itime_before,itime_after              ! i
+     1                             ,nn,n_local_g,n_local_b,stations       ! i/o
+     1                             ,store_1,store_2,store_2ea             ! o
+     1                             ,store_3,store_3ea,store_4,store_4ea   ! o    
+     1                             ,store_5,store_5ea,store_6,store_6ea   ! o
+     1                             ,store_7,store_cldht,store_cldamt      ! o
+     1                             ,provider,istatus)                     ! o
 c        
         integer ni, nj, maxsta, maxobs 
-        integer maxlvls ! raw/processed stations for SND file
+        integer maxlvls ! raw/processed stations for snd file
         parameter (maxlvls=10)
 c
 	real    lat(ni,nj), lon(ni,nj), topo(ni,nj)
@@ -33,13 +33,13 @@ c
         character*8   metar_format
         character*8   a9_to_a8, a8_time
 
-c       Declared then used in 'get_local_towerobs' for SND purposes
+c       declared then used in 'get_local_towerobs' for snd purposes
         real     stalat_s(maxsta,maxlvls),stalon_s(maxsta,maxlvls)
         real     staelev_s(maxsta)
         real     soilmoist_p(maxsta)       
 	character  stname_s(maxsta)*5
 c
-c.....  Output arrays.
+c.....  output arrays.
 c
 	real  store_1(maxsta,4), 
      &          store_2(maxsta,3), store_2ea(maxsta,3),
@@ -50,7 +50,7 @@ c
      &          store_7(maxsta,3),
      &          store_cldht(maxsta,5)
 c
-c.....	Start here.  
+c.....	start here.  
 c
         call get_ibadflag(ibadflag,istatus)
         if(istatus .ne. 1)return
@@ -58,33 +58,33 @@ c
         call get_sfc_badflag(badflag,istatus)
         if(istatus .ne. 1)return
 
-c.....  Get the time from the scheduler or from the user if interactive.
+c.....  get the time from the scheduler or from the user if interactive.
 c
         call make_fnam_lp(i4time_sys,filename9,istatus)
 c
         write(6,*)' systime = ',filename9
 c
-c.....  Call the routine that reads the mesonet data files, then get the data.
+c.....  call the routine that reads the mesonet data files, then get the data.
 c
         write(6,*)
-	write(6,*)'Getting Mesonet Tower Data...'
+	write(6,*)'getting mesonet tower data...'
 c
         ext_s = 'lso'
 
-        call get_local_towerobs(maxsta,maxlvls,                          ! I
+        call get_local_towerobs(maxsta,maxlvls,                          ! i
      &                      i4time_sys,lun_out,
      &                      path_to_tower_data,metar_format,
-     &                      ext_s,                                       ! I
+     &                      ext_s,                                       ! i
      &                      itime_before,itime_after,
 !    &                      grid_east,grid_west,grid_north,grid_south,
-     &                      lat,lon,ni,nj,                               ! I
-     &                      nobs,                                        ! O
+     &                      lat,lon,ni,nj,                               ! i
+     &                      nobs,                                        ! o
 !    &                      stations,
 !    &                      reptype,atype,wmoid,
 !    &                      laps_cycle_time, 
-     &                      stalat_s,stalon_s,staelev_s,                 ! O
-     &                      stname_s,                                    ! O
-     &                      soilmoist_p,                                 ! O
+     &                      stalat_s,stalon_s,staelev_s,                 ! o
+     &                      stname_s,                                    ! o
+     &                      soilmoist_p,                                 ! o
      &                      istatus)
 
 	if(istatus .ne. 1) then
@@ -93,24 +93,24 @@ c
 	endif
 
         if(nobs .gt. maxsta)then
-           write(6,*)' ERROR: nobs > maxsta ',nobs,maxsta
+           write(6,*)' error: nobs > maxsta ',nobs,maxsta
            return
         endif
 c
-!       Final QC check 
+!       final qc check 
         call get_ibadflag(ibadflag,istatus)
         if(istatus .ne. 1)return
 
-!       Check for no obs
+!       check for no obs
         if(nobs .eq. 0)then
-            write(6,*)' NOTE: no SND appended due to no tower obs'
+            write(6,*)' note: no snd appended due to no tower obs'
             return
         endif
 c
 c
-c.....	That's about it...let's go home.
+c.....	that's about it...let's go home.
 c
-	write(6,*)' Normal completion of TOWER_DRIVER, nobs = ',nobs
+	write(6,*)' normal completion of tower_driver, nobs = ',nobs
 
         return
 	end

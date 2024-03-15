@@ -1,39 +1,39 @@
      
      subroutine get_cloud_rad_faces(             &
-                obj_alt,obj_azi,                 & ! I
-                solalt,solazi,                   & ! I 
-                clwc_3d,cice_3d,rain_3d,snow_3d, & ! I
-                topo_a,                          & ! I
-                ni,nj,nk,idb,jdb,                & ! I
-                heights_3d,                      & ! I 
-                transm_2t,transm_3d,transm_4d)     ! O
+                obj_alt,obj_azi,                 & ! i
+                solalt,solazi,                   & ! i 
+                clwc_3d,cice_3d,rain_3d,snow_3d, & ! i
+                topo_a,                          & ! i
+                ni,nj,nk,idb,jdb,                & ! i
+                heights_3d,                      & ! i 
+                transm_2t,transm_3d,transm_4d)     ! o
 
      include 'trigd.inc'
 
-!    Calculate 3D radiation field looping through each of the 6 faces in
+!    calculate 3d radiation field looping through each of the 6 faces in
 !    the domain.
 
-     use mem_namelist, ONLY: r_missing_data,earth_radius,grid_spacing_m &
+     use mem_namelist, only: r_missing_data,earth_radius,grid_spacing_m &
                             ,aod,aero_scaleht,angstrom_exp_a,redp_lvl
-     use mem_allsky, ONLY: uprad_4d ! (upward spectral irradiance)
-     use mem_allsky, ONLY: ext_g, nc
-     use mem_allsky, ONLY: aod_3d   ! (extinction coefficient)            ! I
-     use mem_allsky, ONLY: mode_aero_cld
+     use mem_allsky, only: uprad_4d ! (upward spectral irradiance)
+     use mem_allsky, only: ext_g, nc
+     use mem_allsky, only: aod_3d   ! (extinction coefficient)            ! i
+     use mem_allsky, only: mode_aero_cld
      include 'rad.inc' ! e.g. for ext_o, o3_du
 
      trans(od) = exp(-min(od,80.))
      scurve(x) = (-0.5 * cos(x*3.14159265)) + 0.5  ! x/scurve range is 0-1
 
-!    For each face, set start/end points to loop in the i,j,k dimension
-!    Index of 1 points to the 1st element, 2 points to the last element
-!                  T  B  W  E  N  S
+!    for each face, set start/end points to loop in the i,j,k dimension
+!    index of 1 points to the 1st element, 2 points to the last element
+!                  t  b  w  e  n  s
      real i1(6)  / 1, 1, 1, 2, 1, 1/            
      real i2(6)  / 2, 2, 1, 2, 2, 2/           
      real j1(6)  / 1, 1, 1, 1, 2, 1/            
      real j2(6)  / 2, 2, 2, 2, 2, 1/           
      real k1(6)  / 2, 1, 1, 1, 1, 1/
      real k2(6)  / 2, 1, 2, 2, 2, 2/
-     character*6 cfaces(6) /'Top','Bottom','West','East','North','South'/
+     character*6 cfaces(6) /'top','bottom','west','east','north','south'/
 
      real heights_3d(ni,nj,nk)
      real clwc_3d(ni,nj,nk)  ! kg/m**3
@@ -42,8 +42,8 @@
      real snow_3d(ni,nj,nk)  ! kg/m**3
      real b_alpha_3d(ni,nj,nk) ! m**-1          
      real transm_3d(ni,nj,nk) ! direct transmission plus forward scattered
-     real transm_3t(ni,nj,nk) ! terrain 3D transmission
-     real transm_2t(ni,nj)    ! terrain 2D transmission
+     real transm_3t(ni,nj,nk) ! terrain 3d transmission
+     real transm_2t(ni,nj)    ! terrain 2d transmission
      real transm_4d(ni,nj,nk,nc) ! color information added
      integer kterr(ni,nj)
 
@@ -65,8 +65,8 @@
 
      integer*8 nsteps,nfacesteps
 
-!    These parameters can be obtained/updated from the 'cloud_rad' module
-!    Backscattering efficiencies
+!    these parameters can be obtained/updated from the 'cloud_rad' module
+!    backscattering efficiencies
      real, parameter :: bksct_eff_clwc    = .063
      real, parameter :: bksct_eff_cice    = .14
      real, parameter :: bksct_eff_rain    = .063
@@ -74,19 +74,19 @@
      real, parameter :: bksct_eff_graupel = .30
      real, parameter :: bksct_eff_aero    = .125 
 
-!    Scattering efficiencies
+!    scattering efficiencies
      real, parameter :: q_clwc    = 2.0
      real, parameter :: q_cice    = 2.0
      real, parameter :: q_rain    = 1.0
      real, parameter :: q_snow    = 1.0
      real, parameter :: q_graupel = 1.0
 
-!    Densities
+!    densities
      real, parameter :: rholiq     =   1e3 ! kilograms per cubic meter
      real, parameter :: rhosnow    = .07e3 ! kilograms per cubic meter
      real, parameter :: rhograupel = .50e3 ! kilograms per cubic meter
 
-!    Effective radii
+!    effective radii
      real, parameter :: reff_clwc    = .000007 ! m
      real, parameter :: reff_cice    = .000034 ! m
      real, parameter :: reff_rain    = .000750 ! m
@@ -103,7 +103,7 @@
 
      twi_alt = -4.5
 
-!    Initialize transm_3d
+!    initialize transm_3d
      write(6,*)' initialize transm_3d and kterr'
      do k = 1,nk
          transm_3d(:,:,k) = r_missing_data
@@ -165,7 +165,7 @@
 
      refr_mn = 0.0
 
-!    Different criteria might be used at high altitude depending on how far
+!    different criteria might be used at high altitude depending on how far
 !    away the limb is, in turn related to horz_dep for the observer
      if(solalt .ge. twi_alt)then ! daylight or early twilight
 
@@ -190,7 +190,7 @@
        rjs = js-faceperim; rje = je+faceperim
        rks = ks          ; rke = ke
 
-!      Exception needed if obs_alt = 90.
+!      exception needed if obs_alt = 90.
        objalt = obj_alt(nint(ris),nint(rjs))
        facesteph = min(max(grid_spacing_m*tand(objalt),dhmin),dhmax) ! * 0.3
 
@@ -216,26 +216,26 @@
          b_alpha_new = 0.
          btau = 0.
 
-!        We presently do ray marching a constant distance intervals.
-!        It may be more efficient to have successive steps march 
-!        to the next 3D grid box boundary. We can then interpolate
+!        we presently do ray marching a constant distance intervals.
+!        it may be more efficient to have successive steps march 
+!        to the next 3d grid box boundary. we can then interpolate
 !        from these "end points" to form the needed integrated values
-!        at these grid box boundaries. We'd also want to know the
+!        at these grid box boundaries. we'd also want to know the
 !        integrated values at the location where the ray comes closest
 !        to the center of the grid box that is traverses.
 
-!        When doing bilinear or trilinear interpolation, we're looking at
+!        when doing bilinear or trilinear interpolation, we're looking at
 !        squares/cubes that have grid points lying on the vertices and the
-!        'int' operation is used. When assigning the radiance values to the
+!        'int' operation is used. when assigning the radiance values to the
 !        grid, we are considering the nearest grid point using the 'nint'
-!        operation. Here the cube is centered on a grid point.
+!        operation. here the cube is centered on a grid point.
 
-!        Intersections with terrain are considered by finding maxima in the
+!        intersections with terrain are considered by finding maxima in the
 !        bilinearly interpolated terrain field, relative to the ray height.
-!        These maxima are thought to be located along lines connecting two
+!        these maxima are thought to be located along lines connecting two
 !        adjacent or diagonally adjacent grid points.
 
-!        Start ray trace at this point
+!        start ray trace at this point
          if(idebug .eq. 1)write(6,1)if,it,jt,kt
 1        format('if,it,jt,kt',4i3)
 
@@ -255,9 +255,9 @@
 
 !          if(idebug .eq. 1)write(6,*)'dids/djds/dhtds = ',dids,djds,dhtds
 
-!          Calculate 'scurr' as the total path traversed so far by the ray.
-!          The incremental path length ('ds') will be calculated later on.
-           if(objalt .gt. 15. .AND. if .le. 2)then ! march by height levels
+!          calculate 'scurr' as the total path traversed so far by the ray.
+!          the incremental path length ('ds') will be calculated later on.
+           if(objalt .gt. 15. .and. if .le. 2)then ! march by height levels
              nksteps = 2
              rkmarch = rkt - float(ls)/float(nksteps)
              if(rkmarch .le. 0.)goto 10 ! going outside the domain
@@ -266,7 +266,7 @@
              scurr = (htt - htmarch) / (-dhtds)
 
              if(scurr .lt. slast)then
-               write(6,*)' ERROR s<slast 1:',s,slast,ls,htt,htmarch,rkmarch
+               write(6,*)' error s<slast 1:',s,slast,ls,htt,htmarch,rkmarch
                stop
              endif
 
@@ -277,7 +277,7 @@
              scurr = float(ls) * raysteps
 
              if(scurr .lt. slast)then
-               write(6,*)' ERROR s<slast 2:',s,slast,ls,raysteps
+               write(6,*)' error s<slast 2:',s,slast,ls,raysteps
                stop
              endif
 
@@ -286,12 +286,12 @@
            ri = rit + dids*s
            rj = rjt + djds*s
 
-!          Update the height based on the slope of the ray with a correction
-!          for Earth curvature. The approximation is made that the curve of
-!          the Earth can be given by a quadratic (parabolic) expression.
+!          update the height based on the slope of the ray with a correction
+!          for earth curvature. the approximation is made that the curve of
+!          the earth can be given by a quadratic (parabolic) expression.
 !          ht = htt + dhtds*s + (dxyds*s)**2 / (2.0*earth_radius)
 
-!          This can be used as part of a refraction strategy
+!          this can be used as part of a refraction strategy
            refk = 0.179
            ht = htt + dhtds*s + (dxyds*s)**2 / ((2.0/(1.-refk))*earth_radius)
 
@@ -332,13 +332,13 @@
                nnew = nnew + 1
              endif
 
-!            if(if .eq. 3 .AND. jt .eq. ni/2 .AND. kt .eq. nk/2)then
+!            if(if .eq. 3 .and. jt .eq. ni/2 .and. kt .eq. nk/2)then
 !              alt_theo2 = -atand((ht-htlast) / (s-slast))
 !              write(6,7)id,jd,s,obj_alt(id,jd),alt_theo2
 !7             format('key ray',2i5,f9.1,2f9.4)
 !            endif
 
-!            Valid trace (even if already assigned)
+!            valid trace (even if already assigned)
              illast = il; jllast = jl; kllast = kl
 
              il = max(min(int(ri),ni-1),1); fi = ri - il; ih=il+1
@@ -351,9 +351,9 @@
                l_same_point = .false.
              endif
 
-             if(ht - topo_a(id,jd) .le. 1000. .AND. ihit_terrain .ne. 1 .AND. .false.)then
+             if(ht - topo_a(id,jd) .le. 1000. .and. ihit_terrain .ne. 1 .and. .false.)then
 
-!              Interpolate to get topography at fractional grid point
+!              interpolate to get topography at fractional grid point
 
 !              if(il .le. 0)then
 !                write(6,*)' il bounds check',il,id,ri,rj
@@ -411,12 +411,12 @@
                endif
 
                if(b_alpha_new .lt. 0.)then
-                 write(6,*)' ERROR in b_alpha_new',b_alpha_new,ri,rj,rk,fi,fj,fk
+                 write(6,*)' error in b_alpha_new',b_alpha_new,ri,rj,rk,fi,fj,fk
                  write(6,*)'b_alpha_3d',b_alpha_3d(il:ih,jl:jh,kl:kh)
                  stop
                endif
                if(albedo .gt. 1.0 .or. albedo .lt. 0.0)then
-                 write(6,*)' ERROR in albedo ',albedo,btau,dbtau,ds,b_alpha_m,b_alpha_new,b_alpha_last,s,slast
+                 write(6,*)' error in albedo ',albedo,btau,dbtau,ds,b_alpha_m,b_alpha_new,b_alpha_last,s,slast
                  stop
                endif
 
@@ -441,18 +441,18 @@
        enddo ! j
        enddo ! i
 
-       write(6,*)' Number new/steps assigned on this face =',nnew,nfacesteps
+       write(6,*)' number new/steps assigned on this face =',nnew,nfacesteps
 
        ntot = ntot + nnew
        nsteps = nsteps + nfacesteps
 
-       I4_elapsed = ishow_timer()
+       i4_elapsed = ishow_timer()
 
       enddo ! if
 
      else  ! solalt < twi_alt
       write(6,*)' solalt < twi_alt, raytrace not needed: ',solalt,twi_alt
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
      endif ! solalt
 
@@ -460,19 +460,19 @@
 
      npts = ni*nj*nk
      fractot = float(ntot)/float(npts)
-     write(6,*)' Total is ',ntot, 'Potential pts is',npts,' frac',fractot
+     write(6,*)' total is ',ntot, 'potential pts is',npts,' frac',fractot
      write(6,*)' nsteps is ',nsteps,'frac is',float(nsteps)/float(npts)
 
      arg1 = minval(transm_3d)
      arg2 = maxval(transm_3d)
-     if(arg1 .lt. 0. .OR. arg2 .gt. 1.0)then
-       write(6,*)' WARNING: Range of transm_3d = ',arg1,arg2
+     if(arg1 .lt. 0. .or. arg2 .gt. 1.0)then
+       write(6,*)' warning: range of transm_3d = ',arg1,arg2
 !      stop
      else
        write(6,*)' range of transm_3d = ',arg1,arg2
      endif
 
-     I4_elapsed = ishow_timer()
+     i4_elapsed = ishow_timer()
 
      nshadow = 0
      if(solalt .ge. twi_alt)then ! daylight or early twilight
@@ -483,7 +483,7 @@
          topo = redp_lvl ! generic topo value
          ht_agl = heights_1d(k) - topo
 
-!        See http://mintaka.sdsu.edu/GF/explain/atmos_refr/dip.html
+!        see http://mintaka.sdsu.edu/gf/explain/atmos_refr/dip.html
          if(ht_agl .gt. 0.)then                               
            horz_dep_d = sqrt(2.0 * ht_agl / earth_radius) * 180./3.14
          else
@@ -500,7 +500,7 @@
            endif
 
            if(iverbose .eq. 1)then
-             write(6,*)' Here iverbose 1 ',i,j,k,heights_1d(k),ht_agl,transm_3d(i,j,k)
+             write(6,*)' here iverbose 1 ',i,j,k,heights_1d(k),ht_agl,transm_3d(i,j,k)
            endif
 
            if(transm_3d(i,j,k) .eq. r_missing_data)then
@@ -517,27 +517,27 @@
                write(6,*)' shadow at ',i,j,k,heights_3d(i,j,k)
              endif
 !          elseif(transm_3d(i,j,k) .lt. 0.)then
-!            write(6,*)' ERROR: transm_3d < 0',i,j,k,transm_3d(i,j,k)
+!            write(6,*)' error: transm_3d < 0',i,j,k,transm_3d(i,j,k)
 !            stop
 !          elseif(transm_3d(i,j,k) .gt. 1.)then
-!            write(6,*)' ERROR: transm_3d > 1',i,j,k,transm_3d(i,j,k)
+!            write(6,*)' error: transm_3d > 1',i,j,k,transm_3d(i,j,k)
 !            stop
-           else ! Calculate transm_4d
+           else ! calculate transm_4d
 
-!            Direct illumination of the cloud is calculated here
-!            Indirect illumination is factored in via 'scat_frac'
+!            direct illumination of the cloud is calculated here
+!            indirect illumination is factored in via 'scat_frac'
              obj_alt_thr = .00 ! abs(obj_alt(i,j)) * .00
-             if(abs(obj_alt(i,j) - obj_alt_last) .gt. obj_alt_thr .OR. iverbose .eq. 1)then
+             if(abs(obj_alt(i,j) - obj_alt_last) .gt. obj_alt_thr .or. iverbose .eq. 1)then
 !              ag = airmassf(cosd(90. - max(obj_alt(i,j),-3.0)),patm_k)
                ag = airmassf(90.-obj_alt(i,j), patm_k)
 
                if(.true.)then
                  aero_refht = redp_lvl
                  obj_alt_app = obj_alt(i,j) + refraction
-                 call get_airmass(obj_alt_app,heights_3d(i,j,k),patm_k & ! I 
-                                   ,aero_refht,aero_scaleht &   ! I
-                                   ,earth_radius,iverbose &     ! I
-                                   ,agdum,aodum,aa,refr_deg)    ! O
+                 call get_airmass(obj_alt_app,heights_3d(i,j,k),patm_k & ! i 
+                                   ,aero_refht,aero_scaleht &   ! i
+                                   ,earth_radius,iverbose &     ! i
+                                   ,agdum,aodum,aa,refr_deg)    ! o
                else
                  aa = 0.
                endif
@@ -553,7 +553,7 @@
 20             format(' ht/alt/refr/hzdp/obj_alt_cld',5f9.3)
              endif
 
-!            Estimate solar extinction/reddening by Rayleigh scattering
+!            estimate solar extinction/reddening by rayleigh scattering
 !            at this cloud altitude
              if(obj_alt_cld .lt. -0.25)then ! (early) twilight cloud lighting
 !              twi_int = .1 * 10.**(+obj_alt_cld * 0.4) ! magnitudes per deg
@@ -582,7 +582,7 @@
                  endif
                enddo
 
-!              Fraction of solar disk (approximate)
+!              fraction of solar disk (approximate)
                if(obj_alt_cld .gt. 0.25)then
                  sol_occ = 1.0
                else
@@ -617,39 +617,39 @@
      write(6,*)' nshadow = ',nshadow
 
      if(fractot .lt. 1.0)then
-         write(6,*)' WARNING: missing points in get_cloud_rad_faces',fractot
+         write(6,*)' warning: missing points in get_cloud_rad_faces',fractot
 !        stop
      endif
 
      where(transm_3d .eq. r_missing_data)transm_3d = 0.
 
-     I4_elapsed = ishow_timer()
+     i4_elapsed = ishow_timer()
 
      return
      end
 
-!    Notes:
+!    notes:
 !       above threshold of 15 degrees has banding
 !       at 2.2,4 degrees solalt works well - runs slow in top face
-!       at 1330UTC -0.45 deg looks OK
-!       at 1315UTC -3.19 deg good illumination - some banding
+!       at 1330utc -0.45 deg looks ok
+!       at 1315utc -3.19 deg good illumination - some banding
 !                  turning off ag for transm_4d still has banding
 
-     subroutine get_terrain_shadows(heights_3d,topo_a,obj_alt,obj_azi,kterr,ni,nj,nk,idb,jdb & ! I
-                                   ,transm_3t,transm_2t)                                       ! O
+     subroutine get_terrain_shadows(heights_3d,topo_a,obj_alt,obj_azi,kterr,ni,nj,nk,idb,jdb & ! i
+                                   ,transm_3t,transm_2t)                                       ! o
 
      include 'trigd.inc'
 
-     use mem_namelist, ONLY: r_missing_data,earth_radius,grid_spacing_m
+     use mem_namelist, only: r_missing_data,earth_radius,grid_spacing_m
 
      real heights_3d(ni,nj,nk)
-     real transm_3t(ni,nj,nk) ! terrain 3D transmission
-     real transm_2t(ni,nj)    ! terrain 2D transmission
+     real transm_3t(ni,nj,nk) ! terrain 3d transmission
+     real transm_2t(ni,nj)    ! terrain 2d transmission
      real topo_a(ni,nj),terr_max_path_a(ni,nj)
      real obj_alt(ni,nj),obj_azi(ni,nj)
      integer kterr(ni,nj)
 
-     write(6,*)' Subroutine get_terrain_shadows'
+     write(6,*)' subroutine get_terrain_shadows'
      transm_3t = 1.0
      transm_2t = r_missing_data
 
@@ -657,11 +657,11 @@
      terr_min = minval(topo_a)
      terr_max_path_a = 100000. ! initialize
 
-!    Initial terrain effects
+!    initial terrain effects
      nsteps = 0
      nloop_tot = 0
      do k = 1,nk
-       I4_elapsed = ishow_timer()
+       i4_elapsed = ishow_timer()
        nloop = 0
 
        kunder = max(k-1,1)
@@ -681,7 +681,7 @@
          if(topo_a(i,j) .gt. heights_3d(i,j,k))then             ! below terrain
 !          transm_3d(i,j,k) = 0.
            transm_3t(i,j,k) = 0.
-         elseif(k .ge. 2 .AND. transm_3t(i,j,k-1) .eq. 1.0)then ! underneath level already illuminated
+         elseif(k .ge. 2 .and. transm_3t(i,j,k-1) .eq. 1.0)then ! underneath level already illuminated
            continue 
 !        elseif(htstart .gt. terr_max_path(i,j) .and. objalt .gt. 0.)then
 !          continue	   
@@ -742,7 +742,7 @@
 
 101        continue
 
-!          Special handling at kterr
+!          special handling at kterr
            if(k .ne. kterr(i,j))then
               if(terr_tanalt_max .gt. tan_suntop)then
                   transm_3t(i,j,k) = 0.          
@@ -758,7 +758,7 @@
 
            if(i .eq. idb .and. j .eq. jdb)then
               write(6,102)k,kterr(i,j),is,inew,jnew,transm_3t(i,j,k),terr_tanalt_max,tan_suntop ! ,terr_max_path_a(i,j)
-102           format(' Initial terrain effects for k =',2i5,3i6,f9.3,3f9.3)
+102           format(' initial terrain effects for k =',2i5,3i6,f9.3,3f9.3)
               if(k .eq. kterr(i,j))then
                  write(6,*)' transm_2t = ',transm_2t(i,j)
               endif
@@ -766,8 +766,8 @@
  
          endif ! non-trivial point
 
-!        Level is immediately above the terrain. We can consider integrating this by substituting
-!        the terrain height for one of the 3D heights.
+!        level is immediately above the terrain. we can consider integrating this by substituting
+!        the terrain height for one of the 3d heights.
 !        if(heights_3d(i,j,kunder) .lt. topo_a(i,j) .and. heights_3d(i,j,k) .ge. topo_a(i,j))then
 !             transm_2t(i,j) = transm_3t(i,j,k)
 !        endif

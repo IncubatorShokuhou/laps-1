@@ -6,32 +6,32 @@ c
 c
 c*******************************************************************************
 c
-c       Routine to calculate regression coefficients from y/x data
+c       routine to calculate regression coefficients from y/x data
 c       (formerly t and elev data).
 
-c       Values returned are the coefficients for the regression equations
+c       values returned are the coefficients for the regression equations
 c       as well as mean of each array, bias, rms   
 c
-c       Changes:
-c               P.A. Stamus     12-01-88        Original (from J. McGinley)
-c               Steve Albers    2018            Added weights
+c       changes:
+c               p.a. stamus     12-01-88        original (from j. mcginley)
+c               steve albers    2018            added weights
 c
-c       Inputs/Outputs:
+c       inputs/outputs:
 c
-c          Variable     Var Type    I/O   Description
+c          variable     var type    i/o   description
 c         ----------   ----------  ----- -------------
-c          num_sfc         I         I    Number of surface stations.
-c          x               RA        I    
-c          y               RA        I    
-c          wt_a            RA        I    weights
-c          b_t             R         O    intercept (y = ax + b)
-c          a_t             R         O    slope
-c          xbar            R         O    Mean value of the stations.
-c          ybar            R         O    Mean value of the gridded field
+c          num_sfc         i         i    number of surface stations.
+c          x               ra        i    
+c          y               ra        i    
+c          wt_a            ra        i    weights
+c          b_t             r         o    intercept (y = ax + b)
+c          a_t             r         o    slope
+c          xbar            r         o    mean value of the stations.
+c          ybar            r         o    mean value of the gridded field
 c
-c       User Notes:
+c       user notes:
 c
-c       1. Units are not changed in this routine.
+c       1. units are not changed in this routine.
 c
 c*******************************************************************************
 c
@@ -39,7 +39,7 @@ c
 
 c
 c
-c.....Set up storage variables.
+c.....set up storage variables.
 c
         write(6,*)' start stats_2d'
 
@@ -50,11 +50,11 @@ c
         sumx2 = 0.
         sumy2 = 0.
 c
-c.....  Gather sums and then calculate the 'a' and 'b' for the regression
-c.....  equation y = az + b, for both the temperature and dew point.  The
+c.....  gather sums and then calculate the 'a' and 'b' for the regression
+c.....  equation y = az + b, for both the temperature and dew point.  the
 c.....  'b' is the intercept with sea level, and the 'a' is the lapse rate.
 c.....  'y' represents the y value and 'z' is x/analyzed
-c.....  Also calculate the mean elevation of the stations.
+c.....  also calculate the mean elevation of the stations.
 c
         istatus = 0
 
@@ -85,7 +85,7 @@ c
             return
         endif
 
-!       Slope    
+!       slope    
         denominator = (cnt*sumx2 - sumx*sumx)
         if(denominator .ne. 0.)then
             a_t = (cnt*sumxy - sumx*sumy) / denominator                
@@ -94,7 +94,7 @@ c
             istatus = 0
         endif
 
-!       Intercept
+!       intercept
         b_t = (sumy - a_t * sumx) / cnt
 c
         xbar = sumx / cnt
@@ -105,7 +105,7 @@ c
 
         write(6,*)' xbar,ybar = ',xbar,ybar
 
-!       Calculate rms (stdev) of the ob-background differences
+!       calculate rms (stdev) of the ob-background differences
         cnt = 0
         sumsq = 0.
         do i=1,ni
@@ -126,14 +126,14 @@ c
 
         bias = ybar - xbar
 
-!       if(a_t .lt. 0.1 .OR. a_t .gt. 10.)then
-!          write(6,*)' Warning, slope is ill conditioned'
+!       if(a_t .lt. 0.1 .or. a_t .gt. 10.)then
+!          write(6,*)' warning, slope is ill conditioned'
 !          istatus = 0
 !       endif
 c
-c.....  End of routine
+c.....  end of routine
 c
-!       Compute correlation coefficient
+!       compute correlation coefficient
         sum1 = 0.
         sum2 = 0.
         sum3 = 0.
@@ -159,12 +159,12 @@ c
         write(6,*)' ratio of points = ',cnt/(float(ni*nj))
 
         write(6,900)int(cnt),bias,std,r
-900     format(1x,' N/bias/rms/r = ',i8,2f9.2,f9.3)
+900     format(1x,' n/bias/rms/r = ',i8,2f9.2,f9.3)
 
         if(istatus .eq. 1)then
-          write(6,*)' Success in stats_2d'
+          write(6,*)' success in stats_2d'
         else
-          write(6,*)' WARNING: istatus in stats_2d =',istatus 
+          write(6,*)' warning: istatus in stats_2d =',istatus 
         endif
         write(6,*)
 

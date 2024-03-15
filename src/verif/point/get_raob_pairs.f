@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -32,7 +32,7 @@ cdis
       subroutine get_raob_pairs(raob_fname,model_dir,i4time_sys,i4time,
      1                          i4time_raob_earliest,i4time_raob_latest,
      1                          output_fname, nl_dir, ni, nj,
-     1                          nk, lats, lons, stdLON, 
+     1                          nk, lats, lons, stdlon, 
      1                          laps_levels_mb,laps_levels_pa,
      1                          max_ht_m_proc, min_pres_mb_proc,
      1                          balance, r_missing_data, 
@@ -43,7 +43,7 @@ cdis
       character*(*)     raob_fname	!path and name of raob file to read
       character*(*)     model_dir	!location of model data directories
                                         !lapsprd, or location of fua, fsf
-      integer		i4time		!i4time of LAPS/model file to read
+      integer		i4time		!i4time of laps/model file to read
       integer           i4time_sys
       integer         i4time_raob_latest, i4time_raob_earliest
       character*256     output_fname	!path and name of output file
@@ -51,7 +51,7 @@ cdis
       integer           ni, nj, nk	!i, j and k grid dimensions
       real		lats(ni,nj) 	!domain lats
       real		lons(ni,nj)	!domain lons
-      real 		stdLON		!standard Longitude
+      real 		stdlon		!standard longitude
       real            laps_levels_mb(nk) !laps pressure levels
       real            laps_levels_pa(nk) !laps pressure levels
       real            max_ht_m_proc   !maximum height(m) to process up to
@@ -62,125 +62,125 @@ cdis
       real		verif_missing_data
       integer		istatus		!return value from subroutine
 
-      integer		MAX_RAOBS
-      parameter         (MAX_RAOBS=50)
-      integer           maxM
-      parameter         (maxM=22)
-      integer           maxW
-      parameter         (maxW=97)  !75+22, for mingle mand and sigW
-      integer		maxT
-      parameter         (maxT=177) !150+22 for mingle mand and sigT
-      integer		MAX_HTS
-      parameter		(MAX_HTS=275)
+      integer		max_raobs
+      parameter         (max_raobs=50)
+      integer           maxm
+      parameter         (maxm=22)
+      integer           maxw
+      parameter         (maxw=97)  !75+22, for mingle mand and sigw
+      integer		maxt
+      parameter         (maxt=177) !150+22 for mingle mand and sigt
+      integer		max_hts
+      parameter		(max_hts=275)
 
       integer 		nf_status, ncid, varid
       integer           all_raobs	! 1=use all raobs in domain
-      integer           use_raob(MAX_RAOBS), n_raobs_use
+      integer           use_raob(max_raobs), n_raobs_use
       integer           lun, i, j, dir_len
-      integer 	statusL(2,6)
+      integer 	statusl(2,6)
       character*256     filename
       logical           l_eof
 
-C     1d raob data
-      integer		nRaobs, n_raobs_avail
-      integer 		wmoNum_use(MAX_RAOBS)
-      character*6       staName_use(MAX_RAOBS)
-      integer 	timeSyn(MAX_RAOBS),
-     1			wmoStaNum(MAX_RAOBS),
-     1			timeRel(MAX_RAOBS),
-     1			numSigT(MAX_RAOBS),
-     1			numSigW(MAX_RAOBS) 
-      character*6       staName(MAX_RAOBS) 
-      real            staLat(MAX_RAOBS), 
-     1			staLon(MAX_RAOBS), 
-     1                  staElev(MAX_RAOBS)
-      character*9	a9_time(MAX_RAOBS)
+c     1d raob data
+      integer		nraobs, n_raobs_avail
+      integer 		wmonum_use(max_raobs)
+      character*6       staname_use(max_raobs)
+      integer 	timesyn(max_raobs),
+     1			wmostanum(max_raobs),
+     1			timerel(max_raobs),
+     1			numsigt(max_raobs),
+     1			numsigw(max_raobs) 
+      character*6       staname(max_raobs) 
+      real            stalat(max_raobs), 
+     1			stalon(max_raobs), 
+     1                  staelev(max_raobs)
+      character*9	a9_time(max_raobs)
 
-C     temp variables
-      integer 	numT(MAX_RAOBS),
-     1                  timeLapsT(maxT,MAX_RAOBS),
-     1			fileAvailTHR
-      character*1	typeT(maxT,MAX_RAOBS)
-      real            tSigT(maxT,MAX_RAOBS),
-     1                  tdSigT(maxT,MAX_RAOBS),
-     1                  htSigT(maxT,MAX_RAOBS),
-     1                  prSigT(maxT,MAX_RAOBS),
-     1			prIT(maxT,MAX_RAOBS), 
-     1                  tIT(maxT,MAX_RAOBS),
-     1                  tdIT(maxT,MAX_RAOBS),
-     1                  prPT(maxT,MAX_RAOBS), 
-     1                  tPT(maxT,MAX_RAOBS),
-     1                  tdPT(maxT,MAX_RAOBS),
-     1                  riT(maxT,MAX_RAOBS),
-     1                  rjT(maxT,MAX_RAOBS), 
-     1                  rkT(maxT,MAX_RAOBS),
-     1                  latT(maxT,MAX_RAOBS), 
-     1                  lonT(maxT,MAX_RAOBS), 
-     1                  htT(maxT,MAX_RAOBS) 
+c     temp variables
+      integer 	numt(max_raobs),
+     1                  timelapst(maxt,max_raobs),
+     1			fileavailthr
+      character*1	typet(maxt,max_raobs)
+      real            tsigt(maxt,max_raobs),
+     1                  tdsigt(maxt,max_raobs),
+     1                  htsigt(maxt,max_raobs),
+     1                  prsigt(maxt,max_raobs),
+     1			prit(maxt,max_raobs), 
+     1                  tit(maxt,max_raobs),
+     1                  tdit(maxt,max_raobs),
+     1                  prpt(maxt,max_raobs), 
+     1                  tpt(maxt,max_raobs),
+     1                  tdpt(maxt,max_raobs),
+     1                  rit(maxt,max_raobs),
+     1                  rjt(maxt,max_raobs), 
+     1                  rkt(maxt,max_raobs),
+     1                  latt(maxt,max_raobs), 
+     1                  lont(maxt,max_raobs), 
+     1                  htt(maxt,max_raobs) 
 
-C     wind variables
-      integer 	numW(MAX_RAOBS),
-     1                  timeLapsW(maxW,MAX_RAOBS),
-     1                  fileAvailUV
-      character*1	typeW(maxW,MAX_RAOBS)
-      real            htSigW(maxW,MAX_RAOBS), 
-     1                  wsSigW(maxW,MAX_RAOBS), 
-     1                  wdSigW(maxW,MAX_RAOBS), 
-     1                  uIW(maxW,MAX_RAOBS), 
-     1                  vIW(maxW,MAX_RAOBS),
-     1                  uPW(maxW,MAX_RAOBS), 
-     1                  vPW(maxW,MAX_RAOBS),
-     1                  riW(maxW,MAX_RAOBS),
-     1                  rjW(maxW,MAX_RAOBS), 
-     1                  rkW(maxW,MAX_RAOBS),
-     1                  latW(maxW,MAX_RAOBS), 
-     1                  lonW(maxW,MAX_RAOBS), 
-     1                  htW(maxW,MAX_RAOBS) 
+c     wind variables
+      integer 	numw(max_raobs),
+     1                  timelapsw(maxw,max_raobs),
+     1                  fileavailuv
+      character*1	typew(maxw,max_raobs)
+      real            htsigw(maxw,max_raobs), 
+     1                  wssigw(maxw,max_raobs), 
+     1                  wdsigw(maxw,max_raobs), 
+     1                  uiw(maxw,max_raobs), 
+     1                  viw(maxw,max_raobs),
+     1                  upw(maxw,max_raobs), 
+     1                  vpw(maxw,max_raobs),
+     1                  riw(maxw,max_raobs),
+     1                  rjw(maxw,max_raobs), 
+     1                  rkw(maxw,max_raobs),
+     1                  latw(maxw,max_raobs), 
+     1                  lonw(maxw,max_raobs), 
+     1                  htw(maxw,max_raobs) 
 
-C     data written out
-      integer         nHts(MAX_RAOBS),
-     1                  timeLaps(MAX_HTS,MAX_RAOBS)
-      character*1	type(MAX_HTS,MAX_RAOBS)
-      real            ri(MAX_HTS,MAX_RAOBS),
-     1                  rj(MAX_HTS,MAX_RAOBS), 
-     1                  rk(MAX_HTS,MAX_RAOBS),
-     1                  lat(MAX_HTS,MAX_RAOBS), 
-     1                  lon(MAX_HTS,MAX_RAOBS), 
-     1                  hts(MAX_HTS,MAX_RAOBS),
-     1			lapsTime(MAX_HTS,MAX_RAOBS),
-     1                  uP(MAX_HTS,MAX_RAOBS), 
-     1                  uI(MAX_HTS,MAX_RAOBS), 
-     1                  vP(MAX_HTS,MAX_RAOBS), 
-     1                  vI(MAX_HTS,MAX_RAOBS),
-     1                  tP(MAX_HTS,MAX_RAOBS),
-     1                  tI(MAX_HTS,MAX_RAOBS), 
-     1                  tdP(MAX_HTS,MAX_RAOBS),
-     1                  tdI(MAX_HTS,MAX_RAOBS),
-     1                  prP(MAX_HTS,MAX_RAOBS), 
-     1                  prI(MAX_HTS,MAX_RAOBS)
+c     data written out
+      integer         nhts(max_raobs),
+     1                  timelaps(max_hts,max_raobs)
+      character*1	type(max_hts,max_raobs)
+      real            ri(max_hts,max_raobs),
+     1                  rj(max_hts,max_raobs), 
+     1                  rk(max_hts,max_raobs),
+     1                  lat(max_hts,max_raobs), 
+     1                  lon(max_hts,max_raobs), 
+     1                  hts(max_hts,max_raobs),
+     1			lapstime(max_hts,max_raobs),
+     1                  up(max_hts,max_raobs), 
+     1                  ui(max_hts,max_raobs), 
+     1                  vp(max_hts,max_raobs), 
+     1                  vi(max_hts,max_raobs),
+     1                  tp(max_hts,max_raobs),
+     1                  ti(max_hts,max_raobs), 
+     1                  tdp(max_hts,max_raobs),
+     1                  tdi(max_hts,max_raobs),
+     1                  prp(max_hts,max_raobs), 
+     1                  pri(max_hts,max_raobs)
 
-C     Laps data read in
-      real            uLapsGS(ni,nj,nk), vLapsGS(ni,nj,nk),
-     1                  tLapsGS(ni,nj,nk), rhLapsGS(ni,nj,nk),
-     1                  htLapsGS(ni,nj,nk),uLapsGP(ni,nj,nk),
-     1                  vLapsGP(ni,nj,nk),tLapsGP(ni,nj,nk),
-     1                  rhLapsGP(ni,nj,nk), htLapsGP(ni,nj,nk),
-     1                  htLgaGS(ni,nj,nk), htLgaGP(ni,nj,nk)
+c     laps data read in
+      real            ulapsgs(ni,nj,nk), vlapsgs(ni,nj,nk),
+     1                  tlapsgs(ni,nj,nk), rhlapsgs(ni,nj,nk),
+     1                  htlapsgs(ni,nj,nk),ulapsgp(ni,nj,nk),
+     1                  vlapsgp(ni,nj,nk),tlapsgp(ni,nj,nk),
+     1                  rhlapsgp(ni,nj,nk), htlapsgp(ni,nj,nk),
+     1                  htlgags(ni,nj,nk), htlgagp(ni,nj,nk)
        
-      integer		writeT,writeW
-C
-C     BEGIN
-C
+      integer		writet,writew
+c
+c     begin
+c
       istatus = 1   !assume good return
-      writeW = 0
-      writeT = 0
+      writew = 0
+      writet = 0
 
-C     Set up nHts(MAX_RAOBS)
-      do i = 1, MAX_RAOBS
-        nHts(i) = MAX_HTS
+c     set up nhts(max_raobs)
+      do i = 1, max_raobs
+        nhts(i) = max_hts
       enddo
 
-C     Read verify_raob.nl
+c     read verify_raob.nl
 
       lun = 10
       call s_len(nl_dir,dir_len)
@@ -194,7 +194,7 @@ C     Read verify_raob.nl
 50    format(i5,1x,a6)
 
       do while (.not.l_eof)
-        read(lun,50,end=55,err=901)wmoNum_use(i), staName_use(i)
+        read(lun,50,end=55,err=901)wmonum_use(i), staname_use(i)
         i = i + 1
         goto 56
 55      l_eof = .true.
@@ -206,41 +206,41 @@ C     Read verify_raob.nl
 
       all_raobs = 0	!set to 1 if use all raobs in file
 
-C     See if wmoNum_use(1) .eq. -1...if so, use all raobs in file
-      if (wmoNum_use(1) .eq. -1) then
+c     see if wmonum_use(1) .eq. -1...if so, use all raobs in file
+      if (wmonum_use(1) .eq. -1) then
         all_raobs = 1
       endif
 
-C     Read raob file "raob_fname" and return requested raob data
-C     with Man/SigT mingled by pressure and Man/SigW mingled by height
+c     read raob file "raob_fname" and return requested raob data
+c     with man/sigt mingled by pressure and man/sigw mingled by height
       call get_raob_data_a(ni, nj, i4time,i4time_raob_earliest,
-     1                     i4time_raob_latest,raob_fname,MAX_RAOBS,
-     1                     maxM,maxT, maxW,lats,lons,timeSyn,timeRel, 
-     1                     numSigT, numSigW, wmoStaNum,staname,typeW,
-     1                     typeT,prSigT, tSigT, tdSigT, htSigT, htSigW,
-     1                     wdSigW,wsSigW, staLat, staLon, staElev,
+     1                     i4time_raob_latest,raob_fname,max_raobs,
+     1                     maxm,maxt, maxw,lats,lons,timesyn,timerel, 
+     1                     numsigt, numsigw, wmostanum,staname,typew,
+     1                     typet,prsigt, tsigt, tdsigt, htsigt, htsigw,
+     1                     wdsigw,wssigw, stalat, stalon, staelev,
      1                     max_ht_m_proc, min_pres_mb_proc,
-     1                     nRaobs, n_raobs_avail,verif_missing_data,
+     1                     nraobs, n_raobs_avail,verif_missing_data,
      1                     raob_missing_data, istatus)
 
       if (istatus .ne. 1) then
-        write(6,*) ' Unable to read raob file: ',raob_fname
+        write(6,*) ' unable to read raob file: ',raob_fname
         istatus = 0
         return
       endif
 
       write(6,*)
-      write(6,*) 'Number of raobs available: ',n_raobs_avail
+      write(6,*) 'number of raobs available: ',n_raobs_avail
       write(6,*)
 
       if (n_raobs_avail .gt. 0) then
    
-C       Set which raobs to pull LAPS/model data from
+c       set which raobs to pull laps/model data from
         if (all_raobs .ne. 1) then   !set use_raob(i) to 1 if raob is on list
           do i = 1, n_raobs_use
-            do j = 1, nRaobs
-              if ((wmoNum_use(i) .eq. wmoStaNum(j)) .or.
-     1            (staName_use(i) .eq. staName(j))) then
+            do j = 1, nraobs
+              if ((wmonum_use(i) .eq. wmostanum(j)) .or.
+     1            (staname_use(i) .eq. staname(j))) then
                 use_raob(j) = 1    !set to 1 if current raob is on list to use
               else
                 use_raob(j) = 0  
@@ -248,171 +248,171 @@ C       Set which raobs to pull LAPS/model data from
             enddo
           enddo
         else
-          do i = 1, nRaobs
+          do i = 1, nraobs
             use_raob(i) = 1    !set to 1 if current raob is on list to use
           enddo
         endif
 
-C       For i4time Read LAPS LW3 file for U and V/ LT1 file for T and HT
-C       and LH3 file for rh
-C       statusL(1,x) = Syn  (2,x) = Prev
-C       statusL(x,1)=u (x,2)=v (x,3)=t (x,4)=ht (x,5)=rh (x,6)=LGAht
+c       for i4time read laps lw3 file for u and v/ lt1 file for t and ht
+c       and lh3 file for rh
+c       statusl(1,x) = syn  (2,x) = prev
+c       statusl(x,1)=u (x,2)=v (x,3)=t (x,4)=ht (x,5)=rh (x,6)=lgaht
 
         call make_fnam_lp(i4time,a9_time,istatus)
 
         call get_laps(ni,nj,nk,model_dir,i4time_sys,a9_time,
-     1              uLapsGS,vLapsGS,tLapsGS,rhLapsGs,htLapsGS,
-     1                uLapsGP,vLapsGP,tLapsGP,rhLapsGP,
-     1                htLapsGP,htLgaGS,htLgaGP,balance,
-     1                laps_levels_mb,statusL)
+     1              ulapsgs,vlapsgs,tlapsgs,rhlapsgs,htlapsgs,
+     1                ulapsgp,vlapsgp,tlapsgp,rhlapsgp,
+     1                htlapsgp,htlgags,htlgagp,balance,
+     1                laps_levels_mb,statusl)
 
-        fileAvailUV = 0
-        if ((statusL(1,1) .eq. 1) .and. (statusL(1,2) .eq. 1)) then
-          fileAvailUV = fileAvailUV + 1
-        elseif ((statusL(2,1) .eq. 1) .and.
-     1          (statusL(2,2) .eq. 1)) then
-          fileAvailUV = fileAvailUV + 2
+        fileavailuv = 0
+        if ((statusl(1,1) .eq. 1) .and. (statusl(1,2) .eq. 1)) then
+          fileavailuv = fileavailuv + 1
+        elseif ((statusl(2,1) .eq. 1) .and.
+     1          (statusl(2,2) .eq. 1)) then
+          fileavailuv = fileavailuv + 2
         else
           istatus = 0
-          write(6,*) ' Missing U/V data ',statusL(1,1),
-     1    statusL(1,2),' 11Z ',statusL(2,1), statusL(2,2)
+          write(6,*) ' missing u/v data ',statusl(1,1),
+     1    statusl(1,2),' 11z ',statusl(2,1), statusl(2,2)
         endif
 
-        fileAvailTHR = 0
-        if ((statusL(1,3) .eq. 1) .and. (statusL(1,4) .eq. 1) .and.
-     1      (statusL(1,5) .eq. 1)) then
-          fileAvailTHR = fileAvailTHR + 1
-        elseif ((statusL(2,3) .eq. 1) .and.
-     1          (statusL(2,4) .eq. 1) .and.
-     1          (statusL(2,5) .eq. 1)) then
-          fileAvailTHR = fileAvailTHR + 2
+        fileavailthr = 0
+        if ((statusl(1,3) .eq. 1) .and. (statusl(1,4) .eq. 1) .and.
+     1      (statusl(1,5) .eq. 1)) then
+          fileavailthr = fileavailthr + 1
+        elseif ((statusl(2,3) .eq. 1) .and.
+     1          (statusl(2,4) .eq. 1) .and.
+     1          (statusl(2,5) .eq. 1)) then
+          fileavailthr = fileavailthr + 2
         else
           istatus = 0
-          write(6,*) ' Missing T/HT/Td data ',statusL(1,1),
-     1    statusL(1,2),' 11Z ',statusL(2,1), statusL(2,2)
+          write(6,*) ' missing t/ht/td data ',statusl(1,1),
+     1    statusl(1,2),' 11z ',statusl(2,1), statusl(2,2)
         endif
 
-        if (fileAvailUV .gt. 0) then !need UV for both..if not there, can't run
+        if (fileavailuv .gt. 0) then !need uv for both..if not there, can't run
 
-C         Loop through use_raob and pull model data if use_raob(i) .eq. 1
-          do i = 1, nRaobs
+c         loop through use_raob and pull model data if use_raob(i) .eq. 1
+          do i = 1, nraobs
             if (use_raob(i) .eq. 1) then
 
-C             Ascend balloon for W and return ri,rj,rk,latW,lonW,htW, uIW,vIW,
-C                                           timeLapsW,istatus
-              if (fileAvailUV .gt. 0) then
+c             ascend balloon for w and return ri,rj,rk,latw,lonw,htw, uiw,viw,
+c                                           timelapsw,istatus
+              if (fileavailuv .gt. 0) then
 
-                call ascend_w(timeSyn(i), timeRel(i), numSigW(i),
-     1                      numW(i),fileAvailUV,wmoStaNum(i),
-     1                      staLat(i), staLon(i), staElev(i), maxW,
-     1                      max_ht_m_proc, typeW,
-     1                      MAX_RAOBS, ni, nj, nk, i, statusL,
-     1                      htSigW, wdSigW, wsSigW,  !remember (maxW,MAX_RAOBS)
-     1                      uLapsGS,vLapsGS,uLapsGP,vLapsGP,  !(ni,nj,nk)
-     1                      htLapsGS, htLapsGP, raob_missing_data,
+                call ascend_w(timesyn(i), timerel(i), numsigw(i),
+     1                      numw(i),fileavailuv,wmostanum(i),
+     1                      stalat(i), stalon(i), staelev(i), maxw,
+     1                      max_ht_m_proc, typew,
+     1                      max_raobs, ni, nj, nk, i, statusl,
+     1                      htsigw, wdsigw, wssigw,  !remember (maxw,max_raobs)
+     1                      ulapsgs,vlapsgs,ulapsgp,vlapsgp,  !(ni,nj,nk)
+     1                      htlapsgs, htlapsgp, raob_missing_data,
      1                      verif_missing_data,
      1                      lats,lons,laps_levels_pa,    !(ni,nj,nk)
 !................................variables below returned...................
-     1                      riW,rjW,rkW,latW,lonW,htW, uIW,vIW,
-     1                      uPW,vPW,timeLapsW,istatus)
+     1                      riw,rjw,rkw,latw,lonw,htw, uiw,viw,
+     1                      upw,vpw,timelapsw,istatus)
 
                 if (istatus .ne. 1) then
-                  write(6,*) 'Wind data for raob ',wmoStaNum(i),
+                  write(6,*) 'wind data for raob ',wmostanum(i),
      1                     ' not available.'
            
-                  numW(i) = 0
+                  numw(i) = 0
                 endif
               else
-                numW(i) = 0
+                numw(i) = 0
               endif
 
-              if (fileAvailTHR .gt. 0) then
+              if (fileavailthr .gt. 0) then
 
-                call ascend_t(timeSyn(i), timeRel(i), numSigT(i),
-     1                        numT(i),fileAvailUV,fileAvailTHR, 
-     1                        wmoStaNum(i),staLat(i), staLon(i), 
-     1                        staElev(i), typeT,
-     1                        maxT, maxW,max_ht_m_proc,
-     1                        MAX_RAOBS, ni, nj, nk, i, statusL,
-     1                        prSigT, tSigT, tdSigT,htSigT,  !remember (maxT,MAX_RAOBS)
-     1                        tLapsGS,rhLapsGS,htLapsGS,tLapsGP,  !(ni,nj,nk)
-     1                        rhLapsGP, htLapsGP, 
-     1                        htLgaGS, htLgaGP,raob_missing_data,
+                call ascend_t(timesyn(i), timerel(i), numsigt(i),
+     1                        numt(i),fileavailuv,fileavailthr, 
+     1                        wmostanum(i),stalat(i), stalon(i), 
+     1                        staelev(i), typet,
+     1                        maxt, maxw,max_ht_m_proc,
+     1                        max_raobs, ni, nj, nk, i, statusl,
+     1                        prsigt, tsigt, tdsigt,htsigt,  !remember (maxt,max_raobs)
+     1                        tlapsgs,rhlapsgs,htlapsgs,tlapsgp,  !(ni,nj,nk)
+     1                        rhlapsgp, htlapsgp, 
+     1                        htlgags, htlgagp,raob_missing_data,
      1                        verif_missing_data, lats,lons, !(ni,nj,nk)
-     1                        laps_levels_pa, numSigW(i),
-     1                        htSigW, wdSigW, wsSigW, !remember (maxW,MAX_RAOBS)
+     1                        laps_levels_pa, numsigw(i),
+     1                        htsigw, wdsigw, wssigw, !remember (maxw,max_raobs)
 !................................variables below returned...................
-     1                        riT,rjT,rkT,latT,lonT,htT,prIT,tIT,
-     1                        tdIt,prPT,tPT,tdPT,timeLapsT,istatus)
+     1                        rit,rjt,rkt,latt,lont,htt,prit,tit,
+     1                        tdit,prpt,tpt,tdpt,timelapst,istatus)
 
                 if (istatus .ne. 1) then
-                  numT(i) = 0
-                  write(6,*) 'Temp data for raob ',wmoStaNum(i),
+                  numt(i) = 0
+                  write(6,*) 'temp data for raob ',wmostanum(i),
      1                       ' not available.'
                 endif
               else
-                numT(i) = 0
+                numt(i) = 0
               endif
 
-              if ((numT(i) .eq. 0) .and. (numW(i) .eq. 0)) then
+              if ((numt(i) .eq. 0) .and. (numw(i) .eq. 0)) then
                 use_raob(i) = 0
               else
-                if (numT(i) .ne. 0) writeT = writeT + 1
-                if (numW(i) .ne. 0) writeW = writeW + 1
+                if (numt(i) .ne. 0) writet = writet + 1
+                if (numw(i) .ne. 0) writew = writew + 1
               endif
 
             endif
           enddo
 
-C         re-calc n_raobs_use based on interpolation errors
+c         re-calc n_raobs_use based on interpolation errors
           n_raobs_use = 0
-          do i = 1, nRaobs
+          do i = 1, nraobs
             if (use_raob(i) .eq. 1) n_raobs_use = n_raobs_use + 1
           enddo
 
-C         merge T and W data
-c         call mergeTW(MAX_HTS,MAX_RAOBS,maxW,maxT,numW,numT,
-c    1               nRaobs,use_raob,n_raobs_use,
-c    1               ri,rj,rk,lat,lon,hts,type,uP,uI,vP,vI,
-c    1               tP,tI,tdP,tdI,prP,prI,timeLaps,nHts,
-c    1               riT,rjT,rkT,latT,lonT,htT,typeT,
-c    1               riW,rjW,rkW,latW,lonW,htW,typeW, 
-c    1               uIW,vIW,uPW,vPW,timeLapsW,
-c    1               prIT,tIT,tdIT,prPT,tPT,tdPT,timeLapsT,
+c         merge t and w data
+c         call mergetw(max_hts,max_raobs,maxw,maxt,numw,numt,
+c    1               nraobs,use_raob,n_raobs_use,
+c    1               ri,rj,rk,lat,lon,hts,type,up,ui,vp,vi,
+c    1               tp,ti,tdp,tdi,prp,pri,timelaps,nhts,
+c    1               rit,rjt,rkt,latt,lont,htt,typet,
+c    1               riw,rjw,rkw,latw,lonw,htw,typew, 
+c    1               uiw,viw,upw,vpw,timelapsw,
+c    1               prit,tit,tdit,prpt,tpt,tdpt,timelapst,
 c    1               verif_missing_data, raob_missing_data,
 c    1               istatus)
 
 
-C         write output files
+c         write output files
 
           if (n_raobs_use .gt. 0) then
-            call write_verif_raob(output_fname, MAX_RAOBS,maxW,
-     1                          maxT,numW,numT,nRaobs,
-     1                          writeT, writeW,
-     1                          n_raobs_use,use_raob, wmoStaNum,
-     1                          staName,staLat,staLon, staElev,
-     1                          a9_time,timeSyn,timeRel,
-     1                          riT,rjT,rkT,latT,lonT,htT,
-     1                          riW,rjW,rkW,latW,lonW,htW, 
-     1                          uIW,vIW,uPW,vPW,timeLapsW,
-     1                          prIT,tIT,tdIT,prPT,tPT,tdPT,
-     1                          timeLapsT, istatus)
+            call write_verif_raob(output_fname, max_raobs,maxw,
+     1                          maxt,numw,numt,nraobs,
+     1                          writet, writew,
+     1                          n_raobs_use,use_raob, wmostanum,
+     1                          staname,stalat,stalon, staelev,
+     1                          a9_time,timesyn,timerel,
+     1                          rit,rjt,rkt,latt,lont,htt,
+     1                          riw,rjw,rkw,latw,lonw,htw, 
+     1                          uiw,viw,upw,vpw,timelapsw,
+     1                          prit,tit,tdit,prpt,tpt,tdpt,
+     1                          timelapst, istatus)
 
             if (istatus .ne. 1) then
-              write(6,*) ' Error writing raob verif file: ',
+              write(6,*) ' error writing raob verif file: ',
      1                    output_fname
             endif
           else
-            write(6,*) 'No raobs to output'
+            write(6,*) 'no raobs to output'
           endif
 
         else !no model data files to process
-          write(6,*) 'no UV data available...cannot verify raobs'
+          write(6,*) 'no uv data available...cannot verify raobs'
         endif
         goto 999
 
       else
-        write(6,*)'No raobs to output' 
+        write(6,*)'no raobs to output' 
         goto 999
       endif
 
@@ -428,174 +428,174 @@ C         write output files
       return
       end
 !1.........................................................................
-      subroutine write_verif_raob(output_fname, MAX_RAOBS, maxW,
-     1                          maxT,numW,numT,nRaobs,
-     1                          writeT,writeW,
-     1                          n_raobs_use,use_raob, wmoStaNum,
-     1                          staName,staLat,staLon,staElev,
-     1                          a9_time,timeSyn,timeRel,
-     1                          riT,rjT,rkT,latT,lonT,htT,
-     1                          riW,rjW,rkW,latW,lonW,htW, 
-     1                          uIW,vIW,uPW,vPW,timeLapsW,
-     1                          prIT,tIT,tdIT,prPT,tPT,tdPT,
-     1                          timeLapsT,istatus)
+      subroutine write_verif_raob(output_fname, max_raobs, maxw,
+     1                          maxt,numw,numt,nraobs,
+     1                          writet,writew,
+     1                          n_raobs_use,use_raob, wmostanum,
+     1                          staname,stalat,stalon,staelev,
+     1                          a9_time,timesyn,timerel,
+     1                          rit,rjt,rkt,latt,lont,htt,
+     1                          riw,rjw,rkw,latw,lonw,htw, 
+     1                          uiw,viw,upw,vpw,timelapsw,
+     1                          prit,tit,tdit,prpt,tpt,tdpt,
+     1                          timelapst,istatus)
 
       implicit none
 
       character*256     output_fname	!path and name of output file
-      integer		MAX_RAOBS, maxW,maxT
-      integer           nRaobs, n_raobs_use, use_raob(MAX_RAOBS)
-      integer		writeT,writeW,wmoStaNum(MAX_RAOBS) 
-      character*6       staName(MAX_RAOBS) 
-      real            staLat(MAX_RAOBS), staLon(MAX_RAOBS), 
-     1                  staElev(MAX_RAOBS)
-      character*9	a9_time(MAX_RAOBS)
-      integer		timeSyn(MAX_RAOBS),
-     1         		timeRel(MAX_RAOBS)
+      integer		max_raobs, maxw,maxt
+      integer           nraobs, n_raobs_use, use_raob(max_raobs)
+      integer		writet,writew,wmostanum(max_raobs) 
+      character*6       staname(max_raobs) 
+      real            stalat(max_raobs), stalon(max_raobs), 
+     1                  staelev(max_raobs)
+      character*9	a9_time(max_raobs)
+      integer		timesyn(max_raobs),
+     1         		timerel(max_raobs)
 
-C     temp variables
-      integer         numT(MAX_RAOBS),
-     1			timeLapsT(maxT,MAX_RAOBS)
-      real            riT(maxT,MAX_RAOBS),
-     1                  rjT(maxT,MAX_RAOBS),
-     1                  rkT(maxT,MAX_RAOBS),
-     1                  latT(maxT,MAX_RAOBS),
-     1                  lonT(maxT,MAX_RAOBS),
-     1                  htT(maxT,MAX_RAOBS),
-     1                  prIT(maxT,MAX_RAOBS),
-     1                  tIT(maxT,MAX_RAOBS),
-     1                  tdIT(maxT,MAX_RAOBS),
-     1                  prPT(maxT,MAX_RAOBS),
-     1                  tPT(maxT,MAX_RAOBS),
-     1                  tdPT(maxT,MAX_RAOBS)
+c     temp variables
+      integer         numt(max_raobs),
+     1			timelapst(maxt,max_raobs)
+      real            rit(maxt,max_raobs),
+     1                  rjt(maxt,max_raobs),
+     1                  rkt(maxt,max_raobs),
+     1                  latt(maxt,max_raobs),
+     1                  lont(maxt,max_raobs),
+     1                  htt(maxt,max_raobs),
+     1                  prit(maxt,max_raobs),
+     1                  tit(maxt,max_raobs),
+     1                  tdit(maxt,max_raobs),
+     1                  prpt(maxt,max_raobs),
+     1                  tpt(maxt,max_raobs),
+     1                  tdpt(maxt,max_raobs)
 
-C     wind variables
-      integer         numW(MAX_RAOBS),
-     1 			timeLapsW(maxW,MAX_RAOBS)
-      real            riW(maxW,MAX_RAOBS),
-     1                  rjW(maxW,MAX_RAOBS),
-     1                  rkW(maxW,MAX_RAOBS),
-     1                  latW(maxW,MAX_RAOBS),
-     1                  lonW(maxW,MAX_RAOBS),
-     1                  htW(maxW,MAX_RAOBS),
-     1                  uIW(maxW,MAX_RAOBS),
-     1                  vIW(maxW,MAX_RAOBS),
-     1                  uPW(maxW,MAX_RAOBS),
-     1                  vPW(maxW,MAX_RAOBS)
+c     wind variables
+      integer         numw(max_raobs),
+     1 			timelapsw(maxw,max_raobs)
+      real            riw(maxw,max_raobs),
+     1                  rjw(maxw,max_raobs),
+     1                  rkw(maxw,max_raobs),
+     1                  latw(maxw,max_raobs),
+     1                  lonw(maxw,max_raobs),
+     1                  htw(maxw,max_raobs),
+     1                  uiw(maxw,max_raobs),
+     1                  viw(maxw,max_raobs),
+     1                  upw(maxw,max_raobs),
+     1                  vpw(maxw,max_raobs)
 
       integer		istatus
 
-C     local variables
+c     local variables
       integer		i, j
-      character*256     output_fnameW   !path/name of wind output file
-      character*256     output_fnameT   !path/name of temp output file
+      character*256     output_fnamew   !path/name of wind output file
+      character*256     output_fnamet   !path/name of temp output file
       integer		output_len
 
-C
-C     BEGIN
-C
+c
+c     begin
+c
       istatus = 1   !assume good return
 
       call s_len(output_fname,output_len)
-      output_fnameT = output_fname(1:output_len)//'T'
+      output_fnamet = output_fname(1:output_len)//'t'
 
-      if (writeT .ne. 0) then
-        write(6,*) output_fnameT
+      if (writet .ne. 0) then
+        write(6,*) output_fnamet
 
-C       open output_fname
-        open(1,file=output_fnameT,status='unknown',err=98)
+c       open output_fname
+        open(1,file=output_fnamet,status='unknown',err=98)
         go to 99
 
-98      write(6,*)' Error opening temp verif file: ',output_fnameT
+98      write(6,*)' error opening temp verif file: ',output_fnamet
         istatus = 0
         return
 
 99      continue
 
-C 100   writes: n_raobs_use
+c 100   writes: n_raobs_use
 100     format(i3)
-C 101   writes: nHts,a9_time,wmoStaNum,staName,staLat,staLon,staElev,timeSyn,timeRel
+c 101   writes: nhts,a9_time,wmostanum,staname,stalat,stalon,staelev,timesyn,timerel
 101     format(i3,1x,a9,1x,i7,1x,a6,1x,f7.3,1x,f8.3,1x,f7.0,2(1x,i12))
-C 102   writes: htT,latT,lonT,riT,rjT,rkT,tPT,tIT,tdPT,tdIT,prPT,prIT,timeLapsT
+c 102   writes: htt,latt,lont,rit,rjt,rkt,tpt,tit,tdpt,tdit,prpt,prit,timelapst
 102     format(f7.1,1x,f6.2,1x,f8.2,1x,3(f8.3,1x),6(f6.1,1x),i12)
 
 
-C       write number of raob into file
-        write(1,100) writeT
+c       write number of raob into file
+        write(1,100) writet
       
-C       write temp data out for each raob where use_raob(i) .eq. 1
-        do i = 1, nRaobs
-          if ((use_raob(i) .eq. 1).and.(numT(i).gt.0)) then
-C           write header info
-            write(1,101)numT(i),a9_time(i),wmoStaNum(i),
-     1                 staName(i)(1:6),
-     1                 staLat(i),staLon(i),staElev(i),
-     1                 timeSyn(i),timeRel(i)
+c       write temp data out for each raob where use_raob(i) .eq. 1
+        do i = 1, nraobs
+          if ((use_raob(i) .eq. 1).and.(numt(i).gt.0)) then
+c           write header info
+            write(1,101)numt(i),a9_time(i),wmostanum(i),
+     1                 staname(i)(1:6),
+     1                 stalat(i),stalon(i),staelev(i),
+     1                 timesyn(i),timerel(i)
 
 
             write(1,104)
-            do j = 1, numT(i)
-              write(1,102) htT(j,i),latT(j,i),lonT(j,i),
-     1                   riT(j,i),rjT(j,i),rkT(j,i),tPT(j,i),
-     1                   tIT(j,i),tdPT(j,i),tdIT(j,i),
-     1                   prPT(j,i),prIT(j,i),timeLapsT(j,i)
+            do j = 1, numt(i)
+              write(1,102) htt(j,i),latt(j,i),lont(j,i),
+     1                   rit(j,i),rjt(j,i),rkt(j,i),tpt(j,i),
+     1                   tit(j,i),tdpt(j,i),tdit(j,i),
+     1                   prpt(j,i),prit(j,i),timelapst(j,i)
             enddo
           endif
         enddo
 
         close(1)
       else
-        write(6,*) 'No temp data written: ',output_fnameT
+        write(6,*) 'no temp data written: ',output_fnamet
       endif
 104     format(2x,'hgt',5x,'lat',5x,'lon',6x,'ri',7x,'rj',7x,'rk',
-     +7x,'tPT',4x,'tIT',3x,'tdPT',3x,'tdIT',3x,'prPT',3x,'prIT'
-     +,3x,'i4timelapsT')
+     +7x,'tpt',4x,'tit',3x,'tdpt',3x,'tdit',3x,'prpt',3x,'prit'
+     +,3x,'i4timelapst')
 
-      output_fnameW = output_fname(1:output_len)//'W'
-      if (writeW .gt. 0) then
-        write(6,*) output_fnameW
+      output_fnamew = output_fname(1:output_len)//'w'
+      if (writew .gt. 0) then
+        write(6,*) output_fnamew
 
-C       open output_fname
-        open(1,file=output_fnameW,status='unknown',err=198)
+c       open output_fname
+        open(1,file=output_fnamew,status='unknown',err=198)
         go to 199
 
-198     write(6,*)' Error opening wind verif file: ',output_fnameW
+198     write(6,*)' error opening wind verif file: ',output_fnamew
         istatus = 0
         return
 
 199     continue
 
-C 103   writes: htW,latW,lonW,riW,rjW,rkW,uPW,uIW,vPW,vIW,timeLapsW
+c 103   writes: htw,latw,lonw,riw,rjw,rkw,upw,uiw,vpw,viw,timelapsw
 103     format(f7.1,1x,f6.2,1x,f8.2,1x,3(f8.3,1x),4(f6.1,1x),i12)
 
-C       write number of raob into file
+c       write number of raob into file
         write(1,100) n_raobs_use
       
-C       write wind data out for each raob where use_raob(i) .eq. 1
-        do i = 1, nRaobs
-          if ((use_raob(i) .eq. 1).and.(numW(i).gt.0)) then
-C           write header info
-            write(1,101)numW(i),a9_time(i),wmoStaNum(i),
-     1                 staName(i)(1:6),
-     1                 staLat(i),staLon(i),staElev(i),
-     1                 timeSyn(i),timeRel(i)
+c       write wind data out for each raob where use_raob(i) .eq. 1
+        do i = 1, nraobs
+          if ((use_raob(i) .eq. 1).and.(numw(i).gt.0)) then
+c           write header info
+            write(1,101)numw(i),a9_time(i),wmostanum(i),
+     1                 staname(i)(1:6),
+     1                 stalat(i),stalon(i),staelev(i),
+     1                 timesyn(i),timerel(i)
 
             write(1,105)
-            do j = 1, numW(i)
-            write(1,103) htW(j,i),latW(j,i),lonW(j,i),riW(j,i),
-     1                   rjW(j,i),rkW(j,i),uPW(j,i),
-     1                   uIW(j,i),vPW(j,i),vIW(j,i),timeLapsW(j,i)
+            do j = 1, numw(i)
+            write(1,103) htw(j,i),latw(j,i),lonw(j,i),riw(j,i),
+     1                   rjw(j,i),rkw(j,i),upw(j,i),
+     1                   uiw(j,i),vpw(j,i),viw(j,i),timelapsw(j,i)
             enddo
           endif
         enddo
 
         close(1)
       else
-        write(6,*) 'No wind data to write out: ',output_fnameW
+        write(6,*) 'no wind data to write out: ',output_fnamew
       endif
 
 105   format(2x,'hgt',5x,'lat',5x,'lon',6x,'ri',7x,'rj',7x,'rk',
-     +7x,'uPW',4x,'uIW',4x,'vPW',4x,'vIW',3x,'i4timelapsW')
+     +7x,'upw',4x,'uiw',4x,'vpw',4x,'viw',3x,'i4timelapsw')
 
       return
       end

@@ -99,7 +99,7 @@ c       sumt=sumt+(dif1*dif1)+(dif2*dif2)
        enddo
       enddo
 
-c N/S boundaries
+c n/s boundaries
       do i=2,nx-1
        rmxt=-1*r_missing_data
        rmnt=r_missing_data
@@ -173,7 +173,7 @@ c
 
       enddo
 c
-c E/W boundaries
+c e/w boundaries
       do j=2,ny-1
        rmxt=-1*r_missing_data
        rmnt=r_missing_data
@@ -248,7 +248,7 @@ c
       enddo
 
 c corners
-c SW/NW
+c sw/nw
       rmxt=-1*r_missing_data
       rmnt=r_missing_data
       do i=1,2
@@ -311,7 +311,7 @@ c
         enddo
       enddo
 
-c SE/NE
+c se/ne
       rmxt=-1*r_missing_data
       rmnt=r_missing_data
       do i=nx-1,nx
@@ -452,21 +452,21 @@ c              |     !     |       |frac1!frac2|
 c                    !                   !
 c                    ^                   ^
 c                 analysis            airdrop
-c                   (A)                 (D)
+c                   (a)                 (d)
 c                 input:lga,anal
 c 
 c ----------------------- time -> ---------------------
-c    background at D (this happens in lga_driver):
-c       bkgd_lga-D = (frac2*bkgd4 + frac1*bkgd3)
+c    background at d (this happens in lga_driver):
+c       bkgd_lga-d = (frac2*bkgd4 + frac1*bkgd3)
 c
 c        where bkgd is defined in background.nl (lga namelist)
 c
-c    analysis at D:
-c       analysis-D = analysis-A + (bkgd_lga-D - input_lga-A)
+c    analysis at d:
+c       analysis-d = analysis-a + (bkgd_lga-d - input_lga-a)
 c
-c    return bkgd_lga-D and analysis-D for qbalpe.
+c    return bkgd_lga-d and analysis-d for qbalpe.
 c
-      print*,'  Subroutine advance_grids'
+      print*,'  subroutine advance_grids'
 
       call get_laps_cycle_time(laps_cycle_time,istatus)
       if(istatus.ne.1)then
@@ -487,7 +487,7 @@ c
       allocate (names(max_files),reject_names(max_files)
      .         ,bg_names(max_files))
 
-      print*,'Calling get_acceptable_files'
+      print*,'calling get_acceptable_files'
 
       call get_acceptable_files(i4time_sys_drop,bgpaths(1),bgmodels(1)
      +        ,names,max_files
@@ -495,9 +495,9 @@ c
      +        ,forecast_length
      +        ,cmodels(1),nx,ny,nz,reject_names,rejected_cnt)
 
-      print*,'Returned from get_acceptable_files'
+      print*,'returned from get_acceptable_files'
 
-      print*,'Calling lga_driver!'
+      print*,'calling lga_driver!'
       call lga_driver(nx,ny,nz,luse_sfc_bkgd,laps_cycle_time
      .         ,bgmodels(1),bgpaths(1),cmodels(1),rejected_cnt
      .         ,reject_names,names,max_files,accepted_files
@@ -522,18 +522,18 @@ c
      .         ,omb(nx,ny,nz)
      .         ,psb(nx,ny))
 
-      call get_modelfg_3d(i4time_sys_drop,'U3 ',nx,ny,nz,ub,istatus)
-      call get_modelfg_3d(i4time_sys_drop,'V3 ',nx,ny,nz,vb,istatus)
-      call get_modelfg_3d(i4time_sys_drop,'T3 ',nx,ny,nz,tb,istatus)
-      call get_modelfg_3d(i4time_sys_drop,'HT ',nx,ny,nz,phib,istatus)
-      call get_modelfg_3d(i4time_sys_drop,'SH ',nx,ny,nz,shb,istatus)
-      call get_modelfg_3d(i4time_sys_drop,'OM ',nx,ny,nz,omb,istatus)
+      call get_modelfg_3d(i4time_sys_drop,'u3 ',nx,ny,nz,ub,istatus)
+      call get_modelfg_3d(i4time_sys_drop,'v3 ',nx,ny,nz,vb,istatus)
+      call get_modelfg_3d(i4time_sys_drop,'t3 ',nx,ny,nz,tb,istatus)
+      call get_modelfg_3d(i4time_sys_drop,'ht ',nx,ny,nz,phib,istatus)
+      call get_modelfg_3d(i4time_sys_drop,'sh ',nx,ny,nz,shb,istatus)
+      call get_modelfg_3d(i4time_sys_drop,'om ',nx,ny,nz,omb,istatus)
       if(istatus.ne.1)then
-         print*,'Error returned: get_modelfg_3d'
+         print*,'error returned: get_modelfg_3d'
       endif
-      call get_modelfg_2d(i4time_sys_drop,'PSF',nx,ny,psb,istatus)
+      call get_modelfg_2d(i4time_sys_drop,'psf',nx,ny,psb,istatus)
       if(istatus.ne.1)then
-         print*,'Error returned: get_modelfg_2d'
+         print*,'error returned: get_modelfg_2d'
       endif
 c
 c use this background with the input background to advance the analysis
@@ -589,13 +589,13 @@ c
       found_line=.false.
       if(lexist)then
         open (11, file=filename,form='formatted',status='old',err=50) 
-        Do while (.not.found_line)
+        do while (.not.found_line)
          read(11,100,end=1)dum1
-         if(dum1(1:21).eq.'Obs minus First Guess')then
+         if(dum1(1:21).eq.'obs minus first guess')then
             read(11,*,err=1)  !this one to read the column labels
             do while (.not.found_line)
                read(11,100,err=1)dum1
-               if(dum1(1:6).eq."   PIN".or.dum1(1:8).eq."  DROPSN")then
+               if(dum1(1:6).eq."   pin".or.dum1(1:8).eq."  dropsn")then
                   found_line=.true.
                endif
             enddo
@@ -619,7 +619,7 @@ c
 
       var=' '
       i=7
-      if(dum1(1:8).eq."  DROPSN")i=9
+      if(dum1(1:8).eq."  dropsn")i=9
       do while (i.ne.0)
          if(dum1(i:i).ne.' ')then
             is=i
@@ -659,8 +659,8 @@ c     enddo
 
       return
 
-50    print*, 'Error opening file: ',filename
-1     print*, 'Suspect read in the wgi file'
+50    print*, 'error opening file: ',filename
+1     print*, 'suspect read in the wgi file'
       istatus=0
       return
       end

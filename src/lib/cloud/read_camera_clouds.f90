@@ -1,18 +1,18 @@
 
-       subroutine get_camera_clouds(minalt,maxalt,minazi,maxazi,alt_scale,azi_scale, & ! I
-                                    i4time,fname_ppm,mode, &                           ! I
-                                    mask_cyl,istatus)                                  ! O
+       subroutine get_camera_clouds(minalt,maxalt,minazi,maxazi,alt_scale,azi_scale, & ! i
+                                    i4time,fname_ppm,mode, &                           ! i
+                                    mask_cyl,istatus)                                  ! o
  
        use ppm
 
        parameter (nip = 511)
        parameter (njp = 511)
 
-       integer mask_cyl(minalt:maxalt,minazi:maxazi)  ! O
+       integer mask_cyl(minalt:maxalt,minazi:maxazi)  ! o
                                                       ! 0 means unknown
                                                       ! 1 means clear
                                                       ! 2 means cloud
-       integer image(minalt:maxalt,minazi:maxazi) ! L
+       integer image(minalt:maxalt,minazi:maxazi) ! l
        integer img_polar(3,511,511)
        integer mask_polar(511,511)
        integer, allocatable :: img(:,:,:)
@@ -23,21 +23,21 @@
        character*9 a9time
        character*10 fname_ppm
 
-!      Statement functions
+!      statement functions
        i2ialt(i) = minalt+i-1
        altf(ialt) = (ialt-minalt) * alt_scale
 
        j2jazi(i) = minazi+j-1
        azif(jazi) = (jazi-minazi) * azi_scale
 
-!      Executable statements
+!      executable statements
        camera_path = '.' ! not needed for mode=2
        mask_cyl = 0
 
        a13name = cvt_i4time_wfo_fname13(i4time)
        call make_fnam_lp(i4time,a9time,istatus)
 
-       if(.false.)then      ! Read polar observed image in PPM format 
+       if(.false.)then      ! read polar observed image in ppm format 
 
          imgfile = '/w3/lapb/allsky/sites/dsrc/output3'//'/'//a13name//'_dsrc.ppm'
 
@@ -51,7 +51,7 @@
          close(u)
          write(6,*)' polar image has been read in'
 
-       elseif(.false.)then ! Read cyl observed image in PPM format 
+       elseif(.false.)then ! read cyl observed image in ppm format 
                            ! (remapped to alt/az grid)
 
          imgfile = '/w3/lapb/allsky/sites/dsrc/output3c'//'/'//a13name//'_dsrc.ppm'
@@ -66,7 +66,7 @@
          close(u)
          write(6,*)' cyl image has been read in'
 
-       elseif(mode .eq. 1)then ! Read polar (contingency table) mask
+       elseif(mode .eq. 1)then ! read polar (contingency table) mask
          img_png = trim(camera_path)//'/verif_allsky_mask.dsrc.'//a9time//'.png'
          img_ppm = trim(camera_path)//'/verif_allsky_mask.dsrc.'//a9time//'.ppm'
         
@@ -93,7 +93,7 @@
            enddo ! j
          enddo ! ic
 
-!        Convert to camera cloud mask image
+!        convert to camera cloud mask image
          do i = 1,nip
          do j = 1,njp
              if(img_polar(3,i,j) .eq. 220)then
@@ -113,13 +113,13 @@
 31           format(1x,i3,1x,100i1)
          enddo ! j
 
-         write(6,*)' Sum of mask_polar is ',sum(mask_polar)
+         write(6,*)' sum of mask_polar is ',sum(mask_polar)
 
-!        Convert to cylindrical image
-         write(6,*)' Projecting to Cylindrical Mask using polar_to_cyl'
+!        convert to cylindrical image
+         write(6,*)' projecting to cylindrical mask using polar_to_cyl'
          call polar_to_cyl(mask_polar,mask_cyl,nip,njp,minalt,maxalt,minazi,maxazi,alt_scale,azi_scale)
 
-       elseif(mode .eq. 2)then ! Read cyl mask (if produced by IDL code)
+       elseif(mode .eq. 2)then ! read cyl mask (if produced by idl code)
          if(.false.)then
            img_png = trim(camera_path)//'/camera_allsky_mask.dsrc.'//a9time//'.png'
            img_ppm = trim(camera_path)//'/camera_allsky_mask.dsrc.'//a9time//'.ppm'
@@ -129,7 +129,7 @@
            call system(trim(convert_cmd))
            open(u,file=trim(img_ppm),status='old',err=999)
          else
-           write(6,*)' Opening ',trim(fname_ppm)
+           write(6,*)' opening ',trim(fname_ppm)
            open(u,file=trim(fname_ppm),status='old',err=999)
          endif
 
@@ -149,7 +149,7 @@
            enddo ! j
          enddo ! ic
 
-!        Convert to camera cloud mask image
+!        convert to camera cloud mask image
          do i = 1,nip
          do j = 1,njp
              if(img_polar(3,i,j) .eq. 220)then
@@ -166,19 +166,19 @@
              write(6,31)j,mask_polar(1:nip:6,j)
          enddo ! j
 
-         write(6,*)' Sum of mask_polar is ',sum(mask_polar)
+         write(6,*)' sum of mask_polar is ',sum(mask_polar)
 
-!        Convert to cylindrical image
-         write(6,*)' Projecting to Cylindrical Mask using polar_to_cyl'
+!        convert to cylindrical image
+         write(6,*)' projecting to cylindrical mask using polar_to_cyl'
          call polar_to_cyl(mask_polar,mask_cyl,nip,njp,minalt,maxalt,minazi,maxazi,alt_scale,azi_scale)
 
        endif
 
-!      Mask out label at the top or clone nearby data (a small distance)
+!      mask out label at the top or clone nearby data (a small distance)
 
-!      Mask out horizon area
+!      mask out horizon area
 
-!      Apply cloud algorithm
+!      apply cloud algorithm
        do ialt = minalt,maxalt
        do jazi = minazi,maxazi
        enddo ! jazi
@@ -189,7 +189,7 @@
        return
 
 999    istatus = 0
-       write(6,*)' ERROR opening image file in read_camera_clouds'
+       write(6,*)' error opening image file in read_camera_clouds'
        return
 
        end
@@ -205,15 +205,15 @@
 
        img_c = 0
 
-!      Loop through cylindrical array
+!      loop through cylindrical array
        do ialt = minalt,maxalt
        do jazi = minazi,maxazi
 
-!          Determine altitude and azimuth
+!          determine altitude and azimuth
            alt_d = float(ialt) * alt_scale
            azi_d = float(jazi) * azi_scale
 
-!          Calculate Polar Image Coordinates (zero azimuth is up)
+!          calculate polar image coordinates (zero azimuth is up)
            ipcen = 256
            jpcen = 256
            radius = 255. * (90. - alt_d)/90.
@@ -233,17 +233,17 @@
        return
        end
 
-       subroutine get_camera_image(minalt,maxalt,minazi,maxazi,nc,alt_scale,azi_scale, & ! I
-                                   i4time,mode,site, &                         ! I
-                                   rcam_rgb,istatus)                                     ! O
+       subroutine get_camera_image(minalt,maxalt,minazi,maxazi,nc,alt_scale,azi_scale, & ! i
+                                   i4time,mode,site, &                         ! i
+                                   rcam_rgb,istatus)                                     ! o
  
        use ppm
 
        parameter (nip = 511)
        parameter (njp = 511)
 
-       real    rcam_rgb(nc,minalt:maxalt,minazi:maxazi) ! O
-       integer icam_rgb(nc,minazi:maxazi,minalt:maxalt) ! L (flipped dimensions)
+       real    rcam_rgb(nc,minalt:maxalt,minazi:maxazi) ! o
+       integer icam_rgb(nc,minazi:maxazi,minalt:maxalt) ! l (flipped dimensions)
 
        integer img_polar(3,511,511)
        integer mask_polar(511,511)
@@ -256,24 +256,24 @@
        character*10 fname_ppm
        character*10 site
 
-!      Statement functions
+!      statement functions
        i2ialt(i) = minalt+i-1
        altf(ialt) = (ialt-minalt) * alt_scale
 
        j2jazi(i) = minazi+j-1
        azif(jazi) = (jazi-minazi) * azi_scale
 
-!      Executable statements
+!      executable statements
        iverbose = 0
 
        a13name = cvt_i4time_wfo_fname13(i4time)
 !      a13name = '20171017_1459'
 
-       write(6,*)' Subroutine get_camera_image - mode ',mode ! ,trim(fname_ppm)
+       write(6,*)' subroutine get_camera_image - mode ',mode ! ,trim(fname_ppm)
 
-       if(mode .eq. 1)then      ! Read polar observed image in PPM format 
+       if(mode .eq. 1)then      ! read polar observed image in ppm format 
 
-!        imgdir = '/Users/albers/noaa/180309/wwwallsky/cases/17290/output3'
+!        imgdir = '/users/albers/noaa/180309/wwwallsky/cases/17290/output3'
          imgdir = '/data/fab/projects/allsky/sites/dsrc/output3'
          img_png = trim(imgdir)//'/'//a13name//'_'//trim(site)//'.png'
          img_ppm = trim(imgdir)//'/'//a13name//'_'//trim(site)//'.ppm'
@@ -291,12 +291,12 @@
          close(u)
          write(6,*)' polar image has been read in'
 
-       elseif(mode .eq. 2)then ! Read cyl observed image in PPM format 
+       elseif(mode .eq. 2)then ! read cyl observed image in ppm format 
                                ! (remapped to alt/az grid)
 
          call get_directory('www',imgdir, imgdir_len)
          imgdir = trim(imgdir)//'als/'//trim(site)//'/observed/cyl'
-!        imgdir = '/Users/albers/noaa/180323/wwwallsky/cases/17290/output3c'
+!        imgdir = '/users/albers/noaa/180323/wwwallsky/cases/17290/output3c'
 !        imgdir = '/data/fab/projects/allsky/sites/dsrc/output3c'
 
          img_png = trim(imgdir)//'/'//a13name//'_'//trim(site)//'.png'
@@ -315,12 +315,12 @@
          ncol = 3
          write(6,*)' dynamic dims ',ncol,iwidth,iheight
          if(iwidth .ne. maxazi-minazi+1)then
-            write(6,*)' ERROR width discrepancy ',iwidth,maxazi-minazi+1
+            write(6,*)' error width discrepancy ',iwidth,maxazi-minazi+1
             istatus = 0
             return
          endif
          if(iheight .ne. maxalt-minalt+1)then
-            write(6,*)' ERROR height discrepancy ',iheight,maxalt-minalt+1
+            write(6,*)' error height discrepancy ',iheight,maxalt-minalt+1
             istatus = 0
             return
          endif
@@ -349,7 +349,7 @@
            write(6,*)icam_rgb(1,minazi:maxazi:120,maxalt)
          endif
          
-!        Rotate 90 degrees (reverse i,j) and flip (i)
+!        rotate 90 degrees (reverse i,j) and flip (i)
          do i = minalt,maxalt
            ialt_flip = minalt+(maxalt-i)
            do j = minazi,maxazi
@@ -395,7 +395,7 @@
        return
 
 999    istatus = 0
-       write(6,*)' ERROR opening image file in get_camera_image'
+       write(6,*)' error opening image file in get_camera_image'
        return
 
        end

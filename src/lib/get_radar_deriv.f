@@ -1,26 +1,26 @@
-       subroutine get_radar_deriv(nx,ny,nz,dx,r_miss,                   ! I
-     1                           radar_ref_3d,clouds_3d,cld_hts,        ! I
-     1                           temp_3d,heights_3d,pres_3d,            ! I
-     1                           ibase_array,itop_array,thresh_cvr,     ! I
-     1                           vv_to_height_ratio_Cu,                 ! I
-     1                           cldpcp_type_3d,                        ! I
-     1                           w_3d,istatus)                          ! I/O
-!      Adan Teng
+       subroutine get_radar_deriv(nx,ny,nz,dx,r_miss,                   ! i
+     1                           radar_ref_3d,clouds_3d,cld_hts,        ! i
+     1                           temp_3d,heights_3d,pres_3d,            ! i
+     1                           ibase_array,itop_array,thresh_cvr,     ! i
+     1                           vv_to_height_ratio_cu,                 ! i
+     1                           cldpcp_type_3d,                        ! i
+     1                           w_3d,istatus)                          ! i/o
+!      adan teng
 !      this rutine calculate the cloud bogus omega in radar echo area
-!      First does the convective and stratiform region seperate
-!      In convective region using the parabolic profile as in vv.f
+!      first does the convective and stratiform region seperate
+!      in convective region using the parabolic profile as in vv.f
 !        but using the maximum terminal velocity deduce from reflectivity
 !        to be the maximum value in parabolic profile
-!      In stratiform region parabolic profile assigns above(behind)
+!      in stratiform region parabolic profile assigns above(behind)
 !        the melting level with maximum(minimum) value dependent 
 !        on grid space and cloud depth
-       Implicit none
+       implicit none
        integer nx,ny,nz,istatus                !input
        integer cldpcp_type_3d(nx,ny,nz)        !input
        integer ibase_array(nx,ny)              !input
        integer itop_array(nx,ny)               !input
        real dx,r_miss                        !input
-       real radar_ref_3d(nx,ny,nz)           !input (dbZ)
+       real radar_ref_3d(nx,ny,nz)           !input (dbz)
        real clouds_3d(nx,ny,nz)              !input
        real cld_hts(nx,ny,nz)                !input
        real temp_3d(nx,ny,nz)                !input
@@ -28,14 +28,14 @@
        real pres_3d(nx,ny,nz)                !input
        real thresh_cvr                       !input
        real w_3d(nx,ny,nz)                   !input and output
-       real vv_to_height_ratio_Cu
+       real vv_to_height_ratio_cu
 !      temprary variables
        integer i,j,k
        integer nxx,nyy,ier
        integer str_con_index(nx,ny)
        integer i_strcon
        integer index_random(nx,ny)
-       real  radar_2d_max(nx,ny)             ! dbZ (while in this routine)
+       real  radar_2d_max(nx,ny)             ! dbz (while in this routine)
        logical l_cloud
        logical l_use_random                  ! utilize random indices
        real temp_1d(nz)
@@ -44,7 +44,7 @@
        real pressure_pa(nz)
        integer iarg
        integer cloud_type_1d(nz)
-       real  radar_ref_max ! dbZ
+       real  radar_ref_max ! dbz
        real w_1d(nz)
        real w_to_omega,om_orig
        integer strcon
@@ -70,14 +70,14 @@
 
        write(6,*)' calling get_con_str, nxx/nyy = ',nxx,nyy
 
-!      Determine convective and stratiform regions
-       call get_con_str(nx,ny,nz,nxx,nyy,radar_ref_3d,           ! I
-     1                  pres_3d,temp_3d,                         ! I
-     1                  str_con_index,                           ! O
-     1                  radar_2d_max,r_miss,ier,index_random,    ! O
-     1                  dx1)                                     ! O
+!      determine convective and stratiform regions
+       call get_con_str(nx,ny,nz,nxx,nyy,radar_ref_3d,           ! i
+     1                  pres_3d,temp_3d,                         ! i
+     1                  str_con_index,                           ! o
+     1                  radar_2d_max,r_miss,ier,index_random,    ! o
+     1                  dx1)                                     ! o
        if( ier .eq. 0) then
-        write(*,*)'Cannot separate convection and stratiform region'
+        write(*,*)'cannot separate convection and stratiform region'
         istatus = 0
         return
        endif
@@ -88,7 +88,7 @@
           if( ibase_array(i,j) .lt. itop_array(i,j)) then
            l_cloud = .true.
           endif
-          do k = 1, nz    ! Initialize
+          do k = 1, nz    ! initialize
            temp_1d(k) = temp_3d(i,j,k)-273.15
            heights_1d(k) = heights_3d(i,j,k)
            pressure_mb(k) = pres_3d(i,j,k) / 100.
@@ -117,7 +117,7 @@
               call radar_bogus_w
      1           (dx, cloud_type_1d, heights_1d, temp_1d,
      1            radar_ref_max, strcon, nz, w_1d,
-     1            vv_to_height_ratio_Cu,                                    ! I
+     1            vv_to_height_ratio_cu,                                    ! i
      1            rand_index)
             endif
             do k = 1, nz
@@ -143,16 +143,16 @@
        subroutine radar_bogus_w
      1           (dx, cloud_type, heights, temp,
      1            radar_ref_max, strcon, nz, w,
-     1            vv_to_height_ratio_Cu,                                    ! I
+     1            vv_to_height_ratio_cu,                                    ! i
      1            rand_index)
        
-       Implicit none
+       implicit none
        integer nz, cloud_type(nz), strcon
        integer rand_index
        real heights(nz), temp(nz), w(nz)
        real dx, radar_ref_max
        real vv_to_height_ratio
-       real vv_to_height_ratio_Cu
+       real vv_to_height_ratio_cu
  
 !      data vv_to_height_ratio /0.5/
        real ratio, vv, parabolic_vv_profile
@@ -163,49 +163,49 @@
        real depth, vvmax
        logical l_always_use_cloud,l_always_use_radar
 
-!   Cloud Type      /'  ','St','Sc','Cu','Ns','Ac','As','Cs','Ci','Cc','Cb'/
-!   Integer Value     0     1    2    3    4    5    6    7    8    9   10
+!   cloud type      /'  ','st','sc','cu','ns','ac','as','cs','ci','cc','cb'/
+!   integer value     0     1    2    3    4    5    6    7    8    9   10
 
        l_always_use_radar = .true. ! original was .false.
        l_always_use_cloud = .true. ! original was .false.
 
-! Put in the vv's for cumuliform clouds with radar reflectivity as determined
+! put in the vv's for cumuliform clouds with radar reflectivity as determined
 ! by cloud type at the base
-       vv_to_height_ratio = vv_to_height_ratio_Cu
+       vv_to_height_ratio = vv_to_height_ratio_cu
        ratio = vv_to_height_ratio / dx 
     
        if(.not. l_always_use_cloud)then
-        Do k = 1, nz
-         If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
+        do k = 1, nz
+         if (cloud_type(k) .eq. 3  .or.  cloud_type(k) .eq. 10) then
           kbase = k
-          Go to 10
-         End if
-        End do
+          go to 10
+         end if
+        end do
        else
-        Do k = 1, nz
-         If (cloud_type(k) .ne. 0) then
+        do k = 1, nz
+         if (cloud_type(k) .ne. 0) then
           kbase = k
-          Go to 10
-         End if
-        End do
+          go to 10
+         end if
+        end do
        endif
-        Go to 100
+        go to 100
 
-10      Do k = kbase, nz
-c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
-!     change to the cloudtop by Adan
-         If (cloud_type(k) .ne. 0) then
+10      do k = kbase, nz
+c        if (cloud_type(k) .eq. 3  .or.  cloud_type(k) .eq. 10) then
+!     change to the cloudtop by adan
+         if (cloud_type(k) .ne. 0) then
           ktop = k
-         Else
-          Go to 20
-         End if
-        End do
+         else
+          go to 20
+         end if
+        end do
 
 20      k1 = k          ! save our place in the column
         zbase = heights(kbase)
         ztop  = heights(ktop)
-! Add for recomputing ratio by using terminal velocity dervied by radar
-!         reflectivity  (Jen-Hsin Teng, Adan)
+! add for recomputing ratio by using terminal velocity dervied by radar
+!         reflectivity  (jen-hsin teng, adan)
         if ( strcon .eq. 2 ) then    ! convective
          if (rand_index .eq. 2) then ! higher index 2/3 probability
           ratio_radar=0.
@@ -221,7 +221,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             endif
            endif
           else
-           write(6,*) 'depth =',depth, 'No changes to ratio'
+           write(6,*) 'depth =',depth, 'no changes to ratio'
           endif
 
          else          ! for rand_index = 1 (1/3 probability)
@@ -234,23 +234,23 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
 !           if(ratio_radar .gt. ratio) ratio = ratio_radar
            endif
           else
-           write(6,*) 'depth =',depth, 'No changes to ratio'
+           write(6,*) 'depth =',depth, 'no changes to ratio'
           endif
 
          endif ! rand_index
  
-         Do k = 1, ktop
-          vv = Parabolic_vv_profile (zbase, ztop, ratio, heights(k))
-          If (vv .gt. 0.) then
+         do k = 1, ktop
+          vv = parabolic_vv_profile (zbase, ztop, ratio, heights(k))
+          if (vv .gt. 0.) then
            w(k) = vv
-          End if
-         End do
+          end if
+         end do
 
         elseif (strcon .eq. 1) then    ! stratiform
          if (temp(kbase) .le. 0. .or. 
      1       temp(ktop)  .gt. 0.) then ! doesn't straddle freezing level
 
-                                       ! Are warm layers fully below this level
+                                       ! are warm layers fully below this level
                                        ! treated the same as cold layers fully
                                        ! above?
 
@@ -262,7 +262,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             ratio_radar=vvmax / depth / 1.1
             if(ratio_radar .lt. ratio) ratio = ratio_radar
            else
-            write(6,*) 'depth =',depth, 'No changes to ratio'
+            write(6,*) 'depth =',depth, 'no changes to ratio'
            endif
 
           else     !  for rand_index = 1 (1/3 probability)
@@ -274,17 +274,17 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             ratio_radar=vvmax / depth / 1.1
             if(ratio_radar .lt. ratio) ratio = ratio_radar
            else
-            write(6,*) 'depth =',depth, 'No changes to ratio'
+            write(6,*) 'depth =',depth, 'no changes to ratio'
            endif
 
           endif ! rand_index
 
-          Do k = 1, ktop
-            vv = Parabolic_vv_profile (zbase, ztop, ratio, heights(k))
-            If (vv .gt. 0.) then
+          do k = 1, ktop
+            vv = parabolic_vv_profile (zbase, ztop, ratio, heights(k))
+            if (vv .gt. 0.) then
              w(k) = vv
-            End if
-          End do
+            end if
+          end do
 
          else                           ! straddles freezing level
           do k = kbase, ktop
@@ -304,7 +304,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             ratio_radar=vvmax / depth /1.1 
             if(ratio_radar .lt. ratio) ratio = ratio_radar
            else
-            write(6,*) 'depth =',depth, 'No changes to ratio'
+            write(6,*) 'depth =',depth, 'no changes to ratio'
            endif
 
           else    ! for rand_index = 1 (1/3 probabilty)
@@ -316,13 +316,13 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             ratio_radar=vvmax / depth /1.1
             if(ratio_radar .lt. ratio) ratio = ratio_radar
            else
-            write(6,*) 'depth =',depth, 'No changes to ratio'
+            write(6,*) 'depth =',depth, 'no changes to ratio'
            endif
 
           endif ! rand_index
 
           do k = 1, kmiddle
-           vv = Parabolic_vv_profile (zbase, ztop, ratio, heights(k))
+           vv = parabolic_vv_profile (zbase, ztop, ratio, heights(k))
            if ( vv .gt. 0.) then
             w(k) = -1. * vv
            endif
@@ -338,7 +338,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             ratio_radar=vvmax / depth 
             if(ratio_radar .lt. ratio) ratio = ratio_radar
            else
-            write(6,*) 'depth =',depth, 'No changes to ratio'
+            write(6,*) 'depth =',depth, 'no changes to ratio'
            endif
 
           else      ! for rand_index = 1 (1/3 probability)
@@ -350,15 +350,15 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
             ratio_radar=vvmax / depth
             if(ratio_radar .lt. ratio) ratio = ratio_radar
            else
-            write(6,*) 'depth =',depth, 'No changes to ratio'
+            write(6,*) 'depth =',depth, 'no changes to ratio'
            endif
 
           endif ! rand_index
 
-!         Above the freezing layer while within the echo apply a parabolic 
+!         above the freezing layer while within the echo apply a parabolic 
 !         profile that extends only inside this layer
           do k = kmiddle, ktop
-           vv = Parabolic_vv_profile1 (zbase, ztop, ratio, heights(k))
+           vv = parabolic_vv_profile1 (zbase, ztop, ratio, heights(k))
            if ( vv .gt. 0.) then
             w(k) = vv
            endif
@@ -374,36 +374,36 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
      1                  temp_3d,str_con_index,radar_2d_max,r_miss,ier,
      1                  index_random,dx1) 
 !
-!        Description : Interpolate radar reflectivity to 1 km
+!        description : interpolate radar reflectivity to 1 km
 !                      resolution, then call dfconstr to define
 !                      convective and stratiform region
-!                      Also calculate the maximum reflectivity in
+!                      also calculate the maximum reflectivity in
 !                      vertical column
-!        Arguments : 
-!      I/O/W    name,          type,        description
-!        I      nx             integer      x-dimension
-!        I      ny             integer      y-dimension
-!        I      nz             integer      z-dimension 
-!        I      nxx            integer      x-dimension for 1 km resolution
-!        I      nyy            integer      y-dimension for 1 km resolution
-!        I      radar_ref_3d   real array   3d reflectivity data (dbZ)
-!        O      str_con_index  int array    2d conevction or stratiform index
+!        arguments : 
+!      i/o/w    name,          type,        description
+!        i      nx             integer      x-dimension
+!        i      ny             integer      y-dimension
+!        i      nz             integer      z-dimension 
+!        i      nxx            integer      x-dimension for 1 km resolution
+!        i      nyy            integer      y-dimension for 1 km resolution
+!        i      radar_ref_3d   real array   3d reflectivity data (dbz)
+!        o      str_con_index  int array    2d conevction or stratiform index
 !                                           =0, missing data area
 !                                           =1, stratiform region
 !                                           =2, convective region
-!        I      pres_3d        real array   3d pressure data (pa)
-!        I      temp_3d        real array   3d temperature data (K)
-!        O      radar_2d_max   real array   2d reflectivity maximum data
-!        I      r_miss         real         missing data
-!        O      ier            int          =0, failure
+!        i      pres_3d        real array   3d pressure data (pa)
+!        i      temp_3d        real array   3d temperature data (k)
+!        o      radar_2d_max   real array   2d reflectivity maximum data
+!        i      r_miss         real         missing data
+!        o      ier            int          =0, failure
 !                                           =1, success 
-!        O      index_random   int array    2d random number index
+!        o      index_random   int array    2d random number index
 !                                           =0 missing data area
 !                                           =1 random number less than 
 !                                              devide_random
 !                                           =2 random number greater than 
 !                                              devide_random
-!        I      dx1            real         grid size of small resolution
+!        i      dx1            real         grid size of small resolution
 !
           implicit none
           integer nx, ny, nz, nxx, nyy
@@ -429,7 +429,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
           integer iconmax, icon0, icon1, icon2, icont
           
 !
-!         Initialize the data
+!         initialize the data
 !
           ier = 1
           ierdf = 1
@@ -467,7 +467,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
 !
           
            
-! Change dBZ to Z
+! change dbz to z
           do i = 1, nx
            do j = 1, ny
             if (radar_2d_max(i,j) .ne. r_miss) then
@@ -488,7 +488,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
           istep = (nxx-1)/(nx-1)
           jstep = int(real(nxx-1)/real(nx-1)+0.0001) 
           if (istep .ne. jstep .or. istep .lt. 1) then
-           write(*,*) 'Error in subroutine get_con_str'
+           write(*,*) 'error in subroutine get_con_str'
            ier = 0
            return
           endif
@@ -534,7 +534,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
 
  101      continue
 
-! Change Z to dBZ
+! change z to dbz
           do i = 1, nxx
            do j = 1, nyy
             if(ref_2d(i,j) .ne. r_miss) then
@@ -552,7 +552,7 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
 
           call dfconstr(nxx,nyy,r_miss,ref_2d,icon,ierdf,dx1)
           if (ierdf .eq. 0 ) then
-           write(*,*)'No radar echo to define convective region'
+           write(*,*)'no radar echo to define convective region'
            ier = 0
            return
           endif
@@ -611,27 +611,27 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
           subroutine df_random_index(nx,ny,str_con_index,index_random
      1                        ,devide_random)
 !        
-!        Subroutine/Function : df_random_index
+!        subroutine/function : df_random_index
 !
-!       Usage : call df_random_index(nx,ny,str_con_index,index_random
+!       usage : call df_random_index(nx,ny,str_con_index,index_random
 !    1                        ,devide_random) 
 !
-!       Description : To define random number index in convective and
+!       description : to define random number index in convective and
 !                     stratiform region
 !
-!       Arguments :
-!      I/O/W      name,          type,        description
-!        I        nx             integer      x-dimension
-!        I        ny             integer      y-dimension
-!        I        str_con_index  int array    2d conevction or stratiform index
+!       arguments :
+!      i/o/w      name,          type,        description
+!        i        nx             integer      x-dimension
+!        i        ny             integer      y-dimension
+!        i        str_con_index  int array    2d conevction or stratiform index
 !                                             =0, missing data area
 !                                             =1, stratiform region
 !                                             =2, convective region
-!        O        index_random   int array    2d random number index
+!        o        index_random   int array    2d random number index
 !                                             =0, missing data area
 !                                             =1, smaller random number
 !                                             =2, larger random number
-!        I        devide_random  real number  random number threshhold 
+!        i        devide_random  real number  random number threshhold 
 !
          implicit none
          integer nx, ny
@@ -692,27 +692,27 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
                  
           subroutine dfconstr(nx,ny,r_miss,ref_2d,icon,ier,dx1)
 !        
-!      Subroutine/Function : dfconstr
+!      subroutine/function : dfconstr
 !
-!      Usage : call dfconstr(nx,ny,r_miss,ref_2d,icon,ier)
+!      usage : call dfconstr(nx,ny,r_miss,ref_2d,icon,ier)
 !
-!      Description : To define convective and stratiform region
+!      description : to define convective and stratiform region
 !      
-!      Arguments :
-!      I/O/W      name,        type,        description
-!        I        nx           integer      x-dimension
-!        I        ny           integer      y-dimension
-!        I        r_miss       real         missing value
-!        I        ref_2d       real array   2d reflectivity data
-!        O        icon         int array    2d conevction or stratiform index
+!      arguments :
+!      i/o/w      name,        type,        description
+!        i        nx           integer      x-dimension
+!        i        ny           integer      y-dimension
+!        i        r_miss       real         missing value
+!        i        ref_2d       real array   2d reflectivity data
+!        o        icon         int array    2d conevction or stratiform index
 !                                           =0, missing data area
 !                                           =1, stratiform region
 !                                           =2, convective region
-!        O        ier          integer      =0, failure
+!        o        ier          integer      =0, failure
 !                                           =1, success
-!        I        dx1          real         grid size
-!        Original version: Shiow-Ming Deng
-!        Recently version: Jen-Hsin Teng in 15-Aug-2003
+!        i        dx1          real         grid size
+!        original version: shiow-ming deng
+!        recently version: jen-hsin teng in 15-aug-2003
 !
          implicit none
          integer  nx, ny, ier
@@ -728,14 +728,14 @@ c        If (cloud_type(k) .eq. 3  .OR.  cloud_type(k) .eq. 10) then
          ier = 0
          njump = int(10000./dx1)
          if( nx .lt. 3*njump .or. ny .lt. 3*njump) then
-          write(*,*) 'Error in subroutine dfconstr.'
-          write(*,*) 'Your Domain is too small.'
+          write(*,*) 'error in subroutine dfconstr.'
+          write(*,*) 'your domain is too small.'
           write(*,*) '   nx:',nx,'   ny:',ny
           return
          endif
          dzmax = 42.
          dzmin = 20.
-!     Initial icon data
+!     initial icon data
          do j = 1,ny
           do i = 1,nx
            icon(i,j)=0

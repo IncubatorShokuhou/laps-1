@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -36,22 +36,22 @@ cdis
 !       write(6,*)'hrangle,dec,alt',hrangle,dec,alt
 !       end
 
-        SUBROUTINE solar_position(rlat,rlon,i4time,alt,dec,hrangle)
+        subroutine solar_position(rlat,rlon,i4time,alt,dec,hrangle)
 
-C Steve Albers Jan 1994
-C Argument      I/O     Type                    Description
-C --------      ---     ----    -----------------------------------------------
-C RLAT           I      R*4     Latitude (degrees)
-C RLON           I      R*4     Longitude (degrees)
-C I4TIME         I      I*4     Time (seconds since 1-1-1960)
-C ALT            O      R*4     Solar Elevation Angle (degrees)
-C DEC            O      R*4     Solar Declination (degrees)
-C HRANGLE        O      R*4     Solar Hour Angle (degrees)
+c steve albers jan 1994
+c argument      i/o     type                    description
+c --------      ---     ----    -----------------------------------------------
+c rlat           i      r*4     latitude (degrees)
+c rlon           i      r*4     longitude (degrees)
+c i4time         i      i*4     time (seconds since 1-1-1960)
+c alt            o      r*4     solar elevation angle (degrees)
+c dec            o      r*4     solar declination (degrees)
+c hrangle        o      r*4     solar hour angle (degrees)
         include 'trigd.inc'
         character*9 asc9_time
 
-        PI=3.14159265
-        RPD=PI/180.
+        pi=3.14159265
+        rpd=pi/180.
         call make_fnam_lp(i4time,asc9_time,istatus)
 
         read(asc9_time,1)jd
@@ -65,12 +65,12 @@ C HRANGLE        O      R*4     Solar Hour Angle (degrees)
 
         is = i4time - ((i4time / 60) * 60)
 
-        EQT=TIMEQ2(i4time)/rpd          ! Equation of Time (Degrees)
-        DEC=SOLDEC2(i4time)/rpd         ! Solar declination (Degrees)
-        hrangle = (ih-12)*15. + im/4. + is/240. + rlon + EQT
+        eqt=timeq2(i4time)/rpd          ! equation of time (degrees)
+        dec=soldec2(i4time)/rpd         ! solar declination (degrees)
+        hrangle = (ih-12)*15. + im/4. + is/240. + rlon + eqt
 
-        COSZEN=SIND(RLAT)*SIND(DEC)+COSD(RLAT)*COSD(DEC)*COSD(hrangle)
-        alt = 90. - ACOSD(COSZEN)       ! Solar Altitude (Degrees)
+        coszen=sind(rlat)*sind(dec)+cosd(rlat)*cosd(dec)*cosd(hrangle)
+        alt = 90. - acosd(coszen)       ! solar altitude (degrees)
 
         if(hrangle .lt. -180.)hrangle = hrangle + 360.
         if(hrangle .gt. +180.)hrangle = hrangle - 360.
@@ -78,21 +78,21 @@ C HRANGLE        O      R*4     Solar Hour Angle (degrees)
 !       write(6,*)'jd,ih,im',jd,ih,im
 !       write(6,*)'hrangle,dec,alt',hrangle,dec,alt
 
-        RETURN
-        END
+        return
+        end
 
-        SUBROUTINE solalt(rlat,rlon,i4time,alt)
+        subroutine solalt(rlat,rlon,i4time,alt)
 
-C Steve Albers Jan 1994
-C Argument      I/O     Type                    Description
-C --------      ---     ----    -----------------------------------------------
-C RLAT           I      R*4     Latitude (degrees)
-C RLNG           I      R*4     Longitude (degrees)
+c steve albers jan 1994
+c argument      i/o     type                    description
+c --------      ---     ----    -----------------------------------------------
+c rlat           i      r*4     latitude (degrees)
+c rlng           i      r*4     longitude (degrees)
        include 'trigd.inc'
         character*9 asc9_time
 
-        PI=3.14159265
-        RPD=PI/180.
+        pi=3.14159265
+        rpd=pi/180.
         call make_fnam_lp(i4time,asc9_time,istatus)
 
         read(asc9_time,1)jd
@@ -104,26 +104,26 @@ C RLNG           I      R*4     Longitude (degrees)
         read(asc9_time,3)im
 3       format(7x,i2)
 
-        EQT=TIMEQ2(i4time)/rpd          ! Equation of Time (Degrees)
-        DEC=SOLDEC2(i4time)/rpd         ! Solar declination (Degrees)
-        HRANGLE = (ih-12)*15. + im/4. + rlon + EQT
+        eqt=timeq2(i4time)/rpd          ! equation of time (degrees)
+        dec=soldec2(i4time)/rpd         ! solar declination (degrees)
+        hrangle = (ih-12)*15. + im/4. + rlon + eqt
 
-        COSZEN=SIND(RLAT)*SIND(DEC)+COSD(RLAT)*COSD(DEC)*COSD(HRANGLE)
-        alt = 90. - ACOSD(COSZEN)       ! Solar Altitude (Degrees)
+        coszen=sind(rlat)*sind(dec)+cosd(rlat)*cosd(dec)*cosd(hrangle)
+        alt = 90. - acosd(coszen)       ! solar altitude (degrees)
 
 !       write(6,*)'jd,ih,im',jd,ih,im
 !       write(6,*)'hrangle,dec,alt',hrangle,dec,alt
 
-        RETURN
-        END
+        return
+        end
 
-        SUBROUTINE get_solalt_2d(rlat_a,rlon_a,i4time,ni,nj,alt)
+        subroutine get_solalt_2d(rlat_a,rlon_a,i4time,ni,nj,alt)
 
-C Steve Albers Jan 1994
-C Argument      I/O     Type                    Description
-C --------      ---     ----    -----------------------------------------------
-C RLAT           I      R*4     Latitude (degrees)
-C RLNG           I      R*4     Longitude (degrees)
+c steve albers jan 1994
+c argument      i/o     type                    description
+c --------      ---     ----    -----------------------------------------------
+c rlat           i      r*4     latitude (degrees)
+c rlng           i      r*4     longitude (degrees)
         include 'trigd.inc'
         character*9 asc9_time
 
@@ -131,8 +131,8 @@ C RLNG           I      R*4     Longitude (degrees)
         real rlon_a(ni,nj)
         real alt(ni,nj)
 
-        PI=3.14159265
-        RPD=PI/180.
+        pi=3.14159265
+        rpd=pi/180.
         call make_fnam_lp(i4time,asc9_time,istatus)
 
         read(asc9_time,1)jd
@@ -144,8 +144,8 @@ C RLNG           I      R*4     Longitude (degrees)
         read(asc9_time,3)im
 3       format(7x,i2)
 
-        EQT=TIMEQ2(i4time)/rpd          ! Equation of Time (Degrees)
-        DEC=SOLDEC2(i4time)/rpd         ! Solar declination (Degrees)
+        eqt=timeq2(i4time)/rpd          ! equation of time (degrees)
+        dec=soldec2(i4time)/rpd         ! solar declination (degrees)
 
         do i = 1,ni
         do j = 1,nj
@@ -153,10 +153,10 @@ C RLNG           I      R*4     Longitude (degrees)
           rlat = rlat_a(i,j)
           rlon = rlon_a(i,j)
 
-          HRANGLE = (ih-12)*15. + im/4. + rlon + EQT
+          hrangle = (ih-12)*15. + im/4. + rlon + eqt
 
-          COSZEN=SIND(RLAT)*SIND(DEC)+COSD(RLAT)*COSD(DEC)*COSD(HRANGLE)
-          alt(i,j) = 90. - ACOSD(COSZEN)       ! Solar Altitude (Degrees)
+          coszen=sind(rlat)*sind(dec)+cosd(rlat)*cosd(dec)*cosd(hrangle)
+          alt(i,j) = 90. - acosd(coszen)       ! solar altitude (degrees)
 
         enddo ! j
         enddo ! i
@@ -164,16 +164,16 @@ C RLNG           I      R*4     Longitude (degrees)
 !       write(6,*)'jd,ih,im',jd,ih,im
 !       write(6,*)'hrangle,dec,alt',hrangle,dec,alt
 
-        RETURN
-        END
+        return
+        end
 
-        SUBROUTINE get_solaltaz_2d(rlat_a,rlon_a,i4time,ni,nj,alt,azi)
+        subroutine get_solaltaz_2d(rlat_a,rlon_a,i4time,ni,nj,alt,azi)
 
-C Steve Albers Jan 1994
-C Argument      I/O     Type                    Description
-C --------      ---     ----    -----------------------------------------------
-C RLAT           I      R*4     Latitude (degrees)
-C RLNG           I      R*4     Longitude (degrees)
+c steve albers jan 1994
+c argument      i/o     type                    description
+c --------      ---     ----    -----------------------------------------------
+c rlat           i      r*4     latitude (degrees)
+c rlng           i      r*4     longitude (degrees)
         include 'trigd.inc'
         character*9 asc9_time
 
@@ -182,8 +182,8 @@ C RLNG           I      R*4     Longitude (degrees)
         real alt(ni,nj)
         real azi(ni,nj)
 
-        PI=3.14159265
-        RPD=PI/180.
+        pi=3.14159265
+        rpd=pi/180.
         call make_fnam_lp(i4time,asc9_time,istatus)
 
         read(asc9_time,1)jd
@@ -195,8 +195,8 @@ C RLNG           I      R*4     Longitude (degrees)
         read(asc9_time,3)im
 3       format(7x,i2)
 
-        EQT=TIMEQ2(i4time)/rpd          ! Equation of Time (Degrees)
-        DEC=SOLDEC2(i4time)/rpd         ! Solar declination (Degrees)
+        eqt=timeq2(i4time)/rpd          ! equation of time (degrees)
+        dec=soldec2(i4time)/rpd         ! solar declination (degrees)
 
         do i = 1,ni
         do j = 1,nj
@@ -204,10 +204,10 @@ C RLNG           I      R*4     Longitude (degrees)
           rlat = rlat_a(i,j)
           rlon = rlon_a(i,j)
 
-          HRANGLE = (ih-12)*15. + im/4. + rlon + EQT
+          hrangle = (ih-12)*15. + im/4. + rlon + eqt
 
-          COSZEN=SIND(RLAT)*SIND(DEC)+COSD(RLAT)*COSD(DEC)*COSD(HRANGLE)
-          alt(i,j) = 90. - ACOSD(COSZEN)       ! Solar Altitude (Degrees)
+          coszen=sind(rlat)*sind(dec)+cosd(rlat)*cosd(dec)*cosd(hrangle)
+          alt(i,j) = 90. - acosd(coszen)       ! solar altitude (degrees)
 
 !         call equ_to_altaz_d(solar_dec,solar_ha,lat(i,j)
 !    1                       ,altdum,azi(i,j))               
@@ -216,22 +216,22 @@ C RLNG           I      R*4     Longitude (degrees)
           ha = hrangle
           if(ha .lt. 0.)ha = ha + 360.
 
-          sindec = SIND(dec)
-          cosdec = COSD(dec)
-          sinphi = SIND(phi)
-          cosphi = COSD(phi)
-          cosha  = COSD(ha)
+          sindec = sind(dec)
+          cosdec = cosd(dec)
+          sinphi = sind(phi)
+          cosphi = cosd(phi)
+          cosha  = cosd(ha)
 
-!         alt=ASIND (sinphi*sindec+cosphi*cosdec*cosha)
+!         alt=asind (sinphi*sindec+cosphi*cosdec*cosha)
           cosarg = (cosphi*sindec-sinphi*cosdec*cosha)/cosd(alt(i,j))
           cosarg = min(max(cosarg,-1.),+1.)
-          az =ACOSD(cosarg)
+          az =acosd(cosarg)
 
 !         if(i .eq. ni/2 .and. j .eq. nj/2)then
 !           write(6,*)'ha,az',ha,az
 !         endif
 
-          if(ha .gt. 0. .AND. ha .lt. 180.)az = 360.0 - az
+          if(ha .gt. 0. .and. ha .lt. 180.)az = 360.0 - az
 
 !         if(i .eq. ni/2 .and. j .eq. nj/2)then
 !           write(6,*)'ha,az',ha,az
@@ -250,95 +250,95 @@ C RLNG           I      R*4     Longitude (degrees)
         enddo ! j
         enddo ! i
 
-        RETURN
-        END
+        return
+        end
 
-C       J. Wakefield    28 Jan 82       Original version
+c       j. wakefield    28 jan 82       original version
 
-C***These formulas are from Paltridge and Platt, 1976.  They reference Spencer,
-C***1971 for the solar declination and equation of time.
-C------------------------------------------------------------------------------
-        FUNCTION RADNORM(JD)
-C***Normalized earth-sun distance factor (R0/R)**2
-C***JD is input Julian day number
-        DAYANG1=2.*3.14159265*(JD-1)/365.
-        DAYANG2=2.*DAYANG1
+c***these formulas are from paltridge and platt, 1976.  they reference spencer,
+c***1971 for the solar declination and equation of time.
+c------------------------------------------------------------------------------
+        function radnorm(jd)
+c***normalized earth-sun distance factor (r0/r)**2
+c***jd is input julian day number
+        dayang1=2.*3.14159265*(jd-1)/365.
+        dayang2=2.*dayang1
 
-        RADNORM= 1.000110
-     1          +0.034221*COS(DAYANG1)+0.001280*SIN(DAYANG1)
-     2          +0.000719*COS(DAYANG2)+0.000077*SIN(DAYANG2)
+        radnorm= 1.000110
+     1          +0.034221*cos(dayang1)+0.001280*sin(dayang1)
+     2          +0.000719*cos(dayang2)+0.000077*sin(dayang2)
 
-        RETURN
-        END
-C------------------------------------------------------------------------------
-        FUNCTION SOLDEC(JD)
-C***Solar declination angle (radians)
-C***JD is input Julian day number
-        DAYANG1=2.*3.14159265*(JD-1)/365.
-        DAYANG2=2.*DAYANG1
-        DAYANG3=3.*DAYANG1
+        return
+        end
+c------------------------------------------------------------------------------
+        function soldec(jd)
+c***solar declination angle (radians)
+c***jd is input julian day number
+        dayang1=2.*3.14159265*(jd-1)/365.
+        dayang2=2.*dayang1
+        dayang3=3.*dayang1
 
-        SOLDEC=  0.006918
-     1          -0.399912*COS(DAYANG1)+0.070257*SIN(DAYANG1)
-     2          -0.006758*COS(DAYANG2)+0.000907*SIN(DAYANG2)
-     3          -0.002697*COS(DAYANG3)+0.001480*SIN(DAYANG3)
+        soldec=  0.006918
+     1          -0.399912*cos(dayang1)+0.070257*sin(dayang1)
+     2          -0.006758*cos(dayang2)+0.000907*sin(dayang2)
+     3          -0.002697*cos(dayang3)+0.001480*sin(dayang3)
 
-        RETURN
-        END
-C------------------------------------------------------------------------------
-        FUNCTION SOLDEC2(i4time)
-C***Solar declination angle (radians)
+        return
+        end
+c------------------------------------------------------------------------------
+        function soldec2(i4time)
+c***solar declination angle (radians)
         double precision jd,by
 
-!       Compute Astronomical Julian Date
+!       compute astronomical julian date
         call i4time_to_jd(i4time,jd,istatus)
 
-!       Compute Besselian Year
+!       compute besselian year
         by = 1900.0 + (jd - 2415020.31352) / 365.242198781
         by_frac = by - int(by)
 
-        DAYANG1=2.*3.14159265*by_frac     
-        DAYANG2=2.*DAYANG1
-        DAYANG3=3.*DAYANG1
+        dayang1=2.*3.14159265*by_frac     
+        dayang2=2.*dayang1
+        dayang3=3.*dayang1
 
-        SOLDEC2= 0.006918
-     1          -0.399912*COS(DAYANG1)+0.070257*SIN(DAYANG1)
-     2          -0.006758*COS(DAYANG2)+0.000907*SIN(DAYANG2)
-     3          -0.002697*COS(DAYANG3)+0.001480*SIN(DAYANG3)
+        soldec2= 0.006918
+     1          -0.399912*cos(dayang1)+0.070257*sin(dayang1)
+     2          -0.006758*cos(dayang2)+0.000907*sin(dayang2)
+     3          -0.002697*cos(dayang3)+0.001480*sin(dayang3)
 
-        RETURN
-        END
-C------------------------------------------------------------------------------
-        FUNCTION TIMEQ(JD)
-C***Equation of time (radians)
-C***JD is input Julian day number
-        DAYANG1=2.*3.14159265*(JD-1)/365.
-        DAYANG2=2.*DAYANG1
+        return
+        end
+c------------------------------------------------------------------------------
+        function timeq(jd)
+c***equation of time (radians)
+c***jd is input julian day number
+        dayang1=2.*3.14159265*(jd-1)/365.
+        dayang2=2.*dayang1
 
-        TIMEQ=   0.000075
-     1          +0.001868*COS(DAYANG1)-0.032077*SIN(DAYANG1)
-     2          -0.014615*COS(DAYANG2)-0.040849*SIN(DAYANG2)
+        timeq=   0.000075
+     1          +0.001868*cos(dayang1)-0.032077*sin(dayang1)
+     2          -0.014615*cos(dayang2)-0.040849*sin(dayang2)
 
-        RETURN
-        END
-C------------------------------------------------------------------------------
-        FUNCTION TIMEQ2(i4time)
-C***Equation of time (radians)
+        return
+        end
+c------------------------------------------------------------------------------
+        function timeq2(i4time)
+c***equation of time (radians)
         double precision jd,by
 
-!       Compute Astronomical Julian Date
+!       compute astronomical julian date
         call i4time_to_jd(i4time,jd,istatus)
 
-!       Compute Besselian Year
+!       compute besselian year
         by = 1900.0 + (jd - 2415020.31352) / 365.242198781
         by_frac = by - int(by)
 
-        DAYANG1=2.*3.14159265*by_frac    
-        DAYANG2=2.*DAYANG1
+        dayang1=2.*3.14159265*by_frac    
+        dayang2=2.*dayang1
 
-        TIMEQ2=  0.000075
-     1          +0.001868*COS(DAYANG1)-0.032077*SIN(DAYANG1)
-     2          -0.014615*COS(DAYANG2)-0.040849*SIN(DAYANG2)
+        timeq2=  0.000075
+     1          +0.001868*cos(dayang1)-0.032077*sin(dayang1)
+     2          -0.014615*cos(dayang2)-0.040849*sin(dayang2)
 
-        RETURN
-        END
+        return
+        end

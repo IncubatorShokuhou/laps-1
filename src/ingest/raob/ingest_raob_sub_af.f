@@ -1,29 +1,29 @@
-      subroutine get_raob_data_af(i4time_sys,ilaps_cycle_time,NX_L,NY_L
+      subroutine get_raob_data_af(i4time_sys,ilaps_cycle_time,nx_l,ny_l
      1     ,i4time_raob_earliest,i4time_raob_latest,a9time_file
      1     ,filename       
      1     ,istatus)
 
-!     Ken Dritz     28-Jul-1997       Added NX_L, NY_L to dummy argument list.
-!     Ken Dritz     28-Jul-1997       Added call to get_r_missing_data.
-!     Ken Dritz     28-Jul-1997       Changed LAPS_DOMAIN_FILE to 'nest7grid'.
-!     Ken Dritz     28-Jul-1997       Removed include of lapsparms.for.
-!     Ken Dritz     28-Jul-1997       Removed comment about "non-automatic
+!     ken dritz     28-jul-1997       added nx_l, ny_l to dummy argument list.
+!     ken dritz     28-jul-1997       added call to get_r_missing_data.
+!     ken dritz     28-jul-1997       changed laps_domain_file to 'nest7grid'.
+!     ken dritz     28-jul-1997       removed include of lapsparms.for.
+!     ken dritz     28-jul-1997       removed comment about "non-automatic
 !                                     declarations" (above arrays dimensioned
-!                                     by NX_L, NY_L); they are now automatic.
+!                                     by nx_l, ny_l); they are now automatic.
 
-C     FORTRAN TEMPLATE FOR FILE= 9614912000300o                          
-      PARAMETER (NVARS=39) !NUMBER OF VARIABLES
-      PARAMETER (NREC=   200)   !CHANGE THIS TO GENERALIZE
-C     VARIABLE IDS RUN SEQUENTIALLY FROM 1 TO NVARS= 39
-      INTEGER RCODE
-      INTEGER RECDIM
-C     ****VARIABLES FOR THIS NETCDF FILE****
-C
+c     fortran template for file= 9614912000300o                          
+      parameter (nvars=39) !number of variables
+      parameter (nrec=   200)   !change this to generalize
+c     variable ids run sequentially from 1 to nvars= 39
+      integer rcode
+      integer recdim
+c     ****variables for this netcdf file****
+c
 
       character*170 filename
-      real lat_a(NX_L,NY_L)
-      real lon_a(NX_L,NY_L)
-      real topo_a(NX_L,NY_L)
+      real lat_a(nx_l,ny_l)
+      real lon_a(nx_l,ny_l)
+      real topo_a(nx_l,ny_l)
 
       character*5 c5_staid
       character*11 a11_raob_reltime,a11_pibal_reltime
@@ -32,17 +32,17 @@ C
 
       call get_r_missing_data(r_missing_data,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting r_missing_data'
+          write (6,*) 'error getting r_missing_data'
           return
       endif
 
-      c8_obstype = 'RAOB'
+      c8_obstype = 'raob'
 
-      NRECS = 0
+      nrecs = 0
 
       open(21,file=filename,status='old')
 
-!     Read initial header and ignore it
+!     read initial header and ignore it
       do i = 1,6
           read(21,*,err=997,end=998)
       enddo ! i
@@ -72,7 +72,7 @@ C
   511 format(i12,i12,f11.4,f15.4,f15.0,1x,a5,3x,a9,1x,a8)
 
 
-      if(.true.)then ! Write out stuff for first level
+      if(.true.)then ! write out stuff for first level
               rheight = iheight
               if(abs(rheight) .gt. 1e6)then
                   rheight = r_missing_data
@@ -161,22 +161,22 @@ C
           enddo ! ilvl
       endif ! > 1 lvl
 
-      NRECS = NRECS + 1
+      nrecs = nrecs + 1
 
-      write(6,*)' Looping back to search for another sounding'
+      write(6,*)' looping back to search for another sounding'
 
       go to 400
 
- 997  write(6,*)' Error reading RAOB file'
+ 997  write(6,*)' error reading raob file'
 
       go to 999
 
- 998  write(6,*)' End of RAOB file'
+ 998  write(6,*)' end of raob file'
 
  999  continue
 
       return
-      END
+      end
 
 
 

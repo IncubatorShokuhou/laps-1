@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -31,15 +31,15 @@ cdis
 cdis
         subroutine array_diagnosis(a,imax,jmax,name)
 c
-c.....  Routine to calculate stats on array 'a', that has a 10-character
+c.....  routine to calculate stats on array 'a', that has a 10-character
 c.....  name 'name'.
 c
         dimension a(imax,jmax)
         character name*10
 c
         write(6,1001) name,imax,jmax
-1001    format(1x,'ARRAY DIAGNOSIS ROUTINE FOR ARRAY ',A10/
-     1 ' WITH DIMENSION ',2I6)
+1001    format(1x,'array diagnosis routine for array ',a10/
+     1 ' with dimension ',2i6)
 c
         suma=0
         std=0
@@ -71,7 +71,7 @@ c
 c
         if(cnt.eq.0.) then
           write(6,1002)
-1002      format(1x,' The array is all zeros')
+1002      format(1x,' the array is all zeros')
           return
         endif
 c
@@ -91,12 +91,12 @@ c
 c
         write(6,1000) cnt,cnt0,amean,std,aae,amax,imxsv,jmxsv,
      1  amin,imnsv,jmnsv
-1000    format(1x,'There are ',f8.0,'  grid points with data '/
-     1 1x,' There are ',f8.0,' points with zero '/
-     2 1x,' The data mean is ',e12.3,' ; with std dev of ',e12.4/
-     3 1x,' The abs deviation from the mean is ',e12.4/
-     4 1x,' The maximum is ',e12.4, ' at I,J ',2i6/
-     5 1x,' The minimum is ',e12.4, ' at I,J ',2i6)
+1000    format(1x,'there are ',f8.0,'  grid points with data '/
+     1 1x,' there are ',f8.0,' points with zero '/
+     2 1x,' the data mean is ',e12.3,' ; with std dev of ',e12.4/
+     3 1x,' the abs deviation from the mean is ',e12.4/
+     4 1x,' the maximum is ',e12.4, ' at i,j ',2i6/
+     5 1x,' the minimum is ',e12.4, ' at i,j ',2i6)
 c
         return
         end
@@ -116,7 +116,7 @@ c
 
         call get_r_missing_data(r_missing_data,istatus)
         if(istatus.ne.1)then
-           print*,'get_mxmn_2d: Error getting r_missing_data'
+           print*,'get_mxmn_2d: error getting r_missing_data'
            stop
         endif
 
@@ -157,7 +157,7 @@ c
                rmax = max(rmax,a(i,j))
            else
                if(nmsg .eq. 0)then
-                   write(6,*)' Missing data detected in array_range'
+                   write(6,*)' missing data detected in array_range'
                endif
                nmsg = nmsg + 1
            endif
@@ -165,7 +165,7 @@ c
        enddo ! i
 
        frac_msg = float(nmsg) / (float(ni*nj))
-       write(6,*)' Fraction of array with data is ',1.-frac_msg
+       write(6,*)' fraction of array with data is ',1.-frac_msg
 
        return
        end

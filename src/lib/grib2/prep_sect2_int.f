@@ -1,89 +1,89 @@
-      SUBROUTINE PREP_SECT2_INT(JS2,NVAL,IB,ID,MINA)
-C
-C        MAY     2000   LAWRENCE   GSC/TDL   ORIGINAL CODING
-C        JANUARY 2001   GLAHN      REMOVED MAXA; COMMENTS
-C        JANUARY 2001   GLAHN/LAWRENCE CHANGED 10**IB TO 2**IB;
-C                                  CHANGED JS2(K)*JE TO JS2(K)/JE
-C        JANAURY 2001   LAWRENCE   CHANGED JE=2**IB TO JE=2**(-IB)
-C                                  AND NOW MULTIPLY THE VALUES IN
-C                                  JS2( ) BY JE INSTEAD OF DIVIDING
-C                                  BY IT.
-C        NOVEMBER 2001   GLAHN     COMMENT ABOUT IB 
-C
-C        PURPOSE
-C            PREPARES THE LOCAL DATA TO BE
-C            PACKED USING THE SIMPLE PACKING METHOD.  THE
-C            PREPARATION OF THE DATA ENCOMPASSES MULTIPLYING
-C            ALL OF THE DATA ELEMENTS IN THE FIELD BY
-C            THE DECIMAL SCALING FACTOR, REMOVING THE MINIMUM
-C            VALUE, AND DIVIDING ALL OF THE DATA ELEMENTS
-C            IN THE FIELD BY THE BINARY SCALING FACTOR.
-C
-C        DATA SET USE
-C           NONE
-C
-C        VARIABLES
-C              JS2(K) = CONTAINS THE LOCAL DATA TO BE PACKED USING
-C                       THE SIMPLE PACKING METHOD IN THE LOCAL
-C                       USE SECTION OF THE GRIB2 MESSAGE (K=1,NVAL).
-C                       (INPUT)
-C                NVAL = THE NUMBER OF VALUES IN JS2( ).  (INPUT)
-C                  IB = THE BINARY SCALING FACTOR.  THIS IS
-C                       0 IN THE CALLING PROGRAM PK_SECT2, AND
-C                       HAS NO EFFECT ON THE RESULT.  (INPUT)
-C                  ID = THE DECIMAL SCALING FACTOR.  (INPUT)
-C                MINA = THE FIELD MINIMUM VALUE.  (OUTPUT)
-C            
-C             LOCAL VARIABLES
-C                  JD = THE DECIMAL MULTIPLICATION FACTOR, 10**ID.
-C                  JE = THE BINARY MULTIPLICATION FACTOR, 2**IE.
-C                   K = LOOP INDEXING VARIABLE.
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           NONE
-C
-      DIMENSION JS2(NVAL)
-C
-C     SCALE THE DATA FIELD BY THE DECIMAL SCALING FACTOR.
-C
-      IF(ID.NE.0)THEN
-         JD=10**ID
-C
-         DO 10 K=1,NVAL
-            JS2(K)=JS2(K)*JD
- 10      CONTINUE
-C
-      ENDIF
-C
-C        FIND THE MINIMUM OF THE DATA FIELD.
-      MINA=JS2(1)
-C
-      DO 20 K=2,NVAL
-C
-         IF(JS2(K).LT.MINA)THEN
-            MINA=JS2(K)
-         ENDIF
-C
- 20   CONTINUE
-C
-C        SUBTRACT OUT THE MINIMUM FROM THE DATA
-C        FIELD.
-C
-      DO 30 K=1,NVAL
-         JS2(K)=JS2(K)-MINA
- 30   CONTINUE
-C
-C        MULTIPLY THE DATA FIELD BY THE BINARY
-C        SCALING FACTOR.
-C
-      IF(IB.NE.0)THEN
-         JE=2**(-IB)
-C
-         DO 40 K=1,NVAL
-            JS2(K)=JS2(K)*JE
- 40      CONTINUE
-C
-      ENDIF
-C
-      RETURN
-      END
+      subroutine prep_sect2_int(js2,nval,ib,id,mina)
+c
+c        may     2000   lawrence   gsc/tdl   original coding
+c        january 2001   glahn      removed maxa; comments
+c        january 2001   glahn/lawrence changed 10**ib to 2**ib;
+c                                  changed js2(k)*je to js2(k)/je
+c        janaury 2001   lawrence   changed je=2**ib to je=2**(-ib)
+c                                  and now multiply the values in
+c                                  js2( ) by je instead of dividing
+c                                  by it.
+c        november 2001   glahn     comment about ib 
+c
+c        purpose
+c            prepares the local data to be
+c            packed using the simple packing method.  the
+c            preparation of the data encompasses multiplying
+c            all of the data elements in the field by
+c            the decimal scaling factor, removing the minimum
+c            value, and dividing all of the data elements
+c            in the field by the binary scaling factor.
+c
+c        data set use
+c           none
+c
+c        variables
+c              js2(k) = contains the local data to be packed using
+c                       the simple packing method in the local
+c                       use section of the grib2 message (k=1,nval).
+c                       (input)
+c                nval = the number of values in js2( ).  (input)
+c                  ib = the binary scaling factor.  this is
+c                       0 in the calling program pk_sect2, and
+c                       has no effect on the result.  (input)
+c                  id = the decimal scaling factor.  (input)
+c                mina = the field minimum value.  (output)
+c            
+c             local variables
+c                  jd = the decimal multiplication factor, 10**id.
+c                  je = the binary multiplication factor, 2**ie.
+c                   k = loop indexing variable.
+c
+c        non system subroutines called
+c           none
+c
+      dimension js2(nval)
+c
+c     scale the data field by the decimal scaling factor.
+c
+      if(id.ne.0)then
+         jd=10**id
+c
+         do 10 k=1,nval
+            js2(k)=js2(k)*jd
+ 10      continue
+c
+      endif
+c
+c        find the minimum of the data field.
+      mina=js2(1)
+c
+      do 20 k=2,nval
+c
+         if(js2(k).lt.mina)then
+            mina=js2(k)
+         endif
+c
+ 20   continue
+c
+c        subtract out the minimum from the data
+c        field.
+c
+      do 30 k=1,nval
+         js2(k)=js2(k)-mina
+ 30   continue
+c
+c        multiply the data field by the binary
+c        scaling factor.
+c
+      if(ib.ne.0)then
+         je=2**(-ib)
+c
+         do 40 k=1,nval
+            js2(k)=js2(k)*je
+ 40      continue
+c
+      endif
+c
+      return
+      end

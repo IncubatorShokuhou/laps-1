@@ -1,55 +1,55 @@
       subroutine gf_unpack1(cgrib,lcgrib,iofst,ids,idslen,ierr)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!$$$  subprogram documentation block
 !                .      .    .                                       .
-! SUBPROGRAM:    gf_unpack1 
-!   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-26
+! subprogram:    gf_unpack1 
+!   prgmmr: gilbert         org: w/np11    date: 2000-05-26
 !
-! ABSTRACT: This subroutine unpacks Section 1 (Identification Section)
-!   starting at octet 6 of that Section.  
+! abstract: this subroutine unpacks section 1 (identification section)
+!   starting at octet 6 of that section.  
 !
-! PROGRAM HISTORY LOG:
-! 2000-05-26  Gilbert
-! 2002-01-24  Gilbert  - Changed to dynamically allocate arrays
+! program history log:
+! 2000-05-26  gilbert
+! 2002-01-24  gilbert  - changed to dynamically allocate arrays
 !                        and to pass pointers to those arrays through
 !                        the argument list.
 !
-! USAGE:    CALL gf_unpack1(cgrib,lcgrib,iofst,ids,idslen,ierr)
-!   INPUT ARGUMENT LIST:
-!     cgrib    - Character array containing Section 1 of the GRIB2 message
-!     lcgrib   - Length (in bytes) of GRIB message array cgrib.
-!     iofst    - Bit offset of the beginning of Section 1.
+! usage:    call gf_unpack1(cgrib,lcgrib,iofst,ids,idslen,ierr)
+!   input argument list:
+!     cgrib    - character array containing section 1 of the grib2 message
+!     lcgrib   - length (in bytes) of grib message array cgrib.
+!     iofst    - bit offset of the beginning of section 1.
 !
-!   OUTPUT ARGUMENT LIST:      
-!     iofst    - Bit offset at the end of Section 1, returned.
-!     ids      - Pointer to integer array containing information read from 
-!                Section 1, the Identification section.
-!            ids(1)  = Identification of originating Centre
-!                                 ( see Common Code Table C-1 )
-!            ids(2)  = Identification of originating Sub-centre
-!            ids(3)  = GRIB Master Tables Version Number
-!                                 ( see Code Table 1.0 )
-!            ids(4)  = GRIB Local Tables Version Number
-!                                 ( see Code Table 1.1 )
-!            ids(5)  = Significance of Reference Time (Code Table 1.2)
-!            ids(6)  = Year ( 4 digits )
-!            ids(7)  = Month
-!            ids(8)  = Day
-!            ids(9)  = Hour
-!            ids(10)  = Minute
-!            ids(11)  = Second
-!            ids(12)  = Production status of processed data
-!                                 ( see Code Table 1.3 )
-!            ids(13)  = Type of processed data ( see Code Table 1.4 )
-!     idslen   - Number of elements in ids().
-!     ierr     - Error return code.
+!   output argument list:      
+!     iofst    - bit offset at the end of section 1, returned.
+!     ids      - pointer to integer array containing information read from 
+!                section 1, the identification section.
+!            ids(1)  = identification of originating centre
+!                                 ( see common code table c-1 )
+!            ids(2)  = identification of originating sub-centre
+!            ids(3)  = grib master tables version number
+!                                 ( see code table 1.0 )
+!            ids(4)  = grib local tables version number
+!                                 ( see code table 1.1 )
+!            ids(5)  = significance of reference time (code table 1.2)
+!            ids(6)  = year ( 4 digits )
+!            ids(7)  = month
+!            ids(8)  = day
+!            ids(9)  = hour
+!            ids(10)  = minute
+!            ids(11)  = second
+!            ids(12)  = production status of processed data
+!                                 ( see code table 1.3 )
+!            ids(13)  = type of processed data ( see code table 1.4 )
+!     idslen   - number of elements in ids().
+!     ierr     - error return code.
 !                0 = no error
 !                6 = memory allocation error
 !
-! REMARKS: 
+! remarks: 
 !
-! ATTRIBUTES:
-!   LANGUAGE: Fortran 90
-!   MACHINE:  IBM SP
+! attributes:
+!   language: fortran 90
+!   machine:  ibm sp
 !
 !$$$
 
@@ -67,11 +67,11 @@
       idslen=13
       nullify(ids)
 
-      call gbyte(cgrib,lensec,iofst,32)        ! Get Length of Section
+      call gbyte(cgrib,lensec,iofst,32)        ! get length of section
       iofst=iofst+32
       iofst=iofst+8     ! skip section number
       !
-      !   Unpack each value into array ids from the
+      !   unpack each value into array ids from the
       !   the appropriate number of octets, which are specified in
       !   corresponding entries in array mapid.
       !
@@ -89,5 +89,5 @@
         iofst=iofst+nbits
       enddo
       
-      return    ! End of Section 1 processing
+      return    ! end of section 1 processing
       end

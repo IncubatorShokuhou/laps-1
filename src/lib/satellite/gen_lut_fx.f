@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -33,8 +33,8 @@ cdis
      &nx_l,ny_l,lat,lon,ri_laps,rj_laps,jstatus)
 c
 c
-c     Returns satellite pixel locations for each point on model (LAPS) domain
-c     Initially implemented for Himawari data with 1-D lat/lon metadata arrays
+c     returns satellite pixel locations for each point on model (laps) domain
+c     initially implemented for himawari data with 1-d lat/lon metadata arrays
 c
       implicit none
 
@@ -55,8 +55,8 @@ c
       real    rj(nx_l+2,ny_l+2)
       real    rel_ri(nx_l+2,ny_l+2)
       real    rel_rj(nx_l+2,ny_l+2)
-      real    ri_laps(nx_l,ny_l)         ! Output
-      real    rj_laps(nx_l,ny_l) ! Output
+      real    ri_laps(nx_l,ny_l)         ! output
+      real    rj_laps(nx_l,ny_l) ! output
 
       real emission_angle_d(nx_l+2,ny_l+2)
       real phase_angle_d(nx_l+2,ny_l+2)
@@ -78,9 +78,9 @@ c     integer i,j,n,nc
       integer linestart,lineend
       integer elemstart,elemend
       integer nijout
-      integer isector /2/       ! 0=Dynamic, 1=FullDisk, 2=CONUS
+      integer isector /2/       ! 0=dynamic, 1=fulldisk, 2=conus
       integer i4time_latest, ifstat, i4time_sys
-      integer I4_elapsed, ishow_timer
+      integer i4_elapsed, ishow_timer
 
       logical lpoint
 
@@ -95,7 +95,7 @@ c     character*6   csatid  !satellite data identifier {gmssat only for now}
 c
 c ===========================================================
 c the following include file contains static navigation parameters for
-c all possible satellites.  It contains fortran logic that uses csatid,
+c all possible satellites.  it contains fortran logic that uses csatid,
 c and csattyp to set the appropriate navigation parameters.
 c
       include 'satellite_dims_lvd.inc'
@@ -109,7 +109,7 @@ c
       real*8  scale_x,scale_y,offset_x,offset_y
       real*8  sub_lon_degrees
       real    rlatc,rlonc,swlat,swlon,ne(2),lat0,lon0,geos_dist_m
-      character*1 cgrddef /'N'/ ! latitude ordered N to S 
+      character*1 cgrddef /'n'/ ! latitude ordered n to s 
 
       common /fxgrid/offset_x,offset_y,dx,dy,xmin,ymin,sub_lon_degrees
 
@@ -125,7 +125,7 @@ c retrieve the latest nav info from a file if it exists
 c
       print*,'setting fixed grid navigation information ',cdtype,indx
 
-      if(cdtype .ne. 'gr2')then ! GOES16 fixed grid data, sector PAB
+      if(cdtype .ne. 'gr2')then ! goes16 fixed grid data, sector pab
          if(indx.eq.1)then ! vis
             nxfx = 2048
             nyfx = 2048
@@ -138,7 +138,7 @@ c
             dx = 14. * 1d-6        ! radians
             dy = 14. * 1d-6        ! radians
             sub_lon_degrees = -75.0
-         else              ! IR
+         else              ! ir
             nxfx = 512
             nyfx = 512
             rlatc=(55. + (-5.)) / 2.
@@ -152,8 +152,8 @@ c
             sub_lon_degrees = -75.0
          endif
 
-      else ! Level 2 'gr2' type
-         if(isector .eq. 0)then ! Dynamic Sector
+      else ! level 2 'gr2' type
+         if(isector .eq. 0)then ! dynamic sector
 
 !           call s_len(path_to_raw_sat(kchl,jtype,isat),np)
 !           fname=path_to_raw_sat(kchl,jtype,isat)(1:np)
@@ -163,13 +163,13 @@ c
 !           fname=path_to_raw_sat(kchl,jtype,isat)(1:np)
             fname=fname(1:np)//cftime9//'_'//ct
          
-            call rdgr2head(fname, Nx, Ny, xmin, ymin,
+            call rdgr2head(fname, nx, ny, xmin, ymin,
      +         offset_x, offset_y,
-     +         Dx, Dy, sub_lon_degrees)
+     +         dx, dy, sub_lon_degrees)
 
-            continue ! read NetCDF Header (under construction)
+            continue ! read netcdf header (under construction)
 
-         elseif(isector .eq. 1)then ! Full Disk
+         elseif(isector .eq. 1)then ! full disk
             if(indx.eq.1)then ! vis
                nxfx = 21696
                nyfx = 21696
@@ -180,7 +180,7 @@ c
                dx = 14. * 1d-6         ! radians
                dy = 14. * 1d-6         ! radians
                sub_lon_degrees = -75.0 ! depends on satellite
-            else              ! IR
+            else              ! ir
                nxfx = 5424
                nyfx = 5424
                xmin = 0. ! float(nxfx)
@@ -192,7 +192,7 @@ c
                sub_lon_degrees = -75.0 ! depends on satellite
             endif
 
-         else ! isector = 2 (CONUS)
+         else ! isector = 2 (conus)
             if(indx.eq.1)then ! vis
                nxfx = 6000
                nyfx = 10000
@@ -203,7 +203,7 @@ c
                dx = 14. * 1d-6         ! radians
                dy = 14. * 1d-6         ! radians
                sub_lon_degrees = -75.0 ! depends on satellite
-            else              ! IR
+            else              ! ir
                nxfx = 1500
                nyfx = 2500
                xmin = 0. ! float(nxfx)
@@ -219,14 +219,14 @@ c
       endif
 
       print*,' '
-      print*,'gen_lut_fx: Sat Nav Latlon Parameters'
+      print*,'gen_lut_fx: sat nav latlon parameters'
       print*,'-------------------------------------'
       print*,'nxfx:  ',nxfx
       print*,'nyfx:  ',nyfx
       print*,'rlatc: ',rlatc
       print*,'rlonc: ',rlonc
-      print*,'SW: ',swlat,swlon
-      print*,'NE: ',ne(1),ne(2)
+      print*,'sw: ',swlat,swlon
+      print*,'ne: ',ne(1),ne(2)
       print*,'dx (radians):',dx
       print*,'dy (radians):',dy
       print*,'offset_x (radians):',offset_x
@@ -249,9 +249,9 @@ c laps domain as specified in laps lat/lon arrays.
 c
       call latlon_2_fxij(nx*ny,xlat,xlon,ri,rj)
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
       
-      write(6,*)' Filter out points beyond the limb'
+      write(6,*)' filter out points beyond the limb'
       call get_systime_i4(i4time_sys,istatus)
 
       range_m = 42155680.00
@@ -259,7 +259,7 @@ c
       sublon_d_a(:,:) = sub_lon_degrees ! only scalar might really be needed
       call satgeom(i4time_sys,xlat,xlon,nx,ny
      1   ,sublat_d_a,sublon_d_a,range_m,r_missing_data
-     1   ,Phase_angle_d,Specular_ref_angle_d,emission_angle_d
+     1   ,phase_angle_d,specular_ref_angle_d,emission_angle_d
      1   ,azimuth_d,istatus)
 
       where (emission_angle_d(:,:) .le. 5.0)
@@ -267,13 +267,13 @@ c
           rj(:,:) = r_missing_data
       endwhere
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
-      write(6,*)'Sat ri/rj for expanded model domain corners'
-      write(6,*)'ri1/rj1 (SW) ',ri(1,1),rj(1,1)
-      write(6,*)'ri2/rj2 (SE) ',ri(nx,1),rj(nx,1)
-      write(6,*)'ri3/rj3 (NW) ',ri(1,ny),rj(1,ny)
-      write(6,*)'ri4/rj4 (NE) ',ri(nx,ny),rj(nx,ny)
+      write(6,*)'sat ri/rj for expanded model domain corners'
+      write(6,*)'ri1/rj1 (sw) ',ri(1,1),rj(1,1)
+      write(6,*)'ri2/rj2 (se) ',ri(nx,1),rj(nx,1)
+      write(6,*)'ri3/rj3 (nw) ',ri(1,ny),rj(1,ny)
+      write(6,*)'ri4/rj4 (ne) ',ri(nx,ny),rj(nx,ny)
       write(6,*)
 c
 c get new i/j start/end values for this domain
@@ -283,7 +283,7 @@ c
      &rls,rle,res,ree,istatus)
 
       if(istatus.ne.1)then
-         write(6,*)'WARNING: Laps domain outside sat data cover!'
+         write(6,*)'warning: laps domain outside sat data cover!'
       endif
 c
 c compute ri, rj relative look up table for the block of data surrounding
@@ -291,7 +291,7 @@ c the laps domain.
 c
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data'
+         print*,'error getting r_missing_data'
          return
       endif
 
@@ -315,7 +315,7 @@ c
       enddo
 
       if(nijout.gt.0)then
-         print*,'Found ',nijout,' points outside domain'
+         print*,'found ',nijout,' points outside domain'
       endif
 c
 c put the expanded domain ri/rj's into the original laps domain
@@ -354,13 +354,13 @@ c
       table_path = cname(1:n1)//'-'//cdtype//'.lut'
 
       n1=index(table_path,' ')
-      write(6,*)'Not writing lat/lon to i/j look up table'
+      write(6,*)'not writing lat/lon to i/j look up table'
       write(6,*)table_path(1:n1)
 
 c     call write_table (table_path,nx_l,ny_l,xlat,xlon,
 c    &ri_laps,rj_laps,istatus)
 c     if(istatus .ne. 1)then
-c        write(6,*)'Error writing look-up table'
+c        write(6,*)'error writing look-up table'
 c        goto 1000
 c     endif
 

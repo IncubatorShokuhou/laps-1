@@ -1,80 +1,80 @@
-!dis    Forecast Systems Laboratory
-!dis    NOAA/OAR/ERL/FSL
-!dis    325 Broadway
-!dis    Boulder, CO     80303
+!dis    forecast systems laboratory
+!dis    noaa/oar/erl/fsl
+!dis    325 broadway
+!dis    boulder, co     80303
 !dis
-!dis    Forecast Research Division
-!dis    Local Analysis and Prediction Branch
-!dis    LAPS
+!dis    forecast research division
+!dis    local analysis and prediction branch
+!dis    laps
 !dis
-!dis    This software and its documentation are in the public domain and
-!dis    are furnished "as is."  The United States government, its
+!dis    this software and its documentation are in the public domain and
+!dis    are furnished "as is."  the united states government, its
 !dis    instrumentalities, officers, employees, and agents make no
 !dis    warranty, express or implied, as to the usefulness of the software
-!dis    and documentation for any purpose.  They assume no responsibility
+!dis    and documentation for any purpose.  they assume no responsibility
 !dis    (1) for the use of the software and documentation; or (2) to provide
 !dis    technical support to users.
 !dis
-!dis    Permission to use, copy, modify, and distribute this software is
+!dis    permission to use, copy, modify, and distribute this software is
 !dis    hereby granted, provided that the entire disclaimer notice appears
-!dis    in all copies.  All modifications to this software must be clearly
+!dis    in all copies.  all modifications to this software must be clearly
 !dis    documented, and are solely the responsibility of the agent making
-!dis    the modifications.  If significant modifications or enhancements
-!dis    are made to this software, the FSL Software Policy Manager
+!dis    the modifications.  if significant modifications or enhancements
+!dis    are made to this software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
 
-MODULE LAPS_Parm
+module laps_parm
 
 !==========================================================
-!  This module defines all necessary constant and variables
-!  for LAPS parameters.
+!  this module defines all necessary constant and variables
+!  for laps parameters.
 !
-!  HISTORY: 
-! 	Creation: YUANFU XIE	3-2006
-!========================================================== 
+!  history:
+!         creation: yuanfu xie        3-2006
+!==========================================================
 
-  IMPLICIT NONE
+   implicit none
 
-  INTEGER, PARAMETER :: maxxobs = 100000	! Maximum obs limit
+   integer, parameter :: maxxobs = 100000        ! maximum obs limit
 
-  include 'barnesob.inc'
+   include 'barnesob.inc'
 
-  CHARACTER*16 :: asctime
+   character*16 :: asctime
 
-  INTEGER :: n(3)		! Spatial dimensions
-  INTEGER :: timelen		! Time interval
-  INTEGER :: i4time		! System time
-  INTEGER :: imissing		! Integer missing data
-  INTEGER :: nobs		! Number of observations
-  INTEGER :: n_tobs		! Number of temp observations
-  INTEGER :: nobs_point		! Number of point observations
-  INTEGER :: n_meso		! Number of mesonet data
-  INTEGER :: n_sao		! Number of sfc aviation obs
-  ! INTEGER :: n_pirep		! Number of pilot report obs
-  ! INTEGER :: max_pr		! Max profiles
-  INTEGER :: max_pr_lvls	! Max levels
-  ! INTEGER :: max_radars		! Maximum number of radars
-  INTEGER :: maxtobs		! Maximum number of temp obs
-  INTEGER :: istat_radar_vel
+   integer :: n(3)                ! spatial dimensions
+   integer :: timelen                ! time interval
+   integer :: i4time                ! system time
+   integer :: imissing                ! integer missing data
+   integer :: nobs                ! number of observations
+   integer :: n_tobs                ! number of temp observations
+   integer :: nobs_point                ! number of point observations
+   integer :: n_meso                ! number of mesonet data
+   integer :: n_sao                ! number of sfc aviation obs
+   ! integer :: n_pirep                ! number of pilot report obs
+   ! integer :: max_pr                ! max profiles
+   integer :: max_pr_lvls        ! max levels
+   ! integer :: max_radars                ! maximum number of radars
+   integer :: maxtobs                ! maximum number of temp obs
+   integer :: istat_radar_vel
 
-  LOGICAL :: l_raob, l_cdw, l_radial
-  ! LOGICAL :: l_use_raob
+   logical :: l_raob, l_cdw, l_radial
+   ! logical :: l_use_raob
 
-  REAL :: rmissing		! Real missing data
-  REAL :: dxy
+   real :: rmissing                ! real missing data
+   real :: dxy
 
-  ! Dynamic arrays:
-  REAL,ALLOCATABLE,DIMENSION(:) :: pressr1d,height1d
-  REAL,ALLOCATABLE,DIMENSION(:) :: rlat_radar,rlon_radar
-  REAL,ALLOCATABLE,DIMENSION(:) :: rhgt_radar,n_grid_vel
-  REAL,ALLOCATABLE,DIMENSION(:,:) :: lat,lon,topo
-  REAL,ALLOCATABLE,DIMENSION(:,:,:) :: height3d,pressr3d
-  REAL,ALLOCATABLE,DIMENSION(:,:,:) :: temptr3d,sphumd3d
-  REAL,ALLOCATABLE,DIMENSION(:,:,:) :: u_wind3d,v_wind3d
-  REAL,ALLOCATABLE,DIMENSION(:,:,:,:) :: grid_radar_vel
+   ! dynamic arrays:
+   real, allocatable, dimension(:) :: pressr1d, height1d
+   real, allocatable, dimension(:) :: rlat_radar, rlon_radar
+   real, allocatable, dimension(:) :: rhgt_radar, n_grid_vel
+   real, allocatable, dimension(:, :) :: lat, lon, topo
+   real, allocatable, dimension(:, :, :) :: height3d, pressr3d
+   real, allocatable, dimension(:, :, :) :: temptr3d, sphumd3d
+   real, allocatable, dimension(:, :, :) :: u_wind3d, v_wind3d
+   real, allocatable, dimension(:, :, :, :) :: grid_radar_vel
 
-  REAL :: obs_temp(maxxobs,12)
-  type (barnesob) :: obs_point(maxxobs)
+   real :: obs_temp(maxxobs, 12)
+   type(barnesob) :: obs_point(maxxobs)
 
-END MODULE LAPS_Parm
+end module laps_parm

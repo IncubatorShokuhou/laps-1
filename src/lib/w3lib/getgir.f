@@ -1,90 +1,90 @@
-C-----------------------------------------------------------------------
-      SUBROUTINE GETGIR(LUGB,MSK1,MSK2,MNUM,MBUF,CBUF,NLEN,NNUM,IRET)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM: GETGIR         READS A GRIB INDEX FILE
-C   PRGMMR: IREDELL          ORG: W/NMC23     DATE: 95-10-31
-C
-C ABSTRACT: READ A GRIB FILE AND RETURN ITS INDEX CONTENTS.
-C   THE INDEX BUFFER RETURNED CONTAINS INDEX RECORDS WITH THE INTERNAL FORMAT:
-C       BYTE 001-004: BYTES TO SKIP IN DATA FILE BEFORE GRIB MESSAGE
-C       BYTE 005-008: BYTES TO SKIP IN MESSAGE BEFORE PDS
-C       BYTE 009-012: BYTES TO SKIP IN MESSAGE BEFORE GDS (0 IF NO GDS)
-C       BYTE 013-016: BYTES TO SKIP IN MESSAGE BEFORE BMS (0 IF NO BMS)
-C       BYTE 017-020: BYTES TO SKIP IN MESSAGE BEFORE BDS
-C       BYTE 021-024: BYTES TOTAL IN THE MESSAGE
-C       BYTE 025-025: GRIB VERSION NUMBER
-C       BYTE 026-053: PRODUCT DEFINITION SECTION (PDS)
-C       BYTE 054-095: GRID DEFINITION SECTION (GDS) (OR NULLS)
-C       BYTE 096-101: FIRST PART OF THE BIT MAP SECTION (BMS) (OR NULLS)
-C       BYTE 102-112: FIRST PART OF THE BINARY DATA SECTION (BDS)
-C       BYTE 113-172: (OPTIONAL) BYTES 41-100 OF THE PDS
-C       BYTE 173-184: (OPTIONAL) BYTES 29-40 OF THE PDS
-C       BYTE 185-320: (OPTIONAL) BYTES 43-178 OF THE GDS
-C
-C PROGRAM HISTORY LOG:
-C   95-10-31  IREDELL
-C   96-10-31  IREDELL   AUGMENTED OPTIONAL DEFINITIONS TO BYTE 320
-C
-C USAGE:    CALL GETGIR(LUGB,MSK1,MSK2,MNUM,MBUF,CBUF,NLEN,NNUM,IRET)
-C   INPUT ARGUMENTS:
-C     LUGB         INTEGER UNIT OF THE UNBLOCKED GRIB FILE
-C     MSK1         INTEGER NUMBER OF BYTES TO SEARCH FOR FIRST MESSAGE
-C     MSK2         INTEGER NUMBER OF BYTES TO SEARCH FOR OTHER MESSAGES
-C     MNUM         INTEGER NUMBER OF INDEX RECORDS TO SKIP (USUALLY 0)
-C     MBUF         INTEGER LENGTH OF CBUF IN BYTES
-C   OUTPUT ARGUMENTS:
-C     CBUF         CHARACTER*1 (MBUF) BUFFER TO RECEIVE INDEX DATA
-C     NLEN         INTEGER LENGTH OF EACH INDEX RECORD IN BYTES
-C     NNUM         INTEGER NUMBER OF INDEX RECORDS
-C                  (=0 IF NO GRIB MESSAGES ARE FOUND)
-C     IRET         INTEGER RETURN CODE
-C                    0      ALL OK
-C                    1      CBUF TOO SMALL TO HOLD INDEX DATA
-C
-C SUBPROGRAMS CALLED:
-C   SKGB           SEEK NEXT GRIB MESSAGE
-C   IXGB           MAKE INDEX RECORD
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C   DO NOT ENGAGE THE SAME LOGICAL UNIT FROM MORE THAN ONE PROCESSOR.
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 77
-C   MACHINE:  CRAY, WORKSTATIONS
-C
-C$$$
-      CHARACTER CBUF(MBUF)
-      PARAMETER(MINDEX=320)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  SEARCH FOR FIRST GRIB MESSAGE
-      ISEEK=0
-      CALL SKGB(LUGB,ISEEK,MSK1,LSKIP,LGRIB)
-      IF(LGRIB.GT.0.AND.MINDEX.LE.MBUF) THEN
-        CALL IXGB(LUGB,LSKIP,LGRIB,MINDEX,1,NLEN,CBUF)
-      ELSE
-        NLEN=MINDEX
-      ENDIF
-      DO M=1,MNUM
-        IF(LGRIB.GT.0) THEN
-          ISEEK=LSKIP+LGRIB
-          CALL SKGB(LUGB,ISEEK,MSK2,LSKIP,LGRIB)
-        ENDIF
-      ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  MAKE AN INDEX RECORD FOR EVERY GRIB RECORD FOUND
-      NNUM=0
-      IRET=0
-      DOWHILE(IRET.EQ.0.AND.LGRIB.GT.0)
-        IF(NLEN*(NNUM+1).LE.MBUF) THEN
-          NNUM=NNUM+1
-          CALL IXGB(LUGB,LSKIP,LGRIB,NLEN,NNUM,MLEN,CBUF)
-          ISEEK=LSKIP+LGRIB
-          CALL SKGB(LUGB,ISEEK,MSK2,LSKIP,LGRIB)
-        ELSE
-          IRET=1
-        ENDIF
-      ENDDO
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+c-----------------------------------------------------------------------
+      subroutine getgir(lugb,msk1,msk2,mnum,mbuf,cbuf,nlen,nnum,iret)
+c$$$  subprogram documentation block
+c
+c subprogram: getgir         reads a grib index file
+c   prgmmr: iredell          org: w/nmc23     date: 95-10-31
+c
+c abstract: read a grib file and return its index contents.
+c   the index buffer returned contains index records with the internal format:
+c       byte 001-004: bytes to skip in data file before grib message
+c       byte 005-008: bytes to skip in message before pds
+c       byte 009-012: bytes to skip in message before gds (0 if no gds)
+c       byte 013-016: bytes to skip in message before bms (0 if no bms)
+c       byte 017-020: bytes to skip in message before bds
+c       byte 021-024: bytes total in the message
+c       byte 025-025: grib version number
+c       byte 026-053: product definition section (pds)
+c       byte 054-095: grid definition section (gds) (or nulls)
+c       byte 096-101: first part of the bit map section (bms) (or nulls)
+c       byte 102-112: first part of the binary data section (bds)
+c       byte 113-172: (optional) bytes 41-100 of the pds
+c       byte 173-184: (optional) bytes 29-40 of the pds
+c       byte 185-320: (optional) bytes 43-178 of the gds
+c
+c program history log:
+c   95-10-31  iredell
+c   96-10-31  iredell   augmented optional definitions to byte 320
+c
+c usage:    call getgir(lugb,msk1,msk2,mnum,mbuf,cbuf,nlen,nnum,iret)
+c   input arguments:
+c     lugb         integer unit of the unblocked grib file
+c     msk1         integer number of bytes to search for first message
+c     msk2         integer number of bytes to search for other messages
+c     mnum         integer number of index records to skip (usually 0)
+c     mbuf         integer length of cbuf in bytes
+c   output arguments:
+c     cbuf         character*1 (mbuf) buffer to receive index data
+c     nlen         integer length of each index record in bytes
+c     nnum         integer number of index records
+c                  (=0 if no grib messages are found)
+c     iret         integer return code
+c                    0      all ok
+c                    1      cbuf too small to hold index data
+c
+c subprograms called:
+c   skgb           seek next grib message
+c   ixgb           make index record
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c   do not engage the same logical unit from more than one processor.
+c
+c attributes:
+c   language: fortran 77
+c   machine:  cray, workstations
+c
+c$$$
+      character cbuf(mbuf)
+      parameter(mindex=320)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  search for first grib message
+      iseek=0
+      call skgb(lugb,iseek,msk1,lskip,lgrib)
+      if(lgrib.gt.0.and.mindex.le.mbuf) then
+        call ixgb(lugb,lskip,lgrib,mindex,1,nlen,cbuf)
+      else
+        nlen=mindex
+      endif
+      do m=1,mnum
+        if(lgrib.gt.0) then
+          iseek=lskip+lgrib
+          call skgb(lugb,iseek,msk2,lskip,lgrib)
+        endif
+      enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  make an index record for every grib record found
+      nnum=0
+      iret=0
+      dowhile(iret.eq.0.and.lgrib.gt.0)
+        if(nlen*(nnum+1).le.mbuf) then
+          nnum=nnum+1
+          call ixgb(lugb,lskip,lgrib,nlen,nnum,mlen,cbuf)
+          iseek=lskip+lgrib
+          call skgb(lugb,iseek,msk2,lskip,lgrib)
+        else
+          iret=1
+        endif
+      enddo
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

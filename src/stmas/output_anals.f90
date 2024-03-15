@@ -1,936 +1,932 @@
-MODULE OUTPUT_ANALS
+module output_anals
 !*************************************************
-! OUTPUT THE ANALYSIS RESULT
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
-!          FEBRUARY 2008,  ZHONGJIE HE.
+! output the analysis result
+! history: september 2007, coded by wei li.
+!          february 2008,  zhongjie he.
 !
-!          DECEMBER 2013, YUANFU XIE:
-!          a) CHANGE ANA DIMENSION FOR SAVING MEMORY
-!          b) MODIFY THE TPW CALCULATION
+!          december 2013, yuanfu xie:
+!          a) change ana dimension for saving memory
+!          b) modify the tpw calculation
 !*************************************************
 
-  USE PRMTRS_STMAS
-  USE GENERALTOOLS
-  
-  USE READ_BACKGRD   , ONLY : ORI_LON, ORI_LAT, END_LON, END_LAT,BK0
-  USE DRAWCOUNTOUR   , ONLY : DRCONTOUR, DRCONTOUR_2D
-  USE READOBSERVES   , ONLY : X_RADAR, Y_RADAR
+   use prmtrs_stmas
+   use generaltools
 
-  PUBLIC    OUTPTLAPS, OUTPUTANA, TMPOUTPUT
-  PRIVATE   BKGMEMRLS, DRCONTOUR_0, RADIALWND
+   use read_backgrd, only: ori_lon, ori_lat, end_lon, end_lat, bk0
+   use drawcountour, only: drcontour, drcontour_2d
+   use readobserves, only: x_radar, y_radar
+
+   public outptlaps, outputana, tmpoutput
+   private bkgmemrls, drcontour_0, radialwnd
 !***************************************************
-!!COMMENT:
-!   THIS MODULE IS USED BY THE MAIN PROGRAM, TO OUTPUT THE ANALIZED FIELDS.
-!   SUBROUTINES:
-!      OUTPTLAPS : OUTPUT THE ANALIZED FIELDS TO LAPS.
-!      OUTPUTANA : OUTPUT THE ANALIZED FILEDS TO SOME FILES AND DRAW SOME PICTURES TO CHECK.
-!      TMPOUTPUT : OUTPUT THE ANALIZED FILEDS TO SOME FILES AND DRAW SOME PICTURES TO CHECK.
-!      BKGMEMRLS : RELEASE THE MEMORYS.
-!      DRCONTOUR_0: WRITE SOME FIELDS INTO THE FILES WITH THE FORMAT OF SURFER( A SOFTWARE TO DRAW PICTURES).
-!      RADIALWND : TRANSLATE THE U, V FIELDS TO RADIAL WIND FIELD, USED TO DRAW PICTURE.
+!!comment:
+!   this module is used by the main program, to output the analized fields.
+!   subroutines:
+!      outptlaps : output the analized fields to laps.
+!      outputana : output the analized fileds to some files and draw some pictures to check.
+!      tmpoutput : output the analized fileds to some files and draw some pictures to check.
+!      bkgmemrls : release the memorys.
+!      drcontour_0: write some fields into the files with the format of surfer( a software to draw pictures).
+!      radialwnd : translate the u, v fields to radial wind field, used to draw picture.
 
-CONTAINS
+contains
 
-SUBROUTINE OUTPTLAPS
+   subroutine outptlaps
 !*************************************************
-! GET BACKGROUND FOR ANALYSIS
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! get background for analysis
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,LN
-  CHARACTER(LEN=200) :: DR
-  REAL     :: XB(MAXGRID(1)),YB(MAXGRID(2)),ZB(MAXGRID(3)),TB(MAXGRID(4))
-  REAL     :: XF(FCSTGRD(1)),YF(FCSTGRD(2)),ZF(FCSTGRD(3)),TF(FCSTGRD(4))
-  REAL, ALLOCATABLE :: ANA(:,:,:)
-  INTEGER  :: FG(MAXDIMS),MG(MAXDIMS)
-  REAL     :: Z1(1),T1(1),Z2(1),T2(1),DX,DY
+      integer  :: i, j, k, t, s, ln
+      character(len=200) :: dr
+      real     :: xb(maxgrid(1)), yb(maxgrid(2)), zb(maxgrid(3)), tb(maxgrid(4))
+      real     :: xf(fcstgrd(1)), yf(fcstgrd(2)), zf(fcstgrd(3)), tf(fcstgrd(4))
+      real, allocatable :: ana(:, :, :)
+      integer  :: fg(maxdims), mg(maxdims)
+      real     :: z1(1), t1(1), z2(1), t2(1), dx, dy
 
-  ! PARAMETERS FOR CONVERTING Q, P AND T TO RH (COPIED FROM lib/degrib/rrpr.F90:
-  real, parameter :: svp1=611.2
-  real, parameter :: svp2=17.67
-  real, parameter :: svp3=29.65
-  real, parameter :: svpt0=273.15
-  real, parameter :: eps = 0.622
-  real, parameter :: r_dry = 287.0
-  real            :: tmp,sph,density
+      ! parameters for converting q, p and t to rh (copied from lib/degrib/rrpr.f90:
+      real, parameter :: svp1 = 611.2
+      real, parameter :: svp2 = 17.67
+      real, parameter :: svp3 = 29.65
+      real, parameter :: svpt0 = 273.15
+      real, parameter :: eps = 0.622
+      real, parameter :: r_dry = 287.0
+      real            :: tmp, sph, density
 
-  ! VARIABLES NEEDED FOR LAPS: YUANFU
-  CHARACTER*9   :: A9
-  CHARACTER*3   :: WN(3)=(/'U3','V3','OM'/)	! WIND NAMES
-  CHARACTER*3   :: SN(2)=(/'SU','SV'/)		! WIND NAMES
-  CHARACTER*4   :: WU(3)=(/'M/S ','M/S ','PA/S'/) ! WIND UNITS
-  ! added by shuyuan 20100722
-  CHARACTER*3   :: QW(2)=(/'RAI','SNO'/)       ! rain water content   snow water content
-  CHARACTER*3   :: RE(1)=(/'REF'/)		! reflectivity  dbz
-  CHARACTER*125 :: QWC(2)=(/'ROUR','ROUS'/) ! QW COMMENTS
-  CHARACTER*125 :: RC(1)=(/'reflectivity'/) ! reflectivity COMMENTS 
-  character*10   :: units_3D(2)=(/'kg/m**3','kg/m**3'/)
-  !----------------------------------------------------------
-  CHARACTER*125 :: WC(3)=(/'3DWIND','3DWIND','3DWIND'/) ! WIND COMMENTS
-  CHARACTER*125 :: SC(2)=(/'SFCWIND','SFCWIND'/) ! SFC WIND COMMENTS
-  INTEGER       :: I4,ST,IFRAME,ILV(FCSTGRD(3))  ! PRESSURE IN MB NEEDED USING HUMID WRITE ROUTINES 
-  ! REAL          :: LA(FCSTGRD(1),FCSTGRD(2)),LO(FCSTGRD(1),FCSTGRD(2))
-  ! REAL          :: TP(FCSTGRD(1),FCSTGRD(2)),DS,LV(FCSTGRD(3))
-  REAL          :: DS,LV(FCSTGRD(3))
+      ! variables needed for laps: yuanfu
+      character*9   :: a9
+      character*3   :: wn(3) = (/'u3', 'v3', 'om'/)        ! wind names
+      character*3   :: sn(2) = (/'su', 'sv'/)                ! wind names
+      character*4   :: wu(3) = (/'m/s ', 'm/s ', 'pa/s'/) ! wind units
+      ! added by shuyuan 20100722
+      character*3   :: qw(2) = (/'rai', 'sno'/)       ! rain water content   snow water content
+      character*3   :: re(1) = (/'ref'/)                ! reflectivity  dbz
+      character*125 :: qwc(2) = (/'rour', 'rous'/) ! qw comments
+      character*125 :: rc(1) = (/'reflectivity'/) ! reflectivity comments
+      character*10   :: units_3d(2) = (/'kg/m**3', 'kg/m**3'/)
+      !----------------------------------------------------------
+      character*125 :: wc(3) = (/'3dwind', '3dwind', '3dwind'/) ! wind comments
+      character*125 :: sc(2) = (/'sfcwind', 'sfcwind'/) ! sfc wind comments
+      integer       :: i4, st, iframe, ilv(fcstgrd(3))  ! pressure in mb needed using humid write routines
+      ! real          :: la(fcstgrd(1),fcstgrd(2)),lo(fcstgrd(1),fcstgrd(2))
+      ! real          :: tp(fcstgrd(1),fcstgrd(2)),ds,lv(fcstgrd(3))
+      real          :: ds, lv(fcstgrd(3))
 
-  ! YUANFU: MAKE ALL LARGE ARRAYS INTO ALLOCATABLE ONES FROM AUTOMATIC:
-  REAL, ALLOCATABLE :: HT(:,:,:),RH(:,:,:),T3(:,:,:),W3(:,:,:,:),SF(:,:,:),SP(:,:),TPW(:,:)
+      ! yuanfu: make all large arrays into allocatable ones from automatic:
+      real, allocatable :: ht(:, :, :), rh(:, :, :), t3(:, :, :), w3(:, :, :, :), sf(:, :, :), sp(:, :), tpw(:, :)
 
-  REAL          :: HEIGHT_TO_ZCOORD3,SSH2,MAKE_RH,MAKE_SSH,RM,A,DLNP
-!ADDED BY SHUYUAN 20100722 FOR REFLECTIVITY
-  REAL          :: REF_OUT(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
-  integer       :: istatus  ,N_3D_FIELDS
-!Yuanfu test of cloud ice and liquid for temperature:
-character :: ext*31,unit*10,comment*30 
-integer   :: i4_tol,i4_ret,iqc,nref,n2d,n3d
-integer   :: istatus2d(FCSTGRD(1),FCSTGRD(2)),istatus3d(FCSTGRD(1),FCSTGRD(2))
-integer   :: CLOUD_BASE,CLOUD_TOP,K400
-REAL :: closest_radar(FCSTGRD(1),FCSTGRD(2)),AT
-REAL ::  rlat,rlon,rhgt
-REAL :: FRACTION
+      real          :: height_to_zcoord3, ssh2, make_rh, make_ssh, rm, a, dlnp
+!added by shuyuan 20100722 for reflectivity
+      real          :: ref_out(fcstgrd(1), fcstgrd(2), fcstgrd(3))
+      integer       :: istatus, n_3d_fields
+!yuanfu test of cloud ice and liquid for temperature:
+      character :: ext*31, unit*10, comment*30
+      integer   :: i4_tol, i4_ret, iqc, nref, n2d, n3d
+      integer   :: istatus2d(fcstgrd(1), fcstgrd(2)), istatus3d(fcstgrd(1), fcstgrd(2))
+      integer   :: cloud_base, cloud_top, k400
+      real :: closest_radar(fcstgrd(1), fcstgrd(2)), at
+      real ::  rlat, rlon, rhgt
+      real :: fraction
 
-  ! Yuanfu add integer arrays for interpolation dimensions:
-  integer :: nanal(4),nbkgd(4)
+      ! yuanfu add integer arrays for interpolation dimensions:
+      integer :: nanal(4), nbkgd(4)
 
- ! Include a statement function for converting sh to 'rh' = sh/s2r(p) by Yuanfu Xie:
-  include 'sh2rh.inc'
+      ! include a statement function for converting sh to 'rh' = sh/s2r(p) by yuanfu xie:
+      include 'sh2rh.inc'
 
-i4_tol=900
-i4_ret=0
+      i4_tol = 900
+      i4_ret = 0
 ! --------------------
 
-  ! ALLOCATE MEMORY:
-  ALLOCATE(HT(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3)),RH(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3)), &
-           T3(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3)),W3(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),2), &
-           SF(FCSTGRD(1),FCSTGRD(2),2),SP(FCSTGRD(1),FCSTGRD(2)),TPW(FCSTGRD(1),FCSTGRD(2)), &
-          STAT=ST)
-  
-  DO I=1,FCSTGRD(1)
-    XF(I)=(I-1)*1.0D0
-  ENDDO
-  DO J=1,FCSTGRD(2)
-    YF(J)=(J-1)*1.0D0
-  ENDDO
-  DX=((FCSTGRD(1)-1)*1.0D0)/((MAXGRID(1)-1)*1.0D0)
-  DO I=1,MAXGRID(1)
-    XB(I)=XF(1)+(I-1)*DX
-  ENDDO
-  DY=((FCSTGRD(2)-1)*1.0D0)/((MAXGRID(2)-1)*1.0D0)
-  DO J=1,MAXGRID(2)
-    YB(J)=YF(1)+(J-1)*DY
-  ENDDO
-  
+      ! allocate memory:
+      allocate (ht(fcstgrd(1), fcstgrd(2), fcstgrd(3)), rh(fcstgrd(1), fcstgrd(2), fcstgrd(3)), &
+                t3(fcstgrd(1), fcstgrd(2), fcstgrd(3)), w3(fcstgrd(1), fcstgrd(2), fcstgrd(3), 2), &
+                sf(fcstgrd(1), fcstgrd(2), 2), sp(fcstgrd(1), fcstgrd(2)), tpw(fcstgrd(1), fcstgrd(2)), &
+                stat=st)
+
+      do i = 1, fcstgrd(1)
+         xf(i) = (i - 1)*1.0d0
+      end do
+      do j = 1, fcstgrd(2)
+         yf(j) = (j - 1)*1.0d0
+      end do
+      dx = ((fcstgrd(1) - 1)*1.0d0)/((maxgrid(1) - 1)*1.0d0)
+      do i = 1, maxgrid(1)
+         xb(i) = xf(1) + (i - 1)*dx
+      end do
+      dy = ((fcstgrd(2) - 1)*1.0d0)/((maxgrid(2) - 1)*1.0d0)
+      do j = 1, maxgrid(2)
+         yb(j) = yf(1) + (j - 1)*dy
+      end do
+
 !===========
-  DO K=1,FCSTGRD(3)
-    ZF(K)=Z_FCSTGD(K)
-  ENDDO
-  DO K=1,MAXGRID(3)
-    ZB(K)=Z_MAXGID(K)
-  ENDDO
+      do k = 1, fcstgrd(3)
+         zf(k) = z_fcstgd(k)
+      end do
+      do k = 1, maxgrid(3)
+         zb(k) = z_maxgid(k)
+      end do
 !=================
-!  OPEN(2,FILE=DR(1:LN)//'P_LEVEL.DAT',STATUS='OLD',ACTION='READ')
-!  DO K=1,MAXGRID(3)
-!    READ(2,*)ZB(K)
-!  ENDDO
-!  CLOSE(2)
+!  open(2,file=dr(1:ln)//'p_level.dat',status='old',action='read')
+!  do k=1,maxgrid(3)
+!    read(2,*)zb(k)
+!  enddo
+!  close(2)
 !==================
-  DO T=1,FCSTGRD(4)
-    TF(T)=(ITIME2(2)-ITIME2(1))*(T-1)/(FCSTGRD(4)-1)
-  ENDDO
-  DO T=1,MAXGRID(4)
-    TB(T)=(ITIME2(2)-ITIME2(1))*(T-1)/(MAXGRID(4)-1)
-  ENDDO
+      do t = 1, fcstgrd(4)
+         tf(t) = (itime2(2) - itime2(1))*(t - 1)/(fcstgrd(4) - 1)
+      end do
+      do t = 1, maxgrid(4)
+         tb(t) = (itime2(2) - itime2(1))*(t - 1)/(maxgrid(4) - 1)
+      end do
 
-  ! Output time frame: 2 current by Yuanfu Xie 2014 Feb.
-  iframe = 2
-  nanal = maxgrid
-  nanal(4) = 1 ! Only output time frame
-  nbkgd = fcstgrd
-  nbkgd(4) = 1 ! Only output time frame
+      ! output time frame: 2 current by yuanfu xie 2014 feb.
+      iframe = 2
+      nanal = maxgrid
+      nanal(4) = 1 ! only output time frame
+      nbkgd = fcstgrd
+      nbkgd(4) = 1 ! only output time frame
 
-  ! HEIGHT FROM HYDROSTATIC:
-  ! WRITE(15,*) MAXGRID,GRDBKGD0(1:MAXGRID(1),1:MAXGRID(2),1:MAXGRID(3),2,3)
-  ! DO K=2,MAXGRID(3)
-  !   DO J=1,MAXGRID(2)
-   !    DO I=1,MAXGRID(1)
-   !      GRDBKGD0(I,J,K,1:MAXGRID(4),3) = GRDBKGD0(I,J,K-1,1:MAXGRID(4),3)-287.0/9.8*0.5* &
-! 	  (GRDBKGD0(I,J,K,1:MAXGRID(4),4)+GRDBKGD0(I,J,K-1,1:MAXGRID(4),4))* &
-   !        (LOG(PPM(K))-LOG(PPM(K-1)))
-   !    ENDDO
-   !  ENDDO
-  ! ENDDO
-  ! WRITE(15,*) MAXGRID,GRDBKGD0(1:MAXGRID(1),1:MAXGRID(2),1:MAXGRID(3),2,3)
-  print*,'Increment 1: ',maxval(ABS(grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),iframe,1)))
-  print*,'Increment 2: ',maxval(ABS(grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),iframe,2)))
-  print*,'Increment 3: ',maxval(ABS(grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),iframe,3)))
-  print*,'Increment 4: ',maxval(ABS(grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),iframe,4)))
-  print*,'Increment 5: ',maxval(ABS(grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),iframe,5)))
-  IF (NUMSTAT .GT. 5) print*,'Increment 6: ',maxval(ABS(grdbkgd0(1:maxgrid(1),1:maxgrid(2),maxgrid(3),iframe,raincont)))
+      ! height from hydrostatic:
+      ! write(15,*) maxgrid,grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),2,3)
+      ! do k=2,maxgrid(3)
+      !   do j=1,maxgrid(2)
+      !    do i=1,maxgrid(1)
+      !      grdbkgd0(i,j,k,1:maxgrid(4),3) = grdbkgd0(i,j,k-1,1:maxgrid(4),3)-287.0/9.8*0.5* &
+!           (grdbkgd0(i,j,k,1:maxgrid(4),4)+grdbkgd0(i,j,k-1,1:maxgrid(4),4))* &
+      !        (log(ppm(k))-log(ppm(k-1)))
+      !    enddo
+      !  enddo
+      ! enddo
+      ! write(15,*) maxgrid,grdbkgd0(1:maxgrid(1),1:maxgrid(2),1:maxgrid(3),2,3)
+      print *, 'increment 1: ', maxval(abs(grdbkgd0(1:maxgrid(1), 1:maxgrid(2), 1:maxgrid(3), iframe, 1)))
+      print *, 'increment 2: ', maxval(abs(grdbkgd0(1:maxgrid(1), 1:maxgrid(2), 1:maxgrid(3), iframe, 2)))
+      print *, 'increment 3: ', maxval(abs(grdbkgd0(1:maxgrid(1), 1:maxgrid(2), 1:maxgrid(3), iframe, 3)))
+      print *, 'increment 4: ', maxval(abs(grdbkgd0(1:maxgrid(1), 1:maxgrid(2), 1:maxgrid(3), iframe, 4)))
+      print *, 'increment 5: ', maxval(abs(grdbkgd0(1:maxgrid(1), 1:maxgrid(2), 1:maxgrid(3), iframe, 5)))
+      if (numstat .gt. 5) print *, 'increment 6: ', maxval(abs(grdbkgd0(1:maxgrid(1), 1:maxgrid(2), maxgrid(3), iframe, raincont)))
 
-  ! Yuanfu: Change Ana to a 3 dimensional array to save space:
-  ! ALLOCATE MEMORY:
-  ALLOCATE(ANA(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3)),STAT=ST)
+      ! yuanfu: change ana to a 3 dimensional array to save space:
+      ! allocate memory:
+      allocate (ana(fcstgrd(1), fcstgrd(2), fcstgrd(3)), stat=st)
 
-  ! PRESSURE LEVELS:
-  CALL GET_PRES_1D(LAPSI4T,FCSTGRD(3),LV,ST)
-  ILV = LV/100.0   ! INTEGER PRESSURES NEEDED IN HUMID LH3 OUTPUT
+      ! pressure levels:
+      call get_pres_1d(lapsi4t, fcstgrd(3), lv, st)
+      ilv = lv/100.0   ! integer pressures needed in humid lh3 output
 
-  ! LOOP THROUGH ALL ANALYSIS VARIABLES:
-  DO S=1,NUMSTAT
-    print * ,'------------------------------------------------------'
-    ANA = 0.0
-    IF (UNIFORM .EQ. 0) THEN
-      CALL BKGTOFINE(1,nanal,XB,YB,ZB,TB(iframe), &
-                     nbkgd,XF,YF,ZF,TF(iframe),GRDBKGD0(:,:,:,iframe,S),ANA)
-    ELSE
-      CALL uniform_interpolation3(maxgrid,fcstgrd,GRDBKGD0(:,:,:,iframe,S),ANA)
-    ENDIF
-    ! CALL BKGTOFINE(1,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,GRDBKGD0(:,:,:,:,S),ANA)
+      ! loop through all analysis variables:
+      do s = 1, numstat
+         print *, '------------------------------------------------------'
+         ana = 0.0
+         if (uniform .eq. 0) then
+            call bkgtofine(1, nanal, xb, yb, zb, tb(iframe), &
+                           nbkgd, xf, yf, zf, tf(iframe), grdbkgd0(:, :, :, iframe, s), ana)
+         else
+            call uniform_interpolation3(maxgrid, fcstgrd, grdbkgd0(:, :, :, iframe, s), ana)
+         end if
+         ! call bkgtofine(1,maxgrid,xb,yb,zb,tb,fcstgrd,xf,yf,zf,tf,grdbkgd0(:,:,:,:,s),ana)
 
-    ! MAKE SURE INTERPOLATED SH ANALYSIS POSITIVE:
-    IF (S .EQ. HUMIDITY) THEN
-      DO K=1,FCSTGRD(3)
-      DO J=1,FCSTGRD(2)
-      DO I=1,FCSTGRD(1)
+         ! make sure interpolated sh analysis positive:
+         if (s .eq. humidity) then
+            do k = 1, fcstgrd(3)
+            do j = 1, fcstgrd(2)
+            do i = 1, fcstgrd(1)
 
-        ! Convert 'RH' = SH/s2r(p) back to SH by Yuanfu Xie:
-        ANA(I,J,K) = &
-          MAX(-BK0(I,J,K,iframe,HUMIDITY),ANA(I,J,K))*s2r(lv(k)/100.0)
-        BK0(I,J,K,iframe,HUMIDITY) = BK0(I,J,K,iframe,HUMIDITY)*s2r(lv(k)/100.0)
+               ! convert 'rh' = sh/s2r(p) back to sh by yuanfu xie:
+               ana(i, j, k) = &
+                  max(-bk0(i, j, k, iframe, humidity), ana(i, j, k))*s2r(lv(k)/100.0)
+               bk0(i, j, k, iframe, humidity) = bk0(i, j, k, iframe, humidity)*s2r(lv(k)/100.0)
 
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDIF
+            end do
+            end do
+            end do
+         end if
 
-    ! ADD INCREMENT ANA TO BK0:
-    DO K=1,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-    DO I=1,FCSTGRD(1)
-      BK0(I,J,K,iframe,S) = BK0(I,J,K,iframe,S)+ANA(I,J,K)
-    ENDDO
-    ENDDO
-    ENDDO
-    print*,'bko_max=',maxval(BK0(1:fcstgrd(1),1:fcstgrd(2),1:fcstgrd(3),iframe,S)),S
-    print*,'        ',maxval(ANA)
-    print*,'bko_min=',minval(BK0(1:fcstgrd(1),1:fcstgrd(2),1:fcstgrd(3),iframe,S)),S
-    print*,'        ',minval(ANA)
-  ENDDO
+         ! add increment ana to bk0:
+         do k = 1, fcstgrd(3)
+         do j = 1, fcstgrd(2)
+         do i = 1, fcstgrd(1)
+            bk0(i, j, k, iframe, s) = bk0(i, j, k, iframe, s) + ana(i, j, k)
+         end do
+         end do
+         end do
+         print *, 'bko_max=', maxval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), iframe, s)), s
+         print *, '        ', maxval(ana)
+         print *, 'bko_min=', minval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), iframe, s)), s
+         print *, '        ', minval(ana)
+      end do
 
-  CALL GET_GRID_SPACING_ACTUAL(LATITUDE((FCSTGRD(1)-1)/2+1,(FCSTGRD(2)-1)/2+1), &
-                               LONGITUD((FCSTGRD(1)-1)/2+1,(FCSTGRD(2)-1)/2+1),DS,ST)
+      call get_grid_spacing_actual(latitude((fcstgrd(1) - 1)/2 + 1, (fcstgrd(2) - 1)/2 + 1), &
+                                   longitud((fcstgrd(1) - 1)/2 + 1, (fcstgrd(2) - 1)/2 + 1), ds, st)
 
-  CALL GET_R_MISSING_DATA(RM,ST)
+      call get_r_missing_data(rm, st)
 
-  ! OUTPUT: WIND BY YUANFU --
+      ! output: wind by yuanfu --
 
-  ! INTERPOLATE SURFACE WIND:
-  ! HT = BK0(:,:,:,1,3)
-  ! W3 = BK0(:,:,:,1,1:2)
-  ! DO J=1,FCSTGRD(2)
-  ! DO I=1,FCSTGRD(1)
-  !   SP(I,J) = HEIGHT_TO_ZCOORD3(TP(I,J),HT,LV,FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),I,J,ST)
-  !   K = INT(SP(I,J))
-  !   A = SP(I,J)-K
-  !   SF(I,J,1:2) = (1.0-A)*W3(I,J,K,1:2)+A*W3(I,J,K+1,1:2)
-  ! ENDDO
-  ! ENDDO
+      ! interpolate surface wind:
+      ! ht = bk0(:,:,:,1,3)
+      ! w3 = bk0(:,:,:,1,1:2)
+      ! do j=1,fcstgrd(2)
+      ! do i=1,fcstgrd(1)
+      !   sp(i,j) = height_to_zcoord3(tp(i,j),ht,lv,fcstgrd(1),fcstgrd(2),fcstgrd(3),i,j,st)
+      !   k = int(sp(i,j))
+      !   a = sp(i,j)-k
+      !   sf(i,j,1:2) = (1.0-a)*w3(i,j,k,1:2)+a*w3(i,j,k+1,1:2)
+      ! enddo
+      ! enddo
 
-  ! WRITE SURFACE WIND (THIS IS ALSO REQIRED TO PLOT 3D WIND ON-THE-FLY):
-  ! CALL PUT_LAPS_MULTI_2D(I4,'lwm',SN,WU,SC,SF,FCSTGRD(1),FCSTGRD(2),2,ST)
-  ! CALL WIND_POST_PROCESS(I4,'lw3',WN,WU,WC,W3(1,1,1,1),W3(1,1,1,2), &
-  !                        FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),3,SF(1,1,1),SF(1,1,2),TP, &
-  !                        LA,LO,DS,SP,RM,.TRUE.,ST)
+      ! write surface wind (this is also reqired to plot 3d wind on-the-fly):
+      ! call put_laps_multi_2d(i4,'lwm',sn,wu,sc,sf,fcstgrd(1),fcstgrd(2),2,st)
+      ! call wind_post_process(i4,'lw3',wn,wu,wc,w3(1,1,1,1),w3(1,1,1,2), &
+      !                        fcstgrd(1),fcstgrd(2),fcstgrd(3),3,sf(1,1,1),sf(1,1,2),tp, &
+      !                        la,lo,ds,sp,rm,.true.,st)
 
-  ! WRITE TEMPERATURE: W3 ARRAY SERVES AS WORKING ARRAY:
-  ! T3(:,:,:) = BK0(:,:,:,1,4)
-  ! CALL WRITE_TEMP_ANAL(I4,FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),T3,HT,W3,A9,ST)
+      ! write temperature: w3 array serves as working array:
+      ! t3(:,:,:) = bk0(:,:,:,1,4)
+      ! call write_temp_anal(i4,fcstgrd(1),fcstgrd(2),fcstgrd(3),t3,ht,w3,a9,st)
 
-  ! OUTPUT TIME FRAME:
-  IFRAME = 2	! TEMPORARY TESTING BY YUANFU XIE
+      ! output time frame:
+      iframe = 2        ! temporary testing by yuanfu xie
 
-  ! USE LAPS WRITE BALANCED FIELD:
-  ! VERTICAL VELOCITY:
-  T3 = 0.0 ! ALSO TEST FOR X Y BOUNDARIES: EXTRAPOLATE LATER YUANFU
-  ! CENTER FINITE DIFFERNCE REQUIRE 2*DELTA X (or Y):
-  DS = 2.0*DS
-  DO K=2,FCSTGRD(3)
-    DO J=2,FCSTGRD(2)-1
-      DO I=2,FCSTGRD(1)-1
-        ! V3(K)=V3(K-1)-DZ*(UX+VY):
-        T3(I,J,K) = T3(I,J,K-1) - 0.5* &
-          (LV(K)-LV(K-1))*( &
-          (BK0(I+1,J,K,IFRAME,1)-BK0(I-1,J,K,IFRAME,1))/DS+ &
-          (BK0(I,J+1,K,IFRAME,2)-BK0(I,J-1,K,IFRAME,2))/DS )
-      ENDDO
-    ENDDO
-  ENDDO
+      ! use laps write balanced field:
+      ! vertical velocity:
+      t3 = 0.0 ! also test for x y boundaries: extrapolate later yuanfu
+      ! center finite differnce require 2*delta x (or y):
+      ds = 2.0*ds
+      do k = 2, fcstgrd(3)
+         do j = 2, fcstgrd(2) - 1
+            do i = 2, fcstgrd(1) - 1
+               ! v3(k)=v3(k-1)-dz*(ux+vy):
+               t3(i, j, k) = t3(i, j, k - 1) - 0.5* &
+                             (lv(k) - lv(k - 1))*( &
+                             (bk0(i + 1, j, k, iframe, 1) - bk0(i - 1, j, k, iframe, 1))/ds + &
+                             (bk0(i, j + 1, k, iframe, 2) - bk0(i, j - 1, k, iframe, 2))/ds)
+            end do
+         end do
+      end do
 
-  ! According a discussion with Dan, specific humidity is adjusted by Q_r (rain content) using ssh2 routine of LAPS:
-GOTO 111
-  DO K=1,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-      DO I=1,FCSTGRD(1)
-        ! Assume saturation: TD = T:
-        IF (BK0(I,J,K,IFRAME,raincont) .GT. 0.0) &
-          BK0(I,J,K,IFRAME,5) = SSH2(LV(k)/100.0,BK0(I,J,K,IFRAME,4)-273.15,BK0(I,J,K,IFRAME,4)-273.15,-132.0)
-      ENDDO
-    ENDDO
-  ENDDO
-111 continue ! skip SH adjustment according to q_r
+      ! according a discussion with dan, specific humidity is adjusted by q_r (rain content) using ssh2 routine of laps:
+      goto 111
+      do k = 1, fcstgrd(3)
+         do j = 1, fcstgrd(2)
+            do i = 1, fcstgrd(1)
+               ! assume saturation: td = t:
+               if (bk0(i, j, k, iframe, raincont) .gt. 0.0) &
+             bk0(i, j, k, iframe, 5) = ssh2(lv(k)/100.0, bk0(i, j, k, iframe, 4) - 273.15, bk0(i, j, k, iframe, 4) - 273.15, -132.0)
+            end do
+         end do
+      end do
+111   continue ! skip sh adjustment according to q_r
 
-  ! Adjust SH by bounds:
-goto 222
-  do k=1,fcstgrd(3)
-  do j=1,fcstgrd(2)
-  do i=1,fcstgrd(1)
-    bk0(i,j,k,iframe,5) = max(bk0(i,j,k,iframe,5),bk0(i,j,k,iframe,raincont))
-  enddo
-  enddo
-  enddo
-222 continue
+      ! adjust sh by bounds:
+      goto 222
+      do k = 1, fcstgrd(3)
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         bk0(i, j, k, iframe, 5) = max(bk0(i, j, k, iframe, 5), bk0(i, j, k, iframe, raincont))
+      end do
+      end do
+      end do
+222   continue
 
-  ! CONVERTED FROM P, Q T: NOTE: Q is in g/kg
-  DO K=1,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-      DO I=1,FCSTGRD(1)
-        ! sph = BK0(I,J,K,IFRAME,5)*0.001
-        ! tmp = BK0(I,J,K,IFRAME,4)
-        ! RH(I,J,K) = 1.E2 * (LV(k)*sph/(sph*(1.-eps) + eps))/(svp1*exp(svp2*(tmp-svpt0)/(tmp-svp3)))
-        IF (BK0(I,J,K,IFRAME,5) .GE. 0.0) THEN
-          RH(I,J,K) = MAKE_RH(LV(k)/100.0,BK0(I,J,K,IFRAME,4)-273.15,BK0(I,J,K,IFRAME,5),-132.0)
+      ! converted from p, q t: note: q is in g/kg
+      do k = 1, fcstgrd(3)
+         do j = 1, fcstgrd(2)
+            do i = 1, fcstgrd(1)
+               ! sph = bk0(i,j,k,iframe,5)*0.001
+               ! tmp = bk0(i,j,k,iframe,4)
+               ! rh(i,j,k) = 1.e2 * (lv(k)*sph/(sph*(1.-eps) + eps))/(svp1*exp(svp2*(tmp-svpt0)/(tmp-svp3)))
+               if (bk0(i, j, k, iframe, 5) .ge. 0.0) then
+                  rh(i, j, k) = make_rh(lv(k)/100.0, bk0(i, j, k, iframe, 4) - 273.15, bk0(i, j, k, iframe, 5), -132.0)
 
-          ! Ensure no RH greater than 1.0:
-          IF (RH(I,J,K) .GT. 1.0) THEN
-            RH(I,J,K) = 1.0
-            BK0(I,J,K,IFRAME,5) = &
-              MAKE_SSH(LV(k)/100.0,BK0(I,J,K,IFRAME,4)-273.15,1.0,-132.0)
-          ENDIF
+                  ! ensure no rh greater than 1.0:
+                  if (rh(i, j, k) .gt. 1.0) then
+                     rh(i, j, k) = 1.0
+                     bk0(i, j, k, iframe, 5) = &
+                        make_ssh(lv(k)/100.0, bk0(i, j, k, iframe, 4) - 273.15, 1.0, -132.0)
+                  end if
 
-          ! Percentage:
-          RH(I,J,K) = RH(I,J,K)*100.0
-        ELSE
-          RH(I,J,K) = 0.0
-        ENDIF
-      ENDDO
-    ENDDO
-  ENDDO
-  print*,'Max/Min RH: ',maxval(RH),minval(RH)
+                  ! percentage:
+                  rh(i, j, k) = rh(i, j, k)*100.0
+               else
+                  rh(i, j, k) = 0.0
+               end if
+            end do
+         end do
+      end do
+      print *, 'max/min rh: ', maxval(rh), minval(rh)
 
-  ! HEIGHT FROM HYDROSTATIC:
-  ! BK0(1:FCSTGRD(1),1:FCSTGRD(2),1,IFRAME,3) = 0.0
-  goto 1
-  DO K=4,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-      DO I=1,FCSTGRD(1)
-        BK0(I,J,K,IFRAME,3) = BK0(I,J,K-1,IFRAME,3)-287.0/9.8*0.5* &
-	  (BK0(I,J,K,IFRAME,4)+BK0(I,J,K-1,IFRAME,4))* &
-          (LOG(LV(K))-LOG(LV(K-1)))
-      ENDDO
-    ENDDO
-  ENDDO
-1 continue
+      ! height from hydrostatic:
+      ! bk0(1:fcstgrd(1),1:fcstgrd(2),1,iframe,3) = 0.0
+      goto 1
+      do k = 4, fcstgrd(3)
+         do j = 1, fcstgrd(2)
+            do i = 1, fcstgrd(1)
+               bk0(i, j, k, iframe, 3) = bk0(i, j, k - 1, iframe, 3) - 287.0/9.8*0.5* &
+                                         (bk0(i, j, k, iframe, 4) + bk0(i, j, k - 1, iframe, 4))* &
+                                         (log(lv(k)) - log(lv(k - 1)))
+            end do
+         end do
+      end do
+1     continue
 
-  ! Temperature adjustment according to rain and snow: Testing by YUANFU
-  ! SKIP FOR NOW AS CWB DOMAIN FOR MORAKOT, THIS CAUSES VERY LARGE TEMP INCREMENT
-  GOTO 11
-  DO K=1,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-      DO I=1,FCSTGRD(1)
-        ! Dry density:
-        density = LV(K)/r_dry/BK0(I,J,K,IFRAME,4)
-        ! Adjusted temperature:
-        BK0(I,J,K,IFRAME,4) = LV(K)/r_dry/ &
-          (density+BK0(I,J,K,IFRAME,raincont)*0.001+BK0(I,J,K,IFRAME,snowcont)*0.001)
-      ENDDO
-    ENDDO
-  ENDDO
-11 CONTINUE
-  ! Temperature adjustment according to cloud ice and liquid: Test by Yuanfu
-  ext = "vrz"
-  BK0(:,:,:,1,NUMSTAT+1) = 0.0      ! Reflectivity
-  call read_multiradar_3dref(lapsi4t, &
-      900,0,      & ! 900 tolerate
-      .true.,-10.0, & ! apply_map: true; ref missing data value: 10
-      fcstgrd(1),fcstgrd(2),fcstgrd(3),ext,latitude,longitud,topogrph, &
-      .false.,.false., & ! l_low_fill: false; l_high_fill: false
-      bk0(1,1,1,iframe,3),bk0(1,1,1,1,numstat+1),rlat,rlon,rhgt,unit,iqc,closest_radar, &
-      nref,n2d,n3d,istatus2d,istatus3d)
-  ext = "lwc"
-  BK0(:,:,:,IFRAME,NUMSTAT+1) = 0.0 ! Cloud liquid
-  BK0(:,:,:,IFRAME,NUMSTAT+2) = 0.0 ! Cloud ice
-  CALL GET_LAPS_3DGRID(LAPSI4T,i4_tol,i4_ret, &
-               FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),ext,"lwc", &
-               unit,comment,BK0(1,1,1,IFRAME,NUMSTAT+1),ST)
-  CALL GET_LAPS_3DGRID(LAPSI4T,i4_tol,i4_ret, &
-               FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),ext,"ice", &
-               unit,comment,BK0(1,1,1,IFRAME,NUMSTAT+2),ST)
-  print*,'Max cloud liquid: ',maxval(BK0(:,:,:,IFRAME,NUMSTAT+1))
-  print*,'Max cloud ice   : ',maxval(BK0(:,:,:,IFRAME,NUMSTAT+2))
- goto 333
-  ! Adjust temperature according to cloud:
-  DO J=1,FCSTGRD(2)
-    DO I=1,FCSTGRD(1)
-      AT=0.0
-      CLOUD_BASE = FCSTGRD(3)+1
-      CLOUD_TOP = 0
-      DO K=1,FCSTGRD(3)
-        IF (LV(K) .EQ. 40000) THEN 
-          IF (BK0(I,J,K,1,NUMSTAT+1) .GT. 5 .AND. &
-              BK0(I,J,K,1,NUMSTAT+1) .LT.100.0 ) &
-            AT=BK0(I,J,K,1,NUMSTAT+1)/10.0
-          K400 = K
-        ENDIF
-        IF (BK0(I,J,K,IFRAME,NUMSTAT+1) .GT. 0.0 .OR. &
-            BK0(I,J,K,IFRAME,NUMSTAT+2) .GT. 0.0) THEN
-          CLOUD_BASE = MIN0(K,CLOUD_BASE)
-          CLOUD_TOP  = MAX0(K,CLOUD_TOP)
-        ENDIF
-      ENDDO
+      ! temperature adjustment according to rain and snow: testing by yuanfu
+      ! skip for now as cwb domain for morakot, this causes very large temp increment
+      goto 11
+      do k = 1, fcstgrd(3)
+         do j = 1, fcstgrd(2)
+            do i = 1, fcstgrd(1)
+               ! dry density:
+               density = lv(k)/r_dry/bk0(i, j, k, iframe, 4)
+               ! adjusted temperature:
+               bk0(i, j, k, iframe, 4) = lv(k)/r_dry/ &
+                                         (density + bk0(i, j, k, iframe, raincont)*0.001 + bk0(i, j, k, iframe, snowcont)*0.001)
+            end do
+         end do
+      end do
+11    continue
+      ! temperature adjustment according to cloud ice and liquid: test by yuanfu
+      ext = "vrz"
+      bk0(:, :, :, 1, numstat + 1) = 0.0      ! reflectivity
+      call read_multiradar_3dref(lapsi4t, &
+                                 900, 0, & ! 900 tolerate
+                                 .true., -10.0, & ! apply_map: true; ref missing data value: 10
+                                 fcstgrd(1), fcstgrd(2), fcstgrd(3), ext, latitude, longitud, topogrph, &
+                                 .false., .false., & ! l_low_fill: false; l_high_fill: false
+                                bk0(1, 1, 1, iframe, 3), bk0(1, 1, 1, 1, numstat + 1), rlat, rlon, rhgt, unit, iqc, closest_radar, &
+                                 nref, n2d, n3d, istatus2d, istatus3d)
+      ext = "lwc"
+      bk0(:, :, :, iframe, numstat + 1) = 0.0 ! cloud liquid
+      bk0(:, :, :, iframe, numstat + 2) = 0.0 ! cloud ice
+      call get_laps_3dgrid(lapsi4t, i4_tol, i4_ret, &
+                           fcstgrd(1), fcstgrd(2), fcstgrd(3), ext, "lwc", &
+                           unit, comment, bk0(1, 1, 1, iframe, numstat + 1), st)
+      call get_laps_3dgrid(lapsi4t, i4_tol, i4_ret, &
+                           fcstgrd(1), fcstgrd(2), fcstgrd(3), ext, "ice", &
+                           unit, comment, bk0(1, 1, 1, iframe, numstat + 2), st)
+      print *, 'max cloud liquid: ', maxval(bk0(:, :, :, iframe, numstat + 1))
+      print *, 'max cloud ice   : ', maxval(bk0(:, :, :, iframe, numstat + 2))
+      goto 333
+      ! adjust temperature according to cloud:
+      do j = 1, fcstgrd(2)
+         do i = 1, fcstgrd(1)
+            at = 0.0
+            cloud_base = fcstgrd(3) + 1
+            cloud_top = 0
+            do k = 1, fcstgrd(3)
+               if (lv(k) .eq. 40000) then
+                  if (bk0(i, j, k, 1, numstat + 1) .gt. 5 .and. &
+                      bk0(i, j, k, 1, numstat + 1) .lt. 100.0) &
+                     at = bk0(i, j, k, 1, numstat + 1)/10.0
+                  k400 = k
+               end if
+               if (bk0(i, j, k, iframe, numstat + 1) .gt. 0.0 .or. &
+                   bk0(i, j, k, iframe, numstat + 2) .gt. 0.0) then
+                  cloud_base = min0(k, cloud_base)
+                  cloud_top = max0(k, cloud_top)
+               end if
+            end do
 
-      ! Only adjust when cloud top is above 400mb
-      IF (CLOUD_TOP .LT. K400 .OR. AT .LE. 0.0) cycle
+            ! only adjust when cloud top is above 400mb
+            if (cloud_top .lt. k400 .or. at .le. 0.0) cycle
 
-      IF (CLOUD_BASE .LE. K400) THEN
-        DO K=CLOUD_BASE,K400
-          BK0(I,J,K,IFRAME,4) = BK0(I,J,K,IFRAME,4)+ &
-            AT*(K-CLOUD_BASE)/FLOAT(MAX(K400-CLOUD_BASE,1))
-        ENDDO
-      ENDIF
-      DO K=K400+1,CLOUD_TOP
-        BK0(I,J,K,IFRAME,4) = BK0(I,J,K,IFRAME,4)+ &
-          AT*(CLOUD_TOP-K)/FLOAT(MAX(CLOUD_TOP-K400,1))
-      ENDDO
-    ENDDO
-  ENDDO
-333 continue
- 
-  ! TOTAL PRECIPITABLE WATER:
-  DO J=1,FCSTGRD(2)
-  DO I=1,FCSTGRD(1)
-    TPW(I,J) = 0.0
-    DO K=1,FCSTGRD(3)-1
-      IF (LV(K) .LE. p_sfc_f(i,j)) THEN
-        ! above topography: summed up
-        TPW(I,J) = TPW(I,J) + 0.5* &
-                 (BK0(I,J,K,IFRAME,5)+BK0(I,J,K+1,IFRAME,5))* &
-                 (LV(K)-LV(K+1))/100.0 ! PRESSURE IN MB
+            if (cloud_base .le. k400) then
+               do k = cloud_base, k400
+                  bk0(i, j, k, iframe, 4) = bk0(i, j, k, iframe, 4) + &
+                                            at*(k - cloud_base)/float(max(k400 - cloud_base, 1))
+               end do
+            end if
+            do k = k400 + 1, cloud_top
+               bk0(i, j, k, iframe, 4) = bk0(i, j, k, iframe, 4) + &
+                                         at*(cloud_top - k)/float(max(cloud_top - k400, 1))
+            end do
+         end do
+      end do
+333   continue
 
-      ELSEIF (LV(K+1) .LE. p_sfc_f(i,j)) THEN
-        TPW(I,J) = TPW(I,J) + BK0(I,J,K+1,IFRAME,5)* &
-                   (p_sfc_f(i,j)-LV(k+1))/100.0
-      ENDIF
-    ENDDO
-    ! FROM G/KG TO CM:
-    TPW(I,J) = TPW(I,J)/100.0/9.8 ! FOLLOWING DAN'S INT_IPW.F ROUTINE
-  ENDDO
-  ENDDO
-  PRINT*,'TPW max/min: ', maxval(TPW),minval(TPW)
+      ! total precipitable water:
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         tpw(i, j) = 0.0
+         do k = 1, fcstgrd(3) - 1
+            if (lv(k) .le. p_sfc_f(i, j)) then
+               ! above topography: summed up
+               tpw(i, j) = tpw(i, j) + 0.5* &
+                           (bk0(i, j, k, iframe, 5) + bk0(i, j, k + 1, iframe, 5))* &
+                           (lv(k) - lv(k + 1))/100.0 ! pressure in mb
 
-  ! KG/KG FOR BALANCE NETCDF:
-  BK0(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),IFRAME,5) = 0.001* &
-    BK0(1:FCSTGRD(1),1:FCSTGRD(2),1:FCSTGRD(3),IFRAME,5)
-  CALL WRITE_BAL_LAPS(LAPSI4T,BK0(1,1,1,IFRAME,3),BK0(1,1,1,IFRAME,1), &
-                          BK0(1,1,1,IFRAME,2),BK0(1,1,1,IFRAME,4), &
-                          T3,RH,BK0(1,1,1,IFRAME,5),FCSTGRD(1),FCSTGRD(2), &
-                          FCSTGRD(3),LV,ST)
+            elseif (lv(k + 1) .le. p_sfc_f(i, j)) then
+               tpw(i, j) = tpw(i, j) + bk0(i, j, k + 1, iframe, 5)* &
+                           (p_sfc_f(i, j) - lv(k + 1))/100.0
+            end if
+         end do
+         ! from g/kg to cm:
+         tpw(i, j) = tpw(i, j)/100.0/9.8 ! following dan's int_ipw.f routine
+      end do
+      end do
+      print *, 'tpw max/min: ', maxval(tpw), minval(tpw)
 
-  ! WRITE TEMPERATURE AND WIND INTO LAPSPRD:
-  CALL WRITE_TEMP_ANAL(LAPSI4T,FCSTGRD(1),FCSTGRD(2),FCSTGRD(3), &
-       BK0(1,1,1,IFRAME,4),BK0(1,1,1,IFRAME,3),DR,ST)
+      ! kg/kg for balance netcdf:
+      bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), iframe, 5) = 0.001* &
+                                                                 bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), iframe, 5)
+      call write_bal_laps(lapsi4t, bk0(1, 1, 1, iframe, 3), bk0(1, 1, 1, iframe, 1), &
+                          bk0(1, 1, 1, iframe, 2), bk0(1, 1, 1, iframe, 4), &
+                          t3, rh, bk0(1, 1, 1, iframe, 5), fcstgrd(1), fcstgrd(2), &
+                          fcstgrd(3), lv, st)
 
-  ! WRITE WIND BY COMPONENTS:
-  CALL PUT_LAPS_MULTI_3D_JACKET(LAPSI4T,'lw3',WN,WU,WC, &
-                     BK0(1,1,1,IFRAME,1),BK0(1,1,1,IFRAME,2),T3, &
-                     FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),3,ST)
+      ! write temperature and wind into lapsprd:
+      call write_temp_anal(lapsi4t, fcstgrd(1), fcstgrd(2), fcstgrd(3), &
+                           bk0(1, 1, 1, iframe, 4), bk0(1, 1, 1, iframe, 3), dr, st)
 
-  ! WRITE SP TO FILE FOLLOWING DAN'S LQ3_DRIVE1A.f:
-  WRITE(*,*) 'WRITE-FILE...'
-  CALL WRITEFILE(LAPSI4T,'STMAS SH analysis',ILV,BK0(1,1,1,IFRAME,5), &
-                 FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),ST)
+      ! write wind by components:
+      call put_laps_multi_3d_jacket(lapsi4t, 'lw3', wn, wu, wc, &
+                                    bk0(1, 1, 1, iframe, 1), bk0(1, 1, 1, iframe, 2), t3, &
+                                    fcstgrd(1), fcstgrd(2), fcstgrd(3), 3, st)
 
-  ! WRITE TOTAL PRECIPITABLE WATER TO lh4 FILE:
-  WRITE(*,*) 'WRITE-LH4...'
-  CALL WRITE_LH4(LAPSI4T,TPW,1.0,FCSTGRD(1),FCSTGRD(2),ST)
+      ! write sp to file following dan's lq3_drive1a.f:
+      write (*, *) 'write-file...'
+      call writefile(lapsi4t, 'stmas sh analysis', ilv, bk0(1, 1, 1, iframe, 5), &
+                     fcstgrd(1), fcstgrd(2), fcstgrd(3), st)
 
-  ! WRITE RH TO LH3:
-  WRITE(*,*) 'WRITE-LH3...'
-  CALL LH3_COMPRESS(BK0(1,1,1,IFRAME,5),BK0(1,1,1,IFRAME,4),LAPSI4T,ILV, &
-                    -132.0,FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),0,ST)
+      ! write total precipitable water to lh4 file:
+      write (*, *) 'write-lh4...'
+      call write_lh4(lapsi4t, tpw, 1.0, fcstgrd(1), fcstgrd(2), st)
 
-  ! END OF OUTPUT TO LAPS BY YUANFU
+      ! write rh to lh3:
+      write (*, *) 'write-lh3...'
+      call lh3_compress(bk0(1, 1, 1, iframe, 5), bk0(1, 1, 1, iframe, 4), lapsi4t, ilv, &
+                        -132.0, fcstgrd(1), fcstgrd(2), fcstgrd(3), 0, st)
 
-! --------ADDED BY SHUYUAN 201007---------------------------------
-! CALCULATE AND OUTPUT REFLECTIVITY
-  ! CHECK IF RAIN AND SNOW IS ANALYZED:
-  IF (NUMSTAT .LE. 5) GOTO 555 ! BY YUANFU
-  DO K=1,FCSTGRD(3)
-  DO J=1,FCSTGRD(2)
-  DO I=1,FCSTGRD(1)
-    REF_OUT(I,J,K)= 0.
-    if(BK0(I,J,K,iframe,raincont).GT. 0.0 ) then 
-      REF_OUT(I,J,K)=REF_OUT(I,J,K)+43.1+17.5*ALOG10(BK0(I,J,K,iframe,raincont))
-    else
-     ! LAPS uses -10 as base value for reflectivity:
-     REF_OUT(I,J,K)=-10.
-    endif 
- 
-    if( REF_OUT(I,J,K) .LT. 0.) then
-      ! LAPS uses -10 as base value for reflectivity:
-      REF_OUT(I,J,K)=-10.
-    endif    
-  ENDDO
-  ENDDO
-  ENDDO 
-  print*,'ref_max=',maxval(REF_OUT(1:fcstgrd(1),1:fcstgrd(2),1:fcstgrd(3)))
-  print*,'ref_min=',minval(REF_OUT(1:fcstgrd(1),1:fcstgrd(2),1:fcstgrd(3)))
-  call put_laps_3d(LAPSI4T,'lps',RE,'dBZ',RC,REF_OUT(1,1,1),FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
+      ! end of output to laps by yuanfu
 
-  !RAIN CONTENT(AIR DENSITY* RAIN WATER MIXING RATIO(kg/m3),
-  !SNOW CONTENT(AIR DENSITY * SNOW WATER MIXING RATIO)
-  N_3D_FIELDS=2   ! variable number
-  istatus=0 
-  !convert rc sc to rour rous 
-  DO K=1,FCSTGRD(3)
-  DO J=1,FCSTGRD(2)
-  DO I=1,FCSTGRD(1)
-    if(BK0(I,J,K,iframe,raincont) .NE. 0)then
-      BK0(I,J,K,iframe,raincont)=BK0(I,J,K,iframe,raincont)/1000.  ! kg/m3
-    endif
-    if(BK0(I,J,K,iframe,snowcont) .NE. 0)then
-      BK0(I,J,K,iframe,snowcont)=BK0(I,J,K,iframe,snowcont)/1000.   !20100907
-    endif
-  ENDDO
-  ENDDO
-  ENDDO  
-  print*,'bko6_max=',maxval(BK0(1:fcstgrd(1),1:fcstgrd(2),1:fcstgrd(3),iframe,raincont))
-  print*,'bko7_max=',maxval(BK0(1:fcstgrd(1),1:fcstgrd(2),1:fcstgrd(3),iframe,snowcont))
-  ! OUT PUT SNOW CONTENT(SNO) AND RAI   
-  call put_laps_3d_multi_R(LAPSI4T,'lwc',QW,units_3D,QWC ,  &
-            BK0(1,1,1,iframe,raincont),BK0(1,1,1,iframe,snowcont),     & 
-            FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),            &
-            FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),N_3D_FIELDS,istatus)         
-!--END OUTPUT REF RAI SNO  BY SHUYUAN---------------------
+! --------added by shuyuan 201007---------------------------------
+! calculate and output reflectivity
+      ! check if rain and snow is analyzed:
+      if (numstat .le. 5) goto 555 ! by yuanfu
+      do k = 1, fcstgrd(3)
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         ref_out(i, j, k) = 0.
+         if (bk0(i, j, k, iframe, raincont) .gt. 0.0) then
+            ref_out(i, j, k) = ref_out(i, j, k) + 43.1 + 17.5*alog10(bk0(i, j, k, iframe, raincont))
+         else
+            ! laps uses -10 as base value for reflectivity:
+            ref_out(i, j, k) = -10.
+         end if
 
-  ! SKIP OUTPUT RAIN AND SNOW IF NOT ANALYZED:
-555 CONTINUE
+         if (ref_out(i, j, k) .lt. 0.) then
+            ! laps uses -10 as base value for reflectivity:
+            ref_out(i, j, k) = -10.
+         end if
+      end do
+      end do
+      end do
+      print *, 'ref_max=', maxval(ref_out(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3)))
+      print *, 'ref_min=', minval(ref_out(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3)))
+      call put_laps_3d(lapsi4t, 'lps', re, 'dbz', rc, ref_out(1, 1, 1), fcstgrd(1), fcstgrd(2), fcstgrd(3))
 
-  CALL BKGMEMRLS
-  DEALLOCATE(Z_FCSTGD)
-  ! FINALLY RELEASE THE BACKGROUND ARRAYS: BY YUANFU
-  DEALLOCATE(BK0)
-  ! FINALLY RELEASE MEMORY FOR LAT/LON/TOPO:
-  DEALLOCATE(LATITUDE, LONGITUD, TOPOGRPH)
-  RETURN
-END SUBROUTINE OUTPTLAPS
+      !rain content(air density* rain water mixing ratio(kg/m3),
+      !snow content(air density * snow water mixing ratio)
+      n_3d_fields = 2   ! variable number
+      istatus = 0
+      !convert rc sc to rour rous
+      do k = 1, fcstgrd(3)
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         if (bk0(i, j, k, iframe, raincont) .ne. 0) then
+            bk0(i, j, k, iframe, raincont) = bk0(i, j, k, iframe, raincont)/1000.  ! kg/m3
+         end if
+         if (bk0(i, j, k, iframe, snowcont) .ne. 0) then
+            bk0(i, j, k, iframe, snowcont) = bk0(i, j, k, iframe, snowcont)/1000.   !20100907
+         end if
+      end do
+      end do
+      end do
+      print *, 'bko6_max=', maxval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), iframe, raincont))
+      print *, 'bko7_max=', maxval(bk0(1:fcstgrd(1), 1:fcstgrd(2), 1:fcstgrd(3), iframe, snowcont))
+      ! out put snow content(sno) and rai
+      call put_laps_3d_multi_r(lapsi4t, 'lwc', qw, units_3d, qwc, &
+                               bk0(1, 1, 1, iframe, raincont), bk0(1, 1, 1, iframe, snowcont), &
+                               fcstgrd(1), fcstgrd(2), fcstgrd(3), &
+                               fcstgrd(1), fcstgrd(2), fcstgrd(3), n_3d_fields, istatus)
+!--end output ref rai sno  by shuyuan---------------------
 
-SUBROUTINE OUTPUTANA
+      ! skip output rain and snow if not analyzed:
+555   continue
+
+      call bkgmemrls
+      deallocate (z_fcstgd)
+      ! finally release the background arrays: by yuanfu
+      deallocate (bk0)
+      ! finally release memory for lat/lon/topo:
+      deallocate (latitude, longitud, topogrph)
+      return
+   end subroutine outptlaps
+
+   subroutine outputana
 !*************************************************
-! GET BACKGROUND FOR ANALYSIS
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
-!          FEBRUARY 2008, BY ZHONGJIE HE
+! get background for analysis
+! history: september 2007, coded by wei li.
+!          february 2008, by zhongjie he
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,L,T,S,LN
-  CHARACTER(LEN=200) :: DR
-  REAL     :: XB(MAXGRID(1)),YB(MAXGRID(2)),ZB(MAXGRID(3)),TB(MAXGRID(4))
-  REAL     :: XF(FCSTGRD(1)),YF(FCSTGRD(2)),ZF(FCSTGRD(3)),TF(FCSTGRD(4))
-  REAL     :: BK1(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),FCSTGRD(4),NUMSTAT)
-  INTEGER  :: FG(MAXDIMS),MG(MAXDIMS)
-  REAL     :: Z1(1),T1(1),Z2(1),T2(1),DX,DY,DT
+      integer  :: i, j, k, l, t, s, ln
+      character(len=200) :: dr
+      real     :: xb(maxgrid(1)), yb(maxgrid(2)), zb(maxgrid(3)), tb(maxgrid(4))
+      real     :: xf(fcstgrd(1)), yf(fcstgrd(2)), zf(fcstgrd(3)), tf(fcstgrd(4))
+      real     :: bk1(fcstgrd(1), fcstgrd(2), fcstgrd(3), fcstgrd(4), numstat)
+      integer  :: fg(maxdims), mg(maxdims)
+      real     :: z1(1), t1(1), z2(1), t2(1), dx, dy, dt
 
-! ADDED BY ZHONGJIE HE==========
-  REAL  :: UU(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
-  REAL  :: VV(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
-  REAL  :: WW(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
-  REAL  :: UV(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3))
-  REAL  :: W0(FCSTGRD(1),FCSTGRD(2),FCSTGRD(3),FCSTGRD(4))
+! added by zhongjie he==========
+      real  :: uu(fcstgrd(1), fcstgrd(2), fcstgrd(3))
+      real  :: vv(fcstgrd(1), fcstgrd(2), fcstgrd(3))
+      real  :: ww(fcstgrd(1), fcstgrd(2), fcstgrd(3))
+      real  :: uv(fcstgrd(1), fcstgrd(2), fcstgrd(3))
+      real  :: w0(fcstgrd(1), fcstgrd(2), fcstgrd(3), fcstgrd(4))
 
-  REAL  :: D1,D2,DD
+      real  :: d1, d2, dd
 !===============================
 
 ! --------------------
-  DO I=1,FCSTGRD(1)
-    XF(I)=(I-1)*1.0D0
-  ENDDO
-  DO J=1,FCSTGRD(2)
-    YF(J)=(J-1)*1.0D0
-  ENDDO
-  DX=((FCSTGRD(1)-1)*1.0D0)/((MAXGRID(1)-1)*1.0D0)
-  DO I=1,MAXGRID(1)
-    XB(I)=XF(1)+(I-1)*DX
-  ENDDO
-  DY=((FCSTGRD(2)-1)*1.0D0)/((MAXGRID(2)-1)*1.0D0)
-  DO J=1,MAXGRID(2)
-    YB(J)=YF(1)+(J-1)*DY
-  ENDDO
-  CALL GET_DIRECTORY('static',DR,LN)
+      do i = 1, fcstgrd(1)
+         xf(i) = (i - 1)*1.0d0
+      end do
+      do j = 1, fcstgrd(2)
+         yf(j) = (j - 1)*1.0d0
+      end do
+      dx = ((fcstgrd(1) - 1)*1.0d0)/((maxgrid(1) - 1)*1.0d0)
+      do i = 1, maxgrid(1)
+         xb(i) = xf(1) + (i - 1)*dx
+      end do
+      dy = ((fcstgrd(2) - 1)*1.0d0)/((maxgrid(2) - 1)*1.0d0)
+      do j = 1, maxgrid(2)
+         yb(j) = yf(1) + (j - 1)*dy
+      end do
+      call get_directory('static', dr, ln)
 !================
-  DO K=1,FCSTGRD(3)
-    ZF(K)=Z_FCSTGD(K)
-  ENDDO
-  DO K=1,MAXGRID(3)
-    ZB(K)=Z_MAXGID(K)
-  ENDDO
-!=============== JUST FOR TEST DATA 
-!  OPEN(2,FILE=DR(1:LN)//'P_LEVEL.DAT',STATUS='OLD',ACTION='READ')
-!  DO K=1,MAXGRID(3)
-!    READ(2,*)ZB(K)
-!  ENDDO
-!  CLOSE(2)
-  
-!  DO K=1,MAXGRID(3)
-!    ZB(K)=ZF(1)+(K-1)*(ZF(FCSTGRD(3))-ZF(1))/(MAXGRID(3)-1.0)
-!  ENDDO
+      do k = 1, fcstgrd(3)
+         zf(k) = z_fcstgd(k)
+      end do
+      do k = 1, maxgrid(3)
+         zb(k) = z_maxgid(k)
+      end do
+!=============== just for test data
+!  open(2,file=dr(1:ln)//'p_level.dat',status='old',action='read')
+!  do k=1,maxgrid(3)
+!    read(2,*)zb(k)
+!  enddo
+!  close(2)
+
+!  do k=1,maxgrid(3)
+!    zb(k)=zf(1)+(k-1)*(zf(fcstgrd(3))-zf(1))/(maxgrid(3)-1.0)
+!  enddo
 ! ===============
 
-  DO T=1,FCSTGRD(4)
-    TF(T)=(T-1)*1.0
-  ENDDO
-  IF(MAXGRID(4).GE.2) DT=((FCSTGRD(4)-1)*1.0)/(MAXGRID(4)-1.0)
-  DO T=1,MAXGRID(4)
-    TB(T)=TF(1)+(T-1)*DT
-  ENDDO
+      do t = 1, fcstgrd(4)
+         tf(t) = (t - 1)*1.0
+      end do
+      if (maxgrid(4) .ge. 2) dt = ((fcstgrd(4) - 1)*1.0)/(maxgrid(4) - 1.0)
+      do t = 1, maxgrid(4)
+         tb(t) = tf(1) + (t - 1)*dt
+      end do
 
-! ADDED BY ZHONGJIE HE==========
+! added by zhongjie he==========
 
-!  CALL FCST2BKGD(NUMDIMS,NGPTOBS,NUMSTAT,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,DIFFTOUT,BK1)
-  CALL BKGTOFINE(NUMSTAT,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,GRDBKGD0,BK1)
-!  CALL FCST2BKGD(NUMDIMS,NGPTOBS,1,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,WWWOUT,W0)
-  CALL BKGTOFINE(1,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,WWWOUT,W0)
+!  call fcst2bkgd(numdims,ngptobs,numstat,maxgrid,xb,yb,zb,tb,fcstgrd,xf,yf,zf,tf,difftout,bk1)
+      call bkgtofine(numstat, maxgrid, xb, yb, zb, tb, fcstgrd, xf, yf, zf, tf, grdbkgd0, bk1)
+!  call fcst2bkgd(numdims,ngptobs,1,maxgrid,xb,yb,zb,tb,fcstgrd,xf,yf,zf,tf,wwwout,w0)
+      call bkgtofine(1, maxgrid, xb, yb, zb, tb, fcstgrd, xf, yf, zf, tf, wwwout, w0)
 
-  DEALLOCATE(DIFFTOUT)
-  DEALLOCATE(WWWOUT)
+      deallocate (difftout)
+      deallocate (wwwout)
 
-  DO K=1,FCSTGRD(3)
-  DO J=1,FCSTGRD(2)
-  DO I=1,FCSTGRD(1)
-    UU(I,J,K)=BK1(I,J,K,1,U_CMPNNT)
-    VV(I,J,K)=BK1(I,J,K,1,V_CMPNNT)
-!    WW(I,J,K)=W0(I,J,K,1)
-!    D1=ORI_LON+(END_LON-ORI_LON)/FLOAT(FCSTGRD(1)-1)*(I-1)
-!    D1=D1-X_RADAR
-!    D2=ORI_LAT+(END_LAT-ORI_LAT)/FLOAT(FCSTGRD(2)-1)*(J-1)
-!    D2=D2-Y_RADAR
-!    DD=SQRT(D1*D1+D2*D2)
-!    UV(I,J,K)=UU(I,J,K)*D1/DD+VV(I,J,K)*D2/DD
-  ENDDO
-  ENDDO
-  ENDDO
+      do k = 1, fcstgrd(3)
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         uu(i, j, k) = bk1(i, j, k, 1, u_cmpnnt)
+         vv(i, j, k) = bk1(i, j, k, 1, v_cmpnnt)
+!    ww(i,j,k)=w0(i,j,k,1)
+!    d1=ori_lon+(end_lon-ori_lon)/float(fcstgrd(1)-1)*(i-1)
+!    d1=d1-x_radar
+!    d2=ori_lat+(end_lat-ori_lat)/float(fcstgrd(2)-1)*(j-1)
+!    d2=d2-y_radar
+!    dd=sqrt(d1*d1+d2*d2)
+!    uv(i,j,k)=uu(i,j,k)*d1/dd+vv(i,j,k)*d2/dd
+      end do
+      end do
+      end do
 
-  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,UU,'UD.GRD')
-  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,VV,'VD.GRD')
-!  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,WW,'WD.GRD')
-!  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,UV,'RD.GRD')
+      call drcontour(ori_lon, end_lon, ori_lat, end_lat, numdims, fcstgrd, uu, 'ud.grd')
+      call drcontour(ori_lon, end_lon, ori_lat, end_lat, numdims, fcstgrd, vv, 'vd.grd')
+!  call drcontour(ori_lon,end_lon,ori_lat,end_lat,numdims,fcstgrd,ww,'wd.grd')
+!  call drcontour(ori_lon,end_lon,ori_lat,end_lat,numdims,fcstgrd,uv,'rd.grd')
 
 !===============================
 
-!  CALL FCST2BKGD(NUMDIMS,NGPTOBS,NUMSTAT,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,GRDBKGD0,BK1)
-  CALL BKGTOFINE(NUMSTAT,MAXGRID,XB,YB,ZB,TB,FCSTGRD,XF,YF,ZF,TF,GRDBKGD0,BK1)
+!  call fcst2bkgd(numdims,ngptobs,numstat,maxgrid,xb,yb,zb,tb,fcstgrd,xf,yf,zf,tf,grdbkgd0,bk1)
+      call bkgtofine(numstat, maxgrid, xb, yb, zb, tb, fcstgrd, xf, yf, zf, tf, grdbkgd0, bk1)
 
-! ADDED BY ZHONGJIE HE==========
-  DO K=1,FCSTGRD(3)
-  DO J=1,FCSTGRD(2)
-  DO I=1,FCSTGRD(1)
-    UU(I,J,K)=BK1(I,J,K,1,U_CMPNNT)
-    VV(I,J,K)=BK1(I,J,K,1,V_CMPNNT)
-    WW(I,J,K)=W0(I,J,K,1)
-!    D1=ORI_LON+(END_LON-ORI_LON)/FLOAT(FCSTGRD(1)-1)*(I-1)
-!    D1=D1-X_RADAR
-!    D2=ORI_LAT+(END_LAT-ORI_LAT)/FLOAT(FCSTGRD(2)-1)*(J-1)
-!    D2=D2-Y_RADAR
-!    DD=SQRT(D1*D1+D2*D2)
-!    UV(I,J,K)=UU(I,J,K)*D1/DD+VV(I,J,K)*D2/DD
-  ENDDO
-  ENDDO
-  ENDDO
+! added by zhongjie he==========
+      do k = 1, fcstgrd(3)
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         uu(i, j, k) = bk1(i, j, k, 1, u_cmpnnt)
+         vv(i, j, k) = bk1(i, j, k, 1, v_cmpnnt)
+         ww(i, j, k) = w0(i, j, k, 1)
+!    d1=ori_lon+(end_lon-ori_lon)/float(fcstgrd(1)-1)*(i-1)
+!    d1=d1-x_radar
+!    d2=ori_lat+(end_lat-ori_lat)/float(fcstgrd(2)-1)*(j-1)
+!    d2=d2-y_radar
+!    dd=sqrt(d1*d1+d2*d2)
+!    uv(i,j,k)=uu(i,j,k)*d1/dd+vv(i,j,k)*d2/dd
+      end do
+      end do
+      end do
 
-  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,UU,'UA.GRD')
-  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,VV,'VA.GRD')
-  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,WW,'WA.GRD')
-!  CALL DRCONTOUR(ORI_LON,END_LON,ORI_LAT,END_LAT,NUMDIMS,FCSTGRD,UV,'RA.GRD')
+      call drcontour(ori_lon, end_lon, ori_lat, end_lat, numdims, fcstgrd, uu, 'ua.grd')
+      call drcontour(ori_lon, end_lon, ori_lat, end_lat, numdims, fcstgrd, vv, 'va.grd')
+      call drcontour(ori_lon, end_lon, ori_lat, end_lat, numdims, fcstgrd, ww, 'wa.grd')
+!  call drcontour(ori_lon,end_lon,ori_lat,end_lat,numdims,fcstgrd,uv,'ra.grd')
 !===============================
 
-  CALL BKGMEMRLS
-  DEALLOCATE(Z_FCSTGD)
-  DEALLOCATE(Z_MAXGID)
-
+      call bkgmemrls
+      deallocate (z_fcstgd)
+      deallocate (z_maxgid)
 
 !============= to check the analysis field======
-  OPEN(1,FILE='STMAS_ANAL.DAT',ACTION='WRITE')
-    WRITE(1,*) FCSTGRD(1:4)
-    DO L=1,FCSTGRD(4)
-    DO K=1,FCSTGRD(3)
-    DO J=1,FCSTGRD(2)
-    DO I=1,FCSTGRD(1)
-      WRITE(1,*) BK1(I,J,K,L,U_CMPNNT),BK1(I,J,K,L,V_CMPNNT),BK1(I,J,K,L,TEMPRTUR),W0(I,J,K,L)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  CLOSE(1)
+      open (1, file='stmas_anal.dat', action='write')
+      write (1, *) fcstgrd(1:4)
+      do l = 1, fcstgrd(4)
+      do k = 1, fcstgrd(3)
+      do j = 1, fcstgrd(2)
+      do i = 1, fcstgrd(1)
+         write (1, *) bk1(i, j, k, l, u_cmpnnt), bk1(i, j, k, l, v_cmpnnt), bk1(i, j, k, l, temprtur), w0(i, j, k, l)
+      end do
+      end do
+      end do
+      end do
+      close (1)
 !===========================================
 
+      return
+   end subroutine outputana
 
-  RETURN
-END SUBROUTINE OUTPUTANA
-
-SUBROUTINE TMPOUTPUT
+   subroutine tmpoutput
 !*************************************************
-! OUTPUT ANALYSIS
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! output analysis
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S
-  INTEGER  :: IC,JC
+      integer  :: i, j, k, t, s
+      integer  :: ic, jc
 ! --------------------
-  OPEN(2,FILE='ANALYSIS.DAT')
-  DO S=1,NUMSTAT
-    DO T=1,1      ! NUMGRID(4)
-    DO K=1,1      ! NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      WRITE(2,*) GRDBKGD0(I,J,K,T,S)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
-  CLOSE(2)
-!  CALL DRCONTOUR_0(PRESSURE,'Z.GRD')
-  CALL DRCONTOUR_0(U_CMPNNT,'U.GRD')
-  CALL DRCONTOUR_0(V_CMPNNT,'V.GRD')
-!  CALL DRCONTOUR_0(4,'T.GRD')
-  IC=(NUMGRID(1)+1)/2
-  JC=(NUMGRID(2)+1)/2
-  CALL RADIALWND(IC,JC)
-  CALL BKGMEMRLS
-  RETURN
-END SUBROUTINE TMPOUTPUT
+      open (2, file='analysis.dat')
+      do s = 1, numstat
+         do t = 1, 1      ! numgrid(4)
+         do k = 1, 1      ! numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            write (2, *) grdbkgd0(i, j, k, t, s)
+         end do
+         end do
+         end do
+         end do
+      end do
+      close (2)
+!  call drcontour_0(pressure,'z.grd')
+      call drcontour_0(u_cmpnnt, 'u.grd')
+      call drcontour_0(v_cmpnnt, 'v.grd')
+!  call drcontour_0(4,'t.grd')
+      ic = (numgrid(1) + 1)/2
+      jc = (numgrid(2) + 1)/2
+      call radialwnd(ic, jc)
+      call bkgmemrls
+      return
+   end subroutine tmpoutput
 
-SUBROUTINE BKGMEMRLS
+   subroutine bkgmemrls
 !*************************************************
-! RELEASE MEMORY FOR BACKGROUND ARRAY
-! HISTORY: SEPTEMBER 2007, CODED by WEI LI.
+! release memory for background array
+! history: september 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
-  DEALLOCATE(GRDBKGD0)
-  DEALLOCATE(XX0)
-  DEALLOCATE(YY0)
-  DEALLOCATE(CR0)
-  DEALLOCATE(DG0)
-  DEALLOCATE(DN0)
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN
-    DEALLOCATE(ZZ0)
-    DEALLOCATE(ZZB)
-  ELSEIF(IFPCDNT.EQ.1)THEN
-    DEALLOCATE(PP0,PPM)
-  ENDIF
-  RETURN
-END SUBROUTINE BKGMEMRLS
+      implicit none
+      deallocate (grdbkgd0)
+      deallocate (xx0)
+      deallocate (yy0)
+      deallocate (cr0)
+      deallocate (dg0)
+      deallocate (dn0)
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then
+         deallocate (zz0)
+         deallocate (zzb)
+      elseif (ifpcdnt .eq. 1) then
+         deallocate (pp0, ppm)
+      end if
+      return
+   end subroutine bkgmemrls
 
-SUBROUTINE DRCONTOUR_0(S,FN)
+   subroutine drcontour_0(s, fn)
 !*************************************************
-! DRAW THE ANALYSIS (AFFILIATE)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! draw the analysis (affiliate)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER   :: I,J,K,T,S,IU
-  REAL      :: MX,MN
-  CHARACTER(LEN=5) :: FN
+      integer   :: i, j, k, t, s, iu
+      real      :: mx, mn
+      character(len=5) :: fn
 ! --------------------
-  K=2 !(NUMGRID(3)+1)/2 !NUMGRID(3)
-  T=(NUMGRID(4)+1)/2 !NUMGRID(4) !1
-  IU=2
-  OPEN(IU,FILE=FN,STATUS='UNKNOWN')
-  MX=-1000.0
-  MN=1000.0
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(GRDBKGD0(I,J,K,T,S).LT.9000.0)THEN
-      IF(GRDBKGD0(I,J,K,T,S).GT.MX)MX=GRDBKGD0(I,J,K,T,S)
-      IF(GRDBKGD0(I,J,K,T,S).LT.MN)MN=GRDBKGD0(I,J,K,T,S)
-    ENDIF
-  ENDDO
-  ENDDO
-  WRITE(IU,'(A4)')'DSAA'
-  WRITE(IU,'(2I4)')NUMGRID(1),NUMGRID(2)
-  WRITE(IU,*)ORIPSTN(1),ORIPSTN(1)+(NUMGRID(1)-1)*GRDSPAC(1)
-  WRITE(IU,*)ORIPSTN(2),ORIPSTN(2)+(NUMGRID(2)-1)*GRDSPAC(2)
-  WRITE(IU,*)MN,MX
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(GRDBKGD0(I,J,K,T,S).GT.9000.0)GRDBKGD0(I,J,K,T,S)=2.E38
-  ENDDO
-  ENDDO
-  DO J=1,NUMGRID(2)
-    WRITE(IU,*)(GRDBKGD0(I,J,K,T,S),I=1,NUMGRID(1))
-  ENDDO
-  CLOSE(IU)
-  RETURN
-END SUBROUTINE DRCONTOUR_0
+      k = 2 !(numgrid(3)+1)/2 !numgrid(3)
+      t = (numgrid(4) + 1)/2 !numgrid(4) !1
+      iu = 2
+      open (iu, file=fn, status='unknown')
+      mx = -1000.0
+      mn = 1000.0
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (grdbkgd0(i, j, k, t, s) .lt. 9000.0) then
+            if (grdbkgd0(i, j, k, t, s) .gt. mx) mx = grdbkgd0(i, j, k, t, s)
+            if (grdbkgd0(i, j, k, t, s) .lt. mn) mn = grdbkgd0(i, j, k, t, s)
+         end if
+      end do
+      end do
+      write (iu, '(a4)') 'dsaa'
+      write (iu, '(2i4)') numgrid(1), numgrid(2)
+      write (iu, *) oripstn(1), oripstn(1) + (numgrid(1) - 1)*grdspac(1)
+      write (iu, *) oripstn(2), oripstn(2) + (numgrid(2) - 1)*grdspac(2)
+      write (iu, *) mn, mx
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (grdbkgd0(i, j, k, t, s) .gt. 9000.0) grdbkgd0(i, j, k, t, s) = 2.e38
+      end do
+      end do
+      do j = 1, numgrid(2)
+         write (iu, *) (grdbkgd0(i, j, k, t, s), i=1, numgrid(1))
+      end do
+      close (iu)
+      return
+   end subroutine drcontour_0
 
-SUBROUTINE RADIALWND(IC,JC)
+   subroutine radialwnd(ic, jc)
 !*************************************************
-! DRAW RADIAL WIND (AFFILIATE)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! draw radial wind (affiliate)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: IU,IC,JC,I,J,K,T
-  REAL     :: DX,DY,DD,MN,MX
-  REAL     :: UV(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4))
+      integer  :: iu, ic, jc, i, j, k, t
+      real     :: dx, dy, dd, mn, mx
+      real     :: uv(numgrid(1), numgrid(2), numgrid(3), numgrid(4))
 ! --------------------
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    IF(I.EQ.IC.AND.J.EQ.JC)THEN
-      UV(I,J,K,T)=2.E38
-      CYCLE
-    ENDIF
-    DX=1.0D0*(I-IC)
-    DY=1.0D0*(J-JC)
-    DD=SQRT(DX*DX+DY*DY)
-    UV(I,J,K,T)=GRDBKGD0(I,J,K,T,U_CMPNNT)*DX/DD+GRDBKGD0(I,J,K,T,V_CMPNNT)*DY/DD
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  K=(NUMGRID(3)+1)/2 !NUMGRID(3)
-  T=(NUMGRID(4)+1)/2 !NUMGRID(4) !1
-  IU=2
-  OPEN(IU,FILE='RADIAL.GRD',STATUS='UNKNOWN')
-  MX=-1000.0
-  MN=1000.0
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(UV(I,J,K,T).LT.9000.0)THEN
-      IF(UV(I,J,K,T).GT.MX)MX=UV(I,J,K,T)
-      IF(UV(I,J,K,T).LT.MN)MN=UV(I,J,K,T)
-    ENDIF
-  ENDDO
-  ENDDO
-  WRITE(IU,'(A4)')'DSAA'
-  WRITE(IU,'(2I4)')NUMGRID(1),NUMGRID(2)
-  WRITE(IU,*)ORIPSTN(1),ORIPSTN(1)+(NUMGRID(1)-1)*GRDSPAC(1)
-  WRITE(IU,*)ORIPSTN(2),ORIPSTN(2)+(NUMGRID(2)-1)*GRDSPAC(2)
-  WRITE(IU,*)MN,MX
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(UV(I,J,K,T).GT.9000.0)UV(I,J,K,T)=2.E38
-  ENDDO
-  ENDDO
-  DO J=1,NUMGRID(2)
-    WRITE(IU,*)(UV(I,J,K,T),I=1,NUMGRID(1))
-  ENDDO
-  CLOSE(IU)
-  RETURN
-END SUBROUTINE RADIALWND
-
-
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         if (i .eq. ic .and. j .eq. jc) then
+            uv(i, j, k, t) = 2.e38
+            cycle
+         end if
+         dx = 1.0d0*(i - ic)
+         dy = 1.0d0*(j - jc)
+         dd = sqrt(dx*dx + dy*dy)
+         uv(i, j, k, t) = grdbkgd0(i, j, k, t, u_cmpnnt)*dx/dd + grdbkgd0(i, j, k, t, v_cmpnnt)*dy/dd
+      end do
+      end do
+      end do
+      end do
+      k = (numgrid(3) + 1)/2 !numgrid(3)
+      t = (numgrid(4) + 1)/2 !numgrid(4) !1
+      iu = 2
+      open (iu, file='radial.grd', status='unknown')
+      mx = -1000.0
+      mn = 1000.0
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (uv(i, j, k, t) .lt. 9000.0) then
+            if (uv(i, j, k, t) .gt. mx) mx = uv(i, j, k, t)
+            if (uv(i, j, k, t) .lt. mn) mn = uv(i, j, k, t)
+         end if
+      end do
+      end do
+      write (iu, '(a4)') 'dsaa'
+      write (iu, '(2i4)') numgrid(1), numgrid(2)
+      write (iu, *) oripstn(1), oripstn(1) + (numgrid(1) - 1)*grdspac(1)
+      write (iu, *) oripstn(2), oripstn(2) + (numgrid(2) - 1)*grdspac(2)
+      write (iu, *) mn, mx
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (uv(i, j, k, t) .gt. 9000.0) uv(i, j, k, t) = 2.e38
+      end do
+      end do
+      do j = 1, numgrid(2)
+         write (iu, *) (uv(i, j, k, t), i=1, numgrid(1))
+      end do
+      close (iu)
+      return
+   end subroutine radialwnd
 
 !!added by shuyuan 20100729!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine put_laps_3d_multi_R(i4time,EXT,var_3d &  ! in 
-             ,units_3d,comment_3d       &            ! in    
-             ,array1,array2              &           ! in                                                 
-             ,NX_L_1,NY_L_1,NZ_L_1     &             ! in   
-             ,NX_L_2,NY_L_2,NZ_L_2      &            ! in                             
-             ,N_3D_FIELDS,istatus)              !in out
+   subroutine put_laps_3d_multi_r(i4time, ext, var_3d &  ! in
+                                  , units_3d, comment_3d &            ! in
+                                  , array1, array2 &           ! in
+                                  , nx_l_1, ny_l_1, nz_l_1 &             ! in
+                                  , nx_l_2, ny_l_2, nz_l_2 &            ! in
+                                  , n_3d_fields, istatus)              !in out
 
-   real array1(NX_L_1,NY_L_1,NZ_L_1) !variable for output 
-   real array2(NX_L_2,NY_L_2,NZ_L_2) !variable for output
-       
-   character*125 comment_3D(N_3D_FIELDS) !variable comment 
-   character*10 units_3D(N_3D_FIELDS)    !variable unit
-   character*3 var_3D(N_3D_FIELDS)      !variable name
-   character*(*) EXT                    ! file name suffix and file derictory
-   integer :: l
+      real array1(nx_l_1, ny_l_1, nz_l_1) !variable for output
+      real array2(nx_l_2, ny_l_2, nz_l_2) !variable for output
 
-   write(6,*)' Subroutine put_laps_3d_multi_R...'
+      character*125 comment_3d(n_3d_fields) !variable comment
+      character*10 units_3d(n_3d_fields)    !variable unit
+      character*3 var_3d(n_3d_fields)      !variable name
+      character*(*) ext                    ! file name suffix and file derictory
+      integer :: l
 
-   l = 1
-   call put_laps_multi_3d(i4time,EXT,var_3d(l),units_3d(l), &
-        comment_3d(l),array1,NX_L_1,NY_L_1,NZ_L_1,1,istatus)       
-   if(istatus .ne. 1)return
-   if(l .eq. N_3D_FIELDS)return
+      write (6, *) ' subroutine put_laps_3d_multi_r...'
 
-   l = 2
-   call put_laps_multi_3d_append(i4time,EXT,var_3d(l),units_3d(l),   &    
-        comment_3d(l),array2,NX_L_2,NY_L_2,NZ_L_2,1,istatus)       
-   if(istatus .ne. 1)return
-   if(l .eq. N_3D_FIELDS)return
+      l = 1
+      call put_laps_multi_3d(i4time, ext, var_3d(l), units_3d(l), &
+                             comment_3d(l), array1, nx_l_1, ny_l_1, nz_l_1, 1, istatus)
+      if (istatus .ne. 1) return
+      if (l .eq. n_3d_fields) return
 
-   write(6,*)' Error: N_3D_FIELDS exceeds limit ',N_3D_FIELDS
+      l = 2
+      call put_laps_multi_3d_append(i4time, ext, var_3d(l), units_3d(l), &
+                                    comment_3d(l), array2, nx_l_2, ny_l_2, nz_l_2, 1, istatus)
+      if (istatus .ne. 1) return
+      if (l .eq. n_3d_fields) return
 
-   return
- end subroutine put_laps_3d_multi_R
+      write (6, *) ' error: n_3d_fields exceeds limit ', n_3d_fields
+
+      return
+   end subroutine put_laps_3d_multi_r
 
 !!!!from cloud_deriv_subs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine put_laps_multi_3d_append(i4time,EXT,var_2d,units_2d, &
-                         comment_2d,field_3d,ni,nj,nk,nf,istatus)
+   subroutine put_laps_multi_3d_append(i4time, ext, var_2d, units_2d, &
+                                       comment_2d, field_3d, ni, nj, nk, nf, istatus)
 
-        logical ltest_vertical_grid
+      logical ltest_vertical_grid
 
-        character*150 DIRECTORY
-        character*(*) EXT
+      character*150 directory
+      character*(*) ext
 
-        character*125 comment_3d(nk*nf),comment_2d(nf)
-        character*10 units_3d(nk*nf),units_2d(nf)
-        character*3 var_3d(nk*nf),var_2d(nf)
-        integer LVL_3d(nk*nf)
-        character*4 LVL_COORD_3d(nk*nf)
+      character*125 comment_3d(nk*nf), comment_2d(nf)
+      character*10 units_3d(nk*nf), units_2d(nf)
+      character*3 var_3d(nk*nf), var_2d(nf)
+      integer lvl_3d(nk*nf)
+      character*4 lvl_coord_3d(nk*nf)
 
-        real field_3d(ni,nj,nk,nf)
+      real field_3d(ni, nj, nk, nf)
 
-        istatus = 0
+      istatus = 0
 
-        call get_directory(ext,directory,len_dir)
+      call get_directory(ext, directory, len_dir)
 
-        do l = 1,nf
-            write(6,11)directory,ext(1:5),var_2d(l)
-11          format(' Writing 3d ',a50,1x,a5,1x,a3)
-        enddo ! l
+      do l = 1, nf
+         write (6, 11) directory, ext(1:5), var_2d(l)
+11       format(' writing 3d ', a50, 1x, a5, 1x, a3)
+      end do ! l
 
-        do l = 1,nf
-          do k = 1,nk
+      do l = 1, nf
+         do k = 1, nk
 
-            iscript_3d = (l-1) * nk + k
+            iscript_3d = (l - 1)*nk + k
 
-            units_3d(iscript_3d)   = units_2d(l)
+            units_3d(iscript_3d) = units_2d(l)
             comment_3d(iscript_3d) = comment_2d(l)
-            if(ltest_vertical_grid('HEIGHT'))then
-                lvl_3d(iscript_3d) = zcoord_of_level(k)/10
-                lvl_coord_3d(iscript_3d) = 'MSL'
-            elseif(ltest_vertical_grid('PRESSURE'))then
+            if (ltest_vertical_grid('height')) then
+               lvl_3d(iscript_3d) = zcoord_of_level(k)/10
+               lvl_coord_3d(iscript_3d) = 'msl'
+            elseif (ltest_vertical_grid('pressure')) then
 
-                lvl_3d(iscript_3d) = nint(zcoord_of_level(k))/100
-                lvl_coord_3d(iscript_3d) = 'HPA'
+               lvl_3d(iscript_3d) = nint(zcoord_of_level(k))/100
+               lvl_coord_3d(iscript_3d) = 'hpa'
             else
-                write(6,*)' Error, vertical grid not supported,'  &
-                         ,' this routine supports PRESSURE or HEIGHT'
-                istatus = 0
-                return
-            endif
+               write (6, *) ' error, vertical grid not supported,' &
+                  , ' this routine supports pressure or height'
+               istatus = 0
+               return
+            end if
 
             var_3d(iscript_3d) = var_2d(l)
 
-          enddo ! k
-        enddo ! l
+         end do ! k
+      end do ! l
 
-        CALL WRITE_LAPS_MULTI(I4TIME,DIRECTORY,EXT,ni,nj, &
-        nk*nf,nk*nf,VAR_3D,LVL_3D,LVL_COORD_3D,UNITS_3D,  &
-                           COMMENT_3D,field_3d,ISTATUS)
+      call write_laps_multi(i4time, directory, ext, ni, nj, &
+                            nk*nf, nk*nf, var_3d, lvl_3d, lvl_coord_3d, units_3d, &
+                            comment_3d, field_3d, istatus)
 
-        if(istatus .ne. 1)return
+      if (istatus .ne. 1) return
 
-        istatus = 1
+      istatus = 1
 
-        return
-        end subroutine put_laps_multi_3d_append
+      return
+   end subroutine put_laps_multi_3d_append
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-END MODULE OUTPUT_ANALS
+end module output_anals

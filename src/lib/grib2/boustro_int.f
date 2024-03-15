@@ -1,59 +1,59 @@
-      SUBROUTINE BOUSTRO_INT(IA,NX,NY)
-C
-C        APRIL   2000   LAWRENCE   CALLED BY PREPR
-C        JANUARY 2001   GLAHN      COMMENTS; CHANGED ALGORITHM TO
-C                                  TO USE 2-D ARRAY RATHER THAN 1-D
-C
-C        PURPOSE
-C            SCANS AND REORDERS AN ARRAY OF DATA BOUSTROPHEDONICALLY.
-C            BOUSTROPHEDONIC ORDERING IS A PROCESS IN WHICH
-C            AN ARRAY OF DATA IS SCANNED STARTING FROM THE JY = 1
-C            ROW AND WORKING UP TO THE JY = NY ROW. THE ROWS ARE
-C            ALTERNATIVELY SCANNED FROM LEFT TO RIGHT AND FROM
-C            RIGHT TO LEFT. THIS SCANNING METHOD IS ADVANTAGEOUS
-C            WHEN USED TO PROCESS A FIELD OF DATA THAT WILL BE
-C            PACKED WITH THE GRIB2 COMPLEX PACKING METHOD (WITH
-C            OR WITHOUT SPATIAL DIFFERENCES).  IT GENERALLY
-C            PRODUCES A DATA ARRAY WHICH CAN BE BETTER BROKEN
-C            DOWN INTO GROUPS, A PROCESS WHICH IS CORE TO THE
-C            COMPLEX PACKING METHOD.
-C
-C        DATA SET USE
-C           NONE
-C
-C        VARIABLES
-C           IA(IX,JY) = CONTAINS THE DATA FIELD TO BE
-C                       BOUSTROPHEDONICALLY REORDERED
-C                       (IX=1,NX) (JY=1,NY).  (INPUT/OUTPUT)
-C                  NX = THE NUMBER OF COLUMNS IN THE ARRAY.  (INPUT)
-C                  NY = THE NUMBER OF ROWS IN THE ARRAY.  (INPUT)
-C
-C        LOCAL VARIABLES
-C                NXP1 = NX + 1.  THIS IS DONE UP FRONT IN CASE SOME
-C                       COMPILERS WON'T LIFT IT OUT OF THE LOOP.
-C               ITEMP = SAVES THE VALUE OF A( , ) CURRENTLY BEING SWAPPED
-C                       SO THAT IT IS NOT OVERWRITTEN.
-C
-C         NON SYSTEM SUBROUTINES CALLED
-C            NONE
-C
-      DIMENSION IA(NX,NY)
-C
-      NXP1=NX+1
-C
-      DO 125 JY=1,NY
-C
-         IF(MOD(JY,2).EQ.0)THEN
-C
-            DO 123 IX=1,NX/2
-               ITEMP=IA(IX,JY)
-               IA(IX,JY)=IA(NXP1-IX,JY)
-               IA(NXP1-IX,JY)=ITEMP
- 123        CONTINUE
-C
-         ENDIF
-C  
- 125  CONTINUE
-C
-      RETURN
-      END
+      subroutine boustro_int(ia,nx,ny)
+c
+c        april   2000   lawrence   called by prepr
+c        january 2001   glahn      comments; changed algorithm to
+c                                  to use 2-d array rather than 1-d
+c
+c        purpose
+c            scans and reorders an array of data boustrophedonically.
+c            boustrophedonic ordering is a process in which
+c            an array of data is scanned starting from the jy = 1
+c            row and working up to the jy = ny row. the rows are
+c            alternatively scanned from left to right and from
+c            right to left. this scanning method is advantageous
+c            when used to process a field of data that will be
+c            packed with the grib2 complex packing method (with
+c            or without spatial differences).  it generally
+c            produces a data array which can be better broken
+c            down into groups, a process which is core to the
+c            complex packing method.
+c
+c        data set use
+c           none
+c
+c        variables
+c           ia(ix,jy) = contains the data field to be
+c                       boustrophedonically reordered
+c                       (ix=1,nx) (jy=1,ny).  (input/output)
+c                  nx = the number of columns in the array.  (input)
+c                  ny = the number of rows in the array.  (input)
+c
+c        local variables
+c                nxp1 = nx + 1.  this is done up front in case some
+c                       compilers won't lift it out of the loop.
+c               itemp = saves the value of a( , ) currently being swapped
+c                       so that it is not overwritten.
+c
+c         non system subroutines called
+c            none
+c
+      dimension ia(nx,ny)
+c
+      nxp1=nx+1
+c
+      do 125 jy=1,ny
+c
+         if(mod(jy,2).eq.0)then
+c
+            do 123 ix=1,nx/2
+               itemp=ia(ix,jy)
+               ia(ix,jy)=ia(nxp1-ix,jy)
+               ia(nxp1-ix,jy)=itemp
+ 123        continue
+c
+         endif
+c  
+ 125  continue
+c
+      return
+      end

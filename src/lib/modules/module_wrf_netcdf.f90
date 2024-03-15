@@ -1,219 +1,219 @@
 !dis
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
 !dis
-!dis    This software is distributed under the Open Source Definition,
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
 !dis
-!dis    In particular, redistribution and use in source and binary forms,
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
 !dis
-!dis    - Redistributions of source code must retain this notice, this
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
 !dis
-!dis    - Redistributions in binary form must provide access to this
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
 !dis
-!dis    - All modifications to this software must be clearly documented,
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
 !dis
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
 !dis
 !dis
-!  Module to handle I/O from a WRF v2 netCDF file
+!  module to handle i/o from a wrf v2 netcdf file
 !
 
-MODULE wrf_netcdf
+module wrf_netcdf
 
-! F90 module to deal with reading WRF output files (WRFv1 netcdf)
+! f90 module to deal with reading wrf output files (wrfv1 netcdf)
 
-  USE grid_utils
+  use grid_utils
   include 'netcdf.inc'
-  PRIVATE
+  private
     
-  PUBLIC open_wrfnc
-  PUBLIC close_wrfnc
-  PUBLIC get_wrfsi_map
-  PUBLIC get_wrf2_map
-  PUBLIC get_wrf2_timeinfo
-  PUBLIC get_wrf_misc
-  PUBLIC get_wrf2_misc
-  PUBLIC get_wrf_scalar
-  PUBLIC get_wrf_1d
-  PUBLIC get_wrfnc_2d
-  PUBLIC get_wrfnc_3d
-  PUBLIC make_wrf_file_name
-  PUBLIC make_wrf2_file_name
-  PUBLIC wrfio_wait
+  public open_wrfnc
+  public close_wrfnc
+  public get_wrfsi_map
+  public get_wrf2_map
+  public get_wrf2_timeinfo
+  public get_wrf_misc
+  public get_wrf2_misc
+  public get_wrf_scalar
+  public get_wrf_1d
+  public get_wrfnc_2d
+  public get_wrfnc_3d
+  public make_wrf_file_name
+  public make_wrf2_file_name
+  public wrfio_wait
 
-CONTAINS
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE open_wrfnc(fname, lun, status)
+  subroutine open_wrfnc(fname, lun, status)
 
-    ! Opens a WRF netCDF file, returning the CDF id of the file
+    ! opens a wrf netcdf file, returning the cdf id of the file
 
-    IMPLICIT NONE
+    implicit none
     include 'netcdf.inc'  
-    ! Arguments
+    ! arguments
 
-    CHARACTER(LEN=255),INTENT(IN)          :: fname
-    INTEGER, INTENT(OUT)                   :: lun
-    INTEGER, INTENT(OUT)                   :: status
+    character(len=255),intent(in)          :: fname
+    integer, intent(out)                   :: lun
+    integer, intent(out)                   :: status
 
     status = 0
-    lun = NCOPN(fname, NCNOWRIT,   status)
+    lun = ncopn(fname, ncnowrit,   status)
 
-    IF (status .ne. 0) then
-       print *, 'Error opening netCDF file: ',TRIM(fname)
-    ENDIF
+    if (status .ne. 0) then
+       print *, 'error opening netcdf file: ',trim(fname)
+    endif
 
-    RETURN
-  END SUBROUTINE open_wrfnc
+    return
+  end subroutine open_wrfnc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE close_wrfnc(cdfid)
+  subroutine close_wrfnc(cdfid)
 
-    IMPLICIT NONE
-    INTEGER, INTENT(IN)  :: cdfid
-    INTEGER :: status 
+    implicit none
+    integer, intent(in)  :: cdfid
+    integer :: status 
     include 'netcdf.inc'
 
     status = nf_close(cdfid)
-    if (status .ne. nf_noerr) THEN
-      print *, 'Problem closing the netCDF file.'
+    if (status .ne. nf_noerr) then
+      print *, 'problem closing the netcdf file.'
     endif
     return
- END SUBROUTINE close_wrfnc
+ end subroutine close_wrfnc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrfsi_map(lun, projection, lat1, lon1, stdlon, &
+  subroutine get_wrfsi_map(lun, projection, lat1, lon1, stdlon, &
                          truelat1, truelat2, dx_m, dy_m, &
                          nx, ny, status)
   
-    ! Reads from a WRFSI static file to get mapping information for a WRF domain
-    ! NOTE:  The parameters returned are the non-staggered grid parameters,
-    ! as defined in the wrfsi.nl file.  The dimensions found in the wrfout
-    ! netCDF files require have one less element in each direction.
+    ! reads from a wrfsi static file to get mapping information for a wrf domain
+    ! note:  the parameters returned are the non-staggered grid parameters,
+    ! as defined in the wrfsi.nl file.  the dimensions found in the wrfout
+    ! netcdf files require have one less element in each direction.
 
-    ! Assumes that the static file has been opened with the open_wrfnc routine
-    ! and the CDF ID is the "lun". 
+    ! assumes that the static file has been opened with the open_wrfnc routine
+    ! and the cdf id is the "lun". 
 
-    IMPLICIT NONE
+    implicit none
     include 'netcdf.inc' 
-    ! Args
-    INTEGER, INTENT(IN)                    :: lun  
-    CHARACTER (LEN=32), INTENT(OUT)        :: projection
-    REAL, INTENT(OUT)                      :: lat1
-    REAL, INTENT(OUT)                      :: lon1 
-    REAL, INTENT(OUT)                      :: stdlon
-    REAL, INTENT(OUT)                      :: truelat1
-    REAL, INTENT(OUT)                      :: truelat2
-    REAL, INTENT(OUT)                      :: dx_m
-    REAL, INTENT(OUT)                      :: dy_m
-    INTEGER, INTENT(OUT)                   :: nx
-    INTEGER, INTENT(OUT)                   :: ny
-    INTEGER, INTENT(OUT)                   :: status
+    ! args
+    integer, intent(in)                    :: lun  
+    character (len=32), intent(out)        :: projection
+    real, intent(out)                      :: lat1
+    real, intent(out)                      :: lon1 
+    real, intent(out)                      :: stdlon
+    real, intent(out)                      :: truelat1
+    real, intent(out)                      :: truelat2
+    real, intent(out)                      :: dx_m
+    real, intent(out)                      :: dy_m
+    integer, intent(out)                   :: nx
+    integer, intent(out)                   :: ny
+    integer, intent(out)                   :: status
   
-    !Locals
-    INTEGER :: vid, rcode
-    CHARACTER(LEN=132) :: dum
-    CHARACTER(LEN=132) :: grid_type
-    INTEGER, DIMENSION(2) :: startc, countc
-    INTEGER, DIMENSION(4) :: start, count
+    !locals
+    integer :: vid, rcode
+    character(len=132) :: dum
+    character(len=132) :: grid_type
+    integer, dimension(2) :: startc, countc
+    integer, dimension(4) :: start, count
     status = 0
 
-    ! Get x-y dimensions
+    ! get x-y dimensions
 
-    vid = NCVID(lun, 'x', rcode)
-    CALL NCDINQ(lun,vid,dum,nx,rcode)
-    IF (rcode .NE. 0) THEN
-       PRINT *, 'Error getting nx.'
+    vid = ncvid(lun, 'x', rcode)
+    call ncdinq(lun,vid,dum,nx,rcode)
+    if (rcode .ne. 0) then
+       print *, 'error getting nx.'
        status = 1
-    ENDIF
+    endif
 
-    vid = NCVID(lun, 'y', rcode)
-    CALL NCDINQ(lun,vid,dum,ny,rcode)
-    IF (rcode .NE. 0) THEN
-       PRINT *, 'Error getting nx.'
+    vid = ncvid(lun, 'y', rcode)
+    call ncdinq(lun,vid,dum,ny,rcode)
+    if (rcode .ne. 0) then
+       print *, 'error getting nx.'
        status = 1
-    ENDIF
+    endif
 
-    !  Get projection
+    !  get projection
     startc = (/1,1/)
     countc = (/132,1/)
-    vid = NCVID(lun, 'grid_type', rcode)
-    CALL NCVGTC(lun,vid,startc,countc,grid_type, 132, rcode)
+    vid = ncvid(lun, 'grid_type', rcode)
+    call ncvgtc(lun,vid,startc,countc,grid_type, 132, rcode)
 
-    SELECT CASE(grid_type)
-      CASE ('mercator') 
-        projection = 'MERCATOR                        '
-      CASE ('secant lambert conformal')
-        projection = 'LAMBERT CONFORMAL               '
-      CASE ('tangential lambert conformal')
-        projection = 'LAMBERT CONFORMAL               '
-      CASE ('polar stereographic')
-        projection = 'POLAR STEREOGRAPHIC             '
-      CASE DEFAULT
-        print *, 'Unrecognized grid type: ', grid_type
+    select case(grid_type)
+      case ('mercator') 
+        projection = 'mercator                        '
+      case ('secant lambert conformal')
+        projection = 'lambert conformal               '
+      case ('tangential lambert conformal')
+        projection = 'lambert conformal               '
+      case ('polar stereographic')
+        projection = 'polar stereographic             '
+      case default
+        print *, 'unrecognized grid type: ', grid_type
         status = 1
-    END SELECT
+    end select
 
-    ! Get SW corner point
-    vid = NCVID(lun, 'lat', rcode)
-    CALL NCVGT1(lun, vid, 1, lat1, rcode)
-    vid = NCVID(lun, 'lon', rcode)
-    CALL NCVGT1(lun, vid, 1, lon1, rcode) 
+    ! get sw corner point
+    vid = ncvid(lun, 'lat', rcode)
+    call ncvgt1(lun, vid, 1, lat1, rcode)
+    vid = ncvid(lun, 'lon', rcode)
+    call ncvgt1(lun, vid, 1, lon1, rcode) 
 
-    ! Get Truelat1/trulat2
-    vid = NCVID(lun, 'Latin1', rcode)
-    CALL NCVGT1(lun, vid, 1, truelat1, rcode)
-    vid = NCVID(lun, 'Latin2', rcode)
-    CALL NCVGT1(lun, vid, 1, truelat2, rcode)
+    ! get truelat1/trulat2
+    vid = ncvid(lun, 'latin1', rcode)
+    call ncvgt1(lun, vid, 1, truelat1, rcode)
+    vid = ncvid(lun, 'latin2', rcode)
+    call ncvgt1(lun, vid, 1, truelat2, rcode)
 
-    ! Get standard longitude
-    vid = NCVID(lun, 'LoV', rcode)
-    CALL NCVGT1(lun, vid, 1, stdlon, rcode)
+    ! get standard longitude
+    vid = ncvid(lun, 'lov', rcode)
+    call ncvgt1(lun, vid, 1, stdlon, rcode)
 
-    ! Get dx/dy
-    vid = NCVID(lun, 'Dx', rcode)
-    CALL NCVGT1(lun, vid, 1, dx_m, rcode)
-    vid = NCVID(lun, 'Dy', rcode)
-    CALL NCVGT1(lun, vid, 1, dy_m, rcode)
+    ! get dx/dy
+    vid = ncvid(lun, 'dx', rcode)
+    call ncvgt1(lun, vid, 1, dx_m, rcode)
+    vid = ncvid(lun, 'dy', rcode)
+    call ncvgt1(lun, vid, 1, dy_m, rcode)
 
-    ! Clean up
+    ! clean up
     if (lon1 .gt. 180.) lon1 = lon1 - 360.
     if (stdlon .gt. 180.) stdlon = stdlon - 360.
  
-    RETURN
+    return
 
-  END SUBROUTINE get_wrfsi_map 
+  end subroutine get_wrfsi_map 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrf2_timeinfo(lun,reftime,dt,itimestep,tau_hr,tau_min,tau_sec, &
+  subroutine get_wrf2_timeinfo(lun,reftime,dt,itimestep,tau_hr,tau_min,tau_sec, &
                                status)
 
-    IMPLICIT NONE
+    implicit none
     include 'netcdf.inc'
 
-    INTEGER, INTENT(IN)                  :: lun
-    CHARACTER(LEN=19), INTENT(OUT)       :: reftime
-    REAL, INTENT(OUT)                    :: dt
-    REAL                                 :: xtime
-    INTEGER, INTENT(OUT)                 :: itimestep
-    INTEGER, INTENT(OUT)                 :: tau_hr, tau_min, tau_sec, status
+    integer, intent(in)                  :: lun
+    character(len=19), intent(out)       :: reftime
+    real, intent(out)                    :: dt
+    real                                 :: xtime
+    integer, intent(out)                 :: itimestep
+    integer, intent(out)                 :: tau_hr, tau_min, tau_sec, status
 
-    INTEGER   :: rcode, vid
+    integer   :: rcode, vid
 
     reftime = '????-??-??_??:??:??' 
     tau_hr = 0
@@ -221,60 +221,60 @@ CONTAINS
     tau_sec = 0
     status = 0
 
-    rcode = NF_GET_ATT_TEXT(lun,0,"SIMULATION_START_DATE",reftime)
-    rcode = NF_GET_ATT_REAL(lun,0,"DT",dt)
-    rcode = NF_INQ_VARID(lun,"ITIMESTEP",vid)
-    rcode = NF_GET_VAR_INT(lun,vid,itimestep)
+    rcode = nf_get_att_text(lun,0,"simulation_start_date",reftime)
+    rcode = nf_get_att_real(lun,0,"dt",dt)
+    rcode = nf_inq_varid(lun,"itimestep",vid)
+    rcode = nf_get_var_int(lun,vid,itimestep)
 
-    !!!!! Modified by Wei-Ting (20130307) :            !!!!!
-    !!!!!     Use XTIME instead of ITIMESTEP FOR WRFV3 !!!!!
+    !!!!! modified by wei-ting (20130307) :            !!!!!
+    !!!!!     use xtime instead of itimestep for wrfv3 !!!!!
     if (rcode .lt. 0) then
-      write(6,*)' Warning: ITIMESTEP not found, looking for XTIME in get_wrf2_timeinfo'
-      rcode = NF_INQ_VARID(lun,"XTIME",vid)
-      rcode = NF_GET_VAR_REAL(lun,vid,xtime)
-      itimestep = INT(xtime*60/dt)
+      write(6,*)' warning: itimestep not found, looking for xtime in get_wrf2_timeinfo'
+      rcode = nf_inq_varid(lun,"xtime",vid)
+      rcode = nf_get_var_real(lun,vid,xtime)
+      itimestep = int(xtime*60/dt)
     endif
-    !!!!! End of Modifying !!!!!
+    !!!!! end of modifying !!!!!
     
-    tau_hr = INT(FLOAT(itimestep)*dt)/3600
-    tau_sec = MOD(INT(FLOAT(itimestep)*dt),3600)
+    tau_hr = int(float(itimestep)*dt)/3600
+    tau_sec = mod(int(float(itimestep)*dt),3600)
     tau_min = tau_sec / 60
-    tau_sec = MOD(tau_sec,60) 
+    tau_sec = mod(tau_sec,60) 
 
-    RETURN
-END SUBROUTINE get_wrf2_timeinfo
+    return
+end subroutine get_wrf2_timeinfo
     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrf2_map(lun, stag, projcode, lat1, lon1, stdlon, &
+  subroutine get_wrf2_map(lun, stag, projcode, lat1, lon1, stdlon, &
                           truelat1, truelat2, dx_m, dy_m, &
                           nx, ny, nz, status)
 
-    IMPLICIT NONE
+    implicit none
     include 'netcdf.inc'
-    ! Args
-    INTEGER, INTENT(IN)                    :: lun
-    CHARACTER (LEN=1)                      :: stag
-    INTEGER, INTENT(OUT)                   :: projcode  
-    REAL, INTENT(OUT)                      :: lat1
-    REAL, INTENT(OUT)                      :: lon1
-    REAL, INTENT(OUT)                      :: stdlon
-    REAL, INTENT(OUT)                      :: truelat1
-    REAL, INTENT(OUT)                      :: truelat2
-    REAL, INTENT(OUT)                      :: dx_m
-    REAL, INTENT(OUT)                      :: dy_m
-    INTEGER, INTENT(OUT)                   :: nx
-    INTEGER, INTENT(OUT)                   :: ny
-    INTEGER, INTENT(OUT)                   :: nz
-    INTEGER, INTENT(OUT)                   :: status
+    ! args
+    integer, intent(in)                    :: lun
+    character (len=1)                      :: stag
+    integer, intent(out)                   :: projcode  
+    real, intent(out)                      :: lat1
+    real, intent(out)                      :: lon1
+    real, intent(out)                      :: stdlon
+    real, intent(out)                      :: truelat1
+    real, intent(out)                      :: truelat2
+    real, intent(out)                      :: dx_m
+    real, intent(out)                      :: dy_m
+    integer, intent(out)                   :: nx
+    integer, intent(out)                   :: ny
+    integer, intent(out)                   :: nz
+    integer, intent(out)                   :: status
 
   
-    ! Local variables
-    INTEGER   :: rcode,dimid,vid
-    INTEGER   :: projcode_wrf
-    INTEGER   :: wrf_version
+    ! local variables
+    integer   :: rcode,dimid,vid
+    integer   :: projcode_wrf
+    integer   :: wrf_version
     real, allocatable, dimension(:,:) :: dum_2d
 
-    ! Initialization
+    ! initialization
     lat1 = -999.
     lon1 = -999.
     projcode = 0     
@@ -289,372 +289,372 @@ END SUBROUTINE get_wrf2_timeinfo
     nz =0
     status = 0
 
-    rcode = NF_GET_ATT_INT(lun, 0, "MAP_PROJ", projcode_wrf)
-    SELECT CASE (projcode_wrf)
-      CASE(1)
+    rcode = nf_get_att_int(lun, 0, "map_proj", projcode_wrf)
+    select case (projcode_wrf)
+      case(1)
         projcode = 3
-      CASE(2)
+      case(2)
         projcode = 5
-      CASE(3)
+      case(3)
         projcode = 1
-      CASE DEFAULT
+      case default
         projcode = 99
-    END SELECT 
-    rcode = NF_GET_ATT_REAL(lun, 0, "STAND_LON",stdlon)
-    rcode = NF_GET_ATT_REAL(lun, 0, "TRUELAT1",truelat1)
-    rcode = NF_GET_ATT_REAL(lun, 0, "TRUELAT2",truelat2)
-    rcode = NF_GET_ATT_REAL(lun, 0, "DX", dx_m)
-    rcode = NF_GET_ATT_REAL(lun, 0, "DY", dy_m)
+    end select 
+    rcode = nf_get_att_real(lun, 0, "stand_lon",stdlon)
+    rcode = nf_get_att_real(lun, 0, "truelat1",truelat1)
+    rcode = nf_get_att_real(lun, 0, "truelat2",truelat2)
+    rcode = nf_get_att_real(lun, 0, "dx", dx_m)
+    rcode = nf_get_att_real(lun, 0, "dy", dy_m)
     
-    ! Dimenions
-    rcode = NF_INQ_DIMID(lun, "west_east", dimid)
-    rcode = NF_INQ_DIMLEN(lun, dimid, nx)
-    rcode = NF_INQ_DIMID(lun, "south_north", dimid)
-    rcode = NF_INQ_DIMLEN(lun, dimid, ny)
+    ! dimenions
+    rcode = nf_inq_dimid(lun, "west_east", dimid)
+    rcode = nf_inq_dimlen(lun, dimid, nx)
+    rcode = nf_inq_dimid(lun, "south_north", dimid)
+    rcode = nf_inq_dimlen(lun, dimid, ny)
 
-!   Allocate 
-    ALLOCATE(dum_2d (nx,ny))
+!   allocate 
+    allocate(dum_2d (nx,ny))
 
-    SELECT CASE (stag)
-      CASE('T')
-        rcode = NF_INQ_VARID(lun,"LAT_LL_T",vid)
-        if(rcode .eq. -49)then ! assume version 3 WRF
-          write(6,*)' Warning: LAT_LL_T not found, looking for XLAT'
-          rcode = NF_INQ_VARID(lun,"XLAT",vid)
-          rcode = NF_GET_VAR_REAL(lun,vid,dum_2d)
+    select case (stag)
+      case('t')
+        rcode = nf_inq_varid(lun,"lat_ll_t",vid)
+        if(rcode .eq. -49)then ! assume version 3 wrf
+          write(6,*)' warning: lat_ll_t not found, looking for xlat'
+          rcode = nf_inq_varid(lun,"xlat",vid)
+          rcode = nf_get_var_real(lun,vid,dum_2d)
           lat1 = dum_2d(1,1)
           wrf_version = 3
         else
-          rcode = NF_GET_VAR_REAL(lun,vid,lat1)
+          rcode = nf_get_var_real(lun,vid,lat1)
           wrf_version = 2
         endif
 
-        rcode = NF_INQ_VARID(lun,"LON_LL_T",vid)
-        if(rcode .eq. -49)then ! assume version 3 WRF
-          write(6,*)' Warning: LON_LL_T not found, looking for XLONG'
-          rcode = NF_INQ_VARID(lun,"XLONG",vid)
-          rcode = NF_GET_VAR_REAL(lun,vid,dum_2d)
+        rcode = nf_inq_varid(lun,"lon_ll_t",vid)
+        if(rcode .eq. -49)then ! assume version 3 wrf
+          write(6,*)' warning: lon_ll_t not found, looking for xlong'
+          rcode = nf_inq_varid(lun,"xlong",vid)
+          rcode = nf_get_var_real(lun,vid,dum_2d)
           lon1 = dum_2d(1,1)
         else
-          rcode = NF_GET_VAR_REAL(lun,vid,lon1)
+          rcode = nf_get_var_real(lun,vid,lon1)
         endif
 
-      CASE('U')
-        rcode = NF_INQ_VARID(lun,"LAT_LL_U",vid)
-        if(rcode .eq. -49)then ! assume version 3 WRF
-          write(6,*)' Warning: LAT_LL_U not found, looking for XLAT_U'
-          rcode = NF_INQ_VARID(lun,"XLAT_U",vid)
-          rcode = NF_GET_VAR_REAL(lun,vid,dum_2d)
+      case('u')
+        rcode = nf_inq_varid(lun,"lat_ll_u",vid)
+        if(rcode .eq. -49)then ! assume version 3 wrf
+          write(6,*)' warning: lat_ll_u not found, looking for xlat_u'
+          rcode = nf_inq_varid(lun,"xlat_u",vid)
+          rcode = nf_get_var_real(lun,vid,dum_2d)
           lat1 = dum_2d(1,1)
           wrf_version = 3
         else
-          rcode = NF_GET_VAR_REAL(lun,vid,lat1)
+          rcode = nf_get_var_real(lun,vid,lat1)
           wrf_version = 2
         endif
 
-        rcode = NF_INQ_VARID(lun,"LON_LL_U",vid)
-        if(rcode .eq. -49)then ! assume version 3 WRF
-          write(6,*)' Warning: LON_LL_U not found, looking for XLONG_U'
-          rcode = NF_INQ_VARID(lun,"XLONG_U",vid)
-          rcode = NF_GET_VAR_REAL(lun,vid,dum_2d)
+        rcode = nf_inq_varid(lun,"lon_ll_u",vid)
+        if(rcode .eq. -49)then ! assume version 3 wrf
+          write(6,*)' warning: lon_ll_u not found, looking for xlong_u'
+          rcode = nf_inq_varid(lun,"xlong_u",vid)
+          rcode = nf_get_var_real(lun,vid,dum_2d)
           lon1 = dum_2d(1,1)
         else
-          rcode = NF_GET_VAR_REAL(lun,vid,lon1)
+          rcode = nf_get_var_real(lun,vid,lon1)
         endif
         nx = nx + 1
  
-      CASE('V')
-        rcode = NF_INQ_VARID(lun,"LAT_LL_V",vid)
-        if(rcode .eq. -49)then ! assume version 3 WRF
-          write(6,*)' Warning: LAT_LL_V not found, looking for XLAT_V'
-          rcode = NF_INQ_VARID(lun,"XLAT_V",vid)
-          rcode = NF_GET_VAR_REAL(lun,vid,dum_2d)
+      case('v')
+        rcode = nf_inq_varid(lun,"lat_ll_v",vid)
+        if(rcode .eq. -49)then ! assume version 3 wrf
+          write(6,*)' warning: lat_ll_v not found, looking for xlat_v'
+          rcode = nf_inq_varid(lun,"xlat_v",vid)
+          rcode = nf_get_var_real(lun,vid,dum_2d)
           lat1 = dum_2d(1,1)
           wrf_version = 3
         else
-          rcode = NF_GET_VAR_REAL(lun,vid,lat1)
+          rcode = nf_get_var_real(lun,vid,lat1)
           wrf_version = 2
         endif
 
-        rcode = NF_INQ_VARID(lun,"LON_LL_V",vid)
-        if(rcode .eq. -49)then ! assume version 3 WRF
-          write(6,*)' Warning: LON_LL_V not found, looking for XLONG_V'
-          rcode = NF_INQ_VARID(lun,"XLONG_V",vid)
-          rcode = NF_GET_VAR_REAL(lun,vid,dum_2d)
+        rcode = nf_inq_varid(lun,"lon_ll_v",vid)
+        if(rcode .eq. -49)then ! assume version 3 wrf
+          write(6,*)' warning: lon_ll_v not found, looking for xlong_v'
+          rcode = nf_inq_varid(lun,"xlong_v",vid)
+          rcode = nf_get_var_real(lun,vid,dum_2d)
           lon1 = dum_2d(1,1)
         else
-          rcode = NF_GET_VAR_REAL(lun,vid,lon1)
+          rcode = nf_get_var_real(lun,vid,lon1)
         endif
         ny = ny + 1
 
-    END SELECT
+    end select
 
-    DEALLOCATE(dum_2d)
+    deallocate(dum_2d)
 
 !   if(wrf_version .eq. 2)then
-!       write(6,*)' Version 2, looking for bottom_top for nz '
-        rcode = NF_INQ_DIMID(lun, "bottom_top", dimid)
-        rcode = NF_INQ_DIMLEN(lun, dimid, nz)
+!       write(6,*)' version 2, looking for bottom_top for nz '
+        rcode = nf_inq_dimid(lun, "bottom_top", dimid)
+        rcode = nf_inq_dimlen(lun, dimid, nz)
 !   else
-!       write(6,*)' Version 3, looking for bottom_top_stag for nz '
-!       rcode = NF_INQ_DIMID(lun, "bottom_top_stag", dimid)
-!       rcode = NF_INQ_DIMLEN(lun, dimid, nz)
+!       write(6,*)' version 3, looking for bottom_top_stag for nz '
+!       rcode = nf_inq_dimid(lun, "bottom_top_stag", dimid)
+!       rcode = nf_inq_dimlen(lun, dimid, nz)
 !   endif
 
-    write(6,*)' WRF nx,ny,nz = ',nx,ny,nz
+    write(6,*)' wrf nx,ny,nz = ',nx,ny,nz
 
-    RETURN
-  END SUBROUTINE get_wrf2_map
+    return
+  end subroutine get_wrf2_map
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrf_misc(cdfid, nzh, nzf, ptop, clwflag, iceflag, &
+  subroutine get_wrf_misc(cdfid, nzh, nzf, ptop, clwflag, iceflag, &
                           graupelflag)
 
-    ! Subroutine to get a few key parameters from the WRF model for the
+    ! subroutine to get a few key parameters from the wrf model for the
     ! model post processor.
 
-    IMPLICIT NONE
+    implicit none
     include 'netcdf.inc'
-    INTEGER, INTENT(IN)                :: cdfid   ! netCDF file handle
-    INTEGER, INTENT(OUT)               :: nzh     ! number of half-levels
-    INTEGER, INTENT(OUT)               :: nzf     ! number of full-levels
-    REAL,    INTENT(OUT)               :: ptop    ! Top pressure in Pa
-    LOGICAL, INTENT(OUT)               :: clwflag ! Cloud liquid fields avail
-    LOGICAL, INTENT(OUT)               :: iceflag ! Ice species avail
-    LOGICAL, INTENT(OUT)               :: graupelflag  ! Grauple included
+    integer, intent(in)                :: cdfid   ! netcdf file handle
+    integer, intent(out)               :: nzh     ! number of half-levels
+    integer, intent(out)               :: nzf     ! number of full-levels
+    real,    intent(out)               :: ptop    ! top pressure in pa
+    logical, intent(out)               :: clwflag ! cloud liquid fields avail
+    logical, intent(out)               :: iceflag ! ice species avail
+    logical, intent(out)               :: graupelflag  ! grauple included
 
-    ! Local variables
+    ! local variables
 
-    INTEGER :: vid, rcode,mp_level
-    CHARACTER(LEN=132) :: dum
+    integer :: vid, rcode,mp_level
+    character(len=132) :: dum
 
-    ! Get Ptop, which is not really needed for anything in the em version
-    vid = NCVID(cdfid, 'P_TOP', rcode)
-    rcode  = NF_GET_VAR_REAL(cdfid,vid,ptop)
+    ! get ptop, which is not really needed for anything in the em version
+    vid = ncvid(cdfid, 'p_top', rcode)
+    rcode  = nf_get_var_real(cdfid,vid,ptop)
 
-    ! Get the vertical dimensions
-    rcode = NF_GET_ATT_INT(cdfid, nf_global, 'BOTTOM-TOP_GRID_DIMENSION',nzh)
+    ! get the vertical dimensions
+    rcode = nf_get_att_int(cdfid, nf_global, 'bottom-top_grid_dimension',nzh)
     nzf = nzh + 1
 
-    ! Determine which microphysics package is used and set flags
+    ! determine which microphysics package is used and set flags
     ! accordingly
 
-    rcode = NF_GET_ATT_INT(cdfid, nf_global, 'MP_PHYSICS',mp_level)
+    rcode = nf_get_att_int(cdfid, nf_global, 'mp_physics',mp_level)
 
-    SELECT CASE (mp_level)
+    select case (mp_level)
 
-      CASE(0)  ! No microphysics
+      case(0)  ! no microphysics
         clwflag = .false.
         iceflag = .false.
         graupelflag = .false.
 
-      CASE(1) ! Kessler warm rain
+      case(1) ! kessler warm rain
         clwflag = .true.
         iceflag = .false.
         graupelflag = .false.
 
-      CASE(2) ! Lin et al.
+      case(2) ! lin et al.
         clwflag = .true.
         iceflag = .true.
         graupelflag = .true.
 
-      CASE(3)   ! NCEP 3-class
+      case(3)   ! ncep 3-class
         clwflag = .true.
         iceflag = .true.
         graupelflag = .false.
-      CASE(4)   ! NCEP 5-class
+      case(4)   ! ncep 5-class
         clwflag = .true.
         iceflag = .true.
         graupelflag = .false.
 
-      CASE(5)   ! Eta Ferrier 2-class
+      case(5)   ! eta ferrier 2-class
         clwflag = .true.
         iceflag = .false.
         graupelflag = .false.
 
-      CASE DEFAULT
-        print *, 'WARNING:  Cannot determine microphysics option!'
-        print *, '          Assuming all species present.'
+      case default
+        print *, 'warning:  cannot determine microphysics option!'
+        print *, '          assuming all species present.'
         clwflag = .true.
         iceflag = .true.
         graupelflag = .true.
 
-    END SELECT
+    end select
 
-    RETURN
+    return
 
-  END SUBROUTINE get_wrf_misc
+  end subroutine get_wrf_misc
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrf2_misc(cdfid, nzh, nzf, ptop, clwflag, iceflag, &
+  subroutine get_wrf2_misc(cdfid, nzh, nzf, ptop, clwflag, iceflag, &
                           graupelflag)
 
-    ! Subroutine to get a few key parameters from the WRF model for the 
+    ! subroutine to get a few key parameters from the wrf model for the 
     ! model post processor.
 
-    IMPLICIT NONE
+    implicit none
     include 'netcdf.inc' 
-    INTEGER, INTENT(IN)                :: cdfid   ! netCDF file handle
-    INTEGER, INTENT(OUT)               :: nzh     ! number of half-levels
-    INTEGER, INTENT(OUT)               :: nzf     ! number of full-levels
-    REAL,    INTENT(OUT)               :: ptop    ! Top pressure in Pa
-    LOGICAL, INTENT(OUT)               :: clwflag ! Cloud liquid fields avail
-    LOGICAL, INTENT(OUT)               :: iceflag ! Ice species avail
-    LOGICAL, INTENT(OUT)               :: graupelflag  ! Grauple included
+    integer, intent(in)                :: cdfid   ! netcdf file handle
+    integer, intent(out)               :: nzh     ! number of half-levels
+    integer, intent(out)               :: nzf     ! number of full-levels
+    real,    intent(out)               :: ptop    ! top pressure in pa
+    logical, intent(out)               :: clwflag ! cloud liquid fields avail
+    logical, intent(out)               :: iceflag ! ice species avail
+    logical, intent(out)               :: graupelflag  ! grauple included
 
-    ! Local variables
+    ! local variables
      
-    INTEGER :: vid, rcode,mp_level
-    CHARACTER(LEN=132) :: dum
+    integer :: vid, rcode,mp_level
+    character(len=132) :: dum
 
-    ! Get Ptop, which is not really needed for anything in the em version
-    vid = NCVID(cdfid, 'P_TOP', rcode)
-    rcode  = NF_GET_VAR_REAL(cdfid,vid,ptop)
+    ! get ptop, which is not really needed for anything in the em version
+    vid = ncvid(cdfid, 'p_top', rcode)
+    rcode  = nf_get_var_real(cdfid,vid,ptop)
 
-    ! Get the vertical dimensions
-    rcode = NF_GET_ATT_INT(cdfid, nf_global, 'BOTTOM-TOP_GRID_DIMENSION',nzf)
+    ! get the vertical dimensions
+    rcode = nf_get_att_int(cdfid, nf_global, 'bottom-top_grid_dimension',nzf)
     nzh = nzf - 1
 
-    ! Determine which microphysics package is used and set flags 
+    ! determine which microphysics package is used and set flags 
     ! accordingly
  
-    rcode = NF_GET_ATT_INT(cdfid, nf_global, 'MP_PHYSICS',mp_level) 
+    rcode = nf_get_att_int(cdfid, nf_global, 'mp_physics',mp_level) 
    
-    SELECT CASE (mp_level)
+    select case (mp_level)
 
-      CASE(0)  ! No microphysics
+      case(0)  ! no microphysics
         clwflag = .false.
         iceflag = .false. 
         graupelflag = .false.
 
-      CASE(1) ! Kessler warm rain
+      case(1) ! kessler warm rain
         clwflag = .true.
         iceflag = .false.
         graupelflag = .false.
 
-      CASE(2) ! Lin et al.
+      case(2) ! lin et al.
         clwflag = .true.
         iceflag = .true.
         graupelflag = .true.
   
-      CASE(3)   ! WSM 3-class Simple
+      case(3)   ! wsm 3-class simple
         clwflag = .true.
         iceflag = .true.
         graupelflag = .false.
   
-      CASE(4)   ! WSM 5-class Simple
+      case(4)   ! wsm 5-class simple
         clwflag = .true.
         iceflag = .true.
         graupelflag = .false.
 
-      CASE(5)   ! Eta Ferrier 2-class
+      case(5)   ! eta ferrier 2-class
         clwflag = .true.
         iceflag = .false.
         graupelflag = .false.
       
-      CASE(6)  ! WSM 6-class
+      case(6)  ! wsm 6-class
         clwflag = .true.
         iceflag = .true.
         graupelflag = .true.
   
-      CASE(98) ! NCEP 3-class
+      case(98) ! ncep 3-class
         clwflag = .true.
         iceflag = .false.
         graupelflag = .false.
  
-      CASE(99) ! NCEP 5-class
+      case(99) ! ncep 5-class
         clwflag = .true.
         iceflag = .true.
         graupelflag = .false.
 
-      CASE DEFAULT
-        print *, 'WARNING:  Cannot determine microphysics option!'
-        print *, '          Assuming all species present.'
+      case default
+        print *, 'warning:  cannot determine microphysics option!'
+        print *, '          assuming all species present.'
         clwflag = .true.
         iceflag = .true.
         graupelflag = .true.
 
-    END SELECT
+    end select
 
-    RETURN
+    return
 
-  END SUBROUTINE get_wrf2_misc 
+  end subroutine get_wrf2_misc 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrf_1d(cdfid, varname, data1d, status)
+  subroutine get_wrf_1d(cdfid, varname, data1d, status)
 
-     IMPLICIT NONE
+     implicit none
      include 'netcdf.inc'
-     INTEGER, INTENT(IN)                :: cdfid
-     CHARACTER(LEN=*),INTENT(IN)        :: varname
-     REAL, INTENT(INOUT)                :: data1d(:)
-     INTEGER, INTENT(OUT)               :: status
+     integer, intent(in)                :: cdfid
+     character(len=*),intent(in)        :: varname
+     real, intent(inout)                :: data1d(:)
+     integer, intent(out)               :: status
      
-     INTEGER                            :: vid
+     integer                            :: vid
     
-     status = NF_INQ_VARID(cdfid,TRIM(varname),vid)
-     status = NF_GET_VAR_REAL(cdfid,vid,data1d)
-     IF (status.ne.nf_noerr) THEN
-       print *, 'NetCDF error getting ', TRIM(varname),status
+     status = nf_inq_varid(cdfid,trim(varname),vid)
+     status = nf_get_var_real(cdfid,vid,data1d)
+     if (status.ne.nf_noerr) then
+       print *, 'netcdf error getting ', trim(varname),status
        status = 1
-     ELSE  
+     else  
        status = 0
-     ENDIF
-     RETURN
-  END SUBROUTINE get_wrf_1d
+     endif
+     return
+  end subroutine get_wrf_1d
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrfnc_3d(cdfid, varname, output_stagger, nx,ny,nz,time, &
+  subroutine get_wrfnc_3d(cdfid, varname, output_stagger, nx,ny,nz,time, &
                           data3d, status)
 
-    ! Subroutine to return a 3D grid from WRF output.
+    ! subroutine to return a 3d grid from wrf output.
 
-    IMPLICIT NONE
-    INCLUDE 'netcdf.inc'
+    implicit none
+    include 'netcdf.inc'
     
-    INTEGER, INTENT(IN)                    :: cdfid
-    CHARACTER(LEN=*),INTENT(IN)            :: varname
-    CHARACTER(LEN=1),INTENT(IN)            :: output_stagger
-    INTEGER,INTENT(IN)                     :: nx,ny,nz
-    INTEGER,INTENT(IN)                     :: time
-    REAL,INTENT(OUT)                       :: data3d(nx,ny,nz)
-    INTEGER, INTENT(OUT)                   :: status
+    integer, intent(in)                    :: cdfid
+    character(len=*),intent(in)            :: varname
+    character(len=1),intent(in)            :: output_stagger
+    integer,intent(in)                     :: nx,ny,nz
+    integer,intent(in)                     :: time
+    real,intent(out)                       :: data3d(nx,ny,nz)
+    integer, intent(out)                   :: status
 
-    ! Local vars
-    INTEGER                                :: vid,rcode,attid,ndims,natts
-    INTEGER                                :: dims(10),dimids(10)
-    INTEGER                                :: istart(10),iend(10)
-    CHARACTER(LEN=10)                      :: varstagger
-    CHARACTER(LEN=80)                      :: vname
-    REAL, ALLOCATABLE                      :: dum3d(:,:,:)
-    INTEGER                                :: i,nx_in,ny_in,nz_in,ivtype
-    CHARACTER(LEN=2)                       :: conv
+    ! local vars
+    integer                                :: vid,rcode,attid,ndims,natts
+    integer                                :: dims(10),dimids(10)
+    integer                                :: istart(10),iend(10)
+    character(len=10)                      :: varstagger
+    character(len=80)                      :: vname
+    real, allocatable                      :: dum3d(:,:,:)
+    integer                                :: i,nx_in,ny_in,nz_in,ivtype
+    character(len=2)                       :: conv
     status = 0 
-    rcode = NF_INQ_VARID(cdfid,TRIM(varname),vid)
-    IF (rcode .NE. nf_noerr) THEN
-       PRINT *, 'Problem getting varid for ', TRIM(varname), ': ',rcode
+    rcode = nf_inq_varid(cdfid,trim(varname),vid)
+    if (rcode .ne. nf_noerr) then
+       print *, 'problem getting varid for ', trim(varname), ': ',rcode
        status = 1
-       RETURN
-    ENDIF
+       return
+    endif
    
-    ! Get the dimensions of this variable
-    rcode = NF_INQ_VAR(cdfid,vid,vname,ivtype,ndims,dimids,natts)
-    IF (ndims .NE. 4) THEN
-      PRINT *, 'Dimension problem in get_wrfnc_3d.'
-      PRINT *, 'Data in file should be 4D, but has ', ndims, ' dims.'
+    ! get the dimensions of this variable
+    rcode = nf_inq_var(cdfid,vid,vname,ivtype,ndims,dimids,natts)
+    if (ndims .ne. 4) then
+      print *, 'dimension problem in get_wrfnc_3d.'
+      print *, 'data in file should be 4d, but has ', ndims, ' dims.'
       status = 1
-      RETURN
-    ENDIF
+      return
+    endif
 
-    DO i = 1,ndims
-      rcode = NF_INQ_DIMLEN(cdfid,dimids(i),dims(i) )
-    ENDDO
+    do i = 1,ndims
+      rcode = nf_inq_dimlen(cdfid,dimids(i),dims(i) )
+    enddo
   
-    ! Check the dimensions 
-    IF (time .GT. dims(4) ) THEN
-      PRINT *, 'Requested time index exceeds input times: ', time, dims(4)
+    ! check the dimensions 
+    if (time .gt. dims(4) ) then
+      print *, 'requested time index exceeds input times: ', time, dims(4)
       status = 1
-      RETURN
-    ENDIF
+      return
+    endif
     nx_in = dims(1)
     ny_in = dims(2)
     nz_in = dims(3)
@@ -669,182 +669,182 @@ END SUBROUTINE get_wrf2_timeinfo
     iend(4)   = 1
        
 
-    rcode = NF_GET_ATT_TEXT(cdfid,vid,'stagger',varstagger)
-    IF (rcode .NE. nf_noerr) THEN
-      PRINT *, 'Problem getting stagger: ',rcode
+    rcode = nf_get_att_text(cdfid,vid,'stagger',varstagger)
+    if (rcode .ne. nf_noerr) then
+      print *, 'problem getting stagger: ',rcode
       status = 1
-      RETURN
-    ENDIF
-    IF (varstagger(1:1).EQ. "X") THEN
-      varstagger = "U"
-    ELSEIF (varstagger(1:1).EQ. "Y") THEN
-      varstagger = "V"
-    ELSE
-      varstagger = "T"
-    ENDIF
+      return
+    endif
+    if (varstagger(1:1).eq. "x") then
+      varstagger = "u"
+    elseif (varstagger(1:1).eq. "y") then
+      varstagger = "v"
+    else
+      varstagger = "t"
+    endif
 
-    ! Check input vs. output dimensions
+    ! check input vs. output dimensions
 
-    IF (varstagger(1:1) .EQ. output_stagger) THEN
-       ! In/out dimensions must match
-       IF ( (nx_in .NE. nx) .OR. (ny_in .NE. ny) .OR. &
-            (nz_in .NE. nz) ) THEN
+    if (varstagger(1:1) .eq. output_stagger) then
+       ! in/out dimensions must match
+       if ( (nx_in .ne. nx) .or. (ny_in .ne. ny) .or. &
+            (nz_in .ne. nz) ) then
           status = 1
-       ELSE 
+       else 
          conv = "  "
-       ENDIF
-    ELSE
-       SELECT CASE (output_stagger)
+       endif
+    else
+       select case (output_stagger)
        
-         CASE ('A')
-           IF (varstagger(1:1) .EQ. "T") THEN
-             IF ( (nx_in+1 .NE. nx) .OR. (ny_in+1 .NE. ny) .OR. &
-                  (nz_in .NE. nz) ) THEN
+         case ('a')
+           if (varstagger(1:1) .eq. "t") then
+             if ( (nx_in+1 .ne. nx) .or. (ny_in+1 .ne. ny) .or. &
+                  (nz_in .ne. nz) ) then
                 status = 1
-             ELSE 
-               conv = 'TA'
-             ENDIF
-           ELSEIF(varstagger(1:1) .EQ. "U") THEN
-             IF ( (nx_in .NE. nx) .OR. (ny_in+1 .NE. ny) .OR. &
-                  (nz_in .NE. nz) ) THEN
+             else 
+               conv = 'ta'
+             endif
+           elseif(varstagger(1:1) .eq. "u") then
+             if ( (nx_in .ne. nx) .or. (ny_in+1 .ne. ny) .or. &
+                  (nz_in .ne. nz) ) then
                 status = 1
-             ELSE  
-               conv = "UA"
-             ENDIF
-           ELSEIF(varstagger(1:1) .EQ. "V") THEN
-             IF ( (nx_in+1 .NE. nx) .OR. (ny_in .NE. ny) .OR. &
-                  (nz_in .NE. nz) ) THEN
+             else  
+               conv = "ua"
+             endif
+           elseif(varstagger(1:1) .eq. "v") then
+             if ( (nx_in+1 .ne. nx) .or. (ny_in .ne. ny) .or. &
+                  (nz_in .ne. nz) ) then
                 status = 1
-             ELSE  
-                conv = "VA"
-             ENDIF
-           ELSE 
-             PRINT *, 'Stagger conversion not supported.'
+             else  
+                conv = "va"
+             endif
+           else 
+             print *, 'stagger conversion not supported.'
              status = 1
-           ENDIF
-         CASE('T')
-           IF(varstagger(1:1) .EQ. "U") THEN
-             IF ( (nx_in-1 .NE. nx) .OR. (ny_in .NE. ny) .OR. &
-                  (nz_in .NE. nz) ) THEN
+           endif
+         case('t')
+           if(varstagger(1:1) .eq. "u") then
+             if ( (nx_in-1 .ne. nx) .or. (ny_in .ne. ny) .or. &
+                  (nz_in .ne. nz) ) then
                 status = 1
-             ELSE  
-                conv = "UT"
-             ENDIF
-           ELSEIF(varstagger(1:1) .EQ. "V") THEN
-             IF ( (nx_in .NE. nx) .OR. (ny_in-1 .NE. ny) .OR. &
-                  (nz_in .NE. nz) ) THEN
+             else  
+                conv = "ut"
+             endif
+           elseif(varstagger(1:1) .eq. "v") then
+             if ( (nx_in .ne. nx) .or. (ny_in-1 .ne. ny) .or. &
+                  (nz_in .ne. nz) ) then
                 status = 1
-             ELSE 
-                conv = "VT"
-             ENDIF
-           ELSE
-             PRINT *, 'Stagger conversion not supported.'
-           ENDIF
-         CASE DEFAULT
-           PRINT *, 'Requested stagger conversion not supported.'
+             else 
+                conv = "vt"
+             endif
+           else
+             print *, 'stagger conversion not supported.'
+           endif
+         case default
+           print *, 'requested stagger conversion not supported.'
            status = 1
-       END SELECT
-    ENDIF
-    IF (status .NE. 0) THEN
-      PRINT *, 'STAGGER_IN/STAGGER_REQ: ',varstagger(1:1),output_stagger 
-      PRINT *, 'Mismatch in dimensions: '
-      PRINT *, 'NX_IN / NX_REQ : ', nx_in, nx
-      PRINT *, 'NY_IN / NY_REQ : ', ny_in, ny
-      PRINT *, 'NZ_IN / NZ_REQ : ', nz_in, nz
-      RETURN
-    ENDIF
+       end select
+    endif
+    if (status .ne. 0) then
+      print *, 'stagger_in/stagger_req: ',varstagger(1:1),output_stagger 
+      print *, 'mismatch in dimensions: '
+      print *, 'nx_in / nx_req : ', nx_in, nx
+      print *, 'ny_in / ny_req : ', ny_in, ny
+      print *, 'nz_in / nz_req : ', nz_in, nz
+      return
+    endif
 
-    ! If no destaggering is required, we can just populate the output
+    ! if no destaggering is required, we can just populate the output
     ! array directly
   
-    IF (conv .EQ. "  " ) THEN
-      CALL NCVGT( cdfid, vid, istart, iend, data3d, rcode)
-      IF (rcode .NE. NF_NOERR) THEN
-        PRINT *, 'Problem getting ', TRIM(varname)
+    if (conv .eq. "  " ) then
+      call ncvgt( cdfid, vid, istart, iend, data3d, rcode)
+      if (rcode .ne. nf_noerr) then
+        print *, 'problem getting ', trim(varname)
         status = 1 
-        RETURN
-      ENDIF
-    ELSE
-      ALLOCATE(dum3d(nx_in,ny_in,nz_in)) 
-      CALL NCVGT( cdfid, vid, istart, iend, dum3d, rcode)
-      IF (rcode .NE. NF_NOERR) THEN
-        PRINT *, 'Problem getting ', TRIM(varname)
+        return
+      endif
+    else
+      allocate(dum3d(nx_in,ny_in,nz_in)) 
+      call ncvgt( cdfid, vid, istart, iend, dum3d, rcode)
+      if (rcode .ne. nf_noerr) then
+        print *, 'problem getting ', trim(varname)
         status = 1
-        RETURN
-      ENDIF
-      SELECT CASE (conv)
-        CASE ('TA') 
-          CALL arakawa_c_t2n(dum3d,nx_in,ny_in,nz_in,data3d)
-        CASE ('UA')
-          CALL arakawa_c_u2n(dum3d,nx_in,ny_in,nz_in,data3d) 
-        CASE ('VA')
-          CALL arakawa_c_v2n(dum3d,nx_in,ny_in,nz_in,data3d)
-        CASE ('UT')
-          CALL arakawa_c_u2t(dum3d,nx_in,ny_in,nz_in,data3d) 
-        CASE ('VT')
-          CALL arakawa_c_v2t(dum3d,nx_in,ny_in,nz_in,data3d)
-        CASE DEFAULT
-          PRINT *, 'No stagger case found.  Should not be here.'
+        return
+      endif
+      select case (conv)
+        case ('ta') 
+          call arakawa_c_t2n(dum3d,nx_in,ny_in,nz_in,data3d)
+        case ('ua')
+          call arakawa_c_u2n(dum3d,nx_in,ny_in,nz_in,data3d) 
+        case ('va')
+          call arakawa_c_v2n(dum3d,nx_in,ny_in,nz_in,data3d)
+        case ('ut')
+          call arakawa_c_u2t(dum3d,nx_in,ny_in,nz_in,data3d) 
+        case ('vt')
+          call arakawa_c_v2t(dum3d,nx_in,ny_in,nz_in,data3d)
+        case default
+          print *, 'no stagger case found.  should not be here.'
           status = 1
-      END SELECT
-      DEALLOCATE(dum3d)
-    ENDIF 
+      end select
+      deallocate(dum3d)
+    endif 
 
-    RETURN 
-  END SUBROUTINE get_wrfnc_3d  
+    return 
+  end subroutine get_wrfnc_3d  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE get_wrfnc_2d(cdfid, varname, output_stagger, nx,ny,time, &
+  subroutine get_wrfnc_2d(cdfid, varname, output_stagger, nx,ny,time, &
                           data2d, status)
 
-    ! Subroutine to return a 2D grid from WRF output.
+    ! subroutine to return a 2d grid from wrf output.
 
-    IMPLICIT NONE
-    INCLUDE 'netcdf.inc'
+    implicit none
+    include 'netcdf.inc'
 
-    INTEGER, INTENT(IN)                    :: cdfid
-    CHARACTER(LEN=*),INTENT(IN)            :: varname
-    CHARACTER(LEN=1),INTENT(IN)            :: output_stagger
-    INTEGER,INTENT(IN)                     :: nx,ny
-    INTEGER,INTENT(IN)                     :: time
-    REAL,INTENT(OUT)                       :: data2d(nx,ny)
-    INTEGER, INTENT(OUT)                   :: status
+    integer, intent(in)                    :: cdfid
+    character(len=*),intent(in)            :: varname
+    character(len=1),intent(in)            :: output_stagger
+    integer,intent(in)                     :: nx,ny
+    integer,intent(in)                     :: time
+    real,intent(out)                       :: data2d(nx,ny)
+    integer, intent(out)                   :: status
 
-    ! Local vars
-    INTEGER                                :: vid,rcode,attid,ndims,natts
-    INTEGER                                :: dims(10),dimids(10)
-    INTEGER                                :: istart(10),iend(10)
-    CHARACTER(LEN=10)                      :: varstagger
-    CHARACTER(LEN=80)                      :: vname
-    REAL, ALLOCATABLE                      :: dum2d(:,:)
-    INTEGER                                :: i,nx_in,ny_in,ivtype
-    CHARACTER(LEN=2)                       :: conv
+    ! local vars
+    integer                                :: vid,rcode,attid,ndims,natts
+    integer                                :: dims(10),dimids(10)
+    integer                                :: istart(10),iend(10)
+    character(len=10)                      :: varstagger
+    character(len=80)                      :: vname
+    real, allocatable                      :: dum2d(:,:)
+    integer                                :: i,nx_in,ny_in,ivtype
+    character(len=2)                       :: conv
     status = 0
-    rcode = NF_INQ_VARID(cdfid,TRIM(varname),vid)
-    IF (rcode .NE. nf_noerr) THEN
-       PRINT *, 'Problem getting varid for ', TRIM(varname), ': ',rcode
+    rcode = nf_inq_varid(cdfid,trim(varname),vid)
+    if (rcode .ne. nf_noerr) then
+       print *, 'problem getting varid for ', trim(varname), ': ',rcode
        status = 1
-       RETURN
-    ENDIF
+       return
+    endif
 
-    ! Get the dimensions of this variable
-    rcode = NF_INQ_VAR(cdfid,vid,vname,ivtype,ndims,dimids,natts)
-    IF (ndims .NE. 3) THEN
-      PRINT *, 'Dimension problem in get_wrfnc_2d.'
-      PRINT *, 'Data in file should be 3D, but has ', ndims, ' dims.'
+    ! get the dimensions of this variable
+    rcode = nf_inq_var(cdfid,vid,vname,ivtype,ndims,dimids,natts)
+    if (ndims .ne. 3) then
+      print *, 'dimension problem in get_wrfnc_2d.'
+      print *, 'data in file should be 3d, but has ', ndims, ' dims.'
       status = 1
-      RETURN
-    ENDIF
+      return
+    endif
 
-    DO i = 1,ndims
-      rcode = NF_INQ_DIMLEN(cdfid,dimids(i),dims(i) )
-    ENDDO
+    do i = 1,ndims
+      rcode = nf_inq_dimlen(cdfid,dimids(i),dims(i) )
+    enddo
 
-    ! Check the dimensions
-    IF (time .GT. dims(3) ) THEN
-      PRINT *, 'Requested time index exceeds input times: ', time, dims(3)
+    ! check the dimensions
+    if (time .gt. dims(3) ) then
+      print *, 'requested time index exceeds input times: ', time, dims(3)
       status = 1
-      RETURN
-    ENDIF
+      return
+    endif
     nx_in = dims(1)
     ny_in = dims(2)
 
@@ -856,250 +856,250 @@ END SUBROUTINE get_wrf2_timeinfo
     iend(3)   = 1
 
 
-    rcode = NF_GET_ATT_TEXT(cdfid,vid,'stagger',varstagger)
-    IF (rcode .NE. nf_noerr) THEN
-      PRINT *, 'Problem getting stagger: ',rcode
+    rcode = nf_get_att_text(cdfid,vid,'stagger',varstagger)
+    if (rcode .ne. nf_noerr) then
+      print *, 'problem getting stagger: ',rcode
       status = 1
-      RETURN
-    ENDIF
-    IF (varstagger(1:1).EQ. "X") THEN
-      varstagger = "U"
-    ELSEIF (varstagger(1:1).EQ. "Y") THEN
-      varstagger = "V"
-    ELSE
-      varstagger = "T"
-    ENDIF
+      return
+    endif
+    if (varstagger(1:1).eq. "x") then
+      varstagger = "u"
+    elseif (varstagger(1:1).eq. "y") then
+      varstagger = "v"
+    else
+      varstagger = "t"
+    endif
 
-    ! Check input vs. output dimensions
+    ! check input vs. output dimensions
 
-    IF (varstagger(1:1) .EQ. output_stagger) THEN
-       ! In/out dimensions must match
-       IF ( (nx_in .NE. nx) .OR. (ny_in .NE. ny)) THEN
+    if (varstagger(1:1) .eq. output_stagger) then
+       ! in/out dimensions must match
+       if ( (nx_in .ne. nx) .or. (ny_in .ne. ny)) then
           status = 1
-       ELSE
+       else
          conv = "  "
-       ENDIF
-    ELSE
-       SELECT CASE (output_stagger)
+       endif
+    else
+       select case (output_stagger)
 
-         CASE ('A')
-           IF (varstagger(1:1) .EQ. "T") THEN
-             IF ( (nx_in+1 .NE. nx) .OR. (ny_in+1 .NE. ny))THEN
+         case ('a')
+           if (varstagger(1:1) .eq. "t") then
+             if ( (nx_in+1 .ne. nx) .or. (ny_in+1 .ne. ny))then
                 status = 1
-             ELSE
-               conv = 'TA'
-             ENDIF
-           ELSEIF(varstagger(1:1) .EQ. "U") THEN
-             IF ( (nx_in .NE. nx) .OR. (ny_in+1 .NE. ny)) THEN  
+             else
+               conv = 'ta'
+             endif
+           elseif(varstagger(1:1) .eq. "u") then
+             if ( (nx_in .ne. nx) .or. (ny_in+1 .ne. ny)) then  
                 status = 1
-             ELSE
-               conv = "UA"
-             ENDIF
-           ELSEIF(varstagger(1:1) .EQ. "V") THEN
-             IF ( (nx_in+1 .NE. nx) .OR. (ny_in .NE. ny)) THEN  
+             else
+               conv = "ua"
+             endif
+           elseif(varstagger(1:1) .eq. "v") then
+             if ( (nx_in+1 .ne. nx) .or. (ny_in .ne. ny)) then  
                 status = 1
-             ELSE
-                conv = "VA"
-             ENDIF
-           ELSE
-             PRINT *, 'Stagger conversion not supported.'
+             else
+                conv = "va"
+             endif
+           else
+             print *, 'stagger conversion not supported.'
              status = 1
-           ENDIF
-         CASE('T')
-           IF(varstagger(1:1) .EQ. "U") THEN
-             IF ( (nx_in-1 .NE. nx) .OR. (ny_in .NE. ny) ) THEN 
+           endif
+         case('t')
+           if(varstagger(1:1) .eq. "u") then
+             if ( (nx_in-1 .ne. nx) .or. (ny_in .ne. ny) ) then 
                 status = 1
-             ELSE
-                conv = "UT"
-             ENDIF
-           ELSEIF(varstagger(1:1) .EQ. "V") THEN
-             IF ( (nx_in .NE. nx) .OR. (ny_in-1 .NE. ny)) THEN  
+             else
+                conv = "ut"
+             endif
+           elseif(varstagger(1:1) .eq. "v") then
+             if ( (nx_in .ne. nx) .or. (ny_in-1 .ne. ny)) then  
                 status = 1
-             ELSE
-                conv = "VT"
-             ENDIF
-           ELSE
-             PRINT *, 'Stagger conversion not supported.'
-           ENDIF
-         CASE DEFAULT
-           PRINT *, 'Requested stagger conversion not supported.'
+             else
+                conv = "vt"
+             endif
+           else
+             print *, 'stagger conversion not supported.'
+           endif
+         case default
+           print *, 'requested stagger conversion not supported.'
            status = 1
-       END SELECT
-    ENDIF
-    IF (status .NE. 0) THEN
-      PRINT *, 'STAGGER_IN/STAGGER_REQ: ',varstagger(1:1),output_stagger 
-      PRINT *, 'Mismatch in dimensions: '
-      PRINT *, 'NX_IN / NX_REQ : ', nx_in, nx
-      PRINT *, 'NY_IN / NY_REQ : ', ny_in, ny
-      RETURN
-    ENDIF
+       end select
+    endif
+    if (status .ne. 0) then
+      print *, 'stagger_in/stagger_req: ',varstagger(1:1),output_stagger 
+      print *, 'mismatch in dimensions: '
+      print *, 'nx_in / nx_req : ', nx_in, nx
+      print *, 'ny_in / ny_req : ', ny_in, ny
+      return
+    endif
 
-    ! If no destaggering is required, we can just populate the output
+    ! if no destaggering is required, we can just populate the output
     ! array directly
 
-    IF (conv .EQ. "  " ) THEN
-      CALL NCVGT( cdfid, vid, istart, iend, data2d, rcode)
-      IF (rcode .NE. NF_NOERR) THEN
-        PRINT *, 'Problem getting ', TRIM(varname)
+    if (conv .eq. "  " ) then
+      call ncvgt( cdfid, vid, istart, iend, data2d, rcode)
+      if (rcode .ne. nf_noerr) then
+        print *, 'problem getting ', trim(varname)
         status = 1
-        RETURN
-      ENDIF
-    ELSE
-      ALLOCATE(dum2d(nx_in,ny_in))
-      CALL NCVGT( cdfid, vid, istart, iend, dum2d, rcode)
- print *, 'VAR:',varname,' Pre-stagger min/max:',minval(dum2d),maxval(dum2d)
-      IF (rcode .NE. NF_NOERR) THEN
-        PRINT *, 'Problem getting ', TRIM(varname)
+        return
+      endif
+    else
+      allocate(dum2d(nx_in,ny_in))
+      call ncvgt( cdfid, vid, istart, iend, dum2d, rcode)
+ print *, 'var:',varname,' pre-stagger min/max:',minval(dum2d),maxval(dum2d)
+      if (rcode .ne. nf_noerr) then
+        print *, 'problem getting ', trim(varname)
         status = 1
-        RETURN
-      ENDIF
-      SELECT CASE (conv)
-        CASE ('TA')
-          CALL arakawa_c_t2n(dum2d,nx_in,ny_in,1,data2d)
-        CASE ('UA')
-          CALL arakawa_c_u2n(dum2d,nx_in,ny_in,1,data2d)
-        CASE ('VA')
-          CALL arakawa_c_v2n(dum2d,nx_in,ny_in,1,data2d)
-        CASE ('UT')
-          CALL arakawa_c_u2t(dum2d,nx_in,ny_in,1,data2d)
-        CASE ('VT') 
-          CALL arakawa_c_v2t(dum2d,nx_in,ny_in,1,data2d)
-        CASE DEFAULT
-          PRINT *, 'No stagger case found.  Should not be here.'
+        return
+      endif
+      select case (conv)
+        case ('ta')
+          call arakawa_c_t2n(dum2d,nx_in,ny_in,1,data2d)
+        case ('ua')
+          call arakawa_c_u2n(dum2d,nx_in,ny_in,1,data2d)
+        case ('va')
+          call arakawa_c_v2n(dum2d,nx_in,ny_in,1,data2d)
+        case ('ut')
+          call arakawa_c_u2t(dum2d,nx_in,ny_in,1,data2d)
+        case ('vt') 
+          call arakawa_c_v2t(dum2d,nx_in,ny_in,1,data2d)
+        case default
+          print *, 'no stagger case found.  should not be here.'
           status = 1
-      END SELECT
-      DEALLOCATE(dum2d) 
-    IF (varname .EQ. 'GSW') THEN
-      WHERE(data2d .LT. 0) data2d = 0.
-    ENDIF
-    ENDIF
+      end select
+      deallocate(dum2d) 
+    if (varname .eq. 'gsw') then
+      where(data2d .lt. 0) data2d = 0.
+    endif
+    endif
 
-    RETURN
-  END SUBROUTINE get_wrfnc_2d
+    return
+  end subroutine get_wrfnc_2d
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE make_wrf_file_name(prddir,domnum,time_min,fname)
+  subroutine make_wrf_file_name(prddir,domnum,time_min,fname)
 
-! Creates the WRF output file name based on the working directory,
+! creates the wrf output file name based on the working directory,
 ! domain number, and number of minutes into simulation
 
-    IMPLICIT NONE
+    implicit none
 
-    CHARACTER(LEN=*), INTENT(IN)               :: prddir
-    INTEGER, INTENT(IN)                        :: domnum
-    INTEGER, INTENT(IN)                        :: time_min
-    CHARACTER(LEN=255), INTENT(OUT)            :: fname
+    character(len=*), intent(in)               :: prddir
+    integer, intent(in)                        :: domnum
+    integer, intent(in)                        :: time_min
+    character(len=255), intent(out)            :: fname
 
-    CHARACTER(LEN=2)                           :: domstr
-    CHARACTER(LEN=6)                           :: timestr
+    character(len=2)                           :: domstr
+    character(len=6)                           :: timestr
 
-    WRITE(domstr, '(I2.2)') domnum
-    WRITE(timestr, '(I6.6)') time_min
+    write(domstr, '(i2.2)') domnum
+    write(timestr, '(i6.6)') time_min
 
-    fname = TRIM(prddir) // '/wrfout_d' // domstr // '_' // timestr
-    RETURN
-  END SUBROUTINE make_wrf_file_name
+    fname = trim(prddir) // '/wrfout_d' // domstr // '_' // timestr
+    return
+  end subroutine make_wrf_file_name
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE make_wrf2_file_name(prddir,domnum,timestr,fname)
+  subroutine make_wrf2_file_name(prddir,domnum,timestr,fname)
 
-    ! Creates the WRF output file name based on the working directory, 
+    ! creates the wrf output file name based on the working directory, 
     ! domain number, and number of minutes into simulation
 
-    IMPLICIT NONE
+    implicit none
 
-    CHARACTER(LEN=*), INTENT(IN)               :: prddir
-    INTEGER, INTENT(IN)                        :: domnum
-    CHARACTER(LEN=24), INTENT(IN)              :: timestr
-    CHARACTER(LEN=255), INTENT(OUT)            :: fname
+    character(len=*), intent(in)               :: prddir
+    integer, intent(in)                        :: domnum
+    character(len=24), intent(in)              :: timestr
+    character(len=255), intent(out)            :: fname
 
-    CHARACTER(LEN=2)                           :: domstr
+    character(len=2)                           :: domstr
 
-    WRITE(domstr, '(I2.2)') domnum
+    write(domstr, '(i2.2)') domnum
 
-    fname = TRIM(prddir) // '/wrfout_d' // domstr // '_' // timestr(1:19)
-    RETURN
-  END SUBROUTINE make_wrf2_file_name
+    fname = trim(prddir) // '/wrfout_d' // domstr // '_' // timestr(1:19)
+    return
+  end subroutine make_wrf2_file_name
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  SUBROUTINE wrfio_wait(filename,max_wait_sec)
+  subroutine wrfio_wait(filename,max_wait_sec)
 
-    IMPLICIT NONE
-    CHARACTER(LEN=255)  :: filename
-    CHARACTER(LEN=8)    :: date_ready
-    CHARACTER(LEN=10)   :: time_ready
-    LOGICAL             :: file_exists
-    LOGICAL             :: file_ready
-    INTEGER             :: num_checks
-    INTEGER             :: max_wait_sec
-    INTEGER, PARAMETER  :: pause_sec = 30
-    INTEGER             :: secs_waited
-    INTEGER             :: cdf, rcode, dimid, ntimes,status,vid,itimestep
-    REAL                :: dt,xtime
+    implicit none
+    character(len=255)  :: filename
+    character(len=8)    :: date_ready
+    character(len=10)   :: time_ready
+    logical             :: file_exists
+    logical             :: file_ready
+    integer             :: num_checks
+    integer             :: max_wait_sec
+    integer, parameter  :: pause_sec = 30
+    integer             :: secs_waited
+    integer             :: cdf, rcode, dimid, ntimes,status,vid,itimestep
+    real                :: dt,xtime
     file_ready = .false.
     file_exists = .false.
     num_checks = 0
-    print *, "Checking status of ",trim(filename)
-    DO WHILE (.NOT.file_ready)
-      INQUIRE(FILE=TRIM(filename), EXIST=file_exists)
-      IF (.NOT. file_exists) THEN
-        print *, 'File not ready: ', TRIM(filename)
-        print '(A,I3,A)', 'Sleeping for ', pause_sec, ' seconds'
-        CALL sleep(pause_sec)
+    print *, "checking status of ",trim(filename)
+    do while (.not.file_ready)
+      inquire(file=trim(filename), exist=file_exists)
+      if (.not. file_exists) then
+        print *, 'file not ready: ', trim(filename)
+        print '(a,i3,a)', 'sleeping for ', pause_sec, ' seconds'
+        call sleep(pause_sec)
         num_checks = num_checks + 1
         secs_waited = num_checks * pause_sec
-        print '(A,I5,A)', 'Total sleep time now ', secs_waited, ' seconds'
-        IF (secs_waited .GE. max_wait_sec) THEN
-          PRINT *, 'IO_WAIT:  Timeout waiting for file: ', TRIM(filename)
-          PRINT '(A,I5,A)', '    Maximum wait time set to ', max_wait_sec, 's'
-          STOP 'io_wait'
-        ENDIF
-      ELSE 
+        print '(a,i5,a)', 'total sleep time now ', secs_waited, ' seconds'
+        if (secs_waited .ge. max_wait_sec) then
+          print *, 'io_wait:  timeout waiting for file: ', trim(filename)
+          print '(a,i5,a)', '    maximum wait time set to ', max_wait_sec, 's'
+          stop 'io_wait'
+        endif
+      else 
         num_checks = 0
-        ! Make sure it has been populated with at least 1 time period    
-        DO WHILE (.NOT. file_ready)
+        ! make sure it has been populated with at least 1 time period    
+        do while (.not. file_ready)
        
-          CALL open_wrfnc(filename,cdf,status)  
-          rcode = NF_INQ_DIMID(cdf, "Time", dimid)
-          rcode = NF_INQ_DIMLEN(cdf, dimid, ntimes)
+          call open_wrfnc(filename,cdf,status)  
+          rcode = nf_inq_dimid(cdf, "time", dimid)
+          rcode = nf_inq_dimlen(cdf, dimid, ntimes)
            
           print *,"rcode/ntimes =", rcode,ntimes
-          IF (ntimes.GT.0) THEN
-            rcode = NF_INQ_VARID(cdf,"ITIMESTEP",vid)
-            rcode = NF_GET_VAR_INT(cdf,vid,itimestep)
+          if (ntimes.gt.0) then
+            rcode = nf_inq_varid(cdf,"itimestep",vid)
+            rcode = nf_get_var_int(cdf,vid,itimestep)
             
-            !!!!! Modified by Wei-Ting (20130307) :            !!!!!
-            !!!!!     Use XTIME instead of ITIMESTEP FOR WRFV3 !!!!!
+            !!!!! modified by wei-ting (20130307) :            !!!!!
+            !!!!!     use xtime instead of itimestep for wrfv3 !!!!!
             if (rcode .lt. 0) then
-              write(6,*)' Warning: ITIMESTEP not found, looking for XTIME in wrfio_wait'
-              rcode = NF_GET_ATT_REAL(cdf,0,"DT",dt)
-              rcode = NF_INQ_VARID(cdf,"XTIME",vid)
-              rcode = NF_GET_VAR_REAL(cdf,vid,xtime)
-              itimestep = INT(xtime*60/dt)
+              write(6,*)' warning: itimestep not found, looking for xtime in wrfio_wait'
+              rcode = nf_get_att_real(cdf,0,"dt",dt)
+              rcode = nf_inq_varid(cdf,"xtime",vid)
+              rcode = nf_get_var_real(cdf,vid,xtime)
+              itimestep = int(xtime*60/dt)
             endif
-            !!!!! End of Modifying !!!!!
+            !!!!! end of modifying !!!!!
 
             print *,"rcode/itimestep ", rcode,itimestep
-            IF ((rcode .EQ. NF_NOERR) .AND. (itimestep .GE. 0))THEN
-              CALL date_and_time(date_ready,time_ready)
-              PRINT *, TRIM(filename), ' ready at ', date_ready, '/',time_ready
+            if ((rcode .eq. nf_noerr) .and. (itimestep .ge. 0))then
+              call date_and_time(date_ready,time_ready)
+              print *, trim(filename), ' ready at ', date_ready, '/',time_ready
               file_ready = .true.
-              !CALL sleep(pause_sec)
-            ELSE 
-              CALL sleep(pause_sec)
-            ENDIF
-          ELSE 
-            CALL sleep(pause_sec)
+              !call sleep(pause_sec)
+            else 
+              call sleep(pause_sec)
+            endif
+          else 
+            call sleep(pause_sec)
             num_checks = num_checks + 1
             secs_waited = num_checks * pause_sec
-            IF (secs_waited .GE. max_wait_sec) THEN
-              PRINT *, 'IO_WAIT:  Timeout waiting for file: ', TRIM(filename)
-              PRINT '(A,I5,A)', '    Maximum wait time set to ', max_wait_sec, 's'
-              STOP 'io_wait'
-            ENDIF
-          ENDIF
-          CALL close_wrfnc(cdf)
-        ENDDO 
-      ENDIF
-    ENDDO 
-    RETURN
-  END SUBROUTINE wrfio_wait
+            if (secs_waited .ge. max_wait_sec) then
+              print *, 'io_wait:  timeout waiting for file: ', trim(filename)
+              print '(a,i5,a)', '    maximum wait time set to ', max_wait_sec, 's'
+              stop 'io_wait'
+            endif
+          endif
+          call close_wrfnc(cdf)
+        enddo 
+      endif
+    enddo 
+    return
+  end subroutine wrfio_wait
 
-END MODULE wrf_netcdf
+end module wrf_netcdf

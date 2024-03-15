@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,20 +29,20 @@ cdis
 cdis 
 cdis 
 cdis 
-       subroutine NEXRADWSI_to_LAPS(filename,
+       subroutine nexradwsi_to_laps(filename,
      &                    msng_radar,
      &                    nlines,nelements,nlev,
      &                    imax,jmax,
      &                    lat,lon,
-     &                    validTime,
+     &                    validtime,
      &                    remapped_prod,
      &                    istatus)
 c
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-c Routine reads netCDF WSI-NEXRAD data using subroutine read_wsi_cdf.
-c Nowrad data is then remapped to LAPS domain given lat/lon of domain.
+c routine reads netcdf wsi-nexrad data using subroutine read_wsi_cdf.
+c nowrad data is then remapped to laps domain given lat/lon of domain.
 c
        integer   nlev
 
@@ -53,7 +53,7 @@ c
        integer sum(imax,jmax)
        integer count(imax,jmax)
        integer i_max_value(imax,jmax)
-       integer validTime
+       integer validtime
        integer istatus
        integer jstatus
        integer lstatus
@@ -90,7 +90,7 @@ c
        common /cegrid/nx,ny,nz,nw,se,rlatc,rlonc
 c
 c ***************************************************************************
-c **************************  START ROUTINE *********************************
+c **************************  start routine *********************************
 c
       istatus=1
 
@@ -104,20 +104,20 @@ c
       call get_ref_base_useable(ref_base_useable,iostatus)
       call get_r_missing_data(r_missing_data,iostatus)
 c
-c read nimbus netCDF file
+c read nimbus netcdf file
 c
-      write(6,*)'Reading: ',filename(1:n)
+      write(6,*)'reading: ',filename(1:n)
 
       call rd_wsi_3dradar_cdf(filename,nlines,nelements,
      &rdlat,rdlon,rlat1,rlon1,rlat2,rlon2,centerlon,
-     &validTime,nlev,data_levels,num_levels,level_prefix,
+     &validtime,nlev,data_levels,num_levels,level_prefix,
      &image,jstatus)
 
       if(jstatus.eq.-1)then
-         write(6,*)'Error reading WSI-NEXRAD data'
+         write(6,*)'error reading wsi-nexrad data'
          goto 19
       end if
-      write(6,*)'Found 3d WSI data. Valid Time: ',validTime
+      write(6,*)'found 3d wsi data. valid time: ',validtime
       print*
 c
 c load common block for cylindrical equidistant grid
@@ -167,9 +167,9 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c  rlon1 and rlat1 already in degrees
 c
-c  Remap NOWrad data onto LAPS grid.  We now have the 
-c  section of the NOWrad grid in units of dBZ which 
-c  is in and near the LAPS domain.  This area is defined by
+c  remap nowrad data onto laps grid.  we now have the 
+c  section of the nowrad grid in units of dbz which 
+c  is in and near the laps domain.  this area is defined by
 c  jstart, jend, istart, iend.
 c
        do j=1,jmax
@@ -264,29 +264,29 @@ c               remapped_prod(i,j)=float(i_max_value(i,j))
           end do
        endif
        write(6,*)
-       write(6,*)'       WSI data attributes:'
+       write(6,*)'       wsi data attributes:'
        write(6,*)' ------------------------------------'
-c      write(6,*)'  Pixels No Data (ND) : ',iobcnd
+c      write(6,*)'  pixels no data (nd) : ',iobcnd
 c      write(6,*)'    (%): ',float(iobcnd)/float(itot)
-       write(6,*)'  Pixels = Missing: ',iobcm
+       write(6,*)'  pixels = missing: ',iobcm
        write(6,*)'    (%): ',float(iobcm)/float(itot)
-       write(6,*)'  Pixels > Nlevs : ',iobcn
+       write(6,*)'  pixels > nlevs : ',iobcn
        write(6,*)'    (%): ',float(iobcn)/float(itot)
        if(iobcn.gt.0)then
-          write(6,*)'      Avg Pix Value: ',
+          write(6,*)'      avg pix value: ',
      &              float(incnt)/float(iobcn) 
        endif
-       write(6,*)'  Pixels Unaccounted for: ',iobcu
+       write(6,*)'  pixels unaccounted for: ',iobcu
        write(6,*)'    (%): ',float(iobcu)/float(itot)
-       write(6,*)'  Pixels Useable : ',igood
+       write(6,*)'  pixels useable : ',igood
        write(6,*)'    (%): ',float(igood)/float(itot)
        write(6,*)' ------------------------------------'
 
        goto 16
-19     write(6,*)'Error in nowrad_2_laps, terminating'
+19     write(6,*)'error in nowrad_2_laps, terminating'
        goto 16
-14     write(6,*)'NOWRAD data not found for given time'
+14     write(6,*)'nowrad data not found for given time'
 
-16     write(6,*)'Finished in nowrad_2_laps'
+16     write(6,*)'finished in nowrad_2_laps'
        return
        end

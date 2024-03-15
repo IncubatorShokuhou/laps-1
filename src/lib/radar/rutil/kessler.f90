@@ -4,15 +4,15 @@ subroutine kessler_mr2z(nx,ny,nz &
                        ,rainmr,icemr,snowmr,graupelmr  &
                        ,refl)
 
-! Subroutine to compute estimated radar reflectivity (Z) from
-! the precipitation mixing ratios.  The estimation
-! is done using formulae from Kessler (1969) and 
-! Rogers and Yau (1989).  
+! subroutine to compute estimated radar reflectivity (z) from
+! the precipitation mixing ratios.  the estimation
+! is done using formulae from kessler (1969) and 
+! rogers and yau (1989).  
 
-! Adapted from USAF Weather Agency routine.  
-! Brent Shaw, NOAA Forecast System Lab, Dec 2000
+! adapted from usaf weather agency routine.  
+! brent shaw, noaa forecast system lab, dec 2000
 
-! Put into subroutine by Steve Albers
+! put into subroutine by steve albers
   
 implicit none
 
@@ -26,15 +26,15 @@ do j=1,ny
 do i=1,nx
    do k=1,nz
 
-!     Compute the basic reflectivity 
+!     compute the basic reflectivity 
       refl(i,j,k) =17300.0 * &
                   (rho(i,j,k) * 1000.0 * &
-                   MAX(0.0,rainmr(i,j,k)))**svnfrth
+                   max(0.0,rainmr(i,j,k)))**svnfrth
 
-!     Add the ice component
+!     add the ice component
       refl(i,j,k)=refl(i,j,k) + &
                   38000.0*(rho(i,j,k) * 1000.0 * &
-                  MAX(0.0,icemr(i,j,k)+snowmr(i,j,k)+graupelmr(i,j,k)))**2.2
+                  max(0.0,icemr(i,j,k)+snowmr(i,j,k)+graupelmr(i,j,k)))**2.2
 
    enddo
 

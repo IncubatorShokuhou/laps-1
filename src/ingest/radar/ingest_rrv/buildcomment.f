@@ -26,13 +26,13 @@
       call get_r_missing_data(r_missing_data,istatus)
 
       do i=1,126
-         if(cref_comment(i:i).eq.'K')then
+         if(cref_comment(i:i).eq.'k')then
             ire=i-1
          endif
-         if(cvel_comment(i:i).eq.'K')then
+         if(cvel_comment(i:i).eq.'k')then
             ive=i-1
          endif
-         if(cnyq_comment(i:i).eq.'K')then
+         if(cnyq_comment(i:i).eq.'k')then
             ine=i-1
          endif
       enddo

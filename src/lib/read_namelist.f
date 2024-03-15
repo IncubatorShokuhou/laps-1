@@ -1,7 +1,7 @@
       subroutine config_satellite_lvd(istatus)
 c
-cdoc  Reads static/satellite_lvd.nl file.
-      use mem_namelist, ONLY: solalt_thr_vis
+cdoc  reads static/satellite_lvd.nl file.
+      use mem_namelist, only: solalt_thr_vis
 
       character nest7grid*150
       include 'satellite_dims_lvd.inc'
@@ -29,12 +29,12 @@ cdoc  Reads static/satellite_lvd.nl file.
 
       istatus = 0
 
-!     Initialize
+!     initialize
       cchanneltypes = '   '
       i_qc_sat_flag(:) = 0
 !     solalt_thr_vis = 15.
 
-      write(6,*)' Reading LVD namelist in config_satellite_lvd'
+      write(6,*)' reading lvd namelist in config_satellite_lvd'
       write(6,*)' solalt_thr_vis (from mem_namelist)= ',solalt_thr_vis
 
       call get_directory(grid_fnam_common,nest7grid,len_dir)
@@ -63,36 +63,36 @@ cdoc  Reads static/satellite_lvd.nl file.
        if(isats(i).eq.1)is=is+1
       enddo
       print*
-      print*,'Number of satellites to process: ',is
+      print*,'number of satellites to process: ',is
       do i=1,maxsat
        if(isats(i).eq.1)then
         print*
-        print*,'Sat ',i,' ID: ',c_sat_id(i)
+        print*,'sat ',i,' id: ',c_sat_id(i)
         print*,'================================='
        endif
        do j=1,maxtype
         if(itypes(j,i).eq.1)then
-         print*,'  Type: ',j, ' = ',c_sat_types(j,i)
+         print*,'  type: ',j, ' = ',c_sat_types(j,i)
          print*,'  ***************************************'
-         print*,'  Attributes of this satellite and type: '
+         print*,'  attributes of this satellite and type: '
          print*,'  ---------------------------------------'
-         print*,'   Latin/Lap/Lov: ',r_latin(j,i),r_lap(j,i),r_lov(j,i)
+         print*,'   latin/lap/lov: ',r_latin(j,i),r_lap(j,i),r_lov(j,i)
          print*,'   vis/ir(x/y) resolution (m): ',
      &                 r_resolution_x_vis(j,i),r_resolution_y_vis(j,i),
      &                 r_resolution_x_ir(j,i),r_resolution_y_ir(j,i)
          print*,'  ---------------------------------------'
          do k=1,maxchannel
           if(ichannels(k,j,i).eq.1)then
-           print*,'   Chn ',k,' = ',c_channel_types(k,j,i)(1:3)
-           print*,'   Path      = ',TRIM(path_to_raw_sat(k,j,i))
+           print*,'   chn ',k,' = ',c_channel_types(k,j,i)(1:3)
+           print*,'   path      = ',trim(path_to_raw_sat(k,j,i))
            if(kk.lt.1)then
             call get_file_names(path_to_raw_sat(k,j,i)
      1,numoffiles,c_filenames, max_files,istatus)
 c           print*,'filenames: ',c_filenames(1:numoffiles)
             if(numoffiles.le.0)then
              print*
-             print*,'!!!! Error: No data in given path'
-             print*,'Path: ',TRIM(path_to_raw_sat(k,j,i))
+             print*,'!!!! error: no data in given path'
+             print*,'path: ',trim(path_to_raw_sat(k,j,i))
              print*
              return
             endif
@@ -118,7 +118,7 @@ c----- don't worry about the rep namelist atm.
       return
 
       print*,'**************************************************'
-      print*,'Now using repository version: satellite_lvd_rep.nl'
+      print*,'now using repository version: satellite_lvd_rep.nl'
       print*,'**************************************************'
 
       nest7grid = nest7grid(1:len_dir)//'/satellite_lvd_rep.nl'
@@ -142,7 +142,7 @@ c
      +channel_wavelength_u,imsng_sndr_pix,pct_req_lsr,
      +istatus)
 c
-cdoc  Reads static/sat_sounder.nl file.
+cdoc  reads static/sat_sounder.nl file.
 
       include 'lsr_dims.inc'
       include 'grid_fname.cmn'       !grid_fnam_common
@@ -188,7 +188,7 @@ c
      .           ,comega_smooth, erf, itmax
      .           ,istatus)
 c
-cdoc  Reads static/balance.nl file.
+cdoc  reads static/balance.nl file.
 
       implicit none
 
@@ -237,7 +237,7 @@ c-----------------------------------------------------------
 c
       subroutine get_sfcqc_nl(lrunqc,istatus)
 c
-cdoc  Reads static/balance.nl file.
+cdoc  reads static/balance.nl file.
 
       implicit none
 
@@ -278,7 +278,7 @@ c
      & c_radar_ext,i_window,mosaic_cycle_time,imosaic_3d,
      & n_radars_wideband,n_radars_narrowband,istatus)
 c
-cdoc  Reads static/radar_mosaic.nl file
+cdoc  reads static/radar_mosaic.nl file
 
       include    'radar_mosaic_dim.inc'
       include    'grid_fname.cmn'              !grid_fnam_common
@@ -374,7 +374,7 @@ cdoc reads static/background.nl
       stop
       end
 c
-c --- OSSE namelist reader ---
+c --- osse namelist reader ---
 c
       subroutine get_osse_information(path_to_model,
      1                                cmodel,
@@ -387,7 +387,7 @@ c
      1                                isim_time_hr,
      1                                istatus)
 c
-cdoc  Reads static/osse.nl file.
+cdoc  reads static/osse.nl file.
 
       implicit none
 
@@ -478,7 +478,7 @@ c
        mode = 0
        call find_domain_name(cdataroot,c10_grid_fname,istatus)
        if(istatus.ne.1)then
-          print*,'Error returned from find_domain_name'
+          print*,'error returned from find_domain_name'
           return
        endif
        call get_directory(c10_grid_fname,directory,len)
@@ -505,7 +505,7 @@ c
        character*1	type_obs
        character*150	path_to_raw_profiler
        character*150	path_to_raw_sounding
-       integer	raob_process_lag_Bal
+       integer	raob_process_lag_bal
        integer	raob_process_lag
        integer          n_verif
        integer          i,len
@@ -538,11 +538,11 @@ c
           endif
        enddo
        if(n_verif.le.0)then
-          print*,'Error! Check namelist verif.nl variable'
-          print*,'verif_output_dir. It appears to be empty'
+          print*,'error! check namelist verif.nl variable'
+          print*,'verif_output_dir. it appears to be empty'
           return
        endif
-c      print*,'Number of verification types from verif.nl: ',n_verif
+c      print*,'number of verification types from verif.nl: ',n_verif
 c      call s_len(verif_output_dir(1),len)
 c      do i=1,n_verif
 c         print*,i,' ',verif_output_dir(i)(1:len)
@@ -565,12 +565,12 @@ c --------------------------------------------------------------
 c
        subroutine get_laps_redp(redp_lvl_out,istatus)
 
-       use mem_namelist, ONLY: read_namelist_laps
-       use mem_namelist, ONLY: redp_lvl
+       use mem_namelist, only: read_namelist_laps
+       use mem_namelist, only: redp_lvl
 
        character*150 static_dir,filename
 
-!      Read global parameters into module memory structure
+!      read global parameters into module memory structure
        call get_directory('static',static_dir,len_dir)
        filename = static_dir(1:len_dir)//'/nest7grid.parms'
        call read_namelist_laps('lapsparms',filename)
@@ -583,9 +583,9 @@ c
        end
 
 c ------------------------------------------------------------------
-c New routine that configures the satellite information needed in
+c new routine that configures the satellite information needed in
 c software using a limited satellite lvd namelist file
-c J. Smart 5/07
+c j. smart 5/07
 c
       subroutine conf_isjtkc(nsdim,ntdim,ncdim,
      &csatid,csattypes,cchanneltypes,cpath2sat,
@@ -602,42 +602,42 @@ c
       character*200 cpath2sat(ntdim*nsdim)
 
       print*
-      print*,'Start conf_isjtkc...'
+      print*,'start conf_isjtkc...'
 
-!     Determine satellites with help of 'satdata_lvd_table'
+!     determine satellites with help of 'satdata_lvd_table'
 
       write(6,*)' nsats = ',nsats
       write(6,*)' satellite_ids (csatid) array: ',csatid(1:nsats)
 
-      ISATS=0   
+      isats=0   
       do i=1,nsats
         do js = 1,maxsat
           if(trim(csatid(i)).eq.trim(satellite_ids(js)))then
-            ISATS(js)=1
+            isats(js)=1
             c_sat_id(js)=csatid(i)
           endif
         enddo ! js
       enddo ! i
 
-!     Determine satellite types with help of 'satdata_lvd_table'
-      ITYPES=0
+!     determine satellite types with help of 'satdata_lvd_table'
+      itypes=0
       jj=0
       do i=1,nsats
         do js = 1,maxsat
           if(trim(csatid(i)).eq.trim(satellite_ids(js)))then
             write(6,*)
-            write(6,*)' Match csatid/satellite_ids/ntypes'
+            write(6,*)' match csatid/satellite_ids/ntypes'
      1                                  ,i,js,ntypes(i),csatid(i)
             do j=1,ntypes(i)
               jj=jj+1
               do it = 1,4
                 if(csattypes(jj).eq.satellite_types(it,js))then !raw lat-lon > could be (likely is) netcdf format
-                  write(6,*)' Match csattypes/satellite_types     '
+                  write(6,*)' match csattypes/satellite_types     '
      1                                              ,j,it,csattypes(jj)
-                  ITYPES(it,js)=1
+                  itypes(it,js)=1
                   c_sat_types(it,js)=csattypes(jj)
                 else
-                  write(6,*)' No match csattypes/satellite_types  '
+                  write(6,*)' no match csattypes/satellite_types  '
      1                ,j,it,csattypes(jj),' ',satellite_types(it,js)
                 endif ! type match
               enddo ! it
@@ -650,7 +650,7 @@ c ----
 c goes08 (first satellite type)
 
       write(6,*)
-      write(6,*)' Determine satellite channels:'
+      write(6,*)' determine satellite channels:'
       write(6,*)' nchannel = ',nchannel
       do i=1,ncdim*ntdim*nsdim
           call s_len(cchanneltypes(i),lenc)
@@ -659,13 +659,13 @@ c goes08 (first satellite type)
           endif
       enddo ! i
 
-!     Determine satellite channels without help of 'satdata_lvd_table' at first,
+!     determine satellite channels without help of 'satdata_lvd_table' at first,
 !     though 'satdata_lvd_table' is partially tested near the end of this block
-      ICHANNELS = 0
+      ichannels = 0
       jj=0
       kk=0
       do i=1,nsats
-       write(6,*)' Checking channels for ',i,csatid(i)
+       write(6,*)' checking channels for ',i,csatid(i)
        if(csatid(i).eq.'goes08')then
         do j=1,ntypes(i)
          jj=jj+1
@@ -674,23 +674,23 @@ c format type 1 (gvr)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,1,1)=1
+            ichannels(1,1,1)=1
             c_channel_types(1,1,1)=cchanneltypes(kk)
             i_msng_sat_flag(1,1,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,1,1)=1
+            ichannels(2,1,1)=1
             c_channel_types(2,1,1)=cchanneltypes(kk)
             i_msng_sat_flag(2,1,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,1,1)=1
+            ichannels(3,1,1)=1
             c_channel_types(3,1,1)=cchanneltypes(kk)
             i_msng_sat_flag(3,1,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,1,1)=1
+            ichannels(4,1,1)=1
             c_channel_types(4,1,1)=cchanneltypes(kk)
             i_msng_sat_flag(4,1,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,1,1)=1
+            ichannels(5,1,1)=1
             c_channel_types(5,1,1)=cchanneltypes(kk)
             i_msng_sat_flag(5,1,1)=i_qc_sat_flag(kk)
            endif
@@ -698,43 +698,43 @@ c format type 1 (gvr)
           path_to_raw_sat(1:6,1,1)=cpath2sat(jj)
 
 c format type 2 (wfo)
-!        Note that path_to_raw_sat is specified since wfo is the only
+!        note that path_to_raw_sat is specified since wfo is the only
 !        satellite with subdirectories for each channel
          elseif(csattypes(jj).eq.'wfo')then
           call s_len(cpath2sat(jj),n)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,2,1)=1
+            ichannels(1,2,1)=1
             c_channel_types(1,2,1)=cchanneltypes(kk)
             path_to_raw_sat(1,2,1)=
-!    1        cpath2sat(jj)(1:n)//'conus_vis/regClip/' ! less general
+!    1        cpath2sat(jj)(1:n)//'conus_vis/regclip/' ! less general
      1        cpath2sat(jj)(1:n)//'conus_'//cchanneltypes(kk)
-     1                          //'/regClip/'
+     1                          //'/regclip/'
             i_msng_sat_flag(1,2,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i39')then
-            ICHANNELS(2,2,1)=1
+            ichannels(2,2,1)=1
             c_channel_types(2,2,1)=cchanneltypes(kk)
             path_to_raw_sat(2,2,1)=
-     1        cpath2sat(jj)(1:n)//'conus_i39/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i39/regclip/'
             i_msng_sat_flag(2,2,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'iwv')then
-            ICHANNELS(3,2,1)=1
+            ichannels(3,2,1)=1
             c_channel_types(3,2,1)=cchanneltypes(kk)
             path_to_raw_sat(3,2,1)=
-     1        cpath2sat(jj)(1:n)//'conus_iwv/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_iwv/regclip/'
             i_msng_sat_flag(3,2,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i11')then
-            ICHANNELS(4,2,1)=1
+            ichannels(4,2,1)=1
             c_channel_types(4,2,1)=cchanneltypes(kk)
             path_to_raw_sat(4,2,1)=
-     1        cpath2sat(jj)(1:n)//'conus_i11/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i11/regclip/'
             i_msng_sat_flag(4,2,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i12')then
-            ICHANNELS(5,2,1)=1
+            ichannels(5,2,1)=1
             c_channel_types(5,2,1)=cchanneltypes(kk)
             path_to_raw_sat(5,2,1)=
-     1        cpath2sat(jj)(1:n)//'conus_i12/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i12/regclip/'
             i_msng_sat_flag(5,2,1)=i_qc_sat_flag(kk)
            endif
           enddo
@@ -744,23 +744,23 @@ c format type 3 (netcdf)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,3,1)=1
+            ichannels(1,3,1)=1
             c_channel_types(1,3,1)=cchanneltypes(kk)
             i_msng_sat_flag(1,3,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i39')then
-            ICHANNELS(2,3,1)=1
+            ichannels(2,3,1)=1
             c_channel_types(2,3,1)=cchanneltypes(kk)
             i_msng_sat_flag(2,3,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'iwv')then
-            ICHANNELS(3,3,1)=1
+            ichannels(3,3,1)=1
             c_channel_types(3,3,1)=cchanneltypes(kk)
             i_msng_sat_flag(3,3,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i11')then
-            ICHANNELS(4,3,1)=1
+            ichannels(4,3,1)=1
             c_channel_types(4,3,1)=cchanneltypes(kk)
             i_msng_sat_flag(4,3,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i12')then
-            ICHANNELS(5,3,1)=1
+            ichannels(5,3,1)=1
             c_channel_types(5,3,1)=cchanneltypes(kk)
             i_msng_sat_flag(5,3,1)=i_qc_sat_flag(kk)
            endif
@@ -772,23 +772,23 @@ c format type 4 (raw lat lon)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,1)=1
+            ichannels(1,4,1)=1
             c_channel_types(1,4,1)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,4,1)=1
+            ichannels(2,4,1)=1
             c_channel_types(2,4,1)=cchanneltypes(kk)
             i_msng_sat_flag(2,4,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,4,1)=1
+            ichannels(3,4,1)=1
             c_channel_types(3,4,1)=cchanneltypes(kk)
             i_msng_sat_flag(3,4,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,1)=1
+            ichannels(4,4,1)=1
             c_channel_types(4,4,1)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,1)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,1)=1
+            ichannels(5,4,1)=1
             c_channel_types(5,4,1)=cchanneltypes(kk)
             i_msng_sat_flag(5,4,1)=i_qc_sat_flag(kk)
            endif
@@ -799,7 +799,7 @@ c format type 4 (raw lat lon)
 
        elseif(csatid(i).eq.'meteos_null')then
 c
-c meteos    #goes09 --- 5-12-99 J. Smart changed to AFWA METEOSAT
+c meteos    #goes09 --- 5-12-99 j. smart changed to afwa meteosat
          
         do j=1,ntypes(i)
          jj=jj+1
@@ -808,23 +808,23 @@ c format type 3 (raw lat lon)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,3,2)=1
+            ichannels(1,3,2)=1
             c_channel_types(1,3,2)=cchanneltypes(kk)
             i_msng_sat_flag(1,3,2)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,3,2)=1
+            ichannels(2,3,2)=1
             c_channel_types(2,3,2)=cchanneltypes(kk)
             i_msng_sat_flag(2,3,2)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,3,2)=1
+            ichannels(3,3,2)=1
             c_channel_types(3,3,2)=cchanneltypes(kk)
             i_msng_sat_flag(3,3,2)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,3,2)=1
+            ichannels(4,3,2)=1
             c_channel_types(4,3,2)=cchanneltypes(kk)
             i_msng_sat_flag(4,3,2)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,3,2)=1
+            ichannels(5,3,2)=1
             c_channel_types(5,3,2)=cchanneltypes(kk)
             i_msng_sat_flag(5,3,2)=i_qc_sat_flag(kk)
            endif
@@ -835,21 +835,21 @@ c format type 4 (raw lat lon)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,2)=1
+            ichannels(1,4,2)=1
             c_channel_types(1,4,2)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,2)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,4,2)=1
+            ichannels(2,4,2)=1
             c_channel_types(2,4,2)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,2)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,4,2)=1
+            ichannels(3,4,2)=1
             c_channel_types(3,4,2)=cchanneltypes(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,2)=1
+            ichannels(4,4,2)=1
             c_channel_types(4,4,2)=cchanneltypes(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,2)=1
+            ichannels(5,4,2)=1
             c_channel_types(5,4,2)=cchanneltypes(kk)
            endif
           enddo
@@ -866,23 +866,23 @@ c format type 1 (gvr)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,1,3)=1
+            ichannels(1,1,3)=1
             c_channel_types(1,1,3)=cchanneltypes(kk)
             i_msng_sat_flag(1,1,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,1,3)=1
+            ichannels(2,1,3)=1
             c_channel_types(2,1,3)=cchanneltypes(kk)
             i_msng_sat_flag(2,1,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,1,3)=1
+            ichannels(3,1,3)=1
             c_channel_types(3,1,3)=cchanneltypes(kk)
             i_msng_sat_flag(3,1,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,1,3)=1
+            ichannels(4,1,3)=1
             c_channel_types(4,1,3)=cchanneltypes(kk)
             i_msng_sat_flag(4,1,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,1,3)=1
+            ichannels(5,1,3)=1
             c_channel_types(5,1,3)=cchanneltypes(kk)
             i_msng_sat_flag(5,1,3)=i_qc_sat_flag(kk)
            endif
@@ -895,34 +895,34 @@ c     format type 2 (wfo)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,2,3)=1
+            ichannels(1,2,3)=1
             c_channel_types(1,2,3)=cchanneltypes(kk)
             path_to_raw_sat(1,2,3)=
-     1        cpath2sat(jj)(1:n)//'conus_vis/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_vis/regclip/'
             i_msng_sat_flag(1,2,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i39')then
-            ICHANNELS(2,2,3)=1
+            ichannels(2,2,3)=1
             c_channel_types(2,2,3)=cchanneltypes(kk)
             path_to_raw_sat(2,2,3)=
-     1        cpath2sat(jj)(1:n)//'conus_i39/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i39/regclip/'
             i_msng_sat_flag(2,2,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'iwv')then
-            ICHANNELS(3,2,3)=1
+            ichannels(3,2,3)=1
             c_channel_types(3,2,3)=cchanneltypes(kk)
             path_to_raw_sat(3,2,3)=
-     1        cpath2sat(jj)(1:n)//'conus_iwv/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_iwv/regclip/'
             i_msng_sat_flag(3,2,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i11')then
-            ICHANNELS(4,2,3)=1
+            ichannels(4,2,3)=1
             c_channel_types(4,2,3)=cchanneltypes(kk)
             path_to_raw_sat(4,2,3)=
-     1        cpath2sat(jj)(1:n)//'conus_i11/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i11/regclip/'
             i_msng_sat_flag(4,2,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i12')then
-            ICHANNELS(5,2,3)=1
+            ichannels(5,2,3)=1
             c_channel_types(5,2,3)=cchanneltypes(kk)
             path_to_raw_sat(5,2,3)=
-     1        cpath2sat(jj)(1:n)//'conus_i12/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i12/regclip/'
             i_msng_sat_flag(5,2,3)=i_qc_sat_flag(kk)
            endif
           enddo
@@ -932,23 +932,23 @@ c     format type 4 (raw lat lon)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,3)=1
+            ichannels(1,4,3)=1
             c_channel_types(1,4,3)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,4,3)=1
+            ichannels(2,4,3)=1
             c_channel_types(2,4,3)=cchanneltypes(kk)
             i_msng_sat_flag(2,4,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,4,3)=1
+            ichannels(3,4,3)=1
             c_channel_types(3,4,3)=cchanneltypes(kk)
             i_msng_sat_flag(3,4,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,3)=1
+            ichannels(4,4,3)=1
             c_channel_types(4,4,3)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,3)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,3)=1
+            ichannels(5,4,3)=1
             c_channel_types(5,4,3)=cchanneltypes(kk)
             i_msng_sat_flag(5,4,3)=i_qc_sat_flag(kk)
            endif
@@ -967,19 +967,19 @@ c     format type 4 (rll)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,4)=1
+            ichannels(1,4,4)=1
             c_channel_types(1,4,4)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wvp')then
-            ICHANNELS(3,4,4)=1
+            ichannels(3,4,4)=1
             c_channel_types(3,4,4)=cchanneltypes(kk)
             i_msng_sat_flag(3,4,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,4)=1
+            ichannels(4,4,4)=1
             c_channel_types(4,4,4)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,4)=1
+            ichannels(5,4,4)=1
             c_channel_types(5,4,4)=cchanneltypes(kk)
             i_msng_sat_flag(5,4,4)=i_qc_sat_flag(kk)
            endif
@@ -988,23 +988,23 @@ c     format type 4 (rll)
 
          elseif(csattypes(jj).eq.'hko')then
 
-c     format type 2 (hko):  for HKO (JS  and PW Li 3-20-03)
+c     format type 2 (hko):  for hko (js  and pw li 3-20-03)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,2,4)=1
+            ichannels(1,2,4)=1
             c_channel_types(1,2,4)=cchanneltypes(kk)
             i_msng_sat_flag(1,2,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv ')then
-            ICHANNELS(3,2,4)=1
+            ichannels(3,2,4)=1
             c_channel_types(3,2,4)=cchanneltypes(kk)
             i_msng_sat_flag(3,2,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'ir1')then
-            ICHANNELS(4,2,4)=1
+            ichannels(4,2,4)=1
             c_channel_types(4,2,4)=cchanneltypes(kk)
             i_msng_sat_flag(4,2,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,2,4)=1
+            ichannels(5,2,4)=1
             c_channel_types(5,2,4)=cchanneltypes(kk)
             i_msng_sat_flag(5,2,4)=i_qc_sat_flag(kk)
            endif
@@ -1013,23 +1013,23 @@ c     format type 2 (hko):  for HKO (JS  and PW Li 3-20-03)
 
          elseif(csattypes(jj).eq.'twn')then
 
-c     format type 3 (twn):  for taiwan (JS  and BS Wang 6-7-01)
+c     format type 3 (twn):  for taiwan (js  and bs wang 6-7-01)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,3,4)=1
+            ichannels(1,3,4)=1
             c_channel_types(1,3,4)=cchanneltypes(kk)
             i_msng_sat_flag(1,3,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv ')then
-            ICHANNELS(3,3,4)=1 
+            ichannels(3,3,4)=1 
             c_channel_types(3,3,4)=cchanneltypes(kk)
             i_msng_sat_flag(3,3,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,3,4)=1  !ir1
+            ichannels(4,3,4)=1  !ir1
             c_channel_types(4,3,4)=cchanneltypes(kk)
             i_msng_sat_flag(4,3,4)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,3,4)=1  !<-- end 4th type
+            ichannels(5,3,4)=1  !<-- end 4th type
             c_channel_types(5,3,4)=cchanneltypes(kk)
             i_msng_sat_flag(5,3,4)=i_qc_sat_flag(kk)
            endif
@@ -1047,26 +1047,26 @@ c format type 1 (gvr)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,1,5)=1
+            ichannels(1,1,5)=1
             c_channel_types(1,1,5)=cchanneltypes(kk)
             i_msng_sat_flag(1,1,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,1,5)=1
+            ichannels(2,1,5)=1
             c_channel_types(2,1,5)=cchanneltypes(kk)
             i_msng_sat_flag(2,1,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,1,5)=1
+            ichannels(3,1,5)=1
             c_channel_types(3,1,5)=cchanneltypes(kk)
             i_msng_sat_flag(3,1,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,1,5)=1
+            ichannels(4,1,5)=1
             c_channel_types(4,1,5)=cchanneltypes(kk)
             i_msng_sat_flag(4,1,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'13u')then
-            ICHANNELS(6,1,5)=1
+            ichannels(6,1,5)=1
             c_channel_types(6,1,5)=cchanneltypes(kk)
             i_msng_sat_flag(6,1,5)=i_qc_sat_flag(kk)
-c      C_CHANNEL_TYPES(5,1,5)='   '  !doesn't appear to be 12u for goes12
+c      c_channel_types(5,1,5)='   '  !doesn't appear to be 12u for goes12
            endif
           enddo
           path_to_raw_sat(1:6,1,5)=cpath2sat(jj)
@@ -1077,34 +1077,34 @@ c format type 2 (wfo)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,2,5)=1
+            ichannels(1,2,5)=1
             c_channel_types(1,2,5)=cchanneltypes(kk)
             path_to_raw_sat(1,2,5)=
-     1        cpath2sat(jj)(1:n)//'conus_vis/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_vis/regclip/'
             i_msng_sat_flag(1,2,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i39')then
-            ICHANNELS(2,2,5)=1
+            ichannels(2,2,5)=1
             c_channel_types(2,2,5)=cchanneltypes(kk)
             path_to_raw_sat(2,2,5)=
-     1        cpath2sat(jj)(1:n)//'conus_i39/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i39/regclip/'
             i_msng_sat_flag(2,2,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'iwv')then
-            ICHANNELS(3,2,5)=1
+            ichannels(3,2,5)=1
             c_channel_types(3,2,5)=cchanneltypes(kk)
             path_to_raw_sat(3,2,5)=
-     1        cpath2sat(jj)(1:n)//'conus_iwv/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_iwv/regclip/'
             i_msng_sat_flag(3,2,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i11')then
-            ICHANNELS(4,2,5)=1
+            ichannels(4,2,5)=1
             c_channel_types(4,2,5)=cchanneltypes(kk)
             path_to_raw_sat(4,2,5)=
-     1        cpath2sat(jj)(1:n)//'conus_i11/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i11/regclip/'
             i_msng_sat_flag(4,2,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i12')then
-            ICHANNELS(5,2,5)=1
+            ichannels(5,2,5)=1
             c_channel_types(5,2,5)=cchanneltypes(kk)
             path_to_raw_sat(5,2,5)=
-     1        cpath2sat(jj)(1:n)//'conus_i12/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i12/regclip/'
             i_msng_sat_flag(5,2,5)=i_qc_sat_flag(kk)
            endif
           enddo
@@ -1114,23 +1114,23 @@ c format type 3 (cdf)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,3,5)=1
+            ichannels(1,3,5)=1
             c_channel_types(1,3,5)=cchanneltypes(kk)
             i_msng_sat_flag(1,3,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,3,5)=1
+            ichannels(2,3,5)=1
             c_channel_types(2,3,5)=cchanneltypes(kk)
             i_msng_sat_flag(2,3,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,3,5)=1
+            ichannels(3,3,5)=1
             c_channel_types(3,3,5)=cchanneltypes(kk)
             i_msng_sat_flag(3,3,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,3,5)=1
+            ichannels(4,3,5)=1
             c_channel_types(4,3,5)=cchanneltypes(kk)
             i_msng_sat_flag(4,3,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,3,5)=1
+            ichannels(5,3,5)=1
             c_channel_types(5,3,5)=cchanneltypes(kk)
             i_msng_sat_flag(5,3,5)=i_qc_sat_flag(kk)
            endif
@@ -1142,23 +1142,23 @@ c format type 3 (raw lat lon)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,5)=1
+            ichannels(1,4,5)=1
             c_channel_types(1,4,5)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,4,5)=1
+            ichannels(2,4,5)=1
             c_channel_types(2,4,5)=cchanneltypes(kk)
             i_msng_sat_flag(2,4,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,4,5)=1
+            ichannels(3,4,5)=1
             c_channel_types(3,4,5)=cchanneltypes(kk)
             i_msng_sat_flag(3,4,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,5)=1
+            ichannels(4,4,5)=1
             c_channel_types(4,4,5)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,5)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,5)=1
+            ichannels(5,4,5)=1
             c_channel_types(5,4,5)=cchanneltypes(kk)
             i_msng_sat_flag(5,4,5)=i_qc_sat_flag(kk)
            endif
@@ -1176,23 +1176,23 @@ c format type 1 (gvr)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,1,6)=1
+            ichannels(1,1,6)=1
             c_channel_types(1,1,6)=cchanneltypes(kk)
             i_msng_sat_flag(1,1,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,1,6)=1
+            ichannels(2,1,6)=1
             c_channel_types(2,1,6)=cchanneltypes(kk)
             i_msng_sat_flag(2,1,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,1,6)=1
+            ichannels(3,1,6)=1
             c_channel_types(3,1,6)=cchanneltypes(kk)
             i_msng_sat_flag(3,1,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,1,6)=1
+            ichannels(4,1,6)=1
             c_channel_types(4,1,6)=cchanneltypes(kk)
             i_msng_sat_flag(4,1,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,1,6)=1
+            ichannels(5,1,6)=1
             c_channel_types(5,1,6)=cchanneltypes(kk)
             i_msng_sat_flag(5,1,6)=i_qc_sat_flag(kk)
            endif
@@ -1204,23 +1204,23 @@ c format type 3 (cdf)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,3,6)=1
+            ichannels(1,3,6)=1
             c_channel_types(1,3,6)=cchanneltypes(kk)
             i_msng_sat_flag(1,3,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,3,6)=1
+            ichannels(2,3,6)=1
             c_channel_types(2,3,6)=cchanneltypes(kk)
             i_msng_sat_flag(2,3,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,3,6)=1
+            ichannels(3,3,6)=1
             c_channel_types(3,3,6)=cchanneltypes(kk)
             i_msng_sat_flag(3,3,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,3,6)=1
+            ichannels(4,3,6)=1
             c_channel_types(4,3,6)=cchanneltypes(kk)
             i_msng_sat_flag(4,3,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,3,6)=1
+            ichannels(5,3,6)=1
             c_channel_types(5,3,6)=cchanneltypes(kk)
             i_msng_sat_flag(5,3,6)=i_qc_sat_flag(kk)
            endif
@@ -1232,23 +1232,23 @@ c format type 4 (rll)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,6)=1
+            ichannels(1,4,6)=1
             c_channel_types(1,4,6)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,4,6)=1
+            ichannels(2,4,6)=1
             c_channel_types(2,4,6)=cchanneltypes(kk)
             i_msng_sat_flag(2,4,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,4,6)=1
+            ichannels(3,4,6)=1
             c_channel_types(3,4,6)=cchanneltypes(kk)
             i_msng_sat_flag(3,4,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,6)=1
+            ichannels(4,4,6)=1
             c_channel_types(4,4,6)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,6)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,6)=1
+            ichannels(5,4,6)=1
             c_channel_types(5,4,6)=cchanneltypes(kk)
             i_msng_sat_flag(5,4,6)=i_qc_sat_flag(kk)
            endif
@@ -1267,26 +1267,26 @@ c format type 1 (gvr)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,1,7)=1
+            ichannels(1,1,7)=1
             c_channel_types(1,1,7)=cchanneltypes(kk)
             i_msng_sat_flag(1,1,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,1,7)=1
+            ichannels(2,1,7)=1
             c_channel_types(2,1,7)=cchanneltypes(kk)
             i_msng_sat_flag(2,1,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,1,7)=1
+            ichannels(3,1,7)=1
             c_channel_types(3,1,7)=cchanneltypes(kk)
             i_msng_sat_flag(3,1,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,1,7)=1
+            ichannels(4,1,7)=1
             c_channel_types(4,1,7)=cchanneltypes(kk)
             i_msng_sat_flag(4,1,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'13u')then
-            ICHANNELS(6,1,7)=1
+            ichannels(6,1,7)=1
             c_channel_types(6,1,7)=cchanneltypes(kk)
             i_msng_sat_flag(6,1,7)=i_qc_sat_flag(kk)
-c      C_CHANNEL_TYPES(5,1,7)='   '  !doesn't appear to be 12u for goes11 -> ? maybe there is?
+c      c_channel_types(5,1,7)='   '  !doesn't appear to be 12u for goes11 -> ? maybe there is?
            endif
           enddo
           path_to_raw_sat(1:6,1,7)=cpath2sat(jj)
@@ -1297,34 +1297,34 @@ c format type 2 (wfo)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,2,7)=1
+            ichannels(1,2,7)=1
             c_channel_types(1,2,7)=cchanneltypes(kk)
             path_to_raw_sat(1,2,7)=
-     1        cpath2sat(jj)(1:n)//'conus_vis/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_vis/regclip/'
             i_msng_sat_flag(1,2,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i39')then
-            ICHANNELS(2,2,7)=1
+            ichannels(2,2,7)=1
             c_channel_types(2,2,7)=cchanneltypes(kk)
             path_to_raw_sat(2,2,7)=
-     1        cpath2sat(jj)(1:n)//'conus_i39/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i39/regclip/'
             i_msng_sat_flag(2,2,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'iwv')then
-            ICHANNELS(3,2,7)=1
+            ichannels(3,2,7)=1
             c_channel_types(3,2,7)=cchanneltypes(kk)
             path_to_raw_sat(3,2,7)=
-     1        cpath2sat(jj)(1:n)//'conus_iwv/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_iwv/regclip/'
             i_msng_sat_flag(3,2,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i11')then
-            ICHANNELS(4,2,7)=1
+            ichannels(4,2,7)=1
             c_channel_types(4,2,7)=cchanneltypes(kk)
             path_to_raw_sat(4,2,7)=
-     1        cpath2sat(jj)(1:n)//'conus_i11/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i11/regclip/'
             i_msng_sat_flag(4,2,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i12')then
-            ICHANNELS(5,2,7)=1
+            ichannels(5,2,7)=1
             c_channel_types(5,2,7)=cchanneltypes(kk)
             path_to_raw_sat(5,2,7)=
-     1        cpath2sat(jj)(1:n)//'conus_i12/regClip/'
+     1        cpath2sat(jj)(1:n)//'conus_i12/regclip/'
             i_msng_sat_flag(5,2,7)=i_qc_sat_flag(kk)
            endif
           enddo
@@ -1334,23 +1334,23 @@ c format type 3 (cdf)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,3,7)=1
+            ichannels(1,3,7)=1
             c_channel_types(1,3,7)=cchanneltypes(kk)
             i_msng_sat_flag(1,3,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,3,7)=1
+            ichannels(2,3,7)=1
             c_channel_types(2,3,7)=cchanneltypes(kk)
             i_msng_sat_flag(2,3,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,3,7)=1
+            ichannels(3,3,7)=1
             c_channel_types(3,3,7)=cchanneltypes(kk)
             i_msng_sat_flag(3,3,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'11u')then
-            ICHANNELS(4,3,7)=1
+            ichannels(4,3,7)=1
             c_channel_types(4,3,7)=cchanneltypes(kk)
             i_msng_sat_flag(4,3,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,3,7)=1
+            ichannels(5,3,7)=1
             c_channel_types(5,3,7)=cchanneltypes(kk)
             i_msng_sat_flag(5,3,7)=i_qc_sat_flag(kk)
            endif
@@ -1362,23 +1362,23 @@ c format type 4 (raw lat lon)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,7)=1
+            ichannels(1,4,7)=1
             c_channel_types(1,4,7)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u')then
-            ICHANNELS(2,4,7)=1
+            ichannels(2,4,7)=1
             c_channel_types(2,4,7)=cchanneltypes(kk)
             i_msng_sat_flag(2,4,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'wv')then
-            ICHANNELS(3,4,7)=1
+            ichannels(3,4,7)=1
             c_channel_types(3,4,7)=cchanneltypes(kk)
             i_msng_sat_flag(3,4,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,7)=1
+            ichannels(4,4,7)=1
             c_channel_types(4,4,7)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,7)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'12u')then
-            ICHANNELS(5,4,7)=1
+            ichannels(5,4,7)=1
             c_channel_types(5,4,7)=cchanneltypes(kk)
             i_msng_sat_flag(5,4,7)=i_qc_sat_flag(kk)
            endif
@@ -1388,27 +1388,27 @@ c format type 4 (raw lat lon)
          endif
         enddo
 
-c satellite = NOAA POLAR ORBITER NETCDF
+c satellite = noaa polar orbiter netcdf
        elseif(csatid(i).eq.'noaapo')then
         do j=1,ntypes(i)
          jj=jj+1
-c format type 1 (ncp): netcdf polar (FMI's data type). Stored like wfo
+c format type 1 (ncp): netcdf polar (fmi's data type). stored like wfo
          if(csattypes(jj).eq.'ncp')then
           call s_len(cpath2sat(jj),n)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,1,8)=1
+            ichannels(1,1,8)=1
             c_channel_types(1,1,8)=cchanneltypes(kk)
             path_to_raw_sat(1,1,8)=cpath2sat(kk)(1:n)//'/vis/'
             i_msng_sat_flag(1,1,8)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i39')then
-            ICHANNELS(2,1,8)=1
+            ichannels(2,1,8)=1
             c_channel_types(2,1,8)=cchanneltypes(kk)
             path_to_raw_sat(2,1,8)=cpath2sat(kk)(1:n)//'/i39/'
             i_msng_sat_flag(2,1,8)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'i11')then
-            ICHANNELS(4,1,8)=1
+            ichannels(4,1,8)=1
             c_channel_types(4,1,8)=cchanneltypes(kk)
             path_to_raw_sat(4,1,8)=cpath2sat(kk)(1:n)//'/i11/'
             i_msng_sat_flag(4,1,8)=i_qc_sat_flag(kk)
@@ -1420,15 +1420,15 @@ c format type 4 (rll)
           do k=1,nchannel(jj)
            kk=kk+1
            if(cchanneltypes(kk).eq.'vis')then
-            ICHANNELS(1,4,8)=1
+            ichannels(1,4,8)=1
             c_channel_types(1,4,8)=cchanneltypes(kk)
             i_msng_sat_flag(1,4,8)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'4u ')then
-            ICHANNELS(2,4,8)=1
+            ichannels(2,4,8)=1
             c_channel_types(2,4,8)=cchanneltypes(kk)
             i_msng_sat_flag(2,4,8)=i_qc_sat_flag(kk)
            elseif(cchanneltypes(kk).eq.'10p')then
-            ICHANNELS(4,4,8)=1
+            ichannels(4,4,8)=1
             c_channel_types(4,4,8)=cchanneltypes(kk)
             i_msng_sat_flag(4,4,8)=i_qc_sat_flag(kk)
            endif
@@ -1439,12 +1439,12 @@ c format type 4 (rll)
 
        else ! more general formulation for channels
 
-c format type 1 (ncp): netcdf polar (FMI's data type). Stored like wfo
+c format type 1 (ncp): netcdf polar (fmi's data type). stored like wfo
 c format type 4 (rll)
 
         do js = 1,maxsat
 
-         if(js .eq. 2 .OR. js .ge. 9)then
+         if(js .eq. 2 .or. js .ge. 9)then
 
           if(trim(csatid(i)).eq.trim(satellite_ids(js)))then
 
@@ -1462,7 +1462,7 @@ c format type 4 (rll)
                 do ic = 1,maxchannel
                     if(cchanneltypes(kk).eq.satellite_channels(it,ic,js)
      1                                                             )then  
-                        write(6,*)' Test channel match ',it,js,ic 
+                        write(6,*)' test channel match ',it,js,ic 
      1                           ,kk,cchanneltypes(kk)
                     endif
                 enddo 
@@ -1483,14 +1483,14 @@ c format type 4 (rll)
                 endif
 
                 if(ic .gt. 0)then
-                  ICHANNELS(ic,it,js)=1
+                  ichannels(ic,it,js)=1
                   c_channel_types(ic,it,js)=cchanneltypes(kk)
                   i_msng_sat_flag(ic,it,js)=i_qc_sat_flag(kk)
-                  write(6,*)' Channel Match js/it/k/kk/ic'
+                  write(6,*)' channel match js/it/k/kk/ic'
      1                                     ,js,it,k,kk,ic,csatid(i)
      1                                     ,cchanneltypes(kk)
                 else
-                  write(6,*)' No Channel Match js/it/k/kk/ic'
+                  write(6,*)' no channel match js/it/k/kk/ic'
      1                                     ,js,it,k,kk,ic,csatid(i)
      1                                     ,cchanneltypes(kk)
                 endif ! valid ic found
@@ -1507,6 +1507,6 @@ c format type 4 (rll)
         enddo ! js
        endif ! test of csatid (9 or greater)
       enddo ! i = 1,nsats
-      print*,'Done in conf_isjtkc. Returning to config_satellite_lvd'
+      print*,'done in conf_isjtkc. returning to config_satellite_lvd'
       return
       end

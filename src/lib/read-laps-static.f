@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -29,40 +29,40 @@ cdis
 cdis
 cdis
 cdis
-C Read time-invariant LAPS data.  i4time is set to zero which results
-C in a "file time" of Jan 1, 1960 or 1970.
-C
-        SUBROUTINE READ_LAPS_STATIC (DIR, EXT, IDIM, JDIM, KMAX, KDIM,
-     1                          VAR, UNITS, COMMENT, GRID, STATUS)
-C
-        IMPLICIT NONE
-C
-        CHARACTER*(*) DIR, EXT
-        INTEGER IDIM, JDIM, KMAX, KDIM
-        CHARACTER*(*) VAR(1), UNITS(1), COMMENT(1)
-        REAL GRID(IDIM,JDIM,KDIM)
-        INTEGER STATUS
-C
-        INTEGER NVARSMAX, I
-        PARAMETER (NVARSMAX=20)         ! may need to increase this someday
-        CHARACTER*4 LVL_COORD(NVARSMAX)
-        INTEGER LVL(NVARSMAX)
+c read time-invariant laps data.  i4time is set to zero which results
+c in a "file time" of jan 1, 1960 or 1970.
+c
+        subroutine read_laps_static (dir, ext, idim, jdim, kmax, kdim,
+     1                          var, units, comment, grid, status)
+c
+        implicit none
+c
+        character*(*) dir, ext
+        integer idim, jdim, kmax, kdim
+        character*(*) var(1), units(1), comment(1)
+        real grid(idim,jdim,kdim)
+        integer status
+c
+        integer nvarsmax, i
+        parameter (nvarsmax=20)         ! may need to increase this someday
+        character*4 lvl_coord(nvarsmax)
+        integer lvl(nvarsmax)
 
         write(6,*)
-     1 ' WARNING: This routine reads static data in the old format.'
+     1 ' warning: this routine reads static data in the old format.'
         write(6,*)
-     1 ' The format is non-netCDF and is not portable.'
+     1 ' the format is non-netcdf and is not portable.'
         write(6,*)
-     1 ' It is recommended to call rd_laps_static instead to read'
+     1 ' it is recommended to call rd_laps_static instead to read'
         write(6,*)
-     1 ' the new, portable netCDF files.'
+     1 ' the new, portable netcdf files.'
 
-        DO I=1,NVARSMAX
-                LVL(I) = 0
-        ENDDO
+        do i=1,nvarsmax
+                lvl(i) = 0
+        enddo
 
-        CALL READ_LAPS_DATA (0, DIR, EXT, IDIM, JDIM, KMAX, KDIM,
-     1  VAR, LVL, LVL_COORD, UNITS, COMMENT, GRID, STATUS)
+        call read_laps_data (0, dir, ext, idim, jdim, kmax, kdim,
+     1  var, lvl, lvl_coord, units, comment, grid, status)
 
-        RETURN
-        END
+        return
+        end

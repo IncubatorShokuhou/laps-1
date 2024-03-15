@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -48,11 +48,11 @@ c
 c
 c-------------------------------------------------------------------------
 c
-c     Routine to read the Air Force surface data files.
+c     routine to read the air force surface data files.
 c
-c     Changes:  P. Stamus  06-24-96  Original from FSL version.
-c                          03-19-97  Changed 1st format statement.
-c                          10-28-97  Changes for dynamic LAPS.
+c     changes:  p. stamus  06-24-96  original from fsl version.
+c                          03-19-97  changed 1st format statement.
+c                          10-28-97  changes for dynamic laps.
 c
 c-------------------------------------------------------------------------
 c
@@ -79,12 +79,12 @@ c
       character cover(5,nmax)*8, amt_out*3 
       character*(*) path_to_obs
 c
-c..... Set number of header lines to skip at top of file.
+c..... set number of header lines to skip at top of file.
 c
       num_hdr = 16
 	istatus = -1
 c
-c..... Zero out the cloud arrays and other stuff.
+c..... zero out the cloud arrays and other stuff.
 c
       do j=1,nmax
          do i=1,5
@@ -94,10 +94,10 @@ c
          weather(j) = '                                        '
          type(j) = '      '
          sname(j) = '     '
-         atype(j)(1:6) = 'UNK   '
+         atype(j)(1:6) = 'unk   '
       enddo !j
 c
-c..... Open the data file.
+c..... open the data file.
 c
       af_time = a9_to_a8(filetime)
       len = index(path_to_obs,' ') - 1
@@ -108,15 +108,15 @@ cc    af_file = '../../../lapsdat/sao_af_raw/sao.'//af_time
 c
       open(11,file=af_file,status='old',err=590)
 c
-c..... Read the file header lines.
+c..... read the file header lines.
 c
       do i=1,num_hdr
          read(11,900,err=600,end=600) dum
       enddo !i
  900  format(a132)
 c
-c..... Now read and count up each station, adjusting units/codes/etc
-c..... to something LAPS expects.
+c..... now read and count up each station, adjusting units/codes/etc
+c..... to something laps expects.
 c
       n = 0
  500  n = n + 1
@@ -155,7 +155,7 @@ cc    &             cld3a,cld3h,cld4a
 cc     write(6,940) cld4h,cld5a,cld5h
 c
 c
-c.....	Check for bad station info
+c.....	check for bad station info
 c
 	if(name_in(3:5) .eq. '???') then
 	   n = n - 1
@@ -169,7 +169,7 @@ c
 	   go to 500
 	endif
 c
-c..... Set up final arrays and convert units as needed.
+c..... set up final arrays and convert units as needed.
 c
       if(name_in .eq. '    ') then
          sname(n)(1:5) = id(1:5)
@@ -177,7 +177,7 @@ c
          sname(n)(1:5) = name_in(1:5)
       endif
 c
-c..... Figure out time
+c..... figure out time
 c
       if(timen .gt. 24) then
          n = n - 1
@@ -196,26 +196,26 @@ c
 c
       time(n) = float(timen*100 + timeo)
 c
-c..... Figure out report type
+c..... figure out report type
 c
-      if(rtype .eq. 2.and.astype.eq.2) type(n) = 'METAR'
+      if(rtype .eq. 2.and.astype.eq.2) type(n) = 'metar'
 
-      if(rtype .eq. 3.and.astype.eq.2) type(n) = 'SPECI'
+      if(rtype .eq. 3.and.astype.eq.2) type(n) = 'speci'
 
-      if(rtype .eq. 2.and.astype.eq.4) type(n) = 'METAR'
+      if(rtype .eq. 2.and.astype.eq.4) type(n) = 'metar'
 
-      if(rtype .eq. 2.and.astype.eq.9) type(n) = 'BUOY'
+      if(rtype .eq. 2.and.astype.eq.9) type(n) = 'buoy'
 
-      if(rtype .eq. 2.and.astype.eq.0) type(n) = 'SYNOP'
+      if(rtype .eq. 2.and.astype.eq.0) type(n) = 'synop'
 c
-c..... Auto station?  
+c..... auto station?  
 c
       if(astype .eq. 9) then
-         atype(n)(1:4) = 'AUTO'
+         atype(n)(1:4) = 'auto'
       endif
 c
-c..... Calculate dewpoint, do some first checks, change some units.
-c..... Winds, vis, cld hts, taken care of in calling routine.
+c..... calculate dewpoint, do some first checks, change some units.
+c..... winds, vis, cld hts, taken care of in calling routine.
 c
       td(n) = badflag
       if(t(n).gt.0. .and. t(n).lt.400.) then
@@ -239,7 +239,7 @@ c
          dp(n) = -99
       endif
 c
-c.....  Put cloud data into arrays ht(5,x), cover(5,x) 
+c.....  put cloud data into arrays ht(5,x), cover(5,x) 
 c
       call get_cld_amt_af(cld1a, amt_out)
       call get_cld_hts_af(cld1h, ht_out)
@@ -266,26 +266,26 @@ c
       cover(5,n)(1:3) = amt_out
       ht(5,n) = ht_out
 c
-c..... Back to top of loop.
+c..... back to top of loop.
 c
       go to 500
 c
-c..... When we're done...
+c..... when we're done...
 c
  400  continue
       n = n - 1
       write(6,955) n
- 955  format(' Found ',i4,' stations in surface file.')
+ 955  format(' found ',i4,' stations in surface file.')
       istatus = 1
       return
 c
  590  	continue
-	print *,' WARNING: could not open SAO file.'
+	print *,' warning: could not open sao file.'
 	istatus = 0
 	return
 c
  600  	continue
-	print *,' ERROR reading SAO file.'
+	print *,' error reading sao file.'
 	istatus = 0
 	return
 c
@@ -294,7 +294,7 @@ c
 c
       subroutine get_cld_amt_af(amt_in, amt_out)
 c
-c..... Routine to figure out the AF cloud amounts.
+c..... routine to figure out the af cloud amounts.
 c
       integer amt_in
       character amt_out*3
@@ -302,11 +302,11 @@ c
       amt_in = abs( amt_in )
       amt_out = '   '
       if(amt_in .gt. 9) return
-      if(amt_in .eq. 9) amt_out = 'X  '
-      if(amt_in.ge.8 .and. amt_in.lt.9) amt_out = 'OVC'
-      if(amt_in.ge.4 .and. amt_in.lt.8) amt_out = 'BKN'
-      if(amt_in.ge.1 .and. amt_in.lt.4) amt_out = 'SCT'
-      if(amt_in.ge.0 .and. amt_in.lt.1) amt_out = 'CLR'
+      if(amt_in .eq. 9) amt_out = 'x  '
+      if(amt_in.ge.8 .and. amt_in.lt.9) amt_out = 'ovc'
+      if(amt_in.ge.4 .and. amt_in.lt.8) amt_out = 'bkn'
+      if(amt_in.ge.1 .and. amt_in.lt.4) amt_out = 'sct'
+      if(amt_in.ge.0 .and. amt_in.lt.1) amt_out = 'clr'
       if(amt_in .lt. 0) return
 c
       return
@@ -315,7 +315,7 @@ c
 c    
       subroutine get_cld_hts_af(ht_in, ht_out)
 c
-c..... Routine to figure out the AF cloud heights.
+c..... routine to figure out the af cloud heights.
 c
       integer ht_in
       real ht_out

@@ -1,1119 +1,1114 @@
-MODULE STMAS4D_CORE
+module stmas4d_core
 
-  USE PRMTRS_STMAS
-  USE GENERALTOOLS
-  USE PREP_STMAS4D
-  USE POST_STMAS4D
-  USE COSTFUN_GRAD
-  USE WCOMPT_GRADT,  ONLY : WCOMPGERNL
+   use prmtrs_stmas
+   use generaltools
+   use prep_stmas4d
+   use post_stmas4d
+   use costfun_grad
+   use wcompt_gradt, only: wcompgernl
 
-CONTAINS
+contains
 
-SUBROUTINE MGANALYSS
+   subroutine mganalyss
 !*************************************************
-! MULTI-GRID ANALYSIS
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! multi-grid analysis
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 !------------------------
-  INTEGER       :: IT,FW
-!                  FW=1: FROM COARSE GRID TO FINE GRID
-!                  FW=0: FROM FINE GRID TO COARSE GRID
-   INTEGER  :: I,J,K,T,S
- 
-  INTEGER  ::NUM,NO,N,O   !shuyuan 20100901
-  INTEGER  :: NP(MAXDIMS)  !shuyuan 
+      integer       :: it, fw
+!                  fw=1: from coarse grid to fine grid
+!                  fw=0: from fine grid to coarse grid
+      integer  :: i, j, k, t, s
+
+      integer  ::num, no, n, o   !shuyuan 20100901
+      integer  :: np(maxdims)  !shuyuan
 !------------------------
 
-  PRINT*,'PREPROCSS'
-  CALL PREPROCSS
+      print *, 'preprocss'
+      call preprocss
 
-  GRDLEVL=0
-  IT=0
-  FW=1
-  NUM=0
-    DO WHILE(.TRUE.)
+      grdlevl = 0
+      it = 0
+      fw = 1
+      num = 0
+      do while (.true.)
 
-      GRDLEVL=GRDLEVL+1
-      PRINT*,'NUMBER',GRDLEVL,'LEVEL GRID IS IN PROCESSING'
-      CALL RDINITBGD
-      PRINT*,'PHYSCPSTN'
-      CALL PHYSCPSTN
-      PRINT*,'GETCOEFFT'
-      CALL GETCOEFFT
+         grdlevl = grdlevl + 1
+         print *, 'number', grdlevl, 'level grid is in processing'
+         call rdinitbgd
+         print *, 'physcpstn'
+         call physcpstn
+         print *, 'getcoefft'
+         call getcoefft
 
-      IF(NUMVARS.EQ.0)EXIT
+         if (numvars .eq. 0) exit
 
-      PRINT*,'MINIMIZER'
-      CALL MINIMIZER_XIE
-      IF(GRDLEVL.EQ.FNSTGRD .AND. IT.EQ.ITREPET)EXIT
+         print *, 'minimizer'
+         call minimizer_xie
+         if (grdlevl .eq. fnstgrd .and. it .eq. itrepet) exit
 
-      IF(IFREPET.EQ.0) THEN
-        PRINT*,'COAS2FINE'
-        CALL COAS2FINE_XIE		! USE XIE'S AS THE OLD HAS ERROR
-      ELSE
-        IF(GRDLEVL.EQ.FNSTGRD) FW=0
-        IF(GRDLEVL.EQ.1) THEN
-          FW=1
-          IT=IT+1
-        ENDIF
-        IF(FW.EQ.1) THEN
-          PRINT*,'COAS2FINE'
-          CALL COAS2FINE_XIE		! USE XIE'S AS THE OLD HAS ERROR
-        ELSE
-          GRDLEVL=GRDLEVL-2
-          PRINT*,'FINE2COAS'
-          CALL FINE2COAS_XIE		! USE XIE'S AS THE OLD HAS ERROR
-        ENDIF
-      ENDIF
+         if (ifrepet .eq. 0) then
+            print *, 'coas2fine'
+            call coas2fine_xie                ! use xie's as the old has error
+         else
+            if (grdlevl .eq. fnstgrd) fw = 0
+            if (grdlevl .eq. 1) then
+               fw = 1
+               it = it + 1
+            end if
+            if (fw .eq. 1) then
+               print *, 'coas2fine'
+               call coas2fine_xie                ! use xie's as the old has error
+            else
+               grdlevl = grdlevl - 2
+               print *, 'fine2coas'
+               call fine2coas_xie                ! use xie's as the old has error
+            end if
+         end if
 
-    ENDDO
-!   CALL GETW
-  PRINT*,'PSTPROCSS'
-  CALL PSTPROCSS
-  RETURN
-END SUBROUTINE MGANALYSS
+      end do
+!   call getw
+      print *, 'pstprocss'
+      call pstprocss
+      return
+   end subroutine mganalyss
 
-SUBROUTINE TMPMEMALC
+   subroutine tmpmemalc
 !*************************************************
-! MEMORY ALLOCATE FOR TMP ARRAY
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! memory allocate for tmp array
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,ER
+      integer  :: i, j, k, t, s, er
 ! --------------------
-  ALLOCATE(TMPANALS(NTMPGRD(1),NTMPGRD(2),NTMPGRD(3),NTMPGRD(4),NUMSTAT),STAT=ER)
-  IF(ER.NE.0)STOP 'TMPANALS ALLOCATE WRONG'
-  DO T=1,NTMPGRD(4)
-  DO K=1,NTMPGRD(3)
-  DO J=1,NTMPGRD(2)
-  DO I=1,NTMPGRD(1)
-    DO S=1,NUMSTAT
-      TMPANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  RETURN
-END SUBROUTINE TMPMEMALC
+      allocate (tmpanals(ntmpgrd(1), ntmpgrd(2), ntmpgrd(3), ntmpgrd(4), numstat), stat=er)
+      if (er .ne. 0) stop 'tmpanals allocate wrong'
+      do t = 1, ntmpgrd(4)
+      do k = 1, ntmpgrd(3)
+      do j = 1, ntmpgrd(2)
+      do i = 1, ntmpgrd(1)
+         do s = 1, numstat
+            tmpanals(i, j, k, t, s) = grdanals(i, j, k, t, s)
+         end do
+      end do
+      end do
+      end do
+      end do
+      return
+   end subroutine tmpmemalc
 
-SUBROUTINE TMPMEMRLS
+   subroutine tmpmemrls
 !*************************************************
-! MEMORY RELEASE FOR TMP ARRAY
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! memory release for tmp array
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
-  DEALLOCATE(TMPANALS)
-  RETURN
-END SUBROUTINE TMPMEMRLS
+      implicit none
+      deallocate (tmpanals)
+      return
+   end subroutine tmpmemrls
 
-SUBROUTINE GETCOEFFT
+   subroutine getcoefft
 !*************************************************
-! GET GRID POINT COEFFICENT FOR EVERY OBSERVATION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! get grid point coefficent for every observation
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,O,M,N,UV,RR
-  INTEGER  :: LM(MAXDIMS)
-  INTEGER  :: NP(MAXDIMS),NN(MAXDIMS)
-  REAL     :: AC(NUMDIMS,NGPTOBS),OC(NUMDIMS),CO(NGPTOBS)
+      integer  :: i, j, k, t, o, m, n, uv, rr
+      integer  :: lm(maxdims)
+      integer  :: np(maxdims), nn(maxdims)
+      real     :: ac(numdims, ngptobs), oc(numdims), co(ngptobs)
 ! --------------------
-! GET INTERPOLATION COEFFICENT
-  UV=0
-  RR=0
-  IF(NALLOBS.EQ.0) RETURN
-  DO O=1,NALLOBS
-    DO N=1,MAXDIMS
-      NP(N)=1
-    ENDDO
-    DO N=1,NUMDIMS
-      NP(N)=INT((OBSPOSTN(N,O)-ORIPSTN(N))/GRDSPAC(N))+1
-      IF(NP(N).EQ.NUMGRID(N).AND.NUMGRID(N).NE.1)NP(N)=NUMGRID(N)-1
-      IF(NUMGRID(N).EQ.1)NP(N)=1
-    ENDDO
-    DO N=1,MAXDIMS
-      OBSIDXPC(N,O)=NP(N)
-    ENDDO
-    M=0
+! get interpolation coefficent
+      uv = 0
+      rr = 0
+      if (nallobs .eq. 0) return
+      do o = 1, nallobs
+         do n = 1, maxdims
+            np(n) = 1
+         end do
+         do n = 1, numdims
+            np(n) = int((obspostn(n, o) - oripstn(n))/grdspac(n)) + 1
+            if (np(n) .eq. numgrid(n) .and. numgrid(n) .ne. 1) np(n) = numgrid(n) - 1
+            if (numgrid(n) .eq. 1) np(n) = 1
+         end do
+         do n = 1, maxdims
+            obsidxpc(n, o) = np(n)
+         end do
+         m = 0
 !====================================================
-!    DO T=NP(4),MIN0(NP(4)+1,NUMGRID(4))
-!    DO K=NP(3),MIN0(NP(3)+1,NUMGRID(3))
-!    DO J=NP(2),MIN0(NP(2)+1,NUMGRID(2))
-!    DO I=NP(1),MIN0(NP(1)+1,NUMGRID(1))
-!      NN(1)=I
-!      NN(2)=J
-!      NN(3)=K
-!      NN(4)=T
-!      M=M+1
-!      DO N=1,NUMDIMS
-!        AC(N,M)=NN(N)*1.0
-!      ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!    DO N=1,NUMDIMS
-!      OC(N)=(OBSPOSTN(N,O)-ORIPSTN(N))/GRDSPAC(N)+1
-!    ENDDO
+!    do t=np(4),min0(np(4)+1,numgrid(4))
+!    do k=np(3),min0(np(3)+1,numgrid(3))
+!    do j=np(2),min0(np(2)+1,numgrid(2))
+!    do i=np(1),min0(np(1)+1,numgrid(1))
+!      nn(1)=i
+!      nn(2)=j
+!      nn(3)=k
+!      nn(4)=t
+!      m=m+1
+!      do n=1,numdims
+!        ac(n,m)=nn(n)*1.0
+!      enddo
+!    enddo
+!    enddo
+!    enddo
+!    enddo
+!    do n=1,numdims
+!      oc(n)=(obspostn(n,o)-oripstn(n))/grdspac(n)+1
+!    enddo
 !================== modified by zhongjie he ========
-    DO N=1,MAXDIMS
-      LM(N)=NP(N)+1
-      IF(NUMDIMS.LT.N) LM(N)=NP(N)
-    ENDDO
-    DO T=NP(4),LM(4)
-    DO K=NP(3),LM(3)
-    DO J=NP(2),LM(2)
-    DO I=NP(1),LM(1)
-      NN(1)=MIN0(I,NUMGRID(1))
-      NN(2)=MIN0(J,NUMGRID(2))
-      NN(3)=MIN0(K,NUMGRID(3))
-      NN(4)=MIN0(T,NUMGRID(4))
-      M=M+1
-      DO N=1,NUMDIMS
-        AC(N,M)=NN(N)*1.0
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    DO N=1,NUMDIMS
-      IF(NUMGRID(N).GE.2) THEN
-        OC(N)=(OBSPOSTN(N,O)-ORIPSTN(N))/GRDSPAC(N)+1
-      ELSE
-        OC(N)=1
-      ENDIF
-    ENDDO
+         do n = 1, maxdims
+            lm(n) = np(n) + 1
+            if (numdims .lt. n) lm(n) = np(n)
+         end do
+         do t = np(4), lm(4)
+         do k = np(3), lm(3)
+         do j = np(2), lm(2)
+         do i = np(1), lm(1)
+            nn(1) = min0(i, numgrid(1))
+            nn(2) = min0(j, numgrid(2))
+            nn(3) = min0(k, numgrid(3))
+            nn(4) = min0(t, numgrid(4))
+            m = m + 1
+            do n = 1, numdims
+               ac(n, m) = nn(n)*1.0
+            end do
+         end do
+         end do
+         end do
+         end do
+         do n = 1, numdims
+            if (numgrid(n) .ge. 2) then
+               oc(n) = (obspostn(n, o) - oripstn(n))/grdspac(n) + 1
+            else
+               oc(n) = 1
+            end if
+         end do
 !====================================================
-    ! CALL INTERPLTN_XIE(NUMDIMS,NGPTOBS,CO,AC,OC,3,NUMGRID(3),PPM)
-    CALL INTERPLTN(NUMDIMS,NGPTOBS,CO,AC,OC)
-    DO M=1,NGPTOBS
-      OBSCOEFF(M,O)=CO(M)
-    ENDDO
-  ENDDO
-  UV=NOBSTAT(U_CMPNNT)+NOBSTAT(V_CMPNNT)
-  RR=NOBSTAT(NUMSTAT+1)
-  OBSRADAR = 1.0
-  IF(RR.NE.0)OBSRADAR=100.0*UV/FLOAT(RR)
-  RR=NOBSTAT(NUMSTAT+2)
-  OBS_SFMR = 1.0
-  IF(RR.NE.0)OBS_SFMR=1.0/RR
-!jhui 
-  RR=NOBSTAT(NUMSTAT+3)
-  IF(RR.NE.0)OBSREF=1.0/RR
-  
-  RETURN
-END SUBROUTINE GETCOEFFT
+         ! call interpltn_xie(numdims,ngptobs,co,ac,oc,3,numgrid(3),ppm)
+         call interpltn(numdims, ngptobs, co, ac, oc)
+         do m = 1, ngptobs
+            obscoeff(m, o) = co(m)
+         end do
+      end do
+      uv = nobstat(u_cmpnnt) + nobstat(v_cmpnnt)
+      rr = nobstat(numstat + 1)
+      obsradar = 1.0
+      if (rr .ne. 0) obsradar = 100.0*uv/float(rr)
+      rr = nobstat(numstat + 2)
+      obs_sfmr = 1.0
+      if (rr .ne. 0) obs_sfmr = 1.0/rr
+!jhui
+      rr = nobstat(numstat + 3)
+      if (rr .ne. 0) obsref = 1.0/rr
 
-SUBROUTINE MINIMIZER_XIE
+      return
+   end subroutine getcoefft
+
+   subroutine minimizer_xie
 !*************************************************
-! MINIMIZE THE COST FUNCTION
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! minimize the cost function
+! history: august 2007, coded by wei li.
 !
-!          MODIFIED BY YUANFU FOR USING A SINGLE
-!          PRECISION LBFGS ROUTINE
+!          modified by yuanfu for using a single
+!          precision lbfgs routine
 !
-!          DECEMBER 2013 MODIFIED BY YUANFU FOR
-!          a) CHANGING AUTOMATIC ARRAYS TO ALLOCATABLES
-!          b) SWITCHING TO LBFGSB 3.0 WITH YUANFU'S
-!             MODIFICATION FOR SUPER LARGE MINIMIZATION
-!          c) REMOVING INITIALIZATION OF IW and WA FOR
-!             EFFICIENCY
+!          december 2013 modified by yuanfu for
+!          a) changing automatic arrays to allocatables
+!          b) switching to lbfgsb 3.0 with yuanfu's
+!             modification for super large minimization
+!          c) removing initialization of iw and wa for
+!             efficiency
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER ,PARAMETER :: MM=5
-  CHARACTER(LEN=60) :: TA,CS
-  LOGICAL           :: LS(4)
-  INTEGER    :: I0,IC,IP,IT,ISBMN,N,O,S,T,K,J,I,NO,ER
-  INTEGER    :: IS(44)
-  INTEGER, ALLOCATABLE :: NB(:),IW(:)
-  INTEGER    :: NN(MAXDIMS+1),NG(MAXDIMS+1),NC
-  REAL       :: MN(NUMSTAT+3),MX(NUMSTAT+3)
+      integer, parameter :: mm = 5
+      character(len=60) :: ta, cs
+      logical           :: ls(4)
+      integer    :: i0, ic, ip, it, isbmn, n, o, s, t, k, j, i, no, er
+      integer    :: is(44)
+      integer, allocatable :: nb(:), iw(:)
+      integer    :: nn(maxdims + 1), ng(maxdims + 1), nc
+      real       :: mn(numstat + 3), mx(numstat + 3)
 
-  REAL, ALLOCATABLE :: LB(:), UB(:)
-  REAL :: FA, PG, DS(29)
-  REAL,ALLOCATABLE :: WA(:)
+      real, allocatable :: lb(:), ub(:)
+      real :: fa, pg, ds(29)
+      real, allocatable :: wa(:)
 
-  REAL  ::temp,temp1,temp2,dif1,dif2,temp0
-  INTEGER::  locx,locy,locz,loct,locv
+      real  ::temp, temp1, temp2, dif1, dif2, temp0
+      integer::  locx, locy, locz, loct, locv
 ! --------------------
 
-  ! ALLOCATE WORKING ARRAY:
-  ALLOCATE(WA(2*MM*NUMVARS+5*NUMVARS+12*MM*MM+12*MM), &
-           LB(NUMVARS),UB(NUMVARS),NB(NUMVARS),IW(3*NUMVARS),STAT=ER)
-  IF (ER .NE. 0) THEN
-    PRINT*,'MINIMIZER: Cannot allocate enough memory for the working array'
-    STOP
-  ELSE
-    PRINT*,'Successfully allocate memory for LBFGS!'
-  ENDIF
+      ! allocate working array:
+      allocate (wa(2*mm*numvars + 5*numvars + 12*mm*mm + 12*mm), &
+                lb(numvars), ub(numvars), nb(numvars), iw(3*numvars), stat=er)
+      if (er .ne. 0) then
+         print *, 'minimizer: cannot allocate enough memory for the working array'
+         stop
+      else
+         print *, 'successfully allocate memory for lbfgs!'
+      end if
 
-  IP=1
-  FA=1.0d+2
-  PG=1.0d-10
-  ISBMN = 1	! SUBSPACE MINIMIZATION
-  DO N=1,NUMVARS
-    NB(N)=0
-    LB(N)=0.0
-    UB(N)=0.0
-  ENDDO
+      ip = 1
+      fa = 1.0d+2
+      pg = 1.0d-10
+      isbmn = 1        ! subspace minimization
+      do n = 1, numvars
+         nb(n) = 0
+         lb(n) = 0.0
+         ub(n) = 0.0
+      end do
 
-  ! BOUND: IF IFBOUND EQ 1, USE (MIN(OBS), MAX(OBS)) TO BOUND
-  !        ANALYSIS
-  IF(IFBOUND.EQ.1 .AND. NALLOBS.GE.1)THEN
+      ! bound: if ifbound eq 1, use (min(obs), max(obs)) to bound
+      !        analysis
+      if (ifbound .eq. 1 .and. nallobs .ge. 1) then
 
-    ! FIND THE MIN(OBS) AND MAX(OBS):
+         ! find the min(obs) and max(obs):
 
-    ! BOUND AT LEAST ALLOW ZERO INCREMENT: BY YUANFU CORRECTING ZHONGJIE'S SETTING
-    MN = 0.0
-    MX = 0.0
+         ! bound at least allow zero increment: by yuanfu correcting zhongjie's setting
+         mn = 0.0
+         mx = 0.0
 
-    ! CONVENTIONAL OBS:
-    DO N=1,MAXDIMS
-      NG(N)=NUMGRID(N)
-    ENDDO
-    NG(MAXDIMS+1)=NUMSTAT+1
-    O=0
-    DO S=1,NUMSTAT
-      DO NO=1,NOBSTAT(S)
-        O=O+1
-        MN(S)=MIN(MN(S),OBSVALUE(O))
-        MX(S)=MAX(MX(S),OBSVALUE(O))
-      ENDDO
-    ENDDO
+         ! conventional obs:
+         do n = 1, maxdims
+            ng(n) = numgrid(n)
+         end do
+         ng(maxdims + 1) = numstat + 1
+         o = 0
+         do s = 1, numstat
+            do no = 1, nobstat(s)
+               o = o + 1
+               mn(s) = min(mn(s), obsvalue(o))
+               mx(s) = max(mx(s), obsvalue(o))
+            end do
+         end do
 
-    ! RADAR AND SFMR:
-    S=NUMSTAT+1
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      MN(U_CMPNNT)=MIN(MN(U_CMPNNT),OBSVALUE(O))
-      MX(U_CMPNNT)=MAX(MX(U_CMPNNT),OBSVALUE(O))
-      MN(V_CMPNNT)=MIN(MN(V_CMPNNT),OBSVALUE(O))
-      MX(V_CMPNNT)=MAX(MX(V_CMPNNT),OBSVALUE(O))
-    ENDDO
-    S=NUMSTAT+2
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      MN(U_CMPNNT)=MIN(MN(U_CMPNNT),-1.*OBSVALUE(O))
-      MX(U_CMPNNT)=MAX(MX(U_CMPNNT),OBSVALUE(O))
-      MN(V_CMPNNT)=MIN(MN(V_CMPNNT),-1.*OBSVALUE(O))
-      MX(V_CMPNNT)=MAX(MX(V_CMPNNT),OBSVALUE(O))
-    ENDDO
+         ! radar and sfmr:
+         s = numstat + 1
+         do no = 1, nobstat(s)
+            o = o + 1
+            mn(u_cmpnnt) = min(mn(u_cmpnnt), obsvalue(o))
+            mx(u_cmpnnt) = max(mx(u_cmpnnt), obsvalue(o))
+            mn(v_cmpnnt) = min(mn(v_cmpnnt), obsvalue(o))
+            mx(v_cmpnnt) = max(mx(v_cmpnnt), obsvalue(o))
+         end do
+         s = numstat + 2
+         do no = 1, nobstat(s)
+            o = o + 1
+            mn(u_cmpnnt) = min(mn(u_cmpnnt), -1.*obsvalue(o))
+            mx(u_cmpnnt) = max(mx(u_cmpnnt), obsvalue(o))
+            mn(v_cmpnnt) = min(mn(v_cmpnnt), -1.*obsvalue(o))
+            mx(v_cmpnnt) = max(mx(v_cmpnnt), obsvalue(o))
+         end do
 !jhui
 !----------------------------------
 !changed by shuyuan 20100722
-!      MN(6) =0.0
-!      MX(6) =0.0
-       
-    S=NUMSTAT+3
-    MN(S) =0.0
-    MX(S) =0.0
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      MN(S)=MIN(MN(S),OBSVALUE(O))
-      MX(S)=MAX(MX(S),OBSVALUE(O))
-    ENDDO
+!      mn(6) =0.0
+!      mx(6) =0.0
 
-    DO S=6,7
-     MN(S) =0.0
-     MX(S) =0.0
-     DO NO=1,NOBSTAT(S)
-      O=O+1
-      MN(S)=0.
-      MX(S)=1000.!just for test
-     ENDDO
-    ENDDO
+         s = numstat + 3
+         mn(s) = 0.0
+         mx(s) = 0.0
+         do no = 1, nobstat(s)
+            o = o + 1
+            mn(s) = min(mn(s), obsvalue(o))
+            mx(s) = max(mx(s), obsvalue(o))
+         end do
+
+         do s = 6, 7
+            mn(s) = 0.0
+            mx(s) = 0.0
+            do no = 1, nobstat(s)
+               o = o + 1
+               mn(s) = 0.
+               mx(s) = 1000.!just for test
+            end do
+         end do
 !--------------------------------------------------
-    DO S=1,5!!NUMSTAT+1 
-      DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-      DO J=1,NUMGRID(2)
-      DO I=1,NUMGRID(1)
-        NN(1)=I
-        NN(2)=J
-        NN(3)=K
-        NN(4)=T
-        NN(MAXDIMS+1)=S
-        CALL PSTN2NUMB(MAXDIMS+1,NN,NG,NC)
-        IF(MN(S).LE.MX(S))THEN
-          NB(NC)=2
-          LB(NC)=MN(S)
-          UB(NC)=MX(S)
-        ELSE
-          NB(NC)=0
-          LB(NC)=0.0D0
-          UB(NC)=0.0D0
-        ENDIF
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
+         do s = 1, 5!!numstat+1
+            do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+            do j = 1, numgrid(2)
+            do i = 1, numgrid(1)
+               nn(1) = i
+               nn(2) = j
+               nn(3) = k
+               nn(4) = t
+               nn(maxdims + 1) = s
+               call pstn2numb(maxdims + 1, nn, ng, nc)
+               if (mn(s) .le. mx(s)) then
+                  nb(nc) = 2
+                  lb(nc) = mn(s)
+                  ub(nc) = mx(s)
+               else
+                  nb(nc) = 0
+                  lb(nc) = 0.0d0
+                  ub(nc) = 0.0d0
+               end if
+            end do
+            end do
+            end do
+            end do
+         end do
 
+         if (ifbkgnd .eq. 1) then
+            do n = 1, numvars
+               if (nb(n) .eq. 2) then
+                  lb(n) = min(lb(n), 0.0)
+                  ub(n) = max(ub(n), 0.0)
+               end if
+            end do
+         end if
 
-    IF(IFBKGND.EQ.1)THEN
-      DO N=1,NUMVARS
-        IF(NB(N).EQ.2)THEN
-          LB(N)=MIN(LB(N),0.0)
-          UB(N)=MAX(UB(N),0.0)
-        ENDIF
-      ENDDO
-    ENDIF
+      end if
 
-  ENDIF 
+! bound
+! for 3d radar
+      if (w_cmpnnt .ne. 0) then
+         do n = 1, maxdims
+            ng(n) = numgrid(n)
+         end do
+         ng(maxdims + 1) = numstat
+         s = w_cmpnnt
+         k = 1
+         do t = 1, numgrid(4)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            nn(1) = i
+            nn(2) = j
+            nn(3) = k
+            nn(4) = t
+            nn(maxdims + 1) = s
+            call pstn2numb(maxdims + 1, nn, ng, nc)
+            nb(nc) = 2
+            lb(nc) = 0.0
+            ub(nc) = 0.0
+         end do
+         end do
+         end do
+      end if
 
-! BOUND
-! FOR 3D RADAR
-  IF(W_CMPNNT.NE.0)THEN
-    DO N=1,MAXDIMS
-      NG(N)=NUMGRID(N)
-    ENDDO
-    NG(MAXDIMS+1)=NUMSTAT
-    S=W_CMPNNT
-    K=1
-    DO T=1,NUMGRID(4)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      NN(1)=I
-      NN(2)=J
-      NN(3)=K
-      NN(4)=T
-      NN(MAXDIMS+1)=S
-      CALL PSTN2NUMB(MAXDIMS+1,NN,NG,NC)
-      NB(NC)=2
-      LB(NC)=0.0
-      UB(NC)=0.0
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+      ta = 'start'
+      i0 = 0
+      ic = 0
+      write (*, 9001)
 
-  TA='START'
-  I0=0
-  IC=0
-  WRITE(*,9001)
+      if (w_cmpnnt .ne. 0) then         ! by zhongjie he
+         call costfunct1
+         call costgradt1
+      else                           ! by zhongjie he
+         call wcompgernl
 
-  IF(W_CMPNNT.NE.0) THEN         ! BY ZHONGJIE HE
-    CALL COSTFUNCT1
-    CALL COSTGRADT1
-  ELSE                           ! BY ZHONGJIE HE
-    CALL WCOMPGERNL
-    
-    CALL COSTFUNCT2
-    CALL COSTGRADT2
-  ENDIF
-print*,'minvalue of bk: ',minval(grdbkgnd(1:numgrid(1),1:numgrid(2),1:numgrid(3),1:numgrid(4),5))
+         call costfunct2
+         call costgradt2
+      end if
+      print *, 'minvalue of bk: ', minval(grdbkgnd(1:numgrid(1), 1:numgrid(2), 1:numgrid(3), 1:numgrid(4), 5))
 
-  ! COUNT NUMBER OF ITERATIONS:
-  IT = 0
-  ITERLOOP: DO WHILE (.TRUE.)
+      ! count number of iterations:
+      it = 0
+      iterloop: do while (.true.)
 
-    ! ADD LOW BOUND FOR SPECIFIC HUMIDITY:
-    NG(1:4) = NUMGRID(1:4)
-    NG(5) = NUMSTAT  ! THE NUMBER OF STATES IN THE 5TH DIMENSION
-    DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-        DO J=1,NUMGRID(2)
-          DO I=1,NUMGRID(1)
-            NN(1)=I
-            NN(2)=J
-            NN(3)=K
-            NN(4)=T
-            NN(5)=5  ! POSITION OF SPECIFIC HUMIDITY
-           
-            CALL PSTN2NUMB(5,NN,NG,NC)
+         ! add low bound for specific humidity:
+         ng(1:4) = numgrid(1:4)
+         ng(5) = numstat  ! the number of states in the 5th dimension
+         do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+               do j = 1, numgrid(2)
+                  do i = 1, numgrid(1)
+                     nn(1) = i
+                     nn(2) = j
+                     nn(3) = k
+                     nn(4) = t
+                     nn(5) = 5  ! position of specific humidity
 
-            NB(NC) = 0
-            IF ((MAXGRID(1)-1)/2+1 .LE. NUMGRID(1)) NB(NC) = 1
-            
-            ! LOW BOUND FROM REFLECTIVITY DID NOT GET SCALED AND SO HERE IT DOES:
-            LB(NC) = -GRDBKGND(I,J,K,T,5)+GRDBKGND(I,J,K,T,NUMSTAT+1)
-            UB(NC) = -GRDBKGND(I,J,K,T,5)+GRDBKGND(I,J,K,T,NUMSTAT+2)
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-    ! ADD LOWER BOUNDS FOR RAIN AND SNOW:
-    IF (NUMSTAT .GT. 5) THEN ! RAIN AND SNOW ARE 6TH AND 7TH:
-    DO T=1,NUMGRID(4)
-      DO K=1,NUMGRID(3)
-        DO J=1,NUMGRID(2)
-          DO I=1,NUMGRID(1)
-            NN(1)=I
-            NN(2)=J
-            NN(3)=K
-            NN(4)=T
-            NN(5)=ROUR_CMPNNT  ! POSITION OF RAIN
-           
-            CALL PSTN2NUMB(5,NN,NG,NC)
+                     call pstn2numb(5, nn, ng, nc)
 
-            NB(NC) = 1
-            LB(NC) = -GRDBKGND(I,J,K,T,ROUR_CMPNNT)
+                     nb(nc) = 0
+                     if ((maxgrid(1) - 1)/2 + 1 .le. numgrid(1)) nb(nc) = 1
 
-            NN(5)=ROUS_CMPNNT  ! POSITION OF SNOW
-           
-            CALL PSTN2NUMB(5,NN,NG,NC)
+                     ! low bound from reflectivity did not get scaled and so here it does:
+                     lb(nc) = -grdbkgnd(i, j, k, t, 5) + grdbkgnd(i, j, k, t, numstat + 1)
+                     ub(nc) = -grdbkgnd(i, j, k, t, 5) + grdbkgnd(i, j, k, t, numstat + 2)
+                  end do
+               end do
+            end do
+         end do
+         ! add lower bounds for rain and snow:
+         if (numstat .gt. 5) then ! rain and snow are 6th and 7th:
+         do t = 1, numgrid(4)
+            do k = 1, numgrid(3)
+               do j = 1, numgrid(2)
+                  do i = 1, numgrid(1)
+                     nn(1) = i
+                     nn(2) = j
+                     nn(3) = k
+                     nn(4) = t
+                     nn(5) = rour_cmpnnt  ! position of rain
 
-            NB(NC) = 1
-            LB(NC) = -GRDBKGND(I,J,K,T,ROUS_CMPNNT)
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-    ENDIF
- 
-    CALL SETULB(NUMVARS,MM,GRDANALS,LB,UB,NB,COSTFUN,GRADINT,FA,PG,WA,IW, &
-                TA,IP,CS,LS,IS,DS)
+                     call pstn2numb(5, nn, ng, nc)
 
-    IF(TA(1:2).EQ.'FG')THEN
-      IF(W_CMPNNT.NE.0) THEN         ! BY ZHONGJIE HE
-        CALL COSTFUNCT1
-        CALL COSTGRADT1
-      ELSE                           ! BY ZHONGJIE HE
-        CALL WCOMPGERNL
-        CALL COSTFUNCT2
-        CALL COSTGRADT2
-      ENDIF
-      IC=IC+1
-      CYCLE ITERLOOP
-    ELSEIF(TA(1:5).EQ.'NEW_X')THEN
-      IF(I0.EQ.0)THEN
-        WRITE(*,1003)IS(30),IS(34),DS(13),COSTFUN
-      ELSE
-        WRITE(*,3001)IS(30),IS(34),DS(14),DS(13),COSTFUN
-      ENDIF
-      I0=I0+1
-      IT = IT+1
+                     nb(nc) = 1
+                     lb(nc) = -grdbkgnd(i, j, k, t, rour_cmpnnt)
 
-      ! Exceeds maximum iterations:
-      IF(GRDLEVL.LE.MIDGRID.AND.IT.GT.COSSTEP) EXIT ITERLOOP
-      IF(GRDLEVL.GT.MIDGRID.AND.IT.GT.FINSTEP) EXIT ITERLOOP
+                     nn(5) = rous_cmpnnt  ! position of snow
 
-      CYCLE ITERLOOP
-    ELSE
-      IF(IP.LE.-1.AND.TA(1:4).NE.'STOP')WRITE(6,*)TA
-      EXIT ITERLOOP
-    ENDIF
-  END DO ITERLOOP
-  1003 FORMAT (2(1x,i4),5x,'-',3x,1p,2(1x,d10.3))
-  9001 FORMAT (/,3x,'it',3x,'nf',2x,'stepl',5x,'projg',8x,'f')
-  3001 FORMAT (2(1x,i4),1p,2x,d8.1,1p,2(1x,d10.3))
+                     call pstn2numb(5, nn, ng, nc)
 
-  IF(W_CMPNNT.NE.0) THEN         ! BY ZHONGJIE HE
-    CALL COSTFUNCT1
-!    CALL COSTGRADT1
-  ELSE                           ! BY ZHONGJIE HE
-    CALL WCOMPGERNL
-    CALL COSTFUNCT2
-    
-    
-!    CALL COSTGRADT2
-  ENDIF
+                     nb(nc) = 1
+                     lb(nc) = -grdbkgnd(i, j, k, t, rous_cmpnnt)
+                  end do
+               end do
+            end do
+         end do
+         end if
 
-  ! DEALLOCATE WORKING ARRAY:
-  DEALLOCATE(WA,LB,UB,NB,IW,STAT=ER)
-  IF (ER .NE. 0) THEN
-    PRINT*,'MINIMIZER: Cannot deallocate enough memory for the working array'
-    STOP
-  ENDIF
+         call setulb(numvars, mm, grdanals, lb, ub, nb, costfun, gradint, fa, pg, wa, iw, &
+                     ta, ip, cs, ls, is, ds)
 
-  WRITE(8,*)'BOTTOM FUNCTION =',COSTFUN
-  RETURN
-END SUBROUTINE MINIMIZER_XIE
+         if (ta(1:2) .eq. 'fg') then
+            if (w_cmpnnt .ne. 0) then         ! by zhongjie he
+               call costfunct1
+               call costgradt1
+            else                           ! by zhongjie he
+               call wcompgernl
+               call costfunct2
+               call costgradt2
+            end if
+            ic = ic + 1
+            cycle iterloop
+         elseif (ta(1:5) .eq. 'new_x') then
+            if (i0 .eq. 0) then
+               write (*, 1003) is(30), is(34), ds(13), costfun
+            else
+               write (*, 3001) is(30), is(34), ds(14), ds(13), costfun
+            end if
+            i0 = i0 + 1
+            it = it + 1
 
-SUBROUTINE COAS2FINE_XIE
+            ! exceeds maximum iterations:
+            if (grdlevl .le. midgrid .and. it .gt. cosstep) exit iterloop
+            if (grdlevl .gt. midgrid .and. it .gt. finstep) exit iterloop
+
+            cycle iterloop
+         else
+            if (ip .le. -1 .and. ta(1:4) .ne. 'stop') write (6, *) ta
+            exit iterloop
+         end if
+      end do iterloop
+1003  format(2(1x, i4), 5x, '-', 3x, 1p, 2(1x, d10.3))
+9001  format(/, 3x, 'it', 3x, 'nf', 2x, 'stepl', 5x, 'projg', 8x, 'f')
+3001  format(2(1x, i4), 1p, 2x, d8.1, 1p, 2(1x, d10.3))
+
+      if (w_cmpnnt .ne. 0) then         ! by zhongjie he
+         call costfunct1
+!    call costgradt1
+      else                           ! by zhongjie he
+         call wcompgernl
+         call costfunct2
+
+!    call costgradt2
+      end if
+
+      ! deallocate working array:
+      deallocate (wa, lb, ub, nb, iw, stat=er)
+      if (er .ne. 0) then
+         print *, 'minimizer: cannot deallocate enough memory for the working array'
+         stop
+      end if
+
+      write (8, *) 'bottom function =', costfun
+      return
+   end subroutine minimizer_xie
+
+   subroutine coas2fine_xie
 !*************************************************
-! INTERPOLATION FROM COARSE GRID TO FINE GRID
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!		MODIFIED BY YUANFU FROM WEI LI'S 
-!		COAS2FINE,WHICH IS INCORRECTLY
-!		INTERPOLATING COASE TO FINE GRID.
+! interpolation from coarse grid to fine grid
+! history: august 2007, coded by wei li.
+!                modified by yuanfu from wei li's
+!                coas2fine,which is incorrectly
+!                interpolating coase to fine grid.
 !
-!	NOTE: THIS ROUTINE ASSUME FINE GRID HALVES
-!		THE COASE RESOLUTION.
+!        note: this routine assume fine grid halves
+!                the coase resolution.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,N,I0,J0,K0,T0,SM
-  INTEGER  :: IC(MAXDIMS)
+      integer  :: i, j, k, t, s, n, i0, j0, k0, t0, sm
+      integer  :: ic(maxdims)
 ! --------------------
-  DO N=1,MAXDIMS
-    NTMPGRD(N)=NUMGRID(N)
-  ENDDO
-  CALL TMPMEMALC
-  CALL GRDMEMRLS
-  DO N=1,MAXDIMS
-    IC(N)=1
-    IF(NTMPGRD(N).LT.MAXGRID(N)) THEN
-!      IF(N.NE.3 .OR. GRDLEVL.GT.3) THEN         ! ADDED BY ZHONGJIE HE
-        IC(N)=2
-        NUMGRID(N)=2*NUMGRID(N)-1
-!      ENDIF
-    ENDIF
-  ENDDO
+      do n = 1, maxdims
+         ntmpgrd(n) = numgrid(n)
+      end do
+      call tmpmemalc
+      call grdmemrls
+      do n = 1, maxdims
+         ic(n) = 1
+         if (ntmpgrd(n) .lt. maxgrid(n)) then
+!      if(n.ne.3 .or. grdlevl.gt.3) then         ! added by zhongjie he
+            ic(n) = 2
+            numgrid(n) = 2*numgrid(n) - 1
+!      endif
+         end if
+      end do
 
-  ! PRESSURE COORDINATE LEVELS:
-  I = (MAXGRID(PRESSURE)-1)/(NUMGRID(PRESSURE)-1)
-  DO K=1,NUMGRID(PRESSURE)
-    PPM(K) = PP0((K-1)*I+1)
-  ENDDO
+      ! pressure coordinate levels:
+      i = (maxgrid(pressure) - 1)/(numgrid(pressure) - 1)
+      do k = 1, numgrid(pressure)
+         ppm(k) = pp0((k - 1)*i + 1)
+      end do
 
-  CALL GRDMEMALC
-! GET THE GRID SPACING INFORMATION FOR NEW GRD ARRAY
-  DO N=1,NUMDIMS
-    IF(IC(N).EQ.2)GRDSPAC(N)=GRDSPAC(N)/2.0
-  ENDDO
+      call grdmemalc
+! get the grid spacing information for new grd array
+      do n = 1, numdims
+         if (ic(n) .eq. 2) grdspac(n) = grdspac(n)/2.0
+      end do
 
-! NOTE FINE GRID DOUBLES RESOLUTION FROM COASE GRID:
+! note fine grid doubles resolution from coase grid:
 
-! 1. PROJECT COASE GRID ONTO FINE GRID:
-  DO T=1,NUMGRID(4),IC(4)
-    T0 = (T-1)/IC(4)+1
-  DO K=1,NUMGRID(3),IC(3)
-    K0 = (K-1)/IC(3)+1
-  DO J=1,NUMGRID(2),IC(2)
-    J0 = (J-1)/IC(2)+1
-  DO I=1,NUMGRID(1),IC(1)
-    I0 = (I-1)/IC(1)+1
+! 1. project coase grid onto fine grid:
+      do t = 1, numgrid(4), ic(4)
+         t0 = (t - 1)/ic(4) + 1
+         do k = 1, numgrid(3), ic(3)
+            k0 = (k - 1)/ic(3) + 1
+            do j = 1, numgrid(2), ic(2)
+               j0 = (j - 1)/ic(2) + 1
+               do i = 1, numgrid(1), ic(1)
+                  i0 = (i - 1)/ic(1) + 1
 
-    GRDANALS(I,J,K,T,1:NUMSTAT) = TMPANALS(I0,J0,K0,T0,1:NUMSTAT)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+                  grdanals(i, j, k, t, 1:numstat) = tmpanals(i0, j0, k0, t0, 1:numstat)
+               end do
+            end do
+         end do
+      end do
 
-  ! RELEASE TEMPORARY MEMORY:
-  CALL TMPMEMRLS
+      ! release temporary memory:
+      call tmpmemrls
 
-! 2. X DIRECTION:
-  IF (IC(1) .EQ. 2) THEN
-    DO T=1,NUMGRID(4),IC(4)
-    DO K=1,NUMGRID(3),IC(3)
-    DO J=1,NUMGRID(2),IC(2)
-    DO I=2,NUMGRID(1),IC(1)
+! 2. x direction:
+      if (ic(1) .eq. 2) then
+         do t = 1, numgrid(4), ic(4)
+         do k = 1, numgrid(3), ic(3)
+         do j = 1, numgrid(2), ic(2)
+         do i = 2, numgrid(1), ic(1)
 
-      GRDANALS(I,J,K,T,1:NUMSTAT) = 0.5*(GRDANALS(I-1,J,K,T,1:NUMSTAT) &
-                                        +GRDANALS(I+1,J,K,T,1:NUMSTAT))
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+            grdanals(i, j, k, t, 1:numstat) = 0.5*(grdanals(i - 1, j, k, t, 1:numstat) &
+                                                   + grdanals(i + 1, j, k, t, 1:numstat))
+         end do
+         end do
+         end do
+         end do
+      end if
 
-! 3. Y DIRECTION:
-  IF (IC(2) .EQ. 2) THEN
-    DO T=1,NUMGRID(4),IC(4)
-    DO K=1,NUMGRID(3),IC(3)
-    DO J=2,NUMGRID(2),IC(2)
-    DO I=1,NUMGRID(1)
+! 3. y direction:
+      if (ic(2) .eq. 2) then
+         do t = 1, numgrid(4), ic(4)
+         do k = 1, numgrid(3), ic(3)
+         do j = 2, numgrid(2), ic(2)
+         do i = 1, numgrid(1)
 
-      GRDANALS(I,J,K,T,1:NUMSTAT) = 0.5*(GRDANALS(I,J-1,K,T,1:NUMSTAT) &
-                                        +GRDANALS(I,J+1,K,T,1:NUMSTAT))
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+            grdanals(i, j, k, t, 1:numstat) = 0.5*(grdanals(i, j - 1, k, t, 1:numstat) &
+                                                   + grdanals(i, j + 1, k, t, 1:numstat))
+         end do
+         end do
+         end do
+         end do
+      end if
 
-! 4. Z DIRECTION:
-  IF (IC(3) .EQ. 2) THEN
-    DO T=1,NUMGRID(4),IC(4)
-    DO K=2,NUMGRID(3),IC(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
+! 4. z direction:
+      if (ic(3) .eq. 2) then
+         do t = 1, numgrid(4), ic(4)
+         do k = 2, numgrid(3), ic(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
 
-      GRDANALS(I,J,K,T,1:NUMSTAT) = 0.5*(GRDANALS(I,J,K-1,T,1:NUMSTAT) &
-                                        +GRDANALS(I,J,K+1,T,1:NUMSTAT))
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+            grdanals(i, j, k, t, 1:numstat) = 0.5*(grdanals(i, j, k - 1, t, 1:numstat) &
+                                                   + grdanals(i, j, k + 1, t, 1:numstat))
+         end do
+         end do
+         end do
+         end do
+      end if
 
-! 5. T DIRECTION:
-  IF (IC(4) .EQ. 2) THEN
-    DO T=2,NUMGRID(4),IC(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
+! 5. t direction:
+      if (ic(4) .eq. 2) then
+         do t = 2, numgrid(4), ic(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
 
-      GRDANALS(I,J,K,T,1:NUMSTAT) = 0.5*(GRDANALS(I,J,K,T-1,1:NUMSTAT) &
-                                        +GRDANALS(I,J,K,T+1,1:NUMSTAT))
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
+            grdanals(i, j, k, t, 1:numstat) = 0.5*(grdanals(i, j, k, t - 1, 1:numstat) &
+                                                   + grdanals(i, j, k, t + 1, 1:numstat))
+         end do
+         end do
+         end do
+         end do
+      end if
 
-  ! MAKE SURE INTERPOLATED SH ANALYSIS POSITIVE:
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    GRDANALS(I,J,K,T,HUMIDITY) = &
-      MAX(-GRDBKGND(I,J,K,T,HUMIDITY),GRDANALS(I,J,K,T,HUMIDITY))
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+      ! make sure interpolated sh analysis positive:
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         grdanals(i, j, k, t, humidity) = &
+            max(-grdbkgnd(i, j, k, t, humidity), grdanals(i, j, k, t, humidity))
+      end do
+      end do
+      end do
+      end do
 
-  RETURN
-END SUBROUTINE COAS2FINE_XIE
+      return
+   end subroutine coas2fine_xie
 
-SUBROUTINE COAS2FINE
+   subroutine coas2fine
 !*************************************************
-! INTERPOLATION FROM COARSE GRID TO FINE GRID
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! interpolation from coarse grid to fine grid
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,N,I0,J0,K0,T0,SM
-  INTEGER  :: IC(MAXDIMS)
+      integer  :: i, j, k, t, s, n, i0, j0, k0, t0, sm
+      integer  :: ic(maxdims)
 ! --------------------
-  DO N=1,MAXDIMS
-    NTMPGRD(N)=NUMGRID(N)
-  ENDDO
-  CALL TMPMEMALC
-  CALL GRDMEMRLS
-  DO N=1,MAXDIMS
-    IC(N)=1
-    IF(NTMPGRD(N).LT.MAXGRID(N)) THEN
-!      IF(N.NE.3 .OR. GRDLEVL.GT.3) THEN         ! ADDED BY ZHONGJIE HE
-        IC(N)=2
-        NUMGRID(N)=2*NUMGRID(N)-1
-!      ENDIF
-    ENDIF
-  ENDDO
-  CALL GRDMEMALC
-! GET THE GRID SPACING INFORMATION FOR NEW GRD ARRAY
-  DO N=1,NUMDIMS
-    IF(IC(N).EQ.2)GRDSPAC(N)=GRDSPAC(N)/2.0
-  ENDDO
-! GET THE INFORMATION FOR NEW GRID ARRAY BY INTERPOLATION
-!======================== MODIFIED BY ZHONGJIE HE
-  DO T=1,NUMGRID(4),IC(4)
-  DO K=1,NUMGRID(3),IC(3)
-  DO J=1,NUMGRID(2),IC(2)
-  DO I=1,NUMGRID(1),IC(1)
-    I0=0.5*(I+1)
-    J0=0.5*(J+1)
-    K0=0.5*(K+1)
-    T0=0.5*(T+1)
-    IF(IC(1).EQ.1)I0=I
-    IF(IC(2).EQ.1)J0=J
-    IF(IC(3).EQ.1)K0=K
-    IF(IC(4).EQ.1)T0=T
+      do n = 1, maxdims
+         ntmpgrd(n) = numgrid(n)
+      end do
+      call tmpmemalc
+      call grdmemrls
+      do n = 1, maxdims
+         ic(n) = 1
+         if (ntmpgrd(n) .lt. maxgrid(n)) then
+!      if(n.ne.3 .or. grdlevl.gt.3) then         ! added by zhongjie he
+            ic(n) = 2
+            numgrid(n) = 2*numgrid(n) - 1
+!      endif
+         end if
+      end do
+      call grdmemalc
+! get the grid spacing information for new grd array
+      do n = 1, numdims
+         if (ic(n) .eq. 2) grdspac(n) = grdspac(n)/2.0
+      end do
+! get the information for new grid array by interpolation
+!======================== modified by zhongjie he
+      do t = 1, numgrid(4), ic(4)
+      do k = 1, numgrid(3), ic(3)
+      do j = 1, numgrid(2), ic(2)
+      do i = 1, numgrid(1), ic(1)
+         i0 = 0.5*(i + 1)
+         j0 = 0.5*(j + 1)
+         k0 = 0.5*(k + 1)
+         t0 = 0.5*(t + 1)
+         if (ic(1) .eq. 1) i0 = i
+         if (ic(2) .eq. 1) j0 = j
+         if (ic(3) .eq. 1) k0 = k
+         if (ic(4) .eq. 1) t0 = t
 
-    DO S=1,NUMSTAT
-      SM=0
-      IF(IC(1).EQ.2) THEN
-        IF(I0.EQ.1) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0+1,J0,K0,T0,S)
-          SM=SM+1
-        ELSEIF(I0.EQ.NTMPGRD(1)) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0-1,J0,K0,T0,S)
-          SM=SM+1
-        ELSE
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0-1,J0,K0,T0,S)+TMPANALS(I0+1,J0,K0,T0,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
-      IF(IC(2).EQ.2) THEN
-        IF(J0.EQ.1) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0+1,K0,T0,S)
-          SM=SM+1
-        ELSEIF(J0.EQ.NTMPGRD(2)) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0-1,K0,T0,S)
-          SM=SM+1
-        ELSE
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0-1,K0,T0,S)+TMPANALS(I0,J0+1,K0,T0,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
-      IF(IC(3).EQ.2) THEN
-        IF(K0.EQ.1) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0+1,T0,S)
-          SM=SM+1
-        ELSEIF(K0.EQ.NTMPGRD(3)) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0-1,T0,S)
-          SM=SM+1
-        ELSE
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0-1,T0,S)+TMPANALS(I0,J0,K0+1,T0,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
-      IF(IC(4).EQ.2) THEN
-        IF(T0.EQ.1) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0,T0+1,S)
-          SM=SM+1
-        ELSEIF(T0.EQ.NTMPGRD(4)) THEN
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0,T0-1,S)
-          SM=SM+1
-        ELSE
-          GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0,T0-1,S)+TMPANALS(I0,J0,K0,T0+1,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
+         do s = 1, numstat
+            sm = 0
+            if (ic(1) .eq. 2) then
+               if (i0 .eq. 1) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0 + 1, j0, k0, t0, s)
+                  sm = sm + 1
+               elseif (i0 .eq. ntmpgrd(1)) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0 - 1, j0, k0, t0, s)
+                  sm = sm + 1
+               else
+               grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0 - 1, j0, k0, t0, s) + tmpanals(i0 + 1, j0, k0, t0, s)
+                  sm = sm + 2
+               end if
+            end if
+            if (ic(2) .eq. 2) then
+               if (j0 .eq. 1) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0 + 1, k0, t0, s)
+                  sm = sm + 1
+               elseif (j0 .eq. ntmpgrd(2)) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0 - 1, k0, t0, s)
+                  sm = sm + 1
+               else
+               grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0 - 1, k0, t0, s) + tmpanals(i0, j0 + 1, k0, t0, s)
+                  sm = sm + 2
+               end if
+            end if
+            if (ic(3) .eq. 2) then
+               if (k0 .eq. 1) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0 + 1, t0, s)
+                  sm = sm + 1
+               elseif (k0 .eq. ntmpgrd(3)) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0 - 1, t0, s)
+                  sm = sm + 1
+               else
+               grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0 - 1, t0, s) + tmpanals(i0, j0, k0 + 1, t0, s)
+                  sm = sm + 2
+               end if
+            end if
+            if (ic(4) .eq. 2) then
+               if (t0 .eq. 1) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0, t0 + 1, s)
+                  sm = sm + 1
+               elseif (t0 .eq. ntmpgrd(4)) then
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0, t0 - 1, s)
+                  sm = sm + 1
+               else
+               grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0, t0 - 1, s) + tmpanals(i0, j0, k0, t0 + 1, s)
+                  sm = sm + 2
+               end if
+            end if
 
-      IF(SM.GE.1) THEN
-        GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)/FLOAT(SM)
-      ELSE
-        GRDANALS(I,J,K,T,S)=TMPANALS(I0,J0,K0,T0,S)
-      ENDIF
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-!========================================================== END OF MODIFICATION BY ZHONGJIE HE
-! X DIRECTION
-  IF(IC(1).EQ.2)THEN
-    DO T=1,NUMGRID(4)  ,IC(4)
-    DO K=1,NUMGRID(3)  ,IC(3)
-    DO J=1,NUMGRID(2)  ,IC(2)
-    DO I=2,NUMGRID(1)-1,IC(1)
-      DO S=1,NUMSTAT
-        GRDANALS(I,J,K,T,S)=0.5*(GRDANALS(I-1,J,K,T,S)+GRDANALS(I+1,J,K,T,S))
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-! Y DIRECTION
-  IF(IC(2).EQ.2)THEN
-    DO T=1,NUMGRID(4)  ,IC(4)
-    DO K=1,NUMGRID(3)  ,IC(3)
-    DO J=2,NUMGRID(2)-1,IC(2)
-    DO I=1,NUMGRID(1)
-      DO S=1,NUMSTAT
-        GRDANALS(I,J,K,T,S)=0.5*(GRDANALS(I,J-1,K,T,S)+GRDANALS(I,J+1,K,T,S))
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-! Z DIRECTION
-  IF(IC(3).EQ.2)THEN
-    DO T=1,NUMGRID(4)  ,IC(4)
-    DO K=2,NUMGRID(3)-1,IC(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      DO S=1,NUMSTAT
-        GRDANALS(I,J,K,T,S)=0.5*(GRDANALS(I,J,K-1,T,S)+GRDANALS(I,J,K+1,T,S))
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-! T DIRECTION
-  IF(IC(4).EQ.2)THEN
-    DO T=2,NUMGRID(4)-1,IC(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      DO S=1,NUMSTAT
-        GRDANALS(I,J,K,T,S)=0.5*(GRDANALS(I,J,K,T-1,S)+GRDANALS(I,J,K,T+1,S))
-      ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDIF
-  CALL TMPMEMRLS
-  RETURN
-END SUBROUTINE COAS2FINE
+            if (sm .ge. 1) then
+               grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s)/float(sm)
+            else
+               grdanals(i, j, k, t, s) = tmpanals(i0, j0, k0, t0, s)
+            end if
+         end do
+      end do
+      end do
+      end do
+      end do
+!========================================================== end of modification by zhongjie he
+! x direction
+      if (ic(1) .eq. 2) then
+         do t = 1, numgrid(4), ic(4)
+         do k = 1, numgrid(3), ic(3)
+         do j = 1, numgrid(2), ic(2)
+         do i = 2, numgrid(1) - 1, ic(1)
+            do s = 1, numstat
+               grdanals(i, j, k, t, s) = 0.5*(grdanals(i - 1, j, k, t, s) + grdanals(i + 1, j, k, t, s))
+            end do
+         end do
+         end do
+         end do
+         end do
+      end if
+! y direction
+      if (ic(2) .eq. 2) then
+         do t = 1, numgrid(4), ic(4)
+         do k = 1, numgrid(3), ic(3)
+         do j = 2, numgrid(2) - 1, ic(2)
+         do i = 1, numgrid(1)
+            do s = 1, numstat
+               grdanals(i, j, k, t, s) = 0.5*(grdanals(i, j - 1, k, t, s) + grdanals(i, j + 1, k, t, s))
+            end do
+         end do
+         end do
+         end do
+         end do
+      end if
+! z direction
+      if (ic(3) .eq. 2) then
+         do t = 1, numgrid(4), ic(4)
+         do k = 2, numgrid(3) - 1, ic(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            do s = 1, numstat
+               grdanals(i, j, k, t, s) = 0.5*(grdanals(i, j, k - 1, t, s) + grdanals(i, j, k + 1, t, s))
+            end do
+         end do
+         end do
+         end do
+         end do
+      end if
+! t direction
+      if (ic(4) .eq. 2) then
+         do t = 2, numgrid(4) - 1, ic(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            do s = 1, numstat
+               grdanals(i, j, k, t, s) = 0.5*(grdanals(i, j, k, t - 1, s) + grdanals(i, j, k, t + 1, s))
+            end do
+         end do
+         end do
+         end do
+         end do
+      end if
+      call tmpmemrls
+      return
+   end subroutine coas2fine
 
-SUBROUTINE FINE2COAS_XIE
+   subroutine fine2coas_xie
 !*************************************************
-! INTERPOLATION FROM COARSE GRID TO FINE GRID
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!		MODIFIED BY YUANFU FROM WEI LI'S 
-!		COAS2FINE,WHICH IS INCORRECTLY
-!		INTERPOLATING COASE TO FINE GRID.
-!		THUS YUANFU REWRITES THE FINE2COAS.
+! interpolation from coarse grid to fine grid
+! history: august 2007, coded by wei li.
+!                modified by yuanfu from wei li's
+!                coas2fine,which is incorrectly
+!                interpolating coase to fine grid.
+!                thus yuanfu rewrites the fine2coas.
 !
-!	NOTE: THIS ROUTINE ASSUME FINE GRID HALVES
-!		THE COASE RESOLUTION.
+!        note: this routine assume fine grid halves
+!                the coase resolution.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,N,I0,J0,K0,T0,SM
-  INTEGER  :: IC(MAXDIMS)
+      integer  :: i, j, k, t, s, n, i0, j0, k0, t0, sm
+      integer  :: ic(maxdims)
 ! --------------------
-  DO N=1,MAXDIMS
-    NTMPGRD(N)=NUMGRID(N)
-  ENDDO
-  CALL TMPMEMALC		! TEMPORARY MEMORY AND COPY GRDANALS TO HERE
-  CALL GRDMEMRLS
-  DO N=1,MAXDIMS
-    IC(N)=1
-    IF(NTMPGRD(N).GT.INIGRID(N)) THEN
-        IC(N)=2
-        NUMGRID(N)=(NUMGRID(N)-1)/2+1			! ASSUME NUMGRID ODD NUMBER
-    ENDIF
-  ENDDO
-  CALL GRDMEMALC
-! GET THE GRID SPACING INFORMATION FOR NEW GRD ARRAY
-  DO N=1,NUMDIMS
-    IF(IC(N) .EQ. 2) GRDSPAC(N)=GRDSPAC(N)*2.0
-  ENDDO
+      do n = 1, maxdims
+         ntmpgrd(n) = numgrid(n)
+      end do
+      call tmpmemalc                ! temporary memory and copy grdanals to here
+      call grdmemrls
+      do n = 1, maxdims
+         ic(n) = 1
+         if (ntmpgrd(n) .gt. inigrid(n)) then
+            ic(n) = 2
+            numgrid(n) = (numgrid(n) - 1)/2 + 1                        ! assume numgrid odd number
+         end if
+      end do
+      call grdmemalc
+! get the grid spacing information for new grd array
+      do n = 1, numdims
+         if (ic(n) .eq. 2) grdspac(n) = grdspac(n)*2.0
+      end do
 
-! NOTE FINE GRID DOUBLES RESOLUTION FROM COASE GRID:
+! note fine grid doubles resolution from coase grid:
 
-! 1. PROJECT COASE GRID ONTO FINE GRID:
-  DO T=1,NUMGRID(4)
-    T0 = (T-1)*IC(4)+1
-  DO K=1,NUMGRID(3)
-    K0 = (K-1)*IC(3)+1
-  DO J=1,NUMGRID(2)
-    J0 = (J-1)*IC(2)+1
-  DO I=1,NUMGRID(1)
-    I0 = (I-1)*IC(1)+1
+! 1. project coase grid onto fine grid:
+      do t = 1, numgrid(4)
+         t0 = (t - 1)*ic(4) + 1
+         do k = 1, numgrid(3)
+            k0 = (k - 1)*ic(3) + 1
+            do j = 1, numgrid(2)
+               j0 = (j - 1)*ic(2) + 1
+               do i = 1, numgrid(1)
+                  i0 = (i - 1)*ic(1) + 1
 
-    GRDANALS(I,J,K,T,1:NUMSTAT) = TMPANALS(I0,J0,K0,T0,1:NUMSTAT)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+                  grdanals(i, j, k, t, 1:numstat) = tmpanals(i0, j0, k0, t0, 1:numstat)
+               end do
+            end do
+         end do
+      end do
 
-  ! RELEASE TEMPORARY MEMORY:
-  CALL TMPMEMRLS
+      ! release temporary memory:
+      call tmpmemrls
 
-  RETURN
-END SUBROUTINE FINE2COAS_XIE
+      return
+   end subroutine fine2coas_xie
 
-SUBROUTINE FINE2COAS
+   subroutine fine2coas
 !*************************************************
-! PROJECTION FROM FINE GRID TO COARSE GRID (NOT USED)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! projection from fine grid to coarse grid (not used)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,N,M,I0,J0,K0,T0,SM
-  INTEGER  :: IC(MAXDIMS)
+      integer  :: i, j, k, t, s, n, m, i0, j0, k0, t0, sm
+      integer  :: ic(maxdims)
 ! --------------------
-  DO N=1,MAXDIMS
-    NTMPGRD(N)=NUMGRID(N)
-  ENDDO
-  CALL TMPMEMALC
-  DO N=1,MAXDIMS
-    IC(N)=1
-    IF(NTMPGRD(N).GT.INIGRID(N))IC(N)=2
-  ENDDO
+      do n = 1, maxdims
+         ntmpgrd(n) = numgrid(n)
+      end do
+      call tmpmemalc
+      do n = 1, maxdims
+         ic(n) = 1
+         if (ntmpgrd(n) .gt. inigrid(n)) ic(n) = 2
+      end do
 
-!======================== MODIFIED BY ZHONGJIE HE
-  DO T=1,NTMPGRD(4)
-  DO K=1,NTMPGRD(3)
-  DO J=1,NTMPGRD(2)
-  DO I=1,NTMPGRD(1)
-    DO S=1,NUMSTAT
-      SM=0
-      TMPANALS(I,J,K,T,S)=0
-      IF(IC(1).EQ.2) THEN
-        IF(I.EQ.1) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I+1,J,K,T,S)
-          SM=SM+1
-        ELSEIF(I.EQ.NTMPGRD(1)) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I-1,J,K,T,S)
-          SM=SM+1
-        ELSE
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I-1,J,K,T,S)+GRDANALS(I+1,J,K,T,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
-      IF(IC(2).EQ.2) THEN
-        IF(J.EQ.1) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J+1,K,T,S)
-          SM=SM+1
-        ELSEIF(J.EQ.NTMPGRD(2)) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J-1,K,T,S)
-          SM=SM+1
-        ELSE
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J-1,K,T,S)+GRDANALS(I,J+1,K,T,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
-      IF(IC(3).EQ.2) THEN
-        IF(K.EQ.1) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J,K+1,T,S)
-          SM=SM+1
-        ELSEIF(K.EQ.NTMPGRD(3)) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J,K-1,T,S)
-          SM=SM+1
-        ELSE
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J,K-1,T,S)+GRDANALS(I,J,K+1,T,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
-      IF(IC(4).EQ.2) THEN
-        IF(T.EQ.1) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J,K,T+1,S)
-          SM=SM+1
-        ELSEIF(T.EQ.NTMPGRD(4)) THEN
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J,K,T-1,S)
-          SM=SM+1
-        ELSE
-          TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)+GRDANALS(I,J,K,T-1,S)+GRDANALS(I,J,K,T+1,S)
-          SM=SM+2
-        ENDIF
-      ENDIF
+!======================== modified by zhongjie he
+      do t = 1, ntmpgrd(4)
+      do k = 1, ntmpgrd(3)
+      do j = 1, ntmpgrd(2)
+      do i = 1, ntmpgrd(1)
+         do s = 1, numstat
+            sm = 0
+            tmpanals(i, j, k, t, s) = 0
+            if (ic(1) .eq. 2) then
+               if (i .eq. 1) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i + 1, j, k, t, s)
+                  sm = sm + 1
+               elseif (i .eq. ntmpgrd(1)) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i - 1, j, k, t, s)
+                  sm = sm + 1
+               else
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i - 1, j, k, t, s) + grdanals(i + 1, j, k, t, s)
+                  sm = sm + 2
+               end if
+            end if
+            if (ic(2) .eq. 2) then
+               if (j .eq. 1) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j + 1, k, t, s)
+                  sm = sm + 1
+               elseif (j .eq. ntmpgrd(2)) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j - 1, k, t, s)
+                  sm = sm + 1
+               else
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j - 1, k, t, s) + grdanals(i, j + 1, k, t, s)
+                  sm = sm + 2
+               end if
+            end if
+            if (ic(3) .eq. 2) then
+               if (k .eq. 1) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j, k + 1, t, s)
+                  sm = sm + 1
+               elseif (k .eq. ntmpgrd(3)) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j, k - 1, t, s)
+                  sm = sm + 1
+               else
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j, k - 1, t, s) + grdanals(i, j, k + 1, t, s)
+                  sm = sm + 2
+               end if
+            end if
+            if (ic(4) .eq. 2) then
+               if (t .eq. 1) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j, k, t + 1, s)
+                  sm = sm + 1
+               elseif (t .eq. ntmpgrd(4)) then
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j, k, t - 1, s)
+                  sm = sm + 1
+               else
+                  tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s) + grdanals(i, j, k, t - 1, s) + grdanals(i, j, k, t + 1, s)
+                  sm = sm + 2
+               end if
+            end if
 
-      IF(SM.GE.1) THEN
-        TMPANALS(I,J,K,T,S)=TMPANALS(I,J,K,T,S)/FLOAT(SM)
-      ELSE
-        TMPANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)
-      ENDIF
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-!========================================================== END OF MODIFICATION BY ZHONGJIE HE
+            if (sm .ge. 1) then
+               tmpanals(i, j, k, t, s) = tmpanals(i, j, k, t, s)/float(sm)
+            else
+               tmpanals(i, j, k, t, s) = grdanals(i, j, k, t, s)
+            end if
+         end do
+      end do
+      end do
+      end do
+      end do
+!========================================================== end of modification by zhongjie he
 
-  CALL GRDMEMRLS
-  DO N=1,MAXDIMS
-    IF(IC(N).EQ.2)NUMGRID(N)=0.5*(NUMGRID(N)+1)
-  ENDDO
-  CALL GRDMEMALC
-  DO N=1,NUMDIMS
-    IF(IC(N).EQ.2)GRDSPAC(N)=GRDSPAC(N)*2.0
-  ENDDO
+      call grdmemrls
+      do n = 1, maxdims
+         if (ic(n) .eq. 2) numgrid(n) = 0.5*(numgrid(n) + 1)
+      end do
+      call grdmemalc
+      do n = 1, numdims
+         if (ic(n) .eq. 2) grdspac(n) = grdspac(n)*2.0
+      end do
 ! ----
-  IF(.FALSE.)THEN
+      if (.false.) then
 ! ----
-  DO T=1,NTMPGRD(4),IC(4)
-  DO K=1,NTMPGRD(3),IC(3)
-  DO J=1,NTMPGRD(2),IC(2)
-  DO I=1,NTMPGRD(1),IC(1)
-    DO S=1,NUMSTAT
-      GRDANALS(I,J,K,T,S)=0.0
-      M=0
-      DO T0=MAX0(T-1,1),MIN0(T+1,NTMPGRD(4))
-      DO K0=MAX0(K-1,1),MIN0(K+1,NTMPGRD(3))
-      DO J0=MAX0(J-1,1),MIN0(J+1,NTMPGRD(2))
-      DO I0=MAX0(I-1,1),MIN0(I+1,NTMPGRD(1))
-        IF(I0.EQ.I.AND.J0.EQ.J.AND.K0.EQ.K.AND.T0.EQ.T)CYCLE
-        M=M+1
-        GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)+TMPANALS(I0,J0,K0,T0,S)
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-      IF(M.GT.0)GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)/M
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+         do t = 1, ntmpgrd(4), ic(4)
+         do k = 1, ntmpgrd(3), ic(3)
+         do j = 1, ntmpgrd(2), ic(2)
+         do i = 1, ntmpgrd(1), ic(1)
+            do s = 1, numstat
+               grdanals(i, j, k, t, s) = 0.0
+               m = 0
+               do t0 = max0(t - 1, 1), min0(t + 1, ntmpgrd(4))
+               do k0 = max0(k - 1, 1), min0(k + 1, ntmpgrd(3))
+               do j0 = max0(j - 1, 1), min0(j + 1, ntmpgrd(2))
+               do i0 = max0(i - 1, 1), min0(i + 1, ntmpgrd(1))
+                  if (i0 .eq. i .and. j0 .eq. j .and. k0 .eq. k .and. t0 .eq. t) cycle
+                  m = m + 1
+                  grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s) + tmpanals(i0, j0, k0, t0, s)
+               end do
+               end do
+               end do
+               end do
+               if (m .gt. 0) grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s)/m
+            end do
+         end do
+         end do
+         end do
+         end do
 ! ----
-  ELSE
+      else
 ! ----
-  DO T=1,NTMPGRD(4),IC(4)
-  DO K=1,NTMPGRD(3),IC(3)
-  DO J=1,NTMPGRD(2),IC(2)
-  DO I=1,NTMPGRD(1),IC(1)
-    I0=0.5*(I+1)
-    J0=0.5*(J+1)
-    K0=0.5*(K+1)
-    T0=0.5*(T+1)
-    IF(IC(1).EQ.1)I0=I
-    IF(IC(2).EQ.1)J0=J
-    IF(IC(3).EQ.1)K0=K
-    IF(IC(4).EQ.1)T0=T
-    DO S=1,NUMSTAT
-      GRDANALS(I0,J0,K0,T0,S)=TMPANALS(I,J,K,T,S)
-    ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+         do t = 1, ntmpgrd(4), ic(4)
+         do k = 1, ntmpgrd(3), ic(3)
+         do j = 1, ntmpgrd(2), ic(2)
+         do i = 1, ntmpgrd(1), ic(1)
+            i0 = 0.5*(i + 1)
+            j0 = 0.5*(j + 1)
+            k0 = 0.5*(k + 1)
+            t0 = 0.5*(t + 1)
+            if (ic(1) .eq. 1) i0 = i
+            if (ic(2) .eq. 1) j0 = j
+            if (ic(3) .eq. 1) k0 = k
+            if (ic(4) .eq. 1) t0 = t
+            do s = 1, numstat
+               grdanals(i0, j0, k0, t0, s) = tmpanals(i, j, k, t, s)
+            end do
+         end do
+         end do
+         end do
+         end do
 ! ----
-  ENDIF
+      end if
 ! ----
-  CALL TMPMEMRLS
-  RETURN
-END SUBROUTINE FINE2COAS
+      call tmpmemrls
+      return
+   end subroutine fine2coas
 
-
-SUBROUTINE CHECK_F_G
+   subroutine check_f_g
 !*************************************************
-! CHECK WHETHER THE GRADIENT MATCH COST FUNCTION (AFFILIATE)
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! check whether the gradient match cost function (affiliate)
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S
-  REAL     :: CONTROL(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4),NUMSTAT)
-  REAL     :: ED,F2,F1,GG
+      integer  :: i, j, k, t, s
+      real     :: control(numgrid(1), numgrid(2), numgrid(3), numgrid(4), numstat)
+      real     :: ed, f2, f1, gg
 ! --------------------
-  ED=0.00001
-  DO S=1,NUMSTAT
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    CONTROL(I,J,K,T,S)=GRDANALS(I,J,K,T,S)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  CALL WCOMPGERNL
-  CALL COSTGRADT2
-  DO S=1,NUMSTAT
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    PRINT*,'       '
-    PRINT*,'       '
-    PRINT*,'       '
-    PRINT*,'       '
-    PRINT*,'       '
-    GRDANALS(I,J,K,T,S)=CONTROL(I,J,K,T,S)+ED
-    CALL COSTFUNCT2
-    F2=COSTFUN
-    GRDANALS(I,J,K,T,S)=CONTROL(I,J,K,T,S)-ED
-    CALL COSTFUNCT2
-    F1=COSTFUN
-    GRDANALS(I,J,K,T,S)=CONTROL(I,J,K,T,S)
-    GG=(F2-F1)/(2.0*ED)
-!    PRINT*,F2,F1,GG
-	IF(ABS(GRADINT(I,J,K,T,S)-GG).GT.1.0E-19) &
-    PRINT*,I,J,K,T,S,GRADINT(I,J,K,T,S),GG,GRADINT(I,J,K,T,S)-GG
-	IF(ABS(GRADINT(I,J,K,T,S)-GG).GT.1000.0)STOP
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  RETURN
-END SUBROUTINE CHECK_F_G
+      ed = 0.00001
+      do s = 1, numstat
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         control(i, j, k, t, s) = grdanals(i, j, k, t, s)
+      end do
+      end do
+      end do
+      end do
+      end do
+      call wcompgernl
+      call costgradt2
+      do s = 1, numstat
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         print *, '       '
+         print *, '       '
+         print *, '       '
+         print *, '       '
+         print *, '       '
+         grdanals(i, j, k, t, s) = control(i, j, k, t, s) + ed
+         call costfunct2
+         f2 = costfun
+         grdanals(i, j, k, t, s) = control(i, j, k, t, s) - ed
+         call costfunct2
+         f1 = costfun
+         grdanals(i, j, k, t, s) = control(i, j, k, t, s)
+         gg = (f2 - f1)/(2.0*ed)
+!    print*,f2,f1,gg
+         if (abs(gradint(i, j, k, t, s) - gg) .gt. 1.0e-19) &
+            print *, i, j, k, t, s, gradint(i, j, k, t, s), gg, gradint(i, j, k, t, s) - gg
+         if (abs(gradint(i, j, k, t, s) - gg) .gt. 1000.0) stop
+      end do
+      end do
+      end do
+      end do
+      end do
+      return
+   end subroutine check_f_g
 
-
-SUBROUTINE GETW
-  IMPLICIT NONE
+   subroutine getw
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T
+      integer  :: i, j, k, t
 ! --------------------
-  CALL WCOMPGERNL      ! MODIFIED BY ZHONGJIE HE
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    GRDANALS(I,J,K,T,3)=WWW(I,J,K,T) !*SCL(U_CMPNNT)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
-  RETURN
-END SUBROUTINE GETW
+      call wcompgernl      ! modified by zhongjie he
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         grdanals(i, j, k, t, 3) = www(i, j, k, t) !*scl(u_cmpnnt)
+      end do
+      end do
+      end do
+      end do
+      return
+   end subroutine getw
 
-
-END MODULE STMAS4D_CORE
+end module stmas4d_core

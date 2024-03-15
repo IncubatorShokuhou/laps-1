@@ -1,10 +1,10 @@
-      subroutine get_attribute_vol(nf_fid,StationLatitude
-     &  ,StationLongitude,StationElevationInMeters,station 
-!    &  ,latNxNy,lonNxNy,latdxdy,londxdy,dx,dy,nx,ny
+      subroutine get_attribute_vol(nf_fid,stationlatitude
+     &  ,stationlongitude,stationelevationinmeters,station 
+!    &  ,latnxny,lonnxny,latdxdy,londxdy,dx,dy,nx,ny
      &  ,istatus)
-C
-C  Obtain attributes, still should add radar name
-C
+c
+c  obtain attributes, still should add radar name
+c
       character dummy*31
       character station*31
       integer   istatus
@@ -16,13 +16,13 @@ C
       integer   nf_status
       integer   nf_attid
       integer   nf_attnum
-      real      StationLatitude
-      real      StationLongitude
-      real      rStationElevationInMeters
+      real      stationlatitude
+      real      stationlongitude
+      real      rstationelevationinmeters
       real      rlon00
       real      dx,dy
-      real      latNxNy
-      real      lonNxNy
+      real      latnxny
+      real      lonnxny
       real      latdxdy
       real      londxdy
 
@@ -30,239 +30,239 @@ C
 
 c     lenf=index(filename,' ')-1
 c     print*,'opening ',filename(1:lenf)
-c     nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
+c     nf_status = nf_open(filename,nf_nowrite,nf_fid)
 
-c     if(nf_status.ne.NF_NOERR) then
-c       print *, NF_STRERROR(nf_status)
-c       print *,'NF_OPEN ',filename(1:lenf)
+c     if(nf_status.ne.nf_noerr) then
+c       print *, nf_strerror(nf_status)
+c       print *,'nf_open ',filename(1:lenf)
 c       istatus=-1
 c       goto 100
 c     endif
-C
-C Get StationLatitude
-C
+c
+c get stationlatitude
+c
       nf_attid=0
       nf_attnum=0
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'StationLatitude'
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'stationlatitude'
      .                        ,nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'StationLatitude attribute id'
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'stationlatitude attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status=NF_GET_ATT_REAL(nf_fid,nf_attid,'StationLatitude'
-     .                         ,StationLatitude)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'StationLatitude'
+      nf_status=nf_get_att_real(nf_fid,nf_attid,'stationlatitude'
+     .                         ,stationlatitude)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'stationlatitude'
          istatus=-1
          goto 100
       endif
-C
-C Get StationLongitude
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'StationLongitude'
+c
+c get stationlongitude
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'stationlongitude'
      .                        ,nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'StationLongitude attribute id'
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'stationlongitude attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status=NF_GET_ATT_REAL(nf_fid,nf_attid,'StationLongitude'
-     .                         ,StationLongitude)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'StationLongitude'
+      nf_status=nf_get_att_real(nf_fid,nf_attid,'stationlongitude'
+     .                         ,stationlongitude)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'stationlongitude'
         istatus=-1
         goto 100
       endif
-C
-C Get StationElevationInMeters
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid
-     .                        ,'StationElevationInMeters',nf_attnum)
-      if(nf_status.ne.NF_NOERR)	then
-         print*, NF_STRERROR(nf_status)
-         print*, 'StationElevationInMeters attribute id'
+c
+c get stationelevationinmeters
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid
+     .                        ,'stationelevationinmeters',nf_attnum)
+      if(nf_status.ne.nf_noerr)	then
+         print*, nf_strerror(nf_status)
+         print*, 'stationelevationinmeters attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid
-     .                           ,'StationElevationInMeters'
-     .                           ,StationElevationInMeters)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'StationElevationInMeters'
+      nf_status = nf_get_att_real(nf_fid,nf_attid
+     .                           ,'stationelevationinmeters'
+     .                           ,stationelevationinmeters)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'stationelevationinmeters'
          istatus=-1
          goto 100
       endif
 
-C
-C Get Station     
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'Station',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'Station attribute id'
+c
+c get station     
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'station',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'station attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_TEXT(nf_fid,nf_attid,'Station',station)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'Station'
+      nf_status = nf_get_att_text(nf_fid,nf_attid,'station',station)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'station'
         istatus=-1
         goto 100
       endif
 
       return
-C
-C Get latNxNy
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'latNxNy',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'latNxNy attribute id'
+c
+c get latnxny
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'latnxny',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'latnxny attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid,'latNxNy',latNxNy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'latNxNy'
+      nf_status = nf_get_att_real(nf_fid,nf_attid,'latnxny',latnxny)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'latnxny'
          istatus=-1
          goto 100
       endif
-C
-C Get lonNxNy
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'lonNxNy',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'lonNxNy attribute id'
+c
+c get lonnxny
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'lonnxny',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'lonnxny attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid,'lonNxNy',lonNxNy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'lonNxNy'
+      nf_status = nf_get_att_real(nf_fid,nf_attid,'lonnxny',lonnxny)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'lonnxny'
         istatus=-1
         goto 100
       endif
-C
-C Get latDxDy
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'latDxDy',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'latDxDy attribute id'
+c
+c get latdxdy
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'latdxdy',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'latdxdy attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid,'latDxDy',latdxdy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'latDxDy'
+      nf_status = nf_get_att_real(nf_fid,nf_attid,'latdxdy',latdxdy)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'latdxdy'
          istatus=-1
          goto 100
       endif
-C
-C Get lonDxDy
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'lonDxDy',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'lonDxDy attribute id'
+c
+c get londxdy
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'londxdy',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'londxdy attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid,'lonDxDy',londxdy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'lonDxDy'
+      nf_status = nf_get_att_real(nf_fid,nf_attid,'londxdy',londxdy)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'londxdy'
         istatus=-1
         goto 100
       endif
-C
-C Get resolution-x
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'dxKm',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'dxKm attribute id'
+c
+c get resolution-x
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'dxkm',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'dxkm attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid,'dxKm',dx)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dxKm'
+      nf_status = nf_get_att_real(nf_fid,nf_attid,'dxkm',dx)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dxkm'
         istatus=-1
         goto 100
       endif
-C
-C Get resolution-y
-C
-      nf_status = NF_INQ_ATTID(nf_fid,nf_attid,'dyKm',nf_attnum)
-      if(nf_status.ne.NF_NOERR) then
-         print*, NF_STRERROR(nf_status)
-         print*, 'dyKm attribute id'
+c
+c get resolution-y
+c
+      nf_status = nf_inq_attid(nf_fid,nf_attid,'dykm',nf_attnum)
+      if(nf_status.ne.nf_noerr) then
+         print*, nf_strerror(nf_status)
+         print*, 'dykm attribute id'
          istatus=-1
          goto 100
       endif
 
-      nf_status = NF_GET_ATT_REAL(nf_fid,nf_attid,'dyKm',dy)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dyKm'
+      nf_status = nf_get_att_real(nf_fid,nf_attid,'dykm',dy)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dykm'
         istatus=-1
         goto 100
       endif
 c
 c get x dimension
 c
-      dim_id = NCDID(nf_fid, 'x', rcode)
+      dim_id = ncdid(nf_fid, 'x', rcode)
       if(rcode.ne.0)then
-         write(6,*)'Error getting x id code - returning'
+         write(6,*)'error getting x id code - returning'
          istatus=-1
          goto 100
       endif
 
-      call NCDINQ(nf_fid,dim_id,dummy,nx,RCODE)
+      call ncdinq(nf_fid,dim_id,dummy,nx,rcode)
       if(rcode.ne.0)then
-         write(6,*)'Error getting x dimension - nx'
+         write(6,*)'error getting x dimension - nx'
          istatus=-1
          goto 100
       endif
 c
 c get x dimension
 c
-      dim_id = NCDID(nf_fid, 'y', rcode)
+      dim_id = ncdid(nf_fid, 'y', rcode)
       if(rcode.ne.0)then
-         write(6,*)'Error getting y id code - returning'
+         write(6,*)'error getting y id code - returning'
          istatus=-1
          goto 100
       endif
 
-      call NCDINQ(nf_fid,dim_id,dummy,ny,RCODE)
+      call ncdinq(nf_fid,dim_id,dummy,ny,rcode)
       if(rcode.ne.0)then
-         write(6,*)'Error getting y dimension - ny'
+         write(6,*)'error getting y dimension - ny'
          istatus=-1
          goto 100
       endif
-C
+c
       istatus=0
 100   return
       end

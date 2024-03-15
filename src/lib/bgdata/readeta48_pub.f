@@ -1,204 +1,204 @@
-      subroutine get_eta48_dims(filename,NX,NY,NZ
-     &,StdLat1,StdLat2,Lon0,La1,Lo1,La2,Lo2,istatus)
+      subroutine get_eta48_dims(filename,nx,ny,nz
+     &,stdlat1,stdlat2,lon0,la1,lo1,la2,lo2,istatus)
 c
-c updated to get all nav info - JS 4-01
+c updated to get all nav info - js 4-01
 c
       implicit none
       include 'netcdf.inc'
 
-      integer NZ, nrecs, NX, NY, nf_fid, nf_vid
+      integer nz, nrecs, nx, ny, nf_fid, nf_vid
       integer nf_status,istatus
-      real    StdLat1,StdLat2
-      real    Lon0
-      real    La1,Lo1
-      real    La2,Lo2
+      real    stdlat1,stdlat2
+      real    lon0
+      real    la1,lo1
+      real    la2,lo2
 
       character filename*200
-C
-C  Open netcdf File for reading
-C
+c
+c  open netcdf file for reading
+c
       print*,'filename =',filename
 
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ', filename
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ', filename
       endif
-C
-C  Fill all dimension values
-C
-C
-C  Get size of isoLevel (returned as NZ)
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'isoLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim isoLevel'
-      endif
-
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,NZ)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim isoLevel'
+c
+c  fill all dimension values
+c
+c
+c  get size of isolevel (returned as nz)
+c
+      nf_status = nf_inq_dimid(nf_fid,'isolevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim isolevel'
       endif
 
-C
-C Get size of record
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'record',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,nz)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim isolevel'
+      endif
+
+c
+c get size of record
+c
+      nf_status = nf_inq_dimid(nf_fid,'record',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim record'
       endif
 
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,nrecs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,nrecs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim record'
       endif
 
       if(nrecs.ne.1) then
-         PRINT *, 'ERROR IN ETA48 FORMAT'
-         STOP
+         print *, 'error in eta48 format'
+         stop
       endif
-C
-C Get size of x (returned as NX)
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'x',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of x (returned as nx)
+c
+      nf_status = nf_inq_dimid(nf_fid,'x',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim x'
       endif
 
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,NX)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,nx)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim x'
       endif
 
-C
-C Get size of y (returned as NY)
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'y',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c get size of y (returned as ny)
+c
+      nf_status = nf_inq_dimid(nf_fid,'y',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim y'
       endif
 
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,NY)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,ny)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim y'
       endif
-C
-C     Variable        NETCDF Long Name
-C      IntLat1      "1st latitude of intersect earth-cone"
-C                    returned as StdLat1
-C
-        nf_status = NF_INQ_VARID(nf_fid,'IntLat1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var IntLat1'
+c
+c     variable        netcdf long name
+c      intlat1      "1st latitude of intersect earth-cone"
+c                    returned as stdlat1
+c
+        nf_status = nf_inq_varid(nf_fid,'intlat1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var intlat1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,StdLat1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var IntLat1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stdlat1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var intlat1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      IntLat2      "2nd latitude of intersect earth-cone"
-C                    returned as StdLat2
-C
-        nf_status = NF_INQ_VARID(nf_fid,'IntLat2',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var IntLat2'
+c
+c     variable        netcdf long name
+c      intlat2      "2nd latitude of intersect earth-cone"
+c                    returned as stdlat2
+c
+        nf_status = nf_inq_varid(nf_fid,'intlat2',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var intlat2'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,StdLat2)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var IntLat2'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,stdlat2)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var intlat2'
       endif
-C
-C     Variable        NETCDF Long Name
-C      La1          "first latitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'La1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+c
+c     variable        netcdf long name
+c      la1          "first latitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'la1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      La2          "last latitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'La2',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La2'
+c
+c     variable        netcdf long name
+c      la2          "last latitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'la2',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la2'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,La2)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var La2'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,la2)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var la2'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lo1          "first longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo1',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+c
+c     variable        netcdf long name
+c      lo1          "first longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'lo1',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo1)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo1'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo1)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo1'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lo2          "last longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lo2',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo2'
+c
+c     variable        netcdf long name
+c      lo2          "last longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'lo2',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo2'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lo2)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lo2'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lo2)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lo2'
       endif
-C
-C     Variable        NETCDF Long Name
-C      Lon0         "true longitude"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'Lon0',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lon0'
+c
+c     variable        netcdf long name
+c      lon0         "true longitude"
+c
+        nf_status = nf_inq_varid(nf_fid,'lon0',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lon0'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,Lon0)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var Lon0'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lon0)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lon0'
       endif
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 
       if(nf_status.ne.0)then
-         print*,'Set istatus to Error condition'
+         print*,'set istatus to error condition'
          istatus = 0
          return
       endif
@@ -206,31 +206,31 @@ C
       istatus = 1
       return
       end
-C
-C
-C  Subroutine to read the file "ETA 48 km AWIPS Regional CONUS " 
-C
-      subroutine read_eta_conusc(fname, NX,NY,NZ, ht,p,t,uw,vw,
+c
+c
+c  subroutine to read the file "eta 48 km awips regional conus " 
+c
+      subroutine read_eta_conusc(fname, nx,ny,nz, ht,p,t,uw,vw,
      +     rh, pvv, ht_sfc, p_sfc, rh_sfc, td_sfc, t_sfc, uw_sfc, vw_sfc
      +     ,mslp,istatus)
 
-c KML: CHANGES MADE APRIL 2004
+c kml: changes made april 2004
 c td_sfc (model 2m dew point) is now being read in
 c td_sfc will ultimately be used in subroutine sfcbkgd
-c KML: END
+c kml: end
 
       include 'netcdf.inc'
-      integer NX,NY,NZ, nf_fid, nf_status, k
+      integer nx,ny,nz, nf_fid, nf_status, k
       character*(*) fname
-      real MSLP( NX,  NY),
-     +    ht( NX, NY, NZ), ht_sfc( NX,  NY),
-     +     p( NX, NY, NZ),  p_sfc( NX,  NY), 
-     +    rh( NX,  NY,  NZ), rh_sfc( NX,  NY), 
-     +                       td_sfc( NX,  NY),
-     +     t( NX,  NY,  NZ),  t_sfc( NX,  NY), 
-     +    uw( NX,  NY,  NZ), uw_sfc( NX,  NY), 
-     +    vw( NX,  NY,  NZ), vw_sfc( NX,  NY),
-     +    pvv(NX,  NY,  NZ),
+      real mslp( nx,  ny),
+     +    ht( nx, ny, nz), ht_sfc( nx,  ny),
+     +     p( nx, ny, nz),  p_sfc( nx,  ny), 
+     +    rh( nx,  ny,  nz), rh_sfc( nx,  ny), 
+     +                       td_sfc( nx,  ny),
+     +     t( nx,  ny,  nz),  t_sfc( nx,  ny), 
+     +    uw( nx,  ny,  nz), uw_sfc( nx,  ny), 
+     +    vw( nx,  ny,  nz), vw_sfc( nx,  ny),
+     +    pvv(nx,  ny,  nz),
      +    tmp(nz)
       real qsfc
       real make_ssh, make_td
@@ -241,10 +241,10 @@ c KML: END
 
       istatus = 1
 
-      nf_status = NF_OPEN(fname,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ',fname
+      nf_status = nf_open(fname,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ',fname
         return
       endif
 
@@ -253,23 +253,23 @@ c KML: END
 
       call get_c8_project(c8_project,istatus)
       if(istatus.ne. 1)then
-         print*,'Error: returned from get_c8_project'
-         print*,'Error: current routine: read_eta_conusc'
+         print*,'error: returned from get_c8_project'
+         print*,'error: current routine: read_eta_conusc'
          return
       endif
-C
-C     Variable        NETCDF Long Name
-C      p            "isobaric levels" 
-C
-      call read_netcdf_real(nf_fid,'isoLevel',nz,tmp,0,0,nf_status)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim isoLevel'
+c
+c     variable        netcdf long name
+c      p            "isobaric levels" 
+c
+      call read_netcdf_real(nf_fid,'isolevel',nz,tmp,0,0,nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim isolevel'
         return
       endif
 
 c
-c If p is going from top to bottom, reverse it and set a flag to 
+c if p is going from top to bottom, reverse it and set a flag to 
 c also reverse the other fields
 c 
       if(tmp(1).lt.tmp(nz)) then
@@ -293,147 +293,147 @@ c
       endif
 
 
-C
-C     Variable        NETCDF Long Name
-C      ht           "geopotential height" 
-C
+c
+c     variable        netcdf long name
+c      ht           "geopotential height" 
+c
       call read_netcdf_real(nf_fid,'gh',nxnynz,ht,0,0,nf_status)
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the height field is missing'
-         print*, 'ABORTING file processing for eta file ',fname
+         print*, 'a substantial portion of the height field is missing'
+         print*, 'aborting file processing for eta file ',fname
          return
       endif
          
       if(reverse_fields) call swap_array(nxny,nz,ht)
-C
-C     Variable        NETCDF Long Name
-C      rh           "relative humidity" 
-C
+c
+c     variable        netcdf long name
+c      rh           "relative humidity" 
+c
       call read_netcdf_real(nf_fid,'rh',nxnynz,rh,0,0,nf_status)
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the rh field is missing'
-         print*, 'ABORTING file processing for eta file ',fname
+         print*, 'a substantial portion of the rh field is missing'
+         print*, 'aborting file processing for eta file ',fname
          return
       endif
 
       if(reverse_fields) call swap_array(nxny,nz,rh)
 
-C
-C     Variable        NETCDF Long Name
-C      t            "temperature" 
-C
+c
+c     variable        netcdf long name
+c      t            "temperature" 
+c
       call read_netcdf_real(nf_fid,'t',nxnynz,t,0,0,nf_status)
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the temp field is missing'
-         print*, 'ABORTING file processing for eta file ',fname
+         print*, 'a substantial portion of the temp field is missing'
+         print*, 'aborting file processing for eta file ',fname
          return
       endif
 
 
       if(reverse_fields) call swap_array(nxny,nz,t)
-C
-C     Variable        NETCDF Long Name
-C      uw           "u-component of wind" 
-C
+c
+c     variable        netcdf long name
+c      uw           "u-component of wind" 
+c
       call read_netcdf_real(nf_fid,'uw',nxnynz,uw,0,0,nf_status)
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the u-wind field is missing'
-         print*, 'ABORTING file processing for eta file ',fname
+         print*, 'a substantial portion of the u-wind field is missing'
+         print*, 'aborting file processing for eta file ',fname
          return
       endif
 
 
       if(reverse_fields) call swap_array(nxny,nz,uw)
-C
-C     Variable        NETCDF Long Name
-C      vw           "v-component of wind" 
-C
+c
+c     variable        netcdf long name
+c      vw           "v-component of wind" 
+c
       call read_netcdf_real(nf_fid,'vw',nxnynz,vw,0,0,nf_status)
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the v-wind field is missing'
-         print*, 'ABORTING file processing for eta file ',fname
+         print*, 'a substantial portion of the v-wind field is missing'
+         print*, 'aborting file processing for eta file ',fname
          return
       endif
 
 
       if(reverse_fields) call swap_array(nxny,nz,vw)
-C
-C     Variable        NETCDF Long Name
-C      pvv           "pressure vertical velocity"
-C
+c
+c     variable        netcdf long name
+c      pvv           "pressure vertical velocity"
+c
       call read_netcdf_real(nf_fid,'pvv',nxnynz,pvv,0,0,nf_status)
       if(nf_status.lt.-0.5*nxnynz) then
-         print*, 'A substantial portion of the w-wind field is missing'
-         print*, 'ABORTING file processing for eta file ',fname
+         print*, 'a substantial portion of the w-wind field is missing'
+         print*, 'aborting file processing for eta file ',fname
          return
       endif
 
       if(reverse_fields) call swap_array(nxny,nz,pvv)
 
-C
-C     Variable        NETCDF Long Name
-C      MSLP         "ETA mean sea level pressure" 
-C
+c
+c     variable        netcdf long name
+c      mslp         "eta mean sea level pressure" 
+c
 
-      call read_netcdf_real(nf_fid,'emspMSL',nxny,mslp,0,0,nf_status)
+      call read_netcdf_real(nf_fid,'emspmsl',nxny,mslp,0,0,nf_status)
 
-C
-C     Variable        NETCDF Long Name
-C      ht_sfc       "surface geopotential height" 
-C
+c
+c     variable        netcdf long name
+c      ht_sfc       "surface geopotential height" 
+c
       call read_netcdf_real(nf_fid,'gh_sfc',nxny,ht_sfc,0,0,nf_status)
 
-C
-C     Variable        NETCDF Long Name
-C      p_sfc        "surface pressure" 
-C
+c
+c     variable        netcdf long name
+c      p_sfc        "surface pressure" 
+c
       call read_netcdf_real(nf_fid,'p_sfc',nxny,p_sfc,0,0,nf_status)
 
-c FSL netCDF file only has sfc rh
+c fsl netcdf file only has sfc rh
 c ---------------------------------------
-      if(c8_project.eq.'NIMBUS')then
-C
-C     Variable        NETCDF Long Name
-C      rh_sfc       "relative humidity 2m fixed height abv ground" 
-C
-      print*,'FSL-NIMBUS: Read sfc RH'
-      call read_netcdf_real(nf_fid,'rh_2mFH',nxny,rh_sfc,0,0,nf_status)
-C
-C     Variable        NETCDF Long Name
-C      td_sfc        "dew point temp 2m fixed height abv ground"
-C
+      if(c8_project.eq.'nimbus')then
+c
+c     variable        netcdf long name
+c      rh_sfc       "relative humidity 2m fixed height abv ground" 
+c
+      print*,'fsl-nimbus: read sfc rh'
+      call read_netcdf_real(nf_fid,'rh_2mfh',nxny,rh_sfc,0,0,nf_status)
+c
+c     variable        netcdf long name
+c      td_sfc        "dew point temp 2m fixed height abv ground"
+c
       else
-      print*,'Read td_2mFH: KML Upgrade'
-      call read_netcdf_real(nf_fid,'td_2mFH',nxny,td_sfc,0,0,nf_status)
+      print*,'read td_2mfh: kml upgrade'
+      call read_netcdf_real(nf_fid,'td_2mfh',nxny,td_sfc,0,0,nf_status)
       endif
 c ---------------------------------------
-C
-C     Variable        NETCDF Long Name
-C      t_sfc        "temperature 2m fixed height abv ground" 
-C
-      call read_netcdf_real(nf_fid,'t_2mFH',nxny,t_sfc,0,0,nf_status)
-C
-C     Variable        NETCDF Long Name
-C      uw_sfc       "u wind component 10m fixed height abv ground" 
-C
-      call read_netcdf_real(nf_fid,'uw_10mFH',nxny,uw_sfc,0,0,nf_status)
-C
-C     Variable        NETCDF Long Name
-C      vw_sfc       "v wind component 10m fixed height abv ground" 
-C
-      call read_netcdf_real(nf_fid,'vw_10mFH',nxny,vw_sfc,0,0,nf_status)
+c
+c     variable        netcdf long name
+c      t_sfc        "temperature 2m fixed height abv ground" 
+c
+      call read_netcdf_real(nf_fid,'t_2mfh',nxny,t_sfc,0,0,nf_status)
+c
+c     variable        netcdf long name
+c      uw_sfc       "u wind component 10m fixed height abv ground" 
+c
+      call read_netcdf_real(nf_fid,'uw_10mfh',nxny,uw_sfc,0,0,nf_status)
+c
+c     variable        netcdf long name
+c      vw_sfc       "v wind component 10m fixed height abv ground" 
+c
+      call read_netcdf_real(nf_fid,'vw_10mfh',nxny,vw_sfc,0,0,nf_status)
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
         return
       endif
-C
-C routines in file lib/bgdata/sfcbkgd.f require Td; thus, for FSL netcdf
-C we must derive this from rh.
-C
-      if(c8_project.eq.'NIMBUS')then
+c
+c routines in file lib/bgdata/sfcbkgd.f require td; thus, for fsl netcdf
+c we must derive this from rh.
+c
+      if(c8_project.eq.'nimbus')then
        do j=1,ny
        do i=1,nx
          qsfc=make_ssh(p_sfc(i,j)/100.,t_sfc(i,j)-273.15,

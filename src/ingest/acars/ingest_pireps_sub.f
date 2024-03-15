@@ -1,7 +1,7 @@
 
       subroutine get_pirep_data(i4time_sys,ilaps_cycle_time,filename
      1                                                     ,ext
-     1                                                     ,NX_L,NY_L
+     1                                                     ,nx_l,ny_l
      1                                                     ,istatus)
 
       character*170 filename
@@ -10,206 +10,206 @@
 !.............................................................................
 
       include 'netcdf.inc'
-      integer maxIcingLvls, maxLocs, maxSkyLvls, maxTurbElements,
-     +     maxTurbLvls, recNum,nf_fid, nf_vid, nf_status
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN ',filename
+      integer maxicinglvls, maxlocs, maxskylvls, maxturbelements,
+     +     maxturblvls, recnum,nf_fid, nf_vid, nf_status
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open ',filename
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of maxIcingLvls
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxIcingLvls',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxIcingLvls'
+c
+c  fill all dimension values
+c
+c
+c get size of maxicinglvls
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxicinglvls',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxicinglvls'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxIcingLvls)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxIcingLvls'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxicinglvls)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxicinglvls'
       endif
-C
-C Get size of maxLocs
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxLocs',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxLocs'
+c
+c get size of maxlocs
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxlocs',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxlocs'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxLocs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxLocs'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxlocs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxlocs'
       endif
-C
-C Get size of maxSkyLvls
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxSkyLvls',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxSkyLvls'
+c
+c get size of maxskylvls
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxskylvls',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxskylvls'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxSkyLvls)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxSkyLvls'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxskylvls)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxskylvls'
       endif
-C
-C Get size of maxTurbElements
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxTurbElements',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxTurbElements'
+c
+c get size of maxturbelements
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxturbelements',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxturbelements'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxTurbElements)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxTurbElements'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxturbelements)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxturbelements'
       endif
-C
-C Get size of maxTurbLvls
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxTurbLvls',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxTurbLvls'
+c
+c get size of maxturblvls
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxturblvls',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxturblvls'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxTurbLvls)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxTurbLvls'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxturblvls)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxturblvls'
       endif
-C
-C Get size of recNum
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+c
+c get size of recnum
+c
+      nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      call pireps_sub(nf_fid, maxIcingLvls, maxLocs, maxSkyLvls,
-     +     maxTurbElements, maxTurbLvls, recNum,
+      call pireps_sub(nf_fid, maxicinglvls, maxlocs, maxskylvls,
+     +     maxturbelements, maxturblvls, recnum,
 !.............................................................................
-     1     ext,i4time_sys,ilaps_cycle_time,NX_L,NY_L,istatus)
+     1     ext,i4time_sys,ilaps_cycle_time,nx_l,ny_l,istatus)
       return
 !.............................................................................
       end
-C
-C
-      subroutine pireps_sub(nf_fid, maxIcingLvls, maxLocs, maxSkyLvls,
-     +     maxTurbElements, maxTurbLvls, recNum,
+c
+c
+      subroutine pireps_sub(nf_fid, maxicinglvls, maxlocs, maxskylvls,
+     +     maxturbelements, maxturblvls, recnum,
 !.............................................................................
-     1     ext,i4time_sys,ilaps_cycle_time,NX_L,NY_L,istatus)
+     1     ext,i4time_sys,ilaps_cycle_time,nx_l,ny_l,istatus)
 !.............................................................................
 
       include 'netcdf.inc'
-      integer maxIcingLvls, maxLocs, maxSkyLvls, maxTurbElements,
-     +     maxTurbLvls, recNum,nf_fid, nf_vid, nf_status
-      integer icingIntens( maxIcingLvls, recNum),
-     +     lowLvlWndShr(recNum), temperature(recNum), turbIntens(
-     +     maxTurbElements,  maxTurbLvls, recNum), vis(recNum),
-     +     windDir(recNum), windSpd(recNum)
-      real fltLvlBottom(recNum), fltLvlTop(recNum), icingBottom(
-     +     maxIcingLvls, recNum), icingTop( maxIcingLvls, recNum),
-     +     lat( maxLocs, recNum), lon( maxLocs, recNum),
-     +     skyCvrBottom( maxSkyLvls, recNum), skyCvrTop( maxSkyLvls,
-     +     recNum), turbBottom( maxTurbLvls, recNum), turbTop(
-     +     maxTurbLvls, recNum)
-      double precision recptTime(recNum), timeObs(recNum)
-      character*4 icingHtInd( maxIcingLvls, recNum)
-      character*8 skyCvrAmt( maxSkyLvls, recNum)
-      character*4 turbHtInd( maxTurbLvls, recNum)
-      character*16 locStr( maxLocs, recNum)
-      character*4 skyCvrHtInd( maxSkyLvls, recNum)
-      character*4 turbFreq( maxTurbElements,  maxTurbLvls, recNum)
-      character*33 fltWthr(recNum)
-      character*5 icingType( maxIcingLvls, recNum)
-      character*201 origReport(recNum)
-      character*5 aircraftType(recNum)
-      character*4 reportType(recNum)
-      character*4 fltLvlInd(recNum)
-      character*4 collSite(recNum)
-      character*5 turbType( maxTurbLvls, recNum)
+      integer maxicinglvls, maxlocs, maxskylvls, maxturbelements,
+     +     maxturblvls, recnum,nf_fid, nf_vid, nf_status
+      integer icingintens( maxicinglvls, recnum),
+     +     lowlvlwndshr(recnum), temperature(recnum), turbintens(
+     +     maxturbelements,  maxturblvls, recnum), vis(recnum),
+     +     winddir(recnum), windspd(recnum)
+      real fltlvlbottom(recnum), fltlvltop(recnum), icingbottom(
+     +     maxicinglvls, recnum), icingtop( maxicinglvls, recnum),
+     +     lat( maxlocs, recnum), lon( maxlocs, recnum),
+     +     skycvrbottom( maxskylvls, recnum), skycvrtop( maxskylvls,
+     +     recnum), turbbottom( maxturblvls, recnum), turbtop(
+     +     maxturblvls, recnum)
+      double precision recpttime(recnum), timeobs(recnum)
+      character*4 icinghtind( maxicinglvls, recnum)
+      character*8 skycvramt( maxskylvls, recnum)
+      character*4 turbhtind( maxturblvls, recnum)
+      character*16 locstr( maxlocs, recnum)
+      character*4 skycvrhtind( maxskylvls, recnum)
+      character*4 turbfreq( maxturbelements,  maxturblvls, recnum)
+      character*33 fltwthr(recnum)
+      character*5 icingtype( maxicinglvls, recnum)
+      character*201 origreport(recnum)
+      character*5 aircrafttype(recnum)
+      character*4 reporttype(recnum)
+      character*4 fltlvlind(recnum)
+      character*4 collsite(recnum)
+      character*5 turbtype( maxturblvls, recnum)
 
 !.............................................................................
 
       character*170 filename
       character*(*) ext
-      character*9 a9_timeObs,a9_recptTime 
+      character*9 a9_timeobs,a9_recpttime 
       character*7 c7_skycover
-      real lat_a(NX_L,NY_L)
-      real lon_a(NX_L,NY_L)
-      real topo_a(NX_L,NY_L)
+      real lat_a(nx_l,ny_l)
+      real lon_a(nx_l,ny_l)
+      real topo_a(nx_l,ny_l)
 
 !.............................................................................
 
-      call read_pireps_netcdf(nf_fid, maxIcingLvls, maxLocs, maxSkyLvls,     
-     +     maxTurbElements, maxTurbLvls, recNum, icingIntens, 
-     +     lowLvlWndShr, temperature, turbIntens, vis, windDir, 
-     +     windSpd, fltLvlBottom, fltLvlTop, icingBottom, icingTop, 
-     +     lat, lon, skyCvrBottom, skyCvrTop, turbBottom, turbTop, 
-     +     recptTime, timeObs, aircraftType, collSite, fltLvlInd, 
-     +     fltWthr, icingHtInd, icingType, locStr, origReport, 
-     +     reportType, skyCvrAmt, skyCvrHtInd, turbFreq, turbHtInd, 
-     +     turbType)
-C
-C The netcdf variables are filled - your code goes here
-C
+      call read_pireps_netcdf(nf_fid, maxicinglvls, maxlocs, maxskylvls,     
+     +     maxturbelements, maxturblvls, recnum, icingintens, 
+     +     lowlvlwndshr, temperature, turbintens, vis, winddir, 
+     +     windspd, fltlvlbottom, fltlvltop, icingbottom, icingtop, 
+     +     lat, lon, skycvrbottom, skycvrtop, turbbottom, turbtop, 
+     +     recpttime, timeobs, aircrafttype, collsite, fltlvlind, 
+     +     fltwthr, icinghtind, icingtype, locstr, origreport, 
+     +     reporttype, skycvramt, skycvrhtind, turbfreq, turbhtind, 
+     +     turbtype)
+c
+c the netcdf variables are filled - your code goes here
+c
 !.............................................................................
 
-      call get_domain_perimeter(NX_L,NY_L,'nest7grid',lat_a,lon_a,
+      call get_domain_perimeter(nx_l,ny_l,'nest7grid',lat_a,lon_a,
      1            topo_a,1.0,rnorth,south,east,west,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_domain_perimeter'
+          write(6,*)' error in get_domain_perimeter'
           return
       endif
 
-!     Write All Pireps to LAPS PIN file
+!     write all pireps to laps pin file
       altitude = 0.
 
       r_nc_missing_data = 1e20
 
-      write(6,*)' recNum = ',recNum
+      write(6,*)' recnum = ',recnum
 
-      num_pireps = recNum
+      num_pireps = recnum
 
       do i = 1,num_pireps
 
           write(6,*)
-          write(6,*)' Pirep #',i
+          write(6,*)' pirep #',i
 
           if(lat(1,i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing first latitude',i
+              write(6,*)' missing first latitude',i
               goto 999
           endif
           if(lon(1,i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing first longitude',i
+              write(6,*)' missing first longitude',i
               goto 999
           endif
-          if(timeObs(i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing ob time',i
+          if(timeobs(i) .ge. r_nc_missing_data)then
+              write(6,*)' missing ob time',i
               goto 999
           endif
-          if(recptTime(i) .ge. r_nc_missing_data)then
-              write(6,*)' Missing received time',i
+          if(recpttime(i) .ge. r_nc_missing_data)then
+              write(6,*)' missing received time',i
               goto 999
           endif
 
-!         Test to see how many lat/lons are present
+!         test to see how many lat/lons are present
           n_latitude_present = 0
           do j = 1,4
             if(lat(j,i) .lt. r_nc_missing_data)then
@@ -218,80 +218,80 @@ C
             endif
           enddo ! j
 
-          write(6,*)' Num locations = ',n_latitude_present       
+          write(6,*)' num locations = ',n_latitude_present       
 
           if(n_latitude_present .gt. 1)then
-              write(6,*)' Multiple locations, reject ob',i
+              write(6,*)' multiple locations, reject ob',i
               goto 999
           endif
 
           if(lat(1,i) .le. rnorth .and. lat(1,i) .ge. south .and.
      1       lon(1,i) .ge. west   .and. lon(1,i) .le. east      )then        
-              write(6,*)' Pirep is inside domain lat/lon perimeter'
+              write(6,*)' pirep is inside domain lat/lon perimeter'
           else
               write(6,*)
-     1            ' Outside domain lat/lon perimeter - reject'
+     1            ' outside domain lat/lon perimeter - reject'
               goto 999
           endif
 
-!         Write Individual Pirep to LAPS PIN file
-          call c_time2fname(nint(timeObs(i)),a9_timeObs)
-          call c_time2fname(nint(recptTime(i)),a9_recptTime)
+!         write individual pirep to laps pin file
+          call c_time2fname(nint(timeobs(i)),a9_timeobs)
+          call c_time2fname(nint(recpttime(i)),a9_recpttime)
 
-          call cv_asc_i4time(a9_timeObs,i4time_ob)
+          call cv_asc_i4time(a9_timeobs,i4time_ob)
           i4_resid = abs(i4time_ob - i4time_sys)
           if(i4_resid .gt. (ilaps_cycle_time / 2) )then
-              write(6,*)' Outside time window - reject '
-     1                              ,a9_timeObs,i4_resid
+              write(6,*)' outside time window - reject '
+     1                              ,a9_timeobs,i4_resid
               goto 999        
           endif
 
           call open_ext(31,i4time_sys,ext(1:3),istatus)
 
-          write(6,1)a9_timeObs,a9_recptTime 
-          write(31,1)a9_timeObs,a9_recptTime 
- 1        format(' Time - prp/rcvd:'/1x,a9,2x,a9) 
+          write(6,1)a9_timeobs,a9_recpttime 
+          write(31,1)a9_timeobs,a9_recpttime 
+ 1        format(' time - prp/rcvd:'/1x,a9,2x,a9) 
 
           write(6,2)lat(1,i),lon(1,i),altitude
           write(31,2)lat(1,i),lon(1,i),altitude
- 2        format(' Lat, lon, altitude'/f8.3,f10.3,f8.0)  
+ 2        format(' lat, lon, altitude'/f8.3,f10.3,f8.0)  
 
           write(6,33)
           write(31,33)
- 33       format(' Cloud layer')
+ 33       format(' cloud layer')
 
-!         Write out cloud base/top in feet and cloud amount in eighths
+!         write out cloud base/top in feet and cloud amount in eighths
           do ilyr = 1,3
 
-!             Use -1000. for missing value of cloud base/top
-              if(skyCvrBottom(ilyr,i) .ge. 1e10)then
+!             use -1000. for missing value of cloud base/top
+              if(skycvrbottom(ilyr,i) .ge. 1e10)then
                   rbase = -1000.
               else
-                  rbase = skyCvrBottom(ilyr,i) * 3.281
+                  rbase = skycvrbottom(ilyr,i) * 3.281
               endif
-              if(skyCvrTop(ilyr,i) .ge. 1e10)then
+              if(skycvrtop(ilyr,i) .ge. 1e10)then
                   rtop = -1000.
               else
-                  rtop = skyCvrTop(ilyr,i) * 3.281
+                  rtop = skycvrtop(ilyr,i) * 3.281
               endif
 
-              c7_skycover(1:7) = skyCvrAmt(ilyr,i)(1:7)
+              c7_skycover(1:7) = skycvramt(ilyr,i)(1:7)
 
               call skycover_to_frac(c7_skycover,fraction,istatus)
 
-!             Test for missing or unusable cloud cover
+!             test for missing or unusable cloud cover
               if(istatus .ne. 1)then 
                   ieighths = -999
               else 
                   ieighths = nint(fraction * 8.0)
               endif                  
 
-              write(6,3)rbase,rtop,ieighths,skyCvrAmt(ilyr,i)
+              write(6,3)rbase,rtop,ieighths,skycvramt(ilyr,i)
      1                                     ,fraction
- 3            format(' Cloud layer',2f8.0,i5,1x,a8,f5.2)
+ 3            format(' cloud layer',2f8.0,i5,1x,a8,f5.2)
 
 !             if(istatus .eq. 1)then
-!                 write(6,*)' Above layer written to PIN file'
+!                 write(6,*)' above layer written to pin file'
                   write(31,3)rbase,rtop,ieighths
 !             endif
 
@@ -305,526 +305,526 @@ C
 
       return
       end
-C
-C  Subroutine to read the file "PIREP data : selected by receipt time : time range from 885926400 to 885926700" 
-C
-      subroutine read_pireps_netcdf(nf_fid, maxIcingLvls, maxLocs, 
-     +     maxSkyLvls, maxTurbElements, maxTurbLvls, recNum, 
-     +     icingIntens, lowLvlWndShr, temperature, turbIntens, vis, 
-     +     windDir, windSpd, fltLvlBottom, fltLvlTop, icingBottom, 
-     +     icingTop, lat, lon, skyCvrBottom, skyCvrTop, turbBottom, 
-     +     turbTop, recptTime, timeObs, aircraftType, collSite, 
-     +     fltLvlInd, fltWthr, icingHtInd, icingType, locStr, 
-     +     origReport, reportType, skyCvrAmt, skyCvrHtInd, turbFreq, 
-     +     turbHtInd, turbType)
-C
+c
+c  subroutine to read the file "pirep data : selected by receipt time : time range from 885926400 to 885926700" 
+c
+      subroutine read_pireps_netcdf(nf_fid, maxicinglvls, maxlocs, 
+     +     maxskylvls, maxturbelements, maxturblvls, recnum, 
+     +     icingintens, lowlvlwndshr, temperature, turbintens, vis, 
+     +     winddir, windspd, fltlvlbottom, fltlvltop, icingbottom, 
+     +     icingtop, lat, lon, skycvrbottom, skycvrtop, turbbottom, 
+     +     turbtop, recpttime, timeobs, aircrafttype, collsite, 
+     +     fltlvlind, fltwthr, icinghtind, icingtype, locstr, 
+     +     origreport, reporttype, skycvramt, skycvrhtind, turbfreq, 
+     +     turbhtind, turbtype)
+c
       include 'netcdf.inc'
-      integer maxIcingLvls, maxLocs, maxSkyLvls, maxTurbElements, 
-     +     maxTurbLvls, recNum,nf_fid, nf_vid, nf_status
-      integer icingIntens( maxIcingLvls, recNum),
-     +     lowLvlWndShr(recNum), temperature(recNum), turbIntens(
-     +     maxTurbElements,  maxTurbLvls, recNum), vis(recNum),
-     +     windDir(recNum), windSpd(recNum)
-      real fltLvlBottom(recNum), fltLvlTop(recNum), icingBottom(
-     +     maxIcingLvls, recNum), icingTop( maxIcingLvls, recNum),
-     +     lat( maxLocs, recNum), lon( maxLocs, recNum),
-     +     skyCvrBottom( maxSkyLvls, recNum), skyCvrTop( maxSkyLvls,
-     +     recNum), turbBottom( maxTurbLvls, recNum), turbTop(
-     +     maxTurbLvls, recNum)
-      double precision recptTime(recNum), timeObs(recNum)
-      character*4 icingHtInd( maxIcingLvls, recNum)
-      character*8 skyCvrAmt( maxSkyLvls, recNum)
-      character*4 turbHtInd( maxTurbLvls, recNum)
-      character*16 locStr( maxLocs, recNum)
-      character*4 skyCvrHtInd( maxSkyLvls, recNum)
-      character*33 fltWthr(recNum)
-      character*4 turbFreq( maxTurbElements,  maxTurbLvls, recNum)
-      character*5 icingType( maxIcingLvls, recNum)
-      character*201 origReport(recNum)
-      character*5 aircraftType(recNum)
-      character*4 reportType(recNum)
-      character*4 fltLvlInd(recNum)
-      character*4 collSite(recNum)
-      character*5 turbType( maxTurbLvls, recNum)
+      integer maxicinglvls, maxlocs, maxskylvls, maxturbelements, 
+     +     maxturblvls, recnum,nf_fid, nf_vid, nf_status
+      integer icingintens( maxicinglvls, recnum),
+     +     lowlvlwndshr(recnum), temperature(recnum), turbintens(
+     +     maxturbelements,  maxturblvls, recnum), vis(recnum),
+     +     winddir(recnum), windspd(recnum)
+      real fltlvlbottom(recnum), fltlvltop(recnum), icingbottom(
+     +     maxicinglvls, recnum), icingtop( maxicinglvls, recnum),
+     +     lat( maxlocs, recnum), lon( maxlocs, recnum),
+     +     skycvrbottom( maxskylvls, recnum), skycvrtop( maxskylvls,
+     +     recnum), turbbottom( maxturblvls, recnum), turbtop(
+     +     maxturblvls, recnum)
+      double precision recpttime(recnum), timeobs(recnum)
+      character*4 icinghtind( maxicinglvls, recnum)
+      character*8 skycvramt( maxskylvls, recnum)
+      character*4 turbhtind( maxturblvls, recnum)
+      character*16 locstr( maxlocs, recnum)
+      character*4 skycvrhtind( maxskylvls, recnum)
+      character*33 fltwthr(recnum)
+      character*4 turbfreq( maxturbelements,  maxturblvls, recnum)
+      character*5 icingtype( maxicinglvls, recnum)
+      character*201 origreport(recnum)
+      character*5 aircrafttype(recnum)
+      character*4 reporttype(recnum)
+      character*4 fltlvlind(recnum)
+      character*4 collsite(recnum)
+      character*5 turbtype( maxturblvls, recnum)
 
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C      fltLvlBottom "Bottom of PIREPs flight level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'fltLvlBottom',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltLvlBottom'
+c   variables of type real
+c
+c     variable        netcdf long name
+c      fltlvlbottom "bottom of pireps flight level"
+c
+        nf_status = nf_inq_varid(nf_fid,'fltlvlbottom',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltlvlbottom'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,fltLvlBottom)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltLvlBottom'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,fltlvlbottom)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltlvlbottom'
       endif
-C
-C     Variable        NETCDF Long Name
-C      fltLvlTop    "Top of PIREPs flight level"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'fltLvlTop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltLvlTop'
+c
+c     variable        netcdf long name
+c      fltlvltop    "top of pireps flight level"
+c
+        nf_status = nf_inq_varid(nf_fid,'fltlvltop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltlvltop'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,fltLvlTop)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltLvlTop'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,fltlvltop)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltlvltop'
       endif
-C
-C     Variable        NETCDF Long Name
-C      icingBottom  "Bottom of Icing Layer"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'icingBottom',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingBottom'
+c
+c     variable        netcdf long name
+c      icingbottom  "bottom of icing layer"
+c
+        nf_status = nf_inq_varid(nf_fid,'icingbottom',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingbottom'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,icingBottom)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingBottom'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,icingbottom)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingbottom'
       endif
-C
-C     Variable        NETCDF Long Name
-C      icingTop     "Top of Icing Layer"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'icingTop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingTop'
+c
+c     variable        netcdf long name
+c      icingtop     "top of icing layer"
+c
+        nf_status = nf_inq_varid(nf_fid,'icingtop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingtop'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,icingTop)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingTop'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,icingtop)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingtop'
       endif
-C
-C     Variable        NETCDF Long Name
-C      lat          "Latitude of report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'lat',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      lat          "latitude of report"
+c
+        nf_status = nf_inq_varid(nf_fid,'lat',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lat'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,lat)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lat)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lat'
       endif
-C
-C     Variable        NETCDF Long Name
-C      lon          "Longitude of report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'lon',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      lon          "longitude of report"
+c
+        nf_status = nf_inq_varid(nf_fid,'lon',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lon'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,lon)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,lon)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var lon'
       endif
-C
-C     Variable        NETCDF Long Name
-C      skyCvrBottom "Bottom of Sky Cover Layer"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'skyCvrBottom',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrBottom'
+c
+c     variable        netcdf long name
+c      skycvrbottom "bottom of sky cover layer"
+c
+        nf_status = nf_inq_varid(nf_fid,'skycvrbottom',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvrbottom'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,skyCvrBottom)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrBottom'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,skycvrbottom)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvrbottom'
       endif
-C
-C     Variable        NETCDF Long Name
-C      skyCvrTop    "Bottom of Sky Cover Layer"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'skyCvrTop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrTop'
+c
+c     variable        netcdf long name
+c      skycvrtop    "bottom of sky cover layer"
+c
+        nf_status = nf_inq_varid(nf_fid,'skycvrtop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvrtop'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,skyCvrTop)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrTop'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,skycvrtop)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvrtop'
       endif
-C
-C     Variable        NETCDF Long Name
-C      turbBottom   "Bottom of Turbulence Layer"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'turbBottom',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbBottom'
+c
+c     variable        netcdf long name
+c      turbbottom   "bottom of turbulence layer"
+c
+        nf_status = nf_inq_varid(nf_fid,'turbbottom',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbbottom'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,turbBottom)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbBottom'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,turbbottom)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbbottom'
       endif
-C
-C     Variable        NETCDF Long Name
-C      turbTop      "Top of Turbulence Layer"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'turbTop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbTop'
+c
+c     variable        netcdf long name
+c      turbtop      "top of turbulence layer"
+c
+        nf_status = nf_inq_varid(nf_fid,'turbtop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbtop'
       endif
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,turbTop)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbTop'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,turbtop)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbtop'
       endif
 
-C   Variables of type INT
-C
-C
-C     Variable        NETCDF Long Name
-C      icingIntens  "Icing intensity"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'icingIntens',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingIntens'
+c   variables of type int
+c
+c
+c     variable        netcdf long name
+c      icingintens  "icing intensity"
+c
+        nf_status = nf_inq_varid(nf_fid,'icingintens',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingintens'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,icingIntens)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingIntens'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,icingintens)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingintens'
       endif
-C
-C     Variable        NETCDF Long Name
-C      lowLvlWndShr "Low Level Wind Shear Indicator"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'lowLvlWndShr',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var lowLvlWndShr'
+c
+c     variable        netcdf long name
+c      lowlvlwndshr "low level wind shear indicator"
+c
+        nf_status = nf_inq_varid(nf_fid,'lowlvlwndshr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lowlvlwndshr'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,lowLvlWndShr)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var lowLvlWndShr'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,lowlvlwndshr)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lowlvlwndshr'
       endif
-C
-C     Variable        NETCDF Long Name
-C      temperature  "Temperature"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'temperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      temperature  "temperature"
+c
+        nf_status = nf_inq_varid(nf_fid,'temperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var temperature'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,temperature)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_int(nf_fid,nf_vid,temperature)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var temperature'
       endif
-C
-C     Variable        NETCDF Long Name
-C      turbIntens   "Turbulence Intensity"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'turbIntens',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbIntens'
+c
+c     variable        netcdf long name
+c      turbintens   "turbulence intensity"
+c
+        nf_status = nf_inq_varid(nf_fid,'turbintens',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbintens'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,turbIntens)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbIntens'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,turbintens)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbintens'
       endif
-C
-C     Variable        NETCDF Long Name
-C      vis          "Visibility"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'vis',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      vis          "visibility"
+c
+        nf_status = nf_inq_varid(nf_fid,'vis',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var vis'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,vis)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_int(nf_fid,nf_vid,vis)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var vis'
       endif
-C
-C     Variable        NETCDF Long Name
-C      windDir      "Wind Direction"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'windDir',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var windDir'
+c
+c     variable        netcdf long name
+c      winddir      "wind direction"
+c
+        nf_status = nf_inq_varid(nf_fid,'winddir',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var winddir'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,windDir)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var windDir'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,winddir)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var winddir'
       endif
-C
-C     Variable        NETCDF Long Name
-C      windSpd      "Wind Speed"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'windSpd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var windSpd'
+c
+c     variable        netcdf long name
+c      windspd      "wind speed"
+c
+        nf_status = nf_inq_varid(nf_fid,'windspd',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var windspd'
       endif
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,windSpd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var windSpd'
-      endif
-
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C      recptTime    "Time report was received"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'recptTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var recptTime'
-      endif
-        nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,recptTime)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var recptTime'
-      endif
-C
-C     Variable        NETCDF Long Name
-C      timeObs      "Time of report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'timeObs',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
-      endif
-        nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,timeObs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var timeObs'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,windspd)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var windspd'
       endif
 
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c      recpttime    "time report was received"
+c
+        nf_status = nf_inq_varid(nf_fid,'recpttime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var recpttime'
+      endif
+        nf_status = nf_get_var_double(nf_fid,nf_vid,recpttime)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var recpttime'
+      endif
+c
+c     variable        netcdf long name
+c      timeobs      "time of report"
+c
+        nf_status = nf_inq_varid(nf_fid,'timeobs',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
+      endif
+        nf_status = nf_get_var_double(nf_fid,nf_vid,timeobs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var timeobs'
+      endif
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C      aircraftType "Type of Aircraft issuing report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'aircraftType',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var aircraftType'
+
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c      aircrafttype "type of aircraft issuing report"
+c
+        nf_status = nf_inq_varid(nf_fid,'aircrafttype',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var aircrafttype'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,aircraftType)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var aircraftType'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,aircrafttype)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var aircrafttype'
       endif
-C
-C     Variable        NETCDF Long Name
-C      collSite     "Data Collection Site"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'collSite',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var collSite'
+c
+c     variable        netcdf long name
+c      collsite     "data collection site"
+c
+        nf_status = nf_inq_varid(nf_fid,'collsite',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var collsite'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,collSite)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var collSite'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,collsite)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var collsite'
       endif
-C
-C     Variable        NETCDF Long Name
-C      fltLvlInd    "Flight Level Indicator"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'fltLvlInd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltLvlInd'
+c
+c     variable        netcdf long name
+c      fltlvlind    "flight level indicator"
+c
+        nf_status = nf_inq_varid(nf_fid,'fltlvlind',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltlvlind'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,fltLvlInd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltLvlInd'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,fltlvlind)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltlvlind'
       endif
-C
-C     Variable        NETCDF Long Name
-C      fltWthr      "Flight Weather"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'fltWthr',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltWthr'
+c
+c     variable        netcdf long name
+c      fltwthr      "flight weather"
+c
+        nf_status = nf_inq_varid(nf_fid,'fltwthr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltwthr'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,fltWthr)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var fltWthr'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,fltwthr)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var fltwthr'
       endif
-C
-C     Variable        NETCDF Long Name
-C      icingHtInd   "Icing Height Indicator"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'icingHtInd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingHtInd'
+c
+c     variable        netcdf long name
+c      icinghtind   "icing height indicator"
+c
+        nf_status = nf_inq_varid(nf_fid,'icinghtind',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icinghtind'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,icingHtInd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingHtInd'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,icinghtind)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icinghtind'
       endif
-C
-C     Variable        NETCDF Long Name
-C      icingType    "Type of Icing observed"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'icingType',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingType'
+c
+c     variable        netcdf long name
+c      icingtype    "type of icing observed"
+c
+        nf_status = nf_inq_varid(nf_fid,'icingtype',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingtype'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,icingType)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var icingType'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,icingtype)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var icingtype'
       endif
-C
-C     Variable        NETCDF Long Name
-C      locStr       "Location String for each derived lat/lon"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'locStr',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var locStr'
+c
+c     variable        netcdf long name
+c      locstr       "location string for each derived lat/lon"
+c
+        nf_status = nf_inq_varid(nf_fid,'locstr',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var locstr'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,locStr)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var locStr'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,locstr)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var locstr'
       endif
-C
-C     Variable        NETCDF Long Name
-C      origReport   "Original PIREPs report"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'origReport',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var origReport'
+c
+c     variable        netcdf long name
+c      origreport   "original pireps report"
+c
+        nf_status = nf_inq_varid(nf_fid,'origreport',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var origreport'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,origReport)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var origReport'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,origreport)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var origreport'
       endif
-C
-C     Variable        NETCDF Long Name
-C      reportType   "Report Type"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'reportType',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var reportType'
+c
+c     variable        netcdf long name
+c      reporttype   "report type"
+c
+        nf_status = nf_inq_varid(nf_fid,'reporttype',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var reporttype'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,reportType)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var reportType'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,reporttype)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var reporttype'
       endif
-C
-C     Variable        NETCDF Long Name
-C      skyCvrAmt    "Amount of Sky Cover"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'skyCvrAmt',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrAmt'
+c
+c     variable        netcdf long name
+c      skycvramt    "amount of sky cover"
+c
+        nf_status = nf_inq_varid(nf_fid,'skycvramt',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvramt'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,skyCvrAmt)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrAmt'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,skycvramt)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvramt'
       endif
-C
-C     Variable        NETCDF Long Name
-C      skyCvrHtInd  "Sky Cover Height Indicator"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'skyCvrHtInd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrHtInd'
+c
+c     variable        netcdf long name
+c      skycvrhtind  "sky cover height indicator"
+c
+        nf_status = nf_inq_varid(nf_fid,'skycvrhtind',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvrhtind'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,skyCvrHtInd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var skyCvrHtInd'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,skycvrhtind)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var skycvrhtind'
       endif
-C
-C     Variable        NETCDF Long Name
-C      turbFreq     "Weather qualifier"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'turbFreq',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbFreq'
+c
+c     variable        netcdf long name
+c      turbfreq     "weather qualifier"
+c
+        nf_status = nf_inq_varid(nf_fid,'turbfreq',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbfreq'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,turbFreq)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbFreq'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,turbfreq)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbfreq'
       endif
-C
-C     Variable        NETCDF Long Name
-C      turbHtInd    "Turbulence Height Indicator"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'turbHtInd',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbHtInd'
+c
+c     variable        netcdf long name
+c      turbhtind    "turbulence height indicator"
+c
+        nf_status = nf_inq_varid(nf_fid,'turbhtind',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbhtind'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,turbHtInd)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbHtInd'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,turbhtind)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbhtind'
       endif
-C
-C     Variable        NETCDF Long Name
-C      turbType     "Type of turbulence observed"
-C
-        nf_status = NF_INQ_VARID(nf_fid,'turbType',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbType'
+c
+c     variable        netcdf long name
+c      turbtype     "type of turbulence observed"
+c
+        nf_status = nf_inq_varid(nf_fid,'turbtype',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbtype'
       endif
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,turbType)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var turbType'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,turbtype)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var turbtype'
       endif
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

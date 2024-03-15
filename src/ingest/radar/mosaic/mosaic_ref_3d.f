@@ -1,54 +1,54 @@
 
-      subroutine mosaic_ref_multi(i_ra_count,maxradars,l_low_level,       ! I
-     &                            radar_name,lat,lon,nx,ny,nz,            ! I
-     &                            rlat_radar,rlon_radar,rheight_radar,    ! I
-     &                            topo,rheight_laps,grid_ra_ref,          ! I
-     &                            grid_ra_ref_offset,ioffset,joffset,     ! I
-     &                            nx_r,ny_r,                              ! I
-     &                            maxradarsg,maxradarso,                  ! I
-     &                            imosaic_3d,                             ! I
-     &                            dist_multiradar_2d,                     ! I  
-     &                            l_offset,                               ! I
-     &                            grid_mosaic_2dref,grid_mosaic_3dref,    ! I/O
-     &                            closest_radar_m,istatus)                ! O
+      subroutine mosaic_ref_multi(i_ra_count,maxradars,l_low_level,       ! i
+     &                            radar_name,lat,lon,nx,ny,nz,            ! i
+     &                            rlat_radar,rlon_radar,rheight_radar,    ! i
+     &                            topo,rheight_laps,grid_ra_ref,          ! i
+     &                            grid_ra_ref_offset,ioffset,joffset,     ! i
+     &                            nx_r,ny_r,                              ! i
+     &                            maxradarsg,maxradarso,                  ! i
+     &                            imosaic_3d,                             ! i
+     &                            dist_multiradar_2d,                     ! i  
+     &                            l_offset,                               ! i
+     &                            grid_mosaic_2dref,grid_mosaic_3dref,    ! i/o
+     &                            closest_radar_m,istatus)                ! o
 c
-c routine mosaics vxx radar files. Uses radar closest to the
-c laps grid point. Depending on the value of l_low_level, uses 
+c routine mosaics vxx radar files. uses radar closest to the
+c laps grid point. depending on the value of l_low_level, uses 
 c either the maximum reflectivity in the column (l_low_level = false)
 c or uses the reflectivity on the first level above the laps elevation
 c (l_low_level = true).
 c
-      Real    lat(nx,ny)
-      Real    lon(nx,ny)
-      Real    grid_ra_ref(nx,ny,nz,maxradarsg)
-      Real    grid_ra_ref_offset(nx_r,ny_r,nz,maxradarso)
-      Real    grid_mosaic_2dref(nx,ny)
-      Real    dist_multiradar_2d(nx,ny,maxradars)
-      Real    closest_radar_m(nx,ny)
-      Real    grid_mosaic_3dref(nx,ny,nz)
-      Real    topo(nx,ny)
-      Real    rheight_laps(nx,ny,nz)
-      Real    rlat_radar(maxradars)
-      Real    rlon_radar(maxradars)
-      Real    rheight_radar(maxradars)
-      Real    ri(maxradars)
-      Real    rj(maxradars)
+      real    lat(nx,ny)
+      real    lon(nx,ny)
+      real    grid_ra_ref(nx,ny,nz,maxradarsg)
+      real    grid_ra_ref_offset(nx_r,ny_r,nz,maxradarso)
+      real    grid_mosaic_2dref(nx,ny)
+      real    dist_multiradar_2d(nx,ny,maxradars)
+      real    closest_radar_m(nx,ny)
+      real    grid_mosaic_3dref(nx,ny,nz)
+      real    topo(nx,ny)
+      real    rheight_laps(nx,ny,nz)
+      real    rlat_radar(maxradars)
+      real    rlon_radar(maxradars)
+      real    rheight_radar(maxradars)
+      real    ri(maxradars)
+      real    rj(maxradars)
       real    dist_radar_m(maxradars)
 
-      Logical   l_low_level
-      Logical   found_height
-      Logical   l_valid
-      Logical   l_valid_latlon(maxradars)
-      Logical   l_offset 
-!     Parameter (l_offset = .true.)
+      logical   l_low_level
+      logical   found_height
+      logical   l_valid
+      logical   l_valid_latlon(maxradars)
+      logical   l_offset 
+!     parameter (l_offset = .true.)
 
       integer   lr_2d(nx,ny)                     ! closest radar
-      Integer   ioffset(maxradars),joffset(maxradars)
+      integer   ioffset(maxradars),joffset(maxradars)
 
-      Character*4 radar_name(maxradars)
+      character*4 radar_name(maxradars)
 
       write(6,*)
-      write(6,*)' Subroutine mosaic_ref_multi: imosaic_3d =', imosaic_3d       
+      write(6,*)' subroutine mosaic_ref_multi: imosaic_3d =', imosaic_3d       
 
 !     if(l_offset)then
 !         write(6,*)' grid_ra_ref_offset range: '
@@ -64,7 +64,7 @@ c
       call get_r_missing_data(r_missing_data, istatus)
       call get_grid_spacing_cen(grid_spacing_cen_m,istatus)
 
-!     Initialize
+!     initialize
       grid_mosaic_2dref = r_missing_data
       grid_mosaic_3dref = r_missing_data
       lr_2d = 0
@@ -74,11 +74,11 @@ c
       istatus = 1
       if(i_ra_count .ge. 1)then ! essentially all the time
 
-!        Determine which radars have valid lat/lon
+!        determine which radars have valid lat/lon
          do k = 1,i_ra_count 
             if(rlat_radar(k) .eq. r_missing_data .or.
      1         rlon_radar(k) .eq. r_missing_data      )then
-                write(6,*)' No valid or single lat/lon for radar ',k
+                write(6,*)' no valid or single lat/lon for radar ',k
      1                   ,' ',radar_name(k)
                 l_valid_latlon(k) = .false.
 
@@ -91,11 +91,11 @@ c
      &                                   jstatus)
                 if(jstatus.ne.1)then
                     write(6,*)
-     1               'Error computing ri/rj for radar (outside domain)?'    
+     1               'error computing ri/rj for radar (outside domain)?'    
                 endif
                 write(6,*)radar_name(k),k,ri(k),rj(k)
      1                   ,rlat_radar(k),rlon_radar(k)
-51              format('Valid lat/lon: ',a,i5,2f8.1,2f8.2)
+51              format('valid lat/lon: ',a,i5,2f8.1,2f8.2)
                 l_valid_latlon(k) = .true.
 
                 if(l_offset)then
@@ -106,7 +106,7 @@ c
 
          enddo ! radars
 
-!        Loop through all horizontal gridpoints to define best radar array
+!        loop through all horizontal gridpoints to define best radar array
          icntn=0
          icntp=0
          icntz=0
@@ -120,12 +120,12 @@ c find the valid radar with the minimum distance to the grid point in question.
 c
             lr = 0 
 
-!           Loop through all radars
+!           loop through all radars
             do l = 1,i_ra_count
                l_valid = .false.
 
                if(.not. l_offset)then
-                 do k = 1,nz ! Look for non-missing reflectivity in column
+                 do k = 1,nz ! look for non-missing reflectivity in column
                    if(grid_ra_ref(i,j,k,l) .ne. r_missing_data)then     
                      l_valid = .true.
                    endif
@@ -142,7 +142,7 @@ c
                    continue
 
                  else   
-                   do k = 1,nz ! Look for non-missing reflectivity in column
+                   do k = 1,nz ! look for non-missing reflectivity in column
                      if(grid_ra_ref_offset(io,jo,k,l) .ne. 
      1                                  r_missing_data)then     
                        l_valid = .true.
@@ -160,7 +160,7 @@ c
                    rijdist=sqrt(ridist*ridist + rjdist*rjdist)
                    dist_radar_m(l) = rijdist * grid_spacing_cen_m
 
-               else ! No valid or single lat/lon, use distance array
+               else ! no valid or single lat/lon, use distance array
                    dist_radar_m(l) = dist_multiradar_2d(i,j,l)
 
                endif
@@ -186,7 +186,7 @@ c
                r_dbzmax=ref_base
 
                if(.not. l_offset)then
-!                 Get max ref in column
+!                 get max ref in column
                   do k=1,nz
                      if(grid_ra_ref(i,j,k,l).ne.ref_base .and.
      1                  grid_ra_ref(i,j,k,l).ne.r_missing_data)then
@@ -215,10 +215,10 @@ c
                  io = i - ioffset(l)
                  jo = j - joffset(l)
                  
-                 if(io .ge. 1 .AND. io .le. nx_r .AND.
-     1              jo .ge. 1 .AND. jo .le. ny_r)then
+                 if(io .ge. 1 .and. io .le. nx_r .and.
+     1              jo .ge. 1 .and. jo .le. ny_r)then
 
-!                  Get max ref in column
+!                  get max ref in column
                    do k=1,nz
                      if(grid_ra_ref_offset(io,jo,k,l).ne.ref_base .and.
      1                  grid_ra_ref_offset(io,jo,k,l).ne.r_missing_data
@@ -247,7 +247,7 @@ c
 
                endif ! .true.
 
-!              Increment stats
+!              increment stats
                if(r_dbzmax.ne.ref_base)then
                   if(r_dbzmax.lt.0.0)then
                      icntn=icntn+1
@@ -268,17 +268,17 @@ c
 
       endif ! i_ra_count > 1
 
-      print*,'Statistics for this mosaic'
+      print*,'statistics for this mosaic'
       print*,'--------------------------'
-      print*,'Num points > 0.0  ',icntp
-      print*,'Num points = 0.0  ',icntz
-      print*,'Num points < 0.0  ',icntn
-      print*,'Num points = base ',icntb
+      print*,'num points > 0.0  ',icntp
+      print*,'num points = 0.0  ',icntz
+      print*,'num points < 0.0  ',icntn
+      print*,'num points = base ',icntb
 
       intvl = int(nx/80) + 1
 
       write(6,*)
-      write(6,*)' Map of ',i_ra_count,' valid radars used:'
+      write(6,*)' map of ',i_ra_count,' valid radars used:'
 
       do j = ny,1,-intvl
           write(6,101)(lr_2d(i,j),i=1,nx,intvl) 

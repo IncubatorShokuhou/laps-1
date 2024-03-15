@@ -1,1266 +1,1263 @@
 !dis
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
 !dis
-!dis    This software is distributed under the Open Source Definition,
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
 !dis
-!dis    In particular, redistribution and use in source and binary forms,
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
 !dis
-!dis    - Redistributions of source code must retain this notice, this
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
 !dis
-!dis    - Redistributions in binary form must provide access to this
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
 !dis
-!dis    - All modifications to this software must be clearly documented,
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
 !dis
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
 !dis
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
 !dis
-!dis                                                                   
-
-PROGRAM wfoprep
-
-  ! This is a new version of the wfoprep program.  Unlike the previous
-  ! version of this programs distributed with LAPS, this version is
-  ! focused on acquiring data for lateral boundary conditions to support
-  ! a mesoscale NWP model run.  For initialization, the new program
-  ! "lapsprep" builds the files necessary for the initial condition, assuming
-  ! you wish to initialize with LAPS.  Furthermore, the old version was
-  ! set up to support only the SFM, which we are no longer supporting.  This
-  ! version can output files for ingest by MM5v3/REGRIDDER, RAMS 4.3 in RALPH2
-  ! format, or WRFSI/hinterp input.   This is controlled by the output_type
-  ! entry(ies) in the wfoprep.nl.  Finally, this new version is cast in
-  ! free-form F90 code, including the use of modules.
-  !
-  ! History
-  ! -------
-  ! Sep 2001:  New f90 version for MM5v3/RAMS4.3/WRFSI support.  
-  !            B. Shaw, NOAA/CIRA/FSL FRD/LAPB
-  !
-  !
-  USE wfoprep_setup 
-  USE wfo_models
-  USE map_utils
-  USE wfoprep_mm5
-  USE wfoprep_wrf
- 
-  IMPLICIT NONE  
-  REAL, PARAMETER           :: rmissingval = -9999.
-  INTEGER,PARAMETER         :: maxl=75 
-  INTEGER,PARAMETER         :: maxt=50
-  LOGICAL                   :: filefound
-  INTEGER                   :: fcstsec(maxt)
-  INTEGER                   :: goodlevs
-  REAL                      :: goodpct
-  INTEGER                   :: i,ii
-  INTEGER                   :: i4time_offset
-  INTEGER                   :: i4time_last
-  INTEGER                   :: i4time_valid,i4time_valid1,i4time_valid2
-  INTEGER                   :: i4time_cycle
-  INTEGER, ALLOCATABLE      :: i4times_avail_max(:)
-  INTEGER, ALLOCATABLE      :: i4times_avail(:)
-  INTEGER                   :: istatus
-  INTEGER                   :: k,kk
-  CHARACTER (LEN=13)        :: last_cycle_processed
-  CHARACTER (LEN=13)        :: latest_cycle_wfo
-
-  INTEGER                   :: m
-  CHARACTER (LEN=256)       :: modelfile_wfo
-  INTEGER                   :: nfid
-  INTEGER                   :: ntimes,ntimes_needed
-  INTEGER                   :: outfreq_sec
-  CHARACTER (LEN=256)       :: proclog
-  INTEGER                   :: ta
-  INTEGER                   :: t_id,ht_id,u_id,v_id,rh_id,msl_id
-  INTEGER                   :: nz_t,nz_ht,nz_u,nz_v,nz_rh,nz_msl
-  INTEGER                   :: np_t,np_ht,np_u,np_v,np_rh,np_rh_raw,np_msl
-  LOGICAL                   :: havesfc_t,havesfc_ht,havesfc_u,havesfc_msl
-  LOGICAL                   :: havesfc_v,havesfc_rh
-  CHARACTER (LEN=10)        :: t_levels_c(maxl)
-  CHARACTER (LEN=10)        :: ht_levels_c(maxl)
-  CHARACTER (LEN=10)        :: rh_levels_c(maxl)
-  CHARACTER (LEN=10)        :: u_levels_c(maxl)
-  CHARACTER (LEN=10)        :: v_levels_c(maxl)
-  CHARACTER (LEN=10)        :: msl_levels_c(maxl)
-  REAL                      :: t_plevels(maxl)
-  REAL                      :: ht_plevels(maxl)
-  REAL                      :: rh_plevels(maxl),rh_plevels_raw(maxl)
-  REAL                      :: u_plevels(maxl)
-  REAL                      :: v_plevels(maxl)
-  REAL                      :: msl_plevels(maxl)
-  INTEGER                   :: t_kbotp,t_ktopp, t_ksfc
-  INTEGER                   :: rh_kbotp,rh_ktopp,rh_ksfc
-  INTEGER                   :: ht_kbotp,ht_ktopp,ht_ksfc
-  INTEGER                   :: u_kbotp,u_ktopp,u_ksfc
-  INTEGER                   :: v_kbotp,v_ktopp,v_ksfc
-  INTEGER                   :: msl_kbotp,msl_ktopp,msl_ksfc
-  CHARACTER (LEN=13)        :: wfofname
-  CHARACTER (LEN=13),EXTERNAL :: cvt_i4time_wfo_fname13
-  LOGICAL, ALLOCATABLE      :: t_inv(:,:)
-  LOGICAL, ALLOCATABLE      :: u_inv(:,:)
-  LOGICAL, ALLOCATABLE      :: v_inv(:,:)
-  LOGICAL, ALLOCATABLE      :: rh_inv(:,:)
-  LOGICAL, ALLOCATABLE      :: rh_inv_raw(:,:)
-  LOGICAL, ALLOCATABLE      :: ht_inv(:,:)
-  LOGICAL, ALLOCATABLE      :: msl_inv(:,:)
-  LOGICAL, ALLOCATABLE      :: goodtime_flag (:)
-  INTEGER                   :: n_goodtimes
-  CHARACTER(LEN=10)         :: mslname
-  INTEGER, ALLOCATABLE      :: time_index(:) 
-  INTEGER                   :: nfssttimes
-  TYPE(proj_info)           :: proj
-  REAL                      :: weight1
-  ! Data arrays
-  REAL, ALLOCATABLE         :: z3d(:,:,:),z3d1(:,:,:),z3d2(:,:,:)
-  REAL, ALLOCATABLE         :: zsf(:,:),zsf1(:,:),zsf2(:,:)
-  REAL, ALLOCATABLE         :: t3d(:,:,:),t3d1(:,:,:),t3d2(:,:,:)
-  REAL, ALLOCATABLE         :: tsf(:,:),tsf1(:,:),tsf2(:,:)
-  REAL, ALLOCATABLE         :: rh3d(:,:,:),rh3d1(:,:,:),rh3d2(:,:,:)
-  REAL, ALLOCATABLE         :: rhsf(:,:),rhsf1(:,:),rhsf2(:,:) 
-  REAL, ALLOCATABLE         :: u3d(:,:,:),u3d1(:,:,:),u3d2(:,:,:)
-  REAL, ALLOCATABLE         :: usf(:,:),usf1(:,:),usf2(:,:) 
-  REAL, ALLOCATABLE         :: v3d(:,:,:),v3d1(:,:,:),v3d2(:,:,:)
-  REAL, ALLOCATABLE         :: vsf(:,:),vsf1(:,:),vsf2(:,:)
-  REAL, ALLOCATABLE         :: slp(:,:),slp1(:,:),slp2(:,:)
-  REAL, ALLOCATABLE         :: fsstsum(:,:), fsst(:,:)
-  REAL, ALLOCATABLE         :: topo(:,:)
-  REAL, ALLOCATABLE         :: data3d_temp(:,:,:)
-  REAL                      :: tdsf_c, psf_mb
-  REAL, EXTERNAL            :: dwpt_laps, twet_fast
-  INTEGER                   :: ix,jy
-  LOGICAL                   :: fixvar1, fixvar2
-
-  istatus = 1
-  PRINT '(A)', 'Calling setup routine...'
-  CALL setup_wfoprep(istatus)
-  IF (istatus .ne. 1) THEN
-    PRINT '(A)', 'DPREP: Problem with setup configuration.'
-    STOP
-  ENDIF
-
-  ! At this point, the wfoprep_setup module contains a list of models
-  ! and information relating to their availability (e.g., frequency
-  ! of model runs, delay time before a cycle is available, etc.).  We
-  ! will loop through each valid model and process as requested and
-  ! available.
-
-  model_loop: DO m = 1, num_models
-
-    outfreq_sec = output_freq(m) * 3600
-    PRINT '(2A)', '*** Processing model ', TRIM(model_name(m))
-    ! Based on the namelist entries that tell us how frequently this
-    ! model is run and how many hours after cycle time it becomes available,
-    ! we can do some computations to see which cycle we should be trying to
-    ! process.
-
-    ! First, compute the i4time_offset value, which is the current time
-    ! minus the amount of time between this model's cycle time and when
-    ! the entire run is available.
-
-    i4time_offset = i4time_now - model_delay(m)*3600
-    
-    ! Round i4time_offset to nearest hour
-    i4time_offset = i4time_offset - MOD(i4time_offset,3600)
-
-    ! Now, compute the closest cycle time for this model that is equal 
-    ! to or earlier than the i4time_offset time.
-
-    i4time_cycle = (i4time_offset / (model_run_freq(m)*3600)) * &
-                       model_run_freq(m)*3600    
-    i4time_last = i4time_cycle + max_fcst_len(m)*3600
-
-    ! What is the cycle time closest?
-    latest_cycle_wfo = cvt_i4time_wfo_fname13(i4time_cycle)
-    print *, '    Latest possible cycle for this model = ', latest_cycle_wfo
-
-    ! Check the {model}.last file in the drep output directory
-    ! to see if this cycle has been processed yet.
- 
-    PRINT *, '    Checking log of previously processed cycles.' 
-    proclog = TRIM(ext_data_path) // TRIM(output_name(m)) // '.last'
-    INQUIRE (FILE=proclog, EXIST=filefound)
-    IF (filefound) THEN
-      OPEN(FILE=proclog,UNIT=11,STATUS='OLD',FORM='FORMATTED', &
-           ACCESS='SEQUENTIAL')
-      READ(11,'(A13)') last_cycle_processed
-      CLOSE(11)
-      PRINT '(2A)', '       Last cycle processed for this model:', &
-           last_cycle_processed
-      IF (last_cycle_processed .GE. latest_cycle_wfo) THEN
-        PRINT '(A)', '       Current cycle <= last cycle processed. Skipping...'
-        CYCLE model_loop
-      ENDIF
-    ELSE  
-      PRINT '(A)', '    No record of processing for any previous cycles.'
-    ENDIF
-  
-    ! See if the file required for this cycle is available
-    modelfile_wfo = TRIM(model_path(m)) // '/' // latest_cycle_wfo
-
-    PRINT '(2A)', '    Searching for data file: ',TRIM(modelfile_wfo)
-    INQUIRE(FILE=modelfile_wfo, EXIST=filefound)
-    IF (.NOT. filefound) THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#############################'
-      PRINT '(A)', 'SKIPPING MODEL: NOT AVAILABLE'
-      PRINT '(A)', '#############################' 
-      PRINT '(A)', ' ' 
-      CYCLE model_loop
-    ENDIF
-
-    ! Open the file
-    CALL open_wfofile(modelfile_wfo,nfid,istatus)
-    IF (istatus .NE. 1)THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#############################'
-      PRINT '(A)', 'SKIPPING MODEL: I/O ERROR'
-      PRINT '(A)', '#############################'
-      PRINT '(A)', ' '
-      CYCLE model_loop                          
-    ENDIF
-   
-    ! Get grid/projection info
-    CALL get_wfomodel_proj(nfid,model_name(m),proj,istatus)
-    IF (istatus .NE. 1) THEN
-            PRINT '(A)', ' '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', 'SKIPPING MODEL: PROJ INFO PROBLEM'
-      PRINT '(A)', '#################################'
-      PRINT '(A)', ' '     
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF
-
-    ! Process time info
-    CALL get_wfomodel_fcsttimes(nfid,ntimes,fcstsec,istatus)
-    IF (istatus.NE.1) THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', 'SKIPPING MODEL: TIME INFO PROBLEM'
-      PRINT '(A)', '#################################'
-      PRINT '(A)', ' '     
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF
-    ALLOCATE(i4times_avail_max(ntimes))
-    i4times_avail_max(1:ntimes) = i4time_cycle + fcstsec(1:ntimes)
-    IF (i4time_last .GT. i4times_avail_max(ntimes)) THEN
-      PRINT *, 'INFO: This source does not support max_fcst length of ',max_fcst_len(m)
-      PRINT *, 'INFO: Resetting to ', (i4times_avail_max(ntimes)-i4time_cycle)/36
-      i4time_last = i4times_avail_max(ntimes)
-    ELSE  
-      ! Compute the ntimes_needed value, which reprenents the number
-      ! of time periods actually needed to get us equal to or just past
-      ! i4time_last
-      ntimes_needed = 1
-      find_ntimes_needed: DO i = 2, ntimes
-        ntimes_needed = ntimes_needed + 1
-        IF (i4times_avail_max(i) .GE. i4time_last) THEN
-          EXIT find_ntimes_needed
-        ENDIF
-      ENDDO find_ntimes_needed
-        
-    ENDIF
-
-    ! Get level information for state variables (t,ht,u,v,rh) and then
-    ! get the inventory  
-
-    ! Temperature
-    CALL get_wfomodel_var_levels(nfid,'t         ',t_id, nz_t, t_levels_c, np_t, &
-                  t_plevels,t_kbotp,t_ktopp, havesfc_t,t_ksfc,istatus)
-    IF (istatus.NE.1)THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO T DATA        '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', ' '                  
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF
-  
-    ! Height is only mandatory for 3D data sets
-    IF (model_code(m).GT.1) THEN
-      CALL get_wfomodel_var_levels(nfid,'gh        ',ht_id, nz_ht, ht_levels_c, np_ht, &
-                 ht_plevels,ht_kbotp,ht_ktopp, havesfc_ht, ht_ksfc,istatus)
-      IF (istatus.NE.1)THEN
-        PRINT '(A)', ' '
-        PRINT '(A)', '#################################'
-        PRINT '(A)', 'SKIPPING MODEL: NO Z DATA        '
-        PRINT '(A)', '#################################'
-        PRINT '(A)', ' '  
-        CALL close_wfofile(nfid,istatus)
-        CYCLE model_loop
-      ENDIF                           
-    ENDIF 
-     
-    ! Relative humidity
-    CALL get_wfomodel_var_levels(nfid,'rh        ',rh_id, nz_rh, rh_levels_c, np_rh_raw, &
-                  rh_plevels_raw,rh_kbotp,rh_ktopp, havesfc_rh,rh_ksfc,istatus)
-    IF (istatus.NE.1)THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO RH DATA        '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', ' '                    
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF                      
-
-    ! U-wind component
-    CALL get_wfomodel_var_levels(nfid,'uw        ',u_id, nz_u, u_levels_c, np_u, &
-                  u_plevels, u_kbotp,u_ktopp,havesfc_u,u_ksfc,istatus)
-    IF (istatus.NE.1)THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO U DATA        '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', ' '        
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF                  
-
-    ! V-wind component
-    CALL get_wfomodel_var_levels(nfid,'vw        ',v_id, nz_v, v_levels_c, np_v, &
-                  v_plevels,v_kbotp,v_ktopp, havesfc_v,v_ksfc,istatus)
-    IF (istatus.NE.1)THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO V DATA        '
-      PRINT '(A)', '#################################'
-      PRINT '(A)', ' '   
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF     
-
-    ! MSLP is mandatory for 3D data sets.  Check for Eta MSLP first.  If non-existent,
-    ! then check for standard mslp
-  
-    IF (model_code(m).GT.1) THEN 
-      CALL get_wfomodel_var_levels(nfid,'emsp      ',msl_id, nz_msl, &
-                 msl_levels_c, np_msl, &
-                 msl_plevels,msl_kbotp,msl_ktopp, havesfc_msl, msl_ksfc,istatus)
-      IF (istatus.EQ.1)THEN
-        PRINT *, 'Using ETA MSLP field'
-        mslname = 'emsp      '
-      ELSE
-        CALL get_wfomodel_var_levels(nfid,'pmsl      ',msl_id, nz_msl, &
-                 msl_levels_c, np_msl, &
-                 msl_plevels,msl_kbotp,msl_ktopp, havesfc_msl, msl_ksfc,istatus) 
-        IF (istatus .EQ. 1) THEN
-          PRINT *, 'Using PMSL field'
-          mslname = 'pmsl      '
-        ELSE
-          CALL get_wfomodel_var_levels(nfid,'mmsp      ',msl_id, nz_msl, &
-                 msl_levels_c, np_msl, &
-                 msl_plevels,msl_kbotp,msl_ktopp, havesfc_msl, msl_ksfc,istatus)
-          IF (istatus .EQ. 1) THEN
-            PRINT *, 'Using MMSP field (MAPS Sea-level Pressure)'
-            mslname = 'mmsp      '
-          ELSE
-            PRINT '(A)', ' '
-            PRINT '(A)', '#################################'
-            PRINT '(A)', 'SKIPPING MODEL: NO MSLP DATA        '
-            PRINT '(A)', '#################################'
-            PRINT '(A)', ' '  
-            CALL close_wfofile(nfid,istatus)
-            CYCLE model_loop
-          ENDIF
-        ENDIF
-      ENDIF
-    ENDIF    
-         
-    ! Now, check to make sure we have T,ht, u, and v for all of the same
-    ! pressure levels if this is a 3D data set.  This seems to be the case
-    ! for all supported datasets.  However, RH is a bit trickier.  In some
-    ! cases, RH is not provided above 300 mb or below 975 mb.  Deal with this
-    ! later.
-
-    IF ( model_code(m) .GT. 1) THEN
-      IF ( (np_t .NE. np_ht) .OR. (np_u .NE. np_ht) .OR. &
-           (np_u .NE. np_ht) ) THEN
-         PRINT '(A)', ' '
-          PRINT '(A)', '####################################'
-          PRINT '(A)', 'SKIPPING MODEL: DIMENSION MISMATCHES'
-          PRINT '(A)', '####################################'
-          PRINT '(A)', ' '              
-         DEALLOCATE(i4times_avail_max)
-         CALL close_wfofile(nfid,istatus)
-         CYCLE model_loop
-      ENDIF
-    ENDIF
-
-    ! We have made it this far, so we must have variables we need, but we
-    ! need to check their inventory to see which time periods are complete.
-    ! If this is a 3D data source (model code > 1), then we need to have at
-    ! least the top and bottom level values for each variable for the time
-    ! to be included in the process.  Also must have the first and last
-    ! time periods.  
- 
-    n_goodtimes = 0 
-    IF (ALLOCATED(goodtime_flag))DEALLOCATE(goodtime_flag)
-    ALLOCATE(goodtime_flag(ntimes_needed))
-    goodtime_flag(:) = .true.
-
-    IF (ALLOCATED(t_inv)) DEALLOCATE(t_inv)
-    ALLOCATE(t_inv(nz_t,ntimes))
-    CALL get_wfomodel_var_inv(nfid,'t         ',nz_t,ntimes,t_inv,istatus)
-    IF (istatus .NE. 1) THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO T INVENTORY      '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', ' ' 
-      CALL close_wfofile(nfid,istatus)  
-      CYCLE model_loop
-    ENDIF
-
-    IF (ALLOCATED(u_inv)) DEALLOCATE(u_inv)
-    ALLOCATE(u_inv(nz_u,ntimes))
-    CALL get_wfomodel_var_inv(nfid,'uw        ',nz_u,ntimes,u_inv,istatus)
-    IF (istatus .NE. 1) THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO U INVENTORY      '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', ' '    
-      CALL close_wfofile(nfid,istatus)  
-      CYCLE model_loop
-    ENDIF      
-
-    IF (ALLOCATED(v_inv)) DEALLOCATE(v_inv)
-    ALLOCATE(v_inv(nz_v,ntimes))
-    CALL get_wfomodel_var_inv(nfid,'vw        ',nz_v,ntimes,v_inv,istatus)
-    IF (istatus .NE. 1) THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO V INVENTORY      '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', ' '    
-      CALL close_wfofile(nfid,istatus)  
-      CYCLE model_loop
-    ENDIF       
-
-    IF (ALLOCATED(rh_inv_raw)) DEALLOCATE(rh_inv_raw)
-    ALLOCATE(rh_inv_raw(nz_rh,ntimes))
-    ! Also allocate an array that matches the temperature array
-    IF (ALLOCATED(rh_inv)) DEALLOCATE(rh_inv)
-    ALLOCATE(rh_inv(nz_t,ntimes))
-    rh_inv(:,:) = .false.
-    IF (nz_rh .EQ. nz_t) rh_inv = rh_inv_raw
-    CALL get_wfomodel_var_inv(nfid,'rh        ',nz_rh,ntimes,rh_inv_raw,istatus)
-    IF (istatus .NE. 1) THEN
-      PRINT '(A)', ' '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', 'SKIPPING MODEL: NO RH INVENTORY      '
-      PRINT '(A)', '####################################'
-      PRINT '(A)', ' '    
-      CALL close_wfofile(nfid,istatus)  
-      CYCLE model_loop
-    ENDIF   
-
-    IF (ALLOCATED(ht_inv)) DEALLOCATE(ht_inv)
-    IF (model_code(m).GT.1) THEN
-      ALLOCATE (ht_inv(nz_ht,ntimes))
-      CALL get_wfomodel_var_inv(nfid,'gh        ',nz_ht,ntimes,ht_inv,istatus)
-      IF (istatus .NE. 1) THEN
-        PRINT '(A)', ' '
-        PRINT '(A)', '####################################'
-        PRINT '(A)', 'SKIPPING MODEL: NO Z INVENTORY      '
-        PRINT '(A)', '####################################'
-        PRINT '(A)', ' '    
-        CALL close_wfofile(nfid,istatus)
-        CYCLE model_loop
-      ENDIF   
-    ENDIF  
- 
-    IF (ALLOCATED(msl_inv)) DEALLOCATE(msl_inv)
-    IF (model_code(m).GT.1) THEN
-      ALLOCATE (msl_inv(nz_msl,ntimes))
-      CALL get_wfomodel_var_inv(nfid,mslname,nz_msl,ntimes,msl_inv,istatus)
-      IF (istatus .NE. 1) THEN
-        PRINT '(A)', ' '
-        PRINT '(A)', '####################################'
-        PRINT '(A)', 'SKIPPING MODEL: NO MSLP INVENTORY      '
-        PRINT '(A)', '####################################'
-        PRINT '(A)', ' '   
-        CALL close_wfofile(nfid,istatus)
-        CYCLE model_loop
-      ENDIF
-    ENDIF                                                                
-
-    ! Here is the actual check for minimum requirements.
-    ! Minimum variable requirements:
-    !  ht, T, U, V, RH on pressure levels + MSLP
-    ! For now, require that 100% of the levels be present for each
-    ! variable, and that both the top and bottom level must be
-    ! present.  In the future, we can add vertical interpolatoin
-    ! to allow for missing levels, thus allowing us to reduce the
-    ! 100% level threshold
-
-    invloop: DO i = 1,ntimes_needed
- 
-      IF (model_code(m) .GT. 1) THEN
-
-        ! Check MSL pressure
-        IF (.NOT.msl_inv(msl_ksfc,i)) THEN
-          PRINT *, 'WARNING: Missing MSL for this time:',i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF
-
-        ! Check height field, requiring most levels to be present!
-        goodlevs = 0
-        htinvloop: DO k = ht_kbotp, ht_ktopp
-          IF (ht_inv(k,i)) goodlevs = goodlevs + 1
-        ENDDO  htinvloop
-        goodpct = FLOAT(goodlevs)/FLOAT(np_ht)
-        IF ((goodpct .LT. min_vert_frac).OR.(.NOT.ht_inv(ht_kbotp,i)).OR.&
-            (.NOT.ht_inv(ht_ktopp,i))) THEN
-          PRINT *, 'WARNING: Height inventory failed vertical check:', &
-              goodpct, i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF
-
-        ! Check temperatures
-        goodlevs = 0
-        tinvloop: DO k = t_kbotp, t_ktopp
-          IF (t_inv(k,i)) goodlevs = goodlevs + 1
-        ENDDO  tinvloop
-        goodpct = FLOAT(goodlevs)/FLOAT(np_t)
-        IF ((goodpct .LT. min_vert_frac).OR.(.NOT.t_inv(t_kbotp,i)).OR.&
-            (.NOT.t_inv(t_ktopp,i))) THEN
-          PRINT *, 'WARNING: Temperature inventory failed vertical check:', &
-              goodpct, i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF               
-
-        ! Check RH
-        goodlevs = 0
-        rhinvloop: DO k = rh_kbotp, rh_ktopp
-          IF (rh_inv_raw(k,i)) goodlevs = goodlevs + 1
-        ENDDO  rhinvloop
-        goodpct = FLOAT(goodlevs)/FLOAT(np_rh_raw)
-        IF ((goodpct .LT. min_vert_frac).OR.(.NOT.rh_inv_raw(rh_kbotp,i)).OR.&
-            (.NOT.rh_inv_raw(rh_ktopp,i))) THEN
-          PRINT *, 'WARNING: RH inventory failed vertical check:', &
-              goodpct, i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF                   
-
-        ! Check U 
-        goodlevs = 0
-        uinvloop: DO k = u_kbotp, u_ktopp
-          IF (u_inv(k,i)) goodlevs = goodlevs + 1
-        ENDDO  uinvloop
-        goodpct = FLOAT(goodlevs)/FLOAT(np_u)
-        IF ((goodpct .LT. min_vert_frac).OR.(.NOT.u_inv(u_kbotp,i)).OR.&
-            (.NOT.u_inv(u_ktopp,i))) THEN
-          PRINT *, 'WARNING: U inventory failed vertical check:', &
-              goodpct, i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF                
-
-        ! Check V
-        goodlevs = 0
-        vinvloop: DO k = v_kbotp, v_ktopp
-          IF (v_inv(k,i)) goodlevs = goodlevs + 1
-        ENDDO  vinvloop
-        goodpct = FLOAT(goodlevs)/FLOAT(np_v)
-        IF ((goodpct .LT. min_vert_frac).OR.(.NOT.v_inv(v_kbotp,i)).OR.&
-            (.NOT.v_inv(v_ktopp,i))) THEN
-          PRINT *, 'WARNING: V inventory failed vertical check:', &
-              goodpct,i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF 
-
-      ENDIF
-      IF ((model_code(m).EQ.1).OR.(model_code(m).EQ.3))THEN
-        
-        ! We need surface values
-
-        IF (.NOT. t_inv(t_ksfc,i)) THEN
-          PRINT *, 'WARNING: Missing surface T', i
-          goodtime_flag(i) = .false.
-          CYCLE invloop 
-        ENDIF
-
-        IF (.NOT. u_inv(u_ksfc,i)) THEN
-          PRINT *, 'WARNING: Missing surface U', i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF    
-
-        IF (.NOT. v_inv(u_ksfc,i)) THEN
-          PRINT *, 'WARNING: Missing surface V',i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF     
-
-        IF (.NOT. rh_inv_raw(rh_ksfc,i)) THEN
-          PRINT *, 'WARNING: Missing surface RH',i
-          goodtime_flag(i) = .false.
-          CYCLE invloop
-        ENDIF     
-
-      ENDIF  
-      ! If we made it this far without cycling the loop, then
-      ! this is a good level
-      n_goodtimes = n_goodtimes + 1
-      goodtime_flag(i) = .true.
-    ENDDO invloop 
-           
-    ! OK, now lets make sure that enough time periods
-    ! passed the above check and that the first and last
-    ! times are available
-    goodlevs = 0
-    DO i = 1,ntimes_needed
-      IF (goodtime_flag(i)) goodlevs = goodlevs + 1
-    ENDDO
-    goodpct = FLOAT(goodlevs)/FLOAT(ntimes_needed)
-    IF ( (goodpct .LT. min_time_frac).OR.(.NOT.goodtime_flag(1)).OR.&
-         (.NOT.goodtime_flag(ntimes_needed)))THEN
-      PRINT *, ' '
-      PRINT *, '###################################################'
-      PRINT *, 'SKIPPING MODEL:  TIME INVENTORY CHECK FAILED'
-      PRINT *, 'goodpct/min_time_frac = ', goodpct,min_time_frac
-      PRINT *, 'goodtime_Flag(1) = ', goodtime_Flag(1)
-      PRINT *, 'ntimes_needed = ', ntimes_needed
-      PRINT *, 'goodtime_flag(ntimes_needed) =',goodtime_flag(ntimes_needed)
-      PRINT *, '###################################################'
-      CALL close_wfofile(nfid,istatus)
-      CYCLE model_loop
-    ENDIF
-         
-    ! Allocate the i4times_avail array to the actual number
-    ! of usable time periods and populate it
-    IF (ALLOCATED(i4times_avail)) DEALLOCATE(i4times_avail) 
-    ALLOCATE(i4times_avail(n_goodtimes))
-    IF (ALLOCATED(time_index)) DEALLOCATE(time_index)
-    ALLOCATE(time_index(n_goodtimes))
-    ii = 1
-    DO i = 1, ntimes_needed
-      IF (goodtime_flag(i)) THEN
-        i4times_avail(ii) = i4times_avail_max(i)
-        time_index(ii) = i
-        ii = ii + 1
-      ENDIF
-    ENDDO
-    DEALLOCATE(i4times_avail_max)
- 
-
-    ! Allocate 3 arrays for each state variable.  Two will be needed for the
-    ! data at two times bounding the time of interest.  The third is where
-    ! the time interpolated values will be saved. 
-   
-    IF (model_code(m) .GT. 1) THEN   
-      ALLOCATE (z3d     (proj%nx,proj%ny,np_ht) )
-      ALLOCATE (z3d1    (proj%nx,proj%ny,np_ht) )
-      ALLOCATE (z3d2    (proj%nx,proj%ny,np_ht) )
-      ALLOCATE (t3d     (proj%nx,proj%ny,np_t) )
-      ALLOCATE (t3d1    (proj%nx,proj%ny,np_t) )
-      ALLOCATE (t3d2    (proj%nx,proj%ny,np_t) )
-      ALLOCATE (rh3d     (proj%nx,proj%ny,np_t) )
-      ALLOCATE (rh3d1    (proj%nx,proj%ny,np_rh_raw) )
-      ALLOCATE (rh3d2    (proj%nx,proj%ny,np_rh_raw) ) 
-      ALLOCATE (u3d     (proj%nx,proj%ny,np_u) )
-      ALLOCATE (u3d1    (proj%nx,proj%ny,np_u) )
-      ALLOCATE (u3d2    (proj%nx,proj%ny,np_u) )  
-      ALLOCATE (v3d     (proj%nx,proj%ny,np_v) )
-      ALLOCATE (v3d1    (proj%nx,proj%ny,np_v) )
-      ALLOCATE (v3d2    (proj%nx,proj%ny,np_v) )  
-      ALLOCATE (slp     (proj%nx,proj%ny) )
-      ALLOCATE (slp1    (proj%nx,proj%ny) )  
-      ALLOCATE (slp2    (proj%nx,proj%ny) ) 
-    ENDIF 
-    IF ( (model_code(m).EQ.1).OR.(model_code(m).EQ.3) )THEN
-      ALLOCATE (tsf     (proj%nx,proj%ny) )
-      ALLOCATE (tsf1    (proj%nx,proj%ny) )
-      ALLOCATE (tsf2    (proj%nx,proj%ny) )    
-      ALLOCATE (rhsf    (proj%nx,proj%ny) )
-      ALLOCATE (rhsf1   (proj%nx,proj%ny) )
-      ALLOCATE (rhsf2   (proj%nx,proj%ny) )    
-      ALLOCATE (usf     (proj%nx,proj%ny) )
-      ALLOCATE (usf1    (proj%nx,proj%ny) )
-      ALLOCATE (usf2    (proj%nx,proj%ny) )    
-      ALLOCATE (vsf     (proj%nx,proj%ny) )
-      ALLOCATE (vsf1    (proj%nx,proj%ny) )
-      ALLOCATE (vsf2    (proj%nx,proj%ny) ) 
-      ALLOCATE (fsstsum (proj%nx,proj%ny) )
-      ALLOCATE (fsst    (proj%nx,proj%ny) )
-      fsstsum = 0.
-      nfssttimes = 0
-    ENDIF    
-
-
-    ! Initialize the i4time_valid1 and i4time_valid2, which are the two available
-    ! times which bound the desired output time
-    ta = 1
-    i4time_valid1 = i4times_avail(ta)
-    i4time_valid2 = i4times_avail(ta+1)
-
-    ! Read in the data for these two time periods
-    IF (model_code(m) .GT. 1) THEN
-      ! Get the pressure level data arrays
-  
-      ! MSLP
-      CALL read_wfomodel_data(nfid,msl_id,proj,time_index(ta), &
-                              msl_ksfc,msl_ksfc,slp1,istatus)
-      CALL read_wfomodel_data(nfid,msl_id,proj,time_index(ta+1), &
-                              msl_ksfc,msl_ksfc,slp2,istatus) 
-      ! Height
-      CALL read_wfomodel_data(nfid,ht_id,proj,time_index(ta), &
-                              ht_kbotp,ht_ktopp,z3d1,istatus)
-      CALL read_wfomodel_data(nfid,ht_id,proj,time_index(ta+1), &
-                              ht_kbotp,ht_ktopp,z3d2,istatus)    
-      ! Temperature 
-      CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta), &
-                              t_kbotp,t_ktopp,t3d1,istatus)
-      CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta+1), &
-                              t_kbotp,t_ktopp,t3d2,istatus)  
-
-      ! RH
-      CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta), &
-                              rh_kbotp,rh_ktopp,rh3d1,istatus)
-      CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta+1), &
-                              rh_kbotp,rh_ktopp,rh3d2,istatus)   
-  
-      ! U
-      CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta), &
-                              u_kbotp,u_ktopp,u3d1,istatus)
-      CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta+1), &
-                              u_kbotp,u_ktopp,u3d2,istatus)  
-
-      ! V
-      CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta), &
-                              v_kbotp,v_ktopp,v3d1,istatus)
-      CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta+1), &
-                              v_kbotp,v_ktopp,v3d2,istatus) 
-    ENDIF
-    IF ((model_code(m).EQ.1).OR.(model_code(m).EQ.3))THEN 
-      CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta), &
-                              t_ksfc,t_ksfc,tsf1,istatus)
-      CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta+1), &
-                              t_ksfc,t_ksfc,tsf2,istatus) 
-      CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta), &
-                              u_ksfc,u_ksfc,usf1,istatus)
-      CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta+1), &
-                              u_ksfc,u_ksfc,usf2,istatus)   
-      CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta), &
-                              v_ksfc,v_ksfc,vsf1,istatus)
-      CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta+1), &
-                              v_ksfc,v_ksfc,vsf2,istatus)    
-      CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta), &
-                              rh_ksfc,rh_ksfc,rhsf1,istatus)
-      CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta+1), &
-                              rh_ksfc,rh_ksfc,rhsf2,istatus)       
-
-    ENDIF
-    ALLOCATE(topo(proj%nx,proj%ny))
-    CALL get_wfomodel_topo(nfid,proj,topo,istatus) 
-
-    ! Main loop over all desired output times
-    output_time_loop: DO i4time_valid = i4time_cycle,i4time_last,outfreq_sec
-     ! PRINT *, 'Getting data for i4time = ', i4time_valid 
-      IF (i4time_valid .GT. i4time_valid2) THEN 
-        ! We need to get new bounding data times
-        read_avail_loop: DO WHILE(i4time_valid .GT. i4time_valid2)
-          ta = ta + 1
-          i4time_valid1 = i4times_avail(ta)
-          i4time_valid2 = i4times_avail(ta+1)
-        ENDDO read_avail_loop
-        ! Read the data for these 2 times
-        IF (model_code(m) .GT. 1) THEN
-          ! Get the pressure level data arrays
-
-          ! MSLP
-          CALL read_wfomodel_data(nfid,msl_id,proj,time_index(ta), &
-                              msl_ksfc,msl_ksfc,slp1,istatus)
-          CALL read_wfomodel_data(nfid,msl_id,proj,time_index(ta+1), &
-                              msl_ksfc,msl_ksfc,slp2,istatus)
-          ! Height
-          CALL read_wfomodel_data(nfid,ht_id,proj,time_index(ta), &
-                              ht_kbotp,ht_ktopp,z3d1,istatus)
-          CALL read_wfomodel_data(nfid,ht_id,proj,time_index(ta+1), &
-                              ht_kbotp,ht_ktopp,z3d2,istatus)
-          ! Temperature
-          CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta), &
-                              t_kbotp,t_ktopp,t3d1,istatus)
-          CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta+1), &
-                              t_kbotp,t_ktopp,t3d2,istatus)
-
-          ! RH
-          CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta), &
-                              rh_kbotp,rh_ktopp,rh3d1,istatus)
-          CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta+1), &
-                              rh_kbotp,rh_ktopp,rh3d2,istatus)
-
-          ! U
-          CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta), &
-                              u_kbotp,u_ktopp,u3d1,istatus)
-          CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta+1), &
-                              u_kbotp,u_ktopp,u3d2,istatus)
-
-          ! V
-          CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta), &
-                              v_kbotp,v_ktopp,v3d1,istatus)
-          CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta+1), &
-                              v_kbotp,v_ktopp,v3d2,istatus)
-        ENDIF  
-        IF ((model_code(m).EQ.1).OR.(model_code(m).EQ.3))THEN
-          CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta), &
-                              t_ksfc,t_ksfc,tsf1,istatus)
-          CALL read_wfomodel_data(nfid,t_id,proj,time_index(ta+1), &
-                              t_ksfc,t_ksfc,tsf2,istatus)
-          CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta), &
-                              u_ksfc,u_ksfc,usf1,istatus)
-          CALL read_wfomodel_data(nfid,u_id,proj,time_index(ta+1), &
-                              u_ksfc,u_ksfc,usf2,istatus)
-          CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta), &
-                              v_ksfc,v_ksfc,vsf1,istatus)
-          CALL read_wfomodel_data(nfid,v_id,proj,time_index(ta+1), &
-                              v_ksfc,v_ksfc,vsf2,istatus)
-          CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta), &
-                              rh_ksfc,rh_ksfc,rhsf1,istatus)
-          CALL read_wfomodel_data(nfid,rh_id,proj,time_index(ta+1), &
-                              rh_ksfc,rh_ksfc,rhsf2,istatus)
-        ENDIF                                                                                                                              
-      ENDIF
-
-      ! Handle case where RH has fewer levels than
-      ! the other state variables (only applies if
-      ! we are obtaining upper air data (model_code >1)
-
-      ! If we are processing upper air data from this model,
-      ! then run through some cleanup to account for missing
-      ! levels. 
-      IF (model_code(m) .GT. 1) THEN
-
-        ! Handle case where RH has fewer levels than
-        ! the other state variables (only applies if
-        ! we are obtaining upper air data
-        np_rh = np_t
-        IF (np_rh_raw .LT. np_t) THEN
-          PRINT *, 'WARNING: Expanding RH'
-          ALLOCATE(data3d_temp(proj%nx,proj%ny,np_rh)) 
-          ! Do the rh3d1 array
-          data3d_temp(:,:,:) = rmissingval
-          rh1_zloop: DO k = 1,np_rh_raw
-            t1_zloop: DO kk = 1, np_rh
-              IF  (rh_plevels_raw(k).EQ.t_plevels(kk)) THEN
-                rh_inv(kk+t_kbotp-1,time_index(ta))= &
-                  rh_inv_raw(k+rh_kbotp-1,time_index(ta))
-                IF (rh_inv(kk+t_kbotp-1,time_index(ta))) THEN
-                  data3d_temp(:,:,kk) = rh3d1(:,:,k)
-                ENDIF
-                EXIT t1_zloop
-              ENDIF
-            ENDDO t1_zloop
-          ENDDO rh1_zloop
-
-          DEALLOCATE(rh3d1)
-          ALLOCATE(rh3d1(proj%nx,proj%ny,np_rh))
-          rh3d1(:,:,:) = data3d_temp(:,:,:)
-          
-          ! Fill in top level if not already filled
-          IF (MAXVAL(rh3d1(:,:,np_rh)) .EQ. rmissingval) THEN
-             print *, 'Setting top level RH to 5%'
-             rh3d1(:,:,np_rh) = 5.0  ! Very dry
-             rh_inv(t_ktopp,time_index(ta)) = .true. 
-          ENDIF
-          ! Fill in bottom level if not already filled (the 
-          ! MesoEta does not have the 1000mb value!)
-          IF (MAXVAL(rh3d1(:,:,1)) .EQ. rmissingval) THEN
-             rh3d1(:,:,1) = rh3d1(:,:,2)
-             rh_inv(t_kbotp,time_index(ta)) = .true.
-          ENDIF
-
-
-          ! Repeat for the rh3d2 array
-          data3d_temp(:,:,:) = rmissingval
-          rh2_zloop: DO k = 1,np_rh_raw
-            t2_zloop: DO kk = 1, np_rh
-              IF (rh_plevels_raw(k).EQ.t_plevels(kk)) THEN
-                rh_inv(kk+t_kbotp-1,time_index(ta+1))= &
-                  rh_inv_raw(k+rh_kbotp-1,time_index(ta+1))
-                IF (rh_inv(kk+t_kbotp-1,time_index(ta+1))) THEN
-                  data3d_temp(:,:,kk) = rh3d2(:,:,k)
-                ENDIF          
-                EXIT t2_zloop
-              ENDIF
-            ENDDO t2_zloop
-          ENDDO rh2_zloop
-          DEALLOCATE(rh3d2)
-          ALLOCATE(rh3d2(proj%nx,proj%ny,np_rh))
-          rh3d2(:,:,:) = data3d_temp(:,:,:)
-
-          ! Fill in top level if not already filled
-          IF (MAXVAL(rh3d2(:,:,np_rh)) .EQ. rmissingval) THEN
-             rh3d2(:,:,np_rh) = 5.0  ! Very dry
-             rh_inv(t_ktopp,time_index(ta+1)) = .true.
-          ENDIF        
-          ! Fill in bottom level if not already filled
-          IF (MAXVAL(rh3d2(:,:,1)) .EQ. rmissingval) THEN
-             rh3d2(:,:,1) = rh3d2(:,:,2)
-             rh_inv(t_kbotp,time_index(ta+1)) = .true.
-          ENDIF
-
-          DEALLOCATE(data3d_temp)
-          rh_plevels(1:np_rh) = t_plevels(1:np_t) 
-        ELSE
-          rh_plevels = rh_plevels_raw
-        ENDIF
-
-        ! Clean up all 3D arrays to fill in any missing levels
-
-        ! Z3d
-        fixvar1 = .false.
-        fixvar2 = .false.
-        DO k = 1,np_ht
-          IF (.NOT. ht_inv(k-1+ht_kbotp,time_index(ta))) THEN
-            z3d1(:,:,k) = rmissingval
-            fixvar1 = .true.
-          ENDIF
-          IF (.NOT. ht_inv(k-1+ht_kbotp,time_index(ta+1))) THEN
-            z3d2(:,:,k) = rmissingval
-            fixvar2 = .true.
-          ENDIF  
-          IF (fixvar1) THEN
-            PRINT *, 'WARNING: Filling in missing levels for z3d1'
-            ! Call the fill routine to fill in for z3d1
-            CALL fill_missing_levs(proj%nx,proj%ny,np_ht,ht_plevels, &
-                  z3d1,rmissingval,2)
-          ENDIF
-          IF (fixvar2) THEN
-            ! Call the vinterp routine to fill in for z3d2
-            PRINT *, 'WARNING: Filling in missing levels for z3d2'  
-            CALL fill_missing_levs(proj%nx,proj%ny,np_ht,ht_plevels, &
-                  z3d2,rmissingval,2) 
-          ENDIF
-        ENDDO
-
-        ! t3d
-        fixvar1 = .false.
-        fixvar2 = .false.
-        DO k = 1,np_t
-          IF (.NOT. t_inv(k-1+t_kbotp,time_index(ta))) THEN
-            t3d1(:,:,k) = rmissingval
-            fixvar1 = .true.
-          ENDIF
-          IF (.NOT. t_inv(k-1+t_kbotp,time_index(ta+1))) THEN
-            t3d2(:,:,k) = rmissingval
-            fixvar2 = .true.
-          ENDIF
-          IF (fixvar1) THEN
-            ! Call the vinterp routine to fill in for t3d1
-            PRINT *, 'WARNING: Filling in missing levels for t3d1' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_t,t_plevels, &
-                  t3d1,rmissingval,2) 
-          ENDIF
-          IF (fixvar2) THEN
-            ! Call the vinterp routine to fill in for t3d2
-            PRINT *, 'WARNING: Filling in missing levels for t3d2' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_t,t_plevels, &
-                  t3d2,rmissingval,2) 
-          ENDIF
-        ENDDO 
-
-        ! u3d
-        fixvar1 = .false.
-        fixvar2 = .false.
-        DO k = 1,np_u
-          IF (.NOT. u_inv(k-1+u_kbotp,time_index(ta))) THEN
-            u3d1(:,:,k) = rmissingval
-            fixvar1 = .true.
-          ENDIF
-          IF (.NOT. u_inv(k-1+u_kbotp,time_index(ta+1))) THEN
-            u3d2(:,:,k) = rmissingval
-            fixvar2 = .true.
-          ENDIF
-          IF (fixvar1) THEN
-            ! Call the vinterp routine to fill in for u3d1
-            PRINT *, 'WARNING: Filling in missing levels for u3d1' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_u,u_plevels, &
-                  u3d1,rmissingval,1)
-          ENDIF
-          IF (fixvar2) THEN
-            ! Call the vinterp routine to fill in for u3d2
-            PRINT *, 'WARNING: Filling in missing levels for u3d2' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_u,u_plevels, &
-                  u3d2,rmissingval,1)  
-          ENDIF
-        ENDDO                         
-
-        ! v3d
-        fixvar1 = .false.
-        fixvar2 = .false.
-        DO k = 1,np_v
-          IF (.NOT. v_inv(k-1+v_kbotp,time_index(ta))) THEN
-            v3d1(:,:,k) = rmissingval
-            fixvar1 = .true.
-          ENDIF
-          IF (.NOT. v_inv(k-1+v_kbotp,time_index(ta+1))) THEN
-            v3d2(:,:,k) = rmissingval
-            fixvar2 = .true.
-          ENDIF
-          IF (fixvar1) THEN
-            ! Call the vinterp routine to fill in for v3d1  
-            PRINT *, 'WARNING: Filling in missing levels for v3d1' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_v,v_plevels, &
-                  v3d1,rmissingval,1)  
-          ENDIF
-          IF (fixvar2) THEN
-            ! Call the vinterp routine to fill in for v3d2
-            PRINT *, 'WARNING: Filling in missing levels for z3d2' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_v,v_plevels, &
-                  v3d2,rmissingval,1) 
-          ENDIF                   
-        ENDDO
-
-        ! rh3d
-        fixvar1 = .false.
-        fixvar2 = .false.
-        DO k = 1,np_rh
-          IF (.NOT. rh_inv(k-1+t_kbotp,time_index(ta))) THEN
-            rh3d1(:,:,k) = rmissingval
-            fixvar1 = .true.
-          ENDIF
-          IF (.NOT. rh_inv(k-1+t_kbotp,time_index(ta+1))) THEN
-            rh3d2(:,:,k) = rmissingval
-            fixvar2 = .true.
-          ENDIF
-          IF (fixvar1) THEN
-            ! Call the vinterp routine to fill in for rh3d1
-            PRINT *, 'WARNING: Filling in missing levels for rh3d1' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_rh,rh_plevels, &
-                  rh3d1,rmissingval,1) 
-          ENDIF
-          IF (fixvar2) THEN
-            ! Call the vinterp routine to fill in for rh3d2
-            PRINT *, 'WARNING: Filling in missing levels for rh3d2' 
-            CALL fill_missing_levs(proj%nx,proj%ny,np_rh,rh_plevels, &
-                  rh3d2,rmissingval,1) 
-          ENDIF
-        ENDDO           
-      ENDIF                  
-
-      ! Time to do time interpolation
-
-      ! PRINT *, 'Using bounding i4times of ', i4time_valid1,i4time_valid2
-      ! At this point, we have all of the data we need for two
-      ! bounding times.  So interpolate to the desired time,
-      ! then output the data
-      IF (i4time_valid .EQ. i4time_valid1) THEN
-        IF (model_code(m).GT.1) THEN
-          z3d = z3d1
-          t3d = t3d1
-          u3d = u3d1
-          v3d = v3d1
-          rh3d = rh3d1
-          slp = slp1
-        ENDIF
-        IF ((model_code(m).EQ.1).OR.(model_code(m).EQ.3)) THEN
-          tsf = tsf1
-          rhsf = rhsf1
-          usf = usf1
-          vsf = vsf1
-        ENDIF
-  
-      ELSE IF(i4time_valid .EQ. i4time_valid2) THEN
-        IF (model_code(m).GT.1) THEN
-          z3d = z3d2
-          t3d = t3d2
-          u3d = u3d2
-          v3d = v3d2
-          rh3d = rh3d2
-          slp = slp2
-        ENDIF
-        IF ((model_code(m).EQ.1).OR.(model_code(m).EQ.3)) THEN
-          tsf = tsf2
-          rhsf = rhsf2
-          usf = usf2
-          vsf = vsf2
-        ENDIF       
-        
-      ELSE
-        ! time interpolate
-        weight1 = FLOAT(i4time_valid2-i4time_valid)/FLOAT(i4time_valid2-i4time_valid1)
-        IF (model_code(m).GT.1) THEN
-          z3d = weight1*z3d1 + (1.-weight1)*z3d2
-          t3d = weight1*t3d1 + (1.-weight1)*t3d2  
-          u3d = weight1*u3d1 + (1.-weight1)*u3d2  
-          v3d = weight1*v3d1 + (1.-weight1)*v3d2  
-          rh3d = weight1*rh3d1 + (1.-weight1)*rh3d2  
-          slp = weight1*slp1 + (1.-weight1)*slp2  
-        ENDIF
-        IF ((model_code(m).EQ.1).OR.(model_code(m).EQ.3)) THEN
-          tsf = weight1*tsf1 + (1.-weight1)*tsf2
-          rhsf = weight1*rhsf1 + (1.-weight1)*rhsf2
-          usf = weight1*usf1 + (1.-weight1)*usf2
-          vsf = weight1*vsf1 + (1.-weight1)*vsf2
-        ENDIF                         
-
-      ENDIF
-
-      ! Output the data for this time
-      IF (output_type(1:3).EQ. 'mm5') THEN
-        IF (model_code(m) .GT. 1) THEN
-          PRINT *, 'Writing MM5v3 3D state variables for i4time =',i4time_valid
-          CALL output_mm5v3_basic(i4time_cycle,i4time_valid, proj, &
-               np_ht,np_t,np_u,np_v,np_rh, &
-               ht_plevels, t_plevels, u_plevels, v_plevels, rh_plevels, &
-               z3d, t3d, u3d, v3d, rh3d, slp, topo, &
-               ext_data_path, output_name(m),MM5MODE_NEW,istatus)
-          IF (model_code(m) .EQ. 3) THEN
-            PRINT *, 'Writing MM5v3 2D state variables for i4time =',i4time_valid 
-            CALL output_mm5v3_sfc(i4time_cycle,i4time_valid, proj, &
-               tsf, usf, vsf, rhsf, &
-               ext_data_path, output_name(m),MM5MODE_APPEND,istatus)
-          ENDIF
-        ELSE 
-          PRINT *, 'Writing MM5v3 2D state variables for i4time =',i4time_valid 
-           CALL output_mm5v3_sfc(i4time_cycle,i4time_valid, proj, &
-               tsf, usf, vsf, rhsf,  &
-               ext_data_path, output_name(m), MM5MODE_NEW,istatus) 
-        ENDIF
-      ELSE IF (output_type(1:3).EQ.'wrf') THEN
-        IF (model_code(m) .GT. 1) THEN 
-          PRINT *, 'Writing WRF 3D state variables for i4time =',i4time_valid
-          CALL output_wrf_basic(i4time_cycle,i4time_valid, proj, &
-               np_ht,np_t,np_u,np_v,np_rh, &
-               ht_plevels, t_plevels, u_plevels, v_plevels, rh_plevels, &
-               z3d, t3d, u3d, v3d, rh3d, slp, topo, &
-               ext_data_path, output_name(m),WRFMODE_NEW,istatus)
-          IF (model_code(m) .EQ. 3) THEN
-            PRINT *, 'Writing WRF 2D state variables for i4time =',i4time_valid 
-            CALL output_wrf_sfc(i4time_cycle,i4time_valid, proj, &
-               tsf, usf, vsf, rhsf, &
-               ext_data_path, output_name(m),WRFMODE_APPEND,istatus)
-          ENDIF
-        ELSE
-          PRINT *, 'Writing WRF 2D state variables for i4time =',i4time_valid 
-          CALL output_wrf_sfc(i4time_cycle,i4time_valid, proj, &
-               tsf, usf, vsf, rhsf,  &
-               ext_data_path, output_name(m), WRFMODE_NEW,istatus)
-        ENDIF                                                                   
-      ELSE IF (output_type(1:4).EQ.'rams') THEN
-        print *, 'rams output coming soon'
-        stop 
-      ELSE
-        PRINT *,'Unrecognized output format requested: ', output_type
-        STOP
-      ENDIF
-   
-      ! If we have surface data, compute a fake SST field
-      ! from the wet bulb temperature for this time.  However,
-      ! we want to average wet bulb T over all time periods and write
-      ! one SST field per run
-      IF ( (model_code(m) .EQ. 1) .OR. (model_code(m).EQ.3))THEN 
-        fsst(:,:) = 300. ! initialize to something not too bad
-        DO jy = 1,proj%ny
-          DO ix = 1,proj%nx
-            ! Compute tdsf (deg C)
-            tdsf_c = dwpt_laps(tsf(ix,jy)-273.15,rhsf(ix,jy))
-           
-            ! Estimate psf from topo 
-            psf_mb = 1013.25*(1.-(topo(ix,jy)*2.257e-5))**(5.259)
-            
-            ! Compute fsst (wet bulb T) from tsf/rhsf/psf 
-            fsst(ix,jy) = twet_fast(tsf(ix,jy)-273.15,tdsf_c,psf_mb)+273.15
-          ENDDO
-        ENDDO 
-        ! Add fsst to fsstsum and increment nfssttimes
-        fsstsum(:,:) = fsstsum(:,:) + fsst(:,:) 
-        nfssttimes = nfssttimes + 1 
-      ENDIF
-    ENDDO output_time_loop 
- 
-    ! If nfssttimes > 0, compute mean fsst and output   
-    IF (nfssttimes .GT. 0) THEN
-
-      fsst(:,:) = fsstsum(:,:)/FLOAT(nfssttimes)
-      print *, 'Min/Max Fake SST: ', minval(fsst),maxval(fsst)
-
-      ! Call output routine for specific model
-      IF (output_type(1:3) .EQ. 'mm5') THEN
-        CALL output_mm5v3_fsst(i4time_cycle,i4time_cycle, proj, &
-               fsst, ext_data_path, output_name(m), MM5MODE_NEW,istatus)
-
-      ENDIF
-    ENDIF
-    ! Deallocate 3 arrays for each state variable.  Two will be needed for the
-    ! data at two times bounding the time of interest.  The third is where
-    ! the time interpolated values will be saved.
-
-    IF (model_code(m) .GT. 1) THEN
-      DEALLOCATE (z3d)
-      DEALLOCATE (z3d1)
-      DEALLOCATE (z3d2)
-      DEALLOCATE (t3d)
-      DEALLOCATE (t3d1)
-      DEALLOCATE (t3d2)
-      DEALLOCATE (rh3d)
-      DEALLOCATE (rh3d1)
-      DEALLOCATE (rh3d2)
-      DEALLOCATE (u3d)
-      DEALLOCATE (u3d1)
-      DEALLOCATE (u3d2)
-      DEALLOCATE (v3d)
-      DEALLOCATE (v3d1)
-      DEALLOCATE (v3d2)
-      DEALLOCATE (slp)
-      DEALLOCATE (slp1)
-      DEALLOCATE (slp2)
-    ENDIF
-    IF ( (model_code(m).EQ.1).OR.(model_code(m).EQ.3)) THEN
-      DEALLOCATE (tsf)
-      DEALLOCATE (tsf1)
-      DEALLOCATE (tsf2)
-      DEALLOCATE (rhsf)
-      DEALLOCATE (rhsf1)
-      DEALLOCATE (rhsf2)
-      DEALLOCATE (usf)
-      DEALLOCATE (usf1)
-      DEALLOCATE (usf2)
-      DEALLOCATE (vsf)
-      DEALLOCATE (vsf1)
-      DEALLOCATE (vsf2)
-      DEALLOCATE (fsst)
-      DEALLOCATE (fsstsum)
-    ENDIF                                                            
-    ! Show this cycle for this model as having been processed.
-    PRINT '(2A)', '    Updating process log:',TRIM(proclog)
-    OPEN(FILE=proclog,UNIT=11,FORM='FORMATTED', &
-           ACCESS='SEQUENTIAL',STATUS='REPLACE') 
-    WRITE(11, '(A13)') latest_cycle_wfo
-    CLOSE(11)   
-     
-     ! Deallocate arrays specific to this model
-     IF (ALLOCATED(topo)) DEALLOCATE(topo) 
-     IF (ALLOCATED(i4times_avail)) DEALLOCATE(i4times_avail)
-     IF (ALLOCATED(i4times_avail_max)) DEALLOCATE(i4times_avail_max)
-     CALL close_wfofile(nfid,istatus)
-  ENDDO model_loop
-  
-END PROGRAM wfoprep
-  
+!dis
+
+program wfoprep
+
+   ! this is a new version of the wfoprep program.  unlike the previous
+   ! version of this programs distributed with laps, this version is
+   ! focused on acquiring data for lateral boundary conditions to support
+   ! a mesoscale nwp model run.  for initialization, the new program
+   ! "lapsprep" builds the files necessary for the initial condition, assuming
+   ! you wish to initialize with laps.  furthermore, the old version was
+   ! set up to support only the sfm, which we are no longer supporting.  this
+   ! version can output files for ingest by mm5v3/regridder, rams 4.3 in ralph2
+   ! format, or wrfsi/hinterp input.   this is controlled by the output_type
+   ! entry(ies) in the wfoprep.nl.  finally, this new version is cast in
+   ! free-form f90 code, including the use of modules.
+   !
+   ! history
+   ! -------
+   ! sep 2001:  new f90 version for mm5v3/rams4.3/wrfsi support.
+   !            b. shaw, noaa/cira/fsl frd/lapb
+   !
+   !
+   use wfoprep_setup
+   use wfo_models
+   use map_utils
+   use wfoprep_mm5
+   use wfoprep_wrf
+
+   implicit none
+   real, parameter           :: rmissingval = -9999.
+   integer, parameter         :: maxl = 75
+   integer, parameter         :: maxt = 50
+   logical                   :: filefound
+   integer                   :: fcstsec(maxt)
+   integer                   :: goodlevs
+   real                      :: goodpct
+   integer                   :: i, ii
+   integer                   :: i4time_offset
+   integer                   :: i4time_last
+   integer                   :: i4time_valid, i4time_valid1, i4time_valid2
+   integer                   :: i4time_cycle
+   integer, allocatable      :: i4times_avail_max(:)
+   integer, allocatable      :: i4times_avail(:)
+   integer                   :: istatus
+   integer                   :: k, kk
+   character(len=13)        :: last_cycle_processed
+   character(len=13)        :: latest_cycle_wfo
+
+   integer                   :: m
+   character(len=256)       :: modelfile_wfo
+   integer                   :: nfid
+   integer                   :: ntimes, ntimes_needed
+   integer                   :: outfreq_sec
+   character(len=256)       :: proclog
+   integer                   :: ta
+   integer                   :: t_id, ht_id, u_id, v_id, rh_id, msl_id
+   integer                   :: nz_t, nz_ht, nz_u, nz_v, nz_rh, nz_msl
+   integer                   :: np_t, np_ht, np_u, np_v, np_rh, np_rh_raw, np_msl
+   logical                   :: havesfc_t, havesfc_ht, havesfc_u, havesfc_msl
+   logical                   :: havesfc_v, havesfc_rh
+   character(len=10)        :: t_levels_c(maxl)
+   character(len=10)        :: ht_levels_c(maxl)
+   character(len=10)        :: rh_levels_c(maxl)
+   character(len=10)        :: u_levels_c(maxl)
+   character(len=10)        :: v_levels_c(maxl)
+   character(len=10)        :: msl_levels_c(maxl)
+   real                      :: t_plevels(maxl)
+   real                      :: ht_plevels(maxl)
+   real                      :: rh_plevels(maxl), rh_plevels_raw(maxl)
+   real                      :: u_plevels(maxl)
+   real                      :: v_plevels(maxl)
+   real                      :: msl_plevels(maxl)
+   integer                   :: t_kbotp, t_ktopp, t_ksfc
+   integer                   :: rh_kbotp, rh_ktopp, rh_ksfc
+   integer                   :: ht_kbotp, ht_ktopp, ht_ksfc
+   integer                   :: u_kbotp, u_ktopp, u_ksfc
+   integer                   :: v_kbotp, v_ktopp, v_ksfc
+   integer                   :: msl_kbotp, msl_ktopp, msl_ksfc
+   character(len=13)        :: wfofname
+   character(len=13), external :: cvt_i4time_wfo_fname13
+   logical, allocatable      :: t_inv(:, :)
+   logical, allocatable      :: u_inv(:, :)
+   logical, allocatable      :: v_inv(:, :)
+   logical, allocatable      :: rh_inv(:, :)
+   logical, allocatable      :: rh_inv_raw(:, :)
+   logical, allocatable      :: ht_inv(:, :)
+   logical, allocatable      :: msl_inv(:, :)
+   logical, allocatable      :: goodtime_flag(:)
+   integer                   :: n_goodtimes
+   character(len=10)         :: mslname
+   integer, allocatable      :: time_index(:)
+   integer                   :: nfssttimes
+   type(proj_info)           :: proj
+   real                      :: weight1
+   ! data arrays
+   real, allocatable         :: z3d(:, :, :), z3d1(:, :, :), z3d2(:, :, :)
+   real, allocatable         :: zsf(:, :), zsf1(:, :), zsf2(:, :)
+   real, allocatable         :: t3d(:, :, :), t3d1(:, :, :), t3d2(:, :, :)
+   real, allocatable         :: tsf(:, :), tsf1(:, :), tsf2(:, :)
+   real, allocatable         :: rh3d(:, :, :), rh3d1(:, :, :), rh3d2(:, :, :)
+   real, allocatable         :: rhsf(:, :), rhsf1(:, :), rhsf2(:, :)
+   real, allocatable         :: u3d(:, :, :), u3d1(:, :, :), u3d2(:, :, :)
+   real, allocatable         :: usf(:, :), usf1(:, :), usf2(:, :)
+   real, allocatable         :: v3d(:, :, :), v3d1(:, :, :), v3d2(:, :, :)
+   real, allocatable         :: vsf(:, :), vsf1(:, :), vsf2(:, :)
+   real, allocatable         :: slp(:, :), slp1(:, :), slp2(:, :)
+   real, allocatable         :: fsstsum(:, :), fsst(:, :)
+   real, allocatable         :: topo(:, :)
+   real, allocatable         :: data3d_temp(:, :, :)
+   real                      :: tdsf_c, psf_mb
+   real, external            :: dwpt_laps, twet_fast
+   integer                   :: ix, jy
+   logical                   :: fixvar1, fixvar2
+
+   istatus = 1
+   print '(a)', 'calling setup routine...'
+   call setup_wfoprep(istatus)
+   if (istatus .ne. 1) then
+      print '(a)', 'dprep: problem with setup configuration.'
+      stop
+   end if
+
+   ! at this point, the wfoprep_setup module contains a list of models
+   ! and information relating to their availability (e.g., frequency
+   ! of model runs, delay time before a cycle is available, etc.).  we
+   ! will loop through each valid model and process as requested and
+   ! available.
+
+   model_loop: do m = 1, num_models
+
+      outfreq_sec = output_freq(m)*3600
+      print '(2a)', '*** processing model ', trim(model_name(m))
+      ! based on the namelist entries that tell us how frequently this
+      ! model is run and how many hours after cycle time it becomes available,
+      ! we can do some computations to see which cycle we should be trying to
+      ! process.
+
+      ! first, compute the i4time_offset value, which is the current time
+      ! minus the amount of time between this model's cycle time and when
+      ! the entire run is available.
+
+      i4time_offset = i4time_now - model_delay(m)*3600
+
+      ! round i4time_offset to nearest hour
+      i4time_offset = i4time_offset - mod(i4time_offset, 3600)
+
+      ! now, compute the closest cycle time for this model that is equal
+      ! to or earlier than the i4time_offset time.
+
+      i4time_cycle = (i4time_offset/(model_run_freq(m)*3600))* &
+                     model_run_freq(m)*3600
+      i4time_last = i4time_cycle + max_fcst_len(m)*3600
+
+      ! what is the cycle time closest?
+      latest_cycle_wfo = cvt_i4time_wfo_fname13(i4time_cycle)
+      print *, '    latest possible cycle for this model = ', latest_cycle_wfo
+
+      ! check the {model}.last file in the drep output directory
+      ! to see if this cycle has been processed yet.
+
+      print *, '    checking log of previously processed cycles.'
+      proclog = trim(ext_data_path)//trim(output_name(m))//'.last'
+      inquire (file=proclog, exist=filefound)
+      if (filefound) then
+         open (file=proclog, unit=11, status='old', form='formatted', &
+               access='sequential')
+         read (11, '(a13)') last_cycle_processed
+         close (11)
+         print '(2a)', '       last cycle processed for this model:', &
+            last_cycle_processed
+         if (last_cycle_processed .ge. latest_cycle_wfo) then
+            print '(a)', '       current cycle <= last cycle processed. skipping...'
+            cycle model_loop
+         end if
+      else
+         print '(a)', '    no record of processing for any previous cycles.'
+      end if
+
+      ! see if the file required for this cycle is available
+      modelfile_wfo = trim(model_path(m))//'/'//latest_cycle_wfo
+
+      print '(2a)', '    searching for data file: ', trim(modelfile_wfo)
+      inquire (file=modelfile_wfo, exist=filefound)
+      if (.not. filefound) then
+         print '(a)', ' '
+         print '(a)', '#############################'
+         print '(a)', 'skipping model: not available'
+         print '(a)', '#############################'
+         print '(a)', ' '
+         cycle model_loop
+      end if
+
+      ! open the file
+      call open_wfofile(modelfile_wfo, nfid, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#############################'
+         print '(a)', 'skipping model: i/o error'
+         print '(a)', '#############################'
+         print '(a)', ' '
+         cycle model_loop
+      end if
+
+      ! get grid/projection info
+      call get_wfomodel_proj(nfid, model_name(m), proj, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#################################'
+         print '(a)', 'skipping model: proj info problem'
+         print '(a)', '#################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      ! process time info
+      call get_wfomodel_fcsttimes(nfid, ntimes, fcstsec, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#################################'
+         print '(a)', 'skipping model: time info problem'
+         print '(a)', '#################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+      allocate (i4times_avail_max(ntimes))
+      i4times_avail_max(1:ntimes) = i4time_cycle + fcstsec(1:ntimes)
+      if (i4time_last .gt. i4times_avail_max(ntimes)) then
+         print *, 'info: this source does not support max_fcst length of ', max_fcst_len(m)
+         print *, 'info: resetting to ', (i4times_avail_max(ntimes) - i4time_cycle)/36
+         i4time_last = i4times_avail_max(ntimes)
+      else
+         ! compute the ntimes_needed value, which reprenents the number
+         ! of time periods actually needed to get us equal to or just past
+         ! i4time_last
+         ntimes_needed = 1
+         find_ntimes_needed: do i = 2, ntimes
+            ntimes_needed = ntimes_needed + 1
+            if (i4times_avail_max(i) .ge. i4time_last) then
+               exit find_ntimes_needed
+            end if
+         end do find_ntimes_needed
+
+      end if
+
+      ! get level information for state variables (t,ht,u,v,rh) and then
+      ! get the inventory
+
+      ! temperature
+      call get_wfomodel_var_levels(nfid, 't         ', t_id, nz_t, t_levels_c, np_t, &
+                                   t_plevels, t_kbotp, t_ktopp, havesfc_t, t_ksfc, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#################################'
+         print '(a)', 'skipping model: no t data        '
+         print '(a)', '#################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      ! height is only mandatory for 3d data sets
+      if (model_code(m) .gt. 1) then
+         call get_wfomodel_var_levels(nfid, 'gh        ', ht_id, nz_ht, ht_levels_c, np_ht, &
+                                      ht_plevels, ht_kbotp, ht_ktopp, havesfc_ht, ht_ksfc, istatus)
+         if (istatus .ne. 1) then
+            print '(a)', ' '
+            print '(a)', '#################################'
+            print '(a)', 'skipping model: no z data        '
+            print '(a)', '#################################'
+            print '(a)', ' '
+            call close_wfofile(nfid, istatus)
+            cycle model_loop
+         end if
+      end if
+
+      ! relative humidity
+      call get_wfomodel_var_levels(nfid, 'rh        ', rh_id, nz_rh, rh_levels_c, np_rh_raw, &
+                                   rh_plevels_raw, rh_kbotp, rh_ktopp, havesfc_rh, rh_ksfc, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#################################'
+         print '(a)', 'skipping model: no rh data        '
+         print '(a)', '#################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      ! u-wind component
+      call get_wfomodel_var_levels(nfid, 'uw        ', u_id, nz_u, u_levels_c, np_u, &
+                                   u_plevels, u_kbotp, u_ktopp, havesfc_u, u_ksfc, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#################################'
+         print '(a)', 'skipping model: no u data        '
+         print '(a)', '#################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      ! v-wind component
+      call get_wfomodel_var_levels(nfid, 'vw        ', v_id, nz_v, v_levels_c, np_v, &
+                                   v_plevels, v_kbotp, v_ktopp, havesfc_v, v_ksfc, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '#################################'
+         print '(a)', 'skipping model: no v data        '
+         print '(a)', '#################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      ! mslp is mandatory for 3d data sets.  check for eta mslp first.  if non-existent,
+      ! then check for standard mslp
+
+      if (model_code(m) .gt. 1) then
+         call get_wfomodel_var_levels(nfid, 'emsp      ', msl_id, nz_msl, &
+                                      msl_levels_c, np_msl, &
+                                      msl_plevels, msl_kbotp, msl_ktopp, havesfc_msl, msl_ksfc, istatus)
+         if (istatus .eq. 1) then
+            print *, 'using eta mslp field'
+            mslname = 'emsp      '
+         else
+            call get_wfomodel_var_levels(nfid, 'pmsl      ', msl_id, nz_msl, &
+                                         msl_levels_c, np_msl, &
+                                         msl_plevels, msl_kbotp, msl_ktopp, havesfc_msl, msl_ksfc, istatus)
+            if (istatus .eq. 1) then
+               print *, 'using pmsl field'
+               mslname = 'pmsl      '
+            else
+               call get_wfomodel_var_levels(nfid, 'mmsp      ', msl_id, nz_msl, &
+                                            msl_levels_c, np_msl, &
+                                            msl_plevels, msl_kbotp, msl_ktopp, havesfc_msl, msl_ksfc, istatus)
+               if (istatus .eq. 1) then
+                  print *, 'using mmsp field (maps sea-level pressure)'
+                  mslname = 'mmsp      '
+               else
+                  print '(a)', ' '
+                  print '(a)', '#################################'
+                  print '(a)', 'skipping model: no mslp data        '
+                  print '(a)', '#################################'
+                  print '(a)', ' '
+                  call close_wfofile(nfid, istatus)
+                  cycle model_loop
+               end if
+            end if
+         end if
+      end if
+
+      ! now, check to make sure we have t,ht, u, and v for all of the same
+      ! pressure levels if this is a 3d data set.  this seems to be the case
+      ! for all supported datasets.  however, rh is a bit trickier.  in some
+      ! cases, rh is not provided above 300 mb or below 975 mb.  deal with this
+      ! later.
+
+      if (model_code(m) .gt. 1) then
+         if ((np_t .ne. np_ht) .or. (np_u .ne. np_ht) .or. &
+             (np_u .ne. np_ht)) then
+            print '(a)', ' '
+            print '(a)', '####################################'
+            print '(a)', 'skipping model: dimension mismatches'
+            print '(a)', '####################################'
+            print '(a)', ' '
+            deallocate (i4times_avail_max)
+            call close_wfofile(nfid, istatus)
+            cycle model_loop
+         end if
+      end if
+
+      ! we have made it this far, so we must have variables we need, but we
+      ! need to check their inventory to see which time periods are complete.
+      ! if this is a 3d data source (model code > 1), then we need to have at
+      ! least the top and bottom level values for each variable for the time
+      ! to be included in the process.  also must have the first and last
+      ! time periods.
+
+      n_goodtimes = 0
+      if (allocated(goodtime_flag)) deallocate (goodtime_flag)
+      allocate (goodtime_flag(ntimes_needed))
+      goodtime_flag(:) = .true.
+
+      if (allocated(t_inv)) deallocate (t_inv)
+      allocate (t_inv(nz_t, ntimes))
+      call get_wfomodel_var_inv(nfid, 't         ', nz_t, ntimes, t_inv, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '####################################'
+         print '(a)', 'skipping model: no t inventory      '
+         print '(a)', '####################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      if (allocated(u_inv)) deallocate (u_inv)
+      allocate (u_inv(nz_u, ntimes))
+      call get_wfomodel_var_inv(nfid, 'uw        ', nz_u, ntimes, u_inv, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '####################################'
+         print '(a)', 'skipping model: no u inventory      '
+         print '(a)', '####################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      if (allocated(v_inv)) deallocate (v_inv)
+      allocate (v_inv(nz_v, ntimes))
+      call get_wfomodel_var_inv(nfid, 'vw        ', nz_v, ntimes, v_inv, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '####################################'
+         print '(a)', 'skipping model: no v inventory      '
+         print '(a)', '####################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      if (allocated(rh_inv_raw)) deallocate (rh_inv_raw)
+      allocate (rh_inv_raw(nz_rh, ntimes))
+      ! also allocate an array that matches the temperature array
+      if (allocated(rh_inv)) deallocate (rh_inv)
+      allocate (rh_inv(nz_t, ntimes))
+      rh_inv(:, :) = .false.
+      if (nz_rh .eq. nz_t) rh_inv = rh_inv_raw
+      call get_wfomodel_var_inv(nfid, 'rh        ', nz_rh, ntimes, rh_inv_raw, istatus)
+      if (istatus .ne. 1) then
+         print '(a)', ' '
+         print '(a)', '####################################'
+         print '(a)', 'skipping model: no rh inventory      '
+         print '(a)', '####################################'
+         print '(a)', ' '
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      if (allocated(ht_inv)) deallocate (ht_inv)
+      if (model_code(m) .gt. 1) then
+         allocate (ht_inv(nz_ht, ntimes))
+         call get_wfomodel_var_inv(nfid, 'gh        ', nz_ht, ntimes, ht_inv, istatus)
+         if (istatus .ne. 1) then
+            print '(a)', ' '
+            print '(a)', '####################################'
+            print '(a)', 'skipping model: no z inventory      '
+            print '(a)', '####################################'
+            print '(a)', ' '
+            call close_wfofile(nfid, istatus)
+            cycle model_loop
+         end if
+      end if
+
+      if (allocated(msl_inv)) deallocate (msl_inv)
+      if (model_code(m) .gt. 1) then
+         allocate (msl_inv(nz_msl, ntimes))
+         call get_wfomodel_var_inv(nfid, mslname, nz_msl, ntimes, msl_inv, istatus)
+         if (istatus .ne. 1) then
+            print '(a)', ' '
+            print '(a)', '####################################'
+            print '(a)', 'skipping model: no mslp inventory      '
+            print '(a)', '####################################'
+            print '(a)', ' '
+            call close_wfofile(nfid, istatus)
+            cycle model_loop
+         end if
+      end if
+
+      ! here is the actual check for minimum requirements.
+      ! minimum variable requirements:
+      !  ht, t, u, v, rh on pressure levels + mslp
+      ! for now, require that 100% of the levels be present for each
+      ! variable, and that both the top and bottom level must be
+      ! present.  in the future, we can add vertical interpolatoin
+      ! to allow for missing levels, thus allowing us to reduce the
+      ! 100% level threshold
+
+      invloop: do i = 1, ntimes_needed
+
+         if (model_code(m) .gt. 1) then
+
+            ! check msl pressure
+            if (.not. msl_inv(msl_ksfc, i)) then
+               print *, 'warning: missing msl for this time:', i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            ! check height field, requiring most levels to be present!
+            goodlevs = 0
+            htinvloop: do k = ht_kbotp, ht_ktopp
+               if (ht_inv(k, i)) goodlevs = goodlevs + 1
+            end do htinvloop
+            goodpct = float(goodlevs)/float(np_ht)
+            if ((goodpct .lt. min_vert_frac) .or. (.not. ht_inv(ht_kbotp, i)) .or. &
+                (.not. ht_inv(ht_ktopp, i))) then
+               print *, 'warning: height inventory failed vertical check:', &
+                  goodpct, i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            ! check temperatures
+            goodlevs = 0
+            tinvloop: do k = t_kbotp, t_ktopp
+               if (t_inv(k, i)) goodlevs = goodlevs + 1
+            end do tinvloop
+            goodpct = float(goodlevs)/float(np_t)
+            if ((goodpct .lt. min_vert_frac) .or. (.not. t_inv(t_kbotp, i)) .or. &
+                (.not. t_inv(t_ktopp, i))) then
+               print *, 'warning: temperature inventory failed vertical check:', &
+                  goodpct, i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            ! check rh
+            goodlevs = 0
+            rhinvloop: do k = rh_kbotp, rh_ktopp
+               if (rh_inv_raw(k, i)) goodlevs = goodlevs + 1
+            end do rhinvloop
+            goodpct = float(goodlevs)/float(np_rh_raw)
+            if ((goodpct .lt. min_vert_frac) .or. (.not. rh_inv_raw(rh_kbotp, i)) .or. &
+                (.not. rh_inv_raw(rh_ktopp, i))) then
+               print *, 'warning: rh inventory failed vertical check:', &
+                  goodpct, i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            ! check u
+            goodlevs = 0
+            uinvloop: do k = u_kbotp, u_ktopp
+               if (u_inv(k, i)) goodlevs = goodlevs + 1
+            end do uinvloop
+            goodpct = float(goodlevs)/float(np_u)
+            if ((goodpct .lt. min_vert_frac) .or. (.not. u_inv(u_kbotp, i)) .or. &
+                (.not. u_inv(u_ktopp, i))) then
+               print *, 'warning: u inventory failed vertical check:', &
+                  goodpct, i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            ! check v
+            goodlevs = 0
+            vinvloop: do k = v_kbotp, v_ktopp
+               if (v_inv(k, i)) goodlevs = goodlevs + 1
+            end do vinvloop
+            goodpct = float(goodlevs)/float(np_v)
+            if ((goodpct .lt. min_vert_frac) .or. (.not. v_inv(v_kbotp, i)) .or. &
+                (.not. v_inv(v_ktopp, i))) then
+               print *, 'warning: v inventory failed vertical check:', &
+                  goodpct, i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+         end if
+         if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+
+            ! we need surface values
+
+            if (.not. t_inv(t_ksfc, i)) then
+               print *, 'warning: missing surface t', i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            if (.not. u_inv(u_ksfc, i)) then
+               print *, 'warning: missing surface u', i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            if (.not. v_inv(u_ksfc, i)) then
+               print *, 'warning: missing surface v', i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+            if (.not. rh_inv_raw(rh_ksfc, i)) then
+               print *, 'warning: missing surface rh', i
+               goodtime_flag(i) = .false.
+               cycle invloop
+            end if
+
+         end if
+         ! if we made it this far without cycling the loop, then
+         ! this is a good level
+         n_goodtimes = n_goodtimes + 1
+         goodtime_flag(i) = .true.
+      end do invloop
+
+      ! ok, now lets make sure that enough time periods
+      ! passed the above check and that the first and last
+      ! times are available
+      goodlevs = 0
+      do i = 1, ntimes_needed
+         if (goodtime_flag(i)) goodlevs = goodlevs + 1
+      end do
+      goodpct = float(goodlevs)/float(ntimes_needed)
+      if ((goodpct .lt. min_time_frac) .or. (.not. goodtime_flag(1)) .or. &
+          (.not. goodtime_flag(ntimes_needed))) then
+         print *, ' '
+         print *, '###################################################'
+         print *, 'skipping model:  time inventory check failed'
+         print *, 'goodpct/min_time_frac = ', goodpct, min_time_frac
+         print *, 'goodtime_flag(1) = ', goodtime_flag(1)
+         print *, 'ntimes_needed = ', ntimes_needed
+         print *, 'goodtime_flag(ntimes_needed) =', goodtime_flag(ntimes_needed)
+         print *, '###################################################'
+         call close_wfofile(nfid, istatus)
+         cycle model_loop
+      end if
+
+      ! allocate the i4times_avail array to the actual number
+      ! of usable time periods and populate it
+      if (allocated(i4times_avail)) deallocate (i4times_avail)
+      allocate (i4times_avail(n_goodtimes))
+      if (allocated(time_index)) deallocate (time_index)
+      allocate (time_index(n_goodtimes))
+      ii = 1
+      do i = 1, ntimes_needed
+         if (goodtime_flag(i)) then
+            i4times_avail(ii) = i4times_avail_max(i)
+            time_index(ii) = i
+            ii = ii + 1
+         end if
+      end do
+      deallocate (i4times_avail_max)
+
+      ! allocate 3 arrays for each state variable.  two will be needed for the
+      ! data at two times bounding the time of interest.  the third is where
+      ! the time interpolated values will be saved.
+
+      if (model_code(m) .gt. 1) then
+         allocate (z3d(proj%nx, proj%ny, np_ht))
+         allocate (z3d1(proj%nx, proj%ny, np_ht))
+         allocate (z3d2(proj%nx, proj%ny, np_ht))
+         allocate (t3d(proj%nx, proj%ny, np_t))
+         allocate (t3d1(proj%nx, proj%ny, np_t))
+         allocate (t3d2(proj%nx, proj%ny, np_t))
+         allocate (rh3d(proj%nx, proj%ny, np_t))
+         allocate (rh3d1(proj%nx, proj%ny, np_rh_raw))
+         allocate (rh3d2(proj%nx, proj%ny, np_rh_raw))
+         allocate (u3d(proj%nx, proj%ny, np_u))
+         allocate (u3d1(proj%nx, proj%ny, np_u))
+         allocate (u3d2(proj%nx, proj%ny, np_u))
+         allocate (v3d(proj%nx, proj%ny, np_v))
+         allocate (v3d1(proj%nx, proj%ny, np_v))
+         allocate (v3d2(proj%nx, proj%ny, np_v))
+         allocate (slp(proj%nx, proj%ny))
+         allocate (slp1(proj%nx, proj%ny))
+         allocate (slp2(proj%nx, proj%ny))
+      end if
+      if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+         allocate (tsf(proj%nx, proj%ny))
+         allocate (tsf1(proj%nx, proj%ny))
+         allocate (tsf2(proj%nx, proj%ny))
+         allocate (rhsf(proj%nx, proj%ny))
+         allocate (rhsf1(proj%nx, proj%ny))
+         allocate (rhsf2(proj%nx, proj%ny))
+         allocate (usf(proj%nx, proj%ny))
+         allocate (usf1(proj%nx, proj%ny))
+         allocate (usf2(proj%nx, proj%ny))
+         allocate (vsf(proj%nx, proj%ny))
+         allocate (vsf1(proj%nx, proj%ny))
+         allocate (vsf2(proj%nx, proj%ny))
+         allocate (fsstsum(proj%nx, proj%ny))
+         allocate (fsst(proj%nx, proj%ny))
+         fsstsum = 0.
+         nfssttimes = 0
+      end if
+
+      ! initialize the i4time_valid1 and i4time_valid2, which are the two available
+      ! times which bound the desired output time
+      ta = 1
+      i4time_valid1 = i4times_avail(ta)
+      i4time_valid2 = i4times_avail(ta + 1)
+
+      ! read in the data for these two time periods
+      if (model_code(m) .gt. 1) then
+         ! get the pressure level data arrays
+
+         ! mslp
+         call read_wfomodel_data(nfid, msl_id, proj, time_index(ta), &
+                                 msl_ksfc, msl_ksfc, slp1, istatus)
+         call read_wfomodel_data(nfid, msl_id, proj, time_index(ta + 1), &
+                                 msl_ksfc, msl_ksfc, slp2, istatus)
+         ! height
+         call read_wfomodel_data(nfid, ht_id, proj, time_index(ta), &
+                                 ht_kbotp, ht_ktopp, z3d1, istatus)
+         call read_wfomodel_data(nfid, ht_id, proj, time_index(ta + 1), &
+                                 ht_kbotp, ht_ktopp, z3d2, istatus)
+         ! temperature
+         call read_wfomodel_data(nfid, t_id, proj, time_index(ta), &
+                                 t_kbotp, t_ktopp, t3d1, istatus)
+         call read_wfomodel_data(nfid, t_id, proj, time_index(ta + 1), &
+                                 t_kbotp, t_ktopp, t3d2, istatus)
+
+         ! rh
+         call read_wfomodel_data(nfid, rh_id, proj, time_index(ta), &
+                                 rh_kbotp, rh_ktopp, rh3d1, istatus)
+         call read_wfomodel_data(nfid, rh_id, proj, time_index(ta + 1), &
+                                 rh_kbotp, rh_ktopp, rh3d2, istatus)
+
+         ! u
+         call read_wfomodel_data(nfid, u_id, proj, time_index(ta), &
+                                 u_kbotp, u_ktopp, u3d1, istatus)
+         call read_wfomodel_data(nfid, u_id, proj, time_index(ta + 1), &
+                                 u_kbotp, u_ktopp, u3d2, istatus)
+
+         ! v
+         call read_wfomodel_data(nfid, v_id, proj, time_index(ta), &
+                                 v_kbotp, v_ktopp, v3d1, istatus)
+         call read_wfomodel_data(nfid, v_id, proj, time_index(ta + 1), &
+                                 v_kbotp, v_ktopp, v3d2, istatus)
+      end if
+      if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+         call read_wfomodel_data(nfid, t_id, proj, time_index(ta), &
+                                 t_ksfc, t_ksfc, tsf1, istatus)
+         call read_wfomodel_data(nfid, t_id, proj, time_index(ta + 1), &
+                                 t_ksfc, t_ksfc, tsf2, istatus)
+         call read_wfomodel_data(nfid, u_id, proj, time_index(ta), &
+                                 u_ksfc, u_ksfc, usf1, istatus)
+         call read_wfomodel_data(nfid, u_id, proj, time_index(ta + 1), &
+                                 u_ksfc, u_ksfc, usf2, istatus)
+         call read_wfomodel_data(nfid, v_id, proj, time_index(ta), &
+                                 v_ksfc, v_ksfc, vsf1, istatus)
+         call read_wfomodel_data(nfid, v_id, proj, time_index(ta + 1), &
+                                 v_ksfc, v_ksfc, vsf2, istatus)
+         call read_wfomodel_data(nfid, rh_id, proj, time_index(ta), &
+                                 rh_ksfc, rh_ksfc, rhsf1, istatus)
+         call read_wfomodel_data(nfid, rh_id, proj, time_index(ta + 1), &
+                                 rh_ksfc, rh_ksfc, rhsf2, istatus)
+
+      end if
+      allocate (topo(proj%nx, proj%ny))
+      call get_wfomodel_topo(nfid, proj, topo, istatus)
+
+      ! main loop over all desired output times
+      output_time_loop: do i4time_valid = i4time_cycle, i4time_last, outfreq_sec
+         ! print *, 'getting data for i4time = ', i4time_valid
+         if (i4time_valid .gt. i4time_valid2) then
+            ! we need to get new bounding data times
+            read_avail_loop: do while (i4time_valid .gt. i4time_valid2)
+               ta = ta + 1
+               i4time_valid1 = i4times_avail(ta)
+               i4time_valid2 = i4times_avail(ta + 1)
+            end do read_avail_loop
+            ! read the data for these 2 times
+            if (model_code(m) .gt. 1) then
+               ! get the pressure level data arrays
+
+               ! mslp
+               call read_wfomodel_data(nfid, msl_id, proj, time_index(ta), &
+                                       msl_ksfc, msl_ksfc, slp1, istatus)
+               call read_wfomodel_data(nfid, msl_id, proj, time_index(ta + 1), &
+                                       msl_ksfc, msl_ksfc, slp2, istatus)
+               ! height
+               call read_wfomodel_data(nfid, ht_id, proj, time_index(ta), &
+                                       ht_kbotp, ht_ktopp, z3d1, istatus)
+               call read_wfomodel_data(nfid, ht_id, proj, time_index(ta + 1), &
+                                       ht_kbotp, ht_ktopp, z3d2, istatus)
+               ! temperature
+               call read_wfomodel_data(nfid, t_id, proj, time_index(ta), &
+                                       t_kbotp, t_ktopp, t3d1, istatus)
+               call read_wfomodel_data(nfid, t_id, proj, time_index(ta + 1), &
+                                       t_kbotp, t_ktopp, t3d2, istatus)
+
+               ! rh
+               call read_wfomodel_data(nfid, rh_id, proj, time_index(ta), &
+                                       rh_kbotp, rh_ktopp, rh3d1, istatus)
+               call read_wfomodel_data(nfid, rh_id, proj, time_index(ta + 1), &
+                                       rh_kbotp, rh_ktopp, rh3d2, istatus)
+
+               ! u
+               call read_wfomodel_data(nfid, u_id, proj, time_index(ta), &
+                                       u_kbotp, u_ktopp, u3d1, istatus)
+               call read_wfomodel_data(nfid, u_id, proj, time_index(ta + 1), &
+                                       u_kbotp, u_ktopp, u3d2, istatus)
+
+               ! v
+               call read_wfomodel_data(nfid, v_id, proj, time_index(ta), &
+                                       v_kbotp, v_ktopp, v3d1, istatus)
+               call read_wfomodel_data(nfid, v_id, proj, time_index(ta + 1), &
+                                       v_kbotp, v_ktopp, v3d2, istatus)
+            end if
+            if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+               call read_wfomodel_data(nfid, t_id, proj, time_index(ta), &
+                                       t_ksfc, t_ksfc, tsf1, istatus)
+               call read_wfomodel_data(nfid, t_id, proj, time_index(ta + 1), &
+                                       t_ksfc, t_ksfc, tsf2, istatus)
+               call read_wfomodel_data(nfid, u_id, proj, time_index(ta), &
+                                       u_ksfc, u_ksfc, usf1, istatus)
+               call read_wfomodel_data(nfid, u_id, proj, time_index(ta + 1), &
+                                       u_ksfc, u_ksfc, usf2, istatus)
+               call read_wfomodel_data(nfid, v_id, proj, time_index(ta), &
+                                       v_ksfc, v_ksfc, vsf1, istatus)
+               call read_wfomodel_data(nfid, v_id, proj, time_index(ta + 1), &
+                                       v_ksfc, v_ksfc, vsf2, istatus)
+               call read_wfomodel_data(nfid, rh_id, proj, time_index(ta), &
+                                       rh_ksfc, rh_ksfc, rhsf1, istatus)
+               call read_wfomodel_data(nfid, rh_id, proj, time_index(ta + 1), &
+                                       rh_ksfc, rh_ksfc, rhsf2, istatus)
+            end if
+         end if
+
+         ! handle case where rh has fewer levels than
+         ! the other state variables (only applies if
+         ! we are obtaining upper air data (model_code >1)
+
+         ! if we are processing upper air data from this model,
+         ! then run through some cleanup to account for missing
+         ! levels.
+         if (model_code(m) .gt. 1) then
+
+            ! handle case where rh has fewer levels than
+            ! the other state variables (only applies if
+            ! we are obtaining upper air data
+            np_rh = np_t
+            if (np_rh_raw .lt. np_t) then
+               print *, 'warning: expanding rh'
+               allocate (data3d_temp(proj%nx, proj%ny, np_rh))
+               ! do the rh3d1 array
+               data3d_temp(:, :, :) = rmissingval
+               rh1_zloop: do k = 1, np_rh_raw
+                  t1_zloop: do kk = 1, np_rh
+                     if (rh_plevels_raw(k) .eq. t_plevels(kk)) then
+                        rh_inv(kk + t_kbotp - 1, time_index(ta)) = &
+                           rh_inv_raw(k + rh_kbotp - 1, time_index(ta))
+                        if (rh_inv(kk + t_kbotp - 1, time_index(ta))) then
+                           data3d_temp(:, :, kk) = rh3d1(:, :, k)
+                        end if
+                        exit t1_zloop
+                     end if
+                  end do t1_zloop
+               end do rh1_zloop
+
+               deallocate (rh3d1)
+               allocate (rh3d1(proj%nx, proj%ny, np_rh))
+               rh3d1(:, :, :) = data3d_temp(:, :, :)
+
+               ! fill in top level if not already filled
+               if (maxval(rh3d1(:, :, np_rh)) .eq. rmissingval) then
+                  print *, 'setting top level rh to 5%'
+                  rh3d1(:, :, np_rh) = 5.0  ! very dry
+                  rh_inv(t_ktopp, time_index(ta)) = .true.
+               end if
+               ! fill in bottom level if not already filled (the
+               ! mesoeta does not have the 1000mb value!)
+               if (maxval(rh3d1(:, :, 1)) .eq. rmissingval) then
+                  rh3d1(:, :, 1) = rh3d1(:, :, 2)
+                  rh_inv(t_kbotp, time_index(ta)) = .true.
+               end if
+
+               ! repeat for the rh3d2 array
+               data3d_temp(:, :, :) = rmissingval
+               rh2_zloop: do k = 1, np_rh_raw
+                  t2_zloop: do kk = 1, np_rh
+                     if (rh_plevels_raw(k) .eq. t_plevels(kk)) then
+                        rh_inv(kk + t_kbotp - 1, time_index(ta + 1)) = &
+                           rh_inv_raw(k + rh_kbotp - 1, time_index(ta + 1))
+                        if (rh_inv(kk + t_kbotp - 1, time_index(ta + 1))) then
+                           data3d_temp(:, :, kk) = rh3d2(:, :, k)
+                        end if
+                        exit t2_zloop
+                     end if
+                  end do t2_zloop
+               end do rh2_zloop
+               deallocate (rh3d2)
+               allocate (rh3d2(proj%nx, proj%ny, np_rh))
+               rh3d2(:, :, :) = data3d_temp(:, :, :)
+
+               ! fill in top level if not already filled
+               if (maxval(rh3d2(:, :, np_rh)) .eq. rmissingval) then
+                  rh3d2(:, :, np_rh) = 5.0  ! very dry
+                  rh_inv(t_ktopp, time_index(ta + 1)) = .true.
+               end if
+               ! fill in bottom level if not already filled
+               if (maxval(rh3d2(:, :, 1)) .eq. rmissingval) then
+                  rh3d2(:, :, 1) = rh3d2(:, :, 2)
+                  rh_inv(t_kbotp, time_index(ta + 1)) = .true.
+               end if
+
+               deallocate (data3d_temp)
+               rh_plevels(1:np_rh) = t_plevels(1:np_t)
+            else
+               rh_plevels = rh_plevels_raw
+            end if
+
+            ! clean up all 3d arrays to fill in any missing levels
+
+            ! z3d
+            fixvar1 = .false.
+            fixvar2 = .false.
+            do k = 1, np_ht
+               if (.not. ht_inv(k - 1 + ht_kbotp, time_index(ta))) then
+                  z3d1(:, :, k) = rmissingval
+                  fixvar1 = .true.
+               end if
+               if (.not. ht_inv(k - 1 + ht_kbotp, time_index(ta + 1))) then
+                  z3d2(:, :, k) = rmissingval
+                  fixvar2 = .true.
+               end if
+               if (fixvar1) then
+                  print *, 'warning: filling in missing levels for z3d1'
+                  ! call the fill routine to fill in for z3d1
+                  call fill_missing_levs(proj%nx, proj%ny, np_ht, ht_plevels, &
+                                         z3d1, rmissingval, 2)
+               end if
+               if (fixvar2) then
+                  ! call the vinterp routine to fill in for z3d2
+                  print *, 'warning: filling in missing levels for z3d2'
+                  call fill_missing_levs(proj%nx, proj%ny, np_ht, ht_plevels, &
+                                         z3d2, rmissingval, 2)
+               end if
+            end do
+
+            ! t3d
+            fixvar1 = .false.
+            fixvar2 = .false.
+            do k = 1, np_t
+               if (.not. t_inv(k - 1 + t_kbotp, time_index(ta))) then
+                  t3d1(:, :, k) = rmissingval
+                  fixvar1 = .true.
+               end if
+               if (.not. t_inv(k - 1 + t_kbotp, time_index(ta + 1))) then
+                  t3d2(:, :, k) = rmissingval
+                  fixvar2 = .true.
+               end if
+               if (fixvar1) then
+                  ! call the vinterp routine to fill in for t3d1
+                  print *, 'warning: filling in missing levels for t3d1'
+                  call fill_missing_levs(proj%nx, proj%ny, np_t, t_plevels, &
+                                         t3d1, rmissingval, 2)
+               end if
+               if (fixvar2) then
+                  ! call the vinterp routine to fill in for t3d2
+                  print *, 'warning: filling in missing levels for t3d2'
+                  call fill_missing_levs(proj%nx, proj%ny, np_t, t_plevels, &
+                                         t3d2, rmissingval, 2)
+               end if
+            end do
+
+            ! u3d
+            fixvar1 = .false.
+            fixvar2 = .false.
+            do k = 1, np_u
+               if (.not. u_inv(k - 1 + u_kbotp, time_index(ta))) then
+                  u3d1(:, :, k) = rmissingval
+                  fixvar1 = .true.
+               end if
+               if (.not. u_inv(k - 1 + u_kbotp, time_index(ta + 1))) then
+                  u3d2(:, :, k) = rmissingval
+                  fixvar2 = .true.
+               end if
+               if (fixvar1) then
+                  ! call the vinterp routine to fill in for u3d1
+                  print *, 'warning: filling in missing levels for u3d1'
+                  call fill_missing_levs(proj%nx, proj%ny, np_u, u_plevels, &
+                                         u3d1, rmissingval, 1)
+               end if
+               if (fixvar2) then
+                  ! call the vinterp routine to fill in for u3d2
+                  print *, 'warning: filling in missing levels for u3d2'
+                  call fill_missing_levs(proj%nx, proj%ny, np_u, u_plevels, &
+                                         u3d2, rmissingval, 1)
+               end if
+            end do
+
+            ! v3d
+            fixvar1 = .false.
+            fixvar2 = .false.
+            do k = 1, np_v
+               if (.not. v_inv(k - 1 + v_kbotp, time_index(ta))) then
+                  v3d1(:, :, k) = rmissingval
+                  fixvar1 = .true.
+               end if
+               if (.not. v_inv(k - 1 + v_kbotp, time_index(ta + 1))) then
+                  v3d2(:, :, k) = rmissingval
+                  fixvar2 = .true.
+               end if
+               if (fixvar1) then
+                  ! call the vinterp routine to fill in for v3d1
+                  print *, 'warning: filling in missing levels for v3d1'
+                  call fill_missing_levs(proj%nx, proj%ny, np_v, v_plevels, &
+                                         v3d1, rmissingval, 1)
+               end if
+               if (fixvar2) then
+                  ! call the vinterp routine to fill in for v3d2
+                  print *, 'warning: filling in missing levels for z3d2'
+                  call fill_missing_levs(proj%nx, proj%ny, np_v, v_plevels, &
+                                         v3d2, rmissingval, 1)
+               end if
+            end do
+
+            ! rh3d
+            fixvar1 = .false.
+            fixvar2 = .false.
+            do k = 1, np_rh
+               if (.not. rh_inv(k - 1 + t_kbotp, time_index(ta))) then
+                  rh3d1(:, :, k) = rmissingval
+                  fixvar1 = .true.
+               end if
+               if (.not. rh_inv(k - 1 + t_kbotp, time_index(ta + 1))) then
+                  rh3d2(:, :, k) = rmissingval
+                  fixvar2 = .true.
+               end if
+               if (fixvar1) then
+                  ! call the vinterp routine to fill in for rh3d1
+                  print *, 'warning: filling in missing levels for rh3d1'
+                  call fill_missing_levs(proj%nx, proj%ny, np_rh, rh_plevels, &
+                                         rh3d1, rmissingval, 1)
+               end if
+               if (fixvar2) then
+                  ! call the vinterp routine to fill in for rh3d2
+                  print *, 'warning: filling in missing levels for rh3d2'
+                  call fill_missing_levs(proj%nx, proj%ny, np_rh, rh_plevels, &
+                                         rh3d2, rmissingval, 1)
+               end if
+            end do
+         end if
+
+         ! time to do time interpolation
+
+         ! print *, 'using bounding i4times of ', i4time_valid1,i4time_valid2
+         ! at this point, we have all of the data we need for two
+         ! bounding times.  so interpolate to the desired time,
+         ! then output the data
+         if (i4time_valid .eq. i4time_valid1) then
+            if (model_code(m) .gt. 1) then
+               z3d = z3d1
+               t3d = t3d1
+               u3d = u3d1
+               v3d = v3d1
+               rh3d = rh3d1
+               slp = slp1
+            end if
+            if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+               tsf = tsf1
+               rhsf = rhsf1
+               usf = usf1
+               vsf = vsf1
+            end if
+
+         else if (i4time_valid .eq. i4time_valid2) then
+            if (model_code(m) .gt. 1) then
+               z3d = z3d2
+               t3d = t3d2
+               u3d = u3d2
+               v3d = v3d2
+               rh3d = rh3d2
+               slp = slp2
+            end if
+            if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+               tsf = tsf2
+               rhsf = rhsf2
+               usf = usf2
+               vsf = vsf2
+            end if
+
+         else
+            ! time interpolate
+            weight1 = float(i4time_valid2 - i4time_valid)/float(i4time_valid2 - i4time_valid1)
+            if (model_code(m) .gt. 1) then
+               z3d = weight1*z3d1 + (1.-weight1)*z3d2
+               t3d = weight1*t3d1 + (1.-weight1)*t3d2
+               u3d = weight1*u3d1 + (1.-weight1)*u3d2
+               v3d = weight1*v3d1 + (1.-weight1)*v3d2
+               rh3d = weight1*rh3d1 + (1.-weight1)*rh3d2
+               slp = weight1*slp1 + (1.-weight1)*slp2
+            end if
+            if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+               tsf = weight1*tsf1 + (1.-weight1)*tsf2
+               rhsf = weight1*rhsf1 + (1.-weight1)*rhsf2
+               usf = weight1*usf1 + (1.-weight1)*usf2
+               vsf = weight1*vsf1 + (1.-weight1)*vsf2
+            end if
+
+         end if
+
+         ! output the data for this time
+         if (output_type(1:3) .eq. 'mm5') then
+            if (model_code(m) .gt. 1) then
+               print *, 'writing mm5v3 3d state variables for i4time =', i4time_valid
+               call output_mm5v3_basic(i4time_cycle, i4time_valid, proj, &
+                                       np_ht, np_t, np_u, np_v, np_rh, &
+                                       ht_plevels, t_plevels, u_plevels, v_plevels, rh_plevels, &
+                                       z3d, t3d, u3d, v3d, rh3d, slp, topo, &
+                                       ext_data_path, output_name(m), mm5mode_new, istatus)
+               if (model_code(m) .eq. 3) then
+                  print *, 'writing mm5v3 2d state variables for i4time =', i4time_valid
+                  call output_mm5v3_sfc(i4time_cycle, i4time_valid, proj, &
+                                        tsf, usf, vsf, rhsf, &
+                                        ext_data_path, output_name(m), mm5mode_append, istatus)
+               end if
+            else
+               print *, 'writing mm5v3 2d state variables for i4time =', i4time_valid
+               call output_mm5v3_sfc(i4time_cycle, i4time_valid, proj, &
+                                     tsf, usf, vsf, rhsf, &
+                                     ext_data_path, output_name(m), mm5mode_new, istatus)
+            end if
+         else if (output_type(1:3) .eq. 'wrf') then
+            if (model_code(m) .gt. 1) then
+               print *, 'writing wrf 3d state variables for i4time =', i4time_valid
+               call output_wrf_basic(i4time_cycle, i4time_valid, proj, &
+                                     np_ht, np_t, np_u, np_v, np_rh, &
+                                     ht_plevels, t_plevels, u_plevels, v_plevels, rh_plevels, &
+                                     z3d, t3d, u3d, v3d, rh3d, slp, topo, &
+                                     ext_data_path, output_name(m), wrfmode_new, istatus)
+               if (model_code(m) .eq. 3) then
+                  print *, 'writing wrf 2d state variables for i4time =', i4time_valid
+                  call output_wrf_sfc(i4time_cycle, i4time_valid, proj, &
+                                      tsf, usf, vsf, rhsf, &
+                                      ext_data_path, output_name(m), wrfmode_append, istatus)
+               end if
+            else
+               print *, 'writing wrf 2d state variables for i4time =', i4time_valid
+               call output_wrf_sfc(i4time_cycle, i4time_valid, proj, &
+                                   tsf, usf, vsf, rhsf, &
+                                   ext_data_path, output_name(m), wrfmode_new, istatus)
+            end if
+         else if (output_type(1:4) .eq. 'rams') then
+            print *, 'rams output coming soon'
+            stop
+         else
+            print *, 'unrecognized output format requested: ', output_type
+            stop
+         end if
+
+         ! if we have surface data, compute a fake sst field
+         ! from the wet bulb temperature for this time.  however,
+         ! we want to average wet bulb t over all time periods and write
+         ! one sst field per run
+         if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+            fsst(:, :) = 300. ! initialize to something not too bad
+            do jy = 1, proj%ny
+               do ix = 1, proj%nx
+                  ! compute tdsf (deg c)
+                  tdsf_c = dwpt_laps(tsf(ix, jy) - 273.15, rhsf(ix, jy))
+
+                  ! estimate psf from topo
+                  psf_mb = 1013.25*(1.-(topo(ix, jy)*2.257e-5))**(5.259)
+
+                  ! compute fsst (wet bulb t) from tsf/rhsf/psf
+                  fsst(ix, jy) = twet_fast(tsf(ix, jy) - 273.15, tdsf_c, psf_mb) + 273.15
+               end do
+            end do
+            ! add fsst to fsstsum and increment nfssttimes
+            fsstsum(:, :) = fsstsum(:, :) + fsst(:, :)
+            nfssttimes = nfssttimes + 1
+         end if
+      end do output_time_loop
+
+      ! if nfssttimes > 0, compute mean fsst and output
+      if (nfssttimes .gt. 0) then
+
+         fsst(:, :) = fsstsum(:, :)/float(nfssttimes)
+         print *, 'min/max fake sst: ', minval(fsst), maxval(fsst)
+
+         ! call output routine for specific model
+         if (output_type(1:3) .eq. 'mm5') then
+            call output_mm5v3_fsst(i4time_cycle, i4time_cycle, proj, &
+                                   fsst, ext_data_path, output_name(m), mm5mode_new, istatus)
+
+         end if
+      end if
+      ! deallocate 3 arrays for each state variable.  two will be needed for the
+      ! data at two times bounding the time of interest.  the third is where
+      ! the time interpolated values will be saved.
+
+      if (model_code(m) .gt. 1) then
+         deallocate (z3d)
+         deallocate (z3d1)
+         deallocate (z3d2)
+         deallocate (t3d)
+         deallocate (t3d1)
+         deallocate (t3d2)
+         deallocate (rh3d)
+         deallocate (rh3d1)
+         deallocate (rh3d2)
+         deallocate (u3d)
+         deallocate (u3d1)
+         deallocate (u3d2)
+         deallocate (v3d)
+         deallocate (v3d1)
+         deallocate (v3d2)
+         deallocate (slp)
+         deallocate (slp1)
+         deallocate (slp2)
+      end if
+      if ((model_code(m) .eq. 1) .or. (model_code(m) .eq. 3)) then
+         deallocate (tsf)
+         deallocate (tsf1)
+         deallocate (tsf2)
+         deallocate (rhsf)
+         deallocate (rhsf1)
+         deallocate (rhsf2)
+         deallocate (usf)
+         deallocate (usf1)
+         deallocate (usf2)
+         deallocate (vsf)
+         deallocate (vsf1)
+         deallocate (vsf2)
+         deallocate (fsst)
+         deallocate (fsstsum)
+      end if
+      ! show this cycle for this model as having been processed.
+      print '(2a)', '    updating process log:', trim(proclog)
+      open (file=proclog, unit=11, form='formatted', &
+            access='sequential', status='replace')
+      write (11, '(a13)') latest_cycle_wfo
+      close (11)
+
+      ! deallocate arrays specific to this model
+      if (allocated(topo)) deallocate (topo)
+      if (allocated(i4times_avail)) deallocate (i4times_avail)
+      if (allocated(i4times_avail_max)) deallocate (i4times_avail_max)
+      call close_wfofile(nfid, istatus)
+   end do model_loop
+
+end program wfoprep
+

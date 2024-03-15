@@ -1,5 +1,5 @@
       subroutine get_drpsnd_data
-     +                   (i4time_sys,ilaps_cycle_time,NX_L,NY_L
+     +                   (i4time_sys,ilaps_cycle_time,nx_l,ny_l
      +                   ,i4time_drpsnd_earliest,i4time_drpsnd_latest       
      +                   ,filename,isnd_staname
      +                   ,lun_out,l_fill_ht
@@ -11,183 +11,183 @@
 
       logical l_fill_ht
 
-      integer manLevel, recNum, sigTLevel, sigWLevel,
-     +     tropLevel,nf_fid, nf_vid, nf_status, nlvl_out
-C
-C  Open netcdf File for reading
-C
-      nf_status=NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),filename
+      integer manlevel, recnum, sigtlevel, sigwlevel,
+     +     troplevel,nf_fid, nf_vid, nf_status, nlvl_out
+c
+c  open netcdf file for reading
+c
+      nf_status=nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),filename
         istatus=0
         return
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of manLevel
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'manLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim manLevel'
+c
+c  fill all dimension values
+c
+c
+c get size of manlevel
+c
+      nf_status=nf_inq_dimid(nf_fid,'manlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim manlevel'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,manLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim manLevel'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,manlevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim manlevel'
       endif
-C
-C Get size of recNum
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+c
+c get size of recnum
+c
+      nf_status=nf_inq_dimid(nf_fid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,recnum)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-C
-C Get size of sigTLevel
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'sigTLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigTLevel'
+c
+c get size of sigtlevel
+c
+      nf_status=nf_inq_dimid(nf_fid,'sigtlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigtlevel'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,sigTLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigTLevel'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,sigtlevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigtlevel'
       endif
-C
-C Get size of sigWLevel
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'sigWLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigWLevel'
+c
+c get size of sigwlevel
+c
+      nf_status=nf_inq_dimid(nf_fid,'sigwlevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigwlevel'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,sigWLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim sigWLevel'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,sigwlevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim sigwlevel'
       endif
-C
-C Get size of tropLevel
-C
-      nf_status=NF_INQ_DIMID(nf_fid,'tropLevel',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim tropLevel'
+c
+c get size of troplevel
+c
+      nf_status=nf_inq_dimid(nf_fid,'troplevel',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim troplevel'
       endif
-      nf_status=NF_INQ_DIMLEN(nf_fid,nf_vid,tropLevel)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim tropLevel'
+      nf_status=nf_inq_dimlen(nf_fid,nf_vid,troplevel)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim troplevel'
       endif
-      nlvl_out = manLevel + sigTLevel + sigWLevel
-      call read_drpsnd_data(nf_fid, manLevel, recNum, sigTLevel,
-     +     sigWLevel, tropLevel, i4time_sys, ilaps_cycle_time, NX_L,
-     +     NY_L, i4time_drpsnd_earliest, i4time_drpsnd_latest, 
+      nlvl_out = manlevel + sigtlevel + sigwlevel
+      call read_drpsnd_data(nf_fid, manlevel, recnum, sigtlevel,
+     +     sigwlevel, troplevel, i4time_sys, ilaps_cycle_time, nx_l,
+     +     ny_l, i4time_drpsnd_earliest, i4time_drpsnd_latest, 
      +     nlvl_out, lun_out, l_fill_ht, isnd_staname, istatus)
 
       return
       end
-C
-C
-      subroutine read_drpsnd_data(nf_fid, manLevel, recNum, sigTLevel,
-     +     sigWLevel, tropLevel, i4time_sys, ilaps_cycle_time, NX_L,
-     +     NY_L, i4time_drpsnd_earliest, i4time_drpsnd_latest, nlvl_out,
+c
+c
+      subroutine read_drpsnd_data(nf_fid, manlevel, recnum, sigtlevel,
+     +     sigwlevel, troplevel, i4time_sys, ilaps_cycle_time, nx_l,
+     +     ny_l, i4time_drpsnd_earliest, i4time_drpsnd_latest, nlvl_out,
      +     lun_out, l_fill_ht, isnd_staname, istatus)
 
 
       include 'netcdf.inc'
-      integer manLevel, recNum, sigTLevel, sigWLevel,
-     +     tropLevel,nf_fid, nf_vid, nf_status
-      integer marsdenSquare(recNum), numMand(recNum), numSigT(recNum),
-     +     numSigW(recNum), numTrop(recNum), prMan( manLevel,
-     +     recNum), prTrop( tropLevel, recNum), wdMan( manLevel,
-     +     recNum), wdSigW( sigWLevel, recNum), wdTrop( tropLevel,
-     +     recNum)
-      real htMan( manLevel, recNum), latitude(recNum),
-     +     longitude(recNum), prSigT( sigTLevel, recNum), prSigW(
-     +     sigWLevel, recNum), tdMan( manLevel, recNum), tdSigT(
-     +     sigTLevel, recNum), tdTrop( tropLevel, recNum), tpMan(
-     +     manLevel, recNum), tpSigT( sigTLevel, recNum), tpTrop(
-     +     tropLevel, recNum), wsMan( manLevel, recNum), wsSigW(
-     +     sigWLevel, recNum), wsTrop( tropLevel, recNum)
-      double precision timeNominal(recNum), timeObs(recNum)
-      character*12 DropSondeLocation(recNum)
-      character*2048 rawDropSonde(recNum)
+      integer manlevel, recnum, sigtlevel, sigwlevel,
+     +     troplevel,nf_fid, nf_vid, nf_status
+      integer marsdensquare(recnum), nummand(recnum), numsigt(recnum),
+     +     numsigw(recnum), numtrop(recnum), prman( manlevel,
+     +     recnum), prtrop( troplevel, recnum), wdman( manlevel,
+     +     recnum), wdsigw( sigwlevel, recnum), wdtrop( troplevel,
+     +     recnum)
+      real htman( manlevel, recnum), latitude(recnum),
+     +     longitude(recnum), prsigt( sigtlevel, recnum), prsigw(
+     +     sigwlevel, recnum), tdman( manlevel, recnum), tdsigt(
+     +     sigtlevel, recnum), tdtrop( troplevel, recnum), tpman(
+     +     manlevel, recnum), tpsigt( sigtlevel, recnum), tptrop(
+     +     troplevel, recnum), wsman( manlevel, recnum), wssigw(
+     +     sigwlevel, recnum), wstrop( troplevel, recnum)
+      double precision timenominal(recnum), timeobs(recnum)
+      character*12 dropsondelocation(recnum)
+      character*2048 rawdropsonde(recnum)
 
-      integer wmostanum(recNum)
-      real staelev(recNum)
-      CHARACTER*1 staName(6,recNum)
+      integer wmostanum(recnum)
+      real staelev(recnum)
+      character*1 staname(6,recnum)
       character*6 c6_staname
-      real wdMan_r(manLevel,recNum)
-      real prMan_r(manLevel,recNum)
-      real wdSigW_r(sigWLevel,recNum)
-      real htSigW(sigWLevel, recNum)
+      real wdman_r(manlevel,recnum)
+      real prman_r(manlevel,recnum)
+      real wdsigw_r(sigwlevel,recnum)
+      real htsigw(sigwlevel, recnum)
 
       logical l_closest_time, l_closest_time_i, l_in_domain, l_fill_ht       
-      real lat_a(NX_L,NY_L)
-      real lon_a(NX_L,NY_L)
-      real topo_a(NX_L,NY_L)
+      real lat_a(nx_l,ny_l)
+      real lon_a(nx_l,ny_l)
+      real topo_a(nx_l,ny_l)
       character*8 c8_obstype
       character*9 a9time_sys,a9time_release,a9time_syn,a9time_drpsnd       
 
       call get_r_missing_data(r_missing_data,istatus)
       if (istatus .ne. 1) then
-          write (6,*) 'Error getting r_missing_data'
+          write (6,*) 'error getting r_missing_data'
           return
       endif
-      call get_domain_perimeter(NX_L,NY_L,'nest7grid',lat_a,lon_a,
+      call get_domain_perimeter(nx_l,ny_l,'nest7grid',lat_a,lon_a,
      1            topo_a,1.0,rnorth,south,east,west,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_domain_perimeter'
+          write(6,*)' error in get_domain_perimeter'
           return
       endif
 
-      call read_drpsnd_netcdf(nf_fid, manLevel, recNum, sigTLevel, 
-     +     sigWLevel, tropLevel, marsdenSquare, numMand, numSigT, 
-     +     numSigW, numTrop, prMan, prTrop, wdMan, wdSigW, wdTrop, 
-     +     htMan, latitude, longitude, prSigT, prSigW, tdMan, tdSigT, 
-     +     tdTrop, tpMan, tpSigT, tpTrop, wsMan, wsSigW, wsTrop, 
-     +     DropSondeLocation, rawDropSonde, timeNominal, timeObs)
-C
-C The netcdf variables are filled - your snd write call may go here
-C
-!     Write All Dropsondes to LAPS SND file
+      call read_drpsnd_netcdf(nf_fid, manlevel, recnum, sigtlevel, 
+     +     sigwlevel, troplevel, marsdensquare, nummand, numsigt, 
+     +     numsigw, numtrop, prman, prtrop, wdman, wdsigw, wdtrop, 
+     +     htman, latitude, longitude, prsigt, prsigw, tdman, tdsigt, 
+     +     tdtrop, tpman, tpsigt, tptrop, wsman, wssigw, wstrop, 
+     +     dropsondelocation, rawdropsonde, timenominal, timeobs)
+c
+c the netcdf variables are filled - your snd write call may go here
+c
+!     write all dropsondes to laps snd file
 
       r_nc_missing_data = 1e20
 
-      htSigW = r_missing_data
+      htsigw = r_missing_data
 
-      n_snd = recNum
+      n_snd = recnum
 
       do isnd = 1,n_snd
 
-!         QC and write out the sounding
+!         qc and write out the sounding
           i4time_drpsnd = 0
 
-          if(abs(timeObs(isnd)) .lt. 1e10 .and.
-     1       abs(timeObs(isnd)) .gt.    0.      )then
-              i4time_release = idint(timeObs(isnd))+315619200
+          if(abs(timeobs(isnd)) .lt. 1e10 .and.
+     1       abs(timeobs(isnd)) .gt.    0.      )then
+              i4time_release = idint(timeobs(isnd))+315619200
 
               i4time_diff = i4time_release - i4time_sys
 
               if(abs(i4time_diff) .gt. 20000)then
-                  write(6,*)' Warning: i4time_release is not '
+                  write(6,*)' warning: i4time_release is not '
      1                     ,'consistent with i4time_diff'
      1                     ,i4time_release,i4time_sys
               endif
 
-!             Correction for balloon fall time to mid-sounding
+!             correction for balloon fall time to mid-sounding
               i4time_drpsnd = i4time_release + 100
 
           else
@@ -197,7 +197,7 @@ C
           endif
 
           write(6,*)
-          write(6,*)' Drpsnd #',isnd,i4time_sys,i4time_release
+          write(6,*)' drpsnd #',isnd,i4time_sys,i4time_release
      1                         ,i4time_diff,i4time_syn
 
           call make_fnam_lp(i4time_sys    , a9time_sys    , istatus)
@@ -210,74 +210,74 @@ C
      1             ,a9time_syn,' ',a9time_drpsnd
 
           if(latitude(isnd) .ge. r_nc_missing_data)then
-              write(6,*)' Missing first latitude',isnd
+              write(6,*)' missing first latitude',isnd
               goto 999
           endif
 
           if(longitude(isnd) .ge. r_nc_missing_data)then
-              write(6,*)' Missing first longitude',isnd
+              write(6,*)' missing first longitude',isnd
               goto 999
           endif
 
           if(latitude(isnd) .le. rnorth .and. latitude(isnd) .ge. south 
-     1                                .AND.      
+     1                                .and.      
      1       longitude(isnd) .ge. west   .and. longitude(isnd) .le. east      
      1                                                            )then       
 
 !         if(.true.)then      ! for testing
 
-              write(6,*)' Drpsnd is inside domain lat/lon perimeter'
+              write(6,*)' drpsnd is inside domain lat/lon perimeter'
           else
               write(6,*)
-     1            ' Outside domain lat/lon perimeter - reject'
+     1            ' outside domain lat/lon perimeter - reject'
               goto 999
           endif
 
           if(i4time_drpsnd .ne. 0)then ! test window
               if(i4time_drpsnd .ge. i4time_drpsnd_earliest .and.
      1           i4time_drpsnd .le. i4time_drpsnd_latest)then
-                  write(6,*)' Inside time window'
+                  write(6,*)' inside time window'
               else
-                  write(6,*)' Outside time window - reject'
+                  write(6,*)' outside time window - reject'
                   goto 999
               endif
           endif
 
           staelev(isnd) = -999.
-          c8_obstype = 'DROPSND'
+          c8_obstype = 'dropsnd'
 
           isnd_staname = isnd_staname + 1
           write(c6_staname,1)isnd_staname
- 1        format('D',i4.4,1x)
+ 1        format('d',i4.4,1x)
           do i = 1,6
               staname(i,isnd) = c6_staname(i:i)
           enddo 
 
-!         Convert arrays from integer to real
+!         convert arrays from integer to real
           do ilev = 1,nummand(isnd) 
-              wdMan_r(ilev,isnd) = wdMan(ilev,isnd)
-              prMan_r(ilev,isnd) = prMan(ilev,isnd)
+              wdman_r(ilev,isnd) = wdman(ilev,isnd)
+              prman_r(ilev,isnd) = prman(ilev,isnd)
           enddo ! l
 
           do ilev = 1,numsigw(isnd) 
-              wdSigW_r(ilev,isnd) = wdSigW(ilev,isnd)
+              wdsigw_r(ilev,isnd) = wdsigw(ilev,isnd)
           enddo ! l
 
           call sort_and_write(i4time_sys,lun_out,l_fill_ht
-     1                       ,recNum,isnd,r_missing_data,a9time_drpsnd
+     1                       ,recnum,isnd,r_missing_data,a9time_drpsnd
      1                       ,c8_obstype
      1                       ,wmostanum,staname,latitude,longitude
      1                       ,staelev
      1                       ,nummand,htman,prman_r,tpman,tdman      
-     1                       ,wdMan_r,wsMan
+     1                       ,wdman_r,wsman
      1                       ,numsigt,prsigt,tpsigt,tdsigt
-     1                       ,numsigw,prsigw,htsigw,wdSigW_r,wssigw
+     1                       ,numsigw,prsigw,htsigw,wdsigw_r,wssigw
      1                       ,nlvl_out 
-     1                       ,manLevel,sigTLevel,sigWLevel,istatus)
+     1                       ,manlevel,sigtlevel,sigwlevel,istatus)
 
           go to 999
 
- 998      write(6,*)' Error writing out DRPSND'
+ 998      write(6,*)' error writing out drpsnd'
 
  999      continue
 
@@ -285,416 +285,416 @@ C
 
       return
       end
-C
-C  Subroutine to read the file "Drop Sonde data : selected by ob time : time range from 1201190400 to 1201201200" 
-C
-      subroutine read_drpsnd_netcdf(nf_fid, manLevel, recNum, 
-     +     sigTLevel, sigWLevel, tropLevel, marsdenSquare, numMand, 
-     +     numSigT, numSigW, numTrop, prMan, prTrop, wdMan, wdSigW, 
-     +     wdTrop, htMan, latitude, longitude, prSigT, prSigW, tdMan, 
-     +     tdSigT, tdTrop, tpMan, tpSigT, tpTrop, wsMan, wsSigW, 
-     +     wsTrop, DropSondeLocation, rawDropSonde, timeNominal, 
-     +     timeObs)
-C
+c
+c  subroutine to read the file "drop sonde data : selected by ob time : time range from 1201190400 to 1201201200" 
+c
+      subroutine read_drpsnd_netcdf(nf_fid, manlevel, recnum, 
+     +     sigtlevel, sigwlevel, troplevel, marsdensquare, nummand, 
+     +     numsigt, numsigw, numtrop, prman, prtrop, wdman, wdsigw, 
+     +     wdtrop, htman, latitude, longitude, prsigt, prsigw, tdman, 
+     +     tdsigt, tdtrop, tpman, tpsigt, tptrop, wsman, wssigw, 
+     +     wstrop, dropsondelocation, rawdropsonde, timenominal, 
+     +     timeobs)
+c
       include 'netcdf.inc'
-      integer manLevel, recNum, sigTLevel, sigWLevel, 
-     +     tropLevel,nf_fid, nf_vid, nf_status
-      integer marsdenSquare(recNum), numMand(recNum), numSigT(recNum),
-     +     numSigW(recNum), numTrop(recNum), prMan( manLevel,
-     +     recNum), prTrop( tropLevel, recNum), wdMan( manLevel,
-     +     recNum), wdSigW( sigWLevel, recNum), wdTrop( tropLevel,
-     +     recNum)
-      real htMan( manLevel, recNum), latitude(recNum),
-     +     longitude(recNum), prSigT( sigTLevel, recNum), prSigW(
-     +     sigWLevel, recNum), tdMan( manLevel, recNum), tdSigT(
-     +     sigTLevel, recNum), tdTrop( tropLevel, recNum), tpMan(
-     +     manLevel, recNum), tpSigT( sigTLevel, recNum), tpTrop(
-     +     tropLevel, recNum), wsMan( manLevel, recNum), wsSigW(
-     +     sigWLevel, recNum), wsTrop( tropLevel, recNum)
-      double precision timeNominal(recNum), timeObs(recNum)
-      character*12 DropSondeLocation(recNum)
-      character*2048 rawDropSonde(recNum)
+      integer manlevel, recnum, sigtlevel, sigwlevel, 
+     +     troplevel,nf_fid, nf_vid, nf_status
+      integer marsdensquare(recnum), nummand(recnum), numsigt(recnum),
+     +     numsigw(recnum), numtrop(recnum), prman( manlevel,
+     +     recnum), prtrop( troplevel, recnum), wdman( manlevel,
+     +     recnum), wdsigw( sigwlevel, recnum), wdtrop( troplevel,
+     +     recnum)
+      real htman( manlevel, recnum), latitude(recnum),
+     +     longitude(recnum), prsigt( sigtlevel, recnum), prsigw(
+     +     sigwlevel, recnum), tdman( manlevel, recnum), tdsigt(
+     +     sigtlevel, recnum), tdtrop( troplevel, recnum), tpman(
+     +     manlevel, recnum), tpsigt( sigtlevel, recnum), tptrop(
+     +     troplevel, recnum), wsman( manlevel, recnum), wssigw(
+     +     sigwlevel, recnum), wstrop( troplevel, recnum)
+      double precision timenominal(recnum), timeobs(recnum)
+      character*12 dropsondelocation(recnum)
+      character*2048 rawdropsonde(recnum)
 
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C     htMan         "Geopotential - Mandatory level"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'htMan',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for htMan'
+c   variables of type real
+c
+c     variable        netcdf long name
+c     htman         "geopotential - mandatory level"
+c
+      nf_status=nf_inq_varid(nf_fid,'htman',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for htman'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,htMan)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for htMan'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,htman)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for htman'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     latitude      "latitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'latitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for latitude'
+c
+c     variable        netcdf long name
+c     latitude      "latitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'latitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for latitude'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,latitude)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for latitude'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,latitude)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for latitude'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     longitude     "longitude"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'longitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for longitude'
+c
+c     variable        netcdf long name
+c     longitude     "longitude"
+c
+      nf_status=nf_inq_varid(nf_fid,'longitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for longitude'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,longitude)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for longitude'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,longitude)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for longitude'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     prSigT        "Pressure - Significant level wrt T"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'prSigT',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for prSigT'
+c
+c     variable        netcdf long name
+c     prsigt        "pressure - significant level wrt t"
+c
+      nf_status=nf_inq_varid(nf_fid,'prsigt',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for prsigt'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,prSigT)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for prSigT'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,prsigt)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for prsigt'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     prSigW        "Pressure - Significant level wrt W"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'prSigW',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for prSigW'
+c
+c     variable        netcdf long name
+c     prsigw        "pressure - significant level wrt w"
+c
+      nf_status=nf_inq_varid(nf_fid,'prsigw',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for prsigw'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,prSigW)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for prSigW'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,prsigw)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for prsigw'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tdMan         "Dew Point Depression - Mandatory level"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tdMan',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tdMan'
+c
+c     variable        netcdf long name
+c     tdman         "dew point depression - mandatory level"
+c
+      nf_status=nf_inq_varid(nf_fid,'tdman',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tdman'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,tdMan)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tdMan'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,tdman)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tdman'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tdSigT        "Dew Point Depression - Significant level wrt T"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tdSigT',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tdSigT'
+c
+c     variable        netcdf long name
+c     tdsigt        "dew point depression - significant level wrt t"
+c
+      nf_status=nf_inq_varid(nf_fid,'tdsigt',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tdsigt'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,tdSigT)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tdSigT'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,tdsigt)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tdsigt'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tdTrop        "Dew Point Depression - Tropopause levels"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tdTrop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tdTrop'
+c
+c     variable        netcdf long name
+c     tdtrop        "dew point depression - tropopause levels"
+c
+      nf_status=nf_inq_varid(nf_fid,'tdtrop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tdtrop'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,tdTrop)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tdTrop'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,tdtrop)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tdtrop'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tpMan         "Temperature - Mandatory level"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tpMan',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tpMan'
+c
+c     variable        netcdf long name
+c     tpman         "temperature - mandatory level"
+c
+      nf_status=nf_inq_varid(nf_fid,'tpman',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tpman'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,tpMan)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tpMan'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,tpman)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tpman'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tpSigT        "Temperature - Significant level wrt T"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tpSigT',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tpSigT'
+c
+c     variable        netcdf long name
+c     tpsigt        "temperature - significant level wrt t"
+c
+      nf_status=nf_inq_varid(nf_fid,'tpsigt',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tpsigt'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,tpSigT)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tpSigT'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,tpsigt)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tpsigt'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     tpTrop        "Temperature - Tropopause level"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'tpTrop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for tpTrop'
+c
+c     variable        netcdf long name
+c     tptrop        "temperature - tropopause level"
+c
+      nf_status=nf_inq_varid(nf_fid,'tptrop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for tptrop'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,tpTrop)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for tpTrop'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,tptrop)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for tptrop'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     wsMan         "wind speed"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'wsMan',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for wsMan'
+c
+c     variable        netcdf long name
+c     wsman         "wind speed"
+c
+      nf_status=nf_inq_varid(nf_fid,'wsman',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for wsman'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,wsMan)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for wsMan'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,wsman)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for wsman'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     wsSigW        "wind speed - Significant Level wrt W"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'wsSigW',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for wsSigW'
+c
+c     variable        netcdf long name
+c     wssigw        "wind speed - significant level wrt w"
+c
+      nf_status=nf_inq_varid(nf_fid,'wssigw',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for wssigw'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,wsSigW)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for wsSigW'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,wssigw)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for wssigw'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     wsTrop        "wind speed - Tropopause levels"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'wsTrop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for wsTrop'
+c
+c     variable        netcdf long name
+c     wstrop        "wind speed - tropopause levels"
+c
+      nf_status=nf_inq_varid(nf_fid,'wstrop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for wstrop'
       else
-       nf_status=NF_GET_VAR_REAL(nf_fid,nf_vid,wsTrop)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for wsTrop'
-       endif
-      endif
-
-C   Variables of type INT
-C
-C
-C     Variable        NETCDF Long Name
-C     marsdenSquare "Marsden Square"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'marsdenSquare',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for marsdenSquare'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,marsdenSquare)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for marsdenSquare'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     numMand       "Number of Mandatory Levels"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'numMand',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for numMand'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,numMand)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for numMand'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     numSigT       "Number of Significant Levels wrt T"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'numSigT',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for numSigT'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,numSigT)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for numSigT'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     numSigW       "Number of Significant Levels wrt W"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'numSigW',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for numSigW'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,numSigW)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for numSigW'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     numTrop       "Number of Tropopause Levels"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'numTrop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for numTrop'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,numTrop)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for numTrop'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     prMan         "Pressure - Mandatory level"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'prMan',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for prMan'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,prMan)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for prMan'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     prTrop        "Pressure - Tropopause level"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'prTrop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for prTrop'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,prTrop)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for prTrop'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     wdMan         "wind direction"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'wdMan',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for wdMan'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,wdMan)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for wdMan'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     wdSigW        "wind direction - Significant Level wrt W"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'wdSigW',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for wdSigW'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,wdSigW)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for wdSigW'
-       endif
-      endif
-C
-C     Variable        NETCDF Long Name
-C     wdTrop        "wind direction - Tropopause levels"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'wdTrop',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for wdTrop'
-      else
-       nf_status=NF_GET_VAR_INT(nf_fid,nf_vid,wdTrop)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for wdTrop'
+       nf_status=nf_get_var_real(nf_fid,nf_vid,wstrop)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for wstrop'
        endif
       endif
 
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C     timeNominal   "drop sonde data hour"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'timeNominal',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for timeNominal'
+c   variables of type int
+c
+c
+c     variable        netcdf long name
+c     marsdensquare "marsden square"
+c
+      nf_status=nf_inq_varid(nf_fid,'marsdensquare',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for marsdensquare'
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,timeNominal)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for timeNominal'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,marsdensquare)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for marsdensquare'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     timeObs       "Observation Time"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'timeObs',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for timeObs'
+c
+c     variable        netcdf long name
+c     nummand       "number of mandatory levels"
+c
+      nf_status=nf_inq_varid(nf_fid,'nummand',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for nummand'
       else
-       nf_status=NF_GET_VAR_DOUBLE(nf_fid,nf_vid,timeObs)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for timeObs'
+       nf_status=nf_get_var_int(nf_fid,nf_vid,nummand)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for nummand'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     numsigt       "number of significant levels wrt t"
+c
+      nf_status=nf_inq_varid(nf_fid,'numsigt',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for numsigt'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,numsigt)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for numsigt'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     numsigw       "number of significant levels wrt w"
+c
+      nf_status=nf_inq_varid(nf_fid,'numsigw',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for numsigw'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,numsigw)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for numsigw'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     numtrop       "number of tropopause levels"
+c
+      nf_status=nf_inq_varid(nf_fid,'numtrop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for numtrop'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,numtrop)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for numtrop'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     prman         "pressure - mandatory level"
+c
+      nf_status=nf_inq_varid(nf_fid,'prman',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for prman'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,prman)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for prman'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     prtrop        "pressure - tropopause level"
+c
+      nf_status=nf_inq_varid(nf_fid,'prtrop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for prtrop'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,prtrop)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for prtrop'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     wdman         "wind direction"
+c
+      nf_status=nf_inq_varid(nf_fid,'wdman',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for wdman'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,wdman)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for wdman'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     wdsigw        "wind direction - significant level wrt w"
+c
+      nf_status=nf_inq_varid(nf_fid,'wdsigw',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for wdsigw'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,wdsigw)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for wdsigw'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     wdtrop        "wind direction - tropopause levels"
+c
+      nf_status=nf_inq_varid(nf_fid,'wdtrop',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for wdtrop'
+      else
+       nf_status=nf_get_var_int(nf_fid,nf_vid,wdtrop)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for wdtrop'
+       endif
+      endif
+
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c     timenominal   "drop sonde data hour"
+c
+      nf_status=nf_inq_varid(nf_fid,'timenominal',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for timenominal'
+      else
+       nf_status=nf_get_var_double(nf_fid,nf_vid,timenominal)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for timenominal'
+       endif
+      endif
+c
+c     variable        netcdf long name
+c     timeobs       "observation time"
+c
+      nf_status=nf_inq_varid(nf_fid,'timeobs',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for timeobs'
+      else
+       nf_status=nf_get_var_double(nf_fid,nf_vid,timeobs)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for timeobs'
        endif
       endif
 
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C     DropSondeLocation"DropSonde Location or Observation Type (from 62626)"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'DropSondeLocation',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for DropSondeLocation'
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c     dropsondelocation"dropsonde location or observation type (from 62626)"
+c
+      nf_status=nf_inq_varid(nf_fid,'dropsondelocation',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for dropsondelocation'
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,DropSondeLocation)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for DropSondeLocation'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,dropsondelocation)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for dropsondelocation'
        endif
       endif
-C
-C     Variable        NETCDF Long Name
-C     rawDropSonde  "raw Drop Sonde ASCII message"
-C
-      nf_status=NF_INQ_VARID(nf_fid,'rawDropSonde',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-       print *, NF_STRERROR(nf_status),' for rawDropSonde'
+c
+c     variable        netcdf long name
+c     rawdropsonde  "raw drop sonde ascii message"
+c
+      nf_status=nf_inq_varid(nf_fid,'rawdropsonde',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+       print *, nf_strerror(nf_status),' for rawdropsonde'
       else
-       nf_status=NF_GET_VAR_TEXT(nf_fid,nf_vid,rawDropSonde)
-       if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status),' for rawDropSonde'
+       nf_status=nf_get_var_text(nf_fid,nf_vid,rawdropsonde)
+       if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status),' for rawdropsonde'
        endif
       endif
 
       nf_status=nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 

@@ -1,150 +1,148 @@
-!dis   
-!dis    Open Source License/Disclaimer, Forecast Systems Laboratory
-!dis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
-!dis    
-!dis    This software is distributed under the Open Source Definition,
+!dis
+!dis    open source license/disclaimer, forecast systems laboratory
+!dis    noaa/oar/fsl, 325 broadway boulder, co 80305
+!dis
+!dis    this software is distributed under the open source definition,
 !dis    which may be found at http://www.opensource.org/osd.html.
-!dis    
-!dis    In particular, redistribution and use in source and binary forms,
+!dis
+!dis    in particular, redistribution and use in source and binary forms,
 !dis    with or without modification, are permitted provided that the
 !dis    following conditions are met:
-!dis    
-!dis    - Redistributions of source code must retain this notice, this
+!dis
+!dis    - redistributions of source code must retain this notice, this
 !dis    list of conditions and the following disclaimer.
-!dis    
-!dis    - Redistributions in binary form must provide access to this
+!dis
+!dis    - redistributions in binary form must provide access to this
 !dis    notice, this list of conditions and the following disclaimer, and
 !dis    the underlying source code.
-!dis    
-!dis    - All modifications to this software must be clearly documented,
+!dis
+!dis    - all modifications to this software must be clearly documented,
 !dis    and are solely the responsibility of the agent making the
 !dis    modifications.
-!dis    
-!dis    - If significant modifications or enhancements are made to this
-!dis    software, the FSL Software Policy Manager
+!dis
+!dis    - if significant modifications or enhancements are made to this
+!dis    software, the fsl software policy manager
 !dis    (softwaremgr@fsl.noaa.gov) should be notified.
-!dis    
-!dis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-!dis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-!dis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-!dis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-!dis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-!dis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-!dis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
-!dis   
-!dis 
+!dis
+!dis    this software and its documentation are in the public domain
+!dis    and are furnished "as is."  the authors, the united states
+!dis    government, its instrumentalities, officers, employees, and
+!dis    agents make no warranty, express or implied, as to the usefulness
+!dis    of the software and documentation for any purpose.  they assume
+!dis    no responsibility (1) for the use of the software and
+!dis    documentation; or (2) to provide technical support to users.
+!dis
+!dis
 
+module laps_static
 
+   implicit none
+   integer                     :: x              ! x-dimension of grid
+   integer                     :: y              ! y-dimension of grid
+   integer                     :: z2             ! z-dimension of 2-d grids
+   integer                     :: z3             ! z-dimension of 3-d press
+   real                        :: la1            ! sw corner lat
+   real                        :: lo1            ! se corner lon
+   real                        :: la2            ! ne corner lat
+   real                        :: lo2            ! ne corner lon
+   real                        :: dx             ! x-direction grid spacing
+   real                        :: dy             ! y-direction grid spacing
+   real                        :: lov            ! orientation longitude
+   real                        :: latin1         ! standard lat 1
+   real                        :: latin2         ! standard lat 2
+   real, allocatable           :: topo(:, :)      ! laps topographic height
+   real, allocatable           :: lats(:, :)      ! laps latitude array
+   real, allocatable           :: lons(:, :)      ! laps longitude array
+   character(len=132)         :: grid_type      ! map projection type
 
-MODULE laps_static
-
-  IMPLICIT NONE
-  INTEGER                     :: x              ! X-dimension of grid
-  INTEGER                     :: y              ! Y-dimension of grid
-  INTEGER                     :: z2             ! Z-dimension of 2-d grids
-  INTEGER                     :: z3             ! Z-dimension of 3-d press
-  REAL                        :: la1            ! SW Corner Lat
-  REAL                        :: lo1            ! SE Corner Lon
-  REAL                        :: la2            ! NE Corner Lat
-  REAL                        :: lo2            ! NE Corner Lon
-  REAL                        :: dx             ! X-direction grid spacing
-  REAL                        :: dy             ! Y-direction grid spacing
-  REAL                        :: lov            ! Orientation Longitude
-  REAL                        :: latin1         ! Standard Lat 1
-  REAL                        :: latin2         ! Standard Lat 2
-  REAL, ALLOCATABLE           :: topo(:,:)      ! LAPS Topographic height
-  REAL, ALLOCATABLE           :: lats(:,:)      ! LAPS Latitude Array
-  REAL, ALLOCATABLE           :: lons(:,:)      ! LAPS Longitude Array
-  CHARACTER (LEN=132)         :: grid_type      ! Map projection type
-
-CONTAINS
+contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  SUBROUTINE get_horiz_grid_spec(laps_data_root)
+   subroutine get_horiz_grid_spec(laps_data_root)
 
-    IMPLICIT NONE
-    CHARACTER (LEN=*), INTENT(IN) :: laps_data_root
-    CHARACTER (LEN=256)           :: static_file
-    CHARACTER (LEN=132)           :: dum
-    INTEGER :: cdfid, rcode,xid,yid,vid
-    INTEGER, DIMENSION(2) :: startc, countc
-    INTEGER, DIMENSION(4) :: start, count
-    INCLUDE "netcdf.inc"
+      implicit none
+      character(len=*), intent(in) :: laps_data_root
+      character(len=256)           :: static_file
+      character(len=132)           :: dum
+      integer :: cdfid, rcode, xid, yid, vid
+      integer, dimension(2) :: startc, countc
+      integer, dimension(4) :: start, count
+      include "netcdf.inc"
 
-    static_file = TRIM(laps_data_root)//'/static/static.nest7grid'
+      static_file = trim(laps_data_root)//'/static/static.nest7grid'
 
-    ! Open the static file which is a netCDF file
+      ! open the static file which is a netcdf file
 
-    cdfid = NCOPN(TRIM(static_file),NCNOWRIT, rcode)
+      cdfid = ncopn(trim(static_file), ncnowrit, rcode)
 
-    ! Get x/y dimensions.  
- 
-    xid = NCDID (cdfid, 'x', rcode)
-    yid = NCDID (cdfid, 'y', rcode)
-    CALL NCDINQ ( cdfid, xid, dum, x, rcode )
-    CALL NCDINQ ( cdfid, yid, dum, y, rcode )
-    
-    ! Get the grid projection type
+      ! get x/y dimensions.
 
-    startc = (/ 1 , 1 /)
-    countc = (/ 132 , 1 /)
-    vid = NCVID ( cdfid , 'grid_type' , rcode )
-    CALL NCVGTC ( cdfid , vid , startc , countc , grid_type , 132 , rcode ) 
+      xid = ncdid(cdfid, 'x', rcode)
+      yid = ncdid(cdfid, 'y', rcode)
+      call ncdinq(cdfid, xid, dum, x, rcode)
+      call ncdinq(cdfid, yid, dum, y, rcode)
 
-    ! Get the corner points by reading lat/lon array
-    ALLOCATE ( lats (x,y) )
-    ALLOCATE ( lons (x,y) )
-    vid = NCVID (cdfid, 'lat', rcode)
-    start = (/ 1 , 1 , 1 , 1 /)
-    count = (/ x , y , 1 , 1 /)
-    CALL NCVGT ( cdfid , vid , start , count , lats, rcode ) 
-    vid = NCVID (cdfid, 'lon', rcode)
-    start = (/ 1 , 1 , 1 , 1 /)
-    count = (/ x , y , 1 , 1 /)
-    CALL NCVGT ( cdfid , vid , start , count , lons, rcode ) 
-    la1 = lats(1,1)
-    lo1 = lons(1,1)
-    la2 = lats(x,y)
-    lo2 = lons(x,y)
-    IF (lo1 .gt. 180) lo1 = lo1 - 360.
-    IF (lo2 .gt. 180) lo2 = lo2 - 360.
-    IF (la1 .gt. 270) la1 = la1 - 360.
-    IF (la2 .gt. 270) la2 = la2 - 360.
-    print '(A,2F10.2)', 'SW Corner Lat/Lon = ', la1, lo1
-    print '(A,2F10.2)', 'NE Corner Lat/Lon = ', la2, lo2
+      ! get the grid projection type
 
-    ! Get other projection parameters
+      startc = (/1, 1/)
+      countc = (/132, 1/)
+      vid = ncvid(cdfid, 'grid_type', rcode)
+      call ncvgtc(cdfid, vid, startc, countc, grid_type, 132, rcode)
 
-    vid = NCVID ( cdfid , 'Dx' , rcode )
-    CALL NCVGT1 ( cdfid , vid , 1 , dx , rcode )
-    dx = dx / 1000
+      ! get the corner points by reading lat/lon array
+      allocate (lats(x, y))
+      allocate (lons(x, y))
+      vid = ncvid(cdfid, 'lat', rcode)
+      start = (/1, 1, 1, 1/)
+      count = (/x, y, 1, 1/)
+      call ncvgt(cdfid, vid, start, count, lats, rcode)
+      vid = ncvid(cdfid, 'lon', rcode)
+      start = (/1, 1, 1, 1/)
+      count = (/x, y, 1, 1/)
+      call ncvgt(cdfid, vid, start, count, lons, rcode)
+      la1 = lats(1, 1)
+      lo1 = lons(1, 1)
+      la2 = lats(x, y)
+      lo2 = lons(x, y)
+      if (lo1 .gt. 180) lo1 = lo1 - 360.
+      if (lo2 .gt. 180) lo2 = lo2 - 360.
+      if (la1 .gt. 270) la1 = la1 - 360.
+      if (la2 .gt. 270) la2 = la2 - 360.
+      print '(a,2f10.2)', 'sw corner lat/lon = ', la1, lo1
+      print '(a,2f10.2)', 'ne corner lat/lon = ', la2, lo2
 
-    vid = NCVID ( cdfid , 'Dy' , rcode )
-    CALL NCVGT1 ( cdfid , vid , 1 , dy , rcode )
-    dy = dy / 1000
+      ! get other projection parameters
 
-    vid = NCVID ( cdfid , 'LoV' , rcode )
-    CALL NCVGT1 ( cdfid , vid , 1 , lov , rcode )
-    IF ( lov .GT. 180 ) THEN
-      lov = lov - 360
-    END IF
+      vid = ncvid(cdfid, 'dx', rcode)
+      call ncvgt1(cdfid, vid, 1, dx, rcode)
+      dx = dx/1000
 
-    vid = NCVID ( cdfid , 'Latin1' , rcode )
-    CALL NCVGT1 ( cdfid , vid , 1 , latin1 , rcode )
+      vid = ncvid(cdfid, 'dy', rcode)
+      call ncvgt1(cdfid, vid, 1, dy, rcode)
+      dy = dy/1000
 
-    vid = NCVID ( cdfid , 'Latin2' , rcode )
-    CALL NCVGT1 ( cdfid , vid , 1 , latin2 , rcode )
+      vid = ncvid(cdfid, 'lov', rcode)
+      call ncvgt1(cdfid, vid, 1, lov, rcode)
+      if (lov .gt. 180) then
+         lov = lov - 360
+      end if
 
-    ! Get the topography
+      vid = ncvid(cdfid, 'latin1', rcode)
+      call ncvgt1(cdfid, vid, 1, latin1, rcode)
 
-    ALLOCATE(topo(x,y))
-    vid = NCVID (cdfid, 'avg', rcode)
-    start = (/ 1 , 1 , 1 , 1 /)
-    count = (/ x , y , 1 , 1 /)
-    CALL NCVGT ( cdfid , vid , start , count , topo, rcode ) 
-  
-  END SUBROUTINE get_horiz_grid_spec
-  
+      vid = ncvid(cdfid, 'latin2', rcode)
+      call ncvgt1(cdfid, vid, 1, latin2, rcode)
+
+      ! get the topography
+
+      allocate (topo(x, y))
+      vid = ncvid(cdfid, 'avg', rcode)
+      start = (/1, 1, 1, 1/)
+      count = (/x, y, 1, 1/)
+      call ncvgt(cdfid, vid, start, count, topo, rcode)
+
+   end subroutine get_horiz_grid_spec
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-END MODULE laps_static
+end module laps_static

@@ -1,727 +1,727 @@
 !------------------------------------------------------------------------------
-!M+
-! NAME:
+!m+
+! name:
 !       coefficient_utility
 !
-! PURPOSE:
-!       Module to hold utility data and routines for reading and writing RT
+! purpose:
+!       module to hold utility data and routines for reading and writing rt
 !       model coefficient data
 !
-! CATEGORY:
-!       NCEP RTM
+! category:
+!       ncep rtm
 !
-! CALLING SEQUENCE:
-!       USE coefficient_utility
+! calling sequence:
+!       use coefficient_utility
 !
-! OUTPUTS:
-!       None.
+! outputs:
+!       none.
 !
-! MODULES:
-!       error_handler:          Module to define error codes and handle error
+! modules:
+!       error_handler:          module to define error codes and handle error
 !                               conditions
 !
-!       file_utility:   .       Module containing global file utility routines
+!       file_utility:   .       module containing global file utility routines
 !
-! CONTAINS:
-!       open_coefficient_file:  PUBLIC function to open the sequential access
+! contains:
+!       open_coefficient_file:  public function to open the sequential access
 !                               coefficient files.
 !
-!       check_coefficient_file: PRIVATE function to determine if the coefficient
+!       check_coefficient_file: private function to determine if the coefficient
 !                               file is in the correct format, endian-wise.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! COMMENTS:
-!       All of the array documentation lists the dimensions by a single letter.
-!       Throughout the RTM code these are:
-!         I: Array dimension is of I predictors (Istd and Iint are variants).
-!         J: Array dimension is of J absorbing species.
-!         K: Array dimension is of K atmospheric layers.
-!         L: Array dimension is of L spectral channels.
-!         M: Array dimension is of M profiles.
-!       Not all of these dimensions will appear in every module.
+! comments:
+!       all of the array documentation lists the dimensions by a single letter.
+!       throughout the rtm code these are:
+!         i: array dimension is of i predictors (istd and iint are variants).
+!         j: array dimension is of j absorbing species.
+!         k: array dimension is of k atmospheric layers.
+!         l: array dimension is of l spectral channels.
+!         m: array dimension is of m profiles.
+!       not all of these dimensions will appear in every module.
 !
-! CREATION HISTORY:
-!       Written by:     Paul van Delst, CIMSS@NOAA/NCEP 12-Jun-2000
+! creation history:
+!       written by:     paul van delst, cimss@noaa/ncep 12-jun-2000
 !                       paul.vandelst@ssec.wisc.edu
 !                         or
 !                       pvandelst@ncep.noaa.gov
 !
 !
-!  Copyright (C) 2000 Paul van Delst
+!  copyright (c) 2000 paul van delst
 !
-!  This program is free software; you can redistribute it and/or
-!  modify it under the terms of the GNU General Public License
-!  as published by the Free Software Foundation; either version 2
-!  of the License, or (at your option) any later version.
+!  this program is free software; you can redistribute it and/or
+!  modify it under the terms of the gnu general public license
+!  as published by the free software foundation; either version 2
+!  of the license, or (at your option) any later version.
 !
-!  This program is distributed in the hope that it will be useful,
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!  GNU General Public License for more details.
+!  this program is distributed in the hope that it will be useful,
+!  but without any warranty; without even the implied warranty of
+!  merchantability or fitness for a particular purpose.  see the
+!  gnu general public license for more details.
 !
-!  You should have received a copy of the GNU General Public License
-!  along with this program; if not, write to the Free Software
-!  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-!M-
+!  you should have received a copy of the gnu general public license
+!  along with this program; if not, write to the free software
+!  foundation, inc., 59 temple place - suite 330, boston, ma  02111-1307, usa.
+!m-
 !------------------------------------------------------------------------------
 
-MODULE coefficient_utility
+module coefficient_utility
 
 
   ! ----------
-  ! Module use
+  ! module use
   ! ----------
 
-  USE type_kinds
-  USE file_utility
-  USE error_handler
+  use type_kinds
+  use file_utility
+  use error_handler
 
 
   ! ---------------------------
-  ! Disable all implicit typing
+  ! disable all implicit typing
   ! ---------------------------
 
-  IMPLICIT NONE
+  implicit none
 
 
   ! ------------
-  ! Visibilities
+  ! visibilities
   ! ------------
 
-  PRIVATE
-  PUBLIC :: open_coefficient_file
+  private
+  public :: open_coefficient_file
 
 
   ! -----------------
-  ! Module parameters
+  ! module parameters
   ! -----------------
 
-  INTEGER( Long ), PARAMETER, PRIVATE :: MAGIC_NUMBER = 123456789_Long
+  integer( long ), parameter, private :: magic_number = 123456789_long
 
 
   ! ----------------
-  ! Module variables
+  ! module variables
   ! ----------------
 
-  CHARACTER( 128 ) :: message
+  character( 128 ) :: message
 
 
   ! -----------------
-  ! Module intrinsics
+  ! module intrinsics
   ! -----------------
 
-  INTRINSIC PRESENT, &
-            TRIM
+  intrinsic present, &
+            trim
 
 
 
-CONTAINS
+contains
 
 
 !------------------------------------------------------------------------------
-!S+
-! NAME:
+!s+
+! name:
 !       open_coefficient_file
 !
-! PURPOSE:
-!       PUBLIC function to open the sequential access coefficient files
+! purpose:
+!       public function to open the sequential access coefficient files
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = open_coefficient_file( coefficient_file, &
 !                                       file_id, &
 !                                       message_log = message_log )
 !
-! INPUT ARGUMENTS:
-!       coefficient_file: Name of the file containing the coefficient data.
-!                         UNITS:      None
-!                         TYPE:       Character
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+! input arguments:
+!       coefficient_file: name of the file containing the coefficient data.
+!                         units:      none
+!                         type:       character
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       message_log:      Character string specifying a filename in which any
-!                         messages will be logged. If not specified, or if an
+! optional input arguments:
+!       message_log:      character string specifying a filename in which any
+!                         messages will be logged. if not specified, or if an
 !                         error occurs opening the log file, the default action
 !                         is to output messages to the screen.
-!                         UNITS:      None
-!                         TYPE:       Character
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                         units:      none
+!                         type:       character
+!                         dimension:  scalar
+!                         attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       file_id:          File logical unit number.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( OUT )
+! output arguments:
+!       file_id:          file logical unit number.
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( out )
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => file open was successful
-!              = FAILURE => error occurred during file open OR
+! function result:
+!       result = success => file open was successful
+!              = failure => error occurred during file open or
 !                           error occurred during file check
 !
-! CALLS:
-!      file_exists:             Function to determine if a named file exists.
-!                               SOURCE: file_utility module
+! calls:
+!      file_exists:             function to determine if a named file exists.
+!                               source: file_utility module
 !
-!      get_lun:                 Function to return a free logical unit number
+!      get_lun:                 function to return a free logical unit number
 !                               for file access.
-!                               SOURCE: file_utility module
+!                               source: file_utility module
 !
-!      display_message:         Subroutine to output messages
-!                               SOURCE: error_handler module
+!      display_message:         subroutine to output messages
+!                               source: error_handler module
 !
-!      check_coefficient_file:  Function to check the file for the correct
+!      check_coefficient_file:  function to check the file for the correct
 !                               endian-ness.
-!                               SOURCE: PRIVATE module subprogram
+!                               source: private module subprogram
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The file is inquired to determine if it exists. If so, it is opened
+! procedure:
+!       the file is inquired to determine if it exists. if so, it is opened
 !       and the endian-ness is checked.
-!S-
+!s-
 !------------------------------------------------------------------------------
 
-  FUNCTION open_coefficient_file( coefficient_file, &
+  function open_coefficient_file( coefficient_file, &
                                   file_id,          &
                                   for_output,       &
                                   no_check,         &
                                   message_log )     &
-                                RESULT( error_status )
+                                result( error_status )
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    CHARACTER( * ),           INTENT( IN )  :: coefficient_file
-    INTEGER,                  INTENT( OUT ) :: file_id
+    character( * ),           intent( in )  :: coefficient_file
+    integer,                  intent( out ) :: file_id
 
-    INTEGER,        OPTIONAL, INTENT( IN )  :: for_output
-    INTEGER,        OPTIONAL, INTENT( IN )  :: no_check
+    integer,        optional, intent( in )  :: for_output
+    integer,        optional, intent( in )  :: no_check
 
-    CHARACTER( * ), OPTIONAL, INTENT( IN )  :: message_log
+    character( * ), optional, intent( in )  :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ), PARAMETER :: ROUTINE_NAME = 'OPEN_COEFFICIENT_FILE'
+    character( * ), parameter :: routine_name = 'open_coefficient_file'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER :: file_check
-    INTEGER :: file_output
-    INTEGER :: io_status
+    integer :: file_check
+    integer :: file_output
+    integer :: io_status
 
-    CHARACTER( 7 ) :: file_status
-    CHARACTER( 5 ) :: file_action
+    character( 7 ) :: file_status
+    character( 5 ) :: file_action
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Check optional arguments --                      #
+    !#                      -- check optional arguments --                      #
     !#--------------------------------------------------------------------------#
 
-    IF ( PRESENT( no_check ) ) THEN
+    if ( present( no_check ) ) then
       file_check = 0
-    ELSE
+    else
       file_check = 1
-    END IF
+    end if
 
-    IF ( PRESENT( for_output ) ) THEN
+    if ( present( for_output ) ) then
       file_output = 1
       file_check  = 0
-    ELSE
+    else
       file_output = 0
-    END IF
+    end if
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Check data file existence --                     #
+    !#                      -- check data file existence --                     #
     !#--------------------------------------------------------------------------#
 
-    IF ( file_output == 0 ) THEN
+    if ( file_output == 0 ) then
 
-      ! -- If data file does not exist, return an error
-      IF ( .NOT. file_exists( coefficient_file ) ) THEN
-        error_status = FAILURE
-        WRITE( message, '( "Coefficient file, ", a, " not found." )' ) &
-                        TRIM( coefficient_file )
-        CALL display_message( ROUTINE_NAMe, &
-                              TRIM( message ), &
+      ! -- if data file does not exist, return an error
+      if ( .not. file_exists( coefficient_file ) ) then
+        error_status = failure
+        write( message, '( "coefficient file, ", a, " not found." )' ) &
+                        trim( coefficient_file )
+        call display_message( routine_name, &
+                              trim( message ), &
                               error_status, &
                               message_log = message_log )
-        RETURN
-      END IF
+        return
+      end if
 
-      ! -- Set OPEN keywords for reading
-      file_status = 'OLD   '
-      file_action = 'READ '
+      ! -- set open keywords for reading
+      file_status = 'old   '
+      file_action = 'read '
 
-    ELSE
+    else
 
-      ! -- If data file does exist, output a warning message
-      IF ( file_exists( coefficient_file ) ) THEN
-        WRITE( message, '( "Coefficient file, ", a, " will be overwritten." )' ) &
-                        TRIM( coefficient_file )
-        CALL display_message( ROUTINE_NAMe, &
-                              TRIM( message ), &
-                              WARNING, &
+      ! -- if data file does exist, output a warning message
+      if ( file_exists( coefficient_file ) ) then
+        write( message, '( "coefficient file, ", a, " will be overwritten." )' ) &
+                        trim( coefficient_file )
+        call display_message( routine_name, &
+                              trim( message ), &
+                              warning, &
                               message_log = message_log )
-      END IF
+      end if
 
-      ! -- Set OPEN keywords for writing
-      file_status = 'REPLACE'
-      file_action = 'WRITE'
+      ! -- set open keywords for writing
+      file_status = 'replace'
+      file_action = 'write'
 
-    END IF
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                        -- Open the data file --                          #
+    !#                        -- open the data file --                          #
     !#--------------------------------------------------------------------------#
 
     file_id = get_lun()
-    OPEN( file_id, FILE   = coefficient_file, &
-                   STATUS = TRIM( file_status ), &
-                   ACTION = TRIM( file_action ), &
-                   ACCESS = 'SEQUENTIAL', &
-                   FORM   = 'UNFORMATTED', &
-                   IOSTAT = io_status )
+    open( file_id, file   = coefficient_file, &
+                   status = trim( file_status ), &
+                   action = trim( file_action ), &
+                   access = 'sequential', &
+                   form   = 'unformatted', &
+                   iostat = io_status )
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error opening ", a, ". IOSTAT = ", i5 )' ) &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error opening ", a, ". iostat = ", i5 )' ) &
                       coefficient_file, io_status
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#        -- If file is opened for output, write the magic number --        #
+    !#        -- if file is opened for output, write the magic number --        #
     !#--------------------------------------------------------------------------#
 
-    IF ( file_output == 1 ) THEN
+    if ( file_output == 1 ) then
 
-      WRITE( file_id, IOSTAT = io_status ) MAGIC_NUMBER
+      write( file_id, iostat = io_status ) magic_number
 
-      IF ( io_status /= 0 ) THEN
-        error_status = FAILURE
-        WRITE( message, '( "Error writing magic number to ", a, ". IOSTAT = ", i5 )' ) &
-                        TRIM( coefficient_file ), io_status
-        CALL display_message( ROUTINE_NAME, &
-                              TRIM( message ), &
+      if ( io_status /= 0 ) then
+        error_status = failure
+        write( message, '( "error writing magic number to ", a, ". iostat = ", i5 )' ) &
+                        trim( coefficient_file ), io_status
+        call display_message( routine_name, &
+                              trim( message ), &
                               error_status, &
                               message_log = message_log )
-        CLOSE( file_id )
-        RETURN
-      END IF
+        close( file_id )
+        return
+      end if
 
-    END IF
+    end if
 
 
     
     !#--------------------------------------------------------------------------#
-    !#             -- Check the coefficient data file if required --            #
+    !#             -- check the coefficient data file if required --            #
     !#--------------------------------------------------------------------------#
 
-    IF ( file_check == 0 ) THEN
-      error_status = SUCCESS
-      RETURN
-    END IF
+    if ( file_check == 0 ) then
+      error_status = success
+      return
+    end if
 
     error_status = check_coefficient_file( file_id, &
                                            message_log = message_log )
 
-    IF ( error_status /= SUCCESS ) THEN
-      CLOSE( file_id )
-      WRITE( message, '( "Error checking ", a, ". File closed." )' ) &
+    if ( error_status /= success ) then
+      close( file_id )
+      write( message, '( "error checking ", a, ". file closed." )' ) &
                       coefficient_file
-      CALL display_message( ROUTINE_NAME, &
-                            TRIM( message ), &
+      call display_message( routine_name, &
+                            trim( message ), &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
-  END FUNCTION open_coefficient_file
+  end function open_coefficient_file
 
 
 
 !------------------------------------------------------------------------------
-!P+
-! NAME:
+!p+
+! name:
 !       check_coefficient_file
 !
-! PURPOSE:
-!       PRIVATE function to determine if the coefficient file is in the correct
+! purpose:
+!       private function to determine if the coefficient file is in the correct
 !       format, endian-wise.
 !
-! CALLING SEQUENCE:
+! calling sequence:
 !       result = check_coefficient_file( file_id, &
 !                                        message_log = message_log )
 !
-! INPUT ARGUMENTS:
-!       file_id:          File logical unit number for the open file that is
+! input arguments:
+!       file_id:          file logical unit number for the open file that is
 !                         to be checked.
-!                         UNITS:      None
-!                         TYPE:       Integer
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN )
+!                         units:      none
+!                         type:       integer
+!                         dimension:  scalar
+!                         attributes: intent( in )
 !
 !
-! OPTIONAL INPUT ARGUMENTS:
-!       message_log:      Character string specifying a filename in which any
-!                         messages will be logged. If not specified, or if an
+! optional input arguments:
+!       message_log:      character string specifying a filename in which any
+!                         messages will be logged. if not specified, or if an
 !                         error occurs opening the log file, the default action
 !                         is to output messages to the screen.
-!                         UNITS:      None
-!                         TYPE:       Character
-!                         DIMENSION:  Scalar
-!                         ATTRIBUTES: INTENT( IN ), OPTIONAL
+!                         units:      none
+!                         type:       character
+!                         dimension:  scalar
+!                         attributes: intent( in ), optional
 !
-! OUTPUT ARGUMENTS:
-!       None.
+! output arguments:
+!       none.
 !
-! OPTIONAL OUTPUT ARGUMENTS:
-!       None.
+! optional output arguments:
+!       none.
 !
-! FUNCTION RESULT:
-!       Result = SUCCESS => file check was successful
-!              = FAILURE => error occurred reading a file record OR
+! function result:
+!       result = success => file check was successful
+!              = failure => error occurred reading a file record or
 !                           8- and/or 32-bit integers not supported.
 !
-! CALLS:
-!       display_message:  Subroutine to output messages
-!                         SOURCE: error_handler module
+! calls:
+!       display_message:  subroutine to output messages
+!                         source: error_handler module
 !
-! MODULES:
-!       type_kinds:  Module containing data type kind definitions. Only the
-!                    Byte and Long kind types, and the definition of the number
+! modules:
+!       type_kinds:  module containing data type kind definitions. only the
+!                    byte and long kind types, and the definition of the number
 !                    of bytes used for each type are used.
 !
-! CONTAINS:
-!       swap_endian_long_integer:  Function to byte-swap a long integer to
+! contains:
+!       swap_endian_long_integer:  function to byte-swap a long integer to
 !                                  determine if input data byte-swapping may
 !                                  be required.
 !
-! EXTERNALS:
-!       None
+! externals:
+!       none
 !
-! COMMON BLOCKS:
-!       None.
+! common blocks:
+!       none.
 !
-! SIDE EFFECTS:
-!       None known.
+! side effects:
+!       none known.
 !
-! RESTRICTIONS:
-!       None.
+! restrictions:
+!       none.
 !
-! PROCEDURE:
-!       The file is inquired to determine if it exists. If so, it is opened
+! procedure:
+!       the file is inquired to determine if it exists. if so, it is opened
 !       and the endian-ness is checked.
-!P-
+!p-
 !------------------------------------------------------------------------------
 
-  FUNCTION check_coefficient_file( file_id,  &
+  function check_coefficient_file( file_id,  &
                                    message_log ) &
-                                 RESULT( error_status )
+                                 result( error_status )
 
 
     !#--------------------------------------------------------------------------#
-    !#                         -- Type declarations --                          #
+    !#                         -- type declarations --                          #
     !#--------------------------------------------------------------------------#
 
     ! ---------
-    ! Arguments
+    ! arguments
     ! ---------
 
-    INTEGER,        INTENT( IN )           :: file_id
-    CHARACTER( * ), INTENT( IN ), OPTIONAL :: message_log
+    integer,        intent( in )           :: file_id
+    character( * ), intent( in ), optional :: message_log
 
 
     ! ---------------
-    ! Function result
+    ! function result
     ! ---------------
 
-    INTEGER :: error_status
+    integer :: error_status
 
 
     ! ----------------
-    ! Local parameters
+    ! local parameters
     ! ----------------
 
-    CHARACTER( * ),  PARAMETER :: ROUTINE_NAME = 'CHECK_COEFFICIENT_FILE'
+    character( * ),  parameter :: routine_name = 'check_coefficient_file'
 
 
     ! ---------------
-    ! Local variables
+    ! local variables
     ! ---------------
 
-    INTEGER         :: io_status
-    INTEGER( Long ) :: magic_number_read, dummy_long
+    integer         :: io_status
+    integer( long ) :: magic_number_read, dummy_long
 
 
 
     !#--------------------------------------------------------------------------#
-    !#             -- Check that the current compilation supports --            #
+    !#             -- check that the current compilation supports --            #
     !#             -- 1- and 4-byte integer types                 --            #
     !#--------------------------------------------------------------------------#
 
-    IF ( BIT_SIZE( 1_Long ) /= 32 .OR. &
-         BIT_SIZE( 1_Byte ) /=  8      ) THEN
-      error_status = FAILURE
-      CALL display_message( ROUTINE_NAME, &
+    if ( bit_size( 1_long ) /= 32 .or. &
+         bit_size( 1_byte ) /=  8      ) then
+      error_status = failure
+      call display_message( routine_name, &
                             '8- and/or 32-bit integers not supported. '//&
-                            'Unable to determine endian-ness', &
+                            'unable to determine endian-ness', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                        -- Read the magic number --                       #
+    !#                        -- read the magic number --                       #
     !#--------------------------------------------------------------------------#
 
-    READ( file_id, IOSTAT = io_status ) magic_number_read
+    read( file_id, iostat = io_status ) magic_number_read
 
-    IF ( io_status /= 0 ) THEN
-      error_status = FAILURE
-      WRITE( message, '( "Error reading file. IOSTAT = ", i5 )' ) &
+    if ( io_status /= 0 ) then
+      error_status = failure
+      write( message, '( "error reading file. iostat = ", i5 )' ) &
                       io_status
-      CALL display_message( ROUTINE_NAME, &
+      call display_message( routine_name, &
                             message, &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
 
 
     !#--------------------------------------------------------------------------#
-    !#                      -- Compare the magic numbers --                     #
+    !#                      -- compare the magic numbers --                     #
     !#--------------------------------------------------------------------------#
 
-    IF ( magic_number_read /= MAGIC_NUMBER ) THEN
+    if ( magic_number_read /= magic_number ) then
 
-      ! -- Set the error status
-      error_status = FAILURE
+      ! -- set the error status
+      error_status = failure
 
-      ! -- Byte swap the file data.
+      ! -- byte swap the file data.
       dummy_long = swap_endian_long_integer( magic_number_read )
 
-      ! -- Check the file data again
-      IF ( dummy_long /= MAGIC_NUMBER ) THEN
-        CALL display_message( ROUTINE_NAME, &
-                              'Unrecognised file format. Invalid magic number.', &
+      ! -- check the file data again
+      if ( dummy_long /= magic_number ) then
+        call display_message( routine_name, &
+                              'unrecognised file format. invalid magic number.', &
                               error_status, &
                               message_log = message_log )
-        RETURN
-      END IF
+        return
+      end if
 
-      ! -- If we get here then the data does need to be byte-swapped.
-      CALL display_message( ROUTINE_NAME, &
-                            'Data file needs to be byte-swapped.', &
+      ! -- if we get here then the data does need to be byte-swapped.
+      call display_message( routine_name, &
+                            'data file needs to be byte-swapped.', &
                             error_status, &
                             message_log = message_log )
-      RETURN
-    END IF
+      return
+    end if
 
-    error_status = SUCCESS
+    error_status = success
 
 
-  CONTAINS
+  contains
 
 
     !#--------------------------------------------------------------------------#
-    !#          -- Internal subprogram to byte-swap a long integer --           #
+    !#          -- internal subprogram to byte-swap a long integer --           #
     !#--------------------------------------------------------------------------#
 
-    FUNCTION swap_endian_long_integer ( input ) &
-                                      RESULT ( output )
+    function swap_endian_long_integer ( input ) &
+                                      result ( output )
 
 
       ! -----------------
-      ! Type declarations
+      ! type declarations
       ! -----------------
 
-      ! -- Argument and result
-      INTEGER( Long ), INTENT( IN ) :: input
-      INTEGER( Long )               :: output
+      ! -- argument and result
+      integer( long ), intent( in ) :: input
+      integer( long )               :: output
 
 
-      ! -- Local variables
-      INTEGER( Byte ), DIMENSION( n_bytes_for_Long_kind ) :: binput, boutput
-      INTEGER( Long )                                     :: linput, loutput
-      INTEGER :: i
+      ! -- local variables
+      integer( byte ), dimension( n_bytes_for_long_kind ) :: binput, boutput
+      integer( long )                                     :: linput, loutput
+      integer :: i
 
 
       ! -------------------------------------------
-      ! Equivalence the byte array and long integer
+      ! equivalence the byte array and long integer
       ! -------------------------------------------
 
-      EQUIVALENCE ( binput,  linput  ), &
+      equivalence ( binput,  linput  ), &
                   ( boutput, loutput )
 
 
       ! ----------------------------------------------------------------
-      ! Loop over the number of bytes for swapping.
+      ! loop over the number of bytes for swapping.
       !
-      ! Doing it this way is little bit faster (by about a factor of 4)
-      ! than using the MVBITS intrinsic ( on the systems tested; Linux
-      ! and AIX):
+      ! doing it this way is little bit faster (by about a factor of 4)
+      ! than using the mvbits intrinsic ( on the systems tested; linux
+      ! and aix):
       !
-      !  CALL MVBITS( input, 0,  8, output, 24 )  ! Bits  0-7  --> 24-31
-      !  CALL MVBITS( input, 8,  8, output, 16 )  ! Bits  8-15 --> 16-23
-      !  CALL MVBITS( input, 16, 8, output,  8 )  ! Bits 16-23 -->  8-15
-      !  CALL MVBITS( input, 24, 8, output,  0 )  ! Bits 24-31 -->  0-8
+      !  call mvbits( input, 0,  8, output, 24 )  ! bits  0-7  --> 24-31
+      !  call mvbits( input, 8,  8, output, 16 )  ! bits  8-15 --> 16-23
+      !  call mvbits( input, 16, 8, output,  8 )  ! bits 16-23 -->  8-15
+      !  call mvbits( input, 24, 8, output,  0 )  ! bits 24-31 -->  0-8
       !
-      ! but ONLY if the byte swap loop is inline (rather than by calling
+      ! but only if the byte swap loop is inline (rather than by calling
       ! a generic byte swap routine with the number of bytes to swap is
       ! passed as an argument.)
       ! ----------------------------------------------------------------
 
-      ! -- Reassign the input argument. Can't
+      ! -- reassign the input argument. can't
       ! -- equivalence dummy arguments.
       linput = input
 
-      ! -- Loop over the bytes and swap
-      DO i = 1, n_bytes_for_Long_kind
-        boutput( i ) = binput( n_bytes_for_Long_kind - ( i - 1 ) )
-      END DO
+      ! -- loop over the bytes and swap
+      do i = 1, n_bytes_for_long_kind
+        boutput( i ) = binput( n_bytes_for_long_kind - ( i - 1 ) )
+      end do
 
-      ! -- Assign the output argument. Can't
+      ! -- assign the output argument. can't
       ! -- equivalence dummy arguments.
       output = loutput
 
-    END FUNCTION swap_endian_long_integer
+    end function swap_endian_long_integer
 
-  END FUNCTION check_coefficient_file
+  end function check_coefficient_file
 
-END MODULE coefficient_utility
+end module coefficient_utility
 
 
 !-------------------------------------------------------------------------------
-!                          -- MODIFICATION HISTORY --
+!                          -- modification history --
 !-------------------------------------------------------------------------------
 !
-! $Id$
+! $id$
 !
-! $Date$
+! $date$
 !
-! $Revision$
+! $revision$
 !
-! $State$
+! $state$
 !
-! $Log$
-! Revision 1.8  2001/08/16 16:39:54  paulv
-! - Updated documentation
+! $log$
+! revision 1.8  2001/08/16 16:39:54  paulv
+! - updated documentation
 !
-! Revision 1.7  2001/08/09 20:38:15  paulv
-! - Changed magic number visibility attribute to PRIVATE. Ahhh....
-! - Moved all the spectral and transmittance coefficient data type and name
-!   definitions into their respective modules. Another ahhh.....
-! - Added optional FOR_OUTPUT argument to OPEN_COEFFICIENT_FILE function
+! revision 1.7  2001/08/09 20:38:15  paulv
+! - changed magic number visibility attribute to private. ahhh....
+! - moved all the spectral and transmittance coefficient data type and name
+!   definitions into their respective modules. another ahhh.....
+! - added optional for_output argument to open_coefficient_file function
 !   so that the same function can be used to open coefficient files for
-!   writing. It also means the magic number write can be done in this module
-!   totally encapsulating that functionality in this module only. Double ahhh....
+!   writing. it also means the magic number write can be done in this module
+!   totally encapsulating that functionality in this module only. double ahhh....
 !
-! Revision 1.6  2001/08/01 16:43:05  paulv
-! - Updated the definitions of data items and types in the transmittance
-!   coefficient data file to reflect changes in code. The absorber space
+! revision 1.6  2001/08/01 16:43:05  paulv
+! - updated the definitions of data items and types in the transmittance
+!   coefficient data file to reflect changes in code. the absorber space
 !   levels are no longer calculated during model initialisation, but are
 !   precalculated and stored in the transmittance coefficient data file.
 !
-! Revision 1.5  2001/07/12 16:58:18  paulv
-! - Added USE of TYPE_KINDS module at top of this module. Previously it was
-!   USEd only in the CHECK_COEFFICIENT_FILE() function.
-! - Data file magic number definition now defined at top of module rather
-!   than in the CHECK_COEFFICIENT_FILE() function.
-! - Definitions for the number, type, and names of items in the transmittance
-!   and spectral coefficient files moved from the TRANSMITTANCE_COEFFICIENTS
-!   and SPECTRAL COEFFICIENTS module to this one. This was done to allow this
+! revision 1.5  2001/07/12 16:58:18  paulv
+! - added use of type_kinds module at top of this module. previously it was
+!   used only in the check_coefficient_file() function.
+! - data file magic number definition now defined at top of module rather
+!   than in the check_coefficient_file() function.
+! - definitions for the number, type, and names of items in the transmittance
+!   and spectral coefficient files moved from the transmittance_coefficients
+!   and spectral coefficients module to this one. this was done to allow this
 !   module to be used in both reading and writing/reformatting the coefficient
 !   data files.
-! - Module-wide error message character string defined.
-! - Added NO_CHECK optional argument to the OPEN_COEFFICIENT_FILE() function.
-!   This was done to allow the function to be used to open the old format
+! - module-wide error message character string defined.
+! - added no_check optional argument to the open_coefficient_file() function.
+!   this was done to allow the function to be used to open the old format
 !   coefficient files for reformatting by not performing a magic number check.
 !
-! Revision 1.4  2000/08/31 19:36:31  paulv
-! - Added documentation delimiters.
-! - Updated documentation headers.
+! revision 1.4  2000/08/31 19:36:31  paulv
+! - added documentation delimiters.
+! - updated documentation headers.
 !
-! Revision 1.3  2000/08/24 15:22:10  paulv
-! - File access changed from DIRECT to SEQUENTIAL. Record length argument
-!   no longer required by OPEN_COEFFICIENT_FILE and CHECK_COEFFICIENT_FILE
+! revision 1.3  2000/08/24 15:22:10  paulv
+! - file access changed from direct to sequential. record length argument
+!   no longer required by open_coefficient_file and check_coefficient_file
 !   subprograms.
-! - INQUIRE statement in OPEN_COEFFICIENT_FILE that checks for existence
-!   of the file replaced by function FILE_EXISTS in module FILE_UTILITY.
-! - CHECK_COEFFICIENT_FILE used to return a WARNING status if either 8- or
-!   32-bit integers were not supported. This condition now returns a
-!   FAILURE status as the magic number would not be read so any subsequent
+! - inquire statement in open_coefficient_file that checks for existence
+!   of the file replaced by function file_exists in module file_utility.
+! - check_coefficient_file used to return a warning status if either 8- or
+!   32-bit integers were not supported. this condition now returns a
+!   failure status as the magic number would not be read so any subsequent
 !   attempt to read data would either fail or return junk.
-! - The name of the SWAP_ENDIAN_FOURBYTE_INTEGER subprogram was changed to
-!   SWAP_ENDIAN_LONG_INTEGER to remove any indication of how many bytes are
+! - the name of the swap_endian_fourbyte_integer subprogram was changed to
+!   swap_endian_long_integer to remove any indication of how many bytes are
 !   expected for this data type *apart* from the definition of
-!   N_BYTES_FOR_LONG_KIND in the TYPE_KINDS module.
-! - Updated module and subprogram documentation.
+!   n_bytes_for_long_kind in the type_kinds module.
+! - updated module and subprogram documentation.
 !
-! Revision 1.2  2000/08/08 17:05:45  paulv
-! Cosmetic changes to highlight parameters in the source by making them
+! revision 1.2  2000/08/08 17:05:45  paulv
+! cosmetic changes to highlight parameters in the source by making them
 ! uppercase.
 !
-! Revision 1.1  2000/07/12 16:08:10  paulv
-! Initial checked in version
+! revision 1.1  2000/07/12 16:08:10  paulv
+! initial checked in version
 !
 !
 !

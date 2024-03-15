@@ -2,12 +2,12 @@
      &,istat_dat,lat,topt_out           !istattmp,istatslp,lat,topt_out,path_to_soiltemp
      &,landmask,geog_data,istatus)      !soiltemp_1deg,greenfrac,islope,istatus)
 c
-c This routine uses landmask to make the course resolution
+c this routine uses landmask to make the course resolution
 c soil temp and green fraction data conform to water-land mask.
-c It also fills small islands or isolated land
+c it also fills small islands or isolated land
 c bodies with appropriate geog values as necessary
 c
-c J. Smart NOAA/FSL
+c j. smart noaa/fsl
 c     "    06-22-01 original
 c     "    12-01-03 put subroutine into gridgen_utils, make arrangements for soil
 c                   type data, and allow separate calls for each geog type to reduce
@@ -19,7 +19,7 @@ c
       integer i,j,l,ii,jj
       integer is,js
       integer istatus
-      integer istat_dat    !Input. =0 indicates input geog data was NOT processed properly; =1 otherwise.
+      integer istat_dat    !input. =0 indicates input geog data was not processed properly; =1 otherwise.
       integer ijsthresh    !search distance to look for representative vlues to fill inconsistency.
       integer isum
       integer l1,l2
@@ -67,11 +67,11 @@ c     real,   allocatable ::    islopetmp     (:,:)
       real    tslp
       real    grid_spacing_m, dist_thresh
 
-      write(6,*)' Start adjust_geog ',ctype
+      write(6,*)' start adjust_geog ',ctype
  
       istatus=0
       if(istat_dat.eq.0)then  !.and.istattmp.eq.0.and.istatslp.eq.0)then
-	 print*,'Unable to process geog data in adjust_geog ...'
+	 print*,'unable to process geog data in adjust_geog ...'
      &,' processsing of data failed prior to subroutine call.'
 	 return
       endif
@@ -138,22 +138,22 @@ c 1. deep soil temp.
 c
       if(isc.gt.0)then
          avgtmp=sumt/float(isc)
-         print*,'Domain average annual mean temp = ',avgtmp
+         print*,'domain average annual mean temp = ',avgtmp
       elseif(ctype.eq.'soiltemp')then
 c
 c this section uses mean latitudinally averaged temps derived from 
-c the raw 1 deg temp data. File in raw geog annual mean deep soil
+c the raw 1 deg temp data. file in raw geog annual mean deep soil
 c temp directory (see wrfsi.nl variable soiltemp_1deg).
 c
          call get_path_to_soiltemp_1deg(path_to_soiltemp,istatus)
          sumt=0.0
-         print*,'*** Using mean lat temps -> LATMEANTEMP ***'
+         print*,'*** using mean lat temps -> latmeantemp ***'
          allocate (rmeanlattemp(180))
          call  get_directory_length(path_to_soiltemp,lent)
          call  get_meanlattemp(path_to_soiltemp(1:lent-1)
      &,rmeanlattemp,istatus)
          if(istatus.ne.1)then
-            print*,'Error returned: get_meanlattemp'
+            print*,'error returned: get_meanlattemp'
             return
          endif
          l1=90-nint(minval(lat(:,1)))+1
@@ -180,12 +180,12 @@ c
          elseif(tatlmn.gt.0)then
             avgtmp=tatlmn
          else
-            print*,'Unusual condition with meanlattemp'
+            print*,'unusual condition with meanlattemp'
             istatus = 0
             return
          endif
          deallocate (rmeanlattemp)
-         print*,'Domain average annual mean temp = ',avgtmp
+         print*,'domain average annual mean temp = ',avgtmp
       endif
 c
 c 2. green fraction.
@@ -198,23 +198,23 @@ c
             else
                avggrn(l)=0.0
             endif
-            print*,'Domain average greenfrac = ',l,avggrn(l)
+            print*,'domain average greenfrac = ',l,avggrn(l)
          enddo
 c
-c 3. Terrain slope index or soil type category..
+c 3. terrain slope index or soil type category..
 c
       elseif(ctype.eq.'islope'.or.ctype.eq.'soiltype')then
         avgcat=r_missing_data
         if(islp.gt.0)then
            avgcat=float(isum)/islp
-           print*,'Average category: ',avgcat
+           print*,'average category: ',avgcat
         else
-           print*,'Could not compute average category ?'
-           print*,'Average category: ',avgcat
+           print*,'could not compute average category ?'
+           print*,'average category: ',avgcat
         endif
       endif
 
-c extend search to a fraction of the domain size. Could improve this for
+c extend search to a fraction of the domain size. could improve this for
 c ratio geog-data-res/domain-res (possibly) to avoid unreasonable
 c search distance.
 
@@ -472,7 +472,7 @@ c
 
       else
 
-         print*,'Unknown type input to adjust_geog!'
+         print*,'unknown type input to adjust_geog!'
          return
 
       endif ! ctype switch
@@ -494,7 +494,7 @@ c then use average value
          enddo
          enddo
          print*
-         print*,'Soil Temp stats'
+         print*,'soil temp stats'
 
       elseif(ctype.eq.'greenfrac')then
 
@@ -511,7 +511,7 @@ c then use average value
          enddo
          enddo
          print*
-         print*,'Green fraction stats'
+         print*,'green fraction stats'
 
       elseif(ctype.eq.'islope'.or.ctype.eq.'soiltype')then
 
@@ -533,9 +533,9 @@ c then use average value
         enddo
         print*
         if(ctype.eq.'islope')then
-           print*,'Terrain Slope Index stats'
+           print*,'terrain slope index stats'
         else
-           print*,'Soil Type Category stats'
+           print*,'soil type category stats'
         endif
 
         where(geog_data.eq.r_missing_data)geog_data=0.0  !put water category back to original value
@@ -549,8 +549,8 @@ c then use average value
       print*,'--------------------------'
       if(ctype.ne.'islope'.and.ctype.ne.'soiltype')then
          if(ctype.eq.'greenfrac')then
-            print*,'Fixed ',ifixw,'  points with rep land value'
-            print*,'Fixed ',ifixl,'  points with missing value = water'
+            print*,'fixed ',ifixw,'  points with rep land value'
+            print*,'fixed ',ifixl,'  points with missing value = water'
             print*
             do j = 1,nnyp
             do i = 1,nnxp
@@ -569,23 +569,23 @@ c then use average value
                else
                   avggrn(l)=0.0
                endif
-               print*,'Domain average greenfrac = ',l,avggrn(l)
+               print*,'domain average greenfrac = ',l,avggrn(l)
             enddo
          else
-            print*,'Fixed ',ifixw,'  points with rep land value'
-            print*,'Fixed ',ifixl,'  points with missing value = water'
+            print*,'fixed ',ifixw,'  points with rep land value'
+            print*,'fixed ',ifixl,'  points with missing value = water'
          endif
       elseif(ctype.eq.'islope')then
-         print*,'Fixed ',ifixw,'  points with rep land value'
-         print*,'Fixed ',ifixl,'  points with missing value = water'
+         print*,'fixed ',ifixw,'  points with rep land value'
+         print*,'fixed ',ifixl,'  points with missing value = water'
       else
-         print*,'Fixed ',ifixw,'  points with rep land value'
-         print*,'Fixed ',ifixl,'  points with missing value = water'
+         print*,'fixed ',ifixw,'  points with rep land value'
+         print*,'fixed ',ifixl,'  points with missing value = water'
       endif
 
       istatus=1
 
-      write(6,*)' Returning from adjust_geog...'
+      write(6,*)' returning from adjust_geog...'
 
       return
       end

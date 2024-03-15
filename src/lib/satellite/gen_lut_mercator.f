@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -33,7 +33,7 @@ cdis
      &nx_l,ny_l,lat,lon,ri_laps,rj_laps,jstatus)
 c
 c
-c     Returns satellite pixel locations for each point on model (LAPS) domain
+c     returns satellite pixel locations for each point on model (laps) domain
 c
       implicit none
 
@@ -54,8 +54,8 @@ c
       real    rj(nx_l+2,ny_l+2)
       real    rel_ri(nx_l+2,ny_l+2)
       real    rel_rj(nx_l+2,ny_l+2)
-      real    ri_laps(nx_l,ny_l)         ! Output
-      real    rj_laps(nx_l,ny_l)         ! Output
+      real    ri_laps(nx_l,ny_l)         ! output
+      real    rj_laps(nx_l,ny_l)         ! output
 
       integer isat,jtype,kchl
 c     integer i,j,n,nc
@@ -84,7 +84,7 @@ c     character*6   csatid  !satellite data identifier {gmssat only for now}
 c
 c ===========================================================
 c the following include file contains static navigation parameters for
-c all possible satellites.  It contains fortran logic that uses csatid,
+c all possible satellites.  it contains fortran logic that uses csatid,
 c and csattyp to set the appropriate navigation parameters.
 c
       include 'satellite_dims_lvd.inc'
@@ -109,7 +109,7 @@ c
 c retrieve the latest nav info from a file if it exists
 c
 
-      if(cdtype.eq.'hko')then  !Hong Kong gms satellite data
+      if(cdtype.eq.'hko')then  !hong kong gms satellite data
 
          if(indx.eq.1.or.indx.eq.3.or.
      .      indx.eq.4.or.indx.eq.5)then   
@@ -131,14 +131,14 @@ c
 
       endif
 
-      print*,'Sat Nav Parameters - Mercator'
+      print*,'sat nav parameters - mercator'
       print*,'-----------------------------'
       print*,'nxmc:  ',nxmc
       print*,'nymc:  ',nymc
       print*,'rlatc: ',rlatc
       print*,'rlonc: ',rlonc
-      print*,'SW: ',sw(1),sw(2)
-      print*,'NE: ',ne(1),ne(2)
+      print*,'sw: ',sw(1),sw(2)
+      print*,'ne: ',ne(1),ne(2)
       print*,'dx:    ',dx
       print*,'dy:    ',dy
 c
@@ -160,11 +160,11 @@ c
 
       endif
 
-      write(6,*)'Sat ri/rj corners for domain'
-      write(6,*)'ri1/rj1 (SW) ',ri(1,1),rj(1,1)
-      write(6,*)'ri2/rj2 (SE) ',ri(nx,1),rj(nx,1)
-      write(6,*)'ri3/rj3 (NW) ',ri(1,ny),rj(1,ny)
-      write(6,*)'ri4/rj4 (NE) ',ri(nx,ny),rj(nx,ny)
+      write(6,*)'sat ri/rj corners for domain'
+      write(6,*)'ri1/rj1 (sw) ',ri(1,1),rj(1,1)
+      write(6,*)'ri2/rj2 (se) ',ri(nx,1),rj(nx,1)
+      write(6,*)'ri3/rj3 (nw) ',ri(1,ny),rj(1,ny)
+      write(6,*)'ri4/rj4 (ne) ',ri(nx,ny),rj(nx,ny)
       write(6,*)
 c
 c get new i/j start/end values for this domain
@@ -174,7 +174,7 @@ c
      &rls,rle,res,ree,istatus)
 
       if(istatus.ne.1)then
-         write(6,*)'WARNING: Laps domain outside sat data cover!'
+         write(6,*)'warning: laps domain outside sat data cover!'
       endif
 c
 c compute ri, rj relative look up table for the block of data surrounding
@@ -182,7 +182,7 @@ c the laps domain.
 c
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus.ne.1)then
-         print*,'Error getting r_missing_data'
+         print*,'error getting r_missing_data'
          return
       endif
 
@@ -206,7 +206,7 @@ c
       enddo
 
       if(nijout.gt.0)then
-         print*,'Found ',nijout,' points outside domain'
+         print*,'found ',nijout,' points outside domain'
       endif
 c
 c put the expanded domain ri/rj's into the original laps domain
@@ -245,13 +245,13 @@ c
       table_path = cname(1:n1)//'-'//cdtype//'.lut'
 
       n1=index(table_path,' ')
-      write(6,*)'Write lat/lon to i/j look up table'
+      write(6,*)'write lat/lon to i/j look up table'
       write(6,*)table_path(1:n1)
 
 c     call write_table (table_path,nx_l,ny_l,xlat,xlon,
 c    &ri_laps,rj_laps,istatus)
 c     if(istatus .ne. 1)then
-c        write(6,*)'Error writing look-up table'
+c        write(6,*)'error writing look-up table'
 c        goto 1000
 c     endif
 

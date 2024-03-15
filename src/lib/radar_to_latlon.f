@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -40,7 +40,7 @@ cdis
 
 
         if(rlat_radar .eq. 0.0)then
-            write(6,*)' Warning, Radar Coords NOT Initialized'
+            write(6,*)' warning, radar coords not initialized'
         endif
 
         rpd = 3.141592653589/180.
@@ -80,26 +80,26 @@ cdis
      1                  ,azimuth,slant_range,elev
      1                  ,rlat_radar,rlon_radar,rheight_radar)
 
-cdoc    Calculate radar echo location given radar location and az/ran/elev 
+cdoc    calculate radar echo location given radar location and az/ran/elev 
 cdoc    of radar echo
 
         include 'trigd.inc'
         implicit real (a-z)
 
-        real rlat_radar             ! I    (Degrees)
-        real rlon_radar             ! I    (Degrees)
-        real rheight_radar          ! I    (Meters)
-        real azimuth                ! I    (Degrees)
-        real slant_range            ! I    (Meters)
-        real elev                   ! I    (Degrees)
-        real lat_grid               ! O    (Degrees)
-        real lon_grid               ! O    (Degrees)
-        real height_grid            ! O    (Meters)
+        real rlat_radar             ! i    (degrees)
+        real rlon_radar             ! i    (degrees)
+        real rheight_radar          ! i    (meters)
+        real azimuth                ! i    (degrees)
+        real slant_range            ! i    (meters)
+        real elev                   ! i    (degrees)
+        real lat_grid               ! o    (degrees)
+        real lon_grid               ! o    (degrees)
+        real height_grid            ! o    (meters)
 
         integer i_status
 
         if(rlat_radar .eq. 0.0)then
-            write(6,*)' Warning, Radar Coords NOT Initialized'
+            write(6,*)' warning, radar coords not initialized'
         endif
 
         rpd = 3.141592653589/180.
@@ -122,24 +122,24 @@ cdoc    of radar echo
 !       write(12,*)r_range,azimuth
 
         call razm_lat_lon_gm(
-     1          rlat_radar,                                           ! I
-     1          rlon_radar,                                           ! I
-     1          r_range,                                              ! I
-     1          azimuth,                                              ! I
-     1          lat_grid,                                             ! O
-     1          lon_grid,                                             ! O
-     1          i_status )                                            ! O
+     1          rlat_radar,                                           ! i
+     1          rlon_radar,                                           ! i
+     1          r_range,                                              ! i
+     1          azimuth,                                              ! i
+     1          lat_grid,                                             ! o
+     1          lon_grid,                                             ! o
+     1          i_status )                                            ! o
 
         if(i_status .ne. 1)then
             write(6,*)
-     1         ' ERROR: Status check failed after razm_lat_lon_gm call'
+     1         ' error: status check failed after razm_lat_lon_gm call'
 
             difflat = lat_grid - rlat_radar
             difflon = lon_grid - rlon_radar
             if(r_range .gt. 10000. .and. abs(difflat) .lt. .01
      1                             .and. abs(difflon) .lt. .01)then
                 write(6,*)
-     1           ' ERROR: QC check failed after razm_lat_lon_gm call'
+     1           ' error: qc check failed after razm_lat_lon_gm call'
                 write(6,*)'difflat,difflon,r_range'
      1                    ,difflat,difflon,r_range
                 write(6,*)'azimuth,rlat_radar,rlon_radar'

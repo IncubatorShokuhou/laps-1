@@ -1,29 +1,29 @@
-      SUBROUTINE GBYTEC(IN,IOUT,ISKIP,NBYTE)
+      subroutine gbytec(in,iout,iskip,nbyte)
       character*1 in(*)
       integer iout(*)
-      CALL GBYTESC(IN,IOUT,ISKIP,NBYTE,0,1)
-      RETURN
-      END
+      call gbytesc(in,iout,iskip,nbyte,0,1)
+      return
+      end
 
-      SUBROUTINE SBYTEC(OUT,IN,ISKIP,NBYTE)
+      subroutine sbytec(out,in,iskip,nbyte)
       character*1 out(*)
       integer in(*)
-      CALL SBYTESC(OUT,IN,ISKIP,NBYTE,0,1)
-      RETURN
-      END
+      call sbytesc(out,in,iskip,nbyte,0,1)
+      return
+      end
 
-      SUBROUTINE GBYTESC(IN,IOUT,ISKIP,NBYTE,NSKIP,N)
-C          Get bytes - unpack bits:  Extract arbitrary size values from a
-C          packed bit string, right justifying each value in the unpacked
-C          array.
-C            IN    = character*1 array input
-C            IOUT  = unpacked array output
-C            ISKIP = initial number of bits to skip
-C            NBYTE = number of bits to take
-C            NSKIP = additional number of bits to skip on each iteration
-C            N     = number of iterations
-C v1.1
-C
+      subroutine gbytesc(in,iout,iskip,nbyte,nskip,n)
+c          get bytes - unpack bits:  extract arbitrary size values from a
+c          packed bit string, right justifying each value in the unpacked
+c          array.
+c            in    = character*1 array input
+c            iout  = unpacked array output
+c            iskip = initial number of bits to skip
+c            nbyte = number of bits to take
+c            nskip = additional number of bits to skip on each iteration
+c            n     = number of iterations
+c v1.1
+c
       character*1 in(*)
       integer iout(*)
       integer ones(8), tbit, bitcnt
@@ -61,23 +61,23 @@ c        get data from last byte
          iout(i) = itmp
       enddo
 
-      RETURN
-      END                                                                  
+      return
+      end                                                                  
 
-      SUBROUTINE SBYTESC(OUT,IN,ISKIP,NBYTE,NSKIP,N)
-C          Store bytes - pack bits:  Put arbitrary size values into a
-C          packed bit string, taking the low order bits from each value
-C          in the unpacked array.
-C            IOUT  = packed array output
-C            IN    = unpacked array input
-C            ISKIP = initial number of bits to skip
-C            NBYTE = number of bits to pack
-C            NSKIP = additional number of bits to skip on each iteration
-C            N     = number of iterations
-C v1.1
-C
+      subroutine sbytesc(out,in,iskip,nbyte,nskip,n)
+c          store bytes - pack bits:  put arbitrary size values into a
+c          packed bit string, taking the low order bits from each value
+c          in the unpacked array.
+c            iout  = packed array output
+c            in    = unpacked array input
+c            iskip = initial number of bits to skip
+c            nbyte = number of bits to pack
+c            nskip = additional number of bits to skip on each iteration
+c            n     = number of iterations
+c v1.1
+c
       character*1 out(*)
-      integer in(N), bitcnt, ones(8), tbit
+      integer in(n), bitcnt, ones(8), tbit
       save ones
       data ones/    1,  3,  7, 15, 31, 63,127,255/
 

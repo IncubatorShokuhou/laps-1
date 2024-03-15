@@ -1,104 +1,104 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis 
 
-      SUBROUTINE MNBRAK(AX,BX,CX,FA,FB,FC,FUNC)
-      PARAMETER (GOLD=1.618034, GLIMIT=100., TINY=1.E-20)
-      EXTERNAL FUNC
-      INTEGER COUNTER
-      COUNTER = 0
-      FA=FUNC(AX)
-      FB=FUNC(BX)
-      IF(FB.GT.FA)THEN
-        DUM=AX
-        AX=BX
-        BX=DUM
-        DUM=FB
-        FB=FA
-        FA=DUM
-      ENDIF
-      CX=BX+GOLD*(BX-AX)
-      FC=FUNC(CX)
-1     IF(FB.GE.FC)THEN
-               IF(FB.EQ.FC)THEN ! NO CHANGE
-                      COUNTER = COUNTER+1
-                      IF(COUNTER.GE.10) RETURN
-               ENDIF
-        R=(BX-AX)*(FB-FC)
-        Q=(BX-CX)*(FB-FA)
-        U=BX-((BX-CX)*Q-(BX-AX)*R)/(2.*SIGN(MAX(ABS(Q-R),TINY),Q-R))
-        ULIM=BX+GLIMIT*(CX-BX)
-        IF((BX-U)*(U-CX).GT.0.)THEN
-          FU=FUNC(U)
-          IF(FU.LT.FC)THEN
-            AX=BX
-            FA=FB
-            BX=U
-            FB=FU
-            RETURN
-          ELSE IF(FU.GT.FB)THEN
-            CX=U
-            FC=FU
-            RETURN
-          ENDIF
-          U=CX+GOLD*(CX-BX)
-          FU=FUNC(U)
-        ELSE IF((CX-U)*(U-ULIM).GT.0.)THEN
-          FU=FUNC(U)
-          IF(FU.LT.FC)THEN
-            BX=CX
-            CX=U
-            U=CX+GOLD*(CX-BX)
-            FB=FC
-            FC=FU
-            FU=FUNC(U)
-          ENDIF
-        ELSE IF((U-ULIM)*(ULIM-CX).GE.0.)THEN
-          U=ULIM
-          FU=FUNC(U)
-        ELSE
-          U=CX+GOLD*(CX-BX)
-          FU=FUNC(U)
-        ENDIF
-        AX=BX
-        BX=CX
-        CX=U
-        FA=FB
-        FB=FC
-        FC=FU
-        GO TO 1
-      ENDIF
-      RETURN
-      END
+      subroutine mnbrak(ax,bx,cx,fa,fb,fc,func)
+      parameter (gold=1.618034, glimit=100., tiny=1.e-20)
+      external func
+      integer counter
+      counter = 0
+      fa=func(ax)
+      fb=func(bx)
+      if(fb.gt.fa)then
+        dum=ax
+        ax=bx
+        bx=dum
+        dum=fb
+        fb=fa
+        fa=dum
+      endif
+      cx=bx+gold*(bx-ax)
+      fc=func(cx)
+1     if(fb.ge.fc)then
+               if(fb.eq.fc)then ! no change
+                      counter = counter+1
+                      if(counter.ge.10) return
+               endif
+        r=(bx-ax)*(fb-fc)
+        q=(bx-cx)*(fb-fa)
+        u=bx-((bx-cx)*q-(bx-ax)*r)/(2.*sign(max(abs(q-r),tiny),q-r))
+        ulim=bx+glimit*(cx-bx)
+        if((bx-u)*(u-cx).gt.0.)then
+          fu=func(u)
+          if(fu.lt.fc)then
+            ax=bx
+            fa=fb
+            bx=u
+            fb=fu
+            return
+          else if(fu.gt.fb)then
+            cx=u
+            fc=fu
+            return
+          endif
+          u=cx+gold*(cx-bx)
+          fu=func(u)
+        else if((cx-u)*(u-ulim).gt.0.)then
+          fu=func(u)
+          if(fu.lt.fc)then
+            bx=cx
+            cx=u
+            u=cx+gold*(cx-bx)
+            fb=fc
+            fc=fu
+            fu=func(u)
+          endif
+        else if((u-ulim)*(ulim-cx).ge.0.)then
+          u=ulim
+          fu=func(u)
+        else
+          u=cx+gold*(cx-bx)
+          fu=func(u)
+        endif
+        ax=bx
+        bx=cx
+        cx=u
+        fa=fb
+        fb=fc
+        fc=fu
+        go to 1
+      endif
+      return
+      end

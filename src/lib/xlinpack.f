@@ -1,9 +1,9 @@
 c                                                                                      
-c  L-BFGS-B is released under the “New BSD License” (aka “Modified BSD License”        
+c  l-bfgs-b is released under the “new bsd license” (aka “modified bsd license”        
 c  or “3-clause license”)                                                              
-c  Please read attached file License.txt   
+c  please read attached file license.txt   
 c
-c  Yuanfu Xie (2013): change all double precision to real for saving memory                          
+c  yuanfu xie (2013): change all double precision to real for saving memory                          
 c                                        
       subroutine dpofa(a,lda,n,info)
       integer lda,n,info
@@ -78,7 +78,7 @@ c     ......exit
       return
       end
       
-c====================== The end of dpofa ===============================
+c====================== the end of dpofa ===============================
 
       subroutine dtrsl(t,ldt,n,b,job,info)
       integer ldt,n,job,info
@@ -215,6 +215,6 @@ c
       return
       end
       
-c====================== The end of dtrsl ===============================
+c====================== the end of dtrsl ===============================
 
 

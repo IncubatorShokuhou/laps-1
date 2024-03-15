@@ -1,325 +1,325 @@
-MODULE POST_STMAS4D
+module post_stmas4d
 
-  USE PRMTRS_STMAS
+   use prmtrs_stmas
 
-  PUBLIC   PSTPROCSS, GRDMEMRLS
-  PRIVATE  UNSCALING, RETRIEVAL, OBSMEMRLS
+   public pstprocss, grdmemrls
+   private unscaling, retrieval, obsmemrls
 
 !***************************************************
-!!COMMENT:
-!   THIS MODULE IS USED BY THE MODULE OF STMAS4D_CORE TO DO SOME POST PROCESSES.
-!   SUBROUTINES:
-!      PSTPROCSS : THE MAIN SUBROUTINE OF THIS MODULE.
-!      UNSCALING : UNSCALING EVERY ARRAY.
-!      RETRIEVAL : RETRIEVAL THE ANALYSIS FIELD FOR OUTPUT.
-!      OBSMEMRLS : RELEASE OBSERVATIONS MEMORY 
-!      GRDMEMRLS : RELEASE MEMORY OF BACKGROUND AND ANALYSIS FIELDS
+!!comment:
+!   this module is used by the module of stmas4d_core to do some post processes.
+!   subroutines:
+!      pstprocss : the main subroutine of this module.
+!      unscaling : unscaling every array.
+!      retrieval : retrieval the analysis field for output.
+!      obsmemrls : release observations memory
+!      grdmemrls : release memory of background and analysis fields
 
-CONTAINS
+contains
 
-SUBROUTINE PSTPROCSS
+   subroutine pstprocss
 !*************************************************
-! POST PROCESS
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! post process
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
-  PRINT*, 'UNSCALING ........'
-  CALL UNSCALING
-  PRINT*, 'RETRIEVAL ........'	! FOR LAPS: ADD BKG IN OUTPUT BY YUANFU
-  CALL RETRIEVAL
-  PRINT*, 'OBS MEMORY RELEASING .......'
-  CALL OBSMEMRLS
-  PRINT*, 'GRID MEMORY RELEASING ........'
-  CALL GRDMEMRLS
-  PRINT*, 'END OF POST PROCESS --------'
-  RETURN
-END SUBROUTINE PSTPROCSS
+      implicit none
+      print *, 'unscaling ........'
+      call unscaling
+      print *, 'retrieval ........'        ! for laps: add bkg in output by yuanfu
+      call retrieval
+      print *, 'obs memory releasing .......'
+      call obsmemrls
+      print *, 'grid memory releasing ........'
+      call grdmemrls
+      print *, 'end of post process --------'
+      return
+   end subroutine pstprocss
 
-SUBROUTINE UNSCALING
+   subroutine unscaling
 !*************************************************
-! UNSCALING EVERY ARRAY
-! HISTORY: AUGUST 2007, CODED by WEI LI.
-!          DECEMBER 2008, MODIFIED BY YUANFU XIE:
-!                         CHANGE IF STATEMENT:
-!                        "IF(NALLOBS.EQ.O) RETURN"
-!                         TO:
-!                        "IF(NALLOBS.EQ.0) RETURN"
+! unscaling every array
+! history: august 2007, coded by wei li.
+!          december 2008, modified by yuanfu xie:
+!                         change if statement:
+!                        "if(nallobs.eq.o) return"
+!                         to:
+!                        "if(nallobs.eq.0) return"
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,O,NO,UU
+      integer  :: i, j, k, t, s, o, no, uu
 ! --------------------
-  UU=U_CMPNNT
-! UNSCALING XXX, YYY, ZZZ OR PPP, AND COR
+      uu = u_cmpnnt
+! unscaling xxx, yyy, zzz or ppp, and cor
 
-  DO I=1,NUMGRID(1)
-  DO J=1,NUMGRID(2)
-    IF(PNLT0PU.GE.1.0E-10.OR.PNLT0PV.GE.1.0E-10)COR(I,J)=COR(I,J)*SCP(CSL)
-    DO K=1,NUMGRID(3)
-    DO T=1,NUMGRID(4)
-      DEN(I,J,K,T)=DEN(I,J,K,T)*SCP(DSL)
-    ENDDO
-    ENDDO
-    IF(NUMGRID(1).GE.2)XXX(I,J)=ORIPSTN(1)+XXX(I,J)*SCP(XSL)
-    IF(NUMGRID(2).GE.2)YYY(I,J)=ORIPSTN(2)+YYY(I,J)*SCP(YSL)
-  ENDDO
-  ENDDO
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN      ! FOR SIGMA AND HEIGHT COORDINATE
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      ZZZ(I,J,K,T)=ORIVTCL+ZZZ(I,J,K,T)*SCP(PSL)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-    CLOSE(1)
-  ELSEIF(IFPCDNT.EQ.1)THEN                    ! FOR PRESSURE COORDINATE
-    DO K=1,NUMGRID(3)
-      PPP(K)=ORIVTCL+PPP(K)*SCP(PSL)
-    ENDDO
-  ENDIF
+      do i = 1, numgrid(1)
+      do j = 1, numgrid(2)
+         if (pnlt0pu .ge. 1.0e-10 .or. pnlt0pv .ge. 1.0e-10) cor(i, j) = cor(i, j)*scp(csl)
+         do k = 1, numgrid(3)
+         do t = 1, numgrid(4)
+            den(i, j, k, t) = den(i, j, k, t)*scp(dsl)
+         end do
+         end do
+         if (numgrid(1) .ge. 2) xxx(i, j) = oripstn(1) + xxx(i, j)*scp(xsl)
+         if (numgrid(2) .ge. 2) yyy(i, j) = oripstn(2) + yyy(i, j)*scp(ysl)
+      end do
+      end do
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then      ! for sigma and height coordinate
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            zzz(i, j, k, t) = orivtcl + zzz(i, j, k, t)*scp(psl)
+         end do
+         end do
+         end do
+         end do
+         close (1)
+      elseif (ifpcdnt .eq. 1) then                    ! for pressure coordinate
+         do k = 1, numgrid(3)
+            ppp(k) = orivtcl + ppp(k)*scp(psl)
+         end do
+      end if
 
-  IF(NALLOBS.EQ.0) RETURN	! YUANFU: CHANGE O to 0
-! UNSCALING THE OBSERVATIONS
-  O=0
-  DO S=1,NUMSTAT
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OBSVALUE(O)=OBSVALUE(O)*SCL(S)
-      OBSERROR(O)=OBSERROR(O)*SCL(S)
-    ENDDO
-  ENDDO
-  DO S=NUMSTAT+1,NUMSTAT+2
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OBSVALUE(O)=OBSVALUE(O)*SCL(UU)
-      OBSERROR(O)=OBSERROR(O)*SCL(UU)
-    ENDDO
-  ENDDO
+      if (nallobs .eq. 0) return        ! yuanfu: change o to 0
+! unscaling the observations
+      o = 0
+      do s = 1, numstat
+         do no = 1, nobstat(s)
+            o = o + 1
+            obsvalue(o) = obsvalue(o)*scl(s)
+            obserror(o) = obserror(o)*scl(s)
+         end do
+      end do
+      do s = numstat + 1, numstat + 2
+         do no = 1, nobstat(s)
+            o = o + 1
+            obsvalue(o) = obsvalue(o)*scl(uu)
+            obserror(o) = obserror(o)*scl(uu)
+         end do
+      end do
 !jhui
-  ! ONLY IF REFLECTIVITY IS ANALYZED:
-  IF (NUMSTAT .LE. 5) GOTO 55
-  DO S=NUMSTAT+3,NUMSTAT+3
-    DO NO=1,NOBSTAT(S)
-      O=O+1
-      OBSVALUE(O)=OBSVALUE(O)*SCL(NUMSTAT+1)
-      OBSERROR(O)=OBSERROR(O)*SCL(NUMSTAT+1)
-    ENDDO
-  ENDDO
-  ! SKIP RAIN AND SNOW OBS:
-55 CONTINUE
+      ! only if reflectivity is analyzed:
+      if (numstat .le. 5) goto 55
+      do s = numstat + 3, numstat + 3
+         do no = 1, nobstat(s)
+            o = o + 1
+            obsvalue(o) = obsvalue(o)*scl(numstat + 1)
+            obserror(o) = obserror(o)*scl(numstat + 1)
+         end do
+      end do
+      ! skip rain and snow obs:
+55    continue
 
-! UNSCALING GRID POINT VARIABLES
+! unscaling grid point variables
 !jhui
-  DO S=1,5
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)
-      GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)*SCL(S)
-      GRDBKGND(I,J,K,T,S)=GRDBKGND(I,J,K,T,S)*SCL(S)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      do s = 1, 5
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s)*scl(s)
+            grdbkgnd(i, j, k, t, s) = grdbkgnd(i, j, k, t, s)*scl(s)
+         end do
+         end do
+         end do
+         end do
+      end do
 !-----------------------------
 !unscale rour and rous
 ! added by shuyuan 20100818
-  ! CHECK IF RAIN AND SNOW ARE ANALYZED:
-  IF (NUMSTAT .LE. 5) GOTO 555
-  
-   DO S=6,NUMSTAT
-    DO T=1,NUMGRID(4)
-    DO K=1,NUMGRID(3)
-    DO J=1,NUMGRID(2)
-    DO I=1,NUMGRID(1)     
-      GRDANALS(I,J,K,T,S)=GRDANALS(I,J,K,T,S)*SCL(NUMSTAT+1)
-      GRDBKGND(I,J,K,T,S)=GRDBKGND(I,J,K,T,S)*SCL(NUMSTAT+1)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-   ENDDO
-   
-  ! SKIP SCALING RAIN AND SNOW:
-555 CONTINUE 
+      ! check if rain and snow are analyzed:
+      if (numstat .le. 5) goto 555
+
+      do s = 6, numstat
+         do t = 1, numgrid(4)
+         do k = 1, numgrid(3)
+         do j = 1, numgrid(2)
+         do i = 1, numgrid(1)
+            grdanals(i, j, k, t, s) = grdanals(i, j, k, t, s)*scl(numstat + 1)
+            grdbkgnd(i, j, k, t, s) = grdbkgnd(i, j, k, t, s)*scl(numstat + 1)
+         end do
+         end do
+         end do
+         end do
+      end do
+
+      ! skip scaling rain and snow:
+555   continue
 
 !------------------------------
 
-print*,'SPECIFIC: ',minval(GRDANALS(1:numgrid(1),1:numgrid(2),1:numgrid(3),2,5)+ &
-                             GRDBKGND(1:numgrid(1),1:numgrid(2),1:numgrid(3),2,5))
+      print *, 'specific: ', minval(grdanals(1:numgrid(1), 1:numgrid(2), 1:numgrid(3), 2, 5) + &
+                                    grdbkgnd(1:numgrid(1), 1:numgrid(2), 1:numgrid(3), 2, 5))
 
-  DO T=1,NUMGRID(4)
-  DO K=1,NUMGRID(3)
-  DO J=1,NUMGRID(2)
-  DO I=1,NUMGRID(1)
-    WWW(I,J,K,T)=WWW(I,J,K,T)*SCL(UU)
-  ENDDO
-  ENDDO
-  ENDDO
-  ENDDO
+      do t = 1, numgrid(4)
+      do k = 1, numgrid(3)
+      do j = 1, numgrid(2)
+      do i = 1, numgrid(1)
+         www(i, j, k, t) = www(i, j, k, t)*scl(uu)
+      end do
+      end do
+      end do
+      end do
 
-  RETURN
-END SUBROUTINE UNSCALING
+      return
+   end subroutine unscaling
 
-SUBROUTINE OBSMEMRLS
+   subroutine obsmemrls
 !*************************************************
-! RELEASE OBSERVATIONS MEMORY
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! release observations memory
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
-  IF(NALLOBS.GE.1)THEN
-    DEALLOCATE(OBSPOSTN)
-    DEALLOCATE(OBSCOEFF)
-    DEALLOCATE(OBSIDXPC)
-    DEALLOCATE(OBSVALUE)
-    DEALLOCATE(OBSERROR)
-!    DEALLOCATE(OBSSTATE)
-    DEALLOCATE(OBSEINF1)
-    DEALLOCATE(OBSEINF2)
-!    DEALLOCATE(OBSEINF3)
-    DEALLOCATE(NOBSTAT)
-  ENDIF
-  DEALLOCATE(PENAL_X)
-  DEALLOCATE(PENAL_Y)
-  DEALLOCATE(PENAL_Z)
-  DEALLOCATE(PENAL_T)
-  DEALLOCATE(PENAL0X)
-  DEALLOCATE(PENAL0Y)
-  DEALLOCATE(PENAL0Z)
-  DEALLOCATE(PENAL0T)
-  DEALLOCATE(SCL)
-  DEALLOCATE(SL0)
-  RETURN
-END SUBROUTINE OBSMEMRLS
+      implicit none
+      if (nallobs .ge. 1) then
+         deallocate (obspostn)
+         deallocate (obscoeff)
+         deallocate (obsidxpc)
+         deallocate (obsvalue)
+         deallocate (obserror)
+!    deallocate(obsstate)
+         deallocate (obseinf1)
+         deallocate (obseinf2)
+!    deallocate(obseinf3)
+         deallocate (nobstat)
+      end if
+      deallocate (penal_x)
+      deallocate (penal_y)
+      deallocate (penal_z)
+      deallocate (penal_t)
+      deallocate (penal0x)
+      deallocate (penal0y)
+      deallocate (penal0z)
+      deallocate (penal0t)
+      deallocate (scl)
+      deallocate (sl0)
+      return
+   end subroutine obsmemrls
 
-SUBROUTINE GRDMEMRLS
+   subroutine grdmemrls
 !*************************************************
-! MEMORY RELEASE FOR GRD ARRAY
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! memory release for grd array
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
-  DEALLOCATE(WWW)
-  DEALLOCATE(COR)
-  DEALLOCATE(XXX)
-  DEALLOCATE(YYY)
-  DEALLOCATE(DEG)
-  DEALLOCATE(DEN)
-  IF(IFPCDNT.EQ.0 .OR. IFPCDNT.EQ.2)THEN
-    DEALLOCATE(ZZZ)
-  ELSEIF(IFPCDNT.EQ.1)THEN
-    DEALLOCATE(PPP)
-  ENDIF
-  DEALLOCATE(GRDBKGND)
-  DEALLOCATE(GRDANALS)
-  DEALLOCATE(GRADINT)
-  RETURN
-END SUBROUTINE GRDMEMRLS
+      implicit none
+      deallocate (www)
+      deallocate (cor)
+      deallocate (xxx)
+      deallocate (yyy)
+      deallocate (deg)
+      deallocate (den)
+      if (ifpcdnt .eq. 0 .or. ifpcdnt .eq. 2) then
+         deallocate (zzz)
+      elseif (ifpcdnt .eq. 1) then
+         deallocate (ppp)
+      end if
+      deallocate (grdbkgnd)
+      deallocate (grdanals)
+      deallocate (gradint)
+      return
+   end subroutine grdmemrls
 
-SUBROUTINE RETRIEVAL
+   subroutine retrieval
 !*************************************************
-! RETRIEVAL THE ANALYSIS FIELD FOR OUTPUT
-! HISTORY: AUGUST 2007, CODED by WEI LI.
+! retrieval the analysis field for output
+! history: august 2007, coded by wei li.
 !*************************************************
-  IMPLICIT NONE
+      implicit none
 ! --------------------
-  INTEGER  :: I,J,K,T,S,LN
-  CHARACTER(LEN=200) :: DR
-  INTEGER  :: ER
+      integer  :: i, j, k, t, s, ln
+      character(len=200) :: dr
+      integer  :: er
 ! --------------------
-  IF(TEMPRTUR.GT.10000)THEN ! NOT NEEDED FOR OUTPUT IN KELVIN
-    DO S=TEMPRTUR,TEMPRTUR
-      DO T=1,MAXGRID(4)
-      DO K=1,MAXGRID(3)
-      DO J=1,MAXGRID(2)
-      DO I=1,MAXGRID(1)
-        GRDBKGD0(I,J,K,T,S)=GRDBKGD0(I,J,K,T,S)-273.15
-      ENDDO
-      ENDDO
-      ENDDO
-      ENDDO
-    ENDDO
-  ENDIF
-!  CALL GET_DIRECTORY('bufr',DR,LN)
-!  OPEN(2,FILE=DR(1:LN)//'DIFFERENCE.DAT')
-  !OPEN(2,FILE='./DIFFERENCE.DAT')
-  !WRITE(2,*) NUMGRID(1:4),NUMSTAT
-  !DO S=1,NUMSTAT
-  !  DO T=1,NUMGRID(4)
-  !  DO K=1,NUMGRID(3)
-  !  DO J=1,NUMGRID(2)
-  !  DO I=1,NUMGRID(1)
-  !    WRITE(2,*) GRDBKGD0(I,J,K,T,S) ! GRDANALS(I,J,K,T,S)
-  !  ENDDO
-  !  ENDDO
-  !  ENDDO
-  !  ENDDO
-  !ENDDO
-  !CLOSE(2)
-!  OPEN(2,FILE='BACKGROUND.DAT')
-!  DO S=1,NUMSTAT
-!    DO T=1,NUMGRID(4)
-!    DO K=1,NUMGRID(3)
-!    DO J=1,NUMGRID(2)
-!    DO I=1,NUMGRID(1)
-!      WRITE(2,*)GRDBKGD0(I,J,K,T,S)
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!  ENDDO
-!  CLOSE(2)
+      if (temprtur .gt. 10000) then ! not needed for output in kelvin
+         do s = temprtur, temprtur
+            do t = 1, maxgrid(4)
+            do k = 1, maxgrid(3)
+            do j = 1, maxgrid(2)
+            do i = 1, maxgrid(1)
+               grdbkgd0(i, j, k, t, s) = grdbkgd0(i, j, k, t, s) - 273.15
+            end do
+            end do
+            end do
+            end do
+         end do
+      end if
+!  call get_directory('bufr',dr,ln)
+!  open(2,file=dr(1:ln)//'difference.dat')
+      !open(2,file='./difference.dat')
+      !write(2,*) numgrid(1:4),numstat
+      !do s=1,numstat
+      !  do t=1,numgrid(4)
+      !  do k=1,numgrid(3)
+      !  do j=1,numgrid(2)
+      !  do i=1,numgrid(1)
+      !    write(2,*) grdbkgd0(i,j,k,t,s) ! grdanals(i,j,k,t,s)
+      !  enddo
+      !  enddo
+      !  enddo
+      !  enddo
+      !enddo
+      !close(2)
+!  open(2,file='background.dat')
+!  do s=1,numstat
+!    do t=1,numgrid(4)
+!    do k=1,numgrid(3)
+!    do j=1,numgrid(2)
+!    do i=1,numgrid(1)
+!      write(2,*)grdbkgd0(i,j,k,t,s)
+!    enddo
+!    enddo
+!    enddo
+!    enddo
+!  enddo
+!  close(2)
 
 !jhui
-  DO S=1,NUMSTAT
-    DO T=1,MAXGRID(4)
-    DO K=1,MAXGRID(3)
-    DO J=1,MAXGRID(2)
-    DO I=1,MAXGRID(1)
-      GRDBKGD0(I,J,K,T,S)=GRDANALS(I,J,K,T,S) 	!+GRDBKGD0(I,J,K,T,S)
-    ENDDO
-    ENDDO
-    ENDDO
-    ENDDO
-  ENDDO
+      do s = 1, numstat
+         do t = 1, maxgrid(4)
+         do k = 1, maxgrid(3)
+         do j = 1, maxgrid(2)
+         do i = 1, maxgrid(1)
+            grdbkgd0(i, j, k, t, s) = grdanals(i, j, k, t, s)         !+grdbkgd0(i,j,k,t,s)
+         end do
+         end do
+         end do
+         end do
+      end do
 
-!============= JUST FOR OUTPUT BY ZHONGJIE HE ==========
-  !ALLOCATE(DIFFTOUT(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4),NUMSTAT),STAT=ER)
-  !IF(ER.NE.0)STOP 'DIFFTOUT ALLOCATE WRONG'
-  !ALLOCATE(WWWOUT(NUMGRID(1),NUMGRID(2),NUMGRID(3),NUMGRID(4)),STAT=ER)
-  !IF(ER.NE.0)STOP 'WWWOUT ALLOCATE WRONG'
-  !DO T=1,NUMGRID(4)
-  !DO K=1,NUMGRID(3)
-  !DO J=1,NUMGRID(2)
-  !DO I=1,NUMGRID(1)
-   ! WWWOUT(I,J,K,T)=WWW(I,J,K,T)
-  !  DO S=1,NUMSTAT
-  !    DIFFTOUT(I,J,K,T,S)=GRDANALS(I,J,K,T,S)
-  !  ENDDO
-  !ENDDO
-  !ENDDO
-  !ENDDO
-  !ENDDO
+!============= just for output by zhongjie he ==========
+      !allocate(difftout(numgrid(1),numgrid(2),numgrid(3),numgrid(4),numstat),stat=er)
+      !if(er.ne.0)stop 'difftout allocate wrong'
+      !allocate(wwwout(numgrid(1),numgrid(2),numgrid(3),numgrid(4)),stat=er)
+      !if(er.ne.0)stop 'wwwout allocate wrong'
+      !do t=1,numgrid(4)
+      !do k=1,numgrid(3)
+      !do j=1,numgrid(2)
+      !do i=1,numgrid(1)
+      ! wwwout(i,j,k,t)=www(i,j,k,t)
+      !  do s=1,numstat
+      !    difftout(i,j,k,t,s)=grdanals(i,j,k,t,s)
+      !  enddo
+      !enddo
+      !enddo
+      !enddo
+      !enddo
 
-!  OPEN(2,FILE='./WWWOUT.DAT')
-!    DO T=1,NUMGRID(4)
-!    DO K=1,NUMGRID(3)
-!    DO J=1,NUMGRID(2)
-!    DO I=1,NUMGRID(1)
-!      WRITE(2,*)WWWOUT(I,J,K,T)
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!  CLOSE(2)
+!  open(2,file='./wwwout.dat')
+!    do t=1,numgrid(4)
+!    do k=1,numgrid(3)
+!    do j=1,numgrid(2)
+!    do i=1,numgrid(1)
+!      write(2,*)wwwout(i,j,k,t)
+!    enddo
+!    enddo
+!    enddo
+!    enddo
+!  close(2)
 
 !=======================================================
 
-  RETURN
+      return
 
-END SUBROUTINE RETRIEVAL
+   end subroutine retrieval
 
-END MODULE POST_STMAS4D
+end module post_stmas4d

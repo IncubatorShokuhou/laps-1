@@ -11,17 +11,17 @@
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 !
 !-----------------------------------------------------------------------
-!     This routine generates the ratios and products of spherical Bessel
-!     (bj), Neumann (by), and first kind Hankel (bh) functions of the
+!     this routine generates the ratios and products of spherical bessel
+!     (bj), neumann (by), and first kind hankel (bh) functions of the
 !     order from 0 to n, of real argument x (in bjx, byx, bhx) and/or
-!     complex*16 argument z (in bjz).  The ratios and products are defined
+!     complex*16 argument z (in bjz).  the ratios and products are defined
 !     as: r_i=b_(i-1)/b_i and p_ij=(b1_i)*(b2_j), i,j=1,2,...,n.
-!     Currently, rbhx,rbjx,rbjz,pjzhx,pjzjx are of particular interest.
+!     currently, rbhx,rbjx,rbjz,pjzhx,pjzjx are of particular interest.
 !     there are npnt number of points at which functions are evaluated.
 !-----------------------------------------------------------------------
 !
@@ -42,7 +42,7 @@
       equivalence (xhi,lhi),(xlo,llo)
       data llo,lhi/0,0,0,1,0,0,0,0, 127,127,255,0,0,0,0,0/
 !
-!===> Loop for each integration points
+!===> loop for each integration points
 !
       do 60 ipnt=1,npnt            !
 
@@ -118,7 +118,7 @@
       rbhx(i,ipnt)=1/((2*i-1)/x-rbhx(is1,ipnt))
 !    write(*,*) pjzhx(is1,1,ipnt)        ! in ordnung
 
-      pjzhx(i,1,ipnt)=pjzhx(is1,1,ipnt)/rbjz(i,ipnt) !IN ORDNUGN
+      pjzhx(i,1,ipnt)=pjzhx(is1,1,ipnt)/rbjz(i,ipnt) !in ordnugn
 
       pjzhx(1,i,ipnt)=pjzhx(1,is1,ipnt)/rbhx(i,ipnt)
       pjzjx(i,1,ipnt)=pjzjx(is1,1,ipnt)/rbjz(i,ipnt)
@@ -145,8 +145,8 @@
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 !      integer, parameter::mpnt=32
@@ -163,7 +163,7 @@
     include 'constants.incf'
 !**************************************************
 !
-!===> Set execution parameters into SI units.
+!===> set execution parameters into si units.
 !
 !***********************************************!
 
@@ -176,7 +176,7 @@
       if(kxysym.eq.1) npnt=(npnt+1)/2    !npnt = 16
 !*************************************************
 !
-!===> Set the quadrature integration points over the surface of the
+!===> set the quadrature integration points over the surface of the
 !     object and the weighting values.  u=cos(theta) is the integration
 !     variable.  if particle is symmytric about xy plane, only the upper
 !     half space is needed.
@@ -196,10 +196,10 @@
 !*************************************************
 
 !
-!===> Prepare radius-related-only quantities that are used repeatedly:
+!===> prepare radius-related-only quantities that are used repeatedly:
 !     kr=wvnm*radius and its derivative of theta times sin(theta)
 !     (denoted as xkr and dkr) at each integration point.
-!     Note: here dsa==particle dimension on z-axis.
+!     note: here dsa==particle dimension on z-axis.
 !
 !=>   spheroids.  a=b: sphere, a<b:oblate, a>b: prolate, a: z-dimension.
 !
@@ -227,7 +227,7 @@
       endif        !r2
 !*******************************************************************
 !
-!=>   P. K. Wang's conical particle.
+!=>   p. k. wang's conical particle.
 !     wcnzc=z-dimension, wcnxl=x-dimension, wcnlm=shape factor>1.
 !    schleife wird nicht betreten fuer regen, aber fuer graupel
 
@@ -276,8 +276,8 @@
 
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 
@@ -301,10 +301,10 @@
       real*8  degrad,pi,vlght
       data vlght,pi,degrad/3.d8,3.14159265358979d0,1.745329251994329d-2/
 !
-!===> Set the quadrature integration points over the surface of the
+!===> set the quadrature integration points over the surface of the
 !     object and the weighting values.  u=cos(theta) is the integration
 !     variable.  if particle is symmytric about xy plane, only the upper
-!     half space is needed.  Note: change units to SI units.
+!     half space is needed.  note: change units to si units.
 !
 !       write(*,*) 'test'
       refrc = cmplx(refre,refim)    !
@@ -322,7 +322,7 @@
       wvnm=2*pi*freq0/vlght    !
 !**********************************************************************
 
-      npnt=min0(n0pnt,mpnt)    !starting tmatrix rank, automatically increases                 !with size, bis jetzt konstant 5, VORSICHT!!
+      npnt=min0(n0pnt,mpnt)    !starting tmatrix rank, automatically increases                 !with size, bis jetzt konstant 5, vorsicht!!
 
       n0rank=max0(n0rank,5)
       crtnm=amin1(crtnm,1.0e-2)
@@ -333,8 +333,8 @@
       call tmtbuildup(npnt,aovrb)    !getestest fuer regen
 !***********************************************************************
 !
-!===> Decide convergent nrank value using special property at thinc=0.
-!     the ratios and products of spherical Bessel functions and Hankel
+!===> decide convergent nrank value using special property at thinc=0.
+!     the ratios and products of spherical bessel functions and hankel
 !     functions at each integration point, up to the order of nrank,
 !     and multiplied with proper weights are computed here.
 !
@@ -343,12 +343,12 @@
 !**********************************************************************
 !         write(*,*) 'hallo'
 !
-!===> Initialize scattering amplitudes to zero to accumulate with mode.
+!===> initialize scattering amplitudes to zero to accumulate with mode.
 !
       svvnm=0
       shhnm=0
 !
-!===> Loop for each azimuthal (phi) mode mdp=0, 1, 2, ... ,nrank-1).
+!===> loop for each azimuthal (phi) mode mdp=0, 1, 2, ... ,nrank-1).
 !
       ssmd1=0.0
       kmdcon=0
@@ -357,15 +357,15 @@
       mdp=imd-1
       if(nrank.eq.1) mdp=1
 !
-!-->  integrate matrices A and B over the surface (integration variable
-!     u=cos(theta)) and calculate the Transition-matrix T=B*A^(-1).
+!-->  integrate matrices a and b over the surface (integration variable
+!     u=cos(theta)) and calculate the transition-matrix t=b*a^(-1).
 
       call tmtmtrxabt(nrank,mdp,npnt,tmat,aaa)
 
 
 
 !
-!-->  layout T-matrix
+!-->  layout t-matrix
 !
       call tmtnmdconvrg(nrank, mdp, svvnm,shhnm,ssmd1,crtnm,kmdcon)!, tmat)
 !      write(*,*) kmdcon, 'kmdcon'
@@ -395,13 +395,13 @@
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 !
 !-----------------------------------------------------------------------
-!     calculates the abscissas (x) and weights (w) for n-point Gaussian-
-!     Legendre quadrature over an integration interval of (xx1,xx2).
+!     calculates the abscissas (x) and weights (w) for n-point gaussian-
+!     legendre quadrature over an integration interval of (xx1,xx2).
 !-----------------------------------------------------------------------
 !
       integer mn
@@ -455,8 +455,8 @@
 
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 !      integer, parameter :: mpnt=32
@@ -479,8 +479,8 @@
            bjxjz,bjzr,c01,c1,c2,cil1,cil2,cjk,ckj
 
 !
-!===> Set shifting indix (nshft) for matrix compression when n<m, m!=0.
-!     and initialize matrices A and B to zero for surface integration.
+!===> set shifting indix (nshft) for matrix compression when n<m, m!=0.
+!     and initialize matrices a and b to zero for surface integration.
 !
 
      nsnsft = 0
@@ -496,8 +496,8 @@
       bb = 0.0
 
 !
-!===> Integrating over the surface (integration variable: u=cos(theta))
-!     To reduce computer time, frequently used variable combinations are
+!===> integrating over the surface (integration variable: u=cos(theta))
+!     to reduce computer time, frequently used variable combinations are
 !     sorted and calculated a priori.   a:+, s:-, t:*, d:/
 !
      lqm=1
@@ -506,7 +506,7 @@
      do 50 ipnt=1,npnt        !1=>16
 
 !
-!-->  calculate associated Legendre functions at each integration point.
+!-->  calculate associated legendre functions at each integration point.
 !
       uu=u(ipnt)    !!
       vv=v(ipnt)    !!
@@ -523,7 +523,7 @@
       qtusq=lqm*uu*uu    !
 
 !
-!-->  loop for each row (index i) of matrices A(row,col) and B(row,col).
+!-->  loop for each row (index i) of matrices a(row,col) and b(row,col).
 !
      do 40 i=1,nrank
 !       write(*,*) i, nrank
@@ -542,7 +542,7 @@
      r01=x*bjxr-i    !
 
 !
-!-->  loop for each column (index j) of matrices A(i,j) and B(i,j).
+!-->  loop for each column (index j) of matrices a(i,j) and b(i,j).
 !
       do 30 j=1,nrank
 !       write(*,*) j, nrank
@@ -568,25 +568,25 @@
      pp10=pnmllg(ia1)*pnmllg(j  )    !
      pp11=pnmllg(ia1)*pnmllg(ja1)    !
 
-!-->  parameter bil (IML,LMI,IML',LMI'), and bjk (JMK,KMJ,JMK',KMJ')
+!-->  parameter bil (iml,lmi,iml',lmi'), and bjk (jmk,kmj,jmk',kmj')
      bil=x*( iaj*uu*pp11-iam*pp01-jam*pp10 )    !
      bjk=x*(lqm*(iam*jam*pp00-((itj+itm)*pp10+(itj+jtm)*pp01)*uu)+(msq+itj*qtusq)*pp11 )    !
 
 
 !
-!-->  calculate the [A] and [B] submatrices.  Using symmetry property of
-!     associated Legendre function for simplification to xy-plane mirror
-!     symmetric particle: I=L=0 if (i+j) is even, J=K=0 if (i+j) is odd.
+!-->  calculate the [a] and [b] submatrices.  using symmetry property of
+!     associated legendre function for simplification to xy-plane mirror
+!     symmetric particle: i=l=0 if (i+j) is even, j=k=0 if (i+j) is odd.
 !
-!-->  increment the -(I+refrc*L) and (L+refrc*I) submatrices.
-!     when mdp(or m)=0, Iomnemn=Lomnemn=0.
+!-->  increment the -(i+refrc*l) and (l+refrc*i) submatrices.
+!     when mdp(or m)=0, iomnemn=lomnemn=0.
 !
       if(mdp.eq.0) goto 20
 
       if(kxysym.eq.1 .and. mod(iaj,2).eq.0) goto 20
 
 !
-!-->  cil1 (IML, LMI), cil2 (IML',LMI'), and ail1,ali1,ail2,ali2
+!-->  cil1 (iml, lmi), cil2 (iml',lmi'), and ail1,ali1,ail2,ali2
      r1=pp11*y
       c1=itia1*bjzr-itj*(ia1+ja1)/x
       cil1=r1*(c1+jtja1*bhxr)
@@ -604,12 +604,12 @@
       bb(i1,j2)=bb(i1,j2)-mdp*bjxjz*(ali2*bil+cil2)/refrc
 !       write(*,*) i2, j1, bb(i2,j1)
 !       write(*,*) i1,j2, bb(i1,j2)
-!-->  increment the (K+refrc*J) and (J+refrc*K) submatrices.
+!-->  increment the (k+refrc*j) and (j+refrc*k) submatrices.
 !
 20   if(kxysym.eq.1 .and. mod(iaj,2).eq.1) goto 30
 
 !
-!-->  cjk (JMK,JMK'), ckj (KMJ,KMJ'), and akj1,ajk1,akj2,ajk2
+!-->  cjk (jmk,jmk'), ckj (kmj,kmj'), and akj1,ajk1,akj2,ajk2
       r1=jtja1*(i*uu*pp11-iam*pp01)    !
 
       r2=itia1*(j*uu*pp11-jam*pp10)    !
@@ -638,7 +638,7 @@
  50   continue
 !      write(*,*) 'tst'
 !
-!===> Calculate the Transition-matrix T=B*A^(-1) (stored in B).
+!===> calculate the transition-matrix t=b*a^(-1) (stored in b).
 !write(*,*) bb(1,1), bb(3,2),bb(5,9)
 
       call tmtprcssm(n2sft,aa,bb)
@@ -654,8 +654,8 @@
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
       real*8 ssmd1
@@ -674,7 +674,7 @@
      real*8  ssmd2,uu,vv,pnmllg(mrank1+1)
       complex*16  c1,cj,abi(m2rank),dnrm(m2rank),fgh(m2rank),fgv(m2rank)
 !
-!===> Set shifting indix (nshft) for matrix compression when n<m, m!=0.
+!===> set shifting indix (nshft) for matrix compression when n<m, m!=0.
 !
 !    write(*,*) mdp, nrank
 
@@ -685,7 +685,7 @@
 !      write(*,*) 'nsnsft, nrank, nshft'
 !       write(*,*) nsnsft, nrank, nshft
 !
-!===> normalization factor (=(-)^n*Dmn/wvnm) for each mode.
+!===> normalization factor (=(-)^n*dmn/wvnm) for each mode.
 !
       n1=2*nshft+2
       dnrm(1)=4*(-1)**(nshft+1)*float(n1+1)/float(n1*(nshft+2))/wvnm
@@ -703,7 +703,7 @@
     enddo
 !top
 !
-!===> Determin the largest nmode value needed, using back-scattering
+!===> determin the largest nmode value needed, using back-scattering
 !     alone x axis
 !
       uu=0.0
@@ -765,16 +765,16 @@
 
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 
 !
 !-----------------------------------------------------------------------
-!     This routine determines the largest nrank value needed by current
+!     this routine determines the largest nrank value needed by current
 !     environment for convergent solution, defined by critirion crtnm.
-!     It uses special property of back-scattering along symmetry axis.
+!     it uses special property of back-scattering along symmetry axis.
 !-----------------------------------------------------------------------
 !
 !      integer, parameter :: mpnt=32
@@ -788,7 +788,7 @@
 !           rbjz(mrank1,mpnt),rbhx(mrank1,mpnt),rbjx(mrank1,mpnt)
 !      common/partemwv/refrc,eps,wvnm,kxysym
 !      common/abtmtrxs/tmat(m2rank,m2rank),a(m2rank,m2rank)
-    real :: CRTNM
+    real :: crtnm
       real*8  r1,r2,ssnr1,ssnr2,x
       complex*16 c1,c2,cj
 !       write(*,*) 'hallo'
@@ -866,8 +866,8 @@
 
 !30 continue
      !**************************************************
- 40   if(nrank.ge.mrank1) write(6,*) 'Warning: '&
-     &'T-matrix may not be convergent, try again with larger mrank1.'
+ 40   if(nrank.ge.mrank1) write(6,*) 'warning: '&
+     &'t-matrix may not be convergent, try again with larger mrank1.'
 
       nrank=nrank-2    !geändert!!!
       n0rank=nrank-1
@@ -880,16 +880,16 @@
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 !
 !-----------------------------------------------------------------------
-!     This routine calculates matrix production T=B*A^(-1) by means of
-!     Gauss-Jordan column reduction which is equivalent to row reduction
-!     applied to the transpose T'=A'^(-1)*B'.
-!     The output matrix T(row,col) is stored in the final B(row,col).
+!     this routine calculates matrix production t=b*a^(-1) by means of
+!     gauss-jordan column reduction which is equivalent to row reduction
+!     applied to the transpose t'=a'^(-1)*b'.
+!     the output matrix t(row,col) is stored in the final b(row,col).
 !-----------------------------------------------------------------------
 !
 !      integer, parameter::mpnt=32
@@ -900,8 +900,8 @@
       complex*16 ajimax,arat
       integer :: ls(m2rank)
 !
-!===> Start column reduction of A, or equivalently, row reduction of A'.
-!     indix notations:  i=row of A and B; j and k=column of A and B.
+!===> start column reduction of a, or equivalently, row reduction of a'.
+!     indix notations:  i=row of a and b; j and k=column of a and b.
 
       ls = 0
 !      write(*,*) ls
@@ -915,7 +915,7 @@
 !    write(*,*) j, 'j'
 !        write(*,*) ls
 !
-!-->  search for the element of maximum magnitude in the jth column of A
+!-->  search for the element of maximum magnitude in the jth column of a
 !
       ajimax=as(1,j)
 
@@ -932,7 +932,7 @@
 !  write(*,*) 'test'
 !  write(*,*) ls
 !
-!-->  normalize the jth column of A and B by ajimax.
+!-->  normalize the jth column of a and b by ajimax.
 !
       do 20 i=1,nn
       as(i,j)=as(i,j)/ajimax
@@ -943,7 +943,7 @@
 
 !
 !-->  use column transformations to obtain zeros for the imax-th row but
-!     element of the jth column of A.  the same is applied to B.
+!     element of the jth column of a.  the same is applied to b.
 !
       k = 0
       do 40 k=1,nn
@@ -961,7 +961,7 @@
  !  write(*,*) bs(i,k)
  40   continue
 !
-!-->  store column counter of A in array ls such that ls contains the
+!-->  store column counter of a in array ls such that ls contains the
 !     location of the pivot element of each row (after reduction)
 !
 !      write(*,*) ls
@@ -976,7 +976,7 @@
 
 
 !
-!===> perform column interchanges on A as indicated in array ls.
+!===> perform column interchanges on a as indicated in array ls.
 !     put k=ls(k), if k<i, that column has already been involved in an
 !     interchange so iterate k=ls(k) until k>i (corresponding to a
 !     column stored above the jth column) is obtained.

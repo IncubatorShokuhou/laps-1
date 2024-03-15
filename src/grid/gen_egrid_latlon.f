@@ -1,287 +1,287 @@
-      SUBROUTINE ETALL(im,jm,tph0d,tlm0d,dlmd,dphd,HLAT,HLON,VLAT,VLON)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM: ETALL         COMPUTE EARTH LATITUDE & LONIGTUDE OF
-C                           ETA GRID POINTS
-C   PRGMMR: ROGERS          ORG: W/NP22     DATE: 90-06-13
-C
-C ABSTRACT: COMPUTES THE EARTH LATITUDE AND LONGITUDE OF ETA GRID
-C   POINTS (BOTH H AND V POINTS)
-C
-C PROGRAM HISTORY LOG:
-C   90-06-13  E.ROGERS
-C   98-06-09  M.BALDWIN - CONVERT TO 2-D CODE
-C   01-01-03  T BLACK   - MODIFIED FOR MPI
-C
-C USAGE:    CALL ETALL(HLAT,HLON,VLAT,VLON)
-C   INPUT ARGUMENT LIST:
-C     NONE
-C
-C   OUTPUT ARGUMENT LIST:
-C     HLAT     - LATITUDE OF H GRID POINTS IN RADIANS (NEG=S)
-C     HLON     - LONGITUDE OF H GRID POINTS IN RADIANS (E)
-C     VLAT     - LATITUDE OF V GRID POINTS IN RADIANS (NEG=S)
-C     VLON     - LONGITUDE OF V GRID POINTS IN RADIANS (E)
-C
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM RS/6000 SP
-C-----------------------------------------------------------------------
-C-----------------------------------------------------------------------
-                             D I M E N S I O N
-     & IDAT  (3)
-C
-     &,GLATH (IM,JM),GLONH (IM,JM),GLATV (IM,JM),GLONV (IM,JM)
-C
-        REAL HLAT(IM,JM),HLON(IM,JM),VLAT(IM,JM),VLON(IM,JM)
-C-----------------------------------------------------------------------
-C--------------LOGICAL FILE NAMES---------------------------------------
-C-----------------------------------------------------------------------
-                             D A T A
-     &  LIST  /06/
-C-----------------------------------------------------------------------
-C--------------UNIVERSAL CONSTANTS--------------------------------------
-C-----------------------------------------------------------------------
-                             D A T A
-     & PI/3.141592654/
-C-----------------------------------------------------------------------
- 1000 FORMAT(' I J=',2I4,' GLAT=',E12.5,' GLON=',E12.5,' ELAT=',E12.5
-     &,' ELON=',E12.5,' WLON = ',E12.5)
-C----------------------------------------------------------------------
-C--------------DERIVED GEOMETRICAL CONSTANTS----------------------------
-C----------------------------------------------------------------------
-CC
-	WBD=-(IM-1)*DLMD
-	SBD=-(JM-1)/2*DPHD
-      DTR = PI / 180.0
-      TPH0 = TPH0D * DTR
-      WB = WBD * DTR
-      SB = SBD * DTR
-      DLM = DLMD * DTR
-      DPH = DPHD * DTR
+      subroutine etall(im,jm,tph0d,tlm0d,dlmd,dphd,hlat,hlon,vlat,vlon)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram: etall         compute earth latitude & lonigtude of
+c                           eta grid points
+c   prgmmr: rogers          org: w/np22     date: 90-06-13
+c
+c abstract: computes the earth latitude and longitude of eta grid
+c   points (both h and v points)
+c
+c program history log:
+c   90-06-13  e.rogers
+c   98-06-09  m.baldwin - convert to 2-d code
+c   01-01-03  t black   - modified for mpi
+c
+c usage:    call etall(hlat,hlon,vlat,vlon)
+c   input argument list:
+c     none
+c
+c   output argument list:
+c     hlat     - latitude of h grid points in radians (neg=s)
+c     hlon     - longitude of h grid points in radians (e)
+c     vlat     - latitude of v grid points in radians (neg=s)
+c     vlon     - longitude of v grid points in radians (e)
+c
+c
+c attributes:
+c   language: fortran 90
+c   machine:  ibm rs/6000 sp
+c-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
+                             d i m e n s i o n
+     & idat  (3)
+c
+     &,glath (im,jm),glonh (im,jm),glatv (im,jm),glonv (im,jm)
+c
+        real hlat(im,jm),hlon(im,jm),vlat(im,jm),vlon(im,jm)
+c-----------------------------------------------------------------------
+c--------------logical file names---------------------------------------
+c-----------------------------------------------------------------------
+                             d a t a
+     &  list  /06/
+c-----------------------------------------------------------------------
+c--------------universal constants--------------------------------------
+c-----------------------------------------------------------------------
+                             d a t a
+     & pi/3.141592654/
+c-----------------------------------------------------------------------
+ 1000 format(' i j=',2i4,' glat=',e12.5,' glon=',e12.5,' elat=',e12.5
+     &,' elon=',e12.5,' wlon = ',e12.5)
+c----------------------------------------------------------------------
+c--------------derived geometrical constants----------------------------
+c----------------------------------------------------------------------
+cc
+	wbd=-(im-1)*dlmd
+	sbd=-(jm-1)/2*dphd
+      dtr = pi / 180.0
+      tph0 = tph0d * dtr
+      wb = wbd * dtr
+      sb = sbd * dtr
+      dlm = dlmd * dtr
+      dph = dphd * dtr
 
-	write(6,*) 'TPH0,WB,SB,DLM,DPH,DTR: ', TPH0,WB,SB,DLM,DPH,DTR
+	write(6,*) 'tph0,wb,sb,dlm,dph,dtr: ', tph0,wb,sb,dlm,dph,dtr
 
-      TDLM = DLM + DLM
-      TDPH = DPH + DPH
-C
-      STPH0 = SIN(TPH0)
-      CTPH0 = COS(TPH0)
-C
-C-----------------------------------------------------------------------
-C---COMPUTE GEOGRAPHIC LAT AND LONG OF ETA GRID POINTS (H & V POINTS)---
-C-----------------------------------------------------------------------
-      DO 200 J = 1,JM
-C
-         TLMH = WB - TDLM + MOD(J+1,2) * DLM
-         TPHH = SB+(J-1)*DPH
-         TLMV = WB - TDLM + MOD(J,2) * DLM
-         TPHV = TPHH
-         STPH = SIN(TPHH)
-         CTPH = COS(TPHH)
-         STPV = SIN(TPHV)
-         CTPV = COS(TPHV)
-C----------------------------------------------------------------------
-C---------- COMPUTE EARTH LATITUDE/LONGITUDE OF H POINTS --------------
-C----------------------------------------------------------------------
-         DO 201 I = 1,IM
-           TLMH = TLMH + TDLM
-           SPHH = CTPH0 * STPH + STPH0 * CTPH * COS(TLMH)
-           GLATH(I,J) = ASIN(SPHH)
-           CLMH = CTPH * COS(TLMH) / (COS(GLATH(I,J)) * CTPH0)
-     1               - TAN(GLATH(I,J)) * TAN(TPH0)
-           IF(CLMH .GT. 1.) CLMH = 1.0
-           IF(CLMH .LT. -1.) CLMH = -1.0
-           FACTH = 1.
-           IF(TLMH .GT. 0.) FACTH = -1.
-C          WRITE(6,88888) I,J, CLMH
-C8888      FORMAT(2X,2I6,1X,E12.5)
-           GLONH(I,J) = -TLM0D * DTR + FACTH * ACOS(CLMH)
-C          IF(I .EQ. 1) THEN
-C           WRITE(LIST,99995) I,J,GLATH(I,J),GLONH(I,J)
-C9995       FORMAT(2X,2(I6,1X),2(E12.5,1X))
-C          END IF
-C
-C
-           HLAT(I,J) = GLATH(I,J) / DTR
-C           HLON(I,J) = 360.0 - GLONH(I,J) / DTR
-	    HLON(I,J)= -GLONH(I,J)/DTR
+      tdlm = dlm + dlm
+      tdph = dph + dph
+c
+      stph0 = sin(tph0)
+      ctph0 = cos(tph0)
+c
+c-----------------------------------------------------------------------
+c---compute geographic lat and long of eta grid points (h & v points)---
+c-----------------------------------------------------------------------
+      do 200 j = 1,jm
+c
+         tlmh = wb - tdlm + mod(j+1,2) * dlm
+         tphh = sb+(j-1)*dph
+         tlmv = wb - tdlm + mod(j,2) * dlm
+         tphv = tphh
+         stph = sin(tphh)
+         ctph = cos(tphh)
+         stpv = sin(tphv)
+         ctpv = cos(tphv)
+c----------------------------------------------------------------------
+c---------- compute earth latitude/longitude of h points --------------
+c----------------------------------------------------------------------
+         do 201 i = 1,im
+           tlmh = tlmh + tdlm
+           sphh = ctph0 * stph + stph0 * ctph * cos(tlmh)
+           glath(i,j) = asin(sphh)
+           clmh = ctph * cos(tlmh) / (cos(glath(i,j)) * ctph0)
+     1               - tan(glath(i,j)) * tan(tph0)
+           if(clmh .gt. 1.) clmh = 1.0
+           if(clmh .lt. -1.) clmh = -1.0
+           facth = 1.
+           if(tlmh .gt. 0.) facth = -1.
+c          write(6,88888) i,j, clmh
+c8888      format(2x,2i6,1x,e12.5)
+           glonh(i,j) = -tlm0d * dtr + facth * acos(clmh)
+c          if(i .eq. 1) then
+c           write(list,99995) i,j,glath(i,j),glonh(i,j)
+c9995       format(2x,2(i6,1x),2(e12.5,1x))
+c          end if
+c
+c
+           hlat(i,j) = glath(i,j) / dtr
+c           hlon(i,j) = 360.0 - glonh(i,j) / dtr
+	    hlon(i,j)= -glonh(i,j)/dtr
 	   
-           IF(HLON(I,J) .GT. 180.) HLON(I,J) = HLON(I,J) - 360.
-           IF(HLON(I,J) .LT. -180.) HLON(I,J) = HLON(I,J) + 360.
-  201    CONTINUE
-C----------------------------------------------------------------------
-C---------- COMPUTE EARTH LATITUDE/LONGITUDE OF V POINTS --------------
-C----------------------------------------------------------------------
-         DO 202 I = 1,IM
-           TLMV = TLMV + TDLM
-           SPHV = CTPH0 * STPV + STPH0 * CTPV * COS(TLMV)
-           GLATV(I,J) = ASIN(SPHV)
-           CLMV = CTPV * COS(TLMV) / (COS(GLATV(I,J)) * CTPH0)
-     1          - TAN(GLATV(I,J)) * TAN(TPH0)
-           IF(CLMV .GT. 1.) CLMV = 1.
-           IF(CLMV .LT. -1.) CLMV = -1.
-           FACTV = 1.
-           IF(TLMV .GT. 0.) FACTV = -1.
-           GLONV(I,J) = -TLM0D * DTR + FACTV * ACOS(CLMV)
-C          IF(I.EQ.1) THEN
-C           WRITE(LIST,99995) I,J,GLATV(I,J),GLONV(I,J)
-C          END IF
-C
-C    CONVERT INTO DEGREES AND EAST LONGITUDE
-C
-           VLAT(I,J) = GLATV(I,J) / DTR
-C           VLON(I,J) = 360.0 - GLONV(I,J) / DTR
-           VLON(I,J) = -GLONV(I,J) / DTR
-           IF(VLON(I,J) .GT. 180.) VLON(I,J) = VLON(I,J) - 360.
-           IF(VLON(I,J) .LT. -180.) VLON(I,J) = VLON(I,J) + 360.
-  202    CONTINUE
-  200 CONTINUE
-C
-C     DO 210 J = 1,JM
-C         WRITE(LIST,88888) J,HLAT(1,J),HLON(1,J),VLAT(1,J),VLON(1,J)
-C8888    FORMAT(2X,I5,1X,4(E12.5,1X))
-C      END IF
-C 210 CONTINUE
-      RETURN
-      END
+           if(hlon(i,j) .gt. 180.) hlon(i,j) = hlon(i,j) - 360.
+           if(hlon(i,j) .lt. -180.) hlon(i,j) = hlon(i,j) + 360.
+  201    continue
+c----------------------------------------------------------------------
+c---------- compute earth latitude/longitude of v points --------------
+c----------------------------------------------------------------------
+         do 202 i = 1,im
+           tlmv = tlmv + tdlm
+           sphv = ctph0 * stpv + stph0 * ctpv * cos(tlmv)
+           glatv(i,j) = asin(sphv)
+           clmv = ctpv * cos(tlmv) / (cos(glatv(i,j)) * ctph0)
+     1          - tan(glatv(i,j)) * tan(tph0)
+           if(clmv .gt. 1.) clmv = 1.
+           if(clmv .lt. -1.) clmv = -1.
+           factv = 1.
+           if(tlmv .gt. 0.) factv = -1.
+           glonv(i,j) = -tlm0d * dtr + factv * acos(clmv)
+c          if(i.eq.1) then
+c           write(list,99995) i,j,glatv(i,j),glonv(i,j)
+c          end if
+c
+c    convert into degrees and east longitude
+c
+           vlat(i,j) = glatv(i,j) / dtr
+c           vlon(i,j) = 360.0 - glonv(i,j) / dtr
+           vlon(i,j) = -glonv(i,j) / dtr
+           if(vlon(i,j) .gt. 180.) vlon(i,j) = vlon(i,j) - 360.
+           if(vlon(i,j) .lt. -180.) vlon(i,j) = vlon(i,j) + 360.
+  202    continue
+  200 continue
+c
+c     do 210 j = 1,jm
+c         write(list,88888) j,hlat(1,j),hlon(1,j),vlat(1,j),vlon(1,j)
+c8888    format(2x,i5,1x,4(e12.5,1x))
+c      end if
+c 210 continue
+      return
+      end
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 
-       subroutine vecrot_rotlat(IM,JM,TPH0D,TLM0D,VLAT,VLON,DRAY,CRAY)
+       subroutine vecrot_rotlat(im,jm,tph0d,tlm0d,vlat,vlon,dray,cray)
                                                                                          
-C  SUBPROGRAM: ROTLLE        ROTATE WINDS ON LAT/LONG GRID TO E-GRID
-C   PRGMMR: T.BLACK         ORG: W/NP22     DATE: ??-??-??
-C
-C ABSTRACT: ROTATES WINDS ON THE LAT/LONG GRID TO THE ETA MODEL GRID
-C               (same angles can be used to do reverse function)
-C
-C PROGRAM HISTORY LOG:
-C   ??-??-??  T.BLACK
-C   98-06-08  M.BALDWIN - CONVERT TO 2-D CODE
-C   01-01-03  T BLACK - MODIFIED FOR MPI
-C
-C   INPUT ARGUMENT LIST:
-C     VLAT     - LATITUDE OF E-GRID V POINTS (DEGREES)
-C     VLON     - LONGITUDE OF E-GRID V POINTS (DEGREES)
-C
-C   OUTPUT ARGUMENT LIST:
-C     DRAY     - ROTATION COSINE
-C     CRAY     - ROTATION SINE
-C
-C ATTRIBUTES:
-C   LANGUAGE: FORTRAN 90
-C   MACHINE:  IBM RS/6000 SP
-C
-C***
-C*** ROTATE THE LAT-LON WINDS TO/FROM THE E-GRID
-C***
-C
-C    N O T E : INPUT LAT/LONG MUST BE CONVERTED TO RADIANS !!!
-C
-C----------------------------------------------------------------------
-        parameter(D2RAD=1.745329E-2)
+c  subprogram: rotlle        rotate winds on lat/long grid to e-grid
+c   prgmmr: t.black         org: w/np22     date: ??-??-??
+c
+c abstract: rotates winds on the lat/long grid to the eta model grid
+c               (same angles can be used to do reverse function)
+c
+c program history log:
+c   ??-??-??  t.black
+c   98-06-08  m.baldwin - convert to 2-d code
+c   01-01-03  t black - modified for mpi
+c
+c   input argument list:
+c     vlat     - latitude of e-grid v points (degrees)
+c     vlon     - longitude of e-grid v points (degrees)
+c
+c   output argument list:
+c     dray     - rotation cosine
+c     cray     - rotation sine
+c
+c attributes:
+c   language: fortran 90
+c   machine:  ibm rs/6000 sp
+c
+c***
+c*** rotate the lat-lon winds to/from the e-grid
+c***
+c
+c    n o t e : input lat/long must be converted to radians !!!
+c
+c----------------------------------------------------------------------
+        parameter(d2rad=1.745329e-2)
                                                                                          
-                         D I M E N S I O N
-     1 VLAT(IM,JM),VLON(IM,JM)
-     2,CRAY(IM,JM),DRAY(IM,JM)
-C----------------------------------------------------------------------
+                         d i m e n s i o n
+     1 vlat(im,jm),vlon(im,jm)
+     2,cray(im,jm),dray(im,jm)
+c----------------------------------------------------------------------
                                                                                          
-        ERPHI0=TPH0D*D2RAD
+        erphi0=tph0d*d2rad
 
-        if (TLM0D .lt. 0) then
-        ERLAM0=(TLM0D+360.)*D2RAD
+        if (tlm0d .lt. 0) then
+        erlam0=(tlm0d+360.)*d2rad
         else
-        ERLAM0=TLM0D*D2RAD
+        erlam0=tlm0d*d2rad
         endif
                                                                                          
-      SPHI0 = SIN(ERPHI0)
-      CPHI0 = COS(ERPHI0)
-C
+      sphi0 = sin(erphi0)
+      cphi0 = cos(erphi0)
+c
 	
-	write(6,*) 'TPH0D, TLM0D: ', TPH0D, TLM0D
-	write(6,*) 'IM,JM: ', IM,JM
+	write(6,*) 'tph0d, tlm0d: ', tph0d, tlm0d
+	write(6,*) 'im,jm: ', im,jm
 
-      DO J = 1, JM
-      DO I = 1, IM
+      do j = 1, jm
+      do i = 1, im
 
-!mp DANGEROUS TEST (which had no impact)
-!	if (VLON(I,J) .lt. 0) VLON(I,J)=VLON(I,J)+360.
+!mp dangerous test (which had no impact)
+!	if (vlon(i,j) .lt. 0) vlon(i,j)=vlon(i,j)+360.
 
-        TLAT = VLAT(I,J) * D2RAD
-        TLON = VLON(I,J) * D2RAD
-        RELM = TLON - ERLAM0
-        SRLM = SIN(RELM)
-        CRLM = COS(RELM)
-        SPH = SIN(TLAT)
-        CPH = COS(TLAT)
-        CC = CPH * CRLM
-        TPH = ASIN(CPHI0 * SPH - SPHI0 * CC)
-        RCTPH = 1.0 / COS(TPH)
-        CRAY(I,J) = SPHI0 * SRLM * RCTPH
-        DRAY(I,J) = (CPHI0 * CPH + SPHI0 * SPH * CRLM) * RCTPH
+        tlat = vlat(i,j) * d2rad
+        tlon = vlon(i,j) * d2rad
+        relm = tlon - erlam0
+        srlm = sin(relm)
+        crlm = cos(relm)
+        sph = sin(tlat)
+        cph = cos(tlat)
+        cc = cph * crlm
+        tph = asin(cphi0 * sph - sphi0 * cc)
+        rctph = 1.0 / cos(tph)
+        cray(i,j) = sphi0 * srlm * rctph
+        dray(i,j) = (cphi0 * cph + sphi0 * sph * crlm) * rctph
 
-	if (J .eq. JM) then
-	write(6,*) 'I,RELM,CRAY,DRAY: ',I,RELM,CRAY(I,J),DRAY(I,J)
+	if (j .eq. jm) then
+	write(6,*) 'i,relm,cray,dray: ',i,relm,cray(i,j),dray(i,j)
 	endif
 
-      ENDDO
-      ENDDO
+      enddo
+      enddo
 	  end subroutine vecrot_rotlat
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-	subroutine vecrot_rotlat_new(IM,JM,TPH0D,TLM0D,VLAT,VLON,
-     &                     COSALP,SINALP)
+	subroutine vecrot_rotlat_new(im,jm,tph0d,tlm0d,vlat,vlon,
+     &                     cosalp,sinalp)
 
           
-       REAL:: VLAT(IM,JM),VLON(IM,JM),COSALP(IM,JM),SINALP(IM,JM)
+       real:: vlat(im,jm),vlon(im,jm),cosalp(im,jm),sinalp(im,jm)
 
 
-      PI =3.141592654
-      D2R=PI/180.
-      R2D=1./D2R
-C-----------------------------------------------------------------------
-C***
-C***  READY TO COMPUTE ROTATION ANGLES.
-C***
-C***  FORMULAS USE GEODETIC LONGITUDES POSITIVE WEST
-C***  SO NEGATE LONGITUDES FROM ETALL (VLON AND VLONI)
-C***  AND THE CENTRAL LONGITUDES OF THE GRIDS
-C***  SINCE THEY ARRIVE HERE AS NEGATIVE WEST.
+      pi =3.141592654
+      d2r=pi/180.
+      r2d=1./d2r
+c-----------------------------------------------------------------------
+c***
+c***  ready to compute rotation angles.
+c***
+c***  formulas use geodetic longitudes positive west
+c***  so negate longitudes from etall (vlon and vloni)
+c***  and the central longitudes of the grids
+c***  since they arrive here as negative west.
 
 !mp	is this sufficiently general?  assumption made that all will be west?
 
-C***
-      ERLAM0=-TLM0D*D2R
-      ERPHI0=TPH0D*D2R
-      ERL0_OUT=ERLAM0/D2R
-      CPHI0_OUT=COS(ERPHI0)
-      SPHI0_OUT=SIN(ERPHI0)
-C***
-C***  COMPUTE EARTH ROTATION ANGLES FOR WINDS RELATIVE TO BOTH
-C***  THE INPUT AND OUTPUT GRIDS ON THE OUTPUT GRID POINTS.
-C***
-      DO J=1,JM
-      DO I=1,IM
-        X=CPHI0_OUT*COS(VLAT(I,J)*D2R)*COS((-VLON(I,J)-ERL0_OUT)*D2R)
-     1   +SPHI0_OUT*SIN(VLAT(I,J)*D2R)
-        Y=-COS(VLAT(I,J)*D2R)*SIN((-VLON(I,J)-ERL0_OUT)*D2R)
-        TVLON=ATAN(Y/X)
-        IF(X.LT.0.)TVLON=TVLON+PI
-        ARG=SPHI0_OUT*SIN(TVLON)/COS(VLAT(I,J)*D2R)
-        ARG=AMIN1(ARG,1.)
-        ARG=AMAX1(ARG,-1.)
-	ALPHA=ASIN(ARG)
-	COSALP(I,J)=COS(ALPHA)
-	SINALP(I,J)=SIN(ALPHA)
-C
-	if (J .eq. JM) then
-	write(6,*) 'I,COSALP,SINALP: ',I,COSALP(I,J),SINALP(I,J)
+c***
+      erlam0=-tlm0d*d2r
+      erphi0=tph0d*d2r
+      erl0_out=erlam0/d2r
+      cphi0_out=cos(erphi0)
+      sphi0_out=sin(erphi0)
+c***
+c***  compute earth rotation angles for winds relative to both
+c***  the input and output grids on the output grid points.
+c***
+      do j=1,jm
+      do i=1,im
+        x=cphi0_out*cos(vlat(i,j)*d2r)*cos((-vlon(i,j)-erl0_out)*d2r)
+     1   +sphi0_out*sin(vlat(i,j)*d2r)
+        y=-cos(vlat(i,j)*d2r)*sin((-vlon(i,j)-erl0_out)*d2r)
+        tvlon=atan(y/x)
+        if(x.lt.0.)tvlon=tvlon+pi
+        arg=sphi0_out*sin(tvlon)/cos(vlat(i,j)*d2r)
+        arg=amin1(arg,1.)
+        arg=amax1(arg,-1.)
+	alpha=asin(arg)
+	cosalp(i,j)=cos(alpha)
+	sinalp(i,j)=sin(alpha)
+c
+	if (j .eq. jm) then
+	write(6,*) 'i,cosalp,sinalp: ',i,cosalp(i,j),sinalp(i,j)
 	endif
-      ENDDO
-      ENDDO
+      enddo
+      enddo
 
 	  end subroutine vecrot_rotlat_new

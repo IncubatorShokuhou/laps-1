@@ -1,6 +1,6 @@
 
       subroutine read_ldad_prof(i4time_sys,i4_prof_window
-     1                                    ,NX_L,NY_L
+     1                                    ,nx_l,ny_l
      1                                    ,ext,lun
      1                                    ,filename,n_good_obs,istatus)
 
@@ -9,183 +9,183 @@
 !.............................................................................
 
       include 'netcdf.inc'
-      integer level, maxStaticIds, nInventoryBins, recNum,nf_fid,
+      integer level, maxstaticids, ninventorybins, recnum,nf_fid,
      +     nf_vid, nf_status
 
       write(6,*)
-      write(6,*)' Subroutine read_ldad_prof...'
+      write(6,*)' subroutine read_ldad_prof...'
 
-C
-C  Open netcdf File for reading
-C
-      nf_status = NF_OPEN(filename,NF_NOWRITE,nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'NF_OPEN filename'
+c
+c  open netcdf file for reading
+c
+      nf_status = nf_open(filename,nf_nowrite,nf_fid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'nf_open filename'
       endif
-C
-C  Fill all dimension values
-C
-C
-C Get size of level
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'level',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c  fill all dimension values
+c
+c
+c get size of level
+c
+      nf_status = nf_inq_dimid(nf_fid,'level',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim level'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,level)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,level)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim level'
       endif
-C
-C Get size of maxStaticIds
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'maxStaticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxStaticIds'
+c
+c get size of maxstaticids
+c
+      nf_status = nf_inq_dimid(nf_fid,'maxstaticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxstaticids'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,maxStaticIds)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim maxStaticIds'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,maxstaticids)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim maxstaticids'
       endif
-C
-C Get size of nInventoryBins
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'nInventoryBins',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim nInventoryBins'
+c
+c get size of ninventorybins
+c
+      nf_status = nf_inq_dimid(nf_fid,'ninventorybins',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim ninventorybins'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,nInventoryBins)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim nInventoryBins'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,ninventorybins)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim ninventorybins'
       endif
-C
-C Get size of recNum
-C
-      nf_status = NF_INQ_DIMID(nf_fid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+c
+c get size of recnum
+c
+      nf_status = nf_inq_dimid(nf_fid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      nf_status = NF_INQ_DIMLEN(nf_fid,nf_vid,recNum)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'dim recNum'
+      nf_status = nf_inq_dimlen(nf_fid,nf_vid,recnum)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'dim recnum'
       endif
-      call read_prof(nf_fid, level, maxStaticIds, nInventoryBins,
-     +     recNum,ext,lun,
+      call read_prof(nf_fid, level, maxstaticids, ninventorybins,
+     +     recnum,ext,lun,
 !.............................................................................
-     1     i4time_sys,i4_prof_window,NX_L,NY_L,n_good_obs,istatus)
+     1     i4time_sys,i4_prof_window,nx_l,ny_l,n_good_obs,istatus)
 
       return
 !.............................................................................
 
       end
-C
-C
-      subroutine read_prof(nf_fid, level, maxStaticIds, nInventoryBins,       
-     +     recNum,ext,lun,
+c
+c
+      subroutine read_prof(nf_fid, level, maxstaticids, ninventorybins,       
+     +     recnum,ext,lun,
 !.............................................................................
-     1     i4time_sys,i4_prof_window,NX_L,NY_L,n_good_obs,istatus)
+     1     i4time_sys,i4_prof_window,nx_l,ny_l,n_good_obs,istatus)
 !.............................................................................
 
       include 'netcdf.inc'
-      integer level, maxStaticIds, nInventoryBins, recNum,nf_fid,
+      integer level, maxstaticids, ninventorybins, recnum,nf_fid,
      +     nf_vid, nf_status
-      integer assetId(recNum), averageMinutes(recNum), 
-     +     firstInBin(nInventoryBins),
-     +     firstOverflow, globalInventory, invTime(recNum),
-     +     inventory(maxStaticIds), isOverflow(recNum),
-     +     lastInBin(nInventoryBins), lastRecord(maxStaticIds),
-     +     nStaticIds, prevRecord(recNum), tempQcFlag( level,
-     +     recNum), wdQcFlag( level, recNum), windDir( level,
-     +     recNum), wsQcFlag( level, recNum)
-      real elevation(recNum), latitude(recNum), levels( level,
-     +     recNum), longitude(recNum), temperature( level, recNum),
-     +     windSpeed( level, recNum)
-      double precision observationTime(recNum), receiptTime(recNum),
-     +     reportTime(recNum)
-      character*6 stationId(recNum)
-      character*4 homeWFO(recNum)
-      character*24 dataProvider(recNum)
-      character*6 providerId(recNum)
-      integer stationType(recNum)
-      character*30 staticIds(maxStaticIds)
-      character*51 stationName(recNum)
+      integer assetid(recnum), averageminutes(recnum), 
+     +     firstinbin(ninventorybins),
+     +     firstoverflow, globalinventory, invtime(recnum),
+     +     inventory(maxstaticids), isoverflow(recnum),
+     +     lastinbin(ninventorybins), lastrecord(maxstaticids),
+     +     nstaticids, prevrecord(recnum), tempqcflag( level,
+     +     recnum), wdqcflag( level, recnum), winddir( level,
+     +     recnum), wsqcflag( level, recnum)
+      real elevation(recnum), latitude(recnum), levels( level,
+     +     recnum), longitude(recnum), temperature( level, recnum),
+     +     windspeed( level, recnum)
+      double precision observationtime(recnum), receipttime(recnum),
+     +     reporttime(recnum)
+      character*6 stationid(recnum)
+      character*4 homewfo(recnum)
+      character*24 dataprovider(recnum)
+      character*6 providerid(recnum)
+      integer stationtype(recnum)
+      character*30 staticids(maxstaticids)
+      character*51 stationname(recnum)
 !.............................................................................
 
-      character*9 a9_timeObs,a9_recptTime,a9_closest,a9time_ob
+      character*9 a9_timeobs,a9_recpttime,a9_closest,a9time_ob
       character*8 c8_project,c8_format
       character*6 provider_ref
       character*(*)ext
-      real lat_a(NX_L,NY_L)
-      real lon_a(NX_L,NY_L)
-      real topo_a(NX_L,NY_L)
+      real lat_a(nx_l,ny_l)
+      real lon_a(nx_l,ny_l)
+      real topo_a(nx_l,ny_l)
       real ht_out(200),di_out(200),sp_out(200),temp_out(200)
       integer iqc1_out(200),iqc2_out(200)
-      integer assetId_ref
+      integer assetid_ref
       real mspkt
       data mspkt/.518/
 
 !............................................................................
 
-!     Initialize arrays
-      averageMinutes = -999
-      stationId = 'UNK   '
+!     initialize arrays
+      averageminutes = -999
+      stationid = 'unk   '
 
       call get_c8_project(c8_project,istatus)
 
-      if(c8_project .eq. 'RSA')then
-          c8_format = 'LDAD'
+      if(c8_project .eq. 'rsa')then
+          c8_format = 'ldad'
       else
-          c8_format = 'MADIS'
+          c8_format = 'madis'
       endif
 
-      write(6,*)' Reading profiler/RASS data, format = ',c8_format
+      write(6,*)' reading profiler/rass data, format = ',c8_format
 
-      call read_ldad_prof_netcdf(nf_fid, level, maxStaticIds, 
-     +     nInventoryBins,       
-     +     recNum, assetId, averageMinutes, firstInBin, firstOverflow, 
-     +     globalInventory, invTime, inventory, isOverflow, 
-     +     lastInBin, lastRecord, nStaticIds, prevRecord, tempQcFlag, 
-     +     wdQcFlag, windDir, wsQcFlag, elevation, latitude, levels, 
-     +     longitude, temperature, windSpeed, observationTime, 
-     +     receiptTime, reportTime, dataProvider, homeWFO, 
-     +     providerId, staticIds, stationId, stationName, stationType,
+      call read_ldad_prof_netcdf(nf_fid, level, maxstaticids, 
+     +     ninventorybins,       
+     +     recnum, assetid, averageminutes, firstinbin, firstoverflow, 
+     +     globalinventory, invtime, inventory, isoverflow, 
+     +     lastinbin, lastrecord, nstaticids, prevrecord, tempqcflag, 
+     +     wdqcflag, winddir, wsqcflag, elevation, latitude, levels, 
+     +     longitude, temperature, windspeed, observationtime, 
+     +     receipttime, reporttime, dataprovider, homewfo, 
+     +     providerid, staticids, stationid, stationname, stationtype,
      +     c8_format)
-C
-C The netcdf variables are filled - your code goes here
-C
+c
+c the netcdf variables are filled - your code goes here
+c
 !............................................................................
 
-      call get_latlon_perimeter(NX_L,NY_L,1.0
+      call get_latlon_perimeter(nx_l,ny_l,1.0
      1                         ,lat_a,lon_a,topo_a
      1                         ,rnorth,south,east,west,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_latlon_perimeter'
+          write(6,*)' error in get_latlon_perimeter'
           return
       endif
 
-      write(6,*)' # of profilers = ',nStaticIds
+      write(6,*)' # of profilers = ',nstaticids
       write(6,*)' # of records = ',recnum
 
-      do i_sta = 1,nStaticIds
-        ilast_rec = lastRecord(i_sta) + 1 ! Offset going from C to FORTRAN
-        provider_ref = providerId(ilast_rec)
+      do i_sta = 1,nstaticids
+        ilast_rec = lastrecord(i_sta) + 1 ! offset going from c to fortran
+        provider_ref = providerid(ilast_rec)
 
-        call s_len(staticIds(i_sta),len_id)
+        call s_len(staticids(i_sta),len_id)
 
         write(6,*)
-        write(6,*)' Looping for profiler ',i_sta
-     1                                    ,staticIds(i_sta)(1:len_id)
+        write(6,*)' looping for profiler ',i_sta
+     1                                    ,staticids(i_sta)(1:len_id)
 
-        write(6,*)' Station / last record / provider '
+        write(6,*)' station / last record / provider '
      1           ,i_sta,ilast_rec,provider_ref         
 
         i4_resid_closest = 999999
@@ -194,13 +194,13 @@ C
 
         do irec = 1,recnum
 
-          call s_len(providerId(irec),len_prov)
+          call s_len(providerid(irec),len_prov)
 
-          if(providerId(irec) .eq. provider_ref)then
+          if(providerid(irec) .eq. provider_ref)then
 
               write(6,*)
-              write(6,*)' ProviderId Match = ',irec
-     1                 ,providerId(irec)(1:len_prov)
+              write(6,*)' providerid match = ',irec
+     1                 ,providerid(irec)(1:len_prov)
 
               rlat = latitude(irec)
               rlon = longitude(irec)
@@ -208,71 +208,71 @@ C
               if(rlat .le. rnorth .and. rlat .ge. south .and.
      1           rlon .ge. west   .and. rlon .le. east            )then        
 
-                  write(6,*)irec,providerId(irec)(1:len_prov)
+                  write(6,*)irec,providerid(irec)(1:len_prov)
      1                     ,' is in box'       
 
                   elev = elevation(irec)
 
-!                 Convert u_std, v_std to rms
+!                 convert u_std, v_std to rms
 
-!                 Test observation time
-                  if(abs(observationTime(irec))      .lt. 3d9)then
-                      ictime_ob = nint(observationTime(irec))
+!                 test observation time
+                  if(abs(observationtime(irec))      .lt. 3d9)then
+                      ictime_ob = nint(observationtime(irec))
 
-                      if(averageMinutes(irec) .ne. -999)then
-                          i4_avg_window = averageMinutes(irec) * 60
+                      if(averageminutes(irec) .ne. -999)then
+                          i4_avg_window = averageminutes(irec) * 60
                           i4_avg_window_half = i4_avg_window / 2
                           ictime_ob = ictime_ob - i4_avg_window_half
                       endif
 
-                      call c_time2fname(ictime_ob,a9_timeObs)
+                      call c_time2fname(ictime_ob,a9_timeobs)
 
                   else
-                      write(6,*)' Bad observation time - reject record'         
-     1                           ,observationTime(irec)
+                      write(6,*)' bad observation time - reject record'         
+     1                           ,observationtime(irec)
                       goto 300
 
                   endif
 
-!                 Test number of good levels
+!                 test number of good levels
                   n_good_levels = 0
 
                   if(ext(1:3) .eq. 'pro')then ! test wind profile
                       do i = 1,level
-                          if(windDir(i,irec) .ge. 0      .and.
-     1                       windDir(i,irec) .le. 360    .and.
-     1                 iqc_rsa(wdQcFlag(i,irec)) .ne. -1 .and.       
-     1                 iqc_rsa(wsQcFlag(i,irec)) .ne. -1     
-     1                                                          )then ! Good QC
+                          if(winddir(i,irec) .ge. 0      .and.
+     1                       winddir(i,irec) .le. 360    .and.
+     1                 iqc_rsa(wdqcflag(i,irec)) .ne. -1 .and.       
+     1                 iqc_rsa(wsqcflag(i,irec)) .ne. -1     
+     1                                                          )then ! good qc
                               n_good_levels = n_good_levels + 1
                           endif
                       enddo ! i
 
                   elseif(ext(1:3) .eq. 'lrs')then ! test temperature profile
                       do i = 1,level
-                          if(iqc_rsa(tempQcFlag(i,irec)) .ne. -1
+                          if(iqc_rsa(tempqcflag(i,irec)) .ne. -1
      1                            .and.
      1                        temperature(i,irec) .gt. 200.
      1                            .and.
      1                        temperature(i,irec) .lt. 400.
-     1                                                   )then ! Good QC
+     1                                                   )then ! good qc
                               n_good_levels = n_good_levels + 1
                           endif
                       enddo ! i
                   endif
 
                   if(n_good_levels .le. 0)then
-                      write(6,*)' No good levels - reject record'         
-     1                           ,observationTime(irec)
+                      write(6,*)' no good levels - reject record'         
+     1                           ,observationtime(irec)
                       goto 300
 
                   else ! good levels detected
-                      write(6,*)' Good levels = ',n_good_levels
-     1                           ,observationTime(irec)
+                      write(6,*)' good levels = ',n_good_levels
+     1                           ,observationtime(irec)
                   endif
 
-!                 Determine if this report is closest to the analysis time
-                  call cv_asc_i4time(a9_timeObs,i4time_ob)
+!                 determine if this report is closest to the analysis time
+                  call cv_asc_i4time(a9_timeobs,i4time_ob)
                   i4_resid = abs(i4time_ob - i4time_sys)
                   if(i4_resid .lt. i4_resid_closest)then
                       i4_resid_closest = i4_resid
@@ -283,7 +283,7 @@ C
      1                      ,i4_resid,i4_resid_closest,i4_avg_window       
 
               else !
-                  write(6,*)irec,providerId(irec)(1:len_prov)
+                  write(6,*)irec,providerid(irec)(1:len_prov)
      1                     ,' is outside of domain'
 
                   go to 900 ! loop back to next station
@@ -291,17 +291,17 @@ C
               endif ! in box
 
 !         else
-!             write(6,*)' ProviderId = ',irec
-!    1                 ,providerId(irec)(1:len_prov)
+!             write(6,*)' providerid = ',irec
+!    1                 ,providerid(irec)(1:len_prov)
  
-          endif ! correct provider ID
+          endif ! correct provider id
 
  300      continue
 
         enddo ! irec 
 
         write(6,*)
-        write(6,*)' Evaluating profile closest in time'
+        write(6,*)' evaluating profile closest in time'
 
         if(i4_resid_closest .gt. i4_prof_window)then ! outside time window
             write(6,*)' outside time window - reject '
@@ -309,12 +309,12 @@ C
         
         else
 !           lun=1 ! for both 'pro' and 'lrs'
-C
-C           Open intermediate output file.
-C
+c
+c           open intermediate output file.
+c
             call open_ext(lun,i4time_sys,ext(1:3),istatus)
             if(istatus .ne. 1)then
-                write(6,*)' Error opening product file',ext
+                write(6,*)' error opening product file',ext
                 goto980
             endif
 
@@ -324,53 +324,53 @@ C
 
             n_good_levels = 0
 
-            call filter_string(stationId(i_pr_cl))
+            call filter_string(stationid(i_pr_cl))
 
             if(ext(1:3) .eq. 'pro')then
 
                 rms = 1.0
 
-                write(6,*)'i/windDir/wdQcFlag/wsQcFlag, i_pr_cl='
+                write(6,*)'i/winddir/wdqcflag/wsqcflag, i_pr_cl='
      1                                                 ,i_pr_cl     
 
                 do i = 1,level
-                    write(6,*)i,windDir(i,i_pr_cl)
-     1                         ,wdQcFlag(i,i_pr_cl),wsQcFlag(i,i_pr_cl)       
-                    if(windDir(i,i_pr_cl) .ge. 0      .and.
-     1                 windDir(i,i_pr_cl) .le. 360    .and.
-     1                 iqc_rsa(wdQcFlag(i,i_pr_cl)) .ne. -1 .and.       
-     1                 iqc_rsa(wsQcFlag(i,i_pr_cl)) .ne. -1     
-     1                                                          )then ! Good QC
+                    write(6,*)i,winddir(i,i_pr_cl)
+     1                         ,wdqcflag(i,i_pr_cl),wsqcflag(i,i_pr_cl)       
+                    if(winddir(i,i_pr_cl) .ge. 0      .and.
+     1                 winddir(i,i_pr_cl) .le. 360    .and.
+     1                 iqc_rsa(wdqcflag(i,i_pr_cl)) .ne. -1 .and.       
+     1                 iqc_rsa(wsqcflag(i,i_pr_cl)) .ne. -1     
+     1                                                          )then ! good qc
                         n_good_levels = n_good_levels + 1
                         ht_out(n_good_levels) = levels(i,i_pr_cl)
-                        di_out(n_good_levels) = windDir(i,i_pr_cl)
-                        sp_out(n_good_levels) = windSpeed(i,i_pr_cl)
+                        di_out(n_good_levels) = winddir(i,i_pr_cl)
+                        sp_out(n_good_levels) = windspeed(i,i_pr_cl)
      1                                        * mspkt
-                        iqc1_out(n_good_levels) = wdQcFlag(i,i_pr_cl)     
-                        iqc2_out(n_good_levels) = wsQcFlag(i,i_pr_cl)     
+                        iqc1_out(n_good_levels) = wdqcflag(i,i_pr_cl)     
+                        iqc2_out(n_good_levels) = wsqcflag(i,i_pr_cl)     
                     endif
                 enddo ! i
 
                 call filter_string(provider_ref)
 
-                if(c8_format .eq. 'LDAD')then
+                if(c8_format .eq. 'ldad')then
                     write(6,401)provider_ref
      1                         ,n_good_levels
-     1                         ,rlat,rlon,elev,stationId(i_pr_cl)(1:6)
-     1                         ,a9time_ob,'PROFILER'
+     1                         ,rlat,rlon,elev,stationid(i_pr_cl)(1:6)
+     1                         ,a9time_ob,'profiler'
                     write(lun,401)provider_ref
      1                         ,n_good_levels
-     1                         ,rlat,rlon,elev,stationId(i_pr_cl)(1:6)
-     1                         ,a9time_ob,'PROFILER'
-                else ! MADIS
+     1                         ,rlat,rlon,elev,stationid(i_pr_cl)(1:6)
+     1                         ,a9time_ob,'profiler'
+                else ! madis
                     write(6,402)i_sta
      1                         ,n_good_levels
      1                         ,rlat,rlon,elev,provider_ref(1:6)
-     1                         ,a9time_ob,'PROFILER'
+     1                         ,a9time_ob,'profiler'
                     write(lun,402)i_sta
      1                         ,n_good_levels
      1                         ,rlat,rlon,elev,provider_ref(1:6)
-     1                         ,a9time_ob,'PROFILER'
+     1                         ,a9time_ob,'profiler'
                 endif
 
 401             format(a12,i12,f11.3,f15.3,f15.0,5x,a6,3x,a9,1x,a8)
@@ -395,39 +395,39 @@ C
                 iqc = 1
 
                 do i = 1,level
-                    if(iqc_rsa(tempQcFlag(i,i_pr_cl)) .ne. -1
+                    if(iqc_rsa(tempqcflag(i,i_pr_cl)) .ne. -1
      1                            .and.
      1                 temperature(i,i_pr_cl) .gt. 200.
      1                            .and.
      1                 temperature(i,i_pr_cl) .lt. 400.
-     1                                                   )then ! Good QC
+     1                                                   )then ! good qc
                         n_good_levels = n_good_levels + 1
                         ht_out(n_good_levels) = levels(i,i_pr_cl)
                         temp_out(n_good_levels) = temperature(i,i_pr_cl)
-                        iqc1_out(n_good_levels) = tempQcFlag(i,i_pr_cl)
+                        iqc1_out(n_good_levels) = tempqcflag(i,i_pr_cl)
                     endif
                 enddo ! i
 
                 call filter_string(provider_ref)
 
-                if(c8_format .eq. 'LDAD')then
+                if(c8_format .eq. 'ldad')then
                     write(6,501)provider_ref
      1                         ,n_good_levels
-     1                         ,rlat,rlon,elev,stationId(i_pr_cl)(1:5)
-     1                         ,a9time_ob,'RASS    '
+     1                         ,rlat,rlon,elev,stationid(i_pr_cl)(1:5)
+     1                         ,a9time_ob,'rass    '
                     write(lun,501)provider_ref
      1                         ,n_good_levels
-     1                         ,rlat,rlon,elev,stationId(i_pr_cl)(1:5)
-     1                         ,a9time_ob,'RASS    '
-                else ! MADIS
+     1                         ,rlat,rlon,elev,stationid(i_pr_cl)(1:5)
+     1                         ,a9time_ob,'rass    '
+                else ! madis
                     write(6,502)i_sta
      1                         ,n_good_levels
      1                         ,rlat,rlon,elev,provider_ref(1:5)
-     1                         ,a9time_ob,'RASS    '
+     1                         ,a9time_ob,'rass    '
                     write(lun,502)i_sta
      1                         ,n_good_levels
      1                         ,rlat,rlon,elev,provider_ref(1:5)
-     1                         ,a9time_ob,'RASS    '
+     1                         ,a9time_ob,'rass    '
                 endif
 
 501             format(a12,i12,f11.3,f15.3,f15.0,5x,a5,3x,a9,1x,a8)
@@ -457,546 +457,546 @@ C
 !............................................................................
       return
       end
-C
-C  Subroutine to read the file 
-C
-      subroutine read_ldad_prof_netcdf(nf_fid, level, maxStaticIds, 
-     +     nInventoryBins, recNum, assetId, averageMinutes, firstInBin,        
-     +     firstOverflow, globalInventory, invTime, inventory, 
-     +     isOverflow, lastInBin, lastRecord, nStaticIds, prevRecord, 
-     +     tempQcFlag, wdQcFlag, windDir, wsQcFlag, elevation, 
-     +     latitude, levels, longitude, temperature, windSpeed, 
-     +     observationTime, receiptTime, reportTime, dataProvider, 
-     +     homeWFO, providerId, staticIds, stationId, stationName, 
-     +     stationType,c8_format)
-C
+c
+c  subroutine to read the file 
+c
+      subroutine read_ldad_prof_netcdf(nf_fid, level, maxstaticids, 
+     +     ninventorybins, recnum, assetid, averageminutes, firstinbin,        
+     +     firstoverflow, globalinventory, invtime, inventory, 
+     +     isoverflow, lastinbin, lastrecord, nstaticids, prevrecord, 
+     +     tempqcflag, wdqcflag, winddir, wsqcflag, elevation, 
+     +     latitude, levels, longitude, temperature, windspeed, 
+     +     observationtime, receipttime, reporttime, dataprovider, 
+     +     homewfo, providerid, staticids, stationid, stationname, 
+     +     stationtype,c8_format)
+c
       include 'netcdf.inc'
-      integer level, maxStaticIds, nInventoryBins, recNum,nf_fid, 
+      integer level, maxstaticids, ninventorybins, recnum,nf_fid, 
      +     nf_vid, nf_status
-      integer assetId(recNum), averageMinutes(recNum), 
-     +     firstInBin(nInventoryBins),
-     +     firstOverflow, globalInventory, invTime(recNum),
-     +     inventory(maxStaticIds), isOverflow(recNum),
-     +     lastInBin(nInventoryBins), lastRecord(maxStaticIds),
-     +     nStaticIds, prevRecord(recNum), tempQcFlag( level,
-     +     recNum), wdQcFlag( level, recNum), windDir( level,
-     +     recNum), wsQcFlag( level, recNum)
-      real elevation(recNum), latitude(recNum), levels( level,
-     +     recNum), longitude(recNum), temperature( level, recNum),
-     +     windSpeed( level, recNum)
-      double precision observationTime(recNum), receiptTime(recNum),
-     +     reportTime(recNum)
-      character*6 stationId(recNum)
-      character*4 homeWFO(recNum)
-      character*24 dataProvider(recNum)
-      character*6 providerId(recNum)
-      integer stationType(recNum)
-      character*30 staticIds(maxStaticIds)
-      character*51 stationName(recNum)
+      integer assetid(recnum), averageminutes(recnum), 
+     +     firstinbin(ninventorybins),
+     +     firstoverflow, globalinventory, invtime(recnum),
+     +     inventory(maxstaticids), isoverflow(recnum),
+     +     lastinbin(ninventorybins), lastrecord(maxstaticids),
+     +     nstaticids, prevrecord(recnum), tempqcflag( level,
+     +     recnum), wdqcflag( level, recnum), winddir( level,
+     +     recnum), wsqcflag( level, recnum)
+      real elevation(recnum), latitude(recnum), levels( level,
+     +     recnum), longitude(recnum), temperature( level, recnum),
+     +     windspeed( level, recnum)
+      double precision observationtime(recnum), receipttime(recnum),
+     +     reporttime(recnum)
+      character*6 stationid(recnum)
+      character*4 homewfo(recnum)
+      character*24 dataprovider(recnum)
+      character*6 providerid(recnum)
+      integer stationtype(recnum)
+      character*30 staticids(maxstaticids)
+      character*51 stationname(recnum)
 
       character*8 c8_format
 
 
-C   Variables of type REAL
-C
-C     Variable        NETCDF Long Name
-C      elevation    "Elevation above MSL"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'elevation',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c   variables of type real
+c
+c     variable        netcdf long name
+c      elevation    "elevation above msl"
+c
+      nf_status = nf_inq_varid(nf_fid,'elevation',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var elevation'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,elevation)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,elevation)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var elevation'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      latitude     "Station latitude"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'latitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      latitude     "station latitude"
+c
+      nf_status = nf_inq_varid(nf_fid,'latitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var latitude'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,latitude)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,latitude)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var latitude'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      levels       "Instrument Level, height above station"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'levels',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      levels       "instrument level, height above station"
+c
+      nf_status = nf_inq_varid(nf_fid,'levels',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var levels'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,levels)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,levels)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var levels'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      longitude    "Station longitude"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'longitude',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      longitude    "station longitude"
+c
+      nf_status = nf_inq_varid(nf_fid,'longitude',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var longitude'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,longitude)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,longitude)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var longitude'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      temperature  "Temperature"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'temperature',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      temperature  "temperature"
+c
+      nf_status = nf_inq_varid(nf_fid,'temperature',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var temperature'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,temperature)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_real(nf_fid,nf_vid,temperature)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var temperature'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      windSpeed    "Wind Speed (scalar)"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'windSpeed',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var windSpeed'
+c
+c     variable        netcdf long name
+c      windspeed    "wind speed (scalar)"
+c
+      nf_status = nf_inq_varid(nf_fid,'windspeed',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var windspeed'
       else
-        nf_status = NF_GET_VAR_REAL(nf_fid,nf_vid,windSpeed)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var windSpeed'
+        nf_status = nf_get_var_real(nf_fid,nf_vid,windspeed)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var windspeed'
         endif
       endif
 
-C   Variables of type INT
-C
-C
-C     Variable        NETCDF Long Name
-C      assetId      "RSA Asset Identifier"
-C
-!       nf_status = NF_INQ_VARID(nf_fid,'assetId',nf_vid)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var assetId'
+c   variables of type int
+c
+c
+c     variable        netcdf long name
+c      assetid      "rsa asset identifier"
+c
+!       nf_status = nf_inq_varid(nf_fid,'assetid',nf_vid)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var assetid'
 !     endif
-!       nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,assetId)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var assetId'
+!       nf_status = nf_get_var_int(nf_fid,nf_vid,assetid)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var assetid'
 !     endif
-C
-C     Variable        NETCDF Long Name
-C      firstInBin   
-C
-      nf_status = NF_INQ_VARID(nf_fid,'firstInBin',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var firstInBin'
+c
+c     variable        netcdf long name
+c      firstinbin   
+c
+      nf_status = nf_inq_varid(nf_fid,'firstinbin',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var firstinbin'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,firstInBin)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var firstInBin'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,firstinbin)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var firstinbin'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      averageMinutes
-C
-      nf_status = NF_INQ_VARID(nf_fid,'averageMinutes',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var averageMinutes'
+c
+c     variable        netcdf long name
+c      averageminutes
+c
+      nf_status = nf_inq_varid(nf_fid,'averageminutes',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var averageminutes'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,averageMinutes)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var averageMinutes'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,averageminutes)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var averageminutes'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      firstOverflow
-C
-      nf_status = NF_INQ_VARID(nf_fid,'firstOverflow',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var firstOverflow'
+c
+c     variable        netcdf long name
+c      firstoverflow
+c
+      nf_status = nf_inq_varid(nf_fid,'firstoverflow',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var firstoverflow'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,firstOverflow)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var firstOverflow'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,firstoverflow)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var firstoverflow'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      globalInventory
-C
-      nf_status = NF_INQ_VARID(nf_fid,'globalInventory',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var globalInventory'
+c
+c     variable        netcdf long name
+c      globalinventory
+c
+      nf_status = nf_inq_varid(nf_fid,'globalinventory',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var globalinventory'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,globalInventory)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var globalInventory'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,globalinventory)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var globalinventory'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      invTime      
-C
-      nf_status = NF_INQ_VARID(nf_fid,'invTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var invTime'
+c
+c     variable        netcdf long name
+c      invtime      
+c
+      nf_status = nf_inq_varid(nf_fid,'invtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var invtime'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,invTime)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var invTime'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,invtime)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var invtime'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      inventory    
-C
-      nf_status = NF_INQ_VARID(nf_fid,'inventory',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+c
+c     variable        netcdf long name
+c      inventory    
+c
+      nf_status = nf_inq_varid(nf_fid,'inventory',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'in var inventory'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,inventory)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
+        nf_status = nf_get_var_int(nf_fid,nf_vid,inventory)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
           print *,'in var inventory'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      isOverflow   
-C
-      nf_status = NF_INQ_VARID(nf_fid,'isOverflow',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var isOverflow'
+c
+c     variable        netcdf long name
+c      isoverflow   
+c
+      nf_status = nf_inq_varid(nf_fid,'isoverflow',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var isoverflow'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,isOverflow)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var isOverflow'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,isoverflow)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var isoverflow'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      lastInBin    
-C
-      nf_status = NF_INQ_VARID(nf_fid,'lastInBin',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var lastInBin'
+c
+c     variable        netcdf long name
+c      lastinbin    
+c
+      nf_status = nf_inq_varid(nf_fid,'lastinbin',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lastinbin'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,lastInBin)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var lastInBin'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,lastinbin)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lastinbin'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      lastRecord   
-C
-      nf_status = NF_INQ_VARID(nf_fid,'lastRecord',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var lastRecord'
+c
+c     variable        netcdf long name
+c      lastrecord   
+c
+      nf_status = nf_inq_varid(nf_fid,'lastrecord',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var lastrecord'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,lastRecord)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var lastRecord'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,lastrecord)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var lastrecord'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      nStaticIds   
-C
-      nf_status = NF_INQ_VARID(nf_fid,'nStaticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var nStaticIds'
+c
+c     variable        netcdf long name
+c      nstaticids   
+c
+      nf_status = nf_inq_varid(nf_fid,'nstaticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var nstaticids'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,nStaticIds)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var nStaticIds'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,nstaticids)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var nstaticids'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      prevRecord   
-C
-      nf_status = NF_INQ_VARID(nf_fid,'prevRecord',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var prevRecord'
+c
+c     variable        netcdf long name
+c      prevrecord   
+c
+      nf_status = nf_inq_varid(nf_fid,'prevrecord',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var prevrecord'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,prevRecord)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var prevRecord'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,prevrecord)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var prevrecord'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      tempQcFlag   "RSA Temperature quality control flag"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'tempQcFlag',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var tempQcFlag'
+c
+c     variable        netcdf long name
+c      tempqcflag   "rsa temperature quality control flag"
+c
+      nf_status = nf_inq_varid(nf_fid,'tempqcflag',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var tempqcflag'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,tempQcFlag)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var tempQcFlag'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,tempqcflag)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var tempqcflag'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      wdQcFlag     "RSA Wind direction quality control flag"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'wdQcFlag',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var wdQcFlag'
+c
+c     variable        netcdf long name
+c      wdqcflag     "rsa wind direction quality control flag"
+c
+      nf_status = nf_inq_varid(nf_fid,'wdqcflag',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var wdqcflag'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,wdQcFlag)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var wdQcFlag'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,wdqcflag)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var wdqcflag'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      windDir      "Wind Direction (scalar)"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'windDir',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var windDir'
+c
+c     variable        netcdf long name
+c      winddir      "wind direction (scalar)"
+c
+      nf_status = nf_inq_varid(nf_fid,'winddir',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var winddir'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,windDir)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var windDir'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,winddir)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var winddir'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      wsQcFlag     "RSA Wind speed quality control flag"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'wsQcFlag',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var wsQcFlag'
+c
+c     variable        netcdf long name
+c      wsqcflag     "rsa wind speed quality control flag"
+c
+      nf_status = nf_inq_varid(nf_fid,'wsqcflag',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var wsqcflag'
       else
-        nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,wsQcFlag)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var wsQcFlag'
+        nf_status = nf_get_var_int(nf_fid,nf_vid,wsqcflag)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var wsqcflag'
         endif
       endif
 
-C   Variables of type DOUBLE
-C
-C
-C     Variable        NETCDF Long Name
-C      observationTime"Time of observation"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'observationTime',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var observationTime'
+c   variables of type double
+c
+c
+c     variable        netcdf long name
+c      observationtime"time of observation"
+c
+      nf_status = nf_inq_varid(nf_fid,'observationtime',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var observationtime'
       else
-        nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,observationTime)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var observationTime'
+        nf_status = nf_get_var_double(nf_fid,nf_vid,observationtime)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var observationtime'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      receiptTime  "File time stamp (time file was received)"
-C
-!       nf_status = NF_INQ_VARID(nf_fid,'receiptTime',nf_vid)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var receiptTime'
+c
+c     variable        netcdf long name
+c      receipttime  "file time stamp (time file was received)"
+c
+!       nf_status = nf_inq_varid(nf_fid,'receipttime',nf_vid)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var receipttime'
 !     endif
-!       nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,receiptTime)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var receiptTime'
+!       nf_status = nf_get_var_double(nf_fid,nf_vid,receipttime)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var receipttime'
 !     endif
-C
-C     Variable        NETCDF Long Name
-C      reportTime   "Time of observation"
-C
-!       nf_status = NF_INQ_VARID(nf_fid,'reportTime',nf_vid)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var reportTime'
+c
+c     variable        netcdf long name
+c      reporttime   "time of observation"
+c
+!       nf_status = nf_inq_varid(nf_fid,'reporttime',nf_vid)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var reporttime'
 !     endif
-!       nf_status = NF_GET_VAR_DOUBLE(nf_fid,nf_vid,reportTime)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var reportTime'
+!       nf_status = nf_get_var_double(nf_fid,nf_vid,reporttime)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var reporttime'
 !      endif
 
 
-C   Variables of type CHAR
-C
-C
-C     Variable        NETCDF Long Name
-C      dataProvider "Name of organization responsible for delivering the data"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'dataProvider',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var dataProvider'
+c   variables of type char
+c
+c
+c     variable        netcdf long name
+c      dataprovider "name of organization responsible for delivering the data"
+c
+      nf_status = nf_inq_varid(nf_fid,'dataprovider',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var dataprovider'
       else
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,dataProvider)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var dataProvider'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,dataprovider)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var dataprovider'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      homeWFO      "home WFO Id"
-C
-!       nf_status = NF_INQ_VARID(nf_fid,'homeWFO',nf_vid)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var homeWFO'
+c
+c     variable        netcdf long name
+c      homewfo      "home wfo id"
+c
+!       nf_status = nf_inq_varid(nf_fid,'homewfo',nf_vid)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var homewfo'
 !     endif
-!       nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,homeWFO)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var homeWFO'
+!       nf_status = nf_get_var_text(nf_fid,nf_vid,homewfo)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var homewfo'
 !     endif
-C
-C     Variable        NETCDF Long Name
-C      providerId   "Alphanumeric station name"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'providerId',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var providerId'
+c
+c     variable        netcdf long name
+c      providerid   "alphanumeric station name"
+c
+      nf_status = nf_inq_varid(nf_fid,'providerid',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var providerid'
       else
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,providerId)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var providerId'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,providerid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var providerid'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      staticIds    
-C
-      nf_status = NF_INQ_VARID(nf_fid,'staticIds',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var staticIds'
+c
+c     variable        netcdf long name
+c      staticids    
+c
+      nf_status = nf_inq_varid(nf_fid,'staticids',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var staticids'
       else
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,staticIds)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var staticIds'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,staticids)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var staticids'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      stationId    "alphanumeric station Id"
-C
-      nf_status = NF_INQ_VARID(nf_fid,'stationId',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'in var stationId'
+c
+c     variable        netcdf long name
+c      stationid    "alphanumeric station id"
+c
+      nf_status = nf_inq_varid(nf_fid,'stationid',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'in var stationid'
       else
-        nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,stationId)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var stationId'
+        nf_status = nf_get_var_text(nf_fid,nf_vid,stationid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var stationid'
         endif
       endif
-C
-C     Variable        NETCDF Long Name
-C      stationName  "alphanumeric station name"
-C
-!       nf_status = NF_INQ_VARID(nf_fid,'stationName',nf_vid)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var stationName'
+c
+c     variable        netcdf long name
+c      stationname  "alphanumeric station name"
+c
+!       nf_status = nf_inq_varid(nf_fid,'stationname',nf_vid)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var stationname'
 !     endif
-!       nf_status = NF_GET_VAR_TEXT(nf_fid,nf_vid,stationName)
-!     if(nf_status.ne.NF_NOERR) then
-!       print *, NF_STRERROR(nf_status)
-!       print *,'in var stationName'
+!       nf_status = nf_get_var_text(nf_fid,nf_vid,stationname)
+!     if(nf_status.ne.nf_noerr) then
+!       print *, nf_strerror(nf_status)
+!       print *,'in var stationname'
 !     endif
 
 
-!     For RSA, this variable doesn't contain any useful information.
-!     This could be useful if 'c8_format' is MADIS, if we read it in 
-!     given its "short" declaration as an INT variable.
+!     for rsa, this variable doesn't contain any useful information.
+!     this could be useful if 'c8_format' is madis, if we read it in 
+!     given its "short" declaration as an int variable.
 
-C
-C     Variable        NETCDF Long Name
-C      stationType  "LDAD station type"
-C
-      if(c8_format .eq. 'MADIS')then
-        write(6,*)' read stationType as short/integer'
-        nf_status = NF_INQ_VARID(nf_fid,'stationType',nf_vid)
-        if(nf_status.ne.NF_NOERR) then
-          print *, NF_STRERROR(nf_status)
-          print *,'in var stationType'
+c
+c     variable        netcdf long name
+c      stationtype  "ldad station type"
+c
+      if(c8_format .eq. 'madis')then
+        write(6,*)' read stationtype as short/integer'
+        nf_status = nf_inq_varid(nf_fid,'stationtype',nf_vid)
+        if(nf_status.ne.nf_noerr) then
+          print *, nf_strerror(nf_status)
+          print *,'in var stationtype'
         else
-          nf_status = NF_GET_VAR_INT(nf_fid,nf_vid,stationType)
-          if(nf_status.ne.NF_NOERR) then
-            print *, NF_STRERROR(nf_status)
-            print *,'in var stationType'
+          nf_status = nf_get_var_int(nf_fid,nf_vid,stationtype)
+          if(nf_status.ne.nf_noerr) then
+            print *, nf_strerror(nf_status)
+            print *,'in var stationtype'
           endif
         endif
 
       endif
 
       nf_status = nf_close(nf_fid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'nf_close'
       endif
 
@@ -1006,43 +1006,43 @@ C
 
       function iqc_rsa(iflag)
 
-!     Possible Outputs
-!     -1 Bad Data
-!      0 Unknown quality or unknown input flag
-!     +1 Good Data
+!     possible outputs
+!     -1 bad data
+!      0 unknown quality or unknown input flag
+!     +1 good data
 
       iqc_rsa = 0
 
-      if(iflag .eq.     0)iqc_rsa = +1 ! OK
-      if(iflag .eq.     1)iqc_rsa = -1 ! Out of range
-      if(iflag .eq.     2)iqc_rsa = -1 ! Questionable
-      if(iflag .eq.     3)iqc_rsa =  0 ! Not tested
-      if(iflag .eq.     4)iqc_rsa = -1 ! Missing Data
-      if(iflag .eq.     5)iqc_rsa = +1 ! MFFG Auto Mode Algorithm good data
-      if(iflag .eq.     6)iqc_rsa = +1 ! MFFG Manual Mode Algorithm good data 
-                                       ! Operator no action 
-      if(iflag .eq.     7)iqc_rsa = -1 ! MFFG Auto Mode Algorithm bad data
-      if(iflag .eq.     8)iqc_rsa = -1 ! MFFG Auto Mode Algorithm bad data
-                                       ! Operator no action 
-      if(iflag .eq.     9)iqc_rsa =  0 ! reserved for MFFG but not used
-      if(iflag .eq.    10)iqc_rsa = -1 ! MFFG Manual Mode Algorithm good data
-                                       ! Operator flagged as bad data
-      if(iflag .eq.    11)iqc_rsa =  0 ! reserved for MFFG but not used
-      if(iflag .eq.    12)iqc_rsa = -1 ! MFFG Manual Mode Algorithm bad data 
-                                       ! Operator flagged as bad data
-      if(iflag .eq.    13)iqc_rsa =  0 ! reserved for MFFG but not used
-      if(iflag .eq.    14)iqc_rsa = +1 ! MFFG Manual Mode Algorithm good data 
-                                       ! Operator no action
-      if(iflag .eq.    15)iqc_rsa =  0 ! reserved for MFFG but not used
-      if(iflag .eq.    16)iqc_rsa = -1 ! MFFG Manual Mode Algorithm bad data 
-                                       ! Operator no action
-      if(iflag .eq.    17)iqc_rsa =  0 ! reserved for MFFG but not used
-      if(iflag .eq.    18)iqc_rsa = -1 ! MFFG Manual Mode Algorithm good data 
-                                       ! Operator flagged as bad data
-      if(iflag .eq.    19)iqc_rsa =  0 ! reserved for MFFG but not used
-      if(iflag .eq.    20)iqc_rsa = -1 ! MFFG Manual Mode Algorithm bad data 
-                                       ! Operator flagged as bad data
-      if(iflag .eq. -9999)iqc_rsa = -1 ! Missing Data
+      if(iflag .eq.     0)iqc_rsa = +1 ! ok
+      if(iflag .eq.     1)iqc_rsa = -1 ! out of range
+      if(iflag .eq.     2)iqc_rsa = -1 ! questionable
+      if(iflag .eq.     3)iqc_rsa =  0 ! not tested
+      if(iflag .eq.     4)iqc_rsa = -1 ! missing data
+      if(iflag .eq.     5)iqc_rsa = +1 ! mffg auto mode algorithm good data
+      if(iflag .eq.     6)iqc_rsa = +1 ! mffg manual mode algorithm good data 
+                                       ! operator no action 
+      if(iflag .eq.     7)iqc_rsa = -1 ! mffg auto mode algorithm bad data
+      if(iflag .eq.     8)iqc_rsa = -1 ! mffg auto mode algorithm bad data
+                                       ! operator no action 
+      if(iflag .eq.     9)iqc_rsa =  0 ! reserved for mffg but not used
+      if(iflag .eq.    10)iqc_rsa = -1 ! mffg manual mode algorithm good data
+                                       ! operator flagged as bad data
+      if(iflag .eq.    11)iqc_rsa =  0 ! reserved for mffg but not used
+      if(iflag .eq.    12)iqc_rsa = -1 ! mffg manual mode algorithm bad data 
+                                       ! operator flagged as bad data
+      if(iflag .eq.    13)iqc_rsa =  0 ! reserved for mffg but not used
+      if(iflag .eq.    14)iqc_rsa = +1 ! mffg manual mode algorithm good data 
+                                       ! operator no action
+      if(iflag .eq.    15)iqc_rsa =  0 ! reserved for mffg but not used
+      if(iflag .eq.    16)iqc_rsa = -1 ! mffg manual mode algorithm bad data 
+                                       ! operator no action
+      if(iflag .eq.    17)iqc_rsa =  0 ! reserved for mffg but not used
+      if(iflag .eq.    18)iqc_rsa = -1 ! mffg manual mode algorithm good data 
+                                       ! operator flagged as bad data
+      if(iflag .eq.    19)iqc_rsa =  0 ! reserved for mffg but not used
+      if(iflag .eq.    20)iqc_rsa = -1 ! mffg manual mode algorithm bad data 
+                                       ! operator flagged as bad data
+      if(iflag .eq. -9999)iqc_rsa = -1 ! missing data
 
       return
       end

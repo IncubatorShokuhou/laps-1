@@ -20,8 +20,8 @@ c
       integer    nir_elem,nir_lines
       integer    nvis_elem,nvis_lines
 
-      real image_vis (nvis_elem,nvis_lines,nimages) !ispan vis image polar NH
-      real image_ir  (nir_elem,nir_lines,nimages) !ispan ir image polar NH
+      real image_vis (nvis_elem,nvis_lines,nimages) !ispan vis image polar nh
+      real image_ir  (nir_elem,nir_lines,nimages) !ispan ir image polar nh
       real image_12  (nir_elem,nir_lines,nimages)
       real image_39  (nir_elem,nir_lines,nimages)
       real image_67  (nwv_elem,nwv_lines,nimages)
@@ -29,11 +29,11 @@ c
       real image_data_vis(nvis_elem,nvis_lines)
       real image_data_wv(nwv_elem,nwv_lines)
 
-      Real      rmsng
-      Real      smsng(maxchannels)
-      Real      r_missing_data, scale_img
-      Real      tot_ir_pix,tot_vis_pix,tot_wv_pix
-      Real      mstatus(maxchannels,nimages)
+      real      rmsng
+      real      smsng(maxchannels)
+      real      r_missing_data, scale_img
+      real      tot_ir_pix,tot_vis_pix,tot_wv_pix
+      real      mstatus(maxchannels,nimages)
 
       integer i,j
       integer ispec
@@ -47,7 +47,7 @@ c =====================================================
 c
 c get r_missing_data from nest7grid.parms
 c
-      write(6,*)'Enter set_missing_flag: ',csatid,' ',csat_type
+      write(6,*)'enter set_missing_flag: ',csatid,' ',csat_type
 
       call get_r_missing_data(r_missing_data, istatus)
       if(istatus.ne.1)goto 900
@@ -100,7 +100,7 @@ c
      &               istatus)
 
                mstatus(j,i)=float(abs(istatus))/tot_ir_pix
-               write(6,*)'Missing status (%): ',mstatus(j,i)*100.
+               write(6,*)'missing status (%): ',mstatus(j,i)*100.
 
             elseif(ispec.eq.3)then
 
@@ -112,7 +112,7 @@ c
      &               istatus)
 
                mstatus(j,i)=float(abs(istatus))/tot_wv_pix
-               write(6,*)'Missing status (%): ',mstatus(j,i)*100.
+               write(6,*)'missing status (%): ',mstatus(j,i)*100.
 
             else    !must be the vis data
 
@@ -124,7 +124,7 @@ c
      &               istatus)
 
                mstatus(j,i)=float(abs(istatus))/tot_vis_pix
-               write(6,*)'Missing status (%): ',mstatus(j,i)*100.
+               write(6,*)'missing status (%): ',mstatus(j,i)*100.
 
             endif
 
@@ -150,7 +150,7 @@ c
 
       goto 1000
 
-900   write(6,*)'Did not get r_missing_data - set_missing_flag'
+900   write(6,*)'did not get r_missing_data - set_missing_flag'
 
 1000  return
       end

@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -31,20 +31,20 @@ cdis
 cdis  
 
 c
-c=====  Here are John's subroutines...(abandon hope, ye who enter)
+c=====  here are john's subroutines...(abandon hope, ye who enter)
 c
 	subroutine channel(u,v,topo,imax,jmax,top,pblht,dx,dy,
      &                     z,div)
 c
 c=====================================================================
 c
-c	Routine to channel winds around terrain features.
-c       Includes option to conserve surface convergence from 
+c	routine to channel winds around terrain features.
+c       includes option to conserve surface convergence from 
 c       raw wind data since channeling routine acts to eliminate
 c       convergence totally.
 c
-c       Original:   J. McGinley, 2nd half of 20th Century
-c       Changes:    P. Stamus  26 Aug 1997  Changes for dynamic LAPS
+c       original:   j. mcginley, 2nd half of 20th century
+c       changes:    p. stamus  26 aug 1997  changes for dynamic laps
 c
 c=====================================================================
 c
@@ -89,11 +89,11 @@ c
 	enddo !i
 	enddo !j
 c
-c	print *,' Calculating the solution for streamfunction'
+c	print *,' calculating the solution for streamfunction'
 	call zero(phi,imax,jmax)
 	call leib_2d(phi,ter,100,.1,imax,jmax,z,b,c,z,z,dx,dy)
 c
-c.....	Adjust the winds.
+c.....	adjust the winds.
 c
 	do j=1,jmax-1
 	do i=1,imax-1
@@ -161,9 +161,9 @@ c
 	subroutine leib_2d(sol,force,itmax,erf,imax,jmax,a,b,c,d,e,
      &                   dx,dy)
 c
-c.....  Relaxation routine.
-c.....  Changes:  P. Stamus, NOAA/FSL  13 Aug 1999
-c.....                 Cleaned up, added tagit routine.
+c.....  relaxation routine.
+c.....  changes:  p. stamus, noaa/fsl  13 aug 1999
+c.....                 cleaned up, added tagit routine.
 c       
 	real sol(imax,jmax),force(imax,jmax),a(imax,jmax)
 	real b(imax,jmax),c(imax,jmax),d(imax,jmax),e(imax,jmax)
@@ -219,10 +219,10 @@ c  first guess here
 	reslm = corlm * cortm
 	write(6,1001) it,reslm,corlm,corlmm,erb
 	write(6,1002) ovr
-1002	format(1x,'OVR RLXTN CONST AT FNL ITTR = ',e10.4)
-1001	format(1x,'ITERATIONS= ',i4,' MAX RESIDUAL= ',e10.3,
-     & ' MAX CORRECTION= ',e10.3, ' FIRST ITER MAX COR= ',e10.3,
-     & 'MAX BNDRY RESID= ',e10.3)
+1002	format(1x,'ovr rlxtn const at fnl ittr = ',e10.4)
+1001	format(1x,'iterations= ',i4,' max residual= ',e10.3,
+     & ' max correction= ',e10.3, ' first iter max cor= ',e10.3,
+     & 'max bndry resid= ',e10.3)
 c
 	return
 	end
@@ -233,38 +233,38 @@ c
      &                    imiss,mxstn,obs_error,name,topo,ldf,wt_bkg_a)
 c
 c*******************************************************************************
-c	LAPS spline routine...based on one by J. McGinley.
+c	laps spline routine...based on one by j. mcginley.
 c
-c	Changes:  
-c	  P. Stamus	10-18-90  Started to clean code. Made alf2/alf2o arrays.
-c			11-11-91  Pass in dummy work arrays.
-c			07-27-93  Changes for new barnes2 routine. 
-c                       07-20-95  Put wt calcs here...call to dynamic_wts.
-c                       08-26-97  Changes for dynamic LAPS. Pass in obs_error.
-c         J. McGinley   09-22-98  Changes to fully exploit background info.
-c          and P.Stamus           Routine modified to always use a background
-c                                 field for QC and 1st guess.  Spline solves for
-c                                 a solution difference from 1st guess.  Removed
-c                                 2 Barnes calls. When no satellite data for HSM,
-c                                 'a' weight set to zero.  Bkg added back into
+c	changes:  
+c	  p. stamus	10-18-90  started to clean code. made alf2/alf2o arrays.
+c			11-11-91  pass in dummy work arrays.
+c			07-27-93  changes for new barnes2 routine. 
+c                       07-20-95  put wt calcs here...call to dynamic_wts.
+c                       08-26-97  changes for dynamic laps. pass in obs_error.
+c         j. mcginley   09-22-98  changes to fully exploit background info.
+c          and p.stamus           routine modified to always use a background
+c                                 field for qc and 1st guess.  spline solves for
+c                                 a solution difference from 1st guess.  removed
+c                                 2 barnes calls. when no satellite data for hsm,
+c                                 'a' weight set to zero.  bkg added back into
 c                                 t, to, and s arrays on exit.
-c         P. Stamus     09-29-98  Calc std dev from just obs (not boundaries+obs)
-c                       01-28-99  Temp. replace spline section with Barnes. Fix
+c         p. stamus     09-29-98  calc std dev from just obs (not boundaries+obs)
+c                       01-28-99  temp. replace spline section with barnes. fix
 c                                   boundary normalization.
-c                       07-24-99  Turn spline back on, rm Barnes.  Adj weights.
-c                                   Turn satellite back on.
-c                       08-13-99  Change call to allow diff alf/alf2a/beta/a for
-c                                   diff variables.  Rm alf2 as array.
-c                       11-23-99  Put background (tb) into output (t) array if
+c                       07-24-99  turn spline back on, rm barnes.  adj weights.
+c                                   turn satellite back on.
+c                       08-13-99  change call to allow diff alf/alf2a/beta/a for
+c                                   diff variables.  rm alf2 as array.
+c                       11-23-99  put background (tb) into output (t) array if
 c                                   no obs or all obs bad in data array (to).
 c
-c         S. Albers     2001      Adding in data structures towards the goal of
+c         s. albers     2001      adding in data structures towards the goal of
 c                                 directly analyzing obs external to the grid
 c*******************************************************************************
 c
         logical l_barnes_wide, l_struct
-        data l_struct /.false./        ! Using data structures?
-        data l_barnes_wide /.true./    ! Using barnes_wide routine on boundary?
+        data l_struct /.false./        ! using data structures?
+        data l_barnes_wide /.true./    ! using barnes_wide routine on boundary?
 
         integer max_obs
         parameter (max_obs = 40000)       
@@ -273,7 +273,7 @@ c
         type (barnesob_qc) obs_barnes(max_obs)
 
 	real t(imax,jmax), to(imax,jmax), s(imax,jmax), s_in(imax,jmax)
-	real RESS(1000), tb(imax,jmax) !, alf2(imax,jmax)
+	real ress(1000), tb(imax,jmax) !, alf2(imax,jmax)
         real topo(imax,jmax),ldf(imax,jmax)
         real wt_bkg_a(imax,jmax)                         
 c
@@ -288,26 +288,26 @@ c
 
         lun_s = 6
 c
-!       Analysis mode controls the strategy of doing the analysis
+!       analysis mode controls the strategy of doing the analysis
 !
-!       1) Method in place early 2001. Start spline with constant field based
+!       1) method in place early 2001. start spline with constant field based
 !          on mean of observation increments.
 !
-!       2) Start spline with incremental field as analyzed by 
+!       2) start spline with incremental field as analyzed by 
 !          'barnes_multivariate' routine. 
 !
-!       3) Use barnes_multivariate routine as complete substitute to spline.
+!       3) use barnes_multivariate routine as complete substitute to spline.
 
         analysis_mode = 3
 
  	write(6,910)analysis_mode
  910	format(' subroutine spline: analysis_mode = ',i3)
 
-!       Fill data structure
+!       fill data structure
         rinst_err = 1.5
         n_obs = 0
 
-        if(l_struct)then ! Define "to" array from data structure
+        if(l_struct)then ! define "to" array from data structure
             to = 0.0     ! f90 assignment
             do iob = 1,n_obs
                 i = obs_barnes(iob)%i
@@ -315,7 +315,7 @@ c
                 to(i,j) = obs_barnes(n_obs)%value(1)
             enddo ! iob
 
-        else             ! Define data structure from input "to" array
+        else             ! define data structure from input "to" array
             do i = 1,imax
             do j = 1,jmax
                 if(to(i,j) .ne. 0.0)then
@@ -327,17 +327,17 @@ c
                     obs_barnes(n_obs)%vert_rad_rat = 1.0
                     obs_barnes(n_obs)%value(1) = to(i,j)
                     obs_barnes(n_obs)%qc = .true.
-C
-C TH: 29 November 2002 Begin hack.
-C
-                    if (name .eq. 'PRESSURE') then
+c
+c th: 29 november 2002 begin hack.
+c
+                    if (name .eq. 'pressure') then
                        obs_barnes(n_obs)%mask_sea = 0
                     else
                        obs_barnes(n_obs)%mask_sea = 1
                     endif
-C
-C TH: 29 November 2002 End hack.
-C
+c
+c th: 29 november 2002 end hack.
+c
                 endif
             enddo ! j
             enddo ! i
@@ -356,7 +356,7 @@ c.....	first guess use barnes
 c
 	npass = 1
 c
-c.....  Count the number of observations in the field (not counting the 
+c.....  count the number of observations in the field (not counting the 
 c.....  boundaries.
 
 c
@@ -400,19 +400,19 @@ c
         n_valid_obs = n_obs
 
 	if(n_obs_var .eq. 0) then
-	  print *,'  WARNING.  No observations found in data array. '
+	  print *,'  warning.  no observations found in data array. '
 	  imiss = 1
 	  go to 950
 	else
-	   print *,'  Observations in data array: ', n_obs_var
+	   print *,'  observations in data array: ', n_obs_var
 	endif
 c
-	if(name.ne.'NOPLOT' .and. name(1:3).ne.'TB8') then
+	if(name.ne.'noplot' .and. name(1:3).ne.'tb8') then
 	  write(lun_s,912)
  912	  format('  data passed into spline:')
 	endif
 c
-c.....	Data check algorithm and computation of difference 
+c.....	data check algorithm and computation of difference 
 c.....  from background.
 c
 	sum = 0.
@@ -420,7 +420,7 @@ c
 	sum1 = 0.
 	icnt = 0
 c
-c.....	Compute standard deviation of the obs
+c.....	compute standard deviation of the obs
 c
 	do j=jlow,jhigh
 	do i=ilow,ihigh
@@ -432,25 +432,25 @@ c
 	enddo !j
 c
 	if(cnt .eq. 0.) then
-	  print *,'  WARNING.  Zero observations found in data array. '
+	  print *,'  warning.  zero observations found in data array. '
 	  go to 950
 	else
 	  std = sqrt(sum / cnt)
 	endif
 	if(std .eq. 0.) then
 	  write(6,927) 
- 927	  format(1x,'  WARNING. Standard Deviation is zero.',
-     &           ' Observations equal backgroud at all locations.')
+ 927	  format(1x,'  warning. standard deviation is zero.',
+     &           ' observations equal backgroud at all locations.')
 	  std = zeros
 	endif
 c
-c.....  Bad data defined as deviating 'bad_mult' sigmas from 1st guess
+c.....  bad data defined as deviating 'bad_mult' sigmas from 1st guess
 c
 	bad = bad_mult * std
 	print *,' std dev: ',std,', bad value: ',bad
      1                          ,', ratio: ',bad_mult      
 c
-c.....  Normalize the obs with respect to the bkg.
+c.....  normalize the obs with respect to the bkg.
 c
 	sumdif = 0.
 	numdif = 0
@@ -476,9 +476,9 @@ c
         else ! .not. l_struct
           do j = 1,jmax
           do i = 1,imax
-            if(l_boundary(i,j) .and. l_barnes_wide)then ! Normalize boundary ob
+            if(l_boundary(i,j) .and. l_barnes_wide)then ! normalize boundary ob
 
-!              Here it seems to be important that the stations are mapped onto
+!              here it seems to be important that the stations are mapped onto
 !              the grid with rounding up allowed to get the best possible 
 !              departures
 
@@ -501,7 +501,7 @@ c
 
                endif
  
-            endif ! Boundary point
+            endif ! boundary point
 
           enddo ! j
           enddo ! i
@@ -513,19 +513,19 @@ c
 c
 	print *,' '
 	if(numdif .ne. n_obs_var) then
-	   print *,' Hmmmm...numdif= ',numdif,' ; n_obs_var= ',n_obs_var
+	   print *,' hmmmm...numdif= ',numdif,' ; n_obs_var= ',n_obs_var
 	endif
 	if(n_obs_var.gt.0 .and. numdif.gt.0) then
 	   print *,
-     &       ' Observations in data array after spline QC: ',n_obs_var
+     &       ' observations in data array after spline qc: ',n_obs_var
 	else
 	   print *,
-     &       '  WARNING. No observations in data array after QC check.'
+     &       '  warning. no observations in data array after qc check.'
 	   go to 950
 	endif
 
 
-c.....  Subtract background from satellite obs and calculate sat stats (deg F)
+c.....  subtract background from satellite obs and calculate sat stats (deg f)
 c
 	isat_flag = 0
         num_sat_bkg = 0
@@ -554,70 +554,70 @@ c
 	enddo !i
 	enddo !j
 
-        write(6,*)' Num sat tb8 points = ',num_sat_bkg
+        write(6,*)' num sat tb8 points = ',num_sat_bkg
 
         if(num_sat_bkg .gt. 1)then
             rmean = sum_sat_bkg   / float(num_sat_bkg)
             rms   = sqrt(sumsq_sat_bkg / float(num_sat_bkg))
             rms_abm = sqrt(rms**2 - rmean**2)
             write(6,*)
-     1          ' Mean/RMS/RMS about mean: Sat vs. Background = '
+     1          ' mean/rms/rms about mean: sat vs. background = '
      1          ,rmean,rms,rms_abm       
 
-            write(6,*)' Num of sat/obs comparisons = ',num_sat_obs
+            write(6,*)' num of sat/obs comparisons = ',num_sat_obs
 
             if(num_sat_obs .gt. 1)then
                 rmean = sum_sat_obs   / float(num_sat_obs)
                 rms   = sqrt(sumsq_sat_obs / float(num_sat_obs))
                 rms_abm = sqrt(rms**2 - rmean**2)
                 write(6,*)
-     1              ' Mean/RMS/RMS about mean: Sat vs. Obs = '
+     1              ' mean/rms/rms about mean: sat vs. obs = '
      1              ,rmean,rms,rms_abm       
             endif
 
         endif
 c
-c.....  Have obs, so set starting field so spline converges faster.
+c.....  have obs, so set starting field so spline converges faster.
 c
         if(analysis_mode .eq. 1)then
 	    amean_start = sumdif / numdif
-	    print *,' Using mean of '
+	    print *,' using mean of '
      1             , amean_start, ' to start analysis.'
 	    call constant(t, amean_start, imax,jmax)
 
         elseif(analysis_mode .ge. 2)then
-            write(6,*)' Calling barnes_multivariate_sfc to start spline'       
+            write(6,*)' calling barnes_multivariate_sfc to start spline'       
 
             call get_fnorm_max(imax,jmax,r0_norm,r0_value_min,fnorm_max)   
             n_fnorm = int(fnorm_max) + 1
 
-            call barnes_multivariate_sfc(to,imax,jmax               ! Inputs
-     1                                ,smsng                        ! Input
-     1                                ,rms_thresh_norm              ! Input
-     1                                ,rinst_err                    ! Input
-     1                                ,bad                          ! Input
-     1                                ,wt_bkg_a                     ! Input
-     1                                ,n_fnorm                      ! Input
-     1                                ,l_boundary,.true.,.false.    ! Input
-     1                                ,n_valid_obs,obs_barnes       ! Input
-     1                                ,topo,ldf                     ! Input
-     1                                ,t                            ! Output
-     1                                ,istatus)                     ! Output
+            call barnes_multivariate_sfc(to,imax,jmax               ! inputs
+     1                                ,smsng                        ! input
+     1                                ,rms_thresh_norm              ! input
+     1                                ,rinst_err                    ! input
+     1                                ,bad                          ! input
+     1                                ,wt_bkg_a                     ! input
+     1                                ,n_fnorm                      ! input
+     1                                ,l_boundary,.true.,.false.    ! input
+     1                                ,n_valid_obs,obs_barnes       ! input
+     1                                ,topo,ldf                     ! input
+     1                                ,t                            ! output
+     1                                ,istatus)                     ! output
         endif
 c
-cc	print *,' Using smooth Barnes to start the analysis.'
+cc	print *,' using smooth barnes to start the analysis.'
 cc	rom2 = 0.005
 cc	npass = 1
 cc	idum = 0
 cc	call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 cc	call barnes2(t,imax,jmax,to,smsng,idum,npass,fnorm)
-cc	print *,' Done.'
+cc	print *,' done.'
 c       
         if(analysis_mode .le. 2)then
 c
-c.....      Set the weights for the spline.
+c.....      set the weights for the spline.
 c
-c           We need parity with respect to obs and filtering. Since number
+c           we need parity with respect to obs and filtering. since number
 c           of obs can change depending on variable adjust alf accordingly
 c           so that it is representative of the inverse of observation
 c           error**2 times the number of working gridpoints divided by the 
@@ -630,9 +630,9 @@ c           beta term
 	    if(isat_flag .eq. 0) a = 0.
 c
 	    write(6,9995) alf, beta, alf2a, a
- 9995	    format(5x,'Using spline wts: alf, beta, alf2a, a = ',4f12.4)       
+ 9995	    format(5x,'using spline wts: alf, beta, alf2a, a = ',4f12.4)       
 c
-c.....      Now do the spline.
+c.....      now do the spline.
 c
 	    iteration = .true.
 
@@ -706,13 +706,13 @@ cc	    enddo
   	    write(6,1000) ithold ,corhold !it, cormax
  1000	    format(1x,' it/cormax= ',i4,e12.4)
 
-        endif ! Do the spline
+        endif ! do the spline
 
 cc	return
 
  876	continue
 c
-c.....  Add backgrounds back to t, to, and s
+c.....  add backgrounds back to t, to, and s
 c
 	do j=1,jmax
 	do i=1,imax
@@ -722,21 +722,21 @@ c
 	enddo !i
 	enddo !j
 c
-	if(name.ne.'NOPLOT' .and. name(1:3).ne.'TB8') then
+	if(name.ne.'noplot' .and. name(1:3).ne.'tb8') then
 	   write(lun_s,923)
  923	   format(1x,' solution after spline')
 	endif
 	if(cormax.lt.err .and. it.eq.1) return
  3	continue
 c       
-c.....  That's all.
+c.....  that's all.
 c
 !	print *,' leaving spline'
 	return
 c
  950	continue
 	print *,
-     &  '    No observations available. Setting analysis to background.'
+     &  '    no observations available. setting analysis to background.'
 	call move(tb, t, imax, jmax)
         write(6,*)'    bkgnd analysis range is ',minval(t),maxval(t)
 	return
@@ -760,7 +760,7 @@ c
 c
 c.....	loop over field npass times 
 c
-!	print *,' *** In BARNES2 ***'
+!	print *,' *** in barnes2 ***'
         ncnt = 0
         do j=1,jmax
         do i=1,imax
@@ -774,7 +774,7 @@ cc	     write(6,999) ncnt, i, j, to(i,j)
         enddo !i
         enddo !j
 	if(ncnt .eq. 0) then
-	  print *,' *** NCNT = 0 in BARNES2. ***'
+	  print *,' *** ncnt = 0 in barnes2. ***'
 	  return
 	endif
  999	format('   ncnt: ',i4,' at ',2i5,f10.3)
@@ -838,7 +838,7 @@ c
 550	continue
         enddo !ipass
 c
-!	print *,' *** BARNES2 Done. ***'
+!	print *,' *** barnes2 done. ***'
 	return
 	end
 c
@@ -846,10 +846,10 @@ c
 	subroutine barnes_wide(t,imax,jmax,ii,jj,t_ob,numsta,smsng,
      &                         mxstn,npass,fnorm,istatus)
 c
-c.....	Routine to do a Barnes analysis that will consider stations in
+c.....	routine to do a barnes analysis that will consider stations in
 c.....	the 't_ob' array that are outside the boundaries of the 't' array.
 c
-c       Changes:  P.Stamus NOAA/FSL  7 Jan 1999  Add status flag.
+c       changes:  p.stamus noaa/fsl  7 jan 1999  add status flag.
 c
 
 	real t(imax,jmax), t_ob(mxstn) 
@@ -862,7 +862,7 @@ c
 
         lun_s = 6
 
-!	print *,' *** In BARNES_wide ***'
+!	print *,' *** in barnes_wide ***'
 	istatus = -1
 	call zero(h1,imax,jmax)
 	im1 = imax - 1
@@ -881,13 +881,13 @@ c
 	enddo !n 
 c
 	if(ncnt .eq. 0) then
-	   print *,' **Warning. No obs for analysis in BARNES_WIDE. **'
+	   print *,' **warning. no obs for analysis in barnes_wide. **'
 	   istatus = 0
 	   return
 	endif
 c
 	write(6,900) ncnt, numsta
-900	format('   Selected ',i5,' obs out of ',i5
+900	format('   selected ',i5,' obs out of ',i5
      1        ,' total (barnes_wide)')
 c
 	do ipass=1,npass
@@ -962,14 +962,14 @@ c
 c
 c======================================================================
 c
-c	Routine to calculate the CSSI (Rodgers and Maddox 81) at each 
-c       LAPS gridpoint.  The temp and dewpt enter in deg F, the MSL 
+c	routine to calculate the cssi (rodgers and maddox 81) at each 
+c       laps gridpoint.  the temp and dewpt enter in deg f, the msl 
 c       pressure in mb, and the wind components in m/s, which have to be 
 c       converted to speed and direction in kts.
 c
-c	Original version: 05-03-91  Peter A. Stamus NOAA/FSL
-c	Changes:          11-11-91  Pass in dummy arrays.
-c                         08-26-97  Changes for dynamic LAPS
+c	original version: 05-03-91  peter a. stamus noaa/fsl
+c	changes:          11-11-91  pass in dummy arrays.
+c                         08-26-97  changes for dynamic laps
 c
 c======================================================================
 c
@@ -978,12 +978,12 @@ c
 c
 	real spd(ni,nj), dir(ni,nj)  !work arrays
 c
-c.....	Start.  Convert u,v in m/s to spd/dir in kts.
+c.....	start.  convert u,v in m/s to spd/dir in kts.
 c
 	call windconvert(u,v,dir,spd,ni,nj,badflag)
 	call conv_ms2kt(spd,spd,ni,nj)	
 c
-c.....	Calculate each of the 4 terms involved, then combine.
+c.....	calculate each of the 4 terms involved, then combine.
 c
 	do j=1,nj
 	do i=1,ni
@@ -1014,24 +1014,24 @@ c
 c
 c======================================================================
 c
-c       Given wind components, calculate the corresponding speed and 
-c       direction.  Hacked up from the windcnvrt_gm program.
+c       given wind components, calculate the corresponding speed and 
+c       direction.  hacked up from the windcnvrt_gm program.
 c
 c
-c       Argument     I/O   Type       Description
+c       argument     i/o   type       description
 c      --------	     ---   ----   -----------------------------------
-c       UWind         I    R*4A    U-component of wind
-c       VWind         I	   R*4A    V-component of wind
-c       Direction     O    R*4A    Wind direction (meteoro. degrees)
-c       Speed         O    R*4A    Wind speed (same units as input)
-c       ni,nj         I    I       Grid dimensions
-c       badflag       I    R*4     Bad flag value
+c       uwind         i    r*4a    u-component of wind
+c       vwind         i	   r*4a    v-component of wind
+c       direction     o    r*4a    wind direction (meteoro. degrees)
+c       speed         o    r*4a    wind speed (same units as input)
+c       ni,nj         i    i       grid dimensions
+c       badflag       i    r*4     bad flag value
 c
-c       Notes:
-c       1.  If magnitude of UWind or VWind > 500, set the speed and 
+c       notes:
+c       1.  if magnitude of uwind or vwind > 500, set the speed and 
 c           direction set to the badflag value.
 c
-c       2.  Units are not changed in this routine.
+c       2.  units are not changed in this routine.
 c
 c======================================================================
 c
@@ -1047,7 +1047,7 @@ c
 c
 	   elseif(uwind(i,j).eq.0.0 .and. vwind(i,j).eq.0.0) then
 	      speed(i,j) = 0.0
-	      direction(i,j) = 0.0			!Undefined
+	      direction(i,j) = 0.0			!undefined
 c
 	   else
 	      speed(i,j) = 
@@ -1067,42 +1067,42 @@ c
 c
 c=====================================================================
 c
-c     Routine to calculate the weights to be used in the Barnes
-c     analysis.  The data density is used to set the cutoff for
-c     the response function.  Then that cutoff is used to calculate
+c     routine to calculate the weights to be used in the barnes
+c     analysis.  the data density is used to set the cutoff for
+c     the response function.  then that cutoff is used to calculate
 c     the exp, based on differences so that no additional distance
-c     calculations are required in the Barnes routine.  All of this
+c     calculations are required in the barnes routine.  all of this
 c     is done in gridpoint space.
 c
-c     Original:  07-14-95  P. Stamus, NOAA/FSL
-c     Changes:   P. Stamus  08-28-97  Declare dx,dy integers.
-c                           09-10-97  Bag include. Pass in fnorm.
+c     original:  07-14-95  p. stamus, noaa/fsl
+c     changes:   p. stamus  08-28-97  declare dx,dy integers.
+c                           09-10-97  bag include. pass in fnorm.
 c
-c     Notes:
+c     notes:
 c
-c       1.  If variable 'rom2' is passed in as zero, it is calculated
-c           from the data density.  Otherwise, the value passed in is
+c       1.  if variable 'rom2' is passed in as zero, it is calculated
+c           from the data density.  otherwise, the value passed in is
 c           used in the weight calculation.
 c
-c       2.  The response for 2d waves is hard-wired in this routine.
-c           This is the 'con' variable, and comes from the eqn:
-c                     D = exp -(pi**2 R**2)/lamba**2
-c           If we set D (the response) to our desired cutoff, set 
+c       2.  the response for 2d waves is hard-wired in this routine.
+c           this is the 'con' variable, and comes from the eqn:
+c                     d = exp -(pi**2 r**2)/lamba**2
+c           if we set d (the response) to our desired cutoff, set 
 c           lamba to the desired wavelength in gridpt space (2d),
-c           then solve for R in terms of d, we get the 'con' value
-c           (i.e.,  R = (con)*d).  Here are some values for different
+c           then solve for r in terms of d, we get the 'con' value
+c           (i.e.,  r = (con)*d).  here are some values for different
 c           cutoffs:
-c                     D = 0.01     R = 1.36616d
-c                         0.10     R = 0.96602d
-c                         0.25     R = 0.74956d
-c                         0.50     R = 0.53002d
+c                     d = 0.01     r = 1.36616d
+c                         0.10     r = 0.96602d
+c                         0.25     r = 0.74956d
+c                         0.50     r = 0.53002d
 c
 c=====================================================================
 c
 	real fnorm(0:imax-1,0:jmax-1)
 	integer dx, dy
 c
-c.... First, find the area that each ob covers in gridpt space (this
+c.... first, find the area that each ob covers in gridpt space (this
 c.... of course assumes a uniform coverage).
 c
 cc	con = 0.96602     ! resp of 0.10
@@ -1113,15 +1113,15 @@ cc	con = 0.74956     ! resp of 0.25
 	   d = sqrt( area )
 	   rom2 = 1. / ((con * con) * (d * d))
 	   write(6,900) n_obs_var, area, d, rom2
- 900	   format(1x,'Num obs: ',i5,'  Area: ',f8.2,'  d: ',f8.2,
+ 900	   format(1x,'num obs: ',i5,'  area: ',f8.2,'  d: ',f8.2,
      &       '  rom2: ',f8.5)
 	else
 	   d = sqrt(1./(con * con * rom2))
 	   write(6,902) rom2, d
- 902	   format(' Using preset rom2 of: ',f8.5,'  Calc d: ',f8.2)
+ 902	   format(' using preset rom2 of: ',f8.5,'  calc d: ',f8.2)
 	endif
 c
-c.... Now calculate the weights for all the possible distances.
+c.... now calculate the weights for all the possible distances.
 c
 	pi = 4. * atan(1.)
 	fno = 1. / (sqrt(2. * pi))
@@ -1133,7 +1133,7 @@ c
 	enddo !dx
 	enddo !dy
 c
-c.... That's it.
+c.... that's it.
 c
 	return
 	end
@@ -1143,13 +1143,13 @@ c
 c
 c=======================================================================
 c
-c       Routine to calculate the 'beta' weight for the spline.  'Beta'
+c       routine to calculate the 'beta' weight for the spline.  'beta'
 c       is calculated based on the 'd' from the gridpt to data distance
 c       and an expected observation error for the partictular variable.
 c
 c
-c       Original:  07-19-95  P. Stamus, NOAA/FSL
-c       Changes:
+c       original:  07-19-95  p. stamus, noaa/fsl
+c       changes:
 c
 c=======================================================================
 c
@@ -1162,7 +1162,7 @@ c
 	if(obs_error .ne. 0.) then
 	   alpha = 1. / (obs_error * obs_error)
 	else
-	   print *,' **ERROR. obs_error = 0 in CALC_BETA.**'
+	   print *,' **error. obs_error = 0 in calc_beta.**'
 	   go to 100
 	endif
 c
@@ -1173,7 +1173,7 @@ c
  900	format(1x,'obs error: ',f9.4,'  d: ',f9.4,
      &                      '  alpha: ',f9.4,'  beta: ',f15.4)
 	if(beta .eq. 0.) then
-	   print *,' **ERROR. beta = 0 in CALC_BETA.**'
+	   print *,' **error. beta = 0 in calc_beta.**'
 	   beta = -99.9
 	endif
 c

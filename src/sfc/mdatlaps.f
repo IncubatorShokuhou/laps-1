@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -45,78 +45,78 @@ c
 c*******************************************************************************
 c
 c	rewritten version of the mcginley mesodat program
-c	-- rewritten again for the LAPS surface analysis...1-12-88
+c	-- rewritten again for the laps surface analysis...1-12-88
 c
-c	Changes:
-c 	P.A. Stamus	06-27-88  Changed LAPS grid to new dimensions.
-c			07-13-88  Restructured for new data formats
-c				                  and MAPS first-guess.
-c			07-26-88  Finished new stuff.
-c			08-05-88  Rotate SAO winds to the projection.
-c			08-23-88  Changes for laps library routines.
-c			09-22-88  Make 1st guess optional.
-c			10-11-88  Make filenames time dependent.
+c	changes:
+c 	p.a. stamus	06-27-88  changed laps grid to new dimensions.
+c			07-13-88  restructured for new data formats
+c				                  and maps first-guess.
+c			07-26-88  finished new stuff.
+c			08-05-88  rotate sao winds to the projection.
+c			08-23-88  changes for laps library routines.
+c			09-22-88  make 1st guess optional.
+c			10-11-88  make filenames time dependent.
 c-------------------------------------------------------------------------------
-c			12-15-88  Rewritten.
-c			01-09-89  Changed header, added meanpres calc.
-c			03-29-89  Corrected for staggered grid. Removed
+c			12-15-88  rewritten.
+c			01-09-89  changed header, added meanpres calc.
+c			03-29-89  corrected for staggered grid. removed
 c					dependence on file for correct times.
-c			04-12-89  Changed to do only 1 time per run.
-c			05-12-89  Fixed i4time error.
-c			06-01-89  New grid -- add nest6grid.
-c			11-07-89  Add nummeso/sao to the output header.
+c			04-12-89  changed to do only 1 time per run.
+c			05-12-89  fixed i4time error.
+c			06-01-89  new grid -- add nest6grid.
+c			11-07-89  add nummeso/sao to the output header.
 c			--------------------------------------------------------
-c			03-12-90  Subroutine version.
-c			04-06-90  Pass in ihr,del,gam,ak for header.
-c			04-11-90  Pass in LAPS lat/lon and topography.
-c			04-16-90  Bag cloud stuff except ceiling.
-c			04-17-90  Add MSL pressure.
-c			06-18-90  New cloud check routine.
-c			06-19-90  Add topo.
-c			10-03-90  Changes for new vas data setup.
-c			10-30-90  Put Barnes anl on boundaries.
-c			02-15-91  Add solar radiation code.
-c			05-01-91  Add Hartsough QC code.
-c			11-01-91  Changes for new grids.
-c			01-15-92  Add visibility analysis.
-c			01-22-93  Changes for new LSO/LVD.
-c			07-29-93  Changes for new barnes_wide routine.
-c                       02-24-94  Remove ceiling ht stuff.
-c                       04-14-94  Changes for CRAY port.
-c                       07-20-94  Add include file.
-c                       09-31-94  Change to LGA from LMA for bkgs.
-c                       02-03-95  Move background calls to driver routine.
-c                       02-24-95  Add code to check bkgs for bad winds.
-c                       08-08-95  Changes for new verify code.
-c                       03-22-96  Changes for 30 min cycle.
-c                       10-09-96  Grid stn elevs for use in temp anl.
-c                       11-18-96  Ck num obs.
-c                       12-13-96  More porting changes...common for
-c                                   sfc data, LGS grids. Bag stations.in
-c                       08-27-97  Changes for dynamic LAPS.
-c                       09-24-98  If missing background, do a smooth Barnes
+c			03-12-90  subroutine version.
+c			04-06-90  pass in ihr,del,gam,ak for header.
+c			04-11-90  pass in laps lat/lon and topography.
+c			04-16-90  bag cloud stuff except ceiling.
+c			04-17-90  add msl pressure.
+c			06-18-90  new cloud check routine.
+c			06-19-90  add topo.
+c			10-03-90  changes for new vas data setup.
+c			10-30-90  put barnes anl on boundaries.
+c			02-15-91  add solar radiation code.
+c			05-01-91  add hartsough qc code.
+c			11-01-91  changes for new grids.
+c			01-15-92  add visibility analysis.
+c			01-22-93  changes for new lso/lvd.
+c			07-29-93  changes for new barnes_wide routine.
+c                       02-24-94  remove ceiling ht stuff.
+c                       04-14-94  changes for cray port.
+c                       07-20-94  add include file.
+c                       09-31-94  change to lga from lma for bkgs.
+c                       02-03-95  move background calls to driver routine.
+c                       02-24-95  add code to check bkgs for bad winds.
+c                       08-08-95  changes for new verify code.
+c                       03-22-96  changes for 30 min cycle.
+c                       10-09-96  grid stn elevs for use in temp anl.
+c                       11-18-96  ck num obs.
+c                       12-13-96  more porting changes...common for
+c                                   sfc data, lgs grids. bag stations.in
+c                       08-27-97  changes for dynamic laps.
+c                       09-24-98  if missing background, do a smooth barnes
 c                                   so something is there.
-c                       09-30-98  Housekeeping.
-c                       01-28-99  Rm smooth Barnes for missing bkgs.
-c                       07-08-99  Removed east/west/north/south from call.
-c                                   Changed character array 'stn'.  Rm *4
-c                                   from all declarations.  Use Barnes for
-c                                   missing backgrounds. Turn off for now 
-c                                   MSL P calc at stns that don't report it.
-c	                07-26-99  Set back_mp off until can check.
-c                       08-17-99  Change vis for obs of 10+ miles, turn off bkg.
-c                                   If LGB bkgs good, calculate a bkg red_p
-c                                   instead of using previous LSX.
-c                       09-17-99  Add check of red_p bkg calc.  If badflags get
+c                       09-30-98  housekeeping.
+c                       01-28-99  rm smooth barnes for missing bkgs.
+c                       07-08-99  removed east/west/north/south from call.
+c                                   changed character array 'stn'.  rm *4
+c                                   from all declarations.  use barnes for
+c                                   missing backgrounds. turn off for now 
+c                                   msl p calc at stns that don't report it.
+c	                07-26-99  set back_mp off until can check.
+c                       08-17-99  change vis for obs of 10+ miles, turn off bkg.
+c                                   if lgb bkgs good, calculate a bkg red_p
+c                                   instead of using previous lsx.
+c                       09-17-99  add check of red_p bkg calc.  if badflags get
 c                                   in, don't use it.
 c
-c	Notes:
+c	notes:
 c
 c******************************************************************************
 c
 	include 'laps_sfc.inc'
 c
-c..... Stuff for the sfc data and other station info (LSO +)
+c..... stuff for the sfc data and other station info (lso +)
 
         include 'sfcob.inc'
         type (sfcob) obs(mxstn)
@@ -132,17 +132,17 @@ c
 c
 	character stn(mxstn)*20 
 c
-c.....	Arrays for derived variables from OBS data
+c.....	arrays for derived variables from obs data
 c
 	real uu(mxstn), vv(mxstn), pred_s(mxstn)
 c
-c.....	Stuff for satellite data.
+c.....	stuff for satellite data.
 c
 	integer lvl_v(1)
 	character var_v(1)*3, units_v(1)*10
 	character comment_v(1)*125, ext_v*31
 c
-c.....  Stuff for intermediate grids (old LGS file)
+c.....  stuff for intermediate grids (old lgs file)
 c
 	real u1(ni,nj), v1(ni,nj)
 	real t1(ni,nj), td1(ni,nj), tb81(ni,nj)
@@ -150,7 +150,7 @@ c
 	real vis1(ni,nj), elev1(ni,nj)
 	real dum1(ni,nj), dum2(ni,nj)
 c
-c..... Other arrays for intermediate grids 
+c..... other arrays for intermediate grids 
 c
         real wwu(ni,nj), wwv(ni,nj)
 	real wp(ni,nj), wsp(ni,nj), wmslp(ni,nj)
@@ -160,14 +160,14 @@ c
 	real x1a(ni), x2a(nj), y2a(ni,nj)    !interp routine
 	real d1(ni,nj)   ! work array
 c
-c..... LAPS Lat/lon grids.
+c..... laps lat/lon grids.
 c
 	real lat(ni,nj),lon(ni,nj), topo(ni,nj)
 c
 	real lapse_t, lapse_td
 	character atime*24
 c
-c.....	Grids for the background fields...use if not enough sao data.
+c.....	grids for the background fields...use if not enough sao data.
 c
         real u_bk(ni,nj), v_bk(ni,nj), t_bk(ni,nj), td_bk(ni,nj)
         real wt_u(ni,nj), wt_v(ni,nj)
@@ -177,7 +177,7 @@ c
         integer back_t, back_td, back_rp, back_uv, back_vis, back_sp
         integer back_mp
 c
-c.....  Stuff for checking the background fields.
+c.....  stuff for checking the background fields.
 c
 	real interp_spd(mxstn), bk_speed(ni,nj)
 	parameter(threshold = 2.)  ! factor for diff check
@@ -187,13 +187,13 @@ c
 	integer jstatus(20)
         logical l_bilinear_interp 
 c
-c.....	START.  Set up constants.
+c.....	start.  set up constants.
 c
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
 	call tagit('mdatlaps', 19990917)
 
-!       This will interpolate the grid to the stations using a significantly
+!       this will interpolate the grid to the stations using a significantly
 !       faster bilinear interpolation instead of the splines.
         l_bilinear_interp = .true.
 
@@ -208,7 +208,7 @@ c
         smsng = 1.e37
         zero_ea = 0.
 c
-c.....  Zero out the sparse obs arrays.
+c.....  zero out the sparse obs arrays.
 c
 	call zero(u1,    imax,jmax)
 	call zero(v1,    imax,jmax)
@@ -224,7 +224,7 @@ c
 	   vv(i) = 0.
 	enddo !i
 c
-c.....  Stuff for checking the background windspeed.
+c.....  stuff for checking the background windspeed.
 c
 	if(ilaps_bk.ne.1 .or. back_uv.ne.1) then
 	   call constant(bk_speed,badflag, imax,jmax)
@@ -232,7 +232,7 @@ c
 	   call windspeed(u_bk,v_bk,bk_speed, imax,jmax)
 	endif
 c
-c.....	Rotate sao winds to the projection grid, then change dd,fff to u,v
+c.....	rotate sao winds to the projection grid, then change dd,fff to u,v
 c
 	do i=1,n_obs_b
 	   if(dd_s(i).eq.badflag .or. ff_s(i).eq.badflag) then
@@ -242,7 +242,7 @@ c
      1            obs(i)%ff_ea_kt  .gt. 10.)then
 	      uu(i) = badflag
 	      vv(i) = badflag
-	   else ! dd_s is true N and dd_rot is grid N
+	   else ! dd_s is true n and dd_rot is grid n
               rlat_dum = -999.
 	      dd_rot = dd_s(i) - projrot_latlon( rlat_dum , lon_s(i)
      1                                                    ,istatus )
@@ -254,19 +254,19 @@ c
 	   endif
 	enddo !i
 c
-c.....  Before continuing, use the SAO data to check the backgrounds.
-c.....  Find the background at each station location, then compare
-c.....  to the current observation.  If the difference is larger than the
+c.....  before continuing, use the sao data to check the backgrounds.
+c.....  find the background at each station location, then compare
+c.....  to the current observation.  if the difference is larger than the
 c.....  threshold, zero out the background weights for that variable.
 c
 c
-c.....  First find the max in the background wind speed field.
+c.....  first find the max in the background wind speed field.
 c
 	print *,' '
-	print *,' Checking background windspeeds...'
+	print *,' checking background windspeeds...'
 	print *,' '
 	if(ilaps_bk.ne.1 .or. back_uv.ne.1) then
-	   print *,' NO BACKGROUND WIND FIELDS AVAILIBLE...SKIPPING...'
+	   print *,' no background wind fields availible...skipping...'
 	   go to 415
 	endif
 c
@@ -280,15 +280,15 @@ c
 	enddo !i
 	enddo !j
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 c
-c.....  Find the 2nd derivative table for use by the splines later.
+c.....  find the 2nd derivative table for use by the splines later.
 c
         if(.not. l_bilinear_interp)then
 	    call splie2(x1a,x2a,bk_speed,imax,jmax,y2a)
         endif
 c
-c.....  Now call the spline routine for each station in the grid.
+c.....  now call the spline routine for each station in the grid.
 c
 	ithresh = 0
 	ibkthresh = 0
@@ -341,26 +341,26 @@ c
  330	enddo !i
  400	format(1x,i5,':',1x,a5,' at i,j ',2i5,':',3f12.2,f12.0)
 	write(6,405) diff_mx, stn_mx
- 405	format(1x,' Max difference of ',f12.2,'  at ',a5)
+ 405	format(1x,' max difference of ',f12.2,'  at ',a5)
 	write(6,406) diff_mn, stn_mn
- 406	format(1x,' Min difference of ',f12.2,'  at ',a5)
+ 406	format(1x,' min difference of ',f12.2,'  at ',a5)
 	write(6,410) ithresh, threshold, spdt
- 410	format(1x,' There were ',i4,
+ 410	format(1x,' there were ',i4,
      &            ' locations exceeding threshold of ',f6.3,
      &            ' at speeds greater than ',f6.1,' kts.')
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
 c
-c.....  If too many stations exceed threshold, or if the max in the 
+c.....  if too many stations exceed threshold, or if the max in the 
 c.....  background is too much larger than the max in the obs, backgrounds 
-c.....  probably bad.  Zero out the wt arrays so they won't be used.
+c.....  probably bad.  zero out the wt arrays so they won't be used.
 c
 	print *,' '
 	write(6,420) bksp_mx, ibksp, jbksp
- 420	format(1x,' Background field max: ',f12.2,' at ',i4,',',i4)
+ 420	format(1x,' background field max: ',f12.2,' at ',i4,',',i4)
 	write(6,421) amax_stn, amax_stn_id
- 421	format(1x,' Max speed at station: ',f12.2,' at ',a5)
+ 421	format(1x,' max speed at station: ',f12.2,' at ',a5)
 c
 	if(bksp_mx .ge. 60.) then
 	   if(bksp_mx .gt. amax_stn*2.66) ibkthresh = 1
@@ -369,7 +369,7 @@ c
 	if(ithresh.gt.2 .or. ibkthresh.gt.0) then
 	   write(6,412)
  412	   format(1x,
-     &      '  Possible bad wind/pressure backgrounds...skipping.')
+     &      '  possible bad wind/pressure backgrounds...skipping.')
 	   call zero(wt_u, imax,jmax)
 	   call zero(wt_v, imax,jmax)
 	   call zero(wt_rp, imax,jmax)
@@ -377,20 +377,20 @@ c
 	endif
 	print *,' '
 c
-c.....	Now reduce station pressures to standard levels...1500 m (for CO) 
-c.....  and MSL.  Use background 700 mb and 850 mb data from LGA (or equiv).
+c.....	now reduce station pressures to standard levels...1500 m (for co) 
+c.....  and msl.  use background 700 mb and 850 mb data from lga (or equiv).
 c
 cc	call mean_lapse(n_obs_b,elev_s,t_s,td_s,a_t,lapse_t,a_td,
 cc     &                    lapse_td,hbar,badflag)
 c
-c.....  Set standard lapse rates in deg F.
+c.....  set standard lapse rates in deg f.
 c
         lapse_t = -.01167
         lapse_td = -.007
 c
-c.....  If we have good background T, Td, and Station P fields from LGB (or 
-c.....  FSF), and there is no reduced pressure background, use them
-c.....  to calculate a reduced pressure background.  Otherwise, skip this
+c.....  if we have good background t, td, and station p fields from lgb (or 
+c.....  fsf), and there is no reduced pressure background, use them
+c.....  to calculate a reduced pressure background.  otherwise, skip this
 c.....  section to use what we've already found above.
 c
         write(6,*)' back_rp = ',back_rp
@@ -398,7 +398,7 @@ c
 	if(back_t.eq.1 .and. back_td.eq.1 .and. back_sp.eq.1
      1                 .and. back_rp.ne.1) then
 	   print *
-     1          ,' Have good backgrounds...calculating RP_BK from them.'
+     1          ,' have good backgrounds...calculating rp_bk from them.'
 	   do j=1,jmax
 	   do i=1,imax
 	      if(stnp_bk(i,j).le.badflag .or. t_bk(i,j).le.badflag 
@@ -407,12 +407,12 @@ c
 	      else
 		 call reduce_p(t_bk(i,j),td_bk(i,j),stnp_bk(i,j),
      &                         topo(i,j),lapse_t,lapse_td,rp_bk(i,j),
-     &                         redp_lvl,badflag) ! 1500 m for CO
+     &                         redp_lvl,badflag) ! 1500 m for co
 	      endif
 	   enddo !i
 	   enddo !j
 c
-c.....  Check for badflags in the field.  Don't use if we find one.
+c.....  check for badflags in the field.  don't use if we find one.
 c
 	   back_rp = 1
 	   do j=1,jmax
@@ -424,14 +424,14 @@ c
 	   call check_field_2d(rp_bk,imax,jmax,fill_val,istatus)
 	   if(istatus .ne. 1) back_rp = 0
 c
-	   print *,' Done.  back_rp = ', back_rp
+	   print *,' done.  back_rp = ', back_rp
 	endif
 c
 c
-c.....  Now, back to the analysis.
-c.....	Convert altimeters to station pressure. Original sta pres is superceded
+c.....  now, back to the analysis.
+c.....	convert altimeters to station pressure. original sta pres is superceded
 c
-        write(6,*)' Original station pressures utilized'
+        write(6,*)' original station pressures utilized'
  415	do j=1,n_obs_b
 	  if(alt_s(j) .gt. badflag) then
 	    pstn_s(j) = alt_2_sfc_press(alt_s(j), elev_s(j)) !conv alt to sp
@@ -440,13 +440,13 @@ c
           endif
 	enddo !j
 c
-c       We are now leaving all the original pmsl_s obs in place, regardless
+c       we are now leaving all the original pmsl_s obs in place, regardless
 c       of whether pstn_s obs are present or not.
 c
 	sum_diffp = 0.
 	num_diffp = 0
 	print *,' '
-	print *,' Calculating reduced pressures'
+	print *,' calculating reduced pressures'
 	print *,'----------------------------------'
 	do k=1,n_obs_b
 	  if(pstn_s(k).le.badflag .or. t_s(k).le.badflag 
@@ -458,9 +458,9 @@ c
 !           pmsl_s(k) = badflag
 	  else
 	    call reduce_p(t_s(k),td_s(k),pstn_s(k),elev_s(k),lapse_t,
-     &                       lapse_td,pred_s(k),redp_lvl,badflag)  ! 1500 m for CO
+     &                       lapse_td,pred_s(k),redp_lvl,badflag)  ! 1500 m for co
 	    call reduce_p(t_s(k),td_s(k),pstn_s(k),elev_s(k),lapse_t,
-     &                       lapse_td,p_msl,0.,badflag)        ! MSL
+     &                       lapse_td,p_msl,0.,badflag)        ! msl
 	    if(pmsl_s(k).gt.900. .and. pmsl_s(k).lt.1100.) then
               if(p_msl .ne. badflag) then
 		 diff_ps = p_msl - pmsl_s(k)
@@ -481,7 +481,7 @@ cc	       pmsl_s(k) = p_msl
               if(abs(diff) .gt. 10.)then
                   write(6,981)k,stn(k)(1:5),pred_s(k),rp_bk(ii(k),jj(k))
      1                       ,diff,elev_s(k)
- 981		  format(' Reduced pressure flagged for ',i5,2x,a,4f9.1)
+ 981		  format(' reduced pressure flagged for ',i5,2x,a,4f9.1)
                   pred_s(k) = badflag
               endif
             endif
@@ -490,28 +490,28 @@ cc	       pmsl_s(k) = p_msl
         enddo !k
 	print *,' '
 	if(num_diffp .le. 0) then
-	   print *,' Bad num_diffp'
+	   print *,' bad num_diffp'
 	else
 	   bias = sum_diffp / float(num_diffp)
-	   print *,'Num: ', num_diffp,'   MSL Pressure Bias = ', bias
+	   print *,'num: ', num_diffp,'   msl pressure bias = ', bias
 	endif
  983    format(1x,i5,2x,a8,':',3f12.2)
 	print *,' '
 c
-c.....	Change vis observations that are more than 10 miles to 11 miles,
+c.....	change vis observations that are more than 10 miles to 11 miles,
 c.....  so the high end of the analysis will be "greater than 10 miles".
-c.....  Then convert visibility to log( vis ) for the analysis.
+c.....  then convert visibility to log( vis ) for the analysis.
 c
 	do i=1,n_obs_b
 	   if(vis_s(i) .ge. 11.) vis_s(i) = 11.
 	enddo !i
 	call viss2log(vis_s,mxstn,n_obs_b,badflag)
 c
-c.....	READ IN THE BAND 8 BRIGHTNESS TEMPS (deg K)
+c.....	read in the band 8 brightness temps (deg k)
 c
 	ext_v = 'lvd'
 	lvl_v(1) = 0
-	var_v(1) = 'S8W'	! satellite...band 8, warm pixel (K)
+	var_v(1) = 's8w'	! satellite...band 8, warm pixel (k)
 c
 	call get_laps_2dvar(i4time,970,i4time_nearest,lat,lon,
      &                      dum1,dum2,
@@ -520,74 +520,74 @@ c
 c
 	if(istatus .ne. 1) then
 	   write(6,962) atime
- 962	   format(1x,' +++ Satellite data not available for the ',a24,
+ 962	   format(1x,' +++ satellite data not available for the ',a24,
      &           ' analysis. +++')
 	   call zero(tb81, imax,jmax)
 	   go to 800
 	endif
 	ibt = 1
 c
-c.....  READ IN any other data here
+c.....  read in any other data here
 c
  800	continue
 c
-c.....	Put the data on the grids - accumulate sums.
+c.....	put the data on the grids - accumulate sums.
 c
-c.....	Winds:
+c.....	winds:
 c
 	call put_winds(uu,vv,mxstn,n_obs_b,u1,v1,wwu,wwv,icnt,
      &                 imax,jmax,rii,rjj,ii,jj,badflag)
 	icnt_t = icnt
 
-        ea_thr = 999. ! lower this to enable QC for each variable
+        ea_thr = 999. ! lower this to enable qc for each variable
 c
-c.....	Temperatures:
+c.....	temperatures:
 c
-	print *,' put_thermo for T:'
+	print *,' put_thermo for t:'
 	call put_thermo(t_s,obs(:)%t_ea_f,mxstn,n_obs_b,t1,wt,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Dew points: 
+c.....	dew points: 
 c
-	print *,' put_thermo for TD:'
+	print *,' put_thermo for td:'
 	call put_thermo(td_s,obs(:)%td_ea_f,mxstn,n_obs_b,td1,wtd,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Put the reduced pressure on the grid
+c.....	put the reduced pressure on the grid
 c
-	print *,' put_thermo for P:'
+	print *,' put_thermo for p:'
 	call put_thermo(pred_s,zero_ea,mxstn,n_obs_b,rp1,wp,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Put the station pressure on the grid
+c.....	put the station pressure on the grid
 c
-	print *,' put_thermo for PS:'
+	print *,' put_thermo for ps:'
 	call put_thermo(pstn_s,zero_ea,mxstn,n_obs_b,sp1,wsp,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Put the MSL pressure on the grid
+c.....	put the msl pressure on the grid
 c
-	print *,' put_thermo for MSL:'
+	print *,' put_thermo for msl:'
 	call put_thermo(pmsl_s,zero_ea,mxstn,n_obs_b,mslp1,wmslp,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Visibility:
+c.....	visibility:
 c
-	print *,' put_thermo for VIS:'
+	print *,' put_thermo for vis:'
 	call put_thermo(vis_s,zero_ea,mxstn,n_obs_b,vis1,wvis,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Station elevation:
+c.....	station elevation:
 c
-	print *,' put_thermo for ELEV:'
+	print *,' put_thermo for elev:'
 	call put_thermo(elev_s,zero_ea,mxstn,n_obs_b,elev1,welev,icnt,
      &                  imax,jmax,ii,jj,ea_thr,badflag)
 c
-c.....	Now find the values at the gridpts.
-c       Divide by the weights to average multiple obs on a gridpoint if needed
+c.....	now find the values at the gridpts.
+c       divide by the weights to average multiple obs on a gridpoint if needed
 c
         write(6,1010) icnt_t
-1010	FORMAT(1X,'DATA SET 1 INITIALIZED WITH ',I6,' OBSERVATIONS')
+1010	format(1x,'data set 1 initialized with ',i6,' observations')
         call procar(u1,imax,jmax,wwu,imax,jmax,-1)
         call procar(v1,imax,jmax,wwv,imax,jmax,-1)
         call procar(t1,imax,jmax,wt,imax,jmax,-1)
@@ -598,13 +598,13 @@ c
         call procar(vis1,imax,jmax,wvis,imax,jmax,-1)
         call procar(elev1,imax,jmax,welev,imax,jmax,-1)
 c
-c.....  Now that the data is ready, check the backgrounds.  If they
+c.....  now that the data is ready, check the backgrounds.  if they
 c.....  are missing, fill the background field for the variable
-c.....  with a smooth Barnes analysis of the obs.  This will allow
+c.....  with a smooth barnes analysis of the obs.  this will allow
 c.....  us to cold start the analysis, or run the analysis in a 
 c.....  stand-alone mode.
 c
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 c
 	n_obs_var = 0
 	npass = 1
@@ -612,7 +612,7 @@ c
 	if(back_t .ne. 1) then
 	   print *,' '
 	   print *,
-     & ' **WARNING. No T background. Using smooth Barnes anl of obs'
+     & ' **warning. no t background. using smooth barnes anl of obs'
 	   call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(t_bk,imax,jmax,t1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(t_bk,imax,jmax,fill_val,istatus)
@@ -621,7 +621,7 @@ c
 	if(back_td .ne. 1) then
 	   print *,' '
 	   print *,
-     & ' **WARNING. No Td background. Using smooth Barnes anl of obs'
+     & ' **warning. no td background. using smooth barnes anl of obs'
 	   call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(td_bk,imax,jmax,td1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(td_bk,imax,jmax,fill_val,istatus)
@@ -630,7 +630,7 @@ c
 	if(back_uv .ne. 1) then  !u1/v1 already rotated to grid north
 	   print *,' '
 	   print *,
-     & ' **WARNING. No wind background. Using smooth Barnes anl of obs'
+     & ' **warning. no wind background. using smooth barnes anl of obs'
            call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(u_bk,imax,jmax,u1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(u_bk,imax,jmax,fill_val,istatus)
@@ -642,7 +642,7 @@ c
 	if(back_sp .ne. 1) then
 	   print *,' '
 	   print *,
-     & ' **WARNING. No sfc P background. Using smooth Barnes anl of obs'
+     & ' **warning. no sfc p background. using smooth barnes anl of obs'
 	   call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(stnp_bk,imax,jmax,sp1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(stnp_bk,imax,jmax,fill_val,istatus)
@@ -650,8 +650,8 @@ c
 c
 	if(back_rp .ne. 1) then
 	   print *,' '
-	   print *, ' **WARNING. No reduced P background.',
-     &              ' Using smooth Barnes anl of obs'
+	   print *, ' **warning. no reduced p background.',
+     &              ' using smooth barnes anl of obs'
 	   call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(rp_bk,imax,jmax,rp1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(rp_bk,imax,jmax,fill_val,istatus)
@@ -660,7 +660,7 @@ c
 	if(back_mp .ne. 1) then
 	   print *,' '
 	   print *,
-     & ' **WARNING. No MSL P background. Using smooth Barnes anl of obs'
+     & ' **warning. no msl p background. using smooth barnes anl of obs'
 	   call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(mslp_bk,imax,jmax,mslp1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(mslp_bk,imax,jmax,fill_val,istatus)
@@ -670,53 +670,53 @@ c
 	if(back_vis .ne. 1) then
 	   print *,' '
 	   print *,
-     & ' **WARNING. No VIS background. Using smooth Barnes anl of obs.'
+     & ' **warning. no vis background. using smooth barnes anl of obs.'
 	   call dynamic_wts(imax,jmax,n_obs_var,rom2,d,fnorm)
 	   call barnes2(vis_bk,imax,jmax,vis1,smsng,mxstn,npass,fnorm)
 	   call check_field_2d(vis_bk,imax,jmax,fill_val,istatus)
 	endif
 c
-c.....	Fill in the boundary of each field.
+c.....	fill in the boundary of each field.
 c
 c
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         i_boundary = -1 ! 0 ! 2
 
-	print *,' Boundary for    U:'
+	print *,' boundary for    u:'
 	call set_boundary(u1,imax,jmax,ii,jj,uu,u_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for    V:'
+	print *,' boundary for    v:'
 	call set_boundary(v1,imax,jmax,ii,jj,vv,v_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for    T:'
+	print *,' boundary for    t:'
 	call set_boundary(t1,imax,jmax,ii,jj,t_s,t_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for   TD:'
+	print *,' boundary for   td:'
 	call set_boundary(td1,imax,jmax,ii,jj,td_s,td_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for REDP:'
+	print *,' boundary for redp:'
 	call set_boundary(rp1,imax,jmax,ii,jj,pred_s,rp_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for STNP:'
+	print *,' boundary for stnp:'
 	call set_boundary(sp1,imax,jmax,ii,jj,pstn_s,stnp_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for MSLP:'
+	print *,' boundary for mslp:'
 	call set_boundary(mslp1,imax,jmax,ii,jj,pmsl_s,mslp_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for  VIS:'
+	print *,' boundary for  vis:'
 	call set_boundary(vis1,imax,jmax,ii,jj,vis_s,vis_bk,n_obs_b,
      &                    badflag,mxstn,i_boundary)
-	print *,' Boundary for ELEV:'
+	print *,' boundary for elev:'
 	call set_boundary(elev1,imax,jmax,ii,jj,elev_s,topo,n_obs_b,
      &                    badflag,mxstn,i_boundary)
 c
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 c
-c.....	Check the brightness temperatures for clouds.
+c.....	check the brightness temperatures for clouds.
 c
 	if(ilaps_bk.eq.0 .or. back_t.eq.0) then
-	   print *,' ++ No previous temperature est for cloud routine ++'
+	   print *,' ++ no previous temperature est for cloud routine ++'
 	   go to 720
 	endif
 	call zero(d1,imax,jmax)
@@ -724,7 +724,7 @@ c
 	call clouds(imax,jmax,topo,d1,badflag,tb81,i4time,
      &              laps_cycle_time,lat,lon,1.e37)
 c
-c.....  Convert tb8 from K to F...watch for 0.0's where clds removed.
+c.....  convert tb8 from k to f...watch for 0.0's where clds removed.
 c
 720	continue
 	do j=1,jmax
@@ -736,10 +736,10 @@ c
 	enddo !i
 	enddo !j
 c
-c..... That's it here....
+c..... that's it here....
 c
 	jstatus(1) = 1		! everything's ok...
-	print *,' Normal completion of MDATLAPS'
+	print *,' normal completion of mdatlaps'
 c
 	return
 	end
@@ -750,31 +750,31 @@ c
 c
 c*******************************************************************************
 c
-c	Routine to put the u and v wind components on the LAPS grid...properly
+c	routine to put the u and v wind components on the laps grid...properly
 c       located on the staggered u- and v- grids.
 c
-c	Changes:
-c		P.A. Stamus	12-01-88  Original (cut from old mdatlaps)
-c				03-29-89  Fix for staggered grid.
-c                               02-24-94  Change method to use rii,rjj locatns.
-c                               08-27-97  Pass in bad flag value.
+c	changes:
+c		p.a. stamus	12-01-88  original (cut from old mdatlaps)
+c				03-29-89  fix for staggered grid.
+c                               02-24-94  change method to use rii,rjj locatns.
+c                               08-27-97  pass in bad flag value.
 c
-c	Inputs/Outputs:
-c	   Variable     Var Type   I/O   Description
+c	inputs/outputs:
+c	   variable     var type   i/o   description
 c	  ----------   ---------- ----- -------------
-c	   u_in            RA       I    Array of u wind components at stations
-c	   v_in            RA       I      "      v  "       "       "     "
-c	   max_stn         I        I    Max number of stations (for dimension)
-c	   num_sta         I        I    Number of stations in input file
-c	   u, v            RA       O    U and V component grids.
-c	   wwu             RA       O    Weight grid for U.
-c	   wwv             RA       O    Weight grid for V.
-c	   icnt            I        O    Number of stations put on grid.
-c          rii, rjj        RA       I    i,j locations of stations (real)
-c          ii, jj          IA       I    i,j locations of stations (integer)
-c          badflag         R        I    Bad flag value.
+c	   u_in            ra       i    array of u wind components at stations
+c	   v_in            ra       i      "      v  "       "       "     "
+c	   max_stn         i        i    max number of stations (for dimension)
+c	   num_sta         i        i    number of stations in input file
+c	   u, v            ra       o    u and v component grids.
+c	   wwu             ra       o    weight grid for u.
+c	   wwv             ra       o    weight grid for v.
+c	   icnt            i        o    number of stations put on grid.
+c          rii, rjj        ra       i    i,j locations of stations (real)
+c          ii, jj          ia       i    i,j locations of stations (integer)
+c          badflag         r        i    bad flag value.
 c
-c	User Notes:
+c	user notes:
 c
 c*******************************************************************************
 c
@@ -789,7 +789,7 @@ c
 c
 	do 10 ista=1,num_sta
 c
-c.....	Find ixx, iyy to put data at proper location at the grid square
+c.....	find ixx, iyy to put data at proper location at the grid square
 c
 	  ixxu = ii(ista)
 	  iyyu = rjj(ista) + 0.5   ! grid offset for u-grid from major grid
@@ -797,7 +797,7 @@ c
 	  iyyv = jj(ista)
 	  icnt = icnt + 1
 c
-c.....	Put wind components on the u and v grids
+c.....	put wind components on the u and v grids
 c
 	  if(u_in(ista).eq.badflag .or. v_in(ista).eq.badflag) go to 10
 	  if(u_in(ista) .eq. 0.) u_in(ista) = zeros
@@ -821,29 +821,29 @@ c
 c
 c*******************************************************************************
 c
-c	Routine to put non-wind variables on the 'major' LAPS grid.
+c	routine to put non-wind variables on the 'major' laps grid.
 c
-c	Changes:
-c		P.A. Stamus	12-01-88  Original (cut from old mdatlaps)
-c				03-29-89  Fix for staggered grid.
-c				04-19-89  Added ii,jj for qc routine.
-c				10-30-90  ii,jj now from 'FIND_IJ'.
-c                               02-24-94  New ii,jj arrays.
-c                               08-27-97  Pass in bad flag value.
+c	changes:
+c		p.a. stamus	12-01-88  original (cut from old mdatlaps)
+c				03-29-89  fix for staggered grid.
+c				04-19-89  added ii,jj for qc routine.
+c				10-30-90  ii,jj now from 'find_ij'.
+c                               02-24-94  new ii,jj arrays.
+c                               08-27-97  pass in bad flag value.
 c
-c	Inputs/Outputs:
-c	   Variable     Var Type   I/O   Description
+c	inputs/outputs:
+c	   variable     var type   i/o   description
 c	  ----------   ---------- ----- -------------
-c	   var_in          RA       I    Array of the station ob. 
-c	   max_stn         I        I    Max number of stations (for dimension)
-c	   num_sta         I        I    Number of stations in input file
-c	   x               RA       O    Grid for the variable. 
-c	   w               RA       O    Weight grid.
-c	   icnt            I        O    Number of stations put on grid.
-c          ii, jj          IA       I    i,j locations of the stations (integer)
-c          badflag         R        I    Bad flag value.
+c	   var_in          ra       i    array of the station ob. 
+c	   max_stn         i        i    max number of stations (for dimension)
+c	   num_sta         i        i    number of stations in input file
+c	   x               ra       o    grid for the variable. 
+c	   w               ra       o    weight grid.
+c	   icnt            i        o    number of stations put on grid.
+c          ii, jj          ia       i    i,j locations of the stations (integer)
+c          badflag         r        i    bad flag value.
 c
-c	User Notes:
+c	user notes:
 c
 c*******************************************************************************
 c
@@ -862,7 +862,7 @@ c
 	  iyy = jj(ista)
 	  icnt = icnt + 1
 c
-c.....	Put variable on the LAPS grid
+c.....	put variable on the laps grid
 c
           if(ixx.lt.1 .or. ixx.gt.ni) go to 10
           if(iyy.lt.1 .or. iyy.gt.nj) go to 10
@@ -874,14 +874,14 @@ c
           icnt_var = icnt_var + 1
 10	continue
 c
-        write(6,*)' Number of obs for this field (in put_thermo) = '        
+        write(6,*)' number of obs for this field (in put_thermo) = '        
      1           ,icnt_var
 
 	return
 	end
 c
 c
-        Subroutine procar(a,imax,jmax,b,imax1,jmax1,iproc)
+        subroutine procar(a,imax,jmax,b,imax1,jmax1,iproc)
         real a(imax,jmax),b(imax1,jmax1)
         do 2 j=1,jmax
 	   jj=j
@@ -898,10 +898,10 @@ c
 		 endif
 	      endif
 c
-	      GO TO 2
-!    4   A(I,J)=0.
+	      go to 2
+!    4   a(i,j)=0.
  4	      continue
- 2	CONTINUE 
+ 2	continue 
 c   
 	return  
 	end
@@ -913,23 +913,23 @@ c
 c
 c======================================================================
 c
-c       Routine to fill the boundaries of the grid for a variable.
-c       First, we try a Barnes analysis of observations near the
-c       boundary, both inside and out.  If there aren't enough obs,
-c       we fall back to using the background field.  This routine
+c       routine to fill the boundaries of the grid for a variable.
+c       first, we try a barnes analysis of observations near the
+c       boundary, both inside and out.  if there aren't enough obs,
+c       we fall back to using the background field.  this routine
 c       fills 2 points all the way around the grid (the spline needs
 c       this).
 c
-c       Orginal:  P. Stamus  NOAA/FSL  7 Jan 1999 (from fill_bounds
+c       orginal:  p. stamus  noaa/fsl  7 jan 1999 (from fill_bounds
 c                                                   and back_bounds).
-c       Changes:  
+c       changes:  
 c
 c======================================================================
 c
 	real x(imax,jmax)                ! array to fill boundarys
 	real x_bk(imax,jmax)             ! array with background field
 	real x_ob(mxstn)                 ! array of observations
-	real fnorm(0:imax-1,0:jmax-1)    ! Barnes weights
+	real fnorm(0:imax-1,0:jmax-1)    ! barnes weights
 	real dum(imax,jmax)              ! work array
 c
 	integer ii(mxstn), jj(mxstn)       ! obs location (in gridpts)
@@ -937,10 +937,10 @@ c
 	npass = 1
 	call zero(dum,imax,jmax)
 c
-c.....	First, try the wide-area Barnes, filling the dum array.
+c.....	first, try the wide-area barnes, filling the dum array.
 c
         if(i_boundary .eq. -1)then
-           write(6,*)' Skipping dyn wts, barnes_wide & boundary fill'
+           write(6,*)' skipping dyn wts, barnes_wide & boundary fill'
            return
         endif
 
@@ -950,14 +950,14 @@ c
      &                   mxstn,npass,fnorm,istatus)
 
         if(i_boundary .eq. 0)then
-           write(6,*)' Skipping boundary fill'
+           write(6,*)' skipping boundary fill'
            return
         endif
 c
-c.....	Copy the boundaries from the dummy array to the main array.
+c.....	copy the boundaries from the dummy array to the main array.
 c
 	if(istatus .eq. 1) then
-	   print *,' Filling boundary using Barnes.'
+	   print *,' filling boundary using barnes.'
 c
 	   do i=1,imax
 	      do j=1,i_boundary
@@ -977,7 +977,7 @@ c
 	   enddo !j
 c
 	else
-	   print *,' Problem calculating boundary. Using background.'
+	   print *,' problem calculating boundary. using background.'
 c
 	   do i=1,imax
 	      do j=1,i_boundary
@@ -998,7 +998,7 @@ c
 c
 	endif
 c
-c....   That's it.
+c....   that's it.
 c
 	return
 	end

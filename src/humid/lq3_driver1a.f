@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -58,7 +58,7 @@ cdis
      1     tiros_switch,
      1     sat_skip,
      1     gvap_switch,
-     1     IHOP_flag, 
+     1     ihop_flag, 
      1     time_diff,
      1     gps_switch,
      1     sfc_mix,
@@ -71,7 +71,7 @@ cdis
      1     path2covar,
      1     lct,iout,t_istatus,jstatus)
 
-      USE module_sfc_structure
+      use module_sfc_structure
 
       implicit none
 
@@ -174,14 +174,14 @@ c      real data_pre_bound (ii,jj,kk)
       real, dimension (:,:,:), allocatable :: p_3d
       integer mlevel(kk)
 
-c     CLOUD variables
+c     cloud variables
 
-C      real :: qadjust (ii,jj,kk)
+c      real :: qadjust (ii,jj,kk)
       real, dimension (:,:,:), allocatable :: qadjust
 
-c     SND variables
+c     snd variables
 
-C      real q_snd (ii,jj,kk)
+c      real q_snd (ii,jj,kk)
       real, dimension (:,:,:), allocatable :: q_snd
 c      real weight_snd(ii,jj,kk)
       real, dimension (:,:,:), allocatable :: weight_snd
@@ -224,7 +224,7 @@ c     namelist data
       integer sounder_switch
       integer sat_skip
       integer gvap_switch
-      integer IHOP_flag
+      integer ihop_flag
       integer time_diff         !time allowed for latency (sec)
       integer sfc_mix
       integer mod_4dda_1
@@ -256,42 +256,42 @@ c----------------------code   ------------------
 c     initialization
 c
       write (6,*)
-      write (6,*) 'ENTERING MODULE LQ3_DRIVER1A.F'
+      write (6,*) 'entering module lq3_driver1a.f'
 
 c     allocate arrays
       write (6,*) 
-      write (6,*) 'Begin Array allocation'
+      write (6,*) 'begin array allocation'
 
       allocate (sat (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'SAT array ijk'
+      write (6,*) 'sat array ijk'
       allocate (data_in (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'DATA_IN array ijk'
+      write (6,*) 'data_in array ijk'
       allocate (data_start (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'DATA_START array ijk'
+      write (6,*) 'data_start array ijk'
       allocate (data_pre_bound (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'DATA_PRE_BOUND array ijk'
+      write (6,*) 'data_pre_bound array ijk'
       allocate (p_3d (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'P_3D array ijk'
+      write (6,*) 'p_3d array ijk'
       allocate (qadjust (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'QADJIUST array ijk'
+      write (6,*) 'qadjiust array ijk'
       allocate (q_snd (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'Q_SND array ijk'
+      write (6,*) 'q_snd array ijk'
       allocate (weight_snd (ii,jj,kk))
       write (6,*) 
-      write (6,*) 'WEIGHT_SND array ijk'
-      write (6,*)'----------------END ALLOCATION STEPS---------------'
+      write (6,*) 'weight_snd array ijk'
+      write (6,*)'----------------end allocation steps---------------'
 
-c     define PI
+c     define pi
       pi = acos(-1.0)
       d2r = pi/180.
-      write (6,*) 'Starting run for I4TIME', i4time
+      write (6,*) 'starting run for i4time', i4time
 
 c     assign local variables to passed in variable to protect them pressure only
 
@@ -306,9 +306,9 @@ c     assign local variables to passed in variable to protect them pressure only
 
 c     change pressure array to hpa
       
-      p_3d = p_3d * 0.01 ! convert 3d array to hPa
+      p_3d = p_3d * 0.01 ! convert 3d array to hpa
 
-c     initialize IR emissivity (1:n) and reflectance (1:n)
+c     initialize ir emissivity (1:n) and reflectance (1:n)
 
       do i = 1,ii
          do j = 1,jj
@@ -323,13 +323,13 @@ c     call get_laps congif to fill common block used in pressure assignment
 c     routine
       
       write (6,*) ' '
-      write (6,*) 'Release 6.0 (2/28/2012) successfully incorporates'
-      write (6,*) '1) Namelist control of values in the cloud_sat mod'! module (mod)
-      write (6,*) '2) Increase of Powell method tolerance to 5%'
-      write (6,*) '3) Assimilate Radiometer to namelist level'
-      write (6,*) '4) Ability to read MADIS files for GPS data'
-      write (6,*) '5) Test of input field for bad data (forced abort)'
-      write (6,*) '6) Bug fix for no cloud situation'
+      write (6,*) 'release 6.0 (2/28/2012) successfully incorporates'
+      write (6,*) '1) namelist control of values in the cloud_sat mod'! module (mod)
+      write (6,*) '2) increase of powell method tolerance to 5%'
+      write (6,*) '3) assimilate radiometer to namelist level'
+      write (6,*) '4) ability to read madis files for gps data'
+      write (6,*) '5) test of input field for bad data (forced abort)'
+      write (6,*) '6) bug fix for no cloud situation'
       write (6,*) '7) state variables passed into this routine'
       write (6,*) '8) state variables not modified (except for q)'
       write (6,*) ' '
@@ -345,27 +345,27 @@ c     routine
 
       if(istatus .ne. 1)then
          write(6,*)' error in get_laps_config'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
 
 
       if (covar_switch.eq. 0) then
-         write (6,*) 'Covariances NOT used'
+         write (6,*) 'covariances not used'
       else
-         write(6,*) 'Covariance use is ENABLED'
+         write(6,*) 'covariance use is enabled'
          write (6,*) 'covariance path', path2covar
       endif
       if (print_switch .eq. 0) then
-         write (6,*) 'Printing disabled, expect short printouts'
+         write (6,*) 'printing disabled, expect short printouts'
       else
-         write (6,*) 'Printing ENABLED, expect long print output'
+         write (6,*) 'printing enabled, expect long print output'
       endif
       if (cloud_switch.eq.0) then
-         write(6,*) 'Cloud switch off, ignore clouds'
-         write(6,*) 'If available, clouds will be used in GOES adjust'
+         write(6,*) 'cloud switch off, ignore clouds'
+         write(6,*) 'if available, clouds will be used in goes adjust'
       else
-         write (6,*) 'Clouds will be used in the analysis'
+         write (6,*) 'clouds will be used in the analysis'
       endif
 
       if (cloud_d.eq.0) then
@@ -380,25 +380,25 @@ c     routine
       if (raob_switch.eq.0) then
          write(6,*) 'raob switch off, ignoring raobs (.snd files)'
       else
-         write (6,*) 'Raob switch on... will use raobs if present'
-         write (6,*) 'RAOB radius of influ set to..',raob_radius,' m'
+         write (6,*) 'raob switch on... will use raobs if present'
+         write (6,*) 'raob radius of influ set to..',raob_radius,' m'
       endif
 
       write (6,*) 'radiometer switch set to height of ,',
      1     radiometer_switch, ' level (meters)'
       write (6,*) 'if radiometer not used, this has no effect'
       
-      write(6,*) 'RAOB look back set to ', raob_lookback, 'seconds'
+      write(6,*) 'raob look back set to ', raob_lookback, 'seconds'
       
       if (goes_switch.eq.0) then
-         write(6,*) 'GOES switch off, ignoring goes data'
+         write(6,*) 'goes switch off, ignoring goes data'
       else
-         write(6,*) 'GOES switch on, attempting GOES ', goes_switch
+         write(6,*) 'goes switch on, attempting goes ', goes_switch
       endif
 
       if (sounder_switch.eq.0) then
-         write(6,*) 'Sounder switch off'
-         write(6,*) 'Using IMAGER data only'
+         write(6,*) 'sounder switch off'
+         write(6,*) 'using imager data only'
          
          if (goes_switch.eq.12 .or. goes_switch.eq.0) then
             
@@ -468,7 +468,7 @@ c     routine
          sndr_trans_len = len_trim (sndr_trans)
 
       else
-         write(6,*) 'Sounder ON using Sounder data'
+         write(6,*) 'sounder on using sounder data'
          write (6,*) 'setting sounder to goes:', goes_switch
 
          if (goes_switch.eq.12 .or. goes_switch.eq.0) then
@@ -543,71 +543,71 @@ c     routine
       if (tiros_switch.eq.0) then
          write(6,*) 'tiros switch off'
       else 
-         write (6,*) 'Attempting to run tiros data from NOAA-',  
+         write (6,*) 'attempting to run tiros data from noaa-',  
      1        tiros_switch
       endif
       
       if (tiros_switch.ne.0 .and. goes_switch.ne.0) then
-         write(6,*) 'USING BOTH TIROS AND GOES DATA IN THIS RUN'
+         write(6,*) 'using both tiros and goes data in this run'
       endif
       
       if (sat_skip .eq. 1) then
-         write(6,*) 'Use full resolution satellite'
+         write(6,*) 'use full resolution satellite'
       else
-         write(6,*) 'Using partial satellite resolution ',sat_skip
+         write(6,*) 'using partial satellite resolution ',sat_skip
       endif
       
       if (gvap_switch .eq. 1) then
-         write(6,*) 'Using goes derived pw, assume data connection'
+         write(6,*) 'using goes derived pw, assume data connection'
       else
-         write(6,*) 'GVAP not used... nominal state'
+         write(6,*) 'gvap not used... nominal state'
       endif
 
-      if (IHOP_flag .eq. 1 ) then
-         write (6,*) 'IHOP data used over normal NESDIS GVAP data'
+      if (ihop_flag .eq. 1 ) then
+         write (6,*) 'ihop data used over normal nesdis gvap data'
       else
-         write(6,*) 'Normal NESDIS GVAP data used'
+         write(6,*) 'normal nesdis gvap data used'
       endif
 
       if (gps_switch .eq. 1) then
-         write(6,*) 'Using GPS IPW data'
+         write(6,*) 'using gps ipw data'
       elseif(gps_switch.eq.2) then
-         write (6,*) 'using GPS madis data'
+         write (6,*) 'using gps madis data'
       else
-         write(6,*) 'GPS data not used'
+         write(6,*) 'gps data not used'
       endif
       
       if (time_diff .ne. 0) then
-         write(6,*) 'GVAP latency assigned to ',time_diff, 'seconds'
+         write(6,*) 'gvap latency assigned to ',time_diff, 'seconds'
       else
-         write(6,*) 'NO latency assinged to GVAP data'
+         write(6,*) 'no latency assinged to gvap data'
       endif
       
       if (sfc_mix .eq. 1) then
-         write(6,*) 'Mixing moisture from sfc'
+         write(6,*) 'mixing moisture from sfc'
       else
-         write(6,*) 'Sfc moisture field ignored'
+         write(6,*) 'sfc moisture field ignored'
       endif
       
       if (mod_4dda_1 .eq.1) then
-         write(6,*) 'Mod 4dda active, modifying moisture on output'
-         write(6,*) 'Mod 4dda factor is set to, ',mod_4dda_factor
+         write(6,*) 'mod 4dda active, modifying moisture on output'
+         write(6,*) 'mod 4dda factor is set to, ',mod_4dda_factor
       else
-         write(6,*) 'Mod 4dda turned off ... nominal state'
+         write(6,*) 'mod 4dda turned off ... nominal state'
       endif
       
-      write(6,*) 'T_ref is set to: ',t_ref
+      write(6,*) 't_ref is set to: ',t_ref
       
       if (path_to_gvap12 .eq. ' '.and. path_to_gvap10 .eq. ' ')then
-         write(6,*) 'Path to gvap not assigned, assigning gvap switch 0'
+         write(6,*) 'path to gvap not assigned, assigning gvap switch 0'
          gvap_switch = 0
       else
-         write(6,*) 'Gvap switch assigned, using assigned switch'
-         write(6,*) 'Path is ', path_to_gvap12, ' ',path_to_gvap10
-         write(6,*) 'GVAP switch is set to ',gvap_switch
+         write(6,*) 'gvap switch assigned, using assigned switch'
+         write(6,*) 'path is ', path_to_gvap12, ' ',path_to_gvap10
+         write(6,*) 'gvap switch is set to ',gvap_switch
       endif
 
-      write(6,*) 'GPS path is ', path_to_gps
+      write(6,*) 'gps path is ', path_to_gps
      
 
 c     initialize field to lq3 internal missing data flag.
@@ -645,7 +645,7 @@ c     and store
 
       savefilename = filename
 
-      write(6,*) 'FILENAME = ',filename
+      write(6,*) 'filename = ',filename
 
 c     preserve the i4time
 
@@ -668,7 +668,7 @@ c     check dependence of using cloud data, abort if needed
             write(6,*) 'cloud data not available'
             write(6,*) 'terminating'
             istatus = 0
-            p_3d = p_3d / 0.01  ! convert 3d array to Pa
+            p_3d = p_3d / 0.01  ! convert 3d array to pa
             return
          endif
       endif
@@ -681,7 +681,7 @@ c     check dependence of using cloud data, abort if needed
          write(6,*) 'cloud_dependence switch is on'
          write(6,*) 'aborting'
          istatus = 0
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
 
@@ -745,8 +745,8 @@ c     sun is assumed below horizon
 
       call check_nan3 (lt1dat,ii,jj,kk,istatus)
       if (istatus.ne.1) then
-         write(6,*) 'NaN detected from lt1...ABORT'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         write(6,*) 'nan detected from lt1...abort'
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
       
@@ -770,7 +770,7 @@ c     perform initialquality control check for supersaturation after ingest
       counter = 0
       do k = 1,kk
          write (6,*)
-         write (6,*) 'Level ', k, '   ', p_3d(1,1,k)
+         write (6,*) 'level ', k, '   ', p_3d(1,1,k)
          write (6,*)
          
          do j = jj,1,-1
@@ -799,7 +799,7 @@ c     perform initialquality control check for supersaturation after ingest
       if(counter.gt.0) then
          
          write(6,*) ' '
-         write(6,*) 'Questionable INPUT DATA DETECTED'
+         write(6,*) 'questionable input data detected'
          write(6,*)  counter,' times.'
          write(6,*) ' '
       endif
@@ -810,7 +810,7 @@ c     initial check for computed nans
          write(6,*) 'initial data corrupt after checking for'
          write(6,*) 'supsaturation... hosed before beginning'
          write(6,*) 'var:data  routine:lq3driver1a.f'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
 
@@ -832,7 +832,7 @@ c     ****  execute raob step if switch is on
      1        raob_radius, raob_switch)
              
       else
-         write(6,*) 'the raob switch is off... SND skipped'
+         write(6,*) 'the raob switch is off... snd skipped'
       endif
       
 
@@ -855,28 +855,28 @@ c     check for supersaturation
 c     check fields after lsin call
       call check_nan3(data,ii,jj,kk,istatus)
       if(istatus.ne.1) then
-         write (6,*) 'Nan generated in lsin'
+         write (6,*) 'nan generated in lsin'
          write (6,*) 'var:data  routine:lq3driver1a.f'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
       call check_nan2(tpw,ii,jj,istatus)
       if(istatus.ne.1) then 
-         write(6,*) 'Nan generated in lsin'
+         write(6,*) 'nan generated in lsin'
          write(6,*) 'var:tpw   routine:lq3driver1a.f'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
       
       write(6,*) 'finished with routine lsin'
       if( sfc_mix.eq.1)then
-         write(6,*) 'Lsin allowed to modify data field'
+         write(6,*) 'lsin allowed to modify data field'
 
          if(print_switch.eq.1) then
          
-            write(6,*) 'Reporting incremental boundary layer effects'
+            write(6,*) 'reporting incremental boundary layer effects'
             call report_change (data_in, data, p_3d,mdf,ii,jj,kk)
-            write(6,*) 'Reporting net change'
+            write(6,*) 'reporting net change'
             call report_change (data_start, data, p_3d, mdf, ii,jj,kk)
 
          endif
@@ -886,7 +886,7 @@ c     check fields after lsin call
 c     end report moisture change block
          
       else
-         write(6,*) 'Lsin and sfc mixing step skipped'
+         write(6,*) 'lsin and sfc mixing step skipped'
 
          where (data >= 0.0 )
             data = data_pre_bound
@@ -916,11 +916,11 @@ c     gps data inserstion step (bias correction to gvap only)
 
       istatus_gps = 0
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
       if (gps_switch .ge. 1) then
 
-         write(6,*) 'Initiate bias correction of gps data'
+         write(6,*) 'initiate bias correction of gps data'
 
          if(gps_switch.ge.1) then ! local version
 
@@ -929,7 +929,7 @@ c     gps data inserstion step (bias correction to gvap only)
      1        path_to_gps,filename,gps_switch,istatus_gps)
 
          else
-            write (6,*) 'MADIS data under construction'
+            write (6,*) 'madis data under construction'
          endif
          
 c     gvap data insertion step
@@ -938,19 +938,19 @@ c     gvap data insertion step
 
 c     gvap data acquisition
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
       istatus_gvap = 0
       
       if (gvap_switch.eq.1) then
          
          write(6,*) 
-         write(6,*) 'Begin GVAP insertion setep'
+         write(6,*) 'begin gvap insertion setep'
          write(6,*) 
          
          call process_gvap(ii,jj,sfc_data,gvap_data,gvap_w,
      1        gw1,gw2,gw3,gww1,gww2,gww3,gvap_p,mdf,
-     1        lat,lon,time_diff,IHOP_flag,
+     1        lat,lon,time_diff,ihop_flag,
      1        path_to_gvap12,path_to_gvap10,filename,print_switch,
      1        istatus_gvap)
          
@@ -961,64 +961,64 @@ c     gvap data acquisition
          endif  
          
       else
-         write(6,*) 'Gvap off, not using gvap or attempting' 
+         write(6,*) 'gvap off, not using gvap or attempting' 
          write(6,*) 'any adjustment'
       endif
      
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
          
-c     CHECKING PROCESS OUTPUT
+c     checking process output
 
       call check_nan2(gvap_w,ii,jj,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'Failed in nan after adjust'
+         write(6,*) 'failed in nan after adjust'
          write(6,*) 'var:gvap_w  routine lq3driver'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
          
       call check_nan2(gps_w,ii,jj,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'Failed in nan after adjust'
+         write(6,*) 'failed in nan after adjust'
          write(6,*) 'var:gps_w  routine lq3driver'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
          
       call check_nan2(gps_data,ii,jj,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'Failed in nan after adjust'
+         write(6,*) 'failed in nan after adjust'
          write(6,*) 'var:gps_data  routine lq3driver'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
          
       call check_nan2(gvap_data,ii,jj,istatus)
 
       if(istatus.ne.1) then
-         write(6,*) 'Failed in nan after adjust'
+         write(6,*) 'failed in nan after adjust'
          write(6,*) 'var:gsp_data  routine lq3driver'
          write(6,*) 'taking new measures 1/25/09'
          write(6,*) 'killing gvap in variational'
          gvap_data = 0.0 ! assigned all to zero
          istatus_gvap = 0 ! remove gvap from variational
-c         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+c         p_3d = p_3d / 0.01     ! convert 3d array to pa
 c         return
       endif
 
       call check_nan3(data,ii,jj,kk,istatus)
       if(istatus.ne.1)then
-         write(6,*) 'Nan report from TPW processing'
+         write(6,*) 'nan report from tpw processing'
          write(6,*) 'var:data  routine lq3driver1a.f'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
 
       if (print_switch .eq. 1) then
       
-         write(6,*) 'Reporting changes from TPW data types'
+         write(6,*) 'reporting changes from tpw data types'
          call report_change (data_in, data, p_3d,mdf,ii,jj,kk)
-         write(6,*) 'Reporting net change'
+         write(6,*) 'reporting net change'
          call report_change (data_start, data, p_3d, mdf, ii,jj,kk)
       endif
 
@@ -1026,7 +1026,7 @@ c         return
 
       write(6,*) 
 
-c     make call to TIROS moisture insertion
+c     make call to tiros moisture insertion
 
 
       if (tiros_switch .ne. 0) then
@@ -1034,7 +1034,7 @@ c     make call to TIROS moisture insertion
          if(c_istatus.eq.1 .and. t_istatus.eq.1) then
 
         
-            write (6,*) 'begin TIROS insertion step'
+            write (6,*) 'begin tiros insertion step'
       
             call tiros (
      1           data,          ! specific humidity g/g
@@ -1083,7 +1083,7 @@ c     if cloud dependence is off, then assign c_istatus = 1 to force code to run
      1     .or.
      1     cloud_d.eq.0 .and. t_istatus .eq.1) then
          
-         write (6,*) 'Begin variational assimilation'
+         write (6,*) 'begin variational assimilation'
          call variational (
      1        data,             ! 3-d specific humidity g/g
      1        sfc_data,         ! struct surface data (type lbsi)
@@ -1115,9 +1115,9 @@ c     if cloud dependence is off, then assign c_istatus = 1 to force code to run
 
          if(print_switch .eq. 1) then
 
-            write (6,*) 'GOES step complete, effects logged.'
+            write (6,*) 'goes step complete, effects logged.'
             call report_change (data_in, data, p_3d,mdf,ii,jj,kk)
-            write(6,*) 'Reporting net change'
+            write(6,*) 'reporting net change'
             call report_change (data_start, data, p_3d, mdf, ii,jj,kk)
 
          endif
@@ -1126,7 +1126,7 @@ c     if cloud dependence is off, then assign c_istatus = 1 to force code to run
          
 c     end report moisture change block
          
-         I4_elapsed = ishow_timer()
+         i4_elapsed = ishow_timer()
          
       else
          
@@ -1145,7 +1145,7 @@ c     end report moisture change block
          
       endif
       
-c     assess impact of system compared to GPS sites
+c     assess impact of system compared to gps sites
       
       call int_tpw (data,kstart,qs,ps,p_3d,tpw2,mdf,ii,jj,kk)
       
@@ -1158,8 +1158,8 @@ c     *** insert cloud moisture, this section now controled by a switch
 
       if(cloud_switch.eq.0) then
          write(6,*) ' '
-         write(6,*) 'Cloud switch  '
-         write(6,*) 'Skipping cloud moistening here'
+         write(6,*) 'cloud switch  '
+         write(6,*) 'skipping cloud moistening here'
          write(6,*) ' '
          write(6,*) ' '
          c_istatus = 0          !force this to skip here
@@ -1167,35 +1167,35 @@ c     *** insert cloud moisture, this section now controled by a switch
       
       if(c_istatus.ne.1 .or. i4time.ne.i4timep)then
          c_istatus = 0
-         write(6,*) 'Cloud field not available for exact time'
-         write(6,*) 'assume ALL CLEAR values used'
+         write(6,*) 'cloud field not available for exact time'
+         write(6,*) 'assume all clear values used'
       else                      ! increase moisture based on cloud amount
          
-         write(6,*) 'Saturate in cloudy areas'
+         write(6,*) 'saturate in cloudy areas'
 
          call check_nan3(cg,ii,jj,kk,istatus)
          if(istatus.ne.1)then
-            write(6,*) 'Nan in cg data prior to saturation'
-            p_3d = p_3d / 0.01  ! convert 3d array to Pa
+            write(6,*) 'nan in cg data prior to saturation'
+            p_3d = p_3d / 0.01  ! convert 3d array to pa
             return
          endif
          call check_nan3(lt1dat,ii,jj,kk,istatus)
          if(istatus.ne.1) then
-            write(6,*) 'NaN in lt1dat prior to saturation'
-            p_3d = p_3d / 0.01  ! convert 3d array to Pa
+            write(6,*) 'nan in lt1dat prior to saturation'
+            p_3d = p_3d / 0.01  ! convert 3d array to pa
             return
          endif
 
          call check_nan3(data,ii,jj,kk,istatus)
          if(istatus.ne.1)then
-            write(6,*) 'Nan in data prior to saturation'
-            p_3d = p_3d / 0.01  ! convert 3d array to Pa
+            write(6,*) 'nan in data prior to saturation'
+            p_3d = p_3d / 0.01  ! convert 3d array to pa
             return
          endif
 
 c     saturate in cloudy areas.  
 
-         I4_elapsed = ishow_timer()
+         i4_elapsed = ishow_timer()
 
          do k = 1,kk
             write(6,*) lvllm(k),'checking lvllm prior to sat'
@@ -1208,20 +1208,20 @@ c     saturate in cloudy areas.
             enddo
          enddo
 
-         I4_elapsed = ishow_timer()
+         i4_elapsed = ishow_timer()
 
          call check_nan3(data,ii,jj,kk,istatus)
          if(istatus.ne.1)then
-            write(6,*) 'Nan in data AFTER call to saturation'
-            p_3d = p_3d / 0.01  ! convert 3d array to Pa
+            write(6,*) 'nan in data after call to saturation'
+            p_3d = p_3d / 0.01  ! convert 3d array to pa
             return
          endif
 
          if (print_switch .eq. 1) then
             
-            write (6,*) 'Reporting cloud effects on analysis'
+            write (6,*) 'reporting cloud effects on analysis'
             call report_change (data_in, data, p_3d,mdf,ii,jj,kk)
-            write(6,*) 'Reporting net change'
+            write(6,*) 'reporting net change'
             call report_change (data_start, data, p_3d, mdf, ii,jj,kk)
             
          endif
@@ -1231,7 +1231,7 @@ c     saturate in cloudy areas.
       endif
       
   
-c     mod_4dda_1 to decrease overall water in 4dda mode running at AFWA
+c     mod_4dda_1 to decrease overall water in 4dda mode running at afwa
       
       if(mod_4dda_1 .eq. 1) then ! act to decrease overall water
          
@@ -1258,7 +1258,7 @@ c     repeat quality control check for supersaturation after pre-analysis
       write (6,*)  'perform qc for supersaturation'
       counter = 0
       do k = 1,kk
-         write(6,*) 'Level ',k, '    ', p_3d(1,1,k)
+         write(6,*) 'level ',k, '    ', p_3d(1,1,k)
          do j = jj,1,-1
             do i = 1,ii
                
@@ -1271,7 +1271,7 @@ c     1              lt1dat(i,j,k)-273.15,t_ref )/1000.
                   counter = counter + 1
                   data(i,j,k) = sat(i,j,k)
                elseif (data(i,j,k) .lt. 0.0) then
-                  cdomain(i) = 'M'
+                  cdomain(i) = 'm'
                   
                else
                   write (cdomain(i),35) int(data(i,j,k)/sat(i,j,k)*10.)
@@ -1295,11 +1295,11 @@ c     recompute tpw including clouds and supersat corrections
       
       call int_tpw(data,kstart,qs,ps,p_3d,tpw,mdf,ii,jj,kk)
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
       
 c     place the accepted missing data flag in output field
 c     sum over the entire grid for a total water sum value for 
-c     QC study.
+c     qc study.
       
 c     conform to laps missing data flag (switch from mine)
 
@@ -1328,32 +1328,32 @@ c     log the amount of water vapor
       write (6,*) ' '
       write (6,*) ' '
       write (6,*) '***************************** '
-      write (6,*) 'Average water in volume (g/g)*10000'
+      write (6,*) 'average water in volume (g/g)*10000'
       write (6,*) tempsh/float(ii)/float(jj)/float(kk)*10000.
       write (6,*) '***************************** '
       write (6,*) ' '
       write (6,*) ' '
       
-c     check for NaN values and Abort if found
+c     check for nan values and abort if found
       
       call check_nan3(data,ii,jj,kk,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'NaN values detected (sh array)... aborting'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         write(6,*) 'nan values detected (sh array)... aborting'
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
       
       call check_nan2(tpw,ii,jj,istatus)
       if(istatus.ne.1) then
-         write(6,*) 'NaN values detected (tpw array)... aborting'
-         p_3d = p_3d / 0.01     ! convert 3d array to Pa
+         write(6,*) 'nan values detected (tpw array)... aborting'
+         p_3d = p_3d / 0.01     ! convert 3d array to pa
          return
       endif
 
 c     ------------------------------ write output section
       if (iout.ne.0) then
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
       
 c     write final 3-d sh field to disk
          commentline = 'maps with clouds and surface effects only'
@@ -1361,14 +1361,14 @@ c     write final 3-d sh field to disk
      1        ii,jj,kk,istatus)
          if(istatus.eq.1)        jstatus(1) = 1
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
          
 c     write total precipitable water field
          call write_lh4 (save_i4time,tpw,bias_one,ii,jj,istatus)
          if(istatus.eq.1) then
             jstatus(3) = 1
-c     write out material in log for Seth
-            write(6,*) '***GPS gridpoint comparison*****'
+c     write out material in log for seth
+            write(6,*) '***gps gridpoint comparison*****'
             write (6,*) '****i,j,lat,lon,gps water, laps water (cm)****'
             do i = 1,gps_count
              write(6,*) int(gps_points(i,2)),int(gps_points(i,3)),
@@ -1377,12 +1377,12 @@ c     write out material in log for Seth
      1                  gps_points(i,1),
      1              100.*tpw(int(gps_points(i,2)),int(gps_points(i,3)))
             enddo
-            write(6,*) '********** end GPS compare **********'
+            write(6,*) '********** end gps compare **********'
          endif
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
          
-c     generate lh3 file (RH true, RH liquid)
+c     generate lh3 file (rh true, rh liquid)
          if (t_istatus.eq.1) then
             call lh3_compress(data,lt1dat,save_i4time,lvllm,t_ref,
      1           ii,jj,kk,print_switch,istatus)
@@ -1396,16 +1396,16 @@ c     generate lh3 file (RH true, RH liquid)
          
       endif                     !output
 
-      I4_elapsed = ishow_timer()
+      i4_elapsed = ishow_timer()
 
 c---------------------------end write output section
       
-      write (6,*) 'Reporting overall changes to moisture'
+      write (6,*) 'reporting overall changes to moisture'
       
       call report_change (data_start, data, p_3d,mdf,ii,jj,kk)
 
 c     no need to modify p_3d any longer, array to be destroyed
-c      p_3d = p_3d / 0.01 ! convert 3d array to Pa
+c      p_3d = p_3d / 0.01 ! convert 3d array to pa
 
 c     deallocate (destroy) arrays no longer needed in this routine
       deallocate (sat)

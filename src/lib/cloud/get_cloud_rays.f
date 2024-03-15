@@ -1,58 +1,58 @@
          
-        subroutine get_cloud_rays(i4time,clwc_3d,cice_3d,heights_3d     ! I
-     1                           ,rain_3d,snow_3d                       ! I
-     1                           ,pres_3d,topo_sfc,topo_a               ! I
-     1                           ,topo_albedo_2d                        ! I
-     1                           ,swi_2d                                ! I
-     1                           ,topo_gti,topo_albedo                  ! O
-     1                           ,gtic,dtic,btic,emic                   ! O
-     1                           ,topo_ri,topo_rj                       ! O
-     1                           ,trace_ri,trace_rj                     ! O
-     1                           ,swi_obs                               ! O
-     1                           ,aod_vrt,aod_2_cloud,aod_2_topo        ! O
-     1                           ,dist_2_topo                           ! O
-     1                           ,aod_ill,aod_ill_dir                   ! O
-     1                           ,aod_tot,transm_obs,obs_glow_gnd       ! O
-     1                           ,transm_3d,transm_4d                   ! O
-     1                           ,r_cloud_3d,cloud_od,cloud_od_sp       ! O
-     1                           ,cloud_od_sp_w                         ! O
-     1                           ,r_cloud_rad,cloud_rad_c,cloud_rad_w   ! O
-     1                           ,cloud_rad_c_nt                        ! O
-     1                           ,clear_rad_c,clear_radf_c,patm         ! O
-     1                           ,clear_rad_c_nt                        ! O
-     1                           ,airmass_2_cloud_3d,airmass_2_topo_3d  ! O
-     1                           ,htstart,horz_dep_d,twi_0              ! O
-!    1                           ,solalt_limb_true                      ! O
-     1                           ,htagl                                 ! I
-!    1                           ,elong                                 ! I
-     1                           ,aod,ext_g                             ! I
-     1                           ,ni,nj,nk,i,j,newloc,ri_obs,rj_obs     ! I
-     1                           ,view_alt,view_az,sol_alt,sol_azi      ! I
-     1                           ,alt_norm                              ! I
-     1                           ,moon_alt,moon_azi                     ! I
-     1                           ,moon_mag,moon_mag_thr                 ! I
-     1                           ,l_solar_eclipse,eobsc                 ! I
-     1                           ,rlat,rlon,lat,lon                     ! I
-     1                           ,minalt,maxalt,minazi,maxazi           ! I
-     1                           ,alt_scale,azi_scale                   ! I
-     1                           ,l_binary,l_terrain_following          ! I
-     1                           ,grid_spacing_m,r_missing_data         ! I
-     1                           ,istatus)                              ! O
+        subroutine get_cloud_rays(i4time,clwc_3d,cice_3d,heights_3d     ! i
+     1                           ,rain_3d,snow_3d                       ! i
+     1                           ,pres_3d,topo_sfc,topo_a               ! i
+     1                           ,topo_albedo_2d                        ! i
+     1                           ,swi_2d                                ! i
+     1                           ,topo_gti,topo_albedo                  ! o
+     1                           ,gtic,dtic,btic,emic                   ! o
+     1                           ,topo_ri,topo_rj                       ! o
+     1                           ,trace_ri,trace_rj                     ! o
+     1                           ,swi_obs                               ! o
+     1                           ,aod_vrt,aod_2_cloud,aod_2_topo        ! o
+     1                           ,dist_2_topo                           ! o
+     1                           ,aod_ill,aod_ill_dir                   ! o
+     1                           ,aod_tot,transm_obs,obs_glow_gnd       ! o
+     1                           ,transm_3d,transm_4d                   ! o
+     1                           ,r_cloud_3d,cloud_od,cloud_od_sp       ! o
+     1                           ,cloud_od_sp_w                         ! o
+     1                           ,r_cloud_rad,cloud_rad_c,cloud_rad_w   ! o
+     1                           ,cloud_rad_c_nt                        ! o
+     1                           ,clear_rad_c,clear_radf_c,patm         ! o
+     1                           ,clear_rad_c_nt                        ! o
+     1                           ,airmass_2_cloud_3d,airmass_2_topo_3d  ! o
+     1                           ,htstart,horz_dep_d,twi_0              ! o
+!    1                           ,solalt_limb_true                      ! o
+     1                           ,htagl                                 ! i
+!    1                           ,elong                                 ! i
+     1                           ,aod,ext_g                             ! i
+     1                           ,ni,nj,nk,i,j,newloc,ri_obs,rj_obs     ! i
+     1                           ,view_alt,view_az,sol_alt,sol_azi      ! i
+     1                           ,alt_norm                              ! i
+     1                           ,moon_alt,moon_azi                     ! i
+     1                           ,moon_mag,moon_mag_thr                 ! i
+     1                           ,l_solar_eclipse,eobsc                 ! i
+     1                           ,rlat,rlon,lat,lon                     ! i
+     1                           ,minalt,maxalt,minazi,maxazi           ! i
+     1                           ,alt_scale,azi_scale                   ! i
+     1                           ,l_binary,l_terrain_following          ! i
+     1                           ,grid_spacing_m,r_missing_data         ! i
+     1                           ,istatus)                              ! o
 
-        use mem_namelist, ONLY: earth_radius,aero_scaleht,redp_lvl
-        use mem_allsky, ONLY: aod_3d ! (extinction coefficient)         ! I
-        use mem_allsky, ONLY: aod_ill_opac,aod_ill_opac_potl            ! O
-        use mem_allsky, ONLY: uprad_4d ! (upward spectral irradiance)   ! L
-        use mem_allsky, ONLY: upxrad_3d ! (upward irradiance xcos)      ! L
-        use mem_allsky, ONLY: upyrad_3d ! (upward irradiance ycos)      ! L
-        use mem_allsky, ONLY: mode_aero_cld,nc
+        use mem_namelist, only: earth_radius,aero_scaleht,redp_lvl
+        use mem_allsky, only: aod_3d ! (extinction coefficient)         ! i
+        use mem_allsky, only: aod_ill_opac,aod_ill_opac_potl            ! o
+        use mem_allsky, only: uprad_4d ! (upward spectral irradiance)   ! l
+        use mem_allsky, only: upxrad_3d ! (upward irradiance xcos)      ! l
+        use mem_allsky, only: upyrad_3d ! (upward irradiance ycos)      ! l
+        use mem_allsky, only: mode_aero_cld,nc
         use cloud_rad
 
         include 'trigd.inc'
         include 'wa.inc'
         parameter (pi=3.14159265)
 
-!       Statement Functions
+!       statement functions
         trans(od) = exp(-min(od,80.))
         curvat(hdst,radius) = hdst**2 / (2. * radius)
         resin(x) = sin(x*1.57079)
@@ -61,12 +61,12 @@
         real*8 dsdst,dradius_start,daltray,dcurvat2
         dcurvat2(dsdst,dradius_start,daltray) = 
      1      sqrt(dsdst**2 + dradius_start**2 
-     1   - (2D0*dsdst*dradius_start*cosd(90D0+daltray))) - dradius_start      
+     1   - (2d0*dsdst*dradius_start*cosd(90d0+daltray))) - dradius_start      
         horz_depf(htmsl,erad) = acosd(erad/(erad+htmsl))
         solocc_f(htmsl,erad,solaltarg) = min(max(
      1          (solaltarg + horz_depf(htmsl,erad))/0.25 ,0.),1.)
 
-!       Airmasses relative to zenith at sea level pressure (true altitude)
+!       airmasses relative to zenith at sea level pressure (true altitude)
         airmass_cosz(cosz) =  
      1    (          1.002432 * cosz**2 + 0.148386  * cosz + 0.0096467)  
      1                                 /  
@@ -74,8 +74,8 @@
         airmassf(z,patm1) = min(patm1*airmass_cosz(cosd(min(z,93.)))  
      1                        ,40.*(1.0+sqrt(max(1.0-patm1,0.)))) 
 
-!       Twilight GHI (http://www.lotek.com/blue_twilight.pdf)
-        difftwi(altf) = ! W/m**2                      
+!       twilight ghi (http://www.lotek.com/blue_twilight.pdf)
+        difftwi(altf) = ! w/m**2                      
      1  4. * exp(0.50 * altf - 0.108 * altf**2 - .0044 * altf**3)
 
         yinterp(x1,x2,y1,y2,x) = y1 + ((x-x1)/(x2-x1)) * (y2-y1) 
@@ -86,7 +86,7 @@
 
         parameter (rpd = 3.14159 / 180.)
 
-!       Determine shadow regions of the input 3-D cloud array
+!       determine shadow regions of the input 3-d cloud array
 
         real ext_g(nc),twi_trans_c(nc) ! od per airmass, tramsmissivity
 
@@ -94,15 +94,15 @@
         real cice_3d(ni,nj,nk) ! kg/m**3
         real rain_3d(ni,nj,nk) ! kg/m**3
         real snow_3d(ni,nj,nk) ! kg/m**3
-        real cond_3d(ni,nj,nk) ! kg/m**3 (effective LWC)
+        real cond_3d(ni,nj,nk) ! kg/m**3 (effective lwc)
 !       real aod_3d(ni,nj,nk)  ! aerosol extinction coefficient
         real bi_coeff(2,2),tri_coeff(2,2,2)
-        real heights_3d(ni,nj,nk)    ! MSL
-        real transm_3d(ni,nj,nk)     ! O
-        real transm_4d(ni,nj,nk,nc)  ! O
+        real heights_3d(ni,nj,nk)    ! msl
+        real transm_3d(ni,nj,nk)     ! o
+        real transm_4d(ni,nj,nk,nc)  ! o
         real transm_4d_m(nc)
-        real transm_2t(ni,nj)        ! terrain 2D transmission
-        real transm_3d_vint(ni,nj,nk)! L
+        real transm_2t(ni,nj)        ! terrain 2d transmission
+        real transm_3d_vint(ni,nj,nk)! l
         real uprad_4d_m(nc)
         real sum_aod_rad_opac(nc)
         real slant2_odc(nc)
@@ -115,7 +115,7 @@
         real lon(ni,nj)
         real projrot_2d(ni,nj)
         real topo_albedo_2d(nc,ni,nj)
-        real swi_2d(ni,nj)           ! I (use during twilight)
+        real swi_2d(ni,nj)           ! i (use during twilight)
         real pres_3d(ni,nj,nk)
         real pres_1d(nk)
         real view_alt(minalt:maxalt,minazi:maxazi)
@@ -123,7 +123,7 @@
 
         real sol_alt(ni,nj)
         real sol_azi(ni,nj)
-        real alt_norm(ni,nj)             ! Solar Alt w.r.t. terrain normal
+        real alt_norm(ni,nj)             ! solar alt w.r.t. terrain normal
         real eobsc(ni,nj)                ! array of 'eobsl' values
 
         real moon_alt(ni,nj)
@@ -134,8 +134,8 @@
         real obj_azi(ni,nj)
         real obj_bri_a(ni,nj)
 
-!       https://en.wikipedia.org/wiki/Irradiance#Irradiance
-        real gnd_glow(ni,nj)        ! ground lighting intensity (nL)    
+!       https://en.wikipedia.org/wiki/irradiance#irradiance
+        real gnd_glow(ni,nj)        ! ground lighting intensity (nl)    
         real gnd_radc(nc,ni,nj)     ! ground spectral radiance (wm2srnm)
         real uprad_3d(nc,ni,nj)     ! layer spectral irradiance                 
         real sfc_glow(ni,nj)        ! pass into get_cloud_rad
@@ -150,12 +150,12 @@
         real bhi_clr(nc)
         real absorption(nc)
 
-!       Note that 'ghi_2d' and 'dhi_2d' aren't yet returned for wider use.
-!       However they are used to calculate 'topo_gti' and 'gtic' that are 
+!       note that 'ghi_2d' and 'dhi_2d' aren't yet returned for wider use.
+!       however they are used to calculate 'topo_gti' and 'gtic' that are 
 !       passed back. 'topo_gti' is more legacy and 'gtic' is becoming used.
 
-!       Spectral irradiance W/m2/nm OR normalized to solar spectrum?              
-!       For now this is normalized to the solar spectral irradiance
+!       spectral irradiance w/m2/nm or normalized to solar spectrum?              
+!       for now this is normalized to the solar spectral irradiance
 !       http://www.soda-is.com/eng/education/plane_orientations.html
         real ghic_2d(nc,ni,nj)      ! (global horizontal)
         real dhic_2d(nc,ni,nj)      ! (diffuse horizontal)
@@ -189,7 +189,7 @@
         real clear_rad_c(nc,minalt:maxalt,minazi:maxazi) ! clear sky illumination (twilight)
         real clear_radf_c(nc,minalt:maxalt,minazi:maxazi)! integrated 
                ! fraction of gas illuminated by the sun along line of sight
-               ! (consider Earth's shadow + clouds, used when sun is below
+               ! (consider earth's shadow + clouds, used when sun is below
                !  the horizon), attenuated from consideration behind clouds
         real clear_rad_c_nt(nc,minalt:maxalt,minazi:maxazi)! sky spectral radiance from nlights
         real ag_2d(minalt:maxalt,minazi:maxazi)       ! dummy
@@ -201,7 +201,7 @@
         real topo_rj(minalt:maxalt,minazi:maxazi)
         real trace_ri(minalt:maxalt,minazi:maxazi)
         real trace_rj(minalt:maxalt,minazi:maxazi)
-        real gtic(nc,minalt:maxalt,minazi:maxazi)  ! spectral terrain GNI
+        real gtic(nc,minalt:maxalt,minazi:maxazi)  ! spectral terrain gni
         real dtic(nc,minalt:maxalt,minazi:maxazi)  ! sp terrain diffuse
         real btic(nc,minalt:maxalt,minazi:maxazi)  ! sp beam terrain normal
         real emic(nc,minalt:maxalt,minazi:maxazi)  ! spectral exitance (solar rel)   
@@ -216,7 +216,7 @@
         real sum_odrad_c_last(nc)
         real minalt_deg,maxalt_deg,minazi_deg,maxazi_deg
 
-!       Interpolation info
+!       interpolation info
         integer ialt_intl(minalt:maxalt,minazi:maxazi)
         integer ialt_inth(minalt:maxalt,minazi:maxazi)
         integer jazi_intl(minalt:maxalt,minazi:maxazi)
@@ -249,12 +249,12 @@
 
         kstart = 0 ! 0 means sfc, otherwise level of start
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         write(6,3)i,j,htagl,ri_obs,rj_obs,alt_scale     
-3       format(' Subroutine get_cloud_rays... ',2i5,f8.2,3f9.3)
+3       format(' subroutine get_cloud_rays... ',2i5,f8.2,3f9.3)
         
-!       Grid north azimuth - true north value
+!       grid north azimuth - true north value
         projrot = projrot_latlon(rlat,rlon,istatus)
         write(6,*)'lat/lon/projrot',rlat,rlon,projrot
 
@@ -274,7 +274,7 @@
             rimid = float(ni+1)/2.
         endif
 
-!       Initialize
+!       initialize
         airmass_2_cloud_3d = 0.
         airmass_2_topo_3d = 0.
 !       dist_2_topo = 0.
@@ -302,31 +302,31 @@
 
         icloud_tot = 0                          
 
-!       This may need to be conducted at each domain grid point?
-!       Special measures may be needed when the observer is in 
+!       this may need to be conducted at each domain grid point?
+!       special measures may be needed when the observer is in 
 !       the night yet can see (from high altitude) terrain in sunlight.
-!       We can add the 'horz_dep' to the value of 'sol_alt' for example,
+!       we can add the 'horz_dep' to the value of 'sol_alt' for example,
 !       or try to use 'solalt_limb_true' calculated below.
-        if(((sol_alt(i,j) .lt. -6.0  .AND. moon_alt(i,j) .gt.  0.0) .OR.
-     1      (sol_alt(i,j) .lt. -16.0 .AND. moon_alt(i,j) .gt. -6.0))
-     1                         .AND. 
+        if(((sol_alt(i,j) .lt. -6.0  .and. moon_alt(i,j) .gt.  0.0) .or.
+     1      (sol_alt(i,j) .lt. -16.0 .and. moon_alt(i,j) .gt. -6.0))
+     1                         .and. 
      1                moon_mag .le. moon_mag_thr                  )then
             obj_alt = moon_alt
             obj_azi = moon_azi + projrot_2d(i,j)
             obj_bri = 10. ** ((-26.7 - moon_mag)*0.4)
             moon_cond = 1
-            write(6,*)' Object is moon, brightness is:',obj_bri
+            write(6,*)' object is moon, brightness is:',obj_bri
         else
             obj_alt = sol_alt
             obj_azi = sol_azi + projrot_2d(i,j)
             obj_bri = 1.0
             moon_cond = 0
-            write(6,*)' Object is sun, brightness is:',obj_bri
+            write(6,*)' object is sun, brightness is:',obj_bri
         endif
 
         obj_bri_a(:,:) = obj_bri * (1. - eobsc(:,:))
 
-!       Possibly cloud_rad_c = r_missing_data would help interp
+!       possibly cloud_rad_c = r_missing_data would help interp
         if(sol_alt(i,j) .gt. 0.)then
             cloud_rad_c = obj_bri
         else
@@ -339,21 +339,21 @@
         write(6,*)' range of heights is ',minval(heights_3d)
      1                                   ,maxval(heights_3d)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         twi_alt = -4.5
       
         if(sol_alt(i,j) .lt. twi_alt)then
-          write(6,*)' Call get_sfc_glow'
+          write(6,*)' call get_sfc_glow'
           call get_sfc_glow(ni,nj,grid_spacing_m,lat,lon
      1                     ,sfc_glow,gnd_glow)
-          write(6,*)' Cloud glow for observer (pop nL) is '
+          write(6,*)' cloud glow for observer (pop nl) is '
      1                     ,sfc_glow(i,j)
-          write(6,*)' Grnd glow at observer (pop nL) location is '
+          write(6,*)' grnd glow at observer (pop nl) location is '
      1                     ,gnd_glow(i,j)
 
-!         Update just the gnd_glow with 'get_nlights'
-          write(6,*)' Call get_nlights'
+!         update just the gnd_glow with 'get_nlights'
+          write(6,*)' call get_nlights'
           call get_nlights(ni,nj,grid_spacing_m,lat,lon
      1                    ,gnd_glow)
 
@@ -361,28 +361,28 @@
      1                                              ,maxval(gnd_glow)
 
           if(minval(gnd_glow) .lt. 0.)then
-             write(6,*)' ERROR: Invalid range of gnd_glow'
-             write(6,*)' Remove/Regenerate nlights_multispectral.dat?'
+             write(6,*)' error: invalid range of gnd_glow'
+             write(6,*)' remove/regenerate nlights_multispectral.dat?'
              istatus = 0
              return
           endif
           
           write(6,29)i,j,gnd_glow(i,j)
-29        format('  Grnd glow (wm2sr) at observer location is ',2i5
+29        format('  grnd glow (wm2sr) at observer location is ',2i5
      1                                                       ,f10.6)       
 
           igmin = max( 1,i-120)
           igmax = min(ni,i+120)
           do ig = igmin,igmax
             write(6,30)ig,j,gnd_glow(ig,j),lat(ig,j),lon(ig,j)
-30          format(' Gnd glow at',2i5,f11.5,2f9.3)         
+30          format(' gnd glow at',2i5,f11.5,2f9.3)         
           enddo ! ig
 
           obs_glow_gnd = gnd_glow(i,j)
 
-!         Get upward radiation from ground lights
+!         get upward radiation from ground lights
           if(icall_uprad .eq. 0)then
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
             do ic = 1,nc
 !             wm2sr to wm2srnm (= wm2 to wm2nm)
 !             convert radiance to spectral radiance
@@ -396,7 +396,7 @@
             enddo ! ic
             do il = 0,1
               ilevel = il*(nk-1)+1
-              write(6,*)' Looping level for call to get_uprad_lyr'
+              write(6,*)' looping level for call to get_uprad_lyr'
      1                  ,ilevel
               ht = (20000. * il) + 1000.       ! height of aerosol layer
 !             use 'aef' in subroutine?
@@ -404,11 +404,11 @@
      1                          ,uprad_4d(:,:,ilevel,:)
      1                          ,upxrad_3d(:,:,ilevel)
      1                          ,upyrad_3d(:,:,ilevel))
-              I4_elapsed = ishow_timer()
+              i4_elapsed = ishow_timer()
             enddo ! i
             icall_uprad = 1
 
-            write(6,*)' Vertically interpolate uprad layers'
+            write(6,*)' vertically interpolate uprad layers'
             do k = 2,nk-1
               frack = float(k-1) / float(nk-1)
               uprad_4d(:,:,k,:) = uprad_4d(:,:,1,:)  * (1.-frack) 
@@ -426,18 +426,18 @@
 32            format(1x,'uprad for observer (wm2nm)',i4,e14.3,2f9.3)
           enddo ! k
 
-!         Temporary conversion from wm2sr to nL
+!         temporary conversion from wm2sr to nl
           do ii = 1,ni
           do jj = 1,nj
             gnd_glow(ii,jj) = wm2sr_to_nl_sun(gnd_glow(ii,jj))
           enddo ! jj
           enddo ! ii
           
-          write(6,*)' Grnd glow (nL) at observer location is '
+          write(6,*)' grnd glow (nl) at observer location is '
      1             ,gnd_glow(i,j)
 
         else
-          write(6,*)' Skip call to get_sfc_glow - solalt is'
+          write(6,*)' skip call to get_sfc_glow - solalt is'
      1                                                  ,sol_alt(i,j)      
           uprad_4d(:,:,:,:) = 0.
           obs_glow_gnd = 0.
@@ -446,14 +446,14 @@
         write(6,*)' obs_glow_gnd - (wm2sr) at observer location is'
      1             ,obs_glow_gnd
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Note early twilight will not have 'get_cloud_rad' using a special
+!       note early twilight will not have 'get_cloud_rad' using a special
 !       twilight source as 'get_cloud_rad_faces' is used more explicitly
         grid_size_deg = float(ni) * grid_spacing_m / 110000.
         write(6,*)' grid_size_deg = ',grid_size_deg
 
-!       This is being tested with 3.0 and 4.0 altitude threshold
+!       this is being tested with 3.0 and 4.0 altitude threshold
 !       'rad_ht_thresh' could be made dependent on 'obj_alt' or on the
 !       minimum 'obj_alt' over the domain and/or field of view depending
 !       on 'horz_dep'.        
@@ -466,7 +466,7 @@
           rad_ht_thresh = 300e3
         endif
 
-        if(obj_alt(i,j) .ge. 3.0  .AND. ! as uncorrected for refraction
+        if(obj_alt(i,j) .ge. 3.0  .and. ! as uncorrected for refraction
      1     htagl .lt. rad_ht_thresh     ! not near geosynchronous
      1                                           )then 
           if(newloc .eq. 1)then
@@ -476,25 +476,25 @@
      1                    ,rain_3d,snow_3d,topo_a,lat,lon
      1                    ,heights_3d,transm_3d,transm_4d,i,j,ni,nj,nk
 !    1                    ,l_solar_eclipse
-     1                    ,twi_alt)  ! I
+     1                    ,twi_alt)  ! i
 
-!           Write out transm_3d field
-            var = 'TRN'
+!           write out transm_3d field
+            var = 'trn'
             ext = 'trn'
             units = 'none'
             comment = 
-     1         '3D downward shortwave from cloud (relative to TOA)'     
+     1         '3d downward shortwave from cloud (relative to toa)'     
             call put_laps_3d(i4time,ext,var,units,comment
      1                      ,transm_4d(:,:,:,1),ni,nj,nk)
 
           else
-            write(6,*)' Skip call to get_cloud_rad (newloc = 0)'
+            write(6,*)' skip call to get_cloud_rad (newloc = 0)'
           endif
 
         else ! called if obj_alt < low threshold
             if( (sol_alt(i,j) - twi_alt) * 
      1          (solalt_last  - twi_alt) .le. 0.)then
-                write(6,*)' Crossed twi_alt compared with prior call'
+                write(6,*)' crossed twi_alt compared with prior call'
                 icall_rad = 0 
             endif
 
@@ -503,13 +503,13 @@
               if(htagl .le. faces_thresh)then
                 write(6,*)' call get_cloud_rad_faces...'
                 call get_cloud_rad_faces(              
-     1            obj_alt,obj_azi,                   ! I
-     1            sol_alt(i,j),sol_azi(i,j),         ! I 
-     1            clwc_3d,cice_3d,rain_3d,snow_3d,   ! I
-     1            topo_a,                            ! I
-     1            ni,nj,nk,i,j,                      ! I
-     1            heights_3d,                        ! I 
-     1            transm_2t,transm_3d,transm_4d)     ! O
+     1            obj_alt,obj_azi,                   ! i
+     1            sol_alt(i,j),sol_azi(i,j),         ! i 
+     1            clwc_3d,cice_3d,rain_3d,snow_3d,   ! i
+     1            topo_a,                            ! i
+     1            ni,nj,nk,i,j,                      ! i
+     1            heights_3d,                        ! i 
+     1            transm_2t,transm_3d,transm_4d)     ! o
               else ! consider experimental version for global domain
                 do ii = 1,ni
                 do jj = 1,nj
@@ -521,41 +521,41 @@
                 enddo ! jj
                 enddo ! ii
                 write(6,*)' call get_cloud_rad_faces2...'
-                htstart = topo_sfc+htagl  ! MSL
+                htstart = topo_sfc+htagl  ! msl
                 horz_dep_d = horz_depf(max(htstart,0.),earth_radius)
                 idb = min(389,ni-10)
                 jdb = min(757,nj-10)
                 call get_cloud_rad_faces2(              
-     1            obj_alt,obj_azi,horz_dep_d,        ! I
-     1            sol_alt(i,j),sol_azi(i,j),         ! I 
-     1            clwc_3d,cice_3d,rain_3d,snow_3d,   ! I
-     1            topo_a,grdasp_ll,                  ! I
-!    1            ni,nj,nk,i,j,                      ! I
-!    1            ni,nj,nk,ni/2,nj/2,                ! I
-     1            ni,nj,nk,idb,jdb,                  ! I
-     1            heights_3d,                        ! I 
-     1            sfc_glow,                          ! I
-     1            transm_3d,transm_4d)               ! O
+     1            obj_alt,obj_azi,horz_dep_d,        ! i
+     1            sol_alt(i,j),sol_azi(i,j),         ! i 
+     1            clwc_3d,cice_3d,rain_3d,snow_3d,   ! i
+     1            topo_a,grdasp_ll,                  ! i
+!    1            ni,nj,nk,i,j,                      ! i
+!    1            ni,nj,nk,ni/2,nj/2,                ! i
+     1            ni,nj,nk,idb,jdb,                  ! i
+     1            heights_3d,                        ! i 
+     1            sfc_glow,                          ! i
+     1            transm_3d,transm_4d)               ! o
               endif
               icall_rad = 1
             else
               write(6,*)' skip call to get_cloud_rad_faces'
             endif
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Write out transm_3d field
-            var = 'TRN'
+!           write out transm_3d field
+            var = 'trn'
             ext = 'trn'
             units = 'none'
             comment = 
-     1         '3D downward shortwave from cloud (relative to TOA)'     
+     1         '3d downward shortwave from cloud (relative to toa)'     
             call put_laps_3d(i4time,ext,var,units,comment,transm_3d
      1                      ,ni,nj,nk)
 
         endif
 
-!       Use this version of 'transm_3d' for vertical interpolation
+!       use this version of 'transm_3d' for vertical interpolation
         transm_3d_vint(:,:,:) = transm_3d(:,:,:)
         do ii = 1,ni
         do jj = 1,nj
@@ -569,9 +569,9 @@
         enddo ! jj
         enddo ! ii
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Obtain surface rad from 3D cloud rad fields, etc.
+!       obtain surface rad from 3d cloud rad fields, etc.
         ghi_zen_sfc = ghi_zen_toa * zen_kt ! from cloud_rad module
         arg2 = asind(10./ghi_zen_sfc)      ! approximately 0.5 degrees
         write(6,*)'ghi_zen_sfc/arg2=',ghi_zen_sfc,arg2
@@ -601,7 +601,7 @@
             do kk = 1,nk
               kkp1 = min(kk+1,nk)
 
-!             Consider first point above terrain instead so we can capture
+!             consider first point above terrain instead so we can capture
 !             terrain shadowing?
 !             if(transm_3d(ii,jj,kk) .gt. 0. .and. 
 !    1           transm_3d(ii,jj,kk) .ne. r_missing_data)then
@@ -624,39 +624,39 @@
                
                 cloud_albedo = 1. - transm_tn
 
-!               Here we might need only the aerosol absorption and not the
-!               gas scattering. Both of these feed into the present calculation
+!               here we might need only the aerosol absorption and not the
+!               gas scattering. both of these feed into the present calculation
 !               of absorption.
 
                 transm_tn_pr1 = transm_tn * (1.-absorption(2))
      1                   / (1. - topo_albedo_2d(2,i,j) * cloud_albedo)
                 transm_tn_pr = transm_tn_pr1 ! tn_pr1 or tn (testing)
 
-!               Correct for diffuse radiation at low obj altitude
+!               correct for diffuse radiation at low obj altitude
 !               'solalt_eff' is an empirical function to force the effective
 !               solar altitude to be 1.5 degrees when the actual is 0.
 !               'sb_corr' is an empirical sky brightness correction in 
 !               astronomical magnitudes.
-!               These empirical forumlae should give a reasonable value for 
-!               DHI even when the sun is very near the horizon.
+!               these empirical forumlae should give a reasonable value for 
+!               dhi even when the sun is very near the horizon.
 !               'frac_dir' is an estimate of the direct solar radiation now
 !               including scattered light in a 5 degree radius of the sun.
 
-!               Note the 1.5 value should be set to 'arg2' (about 0.5) to 
+!               note the 1.5 value should be set to 'arg2' (about 0.5) to 
 !               match the sun below horizon case. 'transm' should 
 !               asymptotically be forced to a value of 1 when the sun is 
 !               on the horizon.
 
-!               We might want to calculate the direct independently, then
-!               set GHI = Diffuse Horizontal + Direct Horizontal
+!               we might want to calculate the direct independently, then
+!               set ghi = diffuse horizontal + direct horizontal
 
                 objalt_eff = obj_alt(ii,jj) 
      1                     + (1.5 * cosd(obj_alt(ii,jj))**100.)
                 ghi_clr = obj_bri * sind(objalt_eff) * ghi_zen_sfc *ecld
                 ghi_2d(ii,jj) = transm_tn_pr * ghi_clr    
 
-!               Direct / Diffuse
-!               This takes into account clouds though might also consider terrain
+!               direct / diffuse
+!               this takes into account clouds though might also consider terrain
                 frac_dir1 = max(transm_tn**4.,.0039) ! 5 deg circ of sctrd
                 frac_dir = transm_tn + (1.-transm_tn) * frac_dir1
 
@@ -678,7 +678,7 @@
 !               dhi_2d(ii,jj) = max(dhi_2d_clear,dhi_2d_est) 
 !               dhi_2d(ii,jj) = min(dhi_2d(ii,jj),ghi_2d(ii,jj))
 
-!               Spectral normalized values (under construction)
+!               spectral normalized values (under construction)
                 airmass_g = airmassf(90.-obj_alt(ii,jj),patm_sfc)
                 do ic = 1,nc
                   bni_clr(ic) = obj_bri * ecl 
@@ -722,15 +722,15 @@
                    write(6,42)bhic_2d(:,ii,jj)
      1                       ,bhic_2d(2,ii,jj)*ghi_zen_toa
 42                 format(' bhic_2d   observer =',f9.5
-     1                                           ,' W/m^2 ~=',f10.5)
+     1                                           ,' w/m^2 ~=',f10.5)
                    write(6,43)dhic_2d(:,ii,jj)
      1                       ,dhic_2d(2,ii,jj)*ghi_zen_toa
 43                 format(' dhic_2d   observer =',f9.5
-     1                                           ,' W/m^2 ~=',f10.5)
+     1                                           ,' w/m^2 ~=',f10.5)
                    write(6,44)ghic_2d(:,ii,jj)
      1                       ,ghic_2d(2,ii,jj)*ghi_zen_toa
 44                 format(' ghic_2d   observer =',f9.5
-     1                                           ,' W/m^2 ~=',f10.5)
+     1                                           ,' w/m^2 ~=',f10.5)
 
                 endif
 
@@ -746,10 +746,10 @@
             enddo ! kk
 4           continue
 
-!           Gradual transition from daytime to nighttime equations
+!           gradual transition from daytime to nighttime equations
             ramp_day = min(obj_alt(ii,jj)/3.,1.) ! ramp from 0-3 deg    
             if(ramp_day .lt. 1.0)then
-              diffuse_twi = difftwi(sol_alt(ii,jj)) * obj_bri ! W/m**2
+              diffuse_twi = difftwi(sol_alt(ii,jj)) * obj_bri ! w/m**2
               dhi_2d(ii,jj) = ramp_day * dhi_2d(ii,jj) 
      1                      + (1.-ramp_day) * diffuse_twi
               ghi_2d(ii,jj) = ramp_day * ghi_2d(ii,jj) 
@@ -761,13 +761,13 @@
           if(sol_alt(ii,jj) .lt. 0. .and. sol_alt(ii,jj) .gt. -12.)then
 
 !           compare with compare_analysis_to_rad.f (cloud analysis code)
-!           Empirical forumlae for DHI and GHI when the sun is below the horizon.
-!           Note they are equal since the direct is zero.
-!           We may want to factor in cloud reduction during twilight if
+!           empirical forumlae for dhi and ghi when the sun is below the horizon.
+!           note they are equal since the direct is zero.
+!           we may want to factor in cloud reduction during twilight if
 !           it can be obtained via 'swi_2d' or another cloud field.
 
-!           Add solar twilight to DHI and GHI               
-            diffuse_twi = difftwi(sol_alt(ii,jj)) ! W/m**2
+!           add solar twilight to dhi and ghi               
+            diffuse_twi = difftwi(sol_alt(ii,jj)) ! w/m**2
             if(.true.)then
               dhi_2d(ii,jj) = dhi_2d(ii,jj) + diffuse_twi
               ghi_2d(ii,jj) = ghi_2d(ii,jj) + diffuse_twi
@@ -777,9 +777,9 @@
             endif
 
             if(ii .eq. ni/2 .and. jj .eq. nj/2)then
-              write(6,*)' diffuse_twi CTR = '
+              write(6,*)' diffuse_twi ctr = '
      1                 ,diffuse_twi,diffuse_twi/ghi_zen_toa
-              write(6,*)' swi_2d      CTR = ',swi_2d(ii,jj)
+              write(6,*)' swi_2d      ctr = ',swi_2d(ii,jj)
             endif
 
             if(idb_solar .eq. 1)then
@@ -787,7 +787,7 @@
               write(6,*)' ghic_2d  observer 1 =',ghic_2d(:,ii,jj)
             endif
             
-!           Add solar twilight to spectral normalized values
+!           add solar twilight to spectral normalized values
             dhic_2d(:,ii,jj) = dhic_2d(:,ii,jj) 
      1                       + diffuse_twi / ghi_zen_toa
             ghic_2d(:,ii,jj) = ghic_2d(:,ii,jj) 
@@ -800,8 +800,8 @@
 
           endif
 
-          if(ghi_2d(ii,jj) .lt. 1e-10 .AND. idb_solar .eq. 1)then
-            write(6,*)' WARNING, small ghi_2d ',ii,jj,ghi_2d(ii,jj)
+          if(ghi_2d(ii,jj) .lt. 1e-10 .and. idb_solar .eq. 1)then
+            write(6,*)' warning, small ghi_2d ',ii,jj,ghi_2d(ii,jj)
      1                                         ,sol_alt(ii,jj)
 !           stop
           endif
@@ -825,16 +825,16 @@
 !       enddo ! i
 !       enddo ! j
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        if(sol_alt(i,j) .lt. twi_alt)then ! Modify moon glow section in green channel
-                                      ! Preserve sfc sky glow section in red channel
+        if(sol_alt(i,j) .lt. twi_alt)then ! modify moon glow section in green channel
+                                      ! preserve sfc sky glow section in red channel
             do k = 1,nk
               transm_4d(:,:,k,2) = transm_4d(:,:,k,2) * obj_bri_a(:,:) ! correct for sun/moon brightness
             enddo ! k
             write(6,*)
      1    ' transm_4d red is sky brightness, green is moon brightness'
-            write(6,*)' Range of transm_4d(green channel) = '
+            write(6,*)' range of transm_4d(green channel) = '
      1            ,minval(transm_4d(:,:,:,2)),maxval(transm_4d(:,:,:,2))
         else
             do ic = 1,nc
@@ -845,9 +845,9 @@
             write(6,*)' heights_3d column =     ',heights_3d(i,j,:)
             write(6,*)' transm_3d column =      ',transm_3d(i,j,:)
             write(6,*)' transm_3d_vint column = ',transm_3d_vint(i,j,:)
-            write(6,*)' transm_4d B column =    ',transm_4d(i,j,:,2)
+            write(6,*)' transm_4d b column =    ',transm_4d(i,j,:,2)
         endif
-        write(6,*)' Range of transm_4d(red channel) = '
+        write(6,*)' range of transm_4d(red channel) = '
      1           ,minval(transm_4d(:,:,:,1)),maxval(transm_4d(:,:,:,1))
 
         write(6,*)' clwc column = ',clwc_3d(i,j,:)
@@ -856,22 +856,22 @@
         write(6,*)' snow column = ',snow_3d(i,j,:)
         write(6,*)' aod_3d column = ',aod_3d(i,j,:)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         topo_max_ang = 45.0
         topo_max_ht = maxval(topo_a)
 
-!       MEE values using constants from 'module_cloud_rad.f90'
-!       Values are 1.5 / (rho * reff)
+!       mee values using constants from 'module_cloud_rad.f90'
+!       values are 1.5 / (rho * reff)
 !       clwc2alpha = 75. 
         clwc2alpha = 1.5 / (rholiq  * reff_clwc)
         cice2alpha = 1.5 / (rholiq  * reff_cice)
         rain2alpha = 1.5 / (rholiq  * reff_rain)
         snow2alpha = 1.5 / (rhosnow * reff_snow)
 
-        write(6,*)' clwc2alpha (MEE) is ',clwc2alpha
+        write(6,*)' clwc2alpha (mee) is ',clwc2alpha
 
-!       Updated expressions for MEE
+!       updated expressions for mee
 !       const_clwc = ((1.5 / rholiq ) / reff_clwc_f(clwc_3d(i,j,ku))) * bksct_eff_clwc * ds
 !       const_cice = ((1.5 / rholiq ) / reff_cice_f(cice_3d(i,j,ku))) * bksct_eff_cice * ds
 !       const_rain = ((1.5 / rholiq ) / reff_rain) * bksct_eff_rain * ds
@@ -882,7 +882,7 @@
      1          + rain_3d * (rain2alpha/clwc2alpha) 
      1          + snow_3d * (snow2alpha/clwc2alpha)
 
-!       MEE relative to clwc
+!       mee relative to clwc
         wt_sp(1) = clwc2alpha/clwc2alpha
         wt_sp(2) = cice2alpha/clwc2alpha
         wt_sp(3) = rain2alpha/clwc2alpha
@@ -898,13 +898,13 @@
 
 !       kstart = 0 ! 0 means sfc, otherwise level of start
 
-!       Set up starting information for ray trace from observer
+!       set up starting information for ray trace from observer
 
         if(.true.)then ! general info
           write(6,*)' i/j/topo_sfc = ',i,j,topo_sfc
           write(6,*)' height column = ',heights_3d(i,j,:)
           do k = 1,nk-1
-            if(heights_3d(i,j,k)   .le. topo_sfc .AND.
+            if(heights_3d(i,j,k)   .le. topo_sfc .and.
      1         heights_3d(i,j,k+1) .ge. topo_sfc      )then
                 frach = (topo_sfc - heights_3d(i,j,k)) / 
      1                  (heights_3d(i,j,k+1) - heights_3d(i,j,k))
@@ -915,15 +915,15 @@
         endif
 
         if(htagl .eq. 0.)then ! start from sfc
-          htstart = topo_sfc  ! MSL
-          write(6,*)' Start at sfc, ksfc = ',ksfc
+          htstart = topo_sfc  ! msl
+          write(6,*)' start at sfc, ksfc = ',ksfc
           rkstart = rksfc
           patm = pres_3d(i,j,ksfc) / 101325.
         else ! start aloft
-          htstart = topo_sfc+htagl  ! MSL
+          htstart = topo_sfc+htagl  ! msl
           if(htstart .le. heights_3d(i,j,nk))then ! in domain
             do k = 1,nk-1
-              if(heights_3d(i,j,k)   .le. htstart .AND.
+              if(heights_3d(i,j,k)   .le. htstart .and.
      1           heights_3d(i,j,k+1) .ge. htstart      )then
                 frach = (htstart - heights_3d(i,j,k)) / 
      1                  (heights_3d(i,j,k+1) - heights_3d(i,j,k))
@@ -933,7 +933,7 @@
               endif
             enddo ! k
             if(kstart .eq. 0)then
-               write(6,*)' ERROR: kstart = 0',htstart,heights_3d(i,j,:)
+               write(6,*)' error: kstart = 0',htstart,heights_3d(i,j,:)
                istatus = 0
                return
             endif
@@ -949,7 +949,7 @@
             write(6,*)' horizon tod depression / tod ang diam = '
      1                 ,horz_dep_tod_d, 180.-2.*horz_dep_tod_d
           endif
-          write(6,*)' Start aloft at k/rk/p = ',kstart,rkstart,patm
+          write(6,*)' start aloft at k/rk/p = ',kstart,rkstart,patm
         endif
 
         radius_earth_eff = earth_radius * (1. + (0.33333 * patm))
@@ -968,7 +968,7 @@
 
         write(6,*)' l_spherical = ',l_spherical
 
-!       Always set to true to eliminate small polar artifact at nadir
+!       always set to true to eliminate small polar artifact at nadir
 !       if(grid_spacing_m .ge. 9000. .or. .true.)then
         if(grid_spacing_m .ge. 9000.)then
           l_box = .true.
@@ -982,7 +982,7 @@
 
         write(6,*)' solalt observer grid / l_box = ',sol_alt(i,j),l_box
 
-!       Used to call skyglow_phys vs skyglow_phys_twi for example
+!       used to call skyglow_phys vs skyglow_phys_twi for example
         twi_0 = min(-15.0,-horz_dep_d) ! output
         write(6,*)' twi_0 = ',twi_0
 
@@ -992,7 +992,7 @@
         write(6,*)' aero_scaleht = ',aero_scaleht
         write(6,*)' aod/redp_lvl/aod_vrt = ',aod,redp_lvl,aod_vrt
                   
-!       Calculate observer mean free paths
+!       calculate observer mean free paths
         k_obs = nint(rkstart)
         if(k_obs .le. nk)then
           k_vis = k_obs
@@ -1013,7 +1013,7 @@
      1          ,e16.3,'m',2x,f8.2,'mi',5x,2f8.2,i4)
           endif
 
-!         Will need MEE information for hydrometeors
+!         will need mee information for hydrometeors
           if(clwc_3d(i,j,k_vis) .gt. 0.)then
             mean_free_path = 1.0/clwc_3d(i,j,k_vis)
             vsb_mi = mean_free_path / 1609.34 * vsb_const
@@ -1066,9 +1066,9 @@
         write(6,*)' range of altitudes is ',minalt_deg,maxalt_deg
         write(6,*)' range of azimuths is  ',minazi_deg,maxazi_deg
 
-!       Optional setup of hi-res window
+!       optional setup of hi-res window
         if(grid_spacing_m .le. 100.)then
-           write(6,*)' Setting up full res window'
+           write(6,*)' setting up full res window'
            l_fullres_wdw = .true.
            azimin_full = 205.
            azimax_full = 225.
@@ -1104,14 +1104,14 @@
 
         write(6,*)'azid1/azid2 = ',azid1,azid2
 
-!       Loop through altitudes as seen from the observer
+!       loop through altitudes as seen from the observer
         do ialt = minalt,maxalt
 
 !        l_process = .false.
 
          call get_val(ialt,minalt,alt_scale,altray)
 
-!        Fill in pseudo topo outside horizontal domain
+!        fill in pseudo topo outside horizontal domain
 !        if(dist_2_topo(ialt,jazi) .eq. 0. .and. 
 !    1      view_altitude_deg .lt. -horz_dep_d)then
 !           dist_2_topo(ialt,jazi) = htstart / 
@@ -1187,7 +1187,7 @@
          endif
 
          if(mod((maxazi-minazi),jazi_delt) .ne. 0)then
-             write(6,*)' ERROR: jazi_delt has remainder',jazi_delt
+             write(6,*)' error: jazi_delt has remainder',jazi_delt
              istatus = 0
              return
          endif
@@ -1196,7 +1196,7 @@
 
          call get_htmin(altray,patm,htstart,earth_radius,0,patm2,htmin)
 
-!        This responds to the presence of inner/outer windows
+!        this responds to the presence of inner/outer windows
          jazi_delt_eff = max(jazi_delt,jazi_delt_outer)
 
          if(altray .eq. nint(altray))then
@@ -1209,7 +1209,7 @@
          altray_limb = altray + horz_dep_d
          radius_limb = 90. - horz_dep_d
 
-!        Determine pixels to trace for this altitude
+!        determine pixels to trace for this altitude
          if(jazi_delt .lt. maxazi-minazi)then ! alt ring is traced
             l_pix_trace(ialt,minazi:maxazi:jazi_delt_eff) = .true.
          endif
@@ -1226,7 +1226,7 @@
            azigrid = modulo(view_azi_deg + projrot,360.)
 
            if((abs(view_azi_deg - azid1) .lt. azi_delt_2 .or. 
-     1         abs(view_azi_deg - azid2) .lt. azi_delt_2      ) .AND.
+     1         abs(view_azi_deg - azid2) .lt. azi_delt_2      ) .and.
      1        (abs(altray) .eq. 12  .or. abs(altray) .eq. 9 .or.
      1         (altray .ge. -5. .and. altray .le. 9.) .or. 
      1         ialt .eq. minalt .or. abs(altray) .eq. 14. .or.
@@ -1240,7 +1240,7 @@
      1         abs(altray) .eq. 45. .or. abs(altray) .eq. 63.5 .or.
 !    1         (altray .ge. -75.00 .and. altray .le. -70.00) .or.
      1         abs(altray) .eq. 75.) 
-!    1               .AND. altray .eq. nint(altray) 
+!    1               .and. altray .eq. nint(altray) 
      1                                                   )then
              idebug = 1
              idebug_a(ialt,jazi) = 1
@@ -1248,7 +1248,7 @@
              idebug = 0
           endif
 
-!         High custom
+!         high custom
 !         if(ialt .eq. minalt+(maxalt-minalt)*(90-5)/180)then ! -5 degrees alt
           if(.false.)then
              if(view_azi_deg*2. .eq. nint(view_azi_deg*2.) .and.
@@ -1261,7 +1261,7 @@
              endif
           endif
 
-!         Non-verbose (low observer)                    
+!         non-verbose (low observer)                    
           if(l_box .eqv. .false.)then
             if(htstart .lt. 25. .or. altray .gt. 0.0)then
               if(mode_aero_cld .lt. 3)then
@@ -1272,40 +1272,40 @@
 !           idebug = 1
           endif
 
-!         Zenith / Nadir
+!         zenith / nadir
           if(jazi .eq. minazi .and. abs(altray) .eq. 90.)then
               idebug = 1
               idebug_a(ialt,jazi) = 1
           endif
 
-!         Horizon
+!         horizon
           if(jazi .eq. minazi .and. altray .eq. 0.)then
               idebug = 1
               idebug_a(ialt,jazi) = 1
           endif
 
-!         Custom
+!         custom
           if(ialt .eq. -108 .and. jazi .eq. 340)then
               idebug = 1
               idebug_a(ialt,jazi) = 1
           endif
 
-!         Extra verbose
+!         extra verbose
           if(idebug .eq. 1)then
             write(6,*)
             write(6,*)'alt/azi = ',ialt,jazi,altray,view_azi_deg
           endif
 
-!         Trace towards sky from each grid point
-!         view_altitude_deg = max(altray,0.) ! handle Earth curvature later
+!         trace towards sky from each grid point
+!         view_altitude_deg = max(altray,0.) ! handle earth curvature later
           view_altitude_deg = altray
 
-!         Get direction cosines based on azimuth
+!         get direction cosines based on azimuth
           xcosg = sind(azigrid)
           ycosg = cosd(azigrid)
           ycost = cosd(view_azi_deg)
 
-!         Initialize variables for this ray
+!         initialize variables for this ray
           icloud = 0
           cvr_path_sum = 0.
           cvr_path_sum_sp = 0.
@@ -1401,11 +1401,11 @@
 !             rkdelt = max(min(rkdelt,2.0),0.5)
               
               if(idebug .eq. 1)then
-                if(htagl .gt. 8000e3)I4_elapsed = ishow_timer()
+                if(htagl .gt. 8000e3)i4_elapsed = ishow_timer()
                 write(6,11)altray,view_azi_deg,azigrid,ialt,jazi
      1                    ,jazi_delt,rkdelt,i,j,slant2_optimal,l_box
 11              format(
-     1    'Trace the slant path (alt/azi-g/ialt/jazi/jdelt/rkdelt/i/j):'
+     1    'trace the slant path (alt/azi-g/ialt/jazi/jdelt/rkdelt/i/j):'
      1                ,f8.3,2f6.1,i6,2i5,f8.4,2i5,f7.0,l2)                                     
                 write(6,12)                                   
 12              format('      dz1_l        dz1_h      dxy1_l    dxy1_h',
@@ -1415,7 +1415,7 @@
      1           ' cld_rd_w  aeroext transm3 aod_sm aod_sm_ill/potl')
               endif
 
-!             Initialize ray
+!             initialize ray
               dxy1_h = 0.
               dz1_h = 0.
               dslant1_h = 0.
@@ -1424,8 +1424,8 @@
               ihit_bounds = 0     ! crossed beyond top of domain
               ioutside_domain = 0 ! outside horizontal domain
               rk_h = rkstart
-              rinew_h = i ! for l_spherical = T
-              rjnew_h = j ! for l_spherical = T
+              rinew_h = i ! for l_spherical = t
+              rjnew_h = j ! for l_spherical = t
 
               rkdelt = rkdelt1
 
@@ -1440,11 +1440,11 @@
               endif
 
               do while((rk .le. float(nk)-rkdelt .or. iabove .eq. 1)
-     1           .AND. ihit_topo .eq. 0
-     1           .AND. ihit_bounds .eq. 0
-     1           .AND. ioutside_domain .eq. 0
-     1           .AND. htmin .lt. 100000.     ! will hit atmosphere
-     1           .AND. cvr_path_sum .le. cvr_path_thr) ! Tau < ~75
+     1           .and. ihit_topo .eq. 0
+     1           .and. ihit_bounds .eq. 0
+     1           .and. ioutside_domain .eq. 0
+     1           .and. htmin .lt. 100000.     ! will hit atmosphere
+     1           .and. cvr_path_sum .le. cvr_path_thr) ! tau < ~75
 
                 ls = ls + 1
 
@@ -1485,7 +1485,7 @@
                   frac_l = rk_l - float(kk_l)
 
 !                 if(kk_l .ge. nk .or. kk_l .le. 0)then
-!                   write(6,*)' ERROR: rk/kk_l',rk,kk_l
+!                   write(6,*)' error: rk/kk_l',rk,kk_l
 !                 endif
 
                   rk_h = rk
@@ -1493,8 +1493,8 @@
                   frac_h = rk_h - float(kk_h)
 
                   if(rk_h .gt. float(nk) .or. rk_h .lt. 1.)then
-                    write(6,*)' ERROR: rk_h/kk_h',rk_h,kk_h,ialt,jazi
-                    write(6,*)' ERROR: kk_h is out of bounds '
+                    write(6,*)' error: rk_h/kk_h',rk_h,kk_h,ialt,jazi
+                    write(6,*)' error: kk_h is out of bounds '
      1                       ,ls,iabove
      1                       ,rkstart,rk_h,nk,rkdelt,ht_h,ht_m,topo_m
      1                       ,ihit_topo,ihit_bounds,rinew_l,rjnew_l
@@ -1511,7 +1511,7 @@
                     pr_l = pres_1d(kk_l) * (1. - frac_l) 
      1                   + pres_1d(kk_l+1) * frac_l
 
-                    if(rk_h .lt. float(nk) .AND. rk_h .ge. 1.0)then
+                    if(rk_h .lt. float(nk) .and. rk_h .ge. 1.0)then
                       ht_h = heights_1d(kk_h) * (1. - frac_h) 
      1                     + heights_1d(kk_h+1) * frac_h
 
@@ -1523,7 +1523,7 @@
 
                       pr_h = pres_1d(kk_h)
                     else
-                      write(6,*)' ERROR: rk_h is out of bounds '
+                      write(6,*)' error: rk_h is out of bounds '
      1                       ,ls,iabove
      1                       ,rkstart,rk_h,nk,rkdelt,ht_h,ht_m,topo_m
      1                       ,ihit_topo,rinew_l,rjnew_l,rjnew_h,jnew_m
@@ -1539,7 +1539,7 @@
                     pr_l = pres_3d(in_h,jn_h,kk_l) * (1. - frac_l) 
      1                   + pres_3d(in_h,jn_h,kk_l+1) * frac_l
 
-                    if(rk_h .lt. float(nk) .AND. rk_h .ge. 1.0)then
+                    if(rk_h .lt. float(nk) .and. rk_h .ge. 1.0)then
                       ht_h = heights_3d(in_h,jn_h,kk_h) * (1. - frac_h) 
      1                     + heights_3d(in_h,jn_h,kk_h+1) * frac_h
 
@@ -1551,7 +1551,7 @@
 
                       pr_h = pres_3d(in_h,jn_h,kk_h)
                     else
-                      write(6,*)' ERROR: rk_h is out of bounds '
+                      write(6,*)' error: rk_h is out of bounds '
      1                       ,ls,iabove
      1                       ,rkstart,rk_h,nk,rkdelt,ht_h,ht_m,topo_m
      1                       ,ihit_topo,rjnew_l,rjnew_h,jnew_m
@@ -1623,7 +1623,7 @@
                     cslant = ' '
                   endif
 
-                else  ! Trace by slant range (rkdelt = 0. )
+                else  ! trace by slant range (rkdelt = 0. )
                   dz1_l = dz1_h
                   ht_l = htstart + dz1_l
 
@@ -1635,7 +1635,7 @@
                     endif
                     slant2_optimal = min(htarg/sind_view,grid_spacing_m)
                   endif
-                  dslant2=max(dble(slant2_optimal),ht_l-30000.D0)
+                  dslant2=max(dble(slant2_optimal),ht_l-30000.d0)
                   if((l_box .eqv. .true.) .and. dist_box .lt. 1e30)then
                     dslant2 = dble(dist_box)
                   endif
@@ -1646,7 +1646,7 @@
                   dxy1_l = dxy1_h
                   dxy1_h = dslant1_h * cosd(altray)
 
-!                 Determine height from distance and elev
+!                 determine height from distance and elev
                   if(l_spherical .eqv. .false.)then ! more approximate
                     dz1_h = dslant1_h * sind(altray) 
 !    1                    + dxy1_h**2 / (2. * radius_earth_eff)
@@ -1666,7 +1666,7 @@
 
                   rk_h = r_missing_data
 
-!                 Pseudo grid values above/below LAPS domain
+!                 pseudo grid values above/below laps domain
                   if(.not. l_terrain_following)then
                     if(ht_h .gt. heights_1d(nk) .and. iabove .eq. 1)then
                       rk_h = float(nk) + (ht_h - heights_1d(nk)) / 1000.
@@ -1678,7 +1678,7 @@
      1                   * exp(-(ht_h - heights_1d(1))  / 8000.)
                     else ! inside vertical domain
                       do k = 1,nk-1
-                        if(heights_1d(k)   .le. ht_h .AND.
+                        if(heights_1d(k)   .le. ht_h .and.
      1                     heights_1d(k+1) .ge. ht_h      )then
                             delta_h = heights_1d(k+1) - heights_1d(k)
                             frach = (ht_h - heights_1d(k)) / delta_h
@@ -1702,7 +1702,7 @@
      1                   * exp(-(ht_h - heights_3d(in_h,jn_h,1)) /8000.)
                     else ! inside vertical domain
                       do k = 1,nk-1
-                        if(heights_3d(in_h,jn_h,k)   .le. ht_h .AND.
+                        if(heights_3d(in_h,jn_h,k)   .le. ht_h .and.
      1                     heights_3d(in_h,jn_h,k+1) .ge. ht_h     )then
                             delta_h = heights_3d(in_h,jn_h,k+1) 
      1                              - heights_3d(in_h,jn_h,k)
@@ -1723,7 +1723,7 @@
 
                 endif ! rkdelt .ne. 0.
 
-!               Extra verbose
+!               extra verbose
                 if(altray .le. -60. .and. 
      1              (idebug .eq. 1))then
                   if(ls .le. 15 .or. ls .eq. 100 .or. ls .eq. 1000
@@ -1752,30 +1752,30 @@
 
 !               ioutside_domain = 0
 
-                if(rk_m    .lt. float(nk) .AND.
+                if(rk_m    .lt. float(nk) .and.
      1             rk_m    .gt. 1.0            )then ! in vertical domain
 
                  if(l_spherical .eqv. .true.)then ! more exact
                   rinew_l = rinew_h
                   rjnew_l = rjnew_h
 
-!                 Obtain latlon from spherical geometry
-                  dTLat = ASinD(ycost*SinD(gc_deg)*CosD(rLat) 
-     1                  + SinD(rLat)*CosD(gc_deg))
+!                 obtain latlon from spherical geometry
+                  dtlat = asind(ycost*sind(gc_deg)*cosd(rlat) 
+     1                  + sind(rlat)*cosd(gc_deg))
                   tlat = dtlat
 
                   drlat = rlat
-                  CosDLon = (CosD(gc_deg) - SinD(drLat)*SinD(dTLat)) 
-     1                    / (CosD(drLat)*CosD(dTLat))
-                  If(Abs(CosDLon).gt.1d0)CosDLon=Sign(1d0,CosDLon)
-                  DLon = ACosD(CosDLon)
+                  cosdlon = (cosd(gc_deg) - sind(drlat)*sind(dtlat)) 
+     1                    / (cosd(drlat)*cosd(dtlat))
+                  if(abs(cosdlon).gt.1d0)cosdlon=sign(1d0,cosdlon)
+                  dlon = acosd(cosdlon)
                   
-                  If(view_azi_deg.ge..0.and.view_azi_deg.le.180.)Then ! east
-!                 If(azigrid.ge..0.and.azigrid.le.180.)Then ! grid east
-                    TLon=rLon+DLon
-                  Else ! west
-                    TLon=rLon-DLon
-                  EndIf
+                  if(view_azi_deg.ge..0.and.view_azi_deg.le.180.)then ! east
+!                 if(azigrid.ge..0.and.azigrid.le.180.)then ! grid east
+                    tlon=rlon+dlon
+                  else ! west
+                    tlon=rlon-dlon
+                  endif
 
                   if(.not. l_latlon_grid)then ! speed test
                     call latlon_to_rlapsgrid(tlat,tlon,lat,lon,ni,nj
@@ -1838,7 +1838,7 @@
 
                  endif ! l_spherical
 
-!                Can be used to target box boundaries
+!                can be used to target box boundaries
                  if(l_box .eqv. .true.)then
                    dids = (rinew_h - rinew_l) / slant2
                    djds = (rjnew_h - rjnew_l) / slant2
@@ -1860,7 +1860,7 @@
                  inew_m = nint(rinew_m); jnew_m = nint(rjnew_m)
                  inew_mb = max(min(inew_m,ni),1)
 
-                 if(rinew_h .ge. 1. .and. rinew_h .le. rni .AND. 
+                 if(rinew_h .ge. 1. .and. rinew_h .le. rni .and. 
      1              rjnew_h .ge. 1. .and. rjnew_h .le. rnj)then ! horz domain
 
                   i1 = max(min(int(rinew_m),ni-1),1)
@@ -1874,7 +1874,7 @@
                    return
                   endif
 
-!                 Along-ray distance to next box face, along each axis
+!                 along-ray distance to next box face, along each axis
                   if(l_box .eqv. .true.)then
                     fi = mod(rinew_h,1.)
                     fj = mod(rjnew_h,1.)
@@ -1929,9 +1929,9 @@
                         if(.not. l_terrain_following)then
                           disth = abs((heights_1d(knext) - ht_h) / dhds)
                         else
-                          write(6,*)' ERROR in get_cloud_rays'
+                          write(6,*)' error in get_cloud_rays'
                           write(6,*)
-     1                       ' l_box and l_terrain_following are both T'
+     1                       ' l_box and l_terrain_following are both t'
                           istatus = 0
                           return
                         endif
@@ -1967,14 +1967,14 @@
                   tri_coeff(2,2,1) = fi      *     fj  * (1.- fk)
                   tri_coeff(2,2,2) = fi      *     fj  *      fk
 
-!                 Update box_max only if crossed into new box
+!                 update box_max only if crossed into new box
 !                 ichecksum_last = ichecksum; ichecksum = i1+j1+k1
 !                 if(ichecksum .ne. ichecksum_last)then
                     box_max = maxval(cond_3d(i1:i2,j1:j2,k1:k2))
 !                 endif
 
                   if(cvr_path_sum .le. cvr_path_thr)then ! consider clouds
-!                   Cloud present on any of 8 interpolation vertices
+!                   cloud present on any of 8 interpolation vertices
                     if(box_max .gt. 0.)then
                       cond_m = sum(tri_coeff(:,:,:) * 
      1                             cond_3d(i1:i2,j1:j2,k1:k2))
@@ -2027,23 +2027,23 @@
                   cvr_path_sum_sp(4) = 
      1            cvr_path_sum_sp(4) + snow_m * wt_sp(4) * slant2
 
-!                 if(idebug .eq. 1 .OR. cond_m .gt. 0.)then
+!                 if(idebug .eq. 1 .or. cond_m .gt. 0.)then
                   if(.true.)then
 
-!                   Can this be unfairly reduced when k1 is below the terrain?
+!                   can this be unfairly reduced when k1 is below the terrain?
                     transm_3d_m = sum(tri_coeff(:,:,:) * 
      1                            transm_3d_vint(i1:i2,j1:j2,k1:k2))
 
                     if(idebug .eq. 1 .and. .false.)then
                       if(heights_3d(i1,j1,k1) .lt. topo_a(i1,j1))then
                          write(6,*)
-     1                   ' Warning: suspect transm_3d_m below terrain'
+     1                   ' warning: suspect transm_3d_m below terrain'
      1                   ,transm_3d(i1:i2,j1:j2,k1:k2),transm_3d_m
                       endif
                     endif
 
                     if(.false.)then
-                      write(6,*)' ERROR transm_3d_m < 0',transm_3d_m
+                      write(6,*)' error transm_3d_m < 0',transm_3d_m
      1                            ,sum(tri_coeff(:,:,:)),fi,fj,fk
      1                            ,' tri_coeff '
      1                            ,tri_coeff(:,:,:),i1,i2,j1,j2,k1,k2
@@ -2099,11 +2099,11 @@
 
                     sum_odrad_c_nt(:) = sum_odrad_c_nt(:) + 
      1              (cvr_path * slant2 * uprad_4d_m(:))
-                  endif ! idebug .eq. 1 .OR. cond_m .gt. 0.
+                  endif ! idebug .eq. 1 .or. cond_m .gt. 0.
 
-!                 Assess topo height with respect to ray
+!                 assess topo height with respect to ray
 !                 if(ht_m - htstart .le. 1000.)then ! more accurate topo when low
-                  if(ht_m   .le. topo_max_ht .AND. 
+                  if(ht_m   .le. topo_max_ht .and. 
      1               altray .le. topo_max_ang     )then 
 !                 if(ht_m   .le. topo_max_ht)then 
                     i1 = max(min(int(rinew_m),ni-1),1)
@@ -2134,14 +2134,14 @@
                     topo_h = topo_m
                   endif
 
-!                 Use _h values in addition to _m
+!                 use _h values in addition to _m
 !                 ray_topo_diff_m_last = ray_topo_diff_m
                   ray_topo_diff_h_last = ray_topo_diff_h
                   ray_topo_diff_m = ht_m - topo_m
                   ray_topo_diff_h = ht_h - topo_h
 
-!                 Check both mid-point and end-point of ray segment
-                  if((topo_m .gt. ht_m .or. topo_h .gt. ht_h) .AND. 
+!                 check both mid-point and end-point of ray segment
+                  if((topo_m .gt. ht_m .or. topo_h .gt. ht_h) .and. 
      1                                             ihit_topo .eq. 0)then
                       ihit_topo = 1
 
@@ -2160,9 +2160,9 @@
 
                   sum_aod = sum_aod + aod_inc
 
-!                 Test for hitting tau ~1 (nominal cloud edge)
-                  if((cvr_path          .gt. 0.00) .AND.
-     1               (cvr_path_sum      .le.  .013     .OR. ! tau ~1
+!                 test for hitting tau ~1 (nominal cloud edge)
+                  if((cvr_path          .gt. 0.00) .and.
+     1               (cvr_path_sum      .le.  .013     .or. ! tau ~1
      1                cvr_path_sum_last .eq. 0.  )            )then 
                     aod_2_cloud(ialt,jazi) = sum_aod
                     if(cvr_path_sum_sp(3) .gt. 0.)then
@@ -2220,7 +2220,7 @@
                        solocc = 0.
                     endif
 
-!                   Approximation to trans4 / trans3
+!                   approximation to trans4 / trans3
                     if(shdw_ht .gt. 0.)then ! twilight
                       ht_m_eff = max(ht_m,shdw_ht)
                       amapp = 38. * exp(-min(ht_m_eff/8000.,80.))
@@ -2233,13 +2233,13 @@
                       trn4app = 1.
                     endif
 
-!                   This weights where we examine illumination fraction
+!                   this weights where we examine illumination fraction
                     clrrad_inc_pot = airmass2
      1                             * frac_fntcloud ! was just in numerator
-     1                             * solocc        ! MSL solar occultation
-     1                             * trn4app       ! Gas attenuation
+     1                             * solocc        ! msl solar occultation
+     1                             * trn4app       ! gas attenuation
 
-!                   Apply shadowing by clouds and terrain (above MSL)
+!                   apply shadowing by clouds and terrain (above msl)
                     clrrad_inc = clrrad_inc_pot 
      1                         * transm_3d(inew_m,jnew_m,k_m) 
 
@@ -2262,8 +2262,8 @@
      1                                   * trans(sum_aod+sum_god(ic))
                   enddo ! ic
 
-!                 Check whether near start of ray and near topo
-                  if(rk_m .lt. (rkstart + 1.0) .AND. 
+!                 check whether near start of ray and near topo
+                  if(rk_m .lt. (rkstart + 1.0) .and. 
      1               htagl .lt. 1000.)then
 
 !                 if(.false.)then ! near topo
@@ -2298,7 +2298,7 @@
      1                          * transm_3d_m
 
 !                   if(sum_aod_ill .lt. 0.)then
-!                     write(6,*)' ERROR sum_aod_ill < 0',sum_aod_ill
+!                     write(6,*)' error sum_aod_ill < 0',sum_aod_ill
 !    1                            ,aero_ext_coeff,slant2,transm_3d_m
 !                     stop
 !                   endif
@@ -2319,7 +2319,7 @@
                     sum_aod_ill_opac_potl = sum_aod_ill_opac_potl
      1                         + slant2_trans_od
 
-!                   Night lights and aerosols and gas irradiance sum
+!                   night lights and aerosols and gas irradiance sum
                     sum_aod_rad_opac(:) = sum_aod_rad_opac(:)
      1                         + slant2_trans_odc(:) * uprad_4d_m(:)
 
@@ -2331,8 +2331,8 @@
      1                          / (aero_ext_coeff + alphabar_g)
                   endif
 
-!                 Determine backscatter threshold for averaging cloud rad
-!                 This can be refined by determining the phase of the
+!                 determine backscatter threshold for averaging cloud rad
+!                 this can be refined by determining the phase of the
 !                 cloud so far in the ray traversal
                   if(cvr_path .gt. 0.00)then  
                     frac_liq = (cvr_path_sum_sp(1) + cvr_path_sum_sp(3))
@@ -2345,9 +2345,9 @@
                     endif
                     bks_thr = tau_thr / clwc2alpha
 
-                    if(cvr_path_sum      .le.  bks_thr .OR. ! tau ~7-15
+                    if(cvr_path_sum      .le.  bks_thr .or. ! tau ~7-15
      1                 cvr_path_sum_last .eq. 0.            )then 
-!                     Average value over cloud path (tau ~10)
+!                     average value over cloud path (tau ~10)
                       r_cloud_rad(ialt,jazi) = sum_odrad / cvr_path_sum 
                       if(sum_odrad .gt. 0.)then
                           cloud_rad_w(ialt,jazi) = sum_odrad_w 
@@ -2369,10 +2369,10 @@
                       cloud_rad_c_nt(:,ialt,jazi) 
      1                                = sum_odrad_c_nt(:) / cvr_path_sum 
 
-                    elseif(cvr_path_sum      .gt.  bks_thr .AND.
-     1                     cvr_path_sum_last .le.  bks_thr .AND.
+                    elseif(cvr_path_sum      .gt.  bks_thr .and.
+     1                     cvr_path_sum_last .le.  bks_thr .and.
      1                     cvr_path_sum_last .gt.  0.           )then
-!                     Find average value right at tau_thr boundary
+!                     find average value right at tau_thr boundary
                       frac_path = (bks_thr - cvr_path_sum_last)
      1                          / (cvr_path_sum - cvr_path_sum_last)
 
@@ -2410,16 +2410,16 @@
 
                   endif ! cvr_path > 0
 
-!                 Calculated weighted value of airmass to cloud
+!                 calculated weighted value of airmass to cloud
                   taucloud = clwc2alpha*cvr_path_sum
                   sum_am2cld_atten = sum_am2cld_atten
      1                             + airmass2 * trans(taucloud) 
 !                 airmass_2_cloud_3d(ialt,jazi) = sum_am2cld_atten
 
-!                 Determined earlier that we are hitting topo
+!                 determined earlier that we are hitting topo
                   if(ihit_topo .eq. 1)then
 
-!                     Land illumination related to terrain slope
+!                     land illumination related to terrain slope
                       if(sol_alt(inew_mb,jnew_m)  .gt. 0. )then  
 
 !                       frac_ghi_dir = 0.9 *
@@ -2432,7 +2432,7 @@
      1                   (ghi_2d(inew_mb,jnew_m)-dhi_2d(inew_mb,jnew_m))
      1                    / ghi_2d(inew_mb,jnew_m)
                         else
-                          write(6,*)' WARNING: ghi_2d = 0.'
+                          write(6,*)' warning: ghi_2d = 0.'
      1                             ,inew_mb,jnew_m
      1                             ,sol_alt(inew_mb,jnew_m)
      1                             ,lat(inew_mb,jnew_m)
@@ -2462,22 +2462,22 @@
      1                  sum(bi_coeff(:,:) * ghi_2d(i1:i2,j1:j2))
      1                                    * solar_corr
 
-!                     Terrain spectral radiance (normalized)
-!                     Should gtic = dtic + btic?
+!                     terrain spectral radiance (normalized)
+!                     should gtic = dtic + btic?
                       do ic = 1,nc
                           gtic(ic,ialt,jazi) = 
      1                      sum(bi_coeff(:,:) * ghic_2d(ic,i1:i2,j1:j2))
      1                                        * solar_corr
 
-!                         City lights on the ground (spec exitance - emic)
+!                         city lights on the ground (spec exitance - emic)
                           if(sol_alt(inew_mb,jnew_m) .lt. twi_alt)then  
 
-!                           'gnd_glow' is nL, consider w/m2/sr/nm
+!                           'gnd_glow' is nl, consider w/m2/sr/nm
 !                           'emic' is relative to solar isotropic
                             emic(ic,ialt,jazi) = sum(bi_coeff(:,:)    
      1                        * gnd_glow(i1:i2,j1:j2)) * city_colrat(ic)
      1                        / 3e9 ! nl to solar isotropic (i.e. day_int)
-                            if(gnd_glow(inew_mb,jnew_m) .gt. 0. .AND. ! .OR. 
+                            if(gnd_glow(inew_mb,jnew_m) .gt. 0. .and. ! .or. 
      1                                                idebug .eq. 1)then      
                               write(6,82)ialt,jazi,inew_mb,jnew_m
      1                                  ,gnd_glow(inew_mb,jnew_m)
@@ -2491,7 +2491,7 @@
                           dtic(ic,ialt,jazi) = 
      1                      sum(bi_coeff(:,:) * dhic_2d(ic,i1:i2,j1:j2))
 
-!                         Could be computed from 'bhic' or 'bnic'
+!                         could be computed from 'bhic' or 'bnic'
                           btic(ic,ialt,jazi) = 
      1                      sum(bi_coeff(:,:) * bhic_2d(ic,i1:i2,j1:j2))
      1                                        * solar_corrb
@@ -2525,7 +2525,7 @@
 
                       enddo ! ic                
 
-!                     Topo albedo
+!                     topo albedo
                       do ic = 1,nc
                         topo_albedo(ic,ialt,jazi) = sum(bi_coeff(:,:) 
      1                                 * topo_albedo_2d(ic,i1:i2,j1:j2))
@@ -2536,9 +2536,9 @@
                       topo_ri(ialt,jazi) = rinew_m
                       topo_rj(ialt,jazi) = rjnew_m
 
-!                     Test for first segment
-                      if(dxy1_l .eq. 0. .AND. frac_step_topo .eq. 0.
-     1                                  .AND. htstart .eq. topo_sfc)then
+!                     test for first segment
+                      if(dxy1_l .eq. 0. .and. frac_step_topo .eq. 0.
+     1                                  .and. htstart .eq. topo_sfc)then
                           airmass_2_topo_3d(ialt,jazi) = 1e-5
                           aod_2_topo(ialt,jazi)        = 1e-4
                           dist_2_topo(ialt,jazi)       = 1d0
@@ -2581,7 +2581,7 @@
      1                           ,ghi_2d(inew_mb,jnew_m)
      1                           ,dhi_2d(inew_mb,jnew_m)
                       endif
-91                    format(' Hit topo',2f8.1,4f8.3,f8.2,4f8.3,f12.0
+91                    format(' hit topo',2f8.1,4f8.3,f8.2,4f8.3,f12.0
      1                                  ,4f8.3,2f8.1)
                   endif ! hit topo
 
@@ -2658,12 +2658,12 @@
                 endif
               enddo ! while kk/rk
 
-!             Extra verbose
+!             extra verbose
               if(idebug .eq. 1 .and.
      1                (altray .lt. 0. .or. mode_aero_cld .eq. 3) )then
                 itrace = nint(trace_ri(ialt,jazi))
                 jtrace = nint(trace_rj(ialt,jazi))
-                if(itrace .ge. 1 .and. itrace .le. ni .AND.
+                if(itrace .ge. 1 .and. itrace .le. ni .and.
      1             jtrace .ge. 1 .and. jtrace .le. nj)then
                   trsolalt = sol_alt(itrace,jtrace)
                 else
@@ -2684,7 +2684,7 @@
 
           endif ! true
 
-!         Store various accumulated sums
+!         store various accumulated sums
           cloud_od(ialt,jazi) = clwc2alpha*cvr_path_sum   
           cloud_od_sp(ialt,jazi,:) = clwc2alpha*cvr_path_sum_sp(:)   
           cloud_od_sp_w(ialt,jazi,:) = clwc2alpha*cvr_path_sum_sp_w(:)   
@@ -2701,12 +2701,12 @@
 
            airmass_2_cloud_3d(ialt,jazi) = sum_am2cld_atten
 
-!          Account for multiple scattering in aod_ill
+!          account for multiple scattering in aod_ill
            aod_ill(ialt,jazi) = (1.0 - crep_thr) * sum_aod_ill 
      1                               + crep_thr  * sum_aod
 !          aod_ill(ialt,jazi) = sum_aod_ill
            if(aod_ill(ialt,jazi) .lt. 0.)then
-              write(6,*)' ERROR aod_ill < 0',ialt,jazi,altray
+              write(6,*)' error aod_ill < 0',ialt,jazi,altray
      1                 ,view_azi_deg,sum_aod,sum_aod_ill
               stop
            endif
@@ -2732,7 +2732,7 @@
 !          if(sol_alt(i,j) .gt. 0.)then
            if(obj_alt(i,j) .gt. twi_0)then ! experiment
 
-!           Get clear sky daylight brightness ratio at point
+!           get clear sky daylight brightness ratio at point
 !           (i.e. fraction of atmosphere illuminated by the sun)
             if(rkstart .gt. float(nk) .and. sum_clrrad .eq. 0.0)then
               clear_radf_c(:,ialt,jazi) = 1.00 ! ray all above domain
@@ -2742,7 +2742,7 @@
             elseif(sum_clrrad_pot .gt. 0.)then
               clear_radf_c(:,ialt,jazi) = crep_thr ! secondary scattering in cloud shadow
      1                  + (1.0 - crep_thr) * (sum_clrrad/sum_clrrad_pot)
-            else ! entire ray in Earth's shadow
+            else ! entire ray in earth's shadow
               clear_radf_c(:,ialt,jazi) = 1.0
             endif
             if(idebug .eq. 1)then
@@ -2765,14 +2765,14 @@
 
 !          end include 'skyglow.inc'
 
-          endif ! l_pix_trace is TRUE
+          endif ! l_pix_trace is true
          enddo ! jazi
 
-!        I4_elapsed = ishow_timer()
+!        i4_elapsed = ishow_timer()
 
-!        Get clear sky twilight brightness in ring of constant altitude
-!        Approximate method used only in deep twilight
-!        A different condition could be added for very high altitudes
+!        get clear sky twilight brightness in ring of constant altitude
+!        approximate method used only in deep twilight
+!        a different condition could be added for very high altitudes
 !        by assessing range of solar altitudes around the limb
 !        if(sol_alt(i,j) .le. 0.)then
          if(sol_alt(i,j) .le. twi_0 .and. 
@@ -2782,19 +2782,19 @@
      1             ,minalt,maxalt,minazi,maxazi,idebug_a
      1             ,sol_alt(i,j),sol_azi(i,j),view_alt,view_az
      1             ,earth_radius,patm,aod_vrt,aod_ray_eff,aod_ray_dir
-     1             ,aero_scaleht,htstart,redp_lvl     ! I
-     1             ,aod_ill                           ! I (dummy)
-     1             ,l_solar_eclipse,i4time,rlat,rlon  ! I
-     1             ,clear_radf_c,horz_dep_d,ag_2d     ! I (ag2d is dummy)
-     1             ,clear_rad_c,elong_p             ) ! O (elongp is dummy)
+     1             ,aero_scaleht,htstart,redp_lvl     ! i
+     1             ,aod_ill                           ! i (dummy)
+     1             ,l_solar_eclipse,i4time,rlat,rlon  ! i
+     1             ,clear_radf_c,horz_dep_d,ag_2d     ! i (ag2d is dummy)
+     1             ,clear_rad_c,elong_p             ) ! o (elongp is dummy)
          endif
 
-!        Pixels per degree times 1 and times 2
-!        if(jazi_delt .eq. 2 .OR. jazi_delt .eq. 4 .OR. 
-!    1      jazi_delt .eq. 5 .OR. jazi_delt .eq. 8 .OR.
-!    1      jazi_delt .eq. 10 .OR. jazi_delt .eq. 16 .OR.
-!    1      jazi_delt .eq. 20 .OR. jazi_delt .eq. 32 .OR.
-!    1      jazi_delt .eq. 64 .OR. jazi_delt .eq. 128 .OR.
+!        pixels per degree times 1 and times 2
+!        if(jazi_delt .eq. 2 .or. jazi_delt .eq. 4 .or. 
+!    1      jazi_delt .eq. 5 .or. jazi_delt .eq. 8 .or.
+!    1      jazi_delt .eq. 10 .or. jazi_delt .eq. 16 .or.
+!    1      jazi_delt .eq. 20 .or. jazi_delt .eq. 32 .or.
+!    1      jazi_delt .eq. 64 .or. jazi_delt .eq. 128 .or.
 !    1      jazi_delt .eq. 256 
 !    1                                       )then ! fill missing azimuths
 
@@ -2802,12 +2802,12 @@
      1     jazi_delt_eff .lt. maxazi-minazi  )then ! fill missing azimuths
 
           do jazi = minazi,maxazi
-            call get_interp_parms(minazi,maxazi,jazi_delt_eff,jazi   ! I
-     1                           ,fm,fp,jazim,jazip,ir,istatus)      ! O
+            call get_interp_parms(minazi,maxazi,jazi_delt_eff,jazi   ! i
+     1                           ,fm,fp,jazim,jazip,ir,istatus)      ! o
             if(istatus .ne. 1)then
               write(6,120)
      1                minazi,maxazi,jazi,jazi_delt_outer,jazi_delt_eff
- 120          format(' ERROR in jazi call: ',
+ 120          format(' error in jazi call: ',
      1               'minazi/maxazi/jazi/jazi_delt_outer/jazi_delt_eff'
      1               ,5i8)   
               stop
@@ -2978,28 +2978,28 @@
         enddo ! jazi
         enddo ! ialt
 
-!       We normally fill missing rings above 20 degrees 
+!       we normally fill missing rings above 20 degrees 
         call get_idx(20.,minalt,alt_scale,ialt_min)
         call get_idx(maxalt_deg,minalt,alt_scale,ialt_max)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         if(htagl .gt. 30000e3)then ! skip fill for very high altitudes
           ialt_min = minalt+1
           ialt_max = minalt
-          write(6,*)' Skip filling missing data in altitude rings'
+          write(6,*)' skip filling missing data in altitude rings'
         else
-          write(6,*)' Filling missing data in altitude rings'
+          write(6,*)' filling missing data in altitude rings'
           write(6,*)' ialtmin/ialtmax/deg = '
      1               ,ialt_min,ialt_max,maxalt_deg
           write(6,*)' minalt/alt_scale ',minalt,alt_scale
         endif
 
         do ialt = ialt_min,ialt_max ! fill in missing alt rings
-          call get_interp_parms(minalt,maxalt,idelt,ialt           ! I
-     1                         ,fm,fp,ialtm,ialtp,ir,istatus)      ! O
+          call get_interp_parms(minalt,maxalt,idelt,ialt           ! i
+     1                         ,fm,fp,ialtm,ialtp,ir,istatus)      ! o
           if(istatus .ne. 1)then
-            write(6,*)'ERROR in ialt call: minalt,maxalt,ialt'
+            write(6,*)'error in ialt call: minalt,maxalt,ialt'
      1               ,minalt,maxalt,ialt
             stop
           endif
@@ -3073,7 +3073,7 @@
             topo_albedo(:,ialt,:) =
      1         fm * topo_albedo(:,ialtm,:) + fp * topo_albedo(:,ialtp,:)
 
-!           Check for zero values
+!           check for zero values
             topo_ri(ialt,:) =
      1         fm * topo_ri(ialtm,:) + fp * topo_ri(ialtp,:)
             topo_rj(ialt,:) =
@@ -3086,112 +3086,112 @@
           endif ! ir .ne. 0
         enddo ! ialt
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        write(6,*)' Number of rays with cloud = ',icloud_tot
+        write(6,*)' number of rays with cloud = ',icloud_tot
      1           ,' out of ',91*361
 
-        write(6,*)' Range of r_cloud_3d = ',minval(r_cloud_3d)
+        write(6,*)' range of r_cloud_3d = ',minval(r_cloud_3d)
      1                                     ,maxval(r_cloud_3d)
 
-        write(6,*)' Range of cloud_od = ',minval(cloud_od)
+        write(6,*)' range of cloud_od = ',minval(cloud_od)
      1                                   ,maxval(cloud_od)
 
         do isp = 1,nsp
-          write(6,*)' Range of cloud_od_sp = ',isp
+          write(6,*)' range of cloud_od_sp = ',isp
      1                                    ,minval(cloud_od_sp(:,:,isp))
      1                                    ,maxval(cloud_od_sp(:,:,isp))
         enddo ! isp
 
-        write(6,*)' Range of r_cloud_rad 1 = ',minval(r_cloud_rad)
+        write(6,*)' range of r_cloud_rad 1 = ',minval(r_cloud_rad)
      1                                        ,maxval(r_cloud_rad)
 
         where(r_cloud_rad .gt. 1e30)r_cloud_rad = 0.
 
-        write(6,*)' Range of r_cloud_rad 2 = ',minval(r_cloud_rad)
+        write(6,*)' range of r_cloud_rad 2 = ',minval(r_cloud_rad)
      1                                        ,maxval(r_cloud_rad)
 
-        write(6,*)' Range of cloud_rad_c R =',minval(cloud_rad_c(1,:,:))
+        write(6,*)' range of cloud_rad_c r =',minval(cloud_rad_c(1,:,:))
      1                                       ,maxval(cloud_rad_c(1,:,:))
 
-        write(6,*)' Range of cloud_rad_c G =',minval(cloud_rad_c(2,:,:))
+        write(6,*)' range of cloud_rad_c g =',minval(cloud_rad_c(2,:,:))
      1                                       ,maxval(cloud_rad_c(2,:,:))
 
-        write(6,*)' Range of cloud_rad_c B =',minval(cloud_rad_c(3,:,:))
+        write(6,*)' range of cloud_rad_c b =',minval(cloud_rad_c(3,:,:))
      1                                       ,maxval(cloud_rad_c(3,:,:))
 
-        write(6,*)' Range of cloud_rad_c_nt 2 (wm2srnm) ='
+        write(6,*)' range of cloud_rad_c_nt 2 (wm2srnm) ='
      1                                    ,minval(cloud_rad_c_nt(2,:,:))
      1                                    ,maxval(cloud_rad_c_nt(2,:,:))
 
-        write(6,*)' Range of clear_rad_c 3 =',minval(clear_rad_c(3,:,:))
+        write(6,*)' range of clear_rad_c 3 =',minval(clear_rad_c(3,:,:))
      1                                       ,maxval(clear_rad_c(3,:,:))
 
-        write(6,*)' Range of clear_rad_c_nt 3 (wm2srnm) ='
+        write(6,*)' range of clear_rad_c_nt 3 (wm2srnm) ='
      1                                    ,minval(clear_rad_c_nt(3,:,:))
      1                                    ,maxval(clear_rad_c_nt(3,:,:))
 
 !       cloud_rad_w = min(cloud_rad_w,1.)
 
-        write(6,*)' Range of cloud_rad_w = ',minval(cloud_rad_w)
+        write(6,*)' range of cloud_rad_w = ',minval(cloud_rad_w)
      1                                      ,maxval(cloud_rad_w)
 
-        write(6,*)' Range of clear_radf_c 3 ='
+        write(6,*)' range of clear_radf_c 3 ='
      1                                      ,minval(clear_radf_c(3,:,:))
      1                                      ,maxval(clear_radf_c(3,:,:))
 
         call get_idx(20.,minalt,alt_scale,ialt_idx)
         if(ialt_idx .gt. minalt .and. ialt_idx .le. maxalt)then
-          write(6,*)' Range of clear_radf_c +20. ='
+          write(6,*)' range of clear_radf_c +20. ='
      1                    ,minval(clear_radf_c(3,ialt_idx,:))  
      1                    ,maxval(clear_radf_c(3,ialt_idx,:))
         endif
 
         call get_idx(-20.,minalt,alt_scale,ialt_idx)
         if(ialt_idx .gt. minalt .and. ialt_idx .le. maxalt)then
-          write(6,*)' Range of clear_radf_c -20. ='
+          write(6,*)' range of clear_radf_c -20. ='
      1                    ,minval(clear_radf_c(3,ialt_idx,:))  
      1                    ,maxval(clear_radf_c(3,ialt_idx,:))
         endif
 
-        write(6,*)' Range of topo_gti = ',minval(topo_gti)
+        write(6,*)' range of topo_gti = ',minval(topo_gti)
      1                                   ,maxval(topo_gti)
 
-        write(6,*)' Range of gtic 2 = ',minval(gtic(2,:,:))
+        write(6,*)' range of gtic 2 = ',minval(gtic(2,:,:))
      1                                 ,maxval(gtic(2,:,:))
 
-        write(6,*)' Range of btic 2 = ',minval(btic(2,:,:))
+        write(6,*)' range of btic 2 = ',minval(btic(2,:,:))
      1                                 ,maxval(btic(2,:,:))
 
-        write(6,*)' Range of dtic 2 = ',minval(dtic(2,:,:))
+        write(6,*)' range of dtic 2 = ',minval(dtic(2,:,:))
      1                                 ,maxval(dtic(2,:,:))
 
-        write(6,*)' Range of emic 2 = ',minval(emic(2,:,:))
+        write(6,*)' range of emic 2 = ',minval(emic(2,:,:))
      1                                 ,maxval(emic(2,:,:))
 
-        write(6,*)' Range of topo_albedo 2 = '
+        write(6,*)' range of topo_albedo 2 = '
      1                                       ,minval(topo_albedo(2,:,:))
      1                                       ,maxval(topo_albedo(2,:,:))
 
-        write(6,*)' Range of topo_ri = ',minval(topo_ri)
+        write(6,*)' range of topo_ri = ',minval(topo_ri)
      1                                  ,maxval(topo_ri)
 
-        write(6,*)' Range of topo_rj = ',minval(topo_rj)
+        write(6,*)' range of topo_rj = ',minval(topo_rj)
      1                                  ,maxval(topo_rj)
 
-        write(6,*)' Range of aod_tot = ',minval(aod_tot)
+        write(6,*)' range of aod_tot = ',minval(aod_tot)
      1                                  ,maxval(aod_tot)       
 
-        write(6,*)' Range of aod_ill = ',minval(aod_ill)
+        write(6,*)' range of aod_ill = ',minval(aod_ill)
      1                                  ,maxval(aod_ill)       
 
-        write(6,*)' Range of aod_ill_dir = ',minval(aod_ill_dir)
+        write(6,*)' range of aod_ill_dir = ',minval(aod_ill_dir)
      1                                      ,maxval(aod_ill_dir)       
 
-        write(6,*)' Range of aod_ill_opac = ',minval(aod_ill_opac)
+        write(6,*)' range of aod_ill_opac = ',minval(aod_ill_opac)
      1                                       ,maxval(aod_ill_opac)       
 
-        write(6,*)' Range of aod_ill_opac_potl = '
+        write(6,*)' range of aod_ill_opac_potl = '
      1        ,minval(aod_ill_opac_potl),maxval(aod_ill_opac_potl)       
 
         do ialt = minalt,maxalt
@@ -3214,20 +3214,20 @@
 
         swi_obs = ghi_2d(i,j)
 
-!       Terrain shadowing not yet accounted for in this step
+!       terrain shadowing not yet accounted for in this step
         write(6,*)'transm of observer is ',i,j,int(rkstart)+1
      1                                     ,transm_obs
         write(6,302)i,j,ghi_2d(i,j)
-302     format(' GHI of observer is        ',2i5,e14.7,' W/m**2')
+302     format(' ghi of observer is        ',2i5,e14.7,' w/m**2')
         write(6,303)i,j,dhi_2d(i,j)
-303     format(' Diffuse HI of observer is ',2i5,e14.7,' W/m**2')
+303     format(' diffuse hi of observer is ',2i5,e14.7,' w/m**2')
         write(6,304)i,j,ghi_2d(i,j)-dhi_2d(i,j)
-304     format(' Direct HI of observer is  ',2i5,e14.7,' W/m**2')
+304     format(' direct hi of observer is  ',2i5,e14.7,' w/m**2')
         if(sol_alt(i,j) .gt. 0.)then
-            write(6,*)'DNI of observer is        ',i,j
+            write(6,*)'dni of observer is        ',i,j
      1                ,(ghi_2d(i,j)-dhi_2d(i,j)) / sind(sol_alt(i,j))
         else
-            write(6,*)' topo_gti is derived from GHI'
+            write(6,*)' topo_gti is derived from ghi'
             if(sol_alt(i,j) .gt. -18.)then
                 write(6,*)' diffuse twi of observer is '
      1                   ,difftwi(sol_alt(i,j))
@@ -3244,7 +3244,7 @@
 
         solalt_last = sol_alt(i,j)
 
-        write(6,*)' Sample of topo_ri, topo_rj, trace_ri, trace_rj'
+        write(6,*)' sample of topo_ri, topo_rj, trace_ri, trace_rj'
         write(6,*)
      1    ' ialt   jazi          alt      azi    topo_ri    topo_rj'
      1   ,'    solalt_tp  trace_ri   trace_rj  solalt_tr dist_2_topo'
@@ -3282,7 +3282,7 @@
 321        format(2i6,' tp/tr',2f9.2,7f11.4)       
         enddo ! jazi_sample
         
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         write(6,*)' successful return from get_cloud_rays'
  
@@ -3295,13 +3295,13 @@
 
         include 'trigd.inc'
 
-        real alt                  ! I elevation angle
-        real htmsl                ! I observer height MSL
-        real earth_radius         ! I earth radius (meters)
-        real alt_norm             ! O elevation angle rel to sfc normal
-        real dist_to_topo         ! O distance to sfc (meters)
+        real alt                  ! i elevation angle
+        real htmsl                ! i observer height msl
+        real earth_radius         ! i earth radius (meters)
+        real alt_norm             ! o elevation angle rel to sfc normal
+        real dist_to_topo         ! o distance to sfc (meters)
 
-!       Altitude relative to surface normal (emission angle)
+!       altitude relative to surface normal (emission angle)
         if(alt .ne. 0.)then
           slope = tand(90. - abs(alt))
           htrad = (earth_radius+htmsl) / earth_radius

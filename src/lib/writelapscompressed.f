@@ -3,32 +3,32 @@
      1   kmax,kdim,var,lvl,lvl_coord,units,comment,data,
      1   istatus)
 
-C**********************************************************************
-C
+c**********************************************************************
+c
 !       implicit  none
-C
-      integer      i4time,               !INPUT I4time of data
+c
+      integer      i4time,               !input i4time of data
      1               i4_valtime,
-     1               imax,jmax,kmax,       !INPUT # cols, # rows, # fields
-     1               kdim,                 !INPUT K dimension of DATA array
-     1               lvl(kdim),            !INPUT Level of each field 
-     1               istatus               !OUTPUT
+     1               imax,jmax,kmax,       !input # cols, # rows, # fields
+     1               kdim,                 !input k dimension of data array
+     1               lvl(kdim),            !input level of each field 
+     1               istatus               !output
 
-      real         data(imax,jmax,kdim)    !INPUT Raw data to be written
+      real         data(imax,jmax,kdim)    !input raw data to be written
 
-      integer, allocatable, dimension(:) :: array1 !LOCAL Compressed array
-      real,    allocatable, dimension(:) :: array2 !LOCAL Compressed array
+      integer, allocatable, dimension(:) :: array1 !local compressed array
+      real,    allocatable, dimension(:) :: array2 !local compressed array
 
-      character*(*)  dir                     !INPUT Directory to be written to
-      character*(*)  ext                     !INPUT File name ext
-      character*(*)  var(kdim)               !INPUT 3 letter ID of each field
-      character*(*)  lvl_coord(kdim)         !INPUT Vertical coordinate of fields
-      character*(*)  units(kdim)             !INPUT units of each field
-      character*(*)  comment(kdim)           !INPUT Comments for each field
-C
-      integer      flag,                 !Print flag (1 = off)
-     1               i_reftime,            !UNIX time of data
-     1               i_valtime,            !UNIX time of data
+      character*(*)  dir                     !input directory to be written to
+      character*(*)  ext                     !input file name ext
+      character*(*)  var(kdim)               !input 3 letter id of each field
+      character*(*)  lvl_coord(kdim)         !input vertical coordinate of fields
+      character*(*)  units(kdim)             !input units of each field
+      character*(*)  comment(kdim)           !input comments for each field
+c
+      integer      flag,                 !print flag (1 = off)
+     1               i_reftime,            !unix time of data
+     1               i_valtime,            !unix time of data
      1               error(2),
      1               i,j,n7g_nx, n7g_ny,
      1               lgfc,
@@ -43,15 +43,15 @@ C
      1               stat_len,
      1               n_levels,
      1               max_levels,	   !maximum vertical levels
-     1               called_from,          !0=FORTRAN, 1=C
+     1               called_from,          !0=fortran, 1=c
      1               append                !0=no, 1=yes
-C
+c
       parameter (max_levels=100)
       real         pr(max_levels),       !pressures read from get_pres_1d
      1               cdl_levels(max_levels)
 c
       logical l_check_encoding
-C
+c
       character*5    fcst_hh_mm
       character*9    gtime
       character*150  file_name
@@ -59,58 +59,58 @@ C
       character*150  static_path
       character*24   asctime
       character*20   v_g
-C
+c
       common         /prt/flag
-C
-C
-C-------------------------------------------------------------------------------
-C
+c
+c
+c-------------------------------------------------------------------------------
+c
       error(1)=1
       error(2)=0
 
-C
-C ****  Various checks on input data.
-C
+c
+c ****  various checks on input data.
+c
       if (kmax .gt. kdim) then
         if (flag .ne. 1)
-     1write (6,*) 'Illegal K dimension in DATA array...write aborted.'
+     1write (6,*) 'illegal k dimension in data array...write aborted.'
         istatus=error(2)
         return
       endif
-C
-C ****  Specify file name
-C
+c
+c ****  specify file name
+c
       call make_fnam_lp(i4time,gtime,istatus)
       if (istatus .ne. 1) then
         write (6,*)
-     1'Error converting i4time to file name...write aborted.'
+     1'error converting i4time to file name...write aborted.'
         istatus=error(2)
         return
       endif
-C
-C **** get actual reftime from gtime...
-C
+c
+c **** get actual reftime from gtime...
+c
       i_reftime = i4time - 315619200
       i_valtime = i_reftime
 
-C
-C ****  Create ascii time variables.
-C
+c
+c ****  create ascii time variables.
+c
       i4_valtime = i_valtime +  315619200
       call cv_i4tim_asc_lp(i4_valtime,asctime,istatus)
 
       call s_len(ext, ext_len)
 
-C fcst_hh_mm: Hard wired as a place holder - will be used in filename  only
-C   if write_laps_compressed is called on lga, lgb, fua, fsf, ram, rsf
-C To fix this, call write_laps instead
+c fcst_hh_mm: hard wired as a place holder - will be used in filename  only
+c   if write_laps_compressed is called on lga, lgb, fua, fsf, ram, rsf
+c to fix this, call write_laps instead
       fcst_hh_mm = '0000'
 
       call cvt_fname_v3(dir,gtime,fcst_hh_mm,ext,ext_len,
      1                  file_name,fn_length,istatus)
       if (istatus .eq. error(2)) goto 930
 
-      called_from = 0    !called from FORTRAN
+      called_from = 0    !called from fortran
       append = 0         ! only one analysis time allowed per file
 
       var_len = len(var(1))
@@ -119,29 +119,29 @@ C To fix this, call write_laps instead
       units_len = len(units(1))
       asc_len = len(asctime)
 
-!     Allocate arrays then do run-length encoding
+!     allocate arrays then do run-length encoding
 !     n_cmprs_max = imax*jmax*kdim
       n_cmprs_max = 2000000  
- 800  write(6,*)' Allocate arrays with size of ',n_cmprs_max
+ 800  write(6,*)' allocate arrays with size of ',n_cmprs_max
 
-      allocate( array1(n_cmprs_max), STAT=istat_alloc )
+      allocate( array1(n_cmprs_max), stat=istat_alloc )
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate array1'
-          write(6,*)' Try reducing n_cmprs_max from ',n_cmprs_max
+          write(6,*)' error: could not allocate array1'
+          write(6,*)' try reducing n_cmprs_max from ',n_cmprs_max
           goto 950
       endif
 
-      allocate( array2(n_cmprs_max), STAT=istat_alloc )
+      allocate( array2(n_cmprs_max), stat=istat_alloc )
       if(istat_alloc .ne. 0)then
-          write(6,*)' ERROR: Could not allocate array2'
-          write(6,*)' Try reducing n_cmprs_max from ',n_cmprs_max
+          write(6,*)' error: could not allocate array2'
+          write(6,*)' try reducing n_cmprs_max from ',n_cmprs_max
           goto 950
       endif
 
       ngrids = imax*jmax*kdim
 
-      call runlength_encode(ngrids,n_cmprs_max,data           ! I
-     1                     ,n_cmprs,array1,array2,istatus)    ! O
+      call runlength_encode(ngrids,n_cmprs_max,data           ! i
+     1                     ,n_cmprs,array1,array2,istatus)    ! o
       if(istatus .eq. -1)then ! try increasing array allocations
           deallocate(array1)
           deallocate(array2)
@@ -152,22 +152,22 @@ C To fix this, call write_laps instead
       endif
 
       l_check_encoding = .false.
-      if(l_check_encoding)then ! Just for debugging purposes
-          call runlength_decode(ngrids,n_cmprs,array1,array2        ! I
-     1                         ,data                                ! O
-     1                         ,istatus)                            ! O
+      if(l_check_encoding)then ! just for debugging purposes
+          call runlength_decode(ngrids,n_cmprs,array1,array2        ! i
+     1                         ,data                                ! o
+     1                         ,istatus)                            ! o
           if(istatus .ne. 1)then
               write(6,*)
-     1            ' 1st Decoding test of compressed data unsuccessful'
+     1            ' 1st decoding test of compressed data unsuccessful'
               goto 980
           else
               write(6,*)
-     1            ' 1st Decoding test of compressed data successful'
+     1            ' 1st decoding test of compressed data successful'
           endif
       endif
-C
-C **** write out compressed file
-C
+c
+c **** write out compressed file
+c
       lun = 65
       call open_lapsprd_file(lun,i4time,ext,istatus)
       if(istatus .ne. 1)goto 940
@@ -193,80 +193,80 @@ C
       deallocate(array1)
       deallocate(array2)
 
-!     Second "internal" checksum test
+!     second "internal" checksum test
       if(icheck_sum .ne. ngrids)then
           write(6,*)' 2nd checksum test discrepancy: '
      1             ,icheck_sum, ngrids
           go to 980
       endif
-C
-C ****  Return normally.
-C
-        ISTATUS=ERROR(1)
-999     RETURN
-C
-C ****  Error trapping.
-C
-920     IF (FLAG .NE. 1) THEN
-          write(6,*) ' write_laps_compressed ABORTED!'
-          write(6,*) ' LAPS will currently only work on a PRESSURE'
+c
+c ****  return normally.
+c
+        istatus=error(1)
+999     return
+c
+c ****  error trapping.
+c
+920     if (flag .ne. 1) then
+          write(6,*) ' write_laps_compressed aborted!'
+          write(6,*) ' laps will currently only work on a pressure'
      1              ,' vertical grid'
-          write(6,*) ' Make sure VERTICAL_GRID is set to PRESSURE'
+          write(6,*) ' make sure vertical_grid is set to pressure'
      1              ,' in nest7grid.parms'
-        ENDIF
-        ISTATUS=ERROR(2)
-        GOTO 999
+        endif
+        istatus=error(2)
+        goto 999
 
 930     if (flag .ne. 1)
      1    write (6,*) 'file_name variable too short...write aborted.'
         istatus=error(2)
         goto 999
-C
-940     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error opening file to be written to...write abort
+c
+940     if (flag .ne. 1)
+     1    write (6,*) 'error opening file to be written to...write abort
      1ed.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-950     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error in/near runlength_encode...write aborted'       
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-960     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error writing data to file...write aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-970     IF (FLAG .NE. 1)
+        istatus=error(2)
+        goto 999
+c
+950     if (flag .ne. 1)
+     1    write (6,*) 'error in/near runlength_encode...write aborted'       
+        istatus=error(2)
+        goto 999
+c
+960     if (flag .ne. 1)
+     1    write (6,*) 'error writing data to file...write aborted.'
+        istatus=error(2)
+        goto 999
+c
+970     if (flag .ne. 1)
      1    write (6,*) 
-     1 'Error writing header info into file...write aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-980     IF (FLAG .NE. 1)
+     1 'error writing header info into file...write aborted.'
+        istatus=error(2)
+        goto 999
+c
+980     if (flag .ne. 1)
      1    write (6,*) 
-     1   'Checksum error with runlength encoding'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-990     IF (FLAG .NE. 1)
+     1   'checksum error with runlength encoding'
+        istatus=error(2)
+        goto 999
+c
+990     if (flag .ne. 1)
      1    write (6,*) 
-     1 'File already exists for analysis time...write aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-        END
+     1 'file already exists for analysis time...write aborted.'
+        istatus=error(2)
+        goto 999
+c
+        end
 
 
-        subroutine runlength_encode(ngrids,n_cmprs_max,data           ! I
-     1                             ,n_cmprs,array1,array2,istatus)    ! O
+        subroutine runlength_encode(ngrids,n_cmprs_max,data           ! i
+     1                             ,n_cmprs,array1,array2,istatus)    ! o
 
         integer array1(n_cmprs_max)
         real array2(n_cmprs_max)
         real data(ngrids)
 
-!       Setup for first point
+!       setup for first point
         n_cmprs = 0
         i_count_same = 1
 
@@ -281,7 +281,7 @@ C
                     array2(n_cmprs) = data(i-1)
                     i_count_same = 1
                 else
-                    write(6,*)' ERROR, increase n_cmprs_max',n_cmprs_max
+                    write(6,*)' error, increase n_cmprs_max',n_cmprs_max
                     istatus = -1
                     return
                 endif
@@ -289,7 +289,7 @@ C
 
         enddo ! i
 
-!       Take care of the last point
+!       take care of the last point
         i = ngrids
 
         if(data(i) .eq. data(i-1))then    
@@ -303,14 +303,14 @@ C
             array1(n_cmprs) = i_count_same
             array2(n_cmprs) = data(i)
         else
-            write(6,*)' ERROR, increase n_cmprs_max',n_cmprs_max
+            write(6,*)' error, increase n_cmprs_max',n_cmprs_max
             istatus = -1
             return
         endif
 
-        write(6,*)' End of runlength_encode, number of pts = '
+        write(6,*)' end of runlength_encode, number of pts = '
      1           ,n_cmprs,ngrids       
-        write(6,*)' Compression ratio = ',float(n_cmprs)/float(ngrids)
+        write(6,*)' compression ratio = ',float(n_cmprs)/float(ngrids)
 
         istatus = 1
         return

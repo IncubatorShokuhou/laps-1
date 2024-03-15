@@ -1,12 +1,12 @@
 
-        subroutine plot_allsky(i4time_ref,lun,NX_L,NY_L,NZ_L
+        subroutine plot_allsky(i4time_ref,lun,nx_l,ny_l,nz_l
      1                          ,ni_polar,nj_polar,ipolar_sizeparm
      1                          ,density     
      1                          ,iplo,iphi,jplo,jphi
      1                          ,r_missing_data,laps_cycle_time
      1                          ,l_polar,l_cyl)       
 
-        use mem_namelist, ONLY: max_snd_grid, max_snd_levels
+        use mem_namelist, only: max_snd_grid, max_snd_levels
      1                        , grid_spacing_m, aod, aero_scaleht
      1                        , earth_radius
         use ppm
@@ -18,63 +18,63 @@
         addlogs(x,y) = log10(10.**x + 10.**y)
         horz_depf(htmsl,erad) = acosd(erad/(erad+htmsl))
 
-!       real pres_3d(NX_L,NY_L,NZ_L)
-        real field_3d(NX_L,NY_L,NZ_L)
-!       real heights_3d(NX_L,NY_L,NZ_L)
-!       real clwc_3d(NX_L,NY_L,NZ_L)
-!       real cice_3d(NX_L,NY_L,NZ_L)
-!       real rain_3d(NX_L,NY_L,NZ_L)
-!       real snow_3d(NX_L,NY_L,NZ_L)
-!       real aod_3d(NX_L,NY_L,NZ_L)
+!       real pres_3d(nx_l,ny_l,nz_l)
+        real field_3d(nx_l,ny_l,nz_l)
+!       real heights_3d(nx_l,ny_l,nz_l)
+!       real clwc_3d(nx_l,ny_l,nz_l)
+!       real cice_3d(nx_l,ny_l,nz_l)
+!       real rain_3d(nx_l,ny_l,nz_l)
+!       real snow_3d(nx_l,ny_l,nz_l)
+!       real aod_3d(nx_l,ny_l,nz_l)
 
-!       real transm_3d(NX_L,NY_L,NZ_L)
-!       real transm_4d(NX_L,NY_L,NZ_L,nc) 
+!       real transm_3d(nx_l,ny_l,nz_l)
+!       real transm_4d(nx_l,ny_l,nz_l,nc) 
 
-        real pres_2d(NX_L,NY_L)
-        real t_2d(NX_L,NY_L)
-        real td_2d(NX_L,NY_L)
-        real u_2d(NX_L,NY_L)
-        real v_2d(NX_L,NY_L)
-        real pw_2d(NX_L,NY_L)
-        real cape_2d(NX_L,NY_L)
-        real lil_2d(NX_L,NY_L)
-        real lic_2d(NX_L,NY_L)
-        real swi_2d(NX_L,NY_L)
-!       real ghi_2d(NX_L,NY_L)
-!       real dhi_2d(NX_L,NY_L)
-        real static_albedo(NX_L,NY_L)
-        real land_use(NX_L,NY_L)
-        real land_frac(NX_L,NY_L)
-        real snow_cover(NX_L,NY_L)
-        real snow_albedo_max(NX_L,NY_L)
-        real snow_depth(NX_L,NY_L)
-        real seaice(NX_L,NY_L)
-        real topo_albedo_2d(nc,NX_L,NY_L)
-        real albedo_bm(nc,NX_L,NY_L)
-        real bm_counts(nc,NX_L,NY_L)
-        integer ialbedo_bm(nc,NX_L,NY_L)
-        real albedo_usgs(nc,NX_L,NY_L)
-        real lat(NX_L,NY_L)
-        real lon(NX_L,NY_L)
-        real*8 dlat(NX_L,NY_L)
-        real*8 dlon(NX_L,NY_L)
-        real topo(NX_L,NY_L)
-        real dum_2d(NX_L,NY_L)
-        real dx(NX_L,NY_L)
-        real dy(NX_L,NY_L)
-        real alt_norm(NX_L,NY_L)     ! Solar Alt w.r.t. terrain normal
-        real sol_alt_2d(NX_L,NY_L)
-        real sol_azi_2d(NX_L,NY_L)
-        real eobsc(NX_L,NY_L)        ! array of 'eobsl' values
-        real moon_alt_2d(NX_L,NY_L)
-        real moon_azi_2d(NX_L,NY_L)
+        real pres_2d(nx_l,ny_l)
+        real t_2d(nx_l,ny_l)
+        real td_2d(nx_l,ny_l)
+        real u_2d(nx_l,ny_l)
+        real v_2d(nx_l,ny_l)
+        real pw_2d(nx_l,ny_l)
+        real cape_2d(nx_l,ny_l)
+        real lil_2d(nx_l,ny_l)
+        real lic_2d(nx_l,ny_l)
+        real swi_2d(nx_l,ny_l)
+!       real ghi_2d(nx_l,ny_l)
+!       real dhi_2d(nx_l,ny_l)
+        real static_albedo(nx_l,ny_l)
+        real land_use(nx_l,ny_l)
+        real land_frac(nx_l,ny_l)
+        real snow_cover(nx_l,ny_l)
+        real snow_albedo_max(nx_l,ny_l)
+        real snow_depth(nx_l,ny_l)
+        real seaice(nx_l,ny_l)
+        real topo_albedo_2d(nc,nx_l,ny_l)
+        real albedo_bm(nc,nx_l,ny_l)
+        real bm_counts(nc,nx_l,ny_l)
+        integer ialbedo_bm(nc,nx_l,ny_l)
+        real albedo_usgs(nc,nx_l,ny_l)
+        real lat(nx_l,ny_l)
+        real lon(nx_l,ny_l)
+        real*8 dlat(nx_l,ny_l)
+        real*8 dlon(nx_l,ny_l)
+        real topo(nx_l,ny_l)
+        real dum_2d(nx_l,ny_l)
+        real dx(nx_l,ny_l)
+        real dy(nx_l,ny_l)
+        real alt_norm(nx_l,ny_l)     ! solar alt w.r.t. terrain normal
+        real sol_alt_2d(nx_l,ny_l)
+        real sol_azi_2d(nx_l,ny_l)
+        real eobsc(nx_l,ny_l)        ! array of 'eobsl' values
+        real moon_alt_2d(nx_l,ny_l)
+        real moon_azi_2d(nx_l,ny_l)
         real moon_mag,moon_mag_thr
 
         parameter (mxopt = 10)
         real*8 a_vec(mxopt),a_last(mxopt),depth_this_run,f_merit
         real*8 dstep(mxopt),dstep_gran(mxopt)
 
-        real pres_1d(NZ_L)
+        real pres_1d(nz_l)
 
         real lil_sfc, lic_sfc, lil_cpt, lic_cpt
   
@@ -102,12 +102,12 @@
         logical l_cyl, l_polar, l_water_world 
         logical l_binary /.false./
         logical l_terrain_following /.false./
-        logical l_require_all_fields ! requiring all LAPS fields to run
+        logical l_require_all_fields ! requiring all laps fields to run
         logical l_test_cloud /.false./
 
         include 'icolors.inc'
 
-!       Sounding observation declarations
+!       sounding observation declarations
         real lat_pr(max_snd_grid)
         real lon_pr(max_snd_grid)
         real elev_pr(max_snd_grid)
@@ -161,18 +161,18 @@
 
         rpd = 3.141592653589/180.
 
-!       Initialize
+!       initialize
         snow_cover = r_missing_data        
         snow_albedo_max = r_missing_data        
         snow_depth = r_missing_data        
         seaice = r_missing_data
 
         mil = 1
-        mih = NX_L
+        mih = nx_l
         mjl = 1
-        mjh = NY_L
+        mjh = ny_l
 
-        call alloc_allsky(NX_L,NY_L,NZ_L,nc,istatus)
+        call alloc_allsky(nx_l,ny_l,nz_l,nc,istatus)
 
         if(l_polar .eqv. .true.)then
             mode_polar = 2
@@ -182,11 +182,11 @@
 
         nsmooth = 1
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        call GETENV('C_MODEL',c_model)
+        call getenv('c_model',c_model)
 
-        aod_tmp  = getenv_real('AOD',r_missing_data)
+        aod_tmp  = getenv_real('aod',r_missing_data)
         if(aod_tmp .ne. r_missing_data)aod = aod_tmp
 
         write(6,*)
@@ -206,33 +206,33 @@
 
         ext = 'static'
 
-!       Get the location of the static grid directory
+!       get the location of the static grid directory
         call get_directory(ext,directory,len_dir)
 
-        var_2d='LAT'
-        call read_static_grid(NX_L,NY_L,var_2d,lat,istatus)
+        var_2d='lat'
+        call read_static_grid(nx_l,ny_l,var_2d,lat,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS static-lat'
+            write(6,*)' error reading laps static-lat'
             return
         endif
         dlat = dble(lat)
 
-        var_2d='LON'
-        call read_static_grid(NX_L,NY_L,var_2d,lon,istatus)
+        var_2d='lon'
+        call read_static_grid(nx_l,ny_l,var_2d,lon,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS static-lon'
+            write(6,*)' error reading laps static-lon'
             return
         endif
         dlon = dble(lon)
 
-        var_2d='AVG'
-        call read_static_grid(NX_L,NY_L,var_2d,topo,istatus)
+        var_2d='avg'
+        call read_static_grid(nx_l,ny_l,var_2d,topo,istatus)
         if(istatus .ne. 1)then
-            write(6,*)' Error reading LAPS static-topo'
+            write(6,*)' error reading laps static-topo'
             return
         endif
 
-!       Topo offset (based on topo_1s data over Colorado)
+!       topo offset (based on topo_1s data over colorado)
         if(grid_spacing_m .le. 30.)then
           ioff = -1  ! move the terrain eastward this amount
           joff = +13 ! move the terrain northward this amount
@@ -240,20 +240,20 @@
           ioff = +0  ! move the terrain eastward this amount
           joff = +12 ! move the terrain northward this amount
 
-          do idum = 1,NX_L
-          do jdum = 1,NY_L
-            i = min(max(idum-ioff,1),NX_L)
-            j = min(max(jdum-joff,1),NY_L)
+          do idum = 1,nx_l
+          do jdum = 1,ny_l
+            i = min(max(idum-ioff,1),nx_l)
+            j = min(max(jdum-joff,1),ny_l)
             dum_2d(idum,jdum) = topo(i,j)
           enddo ! j
           enddo ! i
           topo(:,:) = dum_2d(:,:)
 
-!         Find Summits diagnostic near domain center
+!         find summits diagnostic near domain center
           ibox = 13
           ibox2 = ibox/2
-          imid = NX_L/2
-          jmid = NY_L/2
+          imid = nx_l/2
+          jmid = ny_l/2
           do is = imid-300,imid+300
           do js = jmid-300,jmid+300
             topomin = 99999.                
@@ -271,16 +271,16 @@
      1         topo(is,js) .gt. 2430.              )then
               write(6,14)is,js,lat(is,js),lon(is,js),topo(is,js),topomax
      1                                                          ,topomin
-14            format(' Peak detected at',2i5,2f11.5,3f9.2)           
+14            format(' peak detected at',2i5,2f11.5,3f9.2)           
             endif
           enddo ! js
           enddo ! is
 
         endif
 
-!       Generate default 'snow_albedo_max' field
-        do i = 1,NX_L
-          do j = 1,NY_L
+!       generate default 'snow_albedo_max' field
+        do i = 1,nx_l
+          do j = 1,ny_l
             if(topo(i,j) .gt. 1900. .and. topo(i,j) .le. 3500.)then
               snow_albedo_max(i,j) = 0.4
             else
@@ -292,15 +292,15 @@
         write(6,*)' line 290 aod is ',aod
 
         write(6,*)
-        write(6,*)' Input number of all-sky locations...'
+        write(6,*)' input number of all-sky locations...'
         read(lun,*)nloc
 
-        write(6,*)' Number of all-sky locations from file is ',nloc
+        write(6,*)' number of all-sky locations from file is ',nloc
 
         do iloc = 1,nloc
 
  80       write(6,*)
-          write(6,*)' Input x grid point (or latitude) for all-sky...'
+          write(6,*)' input x grid point (or latitude) for all-sky...'
           read(5,*)c20_x
 
           call s_len(c20_x,lenx)
@@ -310,7 +310,7 @@
             read(c20_x(1:lenx-1),*)soundlat(iloc)
             fsoundlat(iloc) = sngl(soundlat(iloc))
 
-            write(6,*)' Input longitude for allsky plot...'       
+            write(6,*)' input longitude for allsky plot...'       
             read(5,*)c20_y
             call s_len(c20_y,leny)
             if(l_parse(c20_y(1:leny),'l'))then
@@ -327,39 +327,39 @@
             write(6,*)' line 330 aod is ',aod
 
             call latlon_db_rlapsgrid(soundlat(iloc),soundlon(iloc)
-     1                              ,dlat,dlon,NX_L,NY_L
+     1                              ,dlat,dlon,nx_l,ny_l
      1                              ,xsound(iloc),ysound(iloc),istatus)
             if(istatus .ne. 1)then
 !             if(trim(c_model) .ne. 'hrrr_smoke')then
               if(len(c_model) .eq. 0)then
-                write(6,*)' Station is outside domain - try again...'
+                write(6,*)' station is outside domain - try again...'
                 return
               else
-                write(6,*)' WARNING: Station is outside domain...'
+                write(6,*)' warning: station is outside domain...'
               endif
             endif
 
-            if(xsound(iloc) .lt. 1d0 .or. xsound(iloc) .gt. dble(NX_L)
+            if(xsound(iloc) .lt. 1d0 .or. xsound(iloc) .gt. dble(nx_l)
      1                              .or.
-     1         ysound(iloc) .lt. 1d0 .or. ysound(iloc) .gt. dble(NY_L)    
+     1         ysound(iloc) .lt. 1d0 .or. ysound(iloc) .gt. dble(ny_l)    
      1                                                             )then
 !             if(trim(c_model) .ne. 'hrrr_smoke')then
               if(len(c_model) .eq. 0)then
-                write(6,*)' Station is outside domain - try again...'
+                write(6,*)' station is outside domain - try again...'
                 return
               else
-                write(6,*)' WARNING: Station is outside domain...'
+                write(6,*)' warning: station is outside domain...'
               endif
             endif
 
           else
             read(c20_x(1:lenx),*)xsound(iloc)
-            write(6,*)' Input y grid point for allsky plot...'
+            write(6,*)' input y grid point for allsky plot...'
             read(5,*)ysound
-            if(xsound(iloc) .lt. 1d0 .OR. ysound(iloc) .lt. 1d0)then ! scale domain
-                write(6,*)' Values less than 1.0, scale to domain'
-                xsound(iloc) = nint(xsound(iloc) * (NX_L-1)) + 1
-                ysound(iloc) = nint(ysound(iloc) * (NY_L-1)) + 1
+            if(xsound(iloc) .lt. 1d0 .or. ysound(iloc) .lt. 1d0)then ! scale domain
+                write(6,*)' values less than 1.0, scale to domain'
+                xsound(iloc) = nint(xsound(iloc) * (nx_l-1)) + 1
+                ysound(iloc) = nint(ysound(iloc) * (ny_l-1)) + 1
                 soundlat(iloc) = 
      1              lat(nint(xsound(iloc)),nint(ysound(iloc)))
                 soundlon(iloc) = 
@@ -378,25 +378,25 @@
         write(6,*)' line 370 aod is ',aod
 
  40     continue
-!40     write(6,*)' Enter c_plotobs'
+!40     write(6,*)' enter c_plotobs'
 !       read(5,*)c_plotobs
 !       if(c_plotobs .eq. '1')then
 !           l_plotobs = .true.
 !       elseif(c_plotobs .eq. '0')then
             l_plotobs = .false.
 !       else
-!           write(6,*)' Unknown c_plotobs, will quit ',c_plotobs
+!           write(6,*)' unknown c_plotobs, will quit ',c_plotobs
 !           go to 900
 !       endif
 
         if(.true.)then ! force config with new dataroot
-            write(6,*)' Enter new dataroot:'
+            write(6,*)' enter new dataroot:'
             read(5,15)new_dataroot
  15         format(a)
             call s_len(new_dataroot,lenroot)
 
             if(new_dataroot(1:1) .eq. 'q')then
-                write(6,*)' Unknown dataroot, will quit'
+                write(6,*)' unknown dataroot, will quit'
                 go to 900
             else
                 write(6,*)' new dataroot is ',new_dataroot(1:lenroot) 
@@ -404,13 +404,13 @@
 
             call force_get_laps_config(new_dataroot(1:lenroot),istatus)
             if(istatus .ne. 1)then
-                write(6,*)' Bad status returned from force_laps_config'
+                write(6,*)' bad status returned from force_laps_config'
                 return
             else
-                write(6,*)' Forced config to ',new_dataroot(1:lenroot)
+                write(6,*)' forced config to ',new_dataroot(1:lenroot)
             endif
 
-            aod_tmp  = getenv_real('AOD',r_missing_data)
+            aod_tmp  = getenv_real('aod',r_missing_data)
             if(aod_tmp .ne. r_missing_data)aod = aod_tmp
         endif
 
@@ -419,8 +419,8 @@
 
         write(6,*)' line 410 aod is ',aod
 
-!       Get 3-D pressure field
-        call get_pres_3d(i4_valid,NX_L,NY_L,NZ_L,pres_3d,istatus)
+!       get 3-d pressure field
+        call get_pres_3d(i4_valid,nx_l,ny_l,nz_l,pres_3d,istatus)
         if(istatus .ne. 1)go to 900
 
         write(6,*)' time diff is ',i4time_ref - i4time_now_gg()
@@ -461,7 +461,7 @@
           lvl2 = 13
           clwc_ideal = .000
           cice_ideal = .000
-        elseif(trim(c_model) .ne. '')then                  ! e.g. HRRR-AK
+        elseif(trim(c_model) .ne. '')then                  ! e.g. hrrr-ak
           l_require_all_fields = .false.
         elseif(grid_spacing_m .le. 30.)then
           l_require_all_fields = .false.                   ! water only
@@ -477,96 +477,96 @@
 
         if(l_require_all_fields .eqv. .true.)then
 
-          n_lvls_snd = NZ_L
+          n_lvls_snd = nz_l
 
           write(6,*)' requiring fields at i4time_ref = ',i4time_ref
 
-!         Read appropriate 3-D fields
-50        call input_product_info(i4time_ref            ! I
-     1                         ,laps_cycle_time         ! I
-     1                         ,3                       ! I
-     1                         ,c_prodtype              ! O
-     1                         ,ext                     ! O
-     1                         ,directory               ! O
-     1                         ,a9time                  ! O
-     1                         ,fcst_hhmm               ! O
-     1                         ,i4_initial              ! O
-     1                         ,i4_valid                ! O
-     1                         ,istatus)                ! O
+!         read appropriate 3-d fields
+50        call input_product_info(i4time_ref            ! i
+     1                         ,laps_cycle_time         ! i
+     1                         ,3                       ! i
+     1                         ,c_prodtype              ! o
+     1                         ,ext                     ! o
+     1                         ,directory               ! o
+     1                         ,a9time                  ! o
+     1                         ,fcst_hhmm               ! o
+     1                         ,i4_initial              ! o
+     1                         ,i4_valid                ! o
+     1                         ,istatus)                ! o
 
           write(6,*)' a9time (product info) is ',a9time
 
           i4_wdw = 108000
 
-!         Read Height
-          if(c_prodtype .eq. 'A')then
-            iflag_temp = 2 ! Returns Height
+!         read height
+          if(c_prodtype .eq. 'a')then
+            iflag_temp = 2 ! returns height
 
-            write(6,*)' Calling get_laps_3dgrid for heights'
-            var_2d = 'HT'
+            write(6,*)' calling get_laps_3dgrid for heights'
+            var_2d = 'ht'
             ext = 'lt1'
             call get_laps_3dgrid
-     1          (i4time_ref,i4_wdw,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_ref,i4_wdw,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,heights_3d,istatus)
 
 !           call get_temp_3d(i4time_ref,i4time_nearest,iflag_temp
-!    1                      ,NX_L,NY_L,NZ_L,heights_3d,istatus)
+!    1                      ,nx_l,ny_l,nz_l,heights_3d,istatus)
             if(istatus .ne. 1)then
-                write(6,*)' Error reading LAPS Heights'
+                write(6,*)' error reading laps heights'
                 return
             endif
 
-          elseif(c_prodtype .eq. 'N')then
+          elseif(c_prodtype .eq. 'n')then
             call get_directory('balance',directory,len_dir)
             ext = 'lt1'
             directory = directory(1:len_dir)//ext(1:3)
 
-            var_2d = 'HT'
+            var_2d = 'ht'
 
             call get_3dgrid_dname(directory
      1                  ,i4time_ref,laps_cycle_time*10000,i4time_nearest       
      1                  ,ext,var_2d,units_2d
-     1                  ,comment_2d,NX_L,NY_L,NZ_L,heights_3d,istatus)       
+     1                  ,comment_2d,nx_l,ny_l,nz_l,heights_3d,istatus)       
 
-          elseif(c_prodtype .eq. 'B' .or. c_prodtype .eq. 'F')then ! Bkg or Fcst
-            var_2d = 'HT'
+          elseif(c_prodtype .eq. 'b' .or. c_prodtype .eq. 'f')then ! bkg or fcst
+            var_2d = 'ht'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,heights_3d
      1                              ,istatus)
             if(istatus .ne. 1)goto300
 
           else
-            write(6,*)' Unknown choice, will quit'
+            write(6,*)' unknown choice, will quit'
             go to 900
 
           endif
 
           goto400
 
-!         Read RH/SH (removed this section)
+!         read rh/sh (removed this section)
 300       continue 
 
 400       continue
 
           if(.not. l_test_cloud)then
 
-!          Read Cloud Liquid
+!          read cloud liquid
            istat_lwc = 0
-           if(c_prodtype .eq. 'A')then ! Read Cloud Liquid
-            var_2d = 'LWC'
+           if(c_prodtype .eq. 'a')then ! read cloud liquid
+            var_2d = 'lwc'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_ref,i4_wdw,i4time_lwc,NX_L,NY_L,NZ_L       
+     1          (i4time_ref,i4_wdw,i4time_lwc,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,clwc_3d,istat_lwc)
 !           call make_fnam_lp(i4time_lwc,a9time,istatus)
 !           call cv_i4tim_asc_lp(i4time_lwc,a24time,istatus)
             i4time_data  = i4time_lwc
-           elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'LWC'
+           elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'lwc'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,clwc_3d
      1                              ,istat_lwc)
@@ -576,7 +576,7 @@
            endif
 
            if(istat_lwc .ne. 1)then
-              write(6,*)' Error reading LWC field in plot_allsky'
+              write(6,*)' error reading lwc field in plot_allsky'
               return
            endif
 
@@ -586,18 +586,18 @@
             continue
            endif
 
-!          Read Cloud Ice
+!          read cloud ice
            istat_ice = 0
-           if(c_prodtype .eq. 'A')then ! Read Cloud Ice
-            var_2d = 'ICE'
+           if(c_prodtype .eq. 'a')then ! read cloud ice
+            var_2d = 'ice'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_lwc,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_lwc,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,cice_3d,istat_ice)
-           elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'ICE'
+           elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'ice'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,cice_3d
      1                              ,istat_ice)
@@ -607,24 +607,24 @@
            if(istat_ice .eq. 1)then
             continue
            else
-            write(6,*)' Error reading ICE field in plot_allsky'
+            write(6,*)' error reading ice field in plot_allsky'
             return
            endif
  
 !          goto500
 
-!          Read Precipitating Rain
+!          read precipitating rain
            istat_rain = 0
-           if(c_prodtype .eq. 'A')then ! Read Precipitating Rain
-            var_2d = 'RAI'
+           if(c_prodtype .eq. 'a')then ! read precipitating rain
+            var_2d = 'rai'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_lwc,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_lwc,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,rain_3d,istat_rain)
-           elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'RAI'
+           elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'rai'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,rain_3d
      1                              ,istat_rain)
@@ -634,22 +634,22 @@
            if(istat_rain .eq. 1)then
             continue
            else
-            write(6,*)' Error reading RAI field in plot_allsky'
+            write(6,*)' error reading rai field in plot_allsky'
             return
            endif
 
-!         Read Precipitating Snow
+!         read precipitating snow
            istat_snow = 0
-           if(c_prodtype .eq. 'A')then ! Read Precipitating Snow
-            var_2d = 'SNO'
+           if(c_prodtype .eq. 'a')then ! read precipitating snow
+            var_2d = 'sno'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_lwc,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_lwc,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,snow_3d,istat_snow)
-           elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'SNO'
+           elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'sno'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,snow_3d
      1                              ,istat_snow)
@@ -659,7 +659,7 @@
            if(istat_snow .eq. 1)then
             continue
            else
-            write(6,*)' Error reading SNO field in plot_allsky'
+            write(6,*)' error reading sno field in plot_allsky'
             return
            endif
 
@@ -667,18 +667,18 @@
 
            goto500
 
-!          Read Precipitating Ice
+!          read precipitating ice
            istat_pice = 0
-           if(c_prodtype .eq. 'A')then ! Read Precipitating Ice
-            var_2d = 'PIC'
+           if(c_prodtype .eq. 'a')then ! read precipitating ice
+            var_2d = 'pic'
             ext = 'lwc'
             call get_laps_3dgrid
-     1          (i4time_lwc,0,i4time_nearest,NX_L,NY_L,NZ_L       
+     1          (i4time_lwc,0,i4time_nearest,nx_l,ny_l,nz_l       
      1          ,ext,var_2d,units_2d,comment_2d,field_3d,istat_pice)
-           elseif(c_prodtype .eq. 'F')then 
-            var_2d = 'PIC'
+           elseif(c_prodtype .eq. 'f')then 
+            var_2d = 'pic'
             call get_lapsdata_3d(i4_initial,i4_valid
-     1                              ,NX_L,NY_L,NZ_L       
+     1                              ,nx_l,ny_l,nz_l       
      1                              ,directory,var_2d
      1                              ,units_2d,comment_2d,field_3d
      1                              ,istat_pice)
@@ -688,7 +688,7 @@
            if(istat_pice .eq. 1)then
             continue
            else
-            write(6,*)' Error reading PIC field in plot_allsky'
+            write(6,*)' error reading pic field in plot_allsky'
             return
            endif
 
@@ -698,44 +698,44 @@
            i4time_lwc = i4time_ref
            i4wdw_sfc = 100000
 
-          endif ! l_test_cloud is F
+          endif ! l_test_cloud is f
 
 500       continue
 
-          if(c_prodtype .eq. 'A')then 
-!           Read in swi data
+          if(c_prodtype .eq. 'a')then 
+!           read in swi data
             ext = 'lcv'
-            var_2d = 'SWI'
+            var_2d = 'swi'
             call get_laps_2dgrid(i4time_lwc,i4wdw_sfc,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,swi_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)then
-              write(6,*)' Error reading LCV/SWI field in plot_allsky'      
+              write(6,*)' error reading lcv/swi field in plot_allsky'      
               return
             endif
 
-!           Read in snow cover data
+!           read in snow cover data
             ext = 'lm2'
-            var_2d = 'SC'
+            var_2d = 'sc'
             call get_laps_2dgrid(i4time_lwc,i4wdw_sfc,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,snow_cover,0,istat_sfc)
             if(istat_sfc .ne. 1 .and. istat_sfc .ne. -1)then
-                write(6,*)' Error reading LM2/SC field in plot_allsky'      
+                write(6,*)' error reading lm2/sc field in plot_allsky'      
                 return
             endif
 !           snow_cover = 0. ! testing
             write(6,*)' range of snow_cover is',
      1                minval(snow_cover),maxval(snow_cover)
 
-!           Read in pw data
+!           read in pw data
             ext = 'lh4'
-            var_2d = 'TPW'
+            var_2d = 'tpw'
             call get_laps_2dgrid(i4time_lwc,i4wdw_sfc,i4time_nearest
-     1                      ,ext,var_2d,units_2d,comment_2d,NX_L,NY_L
+     1                      ,ext,var_2d,units_2d,comment_2d,nx_l,ny_l
      1                      ,pw_2d,0,istat_sfc)
             if(istat_sfc .ne. 1)then
-                write(6,*)' Error reading LH4/PW field in plot_allsky'      
+                write(6,*)' error reading lh4/pw field in plot_allsky'      
                 return
             endif
             write(6,*)' range of pw_2d is',
@@ -748,18 +748,18 @@
 
           write(6,*)
      1          ' calling get_static_field_interp for static_albedo'
-          call get_static_field_interp('albedo',i4time_lwc,NX_L,NY_L
+          call get_static_field_interp('albedo',i4time_lwc,nx_l,ny_l
      1                                ,static_albedo,istat_sfc)
           if(istat_sfc .ne. 1)then
-              write(6,*)' Error in get_static_field_interp'      
+              write(6,*)' error in get_static_field_interp'      
               return
           else
               write(6,*)' success from get_static_field_interp'
           endif
 
           if(.true.)then ! initial setting of albedo (just a placeholder)
-            do j = 1,NY_L
-            do i = 1,NX_L
+            do j = 1,ny_l
+            do i = 1,nx_l
               if(static_albedo(i,j) .ne. 0.08)then ! brown land
                 topo_albedo_2d(1,i,j) = static_albedo(i,j)
                 topo_albedo_2d(2,i,j) = static_albedo(i,j)
@@ -774,7 +774,7 @@
 
           endif
 
-          I4_elapsed = ishow_timer()
+          i4_elapsed = ishow_timer()
 
           if(.true.)then ! experimental
             i4time_solar = i4time_ref
@@ -782,10 +782,10 @@
             i4time_solar = i4time_data
           endif
 
-!         Calculate solar position for 2D array of grid points
-          write(6,*)' call solar_position for 2D array'
-          do i = 1,NX_L
-          do j = 1,NY_L
+!         calculate solar position for 2d array of grid points
+          write(6,*)' call solar_position for 2d array'
+          do i = 1,nx_l
+          do j = 1,ny_l
             call solar_position(lat(i,j),lon(i,j),i4time_solar
      1                         ,sol_alt_2d(i,j),solar_dec,solar_ha)
             call equ_to_altaz_d(solar_dec,solar_ha,lat(i,j)
@@ -795,14 +795,14 @@
           enddo ! j
           enddo ! i
 
-        else ! l_require_all_fields = F
+        else ! l_require_all_fields = f
           snow_cover = 0. ! initialize
 
           if(l_parse(directory,'fim'))then
             filename = '/scratch/staging/fab/albers/fimlarge.nc'
-            write(6,*)' Looking for FIM LWC data in ',trim(filename)
+            write(6,*)' looking for fim lwc data in ',trim(filename)
             call get_fim_data
-     +                   (i4time_sys,ilaps_cycle_time,NX_L,NY_L
+     +                   (i4time_sys,ilaps_cycle_time,nx_l,ny_l
      +                   ,i4time_earliest,i4time_latest
      +                   ,filename
      +                   ,pres_3d
@@ -813,12 +813,12 @@
             write(6,*)' returned from get_fim_data ',istatus
             
           elseif(l_parse(directory,'rams'))then
-            write(6,*)' Looking for RAMS LWC data in ',trim(directory)
-            call GETENV('RAMSOUT_FULL',ramsout_full)
+            write(6,*)' looking for rams lwc data in ',trim(directory)
+            call getenv('ramsout_full',ramsout_full)
             filename = trim(ramsout_full)
 !           filename = '/home/fab/albers/muri/rams_micro_v3.nc'
             call get_rams_data
-     +                   (i4time_sys,ilaps_cycle_time,NX_L,NY_L,NZ_L
+     +                   (i4time_sys,ilaps_cycle_time,nx_l,ny_l,nz_l
      +                   ,i4time_earliest,i4time_latest
      +                   ,filename
      +                   ,lat,lon
@@ -849,8 +849,8 @@
               snow_3d = max(snow_3d * 1e-3,0.)
             endif
 
-            i_aero_1d = 0 ! retain the 3D aerosols read in
-            write(6,*)' RAMS run: set mode_aero_cld = ',mode_aero_cld
+            i_aero_1d = 0 ! retain the 3d aerosols read in
+            write(6,*)' rams run: set mode_aero_cld = ',mode_aero_cld
             write(6,*)' aod_3d range is ',minval(aod_3d),maxval(aod_3d)
             write(6,*)' clwc_3d range is ',minval(clwc_3d)
      1                                    ,maxval(clwc_3d)
@@ -861,9 +861,9 @@
             write(6,*)' snow_3d range is ',minval(snow_3d)
      1                                    ,maxval(snow_3d)
 
-!           Zero out hydrometeors
+!           zero out hydrometeors
             if(.false.)then
-              write(6,*)' RAMS run: zero out hydrometeors'
+              write(6,*)' rams run: zero out hydrometeors'
               clwc_3d = 0.
               cice_3d = 0.
               rain_3d = 0.
@@ -871,10 +871,10 @@
             endif
 
           elseif(l_parse(directory,'navgem'))then
-            write(6,*)' Looking for NAVGEM data in ',trim(directory)
+            write(6,*)' looking for navgem data in ',trim(directory)
             filename = '/home/fab/albers/muri/navgem/file.nc'
             call get_navgem_data
-     +                   (i4time_sys,ilaps_cycle_time,NX_L,NY_L,NZ_L
+     +                   (i4time_sys,ilaps_cycle_time,nx_l,ny_l,nz_l
      +                   ,i4time_earliest,i4time_latest
      +                   ,filename
      +                   ,pres_3d
@@ -885,18 +885,18 @@
      +                   ,seaice,snow_depth
      +                   ,lun_out
      +                   ,istatus)
-            istatus_ht = 0 ! we can perhaps try the height_AGL 
+            istatus_ht = 0 ! we can perhaps try the height_agl 
             write(6,*)' returned from get_navgem_data'
 
             mode_aero_cld = 3
-            write(6,*)' NAVGEM run: mode_aero_cld = ',mode_aero_cld
+            write(6,*)' navgem run: mode_aero_cld = ',mode_aero_cld
 
-            i_aero_1d = 0 ! retain the 3D aerosols read in from NAVGEM
+            i_aero_1d = 0 ! retain the 3d aerosols read in from navgem
             i_aero_synplume = 0
 
-!           Zero out hydrometeors
+!           zero out hydrometeors
             if(.false.)then
-              write(6,*)' NAVGEM run: zero out hydrometeors'
+              write(6,*)' navgem run: zero out hydrometeors'
               clwc_3d = 0.
               cice_3d = 0.
               rain_3d = 0.
@@ -908,44 +908,44 @@
      +           trim(c_model) .eq. 'wrf' .or. 
      +           trim(c_model) .eq. 'hrrr_ak'         )then
 
-            write(6,*)' Getting 1D pressure levels'
-            call get_pres_1d(i4time_sys,NZ_L,pres_1d,istatus)
+            write(6,*)' getting 1d pressure levels'
+            call get_pres_1d(i4time_sys,nz_l,pres_1d,istatus)
 
             if(trim(c_model) .eq. 'hrrr_smoke')then
               mode_aero_cld = 3
               aod = 0.
-              i_aero_1d = 0 ! retain the 3D aerosols read in
+              i_aero_1d = 0 ! retain the 3d aerosols read in
 
-!             Speed up in 'get_cloud_rad'
+!             speed up in 'get_cloud_rad'
               mil = 1
-              mih = NX_L/2
-              mjl = NY_L/2
-              mjh = NY_L
-              itype_aod = 2 ! 1 is TAOD5503D, 2 is tracer_1a              
+              mih = nx_l/2
+              mjl = ny_l/2
+              mjh = ny_l
+              itype_aod = 2 ! 1 is taod5503d, 2 is tracer_1a              
             elseif(trim(c_model) .eq. 'hrrr_ak')then
               mode_aero_cld = 3
               aod = 0.
-              i_aero_1d = 0 ! retain the 3D aerosols read in
-              itype_aod = 2 ! 1 is TAOD5503D, 2 is tracer_1a              
-            elseif(trim(c_model) .eq. 'wrf_chem')then ! MURI
+              i_aero_1d = 0 ! retain the 3d aerosols read in
+              itype_aod = 2 ! 1 is taod5503d, 2 is tracer_1a              
+            elseif(trim(c_model) .eq. 'wrf_chem')then ! muri
               mode_aero_cld = 3
               aod = 0.
-              i_aero_1d = 0 ! retain the 3D aerosols read in
-              itype_aod = 3 ! 1 is TAOD5503D, 2 is tracer_1a, 3 is MURI
+              i_aero_1d = 0 ! retain the 3d aerosols read in
+              itype_aod = 3 ! 1 is taod5503d, 2 is tracer_1a, 3 is muri
             elseif(trim(c_model) .eq. 'wrf')then 
-              itype_aod = 0 ! no aerosols from WRF
+              itype_aod = 0 ! no aerosols from wrf
             endif
 
 !           if(trim(c_model) .eq. 'hrrr_ak')then
-              call GETENV('WRFOUT_FULL',wrfout_full)
+              call getenv('wrfout_full',wrfout_full)
               filename = trim(wrfout_full)
 !           else
 !             filename = 'file.nc'
 !           endif
 
 
-            write(6,*)' Looking for WRF SWIM data in ',trim(filename) ! trim(directory)
-            call wrf2swim(filename,i4time_sys,itype_aod,NX_L,NY_L,NZ_L
+            write(6,*)' looking for wrf swim data in ',trim(filename) ! trim(directory)
+            call wrf2swim(filename,i4time_sys,itype_aod,nx_l,ny_l,nz_l
      +           ,lat,lon    
      +           ,pres_1d,land_frac,snow_cover,snow_albedo_max
      +           ,istatus)
@@ -959,10 +959,10 @@
             if(trim(c_model) .eq. 'hrrr_smoke')then
               write(6,*)'   aod max, mean free path, vsby at each level'
               write(6,*)'     m^-1          m                m'
-              do ka = 1,NZ_L
+              do ka = 1,nz_l
                 aodmax = maxval(aod_3d(:,:,ka))
-                do ia = 1,NX_L
-                do ja = 1,NY_L
+                do ia = 1,nx_l
+                do ja = 1,ny_l
                   if(aod_3d(ia,ja,ka) .eq. aodmax)then
                     imaxa = ia
                     jmaxa = ja 
@@ -983,7 +983,7 @@
             endif
 
             if(trim(c_model) .eq. 'hrrr_smoke' .and. .false.)then
-              write(6,*)' Zero out hydrometeors'
+              write(6,*)' zero out hydrometeors'
               clwc_3d = 0.
               cice_3d = 0.
               rain_3d = 0.
@@ -997,15 +997,15 @@
 
           i4time_solar = i4time_ref
 
-          I4_elapsed = ishow_timer()
+          i4_elapsed = ishow_timer()
 
-!         Calculate solar position for 2D array of grid points
-          write(6,*)' Getting 2D solar position'
+!         calculate solar position for 2d array of grid points
+          write(6,*)' getting 2d solar position'
           if(.true.)then
-           call get_solaltaz_2d(lat,lon,i4time_solar,NX_L,NY_L
+           call get_solaltaz_2d(lat,lon,i4time_solar,nx_l,ny_l
      1                         ,sol_alt_2d,sol_azi_2d)
-           icen = NX_L/2
-           jcen = NY_L/2
+           icen = nx_l/2
+           jcen = ny_l/2
            write(6,*)' solar alt/az (center)',sol_alt_2d(icen,jcen)
      1                                       ,sol_azi_2d(icen,jcen)
 
@@ -1013,8 +1013,8 @@
            write(6,*)' solar swi (center)',swi_2d(icen,jcen)
 
           else
-           do i = 1,NX_L
-           do j = 1,NY_L
+           do i = 1,nx_l
+           do j = 1,ny_l
             call solar_position(lat(i,j),lon(i,j),i4time_solar
      1                         ,sol_alt_2d(i,j),solar_dec,solar_ha)
             call equ_to_altaz_d(solar_dec,solar_ha,lat(i,j)
@@ -1033,10 +1033,10 @@
            enddo ! i
           endif
 
-          I4_elapsed = ishow_timer()
+          i4_elapsed = ishow_timer()
 
           read(lun,*) ! advance through input data
-          write(6,*)' Running without LAPS cloud and other current data'
+          write(6,*)' running without laps cloud and other current data'
 
           if(l_test_cloud)then ! recently active section
             write(6,*)' generate idealized cloud fields - 2',clwc_ideal
@@ -1047,23 +1047,23 @@
             cice_3d(:,:,lvl1:lvl2) = cice_ideal ! 13/800mb .001
           endif
 
-!         Use standard atmosphere for heights (uniform pressure grid)
+!         use standard atmosphere for heights (uniform pressure grid)
           if(istatus_ht .eq. 0)then
-            write(6,*)' Getting 1D pressure levels'
-            call get_pres_1d(i4time_ref,NZ_L,pres_1d,istatus)
+            write(6,*)' getting 1d pressure levels'
+            call get_pres_1d(i4time_ref,nz_l,pres_1d,istatus)
             if(istatus .ne. 1)then
               write(6,*)' error getting 1d pressures'
               return
             endif
-            I4_elapsed = ishow_timer()
-            write(6,*)' Getting 3D heights from 1D pressure levels'
-            do k = 1,NZ_L
+            i4_elapsed = ishow_timer()
+            write(6,*)' getting 3d heights from 1d pressure levels'
+            do k = 1,nz_l
               heights_3d(:,:,k) = psatoz(pres_1d(k)/100.)
             enddo ! k
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
           endif
 
-        endif ! l_require_all_fields is TRUE
+        endif ! l_require_all_fields is true
 
         call make_fnam_lp(i4time_solar,a9time,istatus)
         call cv_i4tim_asc_lp(i4time_solar,a24time,istatus)
@@ -1071,58 +1071,58 @@
         read(a9time(3:5),*)idoy
         r_au = radnorm(idoy)
 
-        write(6,*)' Solar dist (AU) ',r_au
+        write(6,*)' solar dist (au) ',r_au
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-!       Consider additional albedo info based on land use 
-!       This also includes snow cover
-        var_2d='USE'
+!       consider additional albedo info based on land use 
+!       this also includes snow cover
+        var_2d='use'
         write(6,*)' calling read_static_grid for land use'
-        call read_static_grid(NX_L,NY_L,var_2d,land_use,istatus)
+        call read_static_grid(nx_l,ny_l,var_2d,land_use,istatus)
         if(istatus .ne. 1)then
-           print*,' Warning: could not read static-landuse'
+           print*,' warning: could not read static-landuse'
            return
         else
-           write(6,*)' Successful return from read_static_grid'
+           write(6,*)' successful return from read_static_grid'
         endif
 
-        var_2d='LDF'
+        var_2d='ldf'
         write(6,*)' calling read_static_grid for land frac'
-        call read_static_grid(NX_L,NY_L,var_2d,land_frac,istatus)
+        call read_static_grid(nx_l,ny_l,var_2d,land_frac,istatus)
         if(istatus .ne. 1)then
-           print*,' Warning: could not read static-landfrac'
+           print*,' warning: could not read static-landfrac'
            return
         else
-           write(6,*)' Successful return from read_static_grid'
+           write(6,*)' successful return from read_static_grid'
         endif
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         where(topo(:,:) .ge. 3200.); land_use(:,:) = 19.; end where
 
-        call land_albedo(land_use,NX_L,NY_L,albedo_usgs)
+        call land_albedo(land_use,nx_l,ny_l,albedo_usgs)
         write(6,*)' debias albedo_usgs by a factor of 1.25'
         albedo_usgs = albedo_usgs / 1.25
 
-        call land_albedo_bm(lat,lon,NX_L,NY_L,i4time_solar
+        call land_albedo_bm(lat,lon,nx_l,ny_l,i4time_solar
      1                     ,albedo_bm,bm_counts,istat_bm)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
  
         if(istat_bm .eq. 1)then
 
             if(maxval(albedo_bm) .gt. 1.)then
-               write(6,*)' ERROR: land_albedo_bm has invalid values'
+               write(6,*)' error: land_albedo_bm has invalid values'
                stop
             endif
 
-            write(6,*)' Use 3-color albedo based on Blue Marble'
+            write(6,*)' use 3-color albedo based on blue marble'
 
-!           Test a flop if needed
-!           do i = 1,NX_L
-!           do j = 1,NY_L
-!               topo_albedo_2d(:,NX_L+1-i,NY_L+1-j) 
+!           test a flop if needed
+!           do i = 1,nx_l
+!           do j = 1,ny_l
+!               topo_albedo_2d(:,nx_l+1-i,ny_l+1-j) 
 !    1             = albedo_bm(:,i,j)
 !               topo_albedo_2d(:,i,j) 
 !    1             = albedo_bm(:,i,j)
@@ -1132,10 +1132,10 @@
             topo_albedo_2d = albedo_bm
 
             write(6,*)
-     1        ' Row of spectral albedo / counts (through domain center)'
-            jrow = NY_L/2
-            do i = 1,NX_L
-                if(i .eq. (i/5)*5 .OR. abs(i-NX_L/2) .lt. 20)then
+     1        ' row of spectral albedo / counts (through domain center)'
+            jrow = ny_l/2
+            do i = 1,nx_l
+                if(i .eq. (i/5)*5 .or. abs(i-nx_l/2) .lt. 20)then
                     write(6,16)i,lat(i,jrow),lon(i,jrow)
      1                    ,land_frac(i,jrow),topo_albedo_2d(:,i,jrow)
      1                    ,bm_counts(:,i,jrow)
@@ -1144,14 +1144,14 @@
             enddo ! i
             alb_min = minval(topo_albedo_2d(2,:,jrow))
             alb_max = maxval(topo_albedo_2d(2,:,jrow))
-            write(6,*)' Min/Max in row is ',alb_min,alb_max
+            write(6,*)' min/max in row is ',alb_min,alb_max
 
             alb_max = maxval(topo_albedo_2d(2,:,:))
-            do i = 1,NX_L
-            do j = 1,NY_L
+            do i = 1,nx_l
+            do j = 1,ny_l
                 if(topo_albedo_2d(2,i,j) .eq. alb_max)then
                   if(alb_max .le. 1.0)then
-                    write(6,*)' Max albedo at ',i,j
+                    write(6,*)' max albedo at ',i,j
      1                        ,topo_albedo_2d(:,i,j)
                   endif
                 endif
@@ -1159,40 +1159,40 @@
             enddo ! i
 
             if(.false.)then
-                write(6,*)' Write test blue marble albedo image'
+                write(6,*)' write test blue marble albedo image'
                 call get_directory('static',directory,len_dir)
                 ialbedo_bm(:,:,:) = nint(topo_albedo_2d(:,:,:)*255.)
-                call writeppm3Matrix(
+                call writeppm3matrix(
      1               ialbedo_bm(1,:,:),ialbedo_bm(2,:,:)
      1              ,ialbedo_bm(3,:,:),trim(directory)//'/ialbedo_bm')
             endif
         else
-            write(6,*)' Use 3-color albedo based on land use'
+            write(6,*)' use 3-color albedo based on land use'
             topo_albedo_2d = albedo_usgs
         endif
 
-        call compare_land_albedo(land_use,NX_L,NY_L,albedo_usgs
+        call compare_land_albedo(land_use,nx_l,ny_l,albedo_usgs
      1                          ,albedo_bm,static_albedo)
         
-        write(6,*)' Row of albedo_bm / snow / snowalb / albedo / topo'
-        jrow = NY_L/2
+        write(6,*)' row of albedo_bm / snow / snowalb / albedo / topo'
+        jrow = ny_l/2
 
-        do i = 1,NX_L
-          do j = 1,NY_L
-            if(seaice(i,j) .ne. r_missing_data)then ! NAVGEM
+        do i = 1,nx_l
+          do j = 1,ny_l
+            if(seaice(i,j) .ne. r_missing_data)then ! navgem
               snowalb = 0.8
               do ic = 1,3
                 topo_albedo_2d(ic,i,j) = seaice(i,j) * snowalb + 
      1                (1.0-seaice(i,j)) * topo_albedo_2d(ic,i,j)
               enddo ! ic
-            elseif(snow_depth(i,j) .ne. r_missing_data)then ! NAVGEM
+            elseif(snow_depth(i,j) .ne. r_missing_data)then ! navgem
               snowalb = 0.8
               snowcvr = max(snow_depth(i,j) / 0.03,1.0)
               do ic = 1,3
                 topo_albedo_2d(ic,i,j) = snowcvr * snowalb + 
      1                (1.0-snowcvr) * topo_albedo_2d(ic,i,j)
               enddo ! ic
-            elseif(snow_cover(i,j) .ne. r_missing_data)then ! Other models
+            elseif(snow_cover(i,j) .ne. r_missing_data)then ! other models
 !             snowalb = snow_cover(i,j) * snow_albedo_max(i,j)
               snowalb = snow_albedo_max(i,j)
               do ic = 1,3
@@ -1203,7 +1203,7 @@
               enddo ! ic
             endif
             if(j .eq. jrow)then
-              if(i .eq. (i/5)*5 .OR. abs(i-NX_L/2) .lt. 20)then
+              if(i .eq. (i/5)*5 .or. abs(i-nx_l/2) .lt. 20)then
                 write(6,18)i,albedo_bm(2,i,jrow),snow_cover(i,jrow)
      1                ,snowalb,topo_albedo_2d(2,i,jrow),topo(i,jrow)
      1                ,lat(i,jrow),lon(i,jrow),nint(land_use(i,jrow))
@@ -1213,22 +1213,22 @@
           enddo ! j
         enddo ! i 
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        call get_grid_spacing_array(lat,lon,NX_L,NY_L,dx,dy)
+        call get_grid_spacing_array(lat,lon,nx_l,ny_l,dx,dy)
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
-        call solar_normal(NX_L,NY_L,topo,dx,dy,lat,lon ! I
-     1                   ,sol_alt_2d,sol_azi_2d        ! I
-     1                   ,alt_norm)                    ! O
+        call solar_normal(nx_l,ny_l,topo,dx,dy,lat,lon ! i
+     1                   ,sol_alt_2d,sol_azi_2d        ! i
+     1                   ,alt_norm)                    ! o
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         write(6,*)' a9time (solar) is ',a9time
 
-!       Determine aod_ref as aerosol optical depth
-        pw_ref = pw_2d(NX_L/2,NY_L/2)
+!       determine aod_ref as aerosol optical depth
+        pw_ref = pw_2d(nx_l/2,ny_l/2)
         if(pw_ref .eq. r_missing_data)then
            write(6,*)' pw_ref is missing, use default value'
            aod_ref = .07
@@ -1240,15 +1240,15 @@
            aod_ref = aod
         endif
 
-!       Get Aersol Extinction Coefficient (3D field)
-        call get_aod_3d(pres_3d,heights_3d,topo,NX_L,NY_L,NZ_L
+!       get aersol extinction coefficient (3d field)
+        call get_aod_3d(pres_3d,heights_3d,topo,nx_l,ny_l,nz_l
      1                 ,aod,aod_ref,i_aero_synplume,i_aero_1d,aod_3d)
 
         write(6,19,err=20)pw_ref,aod,aod_ref
 19      format(' pw_ref,aod,aod_ref = ',3f10.3)
 20      continue
 
-        I4_elapsed = ishow_timer()
+        i4_elapsed = ishow_timer()
 
         rlat_last = -999.
         rlon_last = -999.
@@ -1256,10 +1256,10 @@
 
         if(mode_cloud_mask .eq. 5)then
             nloops = 75
-            write(6,*)' Optimize mode: initialize',nloops
+            write(6,*)' optimize mode: initialize',nloops
             filename_ppm = ''
 
-!           Number and permutation of variables
+!           number and permutation of variables
             nv = 3
             n_id = 2
             n_jd = 1
@@ -1306,7 +1306,7 @@
         do iloop = 1,nloops ! optimization loop
           if(iloop .gt. 1)then ! optimization case
                 write(6,41)iloop,hm_factor,ridisp,rjdisp    
-41              format(' Modify fields for optimization ',i4,3e13.5)
+41              format(' modify fields for optimization ',i4,3e13.5)
                 
                 clwc_3d(:,:,:) = clwc_3d(:,:,:) * hm_factor
                 cice_3d(:,:,:) = cice_3d(:,:,:) * hm_factor
@@ -1315,16 +1315,16 @@
                 jdo = nint(rjdisp)
 
                 idl1 = max(1+ido,1)
-                idh1 = min(NX_L+ido,NX_L)
+                idh1 = min(nx_l+ido,nx_l)
 
                 idl2 = max(idl1-ido,1)
-                idh2 = min(idh1-ido,NX_L)
+                idh2 = min(idh1-ido,nx_l)
                     
                 jdl1 = max(1+jdo,1)
-                jdh1 = min(NY_L+jdo,NY_L)
+                jdh1 = min(ny_l+jdo,ny_l)
 
                 jdl2 = max(jdl1-jdo,1)
-                jdh2 = min(jdh1-jdo,NY_L)
+                jdh2 = min(jdh1-jdo,ny_l)
 
                 write(6,42)ido,idl1,idh1,idl2,idh2
 42              format(  ' ido,idl1,idh1,idl2,idh2',5i6)             
@@ -1337,9 +1337,9 @@
                 cice_3d(idl1:idh1,jdl1:jdh1,:) =
      1          cice_3d(idl2:idh2,jdl2:jdh2,:)
 
-!               Get Aersol Extinction Coefficient (3D field)
+!               get aersol extinction coefficient (3d field)
                 if(n_ao .le. nv)then
-                  call get_aod_3d(pres_3d,heights_3d,topo,NX_L,NY_L,NZ_L
+                  call get_aod_3d(pres_3d,heights_3d,topo,nx_l,ny_l,nz_l
      1                   ,aod,aod_ref,i_aero_synplume,i_aero_1d,aod_3d)
                 endif
           endif                
@@ -1348,10 +1348,10 @@
             ri_obs = xsound(iloc)
             rj_obs = ysound(iloc)
 
-!           if(trim(c_model) .ne. 'hrrr_smoke')then ! Keep inside model domain
+!           if(trim(c_model) .ne. 'hrrr_smoke')then ! keep inside model domain
             if(.true.)then
-              ri_obs = min(max(ri_obs,1.),float(NX_L))
-              rj_obs = min(max(rj_obs,1.),float(NY_L))
+              ri_obs = min(max(ri_obs,1.),float(nx_l))
+              rj_obs = min(max(rj_obs,1.),float(ny_l))
 !           else
 !               ri_obs = 477.
 !               rj_obs = 881.             
@@ -1370,21 +1370,21 @@
             write(6,*)' iloc = ',iloc,rlat,rlon
 
             if(iloop .eq. 1)then
-              write(6,*)' Enter minalt,maxalt (e.g. 0,90 0,180)'
+              write(6,*)' enter minalt,maxalt (e.g. 0,90 0,180)'
               read(lun,*)minalt_a(iloc),maxalt_a(iloc)           
             endif
             minalt = minalt_a(iloc)
             maxalt = maxalt_a(iloc)
 
             if(iloop .eq. 1)then
-              write(6,*)' Enter minazi,maxazi'                     
+              write(6,*)' enter minazi,maxazi'                     
               read(lun,*)minazi_a(iloc),maxazi_a(iloc)           
             endif
             minazi = minazi_a(iloc)
             maxazi = maxazi_a(iloc)
 
             if(iloop .eq. 1)then
-              write(6,*)' Enter alt_scale,azi_scale'               
+              write(6,*)' enter alt_scale,azi_scale'               
               read(lun,*)alt_scale_a(iloc),azi_scale_a(iloc)     
             endif
             alt_scale = alt_scale_a(iloc)     
@@ -1394,7 +1394,7 @@
             write(6,*)' minazi/maxazi = ',minazi,maxazi
             write(6,*)' alt_scale/azi_scale = ',alt_scale,azi_scale
             if(minazi .eq. maxazi)then
-                write(6,*)' Error minazi = maxazi'
+                write(6,*)' error minazi = maxazi'
                 stop
             endif
 
@@ -1411,20 +1411,20 @@
             if(.false.)then
                 topo_sfc = topo(i_obs,j_obs)
             else
-                call bilinear_laps(ri_obs,rj_obs,NX_L,NY_L,topo
+                call bilinear_laps(ri_obs,rj_obs,nx_l,ny_l,topo
      1                 ,topo_sfc)
             endif
  
             write(6,*)' observer ri/rj/topo_sfc ',ri_obs,rj_obs
      1                                             ,topo_sfc
             write(6,22)topo_albedo_2d(:,i_obs,j_obs)
-22          format('  albedo RGB of observer ',3f9.3)
+22          format('  albedo rgb of observer ',3f9.3)
 
             write(6,*)' land use / frac of observer: '
      1                 ,land_use(i_obs,j_obs),land_frac(i_obs,j_obs)
 
             write(6,*)' array of land frac'
-            call ascii_map(i_obs,j_obs,NX_L,NY_L,land_frac,10,1)
+            call ascii_map(i_obs,j_obs,nx_l,ny_l,land_frac,10,1)
 
             write(6,*)' snow cover of observer: '
      1                 ,snow_cover(i_obs,j_obs)  
@@ -1432,7 +1432,7 @@
             write(6,*)' solar alt/az (2d array)'       
      1                ,sol_alt_2d(i_obs,j_obs),sol_azi_2d(i_obs,j_obs) 
 
-!           Calculate solar position for all-sky point
+!           calculate solar position for all-sky point
             if(.true.)then ! test this again to allow fractional gridpoints?
                 call solar_position(fsoundlat(iloc),fsoundlon(iloc)
      1                             ,i4time_solar,solar_alt     
@@ -1461,8 +1461,8 @@
             thr3 = solar_alt - 3.0
             hdist_loc_thr = max(min(thr1,thr2,thr3),0.0)
 
-            if(hdist_loc .gt. hdist_loc_thr  .OR. 
-     1         i4time_solar .ne. i4time_last .OR.   
+            if(hdist_loc .gt. hdist_loc_thr  .or. 
+     1         i4time_solar .ne. i4time_last .or.   
      1         mode_cloud_mask .eq. 5            )then
                 newloc = 1
                 rlat_last = rlat; rlon_last = rlon
@@ -1479,20 +1479,20 @@
             write(6,*)' call sun_moon at observer sfc grid point '
      1                                                    ,i_obs,j_obs
             idebug = 2
-            call sun_moon(i4time_solar,lat,lon,NX_L,NY_L,i_obs,j_obs   ! I
-     1                   ,alm,azm                                      ! O
-     1                   ,idebug,0.,earth_radius                       ! I
-     1                   ,elgms,moon_mag,rmn                           ! O 
-     1                   ,geo_dec,geo_ra,geo_sublon,geo_dist           ! O
-     1                   ,emag,eobsf,eobsl)                            ! O
+            call sun_moon(i4time_solar,lat,lon,nx_l,ny_l,i_obs,j_obs   ! i
+     1                   ,alm,azm                                      ! o
+     1                   ,idebug,0.,earth_radius                       ! i
+     1                   ,elgms,moon_mag,rmn                           ! o 
+     1                   ,geo_dec,geo_ra,geo_sublon,geo_dist           ! o
+     1                   ,emag,eobsf,eobsl)                            ! o
 
             if(elgms .lt. 1.4)then
               write(6,24)emag,eobsf,eobsl
- 24           format(' NOTE: Solar Eclipse Conditions: mag/obsc = '
+ 24           format(' note: solar eclipse conditions: mag/obsc = '
      1              ,f9.6,2f11.6)
               l_solar_eclipse = .true.
             elseif(elgms .lt. 0.6)then
-              write(6,*)' NOTE: Possible Solar Eclipse Conditions'
+              write(6,*)' note: possible solar eclipse conditions'
               l_solar_eclipse = .true.
             else
               l_solar_eclipse = .false.
@@ -1500,16 +1500,16 @@
 
             write(6,*)' call sun_moon at observer sfc grid point ',i_obs
      1                                                            ,j_obs
-            call sun_moon(i4time_solar,lat,lon,NX_L,NY_L,i_obs,j_obs   ! I
-     1                   ,alm,azm                                      ! O
-     1                   ,idebug,htagl(iloc),earth_radius              ! I
-     1                   ,elgms,moon_mag,rmn                           ! O 
-     1                   ,geo_dec,geo_ra,geo_sublon,geo_dist           ! O
-     1                   ,emag,eobsf,eobsl)                            ! O
+            call sun_moon(i4time_solar,lat,lon,nx_l,ny_l,i_obs,j_obs   ! i
+     1                   ,alm,azm                                      ! o
+     1                   ,idebug,htagl(iloc),earth_radius              ! i
+     1                   ,elgms,moon_mag,rmn                           ! o 
+     1                   ,geo_dec,geo_ra,geo_sublon,geo_dist           ! o
+     1                   ,emag,eobsf,eobsl)                            ! o
             write(6,25)alm,azm,elgms,moon_mag,rmn
  25         format('  alt/az/elg/mnmag/rmn = ',2f8.2,f9.4,f8.2,f9.6)
 
-!           Consider passing 'topo_flag' into 'sun_moon' to consider either
+!           consider passing 'topo_flag' into 'sun_moon' to consider either
 !           solar or lunar eclipses
 !           http://www.jgisen.de/eclipse
 
@@ -1519,17 +1519,17 @@
 
             if(maxval(sol_alt_2d) .gt. 0. .and. 
      1       l_solar_eclipse .eqv. .true.)then
-              write(6,*)' Calculate gridded sfc eclipse obscuration'
+              write(6,*)' calculate gridded sfc eclipse obscuration'
               elgmin = 9999.
               idebug = 0
-              do i = 1,NX_L
-              do j = 1,NY_L
-                call sun_moon(i4time_solar,lat,lon,NX_L,NY_L,i,j         ! I
-     1                       ,almgrd,azmgrd                              ! O
-     1                       ,idebug,0.,earth_radius                     ! I
-     1                       ,elggrd,grdmoon_mag,rmn                     ! O
-     1                       ,geo_dec,geo_ra,geo_sublon,geo_dist         ! O
-     1                       ,solar_eclipse_magnitude,eobsf,eobsc(i,j))  ! O
+              do i = 1,nx_l
+              do j = 1,ny_l
+                call sun_moon(i4time_solar,lat,lon,nx_l,ny_l,i,j         ! i
+     1                       ,almgrd,azmgrd                              ! o
+     1                       ,idebug,0.,earth_radius                     ! i
+     1                       ,elggrd,grdmoon_mag,rmn                     ! o
+     1                       ,geo_dec,geo_ra,geo_sublon,geo_dist         ! o
+     1                       ,solar_eclipse_magnitude,eobsf,eobsc(i,j))  ! o
 
                 if(elggrd .lt. elgmin .and. sol_alt_2d(i,j) .gt. 0.)then
                   elgmin = elggrd
@@ -1552,25 +1552,25 @@
 
 !           l_solar_eclipse = .false. ! test
 
-!           alm = -90.          ! Test for disabling
-!           moon_mag = -4.0    ! Test for disabling
+!           alm = -90.          ! test for disabling
+!           moon_mag = -4.0    ! test for disabling
             moon_mag_thr = -6.0
 
             moon_alt_2d = alm
             moon_azi_2d = azm
 
-!           Get alt_a_roll and azi_a_roll arrays
+!           get alt_a_roll and azi_a_roll arrays
             do i = minalt,maxalt
               call get_val(i,minalt,alt_scale,altobj)
               alt_a_roll(i,:) = altobj
               if(altobj .lt. -90.)then
-                write(6,*)' ERROR: altobj < -90.',i,altobj
+                write(6,*)' error: altobj < -90.',i,altobj
                 return
               endif
               if(i .eq. minalt .or.
      1                 (i .eq. maxalt .and. maxalt .gt. 0))then
                 if(altobj .ne. nint(altobj))then
-                  write(6,*)' ERROR: non-integer altitude bound'
+                  write(6,*)' error: non-integer altitude bound'
      1                     ,i,alt_scale,altobj
                   return
                 endif
@@ -1582,7 +1582,7 @@
               azi_a_roll(:,j) = aziobj
               if(j .eq. minazi .or. j .eq. maxazi)then
                 if(aziobj .ne. nint(aziobj))then
-                  write(6,*)' ERROR: non-integer azimuth bound'
+                  write(6,*)' error: non-integer azimuth bound'
      1                     ,j,azi_scale,aziobj
                   return
                 endif
@@ -1613,48 +1613,48 @@
               topo_albedo_2d(3,:,:) = .028
             endif
 
-!           Setup optimization with single site, for multiple sites we can move
+!           setup optimization with single site, for multiple sites we can move
 !           this up before line 1156 (iloc loop)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
             write(6,*)' call calc_allsky at i4time_solar:',i4time_solar
      1               ,iloop
             call calc_allsky(i4time_solar,exposure ! ,clwc_3d,cice_3d
-!    1                     ,heights_3d                              ! I
-!    1                     ,rain_3d,snow_3d                         ! I
-!    1                     ,pres_3d,aod_3d                          ! I
-     1                     ,topo_sfc,topo,swi_2d,pw_2d              ! I
-     1                     ,topo_albedo_2d,land_frac,snow_cover     ! I
-     1                     ,htagl(iloc)                             ! I
-     1                     ,aod_ref                                 ! I
-     1                     ,NX_L,NY_L,NZ_L,newloc                   ! I
-     1                     ,ri_obs,rj_obs                           ! I
-     1                     ,alt_a_roll,azi_a_roll                   ! I
-     1                     ,sol_alt_2d,sol_azi_2d                   ! I
-     1                     ,solar_alt,solar_az                      ! I
-     1                     ,solar_lat,solar_lon,r_au                ! I
-     1                     ,alt_norm                                ! I
-     1                     ,moon_alt_2d,moon_azi_2d,alm,azm         ! I
-     1                     ,moon_mag,moon_mag_thr,elgms             ! I
-     1                     ,l_solar_eclipse,eobsc,emag              ! I
-     1                     ,rlat,rlon,lat,lon                       ! I
-     1                     ,minalt,maxalt,minazi,maxazi,nsp         ! I
-     1                     ,ni_cyl,nj_cyl,elong_a                   ! O
-     1                     ,alt_scale,azi_scale                     ! I
-     1                     ,grid_spacing_m,r_missing_data           ! I
-     1                     ,l_binary,l_terrain_following            ! I
-     1                     ,mode_cloud_mask,camera_cloud_mask       ! I
-     1                     ,cloud_od,dist_2_topo                    ! O
-     1                     ,sky_rgb_cyl                             ! O
-     1                     ,istatus)                                ! O
+!    1                     ,heights_3d                              ! i
+!    1                     ,rain_3d,snow_3d                         ! i
+!    1                     ,pres_3d,aod_3d                          ! i
+     1                     ,topo_sfc,topo,swi_2d,pw_2d              ! i
+     1                     ,topo_albedo_2d,land_frac,snow_cover     ! i
+     1                     ,htagl(iloc)                             ! i
+     1                     ,aod_ref                                 ! i
+     1                     ,nx_l,ny_l,nz_l,newloc                   ! i
+     1                     ,ri_obs,rj_obs                           ! i
+     1                     ,alt_a_roll,azi_a_roll                   ! i
+     1                     ,sol_alt_2d,sol_azi_2d                   ! i
+     1                     ,solar_alt,solar_az                      ! i
+     1                     ,solar_lat,solar_lon,r_au                ! i
+     1                     ,alt_norm                                ! i
+     1                     ,moon_alt_2d,moon_azi_2d,alm,azm         ! i
+     1                     ,moon_mag,moon_mag_thr,elgms             ! i
+     1                     ,l_solar_eclipse,eobsc,emag              ! i
+     1                     ,rlat,rlon,lat,lon                       ! i
+     1                     ,minalt,maxalt,minazi,maxazi,nsp         ! i
+     1                     ,ni_cyl,nj_cyl,elong_a                   ! o
+     1                     ,alt_scale,azi_scale                     ! i
+     1                     ,grid_spacing_m,r_missing_data           ! i
+     1                     ,l_binary,l_terrain_following            ! i
+     1                     ,mode_cloud_mask,camera_cloud_mask       ! i
+     1                     ,cloud_od,dist_2_topo                    ! o
+     1                     ,sky_rgb_cyl                             ! o
+     1                     ,istatus)                                ! o
             if(istatus .ne. 1)then
-              write(6,*)' Error istatus returned from calc_allsky'
+              write(6,*)' error istatus returned from calc_allsky'
               return
             endif
 
             if(mode_cloud_mask .eq. 4  .or. mode_cloud_mask .eq. 5)then
- !              Note that 'sky_rgb_cyl' is brightened to match camera
+ !              note that 'sky_rgb_cyl' is brightened to match camera
                 isun = minalt + nint(solar_alt / alt_scale)
                 jsun = minazi + nint(solar_az / azi_scale)
 
@@ -1666,15 +1666,15 @@
                 endif
 
                 call compare_camera(
-     1                            iloop,rlat,rlon,nc                  ! I   
-     1                           ,minalt,maxalt,minazi,maxazi         ! I
-     1                           ,alt_scale,azi_scale,camera_rgb      ! I
-     1                           ,i4time_solar,isun,jsun,idbsun       ! I
-     1                           ,alt_a_roll,elong_a,r_missing_data   ! I
-     1                           ,sky_rgb_cyl                         ! I/O
-     1                           ,correlation(:,iloc)                 ! O
-     1                           ,a_t(:,iloc),b_t(:,iloc)             ! O
-     1                           ,istat_cam)                          ! O
+     1                            iloop,rlat,rlon,nc                  ! i   
+     1                           ,minalt,maxalt,minazi,maxazi         ! i
+     1                           ,alt_scale,azi_scale,camera_rgb      ! i
+     1                           ,i4time_solar,isun,jsun,idbsun       ! i
+     1                           ,alt_a_roll,elong_a,r_missing_data   ! i
+     1                           ,sky_rgb_cyl                         ! i/o
+     1                           ,correlation(:,iloc)                 ! o
+     1                           ,a_t(:,iloc),b_t(:,iloc)             ! o
+     1                           ,istat_cam)                          ! o
 
               avecorr = sum(correlation(:,iloc))/float(nc)
               write(6,46)correlation(:,iloc),avecorr
@@ -1696,25 +1696,25 @@
             if(.true.)then ! write labels and images        
               write(6,*)' end of subroutine call block - write labels'
 
-!             Write time label
+!             write time label
               open(53,file='label.'//trim(clun_loop),status='unknown')
               write(53,*)a9time
               write(53,*)a24time(1:17)
               close(53)
 
               if(soundlat(iloc) .gt. 0.)then
-                c1_lat = 'N'
+                c1_lat = 'n'
               else
-                c1_lat = 'S'
+                c1_lat = 's'
               endif
 
               if(soundlon(iloc) .gt. 0.)then
-                c1_lon = 'E'
+                c1_lon = 'e'
               else
-                c1_lon = 'W'
+                c1_lon = 'w'
               endif
 
-!             Write lat/lon and other info for label
+!             write lat/lon and other info for label
               open(54,file='label2.'//trim(clun_loop),status='unknown')
               write(54,54)soundlat(iloc),c1_lat,
      1                    abs(soundlon(iloc)),c1_lon,
@@ -1753,11 +1753,11 @@
               endif
 
               if(l_cyl .eqv. .true.)then
-!               Write all sky for cyl
+!               write all sky for cyl
 
                 if(dither .gt. 0.)then
 
-                   I4_elapsed = ishow_timer()
+                   i4_elapsed = ishow_timer()
 
                    write(6,*)' writing dithered image',dither
 
@@ -1800,12 +1800,12 @@
                 endif
 
                 npts = 3*(maxalt-minalt+1)*(maxazi-minazi+1)
-!               write(6,*)' Write all sky cyl text file ',npts
+!               write(6,*)' write all sky cyl text file ',npts
 !               open(55,file='allsky_rgb_cyl.'//trim(clun_loop),status='unknown')
 !               write(55,*)isky_rgb_cyl           
 !               close(55)
-                write(6,*)' Write cyl diff ppm file ',trim(clun_loop)
-                call writeppm3Matrix(
+                write(6,*)' write cyl diff ppm file ',trim(clun_loop)
+                call writeppm3matrix(
      1                isky_rgb_cyl(0,:,:),isky_rgb_cyl(1,:,:)
      1               ,isky_rgb_cyl(2,:,:)
      1               ,'allsky_rgb_cyl_'//trim(clun_loop))     
@@ -1820,13 +1820,13 @@
                 allocate(sky_rgb_polar(0:2,iplo:iphi,jplo:jphi))
                 allocate(isky_rgb_polar(0:2,iplo:iphi,jplo:jphi))
 
-!               Reproject sky_rgb array from cyl to polar    
+!               reproject sky_rgb array from cyl to polar    
                 do iaz = minazi,maxazi,20
                   write(6,*)'iaz,cyl((maxalt+minalt)/2,iaz)',iaz
      1                       ,sky_rgb_cyl(1,(maxalt+minalt)/2,iaz)
                 enddo ! iaz
 
-!               write(6,*)' Call cyl_to_polar with sky rgb data'
+!               write(6,*)' call cyl_to_polar with sky rgb data'
 
                 if(htagl(iloc) .le. 20.1 .and. 
      1                  (maxalt + minalt) .gt. 0)then ! midpoint above horizon
@@ -1834,7 +1834,7 @@
                 else
                   polat = -90.
                 endif
-                polat_tmp = getenv_real('POLAT',r_missing_data)
+                polat_tmp = getenv_real('polat',r_missing_data)
                 if(polat_tmp .ne. r_missing_data)polat = polat_tmp
 
 !               if(ipolar_sizeparm .ge. 3)then
@@ -1868,7 +1868,7 @@
                   endif
                 endif
 
-                rotew = getenv_real('ROTEW',r_missing_data) 
+                rotew = getenv_real('rotew',r_missing_data) 
  
                 if(htagl(iloc) .eq. 400001.)then
                   rotew = +70. ! positive rotation decreases altitude in the south
@@ -1882,26 +1882,26 @@
                   rotz = 0.
                 endif
 
-                if(alt_scale .lt. .005 .and. alt_scale .gt. .001)then ! HIGHFLAT regional model
+                if(alt_scale .lt. .005 .and. alt_scale .gt. .001)then ! highflat regional model
                   pomag = pomag * 5.
                 endif                
 
-                pomag_tmp = getenv_real('POMAG',r_missing_data)
+                pomag_tmp = getenv_real('pomag',r_missing_data)
                 if(pomag_tmp .ne. r_missing_data)pomag = pomag_tmp
 
-                pox_tmp = getenv_real('POX',r_missing_data)
+                pox_tmp = getenv_real('pox',r_missing_data)
                 if(pox_tmp .ne. r_missing_data)pox = pox_tmp
 
-                poy_tmp = getenv_real('POY',r_missing_data)
+                poy_tmp = getenv_real('poy',r_missing_data)
                 if(poy_tmp .ne. r_missing_data)poy = poy_tmp
 
-                rotz_tmp  = getenv_real('ROTZ',r_missing_data)
+                rotz_tmp  = getenv_real('rotz',r_missing_data)
                 if(rotz_tmp .ne. r_missing_data)rotz = rotz_tmp
 
                 write(6,*)'htrat/pomag',htagl(iloc)/earth_radius,pomag
 
                 do ic = 0,nc-1
-                  write(6,*)' Call cyl_to_polar with sky rgb data',ic
+                  write(6,*)' call cyl_to_polar with sky rgb data',ic
 
                   call cyl_to_polar(sky_rgb_cyl(ic,:,:)
      1                             ,sky_rgb_polar(ic,:,:)
@@ -1913,7 +1913,7 @@
      1                             ,ni_polar,nj_polar)
                 enddo ! ic
 
-!               Write all sky for polar
+!               write all sky for polar
                 where(sky_rgb_polar .eq. r_missing_data)
                   sky_rgb_polar = 0.
                   isky_rgb_polar = 0
@@ -1921,7 +1921,7 @@
 
                 if(dither .gt. 0.)then
 
-                  I4_elapsed = ishow_timer()
+                  i4_elapsed = ishow_timer()
 
                   write(6,*)' writing dithered image',dither
 
@@ -1955,7 +1955,7 @@
      1                                      ,minval(isky_rgb_polar)
 
                 if(minval(isky_rgb_polar) .lt. 0)then
-                  write(6,*)' WARNING: maxval isky_rgb_polar < 0'
+                  write(6,*)' warning: maxval isky_rgb_polar < 0'
               
                   where(isky_rgb_polar .lt. 0)
                         isky_rgb_polar = 0
@@ -1971,14 +1971,14 @@
                 nip_crop = iphi-iplo+1
                 njp_crop = jphi-jplo+1
                 npts = 3*nip_crop*njp_crop
-!               write(6,*)' Write all sky polar text file'
+!               write(6,*)' write all sky polar text file'
 !    1                    ,isky_rgb_polar(:,255,255),npts
 !               open(54,file='allsky_rgb_polar.'//trim(clun_loop),status='unknown')
 !               write(54,*)isky_rgb_polar
 !               close(54)
-                write(6,*)' Write all sky polar ppm file '
+                write(6,*)' write all sky polar ppm file '
      1                   ,trim(clun_loop)
-                call writeppm3Matrix(
+                call writeppm3matrix(
      1                  isky_rgb_polar(0,:,:),isky_rgb_polar(1,:,:)
      1                 ,isky_rgb_polar(2,:,:)
      1                 ,'allsky_rgb_polar_'//trim(clun_loop))
@@ -1990,7 +1990,7 @@
 
             endif ! write labels and images
 
-!           For multiple sites we can move this outside the 'iloc' loop past
+!           for multiple sites we can move this outside the 'iloc' loop past
 !           line 1725
 
             deallocate(aod_ill_opac)
@@ -2007,12 +2007,12 @@
   
 1000        continue
 
-            write(6,*)' End of plot_allsky for iloc...',iloc
+            write(6,*)' end of plot_allsky for iloc...',iloc
             write(6,*)
 
-            I4_elapsed = ishow_timer()
+            i4_elapsed = ishow_timer()
 
-!           Copy image to outer loop array
+!           copy image to outer loop array
             if(mode_cloud_mask .eq. 5 .and. iloop .le. 2)then
               continue              
             endif
@@ -2035,7 +2035,7 @@
 
           if(mode_cloud_mask .eq. 5)then
 
-              write(6,*)'Update a vector and corresponding parameters'
+              write(6,*)'update a vector and corresponding parameters'
               a_last(:) = a_vec(:)
 
               f_merit = 1.0 - avecorr
@@ -2044,7 +2044,7 @@
 !             f_merit = f_merit + .1d0 * a_vec(n_jd)**2
 
               if(iexit_optimize .eq. 1)then              
-                  write(6,*)' Signal to stop optimization'
+                  write(6,*)' signal to stop optimization'
                   write(6,1891)a_vec(1:nv),f_merit,iloop
 1891              format(' exit optimize: a_vec/f_merit'
      1                  ,3f10.5,5x,f10.6,i4)
@@ -2070,7 +2070,7 @@
         if(allocated(sky_rgb_cyl_outer))deallocate(sky_rgb_cyl_outer)
 
         write(6,*)
-        write(6,*)' End of plot_allsky...'
+        write(6,*)' end of plot_allsky...'
         write(6,*)
 
         return
@@ -2099,7 +2099,7 @@
         character(*) c_env
         character*20 c_value
 
-        call GETENV(c_env,c_value)
+        call getenv(c_env,c_value)
 
         call s_len(c_value,lenv)
       

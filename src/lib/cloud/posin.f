@@ -1,67 +1,67 @@
 
-      SUBROUTINE POSIN(T,K,RX,RY,RZ) ! 1950 coordinates
-!     T is TDT (ET)
-      IMPLICIT REAL*8(A,B,C,D,E,F,G,H,O,P,Q,R,S,T,U,V,W,X,Y,Z)
-      REAL*8 I,I0,I1,I2,M,M0,M1,M2,M3
-      DIMENSION A0(1),A1(1),E0(1),E1(1),E2(1),M0(1),M1(1),M2(1),M3(1)
-      DIMENSION I0(1),I1(1),I2(1),WW0(1),WW1(1),WW2(1),W0(1),W1(1),W2(1)
-      DATA A0/1.00000023D0/
-      DATA A1/0.D0/
-      DATA E0/0.0167301085D0/
-      DATA E1/-.41926D-4/
-      DATA E2/-.126D-6/
-      DATA M0/358.000682D0/
-      DATA M1/.9856002628D0/
-      DATA M2/-.155D-3/
-      DATA M3/-.333D-5/
-      DATA I0/0.D0/
-      DATA I1/.013076D0/
-      DATA I2/-.9D-5/
-      DATA WW0/174.40956D0/
-      DATA WW1/-.24166D0/
-      DATA WW2/.6D-4/
-      DATA W0/287.67097D0/
-      DATA W1/.56494D0/
-      DATA W2/.9D-4/
-      DATA PI/3.1415926535897932D0/,O/.4092062118D0/
-      RPD=PI/180.
-      TD=T-2433282.5D0
-      TC=TD/36525.D0
-      TCSQ=TC*TC
-      A=A0(K)+A1(K)*TC
-      E=E0(K)+E1(K)*TC+E2(K)*TCSQ
-      M=(M0(K)+M1(K)*TD+M2(K)*TCSQ+M3(K)*TCSQ*TC)*RPD
-      I=(I0(K)+I1(K)*TC+I2(K)*TCSQ)*RPD
-      WW=(WW0(K)+WW1(K)*TC+WW2(K)*TCSQ)*RPD
-      W=(W0(K)+W1(K)*TC+W2(K)*TCSQ)*RPD
-      EE=M+E*SIN(M)
-8     ARG=EE-(EE-E*DSIN(EE)-M)/(1.D0-E*COS(EE))
-C     PRINT*,'M,E,EE',M,E,EE
-      IF(DABS(ARG-EE)-1.0D-9)11,11,9
-9     EE=ARG
-      GOTO8
-11    EE=ARG
-      XW=A*(DCOS(EE)-E)
-      YW=A*DSQRT(1.D0-E*E)*SIN(EE)
-C     PRINT*,'XW,YW',XW,YW
-      SINW=DSIN(W)
-      COSW=DCOS(W)
-      SINI=DSIN(I)
-      COSI=DCOS(I)
-      SINWW=DSIN(WW)
-      COSWW=DCOS(WW)
-      PX= COSW*COSWW-SINW*SINWW*COSI
-      PY= COSW*SINWW+SINW*COSWW*COSI
-      PZ= SINW*SINI
-C     PRINT*,'PX,PY,PZ',PX,PY,PZ
-      QX=-SINW*COSWW-COSW*SINWW*COSI
-      QY=-SINW*SINWW+COSW*COSWW*COSI
-      QZ= COSW*SINI
-C     PRINT*,'QX,QY,QZ',QX,QY,QZ
-      RX= XW*PX+YW*QX
-      RY1=XW*PY+YW*QY
-      RZ1=XW*PZ+YW*QZ
-      RY=RY1*COS(O)-RZ1*SIN(O)
-      RZ=RY1*SIN(O)+RZ1*COS(O)
-      RETURN
-      END
+      subroutine posin(t,k,rx,ry,rz) ! 1950 coordinates
+!     t is tdt (et)
+      implicit real*8(a,b,c,d,e,f,g,h,o,p,q,r,s,t,u,v,w,x,y,z)
+      real*8 i,i0,i1,i2,m,m0,m1,m2,m3
+      dimension a0(1),a1(1),e0(1),e1(1),e2(1),m0(1),m1(1),m2(1),m3(1)
+      dimension i0(1),i1(1),i2(1),ww0(1),ww1(1),ww2(1),w0(1),w1(1),w2(1)
+      data a0/1.00000023d0/
+      data a1/0.d0/
+      data e0/0.0167301085d0/
+      data e1/-.41926d-4/
+      data e2/-.126d-6/
+      data m0/358.000682d0/
+      data m1/.9856002628d0/
+      data m2/-.155d-3/
+      data m3/-.333d-5/
+      data i0/0.d0/
+      data i1/.013076d0/
+      data i2/-.9d-5/
+      data ww0/174.40956d0/
+      data ww1/-.24166d0/
+      data ww2/.6d-4/
+      data w0/287.67097d0/
+      data w1/.56494d0/
+      data w2/.9d-4/
+      data pi/3.1415926535897932d0/,o/.4092062118d0/
+      rpd=pi/180.
+      td=t-2433282.5d0
+      tc=td/36525.d0
+      tcsq=tc*tc
+      a=a0(k)+a1(k)*tc
+      e=e0(k)+e1(k)*tc+e2(k)*tcsq
+      m=(m0(k)+m1(k)*td+m2(k)*tcsq+m3(k)*tcsq*tc)*rpd
+      i=(i0(k)+i1(k)*tc+i2(k)*tcsq)*rpd
+      ww=(ww0(k)+ww1(k)*tc+ww2(k)*tcsq)*rpd
+      w=(w0(k)+w1(k)*tc+w2(k)*tcsq)*rpd
+      ee=m+e*sin(m)
+8     arg=ee-(ee-e*dsin(ee)-m)/(1.d0-e*cos(ee))
+c     print*,'m,e,ee',m,e,ee
+      if(dabs(arg-ee)-1.0d-9)11,11,9
+9     ee=arg
+      goto8
+11    ee=arg
+      xw=a*(dcos(ee)-e)
+      yw=a*dsqrt(1.d0-e*e)*sin(ee)
+c     print*,'xw,yw',xw,yw
+      sinw=dsin(w)
+      cosw=dcos(w)
+      sini=dsin(i)
+      cosi=dcos(i)
+      sinww=dsin(ww)
+      cosww=dcos(ww)
+      px= cosw*cosww-sinw*sinww*cosi
+      py= cosw*sinww+sinw*cosww*cosi
+      pz= sinw*sini
+c     print*,'px,py,pz',px,py,pz
+      qx=-sinw*cosww-cosw*sinww*cosi
+      qy=-sinw*sinww+cosw*cosww*cosi
+      qz= cosw*sini
+c     print*,'qx,qy,qz',qx,qy,qz
+      rx= xw*px+yw*qx
+      ry1=xw*py+yw*qy
+      rz1=xw*pz+yw*qz
+      ry=ry1*cos(o)-rz1*sin(o)
+      rz=ry1*sin(o)+rz1*cos(o)
+      return
+      end

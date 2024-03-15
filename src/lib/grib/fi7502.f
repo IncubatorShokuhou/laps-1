@@ -1,44 +1,44 @@
-      SUBROUTINE FI7502 (IWORK,ISTART,NPTS,ISAME)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C                .      .    .                                       .
-C SUBPROGRAM:    FI7502      SECOND ORDER SAME VALUE COLLECTION
-C   PRGMMR: CAVANAUGH        ORG: W/NMC42    DATE: 93-06-23
-C
-C ABSTRACT: COLLECT SEQUENTIAL SAME VALUES FOR PROCESSING
-C   AS SECOND ORDER VALUE FOR GRIB MESSAGES.
-C
-C PROGRAM HISTORY LOG:
-C   93-06-23  CAVANAUGH
-C   95-10-31  IREDELL     REMOVED SAVES AND PRINTS
-C
-C USAGE:    CALL FI7502 (IWORK,ISTART,NPTS,ISAME)
-C   INPUT ARGUMENT LIST:
-C     IWORK    - ARRAY CONTAINING SOURCE DATA
-C     ISTART   - STARTING LOCATION FOR THIS TEST
-C     NPTS     - NUMBER OF POINTS IN IWORK
-C
-C   OUTPUT ARGUMENT LIST:      (INCLUDING WORK ARRAYS)
-C     ISAME    - NUMBER OF SEQUENTIAL POINTS HAVING THE SAME VALUE
-C
-C REMARKS: SUBPROGRAM CAN BE CALLED FROM A MULTIPROCESSING ENVIRONMENT.
-C
-C ATTRIBUTES:
-C   LANGUAGE: IBM VS FORTRAN 77, CRAY CFT77 FORTRAN
-C   MACHINE:  HDS, CRAY C916/256, Y-MP8/64, Y-MP EL92/256
-C
-C$$$
-      INTEGER        IWORK(*)
-      INTEGER        ISTART
-      INTEGER        ISAME
-      INTEGER        K
-      INTEGER        NPTS
-C  -------------------------------------------------------------
-      ISAME  = 0
-      DO 100 K = ISTART, NPTS
-          IF (IWORK(K).NE.IWORK(ISTART)) THEN
-              RETURN
-          END IF
-          ISAME  = ISAME + 1
-  100 CONTINUE
-      RETURN
-      END
+      subroutine fi7502 (iwork,istart,npts,isame)
+c$$$  subprogram documentation block
+c                .      .    .                                       .
+c subprogram:    fi7502      second order same value collection
+c   prgmmr: cavanaugh        org: w/nmc42    date: 93-06-23
+c
+c abstract: collect sequential same values for processing
+c   as second order value for grib messages.
+c
+c program history log:
+c   93-06-23  cavanaugh
+c   95-10-31  iredell     removed saves and prints
+c
+c usage:    call fi7502 (iwork,istart,npts,isame)
+c   input argument list:
+c     iwork    - array containing source data
+c     istart   - starting location for this test
+c     npts     - number of points in iwork
+c
+c   output argument list:      (including work arrays)
+c     isame    - number of sequential points having the same value
+c
+c remarks: subprogram can be called from a multiprocessing environment.
+c
+c attributes:
+c   language: ibm vs fortran 77, cray cft77 fortran
+c   machine:  hds, cray c916/256, y-mp8/64, y-mp el92/256
+c
+c$$$
+      integer        iwork(*)
+      integer        istart
+      integer        isame
+      integer        k
+      integer        npts
+c  -------------------------------------------------------------
+      isame  = 0
+      do 100 k = istart, npts
+          if (iwork(k).ne.iwork(istart)) then
+              return
+          end if
+          isame  = isame + 1
+  100 continue
+      return
+      end

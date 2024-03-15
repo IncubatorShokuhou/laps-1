@@ -8,49 +8,49 @@ module src_versuch
  use src_hyd
  use src_scatter
  use src_tmatrix
- use MODI_GAMMA
+ use modi_gamma
 
 !******************************************************************
-!Monika Pfeifer 28.09.2004
-!INTENT(IN) :: rain, snow, graup
-!INTENT(IN) :: temperatur, druck, qd
-!INTENT(OUT) :: Zhhx, Ahhx, ZDR, LDR
+!monika pfeifer 28.09.2004
+!intent(in) :: rain, snow, graup
+!intent(in) :: temperatur, druck, qd
+!intent(out) :: zhhx, ahhx, zdr, ldr
 !******************************************************************
 
 contains
 subroutine versuch(rain,snow,graup,tmp,zhhx,ahhx,zhvx, zvhx, zvvx, druck, qd, delahvx, kkdp, rhohvx)
 
-Implicit none
+implicit none
 
 
-!Include 'variablen.incf'
+!include 'variablen.incf'
 
 !common/glramssd/glszd
 !common/glhydbdy/glbdy,glcad
 !common/cantpara/cdpnum,cdprb,cdpth,&
 !          cdpab,cdpdd,cdpab2,cdpdd2,cdpabd
 
-REAL :: cloud, rain, snow, graup, tmp,  zhhx, ahhx,zzzdr, llldr, druck, qd, &
+real :: cloud, rain, snow, graup, tmp,  zhhx, ahhx,zzzdr, llldr, druck, qd, &
      thetag, thetagd, thetas, thetasd, delahvx, kkdp, rhohvx, &!
      zvhx, zhvx, zvvx
-REAL :: qh, xx, erfct, titu, crtnm, wvln, qitu, wt(40), qg  !
+real :: qh, xx, erfct, titu, crtnm, wvln, qitu, wt(40), qg  !
 
-REAL :: arg1, arg2
+real :: arg1, arg2
 
-Complex  :: epswtr, epsice, epsplt
+complex  :: epswtr, epsice, epsplt
 character :: sctmodel*3
 integer, parameter :: msz=40
 
-Integer  :: ii, idr, nrank,&
+integer  :: ii, idr, nrank,&
             n0rank, n0pnt, ist, nsz, isz, iisz !
 
-Real :: sz(msz),sdprb(msz), thrdr(2)
+real :: sz(msz),sdprb(msz), thrdr(2)
 
-Real :: freq0, lambd(9), tv, qs, scmixgrice, t, q, epsreplt, epsimplt !
+real :: freq0, lambd(9), tv, qs, scmixgrice, t, q, epsreplt, epsimplt !
 
-Integer :: ssznum  !
-Real*4 :: temp, rhox, testgm !
-CHARACTER*9 :: hyddo !
+integer :: ssznum  !
+real*4 :: temp, rhox, testgm !
+character*9 :: hyddo !
 
 
 
@@ -82,7 +82,7 @@ mmb
 
 
 !common/glradars/ndr,glrdr  !nochmal diskutieren
-!common/ensemmtx/stks           !Elements of Backscatter and Extinction Matrices
+!common/ensemmtx/stks           !elements of backscatter and extinction matrices
 !common/extmbmum/extm,bmum
 include 'parameter.incf'
 include 'constants.incf'
@@ -90,8 +90,8 @@ include 'constants.incf'
       idr = 1 ! initialize in case it gets skipped over later
 
 
-       !LM gibt Temperatur in Kelvin aus, deshalb umrechnen
-       ! Environment temperature in Celsius degrees
+       !lm gibt temperatur in kelvin aus, deshalb umrechnen
+       ! environment temperature in celsius degrees
 
 
       temp=tmp-273.16
@@ -109,7 +109,7 @@ include 'constants.incf'
       refimair = 0
 
 
-      !ndr: Number of Radar looking directions
+      !ndr: number of radar looking directions
 
       freq0=0.
       ndr = 1
@@ -117,7 +117,7 @@ include 'constants.incf'
       wvln=vlght/freq0
 
 !--------------------------------------------------
-!set drop size distribution (DSD) for each category
+!set drop size distribution (dsd) for each category
 
 
   sznum=0.
@@ -129,7 +129,7 @@ include 'constants.incf'
   sdgml=0.
   lambd=0.
 
-! Select the model hydrometeors types in the cloud, in the order of:
+! select the model hydrometeors types in the cloud, in the order of:
 !     cldrp(cloud droplet),rains(rain drop),icclm(pristine ice column),
 !     icplt(pristine ice plate),snows(snow flake),aggrs(aggregate),
 !     graup(graupel),hlcnc(conical hail),hlsph(spheroidal hail).
@@ -143,23 +143,23 @@ include 'constants.incf'
   if (snow > 0.)  hyddo(4:4) = '1'
   if (graup > 0.) hyddo(7:7) = '1'
 
-  tv=(temp+273.16)*(1. + 0.61*qd)       ! virtuelle Temperatur
-  rhox=druck/(287.*tv)         ! Luftdichte über Gasgleichung
+  tv=(temp+273.16)*(1. + 0.61*qd)       ! virtuelle temperatur
+  rhox=druck/(287.*tv)         ! luftdichte über gasgleichung
     call watereps(temp,epswtr,epsice)
 
 !-->  cldrp
       if(hyddo(1:1) .eq. '1') then
 
-         sznum(1)=8     !Number of quadrature points in DSD integration
-         szlow(1)=0.001 !Lowest RAMS characteristic size (max or equi dia)
-         szupp(1)=0.2   !Highest RAMS characteristic size (max or equi dia)
-!         sdidv(1)=11    !Input device number for experimental DSD
+         sznum(1)=8     !number of quadrature points in dsd integration
+         szlow(1)=0.001 !lowest rams characteristic size (max or equi dia)
+         szupp(1)=0.2   !highest rams characteristic size (max or equi dia)
+!         sdidv(1)=11    !input device number for experimental dsd
 
 
-         lambd(1) = (( rhox*cloud)/ (.82 * 1.E8 * (GAMMA(1.+3.)/GAMMA(1.))))**(1/(-1.-3))
-         sdgno(1)=1000  !our N_0 in Gamma DSD
-         sdgmm(1)=2     !RAMS mu=our m+1 in Gamma DSD
-         sdgml(1)=.1/3.67 !RAMS D0=1/(our lambda) in Gamma DSD
+         lambd(1) = (( rhox*cloud)/ (.82 * 1.e8 * (gamma(1.+3.)/gamma(1.))))**(1/(-1.-3))
+         sdgno(1)=1000  !our n_0 in gamma dsd
+         sdgmm(1)=2     !rams mu=our m+1 in gamma dsd
+         sdgml(1)=.1/3.67 !rams d0=1/(our lambda) in gamma dsd
       endif
 
 
@@ -167,30 +167,30 @@ include 'constants.incf'
 !-->  rain
       if(hyddo(2:2) .eq. '1') then
          lambd(2) = 0.
-         sznum(2)=13   !Number of quadrature points in DSD integration
-         szlow(2)=0.01 !Daten aus DSD_Param *2 weil angabe in Radius
+         sznum(2)=13   !number of quadrature points in dsd integration
+         szlow(2)=0.01 !daten aus dsd_param *2 weil angabe in radius
 
-         sdgno(2) = 8.E6
-!         sdgno(2) = 3.96e7 ! yen COSMO-DE
+         sdgno(2) = 8.e6
+!         sdgno(2) = 3.96e7 ! yen cosmo-de
 
          sdgmm(2) = 0. ! mu-value in gamma dsd
-!         sdgmm(2)=0.5  ! yen COSMO-DE
+!         sdgmm(2)=0.5  ! yen cosmo-de
 
          lambd(2) = ((1000. * pi * sdgno(2))/(rhox * rain))**0.25    ! [m]
-!         lambd(2) =  ((pi/6. * 1000. * sdgno(2) * GAMMA(4.+sdgmm(2))) / &
-!            (rhox*rain))**(1./(4+sdgmm(2))) ! yen COSMO-DE
+!         lambd(2) =  ((pi/6. * 1000. * sdgno(2) * gamma(4.+sdgmm(2))) / &
+!            (rhox*rain))**(1./(4+sdgmm(2))) ! yen cosmo-de
 
-         sdgml(2) = 3.76/(lambd(2)*1.E-3)    ! mm
-!         sdgml(2) = (3.67+sdgmm(2))/(lambd(2)*1.E-3)  ! yen COSMO-DE
+         sdgml(2) = 3.76/(lambd(2)*1.e-3)    ! mm
+!         sdgml(2) = (3.67+sdgmm(2))/(lambd(2)*1.e-3)  ! yen cosmo-de
 
-         !  force upper limit of size integration to be 2.50*Do.
+         !  force upper limit of size integration to be 2.50*do.
          !szupp(2) = 2.50 * sdgml(2)
          
          szupp(2) = min(2.5 * sdgml(2),5.0)
 
 
-         sdidv(2)=12   !Input device number for experimental DSD data
-!        The gamma parameters are input in fort.12 as a table and
+         sdidv(2)=12   !input device number for experimental dsd data
+!        the gamma parameters are input in fort.12 as a table and
 !        read in dsdparam.f routine.
       endif
 
@@ -198,31 +198,31 @@ include 'constants.incf'
 !-->  snow/icplt
       if(hyddo(4:4) .eq. '1') then
          lambd(4) = 0.
-         sznum(4)=30    !Number of quadrature points in DSD integration
-         szlow(4)=.001 !0.001Lowest RAMS characteristic size (max or equi dia)
-         sdgmm(4)=0.   !2.     !RAMS mu=our m+1 in Gamma DSD
+         sznum(4)=30    !number of quadrature points in dsd integration
+         szlow(4)=.001 !0.001lowest rams characteristic size (max or equi dia)
+         sdgmm(4)=0.   !2.     !rams mu=our m+1 in gamma dsd
          
          
 ! yen 2008.12.09, field et al, dirty and quick
-         !sdgno(4) = 8.E5
-         !lambd(4) =  ((2*0.038*8.E5)/(rhox * snow))**(1./3.)
-         !sdgml(4) = 3.67/(lambd(4)*1.E-3)    ! m Email von Th. Reinhardt
+         !sdgno(4) = 8.e5
+         !lambd(4) =  ((2*0.038*8.e5)/(rhox * snow))**(1./3.)
+         !sdgml(4) = 3.67/(lambd(4)*1.e-3)    ! m email von th. reinhardt
          !szupp(4) = 2.50 * sdgml(4)
          
 ! yen 2008.12.09, field et al, dirty and quick
-  n0s1 = 13.5 * 5.65e5 ! parameter in N0S(T)
-  n0s2 = -0.107        ! parameter in N0S(T), Field et al
+  n0s1 = 13.5 * 5.65e5 ! parameter in n0s(t)
+  n0s2 = -0.107        ! parameter in n0s(t), field et al
   
-  zams  = 0.069  ! Formfactor in the mass-size relation of snow particles corresponding to the radius
+  zams  = 0.069  ! formfactor in the mass-size relation of snow particles corresponding to the radius
 
   mma = (/   5.065339, -0.062659, -3.032362, 0.029469, -0.000285, &
              0.312550,  0.000204,  0.003199, 0.000000, -0.015952 /)
   mmb = (/   0.476221, -0.015896,  0.165977, 0.007468, -0.000141, &
              0.060366,  0.000079,  0.000594, 0.000000, -0.003577 /)
 
-  ! Calculate n0s using the tmerature-dependent moment
-  ! relations of Field et al. (2005)
-  tm = MAX(MIN(temp-273.15,0.0),-40.0)
+  ! calculate n0s using the tmerature-dependent moment
+  ! relations of field et al. (2005)
+  tm = max(min(temp-273.15,0.0),-40.0)
 
   nn  = 3
   hlp = mma(1)      +mma(2)*tm      +mma(3)*nn       +mma(4)*tm*nn+mma(5)*tm**2 &
@@ -231,14 +231,14 @@ include 'constants.incf'
   bet = mmb(1)      +mmb(2)*tm      +mmb(3)*nn       +mmb(4)*tm*nn+mmb(5)*tm**2 &
       + mmb(6)*nn**2+mmb(7)*tm**2*nn+mmb(8)*tm*nn**2+mmb(9)*tm**3+mmb(10)*nn**3
   m2s = rhox*snow/zams
-  m3s = alf*EXP(bet*LOG(m2s))
+  m3s = alf*exp(bet*log(m2s))
 
-  hlp  = n0s1*EXP(n0s2*tm)
+  hlp  = n0s1*exp(n0s2*tm)
   n0s = 13.50 * m2s**4 / m3s**3
-  n0s = MAX(n0s,0.5*hlp)
-  n0s = MIN(n0s,1e2*hlp)
-  n0s = MIN(n0s,1e9)
-  n0s = MAX(n0s,1e6)
+  n0s = max(n0s,0.5*hlp)
+  n0s = min(n0s,1e2*hlp)
+  n0s = min(n0s,1e9)
+  n0s = max(n0s,1e6)
 
   lambda = ((2.*zams*n0s)/(rhox*snow))**(1./3.)
 
@@ -260,11 +260,11 @@ include 'constants.incf'
       if(hyddo(7:7) .eq. '1') then
          lambd(7) = 0.
          sdgno(7) = 0.
-         sdgno(7) = 4.E6
+         sdgno(7) = 4.e6
 
 ! yen 2008.12.09 after mario mwmod, dirty and quick
          !lambd(7) =   ((pi*200.*sdgno(7))/(rhox*graup))**0.25
-         !sdgml(7) = 3.76/(lambd(7)*1.E-3)    ! m
+         !sdgml(7) = 3.76/(lambd(7)*1.e-3)    ! m
          !szupp(7) = 2.50 * sdgml(7)
          !if (szupp(7) .gt. 36) szupp(7) = 36
 ! yen 2008.12.09 after mario mwmod, dirty and quick
@@ -274,14 +274,14 @@ include 'constants.incf'
   if (szupp(7) .gt. 36) szupp(7) = 36 
 ! yen 2008.12.09 after mario mwmod, dirty and quick
 
-         sznum(7)=10     !Number of quadrature points in DSD integration
-         szlow(7)=0.1    !Lowest RAMS characteristic size (max or equi dia)
-         sdidv(7)=17     !Input device number for experimental DSD data
-         sdgmm(7)= 0. !1    !RAMS mu=our m+1 in Gamma DSD
+         sznum(7)=10     !number of quadrature points in dsd integration
+         szlow(7)=0.1    !lowest rams characteristic size (max or equi dia)
+         sdidv(7)=17     !input device number for experimental dsd data
+         sdgmm(7)= 0. !1    !rams mu=our m+1 in gamma dsd
 !        density should be g/cc
          gradens=.2
-!        compute the refractive index of graupel using Maxwell-Garnet formula
-!        the parameter qg from RAMS will give the fraction of water in the
+!        compute the refractive index of graupel using maxwell-garnet formula
+!        the parameter qg from rams will give the fraction of water in the
 !        graupel
      qg=0
          thetag = 40
@@ -326,21 +326,21 @@ include 'constants.incf'
 
 !-->  hlcnc
       if(hyddo(8:8) .eq. '1') then
-!         sdtyp(8)=2   !DSD type, 1=experimental, 2=Gamma.
-         sznum(8)=25  !Number of quadrature points in DSD integration
-         szlow(8)=0.1 !Lowest RAMS characteristic size (max or equi dia)
-         szupp(8)=50. !Highest RAMS characteristic size (max or equi dia)
-         sdidv(8)=18  !Input device number for experimental DSD data
-         sdgno(8)=10  !our N_0 in Gamma DSD
-         sdgml(8)=2   !RAMS D0=1/(our lambda) in Gamma DSD
-         sdgmm(8)=2   !RAMS mu=our m+1 in Gamma DSD
+!         sdtyp(8)=2   !dsd type, 1=experimental, 2=gamma.
+         sznum(8)=25  !number of quadrature points in dsd integration
+         szlow(8)=0.1 !lowest rams characteristic size (max or equi dia)
+         szupp(8)=50. !highest rams characteristic size (max or equi dia)
+         sdidv(8)=18  !input device number for experimental dsd data
+         sdgno(8)=10  !our n_0 in gamma dsd
+         sdgml(8)=2   !rams d0=1/(our lambda) in gamma dsd
+         sdgmm(8)=2   !rams mu=our m+1 in gamma dsd
 
 !        density should be g/cc
          haildens=.89
      qh=.5
 !         temphail=sctmp
          call watereps(temp,epswtr,epsice)
-!        compute the refractive index of hail using Maxwell-Garnet formula
+!        compute the refractive index of hail using maxwell-garnet formula
          if(qh .le. 0.)then
             refreha=real(csqrt(epsice))
             refimha=aimag(csqrt(epsice))
@@ -378,14 +378,14 @@ include 'constants.incf'
 
 !-->  hlsph
       if(hyddo(9:9) .eq. '1') then
-!         sdtyp(9)=2   !DSD type, 1=experimental, 2=Gamma.
-         sznum(9)=10  !Number of quadrature point in DSD integration
-         szlow(9)=.1  !Lowest RAMS characteristic size (max or equi dia)
-     szupp(9)=5  !Highest RAMS characteristice size (max or equi dia)
-         sdidv(9)=19  !Input device number for experimental DSD data
-         sdgno(9)=1735000  !our N_0 in Gamma DSD
-         sdgml(9)=0.7008  !RAMS D0=1/(our lambda) in Gamma DSD
-         sdgmm(9)=1   !RAMS mu=our m+1 in Gamma DSD
+!         sdtyp(9)=2   !dsd type, 1=experimental, 2=gamma.
+         sznum(9)=10  !number of quadrature point in dsd integration
+         szlow(9)=.1  !lowest rams characteristic size (max or equi dia)
+     szupp(9)=5  !highest rams characteristice size (max or equi dia)
+         sdidv(9)=19  !input device number for experimental dsd data
+         sdgno(9)=1735000  !our n_0 in gamma dsd
+         sdgml(9)=0.7008  !rams d0=1/(our lambda) in gamma dsd
+         sdgmm(9)=1   !rams mu=our m+1 in gamma dsd
 
 !        density should be g/cc
          haildens=.05
@@ -437,7 +437,7 @@ bmum = 0.
 
 
 !
-!===> Loop through the 9 hydrometeor catagories provided by RAMS model
+!===> loop through the 9 hydrometeor catagories provided by rams model
 !     to compute radar observables at a fixed space point.
 
       do 80 ist=1,9    !ist refers to our model hydrometeor type.
@@ -454,7 +454,7 @@ bmum = 0.
       sznum(ist)=amax1(sznum(ist),8.0)
 
 
-       nsz=INT(sznum(ist)+0.1)
+       nsz=int(sznum(ist)+0.1)
 
       call gauslegquads(sz,wt,szlow(ist),szupp(ist),msz,nsz)
 
@@ -463,10 +463,10 @@ bmum = 0.
 
       do 70 iisz=1,nsz
 
-    sdprb(iisz) = sdgno(ist)* (sz(iisz) *1.E-3) **sdgmm(ist)*exp(-lambd(ist)*sz(iisz)*1.E-3)
+    sdprb(iisz) = sdgno(ist)* (sz(iisz) *1.e-3) **sdgmm(ist)*exp(-lambd(ist)*sz(iisz)*1.e-3)
 
      dsz=sz(iisz)
-      sdprb(iisz) = sdprb(iisz) * 1.E-3
+      sdprb(iisz) = sdprb(iisz) * 1.e-3
 
        if (ist.eq.4) then
        pltdens = (6. * 0.038)/ (pi * 0.8 *sz(iisz))
@@ -517,9 +517,9 @@ endif
       if(ist.eq.9) call hydhlsph(dsz,epswtr,epsice,scmix,refreha,refimha,aovrb)
 !      write(*,*) refre, refim
 
-!===> Generate canting parameters for integration over the normalized
-!     particle orientation distribution.  This is processed for each
-!     particle to reduce memory requirement.  These parameters will be
+!===> generate canting parameters for integration over the normalized
+!     particle orientation distribution.  this is processed for each
+!     particle to reduce memory requirement.  these parameters will be
 !     re-generate only if canting habit is changes from the previous one
 !     as turned on by non-zero cdtyp parameter.
 !
@@ -528,25 +528,25 @@ endif
 
 !
 !
-!===> Prepare constant values defined in boby FSA, exp(+jwt) convention,
+!===> prepare constant values defined in boby fsa, exp(+jwt) convention,
 !     for computing scatterering amplitudes at any incidence directions
 !     determined by particle canting to transform from boby frame to
-!     radar frame.  e.g., Generate T-matrices of a spheroidal scatterer.
+!     radar frame.  e.g., generate t-matrices of a spheroidal scatterer.
 !
 
-      iscshp=INT(scshp+0.01)
+      iscshp=int(scshp+0.01)
 
       arg1=dmx
-      arg2=deq*aovrb**(2./3)/MIN(1.d0,aovrb)
+      arg2=deq*aovrb**(2./3)/min(1.d0,aovrb)
 
       szpar=refre*max(arg1,arg2)/wvln/1000
 !      write(*,*) ist
 !     write(*,*) iscshp, aovrb, szpar, dmx, deq
 !
-!-->  use Mie solution for spherical particles, such as cloud droplet.
+!-->  use mie solution for spherical particles, such as cloud droplet.
 !
 !***************************************************************
-!     changed threshold for Mie, axis ratio must be .995 to 1.005
+!     changed threshold for mie, axis ratio must be .995 to 1.005
 !     for spheres
 !     aovrb verändert sich und dadurch nicht mehr miestreuung relevant
 
@@ -561,10 +561,10 @@ endif
 
 
 !
-!-->  use Rayleigh Approximation for small particles, e.g., ice crystals
+!-->  use rayleigh approximation for small particles, e.g., ice crystals
 !
-!  Next if statement commented out so that Rayleigh solution is used if
-!   Mie is not.
+!  next if statement commented out so that rayleigh solution is used if
+!   mie is not.
      if(iscshp.eq.1 .and. szpar.lt.0.10) then
 
         call rayleighsph(aovrb)
@@ -574,14 +574,14 @@ endif
       endif
 
 !
-!-->  use T-matrix method for any others.
+!-->  use t-matrix method for any others.
 !      write(*,*) 'tmat'
 
 !     write(*,*) n0rank,n0pnt,crtnm,aovrb
       call tmtdriver(n0rank,n0pnt,crtnm,aovrb, nrank)
       sctmodel='tmt'
 !
-!===> Integration over the normalized particle orientation distribution.
+!===> integration over the normalized particle orientation distribution.
 !
 
 !     write(*,*) 'aha'
@@ -610,8 +610,8 @@ endif
 80    continue
 
 !
-!===> Fill up the uncomputed elements using the symmetry properties of
-!     extinction and backscattering Mueller matrices.
+!===> fill up the uncomputed elements using the symmetry properties of
+!     extinction and backscattering mueller matrices.
 !
 
       extm(1,1,idr)= extm(1,1,idr)*wvln
@@ -641,7 +641,7 @@ endif
 
 
 !
-!===> Construct radar observables.
+!===> construct radar observables.
 !
       zcoef=2.0e18/((pi/wvln)**4*abs((epswtr-1)/(epswtr+2))**2)
 
@@ -650,7 +650,7 @@ endif
 
 
 
-End subroutine versuch
+end subroutine versuch
 
 
     subroutine rdrobservable(zcoef,zhhx,ahhx,zvvx, zhvx, zvhx,delahvx, kkdp, rhohvx)
@@ -659,8 +659,8 @@ End subroutine versuch
 
     implicit none
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 
@@ -688,20 +688,20 @@ End subroutine versuch
 
       data degrad /1.745329251994329e-2/
 
-!      data numcall /0/        ! Number of calls
+!      data numcall /0/        ! number of calls
 
 
-!===> Calculate polarimetric radar parameters
+!===> calculate polarimetric radar parameters
 !
       numcall = 0
       idr=1
 !
-!===> Backscattering related radar parameters:
+!===> backscattering related radar parameters:
 !
 !-->  linear polarization:
 !     zhh,zvv,zvh,zhv:effective reflectivity factor, mm^6/m^3
-!     zdr: differentail reflectivity, dB
-!     ldrh,ldrv: linear depolarization ratio, dB
+!     zdr: differentail reflectivity, db
+!     ldrh,ldrv: linear depolarization ratio, db
 !     dph,dpv: linear degree of polarization, %
 !     rhohv: zero-copolar cross-correlation coefficient, no unit
 !     delhv: backscattering differential phase shift, degree
@@ -724,11 +724,11 @@ End subroutine versuch
       zdr(idr)=fdb(zhh(idr)/zvv(idr))
 
 
-     ! if (zhh(idr) .lt. 1.E-6) then
+     ! if (zhh(idr) .lt. 1.e-6) then
      !    zdr(idr) = 0.
      ! endif
 
-     ! if (zvv(idr) .lt. 1.E-6) then
+     ! if (zvv(idr) .lt. 1.e-6) then
      !    zvv(idr) = 0.
      ! endif
 !      write(*,*) 'zhv, zhh'
@@ -769,7 +769,7 @@ End subroutine versuch
 
 !
 !-->  circular polarization:
-!     cdrl,cdrr: circular depolarization ratio, dB
+!     cdrl,cdrr: circular depolarization ratio, db
 !     corttl,orttr: apparent degree of orientation, no unit
 !     caldl,aldr: apparent orientation angle, degree
 !     cdpl,dpr: circular degree of polarization, %
@@ -795,7 +795,7 @@ End subroutine versuch
          +(bmum(4,1,idr)-bmum(4,4,idr))**2)/(bmum(1,1,idr)-bmum(1,4,idr))
 
 !
-!==> Forward scattering related radar parameters:
+!==> forward scattering related radar parameters:
 !    ahh,avv: specific attenuation, db/km
 !    kdp: specific differential phase, degree/km
 !
@@ -812,14 +812,14 @@ End subroutine versuch
 
       llldr = ldrh(1)
       rhohvx = rhohv(1)
-!      write(*,*) 'LDR', llldr
+!      write(*,*) 'ldr', llldr
 !*****************************************************************
 !    changed order of variables as shown below
       numcall = numcall + 1
-! WY 2007.08.30
+! wy 2007.08.30
       !if (numcall .eq. 1) zhhx=fdb(zhh(1))
       zhhx = zhh(1)
-! WY 2007.08.30
+! wy 2007.08.30
       zhvx = zhv(1)
       zvvx = zvv(1)
       zvhx = zvh(1)
@@ -827,13 +827,13 @@ End subroutine versuch
       ahhx = ahh(1)
       delahvx = delahv(1)
 !write(55,*) '   zhh   zdr   kdp    ahh       delahv'&
-!     &     //'    rhohv   delhv     LDR  rainrate'
-!    If you want to output rainrate then change water_gam to rain_gam
+!     &     //'    rhohv   delhv     ldr  rainrate'
+!    if you want to output rainrate then change water_gam to rain_gam
 !      write(55,44) fdb(zhh(1)),zdr(1),kdp(1),ahh(1),delahv(1),rhohv(1)&
 !     ,delhv(1),ldrh(1),rain_gam
 
 
- 44   format(f9.3,2f7.3,2(1x,E10.3),f8.4,3f8.2)
+ 44   format(f9.3,2f7.3,2(1x,e10.3),f8.4,3f8.2)
       return
       end subroutine
 
@@ -856,24 +856,24 @@ End subroutine versuch
     implicit none
 !
 !-----------------------------------------------------------------------
-!     This routine returns the canting parameters for use in the canting
+!     this routine returns the canting parameters for use in the canting
 !     angle distribution integration.
 !
-!-->  Orientation of a rotationally and equatorially symmetric particle
+!-->  orientation of a rotationally and equatorially symmetric particle
 !     is sufficiently defined by two canting angles, the polar (1st) and
-!     the azimuthal (2nd) angles of its symmetry or body Z-axis.
+!     the azimuthal (2nd) angles of its symmetry or body z-axis.
 !
-!     Array glcad stores the control parameters for each Canting Angle
-!     Distribution in the order of:  CAD type, lower limit, upper limit,
+!     array glcad stores the control parameters for each canting angle
+!     distribution in the order of:  cad type, lower limit, upper limit,
 !     number of quadrature points, mean value, standard deviation.
-!     Array glrdr stores the polar and azimuthal angles of radar beams.
+!     array glrdr stores the polar and azimuthal angles of radar beams.
 !
-!     Currently supported CADs and parameters (in degrees) used are:
-!     1=Uniform: cdtyp=1,calow,caupp,canum.
-!     2=Gaussian: cdtyp=2,calow,caupp,canum,caavr,cadev.
-!     3=Simple harmonic oscillator: cdtyp=3,calow,caupp,canum,caavr.
+!     currently supported cads and parameters (in degrees) used are:
+!     1=uniform: cdtyp=1,calow,caupp,canum.
+!     2=gaussian: cdtyp=2,calow,caupp,canum,caavr,cadev.
+!     3=simple harmonic oscillator: cdtyp=3,calow,caupp,canum,caavr.
 !
-!-->  The following parameters can be fine tuned to speed up the code,
+!-->  the following parameters can be fine tuned to speed up the code,
 !
 !     cdtyp (in hydxxxx routines): if any of the two cdtyp is turned off
 !           (=<0), orientation habit at the previous step will be used,
@@ -919,12 +919,12 @@ End subroutine versuch
 
 
 !
-!===> Not to skip this routine if orientation habit has been changed
+!===> not to skip this routine if orientation habit has been changed
 !
       if(isz.ne.1.and.(cdtyp(1).le.0.0)) goto 140
 !      print*,isz,glcad(1,1),glcad(2,1)
 !
-!===> Calculate Transformation matrices from spherical to Cartesian
+!===> calculate transformation matrices from spherical to cartesian
 !     coordinates for all radar directions measured in the lab frame,
 !
       cdpdt0=cdpdth*degrad
@@ -947,9 +947,9 @@ End subroutine versuch
       ncp(idr)=0
  10   continue
 !
-!===> Generate (sin and cos) canting angles and normalized probabilities
-!     at the nested Gaussian-Legendre quadrature grid points.
-!     Note: Include the sin factor of the solid angle in the probability
+!===> generate (sin and cos) canting angles and normalized probabilities
+!     at the nested gaussian-legendre quadrature grid points.
+!     note: include the sin factor of the solid angle in the probability
 !     of the first canting angle or the polar angle of the body z-axis.
 !
 
@@ -996,7 +996,7 @@ End subroutine versuch
  40   continue
       cdpmx=cdpmx/cdnrm
 !
-!===> Main loop over the two canting angles.  Skip current step if CAD
+!===> main loop over the two canting angles.  skip current step if cad
 !     probability factor is less than cdpskp of its maximum.
 !
       do 70 ica2=1,ccanum(2)
@@ -1015,10 +1015,10 @@ End subroutine versuch
       teu(1,2)=-teu(3,3)*teu(2,1)
       teu(3,2)= teu(1,3)*teu(2,1)
 !
-!===> Mapping the directions of interest from lab frame to body frame.
-!     compute the polar and azimuthal angles measureed in body FSA and
-!     the two transformation parameters from body FSA to lab FSA for the
-!     transverse E-components at each incidence direction.
+!===> mapping the directions of interest from lab frame to body frame.
+!     compute the polar and azimuthal angles measureed in body fsa and
+!     the two transformation parameters from body fsa to lab fsa for the
+!     transverse e-components at each incidence direction.
 !
       do 50 idr=1,ndr
 
@@ -1063,7 +1063,7 @@ End subroutine versuch
  60   continue
  70   continue
 !
-!===> Generate canting parameters
+!===> generate canting parameters
 !
 !-->  exact computation, as denoted by cdpdt0 =< 0
 !
@@ -1089,7 +1089,7 @@ End subroutine versuch
       goto 140
       endif
 !
-!===> Approximate computation.  first sort incidence angle in intervals.
+!===> approximate computation.  first sort incidence angle in intervals.
 !
       ncdp=pi/cdpdt0+1
 
@@ -1155,16 +1155,16 @@ End subroutine versuch
     implicit none
 
 
-    INCLUDE 'parameter.incf'
-    Include 'fields.incf'
+    include 'parameter.incf'
+    include 'fields.incf'
     include 'variablen.incf'
 
 
 !
 !-----------------------------------------------------------------------
-!     This routine integrates the extinction and backscattering Mueller
+!     this routine integrates the extinction and backscattering mueller
 !     matrice over the normalized particle orientation distributions.
-!     Only independent elements are processed.
+!     only independent elements are processed.
 !-----------------------------------------------------------------------
 !
       character sctmodel*3
@@ -1181,7 +1181,7 @@ End subroutine versuch
       real sem(7)
     include 'constants.incf'
 !
-!===> Initialize array stks.
+!===> initialize array stks.
 !
 !        write(*,*) 'hurra'
        idr=1
@@ -1207,11 +1207,11 @@ End subroutine versuch
 !stop
 !      print*,cc,ab,'prob'
 !
-!===> Calculate scattering amplitudes in body FSA, exp(+jwt) convention,
+!===> calculate scattering amplitudes in body fsa, exp(+jwt) convention,
 !     and perform coordinate transformation, and calculate expectation.
-!     Note: the order of array order bstks: svvsvv,shvshv,svhsvh,shhshh,
-!     ReImsvvshv,ReImsvvsvh,ReImsvvshh,ReImshvsvh,ReImshvshh,ReImsvhshh;
-!     and the order of array fstks is: ReImsvv,ReImshv,ReImsvh,ReImshh.
+!     note: the order of array order bstks: svvsvv,shvshv,svhsvh,shhshh,
+!     reimsvvshv,reimsvvsvh,reimsvvshh,reimshvsvh,reimshvshh,reimsvhshh;
+!     and the order of array fstks is: reimsvv,reimshv,reimsvh,reimshh.
 !
 
 

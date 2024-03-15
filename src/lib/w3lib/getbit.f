@@ -1,87 +1,87 @@
-      SUBROUTINE GETBIT(IBM,IBS,IDS,LEN,MG,G,GROUND,GMIN,GMAX,NBIT)
-C$$$  SUBPROGRAM DOCUMENTATION BLOCK
-C
-C SUBPROGRAM:    GETBIT      COMPUTE NUMBER OF BITS AND ROUND FIELD.
-C   PRGMMR: IREDELL          ORG: W/NMC23    DATE: 92-10-31
-C
-C ABSTRACT: THE NUMBER OF BITS REQUIRED TO PACK A GIVEN FIELD
-C   FOR PARTICULAR BINARY AND DECIMAL SCALINGS IS COMPUTED.
-C   THE FIELD IS ROUNDED OFF TO THE DECIMAL SCALING FOR PACKING.
-C   THE MINIMUM AND MAXIMUM ROUNDED FIELD VALUES ARE ALSO RETURNED.
-C   GRIB BITMAP MASKING FOR VALID DATA IS OPTIONALLY USED.
-C
-C PROGRAM HISTORY LOG:
-C   96-09-16  IREDELL
-C
-C USAGE:    CALL GTBITS(IBM,IBS,IDS,LEN,MG,G,GMIN,GMAX,NBIT)
-C   INPUT ARGUMENT LIST:
-C     IBM      - INTEGER BITMAP FLAG (=0 FOR NO BITMAP)
-C     IBS      - INTEGER BINARY SCALING
-C                (E.G. IBS=3 TO ROUND FIELD TO NEAREST EIGHTH VALUE)
-C     IDS      - INTEGER DECIMAL SCALING
-C                (E.G. IDS=3 TO ROUND FIELD TO NEAREST MILLI-VALUE)
-C                (NOTE THAT IDS AND IBS CAN BOTH BE NONZERO,
-C                 E.G. IDS=1 AND IBS=1 ROUNDS TO THE NEAREST TWENTIETH)
-C     LEN      - INTEGER LENGTH OF THE FIELD AND BITMAP
-C     MG       - INTEGER (LEN) BITMAP IF IBM=1 (0 TO SKIP, 1 TO KEEP)
-C     G        - REAL (LEN) FIELD
-C
-C   OUTPUT ARGUMENT LIST:
-C     GROUND   - REAL (LEN) FIELD ROUNDED TO DECIMAL AND BINARY SCALING
-C                (SET TO ZERO WHERE BITMAP IS 0 IF IBM=1)
-C     GMIN     - REAL MINIMUM VALID ROUNDED FIELD VALUE
-C     GMAX     - REAL MAXIMUM VALID ROUNDED FIELD VALUE
-C     NBIT     - INTEGER NUMBER OF BITS TO PACK
-C
-C ATTRIBUTES:
-C   LANGUAGE: CRAY FORTRAN
-C
-C$$$
-      DIMENSION MG(LEN),G(LEN),GROUND(LEN)
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  ROUND FIELD AND DETERMINE EXTREMES WHERE BITMAP IS ON
-      S=2.**IBS*10.**IDS
-      IF(IBM.EQ.0) THEN
-        GROUND(1)=NINT(G(1)*S)/S
-        GMAX=GROUND(1)
-        GMIN=GROUND(1)
-        DO I=2,LEN
-          GROUND(I)=NINT(G(I)*S)/S
-          GMAX=MAX(GMAX,GROUND(I))
-          GMIN=MIN(GMIN,GROUND(I))
-        ENDDO
-      ELSE
-        I1=1
-        DOWHILE(I1.LE.LEN.AND.MG(I1).EQ.0)
-          I1=I1+1
-        ENDDO
-        IF(I1.LE.LEN) THEN
-          DO I=1,I1-1
-            GROUND(I)=0.
-          ENDDO
-          GROUND(I1)=NINT(G(I1)*S)/S
-          GMAX=GROUND(I1)
-          GMIN=GROUND(I1)
-          DO I=I1+1,LEN
-            IF(MG(I).NE.0) THEN
-              GROUND(I)=NINT(G(I)*S)/S
-              GMAX=MAX(GMAX,GROUND(I))
-              GMIN=MIN(GMIN,GROUND(I))
-            ELSE
-              GROUND(I)=0.
-            ENDIF
-          ENDDO
-        ELSE
-          DO I=1,LEN
-            GROUND(I)=0.
-          ENDDO
-          GMAX=0.
-          GMIN=0.
-        ENDIF
-      ENDIF
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-C  COMPUTE NUMBER OF BITS
-      NBIT=LOG((GMAX-GMIN)*S+0.9)/LOG(2.)+1.
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      RETURN
-      END
+      subroutine getbit(ibm,ibs,ids,len,mg,g,ground,gmin,gmax,nbit)
+c$$$  subprogram documentation block
+c
+c subprogram:    getbit      compute number of bits and round field.
+c   prgmmr: iredell          org: w/nmc23    date: 92-10-31
+c
+c abstract: the number of bits required to pack a given field
+c   for particular binary and decimal scalings is computed.
+c   the field is rounded off to the decimal scaling for packing.
+c   the minimum and maximum rounded field values are also returned.
+c   grib bitmap masking for valid data is optionally used.
+c
+c program history log:
+c   96-09-16  iredell
+c
+c usage:    call gtbits(ibm,ibs,ids,len,mg,g,gmin,gmax,nbit)
+c   input argument list:
+c     ibm      - integer bitmap flag (=0 for no bitmap)
+c     ibs      - integer binary scaling
+c                (e.g. ibs=3 to round field to nearest eighth value)
+c     ids      - integer decimal scaling
+c                (e.g. ids=3 to round field to nearest milli-value)
+c                (note that ids and ibs can both be nonzero,
+c                 e.g. ids=1 and ibs=1 rounds to the nearest twentieth)
+c     len      - integer length of the field and bitmap
+c     mg       - integer (len) bitmap if ibm=1 (0 to skip, 1 to keep)
+c     g        - real (len) field
+c
+c   output argument list:
+c     ground   - real (len) field rounded to decimal and binary scaling
+c                (set to zero where bitmap is 0 if ibm=1)
+c     gmin     - real minimum valid rounded field value
+c     gmax     - real maximum valid rounded field value
+c     nbit     - integer number of bits to pack
+c
+c attributes:
+c   language: cray fortran
+c
+c$$$
+      dimension mg(len),g(len),ground(len)
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  round field and determine extremes where bitmap is on
+      s=2.**ibs*10.**ids
+      if(ibm.eq.0) then
+        ground(1)=nint(g(1)*s)/s
+        gmax=ground(1)
+        gmin=ground(1)
+        do i=2,len
+          ground(i)=nint(g(i)*s)/s
+          gmax=max(gmax,ground(i))
+          gmin=min(gmin,ground(i))
+        enddo
+      else
+        i1=1
+        dowhile(i1.le.len.and.mg(i1).eq.0)
+          i1=i1+1
+        enddo
+        if(i1.le.len) then
+          do i=1,i1-1
+            ground(i)=0.
+          enddo
+          ground(i1)=nint(g(i1)*s)/s
+          gmax=ground(i1)
+          gmin=ground(i1)
+          do i=i1+1,len
+            if(mg(i).ne.0) then
+              ground(i)=nint(g(i)*s)/s
+              gmax=max(gmax,ground(i))
+              gmin=min(gmin,ground(i))
+            else
+              ground(i)=0.
+            endif
+          enddo
+        else
+          do i=1,len
+            ground(i)=0.
+          enddo
+          gmax=0.
+          gmin=0.
+        endif
+      endif
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c  compute number of bits
+      nbit=log((gmax-gmin)*s+0.9)/log(2.)+1.
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      return
+      end

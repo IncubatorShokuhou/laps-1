@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -30,57 +30,57 @@ cdis
      1   kmax,kdim,var,lvl,lvl_coord,units,comment,n_levels,
      1   cdl_levels,data,istatus)
 
-C**********************************************************************
-C
-C      This file contains the following FORTRAN subroutines:
-C            write_laps_data
-C
-C      The write_laps_data subroutine reads the following FORTRAN
-C      subroutines from the readlapsdata.f file:
-C            cvt_fname_v3
-C
-C      The write_laps_data subroutine reads the following C subroutines
-C      from the rwl_v3.c file:
-C            write_cdf_v3
-C
-C**********************************************************************
-C
-C      Subroutine WRITE_LAPS_LVLS
-C
-C      Author:    John Snook
-C      Modified:  Copied writelapsdata.f code and  6/98 Linda Wharton
-C                   added parameter cdl_levels to
-C                   make the program independent of
-C                   nest7grid.parms and static.nest7grid
-C
-C      Writes data in arrays DATA and COMMENT to the netCDF file name
-C      specified by I4TIME, DIR and EXT.  The data in VAR, LVL, LVL_COORD,
-C      IMAX, JMAX, KMAX, KDIM and UNITS are stored into the netCDF file
-C      when it is created.  ISTATUS is returned.
-C
-C**********************************************************************
-C
+c**********************************************************************
+c
+c      this file contains the following fortran subroutines:
+c            write_laps_data
+c
+c      the write_laps_data subroutine reads the following fortran
+c      subroutines from the readlapsdata.f file:
+c            cvt_fname_v3
+c
+c      the write_laps_data subroutine reads the following c subroutines
+c      from the rwl_v3.c file:
+c            write_cdf_v3
+c
+c**********************************************************************
+c
+c      subroutine write_laps_lvls
+c
+c      author:    john snook
+c      modified:  copied writelapsdata.f code and  6/98 linda wharton
+c                   added parameter cdl_levels to
+c                   make the program independent of
+c                   nest7grid.parms and static.nest7grid
+c
+c      writes data in arrays data and comment to the netcdf file name
+c      specified by i4time, dir and ext.  the data in var, lvl, lvl_coord,
+c      imax, jmax, kmax, kdim and units are stored into the netcdf file
+c      when it is created.  istatus is returned.
+c
+c**********************************************************************
+c
         implicit  none
-C
-      integer      reftime,              !INPUT I4time of model run 
-     1               valtime,              !INPUT I4time data is valid
-     1               imax,jmax,kmax,       !INPUT # cols, # rows, # fields
-     1               kdim,                 !INPUT K dimension of DATA array
-     1               lvl(kdim),            !INPUT Level of each field 
-     1               istatus               !OUTPUT
+c
+      integer      reftime,              !input i4time of model run 
+     1               valtime,              !input i4time data is valid
+     1               imax,jmax,kmax,       !input # cols, # rows, # fields
+     1               kdim,                 !input k dimension of data array
+     1               lvl(kdim),            !input level of each field 
+     1               istatus               !output
 
-      real         data(imax,jmax,kdim)  !INPUT Raw data to be written
-      character*(*)  datadir               !INPUT Directory to be written to
-      character*(*)  cdldir                !INPUT Directory containing cdls
-      character*(*)  ext                   !INPUT File name ext
-      character*(*)  var(kdim)             !INPUT 3 letter ID of each field
-      character*(*)  lvl_coord(kdim)       !INPUT Vertical coordinate of fields
-      character*(*)  units(kdim)           !INPUT units of each field
-      character*(*)  comment(kdim)         !INPUT Comments for each field
-C
-      integer      flag,                 !Print flag (1 = off)
-     1               i_reftime,            !UNIX time of data
-     1               i_valtime,            !UNIX time of data
+      real         data(imax,jmax,kdim)  !input raw data to be written
+      character*(*)  datadir               !input directory to be written to
+      character*(*)  cdldir                !input directory containing cdls
+      character*(*)  ext                   !input file name ext
+      character*(*)  var(kdim)             !input 3 letter id of each field
+      character*(*)  lvl_coord(kdim)       !input vertical coordinate of fields
+      character*(*)  units(kdim)           !input units of each field
+      character*(*)  comment(kdim)         !input comments for each field
+c
+      integer      flag,                 !print flag (1 = off)
+     1               i_reftime,            !unix time of data
+     1               i_valtime,            !unix time of data
      1               error(2),
      1               i,j,n7g_nx, n7g_ny,
      1               lgfc,
@@ -95,13 +95,13 @@ C
      1               stat_len,
      1               max_levels,
      1               n_levels,
-     1               called_from,          !0=FORTRAN, 1=C
+     1               called_from,          !0=fortran, 1=c
      1               append                !0=no, 1=yes
-C
+c
       parameter (max_levels=100)
       real         pr(max_levels),       !pressures read from get_pres_1d
      1               cdl_levels(n_levels)
-C
+c
       character*5    fcst_hh_mm
       character*9    gtime
       character*150 file_name
@@ -111,24 +111,24 @@ C
       character*40   v_g
       character*256  syscmd
       logical outfile_defined
-C
+c
       common         /prt/flag
-C
+c
       include 'grid_fname.cmn'
-C
-C-------------------------------------------------------------------------------
-C
+c
+c-------------------------------------------------------------------------------
+c
       error(1)=1
       error(2)=0
-C 
-C ****  Check if ext is fua or fsf or pbl
+c 
+c ****  check if ext is fua or fsf or pbl
       if ((ext .eq. 'fua') .or. (ext .eq. 'fsf') .or.
      1 (ext .eq. 'pbl'))  then
-C ****  Skip get_config 
+c ****  skip get_config 
       else
-C
-C ****  call get_config to read nest7grid.parms
-C
+c
+c ****  call get_config to read nest7grid.parms
+c
         call get_config(istatus)
 
         call s_len(grid_fnam_common,lgfc)
@@ -136,14 +136,14 @@ C
           laps_dom_file = grid_fnam_common(1:lgfc)
         else
           laps_dom_file = grid_fnam_common
-          write(6,*) 'Domain name not retrieved by get_config'
-          write(6,*) 'Navigation info will not be written to',
+          write(6,*) 'domain name not retrieved by get_config'
+          write(6,*) 'navigation info will not be written to',
      1' output file'
         endif
 
         call get_laps_dimensions(n_levels,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting vertical domain dimension'
+           write (6,*) 'error getting vertical domain dimension'
            return
         endif
 
@@ -155,26 +155,26 @@ C
 
         call get_vertical_grid(v_g,istatus)
         if (istatus .ne. 1) then
-           write (6,*) 'Error getting vertical grid'
+           write (6,*) 'error getting vertical grid'
            return
         endif
 
-	if (v_g .ne. 'PRESSURE') goto 920
+	if (v_g .ne. 'pressure') goto 920
 
         call get_pres_1d(valtime,n_levels,pr,istatus)
         do j = 1,n_levels
           pr(j)=pr(j)/100.
         enddo
-C
-C ****  Various checks on input data.
-C
+c
+c ****  various checks on input data.
+c
         if (kmax .gt. kdim) then
           if (flag .ne. 1)
-     1write (6,*) 'Illegal K dimension in DATA array...write aborted.'
+     1write (6,*) 'illegal k dimension in data array...write aborted.'
           istatus=error(2)
           return
         endif
-C
+c
         if (imax .ne. n7g_nx) then
           if (flag .ne. 1)
      1write (6,*) 
@@ -182,7 +182,7 @@ C
           istatus=error(2)
           return
         endif
-C
+c
         if (jmax .ne. n7g_ny) then
           if (flag .ne. 1)
      1write (6,*) 
@@ -192,29 +192,29 @@ C
         endif
 
       endif
-C
-C ****  Get cdl_path***NOW PASSED IN AS CDLDIR 
+c
+c ****  get cdl_path***now passed in as cdldir 
 
-C      call get_directory('cdl',cdl_path, cdl_path_len)
+c      call get_directory('cdl',cdl_path, cdl_path_len)
        call s_len(cdldir,cdl_path_len)
-C ****  Get static_path
-C
-C      call get_directory('static',static_path, stat_len)
-C
-C ****  Specify file name
-C
+c ****  get static_path
+c
+c      call get_directory('static',static_path, stat_len)
+c
+c ****  specify file name
+c
       call make_fnam_lp(reftime,gtime,istatus)
       if (istatus .ne. 1) then
         write (6,*)
-     1'Error converting i4time to file name...write aborted.'
+     1'error converting i4time to file name...write aborted.'
         istatus=error(2)
         return
       endif
 
       call make_fcst_time(valtime,reftime,fcst_hh_mm,istatus)
-C
-C ****  Create ascii time variables.
-C
+c
+c ****  create ascii time variables.
+c
       call cv_i4tim_asc_lp(valtime,asctime,istatus)
 
       call s_len(ext, ext_len)
@@ -223,7 +223,7 @@ C
      1                  file_name,fn_length,istatus)
       if (istatus .eq. error(2)) goto 930
 
-      called_from = 0    !called from FORTRAN
+      called_from = 0    !called from fortran
       append = 0         ! only one analysis time allowed per file
 
       var_len = len(var(1))
@@ -235,7 +235,7 @@ C
       i_valtime = valtime - 315619200
 
       if(.true.)then 
-!         Call ncgen here since it may not work from the C code
+!         call ncgen here since it may not work from the c code
           if(imax*jmax*kmax .gt. 50000000)then
             syscmd = 'ncgen -v 2 -x -o '//trim(file_name)
      1               //' '//trim(cdldir)//trim(ext)//'.cdl'
@@ -243,23 +243,23 @@ C
             syscmd = 'ncgen -x -o '//trim(file_name)
      1               //' '//trim(cdldir)//trim(ext)//'.cdl'
           endif
-          write(6,*)' FORTRAN syscmd = ',trim(syscmd)
+          write(6,*)' fortran syscmd = ',trim(syscmd)
           call system(trim(syscmd))
-          inquire(FILE=trim(file_name),EXIST=outfile_defined)
+          inquire(file=trim(file_name),exist=outfile_defined)
           if(outfile_defined .eqv. .false.)then
-              write(6,*)' ERROR: output file does not exist'
+              write(6,*)' error: output file does not exist'
               stop
           else
               write(6,*)
-     1       ' output file successfully created via FORTRAN system call'
+     1       ' output file successfully created via fortran system call'
           endif
       else
-          write(6,*)' use C code to run ncgen'
+          write(6,*)' use c code to run ncgen'
       endif
-C
-C **** write out netCDF file
-C
-      write(6,*)' Writing cdf file: ',file_name(1:fn_length)
+c
+c **** write out netcdf file
+c
+      write(6,*)' writing cdf file: ',file_name(1:fn_length)
       call write_cdf_v3 (file_name,ext,var,comment,asctime,cdldir, 
      1                   static_path,laps_dom_file, lgfc, fn_length,
      1                   ext_len,var_len, 
@@ -267,71 +267,71 @@ C
      1                   i_reftime, i_valtime,imax, jmax, kmax, kdim, 
      1                   lvl, data, pr, n_levels, cdl_levels,
      1                   called_from, append, istatus)
-C
+c
       if (istatus .gt. 0) goto 980
-      IF (istatus .eq. -2) goto 940
-      IF (istatus .eq. -3) goto 950
-      IF (istatus .eq. -4) goto 960
-      IF (istatus .eq. -5) goto 970
-      IF (istatus .eq. -6) goto 990
-C
-C ****  Return normally.
-C
-        ISTATUS=ERROR(1)
-999     RETURN
-C
-C ****  Error trapping.
-C
-920     IF (FLAG .NE. 1) THEN
-          write(6,*) 'write_laps_lvls ABORTED!'
-          write(6,*) ' LAPS will currently only work on a PRESSURE'
+      if (istatus .eq. -2) goto 940
+      if (istatus .eq. -3) goto 950
+      if (istatus .eq. -4) goto 960
+      if (istatus .eq. -5) goto 970
+      if (istatus .eq. -6) goto 990
+c
+c ****  return normally.
+c
+        istatus=error(1)
+999     return
+c
+c ****  error trapping.
+c
+920     if (flag .ne. 1) then
+          write(6,*) 'write_laps_lvls aborted!'
+          write(6,*) ' laps will currently only work on a pressure'
      1,' vertical grid'
-          write(6,*) ' Make sure VERTICAL_GRID is set to PRESSURE'
+          write(6,*) ' make sure vertical_grid is set to pressure'
      1,' in nest7grid.parms'
-        ENDIF
-        ISTATUS=ERROR(2)
-        GOTO 999
+        endif
+        istatus=error(2)
+        goto 999
 
 930     if (flag .ne. 1)
      1    write (6,*) 'file_name variable too short...write aborted.'
         istatus=error(2)
         goto 999
-C
-940     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error opening file to be written to...write abort
+c
+940     if (flag .ne. 1)
+     1    write (6,*) 'error opening file to be written to...write abort
      1ed.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-950     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error in imax,jmax,or n_levels..write aborted'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-960     IF (FLAG .NE. 1)
-     1    write (6,*) 'Error writing data to file...write aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-970     IF (FLAG .NE. 1)
+        istatus=error(2)
+        goto 999
+c
+950     if (flag .ne. 1)
+     1    write (6,*) 'error in imax,jmax,or n_levels..write aborted'
+        istatus=error(2)
+        goto 999
+c
+960     if (flag .ne. 1)
+     1    write (6,*) 'error writing data to file...write aborted.'
+        istatus=error(2)
+        goto 999
+c
+970     if (flag .ne. 1)
      1    write (6,*) 
-     1 'Error writing header info into file...write aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-980     IF (FLAG .NE. 1)
+     1 'error writing header info into file...write aborted.'
+        istatus=error(2)
+        goto 999
+c
+980     if (flag .ne. 1)
      1    write (6,*) 
-     1 'Some grids not written....could not convert LAPS variables.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-990     IF (FLAG .NE. 1)
+     1 'some grids not written....could not convert laps variables.'
+        istatus=error(2)
+        goto 999
+c
+990     if (flag .ne. 1)
      1    write (6,*) 
-     1 'File already exists for analysis time...write aborted.'
-        ISTATUS=ERROR(2)
-        GOTO 999
-C
-        END
+     1 'file already exists for analysis time...write aborted.'
+        istatus=error(2)
+        goto 999
+c
+        end
 
-C##########################################################################
+c##########################################################################
 

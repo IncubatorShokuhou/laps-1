@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -49,26 +49,26 @@ c
       include 'satellite_dims_lvd.inc'
       include 'satellite_common_lvd.inc'
 c
-c ======================== START ==============================
-c Acquiring LAPS latitude and longitude arrays.
+c ======================== start ==============================
+c acquiring laps latitude and longitude arrays.
 c -------------------------------------------------------------------
       call find_domain_name(cgrid_fname,istatus)
       if(istatus.ne.1)then
-         print*,'Error returned: find_domain_name'
+         print*,'error returned: find_domain_name'
          goto 900
       endif
-      write(6,*)'genlvdlut_sub: Get lat/lon grid'
+      write(6,*)'genlvdlut_sub: get lat/lon grid'
       call get_laps_domain(nx_l,ny_l,cgrid_fname,lat,lon,topo,istatus)
-      if(istatus.ne.1)Then
-         write(6,*)'Error - Unable to get lat/lon data'
+      if(istatus.ne.1)then
+         write(6,*)'error - unable to get lat/lon data'
          goto 900 
       end if
 c-----------------------------------------------------------------
 c
-c Detemine which look-up-tables need generating based upon the specific
-c lvd setup defined in satellite_master.nl. Specifically the namelist values
+c detemine which look-up-tables need generating based upon the specific
+c lvd setup defined in satellite_master.nl. specifically the namelist values
 c isats, itypes, and ichannels indicate which sats, types, and channels within
-c the master namelist get processed. Thus it, js, and lc are indices to these
+c the master namelist get processed. thus it, js, and lc are indices to these
 c values.
 c
       istatus = -1
@@ -90,17 +90,17 @@ c
 
              write(6,59)c_sat_id(js),c_sat_types(it,js),
      &c_channel_types(lc,it,js)
-59          format(1x,'Generating lookup table: ',a6,"/",a3,"/",a3)
+59          format(1x,'generating lookup table: ',a6,"/",a3,"/",a3)
 
              call gen_lut_lambert(js,it,lc,nx_l,ny_l,
      &                     lat,lon,istatus)
 
              if(istatus.eq.1)then
-              write(6,*)'LUT generated'
+              write(6,*)'lut generated'
              elseif(istatus.eq.0)then
-              write(*,*)'ir LUT already generated'
+              write(*,*)'ir lut already generated'
              else
-              write(6,*)'Error! LUT not generated ',
+              write(6,*)'error! lut not generated ',
      &c_sat_id(js),'/',c_sat_types(it,js),'/',c_channel_types(lc,it,js)
              endif
 
@@ -123,11 +123,11 @@ c
              call gen_gvarimage_lut(js,it,lc,nx_l,ny_l,lat,lon,
      &istatus)
              if(istatus.eq.1)then
-              write(6,*)'LUT generated'
+              write(6,*)'lut generated'
              elseif(istatus.eq.0)then
-              write(*,*)'ir LUT already generated'
+              write(*,*)'ir lut already generated'
              else
-              write(6,*)'LUT not generated ',c_channel_types(lc,it,js)
+              write(6,*)'lut not generated ',c_channel_types(lc,it,js)
              endif
             else
              write(6,49)c_sat_id(js),c_sat_types(it,js),
@@ -139,7 +139,7 @@ c
 
 c         elseif(c_sat_types(it,js).eq.'asc')then
 c
-c          write(6,*)'Generate LUTs for ascii data'
+c          write(6,*)'generate luts for ascii data'
 
 c           do lc=1,maxchannel
 c              lc=ichannels(lc,it,js)
@@ -151,17 +151,17 @@ c    &csatid,c_sat_types(i,j),c_channel_types(lch,i,j),
 c    &nelem,nlines,nx_l,ny_l,lat,lon,istatus)
 
 c              if(istatus.eq.1)then
-c                 write(6,*)'LUT generated'
+c                 write(6,*)'lut generated'
 c              else
-c                 write(6,*)'LUT not generated ',c_channel_types(lch,i)
+c                 write(6,*)'lut not generated ',c_channel_types(lch,i)
 c              endif
 
 c           enddo
 
           elseif(c_sat_types(it,js).ne.'     ')then
 
-           write(6,*)'Unknown satellite data type! '
-           write(6,*)'Check static/satellite_master.nl'
+           write(6,*)'unknown satellite data type! '
+           write(6,*)'check static/satellite_master.nl'
 
           endif
 

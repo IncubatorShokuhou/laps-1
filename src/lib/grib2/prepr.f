@@ -1,320 +1,320 @@
-      SUBROUTINE PREPR(KFILDO,A,IA,IB,NX,NY,NVAL,ICLEAN,IBITMAP,
-     1                 IS5,NS5,IS6,NS6,IS7,NS7,ID,IE,MINA,
-     2                 XMINA,MISSP,MISSS,XMISSP,XMISSS,MINPK,
-     3                 IPKOPT,IER,JER,NDJER,KJER,*)
-C
-C        MARCH    2000   GLAHN   CALLED BY PK_GRIB2
-C        MAY      2000   LAWRENCE MODIFIED ROUTINE TO REFLECT
-C                                THE LATEST WMO GRIB2 CHANGES.
-C                                THE MOST SIGNIFICANT CHANGE
-C                                IS THAT THE VALUES ARE FIRST
-C                                SCALED BY THE DECIMAL SCALE
-C                                FACTOR, THEN THE MINIMUM IS
-C                                TAKEN FROM THE DATA FIELD, AND
-C                                THEN THE VALUES ARE MULTIPLIED
-C                                BY THE BINARY SCALE FACTOR.
-C        JANUARY  2001   GLAHN   WRITE(KFILDO) MADE /D; COMMENTS
-C        JANUARY  2001   GLAHN   COMMENT FOLLOWING CALL TO PACK_OPT;
-C                                ELIMINATED IS5( ) AND NS5 IN CALL TO
-C                                PREP_INT AND PREP_FLT
-C        JANUARY  2001   GLAHN/LAWRENCE REMOVED UNUSED MISS AND XMISS;
-C                                ELIMINATED IS6( ) AND NS6 FROM CALL
-C                                TO PACK_OPT
-C        NOVEMBER 2001   GLAHN   ADDED JER, NDJER, AND KJER TO CALL
-C                                TO CHECK_INT, CHECK_FLT, INT_MAP,
-C                                AND FLT_MAP
-C        DECEMBER 2001   GLAHN   ADDED KFILDO TO CALL TO CHECK_INT
-C                                AND CHECK_FLT
-C        DECEMBER 2001   GLAHN   MOVED TEST ON IS5(10) = 0, 2, OR 3 
-C                                FROM PK_SECT5.
-C        JANUARY  2002   GLAHN   ADDED IER AND *900 TO CALLS TO 
-C                                PREP_INT AND PREP_FLT; CHANGED
-C                                NVAL COMMENT FROM INPUT TO OUTPUT
-C        FEBRUARY 2002   GLAHN   COMMENTS
-C
-C        PURPOSE
-C            FINDS THE REFERENCE VALUE AND SUBTRACTS IT FROM THE
-C            DATA VALUES.  EITHER FLOATING OR INTEGER DATA ARE
-C            HANDLED, AND WHEN THERE ARE OR AREN'T MISSING VALUES.
-C            A BIT MAP IS GENERATED IF NECESSARY, AND VALUES ARE
-C            INSERTED INTO THE GRID FOR COMPLEX AND SPATIAL
-C            DIFFERENCING.  OPERATIONS WITHIN LOOPS ARE KEPT
-C            TO A RELATIVE MINIMUM AT THE EXPENSE OF MORE CODE
-C            FOR EFFICIENCY.  SECOND ORDER DIFFERENCING IS NOT
-C            DONE WHEN THERE ARE SECONDARY MISSING VALUES PRESENT.
-C
-C            ALL COMPUTATIONS ARE DONE ON INTEGER DATA UNTIL
-C            THEY ARE SCALED WHEN INCOMING DATA ARE INTEGER IN IA( ),
-C            THEN PUT BACK IN IA( ).
-C            ALL COMPUTATIONS ARE DONE ON FLOATING POINT DATA
-C            WHEN INCOMING DATA ARE FLOATING POINT IN A( ), THEN.
-C            PUT IN IA( ).
-C
-C        DATA SET USE
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT)
-C
-C        VARIABLES
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE.  (INPUT)
-C                A(K) = WHEN IS5(21) = 0, A( ) CONTAINS THE DATA
-C                       (K=1,NVAL).  (INPUT)
-C               IA(K) = WHEN IS5(21) = 1, IA( ) CONTAINS THE DATA
-C                       (K=1,NVAL).  THE VALUES TO PACK ARE IN
-C                       IA( ) ON OUTPUT.  (INPUT/OUTPUT)
-C               IB(K) = THE BIT MAP WHEN ONE IS USED.  (INPUT/OUTPUT)
-C                       IT CAN BE INPUT OR IN CAN BE CALCULATED IF
-C                       THE SIMPLE METHOD IS USED (K=1,NXY).
-C                       COMPLEX AND SPATIAL DIFFERENCING DO NOT
-C                       USE A BIT MAP, BUT WILL ACCEPT ONE AND INSERT
-C                       THE MISSING VALUES.
-C               NX,NY = DIMENSIONS OF THE GRID.  NX*NY IS THE DIMENSION
-C                       OF A( ), IA( ), AND IB( ).  (INPUT)
-C                NVAL = THE NUMBER OF VALUES IN A( ) OR IA( ).  (OUTPUT)
-C              ICLEAN = 1 WHEN THERE ARE NO MISSING VALUES IN A( ) OR
-C                         IA( ).
-C                       0 OTHERWISE.
-C                       (INPUT/OUTPUT)
-C             IBITMAP = 1 WHEN THERE IS A BITMAP IN IB( ).
-C                       0 OTHERWISE.
-C                       (INPUT)
-C              IS5(J) = THE VALUES ASSOCIATED WITH SECTION 5, KEYED
-C                       TO THE OCTET NUMBER (J=1,NS5).  THE ELEMENTS
-C                       USED IN THIS ROUTINE ARE:
-C                       IS5(10), TEMPLATE NUMBER:
-C                         0 = SIMPLE
-C                         1 = NOT SUPPORTED
-C                         2 = COMPLEX
-C                         3 = SPATIAL DIFFERENCING
-C                       IS5(21), TYPE OF ORIGINAL FIELD:
-C                         0 = FLOATING POINT
-C                         1 = INTEGER
-C                 NS5 = THE DIMENSION OF IS5( ).  (INPUT)
-C              IS6(J) = THE VALUES ASSOCIATED WITH SECTION 6, KEYED
-C                       TO THE OCTET NUMBER.  THE ELEMENTS USED
-C                       IN THIS ROUTINE ARE:
-C                       IS6(6) = BIT MAP INDICATOR:
-C                       0 = BIT MAP INCLUDED
-C                       255 = NO BIT MAP
-C                       IS6(6) IS MODIFIED ONLY AS NEEDED.  A VALUE
-C                       BETWEEN 1 AND 254 IS NOT DISTURBED
-C                       (J=1,NS6). (INPUT/OUTPUT)
-C                 NS6 = THE DIMENSION OF IS6( ).  (INPUT)
-C                  ID = THE DECIMAL SCALING FACTOR.  (INPUT)
-C                  IE = THE BINARY SCALING FACTOR.  (INPUT)
-C                MINA = THE FIELD MINIMUM VALUE WHEN THE ORIGINAL DATA
-C                       ARE INTEGER.  (OUTPUT)
-C               XMINA = THE FIELD MINIMUM VALUE WHEN THE ORIGINAL DATA
-C                       ARE FLOATING POINT.  (OUTPUT)
-C               MISSP = WHEN MISSING POINTS CAN BE PRESENT IN THE DATA,
-C                       THEY WILL HAVE THE VALUE MISSP OR MISSS WHEN
-C                       THE DATA ARE INTEGER.  MISSP IS THE PRIMARY
-C                       MISSING VALUE WHEN THE ORIGINAL DATA ARE
-C                       INTEGER.  (INPUT)
-C               MISSS = SECONDARY MISSING VALUE INDICATOR WHEN THE DATA
-C                       ARE INTEGER.  (INPUT)
-C              XMISSP = WHEN MISSING POINTS CAN BE PRESENT IN THE DATA,
-C                       THEY WILL HAVE THE VALUE XMISSP OR XMISSS WHEN
-C                       THE DATA ARE FLOATING POINT.  XMISSP
-C                       IS THE PRIMARY MISSING VALUE.  (INPUT)
-C              XMISSS = SECONDARY MISSING VALUE INDICATOR WHEN THE DATA
-C                       ARE FLOATING POINT.  (INPUT)
-C               MINPK = INCREMENT IN WHICH RANGES WILL BE COMPUTED.
-C                       (INPUT)
-C              IPKOPT = PACKING INDICATOR:
-C                       0 = ERROR, DON'T PACK
-C                       1 = PACK IA( ), SIMPLE
-C                       2 = PACK IA( ) AND IB( ), SIMPLE
-C                       3 = PACK COMPLEX OR SPATIAL DIFFERENCING
-C                       4 = PACK COMPLEX.
-C                       (OUTPUT)
-C                 IER = RETURN STATUS.  (OUTPUT)
-C                       0 = GOOD ERROR RETURN.
-C                     902 = THERE ARE NO "GOOD" VALUES IN THE GRID
-C                           AND THE BIT-MAP INDICATES THAT.
-C                     903 = THERE ARE NO VALUES IN THE GRID AND THE
-C                           BIT-MAP INDICATES THAT THERE SHOULD BE.
-C                     904 = THERE ARE NO VALUES IN THE GRID, AND THERE
-C                           IS NO BIT-MAP.
-C                     905 = INVALID DATA TYPE INDICATED IN
-C                           IS5(21).
-C                     906 = NO MISSING VALUES IN THE ARRAY, BIT-MAP
-C                           PROVIDED, SIMPLE, AND NVAL=NXY. (WARNING)
-C                     907 = NO MISSING VALUES IN THE ARRAY, NO
-C                           BIT-MAP PROVIDED, AND NVAL NE NXY WHILE
-C                           PACKING SIMPLE.
-C                     508 = UNSUPPORTED PACKING TYPE IN IS5(10).
-C               NDJER = DIMENSION OF JER( ).  (INPUT)
-C                KJER = NUMBER OF VALUES IN JER( ).  (INPUT/OUTPUT)
-C                   * = ALTERNATE RETURN WHEN JER GE 900.
-C
-C        LOCAL VARIABLES
-C               CFEED = CONTAINS THE CHARACTER REPRESENTATION
-C                       OF A PRINTER FORM FEED.
-C               IFEED = CONTAINS THE INTEGER VALUE OF A PRINTER
-C                       FORM FEED.
-C                 NXY = NX*NY.
-C        1         2         3         4         5         6         7 X
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           BOUSTRO,CHECK_FLT,CHECK_INT,PK_TRACE,FLT_MAP,
-C           INT_MAP,PACK_OPT,PREP_FLT,PREP_INT,PREP_NOVAL
-C
-      CHARACTER*1 CFEED
-      LOGICAL JMISSS,JMISSP
-C
-      DIMENSION A(NX*NY),IA(NX*NY),IB(NX*NY)
-      DIMENSION IS5(NS5),IS6(NS6),IS7(NS7)
-      DIMENSION JER(NDJER,2)
-C
-      DATA IFEED/12/
-C
-      IER=0
-      NXY=NX*NY
-      IPKOPT=0
-      CFEED=CHAR(IFEED)
-C
-      IF(IS5(10).NE.0.AND.IS5(10).NE.2.AND.IS5(10).NE.3)THEN
-C           CHECKS PACKING TYPE; MUST BE 1, 2, OR 3.
-         IER=508
-         GO TO 900
-      ENDIF
-C
-C        PROCESS THE BIT-MAP, IF ONE WAS SUPPLIED.
-      IF(IS5(21).EQ.1)THEN
-C           THIS IS INTEGER DATA.
-         CALL INT_MAP(IA,IB,NXY,IS5,NS5,ICLEAN,
-     1                IBITMAP,MISSP,JER,NDJER,KJER)
-      ELSEIF(IS5(21).EQ.0)THEN
-C           THIS IS FLOATING POINT DATA.
-         CALL FLT_MAP(A,IB,NXY,IS5,NS5,ICLEAN,
-     1                IBITMAP,XMISSP,JER,NDJER,KJER)
-      ELSE
-C
-C           THE DATA ARE NEITHER INTEGER NOR FLOATING POINT.
-C           THE TYPE OF DATA IS NOT LEGITIMATE.
-C           ERRORS MAY RESULT IF PACKING CONTINUES.
-         CALL PK_TRACE(KFILDO,JER,NDJER,KJER,905,2)
-         IPKOPT=0
-         GO TO 900
-      ENDIF
-C
-C        PROCESS THE MISSING VALUES, DETERMINING IF THERE
-C        ARE NO MISSING VALUES, PRIMARY MISSING VALUES
-C        OR SECONDARY MISSING VALUES IN THE FIELD.
-C
-      IF(IS5(21).EQ.1)THEN
-         CALL CHECK_INT(KFILDO,IA,IB,NVAL,NXY,IS5,NS5,ICLEAN,IBITMAP,
-     1                  MISSP,MISSS,JMISSP,JMISSS,IER,
-     2                  JER,NDJER,KJER,*900)
-C           THIS IS INTEGER DATA.
-      ELSEIF(IS5(21).EQ.0)THEN
-         CALL CHECK_FLT(KFILDO,A,IB,NVAL,NXY,IS5,NS5,ICLEAN,IBITMAP,
-     1                  XMISSP,XMISSS,JMISSP,JMISSS,IER,
-     2                  JER,NDJER,KJER,*900)
-C           THIS IS FLOATING POINT DATA.
-      ELSE
-         IER=909
-         GO TO 900
-      ENDIF
-C
-C        ARE THERE ANY VALUES IN THIS DATA FIELD?
-      IF(NVAL.EQ.0)THEN
-         CALL PREP_NOVAL(IB,NXY,IBITMAP,IPKOPT,IER)
-C
-C           WAS A FATAL ERROR ENCOUNTERED?
-         IF(IER.EQ.902)THEN
-            CALL PK_TRACE(KFILDO,JER,NDJER,KJER,IER,1)
-C              IER = 902 IS NOT FATAL.
-         ELSEIF(IER.NE.0)THEN
-            GO TO 900
-         ENDIF
-      ELSE
-C
-C           DETERMINE THE TYPE OF THE DATA.
-         IF(IS5(21).EQ.1)THEN
-C
-C              THE DATA ARE INTEGER.
-C              IF THE COMPLEX OR COMPLEX WITH SPATIAL DIFFERENCES
-C              PACKING METHOD IS BEING USED, THEN SCAN THE
-C              DATA BOUSTROPHEDONICALLY.
-C
-CWDT        IF((IS5(10).EQ.2).OR.(IS5(10).EQ.3))THEN
-CWDT           CALL BOUSTRO_INT(IA,NX,NY)
-CWDT        ENDIF
-C
-            CALL PREP_INT(IA,NXY,NVAL,ICLEAN,ID,IE,
-     1                    MINA,JMISSP,JMISSS,MISSP,MISSS,IER,*900)
-         ELSE
-C
-C              THE DATA ARE FLOATING POINT.
-C              IF THE COMPLEX OR COMPLEX WITH SPATIAL DIFFERENCES
-C              PACKING METHOD IS BEING USED, THEN SCAN THE
-C              DATA BOUSTROPHEDONICALLY.
-C
-CWDT        IF((IS5(10).EQ.2).OR.(IS5(10).EQ.3))THEN
-CWDT           CALL BOUSTRO_FLT(A,NX,NY)
-CWDT        ENDIF
-C
-            CALL PREP_FLT(A,IA,NXY,NVAL,ICLEAN,ID,IE,
-     1                    XMINA,JMISSP,JMISSS,XMISSP,XMISSS,IER,*900)
-C           WRITE(KFILDO,10)CFEED
-C10         FORMAT(A1,/' **********************'
-C    1                /' ORIGINAL SCALED VALUES'
-C    2                /' **********************')
-C           WRITE(KFILDO,20) (IA(J),J=1,200)
-C20         FORMAT(/' '20I6)
-C
-         ENDIF
-C
-      ENDIF
-C
-C        SET IPKOPT TO A PROPER VALUE IF IT HAS NOT ALREADY BEEN
-C        DONE SO IN PREP_NOVAL.
-      IF(IPKOPT.EQ.0)THEN
-         CALL PACK_OPT(KFILDO,IA,IB,NXY,NVAL,ICLEAN,IBITMAP,
-     1                 IS5,NS5,IS7,NS7,JMISSS,MISSP,
-     2                 MINPK,NUMOCTET,IPKOPT,JER,NDJER,
-     3                 KJER,*900)
-C           PACK_OPT MAY HAVE A NORMAL RETURN WITH A NON FATAL
-C           IER.  THIS WILL HAVE BEEN INSERTED INTO JER( , ).
-C           PREPR WILL RETURN TO CALLING PROGRAM WITH THAT IER.
-C           THIS IS A LITTLE DANGEROUS, BUT THE CALLING PROGRAM
-C           PK_GRIB2 JUST CALLS ANOTHER ROUTINE THAT SETS IER = 0.
-C        WRITE(KFILDO,30)CFEED,IS7(8)
-C30      FORMAT(A1,/' ***************************'
-C    1             /' 2ND ORDER DIFFERENCES AFTER'
-C    2             /' THE REMOVAL OF THE FIELD'
-C    3             /' MINIMUM ',I6,
-C    4             /' ***************************')
-C        WRITE(KFILDO,40) (IA(J),J=1,200)
-C40      FORMAT(/' '20I6)
-      ENDIF
-C
-C        INITIALIZE THE PERTINENT VALUES IN IS5( ) DEPENDING
-C        ON THE PACKING OPTION.
- 700  IF(IPKOPT.EQ.1)THEN
-         IS5(1)=21
-         IS5(6)=NVAL
-         IS5(10)=0
-         IS6(6)=255
-      ELSEIF(IPKOPT.EQ.2)THEN
-         IS5(1)=21
-         IS5(6)=NVAL
-         IS5(10)=0
-         IS6(6)=0
-      ELSEIF(IPKOPT.EQ.3)THEN
-         IS5(1)=49
-         IS5(6)=NXY
-         IS5(10)=3
-         IS5(48)=2
-         IS5(49)=NUMOCTET
-         IS6(6)=255
-      ELSEIF(IPKOPT.EQ.4)THEN
-         IS5(1)=47
-         IS5(6)=NXY
-         IS5(10)=2
-         IS6(6)=255
-      ENDIF
-      RETURN
-C
- 900  RETURN 1 
-      END
+      subroutine prepr(kfildo,a,ia,ib,nx,ny,nval,iclean,ibitmap,
+     1                 is5,ns5,is6,ns6,is7,ns7,id,ie,mina,
+     2                 xmina,missp,misss,xmissp,xmisss,minpk,
+     3                 ipkopt,ier,jer,ndjer,kjer,*)
+c
+c        march    2000   glahn   called by pk_grib2
+c        may      2000   lawrence modified routine to reflect
+c                                the latest wmo grib2 changes.
+c                                the most significant change
+c                                is that the values are first
+c                                scaled by the decimal scale
+c                                factor, then the minimum is
+c                                taken from the data field, and
+c                                then the values are multiplied
+c                                by the binary scale factor.
+c        january  2001   glahn   write(kfildo) made /d; comments
+c        january  2001   glahn   comment following call to pack_opt;
+c                                eliminated is5( ) and ns5 in call to
+c                                prep_int and prep_flt
+c        january  2001   glahn/lawrence removed unused miss and xmiss;
+c                                eliminated is6( ) and ns6 from call
+c                                to pack_opt
+c        november 2001   glahn   added jer, ndjer, and kjer to call
+c                                to check_int, check_flt, int_map,
+c                                and flt_map
+c        december 2001   glahn   added kfildo to call to check_int
+c                                and check_flt
+c        december 2001   glahn   moved test on is5(10) = 0, 2, or 3 
+c                                from pk_sect5.
+c        january  2002   glahn   added ier and *900 to calls to 
+c                                prep_int and prep_flt; changed
+c                                nval comment from input to output
+c        february 2002   glahn   comments
+c
+c        purpose
+c            finds the reference value and subtracts it from the
+c            data values.  either floating or integer data are
+c            handled, and when there are or aren't missing values.
+c            a bit map is generated if necessary, and values are
+c            inserted into the grid for complex and spatial
+c            differencing.  operations within loops are kept
+c            to a relative minimum at the expense of more code
+c            for efficiency.  second order differencing is not
+c            done when there are secondary missing values present.
+c
+c            all computations are done on integer data until
+c            they are scaled when incoming data are integer in ia( ),
+c            then put back in ia( ).
+c            all computations are done on floating point data
+c            when incoming data are floating point in a( ), then.
+c            put in ia( ).
+c
+c        data set use
+c           kfildo - unit number for output (print) file. (output)
+c
+c        variables
+c              kfildo = unit number for output (print) file.  (input)
+c                a(k) = when is5(21) = 0, a( ) contains the data
+c                       (k=1,nval).  (input)
+c               ia(k) = when is5(21) = 1, ia( ) contains the data
+c                       (k=1,nval).  the values to pack are in
+c                       ia( ) on output.  (input/output)
+c               ib(k) = the bit map when one is used.  (input/output)
+c                       it can be input or in can be calculated if
+c                       the simple method is used (k=1,nxy).
+c                       complex and spatial differencing do not
+c                       use a bit map, but will accept one and insert
+c                       the missing values.
+c               nx,ny = dimensions of the grid.  nx*ny is the dimension
+c                       of a( ), ia( ), and ib( ).  (input)
+c                nval = the number of values in a( ) or ia( ).  (output)
+c              iclean = 1 when there are no missing values in a( ) or
+c                         ia( ).
+c                       0 otherwise.
+c                       (input/output)
+c             ibitmap = 1 when there is a bitmap in ib( ).
+c                       0 otherwise.
+c                       (input)
+c              is5(j) = the values associated with section 5, keyed
+c                       to the octet number (j=1,ns5).  the elements
+c                       used in this routine are:
+c                       is5(10), template number:
+c                         0 = simple
+c                         1 = not supported
+c                         2 = complex
+c                         3 = spatial differencing
+c                       is5(21), type of original field:
+c                         0 = floating point
+c                         1 = integer
+c                 ns5 = the dimension of is5( ).  (input)
+c              is6(j) = the values associated with section 6, keyed
+c                       to the octet number.  the elements used
+c                       in this routine are:
+c                       is6(6) = bit map indicator:
+c                       0 = bit map included
+c                       255 = no bit map
+c                       is6(6) is modified only as needed.  a value
+c                       between 1 and 254 is not disturbed
+c                       (j=1,ns6). (input/output)
+c                 ns6 = the dimension of is6( ).  (input)
+c                  id = the decimal scaling factor.  (input)
+c                  ie = the binary scaling factor.  (input)
+c                mina = the field minimum value when the original data
+c                       are integer.  (output)
+c               xmina = the field minimum value when the original data
+c                       are floating point.  (output)
+c               missp = when missing points can be present in the data,
+c                       they will have the value missp or misss when
+c                       the data are integer.  missp is the primary
+c                       missing value when the original data are
+c                       integer.  (input)
+c               misss = secondary missing value indicator when the data
+c                       are integer.  (input)
+c              xmissp = when missing points can be present in the data,
+c                       they will have the value xmissp or xmisss when
+c                       the data are floating point.  xmissp
+c                       is the primary missing value.  (input)
+c              xmisss = secondary missing value indicator when the data
+c                       are floating point.  (input)
+c               minpk = increment in which ranges will be computed.
+c                       (input)
+c              ipkopt = packing indicator:
+c                       0 = error, don't pack
+c                       1 = pack ia( ), simple
+c                       2 = pack ia( ) and ib( ), simple
+c                       3 = pack complex or spatial differencing
+c                       4 = pack complex.
+c                       (output)
+c                 ier = return status.  (output)
+c                       0 = good error return.
+c                     902 = there are no "good" values in the grid
+c                           and the bit-map indicates that.
+c                     903 = there are no values in the grid and the
+c                           bit-map indicates that there should be.
+c                     904 = there are no values in the grid, and there
+c                           is no bit-map.
+c                     905 = invalid data type indicated in
+c                           is5(21).
+c                     906 = no missing values in the array, bit-map
+c                           provided, simple, and nval=nxy. (warning)
+c                     907 = no missing values in the array, no
+c                           bit-map provided, and nval ne nxy while
+c                           packing simple.
+c                     508 = unsupported packing type in is5(10).
+c               ndjer = dimension of jer( ).  (input)
+c                kjer = number of values in jer( ).  (input/output)
+c                   * = alternate return when jer ge 900.
+c
+c        local variables
+c               cfeed = contains the character representation
+c                       of a printer form feed.
+c               ifeed = contains the integer value of a printer
+c                       form feed.
+c                 nxy = nx*ny.
+c        1         2         3         4         5         6         7 x
+c
+c        non system subroutines called
+c           boustro,check_flt,check_int,pk_trace,flt_map,
+c           int_map,pack_opt,prep_flt,prep_int,prep_noval
+c
+      character*1 cfeed
+      logical jmisss,jmissp
+c
+      dimension a(nx*ny),ia(nx*ny),ib(nx*ny)
+      dimension is5(ns5),is6(ns6),is7(ns7)
+      dimension jer(ndjer,2)
+c
+      data ifeed/12/
+c
+      ier=0
+      nxy=nx*ny
+      ipkopt=0
+      cfeed=char(ifeed)
+c
+      if(is5(10).ne.0.and.is5(10).ne.2.and.is5(10).ne.3)then
+c           checks packing type; must be 1, 2, or 3.
+         ier=508
+         go to 900
+      endif
+c
+c        process the bit-map, if one was supplied.
+      if(is5(21).eq.1)then
+c           this is integer data.
+         call int_map(ia,ib,nxy,is5,ns5,iclean,
+     1                ibitmap,missp,jer,ndjer,kjer)
+      elseif(is5(21).eq.0)then
+c           this is floating point data.
+         call flt_map(a,ib,nxy,is5,ns5,iclean,
+     1                ibitmap,xmissp,jer,ndjer,kjer)
+      else
+c
+c           the data are neither integer nor floating point.
+c           the type of data is not legitimate.
+c           errors may result if packing continues.
+         call pk_trace(kfildo,jer,ndjer,kjer,905,2)
+         ipkopt=0
+         go to 900
+      endif
+c
+c        process the missing values, determining if there
+c        are no missing values, primary missing values
+c        or secondary missing values in the field.
+c
+      if(is5(21).eq.1)then
+         call check_int(kfildo,ia,ib,nval,nxy,is5,ns5,iclean,ibitmap,
+     1                  missp,misss,jmissp,jmisss,ier,
+     2                  jer,ndjer,kjer,*900)
+c           this is integer data.
+      elseif(is5(21).eq.0)then
+         call check_flt(kfildo,a,ib,nval,nxy,is5,ns5,iclean,ibitmap,
+     1                  xmissp,xmisss,jmissp,jmisss,ier,
+     2                  jer,ndjer,kjer,*900)
+c           this is floating point data.
+      else
+         ier=909
+         go to 900
+      endif
+c
+c        are there any values in this data field?
+      if(nval.eq.0)then
+         call prep_noval(ib,nxy,ibitmap,ipkopt,ier)
+c
+c           was a fatal error encountered?
+         if(ier.eq.902)then
+            call pk_trace(kfildo,jer,ndjer,kjer,ier,1)
+c              ier = 902 is not fatal.
+         elseif(ier.ne.0)then
+            go to 900
+         endif
+      else
+c
+c           determine the type of the data.
+         if(is5(21).eq.1)then
+c
+c              the data are integer.
+c              if the complex or complex with spatial differences
+c              packing method is being used, then scan the
+c              data boustrophedonically.
+c
+cwdt        if((is5(10).eq.2).or.(is5(10).eq.3))then
+cwdt           call boustro_int(ia,nx,ny)
+cwdt        endif
+c
+            call prep_int(ia,nxy,nval,iclean,id,ie,
+     1                    mina,jmissp,jmisss,missp,misss,ier,*900)
+         else
+c
+c              the data are floating point.
+c              if the complex or complex with spatial differences
+c              packing method is being used, then scan the
+c              data boustrophedonically.
+c
+cwdt        if((is5(10).eq.2).or.(is5(10).eq.3))then
+cwdt           call boustro_flt(a,nx,ny)
+cwdt        endif
+c
+            call prep_flt(a,ia,nxy,nval,iclean,id,ie,
+     1                    xmina,jmissp,jmisss,xmissp,xmisss,ier,*900)
+c           write(kfildo,10)cfeed
+c10         format(a1,/' **********************'
+c    1                /' original scaled values'
+c    2                /' **********************')
+c           write(kfildo,20) (ia(j),j=1,200)
+c20         format(/' '20i6)
+c
+         endif
+c
+      endif
+c
+c        set ipkopt to a proper value if it has not already been
+c        done so in prep_noval.
+      if(ipkopt.eq.0)then
+         call pack_opt(kfildo,ia,ib,nxy,nval,iclean,ibitmap,
+     1                 is5,ns5,is7,ns7,jmisss,missp,
+     2                 minpk,numoctet,ipkopt,jer,ndjer,
+     3                 kjer,*900)
+c           pack_opt may have a normal return with a non fatal
+c           ier.  this will have been inserted into jer( , ).
+c           prepr will return to calling program with that ier.
+c           this is a little dangerous, but the calling program
+c           pk_grib2 just calls another routine that sets ier = 0.
+c        write(kfildo,30)cfeed,is7(8)
+c30      format(a1,/' ***************************'
+c    1             /' 2nd order differences after'
+c    2             /' the removal of the field'
+c    3             /' minimum ',i6,
+c    4             /' ***************************')
+c        write(kfildo,40) (ia(j),j=1,200)
+c40      format(/' '20i6)
+      endif
+c
+c        initialize the pertinent values in is5( ) depending
+c        on the packing option.
+ 700  if(ipkopt.eq.1)then
+         is5(1)=21
+         is5(6)=nval
+         is5(10)=0
+         is6(6)=255
+      elseif(ipkopt.eq.2)then
+         is5(1)=21
+         is5(6)=nval
+         is5(10)=0
+         is6(6)=0
+      elseif(ipkopt.eq.3)then
+         is5(1)=49
+         is5(6)=nxy
+         is5(10)=3
+         is5(48)=2
+         is5(49)=numoctet
+         is6(6)=255
+      elseif(ipkopt.eq.4)then
+         is5(1)=47
+         is5(6)=nxy
+         is5(10)=2
+         is6(6)=255
+      endif
+      return
+c
+ 900  return 1 
+      end

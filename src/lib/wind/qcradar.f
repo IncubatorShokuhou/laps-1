@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -38,20 +38,20 @@ cdis
 cdis
 
       subroutine qc_radar_obs(
-     1           imax,jmax,kmax                             ! Input
-     1          ,r_missing_data                             ! Input
-     1          ,nx_r,ny_r,ioffset,joffset                  ! Input
-     1          ,vr_obs                                     ! Input/Output
-     1          ,vr_nyq                                     ! Input
-     1          ,n_radarobs_tot_unfltrd                     ! Input
-     1          ,lat,lon                                    ! Input
-     1          ,rlat_radar,rlon_radar                      ! Input
-     1          ,rheight_radar                              ! Input
-     1          ,upass1,vpass1  ! 1st pass anal             ! Input
-     1          ,u_laps_bkg,v_laps_bkg                      ! Input
-     1          ,v_nyquist_global                           ! Input
-     1          ,l_correct_unfolding,l_grid_north           ! Input
-     1          ,istatus                                    ! Input/Output
+     1           imax,jmax,kmax                             ! input
+     1          ,r_missing_data                             ! input
+     1          ,nx_r,ny_r,ioffset,joffset                  ! input
+     1          ,vr_obs                                     ! input/output
+     1          ,vr_nyq                                     ! input
+     1          ,n_radarobs_tot_unfltrd                     ! input
+     1          ,lat,lon                                    ! input
+     1          ,rlat_radar,rlon_radar                      ! input
+     1          ,rheight_radar                              ! input
+     1          ,upass1,vpass1  ! 1st pass anal             ! input
+     1          ,u_laps_bkg,v_laps_bkg                      ! input
+     1          ,v_nyquist_global                           ! input
+     1          ,l_correct_unfolding,l_grid_north           ! input
+     1          ,istatus                                    ! input/output
      1                                                          )
 
       real   vr_obs(nx_r,ny_r,kmax)
@@ -64,14 +64,14 @@ cdis
 
       parameter (unf_nyq_frac = 0.7)
 
-      write(6,*)' Global Nyquist variable = ',v_nyquist_global
+      write(6,*)' global nyquist variable = ',v_nyquist_global
 
-      write(6,*)' LVL  # Obs  Intvl  # QC'
+      write(6,*)' lvl  # obs  intvl  # qc'
 
-      write(6,*)' Also applying QC and dealiasing'
+      write(6,*)' also applying qc and dealiasing'
       write(6,*)'  i   j   k   df    vr    fgr'
 
-      height_grid = 0. ! This approximation won't hurt the azimuth
+      height_grid = 0. ! this approximation won't hurt the azimuth
 
       icount_unfld = 0
       icount_good_qc = 0
@@ -110,7 +110,7 @@ cdis
      1         abs(vpass1(i,j,k)) .ge. 1e6)then
                 ierr_count = ierr_count + 1
                 if(ierr_count .lt. 100)write(6,*)
-     1      ' Error in upass1,vpass1',i,j,k,upass1(i,j,k),vpass1(i,j,k)
+     1      ' error in upass1,vpass1',i,j,k,upass1(i,j,k),vpass1(i,j,k)
                 istatus = 0
                 return
 
@@ -147,15 +147,15 @@ cdis
      1                          speed)
 
 
-!               Compare radar radial velocity to 1st pass analysis
+!               compare radar radial velocity to 1st pass analysis
                 diff_radial = r_pass1 - vr_obs(io,jo,k)
 
-!               Dealias the radar data if appropriate
-!               Check for folded radar data (up to +/- 1 Nyquist velocity)
-!               Test if residual is more than about 1.3 V Nyquist and
-!                                   less than about 2.7 V Nyquist
+!               dealias the radar data if appropriate
+!               check for folded radar data (up to +/- 1 nyquist velocity)
+!               test if residual is more than about 1.3 v nyquist and
+!                                   less than about 2.7 v nyquist
 !
-                if(v_nyquist_2 .ne. r_missing_data)then ! Use global Nyquist vel
+                if(v_nyquist_2 .ne. r_missing_data)then ! use global nyquist vel
                     v_nyq_2 = v_nyquist_2
                     v_nyq = v_nyquist_global
                 elseif(vr_nyq(io,jo,k) .ne. r_missing_data)then
@@ -167,10 +167,10 @@ cdis
                 endif
 
                 if(v_nyq .ne. r_missing_data)then
-                  if (v_nyq .gt. 0.) THEN  ! Valid Nyquist vel
+                  if (v_nyq .gt. 0.) then  ! valid nyquist vel
                     uf_thresh = unf_nyq_frac * v_nyq
 
-!                   Test if we could benefit from a single de-aliasing
+!                   test if we could benefit from a single de-aliasing
                     if(abs(abs(diff_radial)-v_nyq_2).lt.uf_thresh)then
 c                     call latlon_to_radar(lat(i,j),lon(i,j),height_k
 c    1                  ,azimuth,slant_range,elev
@@ -178,8 +178,8 @@ c    1                  ,rlat_radar,rlon_radar,rheight_radar)
 
                       velold = vr_obs(io,jo,k)
 
-!                     Adjust the velocity value
-                      if(L_correct_unfolding)then
+!                     adjust the velocity value
+                      if(l_correct_unfolding)then
                         r_nyquist_number = nint(diff_radial/v_nyq_2)
                         diff_radial = diff_radial
      1                                  - r_nyquist_number * v_nyq_2
@@ -196,17 +196,17 @@ c    1                  ,rlat_radar,rlon_radar,rheight_radar)
      1                                  ,nint(azimuth)
      1                                  ,nint(slant_range/1000.)
      1                                  ,elev
-102                         format(1x,'Folding at'
+102                         format(1x,'folding at'
      1                        ,i3,i3,i3,' vp,vr,vrnw',3f6.1,' df',f6.1       
      1                        ,' azran=',i3,'/',i3,' el=',f4.1)
 
                         endif ! icount_unfld < 50
-                      endif ! L_correct_unfolding
-                    endif ! Less than unfolding thresh
-                  endif ! Nyquist vel > 0
+                      endif ! l_correct_unfolding
+                    endif ! less than unfolding thresh
+                  endif ! nyquist vel > 0
                 endif ! non-missing nyquist velocity 
 
-!               QC check for radar (current threshold is 12 m/s)
+!               qc check for radar (current threshold is 12 m/s)
                 if(abs(diff_radial) .lt. 12.)then
 !                 write(6,320)i,j,k,di_true,speed,u_true,v_true
 !320              format(1x,3i2,2f6.1,2f6.1)
@@ -216,38 +216,38 @@ c    1                  ,rlat_radar,rlon_radar,rheight_radar)
 
                   icount_good_qc = icount_good_qc + 1
 
-                else ! Radar Ob is QC'ed out
-                  ! Temporarily comment out the following two lines for writing to save
-                  ! output time and file size. Steve or Yuanfu will add a parameter controling what to write
-                  ! Yuanfu July 2013
+                else ! radar ob is qc'ed out
+                  ! temporarily comment out the following two lines for writing to save
+                  ! output time and file size. steve or yuanfu will add a parameter controling what to write
+                  ! yuanfu july 2013
 !                  if(icount_bad_qc .lt. 50)
 !     1       write(6,311)i,j,k,diff_radial,vr_obs(io,jo,k),r_pass1
-311               format(3i4,3f6.1,' Radar OB QCed out')
+311               format(3i4,3f6.1,' radar ob qced out')
                   vr_obs(io,jo,k) = r_missing_data
                   icount_bad_qc = icount_bad_qc + 1
 
                 endif
 
-            endif ! Error condition
+            endif ! error condition
 
-          endif ! Not missing data
+          endif ! not missing data
          endif ! i/j within domain
         enddo ! io
         enddo ! jo
       enddo ! k
 
-      write(6,*)' # of Input (unfiltered) Radar obs = '
+      write(6,*)' # of input (unfiltered) radar obs = '
      1                                      ,n_radarobs_tot_unfltrd
 
       n_radarobs_tot_unfltrd = icount_good_qc
 
-      write(6,*)' # of Velocities Unfolded = ',icount_unfld
+      write(6,*)' # of velocities unfolded = ',icount_unfld
       write(6,604)icount_good_qc,icount_bad_qc
      1           ,pct_rejected(icount_good_qc,icount_bad_qc)
- 604  format(' # of RADAR      GOOD/BAD QC = ',2i6,7x
+ 604  format(' # of radar      good/bad qc = ',2i6,7x
      1      ,'% rejected = ',f6.1)       
 
-      write(6,*)' # of Output (unfiltered) Radar obs = '
+      write(6,*)' # of output (unfiltered) radar obs = '
      1                                      ,n_radarobs_tot_unfltrd       
 
       istatus = 1

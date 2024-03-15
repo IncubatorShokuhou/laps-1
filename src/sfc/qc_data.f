@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -41,22 +41,22 @@ c
 c
 c=========================================================================
 c
-c       LAPS Quality Control routine.
+c       laps quality control routine.
 c
-c       Original by C. Hartsough, FSL  c. 1992
-c       Changes:  
-c           P.Stamus  20 Dec 1996  Porting changes for go anywhere LAPS
-c                     25 Aug 1997  Changes for dynamic LAPS.
-c                     17 Nov 1997  Fill empty arrays (HP compiler prob).
-c                     13 Jul 1999  Remove some variables not used in sfc.
-c                                  Rm *4 from all declarations.
+c       original by c. hartsough, fsl  c. 1992
+c       changes:  
+c           p.stamus  20 dec 1996  porting changes for go anywhere laps
+c                     25 aug 1997  changes for dynamic laps.
+c                     17 nov 1997  fill empty arrays (hp compiler prob).
+c                     13 jul 1999  remove some variables not used in sfc.
+c                                  rm *4 from all declarations.
 c
 c=========================================================================
 c
 c
-c..... Stuff for the sfc data and other station info (LSO +)
+c..... stuff for the sfc data and other station info (lso +)
 c
-        use mem_namelist, ONLY: l_dev_ck
+        use mem_namelist, only: l_dev_ck
 
 	real t_s(mxstn), td_s(mxstn), dd_s(mxstn), ff_s(mxstn)
 	real ddg_s(mxstn), ffg_s(mxstn), vis_s(mxstn)
@@ -67,12 +67,12 @@ c
 c
 	character stn(mxstn)*3, c_field*4
 c
-c..... Model background 
+c..... model background 
         real t_bk_f(ni,nj)
         real td_bk_f(ni,nj)
         real mslp_bk_mb(ni,nj)
 c
-c..... Arrays for the prev hour's OBS file input data
+c..... arrays for the prev hour's obs file input data
 c                            
 	real lat_l(mxstn),lon_l(mxstn),elev_l(mxstn)
 	real td_l(mxstn),t_l(mxstn)
@@ -80,25 +80,25 @@ c
 	real pstn_l(mxstn),pmsl_l(mxstn),alt_l(mxstn)
 	real store_hgt_l(mxstn,5),ceil_l(mxstn),lowcld_l(mxstn)
 	real cover_l(mxstn),vis_l(mxstn),rad_l(mxstn)
-	Integer obstime_l(mxstn),kloud_l(mxstn),idp3_l(mxstn)
-	Character  infile_l*256, atime_l*24, stn_l(mxstn)*3
+	integer obstime_l(mxstn),kloud_l(mxstn),idp3_l(mxstn)
+	character  infile_l*256, atime_l*24, stn_l(mxstn)*3
 	character  obstype_l(mxstn)*8,wx_l(mxstn)*8
 	character  store_emv_l(mxstn,5)*1, store_amt_l(mxstn,5)*4
 c
-c	Other files for internal use...
+c	other files for internal use...
 c
-	integer rely(26,mxstn)            ! QC flags for current cycle
-	integer rely_l(26,mxstn)          ! QC flags for previous cycle
+	integer rely(26,mxstn)            ! qc flags for current cycle
+	integer rely_l(26,mxstn)          ! qc flags for previous cycle
         integer ivals(mxstn)              
-        integer ivals_l(mxstn)            ! Ob indices for previous cycle
+        integer ivals_l(mxstn)            ! ob indices for previous cycle
 	integer istatus, jstatus
 	character filename*9, outfile*256
 c
 c
-c.....  Start here.
+c.....  start here.
 c
         write(6,*)
-        write(6,*)' Subroutine qc_data...'
+        write(6,*)' subroutine qc_data...'
 
 	n_obs_curr = n_obs_b
 !       missing = -99.9
@@ -117,17 +117,17 @@ c
 	enddo !i
 	enddo !n
 c
-c.....	OPEN QC FILE
+c.....	open qc file
 c
 	call get_directory('log', outfile, len)
 	outfile = outfile(1:len) // 'sfcqc.log.' // filename(6:9)
 	print *, ' opening log file for sfc qc:', outfile
 	open(60,file=outfile,status='unknown')
 c
-	write(60,*)' ** LAPS Surface Quality Control **'
+	write(60,*)' ** laps surface quality control **'
 	write(60,*)' ** begin qc on surface data ',filename ,' ** '
 c
-c.....  Get previous sfc data (current passed in via argument list)
+c.....  get previous sfc data (current passed in via argument list)
 c
 	call read_surface_old(infile_l,mxstn,atime_l,n_meso_g_l,
      &  n_meso_pos_l,n_sao_g_l,n_sao_pos_g_l,n_sao_b_l,n_sao_pos_b_l,
@@ -136,7 +136,7 @@ c
      &	pmsl_l,alt_l,kloud_l,ceil_l,lowcld_l,cover_l,rad_l,idp3_l,
      &	store_emv_l,store_amt_l,store_hgt_l,vis_l,obstime_l,istatus)
 	if(istatus .ne. 1) then
-	 write(60,*) ' ERROR: could not read in data. Abort.'
+	 write(60,*) ' error: could not read in data. abort.'
 	 goto 999
 	end if
 c
@@ -145,7 +145,7 @@ c
 	write(60,*) ' # of stns available: ',
      &                         n_obs_b, n_obs_b_l, n_obs_pos_b_l
 	if(n_obs_b.le.0 .or. n_obs_b_l.le.0) then
-	 write(60,*) ' No data for current and/or previous hr..Abort QC'      
+	 write(60,*) ' no data for current and/or previous hr..abort qc'      
 	 return
 	endif
 c
@@ -155,12 +155,12 @@ c
 	 m = n 
 	 if(m .lt. 1) go to 10
 c
-c	 ** no climatological check on STN **       rely(01,m)=imissing 
-c	 ** no climatological check on OBSTYPE **   rely(02,m)=imissing
-c	 ** no climatological check on LAT_S **     rely(03,m)=imissing
-c	 ** no climatological check on LON_S **     rely(04,m)=imissing
-c	 ** no climatological check on ELEV_S **    rely(05,m)=imissing
-c	 ** no climatological check on WX **        rely(06,m)=imissing
+c	 ** no climatological check on stn **       rely(01,m)=imissing 
+c	 ** no climatological check on obstype **   rely(02,m)=imissing
+c	 ** no climatological check on lat_s **     rely(03,m)=imissing
+c	 ** no climatological check on lon_s **     rely(04,m)=imissing
+c	 ** no climatological check on elev_s **    rely(05,m)=imissing
+c	 ** no climatological check on wx **        rely(06,m)=imissing
 c
 	 if(t_s(n)    .ge.  -50.          .and.
      &      t_s(n)    .le.  130.               ) rely(07,m)=10 
@@ -189,20 +189,20 @@ c
 	 if(alt_s(n)  .ge.  900.          .and.
      &      alt_s(n)  .le. 1100.               ) rely(15,m)=10 
 c
-c	 ** no climatological check on KLOUD_S **   rely(16,m)=imissing 
-c	 ** no climatological check on HGT_CEIL **  rely(17,m)=imissing 
-c	 ** no climatological check on HGT_LOW **   rely(18,m)=imissing 
-c	 ** no climatological check on COVER_S **   rely(19,m)=imissing 
-c	 ** no climatological check on SOLAR_S **   rely(20,m)=imissing 
-c	 ** no climatological check on IDP3_S **    rely(21,m)=imissing 
-c	 ** no climatological check on STORE_EMV ** rely(22,m)=imissing 
-c	 ** no climatological check on STORE_AMT ** rely(23,m)=imissing
-c	 ** no climatological check on STORE_HGT ** rely(24,m)=imissing
+c	 ** no climatological check on kloud_s **   rely(16,m)=imissing 
+c	 ** no climatological check on hgt_ceil **  rely(17,m)=imissing 
+c	 ** no climatological check on hgt_low **   rely(18,m)=imissing 
+c	 ** no climatological check on cover_s **   rely(19,m)=imissing 
+c	 ** no climatological check on solar_s **   rely(20,m)=imissing 
+c	 ** no climatological check on idp3_s **    rely(21,m)=imissing 
+c	 ** no climatological check on store_emv ** rely(22,m)=imissing 
+c	 ** no climatological check on store_amt ** rely(23,m)=imissing
+c	 ** no climatological check on store_hgt ** rely(24,m)=imissing
 c
 	 if(vis_s(n)  .ge.    0.          .and.
      &      vis_s(n)  .le.  200.               ) rely(25,m) = 10
 c
-c	 ** no climatological check on OBSTIME **   rely(26,m)=imissing
+c	 ** no climatological check on obstime **   rely(26,m)=imissing
 c
  10	continue
 c
@@ -210,12 +210,12 @@ c
 	 m = ivals_l(n)
 	 if (m .lt. 1) go to 12
 c
-c	 ** no climatological check on STN_L **      rely_l(01,m)=imissing 
-c	 ** no climatological check on OBSTYPE_L **  rely_l(02,m)=imissing
-c	 ** no climatological check on LAT_L **      rely_l(03,m)=imissing
-c	 ** no climatological check on LON_L **      rely_l(04,m)=imissing
-c	 ** no climatological check on ELEV_L **     rely_l(05,m)=imissing
-c	 ** no climatological check on WX_L **       rely_l(06,m)=imissing
+c	 ** no climatological check on stn_l **      rely_l(01,m)=imissing 
+c	 ** no climatological check on obstype_l **  rely_l(02,m)=imissing
+c	 ** no climatological check on lat_l **      rely_l(03,m)=imissing
+c	 ** no climatological check on lon_l **      rely_l(04,m)=imissing
+c	 ** no climatological check on elev_l **     rely_l(05,m)=imissing
+c	 ** no climatological check on wx_l **       rely_l(06,m)=imissing
 c
 	 if(t_l(n)        .ge.   -50.      .and.
      &      t_l(n)        .le.   130.           ) rely_l(07,m)=10 
@@ -236,24 +236,24 @@ c
 	 if(alt_l(n)      .ge.   900.      .and.
      &      alt_l(n)      .le.  1100.           ) rely_l(15,m)=10 
 c
-c	 ** no climatological check on KLOUD_L **     rely_l(16,m)=imissing 
-c	 ** no climatological check on CEIL_L **      rely_l(17,m)=imissing 
-c	 ** no climatological check on LOWCLD_L **    rely_l(18,m)=imissing 
-c	 ** no climatological check on COVER_L **     rely_l(19,m)=imissing 
-c	 ** no climatological check on RAD_L **       rely_l(20,m)=imissing 
-c	 ** no climatological check on IDP3_L **      rely_l(21,m)=imissing 
-c	 ** no climatological check on STORE_EMV_L ** rely_l(22,m)=imissing 
-c	 ** no climatological check on STORE_AMT_L ** rely_l(23,m)=imissing
-c	 ** no climatological check on STORE_HGT_L ** rely_l(24,m)=imissing
+c	 ** no climatological check on kloud_l **     rely_l(16,m)=imissing 
+c	 ** no climatological check on ceil_l **      rely_l(17,m)=imissing 
+c	 ** no climatological check on lowcld_l **    rely_l(18,m)=imissing 
+c	 ** no climatological check on cover_l **     rely_l(19,m)=imissing 
+c	 ** no climatological check on rad_l **       rely_l(20,m)=imissing 
+c	 ** no climatological check on idp3_l **      rely_l(21,m)=imissing 
+c	 ** no climatological check on store_emv_l ** rely_l(22,m)=imissing 
+c	 ** no climatological check on store_amt_l ** rely_l(23,m)=imissing
+c	 ** no climatological check on store_hgt_l ** rely_l(24,m)=imissing
 c
 	 if(vis_l(n)      .ge.     0.      .and.
      &      vis_l(n)      .le.   200.           ) rely_l(25,m) = 10 
 c 
-c        ** no climatological check on OBSTIME_L ** rely_l(26,m)=imissing c
+c        ** no climatological check on obstime_l ** rely_l(26,m)=imissing c
  12	continue
 c
 	write(60,*) '  '
-	write(60,*) ' --- Reliability after climatalogical test --- '
+	write(60,*) ' --- reliability after climatalogical test --- '
 	write(60,*) '  '
 	do 100 j=1,n_obs_curr
 	 write(60,900) j, stn(j), (rely(i,j),i=1,26)
@@ -280,7 +280,7 @@ cc     +	       n_obs_b_l, elev_l, rely_l, ivals)
 c
 c.....  model background checks
 c
-        c_field = 'T'
+        c_field = 't'
         ifld = 7
         thresh = thresh_t
 
@@ -288,7 +288,7 @@ c
      1              ,ii,jj,t_bk_f,rely,badflag,n_obs_curr
      1              ,stn,mxstn,ni,nj,istatus)
 
-        c_field = 'TD'
+        c_field = 'td'
         ifld = 8
         thresh = thresh_td
 
@@ -296,7 +296,7 @@ c
      1              ,ii,jj,td_bk_f,rely,badflag,n_obs_curr
      1              ,stn,mxstn,ni,nj,istatus)
 
-        c_field = 'MSLP'
+        c_field = 'mslp'
         ifld = 14
         thresh = thresh_mslp
 
@@ -306,7 +306,7 @@ c
 
 c
 	write(60,*) '  '
-	write(60,*) ' --- Reliability after std dev & bkg tests --- '
+	write(60,*) ' --- reliability after std dev & bkg tests --- '
 	write(60,*) '  '
 	do 101 j = 1,n_obs_curr
 	 write(60,900) j, stn(j), (rely(i,j),i=1,26)
@@ -337,7 +337,7 @@ c
 	character stn(mxstn)*3
 
         if(iback .eq. 1)then
-            write(6,*)' BKG '//c_field//' check'
+            write(6,*)' bkg '//c_field//' check'
             do j = 1,n_obs_curr
                 observation = ob_s(j)
 
@@ -346,33 +346,33 @@ c
                     jsta = jj(j)
 
                     if(ista .ge. 1 .and. ista .le. ni .and. 
-     1                 jsta .ge. 1 .and. jsta .le. nj)then ! Inside the domain
+     1                 jsta .ge. 1 .and. jsta .le. nj)then ! inside the domain
                         background = background_a(ista,jsta)
                         diff = observation - background
 
                         if(abs(diff) .le. thresh)then
 !                           write(6,911)j, stn(j), observation, 
 !    1                                  background, diff       
- 911                        format('QC: ',i5,1x,a3,1x,3f9.1)     
+ 911                        format('qc: ',i5,1x,a3,1x,3f9.1)     
 
                         else
                             write(6,912)j, stn(j), observation, 
      1                                  background, diff       
- 912                        format('QC: ',i5,1x,a3,1x,3f9.1
-     1                            ,' Exceeds threshold')     
+ 912                        format('qc: ',i5,1x,a3,1x,3f9.1
+     1                            ,' exceeds threshold')     
 
-                            rely(ifld,j) = -25 ! Set to reject
+                            rely(ifld,j) = -25 ! set to reject
 
                         endif
 
-                    endif ! Inside the domain
+                    endif ! inside the domain
 
-                endif ! Station has missing data
+                endif ! station has missing data
 
             enddo ! j
 
         else
-            write(6,*)' Skipping BKG '//c_field//' check'
+            write(6,*)' skipping bkg '//c_field//' check'
 
         endif
 
@@ -384,8 +384,8 @@ c
 c
 	subroutine time_ck(stn1,num1,stn2,num2,ivals)
 
-c       Returns array of indices in stn2 array corresponding to each index
-c       in the stn1 array. This matches the stations in the two arrays.
+c       returns array of indices in stn2 array corresponding to each index
+c       in the stn1 array. this matches the stations in the two arrays.
 
 	dimension ivals(num1)
 	character stn1(num1)*3,stn2(num2)*3
@@ -406,8 +406,8 @@ c
 	dimension ivals_l(num2)
 	character stn1(num1)*3,stn2(num2)*3,stn_all(n_obs_curr)*3
 
-!       Calculate array of indices in stn_all array corresponding to each 
-!       index in the stn2 array. This matches the stations in the two arrays.
+!       calculate array of indices in stn_all array corresponding to each 
+!       index in the stn2 array. this matches the stations in the two arrays.
 	do 30 n=1,num2
 	 ivals_l(n) = -99
 	 do 40 m=1,n_obs_curr

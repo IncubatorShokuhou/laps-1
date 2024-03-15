@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -47,10 +47,10 @@ cdis
 !     write(6,1234) mxa,mxb,mya,myb,umin,umax,vmin,vmax,ltype
  1234 format(1x,4i5,4e12.4,i4)
 
-!     This keeps about the size of barbs relative to the domain
+!     this keeps about the size of barbs relative to the domain
 !     du=(imax)/200. * relsize   
 
-!     This tries to keep the same size of barbs relative to the grid points
+!     this tries to keep the same size of barbs relative to the grid points
       du = relsize
 
       call get_border(imax,jmax,x_1,x_2,y_1,y_2)
@@ -61,14 +61,14 @@ cdis
           goto 1
       endif
 
-      if(c4_rot .eq. 'true')then ! Convert wind ob from true north to grid north
+      if(c4_rot .eq. 'true')then ! convert wind ob from true north to grid north
           rot = projrot_latlon(lat(nint(ri),nint(rj))
      1                        ,lon(nint(ri),nint(rj)),istatus) / 57.295
-      else                       ! Input is in grid north
+      else                       ! input is in grid north
           rot = 0.
       endif
 
-!     Convert ri and rj to x1 and y1 (U and V)
+!     convert ri and rj to x1 and y1 (u and v)
 !     call supcon(alat,alon,x1,y1)
 !     x1 = umin + (umax - umin) * (ri-1.) / float(imax-1)
 !     y1 = vmin + (vmax - vmin) * (rj-1.) / float(jmax-1)
@@ -136,8 +136,8 @@ cdis
 
           icol = min(max(  110. + vel / 2.0   ,  100.  )  ,120.)
           write(6,*)i,j,vel,icol
-          call setusv_dum(2hIN,icol)
-!         call setusv_dum(2hIN,40)
+          call setusv_dum(2hin,icol)
+!         call setusv_dum(2hin,40)
 
           if(n_plotted .eq. 1)then
               do uu = u-du/2.,u+du/2.,du/25.
@@ -151,7 +151,7 @@ cdis
 
           endif
 
-      elseif(c1_plottype .eq. 'a')then ! Plot arrows
+      elseif(c1_plottype .eq. 'a')then ! plot arrows
 
 
       endif
@@ -170,47 +170,47 @@ cdis
       idot_pat=0
       call supmap(iproj,cenlat,cenlon,0.0,selat,selon,nwlat,nwlon,-2,
      1igrid,idetail,idot_pat,ier)
-!     call savesup_gp('laps_sup.parms',Istatus)
+!     call savesup_gp('laps_sup.parms',istatus)
       return
       end
 
 
 c
-        SUBROUTINE BARBS(SPD,DIR,U,V,DU,PROJROT,umin,umax,vmin,vmax
+        subroutine barbs(spd,dir,u,v,du,projrot,umin,umax,vmin,vmax
      1                                              ,sense,aspect)
-C
-C---Wind barb plotter from barbs_gp.
-C
-c       INCLUDE 'SYSDISK:[GUDOC]EDFVAXBOX.FOR'
-C       Paul Schultz    30-JUN-1982     Original version
-C       HOAGENSON       02-SEP-1982     Changed name from BARBS
-C       Schultz         25-OCT-1984     Changed zero-wind symbol
-C
-C---DIR,SPD     WIND DIRECTION AND SPEED
-C---U,V         NCAR COORDINATES OF OBS
-C---DU          ARBITRARILY CHOSEN INCREMENT OF SCREEN SPACE
-C---PROJROT     ROTATION OF BARB DUE TO MAP PROJECTION
-C---ASPECT      RATIO of DU scaling divided by DV scaling (stretch in U dir)
-C
-        DATA DEGRAD/.01745329/
-C
-C
-C---RETURN IF MISSING SPEED OR DIRECTION.
-C
-        IF (DIR .LT. 0. .OR. SPD .LT. 0.) RETURN
-        IF (DIR .GT. 360. .OR. SPD .GT. 300.) RETURN
+c
+c---wind barb plotter from barbs_gp.
+c
+c       include 'sysdisk:[gudoc]edfvaxbox.for'
+c       paul schultz    30-jun-1982     original version
+c       hoagenson       02-sep-1982     changed name from barbs
+c       schultz         25-oct-1984     changed zero-wind symbol
+c
+c---dir,spd     wind direction and speed
+c---u,v         ncar coordinates of obs
+c---du          arbitrarily chosen increment of screen space
+c---projrot     rotation of barb due to map projection
+c---aspect      ratio of du scaling divided by dv scaling (stretch in u dir)
+c
+        data degrad/.01745329/
+c
+c
+c---return if missing speed or direction.
+c
+        if (dir .lt. 0. .or. spd .lt. 0.) return
+        if (dir .gt. 360. .or. spd .gt. 300.) return
 
         thk_base = 1.0
-C
-C---DIRECTIONS:
-C
-        DR=DIR*DEGRAD+PROJROT
-        DR1=(DIR+(60.*sense))*DEGRAD+PROJROT
-        DR90=DR + 90.*DEGRAD
-        SIND=SIN(DR)
-        SIND1=SIN(DR1)
-        COSD=COS(DR)
-        COSD1=COS(DR1)
+c
+c---directions:
+c
+        dr=dir*degrad+projrot
+        dr1=(dir+(60.*sense))*degrad+projrot
+        dr90=dr + 90.*degrad
+        sind=sin(dr)
+        sind1=sin(dr1)
+        cosd=cos(dr)
+        cosd1=cos(dr1)
 
         thk =sqrt(  sind**2          + (cosd *aspect)**2 ) ! staff
         call thk_transform(thk_base,aspect,dr,thk)
@@ -224,191 +224,191 @@ C
 !       write(6,11)aspect,dr*180./3.14159265,dr1*180./3.14159265
 !    1            ,thk,thk1,thkf
 !11     format(' aspect,dr,dr1,thk,thk1,thkf ',f6.3,2f8.1,3f9.3)
-C
-C---LENGTHS:
-C
-        STAFF=DU*4.                     !  MULTIPLIER ARBITRARILY CHOSEN
-        BARB=STAFF*.5
-        ADD=STAFF*.3
-C
-C---SPEED AND COUNTERS:
-C
-        N50=0
-        N10=0
-C
+c
+c---lengths:
+c
+        staff=du*4.                     !  multiplier arbitrarily chosen
+        barb=staff*.5
+        add=staff*.3
+c
+c---speed and counters:
+c
+        n50=0
+        n10=0
+c
 !       if(u .le. umin .or. u .ge. umax .or. v .le. vmin .or. v .ge. vmax)
 !       1                                                       return
 
-        IF (SPD .LT. 1.0) THEN ! calm winds
-!           CALL PWRIT (U,V,'O',1,6,0,0)
-!           CALL PCLOQU(U,V,'O',DU,ANGD,CNTR)
+        if (spd .lt. 1.0) then ! calm winds
+!           call pwrit (u,v,'o',1,6,0,0)
+!           call pcloqu(u,v,'o',du,angd,cntr)
             call plot_circle(u,v,du*0.8)
-        RETURN
+        return
 
-        END IF
-        IF (SPD .LT. 2.5) THEN
-        X1=U
-        Y1=V
-        X2=X1+SIND*STAFF*ASPECT
-        Y2=Y1+COSD*STAFF
+        end if
+        if (spd .lt. 2.5) then
+        x1=u
+        y1=v
+        x2=x1+sind*staff*aspect
+        y2=y1+cosd*staff
 
         if(x2 .lt. umin .or. x2 .gt. umax .or. y2 .lt. vmin .or. y2 .gt.
      1 vmax)then
-            call GSLWSC(thk_base)
+            call gslwsc(thk_base)
             return
         endif
 
-        call GSLWSC(thk)
-        CALL LINE(X1,Y1,X2,Y2)
+        call gslwsc(thk)
+        call line(x1,y1,x2,y2)
 
-        call GSLWSC(thk_base)
+        call gslwsc(thk_base)
         return
 
         endif
-C
-        SP=SPD+2.5
-C
-        DO WHILE (SP .GE. 50.)
-        N50=N50+1
-        SP=SP-50.
-        END DO
-C
-        DO WHILE (SP .GE. 10.)
-        N10=N10+1
-        SP=SP-10.
-        END DO
-C
-C---DRAW STAFF
-C
-        X1=U
-        Y1=V
-        X2=X1+SIND*STAFF*ASPECT
-        Y2=Y1+COSD*STAFF
+c
+        sp=spd+2.5
+c
+        do while (sp .ge. 50.)
+        n50=n50+1
+        sp=sp-50.
+        end do
+c
+        do while (sp .ge. 10.)
+        n10=n10+1
+        sp=sp-10.
+        end do
+c
+c---draw staff
+c
+        x1=u
+        y1=v
+        x2=x1+sind*staff*aspect
+        y2=y1+cosd*staff
 
         if(x2 .lt. umin .or. x2 .gt. umax .or. y2 .lt. vmin .or. y2 .gt.
      1 vmax)then
             return
         endif
 
-        call GSLWSC(thk)
-        CALL LINE(X1,Y1,X2,Y2)
-        call GSLWSC(thk_base)
-C
-C---PLOT HALF-BARB, IF NECESSARY
-C
-        IF (SP .GE. 5.) THEN
-        X1=X2+SIND1*ADD*ASPECT
-        Y1=Y2+COSD1*ADD
+        call gslwsc(thk)
+        call line(x1,y1,x2,y2)
+        call gslwsc(thk_base)
+c
+c---plot half-barb, if necessary
+c
+        if (sp .ge. 5.) then
+        x1=x2+sind1*add*aspect
+        y1=y2+cosd1*add
 
 !       if(x1 .le. umin .or. x1 .ge. umax .or. y1 .le. vmin .or. y1 .ge. vmax)
 !       1                                                       return
 
-        call GSLWSC(thk1)
-        CALL LINE(X1,Y1,X2,Y2)
+        call gslwsc(thk1)
+        call line(x1,y1,x2,y2)
 
-        IF (N50 .NE. 0 .OR. N10 .NE. 0) GO TO 40
-        X1=X2+SIND*ADD*ASPECT
-        Y1=Y2+COSD*ADD
-
-!       if(x1 .le. umin .or. x1 .ge. umax .or. y1 .le. vmin .or. y1 .ge. vmax)
-!       1                                                       return
-
-        call GSLWSC(thk)
-        CALL LINE(X1,Y1,X2,Y2)
-
-        call GSLWSC(thk_base)
-        RETURN
-
-        END IF
-C
-40      X1=X2
-        Y1=Y2
-C
-C---PLOT BARBS, IF NECESSARY
-C
-        DO 50 I=1,N10
-        X2=X1+SIND*ADD*ASPECT
-        Y2=Y1+COSD*ADD
-        X3=X2+SIND1*BARB*ASPECT
-        Y3=Y2+COSD1*BARB
+        if (n50 .ne. 0 .or. n10 .ne. 0) go to 40
+        x1=x2+sind*add*aspect
+        y1=y2+cosd*add
 
 !       if(x1 .le. umin .or. x1 .ge. umax .or. y1 .le. vmin .or. y1 .ge. vmax)
 !       1                                                       return
 
-!       CALL FRSTPT(X1,Y1)
+        call gslwsc(thk)
+        call line(x1,y1,x2,y2)
+
+        call gslwsc(thk_base)
+        return
+
+        end if
+c
+40      x1=x2
+        y1=y2
+c
+c---plot barbs, if necessary
+c
+        do 50 i=1,n10
+        x2=x1+sind*add*aspect
+        y2=y1+cosd*add
+        x3=x2+sind1*barb*aspect
+        y3=y2+cosd1*barb
+
+!       if(x1 .le. umin .or. x1 .ge. umax .or. y1 .le. vmin .or. y1 .ge. vmax)
+!       1                                                       return
+
+!       call frstpt(x1,y1)
 
 !       if(x2 .le. umin .or. x2 .ge. umax .or. y2 .le. vmin .or. y2 .ge. vmax)
 !       1                                                       return
 
-!       CALL VECTOR(X2,Y2)
+!       call vector(x2,y2)
 
-        call GSLWSC(thk)
-        CALL LINE(X1,Y1,X2,Y2)
+        call gslwsc(thk)
+        call line(x1,y1,x2,y2)
 
 !       if(x3 .le. umin .or. x3 .ge. umax .or. y3 .le. vmin .or. y3 .ge. vmax)
 !       1                                                       return
 
-        call GSLWSC(thk1)
-!       CALL VECTOR(X3,Y3)
-        CALL LINE(X2,Y2,X3,Y3)
-        X1=X2
-        Y1=Y2
-50      CONTINUE
-C
-C---PLOT FLAGS, IF NECESSARY
-C
-        DO 60 I=1,N50
-        X2=X1+SIND*ADD*ASPECT
-        Y2=Y1+COSD*ADD
-        X3=X2+SIND1*BARB*ASPECT
-        Y3=Y2+COSD1*BARB
+        call gslwsc(thk1)
+!       call vector(x3,y3)
+        call line(x2,y2,x3,y3)
+        x1=x2
+        y1=y2
+50      continue
+c
+c---plot flags, if necessary
+c
+        do 60 i=1,n50
+        x2=x1+sind*add*aspect
+        y2=y1+cosd*add
+        x3=x2+sind1*barb*aspect
+        y3=y2+cosd1*barb
 
 !       if(x1 .le. umin .or. x1 .ge. umax .or. y1 .le. vmin .or. y1 .ge. vmax)
 !       1                                                       return
 
-        call GSLWSC(thk)
-!       CALL FRSTPT(X1,Y1)
+        call gslwsc(thk)
+!       call frstpt(x1,y1)
 
 !       if(x2 .le. umin .or. x2 .ge. umax .or. y2 .le. vmin .or. y2 .ge. vmax)
 !       1                                                       return
 
-!       CALL VECTOR(X2,Y2)
-        CALL LINE(X1,Y1,X2,Y2)
+!       call vector(x2,y2)
+        call line(x1,y1,x2,y2)
 
 !       if(x3 .le. umin .or. x3 .ge. umax .or. y3 .le. vmin .or. y3 .ge. vmax)
 !       1                                                       return
 
-        call GSLWSC(thk1)
-!       CALL VECTOR(X3,Y3)
-        CALL LINE(X2,Y2,X3,Y3)
+        call gslwsc(thk1)
+!       call vector(x3,y3)
+        call line(x2,y2,x3,y3)
 
 !       if(x1 .le. umin .or. x1 .ge. umax .or. y1 .le. vmin .or. y1 .ge. vmax)
 !       1                                                       return
 
-        call GSLWSC(thkf)
-!       CALL VECTOR(X1,Y1)
-        CALL LINE(X3,Y3,X1,Y1)
-        X1=X2
-        Y1=Y2
-60      CONTINUE
-C
-        call GSLWSC(thk_base)
-        RETURN
-        END
+        call gslwsc(thkf)
+!       call vector(x1,y1)
+        call line(x3,y3,x1,y1)
+        x1=x2
+        y1=y2
+60      continue
+c
+        call gslwsc(thk_base)
+        return
+        end
 c
 
         subroutine plot_circle(u,v,size)
 
-        DATA DEGRAD/.01745329/
+        data degrad/.01745329/
 
         do iaz = 0,360,20
-            az = float(iaz) * DEGRAD
+            az = float(iaz) * degrad
             x = u + size * sin(az)
             y = v + size * cos(az)
             if(iaz .eq. 0)then
-                call FRSTPT(x,y)
+                call frstpt(x,y)
             else
-                call VECTOR(x,y)
+                call vector(x,y)
             endif
         enddo
  
@@ -417,19 +417,19 @@ c
 
         subroutine plot_circle_fill(u,v,radius,frac)
 
-        DATA DEGRAD/.01745329/
+        data degrad/.01745329/
 
         if(frac .lt. 0.10)return
         
         if(frac .ge. 0.10 .and. frac .le. 0.50)then
-!           Add straight line
+!           add straight line
             call line(u,v-radius,u,v+radius)
         endif
 
-        if(frac .gt. .50 .and. frac .lt. 0.9375)then ! BKN
-!           Overcast
+        if(frac .gt. .50 .and. frac .lt. 0.9375)then ! bkn
+!           overcast
             do iaz = -20,+20,40
-                az = float(iaz) * DEGRAD
+                az = float(iaz) * degrad
                 x1 = u + radius * sin(az)
                 y1 = v - radius * cos(az)
                 x2 = u + radius * sin(az)
@@ -439,9 +439,9 @@ c
         endif
 
 
-        if(frac .ge. 0.9375)then ! Overcast - fill full circle
+        if(frac .ge. 0.9375)then ! overcast - fill full circle
             do iaz = 0,270,90
-                az = float(iaz) * DEGRAD
+                az = float(iaz) * degrad
                 x = u + radius * sin(az)
                 y = v + radius * cos(az)
                 call line(u,v,x,y)

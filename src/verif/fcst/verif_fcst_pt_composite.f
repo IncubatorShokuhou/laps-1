@@ -1,4 +1,4 @@
-! Hongli Jiang: NX_L, NY_L, and NZ_L were commented out. Uncomment them
+! hongli jiang: nx_l, ny_l, and nz_l were commented out. uncomment them
 ! and also added in verif_fcst where verif_fcst_compostie is called. 10/14/2013          
 
         subroutine verif_fcst_composite(i4time_sys,a9time,
@@ -6,8 +6,8 @@
      1                  model_fcst_len,
      1                  model_cycle_time_in,
      1                  laps_cycle_time,
-     1                  NX_L,NY_L,
-     1                  NZ_L,
+     1                  nx_l,ny_l,
+     1                  nz_l,
      1                  r_missing_data,
      1                  n_plot_times,
      1                  j_status)
@@ -38,7 +38,7 @@
         integer jl(maxbgmodels,max_fcst_times,max_regions)
         integer jh(maxbgmodels,max_fcst_times,max_regions)
 
-        character EXT*31, directory*255, c_model*30
+        character ext*31, directory*255, c_model*30
 
         character*10  units_2d
         character*125 comment_2d
@@ -64,11 +64,11 @@
         character*2 c2_region
         character*10 c_thr
 
-!       Specify what is being verified
+!       specify what is being verified
         data var_a      
-     1     /'SWI','TSF','DSF','USF','VSF','SSF','WSF'
-     1     ,'T3' ,'W3' ,'TPW','R01','R03','R06','R24'
-     1     ,'RTO','S8A'/     
+     1     /'swi','tsf','dsf','usf','vsf','ssf','wsf'
+     1     ,'t3' ,'w3' ,'tpw','r01','r03','r06','r24'
+     1     ,'rto','s8a'/     
         data nthr_a     /1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1/        
         data istart_a   /0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1/        
         data ipersist_a /0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1/        
@@ -78,8 +78,8 @@
         integer maxthr
         parameter (maxthr=5)
 
-      ! Never being used! Yuanfu covers this for now
-        ! real cont_4d(NX_L,NY_L,NZ_L,maxthr)
+      ! never being used! yuanfu covers this for now
+        ! real cont_4d(nx_l,ny_l,nz_l,maxthr)
 
         real obs_mean(maxbgmodels,0:max_fcst_times,max_regions)
         real fcst_mean(maxbgmodels,0:max_fcst_times,max_regions)
@@ -107,7 +107,7 @@
         integer i_plot_times_m(maxbgmodels,0:max_fcst_times,n_fields)       
 
        write(6,*)
-       write(6,*)' Start subroutine verif_fcst_pt_composite...'
+       write(6,*)' start subroutine verif_fcst_pt_composite...'
  
        l_time_outcoord_hhmm = .true.
 
@@ -121,14 +121,14 @@
          compdir = 'comp2'
         endif
 
-        write(6,*)' Processing stats for period/dir = ',ndays,compdir
+        write(6,*)' processing stats for period/dir = ',ndays,compdir
 
         rmiss = -99.9
         imiss = -999
 
         thresh_var = 20. ! lowest threshold for this variable
 
-        write(6,*)' Time is ',i4time_sys,a9time
+        write(6,*)' time is ',i4time_sys,a9time
         write(6,*)' n_plot_times ',n_plot_times
 
         n_plot_times_m(:,:,:) = 1
@@ -136,7 +136,7 @@
 
         i4_initial = i4time_sys
 
-!       Determine verification timing
+!       determine verification timing
         model_verif_intvl = max(laps_cycle_time,model_fcst_intvl)
         n_fcst_times = (model_fcst_len*60) / model_verif_intvl
 
@@ -159,23 +159,23 @@
           l_persist = .false.
          endif
 
-!        Get fdda_model_source and 'n_fdda_models' from static file
+!        get fdda_model_source and 'n_fdda_models' from static file
          call get_fdda_model_source(c_fdda_mdl_src,n_fdda_models
      1                                            ,istatus)
 
          if(l_persist .eqv. .true.)then
             n_fdda_models = n_fdda_models + 1
             c_fdda_mdl_src(n_fdda_models) = 'persistence'
-            write(6,*)' Adding persistence to fdda_models'
+            write(6,*)' adding persistence to fdda_models'
          endif
 
          write(6,*)' n_fdda_models = ',n_fdda_models
          write(6,*)' c_fdda_mdl_src = '
      1             ,(c_fdda_mdl_src(m),m=1,n_fdda_models)
 
-!        Update array of n_plot_times_m for available model exceptions
+!        update array of n_plot_times_m for available model exceptions
          do imodel = 2,n_fdda_models
-             if(var_a(ifield) .eq. 'RTO')then
+             if(var_a(ifield) .eq. 'rto')then
                  n_plot_times_m(imodel,0:max_fcst_times,ifield) = 0       
 
                  itime_exception  = 3600 / model_verif_intvl
@@ -197,9 +197,9 @@
                  if(itime_exception .le. max_fcst_times)then
                      n_plot_times_m(imodel,itime_exception,ifield) = 1
                  endif
-             endif ! RTO field    
+             endif ! rto field    
 
-!            Accept just 3-hourly forecasts from the NAM model
+!            accept just 3-hourly forecasts from the nam model
              if(trim(c_fdda_mdl_src(imodel)) .eq. 'nam')then 
                  nam_fcst_intvl = 10800                           
                  do itime_fcst = 0,n_fcst_times
@@ -209,9 +209,9 @@
                          n_plot_times_m(imodel,itime_fcst,ifield) = 0
                      endif
                  enddo
-             endif ! NAM model
+             endif ! nam model
 
-!            Accept just 6-hourly forecasts from the NAM-NH model
+!            accept just 6-hourly forecasts from the nam-nh model
              if(trim(c_fdda_mdl_src(imodel)) .eq. 'nam-nh')then 
                  nam_fcst_intvl = 21600                           
                  do itime_fcst = 0,n_fcst_times
@@ -221,13 +221,13 @@
                          n_plot_times_m(imodel,itime_fcst,ifield) = 0
                      endif
                  enddo
-             endif ! NAM model
+             endif ! nam model
 
-!            Accept just 1-hourly 3D/FUA fcsts from the HRRR model
-             if(trim(c_fdda_mdl_src(imodel)) .eq. 'wrf-hrrr' .AND.
-     1          (var_a(ifield) .eq. 'TPW' .or. 
-     1           var_a(ifield) .eq. 'T3'  .or. 
-     1           var_a(ifield) .eq. 'W3'       ) 
+!            accept just 1-hourly 3d/fua fcsts from the hrrr model
+             if(trim(c_fdda_mdl_src(imodel)) .eq. 'wrf-hrrr' .and.
+     1          (var_a(ifield) .eq. 'tpw' .or. 
+     1           var_a(ifield) .eq. 't3'  .or. 
+     1           var_a(ifield) .eq. 'w3'       ) 
      1                                                             )then
                  mdl_fcst_intvl = 3600                            
                  do itime_fcst = 0,n_fcst_times
@@ -237,13 +237,13 @@
                          n_plot_times_m(imodel,itime_fcst,ifield) = 0
                      endif
                  enddo
-             endif ! NAM model
+             endif ! nam model
 
          enddo ! imodel
 
          call get_directory('verif',verif_dir,len_verif)
 
-!        Initialize arrays
+!        initialize arrays
          obs_mean_comp = rmiss
          fcst_mean_comp = rmiss
          rms_comp = rmiss
@@ -256,9 +256,9 @@
          call s_len(var_2d,lenvar)
 
          write(6,*)                                            
-         write(6,*)' Processing field for composite stats ',var_2d               
+         write(6,*)' processing field for composite stats ',var_2d               
 
-         if(var_2d(1:lenvar) .eq. 'SWI')then
+         if(var_2d(1:lenvar) .eq. 'swi')then
           model_cycle_time = 86400
          else
           model_cycle_time = model_cycle_time_in
@@ -286,19 +286,19 @@
           incomplete_run = 0   ! based on any of the models
           incomplete_run_m = 0 ! based on each model
 
-          n = imiss ! Initialize
+          n = imiss ! initialize
 
           i4_initial = i4time_sys - (init * model_cycle_time)       
           call make_fnam_lp(i4_initial,a9time_initial,istatus)
 
           write(6,*)                                            
-          write(6,*)' Processing model cycle ',a9time_initial
+          write(6,*)' processing model cycle ',a9time_initial
 
           plot_dir = verif_dir(1:len_verif)//var_2d(1:lenvar)
      1                                     //'/pt'
           len_plot = len_verif + 3 + lenvar ! + len_model
 
-!         Read individual bias files
+!         read individual bias files
           write(6,*)' nthr before assigning = ',nthr
           nthr = nthr_a(ifield) ! nthr may be unset or have earlier been stepped on
           do idbz = 1,nthr
@@ -307,7 +307,7 @@
            write(c_thr,901)nint(rdbz)
  901       format(i2)
 
-!          write GNUplot file for the time series of this model (region 1)
+!          write gnuplot file for the time series of this model (region 1)
            stats_file_in = plot_dir(1:len_plot)//'/'
      1                                     //a9time_initial     
      1                                     //'.stats'     
@@ -323,14 +323,14 @@
            if(.not. l_exist)then
                nmissing = nmissing + 1
                if(nmissing .le. nmissing_thr)then
-                   write(6,*)' WARNING: file does not exist:'
+                   write(6,*)' warning: file does not exist:'
      1                                                    ,stats_file_in
                    goto960
                else
-                   write(6,*)' WARNING: file does not exist:'
+                   write(6,*)' warning: file does not exist:'
      1                                                    ,stats_file_in
                    write(6,*)
-     1  ' Skipping this field, too many missing initialization times...'       
+     1  ' skipping this field, too many missing initialization times...'       
      1                       ,nmissing,nmissing_thr                  
                    goto980
                endif
@@ -338,13 +338,13 @@
 
 !          inquire(file=stats_file_in,exist=l_exist)
 !          if(.not. l_exist)then
-!              write(6,*)' ERROR: file does not exist:',stats_file_in       
+!              write(6,*)' error: file does not exist:',stats_file_in       
 !              goto980
 !          endif ! l_exist
 
            open(lun_stats_in,file=stats_file_in,status='old')
 
-!          Read comment with model member names
+!          read comment with model member names
            read(lun_stats_in,51,err=958,end=958) cline
 51         format(a)
            write(6,*)'cline = ',cline
@@ -353,7 +353,7 @@
            call csplit(cline,c_fdda_mdl_hdr,nelems,n_fdda_models,char
      1                ,istatus)
            if(istatus .ne. 1)then
-               write(6,*)' Read error in stats file header line...'
+               write(6,*)' read error in stats file header line...'
                goto958
            endif
            write(6,*)'c_fdda_mdl_hdr nelems/n_fdda_models = '
@@ -362,7 +362,7 @@
 902        format('# ',30(1x,a))  
 
            if(l_col)then
-!              Read mean and rms values
+!              read mean and rms values
                do imodel = 2,n_fdda_models
                  if(imodel .gt. 2)then
                      read(lun_stats_in,*)                       
@@ -381,7 +381,7 @@
      1                  rms(imodel,itime_fcst,iregion)
 911                format(a24,1x,3f10.3)
                    goto 913
-912                write(6,*)' Read error in stats file...'
+912                write(6,*)' read error in stats file...'
                    goto 958
 913                continue
 
@@ -391,7 +391,7 @@
                    if(a24time_valid_file .ne. 
      1                a24time_valid_expected)then
                        write(6,*)
-     1                 ' WARNING: imodel / a24time (expected/file)'
+     1                 ' warning: imodel / a24time (expected/file)'
      1                 ,imodel,itime,a24time_valid_expected
      1                              ,a24time_valid_file     
                        goto958
@@ -401,7 +401,7 @@
 
                enddo ! imodel
 
-!              Test for missing data in all times/models                    
+!              test for missing data in all times/models                    
                do itime_fcst = istart_a(ifield),n_fcst_times
 
                  do imodel = 2,n_fdda_models
@@ -410,13 +410,13 @@
                      n(imodel,itime_fcst,iregion) = 0     
                      i_good_timestep_model = 0
                    elseif(obs_mean(imodel,itime_fcst,iregion).eq.0.
-     1                               .AND. 
-     1                    var_2d .ne. 'R01' .and. var_2d .eq. 'RTO')then
+     1                               .and. 
+     1                    var_2d .ne. 'r01' .and. var_2d .eq. 'rto')then
                      write(6,914)imodel,itime_fcst,n_fcst_times       
-914                  format(' ERROR: zero obs_mean'
+914                  format(' error: zero obs_mean'
      1                     ,' imodel/itime = ',2i4
      1                     ,' check # fcst times in file is ',i4)
-                     write(6,*)' Setting n array to zero'
+                     write(6,*)' setting n array to zero'
                      n(:,:,:) = 0     
                      i_good_timestep_model = 0
                    else ! valid data
@@ -425,35 +425,35 @@
                      i_plot_times_m(imodel,itime_fcst,ifield) = 1       
                    endif
 
-!                  Flag as incomplete if missing during expected time     
-                   if(i_good_timestep_model .eq. 0 .AND.
+!                  flag as incomplete if missing during expected time     
+                   if(i_good_timestep_model .eq. 0 .and.
      1                n_plot_times_m(imodel,itime_fcst,ifield) .eq. 1 
      1                                                   )then
-                     if(incomplete_run .eq. 0     .AND. 
+                     if(incomplete_run .eq. 0     .and. 
      1                  itime_fcst .le. n_plot_times)then
                        write(6,916)init,a9time_initial,itime_fcst,imodel
 916                    format(
-     1                 ' WARNING: overall missing for init/time/model  '
+     1                 ' warning: overall missing for init/time/model  '
      1                        ,i6,1x,a9,1x,i6,i6)                      
                        incomplete_run = 1 
                      endif
 
-                     if(incomplete_run_m(imodel) .eq. 0     .AND. 
+                     if(incomplete_run_m(imodel) .eq. 0     .and. 
      1                  itime_fcst .le. n_plot_times)then
                        write(6,917)init,a9time_initial,itime_fcst,imodel
 917                    format(
-     1                 ' WARNING: missing N values for init/time/model '
+     1                 ' warning: missing n values for init/time/model '
      1                        ,i6,1x,a9,1x,i6,i6)                      
                        incomplete_run_m(imodel) = 1
                      endif
 
-                   endif ! i_good_timestep_model = 0 .AND.
+                   endif ! i_good_timestep_model = 0 .and.
                          ! expect output from model at this time
 
                  enddo ! imodel
                enddo ! itime_fcst
 
-!              Read members.txt file
+!              read members.txt file
                open(lun_mem,file=members_file,status='old')
                do imodel = 2,n_fdda_models
                  if(trim(c_model) .ne. 'persistence')then
@@ -465,20 +465,20 @@
      1                                         ,c_fdda_mdl_src(imodel)
 !    1                                         ,c_fdda_mdl_hdr(imodel)
 
-!                  Compare members.txt file and namelist fdda parms
+!                  compare members.txt file and namelist fdda parms
                    if(trim(c_model) .ne.
      1                              trim(c_fdda_mdl_src(imodel)))then
                        write(6,*)
-     1             ' ERROR: Models did not match (members.txt/namelist)'
+     1             ' error: models did not match (members.txt/namelist)'
                        close(lun_mem)
                        return
                    endif
 
-!                  Compare rms file header and namelist fdda parms
+!                  compare rms file header and namelist fdda parms
                    if(trim(c_model) .ne.
      1                              trim(c_fdda_mdl_hdr(imodel)))then
                        write(6,*)
-     1       ' WARNING: Models did not match (rms file header/namelist)'
+     1       ' warning: models did not match (rms file header/namelist)'
                        close(lun_mem)
                        goto 958
                    endif
@@ -494,7 +494,7 @@
 
           enddo ! idbz
 
-!         Write to log for informational purposes
+!         write to log for informational purposes
           do imodel=2,n_fdda_models
              do itime_fcst = 0,n_fcst_times
                  write(6,950)c_fdda_mdl_src(imodel)
@@ -507,12 +507,12 @@
      1                    ,fcst_sum(imodel,itime_fcst,1)                
      1                    ,rms(imodel,itime_fcst,1)                
      1                    ,sumsq(imodel,itime_fcst,1)                
-950              format(' Obs counts/sums: ',a10,' itime_fcst' 
+950              format(' obs counts/sums: ',a10,' itime_fcst' 
      1                                      ,i3,3x,2i6,3(f9.3,f9.1))
                  if(obs_mean(imodel,itime_fcst,1) .eq. 0.    
-     1                               .AND. 
-     1              var_2d .ne. 'R01' .and. var_2d .eq. 'RTO')then
-                     write(6,*)' WARNING: obs_mean = 0. itime = '
+     1                               .and. 
+     1              var_2d .ne. 'r01' .and. var_2d .eq. 'rto')then
+                     write(6,*)' warning: obs_mean = 0. itime = '
      1                        ,itime_fcst
                  endif
              enddo ! itime_fcst
@@ -530,14 +530,14 @@
             endif
           enddo 
 
-          if(nincomplete_t .eq. 0 .OR. 
+          if(nincomplete_t .eq. 0 .or. 
      1                             (l_req_all_mdls .eqv. .false.) )then
-              write(6,*)' Accumulating sums for this run '
+              write(6,*)' accumulating sums for this run '
               nsuccess = nsuccess + 1
 
-              where (n(:,:,:) .ne. imiss .AND. n(:,:,:) .gt. 0
-     1                       .AND. obs_mean(:,:,:) .ne. rmiss
-     1                       .AND. fcst_mean(:,:,:) .ne. rmiss
+              where (n(:,:,:) .ne. imiss .and. n(:,:,:) .gt. 0
+     1                       .and. obs_mean(:,:,:) .ne. rmiss
+     1                       .and. fcst_mean(:,:,:) .ne. rmiss
      1                                                           )                
                n_sum(:,:,:) = n_sum(:,:,:) + n(:,:,:)
                obs_sum(:,:,:) = 
@@ -548,7 +548,7 @@
               end where
 
           else
-              write(6,*)' Not accumulating sums for this run'
+              write(6,*)' not accumulating sums for this run'
 
           endif ! accumulate sums for this run
 
@@ -560,7 +560,7 @@
 
           goto 960 ! success for this time
 
-!         Error Condition for this time
+!         error condition for this time
 958       nmissing = nmissing + 1
 
 960      enddo                    ! init (initialization time)
@@ -599,7 +599,7 @@
 
          write(6,*)'l_plot_criteria = ',l_plot_criteria
 
-!        Define and write to summary*.txt file
+!        define and write to summary*.txt file
          summary_file_out = verif_dir(1:len_verif)//var_2d(1:lenvar)
      1                              //'/pt'
      1                              //'/summary_'//trim(compdir)//'.txt'       
@@ -620,17 +620,17 @@
          close(lun_summary_out)
 
          if(nsuccess .lt. nsuccess_thr)then
-             write(6,*)' Insufficient successful times to plot'
+             write(6,*)' insufficient successful times to plot'
              goto 980
          endif
 
-!        Calculate composite mean rms
+!        calculate composite mean rms
          if(.true.)then
           do idbz = 1,nthr
            do imodel=2,n_fdda_models
 
              write(6,971)imodel,c_fdda_mdl_src(imodel)         
-971          format(/' Writing sums for model ',i3,1x,a10)       
+971          format(/' writing sums for model ',i3,1x,a10)       
 
              do itime_fcst = 0,n_fcst_times
 
@@ -647,7 +647,7 @@
           enddo ! idbz
          endif ! .true. / .false.
 
-         where (n_sum(:,:,:) .ne. imiss .AND. n_sum(:,:,:) .gt. 0)
+         where (n_sum(:,:,:) .ne. imiss .and. n_sum(:,:,:) .gt. 0)
            obs_mean_comp(:,:,:) = obs_sum(:,:,:) / n_sum(:,:,:)
            fcst_mean_comp(:,:,:) = fcst_sum(:,:,:) / n_sum(:,:,:)
            rms_comp(:,:,:) = sqrt(sumsq(:,:,:) / n_sum(:,:,:))
@@ -655,7 +655,7 @@
 
          write(6,*)
          write(6,*)
-     1    ' Write output composite obs/fcst/rms files ############# '                                           
+     1    ' write output composite obs/fcst/rms files ############# '                                           
          write(6,*)' nthr before assigning = ',nthr
          nthr = nthr_a(ifield) ! nthr may be unset or have earlier been stepped on
          do idbz = 1,nthr
@@ -666,7 +666,7 @@
            i4_initial = i4time_sys                                   
            call make_fnam_lp(i4_initial,a9time_initial,istatus)
 
-!          write GNUplot file for the time series of this model (region 1)
+!          write gnuplot file for the time series of this model (region 1)
            stats_file_out = plot_dir(1:len_plot)//'/'
      1                                     //trim(compdir)//'/'
      1                                     //a9time_initial     
@@ -676,7 +676,7 @@
 
            open(lun_stats_out,file=stats_file_out,status='unknown')
 
-!          Write comment with model member names
+!          write comment with model member names
            write(lun_stats_out,902)(trim(c_fdda_mdl_src(imodel))
      1                              ,imodel=2,n_fdda_models)  
            if(l_col)then
@@ -691,7 +691,7 @@
                    write(lun_stats_out,*)                       
                endif
 
-!              Write mean and rms values
+!              write mean and rms values
                do itime_fcst = 0,n_fcst_times
                    i4_valid = i4_initial + itime_fcst*model_verif_intvl      
                    call cv_i4tim_asc_lp(i4_valid,a24time_valid
@@ -742,7 +742,7 @@
 
        enddo ! i_period
 
- 999   write(6,*)' End of subroutine verif_fcst_composite'
+ 999   write(6,*)' end of subroutine verif_fcst_composite'
 
        return
 

@@ -1,36 +1,36 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
@@ -47,7 +47,7 @@ cdis
         integer max_storms
         parameter(max_storms=75)
 
-!       Dummy arrays
+!       dummy arrays
         real xlaps(ni,nj),ylaps(ni,nj),xradar(ni,nj),yradar(ni,nj)
         real grid_ra_vel(ni,nj,nk),grid_ra_ref(ni,nj,nk)
         real max2d_ref(ni,nj),max2d_refprv(ni,nj)
@@ -57,7 +57,7 @@ cdis
         real iiilut(-ni:ni,-nj:nj)
 
         real steer_u(ni,nj),steer_v(ni,nj)
-     1       ,umean(ni,nj),vmean(ni,nj)    ! Unmodified mean winds WRT True N
+     1       ,umean(ni,nj),vmean(ni,nj)    ! unmodified mean winds wrt true n
      1       ,storm_u(max_storms),storm_v(max_storms),wt_ob(max_storms)
 
         integer i4time_latest,istatus,istorm(max_storms),jstorm(max_st
@@ -82,15 +82,15 @@ cdis
      1          lat,lon,standard_latdum,standard_londum,
      1    umean,vmean,n_storms,
      1          istorm,jstorm,
-     1          storm_u,storm_v,         ! Storm Motions WRT True or Grid N?
+     1          storm_u,storm_v,         ! storm motions wrt true or grid n?
      1                                  istatus)
 
         endif
 
         write(6,*)
-        write(6,*)' Returned from storm_cent_rt'
-        write(6,*)'   #             Storm  U/V    Mean U/V'
-     1                  ,'  Stm Dir/Spd  Mean Dir/Spd'
+        write(6,*)' returned from storm_cent_rt'
+        write(6,*)'   #             storm  u/v    mean u/v'
+     1                  ,'  stm dir/spd  mean dir/spd'
 
         do i = 1,n_storms
             umean_at_storm = umean(istorm(i),jstorm(i))
@@ -111,26 +111,26 @@ cdis
         enddo ! i
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c    Call OA routine to derive steering wind grid using umean,vmean,storm_u,
+c    call oa routine to derive steering wind grid using umean,vmean,storm_u,
 c    storm_v
 
-        call analyze_storm_motion(ni,nj,umean,vmean        ! Input
-     1    ,n_storms,istorm,jstorm,storm_u,storm_v          ! Input
-     1  ,iiilut                                    ! Input (Local)
-     1  ,wt_ob                                     ! Input (Local)
-     1        ,max_storms                                ! Input
-     1  ,steer_u,steer_v                        )  ! Output
+        call analyze_storm_motion(ni,nj,umean,vmean        ! input
+     1    ,n_storms,istorm,jstorm,storm_u,storm_v          ! input
+     1  ,iiilut                                    ! input (local)
+     1  ,wt_ob                                     ! input (local)
+     1        ,max_storms                                ! input
+     1  ,steer_u,steer_v                        )  ! output
 
         return
         end
 
 
-        subroutine analyze_storm_motion(ni,nj,umean,vmean ! Input
-     1    ,n_storms,istorm,jstorm,storm_u,storm_v         ! Input
-     1  ,iiilut                                   ! Input (Local)
-     1  ,wt_ob                                    ! Input (Local)
-     1        ,max_storms                               ! Input
-     1  ,steer_u,steer_v                       )  ! Output
+        subroutine analyze_storm_motion(ni,nj,umean,vmean ! input
+     1    ,n_storms,istorm,jstorm,storm_u,storm_v         ! input
+     1  ,iiilut                                   ! input (local)
+     1  ,wt_ob                                    ! input (local)
+     1        ,max_storms                               ! input
+     1  ,steer_u,steer_v                       )  ! output
 
         real iiilut(-ni:ni,-nj:nj)
 
@@ -154,8 +154,8 @@ c    1orms)
             call barnes_r5th(ni,nj,n_storms,max_storms
      1          ,istorm,jstorm,storm_v,wt_ob,vmean,iiilut,steer_v)
 
-        else ! Just copy the mean wind field into the output grids
-            write(6,*)' No storms, returning mean wind field'
+        else ! just copy the mean wind field into the output grids
+            write(6,*)' no storms, returning mean wind field'
             do j = 1,nj
             do i = 1,ni
                 steer_u(i,j) = umean(i,j)
@@ -188,11 +188,11 @@ c    1orms)
 
       real iiilut(-ni:ni,-nj:nj)
 
-      write(6,*)' Barnes_r5th called'
+      write(6,*)' barnes_r5th called'
 
       call get_r_missing_data(r_missing_data,istatus)
       if(istatus .ne. 1)then
-          write(6,*)' Error in barnes_r5th: STOP'
+          write(6,*)' error in barnes_r5th: stop'
           stop
       endif
 
@@ -200,14 +200,14 @@ c    1orms)
         fnorm(iii) = (100./float(iii)) ** (exponent_distance_wt / 2.0)
       enddo
 
-      write(6,*)' Ncnt = ',ncnt
+      write(6,*)' ncnt = ',ncnt
 
-C     THIS IS SEt FOR INCREMENTS OF .01
+c     this is set for increments of .01
       spcng = 10.
       radm2=1.0/spcng**2
       write(6,*)' radm2*100 = ',radm2*100.
 
-!     Create a lookup table for (iii)
+!     create a lookup table for (iii)
       do i = -ni,ni
       do j = -nj,nj
           rsq=i*i+j*j
@@ -222,8 +222,8 @@ C     THIS IS SEt FOR INCREMENTS OF .01
       enddo
       enddo
 
-!     Note that it is OK if iii exceeds n_fnorm because of the test above
-      write(6,*)' Highest value of iii (compared to n_fnorm) = ',iii,n_f
+!     note that it is ok if iii exceeds n_fnorm because of the test above
+      write(6,*)' highest value of iii (compared to n_fnorm) = ',iii,n_f
      1norm
 
       do j=1,nj
@@ -234,14 +234,14 @@ C     THIS IS SEt FOR INCREMENTS OF .01
           do n=1,ncnt
               ii=iob(n)
               jj=job(n)
-              weight = iiilut(i-ii,j-jj) * wt_ob(n) ! Obs are being weighted
+              weight = iiilut(i-ii,j-jj) * wt_ob(n) ! obs are being weighted
               sum=weight*obs(n)+sum
               sumwt=sumwt+weight
           enddo
 
           if (sumwt.eq.0.)then
               anal(i,j) = r_missing_data
-          ELSE
+          else
               anal(i,j)=sum/sumwt
           endif
 

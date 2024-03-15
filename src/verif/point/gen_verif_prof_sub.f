@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps
 cdis
-cdis    This software and its documentation are in the public domain and
-cdis    are furnished "as is."  The United States government, its
+cdis    this software and its documentation are in the public domain and
+cdis    are furnished "as is."  the united states government, its
 cdis    instrumentalities, officers, employees, and agents make no
 cdis    warranty, express or implied, as to the usefulness of the software
-cdis    and documentation for any purpose.  They assume no responsibility
+cdis    and documentation for any purpose.  they assume no responsibility
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making
-cdis    the modifications.  If significant modifications or enhancements
-cdis    are made to this software, the FSL Software Policy Manager
+cdis    the modifications.  if significant modifications or enhancements
+cdis    are made to this software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis
 cdis
@@ -31,7 +31,7 @@ cdis
 cdis
 
       subroutine gen_verif_prof_sub(model_dir, i4time, 
-     1                              nl_dir, ni, nj, nk, stdLON,
+     1                              nl_dir, ni, nj, nk, stdlon,
      1                              n,balance, max_verif,
      1                              r_missing_data,istatus)
 
@@ -40,13 +40,13 @@ cdis
       character*9	a9_time
       character*256     model_dir	!location of model data directories
                                         !lapsprd, or location of fua, fsf
-      integer		i4time		!i4time of LAPS/model file to read
+      integer		i4time		!i4time of laps/model file to read
       character*256	nl_dir		!directory where verify_prof.nl located
       integer           ni, nj, nk	!i, j and k grid dimensions
-      real 		stdLON		!standard Longitude
+      real 		stdlon		!standard longitude
       integer		balance
-      real		r_missing_data	!value used from LAPS for missing data
-      integer           max_verif       !Input: defines the maximum number of verification types
+      real		r_missing_data	!value used from laps for missing data
+      integer           max_verif       !input: defines the maximum number of verification types
       integer           n_verif
       integer		istatus		!return value from subroutine
 
@@ -68,26 +68,26 @@ c     character*150     verif_output_ext
 c     character*150     verif_output_bal
       real		verif_missing_data
       integer		dir_len, model_len, bal_len, i,n
-C
-C     read verify.nl to get prof directory and output directory
+c
+c     read verify.nl to get prof directory and output directory
       write(6,*) 'in gen_sub'
       call read_verif_nl(type_obs,path_to_raw_profiler,
      1 path_to_raw_sounding, raob_process_lag,raob_process_lag_bal,
      1                   max_verif, verif_output_dir,
      1                   verif_missing_data, n_verif, istatus)
       if (istatus .ne. 1) then
-        write(6,*)' Error in read_verif_nl '
+        write(6,*)' error in read_verif_nl '
         istatus = 0
         return
       endif
 
-C     set prof_fname: this may have to move once we modify i4time and/or a9_time
+c     set prof_fname: this may have to move once we modify i4time and/or a9_time
 c     based upon which verification we are performing (ie., balance = 0, or 1, or 2).
       call make_fnam_lp(i4time,a9_time,istatus)
       call s_len(path_to_raw_profiler,dir_len)
       prof_fname = path_to_raw_profiler(1:dir_len)//a9_time//'0100o'
 
-C     make output_fname
+c     make output_fname
       call s_len(model_dir,model_len)
       call s_len(verif_output_dir(n),dir_len)
 
@@ -127,7 +127,7 @@ c        i4time_raob=i4time_laps-raob_process_lag_bal  !for airdrop raob_process
 c        call make_fnam_lp(i4time_raob, a9_time_raob, istatus)
 c        output_fname = model_dir(1:model_len)//'verif/'//
 c    1verif_output_dir(n)(1:dir_len)//'/'//a9_time_raob//'_raob'
-c        if(c8_project.eq.'AIRDROP'.and.balance.eq.1)then
+c        if(c8_project.eq.'airdrop'.and.balance.eq.1)then
 c           i4time_laps=i4time_laps+i_advanal_sec
 c           call make_fnam_lp(i4time_laps,a9_time_laps,istatus)
 c        endif
@@ -136,60 +136,60 @@ c        i4time_raob=i4time_laps-raob_process_lag  !for airdrop = raob_process_l
 c        call make_fnam_lp(i4time_raob, a9_time_raob, istatus)
 c        output_fname = model_dir(1:model_len)//'verif/'//
 c    1verif_output_dir(n)(1:dir_len)//'/'//a9_time_raob//'_raob'
-cc        if(c8_project.eq.'AIRDROP')then
+cc        if(c8_project.eq.'airdrop')then
 cc           i4time_laps=i4time_laps-i_advanal_sec
 cc           call make_fnam_lp(i4time_laps,a9_time_laps,istatus)
 cc        endif
 c     endif
-c     if(c8_project.ne.'AIRDROP')then
+c     if(c8_project.ne.'airdrop')then
 c        i4time_laps=i4time_raob
 c        call make_fnam_lp(i4time_laps, a9_time_laps, istatus)
 c     endif
 
-      write(6,*) 'Processing Analysis Time: ',a9_time    !_laps,
+      write(6,*) 'processing analysis time: ',a9_time    !_laps,
      1,'  ',i4time                                       !_laps
 
 c
-c careful if this is AIRDROP because in this case we want
+c careful if this is airdrop because in this case we want
 c to verify analysis at t, balance at t+payload and backgrounds
 c at either or both times (for comparison sake)
 
-C     Read lat and lon data
-      call read_static_grid(ni,nj,'LAT',lats,istatus)
+c     read lat and lon data
+      call read_static_grid(ni,nj,'lat',lats,istatus)
       if (istatus .ne. 1) then
-        write(6,*)' Error getting LAPS LAT'
+        write(6,*)' error getting laps lat'
         istatus = 0
         return
       endif
 
-      call read_static_grid(ni,nj,'LON',lons,istatus)
+      call read_static_grid(ni,nj,'lon',lons,istatus)
       if (istatus .ne. 1) then
-        write(6,*)' Error getting LAPS LON'
+        write(6,*)' error getting laps lon'
         istatus = 0
         return
       endif
 
-C     Get LAPS/model pressure levels
+c     get laps/model pressure levels
       call get_pres_1d(i4time,nk,laps_levels_pa,istatus)
       if (istatus .ne. 1) then
-        write(6,*)' Error getting LAPS pressure levels'
+        write(6,*)' error getting laps pressure levels'
         istatus = 0
         return
       endif
 
-C     convert pressure levels to mb
+c     convert pressure levels to mb
       laps_levels_mb = laps_levels_pa/100.
 
-C     generate profiler output file
+c     generate profiler output file
       call get_prof_pairs(prof_fname, model_dir, i4time, 
      1                    output_fname, nl_dir, ni, nj,
-     1                    nk, lats, lons, stdLON, 
+     1                    nk, lats, lons, stdlon, 
      1                    laps_levels_mb, laps_levels_pa,
      1                    balance, r_missing_data, 
      1                    verif_missing_data, istatus)
 
       if(istatus .ne. 1)then
-          write(6,*)' Error in get_prof_pairs '
+          write(6,*)' error in get_prof_pairs '
       endif
 
       return

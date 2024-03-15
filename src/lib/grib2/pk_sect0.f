@@ -1,191 +1,191 @@
-      SUBROUTINE PK_SECT0(KFILDO,IPACK,ND5,IS0,NS0,L3264B,
-     1                    NEW,LOCN,IPOS,IEDITION,LOCN0_9,
-     2                    IPOS0_9,IER,ISEVERE,*)
-C
-C        MARCH   2000   LAWRENCE   GSC/TDL   ORIGINAL CODING
-C        JANUARY 2001   GLAHN      COMMENTS; ADDED TEST FOR SIZE
-C                                  OF IS0( )
-C        JANUARY 2001   GLAHN/LAWRENCE INITIALIZED IS0(1) AND IS0(8)
-C        MARCH 2001     LAWRENCE   CHANGED HOW THIS ROUTINE PACKS 
-C                                  THE NUMERIC EQUIVALENT OF THE
-C                                  STRING "GRIB".
-C
-C        PURPOSE
-C            PACKS SECTION 0, THE INDICATOR SECTION, OF A GRIB2
-C            MESSAGE. SECTION 0 CONTAINS INFORMATION PERTAINING
-C            TO THE SIZE OF THE MESSAGE AND THE EDITION OF
-C            THE GRIB STANDARDS TO BE FOLLOWED IN THE PACKING
-C            PROCESS.
-C
-C            IF THIS IS A NEW GRIB2 MESSAGE, THEN THE CONTENTS OF
-C            IS0( ) ARE PACKED INTO THE MESSAGE. IF THIS IS A
-C            PRODUCT THAT IS GETTING APPENDED ONTO A PREEXISTING
-C            MESSAGE, THEN SECTION 0 IS NOT PACKED AGAIN. INSTEAD,
-C            THE END OF MESSAGE INDICATOR OF THE PREVIOUSLY PACKED
-C            PRODUCT IS OVERWRITTEN, AND THE SIZE OF THE GRIB2
-C            MESSAGE (AS STATED BY OCTETS 9-16 OF SECTION 0 OF
-C            THE PREVIOUS PACKED PRODUCT) IS ZEROED OUT. THE TOTAL
-C            SIZE OF THE GRIB2 MESSAGE IS RECALCULATED IN ANOTHER
-C            ROUTINE EVERY TIME NEW PRODUCT IS PACKED ONTO THE MESSAGE.
-C
-C        DATA SET USE
-C           KFILDO - UNIT NUMBER FOR OUTPUT (PRINT) FILE. (OUTPUT)
-C
-C        VARIABLES
-C              KFILDO = UNIT NUMBER FOR OUTPUT (PRINT) FILE. (INPUT)
-C            IPACK(J) = THE ARRAY THAT HOLDS THE ACTUAL PACKED MESSAGE
-C                       (J=1,ND5). (INPUT/OUTPUT)
-C                 ND5 = THE SIZE OF THE ARRAY IPACK( ). (INPUT)
-C              IS0(J) = CONTAINS THE INDICATOR DATA THAT
-C                       WILL BE PACKED INTO IPACK( ) (J=1,NS0).
-C                       (INPUT)
-C                 NS0 = SIZE OF IS0( ). (INPUT)
-C              L3264B = THE INTEGER WORD LENGTH IN BITS OF THE MACHINE
-C                       BEING USED. VALUES OF 32 AND 64 ARE
-C                       ACCOMMODATED. (INPUT)
-C                 NEW = WHEN NEW = 1, THIS IS A NEW PRODUCT. WHEN
-C                       NEW = 0, THIS IS ANOTHER GRID TO PUT INTO
-C                       THE SAME PRODUCT.  (INPUT)
-C                LOCN = THE WORD POSITION TO PLACE THE NEXT VALUE.
-C                       (INPUT/OUTPUT)
-C                IPOS = THE BIT POSITION IN LOCN TO START PLACING
-C                       THE NEXT VALUE. (INPUT/OUTPUT)
-C            IEDITION = THE EDITION NUMBER OF THE GRIB2 ENCODER USED.
-C                       (INPUT) 
-C             LOCN0_9 = CONTAINS THE WORD POSITION IN IPACK TO
-C                       PACK THE TOTAL LENGTH OF THE PACKED GRIB2
-C                       MESSAGE ONCE THIS VALUE CAN BE DETERMINED,
-C                       I.E. WHEN THE MESSAGE HAS BEEN COMPLETELY
-C                       PACKED.  (OUTPUT)
-C             IPOS0_9 = CONTAINS THE BIT POSITION IN WORD LOCN0_9 OF
-C                       IPACK TO PACK THE TOTAL LENGTH OF THE PACKED
-C                       GRIB2 MESSAGE ONCE THIS VALUE CAN BE
-C                       DETERMINED, I.E. WHEN THE MESSAGE HAS BEEN
-C                       COMPLETELY PACKED. (OUTPUT)
-C                 IER = RETURN STATUS CODE. (OUTPUT)
-C                          0 = GOOD RETURN.
-C                        1-4 = FATAL ERROR CODES RETURNED FROM PKBG.
-C                       1002 = IS0( ) HAS NOT BEEN DIMENSIONED LARGE
-C                              ENOUGH.
-C             ISEVERE = THE SEVERITY LEVEL OF THE ERROR.  THE ONLY
-C                       VALUE RETUNED IS:
-C                       2 = A FATAL ERROR  (OUTPUT)
-C                   * = ALTERNATE ERROR RETURN. (OUTPUT)
-C
-C             LOCAL VARIABLES
-C               IGRIB = CONTAINS THE HEXADECIMAL REPRESENTATION
-C                       OF THE STRING "GRIB" AS IT WOULD APPEAR
-C                       WHEN THE STRING IS EQUIVALENCED TO
-C                       AN INTEGER*4 VARIABLE ON A "BIG ENDIAN"
-C                       PLATFORM.
-C              IGRIB1 = CONTAINS THE VALUE OF IGRIB IF A 64-BIT MACHINE
-C                       IS BEING USED.
-C               IZERO = CONTAINS THE VALUE '0'.  THIS IS USED IN THE
-C                       CODE SIMPLY TO EMPHASIZE THAT A CERTAIN 
-C                       GROUP OF OCTETS IN THE MESSAGE ARE BEING 
-C                       ZEROED OUT.
-C                   N = L3264B = THE INTEGER WORD LENGTH IN BITS OF
-C                       THE MACHINE BEING USED. VALUES OF 32 AND
-C                       64 ARE ACCOMMODATED.
-C             MINSIZE = THE MINIMUM SIZE FOR IS0( ).  IS0(7) IS
-C                       FILLED IN PK_SECT0, AND IS0(9) IS FILLED IN
-C                       PK_GRIB.  THIS ONLY APPLIES WHEN THIS IS 
-C                       A "NEW" MESSAGE.      
-C
-C        NON SYSTEM SUBROUTINES CALLED
-C           PKBG
-C
-      PARAMETER(MINSIZE=9)
-C
-      DIMENSION IPACK(ND5),IS0(NS0)
-C
-      DATA IGRIB/'47524942'X/
-      DATA IZERO/0/
-C
-      N=L3264B
-      IER=0
-C
-C        ALL ERRORS GENERATED BY THIS ROUTINE ARE FATAL.
-      ISEVERE=2
-C
-      IF(NEW.EQ.1)THEN
-C
-C           CHECK MINIMUM SIZE OF IS0( ).
-C
-         IF(NS0.LT.MINSIZE)THEN
-C              IS0(7) FILLED IN PK_SECT0, AND IS0(9) FILLED IN
-C              PK_GRIB.         
-            IER=1002
-            GO TO 900
-         ENDIF
-C
-C           THIS IS THE FIRST GRID TO BE PACKED.
-C           LOCN = WORD POSITION IN IPACK( ) TO START PACKING.
-C           PKBG UPDATES IT.
-         LOCN=1
-C
-C           IPOS = BIT POSITION IN IPACK(LOCN) TO START PUTTING VALUE.
-C           PKBG UPDATES IT.
-         IPOS=1
-C
-C           IPACK IS ZEROED IF THIS IS THE FIRST GRID TO BE PACKED
-C
-         DO K=1,ND5
-            IPACK(K)=0
-         ENDDO
-C
-C           PACK THE WORD "GRIB".
-C           ACCOMMODATE A 64-BIT WORD, IF NEED BE, BY
-C           MOVING THE 4 CHARACTERS TO THE RIGHT HALF OF THE WORD FOR
-C           PACKING.
-         IGRIB1=IGRIB
-         IF(L3264B.EQ.64)IGRIB1=ISHFT(IGRIB,-32)
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IGRIB1,32,N,IER,*900)
-         IS0(1)=IGRIB
-C
-C           SKIP OVER BYTES 5-6, WHICH ARE RESERVED
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IZERO,16,N,IER,*900)
-         IS0(5)=0
-         IS0(6)=0
-C
-C           PACK THE DISCIPLINE - MASTER TABLE NUMBER
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IS0(7),8,N,IER,*900)
-C
-C           PACK GRIB EDITION NUMBER.
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IEDITION,8,N,IER,*900)
-         IS0(8)=IEDITION
-C
-C           BYTES 9-16 MUST BE FILLED IN LATER WITH THE GRIB RECORD
-C           LENGTH IN BYTES; LOCN0_9 AND IPOS0_9 HOLD THE LOCATION, AND
-C           THE BELOW STATEMENTS HOLD THE PLACE.
-         LOCN0_9=LOCN
-         IPOS0_9=IPOS
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IZERO,32,N,IER,*900)
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IZERO,32,N,IER,*900)
-C
-C           NOTE THAT ONLY A 32-BIT SIZE IS SUPPORTED, WHICH
-C           ACCOMMODATES OVER 4 GIGABYTES.
-         DO K=9,NS0
-            IS0(K)=0
-         ENDDO
-C
-      ELSE
-C
-C           WHEN THIS IS AN ADDITION TO THE PRODUCT, LOCN AND 
-C           IPOS HAVE VALUES ON ENTRY THAT REPRESENT THE 7777
-C           END OF MESSAGE.  THIS 7777 SHOULD BE OVERWRITTEN.
-C           DO IT BY WRITING A ZERO, THEN SETTING LOCN = LOCN-1.
-C           ALSO NEED TO ZERO OUT THE PRODUCT SIZE, SO THAT IT CAN BE
-C           FILLED IN AT THE END.
-C
-         LOCN=LOCN-1
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN,IPOS,IZERO,32,N,IER,*900)
-         LOCN=LOCN-1
-         CALL PKBG(KFILDO,IPACK,ND5,LOCN0_9,IPOS0_9,IZERO,32,N,IER,*900)
-         LOCN0_9=LOCN0_9-1
-      ENDIF
-C
- 900  IF(IER.NE.0)RETURN 1
-C
-      RETURN
-      END
+      subroutine pk_sect0(kfildo,ipack,nd5,is0,ns0,l3264b,
+     1                    new,locn,ipos,iedition,locn0_9,
+     2                    ipos0_9,ier,isevere,*)
+c
+c        march   2000   lawrence   gsc/tdl   original coding
+c        january 2001   glahn      comments; added test for size
+c                                  of is0( )
+c        january 2001   glahn/lawrence initialized is0(1) and is0(8)
+c        march 2001     lawrence   changed how this routine packs 
+c                                  the numeric equivalent of the
+c                                  string "grib".
+c
+c        purpose
+c            packs section 0, the indicator section, of a grib2
+c            message. section 0 contains information pertaining
+c            to the size of the message and the edition of
+c            the grib standards to be followed in the packing
+c            process.
+c
+c            if this is a new grib2 message, then the contents of
+c            is0( ) are packed into the message. if this is a
+c            product that is getting appended onto a preexisting
+c            message, then section 0 is not packed again. instead,
+c            the end of message indicator of the previously packed
+c            product is overwritten, and the size of the grib2
+c            message (as stated by octets 9-16 of section 0 of
+c            the previous packed product) is zeroed out. the total
+c            size of the grib2 message is recalculated in another
+c            routine every time new product is packed onto the message.
+c
+c        data set use
+c           kfildo - unit number for output (print) file. (output)
+c
+c        variables
+c              kfildo = unit number for output (print) file. (input)
+c            ipack(j) = the array that holds the actual packed message
+c                       (j=1,nd5). (input/output)
+c                 nd5 = the size of the array ipack( ). (input)
+c              is0(j) = contains the indicator data that
+c                       will be packed into ipack( ) (j=1,ns0).
+c                       (input)
+c                 ns0 = size of is0( ). (input)
+c              l3264b = the integer word length in bits of the machine
+c                       being used. values of 32 and 64 are
+c                       accommodated. (input)
+c                 new = when new = 1, this is a new product. when
+c                       new = 0, this is another grid to put into
+c                       the same product.  (input)
+c                locn = the word position to place the next value.
+c                       (input/output)
+c                ipos = the bit position in locn to start placing
+c                       the next value. (input/output)
+c            iedition = the edition number of the grib2 encoder used.
+c                       (input) 
+c             locn0_9 = contains the word position in ipack to
+c                       pack the total length of the packed grib2
+c                       message once this value can be determined,
+c                       i.e. when the message has been completely
+c                       packed.  (output)
+c             ipos0_9 = contains the bit position in word locn0_9 of
+c                       ipack to pack the total length of the packed
+c                       grib2 message once this value can be
+c                       determined, i.e. when the message has been
+c                       completely packed. (output)
+c                 ier = return status code. (output)
+c                          0 = good return.
+c                        1-4 = fatal error codes returned from pkbg.
+c                       1002 = is0( ) has not been dimensioned large
+c                              enough.
+c             isevere = the severity level of the error.  the only
+c                       value retuned is:
+c                       2 = a fatal error  (output)
+c                   * = alternate error return. (output)
+c
+c             local variables
+c               igrib = contains the hexadecimal representation
+c                       of the string "grib" as it would appear
+c                       when the string is equivalenced to
+c                       an integer*4 variable on a "big endian"
+c                       platform.
+c              igrib1 = contains the value of igrib if a 64-bit machine
+c                       is being used.
+c               izero = contains the value '0'.  this is used in the
+c                       code simply to emphasize that a certain 
+c                       group of octets in the message are being 
+c                       zeroed out.
+c                   n = l3264b = the integer word length in bits of
+c                       the machine being used. values of 32 and
+c                       64 are accommodated.
+c             minsize = the minimum size for is0( ).  is0(7) is
+c                       filled in pk_sect0, and is0(9) is filled in
+c                       pk_grib.  this only applies when this is 
+c                       a "new" message.      
+c
+c        non system subroutines called
+c           pkbg
+c
+      parameter(minsize=9)
+c
+      dimension ipack(nd5),is0(ns0)
+c
+      data igrib/'47524942'x/
+      data izero/0/
+c
+      n=l3264b
+      ier=0
+c
+c        all errors generated by this routine are fatal.
+      isevere=2
+c
+      if(new.eq.1)then
+c
+c           check minimum size of is0( ).
+c
+         if(ns0.lt.minsize)then
+c              is0(7) filled in pk_sect0, and is0(9) filled in
+c              pk_grib.         
+            ier=1002
+            go to 900
+         endif
+c
+c           this is the first grid to be packed.
+c           locn = word position in ipack( ) to start packing.
+c           pkbg updates it.
+         locn=1
+c
+c           ipos = bit position in ipack(locn) to start putting value.
+c           pkbg updates it.
+         ipos=1
+c
+c           ipack is zeroed if this is the first grid to be packed
+c
+         do k=1,nd5
+            ipack(k)=0
+         enddo
+c
+c           pack the word "grib".
+c           accommodate a 64-bit word, if need be, by
+c           moving the 4 characters to the right half of the word for
+c           packing.
+         igrib1=igrib
+         if(l3264b.eq.64)igrib1=ishft(igrib,-32)
+         call pkbg(kfildo,ipack,nd5,locn,ipos,igrib1,32,n,ier,*900)
+         is0(1)=igrib
+c
+c           skip over bytes 5-6, which are reserved
+         call pkbg(kfildo,ipack,nd5,locn,ipos,izero,16,n,ier,*900)
+         is0(5)=0
+         is0(6)=0
+c
+c           pack the discipline - master table number
+         call pkbg(kfildo,ipack,nd5,locn,ipos,is0(7),8,n,ier,*900)
+c
+c           pack grib edition number.
+         call pkbg(kfildo,ipack,nd5,locn,ipos,iedition,8,n,ier,*900)
+         is0(8)=iedition
+c
+c           bytes 9-16 must be filled in later with the grib record
+c           length in bytes; locn0_9 and ipos0_9 hold the location, and
+c           the below statements hold the place.
+         locn0_9=locn
+         ipos0_9=ipos
+         call pkbg(kfildo,ipack,nd5,locn,ipos,izero,32,n,ier,*900)
+         call pkbg(kfildo,ipack,nd5,locn,ipos,izero,32,n,ier,*900)
+c
+c           note that only a 32-bit size is supported, which
+c           accommodates over 4 gigabytes.
+         do k=9,ns0
+            is0(k)=0
+         enddo
+c
+      else
+c
+c           when this is an addition to the product, locn and 
+c           ipos have values on entry that represent the 7777
+c           end of message.  this 7777 should be overwritten.
+c           do it by writing a zero, then setting locn = locn-1.
+c           also need to zero out the product size, so that it can be
+c           filled in at the end.
+c
+         locn=locn-1
+         call pkbg(kfildo,ipack,nd5,locn,ipos,izero,32,n,ier,*900)
+         locn=locn-1
+         call pkbg(kfildo,ipack,nd5,locn0_9,ipos0_9,izero,32,n,ier,*900)
+         locn0_9=locn0_9-1
+      endif
+c
+ 900  if(ier.ne.0)return 1
+c
+      return
+      end

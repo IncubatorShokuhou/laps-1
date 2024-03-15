@@ -1,26 +1,26 @@
-cdis    Forecast Systems Laboratory
-cdis    NOAA/OAR/ERL/FSL
-cdis    325 Broadway
-cdis    Boulder, CO     80303
+cdis    forecast systems laboratory
+cdis    noaa/oar/erl/fsl
+cdis    325 broadway
+cdis    boulder, co     80303
 cdis 
-cdis    Forecast Research Division
-cdis    Local Analysis and Prediction Branch
-cdis    LAPS 
+cdis    forecast research division
+cdis    local analysis and prediction branch
+cdis    laps 
 cdis 
-cdis    This software and its documentation are in the public domain and 
-cdis    are furnished "as is."  The United States government, its 
+cdis    this software and its documentation are in the public domain and 
+cdis    are furnished "as is."  the united states government, its 
 cdis    instrumentalities, officers, employees, and agents make no 
 cdis    warranty, express or implied, as to the usefulness of the software 
-cdis    and documentation for any purpose.  They assume no responsibility 
+cdis    and documentation for any purpose.  they assume no responsibility 
 cdis    (1) for the use of the software and documentation; or (2) to provide
 cdis     technical support to users.
 cdis    
-cdis    Permission to use, copy, modify, and distribute this software is
+cdis    permission to use, copy, modify, and distribute this software is
 cdis    hereby granted, provided that the entire disclaimer notice appears
-cdis    in all copies.  All modifications to this software must be clearly
+cdis    in all copies.  all modifications to this software must be clearly
 cdis    documented, and are solely the responsibility of the agent making 
-cdis    the modifications.  If significant modifications or enhancements 
-cdis    are made to this software, the FSL Software Policy Manager  
+cdis    the modifications.  if significant modifications or enhancements 
+cdis    are made to this software, the fsl software policy manager  
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis 
 cdis 
@@ -29,7 +29,7 @@ cdis
 cdis 
 cdis 
 cdis 
-       SUBROUTINE satdat2laps_sndr(imax,jmax,
+       subroutine satdat2laps_sndr(imax,jmax,
      &                  r_grid_ratio,
      &                  r_missing_data,
      &                  image_sndr,
@@ -39,16 +39,16 @@ cdis
      &                  sa,sc,st,
      &                  istatus)
 
-c.....  This routine can be called for any GOES Sounder channel data.
-c.....  This is McAlbers version returing warmest and coldest pixels
-c.....  The warmest go into ST, the "extremum" to SC, the mean to SA
-c       SC is the result of an edge enhancing filter that tries to filter
+c.....  this routine can be called for any goes sounder channel data.
+c.....  this is mcalbers version returing warmest and coldest pixels
+c.....  the warmest go into st, the "extremum" to sc, the mean to sa
+c       sc is the result of an edge enhancing filter that tries to filter
 c       out inbetween pixels in favor of either the warmest or the coldest.
-C
-c       J. Smart          Jul 1995          Orginal Subroutine for GOES 8
-c.....          Changes:  02-OCT-1990       Set up for prodgen.
-c.....          Changes:     SEP-1993       Add average (SA)
-c.....  J. Smart          Dec 1996          Modified the satdat2laps_ir for sounder data
+c
+c       j. smart          jul 1995          orginal subroutine for goes 8
+c.....          changes:  02-oct-1990       set up for prodgen.
+c.....          changes:     sep-1993       add average (sa)
+c.....  j. smart          dec 1996          modified the satdat2laps_ir for sounder data
 c
       implicit none
 
@@ -94,9 +94,9 @@ c     real fraci,fracj
         qcstatus=0
         fcount=0
 c
-c       write(6,*)'   I   J   WarmPix  ColdPix  NPix Nwarm  CldTemp'
+c       write(6,*)'   i   j   warmpix  coldpix  npix nwarm  cldtemp'
 c
-c The "10" loop represents input image resolution < output grid resolution such
+c the "10" loop represents input image resolution < output grid resolution such
 c that there are enough pixels from the input image to get a representative
 c mean value for the remapped output grid value
 c
@@ -104,15 +104,15 @@ c
         icnt_out=0
         if(r_grid_ratio .lt. 0.5)then  !0.75)then
 
-          write(6,*)'Grid ratio .lt. 0.5'   !0.75'
-          write(6,*)'Use pixel avg to get sndr Rad'
+          write(6,*)'grid ratio .lt. 0.5'   !0.75'
+          write(6,*)'use pixel avg to get sndr rad'
 
-          DO 10 J=1,JMAX
-          DO 10 I=1,IMAX
+          do 10 j=1,jmax
+          do 10 i=1,imax
 
-             IF(ST(I,J).NE.0.) GO TO 10
+             if(st(i,j).ne.0.) go to 10
 c
-c line/elem are floating point i/j positions in ISPAN grid for input lat/lon
+c line/elem are floating point i/j positions in ispan grid for input lat/lon
 c also, use the lat/lon to real i/j look up table (r_llij_lut) to map out points
 c needed for satellite pixels.
 c****************************************************************************
@@ -135,13 +135,13 @@ c    &          r_llij_lut_rj(i,j).ne.r_missing_data)then
 
 c            write(*,*)'insufficient data for lat/lon sector'
 c               write(*,1020)i,j
-c1020              format(1x,'LAPS grid (i,j) = ',i3,1x,i3)
+c1020              format(1x,'laps grid (i,j) = ',i3,1x,i3)
 c               write(6,1021)elem_mx,elem_mn,line_mx,line_mn
 c1021            format(1x,'elem mx/mn  line mx/mn ',4f7.1)
 
              else
 c
-c **** FIND PIXELS AROUND GRID POINT
+c **** find pixels around grid point
 c
                 wm=-1.e15
                 wc=1.e15
@@ -149,13 +149,13 @@ c
                 pixsum = 0.
                 maxpix = 0
 
-                DO 3 JJ=jstart,jend
-                   DO 3 II=istart,iend
+                do 3 jj=jstart,jend
+                   do 3 ii=istart,iend
 
-                      if(image_sndr(II,JJ) .ne.
+                      if(image_sndr(ii,jj) .ne.
      &r_missing_data)then
                          npix=npix+1
-                         t_array(npix) = image_sndr(II,JJ)
+                         t_array(npix) = image_sndr(ii,jj)
 
                       endif
 
@@ -166,7 +166,7 @@ c
 c
 c...  this section finds the warmest pixel, coldest pixel, and mean pixel temp.
 c
-                   Do ii=1,npix
+                   do ii=1,npix
 
                       btemp  = t_array(ii)
                       pixsum = pixsum + btemp
@@ -198,9 +198,9 @@ c
 
                    sa(i,j) = pixsum / float(npix)
 
-c.....  Operate on T_array to find cloud top temp. This chooses the warmest
+c.....  operate on t_array to find cloud top temp. this chooses the warmest
 c.....  or coldest pixel depending on whether most pixels are closer to the
-c.....  warmest or coldest. The net result is an edge sharpening filter.
+c.....  warmest or coldest. the net result is an edge sharpening filter.
 
                    tmean = (wc + wm)/2.
 
@@ -212,7 +212,7 @@ c.....  warmest or coldest. The net result is an edge sharpening filter.
                    enddo
 
 c              write(6,1112) wm,wc
- 1112          FORMAT(1X,11F7.0)
+ 1112          format(1x,11f7.0)
 
                    frac = float(nwarm) / float(npix)
                    if(frac .gt. 0.5)then
@@ -227,23 +227,23 @@ c              write(6,1112) wm,wc
 
                    sa(i,j)=btemp
                    sc(i,j)=btemp
-                   sT(i,j)=btemp
+                   st(i,j)=btemp
 
                 endif ! npix .gt. 1
 
 c            endif
 
-             endif  ! Enough data for num_lines .gt. 0
+             endif  ! enough data for num_lines .gt. 0
 
 c            if(i .eq. i/10*10 .and. j .eq. j/10*10)then
 c               write(6,5555)i,j,wm,wc,npix,nwarm,sc(i,j)
 c 5555         format(1x,2i4,2f10.2,2i5,f10.2)
 c            endif
 
-   10     CONTINUE ! I,J
+   10     continue ! i,j
 
-          print*,'Max num sndr pix for avg: ',maxpix
-          print*,'Number of LAPS gridpoints missing',
+          print*,'max num sndr pix for avg: ',maxpix
+          print*,'number of laps gridpoints missing',
      &fcount
 
         else
@@ -252,12 +252,12 @@ c input image resolution is large relative to output grid spacing
 c this section uses bilinear interpolation to map
 c the four surrounding input pixels to the output grid.
 c
-          write(6,*)'Image res .ge. output grid spacing'
-          write(6,*)'Using bilinear interp for sndr Rad'
-          DO J=1,JMAX
-          DO I=1,IMAX
+          write(6,*)'image res .ge. output grid spacing'
+          write(6,*)'using bilinear interp for sndr rad'
+          do j=1,jmax
+          do i=1,imax
 c            if(i_found_it .ne. 1)then
-c              write(6,*)'Enter i and j point'
+c              write(6,*)'enter i and j point'
 c              read(5,*)ipt,jpt
 c              i_found_it = 1
 c            end if
@@ -286,7 +286,7 @@ c
             endif
 
             sc(i,j)=sa(i,j)
-            sT(i,j)=sa(i,j)
+            st(i,j)=sa(i,j)
 
 c            if(i.eq.ipt .and. j.eq.jpt)then
 c               write(29,39)ipt,jpt
@@ -316,8 +316,8 @@ c          close(29)
         enddo
         if(icnt_out.gt.0)print*,'found ',icnt_out,' <= 0.0 pts'
 
-c       WRITE(6,1234) IB,I4VTIME,ICT
-c1234       FORMAT(1X,'BAND ',I4,' COUNT FOR I4TIME ',I10,' IS ',I8)
+c       write(6,1234) ib,i4vtime,ict
+c1234       format(1x,'band ',i4,' count for i4time ',i10,' is ',i8)
 
         istatus = 1
 c

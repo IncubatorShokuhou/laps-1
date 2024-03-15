@@ -1,173 +1,173 @@
       subroutine get_cloud_drift_madis 
      ~           (i4time_sys, i4_window, filename, istatus)     
 
-      IMPLICIT NONE
+      implicit none
       include 'netcdf.inc'
-      INTEGER, INTENT(IN)  :: i4time_sys, i4_window
-      character*(*),INTENT(IN) ::  filename
-      INTEGER, INTENT(OUT) :: istatus
-      INTEGER, PARAMETER  :: lun_cdw = 11
+      integer, intent(in)  :: i4time_sys, i4_window
+      character*(*),intent(in) ::  filename
+      integer, intent(out) :: istatus
+      integer, parameter  :: lun_cdw = 11
 
-      INTEGER :: i,nobs, ncid,nf_vid,nf_status
-      REAL  r_missing_data
-      REAL, ALLOCATABLE :: obLat(:),obLon(:),
-     ~                     pressure(:),windDir(:), windSpd(:)
+      integer :: i,nobs, ncid,nf_vid,nf_status
+      real  r_missing_data
+      real, allocatable :: oblat(:),oblon(:),
+     ~                     pressure(:),winddir(:), windspd(:)
 
-      INTEGER,PARAMETER::double=SELECTED_REAL_KIND(p=13,r=200) 
-      REAL(kind=double), ALLOCATABLE :: validTime(:)
-      CHARACTER(LEN=1),ALLOCATABLE ::windDirDD(:),windSpdDD(:)
-      INTEGER, PARAMETER :: unix2i4 = 315619200
-      CHARACTER(LEN=9)  :: a9timeObs
-      INTEGER :: obtime, i4dif 
-      INTEGER :: nkept,nreject
+      integer,parameter::double=selected_real_kind(p=13,r=200) 
+      real(kind=double), allocatable :: validtime(:)
+      character(len=1),allocatable ::winddirdd(:),windspddd(:)
+      integer, parameter :: unix2i4 = 315619200
+      character(len=9)  :: a9timeobs
+      integer :: obtime, i4dif 
+      integer :: nkept,nreject
       call get_r_missing_data(r_missing_data,istatus)
       if ( istatus .ne. 1 )  then
-         write (6,*) 'Error getting r_missing_data'
+         write (6,*) 'error getting r_missing_data'
          return
       endif
-      print *, "Opening ", TRIM(filename)
-      ! Open the netcdf file
-      nf_status = NF_OPEN(filename,NF_NOWRITE,ncid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *, "Problem opening madis netcdf file."
-        print *, "Filename:",trim(filename)
+      print *, "opening ", trim(filename)
+      ! open the netcdf file
+      nf_status = nf_open(filename,nf_nowrite,ncid)
+      if (nf_status .ne. nf_noerr) then
+        print *, "problem opening madis netcdf file."
+        print *, "filename:",trim(filename)
         istatus = 0
         return
       endif
-      ! Get the number of records
-      nf_status = NF_INQ_DIMID(ncid,'recNum',nf_vid)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
-        print *,'Problem getting recNum'
+      ! get the number of records
+      nf_status = nf_inq_dimid(ncid,'recnum',nf_vid)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
+        print *,'problem getting recnum'
         print *, ' in get_cloud_drift_madis'
         istatus = 0
         return
       endif
-      nf_status = NF_INQ_DIMLEN(ncid,nf_vid,nobs)
-      if(nf_status.ne.NF_NOERR) then
-        print *, NF_STRERROR(nf_status)
+      nf_status = nf_inq_dimlen(ncid,nf_vid,nobs)
+      if(nf_status.ne.nf_noerr) then
+        print *, nf_strerror(nf_status)
         print *,'dim record'
         istatus = 0
         return
       endif
-C
-      print *, " MADIS Cloud Drift: nobs = ", nobs
+c
+      print *, " madis cloud drift: nobs = ", nobs
 
-      print *, " Allocating arrays..."
-      ALLOCATE(obLat(nobs))
-      ALLOCATE(obLon(nobs))
-      ALLOCATE(validTime(nobs))
-      ALLOCATE(pressure(nobs))
-      ALLOCATE(windDir(nobs))
-      ALLOCATE(windDirDD(nobs))
-      ALLOCATE(windSpd(nobs))
-      ALLOCATE(windSpdDD(nobs))
+      print *, " allocating arrays..."
+      allocate(oblat(nobs))
+      allocate(oblon(nobs))
+      allocate(validtime(nobs))
+      allocate(pressure(nobs))
+      allocate(winddir(nobs))
+      allocate(winddirdd(nobs))
+      allocate(windspd(nobs))
+      allocate(windspddd(nobs))
  
-      print *, "Reading data" 
-      ! Read in the data
-      nf_status = NF_INQ_VARID(ncid,"obLat",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting obLat"
+      print *, "reading data" 
+      ! read in the data
+      nf_status = nf_inq_varid(ncid,"oblat",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting oblat"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,obLat)
+        goto 900
+      endif
+      nf_status = nf_get_var_real(ncid,nf_vid,oblat)
 
-      nf_status = NF_INQ_VARID(ncid,"obLon",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting obLon"
+      nf_status = nf_inq_varid(ncid,"oblon",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting oblon"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,obLon)
+        goto 900
+      endif
+      nf_status = nf_get_var_real(ncid,nf_vid,oblon)
 
-      nf_status = NF_INQ_VARID(ncid,"validTime",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting validTime"
+      nf_status = nf_inq_varid(ncid,"validtime",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting validtime"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_DOUBLE(ncid,nf_vid,validTime)
+        goto 900
+      endif
+      nf_status = nf_get_var_double(ncid,nf_vid,validtime)
 
-      nf_status = NF_INQ_VARID(ncid,"pressure",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting pressure"
+      nf_status = nf_inq_varid(ncid,"pressure",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting pressure"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,pressure)
+        goto 900
+      endif
+      nf_status = nf_get_var_real(ncid,nf_vid,pressure)
 
-      nf_status = NF_INQ_VARID(ncid,"windDir",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting windDir"
+      nf_status = nf_inq_varid(ncid,"winddir",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting winddir"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,windDir)
+        goto 900
+      endif
+      nf_status = nf_get_var_real(ncid,nf_vid,winddir)
 
-      nf_status = NF_INQ_VARID(ncid,"windSpd",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting windSpd"
+      nf_status = nf_inq_varid(ncid,"windspd",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting windspd"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_REAL(ncid,nf_vid,windSpd)
+        goto 900
+      endif
+      nf_status = nf_get_var_real(ncid,nf_vid,windspd)
 
-      nf_status = NF_INQ_VARID(ncid,"windDirDD",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting windDirDD"
+      nf_status = nf_inq_varid(ncid,"winddirdd",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting winddirdd"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_TEXT(ncid,nf_vid,windDirDD)
+        goto 900
+      endif
+      nf_status = nf_get_var_text(ncid,nf_vid,winddirdd)
 
-      nf_status = NF_INQ_VARID(ncid,"windSpdDD",nf_vid)
-      IF (nf_status .NE. NF_NOERR) THEN
-        print *," Problem getting windSpdDD"
+      nf_status = nf_inq_varid(ncid,"windspddd",nf_vid)
+      if (nf_status .ne. nf_noerr) then
+        print *," problem getting windspddd"
         istatus = 0
-        GOTO 900
-      ENDIF
-      nf_status = NF_GET_VAR_TEXT(ncid,nf_vid,windSpdDD)
+        goto 900
+      endif
+      nf_status = nf_get_var_text(ncid,nf_vid,windspddd)
 
  
       call open_ext(lun_cdw,i4time_sys,'cdw',istatus)
       nreject =0
       nkept  = 0
       do i= 1,nobs
-C       If this ob passes the quality flag
-         obtime = NINT(validTime(i))+unix2i4
+c       if this ob passes the quality flag
+         obtime = nint(validtime(i))+unix2i4
          i4dif = i4time_sys - obtime
-         IF (ABS(i4dif) .LE. i4_window) THEN
-           IF (windSpdDD(i) .NE. "C" .OR. 
-     ~         windSpd(i) .LT. 0. .OR.
-     ~         windSpd(i) .GT. 125.) THEN
-             windSpd(i) = r_missing_data
-           ENDIF
-           IF (windDirDD(i) .NE. "C" .OR.
-     ~         windDir(i) .LT. 0. .OR.
-     ~         windDir(i) .GT. 360.) THEN
-             windDir(i) = r_missing_data
-           ENDIF
-           CALL c_time2fname(NINT(validTime(i)),a9timeObs)
+         if (abs(i4dif) .le. i4_window) then
+           if (windspddd(i) .ne. "c" .or. 
+     ~         windspd(i) .lt. 0. .or.
+     ~         windspd(i) .gt. 125.) then
+             windspd(i) = r_missing_data
+           endif
+           if (winddirdd(i) .ne. "c" .or.
+     ~         winddir(i) .lt. 0. .or.
+     ~         winddir(i) .gt. 360.) then
+             winddir(i) = r_missing_data
+           endif
+           call c_time2fname(nint(validtime(i)),a9timeobs)
 
            write (lun_cdw,'(f8.3,f10.3,f8.0,f6.0,f6.1,2x,a9)') 
-     ~                 obLat(i), obLon(i), pressure(i), 
-     ~                 windDir(i), windSpd(i), a9timeObs
+     ~                 oblat(i), oblon(i), pressure(i), 
+     ~                 winddir(i), windspd(i), a9timeobs
 
            nkept = nkept+1
-         ELSE
+         else
            nreject = nreject +1
-         ENDIF
+         endif
       enddo
-      print *, "Total Obs/# kept/#rejected:",nobs,nkept,nreject
+      print *, "total obs/# kept/#rejected:",nobs,nkept,nreject
       istatus = 1
-900   DEALLOCATE(obLat)
-      DEALLOCATE(obLon)
-      DEALLOCATE(validTime)
-      DEALLOCATE(pressure)
-      DEALLOCATE(windDir)
-      DEALLOCATE(windDirDD)
-      DEALLOCATE(windSpd)
-      DEALLOCATE(windSpdDD)
+900   deallocate(oblat)
+      deallocate(oblon)
+      deallocate(validtime)
+      deallocate(pressure)
+      deallocate(winddir)
+      deallocate(winddirdd)
+      deallocate(windspd)
+      deallocate(windspddd)
       return
       end

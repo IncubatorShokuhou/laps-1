@@ -1,91 +1,91 @@
 cdis   
-cdis    Open Source License/Disclaimer, Forecast Systems Laboratory
-cdis    NOAA/OAR/FSL, 325 Broadway Boulder, CO 80305
+cdis    open source license/disclaimer, forecast systems laboratory
+cdis    noaa/oar/fsl, 325 broadway boulder, co 80305
 cdis    
-cdis    This software is distributed under the Open Source Definition,
+cdis    this software is distributed under the open source definition,
 cdis    which may be found at http://www.opensource.org/osd.html.
 cdis    
-cdis    In particular, redistribution and use in source and binary forms,
+cdis    in particular, redistribution and use in source and binary forms,
 cdis    with or without modification, are permitted provided that the
 cdis    following conditions are met:
 cdis    
-cdis    - Redistributions of source code must retain this notice, this
+cdis    - redistributions of source code must retain this notice, this
 cdis    list of conditions and the following disclaimer.
 cdis    
-cdis    - Redistributions in binary form must provide access to this
+cdis    - redistributions in binary form must provide access to this
 cdis    notice, this list of conditions and the following disclaimer, and
 cdis    the underlying source code.
 cdis    
-cdis    - All modifications to this software must be clearly documented,
+cdis    - all modifications to this software must be clearly documented,
 cdis    and are solely the responsibility of the agent making the
 cdis    modifications.
 cdis    
-cdis    - If significant modifications or enhancements are made to this
-cdis    software, the FSL Software Policy Manager
+cdis    - if significant modifications or enhancements are made to this
+cdis    software, the fsl software policy manager
 cdis    (softwaremgr@fsl.noaa.gov) should be notified.
 cdis    
-cdis    THIS SOFTWARE AND ITS DOCUMENTATION ARE IN THE PUBLIC DOMAIN
-cdis    AND ARE FURNISHED "AS IS."  THE AUTHORS, THE UNITED STATES
-cdis    GOVERNMENT, ITS INSTRUMENTALITIES, OFFICERS, EMPLOYEES, AND
-cdis    AGENTS MAKE NO WARRANTY, EXPRESS OR IMPLIED, AS TO THE USEFULNESS
-cdis    OF THE SOFTWARE AND DOCUMENTATION FOR ANY PURPOSE.  THEY ASSUME
-cdis    NO RESPONSIBILITY (1) FOR THE USE OF THE SOFTWARE AND
-cdis    DOCUMENTATION; OR (2) TO PROVIDE TECHNICAL SUPPORT TO USERS.
+cdis    this software and its documentation are in the public domain
+cdis    and are furnished "as is."  the authors, the united states
+cdis    government, its instrumentalities, officers, employees, and
+cdis    agents make no warranty, express or implied, as to the usefulness
+cdis    of the software and documentation for any purpose.  they assume
+cdis    no responsibility (1) for the use of the software and
+cdis    documentation; or (2) to provide technical support to users.
 cdis   
 cdis
 cdis
 cdis   
 cdis
-      subroutine GET_AZIMUTHS_DEG ( i_tilt,    ! Input
-     :              Max_rays,        ! Input # rays dimensioned for remapper
-     :              az_array,        ! Output
-     :              istatus )        ! Output
+      subroutine get_azimuths_deg ( i_tilt,    ! input
+     :              max_rays,        ! input # rays dimensioned for remapper
+     :              az_array,        ! output
+     :              istatus )        ! output
 c
-c     PURPOSE:
-c       Fill azimuth array with azimuths from the common buffer.
+c     purpose:
+c       fill azimuth array with azimuths from the common buffer.
 c
-c     AUTHOR:
-c       Steve Albers, FSL
-c     MODIFICATIONS:
-c       Clean-up and improve efficiency Keith Brwester, CAPS, June, 1994
+c     author:
+c       steve albers, fsl
+c     modifications:
+c       clean-up and improve efficiency keith brwester, caps, june, 1994
 c
 
       implicit none
 c
-c     Input variables
+c     input variables
 c
       integer i_tilt
-      integer Max_rays
+      integer max_rays
 c
-c     Output variables
+c     output variables
 c
-      real    az_array(Max_rays)
+      real    az_array(max_rays)
       integer istatus
 c
-c     Include files
+c     include files
 c
       include 'remap_dims.inc'
       include 'remap_buffer.cmn'
 c
-c     Misc internal variables
+c     misc internal variables
 c
       integer i
 c
-      IF( n_rays_cmn .gt. Max_rays ) THEN
+      if( n_rays_cmn .gt. max_rays ) then
         write(6,805)
- 805    format(' n_rays_cmn exceeds Max_rays in GET_AZIMUTHS_DEG')
-        write(6,810) n_rays_cmn,Max_rays
- 810    format(2I12)
+ 805    format(' n_rays_cmn exceeds max_rays in get_azimuths_deg')
+        write(6,810) n_rays_cmn,max_rays
+ 810    format(2i12)
         istatus = 0
-        RETURN
-      END IF
+        return
+      end if
 c
-c     Transfer common data to output array
+c     transfer common data to output array
 c
-      DO 100 i = 1,n_rays_cmn
+      do 100 i = 1,n_rays_cmn
         az_array(i) = azim_cmn(i)
- 100  CONTINUE
+ 100  continue
       istatus = 1
 c
-      RETURN
-      END
+      return
+      end

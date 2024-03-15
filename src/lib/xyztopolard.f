@@ -2,9 +2,9 @@
 
       include 'trigd.inc'
 
-      r=SQRT(x**2+y**2+z**2)
-      dec=ASIND(z/r)
-      ra=ATAN3D(y,x)
+      r=sqrt(x**2+y**2+z**2)
+      dec=asind(z/r)
+      ra=atan3d(y,x)
 
       return
       end

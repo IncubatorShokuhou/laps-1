@@ -10,40 +10,40 @@
      &                       grid_spacing_km,
      &                       istatus)
 c
-      Implicit None
+      implicit none
       real cosd 
-      Integer     nlines,nelems
+      integer     nlines,nelems
 
-      Integer     i,j
-      Integer     itb
-      Integer     img_lin
-      Integer     img_lin_prev
-      Integer     img_ele
-      Integer     img_line(nelems,nlines)
-      Integer     img_elem(nelems,nlines)
-      Integer     image_data(nelems,nlines)
-      Integer     i4time_current
-      Integer     i4time_data
-      Integer     i4time_diff
-      Integer     istatus
-      Integer     i_delta_t
+      integer     i,j
+      integer     itb
+      integer     img_lin
+      integer     img_lin_prev
+      integer     img_ele
+      integer     img_line(nelems,nlines)
+      integer     img_elem(nelems,nlines)
+      integer     image_data(nelems,nlines)
+      integer     i4time_current
+      integer     i4time_data
+      integer     i4time_diff
+      integer     istatus
+      integer     i_delta_t
 
-      Logical       eof
+      logical       eof
 
-      Real        xlat,xlon
-      Real        rlat(nelems,nlines)
-      Real        rlon(nelems,nlines)
+      real        xlat,xlon
+      real        rlat(nelems,nlines)
+      real        rlon(nelems,nlines)
 
-      Real        grid_spacing_deg
-      Real        grid_spacing_km
+      real        grid_spacing_deg
+      real        grid_spacing_km
 
       integer     n_vars_req
       character*100 c_values_req
       character*40  c_vars_req
-      Character     c_date*5
-      Character     c_time*4
-      Character     c_filetime*9
-      Character     c_filename*255
+      character     c_date*5
+      character     c_time*4
+      character     c_filetime*9
+      character     c_filename*255
 
       istatus=1
 c
@@ -61,20 +61,20 @@ c
 c
 c check that time in file is "current"
 c
-      call cv_asc_i4time(c_filetime,I4time_data)
+      call cv_asc_i4time(c_filetime,i4time_data)
 
       i4time_diff = i4time_current-i4time_data
       if(i4time_diff.gt.i_delta_t)then
-         write(6,*)'Data is too old!'
-         write(6,*)'Data    Time: ',c_filetime
+         write(6,*)'data is too old!'
+         write(6,*)'data    time: ',c_filetime
          call make_fnam_lp(i4time_current,c_filetime,istatus)
-         write(6,*)'Current Time: ',c_filetime
+         write(6,*)'current time: ',c_filetime
          goto 902
       elseif(i4time_diff.lt.0)then
-         write(6,*)'Data time is more recent than current time!?'
-         write(6,*)'This does not make sense!'
+         write(6,*)'data time is more recent than current time!?'
+         write(6,*)'this does not make sense!'
       else
-         write(6,*)'Found current data'
+         write(6,*)'found current data'
       endif
 c
 c read second line to set up the line and element counting
@@ -124,19 +124,19 @@ c
 
       goto 995
 
-900   write(6,*)'Error opening LAPS.ASC data file'
+900   write(6,*)'error opening laps.asc data file'
       istatus=-1
       goto 1000
 
-901   write(6,*)'Error - initial read LAPS.ASC'
+901   write(6,*)'error - initial read laps.asc'
       istatus=-1
       goto 1000
 
-902   write(6,*)'Old data. Done in rd_atl_satdat '
+902   write(6,*)'old data. done in rd_atl_satdat '
       istatus=-1
       goto 1000
 
-995   write(6,*)'Finished. i/j totals: ',i,j
+995   write(6,*)'finished. i/j totals: ',i,j
       write(6,*)
       write(6,*)'lat(1,1)/lon(1,1) ',rlat(1,1),rlon(1,1)
       write(6,*)'lat(i,1)/lon(i,1) ',rlat(i,1),rlon(i,1)

@@ -2,8 +2,8 @@
        subroutine get_aod_3d(pres_3d,heights_3d,topo_2d,ni,nj,nk &
                             ,aod,aod_ref,i_aero_synplume,i_aero_1d,aod_3d)
 
-       use mem_namelist, ONLY: redp_lvl,aero_scaleht,grid_spacing_m,aod_ha,ht_ha,alpha_ha
-       use mem_allsky, ONLY: mode_aero_cld,nc
+       use mem_namelist, only: redp_lvl,aero_scaleht,grid_spacing_m,aod_ha,ht_ha,alpha_ha
+       use mem_allsky, only: mode_aero_cld,nc
 
        include 'rad.inc'
 
@@ -29,12 +29,12 @@
        alpha_ha = aod_ha / ((h2_ha-h1_ha)+0.5*(h3_ha-h2_ha))
        write(6,*)'aod_ha / alpha_ha old method ',aod_ha,alpha_ha
 
-!      Transitional assignments if needed
+!      transitional assignments if needed
 !      h1_ha = ht_ha(2)
 !      h2_ha = ht_ha(3)
 
        if(i_aero_1d .eq. 1)then
-         write(6,*)' Set aerosols from 1D parameters'
+         write(6,*)' set aerosols from 1d parameters'
          do k = 1,nk
            do i = 1,ni
            do j = 1,nj
@@ -67,9 +67,9 @@
              write(6,101)k,h_agl,aod_3d(i,j,k),sum_aod
 101          format('k,agl,aod_3d,sum',i5,f9.1,e15.8,f9.5)
          enddo ! k
-         I4_elapsed = ishow_timer()
+         i4_elapsed = ishow_timer()
        else
-         write(6,*)' Skip aerosols from 1D parameters'
+         write(6,*)' skip aerosols from 1d parameters'
        endif ! mode_aero_cld
 
        if(i_aero_synplume .eq. 1)then ! synthetic aerosol plume
@@ -77,12 +77,12 @@
          iplume = ni/2 + 1
          jplume = nj/2 + 1
          iwp = 1
-         write(6,*)' Adding synthetic aerosol plume of',ext_syn,iplume,jplume
+         write(6,*)' adding synthetic aerosol plume of',ext_syn,iplume,jplume
          aod_3d(iplume-iwp:iplume+iwp,jplume-iwp:jplume+iwp,1:nk-8) = ext_syn
-       elseif(i_aero_synplume .eq. 20)then ! synthetic aerosol gradient (CO)
+       elseif(i_aero_synplume .eq. 20)then ! synthetic aerosol gradient (co)
          ri_full = float(ni/2) + 0000. / grid_spacing_m
          ri_none = float(ni/2) + 4000. / grid_spacing_m
-         write(6,*)' Adding synthetic aerosol I gradient ',ni/2,ri_none,ri_full
+         write(6,*)' adding synthetic aerosol i gradient ',ni/2,ri_none,ri_full
          do i = 1,ni
            aero_scale = max(scurvel(float(i),ri_none,ri_full),.0001)
            do k = 1,nk
@@ -100,10 +100,10 @@
          enddo ! i
          aod = 0.
          aod_ref = 0.
-       elseif(i_aero_synplume .eq. 2)then ! synthetic aerosol gradient (Gibraltar)
+       elseif(i_aero_synplume .eq. 2)then ! synthetic aerosol gradient (gibraltar)
          rj_full = float(nj) - 400000. / grid_spacing_m
          rj_none = float(nj) - 300000. / grid_spacing_m
-         write(6,*)' Adding synthetic aerosol J gradient ',ni/2,rj_none,rj_full
+         write(6,*)' adding synthetic aerosol j gradient ',ni/2,rj_none,rj_full
          do j = 1,nj
            aero_scale = max(scurvel(float(j),rj_none,rj_full),.0001)
            do k = 1,nk
@@ -122,7 +122,7 @@
          aod = 0.
          aod_ref = 0.
        else
-         write(6,*)' Skip synthetic aerosol plume'
+         write(6,*)' skip synthetic aerosol plume'
        endif
 
        return
